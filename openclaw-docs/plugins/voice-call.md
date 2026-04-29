@@ -23,7 +23,7 @@ speech), `mock` (dev/no network).
 <Steps>
   <Step title="Install the plugin">
     <Tabs>
-      <Tab title="From npm (recommended)">
+      <Tab title="From npm">
         ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
         openclaw plugins install @openclaw/voice-call
         ```
@@ -37,6 +37,10 @@ speech), `mock` (dev/no network).
         ```
       </Tab>
     </Tabs>
+
+    If npm reports the OpenClaw-owned package as deprecated, that package version
+    is from an older external package train; use a current packaged OpenClaw
+    build or the local folder path until a newer npm package is published.
 
     Restart the Gateway afterwards so the plugin loads.
   </Step>

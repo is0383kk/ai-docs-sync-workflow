@@ -207,7 +207,7 @@ If you run into problems installing on macOS or Linux, check these common issues
   source ~/.bashrc
   ```
 
-  Then try `claude` again. For more details, see [fix your PATH](/en/troubleshooting#verify-your-path).
+  Then try `claude` again. For more details, see [fix your PATH](/en/troubleshoot-install#verify-your-path).
 </Accordion>
 
 <Accordion title="Error with HTML code or 'syntax error near unexpected token'">
@@ -225,10 +225,10 @@ If you run into problems installing on macOS or Linux, check these common issues
 <Accordion title="'dyld' error or 'built for Mac OS X 13.0'">
   If you see `dyld: cannot load`, `dyld: Symbol not found`, or `built for Mac OS X 13.0`, your macOS version is likely older than Claude Code supports.
 
-  Open the Apple menu and select About This Mac to check your version. If it's older than 13.0, update macOS through Software Update. See the [macOS troubleshooting guide](/en/troubleshooting#dyld-cannot-load-on-macos) for more details.
+  Open the Apple menu and select About This Mac to check your version. If it's older than 13.0, update macOS through Software Update. See the [macOS troubleshooting guide](/en/troubleshoot-install#dyld-cannot-load-on-macos) for more details.
 </Accordion>
 
-For other errors, see the full [installation troubleshooting guide](/en/troubleshooting#troubleshoot-installation-issues).
+For other errors, see the full [installation troubleshooting guide](/en/troubleshoot-install).
 
 ### Windows troubleshooting
 
@@ -267,7 +267,7 @@ If you run into problems installing on Windows, check these common issues:
      ```
      Look for the `Git\bin` folder in that path and use it instead.
 
-  To make this permanent so you don't have to set it every time, see [configure Git Bash path](/en/troubleshooting#windows-claude-code-on-windows-requires-either-git-for-windows-for-bash-or-powershell).
+  To make this permanent so you don't have to set it every time, see [configure Git Bash path](/en/troubleshoot-install#claude-code-on-windows-requires-either-git-for-windows-for-bash-or-powershell).
 </Accordion>
 
 <Accordion title="'claude is not recognized'">
@@ -280,7 +280,7 @@ If you run into problems installing on Windows, check these common issues:
   [Environment]::SetEnvironmentVariable('PATH', "$currentPath;$env:USERPROFILE\.local\bin", 'User')
   ```
 
-  Close PowerShell, open a new window, and try `claude` again. See [verify your PATH](/en/troubleshooting#verify-your-path) for more details.
+  Close PowerShell, open a new window, and try `claude` again. See [verify your PATH](/en/troubleshoot-install#verify-your-path) for more details.
 </Accordion>
 
-For other errors, see the full [installation troubleshooting guide](/en/troubleshooting#troubleshoot-installation-issues).
+For other errors, see the full [installation troubleshooting guide](/en/troubleshoot-install).
