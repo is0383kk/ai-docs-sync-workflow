@@ -112,6 +112,8 @@ Check if the install directory is in your PATH by listing your PATH entries and 
 
     Alternatively, close and reopen your terminal.
 
+    For other shells such as fish or Nushell, add `~/.local/bin` to your PATH using your shell's own configuration syntax, then restart your terminal.
+
     Verify the fix worked:
 
     ```bash theme={null}

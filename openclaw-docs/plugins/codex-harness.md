@@ -572,6 +572,13 @@ an OpenClaw response within 30 seconds. On timeout, OpenClaw aborts the tool
 signal where supported and returns a failed dynamic-tool response to Codex so
 the turn can continue instead of leaving the session in `processing`.
 
+After OpenClaw responds to a Codex turn-scoped app-server request, the harness
+also expects Codex to finish the native turn with `turn/completed`. If the
+app-server goes quiet for 60 seconds after that response, OpenClaw best-effort
+interrupts the Codex turn, records a diagnostic timeout, and releases the
+OpenClaw session lane so follow-up chat messages are not queued behind a stale
+native turn.
+
 Environment overrides remain available for local testing:
 
 * `OPENCLAW_CODEX_APP_SERVER_BIN`
@@ -935,6 +942,14 @@ approval flow when Codex marks `_meta.codex_approval_kind` as
 originating chat, and the next queued follow-up message answers that native
 server request instead of being steered as extra context. Other MCP elicitation
 requests still fail closed.
+
+Active-run queue steering maps onto Codex app-server `turn/steer`. With the
+default `messages.queue.mode: "steer"`, OpenClaw batches queued chat messages
+for the configured quiet window and sends them as one `turn/steer` request in
+arrival order. Legacy `queue` mode sends separate `turn/steer` requests. Codex
+review and manual compaction turns can reject same-turn steering, in which case
+OpenClaw uses the followup queue when the selected mode allows fallback. See
+[Steering queue](/concepts/queue-steering).
 
 When the selected model uses the Codex harness, native thread compaction is
 delegated to Codex app-server. OpenClaw keeps a transcript mirror for channel
