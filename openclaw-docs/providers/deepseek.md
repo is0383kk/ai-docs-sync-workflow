@@ -76,6 +76,8 @@
   V4 models support DeepSeek's `thinking` control. OpenClaw also replays
   DeepSeek `reasoning_content` on follow-up turns so thinking sessions with tool
   calls can continue.
+  Use `/think xhigh` or `/think max` with DeepSeek V4 models to request DeepSeek's
+  maximum `reasoning_effort`.
 </Tip>
 
 ## Thinking and tools
