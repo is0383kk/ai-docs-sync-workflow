@@ -78,6 +78,8 @@
 
 * `pnpm test:docker:upgrade-survivor`: Installs the packed OpenClaw tarball over a dirty old-user fixture, runs package update plus non-interactive doctor without live provider or channel keys, then starts a loopback Gateway and checks that agents, channel config, plugin allowlists, workspace/session files, stale plugin runtime-deps state, startup, and RPC status survive.
 
+* `pnpm test:docker:published-upgrade-survivor`: Installs `openclaw@latest` by default, seeds realistic existing-user files without live provider or channel keys, configures that baseline with a baked `openclaw config set` command recipe, updates that published install to the packed OpenClaw tarball, runs non-interactive doctor, writes `.artifacts/upgrade-survivor/summary.json`, then starts a loopback Gateway and checks that configured intents, workspace/session files, stale plugin config/runtime-deps state, startup, `/healthz`, `/readyz`, and RPC status survive or repair cleanly. Override one baseline with `OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC`, expand an exact matrix with `OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS`, or add scenario fixtures with `OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS=reported-issues`; Package Acceptance exposes those as `published_upgrade_survivor_baseline`, `published_upgrade_survivor_baselines`, and `published_upgrade_survivor_scenarios`.
+
 ## Local PR gate
 
 For local PR land/gate checks, run:
