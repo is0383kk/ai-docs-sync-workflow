@@ -6,7 +6,7 @@
 
 # `openclaw migrate`
 
-Import state from another agent system through a plugin-owned migration provider. Bundled providers cover [Claude](/install/migrating-claude) and [Hermes](/install/migrating-hermes); third-party plugins can register additional providers.
+Import state from another agent system through a plugin-owned migration provider. Bundled providers cover Codex CLI state, [Claude](/install/migrating-claude), and [Hermes](/install/migrating-hermes); third-party plugins can register additional providers.
 
 <Tip>
   For user-facing walkthroughs, see [Migrating from Claude](/install/migrating-claude) and [Migrating from Hermes](/install/migrating-hermes). The [migration hub](/install/migrating) lists all paths.
@@ -17,8 +17,12 @@ Import state from another agent system through a plugin-owned migration provider
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
 openclaw migrate list
 openclaw migrate claude --dry-run
+openclaw migrate codex --dry-run
+openclaw migrate codex --skill gog-vault77-google-workspace
 openclaw migrate hermes --dry-run
 openclaw migrate hermes
+openclaw migrate apply codex --yes --skill gog-vault77-google-workspace
+openclaw migrate apply codex --yes
 openclaw migrate apply claude --yes
 openclaw migrate apply hermes --yes
 openclaw migrate apply hermes --include-secrets --yes
@@ -49,6 +53,10 @@ openclaw onboard --import-from hermes --import-source ~/.hermes
 
 <ParamField path="--yes" type="boolean">
   Skip the confirmation prompt. Required in non-interactive mode.
+</ParamField>
+
+<ParamField path="--skill <name>" type="string">
+  Select one skill copy item by skill name or item id. Repeat the flag to migrate multiple skills. When omitted, interactive Codex migrations show a checkbox selector and non-interactive migrations keep all planned skills.
 </ParamField>
 
 <ParamField path="--no-backup" type="boolean">
@@ -106,6 +114,43 @@ The bundled Claude provider detects Claude Code state at `~/.claude` by default.
 ### Archive and manual-review state
 
 Claude hooks, permissions, environment defaults, local memory, path-scoped rules, subagents, caches, plans, and project history are preserved in the migration report or reported as manual-review items. OpenClaw does not execute hooks, copy broad allowlists, or import OAuth/Desktop credential state automatically.
+
+## Codex provider
+
+The bundled Codex provider detects Codex CLI state at `~/.codex` by default, or
+at `CODEX_HOME` when that environment variable is set. Use `--from <path>` to
+inventory a specific Codex home.
+
+Use this provider when moving to the OpenClaw Codex harness and you want to
+promote useful personal Codex CLI assets deliberately. Local Codex app-server
+launches use per-agent `CODEX_HOME` and `HOME` directories, so they do not read
+your personal Codex CLI state by default.
+
+Running `openclaw migrate codex` in an interactive terminal previews the full
+plan, then opens a checkbox selector for skill copy items before the final
+apply confirmation. All skills start selected; uncheck any skill you do not want
+copied into this agent. For scripted or exact runs, pass `--skill <name>` once
+per skill, for example:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw migrate codex --dry-run --skill gog-vault77-google-workspace
+openclaw migrate apply codex --yes --skill gog-vault77-google-workspace
+```
+
+### What Codex imports
+
+* Codex CLI skill directories under `$CODEX_HOME/skills`, excluding Codex's
+  `.system` cache.
+* Personal AgentSkills under `$HOME/.agents/skills`, copied into the current
+  OpenClaw agent workspace when you want per-agent ownership.
+
+### Manual-review Codex state
+
+Codex native plugins, `config.toml`, and native `hooks/hooks.json` are not
+activated automatically. Plugins may expose MCP servers, apps, hooks, or other
+executable behavior, so the provider reports them for review instead of loading
+them into OpenClaw. Config and hook files are copied into the migration report
+for manual review.
 
 ## Hermes provider
 
