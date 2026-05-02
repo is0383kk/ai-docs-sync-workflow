@@ -22,6 +22,12 @@ When enabled, the plugin prepends concise usage guidance into system-prompt spac
 ## Quick start
 
 <Steps>
+  <Step title="Install the plugin">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw plugins install diffs
+    ```
+  </Step>
+
   <Step title="Enable the plugin">
     ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
     {

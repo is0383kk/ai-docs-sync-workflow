@@ -4,7 +4,7 @@
 
 # Prometheus metrics
 
-OpenClaw can expose diagnostics metrics through the bundled `diagnostics-prometheus` plugin. It listens to trusted internal diagnostics and renders a Prometheus text endpoint at:
+OpenClaw can expose diagnostics metrics through the official `diagnostics-prometheus` plugin. It listens to trusted internal diagnostics and renders a Prometheus text endpoint at:
 
 ```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
 GET /api/diagnostics/prometheus
@@ -21,6 +21,12 @@ For traces, logs, OTLP push, and OpenTelemetry GenAI semantic attributes, see [O
 ## Quick start
 
 <Steps>
+  <Step title="Install the plugin">
+    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    openclaw plugins install clawhub:@openclaw/diagnostics-prometheus
+    ```
+  </Step>
+
   <Step title="Enable the plugin">
     <Tabs>
       <Tab title="Config">

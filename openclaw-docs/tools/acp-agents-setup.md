@@ -106,7 +106,7 @@ Thread binding config is channel-adapter specific. Example for Discord:
     discord: {
       threadBindings: {
         enabled: true,
-        spawnAcpSessions: true,
+        spawnSessions: true,
       },
     },
   },
@@ -115,7 +115,7 @@ Thread binding config is channel-adapter specific. Example for Discord:
 
 If thread-bound ACP spawn does not work, verify the adapter feature flag first:
 
-* Discord: `channels.discord.threadBindings.spawnAcpSessions=true`
+* Discord: `channels.discord.threadBindings.spawnSessions=true`
 
 Current-conversation binds do not require child-thread creation. They require an active conversation context and a channel adapter that exposes ACP conversation bindings.
 
@@ -123,8 +123,15 @@ See [Configuration Reference](/gateway/configuration-reference).
 
 ## Plugin setup for acpx backend
 
-Fresh installs ship the bundled `acpx` runtime plugin enabled by default, so ACP
-usually works without a manual plugin install step.
+Packaged installs use the official `@openclaw/acpx` runtime plugin for ACP.
+Install and enable it before using ACP harness sessions:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+openclaw plugins install @openclaw/acpx
+openclaw config set plugins.entries.acpx.enabled true
+```
+
+Source checkouts can also use the local workspace plugin after `pnpm install`.
 
 Start with:
 
@@ -133,10 +140,10 @@ Start with:
 ```
 
 If you disabled `acpx`, denied it via `plugins.allow` / `plugins.deny`, or want
-to switch to a local development checkout, use the explicit plugin path:
+to switch back to the packaged plugin, use the explicit package path:
 
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
-openclaw plugins install acpx
+openclaw plugins install @openclaw/acpx
 openclaw config set plugins.entries.acpx.enabled true
 ```
 
@@ -154,7 +161,7 @@ Then verify backend health:
 
 ### acpx command and version configuration
 
-By default, the bundled `acpx` plugin registers the embedded ACP backend without
+By default, the `acpx` plugin registers the embedded ACP backend without
 spawning an ACP agent during Gateway startup. Run `/acp doctor` for an explicit
 live probe. Set `OPENCLAW_ACPX_RUNTIME_STARTUP_PROBE=1` only when you need the
 Gateway to probe the configured agent at startup.
@@ -240,7 +247,7 @@ What this does:
 
 ### Runtime timeout configuration
 
-The bundled `acpx` plugin defaults embedded runtime turns to a 120-second
+The `acpx` plugin defaults embedded runtime turns to a 120-second
 timeout. This gives slower harnesses such as Gemini CLI enough time to complete
 ACP startup and initialization. Override it if your host needs a different
 runtime limit:
