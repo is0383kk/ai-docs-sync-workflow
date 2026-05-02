@@ -186,7 +186,9 @@ instructions to reference the skill folder path.
 </ParamField>
 
 <ParamField path="disable-model-invocation" type="boolean" default="false">
-  When `true`, the skill is excluded from the model prompt (still available via user invocation).
+  When `true`, OpenClaw keeps the skill's instructions out of the agent's normal
+  prompt. The skill is still installed and can still be run explicitly as a
+  slash command when `user-invocable` is also `true`.
 </ParamField>
 
 <ParamField path="command-dispatch" type="&#x22;tool&#x22;">

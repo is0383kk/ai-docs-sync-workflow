@@ -289,7 +289,7 @@ The script exits with code `2` for invalid method selection or invalid `--instal
   </Step>
 
   <Step title="Install OpenClaw">
-    * `npm` method (default): global npm install using selected `-Tag`
+    * `npm` method (default): global npm install using selected `-Tag`, launched from a writable installer temp directory so shells opened in protected folders such as `C:\` still work
     * `git` method: clone/update repo, install/build with pnpm, and install wrapper at `%USERPROFILE%\.local\bin\openclaw.cmd`
   </Step>
 

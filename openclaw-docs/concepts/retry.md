@@ -35,7 +35,9 @@
 
 ### Discord
 
-* Retries only on rate-limit errors (HTTP 429).
+* Retries on rate-limit errors (HTTP 429), request timeouts, HTTP 5xx responses,
+  and transient transport failures such as DNS lookup failures, connection
+  resets, socket closes, and fetch failures.
 * Uses Discord `retry_after` when available, otherwise exponential backoff.
 
 ### Telegram
