@@ -405,7 +405,7 @@ Default Docker image: `openclaw-sandbox:bookworm-slim`
     scripts/sandbox-common-setup.sh
     ```
 
-    From an npm install, build the default image first (see above), then build the common image on top using the [`Dockerfile.sandbox-common`](https://github.com/openclaw/openclaw/blob/main/Dockerfile.sandbox-common) from the repository.
+    From an npm install, build the default image first (see above), then build the common image on top using the [`scripts/docker/sandbox/Dockerfile.common`](https://github.com/openclaw/openclaw/blob/main/scripts/docker/sandbox/Dockerfile.common) from the repository.
 
     Then set `agents.defaults.sandbox.docker.image` to `openclaw-sandbox-common:bookworm-slim`.
   </Step>
@@ -417,7 +417,7 @@ Default Docker image: `openclaw-sandbox:bookworm-slim`
     scripts/sandbox-browser-setup.sh
     ```
 
-    From an npm install, build using the [`Dockerfile.sandbox-browser`](https://github.com/openclaw/openclaw/blob/main/Dockerfile.sandbox-browser) from the repository.
+    From an npm install, build using the [`scripts/docker/sandbox/Dockerfile.browser`](https://github.com/openclaw/openclaw/blob/main/scripts/docker/sandbox/Dockerfile.browser) from the repository.
   </Step>
 </Steps>
 

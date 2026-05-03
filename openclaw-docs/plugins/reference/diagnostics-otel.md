@@ -11,7 +11,7 @@ OpenClaw diagnostics OpenTelemetry exporter.
 ## Distribution
 
 * Package: `@openclaw/diagnostics-otel`
-* Install route: ClawHub: `clawhub:@openclaw/diagnostics-otel`; npm
+* Install route: npm; ClawHub: `clawhub:@openclaw/diagnostics-otel`
 
 ## Surface
 

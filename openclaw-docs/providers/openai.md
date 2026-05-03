@@ -195,7 +195,7 @@ Choose your preferred auth method and follow the setup steps.
         ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
         openclaw config set plugins.entries.codex '{"enabled":true}' --strict-json --merge
         openclaw config set agents.defaults.model.primary openai/gpt-5.5
-        openclaw config set agents.defaults.agentRuntime '{"id":"codex","fallback":"none"}' --strict-json
+        openclaw config set agents.defaults.agentRuntime '{"id":"codex"}' --strict-json
         ```
       </Step>
 
@@ -235,7 +235,7 @@ Choose your preferred auth method and follow the setup steps.
       agents: {
         defaults: {
           model: { primary: "openai/gpt-5.5" },
-          agentRuntime: { id: "codex", fallback: "none" },
+          agentRuntime: { id: "codex" },
         },
       },
     }

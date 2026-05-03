@@ -347,8 +347,8 @@ For contract tests only:
 
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
 pnpm test -- src/plugins/contracts/shape.contract.test.ts
-pnpm test -- src/plugins/contracts/auth.contract.test.ts
-pnpm test -- src/plugins/contracts/runtime.contract.test.ts
+pnpm test -- src/plugins/contracts/auth-choice.contract.test.ts
+pnpm test -- src/plugins/contracts/runtime-seams.contract.test.ts
 ```
 
 ## Lint enforcement (in-repo plugins)

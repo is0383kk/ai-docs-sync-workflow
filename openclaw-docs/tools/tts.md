@@ -877,6 +877,8 @@ OpenAI and ElevenLabs output formats are fixed per channel as listed above.
   </Accordion>
 
   <Accordion title="Inworld">
+    ### Inworld primary
+
     <ParamField path="apiKey" type="string">Env: `INWORLD_API_KEY`.</ParamField>
     <ParamField path="baseUrl" type="string">Default `https://api.inworld.ai`.</ParamField>
     <ParamField path="modelId" type="string">Default `inworld-tts-1.5-max`. Also: `inworld-tts-1.5-mini`, `inworld-tts-1-max`, `inworld-tts-1`.</ParamField>
