@@ -135,7 +135,9 @@ Returns the revoke result as JSON.
 ## Notes
 
 * Token rotation returns a new token (sensitive). Treat it like a secret.
-* These commands require `operator.pairing` (or `operator.admin`) scope.
+* These commands require `operator.pairing` (or `operator.admin`) scope. Some
+  approvals also require the caller to hold the operator scopes that the target
+  device would mint or inherit; see [Operator scopes](/gateway/operator-scopes).
 * `gateway.nodes.pairing.autoApproveCidrs` is an opt-in Gateway policy for
   fresh node device pairing only; it does not change CLI approval authority.
 * Token rotation and revocation stay inside the approved pairing role set and

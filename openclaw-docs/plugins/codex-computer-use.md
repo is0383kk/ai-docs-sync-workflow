@@ -93,7 +93,6 @@ Computer Use available before a thread starts:
       model: "openai/gpt-5.5",
       agentRuntime: {
         id: "codex",
-        fallback: "none",
       },
     },
   },

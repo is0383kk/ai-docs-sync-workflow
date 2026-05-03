@@ -11,7 +11,7 @@ Adds the Matrix channel surface for sending and receiving OpenClaw messages.
 ## Distribution
 
 * Package: `@openclaw/matrix`
-* Install route: ClawHub + npm
+* Install route: included in OpenClaw
 
 ## Surface
 

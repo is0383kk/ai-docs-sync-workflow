@@ -152,7 +152,7 @@ OpenClaw ships with the pi‑ai catalog. These providers require **no** `models.
   agents: {
     defaults: {
       model: { primary: "openai/gpt-5.5" },
-      agentRuntime: { id: "codex", fallback: "none" },
+      agentRuntime: { id: "codex" },
     },
   },
 }

@@ -11,7 +11,7 @@ Adds agent-callable tools.
 ## Distribution
 
 * Package: `@openclaw/voice-call`
-* Install route: ClawHub + npm
+* Install route: npm; ClawHub
 
 ## Surface
 
