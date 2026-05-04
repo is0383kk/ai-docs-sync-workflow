@@ -5,13 +5,13 @@
 # ElevenLabs
 
 OpenClaw uses ElevenLabs for text-to-speech, batch speech-to-text with Scribe
-v2, and Voice Call streaming STT with Scribe v2 Realtime.
+v2, and streaming STT with Scribe v2 Realtime.
 
-| Capability               | OpenClaw surface                              | Default                  |
-| ------------------------ | --------------------------------------------- | ------------------------ |
-| Text-to-speech           | `messages.tts` / `talk`                       | `eleven_multilingual_v2` |
-| Batch speech-to-text     | `tools.media.audio`                           | `scribe_v2`              |
-| Streaming speech-to-text | Voice Call `streaming.provider: "elevenlabs"` | `scribe_v2_realtime`     |
+| Capability               | OpenClaw surface                                                     | Default                  |
+| ------------------------ | -------------------------------------------------------------------- | ------------------------ |
+| Text-to-speech           | `messages.tts` / `talk`                                              | `eleven_multilingual_v2` |
+| Batch speech-to-text     | `tools.media.audio`                                                  | `scribe_v2`              |
+| Streaming speech-to-text | Voice Call streaming or Google Meet `realtime.transcriptionProvider` | `scribe_v2_realtime`     |
 
 ## Authentication
 
@@ -63,10 +63,10 @@ Use Scribe v2 for inbound audio attachments and short recorded voice segments:
 OpenClaw sends multipart audio to ElevenLabs `/v1/speech-to-text` with
 `model_id: "scribe_v2"`. Language hints map to `language_code` when present.
 
-## Voice Call streaming STT
+## Streaming STT
 
-The bundled `elevenlabs` plugin registers Scribe v2 Realtime for Voice Call
-streaming transcription.
+The bundled `elevenlabs` plugin registers Scribe v2 Realtime for Voice Call and
+Google Meet agent-mode streaming transcription.
 
 | Setting         | Config path                                                               | Default                                           |
 | --------------- | ------------------------------------------------------------------------- | ------------------------------------------------- |
@@ -108,7 +108,13 @@ streaming transcription.
   transcoding.
 </Note>
 
+For Google Meet agent mode, set
+`plugins.entries.google-meet.config.realtime.transcriptionProvider` to
+`"elevenlabs"` and configure the same provider block under
+`plugins.entries.google-meet.config.realtime.providers.elevenlabs`.
+
 ## Related
 
 * [Text-to-speech](/tools/tts)
+* [Google Meet](/plugins/google-meet)
 * [Model selection](/concepts/model-providers)
