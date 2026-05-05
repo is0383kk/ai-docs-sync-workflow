@@ -179,11 +179,14 @@ troubleshooting, see the main [FAQ](/help/faq).
     session overrides. Choosing a model that isn't in that list returns:
 
     ```
-    Model "provider/model" is not allowed. Use /model to list available models.
+    Model "provider/model" is not allowed. Use /models to list providers, or /models <provider> to list models.
+    Add it with: openclaw config set agents.defaults.models '{"provider/model":{}}' --strict-json --merge
     ```
 
     That error is returned **instead of** a normal reply. Fix: add the model to
     `agents.defaults.models`, remove the allowlist, or pick a model from `/model list`.
+    If the command also included `--runtime codex`, add the model first and then retry
+    the same `/model provider/model --runtime codex` command.
   </Accordion>
 
   <Accordion title="Why do I see &#x22;Unknown model: minimax/MiniMax-M2.7&#x22;?">
@@ -442,6 +445,8 @@ Related: [/concepts/oauth](/concepts/oauth) (OAuth flows, token storage, multi-a
     ```
     ~/.openclaw/agents/<agentId>/agent/auth-profiles.json
     ```
+
+    To inspect saved profiles without dumping secrets, run `openclaw models auth list` (optionally `--provider <id>` or `--json`). See [Models CLI](/cli/models#openclaw-models-auth-list) for details.
   </Accordion>
 
   <Accordion title="What are typical profile IDs?">
