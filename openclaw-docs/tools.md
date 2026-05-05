@@ -190,10 +190,10 @@ Use `group:*` shorthands in allow/deny lists:
 | `group:memory`     | memory\_search, memory\_get                                                                                     |
 | `group:web`        | web\_search, x\_search, web\_fetch                                                                              |
 | `group:ui`         | browser, canvas                                                                                                 |
-| `group:automation` | cron, gateway                                                                                                   |
+| `group:automation` | heartbeat\_respond, cron, gateway                                                                               |
 | `group:messaging`  | message                                                                                                         |
 | `group:nodes`      | nodes                                                                                                           |
-| `group:agents`     | agents\_list                                                                                                    |
+| `group:agents`     | agents\_list, update\_plan                                                                                      |
 | `group:media`      | image, image\_generate, music\_generate, video\_generate, tts                                                   |
 | `group:openclaw`   | All built-in OpenClaw tools (excludes plugin tools)                                                             |
 
