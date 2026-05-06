@@ -4,8 +4,6 @@
 
 # Model provider quickstart
 
-# Model Providers
-
 OpenClaw can use many LLM providers. Pick one, authenticate, then set the default
 model as `provider/model`.
 

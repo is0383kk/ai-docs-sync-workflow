@@ -146,6 +146,11 @@ openclaw plugins install "@tencent-weixin/openclaw-weixin" --force
 openclaw gateway restart
 ```
 
+If startup reports that the installed plugin package `requires compiled runtime
+output for TypeScript entry`, the npm package was published without the compiled
+JavaScript runtime files OpenClaw needs. Update/reinstall after the plugin
+publisher ships a fixed package, or temporarily disable/uninstall the plugin.
+
 Temporary disable:
 
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}

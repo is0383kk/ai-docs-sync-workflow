@@ -2,8 +2,6 @@
 > Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
 > Use this file to discover all available pages before exploring further.
 
-# Deepinfra
-
 # DeepInfra
 
 DeepInfra provides a **unified API** that routes requests to the most popular open source and frontier models behind a single
@@ -80,3 +78,8 @@ deepinfra/zai-org/GLM-5.1
 * Default model: `deepinfra/deepseek-ai/DeepSeek-V3.2`
 * Base URL: `https://api.deepinfra.com/v1/openai`
 * Native video generation uses `https://api.deepinfra.com/v1/inference/<model>`.
+
+## Related
+
+* [Model providers](/concepts/model-providers)
+* [All providers](/providers/index)

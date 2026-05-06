@@ -4,8 +4,6 @@
 
 # Zalo personal plugin
 
-# Zalo Personal (plugin)
-
 Zalo Personal support for OpenClaw via a plugin, using native `zca-js` to automate a normal Zalo user account.
 
 <Warning>

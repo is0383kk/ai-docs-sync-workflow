@@ -4,8 +4,6 @@
 
 # Fly.io
 
-# Fly.io Deployment
-
 **Goal:** OpenClaw Gateway running on a [Fly.io](https://fly.io) machine with persistent storage, automatic HTTPS, and Discord/channel access.
 
 ## What you need

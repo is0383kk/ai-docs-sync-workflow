@@ -21,10 +21,10 @@ OpenClaw uses the pi SDK to embed an AI coding agent into its messaging gateway 
 
 ```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
 {
-  "@mariozechner/pi-agent-core": "0.70.2",
-  "@mariozechner/pi-ai": "0.70.2",
-  "@mariozechner/pi-coding-agent": "0.70.2",
-  "@mariozechner/pi-tui": "0.70.2"
+  "@mariozechner/pi-agent-core": "0.73.0",
+  "@mariozechner/pi-ai": "0.73.0",
+  "@mariozechner/pi-coding-agent": "0.73.0",
+  "@mariozechner/pi-tui": "0.73.0"
 }
 ```
 
@@ -335,7 +335,7 @@ const compactResult = await compactEmbeddedPiSessionDirect({
 });
 ```
 
-## Authentication & Model Resolution
+## Authentication and model resolution
 
 ### Auth profiles
 
@@ -416,7 +416,7 @@ if (cfg?.agents?.defaults?.contextPruning?.mode === "cache-ttl") {
 }
 ```
 
-## Streaming & Block Replies
+## Streaming and block replies
 
 ### Block chunking
 

@@ -39,7 +39,7 @@ openclaw plugins install ./path/to/local/line-plugin
 https://gateway-host/line/webhook
 ```
 
-The gateway responds to LINE’s webhook verification (GET) and inbound events (POST).
+The gateway responds to LINE's webhook verification (GET) and inbound events (POST).
 If you need a custom path, set `channels.line.webhookPath` or
 `channels.line.accounts.<id>.webhookPath` and update the URL accordingly.
 
@@ -60,6 +60,22 @@ Minimal config:
       channelAccessToken: "LINE_CHANNEL_ACCESS_TOKEN",
       channelSecret: "LINE_CHANNEL_SECRET",
       dmPolicy: "pairing",
+    },
+  },
+}
+```
+
+Public DM config:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  channels: {
+    line: {
+      enabled: true,
+      channelAccessToken: "LINE_CHANNEL_ACCESS_TOKEN",
+      channelSecret: "LINE_CHANNEL_SECRET",
+      dmPolicy: "open",
+      allowFrom: ["*"],
     },
   },
 }
@@ -116,7 +132,7 @@ openclaw pairing approve line <CODE>
 Allowlists and policies:
 
 * `channels.line.dmPolicy`: `pairing | allowlist | open | disabled`
-* `channels.line.allowFrom`: allowlisted LINE user IDs for DMs
+* `channels.line.allowFrom`: allowlisted LINE user IDs for DMs; `dmPolicy: "open"` requires `["*"]`
 * `channels.line.groupPolicy`: `allowlist | open | disabled`
 * `channels.line.groupAllowFrom`: allowlisted LINE user IDs for groups
 * Per-group overrides: `channels.line.groups.<groupId>.allowFrom`

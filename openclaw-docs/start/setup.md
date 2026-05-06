@@ -23,11 +23,11 @@ Pick a setup workflow based on how often you want updates and whether you want t
 * `pnpm` required for source checkouts. OpenClaw loads bundled plugins from the
   `extensions/*` pnpm workspace packages in dev mode, so root `npm install` does
   not prepare the full source tree.
-* Docker (optional; only for containerized setup/e2e — see [Docker](/install/docker))
+* Docker (optional; only for containerized setup/e2e - see [Docker](/install/docker))
 
 ## Tailoring strategy (so updates do not hurt)
 
-If you want “100% tailored to me” *and* easy updates, keep your customization in:
+If you want "100% tailored to me" *and* easy updates, keep your customization in:
 
 * **Config:** `~/.openclaw/openclaw.json` (JSON/JSON5-ish)
 * **Workspace:** `~/.openclaw/workspace` (skills, prompts, memories; make it a private git repo)
@@ -44,7 +44,7 @@ From inside this repo, use the local CLI entry:
 openclaw setup
 ```
 
-If you don’t have a global install yet, run it via `pnpm openclaw setup`.
+If you don't have a global install yet, run it via `pnpm openclaw setup`.
 
 ## Run the Gateway from this repo
 
@@ -117,7 +117,7 @@ In **OpenClaw\.app**:
 
 ### 3) Verify
 
-* In-app Gateway status should read **“Using existing gateway …”**
+* In-app Gateway status should read **"Using existing gateway …"**
 * Or via CLI:
 
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
@@ -151,14 +151,14 @@ Use this when debugging auth or deciding what to back up:
 
 ## Updating (without wrecking your setup)
 
-* Keep `~/.openclaw/workspace` and `~/.openclaw/` as “your stuff”; don’t put personal prompts/config into the `openclaw` repo.
+* Keep `~/.openclaw/workspace` and `~/.openclaw/` as "your stuff"; don't put personal prompts/config into the `openclaw` repo.
 * Updating source: `git pull` + `pnpm install` + keep using `pnpm gateway:watch`.
 
 ## Linux (systemd user service)
 
 Linux installs use a systemd **user** service. By default, systemd stops user
 services on logout/idle, which kills the Gateway. Onboarding attempts to enable
-lingering for you (may prompt for sudo). If it’s still off, run:
+lingering for you (may prompt for sudo). If it's still off, run:
 
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
 sudo loginctl enable-linger $USER
