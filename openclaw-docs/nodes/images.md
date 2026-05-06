@@ -4,8 +4,6 @@
 
 # Image and media support
 
-# Image & Media Support (2025-12-05)
-
 The WhatsApp channel runs via **Baileys Web**. This document captures the current media handling rules for send, gateway, and agent replies.
 
 ## Goals
@@ -50,7 +48,7 @@ The WhatsApp channel runs via **Baileys Web**. This document captures the curren
   * If the active primary image model already supports vision natively, OpenClaw skips the `[Image]` summary block and passes the original image to the model instead.
 * By default only the first matching image/audio/video attachment is processed; set `tools.media.<cap>.attachments` to process multiple attachments.
 
-## Limits & Errors
+## Limits and errors
 
 **Outbound send caps (WhatsApp web send)**
 

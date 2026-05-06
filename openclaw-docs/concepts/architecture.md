@@ -6,7 +6,7 @@
 
 ## Overview
 
-* A single long‑lived **Gateway** owns all messaging surfaces (WhatsApp via
+* A single long-lived **Gateway** owns all messaging surfaces (WhatsApp via
   Baileys, Telegram via grammY, Slack, Discord, Signal, iMessage, WebChat).
 * Control-plane clients (macOS app, CLI, web UI, automations) connect to the
   Gateway over **WebSocket** on the configured bind host (default
@@ -24,7 +24,7 @@
 ### Gateway (daemon)
 
 * Maintains provider connections.
-* Exposes a typed WS API (requests, responses, server‑push events).
+* Exposes a typed WS API (requests, responses, server-push events).
 * Validates inbound frames against JSON Schema.
 * Emits events like `agent`, `chat`, `presence`, `health`, `heartbeat`, `cron`.
 
@@ -37,7 +37,7 @@
 ### Nodes (macOS / iOS / Android / headless)
 
 * Connect to the **same WS server** with `role: node`.
-* Provide a device identity in `connect`; pairing is **device‑based** (role `node`) and
+* Provide a device identity in `connect`; pairing is **device-based** (role `node`) and
   approval lives in the device pairing store.
 * Expose commands like `canvas.*`, `camera.*`, `screen.record`, `location.get`.
 
@@ -89,8 +89,8 @@ sequenceDiagram
   instead of `connect.params.auth.*`.
 * Private-ingress `gateway.auth.mode: "none"` disables shared-secret auth
   entirely; keep that mode off public/untrusted ingress.
-* Idempotency keys are required for side‑effecting methods (`send`, `agent`) to
-  safely retry; the server keeps a short‑lived dedupe cache.
+* Idempotency keys are required for side-effecting methods (`send`, `agent`) to
+  safely retry; the server keeps a short-lived dedupe cache.
 * Nodes must include `role: "node"` plus caps/commands/permissions in `connect`.
 
 ## Pairing + local trust
@@ -108,7 +108,7 @@ sequenceDiagram
 * Signature payload `v3` also binds `platform` + `deviceFamily`; the gateway
   pins paired metadata on reconnect and requires repair pairing for metadata
   changes.
-* **Non‑local** connects still require explicit approval.
+* **Non-local** connects still require explicit approval.
 * Gateway auth (`gateway.auth.*`) still applies to **all** connections, local or
   remote.
 
@@ -139,12 +139,12 @@ Details: [Gateway protocol](/gateway/protocol), [Pairing](/channels/pairing),
 
 * Start: `openclaw gateway` (foreground, logs to stdout).
 * Health: `health` over WS (also included in `hello-ok`).
-* Supervision: launchd/systemd for auto‑restart.
+* Supervision: launchd/systemd for auto-restart.
 
 ## Invariants
 
 * Exactly one Gateway controls a single Baileys session per host.
-* Handshake is mandatory; any non‑JSON or non‑connect first frame is a hard close.
+* Handshake is mandatory; any non-JSON or non-connect first frame is a hard close.
 * Events are not replayed; clients must refresh on gaps.
 
 ## Related

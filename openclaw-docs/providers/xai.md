@@ -67,7 +67,7 @@ they follow the same API shape.
 
 The bundled plugin maps xAI's current public API surface onto OpenClaw's shared
 provider and tool contracts. Capabilities that don't fit the shared contract
-(for example streaming TTS and realtime voice) are not exposed — see the table
+(for example streaming TTS and realtime voice) are not exposed - see the table
 below.
 
 | xAI capability             | OpenClaw surface                          | Status                                                              |
@@ -79,10 +79,10 @@ below.
 | Images                     | `image_generate`                          | Yes                                                                 |
 | Videos                     | `video_generate`                          | Yes                                                                 |
 | Batch text-to-speech       | `messages.tts.provider: "xai"` / `tts`    | Yes                                                                 |
-| Streaming TTS              | —                                         | Not exposed; OpenClaw's TTS contract returns complete audio buffers |
+| Streaming TTS              | -                                         | Not exposed; OpenClaw's TTS contract returns complete audio buffers |
 | Batch speech-to-text       | `tools.media.audio` / media understanding | Yes                                                                 |
 | Streaming speech-to-text   | Voice Call `streaming.provider: "xai"`    | Yes                                                                 |
-| Realtime voice             | —                                         | Not exposed yet; different session/WebSocket contract               |
+| Realtime voice             | -                                         | Not exposed yet; different session/WebSocket contract               |
 | Files / batches            | Generic model API compatibility only      | Not a first-class OpenClaw tool                                     |
 
 <Note>
@@ -336,13 +336,13 @@ Legacy aliases still normalize to the canonical bundled ids:
 
     | Key               | Type    | Default         | Description                         |
     | ----------------- | ------- | --------------- | ----------------------------------- |
-    | `enabled`         | boolean | —               | Enable or disable x\_search         |
+    | `enabled`         | boolean | -               | Enable or disable x\_search         |
     | `model`           | string  | `grok-4-1-fast` | Model used for x\_search requests   |
-    | `baseUrl`         | string  | —               | xAI Responses base URL override     |
-    | `inlineCitations` | boolean | —               | Include inline citations in results |
-    | `maxTurns`        | number  | —               | Maximum conversation turns          |
-    | `timeoutSeconds`  | number  | —               | Request timeout in seconds          |
-    | `cacheTtlMinutes` | number  | —               | Cache time-to-live in minutes       |
+    | `baseUrl`         | string  | -               | xAI Responses base URL override     |
+    | `inlineCitations` | boolean | -               | Include inline citations in results |
+    | `maxTurns`        | number  | -               | Maximum conversation turns          |
+    | `timeoutSeconds`  | number  | -               | Request timeout in seconds          |
+    | `cacheTtlMinutes` | number  | -               | Cache time-to-live in minutes       |
 
     ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
     {
@@ -374,8 +374,8 @@ Legacy aliases still normalize to the canonical bundled ids:
     | ---------------- | ------- | ------------------------- | -------------------------------------- |
     | `enabled`        | boolean | `true` (if key available) | Enable or disable code execution       |
     | `model`          | string  | `grok-4-1-fast`           | Model used for code execution requests |
-    | `maxTurns`       | number  | —                         | Maximum conversation turns             |
-    | `timeoutSeconds` | number  | —                         | Request timeout in seconds             |
+    | `maxTurns`       | number  | -                         | Maximum conversation turns             |
+    | `timeoutSeconds` | number  | -                         | Request timeout in seconds             |
 
     <Note>
       This is remote xAI sandbox execution, not local [`exec`](/tools/exec).

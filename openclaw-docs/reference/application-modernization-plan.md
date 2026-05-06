@@ -4,8 +4,6 @@
 
 # Application modernization plan
 
-# Application modernization plan
-
 ## Goal
 
 Move the application toward a cleaner, faster, more maintainable product without

@@ -2,8 +2,6 @@
 > Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
 > Use this file to discover all available pages before exploring further.
 
-# Kilocode
-
 # Kilo Gateway
 
 Kilo Gateway provides a **unified API** that routes requests to many models behind a single

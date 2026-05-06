@@ -4,8 +4,6 @@
 
 # Webhooks plugin
 
-# Webhooks (plugin)
-
 The Webhooks plugin adds authenticated HTTP routes that bind external
 automation to OpenClaw TaskFlows.
 

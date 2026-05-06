@@ -4,8 +4,6 @@
 
 # API usage and costs
 
-# API usage & costs
-
 This doc lists **features that can invoke API keys** and where their costs show up. It focuses on
 OpenClaw features that can generate provider usage or paid API calls.
 
@@ -151,7 +149,7 @@ See [Web tools](/tools/web).
 
 * `FIRECRAWL_API_KEY` or `plugins.entries.firecrawl.config.webFetch.apiKey`
 
-If Firecrawl isn’t configured, the tool falls back to direct fetch plus the bundled `web-readability` plugin (no paid API). Disable `plugins.entries.web-readability.enabled` to skip local Readability extraction.
+If Firecrawl isn't configured, the tool falls back to direct fetch plus the bundled `web-readability` plugin (no paid API). Disable `plugins.entries.web-readability.enabled` to skip local Readability extraction.
 
 See [Web tools](/tools/web).
 
@@ -190,7 +188,7 @@ See [Talk mode](/nodes/talk).
 ### 10) Skills (third-party APIs)
 
 Skills can store `apiKey` in `skills.entries.<name>.apiKey`. If a skill uses that key for external
-APIs, it can incur costs according to the skill’s provider.
+APIs, it can incur costs according to the skill's provider.
 
 See [Skills](/tools/skills).
 

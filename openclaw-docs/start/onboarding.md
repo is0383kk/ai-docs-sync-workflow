@@ -4,8 +4,8 @@
 
 # Onboarding (macOS app)
 
-This doc describes the **current** first‑run setup flow. The goal is a
-smooth “day 0” experience: pick where the Gateway runs, connect auth, run the
+This doc describes the **current** first-run setup flow. The goal is a
+smooth "day 0" experience: pick where the Gateway runs, connect auth, run the
 wizard, and let the agent bootstrap itself.
 For a general overview of onboarding paths, see [Onboarding Overview](/start/onboarding-overview).
 
@@ -53,7 +53,7 @@ For a general overview of onboarding paths, see [Onboarding Overview](/start/onb
 
       * The wizard now generates a **token** even for loopback, so local WS clients must authenticate.
       * If you disable auth, any local process can connect; use that only on fully trusted machines.
-      * Use a **token** for multi‑machine access or non‑loopback binds.
+      * Use a **token** for multi-machine access or non-loopback binds.
     </Tip>
   </Step>
 
@@ -83,7 +83,7 @@ For a general overview of onboarding paths, see [Onboarding Overview](/start/onb
 
   <Step title="Onboarding Chat (dedicated session)">
     After setup, the app opens a dedicated onboarding chat session so the agent can
-    introduce itself and guide next steps. This keeps first‑run guidance separate
+    introduce itself and guide next steps. This keeps first-run guidance separate
     from your normal conversation. See [Bootstrapping](/start/bootstrapping) for
     what happens on the gateway host during the first agent run.
   </Step>

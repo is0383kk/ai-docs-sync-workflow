@@ -2,7 +2,7 @@
 > Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
 > Use this file to discover all available pages before exploring further.
 
-# Automation & tasks
+# Automation and tasks
 
 OpenClaw runs work in the background through tasks, scheduled jobs, inferred
 commitments, event hooks, and standing instructions. This page helps you choose
