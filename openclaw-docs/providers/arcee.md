@@ -111,12 +111,12 @@ OpenClaw currently ships this bundled Arcee catalog:
 
 ## Supported features
 
-| Feature                                       | Supported                    |
-| --------------------------------------------- | ---------------------------- |
-| Streaming                                     | Yes                          |
-| Tool use / function calling                   | Yes                          |
-| Structured output (JSON mode and JSON schema) | Yes                          |
-| Extended thinking                             | Yes (Trinity Large Thinking) |
+| Feature                                       | Supported                                    |
+| --------------------------------------------- | -------------------------------------------- |
+| Streaming                                     | Yes                                          |
+| Tool use / function calling                   | Yes (Trinity Mini, Trinity Large Preview)    |
+| Structured output (JSON mode and JSON schema) | Yes                                          |
+| Extended thinking                             | Yes (Trinity Large Thinking; tools disabled) |
 
 <AccordionGroup>
   <Accordion title="Environment note">

@@ -16,7 +16,7 @@ reference for **what to import** and **what you can register**.
 </Note>
 
 <Tip>
-  Looking for a how-to guide instead? Start with [Building plugins](/plugins/building-plugins), use [Channel plugins](/plugins/sdk-channel-plugins) for channel plugins, [Provider plugins](/plugins/sdk-provider-plugins) for provider plugins, and [Plugin hooks](/plugins/hooks) for tool or lifecycle hook plugins.
+  Looking for a how-to guide instead? Start with [Building plugins](/plugins/building-plugins), use [Channel plugins](/plugins/sdk-channel-plugins) for channel plugins, [Provider plugins](/plugins/sdk-provider-plugins) for provider plugins, [CLI backend plugins](/plugins/cli-backend-plugins) for local AI CLI backends, and [Plugin hooks](/plugins/hooks) for tool or lifecycle hook plugins.
 </Tip>
 
 ## Import convention
@@ -113,6 +113,7 @@ provider- or plugin-specific policy to core prompt builders.
 | `api.registerGatewayMethod(name, handler)`     | Gateway RPC method                      |
 | `api.registerGatewayDiscoveryService(service)` | Local Gateway discovery advertiser      |
 | `api.registerCli(registrar, opts?)`            | CLI subcommand                          |
+| `api.registerNodeCliFeature(registrar, opts?)` | Node feature CLI under `openclaw nodes` |
 | `api.registerService(service)`                 | Background service                      |
 | `api.registerInteractiveHandler(registration)` | Interactive handler                     |
 | `api.registerAgentToolResultMiddleware(...)`   | Runtime tool-result middleware          |
@@ -210,11 +211,18 @@ own trust.
 
 ### CLI registration metadata
 
-`api.registerCli(registrar, opts?)` accepts two kinds of top-level metadata:
+`api.registerCli(registrar, opts?)` accepts two kinds of command metadata:
 
-* `commands`: explicit command roots owned by the registrar
-* `descriptors`: parse-time command descriptors used for root CLI help,
+* `commands`: explicit command names owned by the registrar
+* `descriptors`: parse-time command descriptors used for CLI help,
   routing, and lazy plugin CLI registration
+* `parentPath`: optional parent command path for nested command groups, such as
+  `["nodes"]`
+
+For paired-node features, prefer
+`api.registerNodeCliFeature(registrar, opts?)`. It is a small wrapper around
+`api.registerCli(..., { parentPath: ["nodes"] })` and makes commands such as
+`openclaw nodes canvas` explicit plugin-owned node features.
 
 If you want a plugin command to stay lazy-loaded in the normal root CLI path,
 provide `descriptors` that cover every top-level command root exposed by that
@@ -231,6 +239,27 @@ api.registerCli(
       {
         name: "matrix",
         description: "Manage Matrix accounts, verification, devices, and profile state",
+        hasSubcommands: true,
+      },
+    ],
+  },
+);
+```
+
+Nested commands receive the resolved parent command as `program`:
+
+```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+api.registerCli(
+  async ({ program }) => {
+    const { registerNodesCanvasCommands } = await import("./src/cli.js");
+    registerNodesCanvasCommands(program);
+  },
+  {
+    parentPath: ["nodes"],
+    descriptors: [
+      {
+        name: "canvas",
+        description: "Capture or render canvas content from a paired node",
         hasSubcommands: true,
       },
     ],
@@ -256,6 +285,9 @@ AI CLI backend such as `codex-cli`.
 * Use `resolveExecutionArgs` for request-scoped argv rewrites that belong to
   the CLI dialect, such as mapping OpenClaw thinking levels to a native effort
   flag.
+
+For an end-to-end authoring guide, see
+[CLI backend plugins](/plugins/cli-backend-plugins).
 
 ### Exclusive slots
 
