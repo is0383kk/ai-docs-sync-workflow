@@ -6,7 +6,7 @@
 
 Community plugins are third-party packages that extend OpenClaw with new
 channels, tools, providers, or other capabilities. They are built and maintained
-by the community, usually published on [ClawHub](/tools/clawhub), and installable
+by the community, usually published on [ClawHub](/clawhub), and installable
 with a single command. Npm remains the launch default for bare package specs
 while ClawHub pack installs roll out.
 
@@ -150,7 +150,7 @@ We welcome community plugins that are useful, documented, and safe to operate.
 <Steps>
   <Step title="Publish to ClawHub or npm">
     Your plugin must be installable via `openclaw plugins install \<package-name\>`.
-    Publish to [ClawHub](/tools/clawhub) unless you specifically need npm-only
+    Publish to [ClawHub](/clawhub) unless you specifically need npm-only
     distribution.
     See [Building Plugins](/plugins/building-plugins) for the full guide.
   </Step>

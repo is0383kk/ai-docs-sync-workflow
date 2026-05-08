@@ -310,7 +310,7 @@ Per-agent elevated overrides (`agents.list[].tools.elevated`) can further restri
     ```
   </Tab>
 
-  <Tab title="Safe execution (no file modifications)">
+  <Tab title="Shell execution with filesystem tools disabled">
     ```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
     {
       "tools": {
@@ -319,6 +319,10 @@ Per-agent elevated overrides (`agents.list[].tools.elevated`) can further restri
       }
     }
     ```
+
+    <Warning>
+      This policy disables OpenClaw filesystem tools, but `exec` is still a shell and can write files wherever the selected host or sandbox filesystem allows. For a read-only agent, deny `exec` and `process`, or combine shell access with sandbox filesystem controls such as `agents.defaults.sandbox.workspaceAccess: "ro"` or `"none"`.
+    </Warning>
   </Tab>
 
   <Tab title="Communication-only">
