@@ -38,7 +38,6 @@
 * [Telegram](/channels/telegram)
 * [Discord](/channels/discord)
 * [Mattermost](/channels/mattermost)
-* [BlueBubbles (legacy iMessage bridge)](/channels/bluebubbles)
 * [QQ Bot](/channels/qqbot)
 * [iMessage](/channels/imessage)
 * [Groups](/channels/groups)

@@ -50,19 +50,23 @@ You can also ask Claude to "work in a worktree" during a session, and it will cr
 
 ### Choose the base branch
 
-Worktrees branch from your default branch: `origin/HEAD` if the repository has a remote, otherwise the current local `HEAD`. The `origin/HEAD` reference is stored in your local `.git` directory and was set when you cloned. If the repository's default branch later changed on the remote, your local `origin/HEAD` still points at the old one. Re-sync it with the remote's current default:
+Worktrees branch from your repository's default branch, `origin/HEAD`, so they start from a clean tree matching the remote. If no remote is configured or the fetch fails, the worktree falls back to your current local `HEAD`. To always branch from local `HEAD` instead, set `worktree.baseRef` to `"head"` in [settings](/en/settings#worktree-settings). Setting `baseRef` to `"head"` makes new worktrees carry your unpushed commits and feature-branch state, which is useful when isolating subagents that need to operate on in-progress work. The setting accepts only `"fresh"` or `"head"`, not arbitrary git refs:
 
-```bash theme={null}
-git remote set-head origin -a
+```json theme={null}
+{
+  "worktree": {
+    "baseRef": "head"
+  }
+}
 ```
 
-To base worktrees off a specific branch instead, set it explicitly:
+To branch from a specific pull request, pass the PR number prefixed with `#`, or a full GitHub pull request URL. Claude Code fetches `pull/<number>/head` from `origin` and creates the worktree at `.claude/worktrees/pr-<number>`:
 
 ```bash theme={null}
-git remote set-head origin your-branch-name
+claude --worktree "#1234"
 ```
 
-Both commands update only your local `.git` directory and change nothing on the remote. For per-invocation control over the base, configure a [`WorktreeCreate` hook](/en/hooks#worktreecreate), which replaces the default `git worktree` logic entirely.
+For full control over how worktrees are created, configure a [`WorktreeCreate` hook](/en/hooks#worktreecreate), which replaces the default `git worktree` logic entirely.
 
 ## Copy gitignored files into worktrees
 

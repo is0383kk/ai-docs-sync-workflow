@@ -75,6 +75,8 @@
       destination = "/data"
     ```
 
+    The OpenClaw Docker image uses `tini` as its entrypoint. Fly process commands replace Docker `CMD` without replacing `ENTRYPOINT`, so the process still runs under `tini`.
+
     **Key settings:**
 
     | Setting                        | Why                                                                         |
