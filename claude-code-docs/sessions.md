@@ -93,7 +93,7 @@ From the command line, combine `--continue` or `--resume` with `--fork-session`:
 claude --continue --fork-session
 ```
 
-The original session is unchanged and remains available in the session picker. The `/branch` confirmation prints the original session's ID; to return to it, use that ID, the session picker, or `/resume <original-name>`. Permissions you approved with "allow for this session" do not carry over to the new branch. If you resume the same session in two terminals without forking, messages from both interleave into one transcript.
+The original session is unchanged and remains available in the session picker. The `/branch` confirmation prints two session IDs: the new branch you are now in and the original. To return to the original, pass its ID to `/resume`, use the session picker, or run `/resume <original-name>`. Permissions you approved with "allow for this session" do not carry over to the new branch. If you resume the same session in two terminals without forking, messages from both interleave into one transcript.
 
 For checkpoint-based rewind within a single session, see [Checkpointing](/en/checkpointing).
 

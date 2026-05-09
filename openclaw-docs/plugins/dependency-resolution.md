@@ -37,7 +37,8 @@ OpenClaw uses stable per-source roots:
 npm installs run in the npm root with:
 
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
-npm install --prefix ~/.openclaw/npm <spec> --omit=dev --omit=peer --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+cd ~/.openclaw/npm
+npm install --omit=dev --omit=peer --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 ```
 
 `openclaw plugins install npm-pack:<path.tgz>` uses that same managed npm root

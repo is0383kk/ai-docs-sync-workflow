@@ -82,6 +82,7 @@ Stores your API token + cached registry URL.
 
 * Default: opens browser to `<site>/cli/auth` and completes via loopback callback.
 * Headless: `clawhub login --token clh_...`
+* Remote/headless interactive: `clawhub login --device` prints a code and waits while you authorize it at `<site>/cli/device`.
 
 ### `whoami`
 
@@ -125,6 +126,7 @@ Stores your API token + cached registry URL.
 * Resolves latest version via `/api/v1/skills/<slug>`.
 * Downloads zip via `/api/v1/download`.
 * Extracts into `<workdir>/<dir>/<slug>`.
+* Refuses to overwrite pinned skills; run `clawhub unpin <slug>` first.
 * Writes:
   * `<workdir>/.clawhub/lock.json` (legacy `.clawdhub`)
   * `<skill>/.clawhub/origin.json` (legacy `.clawdhub`)
@@ -138,6 +140,18 @@ Stores your API token + cached registry URL.
 ### `list`
 
 * Reads `<workdir>/.clawhub/lock.json` (legacy `.clawdhub`).
+* Shows `pinned` next to skills frozen with `clawhub pin`, including the optional reason.
+
+### `pin <slug>`
+
+* Marks an installed skill as pinned in the lockfile.
+* `--reason <text>` records why the skill is frozen.
+* Pinned skills are skipped by `update --all` and rejected by direct `update <slug>`.
+* Pinned skills also reject `install --force` so the local bytes cannot be replaced accidentally.
+
+### `unpin <slug>`
+
+* Removes the lockfile pin from an installed skill so future updates can modify it.
 
 ### `update [slug]` / `update --all`
 
@@ -146,6 +160,9 @@ Stores your API token + cached registry URL.
 * If fingerprint does not match:
   * refuses by default
   * overwrites with `--force` (or prompt, if interactive)
+* Pinned skills are never updated by `--force`.
+* `update <slug>` fails fast for pinned slugs and tells you to run `clawhub unpin <slug>` first.
+* `update --all` skips pinned slugs and prints a summary of what stayed frozen.
 
 ### `skill publish <path>`
 
@@ -165,6 +182,7 @@ Stores your API token + cached registry URL.
 
 * Soft-delete a skill (owner, moderator, or admin).
 * Calls `DELETE /api/v1/skills/{slug}`.
+* Owner-initiated soft deletes reserve the slug for 30 days; the command prints the expiry time.
 * `--reason <text>` records a moderation note on the skill and audit log.
 * `--note <text>` is an alias for `--reason`.
 * `--yes` skips confirmation.
@@ -490,7 +508,7 @@ Notes:
 #### GitHub Actions
 
 ClawHub also ships an official reusable workflow at
-[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/5b63d5df6071a91cfd3e5e184bc44e212e977cc9/.github/workflows/package-publish.yml)
+[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/40627f079688b06352d8e64b5a4c597e921808bf/.github/workflows/package-publish.yml)
 for plugin repos.
 
 Typical caller setup:

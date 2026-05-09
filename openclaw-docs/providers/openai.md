@@ -832,25 +832,6 @@ Azure portal.
     * [Streaming API responses (SSE)](https://platform.openai.com/docs/guides/streaming-responses)
   </Accordion>
 
-  <Accordion title="WebSocket warm-up">
-    OpenClaw enables WebSocket warm-up by default for `openai/*` to reduce first-turn latency.
-
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
-    // Disable warm-up
-    {
-      agents: {
-        defaults: {
-          models: {
-            "openai/gpt-5.5": {
-              params: { openaiWsWarmup: false },
-            },
-          },
-        },
-      },
-    }
-    ```
-  </Accordion>
-
   <Accordion title="Fast mode">
     OpenClaw exposes a shared fast-mode toggle for `openai/*`:
 
