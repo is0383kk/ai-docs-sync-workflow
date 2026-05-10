@@ -60,6 +60,7 @@ The runtime exposes three preferred entry points so adapters can opt in at the l
 
 ```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
 runtime.channel.turn.run(...)             // adapter-driven full pipeline
+runtime.channel.turn.runAssembled(...)    // already-built context + delivery adapter
 runtime.channel.turn.runPrepared(...)     // channel owns dispatch; kernel runs record + finalize
 runtime.channel.turn.buildContext(...)    // pure facts to FinalizedMsgContext mapping
 ```
@@ -68,7 +69,7 @@ Two older runtime helpers remain available for Plugin SDK compatibility:
 
 ```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
 runtime.channel.turn.runResolved(...)      // deprecated compatibility alias; prefer run
-runtime.channel.turn.dispatchAssembled(...) // deprecated compatibility alias; prefer run or runPrepared
+runtime.channel.turn.dispatchAssembled(...) // deprecated compatibility alias; prefer runAssembled
 ```
 
 ### run
@@ -109,6 +110,41 @@ await runtime.channel.turn.run({
 ```
 
 `run` is the right shape when the channel has small adapter logic and benefits from owning the lifecycle through hooks.
+
+### runAssembled
+
+Use when the channel has already resolved routing, built a `FinalizedMsgContext`,
+and only needs the shared record, reply-pipeline, dispatch, and finalize
+ordering. This is the preferred shape for simple bundled inbound paths that
+would otherwise repeat `createChannelMessageReplyPipeline(...)` and
+`runPrepared(...)` boilerplate.
+
+```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+await runtime.channel.turn.runAssembled({
+  cfg,
+  channel: "irc",
+  accountId,
+  agentId: route.agentId,
+  routeSessionKey: route.sessionKey,
+  storePath,
+  ctxPayload,
+  recordInboundSession: runtime.channel.session.recordInboundSession,
+  dispatchReplyWithBufferedBlockDispatcher:
+    runtime.channel.reply.dispatchReplyWithBufferedBlockDispatcher,
+  delivery: {
+    deliver: async (payload) => {
+      await sendPlatformReply(payload);
+    },
+    onError: (err, info) => {
+      runtime.error?.(`reply ${info.kind} failed: ${String(err)}`);
+    },
+  },
+});
+```
+
+Choose `runAssembled` over `runPrepared` when the only channel-owned dispatch
+behavior is final payload delivery plus optional typing, reply options, durable
+delivery, or error logging.
 
 ### runPrepared
 

@@ -209,7 +209,7 @@ If SIP-disabled isn't acceptable for your threat model:
 
     Allowlist field: `channels.imessage.allowFrom`.
 
-    Allowlist entries can be handles or chat targets (`chat_id:*`, `chat_guid:*`, `chat_identifier:*`).
+    Allowlist entries can be handles, static sender access groups (`accessGroup:<name>`), or chat targets (`chat_id:*`, `chat_guid:*`, `chat_identifier:*`).
   </Tab>
 
   <Tab title="Group policy + mentions">
@@ -220,6 +220,8 @@ If SIP-disabled isn't acceptable for your threat model:
     * `disabled`
 
     Group sender allowlist: `channels.imessage.groupAllowFrom`.
+
+    `groupAllowFrom` entries can also reference static sender access groups (`accessGroup:<name>`).
 
     Runtime fallback: if `groupAllowFrom` is unset, iMessage group sender checks fall back to `allowFrom` when available.
     Runtime note: if `channels.imessage` is completely missing, runtime falls back to `groupPolicy="allowlist"` and logs a warning (even if `channels.defaults.groupPolicy` is set).

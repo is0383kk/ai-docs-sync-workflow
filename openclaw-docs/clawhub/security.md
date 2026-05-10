@@ -54,6 +54,12 @@ what it appears to do. For example, a skill that references a required API key
 should declare that requirement in `SKILL.md` so users can see it before
 installing.
 
+Scan findings are artifact-based. Expected provider behavior, such as declared
+API credentials, localhost OAuth callbacks, scoped uninstall cleanup, Basic Auth
+encoding, or user-selected file uploads to the stated provider, is treated
+differently from hidden credential forwarding, broad private-file access,
+unrelated network destinations, or stealth browser abuse.
+
 See [Skill format](/clawhub/skill-format).
 
 ## Plugins
@@ -63,7 +69,9 @@ fields, and artifact integrity information.
 
 OpenClaw checks compatibility before installing ClawHub-hosted plugins. Package
 records may also expose digest metadata so OpenClaw can verify downloaded
-artifacts.
+artifacts. ClawScan includes declared package `openclaw.environment` env/config
+metadata when reviewing plugin releases so declared runtime requirements are
+compared against observed behavior.
 
 ## Reports
 
@@ -104,7 +112,8 @@ handoff path when needed.
 ## Appeals and rescans
 
 Owners can request a rescan when they believe a skill or package was incorrectly
-held or flagged:
+held or flagged. Platform moderators and admins can request rescans for any
+skill or package while handling reports or support requests:
 
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
 clawhub skill rescan <slug>
@@ -121,6 +130,11 @@ When the static scanner flags an uploaded skill as malicious, the publisher is
 automatically placed under a moderation hold (`requiresModerationAt` set on the
 user). This hides all of the publisher's skills, causes future publishes to
 start hidden, and creates a `user.moderation.auto` audit log entry.
+
+Static suspicious findings are retained as file/line evidence for moderators,
+but they do not hide content or decide the public scan verdict on their own.
+New uploads remain in review/pending state until the VirusTotal and LLM reviews
+settle; static scanning only blocks immediately for malicious signatures.
 
 Admins can lift a false-positive hold:
 

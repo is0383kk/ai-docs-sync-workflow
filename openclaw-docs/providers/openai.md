@@ -576,7 +576,7 @@ The GPT-5 contribution adds a tagged behavior contract for persona persistence, 
     ```
 
     <Note>
-      Set `OPENAI_TTS_BASE_URL` to override the TTS base URL without affecting the chat API endpoint.
+      Set `OPENAI_TTS_BASE_URL` to override the TTS base URL without affecting the chat API endpoint. OpenAI TTS is still configured through an API key; for OAuth-only live talk-back, use the Realtime voice path instead of agent-mode STT -> TTS speech.
     </Note>
   </Accordion>
 
@@ -618,31 +618,33 @@ The GPT-5 contribution adds a tagged behavior contract for persona persistence, 
   <Accordion title="Realtime transcription">
     The bundled `openai` plugin registers realtime transcription for the Voice Call plugin.
 
-    | Setting          | Config path                                                          | Default                        |
-    | ---------------- | -------------------------------------------------------------------- | ------------------------------ |
-    | Model            | `plugins.entries.voice-call.config.streaming.providers.openai.model` | `gpt-4o-transcribe`            |
-    | Language         | `...openai.language`                                                 | (unset)                        |
-    | Prompt           | `...openai.prompt`                                                   | (unset)                        |
-    | Silence duration | `...openai.silenceDurationMs`                                        | `800`                          |
-    | VAD threshold    | `...openai.vadThreshold`                                             | `0.5`                          |
-    | API key          | `...openai.apiKey`                                                   | Falls back to `OPENAI_API_KEY` |
+    | Setting          | Config path                                                          | Default                                                                       |
+    | ---------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+    | Model            | `plugins.entries.voice-call.config.streaming.providers.openai.model` | `gpt-4o-transcribe`                                                           |
+    | Language         | `...openai.language`                                                 | (unset)                                                                       |
+    | Prompt           | `...openai.prompt`                                                   | (unset)                                                                       |
+    | Silence duration | `...openai.silenceDurationMs`                                        | `800`                                                                         |
+    | VAD threshold    | `...openai.vadThreshold`                                             | `0.5`                                                                         |
+    | Auth             | `...openai.apiKey`, `OPENAI_API_KEY`, or `openai-codex` OAuth        | API keys connect directly; OAuth mints a Realtime transcription client secret |
 
     <Note>
-      Uses a WebSocket connection to `wss://api.openai.com/v1/realtime` with G.711 u-law (`g711_ulaw` / `audio/pcmu`) audio. This streaming provider is for Voice Call's realtime transcription path; Discord voice currently records short segments and uses the batch `tools.media.audio` transcription path instead.
+      Uses a WebSocket connection to `wss://api.openai.com/v1/realtime` with G.711 u-law (`g711_ulaw` / `audio/pcmu`) audio. When only `openai-codex` OAuth is configured, the Gateway mints an ephemeral Realtime transcription client secret before opening the WebSocket. This streaming provider is for Voice Call's realtime transcription path; Discord voice currently records short segments and uses the batch `tools.media.audio` transcription path instead.
     </Note>
   </Accordion>
 
   <Accordion title="Realtime voice">
     The bundled `openai` plugin registers realtime voice for the Voice Call plugin.
 
-    | Setting                               | Config path                                                         | Default                        |
-    | ------------------------------------- | ------------------------------------------------------------------- | ------------------------------ |
-    | Model                                 | `plugins.entries.voice-call.config.realtime.providers.openai.model` | `gpt-realtime-2`               |
-    | Voice                                 | `...openai.voice`                                                   | `alloy`                        |
-    | Temperature (Azure deployment bridge) | `...openai.temperature`                                             | `0.8`                          |
-    | VAD threshold                         | `...openai.vadThreshold`                                            | `0.5`                          |
-    | Silence duration                      | `...openai.silenceDurationMs`                                       | `500`                          |
-    | API key                               | `...openai.apiKey`                                                  | Falls back to `OPENAI_API_KEY` |
+    | Setting                               | Config path                                                         | Default                                                        |
+    | ------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------- |
+    | Model                                 | `plugins.entries.voice-call.config.realtime.providers.openai.model` | `gpt-realtime-2`                                               |
+    | Voice                                 | `...openai.voice`                                                   | `alloy`                                                        |
+    | Temperature (Azure deployment bridge) | `...openai.temperature`                                             | `0.8`                                                          |
+    | VAD threshold                         | `...openai.vadThreshold`                                            | `0.5`                                                          |
+    | Silence duration                      | `...openai.silenceDurationMs`                                       | `500`                                                          |
+    | Prefix padding                        | `...openai.prefixPaddingMs`                                         | `300`                                                          |
+    | Reasoning effort                      | `...openai.reasoningEffort`                                         | (unset)                                                        |
+    | Auth                                  | `...openai.apiKey`, `OPENAI_API_KEY`, or `openai-codex` OAuth       | Browser Talk and non-Azure backend bridges can use Codex OAuth |
 
     Available built-in Realtime voices for `gpt-realtime-2`: `alloy`, `ash`,
     `ballad`, `coral`, `echo`, `sage`, `shimmer`, `verse`, `marin`, `cedar`.
@@ -664,7 +666,11 @@ The GPT-5 contribution adds a tagged behavior contract for persona persistence, 
     <Note>
       Control UI Talk uses OpenAI browser realtime sessions with a Gateway-minted
       ephemeral client secret and a direct browser WebRTC SDP exchange against the
-      OpenAI Realtime API. Maintainer live verification is available with
+      OpenAI Realtime API. When no direct OpenAI API key is configured, the
+      Gateway can mint that client secret with the selected `openai-codex` OAuth
+      profile. Gateway relay and Voice Call backend realtime WebSocket bridges use
+      the same OAuth fallback for native OpenAI endpoints. Maintainer live
+      verification is available with
       `OPENAI_API_KEY=... GEMINI_API_KEY=... node --import tsx scripts/dev/realtime-talk-live-smoke.ts`;
       the OpenAI legs verify both the backend WebSocket bridge and the browser
       WebRTC SDP exchange without logging secrets.
