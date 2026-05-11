@@ -50,8 +50,14 @@ Each agent in a multi-agent setup can override the global sandbox and tool polic
               "scope": "agent"
             },
             "tools": {
-              "allow": ["read"],
-              "deny": ["exec", "write", "edit", "apply_patch", "process", "browser"]
+              "allow": ["read", "message"],
+              "deny": ["exec", "write", "edit", "apply_patch", "process", "browser"],
+              "message": {
+                "crossContext": {
+                  "allowWithinProvider": false,
+                  "allowAcrossProviders": false
+                }
+              }
             }
           }
         ]
@@ -75,7 +81,7 @@ Each agent in a multi-agent setup can override the global sandbox and tool polic
     **Result:**
 
     * `main` agent: runs on host, full tool access.
-    * `family` agent: runs in Docker (one container per agent), only `read` tool.
+    * `family` agent: runs in Docker (one container per agent), only `read` and current-conversation message sends.
   </Accordion>
 
   <Accordion title="Example 2: Work agent with shared sandbox">
