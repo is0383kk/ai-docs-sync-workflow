@@ -22,6 +22,7 @@ Auto-compaction is on by default. It runs when the session nears the context lim
 
 You will see:
 
+* `embedded run auto-compaction start` / `complete` in normal Gateway logs.
 * `🧹 Auto-compaction complete` in verbose mode.
 * `/status` showing `🧹 Compactions: <count>`.
 
