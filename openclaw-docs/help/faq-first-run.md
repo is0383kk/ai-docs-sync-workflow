@@ -69,7 +69,7 @@ and troubleshooting see the main [FAQ](/help/faq).
     In task mode, due timestamps are only advanced after a real heartbeat run
     completes. Skipped runs do not mark tasks as completed.
 
-    Docs: [Heartbeat](/gateway/heartbeat), [Automation & Tasks](/automation).
+    Docs: [Heartbeat](/gateway/heartbeat), [Automation](/automation).
   </Accordion>
 
   <Accordion title="Recommended way to install and set up OpenClaw">

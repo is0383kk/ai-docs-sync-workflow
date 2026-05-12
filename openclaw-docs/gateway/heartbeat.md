@@ -5,7 +5,7 @@
 # Heartbeat
 
 <Note>
-  **Heartbeat vs cron?** See [Automation & Tasks](/automation) for guidance on when to use each.
+  **Heartbeat vs cron?** See [Automation](/automation) for guidance on when to use each.
 </Note>
 
 Heartbeat runs **periodic agent turns** in the main session so the model can surface anything that needs attention without spamming you.
@@ -487,7 +487,7 @@ Current heartbeats preserve the shared session's existing runtime model after th
 
 ## Related
 
-* [Automation & Tasks](/automation) — all automation mechanisms at a glance
+* [Automation](/automation) — all automation mechanisms at a glance
 * [Background Tasks](/automation/tasks) — how detached work is tracked
 * [Timezone](/concepts/timezone) — how timezone affects heartbeat scheduling
 * [Troubleshooting](/automation/cron-jobs#troubleshooting) — debugging automation issues

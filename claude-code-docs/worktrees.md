@@ -10,17 +10,7 @@ A [git worktree](https://git-scm.com/docs/git-worktree) is a separate working di
 
 This page covers worktree isolation in the CLI. Everything below assumes a git repository. For other version control systems, see [Non-git version control](#non-git-version-control). The [desktop app](/en/desktop#work-in-parallel-with-sessions) creates a worktree for every new session automatically.
 
-## Choose a parallelism approach
-
-Worktrees are one of several ways to run Claude in parallel. Pick based on who is coordinating the work:
-
-| Approach                       | What it gives you                                                                   | When to use it                                               |
-| :----------------------------- | :---------------------------------------------------------------------------------- | :----------------------------------------------------------- |
-| Worktrees                      | Separate checkouts you drive yourself, one terminal per task                        | You want to work on unrelated tasks side by side             |
-| [Subagents](/en/sub-agents)    | Delegated tasks inside a single session, results returned to your main conversation | You want Claude to fan out research or edits within one task |
-| [Agent teams](/en/agent-teams) | Multiple coordinated sessions that message each other and share a task list         | You want Claude to manage the parallelism for you            |
-
-Subagents and agent teams can also use worktree isolation. See [Isolate subagents with worktrees](#isolate-subagents-with-worktrees).
+Worktrees are one of several ways to run Claude in parallel. They isolate file edits, while [subagents](/en/sub-agents) and [agent teams](/en/agent-teams) coordinate the work itself. See [Run agents in parallel](/en/agents) to compare the approaches, or skip ahead to [Isolate subagents with worktrees](#isolate-subagents-with-worktrees) to use worktrees and subagents together.
 
 ## Start Claude in a worktree
 

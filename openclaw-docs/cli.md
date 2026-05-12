@@ -253,6 +253,7 @@ Palette source of truth: `src/terminal/palette.ts`.
     cron
       status
       list
+      get
       add
       edit
       rm

@@ -9,7 +9,7 @@
 ClawHub is the public registry for OpenClaw skills and plugins.
 
 * Use native `openclaw` commands to search, install, and update skills and to install plugins from ClawHub.
-* Use the separate `clawhub` CLI for registry auth, publishing, delete/undelete, rescans, and sync workflows.
+* Use the separate `clawhub` CLI for registry auth, publishing, delete/undelete, and sync workflows.
 
 Site: [clawhub.ai](https://clawhub.ai)
 
@@ -32,7 +32,7 @@ openclaw plugins update --all
 ```
 
 Install the ClawHub CLI when you want registry-authenticated workflows such as
-publish, sync, delete/undelete, or owner-requested rescans:
+publish, sync, or delete/undelete:
 
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
 npm i -g clawhub
@@ -137,17 +137,8 @@ ClawHub runs automated checks on published skills and plugin releases. Scan-held
 or blocked releases may disappear from public catalog and install surfaces while
 remaining visible to their owner in `/dashboard`.
 
-Owners can request limited rescans for false-positive recovery. Platform
-moderators and admins can request rescans for any skill or package when handling
-support reports:
-
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
-clawhub skill rescan <slug>
-clawhub package rescan <name>
-```
-
 Signed-in users can report skills and packages. Moderators can review reports,
-hide or restore content, resolve appeals, and ban abusive accounts. See
+hide or restore content, and ban abusive accounts. See
 [Acceptable usage](/clawhub/acceptable-usage) and
 [Security + moderation](/clawhub/security) for policy and enforcement details.
 

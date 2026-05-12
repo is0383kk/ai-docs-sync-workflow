@@ -11,7 +11,7 @@
 </Note>
 
 <Warning>
-  BlueBubbles support was removed. Migrate `channels.bluebubbles` configs to `channels.imessage`; OpenClaw supports iMessage through `imsg` only.
+  BlueBubbles support was removed. Migrate `channels.bluebubbles` configs to `channels.imessage`; OpenClaw supports iMessage through `imsg` only. Start with [BlueBubbles removal and the imsg iMessage path](/announcements/bluebubbles-imessage) for the short announcement, or [Coming from BlueBubbles](/channels/imessage-from-bluebubbles) for the full migration table.
 </Warning>
 
 Status: native external CLI integration. Gateway spawns `imsg rpc` and communicates over JSON-RPC on stdio (no separate daemon/port). Advanced actions require `imsg launch` and a successful private API probe.
@@ -518,6 +518,18 @@ When `imsg launch` is running and `openclaw channels status --probe` reports `pr
 
     Older `imsg` builds that pre-date the per-method capability list will gate off typing/read silently; OpenClaw logs a one-time warning per restart so the missing receipt is attributable.
   </Accordion>
+
+  <Accordion title="Inbound tapbacks">
+    OpenClaw subscribes to iMessage tapbacks and routes accepted reactions as system events instead of normal message text, so a user tapback does not trigger an ordinary reply loop.
+
+    Notification mode is controlled by `channels.imessage.reactionNotifications`:
+
+    * `"own"` (default): notify only when users react to bot-authored messages.
+    * `"all"`: notify for all inbound tapbacks from authorized senders.
+    * `"off"`: ignore inbound tapbacks.
+
+    Per-account overrides use `channels.imessage.accounts.<id>.reactionNotifications`.
+  </Accordion>
 </AccordionGroup>
 
 ## Config writes
@@ -752,6 +764,7 @@ When you turn catchup on, the first startup with no cursor only looks back `firs
 ## Related
 
 * [Channels Overview](/channels) — all supported channels
+* [BlueBubbles removal and the imsg iMessage path](/announcements/bluebubbles-imessage) — announcement and migration summary
 * [Coming from BlueBubbles](/channels/imessage-from-bluebubbles) — config translation table and step-by-step cutover
 * [Pairing](/channels/pairing) — DM authentication and pairing flow
 * [Groups](/channels/groups) — group chat behavior and mention gating

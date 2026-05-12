@@ -176,7 +176,15 @@ Stores your API token + cached registry URL.
 * Publishing a skill means it is released under `MIT-0` on ClawHub.
 * Published skills are free to use, modify, and redistribute without attribution.
 * ClawHub does not support paid skills or per-skill pricing.
+* `--clawscan-note <text>` adds a ClawScan note. This note gives ClawScan
+  context for behavior that may otherwise look unusual, such as network access,
+  native host access, or provider-specific credentials. The note is stored on
+  the published version.
 * Legacy alias: `publish <path>`.
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+clawhub skill publish ./my-skill --clawscan-note "Uses network access only to call the user-configured Weather API."
+```
 
 ### `delete <slug>`
 
@@ -218,27 +226,12 @@ Stores your API token + cached registry URL.
 * Calls `POST /api/v1/skills/{sourceSlug}/merge`.
 * `--yes` skips confirmation.
 
-### `skill rescan <slug>`
-
-* Request a security rescan for the latest published skill version.
-* Owners and publisher admins can rescan their own skills up to the per-version
-  recovery limit.
-* Platform moderators and admins can rescan any skill and are not blocked by the
-  owner recovery limit, though only one rescan can run at a time per version.
-* Calls `POST /api/v1/skills/{slug}/rescan`.
-* Flags:
-  * `--yes`: skip confirmation.
-  * `--json`: machine-readable output.
-
-Example:
-
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
-clawhub skill rescan suspicious-skill --yes
-```
-
 ### `transfer`
 
 * Ownership transfer workflow.
+* Transfers to user handles create a pending request that the recipient accepts.
+* Transfers to org/publisher handles apply immediately only when the actor has
+  admin access to both the current owner and destination publisher.
 * Subcommands:
   * `transfer request <slug> <handle> [--message "..."] [--yes]`
   * `transfer list [--outgoing]`
@@ -352,14 +345,12 @@ Example:
 clawhub package delete @openclaw/example-plugin --yes
 ```
 
-### `package rescan <name>`
+### `package undelete <name>`
 
-* Request a security rescan for the latest published package release.
-* Owners and publisher admins can rescan their own packages up to the per-release
-  recovery limit.
-* Platform moderators and admins can rescan any package and are not blocked by
-  the owner recovery limit, though only one rescan can run at a time per release.
-* Calls `POST /api/v1/packages/{name}/rescan`.
+* Restores a soft-deleted package and releases.
+* Requires the package owner, an org publisher owner/admin, platform moderator,
+  or platform admin.
+* Calls `POST /api/v1/packages/{name}/undelete`.
 * Flags:
   * `--yes`: skip confirmation.
   * `--json`: machine-readable output.
@@ -367,7 +358,25 @@ clawhub package delete @openclaw/example-plugin --yes
 Example:
 
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
-clawhub package rescan @openclaw/example-plugin --yes
+clawhub package undelete @openclaw/example-plugin --yes
+```
+
+### `package transfer <name>`
+
+* Transfers a package to another publisher.
+* Requires admin access to both the current package owner and destination
+  publisher, unless performed by a platform admin.
+* Scoped package names must transfer to the matching scope owner.
+* Calls `POST /api/v1/packages/{name}/transfer`.
+* Flags:
+  * `--to <owner>`: destination publisher handle.
+  * `--reason <text>`: optional audit reason.
+  * `--json`: machine-readable output.
+
+Example:
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+clawhub package transfer @openclaw/example-plugin --to openclaw
 ```
 
 ### `package report`
@@ -386,23 +395,6 @@ Example:
 
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
 clawhub package report @openclaw/example-plugin --version 1.2.3 --reason "suspicious native payload"
-```
-
-### `package appeal`
-
-* Owner/publisher command for appealing release moderation.
-* Calls `POST /api/v1/packages/{name}/appeal`.
-* Appeals are accepted for quarantined, revoked, suspicious, or malicious
-  releases.
-* Flags:
-  * `--version <version>`: required package version.
-  * `--message <text>`: required appeal message.
-  * `--json`: machine-readable output.
-
-Example:
-
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
-clawhub package appeal @openclaw/example-plugin --version 1.2.3 --message "linked source release explains the native binary"
 ```
 
 ### `package moderation-status`
@@ -477,9 +469,17 @@ clawhub package migration-status @openclaw/example-plugin
 * `--dry-run` previews the resolved publish payload without uploading.
 * `--json` emits machine-readable output for CI.
 * `--owner <handle>` publishes under a user or org publisher handle when the actor has publisher access.
+* `--clawscan-note <text>` adds a ClawScan note. This note gives ClawScan
+  context for behavior that may otherwise look unusual, such as network access,
+  native host access, or provider-specific credentials. The note is stored on
+  the published release.
 * Scoped package names must match the selected owner. See `docs/publishing.md`.
 * Existing flags (`--family`, `--name`, `--version`, `--source-repo`, `--source-commit`, `--source-ref`, `--source-path`) still work as overrides.
 * Private GitHub repos require `GITHUB_TOKEN`.
+
+```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+clawhub package publish ./plugin.tgz --clawscan-note "Native host access is limited to the local OpenClaw bridge."
+```
 
 #### Recommended local flow
 
@@ -544,7 +544,7 @@ Notes:
 #### GitHub Actions
 
 ClawHub also ships an official reusable workflow at
-[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/3173ecd629290cc08d42e03306b0ba85f3bed529/.github/workflows/package-publish.yml)
+[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/be77f0626d9e4b52c465670ba411882be1ac3a2d/.github/workflows/package-publish.yml)
 for plugin repos.
 
 Typical caller setup:
