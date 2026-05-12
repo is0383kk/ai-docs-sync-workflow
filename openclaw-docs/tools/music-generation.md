@@ -170,7 +170,7 @@ Direct generation example:
 </ParamField>
 
 <ParamField path="filename" type="string">Output filename hint.</ParamField>
-<ParamField path="timeoutMs" type="number">Optional provider request timeout in milliseconds. Values below 10000ms are raised to 10000ms and reported in the tool result.</ParamField>
+<ParamField path="timeoutMs" type="number">Optional provider request timeout in milliseconds. When omitted, OpenClaw uses `agents.defaults.musicGenerationModel.timeoutMs` if configured. Values below 10000ms are raised to 10000ms and reported in the tool result.</ParamField>
 
 <Note>
   Not all providers support all parameters. OpenClaw still validates hard

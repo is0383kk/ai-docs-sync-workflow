@@ -247,7 +247,7 @@ lives on the [First-run FAQ](/help/faq-first-run).
     openclaw cron runs --id <jobId> --limit 50
     ```
 
-    Docs: [Cron jobs](/automation/cron-jobs), [Automation & Tasks](/automation).
+    Docs: [Cron jobs](/automation/cron-jobs), [Automation](/automation).
   </Accordion>
 
   <Accordion title="Cron fired, but nothing was sent to the channel. Why?">
@@ -329,7 +329,7 @@ lives on the [First-run FAQ](/help/faq-first-run).
     * **Heartbeat** for "main session" periodic checks.
     * **Isolated jobs** for autonomous agents that post summaries or deliver to chats.
 
-    Docs: [Cron jobs](/automation/cron-jobs), [Automation & Tasks](/automation),
+    Docs: [Cron jobs](/automation/cron-jobs), [Automation](/automation),
     [Heartbeat](/gateway/heartbeat).
   </Accordion>
 
