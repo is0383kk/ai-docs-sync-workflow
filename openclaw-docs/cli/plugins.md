@@ -84,6 +84,7 @@ openclaw plugins install git:github.com/<owner>/<repo>  # git repo
 openclaw plugins install git:github.com/<owner>/<repo>@<ref>
 openclaw plugins install <package> --force              # overwrite existing install
 openclaw plugins install <package> --pin                # pin version
+openclaw plugins install <package> --acknowledge-clawhub-risk
 openclaw plugins install <package> --dangerously-force-unsafe-install
 openclaw plugins install <path>                         # local path
 openclaw plugins install <plugin>@<marketplace>         # marketplace
@@ -136,6 +137,12 @@ not skills. Use `openclaw skills search` for ClawHub skills.
     This CLI flag applies to plugin install/update flows. Gateway-backed skill dependency installs use the matching `dangerouslyForceUnsafeInstall` request override, while `openclaw skills install` remains a separate ClawHub skill download/install flow.
 
     If a plugin you published on ClawHub is blocked by a registry scan, use the publisher steps in [ClawHub](/clawhub/security).
+  </Accordion>
+
+  <Accordion title="--acknowledge-clawhub-risk">
+    ClawHub installs check the selected release trust record before downloading the package. If ClawHub reports a risky scan status, risky moderation state, download block, or registry reason, OpenClaw shows the trust details and asks for confirmation before continuing.
+
+    Use `--acknowledge-clawhub-risk` only after reviewing the ClawHub warning and deciding to continue without an interactive prompt. Pending or stale clean trust records warn but do not require acknowledgement.
   </Accordion>
 
   <Accordion title="Hook packs and npm specs">
@@ -327,6 +334,7 @@ openclaw plugins update <id-or-npm-spec>
 openclaw plugins update --all
 openclaw plugins update <id-or-npm-spec> --dry-run
 openclaw plugins update @openclaw/voice-call
+openclaw plugins update openclaw-codex-app-server --acknowledge-clawhub-risk
 openclaw plugins update openclaw-codex-app-server --dangerously-force-unsafe-install
 ```
 
@@ -353,6 +361,10 @@ Updates apply to tracked plugin installs in the managed plugin index and tracked
 
   <Accordion title="--dangerously-force-unsafe-install on update">
     `--dangerously-force-unsafe-install` is also available on `plugins update` as a break-glass override for built-in dangerous-code scan false positives during plugin updates. It still does not bypass plugin `before_install` policy blocks or scan-failure blocking, and it only applies to plugin updates, not hook-pack updates.
+  </Accordion>
+
+  <Accordion title="--acknowledge-clawhub-risk on update">
+    ClawHub-backed plugin updates run the same exact-release trust check as installs before downloading the replacement package. Use `--acknowledge-clawhub-risk` for reviewed automation that should continue when the selected ClawHub release has a risky trust warning.
   </Accordion>
 </AccordionGroup>
 
