@@ -381,7 +381,7 @@ Production-ready for bot DMs and groups via grammY. Long polling is the default 
     Outbound text uses Telegram `parse_mode: "HTML"`.
 
     * Markdown-ish text is rendered to Telegram-safe HTML.
-    * Raw model HTML is escaped to reduce Telegram parse failures.
+    * Supported Telegram HTML tags are preserved; unsupported HTML is escaped.
     * If Telegram rejects parsed HTML, OpenClaw retries as plain text.
 
     Link previews are enabled by default and can be disabled with `channels.telegram.linkPreview: false`.
