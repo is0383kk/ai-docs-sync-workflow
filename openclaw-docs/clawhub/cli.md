@@ -545,7 +545,7 @@ Notes:
 #### GitHub Actions
 
 ClawHub also ships an official reusable workflow at
-[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/6c15a481d042807254bd9ba52c779e176f21fe05/.github/workflows/package-publish.yml)
+[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/c7458d947733dab58eb2d233da0026b5e684281f/.github/workflows/package-publish.yml)
 for plugin repos.
 
 Typical caller setup:

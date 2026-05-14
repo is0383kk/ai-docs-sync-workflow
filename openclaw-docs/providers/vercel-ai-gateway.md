@@ -87,10 +87,10 @@ runtime:
     `AI_GATEWAY_API_KEY` is available to that process.
 
     <Warning>
-      A key set only in `~/.profile` will not be visible to a launchd/systemd
-      daemon unless that environment is explicitly imported. Set the key in
-      `~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway process can
-      read it.
+      A key exported only in an interactive shell will not be visible to a
+      launchd/systemd daemon unless that environment is explicitly imported. Set
+      the key in `~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway
+      process can read it.
     </Warning>
   </Accordion>
 
