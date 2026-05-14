@@ -35,11 +35,11 @@ Enforcement model:
   deleted/banned/disabled accounts should each get actionable text so CLI
   clients can tell users what blocked them.
 
-* Read: 600/min per IP, 2400/min per key
+* Read: 3000/min per IP, 12000/min per key
 
-* Write: 45/min per IP, 180/min per key
+* Write: 300/min per IP, 3000/min per key
 
-* Download: 30/min per IP, 180/min per key (`/api/v1/download`)
+* Download: 1200/min per IP, 6000/min per key (download endpoints)
 
 Headers:
 
@@ -80,6 +80,15 @@ IP source:
 * Uses `cf-connecting-ip` (Cloudflare) for client IP by default.
 * ClawHub uses trusted forwarding headers to identify client IPs at the edge.
 * If no trusted client IP is available, anonymous download requests use an endpoint-scoped fallback bucket instead of one global `ip:unknown` bucket. Anonymous read/write requests still use the shared unknown bucket so missing-IP routing remains visible and conservative.
+
+## Error responses
+
+Public v1 error responses are plain text with `content-type: text/plain; charset=utf-8`.
+This includes validation failures (`400`), missing public resources (`404`), auth and
+permission failures (`401`/`403`), rate limits (`429`), and blocked downloads. Clients
+should read the response body as a human-readable string. Unknown query parameters are
+ignored for compatibility, but recognized query parameters with invalid values return
+`400`.
 
 ## Public endpoints (no auth)
 
@@ -140,6 +149,8 @@ Query params:
 * `sort` (optional): `updated` (default), `createdAt` (alias: `newest`), `downloads`, `stars` (alias: `rating`), `installsCurrent` (alias: `installs`), `installsAllTime`, `trending`
 * `nonSuspiciousOnly` (optional): `true` to hide suspicious (`flagged.suspicious`) skills
 * `nonSuspicious` (optional): legacy alias for `nonSuspiciousOnly`
+
+Invalid `sort` values return `400`.
 
 Notes:
 
@@ -392,6 +403,10 @@ Query params:
 * `isOfficial` (optional): `true` or `false`
 * `executesCode` (optional): `true` or `false`
 * `capabilityTag` (optional): capability filter for plugin packages
+* `category` (optional): plugin category filter. Supported only when the
+  request is scoped to plugin packages (`/api/v1/plugins`,
+  `/api/v1/code-plugins`, `/api/v1/bundle-plugins`, or package endpoints with
+  `family=code-plugin`/`family=bundle-plugin`).
 * `target` / `hostTarget` (optional): shorthand for `host:<target>`
 * `os`, `arch`, `libc` (optional): shorthand for host capability filters
 * `requiresBrowser`, `requiresDesktop`, `requiresNativeDeps`,
@@ -405,6 +420,9 @@ Query params:
 
 Notes:
 
+* Invalid values for `family`, `channel`, `isOfficial`, `executesCode`,
+  `featured`, `highlightedOnly`, `artifactKind`, or boolean capability shorthands
+  return `400`. Unknown query parameters are ignored.
 * `GET /api/v1/code-plugins` and `GET /api/v1/bundle-plugins` remain fixed-family aliases.
 * Skill entries stay backed by the skill registry and can still be published only through `POST /api/v1/skills`.
 * `POST /api/v1/packages` is still only for code-plugin and bundle-plugin releases.
@@ -425,6 +443,8 @@ Query params:
 * `isOfficial` (optional): `true` or `false`
 * `executesCode` (optional): `true` or `false`
 * `capabilityTag` (optional): capability filter for plugin packages
+* `category` (optional): plugin category filter. Supported only when the
+  request is scoped to plugin packages.
 * `target` / `hostTarget`, `os`, `arch`, `libc`, `requiresBrowser`,
   `requiresDesktop`, `requiresNativeDeps`, `requiresExternalService`,
   `requiresBinary`, `requiresOsPermission`, `externalService`, `binary`, and
@@ -435,11 +455,52 @@ Query params:
 
 Notes:
 
+* Invalid values for `family`, `channel`, `isOfficial`, `executesCode`,
+  `featured`, `highlightedOnly`, `artifactKind`, or boolean capability shorthands
+  return `400`. Unknown query parameters are ignored.
 * Anonymous callers only see public package channels.
 * Authenticated callers can search private packages for publishers they belong to.
 * `channel=private` only returns packages the authenticated caller can read.
 * Artifact filters are backed by indexed capability tags:
   `artifact:legacy-zip`, `artifact:npm-pack`, and `npm-mirror:available`.
+
+### `GET /api/v1/plugins`
+
+Plugin-only catalog browse across code-plugin and bundle-plugin packages.
+
+Query params:
+
+* `limit` (optional): integer (1-100)
+* `cursor` (optional): pagination cursor
+* `isOfficial` (optional): `true` or `false`
+* `executesCode` (optional): `true` or `false`
+* `capabilityTag` (optional): capability filter for plugin packages
+* `category` (optional): plugin category filter. Current values:
+  `channels`, `mcp-tooling`, `data`, `security`, `observability`,
+  `automation`, `deployment`, `dev-tools`.
+
+### `GET /api/v1/plugins/search`
+
+Plugin-only search across code-plugin and bundle-plugin packages.
+
+Query params:
+
+* `q` (required): query string
+* `limit` (optional): integer (1-100)
+* `isOfficial` (optional): `true` or `false`
+* `executesCode` (optional): `true` or `false`
+* `capabilityTag` (optional): capability filter for plugin packages
+* `category` (optional): plugin category filter. Current values:
+  `channels`, `mcp-tooling`, `data`, `security`, `observability`,
+  `automation`, `deployment`, `dev-tools`.
+
+Notes:
+
+* Category filtering is a real API filter backed by plugin category digest
+  rows, not a search-query rewrite.
+* Results are returned in relevance order and do not currently paginate.
+* Browser UI sort controls for plugin search reorder the loaded relevance results,
+  matching the current `/skills` browse behavior.
 
 ### `GET /api/v1/packages/{name}`
 
