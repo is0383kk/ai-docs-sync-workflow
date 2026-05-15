@@ -78,7 +78,7 @@
 
 * `pnpm test:docker:skill-install`: Installs the packed OpenClaw tarball in a bare Docker runner, disables `skills.install.allowUploadedArchives`, resolves a current skill slug from live ClawHub search, installs it through `openclaw skills install`, and verifies `SKILL.md`, `.clawhub/origin.json`, `.clawhub/lock.json`, and `skills info --json`.
 
-* CLI backend live Docker probes can be run as focused lanes, for example `pnpm test:docker:live-cli-backend:codex`, `pnpm test:docker:live-cli-backend:codex:resume`, or `pnpm test:docker:live-cli-backend:codex:mcp`. Claude and Gemini have matching `:resume` and `:mcp` aliases.
+* CLI backend live Docker probes can be run as focused lanes, for example `pnpm test:docker:live-cli-backend:claude`, `pnpm test:docker:live-cli-backend:claude:resume`, or `pnpm test:docker:live-cli-backend:claude:mcp`. Gemini has matching `:resume` and `:mcp` aliases.
 
 * `pnpm test:docker:openwebui`: Starts Dockerized OpenClaw + Open WebUI, signs in through Open WebUI, checks `/api/models`, then runs a real proxied chat through `/api/chat/completions`. Requires a usable live model key, pulls an external Open WebUI image, and is not expected to be CI-stable like the normal unit/e2e suites.
 

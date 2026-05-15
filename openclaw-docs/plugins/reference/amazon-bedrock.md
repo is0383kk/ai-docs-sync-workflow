@@ -11,7 +11,7 @@ Adds Amazon Bedrock model provider support to OpenClaw.
 ## Distribution
 
 * Package: `@openclaw/amazon-bedrock-provider`
-* Install route: npm
+* Install route: npm; ClawHub
 
 ## Surface
 
