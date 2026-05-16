@@ -90,7 +90,6 @@ Use explicit config when:
         baseUrl: "http://127.0.0.1:8000/v1",
         apiKey: "${VLLM_API_KEY}",
         api: "openai-completions",
-        request: { allowPrivateNetwork: true },
         timeoutSeconds: 300, // Optional: extend connect/header/body/request timeout for slow local models
         models: [
           {
@@ -263,7 +262,6 @@ wildcard to the visible model catalog:
             baseUrl: "http://192.168.1.50:9000/v1",
             apiKey: "${VLLM_API_KEY}",
             api: "openai-completions",
-            request: { allowPrivateNetwork: true },
             timeoutSeconds: 300,
             models: [
               {
@@ -298,7 +296,6 @@ wildcard to the visible model catalog:
             baseUrl: "http://192.168.1.50:8000/v1",
             apiKey: "${VLLM_API_KEY}",
             api: "openai-completions",
-            request: { allowPrivateNetwork: true },
             timeoutSeconds: 300,
             models: [{ id: "your-model-id", name: "Local vLLM Model" }],
           },
@@ -321,10 +318,12 @@ wildcard to the visible model catalog:
     ```
 
     If you see a connection error, verify the host, port, and that vLLM started with the OpenAI-compatible server mode.
-    For explicit loopback, LAN, or Tailscale endpoints, also set
-    `models.providers.vllm.request.allowPrivateNetwork: true`; provider
-    requests block private-network URLs by default unless the provider is
-    explicitly trusted.
+    For explicit loopback, LAN, or Tailscale endpoints, OpenClaw trusts the
+    exact configured `models.providers.vllm.baseUrl` origin for guarded model
+    requests. Metadata/link-local origins remain blocked without explicit
+    opt-in. Set `models.providers.vllm.request.allowPrivateNetwork: true` only
+    when vLLM requests must reach another private origin, and set it to `false`
+    to opt out of exact-origin trust.
   </Accordion>
 
   <Accordion title="Auth errors on requests">

@@ -132,6 +132,7 @@ matches you can inspect before choosing one to write.
 | `--json`        | Force JSON output (default when stdout is not a TTY).                    |
 | `--human`       | Force human output (default when stdout is a TTY).                       |
 | `--dry-run`     | (only on `set`) print the bytes that would be written without writing.   |
+| `--diff`        | (with `set --dry-run`) print a unified diff instead of the full bytes.   |
 
 ## `oc://` syntax
 
@@ -199,6 +200,8 @@ the per-kind AST shape.
 Use `--dry-run` before user-visible writes when the exact bytes matter. The
 substrate preserves byte-identical output for parse/emit round-trips, but a
 mutation can canonicalize the edited region or file depending on kind.
+Add `--diff` when you want the preview as a focused before/after patch instead
+of the full rendered file.
 
 ## Examples
 
@@ -214,6 +217,9 @@ openclaw path find 'oc://session.jsonl/*/event' --file ./logs/session.jsonl
 
 # Dry-run a write
 openclaw path set 'oc://gateway.jsonc/version' '2.0' --dry-run
+
+# Dry-run a write as a unified diff
+openclaw path set 'oc://gateway.jsonc/version' '2.0' --dry-run --diff
 
 # Apply the write
 openclaw path set 'oc://gateway.jsonc/version' '2.0'
@@ -372,12 +378,13 @@ openclaw path find 'oc://config.jsonc/plugins/{github,slack}/enabled'
 ### `set <oc-path> <value>`
 
 Write a leaf. Pair with `--dry-run` to preview the bytes that would be
-written without touching the file. Exits `0` on a successful write, `1` if
-the substrate refuses (for example, a sentinel guard hit), `2` on parse
-errors.
+written without touching the file. Add `--diff` for a unified diff preview.
+Exits `0` on a successful write, `1` if the substrate refuses (for example, a
+sentinel guard hit), `2` on parse errors.
 
 ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
 openclaw path set 'oc://gateway.jsonc/version' '2.0' --dry-run
+openclaw path set 'oc://gateway.jsonc/version' '2.0' --dry-run --diff
 openclaw path set 'oc://gateway.jsonc/version' '2.0'
 openclaw path set 'oc://AGENTS.md/Tools/+gh/risk' 'low'
 ```
