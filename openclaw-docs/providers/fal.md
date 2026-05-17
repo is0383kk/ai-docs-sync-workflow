@@ -4,7 +4,8 @@
 
 # Fal
 
-OpenClaw ships a bundled `fal` provider for hosted image and video generation.
+OpenClaw ships a bundled `fal` provider for hosted image, video, and music
+generation.
 
 | Property | Value                                                         |
 | -------- | ------------------------------------------------------------- |
@@ -147,6 +148,35 @@ The bundled `fal` video-generation provider defaults to
   </Accordion>
 </AccordionGroup>
 
+## Music generation
+
+The bundled `fal` plugin also registers a music-generation provider for the
+shared `music_generate` tool.
+
+| Capability    | Value                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------ |
+| Default model | `fal/fal-ai/minimax-music/v2.6`                                                                        |
+| Models        | `fal-ai/minimax-music/v2.6`, `fal-ai/ace-step/prompt-to-audio`, `fal-ai/stable-audio-25/text-to-audio` |
+| Runtime       | Synchronous request plus generated audio download                                                      |
+
+Use fal as the default music provider:
+
+```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+{
+  agents: {
+    defaults: {
+      musicGenerationModel: {
+        primary: "fal/fal-ai/minimax-music/v2.6",
+      },
+    },
+  },
+}
+```
+
+`fal-ai/minimax-music/v2.6` supports explicit lyrics and instrumental mode.
+ACE-Step and Stable Audio are prompt-to-audio endpoints; choose them with the
+`model` override when you want those model families.
+
 <Tip>
   Use `openclaw models list --provider fal` to see the full list of available fal
   models, including any recently added entries.
@@ -163,7 +193,11 @@ The bundled `fal` video-generation provider defaults to
     Shared video tool parameters and provider selection.
   </Card>
 
+  <Card title="Music generation" href="/tools/music-generation" icon="music">
+    Shared music tool parameters and provider selection.
+  </Card>
+
   <Card title="Configuration reference" href="/gateway/config-agents#agent-defaults" icon="gear">
-    Agent defaults including image and video model selection.
+    Agent defaults including image, video, and music model selection.
   </Card>
 </CardGroup>
