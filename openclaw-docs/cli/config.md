@@ -332,7 +332,7 @@ openclaw config set channels.discord.token \
     * `checks.resolvabilityComplete`: whether resolvability checks ran to completion (false when exec refs are skipped)
     * `refsChecked`: number of refs actually resolved during dry-run
     * `skippedExecRefs`: number of exec refs skipped because `--allow-exec` was not set
-    * `errors`: structured schema/resolvability failures when `ok=false`
+    * `errors`: structured missing-path, schema, or resolvability failures when `ok=false`
   </Accordion>
 </AccordionGroup>
 
@@ -343,7 +343,7 @@ openclaw config set channels.discord.token \
   ok: boolean,
   operations: number,
   configPath: string,
-  inputModes: ["value" | "json" | "builder", ...],
+  inputModes: ["value" | "json" | "builder" | "unset", ...],
   checks: {
     schema: boolean,
     resolvability: boolean,
@@ -353,7 +353,7 @@ openclaw config set channels.discord.token \
   skippedExecRefs: number,
   errors?: [
     {
-      kind: "schema" | "resolvability",
+      kind: "missing-path" | "schema" | "resolvability",
       message: string,
       ref?: string, // present for resolvability errors
     },
