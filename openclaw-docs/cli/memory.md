@@ -7,7 +7,9 @@
 # `openclaw memory`
 
 Manage semantic memory indexing and search.
-Provided by the active memory plugin (default: `memory-core`; set `plugins.slots.memory = "none"` to disable).
+Provided by the bundled `memory-core` plugin. The command is available when
+`plugins.slots.memory` selects `memory-core` (the default); other memory plugins
+expose their own CLI namespaces.
 
 Related:
 
