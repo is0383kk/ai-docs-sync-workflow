@@ -20,6 +20,8 @@ The first pack is intentionally narrow:
 * safe read-backed tool followthrough after a short approval-style turn
 * approval denial stop behavior for a sensitive local read request
 * proof-backed task status reporting that keeps pending, blocked, and done separate
+* share-safe diagnostics artifacts that keep useful status while omitting raw personal content
+* proof-backed completion claims that avoid fake progress before local evidence exists
 
 ## Scenarios
 

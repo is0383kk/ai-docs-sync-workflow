@@ -139,12 +139,7 @@ The remaining guidance is recommended but not enforced. Claude Code cannot obser
 
 ## Get your plugin into the official marketplace
 
-The hint protocol only takes effect for plugins that are listed in the official Anthropic marketplace. To submit a plugin, use one of the in-app submission forms:
-
-* **Claude.ai**: [claude.ai/settings/plugins/submit](https://claude.ai/settings/plugins/submit)
-* **Console**: [platform.claude.com/plugins/submit](https://platform.claude.com/plugins/submit)
-
-If you are working with an Anthropic partner contact, reach out to them to coordinate the listing.
+The hint protocol only takes effect for plugins listed in the official Anthropic marketplace, `claude-plugins-official`. Anthropic curates that marketplace at its discretion, and the in-app submission forms add plugins to the [community marketplace](/en/plugins#submit-your-plugin-to-the-community-marketplace) instead, which the hint protocol does not check. If you are working with an Anthropic partner contact, reach out to them to coordinate an official-marketplace listing.
 
 ## See also
 
