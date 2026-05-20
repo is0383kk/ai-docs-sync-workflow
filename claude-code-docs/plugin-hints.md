@@ -14,7 +14,7 @@ This page is for CLI and SDK maintainers. If you are looking to install plugins,
 
 ## How it works
 
-Claude Code sets the [`CLAUDECODE`](/en/env-vars) environment variable to `1` for every command it runs through the Bash and PowerShell tools. When your CLI sees that variable, it writes a self-closing `<claude-code-hint />` tag to stderr.
+Claude Code sets the [`CLAUDECODE`](/en/env-vars) environment variable to `1` for every command it runs through the Bash and PowerShell tools, and for [hook](/en/hooks) commands. When your CLI sees that variable, it writes a self-closing `<claude-code-hint />` tag to stderr. In hook commands the hint tag is stripped and ignored. Only Bash and PowerShell tool output triggers the install prompt.
 
 When Claude Code receives the command output, it:
 
