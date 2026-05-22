@@ -57,6 +57,7 @@ type MessagePresentationButton = {
   web_app?: { url: string };
   priority?: number;
   disabled?: boolean;
+  reusable?: boolean;
   style?: "primary" | "secondary" | "success" | "danger";
 };
 
@@ -94,6 +95,10 @@ Button semantics:
   order is preserved.
 * `disabled` is optional. Channels must opt in with `supportsDisabled`; otherwise
   core degrades the disabled control to non-interactive fallback text.
+* `reusable` is optional. Channels that support reusable native callbacks may
+  keep the action available after a successful interaction. Use it for
+  repeatable or idempotent actions such as refresh, inspect, or more details;
+  leave it unset for normal one-shot approvals and destructive actions.
 
 Select semantics:
 
