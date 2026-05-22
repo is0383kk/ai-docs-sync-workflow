@@ -6,7 +6,7 @@
 
 # Openshell plugin
 
-Sandbox backend powered by OpenShell with mirrored local workspaces and SSH-based command execution.
+Sandbox backend powered by the NVIDIA OpenShell CLI with mirrored local workspaces and SSH-based command execution.
 
 ## Distribution
 

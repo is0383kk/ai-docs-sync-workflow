@@ -91,6 +91,7 @@ methods:
 | `api.registerAgentHarness(...)`                  | Experimental low-level agent executor |
 | `api.registerCliBackend(...)`                    | Local CLI inference backend           |
 | `api.registerChannel(...)`                       | Messaging channel                     |
+| `api.registerEmbeddingProvider(...)`             | Reusable vector embedding provider    |
 | `api.registerSpeechProvider(...)`                | Text-to-speech / STT synthesis        |
 | `api.registerRealtimeTranscriptionProvider(...)` | Streaming realtime transcription      |
 | `api.registerRealtimeVoiceProvider(...)`         | Duplex realtime voice sessions        |
@@ -100,6 +101,12 @@ methods:
 | `api.registerVideoGenerationProvider(...)`       | Video generation                      |
 | `api.registerWebFetchProvider(...)`              | Web fetch / scrape provider           |
 | `api.registerWebSearchProvider(...)`             | Web search                            |
+
+Embedding providers registered with `api.registerEmbeddingProvider(...)` must
+also be listed in `contracts.embeddingProviders` in the plugin manifest. This
+is the generic embedding surface for reusable vector generation. Memory-only
+adapters still use `api.registerMemoryEmbeddingProvider(...)` and
+`contracts.memoryEmbeddingProviders`.
 
 ### Tools and commands
 

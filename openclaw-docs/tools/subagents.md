@@ -188,7 +188,7 @@ Per-agent overrides use `agents.list[].subagents.delegationMode`.
 </ParamField>
 
 <ParamField path="agentId" type="string">
-  Spawn under another agent id when allowed by `subagents.allowAgents`.
+  Spawn under another configured agent id when allowed by `subagents.allowAgents`.
 </ParamField>
 
 <ParamField path="runtime" type="&#x22;subagent&#x22; | &#x22;acp&#x22;" default="subagent">
@@ -353,11 +353,11 @@ See [Configuration reference](/gateway/configuration-reference) and
 ### Allowlist
 
 <ParamField path="agents.list[].subagents.allowAgents" type="string[]">
-  List of agent ids that can be targeted via explicit `agentId` (`["*"]` allows any configured target). Default: only the requester agent. If you set a list and still want the requester to spawn itself with `agentId`, include the requester id in the list.
+  List of configured agent ids that can be targeted via explicit `agentId` (`["*"]` allows any configured target). Default: only the requester agent. If you set a list and still want the requester to spawn itself with `agentId`, include the requester id in the list.
 </ParamField>
 
 <ParamField path="agents.defaults.subagents.allowAgents" type="string[]">
-  Default target-agent allowlist used when the requester agent does not set its own `subagents.allowAgents`.
+  Default configured target-agent allowlist used when the requester agent does not set its own `subagents.allowAgents`.
 </ParamField>
 
 <ParamField path="agents.defaults.subagents.requireAgentId" type="boolean" default="false">
@@ -377,6 +377,13 @@ Use `agents_list` to see which agent ids are currently allowed for
 `sessions_spawn`. The response includes each listed agent's effective
 model and embedded runtime metadata so callers can distinguish PI, Codex
 app-server, and other configured native runtimes.
+
+`allowAgents` entries must point at configured agent ids in `agents.list[]`.
+`["*"]` means any configured target agent plus the requester. If an agent config
+is deleted but its id remains in `allowAgents`, `sessions_spawn` rejects that id
+and `agents_list` omits it. Run `openclaw doctor --fix` to clean stale
+allowlist entries, or add a minimal `agents.list[]` entry when the target should
+remain spawnable while inheriting defaults.
 
 ### Auto-archive
 
