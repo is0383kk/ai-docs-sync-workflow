@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Google plugin
+---
+summary: "Adds Google, Google Gemini CLI, Google Vertex model provider support to OpenClaw."
+read_when:
+  - You are installing, configuring, or auditing the google plugin
+title: "Google plugin"
+---
 
 # Google plugin
 
@@ -10,8 +11,8 @@ Adds Google, Google Gemini CLI, Google Vertex model provider support to OpenClaw
 
 ## Distribution
 
-* Package: `@openclaw/google-plugin`
-* Install route: included in OpenClaw
+- Package: `@openclaw/google-plugin`
+- Install route: included in OpenClaw
 
 ## Surface
 
@@ -19,4 +20,4 @@ providers: google, google-gemini-cli, google-vertex; contracts: imageGenerationP
 
 ## Related docs
 
-* [google](/providers/google)
+- [google](/providers/google)

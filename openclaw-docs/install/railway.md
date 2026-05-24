@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Railway
+---
+summary: "Deploy OpenClaw on Railway with one-click template"
+read_when:
+  - Deploying OpenClaw to Railway
+  - You want a one-click cloud deploy with browser-based Control UI
+title: "Railway"
+---
 
 # Railway
 
@@ -27,17 +29,17 @@ After deploy, find your public URL in **Railway → your service → Settings �
 
 Railway will either:
 
-* give you a generated domain (often `https://<something>.up.railway.app`), or
-* use your custom domain if you attached one.
+- give you a generated domain (often `https://<something>.up.railway.app`), or
+- use your custom domain if you attached one.
 
 Then open:
 
-* `https://<your-railway-domain>/openclaw` — Control UI
+- `https://<your-railway-domain>/openclaw` — Control UI
 
 ## What you get
 
-* Hosted OpenClaw Gateway + Control UI
-* Persistent storage via Railway Volume (`/data`) so `openclaw.json`,
+- Hosted OpenClaw Gateway + Control UI
+- Persistent storage via Railway Volume (`/data`) so `openclaw.json`,
   per-agent `auth-profiles.json`, channel/provider state, sessions, and
   workspace survive redeploys
 
@@ -47,36 +49,36 @@ Then open:
 
 Enable **HTTP Proxy** for the service.
 
-* Port: `8080`
+- Port: `8080`
 
 ### Volume (required)
 
 Attach a volume mounted at:
 
-* `/data`
+- `/data`
 
 ### Variables
 
 Set these variables on the service:
 
-* `OPENCLAW_GATEWAY_PORT=8080` (required — must match the port in Public Networking)
-* `OPENCLAW_GATEWAY_TOKEN` (required; treat as an admin secret)
-* `OPENCLAW_STATE_DIR=/data/.openclaw` (recommended)
-* `OPENCLAW_WORKSPACE_DIR=/data/workspace` (recommended)
+- `OPENCLAW_GATEWAY_PORT=8080` (required — must match the port in Public Networking)
+- `OPENCLAW_GATEWAY_TOKEN` (required; treat as an admin secret)
+- `OPENCLAW_STATE_DIR=/data/.openclaw` (recommended)
+- `OPENCLAW_WORKSPACE_DIR=/data/workspace` (recommended)
 
 ## Connect a channel
 
 Use the Control UI at `/openclaw` or run `openclaw onboard` via Railway's shell for channel setup instructions:
 
-* [Telegram](/channels/telegram) (fastest — just a bot token)
-* [Discord](/channels/discord)
-* [All channels](/channels)
+- [Telegram](/channels/telegram) (fastest — just a bot token)
+- [Discord](/channels/discord)
+- [All channels](/channels)
 
 ## Backups & migration
 
 Export your state, config, auth profiles, and workspace:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw backup create
 ```
 
@@ -85,6 +87,6 @@ workspace. See [Backup](/cli/backup) for details.
 
 ## Next steps
 
-* Set up messaging channels: [Channels](/channels)
-* Configure the Gateway: [Gateway configuration](/gateway/configuration)
-* Keep OpenClaw up to date: [Updating](/install/updating)
+- Set up messaging channels: [Channels](/channels)
+- Configure the Gateway: [Gateway configuration](/gateway/configuration)
+- Keep OpenClaw up to date: [Updating](/install/updating)

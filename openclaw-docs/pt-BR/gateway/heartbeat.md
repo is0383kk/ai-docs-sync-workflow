@@ -1,0 +1,498 @@
+---
+read_when:
+    - Ajustando a cadência do Heartbeat ou as mensagens
+    - Escolhendo entre Heartbeat e Cron para tarefas agendadas
+sidebarTitle: Heartbeat
+summary: Mensagens de sondagem de Heartbeat e regras de notificação
+title: Heartbeat
+x-i18n:
+    generated_at: "2026-05-12T23:30:30Z"
+    model: gpt-5.5
+    provider: openai
+    source_hash: 247a0fe25ef6e47ec447e6c911ac66af4ab669e15dba886c967250b56e9f1a9c
+    source_path: gateway/heartbeat.md
+    workflow: 16
+---
+
+<Note>
+**Heartbeat vs cron?** Consulte [Automação](/pt-BR/automation) para orientações sobre quando usar cada um.
+</Note>
+
+Heartbeat executa **turnos periódicos do agente** na sessão principal para que o modelo possa destacar qualquer coisa que precise de atenção sem enviar spam.
+
+Heartbeat é um turno agendado da sessão principal — ele **não** cria registros de [tarefa em segundo plano](/pt-BR/automation/tasks). Registros de tarefa são para trabalho separado (execuções ACP, subagentes, trabalhos cron isolados).
+
+Solução de problemas: [Tarefas agendadas](/pt-BR/automation/cron-jobs#troubleshooting)
+
+## Início rápido (iniciante)
+
+<Steps>
+  <Step title="Escolha uma cadência">
+    Deixe os heartbeats ativados (o padrão é `30m`, ou `1h` para autenticação por OAuth/token da Anthropic, incluindo reutilização da Claude CLI) ou defina sua própria cadência.
+  </Step>
+  <Step title="Adicione HEARTBEAT.md (opcional)">
+    Crie uma pequena checklist `HEARTBEAT.md` ou um bloco `tasks:` no workspace do agente.
+  </Step>
+  <Step title="Decida para onde as mensagens de heartbeat devem ir">
+    `target: "none"` é o padrão; defina `target: "last"` para rotear para o último contato.
+  </Step>
+  <Step title="Ajuste opcional">
+    - Ative a entrega do raciocínio do heartbeat para transparência.
+    - Use contexto de bootstrap leve se as execuções de heartbeat só precisarem de `HEARTBEAT.md`.
+    - Ative sessões isoladas para evitar enviar todo o histórico da conversa a cada heartbeat.
+    - Restrinja heartbeats a horários ativos (hora local).
+
+  </Step>
+</Steps>
+
+Configuração de exemplo:
+
+```json5
+{
+  agents: {
+    defaults: {
+      heartbeat: {
+        every: "30m",
+        target: "last", // explicit delivery to last contact (default is "none")
+        directPolicy: "allow", // default: allow direct/DM targets; set "block" to suppress
+        lightContext: true, // optional: only inject HEARTBEAT.md from bootstrap files
+        isolatedSession: true, // optional: fresh session each run (no conversation history)
+        skipWhenBusy: true, // optional: also defer when this agent's subagent or nested lanes are busy
+        // activeHours: { start: "08:00", end: "24:00" },
+        // includeReasoning: true, // optional: send separate `Reasoning:` message too
+      },
+    },
+  },
+}
+```
+
+## Padrões
+
+- Intervalo: `30m` (ou `1h` quando autenticação por OAuth/token da Anthropic é o modo de autenticação detectado, incluindo reutilização da Claude CLI). Defina `agents.defaults.heartbeat.every` ou `agents.list[].heartbeat.every` por agente; use `0m` para desativar.
+- Corpo do prompt (configurável por `agents.defaults.heartbeat.prompt`): `Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.`
+- O prompt de heartbeat é enviado **literalmente** como a mensagem do usuário. O prompt do sistema inclui uma seção "Heartbeat" apenas quando heartbeats estão ativados para o agente padrão, e a execução é sinalizada internamente.
+- Quando heartbeats são desativados com `0m`, execuções normais também omitem `HEARTBEAT.md` do contexto de bootstrap para que o modelo não veja instruções exclusivas de heartbeat.
+- Horários ativos (`heartbeat.activeHours`) são verificados no fuso horário configurado. Fora da janela, heartbeats são ignorados até o próximo tick dentro da janela.
+- Heartbeats são adiados automaticamente enquanto trabalho cron está ativo ou enfileirado. Defina `heartbeat.skipWhenBusy: true` para também adiar um agente em suas próprias lanes de subagente ou comando aninhado vinculadas à chave de sessão; agentes irmãos não pausam mais só porque outro agente tem trabalho de subagente em andamento.
+
+## Para que serve o prompt de heartbeat
+
+O prompt padrão é intencionalmente amplo:
+
+- **Tarefas em segundo plano**: "Consider outstanding tasks" incentiva o agente a revisar acompanhamentos (caixa de entrada, calendário, lembretes, trabalho enfileirado) e destacar qualquer coisa urgente.
+- **Check-in humano**: "Checkup sometimes on your human during day time" incentiva uma mensagem leve ocasional do tipo "você precisa de algo?", mas evita spam noturno usando seu fuso horário local configurado (consulte [Fuso horário](/pt-BR/concepts/timezone)).
+
+Heartbeat pode reagir a [tarefas em segundo plano](/pt-BR/automation/tasks) concluídas, mas uma execução de heartbeat em si não cria um registro de tarefa.
+
+Se você quiser que um heartbeat faça algo muito específico (por exemplo, "verificar estatísticas do Gmail PubSub" ou "verificar a integridade do gateway"), defina `agents.defaults.heartbeat.prompt` (ou `agents.list[].heartbeat.prompt`) como um corpo personalizado (enviado literalmente).
+
+## Contrato de resposta
+
+- Se nada precisar de atenção, responda com **`HEARTBEAT_OK`**.
+- Execuções de heartbeat com capacidade de ferramentas podem, em vez disso, chamar `heartbeat_respond` com `notify: false` para nenhuma atualização visível, ou `notify: true` mais `notificationText` para um alerta. Quando presente, a resposta estruturada da ferramenta tem precedência sobre o fallback de texto.
+- Durante execuções de heartbeat, o OpenClaw trata `HEARTBEAT_OK` como um ack quando ele aparece no **início ou fim** da resposta. O token é removido e a resposta é descartada se o conteúdo restante tiver **≤ `ackMaxChars`** (padrão: 300).
+- Se `HEARTBEAT_OK` aparecer no **meio** de uma resposta, ele não recebe tratamento especial.
+- Para alertas, **não** inclua `HEARTBEAT_OK`; retorne apenas o texto do alerta.
+
+Fora dos heartbeats, um `HEARTBEAT_OK` solto no início/fim de uma mensagem é removido e registrado em log; uma mensagem que contenha apenas `HEARTBEAT_OK` é descartada.
+
+## Configuração
+
+```json5
+{
+  agents: {
+    defaults: {
+      heartbeat: {
+        every: "30m", // default: 30m (0m disables)
+        model: "anthropic/claude-opus-4-6",
+        includeReasoning: false, // default: false (deliver separate Reasoning: message when available)
+        lightContext: false, // default: false; true keeps only HEARTBEAT.md from workspace bootstrap files
+        isolatedSession: false, // default: false; true runs each heartbeat in a fresh session (no conversation history)
+        skipWhenBusy: false, // default: false; true also waits for this agent's subagent/nested lanes
+        target: "last", // default: none | options: last | none | <channel id> (core or plugin, e.g. "imessage")
+        to: "+15551234567", // optional channel-specific override
+        accountId: "ops-bot", // optional multi-account channel id
+        prompt: "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+        ackMaxChars: 300, // max chars allowed after HEARTBEAT_OK
+      },
+    },
+  },
+}
+```
+
+### Escopo e precedência
+
+- `agents.defaults.heartbeat` define o comportamento global de Heartbeat.
+- `agents.list[].heartbeat` é mesclado por cima; se qualquer agente tiver um bloco `heartbeat`, **somente esses agentes** executam Heartbeats.
+- `channels.defaults.heartbeat` define os padrões de visibilidade para todos os canais.
+- `channels.<channel>.heartbeat` substitui os padrões do canal.
+- `channels.<channel>.accounts.<id>.heartbeat` (canais com várias contas) substitui as configurações por canal.
+
+### Heartbeats por agente
+
+Se qualquer entrada `agents.list[]` incluir um bloco `heartbeat`, **somente esses agentes** executam Heartbeats. O bloco por agente é mesclado por cima de `agents.defaults.heartbeat` (assim você pode definir padrões compartilhados uma vez e substituir por agente).
+
+Exemplo: dois agentes, somente o segundo agente executa Heartbeats.
+
+```json5
+{
+  agents: {
+    defaults: {
+      heartbeat: {
+        every: "30m",
+        target: "last", // explicit delivery to last contact (default is "none")
+      },
+    },
+    list: [
+      { id: "main", default: true },
+      {
+        id: "ops",
+        heartbeat: {
+          every: "1h",
+          target: "whatsapp",
+          to: "+15551234567",
+          timeoutSeconds: 45,
+          prompt: "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+        },
+      },
+    ],
+  },
+}
+```
+
+### Exemplo de horário ativo
+
+Restrinja Heartbeats ao horário comercial em um fuso horário específico:
+
+```json5
+{
+  agents: {
+    defaults: {
+      heartbeat: {
+        every: "30m",
+        target: "last", // explicit delivery to last contact (default is "none")
+        activeHours: {
+          start: "09:00",
+          end: "22:00",
+          timezone: "America/New_York", // optional; uses your userTimezone if set, otherwise host tz
+        },
+      },
+    },
+  },
+}
+```
+
+Fora dessa janela (antes das 9h ou depois das 22h no horário do Leste), os Heartbeats são ignorados. O próximo tick agendado dentro da janela será executado normalmente.
+
+### Configuração 24/7
+
+Se você quiser que os Heartbeats sejam executados o dia todo, use um destes padrões:
+
+- Omita `activeHours` completamente (sem restrição de janela de tempo; este é o comportamento padrão).
+- Defina uma janela de dia inteiro: `activeHours: { start: "00:00", end: "24:00" }`.
+
+<Warning>
+Não defina o mesmo horário para `start` e `end` (por exemplo, de `08:00` a `08:00`). Isso é tratado como uma janela de largura zero, portanto os heartbeats são sempre ignorados.
+</Warning>
+
+### Exemplo de várias contas
+
+Use `accountId` para direcionar uma conta específica em canais com várias contas, como Telegram:
+
+```json5
+{
+  agents: {
+    list: [
+      {
+        id: "ops",
+        heartbeat: {
+          every: "1h",
+          target: "telegram",
+          to: "12345678:topic:42", // optional: route to a specific topic/thread
+          accountId: "ops-bot",
+        },
+      },
+    ],
+  },
+  channels: {
+    telegram: {
+      accounts: {
+        "ops-bot": { botToken: "YOUR_TELEGRAM_BOT_TOKEN" },
+      },
+    },
+  },
+}
+```
+
+### Observações dos campos
+
+<ParamField path="every" type="string">
+  Intervalo de Heartbeat (string de duração; unidade padrão = minutos).
+</ParamField>
+<ParamField path="model" type="string">
+  Substituição opcional de modelo para execuções de heartbeat (`provider/model`).
+</ParamField>
+<ParamField path="includeReasoning" type="boolean" default="false">
+  Quando ativado, também entrega a mensagem `Reasoning:` separada quando disponível (mesmo formato de `/reasoning on`).
+</ParamField>
+<ParamField path="lightContext" type="boolean" default="false">
+  Quando verdadeiro, as execuções de heartbeat usam contexto de bootstrap leve e mantêm apenas `HEARTBEAT.md` dos arquivos de bootstrap do espaço de trabalho.
+</ParamField>
+<ParamField path="isolatedSession" type="boolean" default="false">
+  Quando verdadeiro, cada heartbeat é executado em uma nova sessão sem histórico de conversa anterior. Usa o mesmo padrão de isolamento que cron `sessionTarget: "isolated"`. Reduz drasticamente o custo de tokens por heartbeat. Combine com `lightContext: true` para economia máxima. O roteamento de entrega ainda usa o contexto da sessão principal.
+</ParamField>
+<ParamField path="skipWhenBusy" type="boolean" default="false">
+  Quando verdadeiro, as execuções de heartbeat são adiadas nas pistas extras ocupadas desse agente: seu próprio subagente com chave de sessão ou trabalho de comando aninhado. As pistas de Cron sempre adiam heartbeats, mesmo sem esta flag, para que hosts de modelo local não executem prompts de cron e heartbeat ao mesmo tempo.
+</ParamField>
+<ParamField path="session" type="string">
+  Chave de sessão opcional para execuções de heartbeat.
+
+- `main` (padrão): sessão principal do agente.
+- Chave de sessão explícita (copie de `openclaw sessions --json` ou da [CLI de sessões](/pt-BR/cli/sessions)).
+- Formatos de chave de sessão: veja [Sessões](/pt-BR/concepts/session) e [Grupos](/pt-BR/channels/groups).
+
+</ParamField>
+<ParamField path="target" type="string">
+- `last`: entregar no último canal externo usado.
+- canal explícito: qualquer canal ou id de plugin configurado, por exemplo `discord`, `matrix`, `telegram` ou `whatsapp`.
+- `none` (padrão): executar o heartbeat, mas **não entregar** externamente.
+
+</ParamField>
+<ParamField path="directPolicy" type='"allow" | "block"' default="allow">
+  Controla o comportamento de entrega direta/DM. `allow`: permite entrega direta/DM de heartbeat. `block`: suprime entrega direta/DM (`reason=dm-blocked`).
+
+</ParamField>
+<ParamField path="to" type="string">
+  Substituição opcional de destinatário (id específico do canal, por exemplo E.164 para WhatsApp ou um id de chat do Telegram). Para tópicos/threads do Telegram, use `<chatId>:topic:<messageThreadId>`.
+
+</ParamField>
+<ParamField path="accountId" type="string">
+  Id de conta opcional para canais com várias contas. Quando `target: "last"`, o id da conta se aplica ao último canal resolvido se ele oferecer suporte a contas; caso contrário, é ignorado. Se o id da conta não corresponder a uma conta configurada para o canal resolvido, a entrega será ignorada.
+
+</ParamField>
+<ParamField path="prompt" type="string">
+  Substitui o corpo do prompt padrão (não mesclado).
+
+</ParamField>
+<ParamField path="ackMaxChars" type="number" default="300">
+  Máximo de caracteres permitido após `HEARTBEAT_OK` antes da entrega.
+
+</ParamField>
+<ParamField path="suppressToolErrorWarnings" type="boolean">
+  Quando verdadeiro, suprime payloads de aviso de erro de ferramenta durante execuções de Heartbeat.
+
+</ParamField>
+<ParamField path="activeHours" type="object">
+  Restringe execuções de Heartbeat a uma janela de tempo. Objeto com `start` (HH:MM, inclusivo; use `00:00` para início do dia), `end` (HH:MM exclusivo; `24:00` permitido para fim do dia) e `timezone` opcional.
+
+- Omitido ou `"user"`: usa seu `agents.defaults.userTimezone` se definido; caso contrário, recorre ao fuso horário do sistema host.
+- `"local"`: sempre usa o fuso horário do sistema host.
+- Qualquer identificador IANA (por exemplo, `America/New_York`): usado diretamente; se inválido, recorre ao comportamento `"user"` acima.
+- `start` e `end` não devem ser iguais para uma janela ativa; valores iguais são tratados como largura zero (sempre fora da janela).
+- Fora da janela ativa, Heartbeats são ignorados até o próximo tick dentro da janela.
+
+</ParamField>
+
+## Comportamento de entrega
+
+<AccordionGroup>
+  <Accordion title="Roteamento de sessão e destino">
+    - Heartbeats são executados na sessão principal do agente por padrão (`agent:<id>:<mainKey>`), ou em `global` quando `session.scope = "global"`. Defina `session` para substituir por uma sessão de canal específica (Discord/WhatsApp/etc.).
+    - `session` afeta apenas o contexto da execução; a entrega é controlada por `target` e `to`.
+    - Para entregar a um canal/destinatário específico, defina `target` + `to`. Com `target: "last"`, a entrega usa o último canal externo dessa sessão.
+    - Entregas de Heartbeat permitem destinos diretos/DM por padrão. Defina `directPolicy: "block"` para suprimir envios a destinos diretos enquanto ainda executa o turno de Heartbeat.
+    - Se a fila principal, a lane da sessão de destino, a lane do Cron ou uma tarefa Cron ativa estiver ocupada, o Heartbeat é ignorado e tentado novamente depois.
+    - Se `skipWhenBusy: true`, o subagente com chave de sessão deste agente e as lanes aninhadas também adiam execuções de Heartbeat. Lanes ocupadas de outros agentes não adiam este agente.
+    - Se `target` não resolver para nenhum destino externo, a execução ainda acontece, mas nenhuma mensagem de saída é enviada.
+
+  </Accordion>
+  <Accordion title="Visibilidade e comportamento de salto">
+    - Se `showOk`, `showAlerts` e `useIndicator` estiverem todos desabilitados, a execução é ignorada antecipadamente como `reason=alerts-disabled`.
+    - Se apenas a entrega de alertas estiver desabilitada, o OpenClaw ainda pode executar o Heartbeat, atualizar timestamps de tarefas vencidas, restaurar o timestamp de ociosidade da sessão e suprimir o payload de alerta externo.
+    - Se o destino de Heartbeat resolvido oferecer suporte a digitação, o OpenClaw mostra digitação enquanto a execução de Heartbeat está ativa. Isso usa o mesmo destino para o qual o Heartbeat enviaria a saída de chat, e é desabilitado por `typingMode: "never"`.
+
+  </Accordion>
+  <Accordion title="Ciclo de vida da sessão e auditoria">
+    - Respostas apenas de Heartbeat **não** mantêm a sessão ativa. Metadados de Heartbeat podem atualizar a linha da sessão, mas a expiração por ociosidade usa `lastInteractionAt` da última mensagem real de usuário/canal, e a expiração diária usa `sessionStartedAt`.
+    - A interface de controle e o histórico do WebChat ocultam prompts de Heartbeat e confirmações apenas OK. A transcrição da sessão subjacente ainda pode conter esses turnos para auditoria/replay.
+    - [Tarefas em segundo plano](/pt-BR/automation/tasks) destacadas podem enfileirar um evento de sistema e acordar o Heartbeat quando a sessão principal deve perceber algo rapidamente. Esse despertar não faz a execução de Heartbeat virar uma tarefa em segundo plano.
+
+  </Accordion>
+</AccordionGroup>
+
+## Controles de visibilidade
+
+Por padrão, confirmações `HEARTBEAT_OK` são suprimidas enquanto conteúdo de alerta é entregue. Você pode ajustar isso por canal ou por conta:
+
+```yaml
+channels:
+  defaults:
+    heartbeat:
+      showOk: false # Hide HEARTBEAT_OK (default)
+      showAlerts: true # Show alert messages (default)
+      useIndicator: true # Emit indicator events (default)
+  telegram:
+    heartbeat:
+      showOk: true # Show OK acknowledgments on Telegram
+  whatsapp:
+    accounts:
+      work:
+        heartbeat:
+          showAlerts: false # Suppress alert delivery for this account
+```
+
+Precedência: por conta → por canal → padrões do canal → padrões integrados.
+
+### O que cada flag faz
+
+- `showOk`: envia uma confirmação `HEARTBEAT_OK` quando o modelo retorna uma resposta apenas OK.
+- `showAlerts`: envia o conteúdo do alerta quando o modelo retorna uma resposta que não é OK.
+- `useIndicator`: emite eventos indicadores para superfícies de status da UI.
+
+Se **todos os três** forem falsos, o OpenClaw ignora completamente a execução de Heartbeat (sem chamada ao modelo).
+
+### Exemplos por canal vs por conta
+
+```yaml
+channels:
+  defaults:
+    heartbeat:
+      showOk: false
+      showAlerts: true
+      useIndicator: true
+  slack:
+    heartbeat:
+      showOk: true # all Slack accounts
+    accounts:
+      ops:
+        heartbeat:
+          showAlerts: false # suppress alerts for the ops account only
+  telegram:
+    heartbeat:
+      showOk: true
+```
+
+### Padrões comuns
+
+| Objetivo                                | Configuração                                                                              |
+| --------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Comportamento padrão (OKs silenciosos, alertas ativos) | _(nenhuma configuração necessária)_                                                       |
+| Totalmente silencioso (sem mensagens, sem indicador) | `channels.defaults.heartbeat: { showOk: false, showAlerts: false, useIndicator: false }` |
+| Apenas indicador (sem mensagens)        | `channels.defaults.heartbeat: { showOk: false, showAlerts: false, useIndicator: true }`  |
+| OKs em apenas um canal                  | `channels.telegram.heartbeat: { showOk: true }`                                          |
+
+## HEARTBEAT.md (opcional)
+
+Se existir um arquivo `HEARTBEAT.md` no workspace, o prompt padrão instrui o agente a lê-lo. Pense nele como sua "checklist de Heartbeat": pequena, estável e segura para incluir a cada 30 minutos.
+
+Em execuções normais, `HEARTBEAT.md` só é injetado quando a orientação de Heartbeat está habilitada para o agente padrão. Desabilitar a cadência de Heartbeat com `0m` ou definir `includeSystemPromptSection: false` o omite do contexto de bootstrap normal.
+
+Se `HEARTBEAT.md` existir, mas estiver efetivamente vazio (apenas linhas em branco e cabeçalhos markdown como `# Heading`), o OpenClaw ignora a execução de Heartbeat para economizar chamadas de API. Esse salto é relatado como `reason=empty-heartbeat-file`. Se o arquivo estiver ausente, o Heartbeat ainda é executado e o modelo decide o que fazer.
+
+Mantenha-o minúsculo (checklist curta ou lembretes) para evitar inchaço do prompt.
+
+Exemplo de `HEARTBEAT.md`:
+
+```md
+# Heartbeat checklist
+
+- Quick scan: anything urgent in inboxes?
+- If it's daytime, do a lightweight check-in if nothing else is pending.
+- If a task is blocked, write down _what is missing_ and ask Peter next time.
+```
+
+### Blocos `tasks:`
+
+`HEARTBEAT.md` também oferece suporte a um pequeno bloco estruturado `tasks:` para verificações baseadas em intervalo dentro do próprio Heartbeat.
+
+Exemplo:
+
+```md
+tasks:
+
+- name: inbox-triage
+  interval: 30m
+  prompt: "Check for urgent unread emails and flag anything time sensitive."
+- name: calendar-scan
+  interval: 2h
+  prompt: "Check for upcoming meetings that need prep or follow-up."
+
+# Additional instructions
+
+- Keep alerts short.
+- If nothing needs attention after all due tasks, reply HEARTBEAT_OK.
+```
+
+<AccordionGroup>
+  <Accordion title="Comportamento">
+    - O OpenClaw analisa o bloco `tasks:` e verifica cada tarefa em relação ao próprio `interval`.
+    - Apenas tarefas **vencidas** são incluídas no prompt de Heartbeat desse tick.
+    - Se nenhuma tarefa estiver vencida, o Heartbeat é totalmente ignorado (`reason=no-tasks-due`) para evitar uma chamada de modelo desperdiçada.
+    - Conteúdo que não é tarefa em `HEARTBEAT.md` é preservado e anexado como contexto adicional após a lista de tarefas vencidas.
+    - Timestamps da última execução da tarefa são armazenados no estado da sessão (`heartbeatTaskState`), portanto os intervalos sobrevivem a reinicializações normais.
+    - Timestamps de tarefa só avançam depois que uma execução de Heartbeat conclui seu caminho normal de resposta. Execuções ignoradas `empty-heartbeat-file` / `no-tasks-due` não marcam tarefas como concluídas.
+
+  </Accordion>
+</AccordionGroup>
+
+O modo de tarefa é útil quando você quer que um arquivo de Heartbeat contenha várias verificações periódicas sem pagar por todas elas a cada tick.
+
+### O agente pode atualizar HEARTBEAT.md?
+
+Sim — se você pedir.
+
+`HEARTBEAT.md` é apenas um arquivo normal no workspace do agente, então você pode dizer ao agente (em um chat normal) algo como:
+
+- "Atualize `HEARTBEAT.md` para adicionar uma verificação diária de calendário."
+- "Reescreva `HEARTBEAT.md` para que fique mais curto e focado em acompanhamentos da caixa de entrada."
+
+Se você quiser que isso aconteça proativamente, também pode incluir uma linha explícita no seu prompt de Heartbeat como: "Se a checklist ficar desatualizada, atualize HEARTBEAT.md com uma melhor."
+
+<Warning>
+Não coloque segredos (chaves de API, números de telefone, tokens privados) em `HEARTBEAT.md` — ele se torna parte do contexto do prompt.
+</Warning>
+
+## Despertar manual (sob demanda)
+
+Você pode enfileirar um evento de sistema e disparar um Heartbeat imediato com:
+
+```bash
+openclaw system event --text "Check for urgent follow-ups" --mode now
+```
+
+Se vários agentes tiverem `heartbeat` configurado, um despertar manual executa cada um desses Heartbeats de agente imediatamente.
+
+Use `--mode next-heartbeat` para aguardar o próximo tick agendado.
+
+## Entrega de raciocínio (opcional)
+
+Por padrão, Heartbeats entregam apenas o payload final de "resposta".
+
+Se você quiser transparência, habilite:
+
+- `agents.defaults.heartbeat.includeReasoning: true`
+
+Quando habilitado, Heartbeats também entregarão uma mensagem separada prefixada com `Reasoning:` (mesmo formato de `/reasoning on`). Isso pode ser útil quando o agente está gerenciando várias sessões/codexes e você quer ver por que ele decidiu chamar sua atenção — mas também pode vazar mais detalhes internos do que você deseja. Prefira mantê-lo desativado em chats em grupo.
+
+## Consciência de custo
+
+Heartbeats executam turnos completos do agente. Intervalos mais curtos consomem mais tokens. Para reduzir custo:
+
+- Use `isolatedSession: true` para evitar enviar o histórico completo da conversa (~100K tokens para ~2-5K por execução).
+- Use `lightContext: true` para limitar arquivos de bootstrap a apenas `HEARTBEAT.md`.
+- Defina um `model` mais barato (por exemplo, `ollama/llama3.2:1b`).
+- Mantenha `HEARTBEAT.md` pequeno.
+- Use `target: "none"` se você só quiser atualizações de estado internas.
+
+## Estouro de contexto após Heartbeat
+
+Se um Heartbeat deixou anteriormente uma sessão existente em um modelo local menor, por exemplo um modelo Ollama com uma janela de 32k, e o próximo turno da sessão principal relatar estouro de contexto, redefina o modelo de runtime da sessão de volta para o modelo primário configurado. A mensagem de redefinição do OpenClaw destaca isso quando o último modelo de runtime corresponde ao `heartbeat.model` configurado.
+
+Heartbeats atuais preservam o modelo de runtime existente da sessão compartilhada após a conclusão da execução. Você ainda pode usar `isolatedSession: true` para executar Heartbeats em uma sessão nova, combiná-lo com `lightContext: true` para o menor prompt ou escolher um modelo de Heartbeat com uma janela de contexto grande o suficiente para a sessão compartilhada.
+
+## Relacionados
+
+- [Automação](/pt-BR/automation) — todos os mecanismos de automação em um relance
+- [Tarefas em segundo plano](/pt-BR/automation/tasks) — como trabalho destacado é rastreado
+- [Fuso horário](/pt-BR/concepts/timezone) — como o fuso horário afeta o agendamento de Heartbeat
+- [Solução de problemas](/pt-BR/automation/cron-jobs#troubleshooting) — depuração de problemas de automação

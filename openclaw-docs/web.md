@@ -1,14 +1,16 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Web
+---
+summary: "Gateway web surfaces: Control UI, bind modes, and security"
+read_when:
+  - You want to access the Gateway over Tailscale
+  - You want the browser Control UI and config editing
+title: "Web"
+---
 
 The Gateway serves a small **browser Control UI** (Vite + Lit) from the same port as the Gateway WebSocket:
 
-* default: `http://<host>:18789/`
-* with `gateway.tls.enabled: true`: `https://<host>:18789/`
-* optional prefix: set `gateway.controlUi.basePath` (e.g. `/openclaw`)
+- default: `http://<host>:18789/`
+- with `gateway.tls.enabled: true`: `https://<host>:18789/`
+- optional prefix: set `gateway.controlUi.basePath` (e.g. `/openclaw`)
 
 Capabilities live in [Control UI](/web/control-ui). The rest of this page focuses on bind modes, security, and web-facing surfaces.
 
@@ -28,7 +30,7 @@ See [Admin HTTP RPC](/plugins/admin-http-rpc) for the auth model, allowed method
 The Control UI is **enabled by default** when assets are present (`dist/control-ui`).
 You can control it via config:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   gateway: {
     controlUi: { enabled: true, basePath: "/openclaw" }, // basePath optional
@@ -42,7 +44,7 @@ You can control it via config:
 
 Keep the Gateway on loopback and let Tailscale Serve proxy it:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   gateway: {
     bind: "loopback",
@@ -53,17 +55,17 @@ Keep the Gateway on loopback and let Tailscale Serve proxy it:
 
 Then start the gateway:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw gateway
 ```
 
 Open:
 
-* `https://<magicdns>/` (or your configured `gateway.controlUi.basePath`)
+- `https://<magicdns>/` (or your configured `gateway.controlUi.basePath`)
 
 ### Tailnet bind + token
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   gateway: {
     bind: "tailnet",
@@ -76,17 +78,17 @@ Open:
 Then start the gateway (this non-loopback example uses shared-secret token
 auth):
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw gateway
 ```
 
 Open:
 
-* `http://<tailscale-ip>:18789/` (or your configured `gateway.controlUi.basePath`)
+- `http://<tailscale-ip>:18789/` (or your configured `gateway.controlUi.basePath`)
 
 ### Public internet (Funnel)
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   gateway: {
     bind: "loopback",
@@ -98,34 +100,34 @@ Open:
 
 ## Security notes
 
-* Gateway auth is required by default (token, password, trusted-proxy, or Tailscale Serve identity headers when enabled).
-* Non-loopback binds still **require** gateway auth. In practice that means token/password auth or an identity-aware reverse proxy with `gateway.auth.mode: "trusted-proxy"`.
-* The wizard creates shared-secret auth by default and usually generates a
+- Gateway auth is required by default (token, password, trusted-proxy, or Tailscale Serve identity headers when enabled).
+- Non-loopback binds still **require** gateway auth. In practice that means token/password auth or an identity-aware reverse proxy with `gateway.auth.mode: "trusted-proxy"`.
+- The wizard creates shared-secret auth by default and usually generates a
   gateway token (even on loopback).
-* In shared-secret mode, the UI sends `connect.params.auth.token` or
+- In shared-secret mode, the UI sends `connect.params.auth.token` or
   `connect.params.auth.password`.
-* When `gateway.tls.enabled: true`, local dashboard and status helpers render
+- When `gateway.tls.enabled: true`, local dashboard and status helpers render
   `https://` dashboard URLs and `wss://` WebSocket URLs.
-* In identity-bearing modes such as Tailscale Serve or `trusted-proxy`, the
+- In identity-bearing modes such as Tailscale Serve or `trusted-proxy`, the
   WebSocket auth check is satisfied from request headers instead.
-* For public non-loopback Control UI deployments, set `gateway.controlUi.allowedOrigins`
+- For public non-loopback Control UI deployments, set `gateway.controlUi.allowedOrigins`
   explicitly (full origins). Private same-origin LAN/Tailnet loads are accepted for loopback,
   RFC1918/link-local, `.local`, `.ts.net`, and Tailscale CGNAT hosts.
-* `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true` enables
+- `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true` enables
   Host-header origin fallback mode, but is a dangerous security downgrade.
-* With Serve, Tailscale identity headers can satisfy Control UI/WebSocket auth
+- With Serve, Tailscale identity headers can satisfy Control UI/WebSocket auth
   when `gateway.auth.allowTailscale` is `true` (no token/password required).
   HTTP API endpoints do not use those Tailscale identity headers; they follow
   the gateway's normal HTTP auth mode instead. Set
   `gateway.auth.allowTailscale: false` to require explicit credentials. See
   [Tailscale](/gateway/tailscale) and [Security](/gateway/security). This
   tokenless flow assumes the gateway host is trusted.
-* `gateway.tailscale.mode: "funnel"` requires `gateway.auth.mode: "password"` (shared password).
+- `gateway.tailscale.mode: "funnel"` requires `gateway.auth.mode: "password"` (shared password).
 
 ## Building the UI
 
 The Gateway serves static files from `dist/control-ui`. Build them with:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm ui:build
 ```

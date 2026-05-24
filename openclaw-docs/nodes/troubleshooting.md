@@ -1,14 +1,16 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Node troubleshooting
+---
+summary: "Troubleshoot node pairing, foreground requirements, permissions, and tool failures"
+read_when:
+  - Node is connected but camera/canvas/screen/exec tools fail
+  - You need the node pairing versus approvals mental model
+title: "Node troubleshooting"
+---
 
 Use this page when a node is visible in status but node tools fail.
 
 ## Command ladder
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw status
 openclaw gateway status
 openclaw logs --follow
@@ -18,7 +20,7 @@ openclaw channels status --probe
 
 Then run node specific checks:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw nodes status
 openclaw nodes describe --node <idOrNameOrIp>
 openclaw approvals get --node <idOrNameOrIp>
@@ -26,9 +28,9 @@ openclaw approvals get --node <idOrNameOrIp>
 
 Healthy signals:
 
-* Node is connected and paired for role `node`.
-* `nodes describe` includes the capability you are calling.
-* Exec approvals show expected mode/allowlist.
+- Node is connected and paired for role `node`.
+- `nodes describe` includes the capability you are calling.
+- Exec approvals show expected mode/allowlist.
 
 ## Foreground requirements
 
@@ -36,7 +38,7 @@ Healthy signals:
 
 Quick check and fix:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw nodes describe --node <idOrNameOrIp>
 openclaw nodes canvas snapshot --node <idOrNameOrIp>
 openclaw logs --follow
@@ -63,7 +65,7 @@ These are different gates:
 
 Quick checks:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw devices list
 openclaw nodes status
 openclaw approvals get --node <idOrNameOrIp>
@@ -83,20 +85,20 @@ run as an approval mismatch instead of trusting the edited payload.
 
 ## Common node error codes
 
-* `NODE_BACKGROUND_UNAVAILABLE` → app is backgrounded; bring it foreground.
-* `CAMERA_DISABLED` → camera toggle disabled in node settings.
-* `*_PERMISSION_REQUIRED` → OS permission missing/denied.
-* `LOCATION_DISABLED` → location mode is off.
-* `LOCATION_PERMISSION_REQUIRED` → requested location mode not granted.
-* `LOCATION_BACKGROUND_UNAVAILABLE` → app is backgrounded but only While Using permission exists.
-* `SYSTEM_RUN_DENIED: approval required` → exec request needs explicit approval.
-* `SYSTEM_RUN_DENIED: allowlist miss` → command blocked by allowlist mode.
+- `NODE_BACKGROUND_UNAVAILABLE` → app is backgrounded; bring it foreground.
+- `CAMERA_DISABLED` → camera toggle disabled in node settings.
+- `*_PERMISSION_REQUIRED` → OS permission missing/denied.
+- `LOCATION_DISABLED` → location mode is off.
+- `LOCATION_PERMISSION_REQUIRED` → requested location mode not granted.
+- `LOCATION_BACKGROUND_UNAVAILABLE` → app is backgrounded but only While Using permission exists.
+- `SYSTEM_RUN_DENIED: approval required` → exec request needs explicit approval.
+- `SYSTEM_RUN_DENIED: allowlist miss` → command blocked by allowlist mode.
   On Windows node hosts, shell-wrapper forms like `cmd.exe /c ...` are treated as allowlist misses in
   allowlist mode unless approved via ask flow.
 
 ## Fast recovery loop
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw nodes status
 openclaw nodes describe --node <idOrNameOrIp>
 openclaw approvals get --node <idOrNameOrIp>
@@ -105,17 +107,17 @@ openclaw logs --follow
 
 If still stuck:
 
-* Re-approve device pairing.
-* Re-open node app (foreground).
-* Re-grant OS permissions.
-* Recreate/adjust exec approval policy.
+- Re-approve device pairing.
+- Re-open node app (foreground).
+- Re-grant OS permissions.
+- Recreate/adjust exec approval policy.
 
 ## Related
 
-* [Nodes overview](/nodes)
-* [Camera nodes](/nodes/camera)
-* [Location command](/nodes/location-command)
-* [Exec approvals](/tools/exec-approvals)
-* [Gateway pairing](/gateway/pairing)
-* [Gateway troubleshooting](/gateway/troubleshooting)
-* [Channel troubleshooting](/channels/troubleshooting)
+- [Nodes overview](/nodes)
+- [Camera nodes](/nodes/camera)
+- [Location command](/nodes/location-command)
+- [Exec approvals](/tools/exec-approvals)
+- [Gateway pairing](/gateway/pairing)
+- [Gateway troubleshooting](/gateway/troubleshooting)
+- [Channel troubleshooting](/channels/troubleshooting)

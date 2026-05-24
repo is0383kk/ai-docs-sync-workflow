@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Tencent Cloud (TokenHub)
+---
+summary: "Tencent Cloud TokenHub setup for Hy3 preview"
+title: "Tencent Cloud (TokenHub)"
+read_when:
+  - You want to use Tencent Hy3 preview with OpenClaw
+  - You need the TokenHub API key setup
+---
 
 Tencent Cloud ships as a bundled provider plugin in OpenClaw. It gives access to Tencent Hy3 preview through the TokenHub endpoint (`tencent-tokenhub`) using an OpenAI-compatible API.
 
@@ -24,27 +26,28 @@ Tencent Cloud ships as a bundled provider plugin in OpenClaw. It gives access to
   <Step title="Create a TokenHub API key">
     Create an API key in Tencent Cloud TokenHub. If you choose a limited access scope for the key, include **Hy3 preview** in the allowed models.
   </Step>
-
   <Step title="Run onboarding">
     <CodeGroup>
-      ```bash Onboarding theme={"theme":{"light":"min-light","dark":"min-dark"}}
-      openclaw onboard --auth-choice tokenhub-api-key
-      ```
 
-      ```bash Direct flag theme={"theme":{"light":"min-light","dark":"min-dark"}}
-      openclaw onboard --non-interactive \
-        --auth-choice tokenhub-api-key \
-        --tokenhub-api-key "$TOKENHUB_API_KEY"
-      ```
+```bash Onboarding
+openclaw onboard --auth-choice tokenhub-api-key
+```
 
-      ```bash Env only theme={"theme":{"light":"min-light","dark":"min-dark"}}
-      export TOKENHUB_API_KEY=...
-      ```
+```bash Direct flag
+openclaw onboard --non-interactive \
+  --auth-choice tokenhub-api-key \
+  --tokenhub-api-key "$TOKENHUB_API_KEY"
+```
+
+```bash Env only
+export TOKENHUB_API_KEY=...
+```
+
     </CodeGroup>
-  </Step>
 
+  </Step>
   <Step title="Verify the model">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw models list --provider tencent-tokenhub
     ```
   </Step>
@@ -52,7 +55,7 @@ Tencent Cloud ships as a bundled provider plugin in OpenClaw. It gives access to
 
 ## Non-interactive setup
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard --non-interactive \
   --mode local \
   --auth-choice tokenhub-api-key \
@@ -91,11 +94,12 @@ Rates are per million tokens in USD as advertised by Tencent. Override pricing u
   <Accordion title="Endpoint override">
     OpenClaw defaults to Tencent Cloud's `https://tokenhub.tencentmaas.com/v1` endpoint. Tencent also documents an international TokenHub endpoint:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw config set models.providers.tencent-tokenhub.baseUrl "https://tokenhub-intl.tencentmaas.com/v1"
     ```
 
     Only override the endpoint when your TokenHub account or region requires it.
+
   </Accordion>
 
   <Accordion title="Environment availability for the daemon">
@@ -104,6 +108,7 @@ Rates are per million tokens in USD as advertised by Tencent. Override pricing u
     <Warning>
       Keys exported only in an interactive shell are not visible to managed gateway processes. Use the env file or config seam for persistent availability.
     </Warning>
+
   </Accordion>
 </AccordionGroup>
 
@@ -113,15 +118,12 @@ Rates are per million tokens in USD as advertised by Tencent. Override pricing u
   <Card title="Model providers" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/configuration" icon="gear">
     Full config schema including provider settings.
   </Card>
-
   <Card title="Tencent TokenHub" href="https://cloud.tencent.com/product/tokenhub" icon="arrow-up-right-from-square">
     Tencent Cloud's TokenHub product page.
   </Card>
-
   <Card title="Hy3 preview model card" href="https://huggingface.co/tencent/Hy3-preview" icon="square-poll-horizontal">
     Tencent Hunyuan Hy3 preview details and benchmarks.
   </Card>

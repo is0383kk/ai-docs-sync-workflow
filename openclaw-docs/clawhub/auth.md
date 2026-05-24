@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Auth
+---
+summary: "ClawHub sign-in, API tokens, CLI login, token storage, and revocation."
+read_when:
+  - Signing in to ClawHub
+  - Using the ClawHub CLI
+  - Debugging 401s
+---
 
 # Auth
 
@@ -21,7 +23,7 @@ standing.
 
 The default CLI login flow opens your browser:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub login
 clawhub whoami
 ```
@@ -41,7 +43,7 @@ proxy rules, use the headless token flow.
 
 Create a token in the ClawHub web UI, then pass it to the CLI:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub login --token clh_...
 ```
 
@@ -49,7 +51,7 @@ Use this flow for servers, CI jobs, or terminal-only environments.
 
 For remote shells where you can open a browser elsewhere, run:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub login --device
 ```
 
@@ -60,13 +62,13 @@ The CLI prints a one-time code and waits while you authorize it at
 
 Default config paths:
 
-* macOS: `~/Library/Application Support/clawhub/config.json`
-* Linux/XDG: `$XDG_CONFIG_HOME/clawhub/config.json` or `~/.config/clawhub/config.json`
-* Windows: `%APPDATA%\\clawhub\\config.json`
+- macOS: `~/Library/Application Support/clawhub/config.json`
+- Linux/XDG: `$XDG_CONFIG_HOME/clawhub/config.json` or `~/.config/clawhub/config.json`
+- Windows: `%APPDATA%\\clawhub\\config.json`
 
 Override the path with:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export CLAWHUB_CONFIG_PATH=/path/to/config.json
 ```
 

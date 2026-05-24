@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Volcengine (Doubao)
+---
+summary: "Volcano Engine setup (Doubao models, coding endpoints, and Seed Speech TTS)"
+title: "Volcengine (Doubao)"
+read_when:
+  - You want to use Volcano Engine or Doubao models with OpenClaw
+  - You need the Volcengine API key setup
+  - You want to use Volcengine Speech text-to-speech
+---
 
 The Volcengine provider gives access to Doubao models and third-party models
 hosted on Volcano Engine, with separate endpoints for general and coding
@@ -22,15 +25,15 @@ provider.
   <Step title="Set the API key">
     Run interactive onboarding:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --auth-choice volcengine-api-key
     ```
 
     This registers both the general (`volcengine`) and coding (`volcengine-plan`) providers from a single API key.
-  </Step>
 
+  </Step>
   <Step title="Set a default model">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -40,9 +43,8 @@ provider.
     }
     ```
   </Step>
-
   <Step title="Verify the model is available">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw models list --provider volcengine
     openclaw models list --provider volcengine-plan
     ```
@@ -50,14 +52,15 @@ provider.
 </Steps>
 
 <Tip>
-  For non-interactive setup (CI, scripting), pass the key directly:
+For non-interactive setup (CI, scripting), pass the key directly:
 
-  ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
-  openclaw onboard --non-interactive \
-    --mode local \
-    --auth-choice volcengine-api-key \
-    --volcengine-api-key "$VOLCANO_ENGINE_API_KEY"
-  ```
+```bash
+openclaw onboard --non-interactive \
+  --mode local \
+  --auth-choice volcengine-api-key \
+  --volcengine-api-key "$VOLCANO_ENGINE_API_KEY"
+```
+
 </Tip>
 
 ## Providers and endpoints
@@ -68,7 +71,7 @@ provider.
 | `volcengine-plan` | `ark.cn-beijing.volces.com/api/coding/v3` | Coding models  |
 
 <Note>
-  Both providers are configured from a single API key. Setup registers both automatically.
+Both providers are configured from a single API key. Setup registers both automatically.
 </Note>
 
 ## Built-in catalog
@@ -83,7 +86,6 @@ provider.
     | `volcengine/glm-4-7-251222`                  | GLM 4.7                         | text, image | 200,000 |
     | `volcengine/deepseek-v3-2-251201`            | DeepSeek V3.2                   | text, image | 128,000 |
   </Tab>
-
   <Tab title="Coding (volcengine-plan)">
     | Model ref                                         | Name                     | Input | Context |
     | ------------------------------------------------- | ------------------------ | ----- | ------- |
@@ -102,14 +104,14 @@ Volcengine TTS uses the BytePlus Seed Speech HTTP API and is configured
 separately from the OpenAI-compatible Doubao model API key. In the BytePlus
 console, open Seed Speech > Settings > API Keys and copy the API key, then set:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export VOLCENGINE_TTS_API_KEY="byteplus_seed_speech_api_key"
 export VOLCENGINE_TTS_RESOURCE_ID="seed-tts-1.0"
 ```
 
 Then enable it in `openclaw.json`:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   messages: {
     tts: {
@@ -136,14 +138,14 @@ to newly created Seed Speech API keys in the default project. If your project
 has TTS 2.0 entitlement, set `VOLCENGINE_TTS_RESOURCE_ID=seed-tts-2.0`.
 
 <Warning>
-  `VOLCANO_ENGINE_API_KEY` is for the ModelArk/Doubao model endpoints and is not a
-  Seed Speech API key. TTS needs a Seed Speech API key from the BytePlus Speech
-  Console, or a legacy Speech Console AppID/token pair.
+`VOLCANO_ENGINE_API_KEY` is for the ModelArk/Doubao model endpoints and is not a
+Seed Speech API key. TTS needs a Seed Speech API key from the BytePlus Speech
+Console, or a legacy Speech Console AppID/token pair.
 </Warning>
 
 Legacy AppID/token auth remains supported for older Speech Console applications:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export VOLCENGINE_TTS_APPID="speech_app_id"
 export VOLCENGINE_TTS_TOKEN="speech_access_token"
 export VOLCENGINE_TTS_CLUSTER="volcano_tts"
@@ -175,8 +177,8 @@ export VOLCENGINE_TTS_CLUSTER="volcano_tts"
 </AccordionGroup>
 
 <Warning>
-  When running OpenClaw as a background service, environment variables set in your
-  interactive shell are not automatically inherited. See the daemon note above.
+When running OpenClaw as a background service, environment variables set in your
+interactive shell are not automatically inherited. See the daemon note above.
 </Warning>
 
 ## Related
@@ -185,15 +187,12 @@ export VOLCENGINE_TTS_CLUSTER="volcano_tts"
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Configuration" href="/gateway/configuration" icon="gear">
     Full config reference for agents, models, and providers.
   </Card>
-
   <Card title="Troubleshooting" href="/help/troubleshooting" icon="wrench">
     Common issues and debugging steps.
   </Card>
-
   <Card title="FAQ" href="/help/faq" icon="circle-question">
     Frequently asked questions about OpenClaw setup.
   </Card>

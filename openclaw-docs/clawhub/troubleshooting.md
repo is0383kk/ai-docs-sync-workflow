@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Troubleshooting
+---
+summary: "Troubleshooting ClawHub sign-in, install, publish, sync, update, and API issues."
+read_when:
+  - ClawHub CLI or OpenClaw registry commands fail
+  - A package cannot be installed, published, or updated
+---
 
 # Troubleshooting
 
@@ -10,28 +11,28 @@
 
 The CLI starts a short-lived local callback server during browser login.
 
-* Make sure your browser can reach `http://127.0.0.1:<port>/callback`.
-* Check local firewall, VPN, and proxy rules if the callback never arrives.
-* In headless environments, create an API token in the ClawHub web UI and run:
+- Make sure your browser can reach `http://127.0.0.1:<port>/callback`.
+- Check local firewall, VPN, and proxy rules if the callback never arrives.
+- In headless environments, create an API token in the ClawHub web UI and run:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub login --token clh_...
 ```
 
 ## `whoami` or `publish` returns `Unauthorized` (401)
 
-* Sign in again with `clawhub login`.
-* If you use a custom config path, confirm `CLAWHUB_CONFIG_PATH` points at the
+- Sign in again with `clawhub login`.
+- If you use a custom config path, confirm `CLAWHUB_CONFIG_PATH` points at the
   file that contains your current token.
-* If you use an API token, confirm it was not revoked in the web UI.
+- If you use an API token, confirm it was not revoked in the web UI.
 
 ## Search or install returns `Rate limit exceeded` (429)
 
 Read the retry information in the response:
 
-* `Retry-After`: seconds to wait before retrying.
-* `RateLimit-Remaining` and `RateLimit-Limit`: your current budget.
-* `RateLimit-Reset` or `X-RateLimit-Reset`: reset timing.
+- `Retry-After`: seconds to wait before retrying.
+- `RateLimit-Remaining` and `RateLimit-Limit`: your current budget.
+- `RateLimit-Reset` or `X-RateLimit-Reset`: reset timing.
 
 If many users share one egress IP, anonymous IP limits can be hit even when each
 person only sends a few requests. Sign in where possible and retry after the
@@ -41,7 +42,7 @@ reported delay.
 
 The CLI respects standard proxy variables:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export HTTPS_PROXY=http://proxy.example.com:3128
 clawhub search "my query"
 ```
@@ -51,11 +52,11 @@ Supported names include `HTTPS_PROXY`, `HTTP_PROXY`, `https_proxy`, and
 
 ## A skill does not appear in search
 
-* Check the exact slug or owner page if you know it.
-* Confirm the release is public and not held by scan or moderation.
-* If you own the skill, sign in and inspect it:
+- Check the exact slug or owner page if you know it.
+- Confirm the release is public and not held by scan or moderation.
+- If you own the skill, sign in and inspect it:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub inspect <skill-slug>
 ```
 
@@ -72,7 +73,7 @@ need OpenClaw compatibility fields such as `openclaw.compat.pluginApi` and
 
 Preview the publish payload first:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub package publish <source> --family code-plugin --dry-run
 ```
 
@@ -81,10 +82,10 @@ clawhub package publish <source> --family code-plugin --dry-run
 ClawHub uses GitHub identity and source attribution to connect packages to their
 publishers.
 
-* Make sure you are signed in with the GitHub account that owns or can publish
+- Make sure you are signed in with the GitHub account that owns or can publish
   the package.
-* Check that the source URL is public or accessible to ClawHub.
-* For GitHub sources, use `owner/repo`, `owner/repo@ref`, or a full GitHub URL.
+- Check that the source URL is public or accessible to ClawHub.
+- For GitHub sources, use `owner/repo`, `owner/repo@ref`, or a full GitHub URL.
 
 ## `sync` says no skills were found
 
@@ -92,13 +93,13 @@ publishers.
 
 Point it at the roots you want to scan:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub sync --root /path/to/skills
 ```
 
 Preview first if you are unsure what will publish:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub sync --all --dry-run --no-input
 ```
 
@@ -106,34 +107,34 @@ clawhub sync --all --dry-run --no-input
 
 The local files do not match any version ClawHub knows about. Choose one:
 
-* Keep local edits and skip the update.
-* Overwrite with the published version:
+- Keep local edits and skip the update.
+- Overwrite with the published version:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub update <slug> --force
 ```
 
-* Publish your edited copy as a new slug or fork.
+- Publish your edited copy as a new slug or fork.
 
 ## A plugin install fails in OpenClaw
 
-* Use an explicit ClawHub source:
+- Use an explicit ClawHub source:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install clawhub:<package>
 ```
 
-* Check the package detail page for scan status and compatibility metadata.
-* Confirm your OpenClaw version satisfies the package's advertised
+- Check the package detail page for scan status and compatibility metadata.
+- Confirm your OpenClaw version satisfies the package's advertised
   compatibility range.
-* If the package is hidden, held, or blocked, it may not be installable until
+- If the package is hidden, held, or blocked, it may not be installable until
   the owner resolves the issue.
 
 ## Public API requests fail
 
-* Respect `429` retry headers and cache public list/search responses.
-* Link users back to the canonical ClawHub listing.
-* Do not mirror hidden, private, held, or moderation-blocked content outside the
+- Respect `429` retry headers and cache public list/search responses.
+- Link users back to the canonical ClawHub listing.
+- Do not mirror hidden, private, held, or moderation-blocked content outside the
   public API surface.
 
 See [HTTP API](/clawhub/http-api) for endpoint details.

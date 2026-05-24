@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# SenseAudio
+---
+summary: "SenseAudio batch speech-to-text for inbound voice notes"
+read_when:
+  - You want SenseAudio speech-to-text for audio attachments
+  - You need the SenseAudio API key env var or audio config path
+title: "SenseAudio"
+---
 
 SenseAudio can transcribe inbound audio and voice-note attachments through OpenClaw's shared `tools.media.audio` pipeline. OpenClaw posts multipart audio to the OpenAI-compatible transcription endpoint and injects the returned text as `{{Transcript}}` plus an `[Audio]` block.
 
@@ -21,13 +23,12 @@ SenseAudio can transcribe inbound audio and voice-note attachments through OpenC
 
 <Steps>
   <Step title="Set your API key">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     export SENSEAUDIO_API_KEY="..."
     ```
   </Step>
-
   <Step title="Enable the audio provider">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       tools: {
         media: {
@@ -40,7 +41,6 @@ SenseAudio can transcribe inbound audio and voice-note attachments through OpenC
     }
     ```
   </Step>
-
   <Step title="Send a voice note">
     Send an audio message through any connected channel. OpenClaw uploads the
     audio to SenseAudio and uses the transcript in the reply pipeline.
@@ -58,11 +58,11 @@ SenseAudio can transcribe inbound audio and voice-note attachments through OpenC
 | `headers`  | `tools.media.audio.request.headers`   | Extra request headers               |
 
 <Note>
-  SenseAudio is batch STT only in OpenClaw. Voice Call realtime transcription
-  continues to use providers with streaming STT support.
+SenseAudio is batch STT only in OpenClaw. Voice Call realtime transcription
+continues to use providers with streaming STT support.
 </Note>
 
 ## Related
 
-* [Media understanding (audio)](/nodes/audio)
-* [Model providers](/concepts/model-providers)
+- [Media understanding (audio)](/nodes/audio)
+- [Model providers](/concepts/model-providers)

@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Flows (redirect)
+---
+summary: "Redirect: flow commands live under `openclaw tasks flow`"
+read_when:
+  - You encounter `openclaw flows` in older docs or release notes
+  - You want a quick TaskFlow inspection reference
+title: "Flows (redirect)"
+---
 
 # `openclaw tasks flow`
 
@@ -10,7 +12,7 @@ There is no top-level `openclaw flows` command. Durable TaskFlow inspection live
 
 ## Subcommands
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw tasks flow list   [--json] [--status <name>]
 openclaw tasks flow show   <lookup> [--json]
 openclaw tasks flow cancel <lookup>
@@ -32,7 +34,7 @@ openclaw tasks flow cancel <lookup>
 
 ## Examples
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw tasks flow list
 openclaw tasks flow list --status running
 openclaw tasks flow list --json
@@ -45,6 +47,6 @@ For full TaskFlow concepts and authoring see [TaskFlow](/automation/taskflow). F
 
 ## Related
 
-* [CLI reference](/cli)
-* [Automation](/automation)
-* [TaskFlow](/automation/taskflow)
+- [CLI reference](/cli)
+- [Automation](/automation)
+- [TaskFlow](/automation/taskflow)

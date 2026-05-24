@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Completion
+---
+summary: "CLI reference for `openclaw completion` (generate/install shell completion scripts)"
+read_when:
+  - You want shell completions for zsh/bash/fish/PowerShell
+  - You need to cache completion scripts under OpenClaw state
+title: "Completion"
+---
 
 # `openclaw completion`
 
@@ -10,7 +12,7 @@ Generate shell completion scripts and optionally install them into your shell pr
 
 ## Usage
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw completion
 openclaw completion --shell zsh
 openclaw completion --install
@@ -21,17 +23,17 @@ openclaw completion --shell bash --write-state
 
 ## Options
 
-* `-s, --shell <shell>`: shell target (`zsh`, `bash`, `powershell`, `fish`; default: `zsh`)
-* `-i, --install`: install completion by adding a source line to your shell profile
-* `--write-state`: write completion script(s) to `$OPENCLAW_STATE_DIR/completions` without printing to stdout
-* `-y, --yes`: skip install confirmation prompts
+- `-s, --shell <shell>`: shell target (`zsh`, `bash`, `powershell`, `fish`; default: `zsh`)
+- `-i, --install`: install completion by adding a source line to your shell profile
+- `--write-state`: write completion script(s) to `$OPENCLAW_STATE_DIR/completions` without printing to stdout
+- `-y, --yes`: skip install confirmation prompts
 
 ## Notes
 
-* `--install` writes a small "OpenClaw Completion" block into your shell profile and points it at the cached script.
-* Without `--install` or `--write-state`, the command prints the script to stdout.
-* Completion generation eagerly loads command trees so nested subcommands are included.
+- `--install` writes a small "OpenClaw Completion" block into your shell profile and points it at the cached script.
+- Without `--install` or `--write-state`, the command prints the script to stdout.
+- Completion generation eagerly loads command trees so nested subcommands are included.
 
 ## Related
 
-* [CLI reference](/cli)
+- [CLI reference](/cli)

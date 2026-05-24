@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Channel troubleshooting
+---
+summary: "Fast channel level troubleshooting with per channel failure signatures and fixes"
+read_when:
+  - Channel transport says connected but replies fail
+  - You need channel specific checks before deep provider docs
+title: "Channel troubleshooting"
+---
 
 Use this page when a channel connects but behavior is wrong.
 
@@ -10,7 +12,7 @@ Use this page when a channel connects but behavior is wrong.
 
 Run these in order first:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw status
 openclaw gateway status
 openclaw logs --follow
@@ -20,24 +22,25 @@ openclaw channels status --probe
 
 Healthy baseline:
 
-* `Runtime: running`
-* `Connectivity probe: ok`
-* `Capability: read-only`, `write-capable`, or `admin-capable`
-* Channel probe shows transport connected and, where supported, `works` or `audit ok`
+- `Runtime: running`
+- `Connectivity probe: ok`
+- `Capability: read-only`, `write-capable`, or `admin-capable`
+- Channel probe shows transport connected and, where supported, `works` or `audit ok`
 
 ## After an update
 
 Use this when Telegram, iMessage, BlueBubbles-era configs, or another plugin
 channel disappears after updating.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw status --all
 openclaw doctor --fix
 openclaw gateway restart
 openclaw status --all
 ```
 
-Look for `plugin load failed: dependency tree corrupted; run openclaw doctor --fix` in `openclaw status --all`. That means the channel is configured, but
+Look for `plugin load failed: dependency tree corrupted; run openclaw doctor
+--fix` in `openclaw status --all`. That means the channel is configured, but
 the plugin setup/load path hit a corrupt dependency tree instead of registering
 the channel. `openclaw doctor --fix` removes stale plugin dependency staging
 directories and stale auth shadows, then `openclaw gateway restart` reloads the
@@ -53,6 +56,7 @@ clean state.
 | Group messages ignored              | Check `requireMention` + mention patterns in config | Mention the bot or relax mention policy for that group.                                                                          |
 | QR login times out with 408         | Check gateway `HTTPS_PROXY` / `HTTP_PROXY` env      | Set a reachable proxy; use `NO_PROXY` only for bypasses.                                                                         |
 | Random disconnect/relogin loops     | `openclaw channels status --probe` + logs           | Recent reconnects are flagged even when currently connected; watch logs, restart the gateway, then relink if flapping continues. |
+| `status=408 Request Time-out` loop  | Probe, logs, doctor, then gateway status            | Fix host connectivity/timing first; back up auth and re-link the account if the loop persists.                                   |
 | Replies arrive seconds/minutes late | `openclaw doctor --fix`                             | Doctor stops verified stale local TUI clients when they are degrading the Gateway event loop.                                    |
 
 Full troubleshooting: [WhatsApp troubleshooting](/channels/whatsapp#troubleshooting)
@@ -110,7 +114,7 @@ Full troubleshooting: [Slack troubleshooting](/channels/slack#troubleshooting)
 
 Full troubleshooting:
 
-* [iMessage troubleshooting](/channels/imessage#troubleshooting)
+- [iMessage troubleshooting](/channels/imessage#troubleshooting)
 
 ## Signal
 
@@ -153,6 +157,6 @@ Full setup and config: [Matrix](/channels/matrix)
 
 ## Related
 
-* [Pairing](/channels/pairing)
-* [Channel routing](/channels/channel-routing)
-* [Gateway troubleshooting](/gateway/troubleshooting)
+- [Pairing](/channels/pairing)
+- [Channel routing](/channels/channel-routing)
+- [Gateway troubleshooting](/gateway/troubleshooting)

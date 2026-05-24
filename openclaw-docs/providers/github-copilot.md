@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# GitHub Copilot
+---
+summary: "Sign in to GitHub Copilot from OpenClaw using the device flow or non-interactive token import"
+read_when:
+  - You want to use GitHub Copilot as a model provider
+  - You need the `openclaw models auth login-github-copilot` flow
+title: "GitHub Copilot"
+---
 
 GitHub Copilot is GitHub's AI coding assistant. It provides access to Copilot
 models for your GitHub account and plan. OpenClaw can use Copilot as a model
@@ -18,22 +20,21 @@ provider in two different ways.
 
     <Steps>
       <Step title="Run the login command">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw models auth login-github-copilot
         ```
 
         You will be prompted to visit a URL and enter a one-time code. Keep the
         terminal open until it completes.
       </Step>
-
       <Step title="Set a default model">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw models set github-copilot/claude-opus-4.7
         ```
 
         Or in config:
 
-        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```json5
         {
           agents: {
             defaults: { model: { primary: "github-copilot/claude-opus-4.7" } },
@@ -42,6 +43,7 @@ provider in two different ways.
         ```
       </Step>
     </Steps>
+
   </Tab>
 
   <Tab title="Copilot Proxy plugin (copilot-proxy)">
@@ -49,9 +51,10 @@ provider in two different ways.
     the proxy's `/v1` endpoint and uses the model list you configure there.
 
     <Note>
-      Choose this when you already run Copilot Proxy in VS Code or need to route
-      through it. You must enable the plugin and keep the VS Code extension running.
+    Choose this when you already run Copilot Proxy in VS Code or need to route
+    through it. You must enable the plugin and keep the VS Code extension running.
     </Note>
+
   </Tab>
 </Tabs>
 
@@ -62,7 +65,7 @@ provider in two different ways.
 | `--yes`         | Skip the confirmation prompt                        |
 | `--set-default` | Also apply the provider's recommended default model |
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Skip confirmation
 openclaw models auth login-github-copilot --yes
 
@@ -75,7 +78,7 @@ openclaw models auth login --provider github-copilot --method device --set-defau
 If you already have a GitHub OAuth access token for Copilot, import it during
 headless setup with `openclaw onboard --non-interactive`:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard --non-interactive --accept-risk \
   --auth-choice github-copilot \
   --github-copilot-token "$COPILOT_GITHUB_TOKEN" \
@@ -96,7 +99,9 @@ back to `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`, then `GITHUB_TOKEN`. Use
 
   <Accordion title="Model availability depends on your plan">
     Copilot model availability depends on your GitHub plan. If a model is
-    rejected, try another ID (for example `github-copilot/gpt-4.1`).
+    rejected, try another ID (for example `github-copilot/gpt-5.5`). See
+    GitHub's [supported models per Copilot plan](https://docs.github.com/en/copilot/reference/ai-models/supported-models#supported-ai-models-per-copilot-plan)
+    for the current model list.
   </Accordion>
 
   <Accordion title="Live catalog refresh from the Copilot API">
@@ -114,7 +119,7 @@ back to `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`, then `GITHUB_TOKEN`. Use
     fails, or the `/models` HTTPS call errors. To opt out and rely entirely
     on the static manifest catalog (offline / air-gapped scenarios):
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       plugins: {
         entries: {
@@ -125,6 +130,7 @@ back to `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`, then `GITHUB_TOKEN`. Use
       },
     }
     ```
+
   </Accordion>
 
   <Accordion title="Transport selection">
@@ -144,16 +150,17 @@ back to `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`, then `GITHUB_TOKEN`. Use
     OpenClaw resolves Copilot auth from environment variables in the following
     priority order:
 
-    | Priority | Variable               | Notes                              |
-    | -------- | ---------------------- | ---------------------------------- |
+    | Priority | Variable              | Notes                            |
+    | -------- | --------------------- | -------------------------------- |
     | 1        | `COPILOT_GITHUB_TOKEN` | Highest priority, Copilot-specific |
-    | 2        | `GH_TOKEN`             | GitHub CLI token (fallback)        |
-    | 3        | `GITHUB_TOKEN`         | Standard GitHub token (lowest)     |
+    | 2        | `GH_TOKEN`            | GitHub CLI token (fallback)      |
+    | 3        | `GITHUB_TOKEN`        | Standard GitHub token (lowest)   |
 
     When multiple variables are set, OpenClaw uses the highest-priority one.
     The device-login flow (`openclaw models auth login-github-copilot`) stores
     its token in the auth profile store and takes precedence over all environment
     variables.
+
   </Accordion>
 
   <Accordion title="Token storage">
@@ -164,8 +171,8 @@ back to `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`, then `GITHUB_TOKEN`. Use
 </AccordionGroup>
 
 <Warning>
-  The device-login command requires an interactive TTY. Use non-interactive
-  onboarding when you need headless setup.
+The device-login command requires an interactive TTY. Use non-interactive
+onboarding when you need headless setup.
 </Warning>
 
 ## Memory search embeddings
@@ -183,7 +190,7 @@ embedding models from the Copilot API and picks the best one automatically.
 
 ### Explicit config
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -214,7 +221,6 @@ available, OpenClaw skips Copilot and tries the next provider.
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="OAuth and auth" href="/gateway/authentication" icon="key">
     Auth details and credential reuse rules.
   </Card>

@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# DuckDuckGo plugin
+---
+summary: "Adds web search provider support."
+read_when:
+  - You are installing, configuring, or auditing the duckduckgo plugin
+title: "DuckDuckGo plugin"
+---
 
 # DuckDuckGo plugin
 
@@ -10,8 +11,8 @@ Adds web search provider support.
 
 ## Distribution
 
-* Package: `@openclaw/duckduckgo-plugin`
-* Install route: included in OpenClaw
+- Package: `@openclaw/duckduckgo-plugin`
+- Install route: included in OpenClaw
 
 ## Surface
 
@@ -19,4 +20,4 @@ contracts: webSearchProviders
 
 ## Related docs
 
-* [duckduckgo](/tools/duckduckgo-search)
+- [duckduckgo](/tools/duckduckgo-search)

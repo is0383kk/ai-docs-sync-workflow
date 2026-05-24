@@ -1,17 +1,18 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
+---
+summary: "Inworld streaming text-to-speech (MP3, OGG_OPUS, PCM telephony)."
+read_when:
+  - You are installing, configuring, or auditing the inworld plugin
+title: "Inworld plugin"
+---
 
 # Inworld plugin
 
-# Inworld plugin
-
-Inworld streaming text-to-speech (MP3, OGG\_OPUS, PCM telephony).
+Inworld streaming text-to-speech (MP3, OGG_OPUS, PCM telephony).
 
 ## Distribution
 
-* Package: `@openclaw/inworld-speech`
-* Install route: included in OpenClaw
+- Package: `@openclaw/inworld-speech`
+- Install route: included in OpenClaw
 
 ## Surface
 
@@ -19,4 +20,4 @@ contracts: speechProviders
 
 ## Related docs
 
-* [inworld](/providers/inworld)
+- [inworld](/providers/inworld)

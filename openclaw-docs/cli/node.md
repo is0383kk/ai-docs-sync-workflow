@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Node
+---
+summary: "CLI reference for `openclaw node` (headless node host)"
+read_when:
+  - Running the headless node host
+  - Pairing a non-macOS node for system.run
+title: "Node"
+---
 
 # `openclaw node`
 
@@ -16,9 +18,9 @@ network without installing a full macOS companion app there.
 
 Common use cases:
 
-* Run commands on remote Linux/Windows boxes (build servers, lab machines, NAS).
-* Keep exec **sandboxed** on the gateway, but delegate approved runs to other hosts.
-* Provide a lightweight, headless execution target for automation or CI nodes.
+- Run commands on remote Linux/Windows boxes (build servers, lab machines, NAS).
+- Keep exec **sandboxed** on the gateway, but delegate approved runs to other hosts.
+- Provide a lightweight, headless execution target for automation or CI nodes.
 
 Execution is still guarded by **exec approvals** and per-agent allowlists on the
 node host, so you can keep command access scoped and explicit.
@@ -36,7 +38,7 @@ create/delete routes are blocked through the proxy.
 
 Disable it on the node if needed:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   nodeHost: {
     browserProxy: {
@@ -48,29 +50,29 @@ Disable it on the node if needed:
 
 ## Run (foreground)
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw node run --host <gateway-host> --port 18789
 ```
 
 Options:
 
-* `--host <host>`: Gateway WebSocket host (default: `127.0.0.1`)
-* `--port <port>`: Gateway WebSocket port (default: `18789`)
-* `--tls`: Use TLS for the gateway connection
-* `--tls-fingerprint <sha256>`: Expected TLS certificate fingerprint (sha256)
-* `--node-id <id>`: Override node id (clears pairing token)
-* `--display-name <name>`: Override the node display name
+- `--host <host>`: Gateway WebSocket host (default: `127.0.0.1`)
+- `--port <port>`: Gateway WebSocket port (default: `18789`)
+- `--tls`: Use TLS for the gateway connection
+- `--tls-fingerprint <sha256>`: Expected TLS certificate fingerprint (sha256)
+- `--node-id <id>`: Override node id (clears pairing token)
+- `--display-name <name>`: Override the node display name
 
 ## Gateway auth for node host
 
 `openclaw node run` and `openclaw node install` resolve gateway auth from config/env (no `--token`/`--password` flags on node commands):
 
-* `OPENCLAW_GATEWAY_TOKEN` / `OPENCLAW_GATEWAY_PASSWORD` are checked first.
-* Then local config fallback: `gateway.auth.token` / `gateway.auth.password`.
-* In local mode, node host intentionally does not inherit `gateway.remote.token` / `gateway.remote.password`.
-* If `gateway.auth.token` / `gateway.auth.password` is explicitly configured via SecretRef and unresolved, node auth resolution fails closed (no remote fallback masking).
-* In `gateway.mode=remote`, remote client fields (`gateway.remote.token` / `gateway.remote.password`) are also eligible per remote precedence rules.
-* Node host auth resolution only honors `OPENCLAW_GATEWAY_*` env vars.
+- `OPENCLAW_GATEWAY_TOKEN` / `OPENCLAW_GATEWAY_PASSWORD` are checked first.
+- Then local config fallback: `gateway.auth.token` / `gateway.auth.password`.
+- In local mode, node host intentionally does not inherit `gateway.remote.token` / `gateway.remote.password`.
+- If `gateway.auth.token` / `gateway.auth.password` is explicitly configured via SecretRef and unresolved, node auth resolution fails closed (no remote fallback masking).
+- In `gateway.mode=remote`, remote client fields (`gateway.remote.token` / `gateway.remote.password`) are also eligible per remote precedence rules.
+- Node host auth resolution only honors `OPENCLAW_GATEWAY_*` env vars.
 
 For a node connecting to a plaintext `ws://` Gateway, loopback, private IP
 literals, `.local`, and Tailnet `*.ts.net` hosts are accepted. For other
@@ -85,24 +87,24 @@ present in the install command environment.
 
 Install a headless node host as a user service.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw node install --host <gateway-host> --port 18789
 ```
 
 Options:
 
-* `--host <host>`: Gateway WebSocket host (default: `127.0.0.1`)
-* `--port <port>`: Gateway WebSocket port (default: `18789`)
-* `--tls`: Use TLS for the gateway connection
-* `--tls-fingerprint <sha256>`: Expected TLS certificate fingerprint (sha256)
-* `--node-id <id>`: Override node id (clears pairing token)
-* `--display-name <name>`: Override the node display name
-* `--runtime <runtime>`: Service runtime (`node` or `bun`)
-* `--force`: Reinstall/overwrite if already installed
+- `--host <host>`: Gateway WebSocket host (default: `127.0.0.1`)
+- `--port <port>`: Gateway WebSocket port (default: `18789`)
+- `--tls`: Use TLS for the gateway connection
+- `--tls-fingerprint <sha256>`: Expected TLS certificate fingerprint (sha256)
+- `--node-id <id>`: Override node id (clears pairing token)
+- `--display-name <name>`: Override the node display name
+- `--runtime <runtime>`: Service runtime (`node` or `bun`)
+- `--force`: Reinstall/overwrite if already installed
 
 Manage the service:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw node status
 openclaw node start
 openclaw node stop
@@ -125,7 +127,7 @@ flow so the pending request can be approved.
 The first connection creates a pending device pairing request (`role: node`) on the Gateway.
 Approve it via:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw devices list
 openclaw devices approve <requestId>
 ```
@@ -133,7 +135,7 @@ openclaw devices approve <requestId>
 On tightly controlled node networks, the Gateway operator can explicitly opt in
 to auto-approving first-time node pairing from trusted CIDRs:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   gateway: {
     nodes: {
@@ -160,9 +162,9 @@ The node host stores its node id, token, display name, and gateway connection in
 
 `system.run` is gated by local exec approvals:
 
-* `~/.openclaw/exec-approvals.json`
-* [Exec approvals](/tools/exec-approvals)
-* `openclaw approvals --node <id|name|ip>` (edit from the Gateway)
+- `~/.openclaw/exec-approvals.json`
+- [Exec approvals](/tools/exec-approvals)
+- `openclaw approvals --node <id|name|ip>` (edit from the Gateway)
 
 For approved async node exec, OpenClaw prepares a canonical `systemRunPlan`
 before prompting. The later approved `system.run` forward reuses that stored
@@ -171,5 +173,5 @@ created are rejected instead of changing what the node executes.
 
 ## Related
 
-* [CLI reference](/cli)
-* [Nodes](/nodes)
+- [CLI reference](/cli)
+- [Nodes](/nodes)

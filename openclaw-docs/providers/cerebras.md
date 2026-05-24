@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Cerebras
+---
+summary: "Cerebras setup (auth + model selection)"
+title: "Cerebras"
+read_when:
+  - You want to use Cerebras with OpenClaw
+  - You need the Cerebras API key env var or CLI auth choice
+---
 
 [Cerebras](https://www.cerebras.ai) provides high-speed OpenAI-compatible inference on custom inference hardware. OpenClaw includes a bundled Cerebras provider plugin with a static four-model catalog.
 
@@ -23,37 +25,39 @@
   <Step title="Get an API key">
     Create an API key in the [Cerebras Cloud Console](https://cloud.cerebras.ai).
   </Step>
-
   <Step title="Run onboarding">
     <CodeGroup>
-      ```bash Onboarding theme={"theme":{"light":"min-light","dark":"min-dark"}}
-      openclaw onboard --auth-choice cerebras-api-key
-      ```
 
-      ```bash Direct flag theme={"theme":{"light":"min-light","dark":"min-dark"}}
-      openclaw onboard --non-interactive \
-        --auth-choice cerebras-api-key \
-        --cerebras-api-key "$CEREBRAS_API_KEY"
-      ```
+```bash Onboarding
+openclaw onboard --auth-choice cerebras-api-key
+```
 
-      ```bash Env only theme={"theme":{"light":"min-light","dark":"min-dark"}}
-      export CEREBRAS_API_KEY=csk-...
-      ```
+```bash Direct flag
+openclaw onboard --non-interactive \
+  --auth-choice cerebras-api-key \
+  --cerebras-api-key "$CEREBRAS_API_KEY"
+```
+
+```bash Env only
+export CEREBRAS_API_KEY=csk-...
+```
+
     </CodeGroup>
-  </Step>
 
+  </Step>
   <Step title="Verify models are available">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw models list --provider cerebras
     ```
 
     The list should include all four bundled models. If `CEREBRAS_API_KEY` is unresolved, `openclaw models status --json` reports the missing credential under `auth.unusableProfiles`.
+
   </Step>
 </Steps>
 
 ## Non-interactive setup
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard --non-interactive \
   --mode local \
   --auth-choice cerebras-api-key \
@@ -79,7 +83,7 @@ OpenClaw ships a static Cerebras catalog that mirrors the public OpenAI-compatib
 
 The bundled plugin usually means you only need the API key. Use explicit `models.providers.cerebras` config when you want to override model metadata or run in `mode: "merge"` against the static catalog:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   env: { CEREBRAS_API_KEY: "csk-..." },
   agents: {
@@ -114,15 +118,12 @@ The bundled plugin usually means you only need the API key. Use explicit `models
   <Card title="Model providers" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Thinking modes" href="/tools/thinking" icon="brain">
     Reasoning effort levels for the two reasoning-capable Cerebras models.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/config-agents#agent-defaults" icon="gear">
     Agent defaults and model configuration.
   </Card>
-
   <Card title="Models FAQ" href="/help/faq-models" icon="circle-question">
     Auth profiles, switching models, and resolving "no profile" errors.
   </Card>

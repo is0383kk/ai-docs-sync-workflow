@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# BTW side questions
+---
+summary: "Ephemeral side questions with /btw"
+read_when:
+  - You want to ask a quick side question about the current session
+  - You are implementing or debugging BTW behavior across clients
+title: "BTW side questions"
+---
 
 `/btw` lets you ask a quick side question about the **current session** without
 turning that question into normal conversation history. `/side` is an alias.
@@ -14,7 +16,7 @@ Gateway and multi-channel architecture.
 
 When you send:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 /btw what changed?
 ```
 
@@ -29,11 +31,11 @@ OpenClaw:
 
 The important mental model is:
 
-* same session context
-* separate one-shot side query
-* same native harness transport when the session uses a native harness
-* no future context pollution
-* no transcript persistence
+- same session context
+- separate one-shot side query
+- same native harness transport when the session uses a native harness
+- no future context pollution
+- no transcript persistence
 
 For Codex harness sessions, BTW stays inside Codex by forking the active
 app-server thread as an ephemeral side thread. That keeps Codex OAuth and native
@@ -47,11 +49,11 @@ keep the older direct one-shot path.
 
 `/btw` does **not**:
 
-* create a new durable session,
-* continue the unfinished main task,
-* write BTW question/answer data to transcript history,
-* appear in `chat.history`,
-* survive a reload.
+- create a new durable session,
+- continue the unfinished main task,
+- write BTW question/answer data to transcript history,
+- appear in `chat.history`,
+- survive a reload.
 
 It is intentionally **ephemeral**.
 
@@ -63,9 +65,9 @@ If the main run is currently active, OpenClaw snapshots the current message
 state and includes the in-flight main prompt as background context, while
 explicitly telling the model:
 
-* answer only the side question,
-* do not resume or complete the unfinished main task,
-* do not steer the parent conversation.
+- answer only the side question,
+- do not resume or complete the unfinished main task,
+- do not steer the parent conversation.
 
 That keeps BTW isolated from the main run while still making it aware of what
 the session is about.
@@ -76,8 +78,8 @@ BTW is **not** delivered as a normal assistant transcript message.
 
 At the Gateway protocol level:
 
-* normal assistant chat uses the `chat` event
-* BTW uses the `chat.side_result` event
+- normal assistant chat uses the `chat` event
+- BTW uses the `chat.side_result` event
 
 This separation is intentional. If BTW reused the normal `chat` event path,
 clients would treat it like regular conversation history.
@@ -92,9 +94,9 @@ Because BTW uses a separate live event and is not replayed from
 In TUI, BTW is rendered inline in the current session view, but it remains
 ephemeral:
 
-* visibly distinct from a normal assistant reply
-* dismissible with `Enter` or `Esc`
-* not replayed on reload
+- visibly distinct from a normal assistant reply
+- dismissible with `Enter` or `Esc`
+- not replayed on reload
 
 ### External channels
 
@@ -118,13 +120,13 @@ a complete browser UX.
 
 Use `/btw` when you want:
 
-* a quick clarification about the current work,
-* a factual side answer while a long run is still in progress,
-* a temporary answer that should not become part of future session context.
+- a quick clarification about the current work,
+- a factual side answer while a long run is still in progress,
+- a temporary answer that should not become part of future session context.
 
 Examples:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 /btw what file are we editing?
 /side what changed while the main run continued?
 /btw what does this error mean?
@@ -145,15 +147,12 @@ In that case, ask normally in the main session instead of using BTW.
   <Card title="Slash commands" href="/tools/slash-commands" icon="terminal">
     Native command catalog and chat directives.
   </Card>
-
   <Card title="Thinking levels" href="/tools/thinking" icon="brain">
     Reasoning effort levels for the side-question model call.
   </Card>
-
   <Card title="Session" href="/concepts/session" icon="comments">
     Session keys, history, and persistence semantics.
   </Card>
-
   <Card title="Steer command" href="/tools/steer" icon="arrow-right">
     Inject a steering message into the active run without ending it.
   </Card>

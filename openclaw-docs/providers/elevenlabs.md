@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# ElevenLabs
+---
+summary: "Use ElevenLabs speech, Scribe STT, and realtime transcription with OpenClaw"
+read_when:
+  - You want ElevenLabs text-to-speech in OpenClaw
+  - You want ElevenLabs Scribe speech-to-text for audio attachments
+  - You want ElevenLabs realtime transcription for Voice Call or Google Meet
+title: "ElevenLabs"
+---
 
 OpenClaw uses ElevenLabs for text-to-speech, batch speech-to-text with Scribe
 v2, and streaming STT with Scribe v2 Realtime.
@@ -18,13 +21,13 @@ v2, and streaming STT with Scribe v2 Realtime.
 Set `ELEVENLABS_API_KEY` in the environment. `XI_API_KEY` is also accepted for
 compatibility with existing ElevenLabs tooling.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export ELEVENLABS_API_KEY="..."
 ```
 
 ## Text-to-speech
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   messages: {
     tts: {
@@ -54,7 +57,7 @@ omits that parameter for `eleven_v3`, which rejects it.
 
 Use Scribe v2 for inbound audio attachments and short recorded voice segments:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     media: {
@@ -84,7 +87,7 @@ Google Meet agent-mode streaming transcription.
 | Commit strategy | `...elevenlabs.commitStrategy`                                            | `vad`                                             |
 | Language        | `...elevenlabs.languageCode`                                              | (unset)                                           |
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -110,9 +113,9 @@ Google Meet agent-mode streaming transcription.
 ```
 
 <Note>
-  Voice Call receives Twilio media as 8 kHz G.711 u-law. The ElevenLabs realtime
-  provider defaults to `ulaw_8000`, so telephony frames can be forwarded without
-  transcoding.
+Voice Call receives Twilio media as 8 kHz G.711 u-law. The ElevenLabs realtime
+provider defaults to `ulaw_8000`, so telephony frames can be forwarded without
+transcoding.
 </Note>
 
 For Google Meet agent mode, set
@@ -122,6 +125,6 @@ For Google Meet agent mode, set
 
 ## Related
 
-* [Text-to-speech](/tools/tts)
-* [Google Meet](/plugins/google-meet)
-* [Model selection](/concepts/model-providers)
+- [Text-to-speech](/tools/tts)
+- [Google Meet](/plugins/google-meet)
+- [Model selection](/concepts/model-providers)

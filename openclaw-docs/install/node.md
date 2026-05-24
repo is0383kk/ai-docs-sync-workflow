@@ -1,14 +1,17 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Node.js
+---
+summary: "Install and configure Node.js for OpenClaw - version requirements, install options, and PATH troubleshooting"
+title: "Node.js"
+read_when:
+  - "You need to install Node.js before installing OpenClaw"
+  - "You installed OpenClaw but `openclaw` is command not found"
+  - "npm install -g fails with permissions or PATH issues"
+---
 
 OpenClaw requires **Node 22.19 or newer**. **Node 24 is the default and recommended runtime** for installs, CI, and release workflows. Node 22 remains supported via the active LTS line. The [installer script](/install#alternative-install-methods) will detect and install Node automatically - this page is for when you want to set up Node yourself and make sure everything is wired up correctly (versions, PATH, global installs).
 
 ## Check your version
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 node -v
 ```
 
@@ -20,63 +23,64 @@ If this prints `v24.x.x` or higher, you're on the recommended default. If it pri
   <Tab title="macOS">
     **Homebrew** (recommended):
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     brew install node
     ```
 
     Or download the macOS installer from [nodejs.org](https://nodejs.org/).
-  </Tab>
 
+  </Tab>
   <Tab title="Linux">
     **Ubuntu / Debian:**
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
     sudo apt-get install -y nodejs
     ```
 
     **Fedora / RHEL:**
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     sudo dnf install nodejs
     ```
 
     Or use a version manager (see below).
-  </Tab>
 
+  </Tab>
   <Tab title="Windows">
     **winget** (recommended):
 
-    ```powershell theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```powershell
     winget install OpenJS.NodeJS.LTS
     ```
 
     **Chocolatey:**
 
-    ```powershell theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```powershell
     choco install nodejs-lts
     ```
 
     Or download the Windows installer from [nodejs.org](https://nodejs.org/).
+
   </Tab>
 </Tabs>
 
 <Accordion title="Using a version manager (nvm, fnm, mise, asdf)">
   Version managers let you switch between Node versions easily. Popular options:
 
-  * [**fnm**](https://github.com/Schniz/fnm) - fast, cross-platform
-  * [**nvm**](https://github.com/nvm-sh/nvm) - widely used on macOS/Linux
-  * [**mise**](https://mise.jdx.dev/) - polyglot (Node, Python, Ruby, etc.)
+- [**fnm**](https://github.com/Schniz/fnm) - fast, cross-platform
+- [**nvm**](https://github.com/nvm-sh/nvm) - widely used on macOS/Linux
+- [**mise**](https://mise.jdx.dev/) - polyglot (Node, Python, Ruby, etc.)
 
-  Example with fnm:
+Example with fnm:
 
-  ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
-  fnm install 24
-  fnm use 24
-  ```
+```bash
+fnm install 24
+fnm use 24
+```
 
   <Warning>
-    Make sure your version manager is initialized in your shell startup file (`~/.zshrc` or `~/.bashrc`). If it isn't, `openclaw` may not be found in new terminal sessions because the PATH won't include Node's bin directory.
+  Make sure your version manager is initialized in your shell startup file (`~/.zshrc` or `~/.bashrc`). If it isn't, `openclaw` may not be found in new terminal sessions because the PATH won't include Node's bin directory.
   </Warning>
 </Accordion>
 
@@ -88,35 +92,34 @@ This almost always means npm's global bin directory isn't on your PATH.
 
 <Steps>
   <Step title="Find your global npm prefix">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     npm prefix -g
     ```
   </Step>
-
   <Step title="Check if it's on your PATH">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     echo "$PATH"
     ```
 
     Look for `<npm-prefix>/bin` (macOS/Linux) or `<npm-prefix>` (Windows) in the output.
-  </Step>
 
+  </Step>
   <Step title="Add it to your shell startup file">
     <Tabs>
       <Tab title="macOS / Linux">
         Add to `~/.zshrc` or `~/.bashrc`:
 
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         export PATH="$(npm prefix -g)/bin:$PATH"
         ```
 
         Then open a new terminal (or run `rehash` in zsh / `hash -r` in bash).
       </Tab>
-
       <Tab title="Windows">
         Add the output of `npm prefix -g` to your system PATH via Settings → System → Environment Variables.
       </Tab>
     </Tabs>
+
   </Step>
 </Steps>
 
@@ -124,7 +127,7 @@ This almost always means npm's global bin directory isn't on your PATH.
 
 If you see `EACCES` errors, switch npm's global prefix to a user-writable directory:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 mkdir -p "$HOME/.npm-global"
 npm config set prefix "$HOME/.npm-global"
 export PATH="$HOME/.npm-global/bin:$PATH"
@@ -134,6 +137,6 @@ Add the `export PATH=...` line to your `~/.bashrc` or `~/.zshrc` to make it perm
 
 ## Related
 
-* [Install Overview](/install) - all installation methods
-* [Updating](/install/updating) - keeping OpenClaw up to date
-* [Getting Started](/start/getting-started) - first steps after install
+- [Install Overview](/install) - all installation methods
+- [Updating](/install/updating) - keeping OpenClaw up to date
+- [Getting Started](/start/getting-started) - first steps after install

@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Wiki
+---
+summary: "CLI reference for `openclaw wiki` (memory-wiki vault status, search, compile, lint, apply, bridge, and Obsidian helpers)"
+read_when:
+  - You want to use the memory-wiki CLI
+  - You are documenting or changing `openclaw wiki`
+title: "Wiki"
+---
 
 # `openclaw wiki`
 
@@ -12,23 +14,23 @@ Provided by the bundled `memory-wiki` plugin.
 
 Related:
 
-* [Memory Wiki plugin](/plugins/memory-wiki)
-* [Memory Overview](/concepts/memory)
-* [CLI: memory](/cli/memory)
+- [Memory Wiki plugin](/plugins/memory-wiki)
+- [Memory Overview](/concepts/memory)
+- [CLI: memory](/cli/memory)
 
 ## What it is for
 
 Use `openclaw wiki` when you want a compiled knowledge vault with:
 
-* wiki-native search and page reads
-* provenance-rich syntheses
-* contradiction and freshness reports
-* bridge imports from the active memory plugin
-* optional Obsidian CLI helpers
+- wiki-native search and page reads
+- provenance-rich syntheses
+- contradiction and freshness reports
+- bridge imports from the active memory plugin
+- optional Obsidian CLI helpers
 
 ## Common commands
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw wiki status
 openclaw wiki doctor
 openclaw wiki init
@@ -81,9 +83,9 @@ and bridge configs that do not read memory artifacts remain local/offline.
 
 Typical issues include:
 
-* bridge mode enabled without public memory artifacts
-* invalid or missing vault layout
-* missing external Obsidian CLI when Obsidian mode is expected
+- bridge mode enabled without public memory artifacts
+- invalid or missing vault layout
+- missing external Obsidian CLI when Obsidian mode is expected
 
 ### `wiki init`
 
@@ -98,9 +100,9 @@ Import content into the wiki source layer.
 
 Notes:
 
-* URL ingest is controlled by `ingest.allowUrlIngest`
-* imported source pages keep provenance in frontmatter
-* auto-compile can run after ingest when enabled
+- URL ingest is controlled by `ingest.allowUrlIngest`
+- imported source pages keep provenance in frontmatter
+- auto-compile can run after ingest when enabled
 
 ### `wiki compile`
 
@@ -108,8 +110,8 @@ Rebuild indexes, related blocks, dashboards, and compiled digests.
 
 This writes stable machine-facing artifacts under:
 
-* `.openclaw-wiki/cache/agent-digest.json`
-* `.openclaw-wiki/cache/claims.jsonl`
+- `.openclaw-wiki/cache/agent-digest.json`
+- `.openclaw-wiki/cache/claims.jsonl`
 
 If `render.createDashboards` is enabled, compile also refreshes report pages.
 
@@ -117,12 +119,12 @@ If `render.createDashboards` is enabled, compile also refreshes report pages.
 
 Lint the vault and report:
 
-* structural issues
-* provenance gaps
-* contradictions
-* open questions
-* low-confidence pages/claims
-* stale pages/claims
+- structural issues
+- provenance gaps
+- contradictions
+- open questions
+- low-confidence pages/claims
+- stale pages/claims
 
 Run this after meaningful wiki updates.
 
@@ -132,9 +134,9 @@ Search wiki content.
 
 Behavior depends on config:
 
-* `search.backend`: `shared` or `local`
-* `search.corpus`: `wiki`, `memory`, or `all`
-* `--mode`: `auto`, `find-person`, `route-question`, `source-evidence`, or
+- `search.backend`: `shared` or `local`
+- `search.corpus`: `wiki`, `memory`, or `all`
+- `--mode`: `auto`, `find-person`, `route-question`, `source-evidence`, or
   `raw-claim`
 
 Use `wiki search` when you want wiki-specific ranking or provenance details.
@@ -143,14 +145,14 @@ active memory plugin exposes shared search.
 
 Search modes help the agent choose the right surface:
 
-* `find-person`: aliases, handles, socials, canonical IDs, and person pages
-* `route-question`: ask-for/best-used-for hints and relationship context
-* `source-evidence`: source pages and structured evidence fields
-* `raw-claim`: structured claim text with claim/evidence metadata
+- `find-person`: aliases, handles, socials, canonical IDs, and person pages
+- `route-question`: ask-for/best-used-for hints and relationship context
+- `source-evidence`: source pages and structured evidence fields
+- `raw-claim`: structured claim text with claim/evidence metadata
 
 Examples:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw wiki search "bgroux" --mode find-person
 openclaw wiki search "who knows Teams rollout?" --mode route-question
 openclaw wiki search "maintainer-whois" --mode source-evidence
@@ -168,7 +170,7 @@ Read a wiki page by id or relative path.
 
 Examples:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw wiki get entity.alpha
 openclaw wiki get syntheses/alpha-summary.md --from 1 --lines 80
 ```
@@ -179,13 +181,13 @@ Apply narrow mutations without freeform page surgery.
 
 Supported flows include:
 
-* create/update a synthesis page
-* update page metadata
-* attach source ids
-* add questions
-* add contradictions
-* update confidence/status
-* write structured claims
+- create/update a synthesis page
+- update page metadata
+- attach source ids
+- add questions
+- add contradictions
+- update confidence/status
+- write structured claims
 
 This command exists so the wiki can evolve safely without manually editing
 managed blocks.
@@ -215,40 +217,40 @@ Obsidian helper commands for vaults running in Obsidian-friendly mode.
 
 Subcommands:
 
-* `status`
-* `search`
-* `open`
-* `command`
-* `daily`
+- `status`
+- `search`
+- `open`
+- `command`
+- `daily`
 
 These require the official `obsidian` CLI on `PATH` when
 `obsidian.useOfficialCli` is enabled.
 
 ## Practical usage guidance
 
-* Use `wiki search` + `wiki get` when provenance and page identity matter.
-* Use `wiki apply` instead of hand-editing managed generated sections.
-* Use `wiki lint` before trusting contradictory or low-confidence content.
-* Use `wiki compile` after bulk imports or source changes when you want fresh
+- Use `wiki search` + `wiki get` when provenance and page identity matter.
+- Use `wiki apply` instead of hand-editing managed generated sections.
+- Use `wiki lint` before trusting contradictory or low-confidence content.
+- Use `wiki compile` after bulk imports or source changes when you want fresh
   dashboards and compiled digests immediately.
-* Use `wiki bridge import` when bridge mode depends on newly exported memory
+- Use `wiki bridge import` when bridge mode depends on newly exported memory
   artifacts.
 
 ## Configuration tie-ins
 
 `openclaw wiki` behavior is shaped by:
 
-* `plugins.entries.memory-wiki.config.vaultMode`
-* `plugins.entries.memory-wiki.config.search.backend`
-* `plugins.entries.memory-wiki.config.search.corpus`
-* `plugins.entries.memory-wiki.config.bridge.*`
-* `plugins.entries.memory-wiki.config.obsidian.*`
-* `plugins.entries.memory-wiki.config.render.*`
-* `plugins.entries.memory-wiki.config.context.includeCompiledDigestPrompt`
+- `plugins.entries.memory-wiki.config.vaultMode`
+- `plugins.entries.memory-wiki.config.search.backend`
+- `plugins.entries.memory-wiki.config.search.corpus`
+- `plugins.entries.memory-wiki.config.bridge.*`
+- `plugins.entries.memory-wiki.config.obsidian.*`
+- `plugins.entries.memory-wiki.config.render.*`
+- `plugins.entries.memory-wiki.config.context.includeCompiledDigestPrompt`
 
 See [Memory Wiki plugin](/plugins/memory-wiki) for the full config model.
 
 ## Related
 
-* [CLI reference](/cli)
-* [Memory wiki](/plugins/memory-wiki)
+- [CLI reference](/cli)
+- [Memory wiki](/plugins/memory-wiki)

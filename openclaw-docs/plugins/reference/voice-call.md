@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Voice Call plugin
+---
+summary: "Adds agent-callable tools."
+read_when:
+  - You are installing, configuring, or auditing the voice-call plugin
+title: "Voice Call plugin"
+---
 
 # Voice Call plugin
 
@@ -10,8 +11,8 @@ Adds agent-callable tools.
 
 ## Distribution
 
-* Package: `@openclaw/voice-call`
-* Install route: npm; ClawHub
+- Package: `@openclaw/voice-call`
+- Install route: npm; ClawHub
 
 ## Surface
 
@@ -19,4 +20,4 @@ contracts: tools
 
 ## Related docs
 
-* [voice-call](/plugins/voice-call)
+- [voice-call](/plugins/voice-call)

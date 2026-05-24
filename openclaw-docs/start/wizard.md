@@ -1,15 +1,18 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Onboarding (CLI)
+---
+summary: "CLI onboarding: guided setup for gateway, workspace, channels, and skills"
+read_when:
+  - Running or configuring CLI onboarding
+  - Setting up a new machine
+title: "Onboarding (CLI)"
+sidebarTitle: "Onboarding: CLI"
+---
 
 CLI onboarding is the **recommended** way to set up OpenClaw on macOS,
 Linux, or Windows (via WSL2; strongly recommended).
 It configures a local Gateway or a remote Gateway connection, plus channels, skills,
 and workspace defaults in one guided flow.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard
 ```
 
@@ -19,7 +22,7 @@ The CLI wizard localizes fixed onboarding copy. It resolves locale from
 `OPENCLAW_LOCALE`, then `LC_ALL`, then `LC_MESSAGES`, then `LANG`, and falls
 back to English. Supported wizard locales are `en`, `zh-CN`, and `zh-TW`.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 OPENCLAW_LOCALE=zh-CN openclaw onboard
 ```
 
@@ -28,27 +31,27 @@ commands, config keys, URLs, provider IDs, model IDs, and plugin/channel labels
 are not translated.
 
 <Info>
-  Fastest first chat: open the Control UI (no channel setup needed). Run
-  `openclaw dashboard` and chat in the browser. Docs: [Dashboard](/web/dashboard).
+Fastest first chat: open the Control UI (no channel setup needed). Run
+`openclaw dashboard` and chat in the browser. Docs: [Dashboard](/web/dashboard).
 </Info>
 
 To reconfigure later:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw configure
 openclaw agents add <name>
 ```
 
 <Note>
-  `--json` does not imply non-interactive mode. For scripts, use `--non-interactive`.
+`--json` does not imply non-interactive mode. For scripts, use `--non-interactive`.
 </Note>
 
 <Tip>
-  CLI onboarding includes a web search step where you can pick a provider
-  such as Brave, DuckDuckGo, Exa, Firecrawl, Gemini, Grok, Kimi, MiniMax Search,
-  Ollama Web Search, Perplexity, SearXNG, or Tavily. Some providers require an
-  API key, while others are key-free. You can also configure this later with
-  `openclaw configure --section web`. Docs: [Web tools](/tools/web).
+CLI onboarding includes a web search step where you can pick a provider
+such as Brave, DuckDuckGo, Exa, Firecrawl, Gemini, Grok, Kimi, MiniMax Search,
+Ollama Web Search, Perplexity, SearXNG, or Tavily. Some providers require an
+API key, while others are key-free. You can also configure this later with
+`openclaw configure --section web`. Docs: [Web tools](/tools/web).
 </Tip>
 
 ## QuickStart vs Advanced
@@ -57,18 +60,19 @@ Onboarding starts with **QuickStart** (defaults) vs **Advanced** (full control).
 
 <Tabs>
   <Tab title="QuickStart (defaults)">
-    * Local gateway (loopback)
-    * Workspace default (or existing workspace)
-    * Gateway port **18789**
-    * Gateway auth **Token** (auto-generated, even on loopback)
-    * Tool policy default for new local setups: `tools.profile: "coding"` (existing explicit profile is preserved)
-    * DM isolation default: local onboarding writes `session.dmScope: "per-channel-peer"` when unset. Details: [CLI Setup Reference](/start/wizard-cli-reference#outputs-and-internals)
-    * Tailscale exposure **Off**
-    * Telegram + WhatsApp DMs default to **allowlist** (you'll be prompted for your phone number)
-  </Tab>
+    - Local gateway (loopback)
+    - Workspace default (or existing workspace)
+    - Gateway port **18789**
+    - Gateway auth **Token** (auto-generated, even on loopback)
+    - Tool policy default for new local setups: `tools.profile: "coding"` (existing explicit profile is preserved)
+    - DM isolation default: local onboarding writes `session.dmScope: "per-channel-peer"` when unset. Details: [CLI Setup Reference](/start/wizard-cli-reference#outputs-and-internals)
+    - Tailscale exposure **Off**
+    - Telegram + WhatsApp DMs default to **allowlist** (you'll be prompted for your phone number)
 
+  </Tab>
   <Tab title="Advanced (full control)">
-    * Exposes every step (mode, workspace, gateway, channels, daemon, skills).
+    - Exposes every step (mode, workspace, gateway, channels, daemon, skills).
+
   </Tab>
 </Tabs>
 
@@ -96,9 +100,9 @@ Onboarding starts with **QuickStart** (defaults) vs **Advanced** (full control).
 7. **Skills** — Installs recommended skills and optional dependencies.
 
 <Note>
-  Re-running onboarding does **not** wipe anything unless you explicitly choose **Reset** (or pass `--reset`).
-  CLI `--reset` defaults to config, credentials, and sessions; use `--reset-scope full` to include workspace.
-  If the config is invalid or contains legacy keys, onboarding asks you to run `openclaw doctor` first.
+Re-running onboarding does **not** wipe anything unless you explicitly choose **Reset** (or pass `--reset`).
+CLI `--reset` defaults to config, credentials, and sessions; use `--reset-scope full` to include workspace.
+If the config is invalid or contains legacy keys, onboarding asks you to run `openclaw doctor` first.
 </Note>
 
 **Remote mode** only configures the local client to connect to a Gateway elsewhere.
@@ -111,15 +115,15 @@ sessions, and auth profiles. Running without `--workspace` launches onboarding.
 
 What it sets:
 
-* `agents.list[].name`
-* `agents.list[].workspace`
-* `agents.list[].agentDir`
+- `agents.list[].name`
+- `agents.list[].workspace`
+- `agents.list[].agentDir`
 
 Notes:
 
-* Default workspaces follow `~/.openclaw/workspace-<agentId>`.
-* Add `bindings` to route inbound messages (onboarding can do this).
-* Non-interactive flags: `--model`, `--agent-dir`, `--bind`, `--non-interactive`.
+- Default workspaces follow `~/.openclaw/workspace-<agentId>`.
+- Add `bindings` to route inbound messages (onboarding can do this).
+- Non-interactive flags: `--model`, `--agent-dir`, `--bind`, `--non-interactive`.
 
 ## Full reference
 
@@ -131,7 +135,7 @@ For the deeper technical reference, including RPC details, see
 
 ## Related docs
 
-* CLI command reference: [`openclaw onboard`](/cli/onboard)
-* Onboarding overview: [Onboarding Overview](/start/onboarding-overview)
-* macOS app onboarding: [Onboarding](/start/onboarding)
-* Agent first-run ritual: [Agent Bootstrapping](/start/bootstrapping)
+- CLI command reference: [`openclaw onboard`](/cli/onboard)
+- Onboarding overview: [Onboarding Overview](/start/onboarding-overview)
+- macOS app onboarding: [Onboarding](/start/onboarding)
+- Agent first-run ritual: [Agent Bootstrapping](/start/bootstrapping)

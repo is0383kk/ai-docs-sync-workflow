@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Tool-loop detection
+---
+summary: "How to enable and tune guardrails that detect repetitive tool-call loops"
+title: "Tool-loop detection"
+read_when:
+  - A user reports agents getting stuck repeating tool calls
+  - You need to tune repetitive-call protection
+  - You are editing agent tool/runtime policies
+  - You hit `compaction_loop_persisted` aborts after a context-overflow retry
+---
 
 OpenClaw has two cooperating guardrails for repetitive tool-call patterns:
 
@@ -13,16 +17,16 @@ Both are configured under the same `tools.loopDetection` block, but the post-com
 
 ## Why this exists
 
-* Detect repetitive sequences that do not make progress.
-* Detect high-frequency no-result loops (same tool, same inputs, repeated errors).
-* Detect specific repeated-call patterns for known polling tools.
-* Prevent context-overflow then compaction then same-loop cycles from running indefinitely.
+- Detect repetitive sequences that do not make progress.
+- Detect high-frequency no-result loops (same tool, same inputs, repeated errors).
+- Detect specific repeated-call patterns for known polling tools.
+- Prevent context-overflow then compaction then same-loop cycles from running indefinitely.
 
 ## Configuration block
 
 Global defaults, with every documented field shown:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     loopDetection: {
@@ -47,7 +51,7 @@ Global defaults, with every documented field shown:
 
 Per-agent override (optional):
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     list: [
@@ -85,14 +89,14 @@ For `exec`, no-progress checks compare stable command outcomes and ignore volati
 
 ## Recommended setup
 
-* For smaller models, set `enabled: true` and leave the thresholds at their defaults. Flagship models rarely need rolling-history detection and can leave the master switch at `false` while still benefiting from the post-compaction guard.
-* Keep thresholds ordered as `warningThreshold < criticalThreshold < globalCircuitBreakerThreshold`.
-* If false positives occur:
-  * Raise `warningThreshold` and/or `criticalThreshold`.
-  * Optionally raise `globalCircuitBreakerThreshold`.
-  * Disable only the specific detector causing issues (`detectors.<name>: false`).
-  * Reduce `historySize` for less strict historical context.
-* To disable everything (including the post-compaction guard), set `tools.loopDetection.enabled: false` explicitly.
+- For smaller models, set `enabled: true` and leave the thresholds at their defaults. Flagship models rarely need rolling-history detection and can leave the master switch at `false` while still benefiting from the post-compaction guard.
+- Keep thresholds ordered as `warningThreshold < criticalThreshold < globalCircuitBreakerThreshold`.
+- If false positives occur:
+  - Raise `warningThreshold` and/or `criticalThreshold`.
+  - Optionally raise `globalCircuitBreakerThreshold`.
+  - Disable only the specific detector causing issues (`detectors.<name>: false`).
+  - Reduce `historySize` for less strict historical context.
+- To disable everything (including the post-compaction guard), set `tools.loopDetection.enabled: false` explicitly.
 
 ## Post-compaction guard
 
@@ -100,7 +104,7 @@ When the runner completes a compaction-retry after a context-overflow, it arms a
 
 The guard is gated by the master `tools.loopDetection.enabled` flag with one twist: it stays **enabled when the flag is unset or `true`** and only deactivates when the flag is explicitly `false`. This is intentional. The guard exists to escape compaction loops that would otherwise burn unbounded tokens, so a no-config user still gets the protection.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     loopDetection: {
@@ -114,10 +118,10 @@ The guard is gated by the master `tools.loopDetection.enabled` flag with one twi
 }
 ```
 
-* Lower `windowSize` is stricter (fewer attempts before abort).
-* Higher `windowSize` gives the agent more recovery attempts.
-* The guard never aborts when results are changing, only when results are byte-identical across the window.
-* It is intentionally narrow: it fires only in the immediate aftermath of a compaction-retry.
+- Lower `windowSize` is stricter (fewer attempts before abort).
+- Higher `windowSize` gives the agent more recovery attempts.
+- The guard never aborts when results are changing, only when results are byte-identical across the window.
+- It is intentionally narrow: it fires only in the immediate aftermath of a compaction-retry.
 
 <Note>
   The post-compaction guard runs whenever the master flag is not explicitly `false`, even if you never wrote a `tools.loopDetection` block. To verify, look for `post-compaction guard armed for N attempts` in the gateway log immediately after a compaction event.
@@ -127,10 +131,10 @@ The guard is gated by the master `tools.loopDetection.enabled` flag with one twi
 
 When a loop is detected, OpenClaw reports a loop event and either dampens or blocks the next tool-cycle depending on severity. This protects users from runaway token spend and lockups while preserving normal tool access.
 
-* Warnings come first.
-* Suppression follows when patterns persist past the warning threshold.
-* Critical thresholds block the next tool-cycle and surface a clear loop-detection reason in the run record.
-* The post-compaction guard emits `compaction_loop_persisted` errors with the offending tool name and identical-call count.
+- Warnings come first.
+- Suppression follows when patterns persist past the warning threshold.
+- Critical thresholds block the next tool-cycle and surface a clear loop-detection reason in the run record.
+- The post-compaction guard emits `compaction_loop_persisted` errors with the offending tool name and identical-call count.
 
 ## Related
 
@@ -138,15 +142,12 @@ When a loop is detected, OpenClaw reports a loop event and either dampens or blo
   <Card title="Exec approvals" href="/tools/exec-approvals" icon="shield">
     Allow/deny policy for shell execution.
   </Card>
-
   <Card title="Thinking levels" href="/tools/thinking" icon="brain">
     Reasoning effort levels and provider-policy interaction.
   </Card>
-
   <Card title="Sub-agents" href="/tools/subagents" icon="users">
     Spawning isolated agents to bound runaway behavior.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
     Full `tools.loopDetection` schema and merging semantics.
   </Card>

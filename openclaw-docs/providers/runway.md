@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Runway
+---
+summary: "Runway video generation setup in OpenClaw"
+title: "Runway"
+read_when:
+  - You want to use Runway video generation in OpenClaw
+  - You need the Runway API key/env setup
+  - You want to make Runway the default video provider
+---
 
 OpenClaw ships a bundled `runway` provider for hosted video generation. The plugin is enabled by default and registers the `runway` provider against the `videoGenerationProviders` contract.
 
@@ -20,17 +23,15 @@ OpenClaw ships a bundled `runway` provider for hosted video generation. The plug
 
 <Steps>
   <Step title="Set the API key">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --auth-choice runway-api-key
     ```
   </Step>
-
   <Step title="Set Runway as the default video provider">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw config set agents.defaults.videoGenerationModel.primary "runway/gen4.5"
     ```
   </Step>
-
   <Step title="Generate a video">
     Ask the agent to generate a video. Runway will be used automatically.
   </Step>
@@ -63,7 +64,7 @@ Local image and video references are supported via data URIs.
 
 ## Configuration
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -96,7 +97,6 @@ Local image and video references are supported via data URIs.
   <Card title="Video generation" href="/tools/video-generation" icon="video">
     Shared tool parameters, provider selection, and async behavior.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/config-agents#agent-defaults" icon="gear">
     Agent default settings including video generation model.
   </Card>

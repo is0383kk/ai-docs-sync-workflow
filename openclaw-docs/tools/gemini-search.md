@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Gemini search
+---
+summary: "Gemini web search with Google Search grounding"
+read_when:
+  - You want to use Gemini for web_search
+  - You need a GEMINI_API_KEY or models.providers.google.apiKey
+  - You want Google Search grounding
+title: "Gemini search"
+---
 
 OpenClaw supports Gemini models with built-in
 [Google Search grounding](https://ai.google.dev/gemini-api/docs/grounding),
@@ -16,20 +19,20 @@ citations.
     Go to [Google AI Studio](https://aistudio.google.com/apikey) and create an
     API key.
   </Step>
-
   <Step title="Store the key">
     Set `GEMINI_API_KEY` in the Gateway environment, reuse
     `models.providers.google.apiKey`, or configure a dedicated web-search key via:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw configure --section web
     ```
+
   </Step>
 </Steps>
 
 ## Config
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -69,11 +72,11 @@ Gemini uses Google Search grounding to produce AI-synthesized answers with
 inline citations. The results include both the synthesized answer and the source
 URLs.
 
-* Citation URLs from Gemini grounding are automatically resolved from Google
+- Citation URLs from Gemini grounding are automatically resolved from Google
   redirect URLs to direct URLs.
-* Redirect resolution uses the SSRF guard path (HEAD + redirect checks +
+- Redirect resolution uses the SSRF guard path (HEAD + redirect checks +
   http/https validation) before returning the final citation URL.
-* Redirect resolution uses strict SSRF defaults, so redirects to
+- Redirect resolution uses strict SSRF defaults, so redirects to
   private/internal targets are blocked.
 
 ## Supported parameters
@@ -106,6 +109,6 @@ as provided after trimming trailing slashes.
 
 ## Related
 
-* [Web Search overview](/tools/web) -- all providers and auto-detection
-* [Brave Search](/tools/brave-search) -- structured results with snippets
-* [Perplexity Search](/tools/perplexity-search) -- structured results + content extraction
+- [Web Search overview](/tools/web) -- all providers and auto-detection
+- [Brave Search](/tools/brave-search) -- structured results with snippets
+- [Perplexity Search](/tools/perplexity-search) -- structured results + content extraction

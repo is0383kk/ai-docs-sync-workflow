@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Matrix presentation metadata
+---
+summary: "Matrix MessagePresentation metadata for OpenClaw-aware clients"
+read_when:
+  - Building Matrix clients that render OpenClaw rich responses
+  - Debugging com.openclaw.presentation event content
+title: "Matrix presentation metadata"
+---
 
 OpenClaw can attach normalized `MessagePresentation` metadata to outbound Matrix `m.room.message` events under `com.openclaw.presentation`.
 
@@ -12,7 +14,7 @@ Stock Matrix clients continue to render the plain text `body`. OpenClaw-aware cl
 
 The metadata is stored in Matrix event content:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "msgtype": "m.text",
   "body": "Select model\n\n- DeepSeek: /model deepseek/deepseek-chat",
@@ -49,10 +51,10 @@ Unsupported clients should continue to show the fallback text. OpenClaw-aware cl
 
 The Matrix outbound adapter advertises support for:
 
-* `buttons`
-* `select`
-* `context`
-* `divider`
+- `buttons`
+- `select`
+- `context`
+- `divider`
 
 Clients should treat these blocks as best-effort presentation hints. Unknown fields and unknown block types should be ignored rather than causing the full message to fail rendering.
 

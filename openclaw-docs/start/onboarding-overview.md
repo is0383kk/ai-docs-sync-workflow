@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Onboarding overview
+---
+summary: "Overview of OpenClaw onboarding options and flows"
+read_when:
+  - Choosing an onboarding path
+  - Setting up a new environment
+title: "Onboarding overview"
+sidebarTitle: "Onboarding Overview"
+---
 
 OpenClaw has two onboarding paths. Both configure auth, the Gateway, and
 optional chat channels — they just differ in how you interact with the setup.
@@ -36,7 +39,7 @@ Regardless of which path you choose, onboarding sets up:
 
 Run in any terminal:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard
 ```
 
@@ -57,13 +60,13 @@ Full reference: [Onboarding (macOS App)](/start/onboarding)
 If your provider is not listed in onboarding, choose **Custom Provider** and
 enter:
 
-* API compatibility mode (OpenAI-compatible, Anthropic-compatible, or auto-detect)
-* Base URL and API key
-* Model ID and optional alias
+- API compatibility mode (OpenAI-compatible, Anthropic-compatible, or auto-detect)
+- Base URL and API key
+- Model ID and optional alias
 
 Multiple custom endpoints can coexist — each gets its own endpoint ID.
 
 ## Related
 
-* [Getting started](/start/getting-started)
-* [CLI setup reference](/start/wizard-cli-reference)
+- [Getting started](/start/getting-started)
+- [CLI setup reference](/start/wizard-cli-reference)

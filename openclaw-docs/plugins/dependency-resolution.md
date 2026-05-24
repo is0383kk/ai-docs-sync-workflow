@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Plugin dependency resolution
+---
+summary: "How OpenClaw installs plugin packages and resolves plugin dependencies"
+read_when:
+  - You are debugging plugin package installs
+  - You are changing plugin startup, doctor, or package-manager install behavior
+  - You are maintaining packaged OpenClaw installs or bundled plugin manifests
+title: "Plugin dependency resolution"
+sidebarTitle: "Dependencies"
+---
 
 OpenClaw keeps plugin dependency work at install/update time. Runtime loading
 does not run package managers, repair dependency trees, or mutate the OpenClaw
@@ -12,31 +16,31 @@ package directory.
 
 Plugin packages own their dependency graph:
 
-* runtime dependencies live in the plugin package `dependencies` or
+- runtime dependencies live in the plugin package `dependencies` or
   `optionalDependencies`
-* SDK/core imports are peer or supplied OpenClaw imports
-* local development plugins bring their own already-installed dependencies
-* npm and git plugins are installed into OpenClaw-owned package roots
+- SDK/core imports are peer or supplied OpenClaw imports
+- local development plugins bring their own already-installed dependencies
+- npm and git plugins are installed into OpenClaw-owned package roots
 
 OpenClaw owns only the plugin lifecycle:
 
-* discover the plugin source
-* install or update the package when explicitly requested
-* record the install metadata
-* load the plugin entrypoint
-* fail with an actionable error when dependencies are missing
+- discover the plugin source
+- install or update the package when explicitly requested
+- record the install metadata
+- load the plugin entrypoint
+- fail with an actionable error when dependencies are missing
 
 ## Install roots
 
 OpenClaw uses stable per-source roots:
 
-* npm packages install under `~/.openclaw/npm`
-* git packages clone under `~/.openclaw/git`
-* local/path/archive installs are copied or referenced without dependency repair
+- npm packages install under `~/.openclaw/npm`
+- git packages clone under `~/.openclaw/git`
+- local/path/archive installs are copied or referenced without dependency repair
 
 npm installs run in the npm root with:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 cd ~/.openclaw/npm
 npm install --omit=dev --omit=peer --legacy-peer-deps --ignore-scripts --no-audit --no-fund
 ```
@@ -53,6 +57,34 @@ the plugin package. OpenClaw scans the managed npm root before trusting the
 install and uses npm to remove npm-managed packages during uninstall, so hoisted
 runtime dependencies stay inside the managed cleanup boundary.
 
+Published npm plugin packages can ship `npm-shrinkwrap.json`. npm uses that
+publishable lockfile during install, and OpenClaw's managed npm root supports it
+through the normal npm install path. OpenClaw-owned publishable plugin packages
+must include a package-local shrinkwrap generated from that plugin package's
+published dependency graph:
+
+```bash
+pnpm deps:shrinkwrap:generate
+pnpm deps:shrinkwrap:check
+```
+
+The generator strips plugin `devDependencies`, applies the workspace override
+policy, and writes `extensions/<id>/npm-shrinkwrap.json` for each
+`publishToNpm` plugin. Third-party plugin packages may also ship shrinkwrap;
+OpenClaw does not require it for community packages, but npm will respect it
+when present.
+
+OpenClaw-owned npm plugin packages can also publish with explicit
+`bundledDependencies`. The npm publish path overlays the runtime dependency
+name list, removes dev-only workspace metadata from the published package
+manifest, runs a script-free npm install for package-local runtime
+dependencies, then packs or publishes the plugin tarball with those dependency
+files included. Native-heavy packages, including Codex and ACP runtimes, opt out
+with `openclaw.release.bundleRuntimeDependencies: false`; those packages still
+ship their shrinkwrap, but npm resolves runtime dependencies during install
+instead of embedding every platform binary in the plugin tarball. The root
+`openclaw` package does not bundle its full dependency tree.
+
 Plugins that import `openclaw/plugin-sdk/*` declare `openclaw` as a peer
 dependency. OpenClaw does not let npm install a separate registry copy of the
 host package into the managed root, because stale host packages can affect npm
@@ -63,7 +95,7 @@ the host peer after install, update, or uninstall.
 
 git installs clone or refresh the repository, then run:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 npm install --omit=dev --ignore-scripts --no-audit --no-fund
 ```
 
@@ -89,7 +121,7 @@ the plugin install records, compute the entrypoint, and load it.
 If a dependency is missing at runtime, the plugin fails to load and the error
 should point the operator to an explicit fix:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins update <id>
 openclaw plugins install <source>
 openclaw doctor --fix

@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Fal
+---
+summary: "fal image, video, and music generation setup in OpenClaw"
+title: "Fal"
+read_when:
+  - You want to use fal image generation in OpenClaw
+  - You need the FAL_KEY auth flow
+  - You want fal defaults for image_generate, video_generate, or music_generate
+---
 
 OpenClaw ships a bundled `fal` provider for hosted image, video, and music
 generation.
@@ -17,13 +20,12 @@ generation.
 
 <Steps>
   <Step title="Set the API key">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --auth-choice fal-api-key
     ```
   </Step>
-
   <Step title="Set a default image model">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -52,9 +54,9 @@ The bundled `fal` image-generation provider defaults to
 | Output format  | `png` or `jpeg`                                             |
 
 <Warning>
-  Flux image-to-image requests do **not** support `aspectRatio` overrides. GPT
-  Image 2 and Nano Banana 2 edit requests use fal's `/edit` endpoint and accept
-  aspect-ratio hints.
+Flux image-to-image requests do **not** support `aspectRatio` overrides. GPT
+Image 2 and Nano Banana 2 edit requests use fal's `/edit` endpoint and accept
+aspect-ratio hints.
 </Warning>
 
 Use `outputFormat: "png"` when you want PNG output. fal does not declare an
@@ -63,7 +65,7 @@ explicit transparent-background control in OpenClaw, so `background:
 
 To use fal as the default image provider:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -89,20 +91,21 @@ The bundled `fal` video-generation provider defaults to
   <Accordion title="Available video models">
     **HeyGen video-agent:**
 
-    * `fal/fal-ai/heygen/v2/video-agent`
+    - `fal/fal-ai/heygen/v2/video-agent`
 
     **Seedance 2.0:**
 
-    * `fal/bytedance/seedance-2.0/fast/text-to-video`
-    * `fal/bytedance/seedance-2.0/fast/image-to-video`
-    * `fal/bytedance/seedance-2.0/fast/reference-to-video`
-    * `fal/bytedance/seedance-2.0/text-to-video`
-    * `fal/bytedance/seedance-2.0/image-to-video`
-    * `fal/bytedance/seedance-2.0/reference-to-video`
+    - `fal/bytedance/seedance-2.0/fast/text-to-video`
+    - `fal/bytedance/seedance-2.0/fast/image-to-video`
+    - `fal/bytedance/seedance-2.0/fast/reference-to-video`
+    - `fal/bytedance/seedance-2.0/text-to-video`
+    - `fal/bytedance/seedance-2.0/image-to-video`
+    - `fal/bytedance/seedance-2.0/reference-to-video`
+
   </Accordion>
 
   <Accordion title="Seedance 2.0 config example">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -116,7 +119,7 @@ The bundled `fal` video-generation provider defaults to
   </Accordion>
 
   <Accordion title="Seedance 2.0 reference-to-video config example">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -131,10 +134,11 @@ The bundled `fal` video-generation provider defaults to
     Reference-to-video accepts up to 9 images, 3 videos, and 3 audio references
     through the shared `video_generate` `images`, `videos`, and `audioRefs`
     parameters, with at most 12 total reference files.
+
   </Accordion>
 
   <Accordion title="HeyGen video-agent config example">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -161,7 +165,7 @@ shared `music_generate` tool.
 
 Use fal as the default music provider:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -178,8 +182,8 @@ ACE-Step and Stable Audio are prompt-to-audio endpoints; choose them with the
 `model` override when you want those model families.
 
 <Tip>
-  Use `openclaw models list --provider fal` to see the full list of available fal
-  models, including any recently added entries.
+Use `openclaw models list --provider fal` to see the full list of available fal
+models, including any recently added entries.
 </Tip>
 
 ## Related
@@ -188,15 +192,12 @@ ACE-Step and Stable Audio are prompt-to-audio endpoints; choose them with the
   <Card title="Image generation" href="/tools/image-generation" icon="image">
     Shared image tool parameters and provider selection.
   </Card>
-
   <Card title="Video generation" href="/tools/video-generation" icon="video">
     Shared video tool parameters and provider selection.
   </Card>
-
   <Card title="Music generation" href="/tools/music-generation" icon="music">
     Shared music tool parameters and provider selection.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/config-agents#agent-defaults" icon="gear">
     Agent defaults including image, video, and music model selection.
   </Card>

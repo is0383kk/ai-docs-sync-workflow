@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Moderation and Account Safety
+---
+summary: "How ClawHub reports, moderation holds, hidden listings, bans, and account standing work."
+read_when:
+  - Reporting a skill, plugin, package, or comment
+  - Recovering from a held, hidden, or blocked listing
+  - Understanding ClawHub moderation, bans, or account standing
+title: "Moderation and Account Safety"
+sidebarTitle: "Moderation and Account Safety"
+---
 
 # Moderation and Account Safety
 
@@ -23,12 +27,12 @@ Signed-in users can report skills, plugins, packages, and comments.
 
 Good reports are specific and actionable. Useful reasons include:
 
-* misleading metadata
-* undeclared credentials or permission requirements
-* suspicious install instructions
-* scam comments or impersonation
-* bad-faith registrations or trademark misuse
-* content that violates [Acceptable usage](/clawhub/acceptable-usage)
+- misleading metadata
+- undeclared credentials or permission requirements
+- suspicious install instructions
+- scam comments or impersonation
+- bad-faith registrations or trademark misuse
+- content that violates [Acceptable usage](/clawhub/acceptable-usage)
 
 Abuse of reporting can itself lead to account action.
 
@@ -60,17 +64,17 @@ result in account bans, token revocation, hidden content, or removed listings.
 
 Deleted, banned, or disabled accounts cannot use ClawHub API tokens. If CLI auth
 starts failing after account action, sign in to the web UI to review account
-state. If sign-in or normal CLI access is blocked, contact [security@openclaw.ai](mailto:security@openclaw.ai)
+state. If sign-in or normal CLI access is blocked, contact security@openclaw.ai
 for recovery review.
 
 ## Publisher guidance
 
 To reduce false positives and improve user trust:
 
-* keep names, summaries, tags, and changelogs accurate
-* declare required environment variables and permissions
-* explain unusual but intentional behavior in a ClawScan note
-* avoid obfuscated install commands
-* link to source when possible
-* use dry runs before publishing plugins
-* respond clearly if users or moderators ask about release behavior
+- keep names, summaries, tags, and changelogs accurate
+- declare required environment variables and permissions
+- explain unusual but intentional behavior in a ClawScan note
+- avoid obfuscated install commands
+- link to source when possible
+- use dry runs before publishing plugins
+- respond clearly if users or moderators ask about release behavior

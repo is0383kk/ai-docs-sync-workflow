@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Context engine
+---
+summary: "Context engine: pluggable context assembly, compaction, and subagent lifecycle"
+read_when:
+  - You want to understand how OpenClaw assembles model context
+  - You are switching between the legacy engine and a plugin engine
+  - You are building a context engine plugin
+title: "Context engine"
+sidebarTitle: "Context engine"
+---
 
 A **context engine** controls how OpenClaw builds model context for each run: which messages to include, how to summarize older history, and how to manage context across subagent boundaries.
 
@@ -12,33 +16,31 @@ OpenClaw ships with a built-in `legacy` engine and uses it by default - most use
 
 <Steps>
   <Step title="Check which engine is active">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw doctor
     # or inspect config directly:
     cat ~/.openclaw/openclaw.json | jq '.plugins.slots.contextEngine'
     ```
   </Step>
-
   <Step title="Install a plugin engine">
     Context engine plugins are installed like any other OpenClaw plugin.
 
     <Tabs>
       <Tab title="From npm">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw plugins install @martian-engineering/lossless-claw
         ```
       </Tab>
-
       <Tab title="From a local path">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw plugins install -l ./my-context-engine
         ```
       </Tab>
     </Tabs>
-  </Step>
 
+  </Step>
   <Step title="Enable and select the engine">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     // openclaw.json
     {
       plugins: {
@@ -56,8 +58,8 @@ OpenClaw ships with a built-in `legacy` engine and uses it by default - most use
     ```
 
     Restart the gateway after installing and configuring.
-  </Step>
 
+  </Step>
   <Step title="Switch back to legacy (optional)">
     Set `contextEngine` to `"legacy"` (or remove the key entirely - `"legacy"` is the default).
   </Step>
@@ -71,15 +73,12 @@ Every time OpenClaw runs a model prompt, the context engine participates at four
   <Accordion title="1. Ingest">
     Called when a new message is added to the session. The engine can store or index the message in its own data store.
   </Accordion>
-
   <Accordion title="2. Assemble">
     Called before each model run. The engine returns an ordered set of messages (and an optional `systemPromptAddition`) that fit within the token budget.
   </Accordion>
-
   <Accordion title="3. Compact">
     Called when the context window is full, or when the user runs `/compact`. The engine summarizes older history to free space.
   </Accordion>
-
   <Accordion title="4. After turn">
     Called after a run completes. The engine can persist state, trigger background compaction, or update indexes.
   </Accordion>
@@ -94,7 +93,6 @@ OpenClaw calls two optional subagent lifecycle hooks:
 <ParamField path="prepareSubagentSpawn" type="method">
   Prepare shared context state before a child run starts. The hook receives parent/child session keys, `contextMode` (`isolated` or `fork`), available transcript ids/files, and optional TTL. If it returns a rollback handle, OpenClaw calls it when spawn fails after preparation succeeds.
 </ParamField>
-
 <ParamField path="onSubagentEnded" type="method">
   Clean up when a subagent session completes or is swept.
 </ParamField>
@@ -107,10 +105,10 @@ The `assemble` method can return a `systemPromptAddition` string. OpenClaw prepe
 
 The built-in `legacy` engine preserves OpenClaw's original behavior:
 
-* **Ingest**: no-op (the session manager handles message persistence directly).
-* **Assemble**: pass-through (the existing sanitize → validate → limit pipeline in the runtime handles context assembly).
-* **Compact**: delegates to the built-in summarization compaction, which creates a single summary of older messages and keeps recent messages intact.
-* **After turn**: no-op.
+- **Ingest**: no-op (the session manager handles message persistence directly).
+- **Assemble**: pass-through (the existing sanitize → validate → limit pipeline in the runtime handles context assembly).
+- **Compact**: delegates to the built-in summarization compaction, which creates a single summary of older messages and keeps recent messages intact.
+- **After turn**: no-op.
 
 The legacy engine does not register tools or provide a `systemPromptAddition`.
 
@@ -120,7 +118,7 @@ When no `plugins.slots.contextEngine` is set (or it's set to `"legacy"`), this e
 
 A plugin can register a context engine using the plugin API:
 
-```ts theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```ts
 import { buildMemorySystemPromptAddition } from "openclaw/plugin-sdk/core";
 
 export default function register(api) {
@@ -162,7 +160,7 @@ first lifecycle hook runs.
 
 Then enable it in config:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     slots: {
@@ -193,16 +191,13 @@ Required members:
 <ParamField path="messages" type="Message[]" required>
   The ordered messages to send to the model.
 </ParamField>
-
 <ParamField path="estimatedTokens" type="number" required>
   The engine's estimate of total tokens in the assembled context. OpenClaw uses this for compaction threshold decisions and diagnostic reporting.
 </ParamField>
-
 <ParamField path="systemPromptAddition" type="string">
   Prepended to the system prompt.
 </ParamField>
-
-<ParamField path="promptAuthority" type="&#x22;assembled&#x22; | &#x22;preassembly_may_overflow&#x22;">
+<ParamField path="promptAuthority" type='"assembled" | "preassembly_may_overflow"'>
   Controls which token estimate the runner uses for preemptive overflow
   prechecks. Defaults to `"assembled"`, which means only the assembled
   prompt's estimate is checked - appropriate for engines that return a
@@ -229,6 +224,33 @@ Optional members:
 | `onSubagentEnded(params)`      | Method | Clean up after a subagent ends.                                                                                 |
 | `dispose()`                    | Method | Release resources. Called during gateway shutdown or plugin reload - not per-session.                           |
 
+### Host requirements
+
+Context engines can declare host capability requirements on `info.hostRequirements`.
+OpenClaw checks these requirements before starting the operation and fails closed
+with a descriptive error when the selected runtime cannot satisfy them.
+
+For agent runs, declare `assemble-before-prompt` when the engine must control the
+actual model prompt through `assemble()`:
+
+```ts
+info: {
+  id: "my-context-engine",
+  name: "My Context Engine",
+  hostRequirements: {
+    "agent-run": {
+      requiredCapabilities: ["assemble-before-prompt"],
+      unsupportedMessage:
+        "Use the native Codex or Pi embedded runtime, or select the legacy context engine.",
+    },
+  },
+}
+```
+
+Native Codex and Pi embedded agent runs satisfy `assemble-before-prompt`.
+Generic CLI backends do not, so engines that require it are rejected before the
+CLI process starts.
+
 ### ownsCompaction
 
 `ownsCompaction` controls whether Pi's built-in in-attempt auto-compaction stays enabled for the run:
@@ -237,14 +259,13 @@ Optional members:
   <Accordion title="ownsCompaction: true">
     The engine owns compaction behavior. OpenClaw disables Pi's built-in auto-compaction for that run, and the engine's `compact()` implementation is responsible for `/compact`, overflow recovery compaction, and any proactive compaction it wants to do in `afterTurn()`. OpenClaw may still run the pre-prompt overflow safeguard; when it predicts the full transcript will overflow, the recovery path calls the active engine's `compact()` before submitting another prompt.
   </Accordion>
-
   <Accordion title="ownsCompaction: false or unset">
     Pi's built-in auto-compaction may still run during prompt execution, but the active engine's `compact()` method is still called for `/compact` and overflow recovery.
   </Accordion>
 </AccordionGroup>
 
 <Warning>
-  `ownsCompaction: false` does **not** mean OpenClaw automatically falls back to the legacy engine's compaction path.
+`ownsCompaction: false` does **not** mean OpenClaw automatically falls back to the legacy engine's compaction path.
 </Warning>
 
 That means there are two valid plugin patterns:
@@ -253,7 +274,6 @@ That means there are two valid plugin patterns:
   <Tab title="Owning mode">
     Implement your own compaction algorithm and set `ownsCompaction: true`.
   </Tab>
-
   <Tab title="Delegating mode">
     Set `ownsCompaction: false` and have `compact()` call `delegateCompactionToRuntime(...)` from `openclaw/plugin-sdk/core` to use OpenClaw's built-in compaction behavior.
   </Tab>
@@ -263,7 +283,7 @@ A no-op `compact()` is unsafe for an active non-owning engine because it disable
 
 ## Configuration reference
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     slots: {
@@ -276,11 +296,11 @@ A no-op `compact()` is unsafe for an active non-owning engine because it disable
 ```
 
 <Note>
-  The slot is exclusive at run time - only one registered context engine is resolved for a given run or compaction operation. Other enabled `kind: "context-engine"` plugins can still load and run their registration code; `plugins.slots.contextEngine` only selects which registered engine id OpenClaw resolves when it needs a context engine.
+The slot is exclusive at run time - only one registered context engine is resolved for a given run or compaction operation. Other enabled `kind: "context-engine"` plugins can still load and run their registration code; `plugins.slots.contextEngine` only selects which registered engine id OpenClaw resolves when it needs a context engine.
 </Note>
 
 <Note>
-  **Plugin uninstall:** when you uninstall the plugin currently selected as `plugins.slots.contextEngine`, OpenClaw resets the slot back to the default (`legacy`). The same reset behavior applies to `plugins.slots.memory`. No manual config edit is required.
+**Plugin uninstall:** when you uninstall the plugin currently selected as `plugins.slots.contextEngine`, OpenClaw resets the slot back to the default (`legacy`). The same reset behavior applies to `plugins.slots.memory`. No manual config edit is required.
 </Note>
 
 ## Relationship to compaction and memory
@@ -289,11 +309,9 @@ A no-op `compact()` is unsafe for an active non-owning engine because it disable
   <Accordion title="Compaction">
     Compaction is one responsibility of the context engine. The legacy engine delegates to OpenClaw's built-in summarization. Plugin engines can implement any compaction strategy (DAG summaries, vector retrieval, etc.).
   </Accordion>
-
   <Accordion title="Memory plugins">
     Memory plugins (`plugins.slots.memory`) are separate from context engines. Memory plugins provide search/retrieval; context engines control what the model sees. They can work together - a context engine might use memory plugin data during assembly. Plugin engines that want the active memory prompt path should prefer `buildMemorySystemPromptAddition(...)` from `openclaw/plugin-sdk/core`, which converts the active memory prompt sections into a ready-to-prepend `systemPromptAddition`. If an engine needs lower-level control, it can still pull raw lines from `openclaw/plugin-sdk/memory-host-core` via `buildActiveMemoryPromptSection(...)`.
   </Accordion>
-
   <Accordion title="Session pruning">
     Trimming old tool results in-memory still runs regardless of which context engine is active.
   </Accordion>
@@ -301,15 +319,15 @@ A no-op `compact()` is unsafe for an active non-owning engine because it disable
 
 ## Tips
 
-* Use `openclaw doctor` to verify your engine is loading correctly.
-* If switching engines, existing sessions continue with their current history. The new engine takes over for future runs.
-* Engine errors are logged and surfaced in diagnostics. If a plugin engine fails to register or the selected engine id cannot be resolved, OpenClaw does not fall back automatically; runs fail until you fix the plugin or switch `plugins.slots.contextEngine` back to `"legacy"`.
-* For development, use `openclaw plugins install -l ./my-engine` to link a local plugin directory without copying.
+- Use `openclaw doctor` to verify your engine is loading correctly.
+- If switching engines, existing sessions continue with their current history. The new engine takes over for future runs.
+- Engine errors are logged and surfaced in diagnostics. If a plugin engine fails to register or the selected engine id cannot be resolved, OpenClaw does not fall back automatically; runs fail until you fix the plugin or switch `plugins.slots.contextEngine` back to `"legacy"`.
+- For development, use `openclaw plugins install -l ./my-engine` to link a local plugin directory without copying.
 
 ## Related
 
-* [Compaction](/concepts/compaction) - summarizing long conversations
-* [Context](/concepts/context) - how context is built for agent turns
-* [Plugin Architecture](/plugins/architecture) - registering context engine plugins
-* [Plugin manifest](/plugins/manifest) - plugin manifest fields
-* [Plugins](/tools/plugin) - plugin overview
+- [Compaction](/concepts/compaction) - summarizing long conversations
+- [Context](/concepts/context) - how context is built for agent turns
+- [Plugin Architecture](/plugins/architecture) - registering context engine plugins
+- [Plugin manifest](/plugins/manifest) - plugin manifest fields
+- [Plugins](/tools/plugin) - plugin overview

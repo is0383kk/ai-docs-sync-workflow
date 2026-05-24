@@ -1,41 +1,43 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Hugging Face (inference)
+---
+summary: "Hugging Face Inference setup (auth + model selection)"
+read_when:
+  - You want to use Hugging Face Inference with OpenClaw
+  - You need the HF token env var or CLI auth choice
+title: "Hugging Face (inference)"
+---
 
 [Hugging Face Inference Providers](https://huggingface.co/docs/inference-providers) offer OpenAI-compatible chat completions through a single router API. You get access to many models (DeepSeek, Llama, and more) with one token. OpenClaw uses the **OpenAI-compatible endpoint** (chat completions only); for text-to-image, embeddings, or speech use the [HF inference clients](https://huggingface.co/docs/api-inference/quicktour) directly.
 
-* Provider: `huggingface`
-* Auth: `HUGGINGFACE_HUB_TOKEN` or `HF_TOKEN` (fine-grained token with **Make calls to Inference Providers**)
-* API: OpenAI-compatible (`https://router.huggingface.co/v1`)
-* Billing: Single HF token; [pricing](https://huggingface.co/docs/inference-providers/pricing) follows provider rates with a free tier.
+- Provider: `huggingface`
+- Auth: `HUGGINGFACE_HUB_TOKEN` or `HF_TOKEN` (fine-grained token with **Make calls to Inference Providers**)
+- API: OpenAI-compatible (`https://router.huggingface.co/v1`)
+- Billing: Single HF token; [pricing](https://huggingface.co/docs/inference-providers/pricing) follows provider rates with a free tier.
 
 ## Getting started
 
 <Steps>
   <Step title="Create a fine-grained token">
-    Go to [Hugging Face Settings Tokens](https://huggingface.co/settings/tokens/new?ownUserPermissions=inference.serverless.write\&tokenType=fineGrained) and create a new fine-grained token.
+    Go to [Hugging Face Settings Tokens](https://huggingface.co/settings/tokens/new?ownUserPermissions=inference.serverless.write&tokenType=fineGrained) and create a new fine-grained token.
 
     <Warning>
-      The token must have the **Make calls to Inference Providers** permission enabled or API requests will be rejected.
+    The token must have the **Make calls to Inference Providers** permission enabled or API requests will be rejected.
     </Warning>
-  </Step>
 
+  </Step>
   <Step title="Run onboarding">
     Choose **Hugging Face** in the provider dropdown, then enter your API key when prompted:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --auth-choice huggingface-api-key
     ```
-  </Step>
 
+  </Step>
   <Step title="Select a default model">
     In the **Default Hugging Face model** dropdown, pick the model you want. The list is loaded from the Inference API when you have a valid token; otherwise a built-in list is shown. Your choice is saved as the default model.
 
     You can also set or change the default model later in config:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -44,10 +46,10 @@
       },
     }
     ```
-  </Step>
 
+  </Step>
   <Step title="Verify the model is available">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw models list --provider huggingface
     ```
   </Step>
@@ -55,7 +57,7 @@
 
 ### Non-interactive setup
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard --non-interactive \
   --mode local \
   --auth-choice huggingface-api-key \
@@ -82,7 +84,7 @@ Model refs use the form `huggingface/<org>/<model>` (Hub-style IDs). The list be
 | Kimi K2.5              | `moonshotai/Kimi-K2.5`              |
 
 <Tip>
-  You can append `:fastest` or `:cheapest` to any model id. Set your default order in [Inference Provider settings](https://hf.co/settings/inference-providers); see [Inference Providers](https://huggingface.co/docs/inference-providers) and **GET** `https://router.huggingface.co/v1/models` for the full list.
+You can append `:fastest` or `:cheapest` to any model id. Set your default order in [Inference Provider settings](https://hf.co/settings/inference-providers); see [Inference Providers](https://huggingface.co/docs/inference-providers) and **GET** `https://router.huggingface.co/v1/models` for the full list.
 </Tip>
 
 ## Advanced configuration
@@ -91,20 +93,21 @@ Model refs use the form `huggingface/<org>/<model>` (Hub-style IDs). The list be
   <Accordion title="Model discovery and onboarding dropdown">
     OpenClaw discovers models by calling the **Inference endpoint directly**:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     GET https://router.huggingface.co/v1/models
     ```
 
     (Optional: send `Authorization: Bearer $HUGGINGFACE_HUB_TOKEN` or `$HF_TOKEN` for the full list; some endpoints return a subset without auth.) The response is OpenAI-style `{ "object": "list", "data": [ { "id": "Qwen/Qwen3-8B", "owned_by": "Qwen", ... }, ... ] }`.
 
     When you configure a Hugging Face API key (via onboarding, `HUGGINGFACE_HUB_TOKEN`, or `HF_TOKEN`), OpenClaw uses this GET to discover available chat-completion models. During **interactive setup**, after you enter your token you see a **Default Hugging Face model** dropdown populated from that list (or the built-in catalog if the request fails). At runtime (e.g. Gateway startup), when a key is present, OpenClaw again calls **GET** `https://router.huggingface.co/v1/models` to refresh the catalog. The list is merged with a built-in catalog (for metadata like context window and cost). If the request fails or no key is set, only the built-in catalog is used.
+
   </Accordion>
 
   <Accordion title="Model names, aliases, and policy suffixes">
-    * **Name from API:** The model display name is **hydrated from GET /v1/models** when the API returns `name`, `title`, or `display_name`; otherwise it is derived from the model id (e.g. `deepseek-ai/DeepSeek-R1` becomes "DeepSeek R1").
-    * **Override display name:** You can set a custom label per model in config so it appears the way you want in the CLI and UI:
+    - **Name from API:** The model display name is **hydrated from GET /v1/models** when the API returns `name`, `title`, or `display_name`; otherwise it is derived from the model id (e.g. `deepseek-ai/DeepSeek-R1` becomes "DeepSeek R1").
+    - **Override display name:** You can set a custom label per model in config so it appears the way you want in the CLI and UI:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -117,26 +120,27 @@ Model refs use the form `huggingface/<org>/<model>` (Hub-style IDs). The list be
     }
     ```
 
-    * **Policy suffixes:** OpenClaw's bundled Hugging Face docs and helpers currently treat these two suffixes as the built-in policy variants:
-
-      * **`:fastest`** — highest throughput.
-      * **`:cheapest`** — lowest cost per output token.
+    - **Policy suffixes:** OpenClaw's bundled Hugging Face docs and helpers currently treat these two suffixes as the built-in policy variants:
+      - **`:fastest`** — highest throughput.
+      - **`:cheapest`** — lowest cost per output token.
 
       You can add these as separate entries in `models.providers.huggingface.models` or set `model.primary` with the suffix. You can also set your default provider order in [Inference Provider settings](https://hf.co/settings/inference-providers) (no suffix = use that order).
 
-    * **Config merge:** Existing entries in `models.providers.huggingface.models` (e.g. in `models.json`) are kept when config is merged. So any custom `name`, `alias`, or model options you set there are preserved.
+    - **Config merge:** Existing entries in `models.providers.huggingface.models` (e.g. in `models.json`) are kept when config is merged. So any custom `name`, `alias`, or model options you set there are preserved.
+
   </Accordion>
 
   <Accordion title="Environment and daemon setup">
     If the Gateway runs as a daemon (launchd/systemd), make sure `HUGGINGFACE_HUB_TOKEN` or `HF_TOKEN` is available to that process (for example, in `~/.openclaw/.env` or via `env.shellEnv`).
 
     <Note>
-      OpenClaw accepts both `HUGGINGFACE_HUB_TOKEN` and `HF_TOKEN` as env var aliases. Either one works; if both are set, `HUGGINGFACE_HUB_TOKEN` takes precedence.
+    OpenClaw accepts both `HUGGINGFACE_HUB_TOKEN` and `HF_TOKEN` as env var aliases. Either one works; if both are set, `HUGGINGFACE_HUB_TOKEN` takes precedence.
     </Note>
+
   </Accordion>
 
   <Accordion title="Config: DeepSeek R1 with Qwen fallback">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -155,7 +159,7 @@ Model refs use the form `huggingface/<org>/<model>` (Hub-style IDs). The list be
   </Accordion>
 
   <Accordion title="Config: Qwen with cheapest and fastest variants">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -172,7 +176,7 @@ Model refs use the form `huggingface/<org>/<model>` (Hub-style IDs). The list be
   </Accordion>
 
   <Accordion title="Config: DeepSeek + Llama + GPT-OSS with aliases">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -195,7 +199,7 @@ Model refs use the form `huggingface/<org>/<model>` (Hub-style IDs). The list be
   </Accordion>
 
   <Accordion title="Config: Multiple Qwen and DeepSeek with policy suffixes">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -219,15 +223,12 @@ Model refs use the form `huggingface/<org>/<model>` (Hub-style IDs). The list be
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Overview of all providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Model selection" href="/concepts/models" icon="brain">
     How to choose and configure models.
   </Card>
-
   <Card title="Inference Providers docs" href="https://huggingface.co/docs/inference-providers" icon="book">
     Official Hugging Face Inference Providers documentation.
   </Card>
-
   <Card title="Configuration" href="/gateway/configuration" icon="gear">
     Full config reference.
   </Card>

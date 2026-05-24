@@ -1,0 +1,186 @@
+---
+read_when:
+    - どの環境変数がどの順序で読み込まれるかを把握する必要があります
+    - Gateway で API キーが見つからない問題をデバッグしています
+    - プロバイダー認証またはデプロイ環境を文書化している場合
+summary: OpenClaw が環境変数を読み込む場所と優先順位
+title: 環境変数
+x-i18n:
+    generated_at: "2026-05-11T20:31:41Z"
+    model: gpt-5.5
+    provider: openai
+    source_hash: b4b91e9bb3c386292f11a3ffe5ae718a74a800bd19fe95073da990d881e6069d
+    source_path: help/environment.md
+    workflow: 16
+---
+
+OpenClaw は複数のソースから環境変数を取得します。ルールは **既存の値を決して上書きしない** ことです。
+
+## 優先順位（最高 → 最低）
+
+1. **プロセス環境**（Gateway プロセスが親シェル/デーモンからすでに持っているもの）。
+2. **現在の作業ディレクトリの `.env`**（dotenv のデフォルト。上書きしません）。
+3. **グローバル `.env`**（`~/.openclaw/.env`、別名 `$OPENCLAW_STATE_DIR/.env`。上書きしません）。
+4. **設定の `env` ブロック**（欠けている場合にのみ適用）。
+5. **任意のログインシェルインポート**（`env.shellEnv.enabled` または `OPENCLAW_LOAD_SHELL_ENV=1`）。期待されるキーが欠けている場合にのみ適用されます。
+
+デフォルトの状態ディレクトリを使用する Ubuntu の新規インストールでは、OpenClaw はグローバル `.env` の後の互換性フォールバックとして `~/.config/openclaw/gateway.env` も扱います。両方のファイルが存在し、内容が一致しない場合、OpenClaw は `~/.openclaw/.env` を保持し、警告を出力します。
+
+設定ファイルが完全に存在しない場合、ステップ 4 はスキップされます。シェルインポートは有効化されていれば引き続き実行されます。
+
+## 設定の `env` ブロック
+
+インライン環境変数を設定する同等の方法が 2 つあります（どちらも上書きしません）。
+
+```json5
+{
+  env: {
+    OPENROUTER_API_KEY: "sk-or-...",
+    vars: {
+      GROQ_API_KEY: "gsk-...",
+    },
+  },
+}
+```
+
+## シェル環境のインポート
+
+`env.shellEnv` はログインシェルを実行し、期待されるキーのうち **欠けている** ものだけをインポートします。
+
+```json5
+{
+  env: {
+    shellEnv: {
+      enabled: true,
+      timeoutMs: 15000,
+    },
+  },
+}
+```
+
+対応する環境変数:
+
+- `OPENCLAW_LOAD_SHELL_ENV=1`
+- `OPENCLAW_SHELL_ENV_TIMEOUT_MS=15000`
+
+## ランタイムで注入される環境変数
+
+OpenClaw は生成した子プロセスにもコンテキストマーカーを注入します。
+
+- `OPENCLAW_SHELL=exec`: `exec` ツール経由で実行されるコマンドに設定されます。
+- `OPENCLAW_SHELL=acp`: ACP ランタイムバックエンドプロセスの生成（例: `acpx`）に設定されます。
+- `OPENCLAW_SHELL=acp-client`: `openclaw acp client` が ACP ブリッジプロセスを生成する際に設定されます。
+- `OPENCLAW_SHELL=tui-local`: ローカル TUI の `!` シェルコマンドに設定されます。
+
+これらはランタイムマーカーです（ユーザー設定として必須ではありません）。シェル/プロファイルのロジックで、
+コンテキスト固有のルールを適用するために使用できます。
+
+## UI 環境変数
+
+- `OPENCLAW_THEME=light`: 端末の背景が明るい場合に、明るい TUI パレットを強制します。
+- `OPENCLAW_THEME=dark`: 暗い TUI パレットを強制します。
+- `COLORFGBG`: 端末がこれをエクスポートしている場合、OpenClaw は背景色のヒントを使用して TUI パレットを自動選択します。
+
+## 設定内の環境変数置換
+
+`${VAR_NAME}` 構文を使って、設定の文字列値内で環境変数を直接参照できます。
+
+```json5
+{
+  models: {
+    providers: {
+      "vercel-gateway": {
+        apiKey: "${VERCEL_GATEWAY_API_KEY}",
+      },
+    },
+  },
+}
+```
+
+詳細は [設定: 環境変数置換](/ja-JP/gateway/configuration-reference#env-var-substitution) を参照してください。
+
+## シークレット参照と `${ENV}` 文字列
+
+OpenClaw は環境変数駆動のパターンを 2 つサポートします。
+
+- 設定値内の `${VAR}` 文字列置換。
+- シークレット参照をサポートするフィールド向けの SecretRef オブジェクト（`{ source: "env", provider: "default", id: "VAR" }`）。
+
+どちらもアクティベーション時にプロセス環境から解決されます。SecretRef の詳細は [シークレット管理](/ja-JP/gateway/secrets) に記載されています。
+
+## パス関連の環境変数
+
+| 変数                     | 目的                                                                                                                                                                             |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OPENCLAW_HOME`          | すべての内部パス解決（`~/.openclaw/`、エージェントディレクトリ、セッション、認証情報）に使用するホームディレクトリを上書きします。OpenClaw を専用サービスユーザーとして実行する場合に便利です。 |
+| `OPENCLAW_STATE_DIR`     | 状態ディレクトリを上書きします（デフォルトは `~/.openclaw`）。                                                                                                                   |
+| `OPENCLAW_CONFIG_PATH`   | 設定ファイルのパスを上書きします（デフォルトは `~/.openclaw/openclaw.json`）。                                                                                                  |
+| `OPENCLAW_INCLUDE_ROOTS` | `$include` ディレクティブが設定ディレクトリ外のファイルを解決できるディレクトリのパスリストです（デフォルト: なし — `$include` は設定ディレクトリに制限されます）。チルダ展開されます。 |
+
+## ログ記録
+
+| 変数                             | 目的                                                                                                                                                                                      |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OPENCLAW_LOG_LEVEL`             | ファイルとコンソールの両方のログレベルを上書きします（例: `debug`, `trace`）。設定内の `logging.level` と `logging.consoleLevel` より優先されます。無効な値は警告付きで無視されます。 |
+| `OPENCLAW_DEBUG_MODEL_TRANSPORT` | グローバルなデバッグログを有効化せずに、対象を絞ったモデルリクエスト/レスポンスのタイミング診断を `info` レベルで出力します。                                                           |
+| `OPENCLAW_DEBUG_MODEL_PAYLOAD`   | モデルペイロード診断: `summary`, `tools`, または `full-redacted`。`full-redacted` は上限付きで墨消しされますが、プロンプト/メッセージテキストを含む場合があります。                    |
+| `OPENCLAW_DEBUG_SSE`             | ストリーミング診断: 最初/完了のタイミングには `events`、最初の 5 件の墨消し済み SSE イベントを含めるには `peek`。                                                                        |
+| `OPENCLAW_DEBUG_CODE_MODE`       | プロバイダーツールの非表示や exec/wait のみの強制を含む、コードモードのモデルサーフェス診断。                                                                                           |
+
+### `OPENCLAW_HOME`
+
+設定されている場合、`OPENCLAW_HOME` はすべての内部パス解決でシステムのホームディレクトリ（`$HOME` / `os.homedir()`）を置き換えます。これにより、ヘッドレスサービスアカウントで完全なファイルシステム分離が可能になります。
+
+**優先順位:** `OPENCLAW_HOME` > `$HOME` > `USERPROFILE` > `os.homedir()`
+
+**例**（macOS LaunchDaemon）:
+
+```xml
+<key>EnvironmentVariables</key>
+<dict>
+  <key>OPENCLAW_HOME</key>
+  <string>/Users/user</string>
+</dict>
+```
+
+`OPENCLAW_HOME` はチルダパス（例: `~/svc`）に設定することもでき、使用前に `$HOME` を使って展開されます。
+
+## nvm ユーザー: web_fetch の TLS 失敗
+
+Node.js が（システムパッケージマネージャーではなく）**nvm** 経由でインストールされている場合、組み込みの `fetch()` は
+nvm に同梱された CA ストアを使用します。このストアには、最新のルート CA（Let's Encrypt の ISRG Root X1/X2、
+DigiCert Global Root G2 など）が欠けている場合があります。これにより、ほとんどの HTTPS サイトで `web_fetch` が `"fetch failed"` により失敗します。
+
+Linux では、OpenClaw は nvm を自動検出し、実際の起動環境に修正を適用します。
+
+- `openclaw gateway install` は `NODE_EXTRA_CA_CERTS` を systemd サービス環境に書き込みます
+- `openclaw` CLI エントリポイントは、Node 起動前に `NODE_EXTRA_CA_CERTS` を設定して自身を再実行します
+
+**手動修正（古いバージョンまたは直接 `node ...` を起動する場合）:**
+
+OpenClaw を起動する前に変数をエクスポートします。
+
+```bash
+export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+openclaw gateway run
+```
+
+この変数については、`~/.openclaw/.env` にのみ書き込む方法に依存しないでください。Node はプロセス起動時に
+`NODE_EXTRA_CA_CERTS` を読み取ります。
+
+## レガシー環境変数
+
+OpenClaw は `OPENCLAW_*` 環境変数のみを読み取ります。以前のリリースで使われていたレガシーの
+`CLAWDBOT_*` および `MOLTBOT_*` プレフィックスは、黙って
+無視されます。
+
+起動時に Gateway プロセス上でいずれかがまだ設定されている場合、OpenClaw は
+検出されたプレフィックスと合計数を列挙する単一の Node 非推奨警告（`OPENCLAW_LEGACY_ENV_VARS`）を出力します。
+各値は、レガシープレフィックスを `OPENCLAW_` に置き換えて名前変更してください（例: `CLAWDBOT_GATEWAY_TOKEN` →
+`OPENCLAW_GATEWAY_TOKEN`）。古い名前は効果を持ちません。
+
+## 関連
+
+- [Gateway 設定](/ja-JP/gateway/configuration)
+- [FAQ: 環境変数と .env の読み込み](/ja-JP/help/faq#env-vars-and-env-loading)
+- [モデル概要](/ja-JP/concepts/models)

@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Task flow
+---
+summary: "Task Flow orchestration layer above background tasks"
+read_when:
+  - You want to understand how Task Flow relates to background tasks
+  - You encounter Task Flow or openclaw tasks flow in release notes or docs
+  - You want to inspect or manage durable flow state
+title: "Task flow"
+---
 
 Task Flow is the flow orchestration substrate that sits above [background tasks](/automation/tasks). It manages durable multi-step flows with their own state, revision tracking, and sync semantics while individual tasks remain the unit of detached work.
 
@@ -28,7 +31,7 @@ For recurring workflows such as market intelligence briefings, treat the schedul
 
 Example cron shape:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron add \
   --name "Market intelligence brief" \
   --cron "0 7 * * 1-5" \
@@ -44,7 +47,7 @@ Use `session:<id>` instead of `isolated` when the recurring workflow needs delib
 
 Inside the workflow, put reliability checks before the LLM summary step:
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 name: market-intel-brief
 steps:
   - id: preflight
@@ -67,15 +70,15 @@ steps:
 
 Recommended preflight checks:
 
-* Browser availability and profile choice, for example `openclaw` for managed state or `user` when a signed-in Chrome session is required. See [Browser](/tools/browser).
-* API credentials and quota for each source.
-* Network reachability for required endpoints.
-* Required tools enabled for the agent, such as `lobster`, `browser`, and `llm-task`.
-* Failure destination configured for cron so preflight failures are visible. See [Scheduled Tasks](/automation/cron-jobs#delivery-and-output).
+- Browser availability and profile choice, for example `openclaw` for managed state or `user` when a signed-in Chrome session is required. See [Browser](/tools/browser).
+- API credentials and quota for each source.
+- Network reachability for required endpoints.
+- Required tools enabled for the agent, such as `lobster`, `browser`, and `llm-task`.
+- Failure destination configured for cron so preflight failures are visible. See [Scheduled Tasks](/automation/cron-jobs#delivery-and-output).
 
 Recommended data provenance fields for every collected item:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "sourceUrl": "https://example.com/report",
   "retrievedAt": "2026-04-24T12:00:00Z",
@@ -123,7 +126,7 @@ unbounded `registry.sqlite-wal` sidecar files.
 
 ## CLI commands
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # List active and recent flows
 openclaw tasks flow list
 
@@ -146,7 +149,7 @@ Flows coordinate tasks, not replace them. A single flow may drive multiple backg
 
 ## Related
 
-* [Background Tasks](/automation/tasks) — the detached work ledger that flows coordinate
-* [CLI: tasks](/cli/tasks) — CLI command reference for `openclaw tasks flow`
-* [Automation Overview](/automation) — all automation mechanisms at a glance
-* [Cron Jobs](/automation/cron-jobs) — scheduled jobs that may feed into flows
+- [Background Tasks](/automation/tasks) — the detached work ledger that flows coordinate
+- [CLI: tasks](/cli/tasks) — CLI command reference for `openclaw tasks flow`
+- [Automation Overview](/automation) — all automation mechanisms at a glance
+- [Cron Jobs](/automation/cron-jobs) — scheduled jobs that may feed into flows

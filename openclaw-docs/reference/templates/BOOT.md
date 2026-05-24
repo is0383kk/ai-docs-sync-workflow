@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# BOOT.md template
+---
+summary: "Workspace template for BOOT.md"
+title: "BOOT.md template"
+read_when:
+  - Adding a BOOT.md checklist
+---
 
 # BOOT.md
 
@@ -12,4 +13,4 @@ silent token `NO_REPLY` / `no_reply`.
 
 ## Related
 
-* [Agent workspace](/concepts/agent-workspace)
+- [Agent workspace](/concepts/agent-workspace)

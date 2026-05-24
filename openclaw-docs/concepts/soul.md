@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# SOUL.md personality guide
+---
+summary: "Use SOUL.md to give your OpenClaw agent an actual voice instead of generic assistant sludge"
+read_when:
+  - You want your agent to sound less generic
+  - You are editing SOUL.md
+  - You want a stronger personality without breaking safety or brevity
+title: "SOUL.md personality guide"
+---
 
 `SOUL.md` is where your agent's voice lives.
 
@@ -13,19 +16,19 @@ sounds bland, hedgy, or weirdly corporate, this is usually the file to fix.
 
 Put the stuff that changes how the agent feels to talk to:
 
-* tone
-* opinions
-* brevity
-* humor
-* boundaries
-* default level of bluntness
+- tone
+- opinions
+- brevity
+- humor
+- boundaries
+- default level of bluntness
 
 Do **not** turn it into:
 
-* a life story
-* a changelog
-* a security policy dump
-* a giant wall of vibes with no behavioral effect
+- a life story
+- a changelog
+- a security policy dump
+- a giant wall of vibes with no behavioral effect
 
 Short beats long. Sharp beats vague.
 
@@ -33,10 +36,10 @@ Short beats long. Sharp beats vague.
 
 This lines up with OpenAI's prompt guidance:
 
-* The prompt engineering guide says high-level behavior, tone, goals, and
+- The prompt engineering guide says high-level behavior, tone, goals, and
   examples belong in the high-priority instruction layer, not buried in the
   user turn.
-* The same guide recommends treating prompts like something you iterate on,
+- The same guide recommends treating prompts like something you iterate on,
   pin, and evaluate, not magical prose you write once and forget.
 
 For OpenClaw, `SOUL.md` is that layer.
@@ -46,8 +49,8 @@ personality, keep them concise and versioned.
 
 OpenAI refs:
 
-* [Prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering)
-* [Message roles and instruction following](https://developers.openai.com/api/docs/guides/prompt-engineering#message-roles-and-instruction-following)
+- [Prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering)
+- [Message roles and instruction following](https://developers.openai.com/api/docs/guides/prompt-engineering#message-roles-and-instruction-following)
 
 ## The Molty prompt
 
@@ -55,7 +58,7 @@ Paste this into your agent and let it rewrite `SOUL.md`.
 
 Path fixed for OpenClaw workspaces: use `SOUL.md`, not `http://SOUL.md`.
 
-```md theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```md
 Read your `SOUL.md`. Now rewrite it with these changes:
 
 1. You have opinions now. Strong ones. Stop hedging everything with "it depends" - commit to a take.
@@ -74,17 +77,17 @@ Save the new `SOUL.md`. Welcome to having a personality.
 
 Good `SOUL.md` rules sound like this:
 
-* have a take
-* skip filler
-* be funny when it fits
-* call out bad ideas early
-* stay concise unless depth is actually useful
+- have a take
+- skip filler
+- be funny when it fits
+- call out bad ideas early
+- stay concise unless depth is actually useful
 
 Bad `SOUL.md` rules sound like this:
 
-* maintain professionalism at all times
-* provide comprehensive and thoughtful assistance
-* ensure a positive and supportive experience
+- maintain professionalism at all times
+- provide comprehensive and thoughtful assistance
+- ensure a positive and supportive experience
 
 That second list is how you get mush.
 
@@ -104,11 +107,9 @@ Sharp is good. Annoying is not.
   <Card title="Agent workspace" href="/concepts/agent-workspace" icon="folder-open">
     Workspace files OpenClaw injects into model context.
   </Card>
-
   <Card title="System prompt" href="/concepts/system-prompt" icon="message-lines">
     How `SOUL.md` is composed into OpenClaw and Codex runtime context.
   </Card>
-
   <Card title="SOUL.md template" href="/reference/templates/SOUL" icon="file-lines">
     Starter template for a personality file.
   </Card>

@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Plugin bundles
+---
+summary: "Install Codex, Claude, and Cursor-compatible bundles as OpenClaw plugins"
+read_when:
+  - You want to install a Codex, Claude, or Cursor-compatible bundle
+  - You need to know which bundle features OpenClaw executes
+  - You are debugging bundle detection, MCP tools, LSP defaults, or missing capabilities
+title: "Plugin bundles"
+doc-schema-version: 1
+---
 
 Plugin bundles let OpenClaw reuse compatible Codex, Claude, and Cursor plugin
 layouts without loading them as native OpenClaw runtime modules. Use this page
@@ -41,7 +45,7 @@ and [Plugins](/tools/plugin) for the main install workflow.
   <Step title="Install the bundle">
     Install from a local directory, archive, or supported marketplace source:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     # Local directory
     openclaw plugins install ./my-bundle
 
@@ -52,24 +56,27 @@ and [Plugins](/tools/plugin) for the main install workflow.
     openclaw plugins marketplace list <marketplace-name>
     openclaw plugins install <plugin-name>@<marketplace-name>
     ```
+
   </Step>
 
   <Step title="Check detection">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw plugins list
     openclaw plugins inspect <id>
     ```
 
     A compatible bundle appears with `Format: bundle` and a `codex`, `claude`,
     or `cursor` subtype.
+
   </Step>
 
   <Step title="Restart the Gateway">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw gateway restart
     ```
 
     Installing or updating plugin code requires restarting the Gateway.
+
   </Step>
 </Steps>
 
@@ -121,9 +128,9 @@ defaults. Supported stdio-backed LSP servers can run.
 
 OpenClaw reports these in diagnostics but does not run them:
 
-* Claude `agents`, `hooks/hooks.json`, `outputStyles`
-* Cursor `.cursor/agents`, `.cursor/hooks.json`, `.cursor/rules`
-* Codex app or inline metadata
+- Claude `agents`, `hooks/hooks.json`, `outputStyles`
+- Cursor `.cursor/agents`, `.cursor/hooks.json`, `.cursor/rules`
+- Codex app or inline metadata
 
 ## Bundle formats and detection
 
@@ -143,13 +150,14 @@ After native detection, OpenClaw recognizes these bundle layouts:
 
     Codex bundles fit OpenClaw best when they use skill roots and OpenClaw-style
     hook-pack directories.
+
   </Accordion>
 
   <Accordion title="Claude bundles">
     Detection modes:
 
-    * **Manifest-based:** `.claude-plugin/plugin.json`
-    * **Manifestless:** default Claude layout with `skills/`, `commands/`,
+    - **Manifest-based:** `.claude-plugin/plugin.json`
+    - **Manifestless:** default Claude layout with `skills/`, `commands/`,
       `agents/`, `hooks/hooks.json`, `.mcp.json`, `.lsp.json`, or
       `settings.json`
 
@@ -158,6 +166,7 @@ After native detection, OpenClaw recognizes these bundle layouts:
     manifest-declared `lspServers`.
 
     Detect-only content: `agents`, `hooks/hooks.json`, and `outputStyles`.
+
   </Accordion>
 
   <Accordion title="Cursor bundles">
@@ -167,6 +176,7 @@ After native detection, OpenClaw recognizes these bundle layouts:
 
     Detect-only content: `.cursor/agents`, `.cursor/hooks.json`, and
     `.cursor/rules`.
+
   </Accordion>
 </AccordionGroup>
 
@@ -178,7 +188,7 @@ the default paths that exist in the bundle instead of replacing them.
 Bundle MCP tools use the synthetic plugin key `bundle-mcp` for profile filtering.
 To opt out for an agent or Gateway, deny that key:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     deny: ["bundle-mcp"],
@@ -194,7 +204,7 @@ workspace settings can override bundle MCP entries when needed.
 Bundle MCP files can use either `mcpServers`, `servers`, or a top-level server
 map. Stdio servers launch a child process:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "mcpServers": {
     "my-server": {
@@ -208,7 +218,7 @@ map. Stdio servers launch a child process:
 
 HTTP servers connect over `sse` by default, or `streamable-http` when requested:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "mcpServers": {
     "my-server": {
@@ -225,18 +235,18 @@ HTTP servers connect over `sse` by default, or `streamable-http` when requested:
 
 Rules:
 
-* `transport` may be `"sse"` or `"streamable-http"`. When omitted, OpenClaw
+- `transport` may be `"sse"` or `"streamable-http"`. When omitted, OpenClaw
   uses `sse`.
-* `type: "http"` is a CLI-native downstream alias. Prefer
+- `type: "http"` is a CLI-native downstream alias. Prefer
   `transport: "streamable-http"` in bundle config; `openclaw mcp set` and
   `openclaw doctor --fix` normalize the alias.
-* Only `http:` and `https:` URLs are supported.
-* `headers` must be a JSON object with string-compatible values.
-* A server entry with `command` is treated as stdio. A server entry with `url`
+- Only `http:` and `https:` URLs are supported.
+- `headers` must be a JSON object with string-compatible values.
+- A server entry with `command` is treated as stdio. A server entry with `url`
   and no command is treated as HTTP.
-* URL credentials, including userinfo and query params, are redacted from tool
+- URL credentials, including userinfo and query params, are redacted from tool
   descriptions and logs.
-* `connectionTimeoutMs` overrides the default 30-second connection timeout for
+- `connectionTimeoutMs` overrides the default 30-second connection timeout for
   stdio and HTTP transports.
 
 For stdio startup safety, unsupported environment-variable entries are ignored
@@ -251,22 +261,22 @@ are expanded against that file's directory. Claude bundle config can also use
 
 OpenClaw registers bundle MCP tools with provider-safe names:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 serverName__toolName
 ```
 
 Naming rules:
 
-* Characters outside `A-Za-z0-9_-` become `-`.
-* Server prefixes must start with a letter; numeric server keys get an `mcp-`
+- Characters outside `A-Za-z0-9_-` become `-`.
+- Server prefixes must start with a letter; numeric server keys get an `mcp-`
   prefix.
-* Empty server names fall back to `mcp`.
-* Server prefixes are capped at 30 characters.
-* Full tool names are capped at 64 characters.
-* Colliding sanitized names get numeric suffixes.
-* Exposed tools are sorted deterministically by safe name so repeated Pi turns
+- Empty server names fall back to `mcp`.
+- Server prefixes are capped at 30 characters.
+- Full tool names are capped at 64 characters.
+- Colliding sanitized names get numeric suffixes.
+- Exposed tools are sorted deterministically by safe name so repeated Pi turns
   keep stable tool blocks.
-* Profile allowlists and denylists can name either individual exposed tools or
+- Profile allowlists and denylists can name either individual exposed tools or
   the `bundle-mcp` plugin key.
 
 ## Embedded Pi settings and LSP defaults
@@ -278,8 +288,8 @@ shell execution behavior.
 
 Sanitized keys:
 
-* `shellPath`
-* `shellCommandPrefix`
+- `shellPath`
+- `shellCommandPrefix`
 
 Enabled Claude bundles can also contribute LSP server config through `.lsp.json`
 or manifest-declared `lspServers`. OpenClaw merges those entries into embedded
@@ -302,11 +312,11 @@ but the local plugin index is missing.
 
 Bundles have a narrower runtime boundary than native plugins:
 
-* OpenClaw does not load arbitrary bundle runtime modules in process.
-* Skill roots, hook-pack paths, settings files, MCP files, and LSP files are
+- OpenClaw does not load arbitrary bundle runtime modules in process.
+- Skill roots, hook-pack paths, settings files, MCP files, and LSP files are
   read with plugin-root boundary checks.
-* OpenClaw-style hook packs must stay inside the plugin root.
-* Supported stdio MCP servers can still launch subprocesses.
+- OpenClaw-style hook packs must stay inside the plugin root.
+- Supported stdio MCP servers can still launch subprocesses.
 
 Treat third-party bundles as trusted content for the mapped features they
 expose, especially MCP servers and hook packs.
@@ -322,8 +332,8 @@ expose, especially MCP servers and hook packs.
 
 ## Related
 
-* [Plugins](/tools/plugin) - install, configure, and troubleshoot plugins
-* [Manage plugins](/plugins/manage-plugins) - common plugin CLI examples
-* [Plugin inventory](/plugins/plugin-inventory) - generated bundled and external plugin list
-* [Plugin manifest](/plugins/manifest) - native plugin manifest schema
-* [Building plugins](/plugins/building-plugins) - create a native plugin
+- [Plugins](/tools/plugin) - install, configure, and troubleshoot plugins
+- [Manage plugins](/plugins/manage-plugins) - common plugin CLI examples
+- [Plugin inventory](/plugins/plugin-inventory) - generated bundled and external plugin list
+- [Plugin manifest](/plugins/manifest) - native plugin manifest schema
+- [Building plugins](/plugins/building-plugins) - create a native plugin

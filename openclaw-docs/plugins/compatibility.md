@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Plugin compatibility
+---
+summary: "Plugin compatibility contracts, deprecation metadata, and migration expectations"
+title: "Plugin compatibility"
+read_when:
+  - You maintain an OpenClaw plugin
+  - You see a plugin compatibility warning
+  - You are planning a plugin SDK or manifest migration
+---
 
 OpenClaw keeps older plugin contracts wired through named compatibility
 adapters before removing them. This protects existing bundled and external
@@ -16,13 +19,13 @@ Plugin compatibility contracts are tracked in the core registry at
 
 Each record has:
 
-* a stable compatibility code
-* status: `active`, `deprecated`, `removal-pending`, or `removed`
-* owner: SDK, config, setup, channel, provider, plugin execution, agent runtime,
+- a stable compatibility code
+- status: `active`, `deprecated`, `removal-pending`, or `removed`
+- owner: SDK, config, setup, channel, provider, plugin execution, agent runtime,
   or core
-* introduction and deprecation dates when applicable
-* replacement guidance
-* docs, diagnostics, and tests that cover the old and new behavior
+- introduction and deprecation dates when applicable
+- replacement guidance
+- docs, diagnostics, and tests that cover the old and new behavior
 
 The registry is the source for maintainer planning and future plugin inspector
 checks. If a plugin-facing behavior changes, add or update the compatibility
@@ -48,17 +51,17 @@ contracts.
 
 The day-one CLI should be:
 
-```sh theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```sh
 openclaw-plugin-inspector ./my-plugin
 ```
 
 It should emit:
 
-* manifest/schema validation
-* the contract compatibility version being checked
-* install/source metadata checks
-* cold-path import checks
-* deprecation and compatibility warnings
+- manifest/schema validation
+- the contract compatibility version being checked
+- install/source metadata checks
+- cold-path import checks
+- deprecation and compatibility warnings
 
 Use `--json` for stable machine-readable output in CI annotations. OpenClaw
 core should expose contracts and fixtures the inspector can consume, but should
@@ -70,7 +73,7 @@ Use Crabbox-backed Blacksmith Testbox for the installable-package acceptance
 lane when validating the external inspector against OpenClaw plugin packages.
 Run it from a clean OpenClaw checkout after the package is built:
 
-```sh theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```sh
 pnpm crabbox:run -- --provider blacksmith-testbox --timing-json --shell -- "pnpm install && pnpm build && npm exec --yes @openclaw/plugin-inspector@0.1.0 -- ./extensions/telegram --json"
 pnpm crabbox:run -- --provider blacksmith-testbox --timing-json --shell -- "npm exec --yes @openclaw/plugin-inspector@0.1.0 -- ./extensions/discord --json"
 pnpm crabbox:run -- --provider blacksmith-testbox --timing-json --shell -- "npm exec --yes @openclaw/plugin-inspector@0.1.0 -- <clawhub-plugin-dir> --json"
@@ -107,47 +110,47 @@ instead.
 
 Current compatibility records include:
 
-* legacy broad SDK imports such as `openclaw/plugin-sdk/compat`
-* legacy hook-only plugin shapes and `before_agent_start`
-* legacy `api.on("deactivate", ...)` cleanup hook names while plugins migrate to
+- legacy broad SDK imports such as `openclaw/plugin-sdk/compat`
+- legacy hook-only plugin shapes and `before_agent_start`
+- legacy `api.on("deactivate", ...)` cleanup hook names while plugins migrate to
   `gateway_stop`
-* legacy `activate(api)` plugin entrypoints while plugins migrate to
+- legacy `activate(api)` plugin entrypoints while plugins migrate to
   `register(api)`
-* legacy SDK aliases such as `openclaw/extension-api`,
+- legacy SDK aliases such as `openclaw/extension-api`,
   `openclaw/plugin-sdk/channel-runtime`, `openclaw/plugin-sdk/command-auth`
   status builders, `openclaw/plugin-sdk/test-utils` (replaced by focused
   `openclaw/plugin-sdk/*` test subpaths), and the `ClawdbotConfig` /
   `OpenClawSchemaType` type aliases
-* bundled plugin allowlist and enablement behavior
-* legacy provider/channel env-var manifest metadata
-* legacy provider plugin hooks and type aliases while providers move to
+- bundled plugin allowlist and enablement behavior
+- legacy provider/channel env-var manifest metadata
+- legacy provider plugin hooks and type aliases while providers move to
   explicit catalog, auth, thinking, replay, and transport hooks
-* legacy runtime aliases such as `api.runtime.taskFlow`,
+- legacy runtime aliases such as `api.runtime.taskFlow`,
   `api.runtime.subagent.getSession`, `api.runtime.stt`, and deprecated
   `api.runtime.config.loadConfig()` / `api.runtime.config.writeConfigFile(...)`
-* legacy memory-plugin split registration while memory plugins move to
+- legacy memory-plugin split registration while memory plugins move to
   `registerMemoryCapability`
-* legacy channel SDK helpers for native message schemas, mention gating,
+- legacy channel SDK helpers for native message schemas, mention gating,
   inbound envelope formatting, and approval capability nesting
-* legacy channel route key and comparable-target helper aliases while plugins
+- legacy channel route key and comparable-target helper aliases while plugins
   move to `openclaw/plugin-sdk/channel-route`
-* activation hints that are being replaced by manifest contribution ownership
-* `setup-api` runtime fallback while setup descriptors move to cold
+- activation hints that are being replaced by manifest contribution ownership
+- `setup-api` runtime fallback while setup descriptors move to cold
   `setup.requiresRuntime: false` metadata
-* provider `discovery` hooks while provider catalog hooks move to
+- provider `discovery` hooks while provider catalog hooks move to
   `catalog.run(...)`
-* channel `showConfigured` / `showInSetup` metadata while channel packages move
+- channel `showConfigured` / `showInSetup` metadata while channel packages move
   to `openclaw.channel.exposure`
-* legacy runtime-policy config keys while doctor migrates operators to
+- legacy runtime-policy config keys while doctor migrates operators to
   `agentRuntime`
-* generated bundled channel config metadata fallback while registry-first
+- generated bundled channel config metadata fallback while registry-first
   `channelConfigs` metadata lands
-* persisted plugin registry disable and install-migration env flags while
+- persisted plugin registry disable and install-migration env flags while
   repair flows migrate operators to `openclaw plugins registry --refresh` and
   `openclaw doctor --fix`
-* legacy plugin-owned web search, web fetch, and x\_search config paths while
+- legacy plugin-owned web search, web fetch, and x_search config paths while
   doctor migrates them to `plugins.entries.<plugin>.config`
-* legacy `plugins.installs` authored config and bundled plugin load-path
+- legacy `plugins.installs` authored config and bundled plugin load-path
   aliases while install metadata moves into the state-managed plugin ledger
 
 New plugin code should prefer the replacement listed in the registry and in the

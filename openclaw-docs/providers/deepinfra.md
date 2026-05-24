@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# DeepInfra
+---
+summary: "Use DeepInfra's unified API to access the most popular open source and frontier models in OpenClaw"
+read_when:
+  - You want a single API key for the top open source LLMs
+  - You want to run models via DeepInfra's API in OpenClaw
+title: "DeepInfra"
+---
 
 DeepInfra provides a **unified API** that routes requests to the most popular open source and frontier models behind a single
 endpoint and API key. It is OpenAI-compatible, so most OpenAI SDKs work by switching the base URL.
@@ -15,19 +17,19 @@ endpoint and API key. It is OpenAI-compatible, so most OpenAI SDKs work by switc
 
 ## CLI setup
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard --deepinfra-api-key <key>
 ```
 
 Or set the environment variable:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export DEEPINFRA_API_KEY="<your-deepinfra-api-key>" # pragma: allowlist secret
 ```
 
 ## Config snippet
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   env: { DEEPINFRA_API_KEY: "<your-deepinfra-api-key>" }, // pragma: allowlist secret
   agents: {
@@ -74,12 +76,12 @@ deepinfra/zai-org/GLM-5.1
 
 ## Notes
 
-* Model refs are `deepinfra/<provider>/<model>` (e.g., `deepinfra/Qwen/Qwen3-Max`).
-* Default model: `deepinfra/deepseek-ai/DeepSeek-V3.2`
-* Base URL: `https://api.deepinfra.com/v1/openai`
-* Native video generation uses `https://api.deepinfra.com/v1/inference/<model>`.
+- Model refs are `deepinfra/<provider>/<model>` (e.g., `deepinfra/Qwen/Qwen3-Max`).
+- Default model: `deepinfra/deepseek-ai/DeepSeek-V3.2`
+- Base URL: `https://api.deepinfra.com/v1/openai`
+- Native video generation uses `https://api.deepinfra.com/v1/inference/<model>`.
 
 ## Related
 
-* [Model providers](/concepts/model-providers)
-* [All providers](/providers/index)
+- [Model providers](/concepts/model-providers)
+- [All providers](/providers/index)

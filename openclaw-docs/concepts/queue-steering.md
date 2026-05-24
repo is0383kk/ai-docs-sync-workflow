@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Steering queue
+---
+summary: "How active-run steering queues messages at runtime boundaries"
+read_when:
+  - Explaining how steer behaves while an agent is using tools
+  - Changing active-run queue behavior or runtime steering integration
+  - Comparing steering with followup, collect, and interrupt queue modes
+title: "Steering queue"
+---
 
 When a normal prompt arrives while a session run is already streaming, OpenClaw
 tries to send that prompt into the active runtime by default when the queue mode
@@ -51,13 +54,13 @@ this steering path; they wait until the active run finishes. For the explicit
 
 If four users send messages while the agent is executing a tool call:
 
-* With default behavior, the active runtime receives all four messages in
+- With default behavior, the active runtime receives all four messages in
   arrival order before its next model decision. Pi drains them at the next model
   boundary; Codex receives them as one batched `turn/steer`.
-* With `/queue collect`, OpenClaw does not steer. It waits until the active run
+- With `/queue collect`, OpenClaw does not steer. It waits until the active run
   ends, then creates a followup turn with compatible queued messages after the
   debounce window.
-* With `/queue interrupt`, OpenClaw aborts the active run and starts the newest
+- With `/queue interrupt`, OpenClaw aborts the active run and starts the newest
   message instead of steering.
 
 ## Scope
@@ -81,7 +84,7 @@ boundary.
 
 ## Related
 
-* [Command queue](/concepts/queue)
-* [Steer](/tools/steer)
-* [Messages](/concepts/messages)
-* [Agent loop](/concepts/agent-loop)
+- [Command queue](/concepts/queue)
+- [Steer](/tools/steer)
+- [Messages](/concepts/messages)
+- [Agent loop](/concepts/agent-loop)

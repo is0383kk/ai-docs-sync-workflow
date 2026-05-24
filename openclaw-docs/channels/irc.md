@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# IRC
+---
+summary: "IRC plugin setup, access controls, and troubleshooting"
+title: IRC
+read_when:
+  - You want to connect OpenClaw to IRC channels or DMs
+  - You are configuring IRC allowlists, group policy, or mention gating
+---
 
 Use IRC when you want OpenClaw in classic channels (`#room`) and direct messages.
 IRC ships as a bundled plugin, but it is configured in the main config under `channels.irc`.
@@ -12,7 +14,7 @@ IRC ships as a bundled plugin, but it is configured in the main config under `ch
 1. Enable IRC config in `~/.openclaw/openclaw.json`.
 2. Set at least:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     irc: {
@@ -31,17 +33,17 @@ Prefer a private IRC server for bot coordination. If you intentionally use a pub
 
 3. Start/restart gateway:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw gateway run
 ```
 
 ## Security defaults
 
-* IRC uses raw TCP/TLS sockets outside OpenClaw operator-managed forward proxy routing. In deployments that require all egress through that forward proxy, set `channels.irc.enabled=false` unless direct IRC egress is explicitly approved.
-* `channels.irc.dmPolicy` defaults to `"pairing"`.
-* `channels.irc.groupPolicy` defaults to `"allowlist"`.
-* With `groupPolicy="allowlist"`, set `channels.irc.groups` to define allowed channels.
-* Use TLS (`channels.irc.tls=true`) unless you intentionally accept plaintext transport.
+- IRC uses raw TCP/TLS sockets outside OpenClaw operator-managed forward proxy routing. In deployments that require all egress through that forward proxy, set `channels.irc.enabled=false` unless direct IRC egress is explicitly approved.
+- `channels.irc.dmPolicy` defaults to `"pairing"`.
+- `channels.irc.groupPolicy` defaults to `"allowlist"`.
+- With `groupPolicy="allowlist"`, set `channels.irc.groups` to define allowed channels.
+- Use TLS (`channels.irc.tls=true`) unless you intentionally accept plaintext transport.
 
 ## Access control
 
@@ -52,10 +54,10 @@ There are two separate "gates" for IRC channels:
 
 Config keys:
 
-* DM allowlist (DM sender access): `channels.irc.allowFrom`
-* Group sender allowlist (channel sender access): `channels.irc.groupAllowFrom`
-* Per-channel controls (channel + sender + mention rules): `channels.irc.groups["#channel"]`
-* `channels.irc.groupPolicy="open"` allows unconfigured channels (**still mention-gated by default**)
+- DM allowlist (DM sender access): `channels.irc.allowFrom`
+- Group sender allowlist (channel sender access): `channels.irc.groupAllowFrom`
+- Per-channel controls (channel + sender + mention rules): `channels.irc.groups["#channel"]`
+- `channels.irc.groupPolicy="open"` allows unconfigured channels (**still mention-gated by default**)
 
 Allowlist entries should use stable sender identities (`nick!user@host`).
 Bare nick matching is mutable and only enabled when `channels.irc.dangerouslyAllowNameMatching: true`.
@@ -64,16 +66,16 @@ Bare nick matching is mutable and only enabled when `channels.irc.dangerouslyAll
 
 If you see logs like:
 
-* `irc: drop group sender alice!ident@host (policy=allowlist)`
+- `irc: drop group sender alice!ident@host (policy=allowlist)`
 
 ...it means the sender wasn't allowed for **group/channel** messages. Fix it by either:
 
-* setting `channels.irc.groupAllowFrom` (global for all channels), or
-* setting per-channel sender allowlists: `channels.irc.groups["#channel"].allowFrom`
+- setting `channels.irc.groupAllowFrom` (global for all channels), or
+- setting per-channel sender allowlists: `channels.irc.groups["#channel"].allowFrom`
 
 Example (allow anyone in `#tuirc-dev` to talk to the bot):
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     irc: {
@@ -94,7 +96,7 @@ That means you may see logs like `drop channel … (missing-mention)` unless the
 
 To make the bot reply in an IRC channel **without needing a mention**, disable mention gating for that channel:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     irc: {
@@ -112,7 +114,7 @@ To make the bot reply in an IRC channel **without needing a mention**, disable m
 
 Or to allow **all** IRC channels (no per-channel allowlist) and still reply without mentions:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     irc: {
@@ -132,7 +134,7 @@ To reduce risk, restrict tools for that channel.
 
 ### Same tools for everyone in the channel
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     irc: {
@@ -153,7 +155,7 @@ To reduce risk, restrict tools for that channel.
 
 Use `toolsBySender` to apply a stricter policy to `"*"` and a looser one to your nick:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     irc: {
@@ -177,10 +179,10 @@ Use `toolsBySender` to apply a stricter policy to `"*"` and a looser one to your
 
 Notes:
 
-* `toolsBySender` keys should use `id:` for IRC sender identity values:
+- `toolsBySender` keys should use `id:` for IRC sender identity values:
   `id:eigen` or `id:eigen!~eigen@174.127.248.171` for stronger matching.
-* Legacy unprefixed keys are still accepted and matched as `id:` only.
-* The first matching sender policy wins; `"*"` is the wildcard fallback.
+- Legacy unprefixed keys are still accepted and matched as `id:` only.
+- The first matching sender policy wins; `"*"` is the wildcard fallback.
 
 For more on group access vs mention-gating (and how they interact), see: [/channels/groups](/channels/groups).
 
@@ -188,7 +190,7 @@ For more on group access vs mention-gating (and how they interact), see: [/chann
 
 To identify with NickServ after connect:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     irc: {
@@ -204,7 +206,7 @@ To identify with NickServ after connect:
 
 Optional one-time registration on connect:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     irc: {
@@ -223,29 +225,29 @@ Disable `register` after the nick is registered to avoid repeated REGISTER attem
 
 Default account supports:
 
-* `IRC_HOST`
-* `IRC_PORT`
-* `IRC_TLS`
-* `IRC_NICK`
-* `IRC_USERNAME`
-* `IRC_REALNAME`
-* `IRC_PASSWORD`
-* `IRC_CHANNELS` (comma-separated)
-* `IRC_NICKSERV_PASSWORD`
-* `IRC_NICKSERV_REGISTER_EMAIL`
+- `IRC_HOST`
+- `IRC_PORT`
+- `IRC_TLS`
+- `IRC_NICK`
+- `IRC_USERNAME`
+- `IRC_REALNAME`
+- `IRC_PASSWORD`
+- `IRC_CHANNELS` (comma-separated)
+- `IRC_NICKSERV_PASSWORD`
+- `IRC_NICKSERV_REGISTER_EMAIL`
 
 `IRC_HOST` cannot be set from a workspace `.env`; see [Workspace `.env` files](/gateway/security).
 
 ## Troubleshooting
 
-* If the bot connects but never replies in channels, verify `channels.irc.groups` **and** whether mention-gating is dropping messages (`missing-mention`). If you want it to reply without pings, set `requireMention:false` for the channel.
-* If login fails, verify nick availability and server password.
-* If TLS fails on a custom network, verify host/port and certificate setup.
+- If the bot connects but never replies in channels, verify `channels.irc.groups` **and** whether mention-gating is dropping messages (`missing-mention`). If you want it to reply without pings, set `requireMention:false` for the channel.
+- If login fails, verify nick availability and server password.
+- If TLS fails on a custom network, verify host/port and certificate setup.
 
 ## Related
 
-* [Channels Overview](/channels) — all supported channels
-* [Pairing](/channels/pairing) — DM authentication and pairing flow
-* [Groups](/channels/groups) — group chat behavior and mention gating
-* [Channel Routing](/channels/channel-routing) — session routing for messages
-* [Security](/gateway/security) — access model and hardening
+- [Channels Overview](/channels) — all supported channels
+- [Pairing](/channels/pairing) — DM authentication and pairing flow
+- [Groups](/channels/groups) — group chat behavior and mention gating
+- [Channel Routing](/channels/channel-routing) — session routing for messages
+- [Security](/gateway/security) — access model and hardening

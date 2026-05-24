@@ -1,13 +1,16 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Ansible
+---
+summary: "Automated, hardened OpenClaw installation with Ansible, Tailscale VPN, and firewall isolation"
+read_when:
+  - You want automated server deployment with security hardening
+  - You need firewall-isolated setup with VPN access
+  - You're deploying to remote Debian/Ubuntu servers
+title: "Ansible"
+---
 
 Deploy OpenClaw to production servers with **[openclaw-ansible](https://github.com/openclaw/openclaw-ansible)** -- an automated installer with security-first architecture.
 
 <Info>
-  The [openclaw-ansible](https://github.com/openclaw/openclaw-ansible) repo is the source of truth for Ansible deployment. This page is a quick overview.
+The [openclaw-ansible](https://github.com/openclaw/openclaw-ansible) repo is the source of truth for Ansible deployment. This page is a quick overview.
 </Info>
 
 ## Prerequisites
@@ -21,18 +24,18 @@ Deploy OpenClaw to production servers with **[openclaw-ansible](https://github.c
 
 ## What you get
 
-* **Firewall-first security** -- UFW + Docker isolation (only SSH + Tailscale accessible)
-* **Tailscale VPN** -- secure remote access without exposing services publicly
-* **Docker** -- isolated sandbox containers, localhost-only bindings
-* **Defense in depth** -- 4-layer security architecture
-* **Systemd integration** -- auto-start on boot with hardening
-* **One-command setup** -- complete deployment in minutes
+- **Firewall-first security** -- UFW + Docker isolation (only SSH + Tailscale accessible)
+- **Tailscale VPN** -- secure remote access without exposing services publicly
+- **Docker** -- isolated sandbox containers, localhost-only bindings
+- **Defense in depth** -- 4-layer security architecture
+- **Systemd integration** -- auto-start on boot with hardening
+- **One-command setup** -- complete deployment in minutes
 
 ## Quick start
 
 One-command install:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-ansible/main/install.sh | bash
 ```
 
@@ -48,39 +51,34 @@ The Ansible playbook installs and configures:
 6. **Systemd service** -- auto-start with security hardening
 
 <Note>
-  The gateway runs directly on the host (not in Docker). Agent sandboxing is
-  optional; this playbook installs Docker because it is the default sandbox
-  backend. See [Sandboxing](/gateway/sandboxing) for details and other backends.
+The gateway runs directly on the host (not in Docker). Agent sandboxing is
+optional; this playbook installs Docker because it is the default sandbox
+backend. See [Sandboxing](/gateway/sandboxing) for details and other backends.
 </Note>
 
 ## Post-Install Setup
 
 <Steps>
   <Step title="Switch to the openclaw user">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     sudo -i -u openclaw
     ```
   </Step>
-
   <Step title="Run the onboarding wizard">
     The post-install script guides you through configuring OpenClaw settings.
   </Step>
-
   <Step title="Connect messaging providers">
     Log in to WhatsApp, Telegram, Discord, or Signal:
-
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw channels login
     ```
   </Step>
-
   <Step title="Verify the installation">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     sudo systemctl status openclaw
     sudo journalctl -u openclaw -f
     ```
   </Step>
-
   <Step title="Connect to Tailscale">
     Join your VPN mesh for secure remote access.
   </Step>
@@ -88,7 +86,7 @@ The Ansible playbook installs and configures:
 
 ### Quick commands
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Check service status
 sudo systemctl status openclaw
 
@@ -114,7 +112,7 @@ The deployment uses a 4-layer defense model:
 
 To verify your external attack surface:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 nmap -p- YOUR_SERVER_IP
 ```
 
@@ -128,35 +126,32 @@ If you prefer manual control over the automation:
 
 <Steps>
   <Step title="Install prerequisites">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     sudo apt update && sudo apt install -y ansible git
     ```
   </Step>
-
   <Step title="Clone the repository">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     git clone https://github.com/openclaw/openclaw-ansible.git
     cd openclaw-ansible
     ```
   </Step>
-
   <Step title="Install Ansible collections">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     ansible-galaxy collection install -r requirements.yml
     ```
   </Step>
-
   <Step title="Run the playbook">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     ./run-playbook.sh
     ```
 
     Alternatively, run directly and then manually execute the setup script afterward:
-
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     ansible-playbook playbook.yml --ask-become-pass
     # Then run: /tmp/openclaw-setup.sh
     ```
+
   </Step>
 </Steps>
 
@@ -166,7 +161,7 @@ The Ansible installer sets up OpenClaw for manual updates. See [Updating](/insta
 
 To re-run the Ansible playbook (for example, for configuration changes):
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 cd openclaw-ansible
 ./run-playbook.sh
 ```
@@ -177,13 +172,13 @@ This is idempotent and safe to run multiple times.
 
 <AccordionGroup>
   <Accordion title="Firewall blocks my connection">
-    * Ensure you can access via Tailscale VPN first
-    * SSH access (port 22) is always allowed
-    * The gateway is only accessible via Tailscale by design
-  </Accordion>
+    - Ensure you can access via Tailscale VPN first
+    - SSH access (port 22) is always allowed
+    - The gateway is only accessible via Tailscale by design
 
+  </Accordion>
   <Accordion title="Service will not start">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     # Check logs
     sudo journalctl -u openclaw -n 100
 
@@ -195,10 +190,10 @@ This is idempotent and safe to run multiple times.
     cd ~/openclaw
     openclaw gateway run
     ```
-  </Accordion>
 
+  </Accordion>
   <Accordion title="Docker sandbox issues">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     # Verify Docker is running
     sudo systemctl status docker
 
@@ -211,12 +206,11 @@ This is idempotent and safe to run multiple times.
     # For npm installs without a source checkout, see
     # https://docs.openclaw.ai/gateway/sandboxing#images-and-setup
     ```
-  </Accordion>
 
+  </Accordion>
   <Accordion title="Provider login fails">
     Make sure you are running as the `openclaw` user:
-
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     sudo -i -u openclaw
     openclaw channels login
     ```
@@ -227,13 +221,13 @@ This is idempotent and safe to run multiple times.
 
 For detailed security architecture and troubleshooting, see the openclaw-ansible repo:
 
-* [Security Architecture](https://github.com/openclaw/openclaw-ansible/blob/main/docs/security.md)
-* [Technical Details](https://github.com/openclaw/openclaw-ansible/blob/main/docs/architecture.md)
-* [Troubleshooting Guide](https://github.com/openclaw/openclaw-ansible/blob/main/docs/troubleshooting.md)
+- [Security Architecture](https://github.com/openclaw/openclaw-ansible/blob/main/docs/security.md)
+- [Technical Details](https://github.com/openclaw/openclaw-ansible/blob/main/docs/architecture.md)
+- [Troubleshooting Guide](https://github.com/openclaw/openclaw-ansible/blob/main/docs/troubleshooting.md)
 
 ## Related
 
-* [openclaw-ansible](https://github.com/openclaw/openclaw-ansible) -- full deployment guide
-* [Docker](/install/docker) -- containerized gateway setup
-* [Sandboxing](/gateway/sandboxing) -- agent sandbox configuration
-* [Multi-Agent Sandbox and Tools](/tools/multi-agent-sandbox-tools) -- per-agent isolation
+- [openclaw-ansible](https://github.com/openclaw/openclaw-ansible) -- full deployment guide
+- [Docker](/install/docker) -- containerized gateway setup
+- [Sandboxing](/gateway/sandboxing) -- agent sandbox configuration
+- [Multi-Agent Sandbox and Tools](/tools/multi-agent-sandbox-tools) -- per-agent isolation

@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Arcee plugin
+---
+summary: "Adds Arcee model provider support to OpenClaw."
+read_when:
+  - You are installing, configuring, or auditing the arcee plugin
+title: "Arcee plugin"
+---
 
 # Arcee plugin
 
@@ -10,8 +11,8 @@ Adds Arcee model provider support to OpenClaw.
 
 ## Distribution
 
-* Package: `@openclaw/arcee-provider`
-* Install route: included in OpenClaw
+- Package: `@openclaw/arcee-provider`
+- Install route: included in OpenClaw
 
 ## Surface
 
@@ -19,4 +20,4 @@ providers: arcee
 
 ## Related docs
 
-* [arcee](/providers/arcee)
+- [arcee](/providers/arcee)

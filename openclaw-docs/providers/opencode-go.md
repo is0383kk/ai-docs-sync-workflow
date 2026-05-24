@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# OpenCode Go
+---
+summary: "Use the OpenCode Go catalog with the shared OpenCode setup"
+read_when:
+  - You want the OpenCode Go catalog
+  - You need the runtime model refs for Go-hosted models
+title: "OpenCode Go"
+---
 
 OpenCode Go is the Go catalog within [OpenCode](/providers/opencode).
 It uses the same `OPENCODE_API_KEY` as the Zen catalog, but keeps the runtime
@@ -43,19 +45,17 @@ The provider includes:
   <Tab title="Interactive">
     <Steps>
       <Step title="Run onboarding">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw onboard --auth-choice opencode-go
         ```
       </Step>
-
       <Step title="Set a Go model as default">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw config set agents.defaults.model.primary "opencode-go/kimi-k2.6"
         ```
       </Step>
-
       <Step title="Verify models are available">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw models list --provider opencode-go
         ```
       </Step>
@@ -65,13 +65,12 @@ The provider includes:
   <Tab title="Non-interactive">
     <Steps>
       <Step title="Pass the key directly">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw onboard --opencode-go-api-key "$OPENCODE_API_KEY"
         ```
       </Step>
-
       <Step title="Verify models are available">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw models list --provider opencode-go
         ```
       </Step>
@@ -81,7 +80,7 @@ The provider includes:
 
 ## Config example
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   env: { OPENCODE_API_KEY: "YOUR_API_KEY_HERE" }, // pragma: allowlist secret
   agents: { defaults: { model: { primary: "opencode-go/kimi-k2.6" } } },
@@ -108,8 +107,8 @@ The provider includes:
 </AccordionGroup>
 
 <Tip>
-  See [OpenCode](/providers/opencode) for the shared onboarding overview and the full
-  Zen + Go catalog reference.
+See [OpenCode](/providers/opencode) for the shared onboarding overview and the full
+Zen + Go catalog reference.
 </Tip>
 
 ## Related
@@ -118,7 +117,6 @@ The provider includes:
   <Card title="OpenCode (parent)" href="/providers/opencode" icon="server">
     Shared onboarding, catalog overview, and advanced notes.
   </Card>
-
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>

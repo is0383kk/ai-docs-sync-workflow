@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Memory LanceDB
+---
+summary: "Configure the official external LanceDB memory plugin, including local Ollama-compatible embeddings"
+read_when:
+  - You are configuring the memory-lancedb plugin
+  - You want LanceDB-backed long-term memory with auto-recall or auto-capture
+  - You are using local OpenAI-compatible embeddings such as Ollama
+title: "Memory LanceDB"
+sidebarTitle: "Memory LanceDB"
+---
 
 `memory-lancedb` is an official external memory plugin that stores long-term memory in
 LanceDB and uses embeddings for recall. It can automatically recall relevant
@@ -16,7 +20,7 @@ the default built-in memory store.
 
 Install `memory-lancedb` before setting `plugins.slots.memory = "memory-lancedb"`:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install @openclaw/memory-lancedb
 ```
 
@@ -25,14 +29,14 @@ The installer writes the plugin entry and switches the memory slot when no other
 plugin owns it.
 
 <Note>
-  `memory-lancedb` is an active memory plugin. Enable it by selecting the memory
-  slot with `plugins.slots.memory = "memory-lancedb"`. Companion plugins such as
-  `memory-wiki` can run beside it, but only one plugin owns the active memory slot.
+`memory-lancedb` is an active memory plugin. Enable it by selecting the memory
+slot with `plugins.slots.memory = "memory-lancedb"`. Companion plugins such as
+`memory-wiki` can run beside it, but only one plugin owns the active memory slot.
 </Note>
 
 ## Quick start
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     slots: {
@@ -57,13 +61,13 @@ plugin owns it.
 
 Restart the Gateway after changing plugin config:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw gateway restart
 ```
 
 Then verify the plugin is loaded:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins list
 ```
 
@@ -74,7 +78,7 @@ openclaw plugins list
 provider's configured auth profile, environment variable, or
 `models.providers.<provider>.apiKey`.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     slots: {
@@ -100,7 +104,7 @@ This path works with provider auth profiles that expose embedding credentials.
 For example, GitHub Copilot can be used when the Copilot profile/plan supports
 embeddings:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     slots: {
@@ -132,7 +136,7 @@ For Ollama embeddings, prefer the bundled Ollama embedding provider. It uses the
 native Ollama `/api/embed` endpoint and follows the same auth/base URL rules as
 the Ollama provider documented in [Ollama](/providers/ollama).
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     slots: {
@@ -180,7 +184,7 @@ OpenAI-compatible client path.
 Set `embedding.dimensions` for providers whose model dimensions are not built
 in. For example, ZhiPu `embedding-3` uses `2048` dimensions:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -228,7 +232,7 @@ Chinese, Japanese, and Korean memory phrases.
 When `memory-lancedb` is the active memory plugin, it registers the `ltm` CLI
 namespace:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw ltm list
 openclaw ltm search "project preferences"
 openclaw ltm stats
@@ -237,28 +241,28 @@ openclaw ltm stats
 The `query` subcommand runs a non-vector query against the LanceDB table
 directly:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw ltm query --cols id,text,createdAt --limit 20
 openclaw ltm query --filter "category = 'preference'" --order-by createdAt:desc
 ```
 
-* `--cols <columns>`: comma-separated column allowlist (defaults to `id`, `text`, `importance`, `category`, `createdAt`).
-* `--filter <condition>`: SQL-style WHERE clause; capped at 200 characters and restricted to alphanumerics, comparison operators, quotes, parentheses, and a small set of safe punctuation.
-* `--limit <n>`: positive integer; default `10`.
-* `--order-by <column>:<asc|desc>`: in-memory sort applied after the filter; the sort column is auto-included in the projection.
+- `--cols <columns>`: comma-separated column allowlist (defaults to `id`, `text`, `importance`, `category`, `createdAt`).
+- `--filter <condition>`: SQL-style WHERE clause; capped at 200 characters and restricted to alphanumerics, comparison operators, quotes, parentheses, and a small set of safe punctuation.
+- `--limit <n>`: positive integer; default `10`.
+- `--order-by <column>:<asc|desc>`: in-memory sort applied after the filter; the sort column is auto-included in the projection.
 
 Agents also get LanceDB memory tools from the active memory plugin:
 
-* `memory_recall` for LanceDB-backed recall
-* `memory_store` for saving important facts, preferences, decisions, and entities
-* `memory_forget` for removing matching memories
+- `memory_recall` for LanceDB-backed recall
+- `memory_store` for saving important facts, preferences, decisions, and entities
+- `memory_forget` for removing matching memories
 
 ## Storage
 
 By default, LanceDB data lives under `~/.openclaw/memory/lancedb`. Override the
 path with `dbPath`:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -280,7 +284,7 @@ path with `dbPath`:
 `storageOptions` accepts string key/value pairs for LanceDB storage backends and
 supports `${ENV_VAR}` expansion:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -325,13 +329,13 @@ disable `memory-lancedb`.
 
 This usually means the embedding model rejected the recall query:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 memory-lancedb: recall failed: Error: 400 the input length exceeds the context length
 ```
 
 Set a lower `recallMaxChars`, then restart the Gateway:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -347,7 +351,7 @@ Set a lower `recallMaxChars`, then restart the Gateway:
 
 For Ollama, also verify the embedding server is reachable from the Gateway host:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 curl http://127.0.0.1:11434/v1/embeddings \
   -H "Content-Type: application/json" \
   -d '{"model":"mxbai-embed-large","input":"hello"}'
@@ -363,7 +367,7 @@ size reported by that model.
 
 Check that `plugins.slots.memory` points at `memory-lancedb`, then run:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw ltm stats
 openclaw ltm search "recent preference"
 ```
@@ -374,8 +378,8 @@ not automatically store new ones. Use the `memory_store` tool or enable
 
 ## Related
 
-* [Memory overview](/concepts/memory)
-* [Active memory](/concepts/active-memory)
-* [Memory search](/concepts/memory-search)
-* [Memory Wiki](/plugins/memory-wiki)
-* [Ollama](/providers/ollama)
+- [Memory overview](/concepts/memory)
+- [Active memory](/concepts/active-memory)
+- [Memory search](/concepts/memory-search)
+- [Memory Wiki](/plugins/memory-wiki)
+- [Ollama](/providers/ollama)

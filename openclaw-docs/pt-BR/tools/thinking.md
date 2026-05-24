@@ -1,0 +1,147 @@
+---
+read_when:
+    - Ajustando a análise ou os padrões das diretivas thinking, fast-mode ou verbose
+summary: Sintaxe de diretivas para /think, /fast, /verbose, /trace e visibilidade do raciocínio
+title: Níveis de raciocínio
+x-i18n:
+    generated_at: "2026-05-10T19:53:49Z"
+    model: gpt-5.5
+    provider: openai
+    source_hash: c75e2360a260aaf4571f2da6c7519fb4987e4c8c7947e3dc37f94a0ad260ad55
+    source_path: tools/thinking.md
+    workflow: 16
+---
+
+## O que ele faz
+
+- Diretiva inline em qualquer corpo recebido: `/t <level>`, `/think:<level>` ou `/thinking <level>`.
+- Níveis (aliases): `off | minimal | low | medium | high | xhigh | adaptive | max`
+  - minimal → "think"
+  - low → "think hard"
+  - medium → "think harder"
+  - high → "ultrathink" (orçamento máximo)
+  - xhigh → "ultrathink+" (modelos GPT-5.2+ e Codex, além do esforço do Anthropic Claude Opus 4.7)
+  - adaptive → raciocínio adaptativo gerenciado pelo provedor (compatível com Claude 4.6 no Anthropic/Bedrock, Anthropic Claude Opus 4.7 e raciocínio dinâmico do Google Gemini)
+  - max → raciocínio máximo do provedor (Anthropic Claude Opus 4.7; Ollama mapeia isso para seu maior esforço `think` nativo)
+  - `x-high`, `x_high`, `extra-high`, `extra high` e `extra_high` mapeiam para `xhigh`.
+  - `highest` mapeia para `high`.
+- Notas do provedor:
+  - Menus e seletores de raciocínio são orientados pelo perfil do provedor. Plugins de provedor declaram o conjunto exato de níveis para o modelo selecionado, incluindo rótulos como o binário `on`.
+  - `adaptive`, `xhigh` e `max` só são anunciados para perfis de provedor/modelo que os suportam. Diretivas digitadas para níveis não compatíveis são rejeitadas com as opções válidas desse modelo.
+  - Níveis não compatíveis já armazenados são remapeados pela classificação do perfil do provedor. `adaptive` recua para `medium` em modelos não adaptativos, enquanto `xhigh` e `max` recuam para o maior nível não `off` compatível com o modelo selecionado.
+  - Modelos Anthropic Claude 4.6 usam `adaptive` por padrão quando nenhum nível de raciocínio explícito é definido.
+  - Anthropic Claude Opus 4.7 não usa raciocínio adaptativo por padrão. O padrão de esforço da API continua pertencendo ao provedor, a menos que você defina explicitamente um nível de raciocínio.
+  - Anthropic Claude Opus 4.7 mapeia `/think xhigh` para raciocínio adaptativo mais `output_config.effort: "xhigh"`, porque `/think` é uma diretiva de raciocínio e `xhigh` é a configuração de esforço do Opus 4.7.
+  - Anthropic Claude Opus 4.7 também expõe `/think max`; ele mapeia para o mesmo caminho de esforço máximo pertencente ao provedor.
+  - Modelos DeepSeek V4 diretos expõem `/think xhigh|max`; ambos mapeiam para `reasoning_effort: "max"` do DeepSeek, enquanto níveis não `off` inferiores mapeiam para `high`.
+  - Modelos DeepSeek V4 roteados pelo OpenRouter expõem `/think xhigh` e enviam valores de `reasoning_effort` compatíveis com o OpenRouter. Substituições `max` armazenadas recuam para `xhigh`.
+  - Modelos do Ollama com capacidade de raciocínio expõem `/think low|medium|high|max`; `max` mapeia para `think: "high"` nativo porque a API nativa do Ollama aceita strings de esforço `low`, `medium` e `high`.
+  - Modelos GPT da OpenAI mapeiam `/think` pelo suporte a esforço específico do modelo na Responses API. `/think off` envia `reasoning.effort: "none"` somente quando o modelo de destino oferece suporte a isso; caso contrário, o OpenClaw omite o payload de raciocínio desativado em vez de enviar um valor incompatível.
+  - Entradas de catálogo personalizadas compatíveis com OpenAI podem optar por `/think xhigh` definindo `models.providers.<provider>.models[].compat.supportedReasoningEfforts` para incluir `"xhigh"`. Isso usa os mesmos metadados de compatibilidade que mapeiam payloads de esforço de raciocínio de saída da OpenAI, então menus, validação de sessão, CLI do agente e `llm-task` concordam com o comportamento de transporte.
+  - Referências configuradas obsoletas do OpenRouter Hunter Alpha ignoram a injeção de raciocínio por proxy porque essa rota aposentada podia retornar texto de resposta final por campos de raciocínio.
+  - Google Gemini mapeia `/think adaptive` para o raciocínio dinâmico pertencente ao provedor do Gemini. Solicitações do Gemini 3 omitem um `thinkingLevel` fixo, enquanto solicitações do Gemini 2.5 enviam `thinkingBudget: -1`; níveis fixos ainda mapeiam para o `thinkingLevel` ou orçamento do Gemini mais próximo para essa família de modelos.
+  - MiniMax (`minimax/*`) no caminho de streaming compatível com Anthropic usa `thinking: { type: "disabled" }` por padrão, a menos que você defina explicitamente raciocínio nos parâmetros do modelo ou nos parâmetros da solicitação. Isso evita deltas de `reasoning_content` vazados do formato de stream não nativo da Anthropic do MiniMax.
+  - Z.AI (`zai/*`) só oferece suporte a raciocínio binário (`on`/`off`). Qualquer nível diferente de `off` é tratado como `on` (mapeado para `low`).
+  - Moonshot (`moonshot/*`) mapeia `/think off` para `thinking: { type: "disabled" }` e qualquer nível diferente de `off` para `thinking: { type: "enabled" }`. Quando o raciocínio está ativado, o Moonshot aceita apenas `tool_choice` `auto|none`; o OpenClaw normaliza valores incompatíveis para `auto`.
+
+## Ordem de resolução
+
+1. Diretiva inline na mensagem (aplica-se apenas a essa mensagem).
+2. Substituição da sessão (definida ao enviar uma mensagem contendo apenas diretiva).
+3. Padrão por agente (`agents.list[].thinkingDefault` na configuração).
+4. Padrão global (`agents.defaults.thinkingDefault` na configuração).
+5. Fallback: padrão declarado pelo provedor quando disponível; caso contrário, modelos com capacidade de raciocínio resolvem para `medium` ou para o nível não `off` compatível mais próximo desse modelo, e modelos sem raciocínio permanecem `off`.
+
+## Definindo um padrão de sessão
+
+- Envie uma mensagem que seja **apenas** a diretiva (espaços em branco permitidos), por exemplo, `/think:medium` ou `/t high`.
+- Isso permanece na sessão atual (por remetente, por padrão). Use `/think default` para limpar a substituição da sessão e herdar o padrão configurado/do provedor; aliases incluem `inherit`, `clear`, `reset` e `unpin`.
+- `/think off` armazena uma substituição explícita de desativado. Ela desativa o raciocínio até você alterar ou limpar a substituição da sessão.
+- Uma resposta de confirmação é enviada (`Thinking level set to high.` / `Thinking disabled.`). Se o nível for inválido (por exemplo, `/thinking big`), o comando é rejeitado com uma dica e o estado da sessão permanece inalterado.
+- Envie `/think` (ou `/think:`) sem argumento para ver o nível de raciocínio atual.
+
+## Aplicação por agente
+
+- **Pi incorporado**: o nível resolvido é passado para o runtime do agente Pi em processo.
+- **Backend da Claude CLI**: níveis não desativados são passados ao Claude Code como `--effort` ao usar `claude-cli`; consulte [backends de CLI](/pt-BR/gateway/cli-backends).
+
+## Modo rápido (/fast)
+
+- Níveis: `on|off|default`.
+- Mensagem contendo apenas diretiva alterna uma substituição de modo rápido da sessão e responde `Fast mode enabled.` / `Fast mode disabled.`. Use `/fast default` para limpar a substituição da sessão e herdar o padrão configurado; aliases incluem `inherit`, `clear`, `reset` e `unpin`.
+- Envie `/fast` (ou `/fast status`) sem modo para ver o estado efetivo atual do modo rápido.
+- O OpenClaw resolve o modo rápido nesta ordem:
+  1. Substituição inline/contendo apenas diretiva `/fast on|off` (`/fast default` limpa esta camada)
+  2. Substituição da sessão
+  3. Padrão por agente (`agents.list[].fastModeDefault`)
+  4. Configuração por modelo: `agents.defaults.models["<provider>/<model>"].params.fastMode`
+  5. Fallback: `off`
+- Para `openai/*`, o modo rápido mapeia para processamento prioritário da OpenAI enviando `service_tier=priority` em solicitações Responses compatíveis.
+- Para `openai-codex/*`, o modo rápido envia a mesma flag `service_tier=priority` em Responses do Codex. O OpenClaw mantém um único alternador `/fast` compartilhado entre os dois caminhos de autenticação.
+- Para solicitações públicas diretas `anthropic/*`, incluindo tráfego autenticado por OAuth enviado para `api.anthropic.com`, o modo rápido mapeia para níveis de serviço da Anthropic: `/fast on` define `service_tier=auto`, `/fast off` define `service_tier=standard_only`.
+- Para `minimax/*` no caminho compatível com Anthropic, `/fast on` (ou `params.fastMode: true`) reescreve `MiniMax-M2.7` para `MiniMax-M2.7-highspeed`.
+- Parâmetros explícitos de modelo Anthropic `serviceTier` / `service_tier` substituem o padrão do modo rápido quando ambos estão definidos. O OpenClaw ainda ignora a injeção de nível de serviço da Anthropic para URLs base de proxy que não sejam da Anthropic.
+- `/status` mostra `Fast` somente quando o modo rápido está ativado.
+
+## Diretivas verbosas (/verbose ou /v)
+
+- Níveis: `on` (mínimo) | `full` | `off` (padrão).
+- Mensagem contendo apenas diretiva alterna o modo verboso da sessão e responde `Verbose logging enabled.` / `Verbose logging disabled.`; níveis inválidos retornam uma dica sem alterar o estado.
+- `/verbose off` armazena uma substituição explícita da sessão; limpe-a pela UI de sessões escolhendo `inherit`.
+- Diretiva inline afeta apenas essa mensagem; padrões de sessão/globais se aplicam caso contrário.
+- Envie `/verbose` (ou `/verbose:`) sem argumento para ver o nível verboso atual.
+- Quando o modo verboso está ativado, agentes que emitem resultados estruturados de ferramentas (Pi, outros agentes JSON) enviam cada chamada de ferramenta de volta como sua própria mensagem apenas de metadados, prefixada com `<emoji> <tool-name>: <arg>` quando disponível. Esses resumos de ferramentas são enviados assim que cada ferramenta inicia (bolhas separadas), não como deltas de streaming.
+- Resumos de falha de ferramenta permanecem visíveis no modo normal, mas sufixos com detalhes brutos de erro ficam ocultos, a menos que o modo verboso esteja `on` ou `full`.
+- Quando o modo verboso está `full`, as saídas das ferramentas também são encaminhadas após a conclusão (bolha separada, truncada para um comprimento seguro). Se você alternar `/verbose on|full|off` enquanto uma execução está em andamento, as bolhas de ferramenta subsequentes respeitam a nova configuração.
+- `agents.defaults.toolProgressDetail` controla o formato dos resumos de ferramentas de `/verbose` e das linhas de ferramentas em rascunhos de progresso. Use `"explain"` (padrão) para rótulos humanos compactos, como `🛠️ Exec: checking JS syntax`; use `"raw"` quando também quiser que o comando/detalhe bruto seja anexado para depuração. `agents.list[].toolProgressDetail` por agente substitui o padrão.
+  - `explain`: `🛠️ Exec: check JS syntax for /tmp/app.js`
+  - `raw`: `🛠️ Exec: check JS syntax for /tmp/app.js, node --check /tmp/app.js`
+
+## Diretivas de rastreamento de Plugin (/trace)
+
+- Níveis: `on` | `off` (padrão).
+- Mensagem contendo apenas diretiva alterna a saída de rastreamento de Plugin da sessão e responde `Plugin trace enabled.` / `Plugin trace disabled.`.
+- Diretiva inline afeta apenas essa mensagem; padrões de sessão/globais se aplicam caso contrário.
+- Envie `/trace` (ou `/trace:`) sem argumento para ver o nível de rastreamento atual.
+- `/trace` é mais restrito que `/verbose`: ele expõe apenas linhas de rastreamento/depuração pertencentes ao Plugin, como resumos de depuração da Active Memory.
+- Linhas de rastreamento podem aparecer em `/status` e como uma mensagem diagnóstica de acompanhamento após a resposta normal do assistente.
+
+## Visibilidade do raciocínio (/reasoning)
+
+- Níveis: `on|off|stream`.
+- Mensagem contendo apenas diretiva alterna se blocos de raciocínio são mostrados nas respostas.
+- Quando ativado, o raciocínio é enviado como uma **mensagem separada** prefixada com `Reasoning:`.
+- `stream` (somente Telegram): transmite o raciocínio para a bolha de rascunho do Telegram enquanto a resposta está sendo gerada, depois envia a resposta final sem raciocínio.
+- Alias: `/reason`.
+- Envie `/reasoning` (ou `/reasoning:`) sem argumento para ver o nível de raciocínio atual.
+- Ordem de resolução: diretiva inline, depois substituição da sessão, depois padrão por agente (`agents.list[].reasoningDefault`), depois padrão global (`agents.defaults.reasoningDefault`), depois fallback (`off`).
+
+Tags de raciocínio de modelo local malformadas são tratadas de forma conservadora. Blocos `<think>...</think>` fechados permanecem ocultos em respostas normais, e raciocínio não fechado depois de texto já visível também fica oculto. Se uma resposta estiver totalmente envolvida em uma única tag de abertura não fechada e, de outra forma, seria entregue como texto vazio, o OpenClaw remove a tag de abertura malformada e entrega o texto restante.
+
+## Relacionado
+
+- A documentação do modo elevado fica em [modo elevado](/pt-BR/tools/elevated).
+
+## Heartbeats
+
+- O corpo da sondagem de Heartbeat é o prompt de Heartbeat configurado (padrão: `Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.`). Diretivas inline em uma mensagem de Heartbeat se aplicam normalmente (mas evite alterar padrões de sessão a partir de Heartbeats).
+- A entrega de Heartbeat envia apenas o payload final por padrão. Para também enviar a mensagem `Reasoning:` separada (quando disponível), defina `agents.defaults.heartbeat.includeReasoning: true` ou `agents.list[].heartbeat.includeReasoning: true` por agente.
+
+## UI de chat na Web
+
+- O seletor de pensamento do chat na web espelha o nível armazenado da sessão a partir do armazenamento/configuração de sessão de entrada quando a página carrega.
+- Escolher outro nível grava a sobrescrita da sessão imediatamente via `sessions.patch`; ele não espera o próximo envio e não é uma sobrescrita única `thinkingOnce`.
+- A primeira opção é sempre a escolha para limpar a sobrescrita. Ela mostra `Inherited: <resolved level>` quando a sessão está herdando um padrão efetivo diferente de desligado, ou `Off` quando o pensamento herdado está desativado.
+- As escolhas explícitas do seletor são rotuladas como sobrescritas, preservando os rótulos do provedor quando presentes (por exemplo, `Override: maximum` para uma opção `max` rotulada pelo provedor).
+- O seletor usa `thinkingLevels` retornado pela linha/padrões da sessão do Gateway, com `thinkingOptions` mantido como uma lista legada de rótulos. A UI do navegador não mantém sua própria lista de regex de provedor; os plugins são responsáveis pelos conjuntos de níveis específicos do modelo.
+- `/think:<level>` ainda funciona e atualiza o mesmo nível de sessão armazenado, então as diretivas do chat e o seletor permanecem sincronizados.
+
+## Perfis de provedor
+
+- Plugins de provedor podem expor `resolveThinkingProfile(ctx)` para definir os níveis compatíveis e o padrão do modelo.
+- Plugins de provedor que fazem proxy de modelos Claude devem reutilizar `resolveClaudeThinkingProfile(modelId)` de `openclaw/plugin-sdk/provider-model-shared` para que os catálogos diretos da Anthropic e por proxy permaneçam alinhados.
+- Cada nível de perfil tem um `id` canônico armazenado (`off`, `minimal`, `low`, `medium`, `high`, `xhigh`, `adaptive` ou `max`) e pode incluir um `label` de exibição. Provedores binários usam `{ id: "low", label: "on" }`.
+- Plugins de ferramenta que precisam validar uma sobrescrita explícita de pensamento devem usar `api.runtime.agent.resolveThinkingPolicy({ provider, model })` mais `api.runtime.agent.normalizeThinkingLevel(...)`; eles não devem manter suas próprias listas de níveis por provedor/modelo.
+- Plugins de ferramenta com acesso a metadados configurados de modelos personalizados podem passar `catalog` para `resolveThinkingPolicy` para que adesões `compat.supportedReasoningEfforts` sejam refletidas na validação do lado do plugin.
+- Hooks legados publicados (`supportsXHighThinking`, `isBinaryThinking` e `resolveDefaultThinkingLevel`) permanecem como adaptadores de compatibilidade, mas novos conjuntos de níveis personalizados devem usar `resolveThinkingProfile`.
+- Linhas/padrões do Gateway expõem `thinkingLevels`, `thinkingOptions` e `thinkingDefault` para que clientes ACP/chat renderizem os mesmos ids e rótulos de perfil que a validação de runtime usa.

@@ -1,23 +1,26 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Plugin inventory
+---
+summary: "Generated inventory of OpenClaw plugins shipped in core, published externally, or kept source-only"
+read_when:
+  - You are deciding whether a plugin ships in the core npm package or installs separately
+  - You are updating bundled plugin package metadata or release automation
+  - You need the canonical internal vs external plugin list
+title: "Plugin inventory"
+---
 
 # Plugin inventory
 
 This page is generated from `extensions/*/package.json`, `openclaw.plugin.json`,
 and the root npm package `files` exclusions. Regenerate it with:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm plugins:inventory:gen
 ```
 
 ## Definitions
 
-* **Core npm package:** built into the `openclaw` npm package and available without a separate plugin install.
-* **Official external package:** OpenClaw-maintained plugin omitted from the core npm package, kept in this official inventory, and installed on demand through ClawHub and/or npm.
-* **Source checkout only:** repo-local plugin omitted from published npm artifacts and not advertised as an installable package.
+- **Core npm package:** built into the `openclaw` npm package and available without a separate plugin install.
+- **Official external package:** OpenClaw-maintained plugin omitted from the core npm package, kept in this official inventory, and installed on demand through ClawHub and/or npm.
+- **Source checkout only:** repo-local plugin omitted from published npm artifacts and not advertised as an installable package.
 
 Source checkouts are different from npm installs: after `pnpm install`, bundled
 plugins load from `extensions/<id>` so local edits and package-local workspace
@@ -31,7 +34,7 @@ external packages need one install, then a Gateway restart.
 
 For example, Discord is an official external package:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install @openclaw/discord
 openclaw gateway restart
 openclaw plugins inspect discord --runtime --json
@@ -80,7 +83,7 @@ commands.
 | [groq](/plugins/reference/groq)                                   | Adds Groq model provider support to OpenClaw.                                                                                                                        | `@openclaw/groq-provider`<br />included in OpenClaw                  | providers: groq; contracts: mediaUnderstandingProviders                                                                                                                                                                                                          |
 | [huggingface](/plugins/reference/huggingface)                     | Adds Hugging Face model provider support to OpenClaw.                                                                                                                | `@openclaw/huggingface-provider`<br />included in OpenClaw           | providers: huggingface                                                                                                                                                                                                                                           |
 | [imessage](/plugins/reference/imessage)                           | Adds the iMessage channel surface for sending and receiving OpenClaw messages.                                                                                       | `@openclaw/imessage`<br />included in OpenClaw                       | channels: imessage                                                                                                                                                                                                                                               |
-| [inworld](/plugins/reference/inworld)                             | Inworld streaming text-to-speech (MP3, OGG\_OPUS, PCM telephony).                                                                                                    | `@openclaw/inworld-speech`<br />included in OpenClaw                 | contracts: speechProviders                                                                                                                                                                                                                                       |
+| [inworld](/plugins/reference/inworld)                             | Inworld streaming text-to-speech (MP3, OGG_OPUS, PCM telephony).                                                                                                     | `@openclaw/inworld-speech`<br />included in OpenClaw                 | contracts: speechProviders                                                                                                                                                                                                                                       |
 | [irc](/plugins/reference/irc)                                     | Adds the IRC channel surface for sending and receiving OpenClaw messages.                                                                                            | `@openclaw/irc`<br />included in OpenClaw                            | channels: irc                                                                                                                                                                                                                                                    |
 | [kilocode](/plugins/reference/kilocode)                           | Adds Kilocode model provider support to OpenClaw.                                                                                                                    | `@openclaw/kilocode-provider`<br />included in OpenClaw              | providers: kilocode                                                                                                                                                                                                                                              |
 | [kimi](/plugins/reference/kimi)                                   | Adds Kimi, Kimi Coding model provider support to OpenClaw.                                                                                                           | `@openclaw/kimi-provider`<br />included in OpenClaw                  | providers: kimi, kimi-coding                                                                                                                                                                                                                                     |
@@ -148,7 +151,7 @@ commands.
 | [diagnostics-otel](/plugins/reference/diagnostics-otel)             | OpenClaw diagnostics OpenTelemetry exporter.                                                                        | `@openclaw/diagnostics-otel`<br />npm; ClawHub: `clawhub:@openclaw/diagnostics-otel`             | plugin                                                                       |
 | [diagnostics-prometheus](/plugins/reference/diagnostics-prometheus) | OpenClaw diagnostics Prometheus exporter.                                                                           | `@openclaw/diagnostics-prometheus`<br />npm; ClawHub: `clawhub:@openclaw/diagnostics-prometheus` | plugin                                                                       |
 | [diffs](/plugins/reference/diffs)                                   | Read-only diff viewer and file renderer for agents.                                                                 | `@openclaw/diffs`<br />npm; ClawHub                                                              | contracts: tools; skills                                                     |
-| [discord](/plugins/reference/discord)                               | Adds the Discord channel surface for sending and receiving OpenClaw messages.                                       | `@openclaw/discord`<br />npm; ClawHub                                                            | channels: discord                                                            |
+| [discord](/plugins/reference/discord)                               | Adds the Discord channel surface for sending and receiving OpenClaw messages.                                       | `@openclaw/discord`<br />npm; ClawHub                                                            | channels: discord; contracts: meetingNotesSourceProviders                    |
 | [feishu](/plugins/reference/feishu)                                 | Adds the Feishu channel surface for sending and receiving OpenClaw messages.                                        | `@openclaw/feishu`<br />npm; ClawHub                                                             | channels: feishu; contracts: tools; skills                                   |
 | [google-meet](/plugins/reference/google-meet)                       | Join Google Meet calls through Chrome or Twilio transports.                                                         | `@openclaw/google-meet`<br />npm; ClawHub                                                        | contracts: tools                                                             |
 | [googlechat](/plugins/reference/googlechat)                         | Adds the Google Chat channel surface for sending and receiving OpenClaw messages.                                   | `@openclaw/googlechat`<br />npm; ClawHub                                                         | channels: googlechat                                                         |
@@ -163,7 +166,7 @@ commands.
 | [qqbot](/plugins/reference/qqbot)                                   | Adds the QQ Bot channel surface for sending and receiving OpenClaw messages.                                        | `@openclaw/qqbot`<br />npm; ClawHub                                                              | channels: qqbot; contracts: tools; skills                                    |
 | [slack](/plugins/reference/slack)                                   | Adds the Slack channel surface for sending and receiving OpenClaw messages.                                         | `@openclaw/slack`<br />npm; ClawHub                                                              | channels: slack                                                              |
 | [synology-chat](/plugins/reference/synology-chat)                   | Adds the Synology Chat channel surface for sending and receiving OpenClaw messages.                                 | `@openclaw/synology-chat`<br />npm; ClawHub                                                      | channels: synology-chat                                                      |
-| [tlon](/plugins/reference/tlon)                                     | Adds the Tlon channel surface for sending and receiving OpenClaw messages.                                          | `@openclaw/tlon`<br />npm; ClawHub                                                               | channels: tlon; contracts: tools; skills                                     |
+| [tlon](/plugins/reference/tlon)                                     | Adds the Tlon channel surface for sending and receiving OpenClaw messages.                                          | `@openclaw/tlon`<br />npm; ClawHub                                                               | channels: tlon; skills                                                       |
 | [twitch](/plugins/reference/twitch)                                 | Adds the Twitch channel surface for sending and receiving OpenClaw messages.                                        | `@openclaw/twitch`<br />npm; ClawHub                                                             | channels: twitch                                                             |
 | [voice-call](/plugins/reference/voice-call)                         | Adds agent-callable tools.                                                                                          | `@openclaw/voice-call`<br />npm; ClawHub                                                         | contracts: tools                                                             |
 | [whatsapp](/plugins/reference/whatsapp)                             | Adds the WhatsApp channel surface for sending and receiving OpenClaw messages.                                      | `@openclaw/whatsapp`<br />ClawHub: `clawhub:@openclaw/whatsapp`; npm                             | channels: whatsapp                                                           |
@@ -172,8 +175,9 @@ commands.
 
 ## Source checkout only
 
-| Plugin                                      | Description                                                              | Distribution                                     | Surface              |
-| ------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------ | -------------------- |
-| [qa-channel](/plugins/reference/qa-channel) | Adds the QA Channel surface for sending and receiving OpenClaw messages. | `@openclaw/qa-channel`<br />source checkout only | channels: qa-channel |
-| [qa-lab](/plugins/reference/qa-lab)         | OpenClaw QA lab plugin with private debugger UI and scenario runner.     | `@openclaw/qa-lab`<br />source checkout only     | plugin               |
-| [qa-matrix](/plugins/reference/qa-matrix)   | Matrix QA transport runner and substrate.                                | `@openclaw/qa-matrix`<br />source checkout only  | plugin               |
+| Plugin                                            | Description                                                                 | Distribution                                        | Surface                                       |
+| ------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------- |
+| [meeting-notes](/plugins/reference/meeting-notes) | Capture meeting transcripts from channel-owned sources and write summaries. | `@openclaw/meeting-notes`<br />source checkout only | contracts: meetingNotesSourceProviders, tools |
+| [qa-channel](/plugins/reference/qa-channel)       | Adds the QA Channel surface for sending and receiving OpenClaw messages.    | `@openclaw/qa-channel`<br />source checkout only    | channels: qa-channel                          |
+| [qa-lab](/plugins/reference/qa-lab)               | OpenClaw QA lab plugin with private debugger UI and scenario runner.        | `@openclaw/qa-lab`<br />source checkout only        | plugin                                        |
+| [qa-matrix](/plugins/reference/qa-matrix)         | Matrix QA transport runner and substrate.                                   | `@openclaw/qa-matrix`<br />source checkout only     | plugin                                        |

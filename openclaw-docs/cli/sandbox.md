@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Sandbox CLI
+---
+summary: "Manage sandbox runtimes and inspect effective sandbox policy"
+title: Sandbox CLI
+read_when: "You are managing sandbox runtimes or debugging sandbox/tool-policy behavior."
+status: active
+---
 
 Manage sandbox runtimes for isolated agent execution.
 
@@ -12,15 +13,15 @@ OpenClaw can run agents in isolated sandbox runtimes for security. The `sandbox`
 
 Today that usually means:
 
-* Docker sandbox containers
-* SSH sandbox runtimes when `agents.defaults.sandbox.backend = "ssh"`
-* OpenShell sandbox runtimes when `agents.defaults.sandbox.backend = "openshell"`
+- Docker sandbox containers
+- SSH sandbox runtimes when `agents.defaults.sandbox.backend = "ssh"`
+- OpenShell sandbox runtimes when `agents.defaults.sandbox.backend = "openshell"`
 
 For `ssh` and OpenShell `remote`, recreate matters more than with Docker:
 
-* the remote workspace is canonical after the initial seed
-* `openclaw sandbox recreate` deletes that canonical remote workspace for the selected scope
-* next use seeds it again from the current local workspace
+- the remote workspace is canonical after the initial seed
+- `openclaw sandbox recreate` deletes that canonical remote workspace for the selected scope
+- next use seeds it again from the current local workspace
 
 ## Commands
 
@@ -28,7 +29,7 @@ For `ssh` and OpenShell `remote`, recreate matters more than with Docker:
 
 Inspect the **effective** sandbox mode/scope/workspace access, sandbox tool policy, and elevated gates (with fix-it config key paths).
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw sandbox explain
 openclaw sandbox explain --session agent:main:main
 openclaw sandbox explain --agent work
@@ -39,7 +40,7 @@ openclaw sandbox explain --json
 
 List all sandbox runtimes with their status and configuration.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw sandbox list
 openclaw sandbox list --browser  # List only browser containers
 openclaw sandbox list --json     # JSON output
@@ -47,18 +48,18 @@ openclaw sandbox list --json     # JSON output
 
 **Output includes:**
 
-* Runtime name and status
-* Backend (`docker`, `openshell`, etc.)
-* Config label and whether it matches current config
-* Age (time since creation)
-* Idle time (time since last use)
-* Associated session/agent
+- Runtime name and status
+- Backend (`docker`, `openshell`, etc.)
+- Config label and whether it matches current config
+- Age (time since creation)
+- Idle time (time since last use)
+- Associated session/agent
 
 ### `openclaw sandbox recreate`
 
 Remove sandbox runtimes to force recreation with updated config.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw sandbox recreate --all                # Recreate all containers
 openclaw sandbox recreate --session main       # Specific session
 openclaw sandbox recreate --agent mybot        # Specific agent
@@ -68,21 +69,21 @@ openclaw sandbox recreate --all --force        # Skip confirmation
 
 **Options:**
 
-* `--all`: Recreate all sandbox containers
-* `--session <key>`: Recreate container for specific session
-* `--agent <id>`: Recreate containers for specific agent
-* `--browser`: Only recreate browser containers
-* `--force`: Skip confirmation prompt
+- `--all`: Recreate all sandbox containers
+- `--session <key>`: Recreate container for specific session
+- `--agent <id>`: Recreate containers for specific agent
+- `--browser`: Only recreate browser containers
+- `--force`: Skip confirmation prompt
 
 <Note>
-  Runtimes are automatically recreated when the agent is next used.
+Runtimes are automatically recreated when the agent is next used.
 </Note>
 
 ## Use cases
 
 ### After updating a Docker image
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Pull new image
 docker pull openclaw-sandbox:latest
 docker tag openclaw-sandbox:latest openclaw-sandbox:bookworm-slim
@@ -96,7 +97,7 @@ openclaw sandbox recreate --all
 
 ### After changing sandbox configuration
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Edit config: agents.defaults.sandbox.* (or agents.list[].sandbox.*)
 
 # Recreate to apply new config
@@ -105,7 +106,7 @@ openclaw sandbox recreate --all
 
 ### After changing SSH target or SSH auth material
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Edit config:
 # - agents.defaults.sandbox.backend
 # - agents.defaults.sandbox.ssh.target
@@ -121,7 +122,7 @@ on the SSH target. The next run seeds it again from the local workspace.
 
 ### After changing OpenShell source, policy, or mode
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Edit config:
 # - agents.defaults.sandbox.backend
 # - plugins.entries.openshell.config.from
@@ -136,7 +137,7 @@ for that scope. The next run seeds it again from the local workspace.
 
 ### After changing setupCommand
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw sandbox recreate --all
 # or just one agent:
 openclaw sandbox recreate --agent family
@@ -144,7 +145,7 @@ openclaw sandbox recreate --agent family
 
 ### For a specific agent only
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Update only one agent's containers
 openclaw sandbox recreate --agent alfred
 ```
@@ -153,22 +154,22 @@ openclaw sandbox recreate --agent alfred
 
 When you update sandbox configuration:
 
-* Existing runtimes continue running with old settings.
-* Runtimes are only pruned after 24h of inactivity.
-* Regularly-used agents keep old runtimes alive indefinitely.
+- Existing runtimes continue running with old settings.
+- Runtimes are only pruned after 24h of inactivity.
+- Regularly-used agents keep old runtimes alive indefinitely.
 
 Use `openclaw sandbox recreate` to force removal of old runtimes. They are recreated automatically with current settings when next needed.
 
 <Tip>
-  Prefer `openclaw sandbox recreate` over manual backend-specific cleanup. It uses the Gateway's runtime registry and avoids mismatches when scope or session keys change.
+Prefer `openclaw sandbox recreate` over manual backend-specific cleanup. It uses the Gateway's runtime registry and avoids mismatches when scope or session keys change.
 </Tip>
 
 ## Registry migration
 
 OpenClaw stores sandbox runtime metadata as one JSON shard per container/browser entry under the sandbox state directory. Older installs may still have monolithic legacy files:
 
-* `~/.openclaw/sandbox/containers.json`
-* `~/.openclaw/sandbox/browsers.json`
+- `~/.openclaw/sandbox/containers.json`
+- `~/.openclaw/sandbox/browsers.json`
 
 Regular sandbox runtime reads do not rewrite those files. Run `openclaw doctor --fix` to migrate valid legacy entries into the sharded registry directories. Invalid legacy files are quarantined so one bad old registry cannot hide current runtime entries.
 
@@ -176,7 +177,7 @@ Regular sandbox runtime reads do not rewrite those files. Run `openclaw doctor -
 
 Sandbox settings live in `~/.openclaw/openclaw.json` under `agents.defaults.sandbox` (per-agent overrides go in `agents.list[].sandbox`):
 
-```jsonc theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```jsonc
 {
   "agents": {
     "defaults": {
@@ -201,7 +202,7 @@ Sandbox settings live in `~/.openclaw/openclaw.json` under `agents.defaults.sand
 
 ## Related
 
-* [CLI reference](/cli)
-* [Sandboxing](/gateway/sandboxing)
-* [Agent workspace](/concepts/agent-workspace)
-* [Doctor](/gateway/doctor): checks sandbox setup.
+- [CLI reference](/cli)
+- [Sandboxing](/gateway/sandboxing)
+- [Agent workspace](/concepts/agent-workspace)
+- [Doctor](/gateway/doctor): checks sandbox setup.

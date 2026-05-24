@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Quickstart
+---
+summary: "Start using ClawHub: find, install, update, and publish skills or plugins."
+read_when:
+  - First time using ClawHub
+  - Installing a skill or plugin from the registry
+  - Publishing to ClawHub
+---
 
 # Quickstart
 
@@ -16,19 +18,19 @@ registry-specific workflows.
 
 Search from OpenClaw:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw skills search "calendar"
 ```
 
 Install a skill:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw skills install <skill-slug>
 ```
 
 Update installed skills:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw skills update --all
 ```
 
@@ -39,19 +41,19 @@ resolve through ClawHub.
 
 Search from OpenClaw:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins search "calendar"
 ```
 
 Install a ClawHub-hosted plugin with an explicit ClawHub source:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install clawhub:<package>
 ```
 
 Update installed plugins:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins update --all
 ```
 
@@ -62,7 +64,7 @@ ClawHub rather than npm or another source.
 
 Install the ClawHub CLI:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 npm i -g clawhub
 # or
 pnpm add -g clawhub
@@ -70,14 +72,14 @@ pnpm add -g clawhub
 
 Sign in with GitHub:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub login
 clawhub whoami
 ```
 
 Headless environments can use an API token from the ClawHub web UI:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub login --token clh_...
 ```
 
@@ -86,7 +88,7 @@ clawhub login --token clh_...
 A skill is a folder with a required `SKILL.md` file and optional supporting
 files.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub skill publish ./my-skill \
   --slug my-skill \
   --name "My Skill" \
@@ -103,7 +105,7 @@ skill needs before they install it. See [Skill format](/clawhub/skill-format).
 Publish a plugin from a local folder, a GitHub repo, a GitHub ref, or an
 existing archive:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub package publish <source> --family code-plugin --dry-run
 clawhub package publish <source> --family code-plugin
 ```
@@ -119,7 +121,7 @@ including `openclaw.compat.pluginApi` and `openclaw.build.openclawVersion`.
 `sync` scans skill folders and publishes new or changed skills that are not
 already synchronized.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub sync --all --dry-run
 clawhub sync --all
 ```
@@ -133,7 +135,7 @@ and how to opt out.
 Before installing, use the ClawHub web page or CLI detail commands to inspect
 metadata, source links, versions, changelogs, and scan status:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub inspect <skill-slug>
 clawhub package inspect <package>
 ```

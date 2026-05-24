@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Gradium
+---
+summary: "Use Gradium text-to-speech in OpenClaw"
+read_when:
+  - You want Gradium for text-to-speech
+  - You need Gradium API key, voice, or directive token configuration
+title: "Gradium"
+---
 
 [Gradium](https://gradium.ai) is a bundled text-to-speech provider for OpenClaw. The plugin can render normal audio replies (WAV), voice-note-compatible Opus output, and 8 kHz u-law audio for telephony surfaces.
 
@@ -19,13 +21,13 @@ Create a Gradium API key, then expose it to OpenClaw with either an env var or t
 
 <Tabs>
   <Tab title="Env var">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     export GRADIUM_API_KEY="gsk_..."
     ```
   </Tab>
 
   <Tab title="Config key">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       messages: {
         tts: {
@@ -47,7 +49,7 @@ The plugin checks the resolved `apiKey` first and falls back to the `GRADIUM_API
 
 ## Config
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   messages: {
     tts: {
@@ -91,7 +93,7 @@ Default voice: Emma.
 
 When the active speech policy allows voice overrides, you can switch voices inline using a directive token. All of these resolve to the same `voiceId` override:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 /voice:LFZvm12tW_z0xfGo
 /voice_id:LFZvm12tW_z0xfGo
 /voiceid:LFZvm12tW_z0xfGo
@@ -117,5 +119,5 @@ Among configured TTS providers, Gradium's auto-select order is `30`. See [Text-t
 
 ## Related
 
-* [Text-to-Speech](/tools/tts)
-* [Media Overview](/tools/media-overview)
+- [Text-to-Speech](/tools/tts)
+- [Media Overview](/tools/media-overview)

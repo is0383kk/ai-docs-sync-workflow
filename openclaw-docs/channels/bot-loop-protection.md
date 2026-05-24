@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Bot loop protection
+---
+summary: "Bot-to-bot loop protection defaults and channel overrides"
+read_when:
+  - Configuring bot-authored channel messages
+  - Tuning bot-to-bot loop protection
+title: "Bot loop protection"
+sidebarTitle: "Bot loop protection"
+---
 
 # Bot loop protection
 
@@ -21,9 +24,9 @@ cooldown after the budget is exceeded.
 Pair loop protection is active when a channel lets bot-authored messages reach
 dispatch. Built-in defaults are:
 
-* `maxEventsPerWindow: 20` - a bot pair can exchange 20 events within the window
-* `windowSeconds: 60` - sliding window length
-* `cooldownSeconds: 60` - suppression time after the pair exceeds the budget
+- `maxEventsPerWindow: 20` - a bot pair can exchange 20 events within the window
+- `windowSeconds: 60` - sliding window length
+- `cooldownSeconds: 60` - suppression time after the pair exceeds the budget
 
 The guard does not affect normal human-authored messages, single-bot deployments,
 self-message filtering, or one-shot bot replies that stay under the budget.
@@ -34,7 +37,7 @@ Set `channels.defaults.botLoopProtection` once to give every supporting channel
 the same baseline. Channel and account overrides can still tune individual
 surfaces.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     defaults: {
@@ -55,13 +58,13 @@ bot-to-bot conversations without automatic suppression.
 
 Supporting channels layer their own config over the shared default. Precedence is:
 
-* `channels.<channel>.<room-or-space>.botLoopProtection`, when the channel supports per-conversation overrides
-* `channels.<channel>.accounts.<account>.botLoopProtection`, when the channel supports accounts
-* `channels.<channel>.botLoopProtection`, when the channel supports top-level defaults
-* `channels.defaults.botLoopProtection`
-* built-in defaults
+- `channels.<channel>.<room-or-space>.botLoopProtection`, when the channel supports per-conversation overrides
+- `channels.<channel>.accounts.<account>.botLoopProtection`, when the channel supports accounts
+- `channels.<channel>.botLoopProtection`, when the channel supports top-level defaults
+- `channels.defaults.botLoopProtection`
+- built-in defaults
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     defaults: {
@@ -115,10 +118,10 @@ Supporting channels layer their own config over the shared default. Precedence i
 
 ## Channel support
 
-* Discord: native `author.bot` facts, keyed by Discord account, channel, and bot pair.
-* Slack: native `bot_id` facts for accepted bot-authored messages, keyed by Slack account, channel, and bot pair.
-* Matrix: configured Matrix bot accounts, keyed by Matrix account, room, and configured bot pair.
-* Google Chat: native `sender.type=BOT` facts for accepted bot-authored messages, keyed by account, space, and bot pair.
+- Discord: native `author.bot` facts, keyed by Discord account, channel, and bot pair.
+- Slack: native `bot_id` facts for accepted bot-authored messages, keyed by Slack account, channel, and bot pair.
+- Matrix: configured Matrix bot accounts, keyed by Matrix account, room, and configured bot pair.
+- Google Chat: native `sender.type=BOT` facts for accepted bot-authored messages, keyed by account, space, and bot pair.
 
 Channels that do not expose a reliable inbound bot identity keep using their
 normal self-message and access-policy filters. They should not opt into this

@@ -1,18 +1,21 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# CLI automation
+---
+summary: "Scripted onboarding and agent setup for the OpenClaw CLI"
+read_when:
+  - You are automating onboarding in scripts or CI
+  - You need non-interactive examples for specific providers
+title: "CLI automation"
+sidebarTitle: "CLI automation"
+---
 
 Use `--non-interactive` to automate `openclaw onboard`.
 
 <Note>
-  `--json` does not imply non-interactive mode. Use `--non-interactive` (and `--workspace`) for scripts.
+`--json` does not imply non-interactive mode. Use `--non-interactive` (and `--workspace`) for scripts.
 </Note>
 
 ## Baseline non-interactive example
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard --non-interactive \
   --mode local \
   --auth-choice apiKey \
@@ -38,7 +41,7 @@ Passing inline key flags without the matching env var now fails fast.
 
 Example:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard --non-interactive \
   --mode local \
   --auth-choice openai-api-key \
@@ -50,7 +53,7 @@ openclaw onboard --non-interactive \
 
 <AccordionGroup>
   <Accordion title="Anthropic API key example">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice apiKey \
@@ -59,9 +62,8 @@ openclaw onboard --non-interactive \
       --gateway-bind loopback
     ```
   </Accordion>
-
   <Accordion title="Gemini example">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice gemini-api-key \
@@ -70,9 +72,8 @@ openclaw onboard --non-interactive \
       --gateway-bind loopback
     ```
   </Accordion>
-
   <Accordion title="Z.AI example">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice zai-api-key \
@@ -81,9 +82,8 @@ openclaw onboard --non-interactive \
       --gateway-bind loopback
     ```
   </Accordion>
-
   <Accordion title="Vercel AI Gateway example">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice ai-gateway-api-key \
@@ -92,9 +92,8 @@ openclaw onboard --non-interactive \
       --gateway-bind loopback
     ```
   </Accordion>
-
   <Accordion title="Cloudflare AI Gateway example">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice cloudflare-ai-gateway-api-key \
@@ -105,9 +104,8 @@ openclaw onboard --non-interactive \
       --gateway-bind loopback
     ```
   </Accordion>
-
   <Accordion title="Moonshot example">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice moonshot-api-key \
@@ -116,9 +114,8 @@ openclaw onboard --non-interactive \
       --gateway-bind loopback
     ```
   </Accordion>
-
   <Accordion title="Mistral example">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice mistral-api-key \
@@ -127,9 +124,8 @@ openclaw onboard --non-interactive \
       --gateway-bind loopback
     ```
   </Accordion>
-
   <Accordion title="Synthetic example">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice synthetic-api-key \
@@ -138,9 +134,8 @@ openclaw onboard --non-interactive \
       --gateway-bind loopback
     ```
   </Accordion>
-
   <Accordion title="OpenCode example">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice opencode-zen \
@@ -148,12 +143,10 @@ openclaw onboard --non-interactive \
       --gateway-port 18789 \
       --gateway-bind loopback
     ```
-
     Swap to `--auth-choice opencode-go --opencode-go-api-key "$OPENCODE_API_KEY"` for the Go catalog.
   </Accordion>
-
   <Accordion title="Ollama example">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice ollama \
@@ -163,9 +156,8 @@ openclaw onboard --non-interactive \
       --gateway-bind loopback
     ```
   </Accordion>
-
   <Accordion title="Custom provider example">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice custom-api-key \
@@ -184,7 +176,7 @@ openclaw onboard --non-interactive \
 
     Ref-mode variant:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     export CUSTOM_API_KEY="your-key"
     openclaw onboard --non-interactive \
       --mode local \
@@ -200,6 +192,7 @@ openclaw onboard --non-interactive \
     ```
 
     In this mode, onboarding stores `apiKey` as `{ source: "env", provider: "default", id: "CUSTOM_API_KEY" }`.
+
   </Accordion>
 </AccordionGroup>
 
@@ -211,7 +204,7 @@ For production, prefer an Anthropic API key.
 Use `openclaw agents add <name>` to create a separate agent with its own workspace,
 sessions, and auth profiles. Running without `--workspace` launches the wizard.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw agents add work \
   --workspace ~/.openclaw/workspace-work \
   --model openai/gpt-5.5 \
@@ -222,18 +215,18 @@ openclaw agents add work \
 
 What it sets:
 
-* `agents.list[].name`
-* `agents.list[].workspace`
-* `agents.list[].agentDir`
+- `agents.list[].name`
+- `agents.list[].workspace`
+- `agents.list[].agentDir`
 
 Notes:
 
-* Default workspaces follow `~/.openclaw/workspace-<agentId>`.
-* Add `bindings` to route inbound messages (the wizard can do this).
-* Non-interactive flags: `--model`, `--agent-dir`, `--bind`, `--non-interactive`.
+- Default workspaces follow `~/.openclaw/workspace-<agentId>`.
+- Add `bindings` to route inbound messages (the wizard can do this).
+- Non-interactive flags: `--model`, `--agent-dir`, `--bind`, `--non-interactive`.
 
 ## Related docs
 
-* Onboarding hub: [Onboarding (CLI)](/start/wizard)
-* Full reference: [CLI Setup Reference](/start/wizard-cli-reference)
-* Command reference: [`openclaw onboard`](/cli/onboard)
+- Onboarding hub: [Onboarding (CLI)](/start/wizard)
+- Full reference: [CLI Setup Reference](/start/wizard-cli-reference)
+- Command reference: [`openclaw onboard`](/cli/onboard)

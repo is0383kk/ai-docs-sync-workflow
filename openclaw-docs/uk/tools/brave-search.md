@@ -1,0 +1,146 @@
+---
+read_when:
+    - Ви хочете використовувати Brave Search для web_search
+    - Потрібен BRAVE_API_KEY або відомості про план
+summary: Налаштування Brave Search API для web_search
+title: Пошук Brave
+x-i18n:
+    generated_at: "2026-05-06T07:08:37Z"
+    model: gpt-5.5
+    provider: openai
+    source_hash: d2bff7589ddb54d002853898c6fc37e613fd32b0fa69cb0d712d5955973efb39
+    source_path: tools/brave-search.md
+    workflow: 16
+---
+
+OpenClaw підтримує Brave Search API як провайдера `web_search`.
+
+## Отримання API-ключа
+
+1. Створіть обліковий запис Brave Search API на [https://brave.com/search/api/](https://brave.com/search/api/)
+2. На панелі керування виберіть план **Search** і згенеруйте API-ключ.
+3. Збережіть ключ у конфігурації або задайте `BRAVE_API_KEY` у середовищі Gateway.
+
+## Приклад конфігурації
+
+```json5
+{
+  plugins: {
+    entries: {
+      brave: {
+        config: {
+          webSearch: {
+            apiKey: "BRAVE_API_KEY_HERE",
+            mode: "web", // or "llm-context"
+            baseUrl: "https://api.search.brave.com", // optional proxy/base URL override
+          },
+        },
+      },
+    },
+  },
+  tools: {
+    web: {
+      search: {
+        provider: "brave",
+        maxResults: 5,
+        timeoutSeconds: 30,
+      },
+    },
+  },
+}
+```
+
+Налаштування пошуку Brave, специфічні для провайдера, тепер розміщуються в `plugins.entries.brave.config.webSearch.*`.
+Застарілий `tools.web.search.apiKey` досі завантажується через shim сумісності, але це більше не канонічний шлях конфігурації.
+
+`webSearch.mode` керує транспортом Brave:
+
+- `web` (за замовчуванням): звичайний вебпошук Brave із заголовками, URL-адресами та фрагментами
+- `llm-context`: Brave LLM Context API із попередньо витягнутими текстовими фрагментами та джерелами для обґрунтування
+
+`webSearch.baseUrl` може спрямовувати запити Brave до довіреного Brave-сумісного проксі
+або gateway. OpenClaw додає `/res/v1/web/search` або `/res/v1/llm/context` до
+налаштованої базової URL-адреси та зберігає базову URL-адресу в ключі кешу. Публічні
+кінцеві точки мають використовувати `https://`; `http://` приймається лише для довірених loopback
+або проксі-хостів приватної мережі.
+
+## Параметри інструмента
+
+<ParamField path="query" type="string" required>
+Пошуковий запит.
+</ParamField>
+
+<ParamField path="count" type="number" default="5">
+Кількість результатів для повернення (1–10).
+</ParamField>
+
+<ParamField path="country" type="string">
+2-літерний код країни ISO (наприклад, `US`, `DE`).
+</ParamField>
+
+<ParamField path="language" type="string">
+Код мови ISO 639-1 для результатів пошуку (наприклад, `en`, `de`, `fr`).
+</ParamField>
+
+<ParamField path="search_lang" type="string">
+Код мови пошуку Brave (наприклад, `en`, `en-gb`, `zh-hans`).
+</ParamField>
+
+<ParamField path="ui_lang" type="string">
+Код мови ISO для елементів інтерфейсу.
+</ParamField>
+
+<ParamField path="freshness" type="'day' | 'week' | 'month' | 'year'">
+Фільтр часу — `day` означає 24 години.
+</ParamField>
+
+<ParamField path="date_after" type="string">
+Лише результати, опубліковані після цієї дати (`YYYY-MM-DD`).
+</ParamField>
+
+<ParamField path="date_before" type="string">
+Лише результати, опубліковані до цієї дати (`YYYY-MM-DD`).
+</ParamField>
+
+**Приклади:**
+
+```javascript
+// Country and language-specific search
+await web_search({
+  query: "renewable energy",
+  country: "DE",
+  language: "de",
+});
+
+// Recent results (past week)
+await web_search({
+  query: "AI news",
+  freshness: "week",
+});
+
+// Date range search
+await web_search({
+  query: "AI developments",
+  date_after: "2024-01-01",
+  date_before: "2024-06-30",
+});
+```
+
+## Примітки
+
+- OpenClaw використовує план Brave **Search**. Якщо у вас є застаріла підписка (наприклад, початковий безплатний план із 2 000 запитів на місяць), вона залишається чинною, але не включає новіші функції, як-от LLM Context або вищі ліміти частоти запитів.
+- Кожен план Brave включає **\$5/місяць безплатного кредиту** (з поновленням). План Search коштує \$5 за 1 000 запитів, тож кредит покриває 1 000 запитів на місяць. Установіть ліміт використання на панелі керування Brave, щоб уникнути неочікуваних витрат. Поточні плани дивіться на [порталі Brave API](https://brave.com/search/api/).
+- План Search включає кінцеву точку LLM Context і права на AI-виведення. Зберігання результатів для навчання або налаштування моделей потребує плану з явними правами на зберігання. Дивіться [Умови надання послуг](https://api-dashboard.search.brave.com/terms-of-service) Brave.
+- Режим `llm-context` повертає обґрунтовані записи джерел замість звичайної форми фрагментів вебпошуку.
+- Режим `llm-context` підтримує `freshness` і обмежені діапазони `date_after` + `date_before`. Він не підтримує `ui_lang`; `date_before` без `date_after` відхиляється, оскільки Brave вимагає, щоб користувацькі діапазони свіжості містили і початкову, і кінцеву дати.
+- `ui_lang` має містити підтег регіону, як-от `en-US`.
+- Результати кешуються за замовчуванням на 15 хвилин (налаштовується через `cacheTtlMinutes`).
+- Користувацькі значення `webSearch.baseUrl` включаються в ідентичність кешу Brave, тому
+  відповіді, специфічні для проксі, не конфліктують.
+- Увімкніть діагностичний прапорець `brave.http`, щоб під час усунення несправностей журналювати URL-адреси/параметри запитів Brave, стан/час відповіді та події влучання/промаху/запису пошукового кешу. Прапорець ніколи не журналює API-ключ або тіла відповідей, але пошукові запити можуть бути конфіденційними.
+
+## Пов’язане
+
+- [Огляд вебпошуку](/uk/tools/web) -- усі провайдери та автовиявлення
+- [Пошук Perplexity](/uk/tools/perplexity-search) -- структуровані результати з фільтрацією за доменами
+- [Пошук Exa](/uk/tools/exa-search) -- нейронний пошук із витягуванням вмісту

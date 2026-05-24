@@ -1,13 +1,17 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Tavily
+---
+summary: "Tavily search and extract tools"
+read_when:
+  - You want Tavily-backed web search
+  - You need a Tavily API key
+  - You want Tavily as a web_search provider
+  - You want content extraction from URLs
+title: "Tavily"
+---
 
 [Tavily](https://tavily.com) is a search API designed for AI applications. OpenClaw exposes it in two ways:
 
-* as the `web_search` provider for the generic search tool
-* as explicit plugin tools: `tavily_search` and `tavily_extract`
+- as the `web_search` provider for the generic search tool
+- as explicit plugin tools: `tavily_search` and `tavily_extract`
 
 Tavily returns structured results optimized for LLM consumption with configurable search depth, topic filtering, domain filters, AI-generated answer summaries, and content extraction from URLs (including JavaScript-rendered pages).
 
@@ -24,9 +28,8 @@ Tavily returns structured results optimized for LLM consumption with configurabl
   <Step title="Get an API key">
     Create a Tavily account at [tavily.com](https://tavily.com), then generate an API key in the dashboard.
   </Step>
-
   <Step title="Configure the plugin and provider">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       plugins: {
         entries: {
@@ -51,14 +54,13 @@ Tavily returns structured results optimized for LLM consumption with configurabl
     }
     ```
   </Step>
-
   <Step title="Verify search runs">
     Trigger a `web_search` from any agent, or call `tavily_search` directly.
   </Step>
 </Steps>
 
 <Tip>
-  Choosing Tavily in onboarding or `openclaw configure --section web` enables the bundled Tavily plugin automatically.
+Choosing Tavily in onboarding or `openclaw configure --section web` enables the bundled Tavily plugin automatically.
 </Tip>
 
 ## Tool reference
@@ -105,7 +107,7 @@ Extract depth tradeoff:
 | `advanced` | JS-rendered SPAs, dynamic content, tables. |
 
 <Tip>
-  Batch larger URL lists into multiple `tavily_extract` calls (max 20 per request). Use `query` plus `chunks_per_source` to get only relevant content instead of full pages.
+Batch larger URL lists into multiple `tavily_extract` calls (max 20 per request). Use `query` plus `chunks_per_source` to get only relevant content instead of full pages.
 </Tip>
 
 ## Choosing the right tool
@@ -117,7 +119,7 @@ Extract depth tradeoff:
 | Extract content from specific URLs   | `tavily_extract` |
 
 <Note>
-  The generic `web_search` tool with Tavily as provider supports `query` and `count` (up to 20 results). For Tavily-specific controls (`search_depth`, `topic`, `include_answer`, domain filters, time range), use `tavily_search` instead.
+The generic `web_search` tool with Tavily as provider supports `query` and `count` (up to 20 results). For Tavily-specific controls (`search_depth`, `topic`, `include_answer`, domain filters, time range), use `tavily_search` instead.
 </Note>
 
 ## Advanced configuration
@@ -130,6 +132,7 @@ Extract depth tradeoff:
     2. `TAVILY_API_KEY` from the gateway environment.
 
     `tavily_extract` raises a setup error if neither is present.
+
   </Accordion>
 
   <Accordion title="Custom base URL">
@@ -147,15 +150,12 @@ Extract depth tradeoff:
   <Card title="Web Search overview" href="/tools/web" icon="magnifying-glass">
     All providers and auto-detection rules.
   </Card>
-
   <Card title="Firecrawl" href="/tools/firecrawl" icon="fire">
     Search plus scraping with content extraction.
   </Card>
-
   <Card title="Exa Search" href="/tools/exa-search" icon="binoculars">
     Neural search with content extraction.
   </Card>
-
   <Card title="Configuration" href="/gateway/configuration" icon="gear">
     Full config schema for plugin entries and tool routing.
   </Card>

@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Browser login
+---
+summary: "Manual logins for browser automation + X/Twitter posting"
+read_when:
+  - You need to log into sites for browser automation
+  - You want to post updates to X/Twitter
+title: "Browser login"
+---
 
 ## Manual login (recommended)
 
@@ -18,16 +20,16 @@ OpenClaw controls a **dedicated Chrome profile** (named `openclaw`, orange-tinte
 
 For agent browser tool calls:
 
-* Default choice: the agent should use its isolated `openclaw` browser.
-* Use `profile="user"` only when existing logged-in sessions matter and the user is at the computer to click/approve any attach prompt.
-* If you have multiple user-browser profiles, specify the profile explicitly instead of guessing.
+- Default choice: the agent should use its isolated `openclaw` browser.
+- Use `profile="user"` only when existing logged-in sessions matter and the user is at the computer to click/approve any attach prompt.
+- If you have multiple user-browser profiles, specify the profile explicitly instead of guessing.
 
 Two easy ways to access it:
 
 1. **Ask the agent to open the browser** and then log in yourself.
 2. **Open it via CLI**:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw browser start
 openclaw browser open https://x.com
 ```
@@ -36,8 +38,8 @@ If you have multiple profiles, pass `--browser-profile <name>` (the default is `
 
 ## X/Twitter: recommended flow
 
-* **Read/search/threads:** use the **host** browser (manual login).
-* **Post updates:** use the **host** browser (manual login).
+- **Read/search/threads:** use the **host** browser (manual login).
+- **Post updates:** use the **host** browser (manual login).
 
 ## Sandboxing + host browser access
 
@@ -45,7 +47,7 @@ Sandboxed browser sessions are **more likely** to trigger bot detection. For X/T
 
 If the agent is sandboxed, the browser tool defaults to the sandbox. To allow host control:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -62,7 +64,7 @@ If the agent is sandboxed, the browser tool defaults to the sandbox. To allow ho
 
 Then open the host browser yourself (CLI invocations always run against the host browser):
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw browser open https://x.com --browser-profile openclaw
 ```
 
@@ -70,6 +72,6 @@ The agent's `browser` tool calls can then target the host once `sandbox.browser.
 
 ## Related
 
-* [Browser](/tools/browser)
-* [Browser Linux troubleshooting](/tools/browser-linux-troubleshooting)
-* [Browser WSL2 troubleshooting](/tools/browser-wsl2-windows-remote-cdp-troubleshooting)
+- [Browser](/tools/browser)
+- [Browser Linux troubleshooting](/tools/browser-linux-troubleshooting)
+- [Browser WSL2 troubleshooting](/tools/browser-wsl2-windows-remote-cdp-troubleshooting)

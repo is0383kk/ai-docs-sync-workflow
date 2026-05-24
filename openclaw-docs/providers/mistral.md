@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Mistral
+---
+summary: "Use Mistral models and Voxtral transcription with OpenClaw"
+read_when:
+  - You want to use Mistral models in OpenClaw
+  - You want Voxtral realtime transcription for Voice Call
+  - You need Mistral API key onboarding and model refs
+title: "Mistral"
+---
 
 OpenClaw includes a bundled Mistral plugin that registers four contracts: chat completions, media understanding (Voxtral batch transcription), realtime STT for Voice Call (Voxtral Realtime), and memory embeddings (`mistral-embed`).
 
@@ -26,30 +29,28 @@ OpenClaw includes a bundled Mistral plugin that registers four contracts: chat c
   <Step title="Get your API key">
     Create an API key in the [Mistral Console](https://console.mistral.ai/).
   </Step>
-
   <Step title="Run onboarding">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --auth-choice mistral-api-key
     ```
 
     Or pass the key directly:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --mistral-api-key "$MISTRAL_API_KEY"
     ```
-  </Step>
 
+  </Step>
   <Step title="Set a default model">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       env: { MISTRAL_API_KEY: "sk-..." },
       agents: { defaults: { model: { primary: "mistral/mistral-large-latest" } } },
     }
     ```
   </Step>
-
   <Step title="Verify the model is available">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw models list --provider mistral
     ```
   </Step>
@@ -79,7 +80,7 @@ OpenClaw currently ships this bundled Mistral catalog:
 
 After onboarding, smoke-test Medium 3.5 without starting the Gateway:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw infer model run --local \
   --model mistral/mistral-medium-3-5 \
   --prompt "Reply with exactly: mistral-ok" \
@@ -88,7 +89,7 @@ openclaw infer model run --local \
 
 To browse the bundled catalog row before changing config:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw models list --all --provider mistral --plain
 ```
 
@@ -97,7 +98,7 @@ openclaw models list --all --provider mistral --plain
 Use Voxtral for batch audio transcription through the media understanding
 pipeline.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     media: {
@@ -111,7 +112,7 @@ pipeline.
 ```
 
 <Tip>
-  The media transcription path uses `/v1/audio/transcriptions`. The default audio model for Mistral is `voxtral-mini-latest`.
+The media transcription path uses `/v1/audio/transcriptions`. The default audio model for Mistral is `voxtral-mini-latest`.
 </Tip>
 
 ## Voice Call streaming STT
@@ -127,7 +128,7 @@ streaming STT provider.
 | Sample rate  | `...mistral.sampleRate`                                                | `8000`                                  |
 | Target delay | `...mistral.targetStreamingDelayMs`                                    | `800`                                   |
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -151,9 +152,9 @@ streaming STT provider.
 ```
 
 <Note>
-  OpenClaw defaults Mistral realtime STT to `pcm_mulaw` at 8 kHz so Voice Call
-  can forward Twilio media frames directly. Use `encoding: "pcm_s16le"` and a
-  matching `sampleRate` only if your upstream stream is already raw PCM.
+OpenClaw defaults Mistral realtime STT to `pcm_mulaw` at 8 kHz so Voice Call
+can forward Twilio media frames directly. Use `encoding: "pcm_s16le"` and a
+matching `sampleRate` only if your upstream stream is already raw PCM.
 </Note>
 
 ## Advanced configuration
@@ -164,24 +165,24 @@ streaming STT provider.
 
     OpenClaw maps the session **thinking** level to Mistral's API:
 
-    | OpenClaw thinking level                                              | Mistral `reasoning_effort` |
-    | -------------------------------------------------------------------- | -------------------------- |
-    | **off** / **minimal**                                                | `none`                     |
-    | **low** / **medium** / **high** / **xhigh** / **adaptive** / **max** | `high`                     |
+    | OpenClaw thinking level                          | Mistral `reasoning_effort` |
+    | ------------------------------------------------ | -------------------------- |
+    | **off** / **minimal**                            | `none`                     |
+    | **low** / **medium** / **high** / **xhigh** / **adaptive** / **max** | `high`     |
 
     <Warning>
-      Do not combine Medium 3.5 reasoning mode with `temperature: 0`. The Mistral
-      HTTP API rejects `reasoning_effort="high"` plus `temperature: 0` with a 400
-      response. Leave temperature unset so Mistral uses its default, or follow
-      the [Medium 3.5 recommended settings](https://huggingface.co/mistralai/Mistral-Medium-3.5-128B)
-      and use `temperature: 0.7` for high reasoning. For deterministic direct
-      answers, turn thinking off/minimal so OpenClaw sends
-      `reasoning_effort: "none"` before you lower temperature.
+    Do not combine Medium 3.5 reasoning mode with `temperature: 0`. The Mistral
+    HTTP API rejects `reasoning_effort="high"` plus `temperature: 0` with a 400
+    response. Leave temperature unset so Mistral uses its default, or follow
+    the [Medium 3.5 recommended settings](https://huggingface.co/mistralai/Mistral-Medium-3.5-128B)
+    and use `temperature: 0.7` for high reasoning. For deterministic direct
+    answers, turn thinking off/minimal so OpenClaw sends
+    `reasoning_effort: "none"` before you lower temperature.
     </Warning>
 
     Example model-scoped config for Medium 3.5 reasoning:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -197,25 +198,28 @@ streaming STT provider.
     ```
 
     <Note>
-      Other bundled Mistral catalog models do not use this parameter. Keep using `magistral-*` models when you want Mistral's native reasoning-first behavior.
+    Other bundled Mistral catalog models do not use this parameter. Keep using `magistral-*` models when you want Mistral's native reasoning-first behavior.
     </Note>
+
   </Accordion>
 
   <Accordion title="Memory embeddings">
     Mistral can serve memory embeddings via `/v1/embeddings` (default model: `mistral-embed`).
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       memorySearch: { provider: "mistral" },
     }
     ```
+
   </Accordion>
 
   <Accordion title="Auth and base URL">
-    * Mistral auth uses `MISTRAL_API_KEY` (Bearer header).
-    * Provider base URL defaults to `https://api.mistral.ai/v1` and accepts the standard OpenAI-compatible chat-completions request shape.
-    * Onboarding default model is `mistral/mistral-large-latest`.
-    * Override the base URL under `models.providers.mistral.baseUrl` only when Mistral explicitly publishes a regional endpoint you need.
+    - Mistral auth uses `MISTRAL_API_KEY` (Bearer header).
+    - Provider base URL defaults to `https://api.mistral.ai/v1` and accepts the standard OpenAI-compatible chat-completions request shape.
+    - Onboarding default model is `mistral/mistral-large-latest`.
+    - Override the base URL under `models.providers.mistral.baseUrl` only when Mistral explicitly publishes a regional endpoint you need.
+
   </Accordion>
 </AccordionGroup>
 
@@ -225,7 +229,6 @@ streaming STT provider.
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Media understanding" href="/nodes/media-understanding" icon="microphone">
     Audio transcription setup and provider selection.
   </Card>

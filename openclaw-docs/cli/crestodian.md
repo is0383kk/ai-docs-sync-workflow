@@ -1,16 +1,22 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Crestodian
+---
+summary: "CLI reference and security model for Crestodian, the configless-safe setup and repair helper"
+read_when:
+  - You run openclaw with no command after setup and want to understand Crestodian
+  - You need a configless-safe way to inspect or repair OpenClaw
+  - You are designing or enabling message-channel rescue mode
+title: "Crestodian"
+---
 
 # `openclaw crestodian`
 
 Crestodian is OpenClaw's local setup, repair, and configuration helper. It is
 designed to stay reachable when the normal agent path is broken.
 
-Running `openclaw` with no command starts Crestodian in an interactive terminal.
-Running `openclaw crestodian` starts the same helper explicitly.
+Running `openclaw` with no command starts classic onboarding first when the
+active config file is missing or has no authored settings (empty or
+metadata-only). After a config file has authored settings, running `openclaw`
+with no command starts Crestodian in an interactive terminal. Running
+`openclaw crestodian` starts the same helper explicitly.
 
 ## What Crestodian shows
 
@@ -18,11 +24,11 @@ On startup, interactive Crestodian opens the same TUI shell used by
 `openclaw tui`, with a Crestodian chat backend. The chat log starts with a short
 greeting:
 
-* when to start Crestodian
-* the model or deterministic planner path Crestodian is actually using
-* config validity and the default agent
-* Gateway reachability from the first startup probe
-* the next debug action Crestodian can take
+- when to start Crestodian
+- the model or deterministic planner path Crestodian is actually using
+- config validity and the default agent
+- Gateway reachability from the first startup probe
+- the next debug action Crestodian can take
 
 It does not dump secrets or load plugin CLI commands just to start. The TUI
 still provides the normal header, chat log, status line, footer, autocomplete,
@@ -39,7 +45,7 @@ guidance to review source whenever the docs are not enough.
 
 ## Examples
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw
 openclaw crestodian
 openclaw crestodian --json
@@ -52,7 +58,7 @@ openclaw onboard --modern
 
 Inside the Crestodian TUI:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 status
 health
 doctor
@@ -82,15 +88,16 @@ quit
 
 Crestodian's startup path is deliberately small. It can run when:
 
-* `openclaw.json` is missing
-* `openclaw.json` is invalid
-* the Gateway is down
-* plugin command registration is unavailable
-* no agent has been configured yet
+- `openclaw.json` is missing
+- `openclaw.json` is invalid
+- the Gateway is down
+- plugin command registration is unavailable
+- no agent has been configured yet
 
 `openclaw --help` and `openclaw --version` still use the normal fast paths.
-Noninteractive `openclaw` exits with a short message instead of printing root
-help, because the no-command product is Crestodian.
+Noninteractive bare `openclaw` exits with a short message instead of printing
+root help. On a fresh install, the message points to non-interactive onboarding;
+after setup, it points to one-shot Crestodian commands.
 
 ## Operations and approval
 
@@ -98,34 +105,34 @@ Crestodian uses typed operations instead of editing config ad hoc.
 
 Read-only operations can run immediately:
 
-* show overview
-* list agents
-* list installed plugins
-* search ClawHub plugins
-* show model/backend status
-* run status or health checks
-* check Gateway reachability
-* run doctor without interactive fixes
-* validate config
-* show the audit-log path
+- show overview
+- list agents
+- list installed plugins
+- search ClawHub plugins
+- show model/backend status
+- run status or health checks
+- check Gateway reachability
+- run doctor without interactive fixes
+- validate config
+- show the audit-log path
 
 Persistent operations require conversational approval in interactive mode unless
 you pass `--yes` for a direct command:
 
-* write config
-* run `config set`
-* set supported SecretRef values through `config set-ref`
-* run setup/onboarding bootstrap
-* change the default model
-* start, stop, or restart the Gateway
-* create agents
-* install plugins from ClawHub or npm
-* uninstall plugins
-* run doctor repairs that rewrite config or state
+- write config
+- run `config set`
+- set supported SecretRef values through `config set-ref`
+- run setup/onboarding bootstrap
+- change the default model
+- start, stop, or restart the Gateway
+- create agents
+- install plugins from ClawHub or npm
+- uninstall plugins
+- run doctor repairs that rewrite config or state
 
 Applied writes are recorded in:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 ~/.openclaw/audit/crestodian.jsonl
 ```
 
@@ -139,7 +146,7 @@ Plain `openclaw onboard` still runs classic onboarding.
 `setup` is the chat-first onboarding bootstrap. It writes only through typed
 config operations and asks for approval first.
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 setup
 setup workspace ~/Projects/work
 setup workspace ~/Projects/work model openai/gpt-5.5
@@ -148,11 +155,11 @@ setup workspace ~/Projects/work model openai/gpt-5.5
 When no model is configured, setup selects the first usable backend in this
 order and tells you what it chose:
 
-* existing explicit model, if already configured
-* `OPENAI_API_KEY` -> `openai/gpt-5.5`
-* `ANTHROPIC_API_KEY` -> `anthropic/claude-opus-4-7`
-* Claude Code CLI -> `claude-cli/claude-opus-4-7`
-* Codex -> `openai/gpt-5.5` through the Codex app-server harness
+- existing explicit model, if already configured
+- `OPENAI_API_KEY` -> `openai/gpt-5.5`
+- `ANTHROPIC_API_KEY` -> `anthropic/claude-opus-4-7`
+- Claude Code CLI -> `claude-cli/claude-opus-4-7`
+- Codex -> `openai/gpt-5.5` through the Codex app-server harness
 
 If none are available, setup still writes the default workspace and leaves the
 model unset. Install or log into Codex/Claude Code, or expose
@@ -166,8 +173,8 @@ planner turn through OpenClaw's normal runtime paths. It first uses the
 configured OpenClaw model. If no configured model is usable yet, it can fall
 back to local runtimes already present on the machine:
 
-* Claude Code CLI: `claude-cli/claude-opus-4-7`
-* Codex app-server harness: `openai/gpt-5.5`
+- Claude Code CLI: `claude-cli/claude-opus-4-7`
+- Codex app-server harness: `openai/gpt-5.5`
 
 The model-assisted planner cannot mutate config directly. It must translate the
 request into one of Crestodian's typed commands, then the normal approval and
@@ -184,7 +191,7 @@ be used as a config editor.
 
 Use a natural-language selector to leave Crestodian and open the normal TUI:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 talk to agent
 talk to work agent
 switch to main agent
@@ -196,7 +203,7 @@ agent TUI directly. They do not start Crestodian.
 After switching into the normal TUI, use `/crestodian` to return to Crestodian.
 You can include a follow-up request:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 /crestodian
 /crestodian restart gateway
 ```
@@ -211,11 +218,11 @@ still receives commands.
 
 Supported text command:
 
-* `/crestodian <request>`
+- `/crestodian <request>`
 
 Operator flow:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 You, in a trusted owner DM: /crestodian status
 OpenClaw: Crestodian rescue mode. Gateway reachable: no. Config valid: no.
 You: /crestodian restart gateway
@@ -226,7 +233,7 @@ OpenClaw: Applied. Audit entry written.
 
 Agent creation can also be queued from the local prompt or rescue mode:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 create agent work workspace ~/Projects/work model openai/gpt-5.5
 /crestodian create agent work workspace ~/Projects/work
 ```
@@ -236,32 +243,32 @@ repair, not like normal chat.
 
 Security contract for remote rescue:
 
-* Disabled when sandboxing is active. If an agent/session is sandboxed,
+- Disabled when sandboxing is active. If an agent/session is sandboxed,
   Crestodian must refuse remote rescue and explain that local CLI repair is
   required.
-* Default effective state is `auto`: allow remote rescue only in trusted YOLO
+- Default effective state is `auto`: allow remote rescue only in trusted YOLO
   operation, where the runtime already has unsandboxed local authority.
-* Require an explicit owner identity. Rescue must not accept wildcard sender
+- Require an explicit owner identity. Rescue must not accept wildcard sender
   rules, open group policy, unauthenticated webhooks, or anonymous channels.
-* Owner DMs only by default. Group/channel rescue requires explicit opt-in.
-* Plugin search and list are read-only. Plugin install is local-only by default
+- Owner DMs only by default. Group/channel rescue requires explicit opt-in.
+- Plugin search and list are read-only. Plugin install is local-only by default
   because it downloads executable code. Plugin uninstall can be allowed as an
   approved repair operation when rescue policy permits persistent writes.
-* Remote rescue cannot open the local TUI or switch into an interactive agent
+- Remote rescue cannot open the local TUI or switch into an interactive agent
   session. Use local `openclaw` for agent handoff.
-* Persistent writes still require approval, even in rescue mode.
-* Audit every applied rescue operation. Message-channel rescue records channel,
+- Persistent writes still require approval, even in rescue mode.
+- Audit every applied rescue operation. Message-channel rescue records channel,
   account, sender, and source-address metadata. Config-mutating operations also
   record config hashes before and after.
-* Never echo secrets. SecretRef inspection should report availability, not
+- Never echo secrets. SecretRef inspection should report availability, not
   values.
-* If the Gateway is alive, prefer Gateway typed operations. If the Gateway is
+- If the Gateway is alive, prefer Gateway typed operations. If the Gateway is
   dead, use only the minimal local repair surface that does not depend on the
   normal agent loop.
 
 Config shape:
 
-```jsonc theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```jsonc
 {
   "crestodian": {
     "rescue": {
@@ -274,56 +281,57 @@ Config shape:
 
 `enabled` should accept:
 
-* `"auto"`: default. Allow only when the effective runtime is YOLO and
+- `"auto"`: default. Allow only when the effective runtime is YOLO and
   sandboxing is off.
-* `false`: never allow message-channel rescue.
-* `true`: explicitly allow rescue when the owner/channel checks pass. This
+- `false`: never allow message-channel rescue.
+- `true`: explicitly allow rescue when the owner/channel checks pass. This
   still must not bypass the sandboxing denial.
 
 The default `"auto"` YOLO posture is:
 
-* sandbox mode resolves to `off`
-* `tools.exec.security` resolves to `full`
-* `tools.exec.ask` resolves to `off`
+- sandbox mode resolves to `off`
+- `tools.exec.security` resolves to `full`
+- `tools.exec.ask` resolves to `off`
 
 Remote rescue is covered by the Docker lane:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm test:docker:crestodian-rescue
 ```
 
 Configless local planner fallback is covered by:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm test:docker:crestodian-planner
 ```
 
 An opt-in live channel command-surface smoke checks `/crestodian status` plus a
 persistent approval roundtrip through the rescue handler:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm test:live:crestodian-rescue-channel
 ```
 
-Fresh configless setup through Crestodian is covered by:
+Configless setup through explicit Crestodian commands is covered by:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm test:docker:crestodian-first-run
 ```
 
-That lane starts with an empty state dir, routes bare `openclaw` to Crestodian,
-sets the default model, creates an additional agent, configures Discord through
-a plugin enablement plus token SecretRef, validates config, and checks the audit
-log. QA Lab also has a repo-backed scenario for the same Ring 0 flow:
+That lane starts with an empty state dir, verifies the modern onboard Crestodian
+entrypoint, sets the default model, creates an additional agent, configures
+Discord through a plugin enablement plus token SecretRef, validates config, and
+checks the audit log. QA Lab also has a repo-backed scenario for the same Ring 0
+flow:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm openclaw qa suite --scenario crestodian-ring-zero-setup
 ```
 
 ## Related
 
-* [CLI reference](/cli)
-* [Doctor](/cli/doctor)
-* [TUI](/cli/tui)
-* [Sandbox](/cli/sandbox)
-* [Security](/cli/security)
+- [CLI reference](/cli)
+- [Doctor](/cli/doctor)
+- [TUI](/cli/tui)
+- [Sandbox](/cli/sandbox)
+- [Security](/cli/security)

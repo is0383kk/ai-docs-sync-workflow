@@ -1,25 +1,28 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# QA channel
+---
+summary: "Synthetic Slack-class channel plugin for deterministic OpenClaw QA scenarios"
+title: "QA channel"
+read_when:
+  - You are wiring the synthetic QA transport into a local or CI test run
+  - You need the bundled qa-channel config surface
+  - You are iterating on end-to-end QA automation
+---
 
 `qa-channel` is a bundled synthetic message transport for automated OpenClaw QA. It is not a production channel - it exists to exercise the same channel plugin boundary used by real transports while keeping state deterministic and fully inspectable.
 
 ## What it does
 
-* Slack-class target grammar:
-  * `dm:<user>`
-  * `channel:<room>`
-  * `group:<room>`
-  * `thread:<room>/<thread>`
-* Shared `channel:` and `group:` conversations are surfaced to agents as group/channel room turns, so they exercise the same visible-reply and message-tool routing policy used by Discord, Slack, Telegram, and similar transports.
-* HTTP-backed synthetic bus for inbound message injection, outbound transcript capture, thread creation, reactions, edits, deletes, and search/read actions.
-* Host-side self-check runner that writes a Markdown report to `.artifacts/qa-e2e/`.
+- Slack-class target grammar:
+  - `dm:<user>`
+  - `channel:<room>`
+  - `group:<room>`
+  - `thread:<room>/<thread>`
+- Shared `channel:` and `group:` conversations are surfaced to agents as group/channel room turns, so they exercise the same visible-reply and message-tool routing policy used by Discord, Slack, Telegram, and similar transports.
+- HTTP-backed synthetic bus for inbound message injection, outbound transcript capture, thread creation, reactions, edits, deletes, and search/read actions.
+- Host-side self-check runner that writes a Markdown report to `.artifacts/qa-e2e/`.
 
 ## Config
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "channels": {
     "qa-channel": {
@@ -35,33 +38,33 @@
 
 Account keys:
 
-* `enabled` - master toggle for this account.
-* `name` - optional display label.
-* `baseUrl` - synthetic bus URL.
-* `botUserId` - Matrix-style bot user id used in target grammar.
-* `botDisplayName` - display name for outbound messages.
-* `pollTimeoutMs` - long-poll wait window. Integer between 100 and 30000.
-* `allowFrom` - sender allowlist (user ids or `"*"`). Direct messages and
+- `enabled` - master toggle for this account.
+- `name` - optional display label.
+- `baseUrl` - synthetic bus URL.
+- `botUserId` - Matrix-style bot user id used in target grammar.
+- `botDisplayName` - display name for outbound messages.
+- `pollTimeoutMs` - long-poll wait window. Integer between 100 and 30000.
+- `allowFrom` - sender allowlist (user ids or `"*"`). Direct messages and
   allowlisted group policy both use these synthetic sender ids.
-* `groupPolicy` - shared-room policy: `"open"` (default), `"allowlist"`, or
+- `groupPolicy` - shared-room policy: `"open"` (default), `"allowlist"`, or
   `"disabled"`.
-* `groupAllowFrom` - optional shared-room sender allowlist. When omitted under
+- `groupAllowFrom` - optional shared-room sender allowlist. When omitted under
   `"allowlist"`, QA Channel falls back to `allowFrom`.
-* `groups.<room>.requireMention` - require a bot mention before replying in a
+- `groups.<room>.requireMention` - require a bot mention before replying in a
   specific group/channel room. `groups."*"` sets the default.
-* `defaultTo` - fallback target when none is supplied.
-* `actions.messages` / `actions.reactions` / `actions.search` / `actions.threads` - per-action tool gating.
+- `defaultTo` - fallback target when none is supplied.
+- `actions.messages` / `actions.reactions` / `actions.search` / `actions.threads` - per-action tool gating.
 
 Multi-account keys at the top level:
 
-* `accounts` - record of named per-account overrides keyed by account id.
-* `defaultAccount` - preferred account id when multiple are configured.
+- `accounts` - record of named per-account overrides keyed by account id.
+- `defaultAccount` - preferred account id when multiple are configured.
 
 ## Runners
 
 Host-side self-check (writes a Markdown report under `.artifacts/qa-e2e/`):
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm qa:e2e
 ```
 
@@ -69,7 +72,7 @@ This routes through `qa-lab`, starts the in-repo QA bus, boots the bundled `qa-c
 
 Full repo-backed scenario suite:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm openclaw qa suite
 ```
 
@@ -77,7 +80,7 @@ Runs scenarios in parallel against the QA gateway lane. See [QA overview](/conce
 
 Docker-backed QA site (gateway + QA Lab debugger UI in one stack):
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm qa:lab:up
 ```
 
@@ -85,8 +88,8 @@ Builds the QA site, starts the Docker-backed gateway + QA Lab stack, and prints 
 
 ## Related
 
-* [QA overview](/concepts/qa-e2e-automation) - overall stack, transport adapters, scenario authoring
-* [Matrix QA](/concepts/qa-matrix) - example live-transport runner that drives a real channel
-* [Pairing](/channels/pairing)
-* [Groups](/channels/groups)
-* [Channels overview](/channels)
+- [QA overview](/concepts/qa-e2e-automation) - overall stack, transport adapters, scenario authoring
+- [Matrix QA](/concepts/qa-matrix) - example live-transport runner that drives a real channel
+- [Pairing](/channels/pairing)
+- [Groups](/channels/groups)
+- [Channels overview](/channels)

@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Canvas plugin
+---
+summary: "Experimental Canvas control and A2UI rendering surfaces for paired nodes."
+read_when:
+  - You are installing, configuring, or auditing the canvas plugin
+title: "Canvas plugin"
+---
 
 # Canvas plugin
 
@@ -10,8 +11,8 @@ Experimental Canvas control and A2UI rendering surfaces for paired nodes.
 
 ## Distribution
 
-* Package: `@openclaw/canvas-plugin`
-* Install route: included in OpenClaw
+- Package: `@openclaw/canvas-plugin`
+- Install route: included in OpenClaw
 
 ## Surface
 

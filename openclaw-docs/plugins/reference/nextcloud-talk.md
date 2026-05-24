@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Nextcloud Talk plugin
+---
+summary: "Adds the Nextcloud Talk channel surface for sending and receiving OpenClaw messages."
+read_when:
+  - You are installing, configuring, or auditing the nextcloud-talk plugin
+title: "Nextcloud Talk plugin"
+---
 
 # Nextcloud Talk plugin
 
@@ -10,8 +11,8 @@ Adds the Nextcloud Talk channel surface for sending and receiving OpenClaw messa
 
 ## Distribution
 
-* Package: `@openclaw/nextcloud-talk`
-* Install route: npm; ClawHub
+- Package: `@openclaw/nextcloud-talk`
+- Install route: npm; ClawHub
 
 ## Surface
 
@@ -19,4 +20,4 @@ channels: nextcloud-talk
 
 ## Related docs
 
-* [nextcloud-talk](/channels/nextcloud-talk)
+- [nextcloud-talk](/channels/nextcloud-talk)

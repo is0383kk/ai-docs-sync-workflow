@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# LM Studio
+---
+summary: "Run OpenClaw with LM Studio"
+read_when:
+  - You want to run OpenClaw with open source models via LM Studio
+  - You want to set up and configure LM Studio
+title: "LM Studio"
+---
 
 LM Studio is a friendly yet powerful app for running open-weight models on your own hardware. It lets you run llama.cpp (GGUF) or MLX models (Apple Silicon). Comes in a GUI package or headless daemon (`llmster`). For product and setup docs, see [lmstudio.ai](https://lmstudio.ai/).
 
@@ -10,7 +12,7 @@ LM Studio is a friendly yet powerful app for running open-weight models on your 
 
 1. Install LM Studio (desktop) or `llmster` (headless), then start the local server:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 curl -fsSL https://lmstudio.ai/install.sh | bash
 ```
 
@@ -18,11 +20,11 @@ curl -fsSL https://lmstudio.ai/install.sh | bash
 
 Make sure you either start the desktop app or run the daemon using the following command:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 lms daemon up
 ```
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 lms server start --port 1234
 ```
 
@@ -30,7 +32,7 @@ If you are using the app, make sure you have JIT enabled for a smooth experience
 
 3. If LM Studio authentication is enabled, set `LM_API_TOKEN`:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export LM_API_TOKEN="your-lm-studio-api-token"
 ```
 
@@ -40,7 +42,7 @@ For LM Studio auth setup details, see [LM Studio Authentication](https://lmstudi
 
 4. Run onboarding and choose `LM Studio`:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard
 ```
 
@@ -48,7 +50,7 @@ openclaw onboard
 
 You can also set or change it later:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw models set lmstudio/qwen/qwen3.5-9b
 ```
 
@@ -60,7 +62,7 @@ a model by running `curl http://localhost:1234/api/v1/models` and looking at the
 
 Use non-interactive onboarding when you want to script setup (CI, provisioning, remote bootstrap):
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard \
   --non-interactive \
   --accept-risk \
@@ -69,7 +71,7 @@ openclaw onboard \
 
 Or specify the base URL, model, and optional API key:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard \
   --non-interactive \
   --accept-risk \
@@ -104,13 +106,13 @@ LM Studio is streaming-usage compatible. When it does not emit an OpenAI-shaped
 
 Same streaming usage behavior applies to these OpenAI-compatible local backends:
 
-* vLLM
-* SGLang
-* llama.cpp
-* LocalAI
-* Jan
-* TabbyAPI
-* text-generation-webui
+- vLLM
+- SGLang
+- llama.cpp
+- LocalAI
+- Jan
+- TabbyAPI
+- text-generation-webui
 
 ### Thinking compatibility
 
@@ -125,7 +127,7 @@ normalized the same way when the catalog is loaded.
 
 ### Explicit configuration
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   models: {
     providers: {
@@ -156,14 +158,14 @@ normalized the same way when the catalog is loaded.
 
 Make sure LM Studio is running. If authentication is enabled, also set `LM_API_TOKEN`:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Start via desktop app, or headless:
 lms server start --port 1234
 ```
 
 Verify the API is accessible:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 curl http://localhost:1234/api/v1/models
 ```
 
@@ -171,15 +173,15 @@ curl http://localhost:1234/api/v1/models
 
 If setup reports HTTP 401, verify your API key:
 
-* Check that `LM_API_TOKEN` matches the key configured in LM Studio.
-* For LM Studio auth setup details, see [LM Studio Authentication](https://lmstudio.ai/docs/developer/core/authentication).
-* If your server does not require authentication, leave the key blank during setup.
+- Check that `LM_API_TOKEN` matches the key configured in LM Studio.
+- For LM Studio auth setup details, see [LM Studio Authentication](https://lmstudio.ai/docs/developer/core/authentication).
+- If your server does not require authentication, leave the key blank during setup.
 
 ### Just-in-time model loading
 
 LM Studio supports just-in-time (JIT) model loading, where models are loaded on first request. OpenClaw preloads models through LM Studio's native load endpoint by default, which helps when JIT is disabled. To let LM Studio's JIT, idle TTL, and auto-evict behavior own model lifecycle, disable OpenClaw's preload step:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   models: {
     providers: {
@@ -198,7 +200,7 @@ LM Studio supports just-in-time (JIT) model loading, where models are loaded on 
 
 Use the LM Studio host's reachable address, keep `/v1`, and make sure LM Studio is bound beyond loopback on that machine:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   models: {
     providers: {
@@ -217,6 +219,6 @@ Use the LM Studio host's reachable address, keep `/v1`, and make sure LM Studio 
 
 ## Related
 
-* [Model selection](/concepts/model-providers)
-* [Ollama](/providers/ollama)
-* [Local models](/gateway/local-models)
+- [Model selection](/concepts/model-providers)
+- [Ollama](/providers/ollama)
+- [Local models](/gateway/local-models)

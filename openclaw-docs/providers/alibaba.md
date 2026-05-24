@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Alibaba Model Studio
+---
+summary: "Alibaba Model Studio Wan video generation in OpenClaw"
+title: "Alibaba Model Studio"
+read_when:
+  - You want to use Alibaba Wan video generation in OpenClaw
+  - You need Model Studio or DashScope API key setup for video generation
+---
 
 OpenClaw ships a bundled `alibaba` plugin that registers a video-generation provider for Wan models on Alibaba Model Studio (the international name for DashScope). The plugin is enabled by default; you only need to set an API key.
 
@@ -22,27 +24,27 @@ OpenClaw ships a bundled `alibaba` plugin that registers a video-generation prov
   <Step title="Set an API key">
     Use onboarding to store the key against the `alibaba` provider:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --auth-choice alibaba-model-studio-api-key
     ```
 
     Or pass the key directly during install/onboarding:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --alibaba-model-studio-api-key <your-key>
     ```
 
     Or export any of the accepted env vars before starting the Gateway:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     export MODELSTUDIO_API_KEY=sk-...
     # or DASHSCOPE_API_KEY=...
     # or QWEN_API_KEY=...
     ```
-  </Step>
 
+  </Step>
   <Step title="Set a default video model">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -54,13 +56,13 @@ OpenClaw ships a bundled `alibaba` plugin that registers a video-generation prov
     }
     ```
   </Step>
-
   <Step title="Verify the provider is configured">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw models list --provider alibaba
     ```
 
     The list should include all five bundled Wan models. If `MODELSTUDIO_API_KEY` is unresolved, `openclaw models status --json` reports the missing credential under `auth.unusableProfiles`.
+
   </Step>
 </Steps>
 
@@ -100,7 +102,7 @@ When a request omits `durationSeconds`, the provider sends DashScope's accepted 
   <Accordion title="Override the DashScope base URL">
     The provider defaults to the international DashScope endpoint. To target the China-region endpoint, set:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       models: {
         providers: {
@@ -113,6 +115,7 @@ When a request omits `durationSeconds`, the provider sends DashScope's accepted 
     ```
 
     The provider strips trailing slashes before constructing AIGC task URLs.
+
   </Accordion>
 
   <Accordion title="Auth env priority">
@@ -123,15 +126,17 @@ When a request omits `durationSeconds`, the provider sends DashScope's accepted 
     3. `QWEN_API_KEY`
 
     Configured `auth.profiles` entries (set via `openclaw models auth login`) override env-var resolution. See [Auth profiles in the models FAQ](/help/faq-models#what-is-an-auth-profile) for profile rotation, cooldown, and override mechanics.
+
   </Accordion>
 
   <Accordion title="Relationship to the Qwen plugin">
     Both bundled plugins talk to DashScope and accept overlapping API keys. Use:
 
-    * `alibaba/wan*.*` ids to drive the dedicated Wan video provider documented on this page.
-    * `qwen/*` ids for Qwen chat, embedding, and media understanding (see [Qwen](/providers/qwen)).
+    - `alibaba/wan*.*` ids to drive the dedicated Wan video provider documented on this page.
+    - `qwen/*` ids for Qwen chat, embedding, and media understanding (see [Qwen](/providers/qwen)).
 
     Setting `MODELSTUDIO_API_KEY` once authenticates both plugins because the auth env var list intentionally overlaps; you do not need to onboard each plugin separately.
+
   </Accordion>
 </AccordionGroup>
 
@@ -141,15 +146,12 @@ When a request omits `durationSeconds`, the provider sends DashScope's accepted 
   <Card title="Video generation" href="/tools/video-generation" icon="video">
     Shared video tool parameters and provider selection.
   </Card>
-
   <Card title="Qwen" href="/providers/qwen" icon="microchip">
     Qwen chat, embedding, and media-understanding setup on the same DashScope auth.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/config-agents#agent-defaults" icon="gear">
     Agent defaults and model configuration.
   </Card>
-
   <Card title="Models FAQ" href="/help/faq-models" icon="circle-question">
     Auth profiles, switching models, and resolving "no profile" errors.
   </Card>

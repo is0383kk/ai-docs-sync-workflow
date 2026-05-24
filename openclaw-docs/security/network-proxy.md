@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Network proxy
+---
+summary: "How to route OpenClaw runtime HTTP and WebSocket traffic through an operator-managed filtering proxy"
+title: "Network proxy"
+read_when:
+  - You want defense-in-depth against SSRF and DNS rebinding attacks
+  - Configuring an external forward proxy for OpenClaw runtime traffic
+---
 
 OpenClaw can route runtime HTTP and WebSocket traffic through an operator-managed forward proxy. This is optional defense in depth for deployments that want central egress control, stronger SSRF protection, and better network auditability.
 
@@ -12,12 +14,12 @@ OpenClaw does not ship, download, start, configure, or certify a proxy. You run 
 
 A proxy gives operators one network control point for outbound HTTP and WebSocket traffic. That can be useful even outside SSRF hardening:
 
-* Central policy: maintain one egress policy instead of relying on every application HTTP call site to get network rules right.
-* Connect-time checks: evaluate the destination after DNS resolution and immediately before the proxy opens the upstream connection.
-* DNS rebinding defense: reduce the gap between an application-level DNS check and the actual outbound connection.
-* Broader JavaScript coverage: route ordinary `fetch`, `node:http`, `node:https`, WebSocket, axios, got, node-fetch, and similar clients through the same path.
-* Auditability: log allowed and denied destinations at the egress boundary.
-* Operational control: enforce destination rules, network segmentation, rate limits, or outbound allowlists without rebuilding OpenClaw.
+- Central policy: maintain one egress policy instead of relying on every application HTTP call site to get network rules right.
+- Connect-time checks: evaluate the destination after DNS resolution and immediately before the proxy opens the upstream connection.
+- DNS rebinding defense: reduce the gap between an application-level DNS check and the actual outbound connection.
+- Broader JavaScript coverage: route ordinary `fetch`, `node:http`, `node:https`, WebSocket, axios, got, node-fetch, and similar clients through the same path.
+- Auditability: log allowed and denied destinations at the egress boundary.
+- Operational control: enforce destination rules, network segmentation, rate limits, or outbound allowlists without rebuilding OpenClaw.
 
 Proxy routing is a process-level guardrail for normal HTTP and WebSocket egress. It gives operators a fail-closed path for routing supported JavaScript HTTP clients through their own filtering proxy, but it is not an OS-level network sandbox and does not make OpenClaw certify the proxy's destination policy.
 
@@ -25,7 +27,7 @@ Proxy routing is a process-level guardrail for normal HTTP and WebSocket egress.
 
 When `proxy.enabled=true` and a proxy URL is configured, protected runtime processes such as `openclaw gateway run`, `openclaw node run`, and `openclaw agent --local` route normal HTTP and WebSocket egress through the configured proxy:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 OpenClaw process
   fetch                  -> operator-managed filtering proxy -> public internet
   node:http and https    -> operator-managed filtering proxy -> public internet
@@ -40,8 +42,8 @@ Some plugins own custom transports that need explicit proxy wiring even when pro
 
 The proxy URL itself can use either `http://` or `https://`. These schemes describe the connection from OpenClaw to the proxy endpoint:
 
-* `http://proxy.example:3128`: OpenClaw opens a plain TCP connection to the forward proxy and sends HTTP proxy requests, including `CONNECT` for HTTPS destinations.
-* `https://proxy.example:8443`: OpenClaw opens TLS to the proxy endpoint, verifies the proxy certificate, and then sends HTTP proxy requests inside that TLS session.
+- `http://proxy.example:3128`: OpenClaw opens a plain TCP connection to the forward proxy and sends HTTP proxy requests, including `CONNECT` for HTTPS destinations.
+- `https://proxy.example:8443`: OpenClaw opens TLS to the proxy endpoint, verifies the proxy certificate, and then sends HTTP proxy requests inside that TLS session.
 
 Destination HTTPS is separate from proxy endpoint TLS. For an HTTPS destination, OpenClaw still asks the proxy for an HTTP `CONNECT` tunnel and then starts destination TLS through that tunnel.
 
@@ -51,15 +53,15 @@ On shutdown, OpenClaw restores the previous proxy environment and resets cached 
 
 ## Related proxy terms
 
-* `proxy.enabled` / `proxy.proxyUrl`: outbound forward-proxy routing for OpenClaw runtime egress. This page documents that feature.
-* `gateway.auth.mode: "trusted-proxy"`: inbound identity-aware reverse-proxy authentication for Gateway access. See [Trusted proxy auth](/gateway/trusted-proxy-auth).
-* `openclaw proxy`: local debug proxy and capture inspector for development and support. See [openclaw proxy](/cli/proxy).
-* `tools.web.fetch.useTrustedEnvProxy`: opt-in for `web_fetch` to let an operator-controlled HTTP(S) env proxy resolve DNS while keeping default strict DNS pinning and hostname policy. See [Web fetch](/tools/web-fetch#trusted-env-proxy).
-* Channel or provider-specific proxy settings: owner-specific overrides for a particular transport. Prefer the managed network proxy when the goal is central egress control across the runtime.
+- `proxy.enabled` / `proxy.proxyUrl`: outbound forward-proxy routing for OpenClaw runtime egress. This page documents that feature.
+- `gateway.auth.mode: "trusted-proxy"`: inbound identity-aware reverse-proxy authentication for Gateway access. See [Trusted proxy auth](/gateway/trusted-proxy-auth).
+- `openclaw proxy`: local debug proxy and capture inspector for development and support. See [openclaw proxy](/cli/proxy).
+- `tools.web.fetch.useTrustedEnvProxy`: opt-in for `web_fetch` to let an operator-controlled HTTP(S) env proxy resolve DNS while keeping default strict DNS pinning and hostname policy. See [Web fetch](/tools/web-fetch#trusted-env-proxy).
+- Channel or provider-specific proxy settings: owner-specific overrides for a particular transport. Prefer the managed network proxy when the goal is central egress control across the runtime.
 
 ## Configuration
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 proxy:
   enabled: true
   proxyUrl: http://127.0.0.1:3128
@@ -67,7 +69,7 @@ proxy:
 
 For an HTTPS proxy endpoint with a private proxy CA:
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 proxy:
   enabled: true
   proxyUrl: https://proxy.corp.example:8443
@@ -77,7 +79,7 @@ proxy:
 
 You can also provide the URL through the environment, while keeping `proxy.enabled=true` in config:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 OPENCLAW_PROXY_URL=http://127.0.0.1:3128 openclaw gateway run
 ```
 
@@ -85,24 +87,24 @@ OPENCLAW_PROXY_URL=http://127.0.0.1:3128 openclaw gateway run
 
 ### Gateway Loopback Mode
 
-Local Gateway control-plane clients usually connect to a loopback WebSocket such as `ws://127.0.0.1:18789`. Use `proxy.loopbackMode` to choose how that traffic behaves while the managed proxy is active:
+Local Gateway control-plane clients usually connect to a loopback WebSocket such as `ws://127.0.0.1:18789`. Use `proxy.loopbackMode` to choose how loopback managed-proxy exceptions behave while the managed proxy is active:
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 proxy:
   enabled: true
   proxyUrl: http://127.0.0.1:3128
   loopbackMode: gateway-only # gateway-only, proxy, or block
 ```
 
-* `gateway-only` (default): OpenClaw registers the Gateway loopback authority in Proxyline's managed bypass policy so local Gateway WebSocket traffic can connect directly. Custom loopback Gateway ports work because the active Gateway URL's host and port are registered.
-* `proxy`: OpenClaw does not register a Gateway loopback bypass, so local Gateway traffic is sent through the managed proxy. If the proxy is remote, it must provide special routing for the OpenClaw host's loopback service, such as mapping it to a proxy-reachable hostname, IP, or tunnel. Standard remote proxies resolve `127.0.0.1` and `localhost` from the proxy host, not from the OpenClaw host.
-* `block`: OpenClaw denies loopback Gateway control-plane connections before opening a socket.
+- `gateway-only` (default): OpenClaw registers the Gateway loopback authority in Proxyline's managed bypass policy so local Gateway WebSocket traffic can connect directly. Custom loopback Gateway ports work because the active Gateway URL's host and port are registered. The bundled browser plugin can also register the exact local CDP readiness and DevTools WebSocket endpoints for OpenClaw-launched managed browsers, and the bundled Ollama memory embedding provider can use its own narrower guarded direct path for the exact configured host-local loopback embedding origin.
+- `proxy`: OpenClaw does not register Gateway or Ollama loopback bypasses, so that loopback traffic is sent through the managed proxy. If the proxy is remote, it must provide special routing for the OpenClaw host's loopback service, such as mapping it to a proxy-reachable hostname, IP, or tunnel. Standard remote proxies resolve `127.0.0.1` and `localhost` from the proxy host, not from the OpenClaw host.
+- `block`: OpenClaw denies Gateway loopback control-plane connections and guarded Ollama host-local embedding loopback connections before opening a socket.
 
 If `enabled=true` but no valid proxy URL is configured, protected commands fail startup instead of falling back to direct network access.
 
 For managed gateway services started with `openclaw gateway start`, prefer storing the URL in config:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw config set proxy.enabled true
 openclaw config set proxy.proxyUrl http://127.0.0.1:3128
 openclaw gateway install --force
@@ -119,14 +121,14 @@ The proxy policy is the security boundary. OpenClaw cannot verify that the proxy
 
 Configure the proxy to:
 
-* Bind only to loopback or a private trusted interface.
-* Restrict access so only the OpenClaw process, host, container, or service account can use it.
-* Resolve destinations itself and block destination IPs after DNS resolution.
-* Apply policy at connect time for both plain HTTP requests and HTTPS `CONNECT` tunnels.
-* Reject destination-based bypasses for loopback, private, link-local, metadata, multicast, reserved, or documentation ranges.
-* Avoid hostname allowlists unless you fully trust the DNS resolution path.
-* Log destination, decision, status, and reason without logging request bodies, authorization headers, cookies, or other secrets.
-* Keep proxy policy under version control and review changes like security-sensitive configuration.
+- Bind only to loopback or a private trusted interface.
+- Restrict access so only the OpenClaw process, host, container, or service account can use it.
+- Resolve destinations itself and block destination IPs after DNS resolution.
+- Apply policy at connect time for both plain HTTP requests and HTTPS `CONNECT` tunnels.
+- Reject destination-based bypasses for loopback, private, link-local, metadata, multicast, reserved, or documentation ranges.
+- Avoid hostname allowlists unless you fully trust the DNS resolution path.
+- Log destination, decision, status, and reason without logging request bodies, authorization headers, cookies, or other secrets.
+- Keep proxy policy under version control and review changes like security-sensitive configuration.
 
 ## Recommended blocked destinations
 
@@ -159,13 +161,13 @@ If your cloud provider or network platform documents additional metadata hosts o
 
 Validate the proxy from the same host, container, or service account that runs OpenClaw:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw proxy validate --proxy-url http://127.0.0.1:3128
 ```
 
 For an HTTPS proxy endpoint signed by a private CA:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw proxy validate --proxy-url https://proxy.corp.example:8443 --proxy-ca-file /etc/openclaw/proxy-ca.pem
 ```
 
@@ -173,7 +175,7 @@ By default, when no custom destinations are provided, the command checks that `h
 
 Use `--json` for automation. The JSON output contains the overall result, the effective proxy config source, any config errors, and each destination check. Proxy URL credentials are redacted in text and JSON output:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "ok": true,
   "config": {
@@ -201,7 +203,7 @@ Use `--json` for automation. The JSON output contains the overall result, the ef
 
 You can also validate manually with `curl`:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 curl -x http://127.0.0.1:3128 https://example.com/
 curl -x http://127.0.0.1:3128 http://127.0.0.1/
 curl -x http://127.0.0.1:3128 http://169.254.169.254/
@@ -213,7 +215,7 @@ The public request should succeed. The loopback and metadata requests should be 
 
 Use managed `proxy.tls.caFile` when the proxy endpoint itself uses a certificate signed by a private CA:
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 proxy:
   enabled: true
   proxyUrl: https://proxy.corp.example:8443
@@ -227,7 +229,7 @@ Use `NODE_EXTRA_CA_CERTS` only when the whole Node process must trust an additio
 
 Then enable OpenClaw proxy routing:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw config set proxy.enabled true
 openclaw config set proxy.proxyUrl https://proxy.corp.example:8443
 openclaw config set proxy.tls.caFile /etc/openclaw/proxy-ca.pem
@@ -236,7 +238,7 @@ openclaw gateway run
 
 or set:
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 proxy:
   enabled: true
   proxyUrl: https://proxy.corp.example:8443
@@ -246,15 +248,15 @@ proxy:
 
 ## Limits
 
-* The proxy improves coverage for process-local JavaScript HTTP and WebSocket clients, but it is not an OS-level network sandbox.
-* Gateway loopback control-plane traffic defaults to direct local bypass through `proxy.loopbackMode: "gateway-only"`. OpenClaw implements that bypass by registering the active Gateway loopback authority in Proxyline's managed bypass policy. Operators can set `proxy.loopbackMode: "proxy"` to send Gateway loopback traffic through the managed proxy, or `proxy.loopbackMode: "block"` to deny loopback Gateway connections. See [Gateway Loopback Mode](#gateway-loopback-mode) for the remote-proxy caveat.
-* Raw `net`, `tls`, and `http2` sockets, native addons, and non-OpenClaw child processes may bypass Node-level proxy routing unless they inherit and respect proxy environment variables. Forked OpenClaw child CLIs inherit the managed proxy URL and `proxy.loopbackMode` state.
-* IRC is a raw TCP/TLS channel outside operator-managed forward proxy routing. In deployments that require all egress through that forward proxy, set `channels.irc.enabled=false` unless direct IRC egress is explicitly approved.
-* The local debug proxy is diagnostic tooling and its direct upstream forwarding for proxy requests and CONNECT tunnels is disabled by default while managed proxy mode is active; enable direct forwarding only for approved local diagnostics.
-* User local WebUIs and local model servers should be allowlisted in the operator proxy policy when needed; OpenClaw does not expose a general local-network bypass for them.
-* Gateway control-plane proxy bypass is intentionally limited to `localhost` and literal loopback IP URLs. Use `ws://127.0.0.1:18789`, `ws://[::1]:18789`, or `ws://localhost:18789` for local direct Gateway control-plane connections; other hostnames route like ordinary hostname-based traffic.
-* OpenClaw does not inspect, test, or certify your proxy policy.
-* Treat proxy policy changes as security-sensitive operational changes.
+- The proxy improves coverage for process-local JavaScript HTTP and WebSocket clients, but it is not an OS-level network sandbox.
+- Gateway loopback control-plane traffic defaults to direct local bypass through `proxy.loopbackMode: "gateway-only"`. OpenClaw implements that bypass by registering the active Gateway loopback authority in Proxyline's managed bypass policy. Operators can set `proxy.loopbackMode: "proxy"` to send Gateway loopback traffic through the managed proxy, or `proxy.loopbackMode: "block"` to deny loopback Gateway connections. See [Gateway Loopback Mode](#gateway-loopback-mode) for the remote-proxy caveat.
+- Raw `net`, `tls`, and `http2` sockets, native addons, and non-OpenClaw child processes may bypass Node-level proxy routing unless they inherit and respect proxy environment variables. Forked OpenClaw child CLIs inherit the managed proxy URL and `proxy.loopbackMode` state.
+- IRC is a raw TCP/TLS channel outside operator-managed forward proxy routing. In deployments that require all egress through that forward proxy, set `channels.irc.enabled=false` unless direct IRC egress is explicitly approved.
+- The local debug proxy is diagnostic tooling and its direct upstream forwarding for proxy requests and CONNECT tunnels is disabled by default while managed proxy mode is active; enable direct forwarding only for approved local diagnostics.
+- User local WebUIs and local model servers should be allowlisted in the operator proxy policy when needed; OpenClaw does not expose a general local-network bypass for them. The bundled Ollama memory embedding provider is narrower: it can use a guarded direct path only for the exact host-local loopback embedding origin derived from the configured `baseUrl` so host-local embeddings keep working when the managed proxy cannot reach host loopback. LAN, tailnet, private-network, and public Ollama embedding hosts still use the managed proxy path. `proxy.loopbackMode: "proxy"` sends this Ollama loopback traffic through the managed proxy, and `proxy.loopbackMode: "block"` denies it before opening a connection.
+- Gateway control-plane proxy bypass is intentionally limited to `localhost` and literal loopback IP URLs. Use `ws://127.0.0.1:18789`, `ws://[::1]:18789`, or `ws://localhost:18789` for local direct Gateway control-plane connections; other hostnames route like ordinary hostname-based traffic.
+- OpenClaw does not inspect, test, or certify your proxy policy.
+- Treat proxy policy changes as security-sensitive operational changes.
 
 | Surface                                                      | Managed proxy status                                                                               |
 | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |

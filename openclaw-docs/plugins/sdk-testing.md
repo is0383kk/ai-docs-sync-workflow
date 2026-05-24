@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Plugin testing
+---
+summary: "Testing utilities and patterns for OpenClaw plugins"
+title: "Plugin testing"
+sidebarTitle: "Testing"
+read_when:
+  - You are writing tests for a plugin
+  - You need test utilities from the plugin SDK
+  - You want to understand contract tests for bundled plugins
+---
 
 Reference for test utilities, patterns, and lint enforcement for OpenClaw
 plugins.
@@ -48,7 +52,7 @@ Repo guardrails reject new real imports from `plugin-sdk/testing` and
 `plugin-sdk/test-utils`; those names remain only as deprecated compatibility
 surfaces for compatibility-record tests.
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import {
   shouldAckReaction,
   removeAckReactionAfterReply,
@@ -156,7 +160,7 @@ broad `plugin-sdk/testing` compatibility barrel, repo `src/**` files, or repo
 
 Focused testing subpaths also re-export types useful in test files:
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import type {
   ChannelAccountSnapshot,
   ChannelGatewayContext,
@@ -170,7 +174,7 @@ import type { MockFn, PluginRuntime, RuntimeEnv } from "openclaw/plugin-sdk/plug
 Use `installCommonResolveTargetErrorCases` to add standard error cases for
 channel target resolution:
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import { describe } from "vitest";
 import { installCommonResolveTargetErrorCases } from "openclaw/plugin-sdk/channel-target-testing";
 
@@ -215,7 +219,7 @@ explicitly covering legacy compatibility behavior.
 
 ### Unit testing a channel plugin
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import { describe, it, expect, vi } from "vitest";
 
 describe("my-channel plugin", () => {
@@ -251,7 +255,7 @@ describe("my-channel plugin", () => {
 
 ### Unit testing a provider plugin
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import { describe, it, expect } from "vitest";
 
 describe("my-provider plugin", () => {
@@ -281,7 +285,7 @@ describe("my-provider plugin", () => {
 
 For code that uses `createPluginRuntimeStore`, mock the runtime in tests:
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
 import type { PluginRuntime } from "openclaw/plugin-sdk/runtime-store";
 
@@ -314,7 +318,7 @@ store.clearRuntime();
 
 Prefer per-instance stubs over prototype mutation:
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 // Preferred: per-instance stub
 const client = new MyChannelClient();
 client.sendMessage = vi.fn().mockResolvedValue({ id: "msg-1" });
@@ -327,28 +331,28 @@ client.sendMessage = vi.fn().mockResolvedValue({ id: "msg-1" });
 
 Bundled plugins have contract tests that verify registration ownership:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm test -- src/plugins/contracts/
 ```
 
 These tests assert:
 
-* Which plugins register which providers
-* Which plugins register which speech providers
-* Registration shape correctness
-* Runtime contract compliance
+- Which plugins register which providers
+- Which plugins register which speech providers
+- Registration shape correctness
+- Runtime contract compliance
 
 ### Running scoped tests
 
 For a specific plugin:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm test -- <bundled-plugin-root>/my-channel/
 ```
 
 For contract tests only:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm test -- src/plugins/contracts/shape.contract.test.ts
 pnpm test -- src/plugins/contracts/auth-choice.contract.test.ts
 pnpm test -- src/plugins/contracts/runtime-seams.contract.test.ts
@@ -369,7 +373,7 @@ patterns is recommended.
 
 OpenClaw uses Vitest with V8 coverage thresholds. For plugin tests:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Run all tests
 pnpm test
 
@@ -385,13 +389,13 @@ pnpm test:coverage
 
 If local runs cause memory pressure:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 OPENCLAW_VITEST_MAX_WORKERS=1 pnpm test
 ```
 
 ## Related
 
-* [SDK Overview](/plugins/sdk-overview) -- import conventions
-* [SDK Channel Plugins](/plugins/sdk-channel-plugins) -- channel plugin interface
-* [SDK Provider Plugins](/plugins/sdk-provider-plugins) -- provider plugin hooks
-* [Building Plugins](/plugins/building-plugins) -- getting started guide
+- [SDK Overview](/plugins/sdk-overview) -- import conventions
+- [SDK Channel Plugins](/plugins/sdk-channel-plugins) -- channel plugin interface
+- [SDK Provider Plugins](/plugins/sdk-provider-plugins) -- provider plugin hooks
+- [Building Plugins](/plugins/building-plugins) -- getting started guide

@@ -1,0 +1,706 @@
+---
+read_when:
+    - یادگیری نحوه پیکربندی OpenClaw
+    - در حال جست‌وجوی نمونه‌های پیکربندی
+    - راه‌اندازی OpenClaw برای نخستین بار
+summary: نمونه‌های پیکربندی مطابق با طرح‌واره برای راه‌اندازی‌های رایج OpenClaw
+title: نمونه‌های پیکربندی
+x-i18n:
+    generated_at: "2026-05-11T20:33:26Z"
+    model: gpt-5.5
+    provider: openai
+    source_hash: e077b2fe83b1c6e4ffd2ff0029fe3b754c7dc5dced06f134ddf18e9ed6a11fd2
+    source_path: gateway/configuration-examples.md
+    workflow: 16
+---
+
+مثال‌های زیر با طرح‌واره پیکربندی فعلی هم‌راستا هستند. برای مرجع کامل و یادداشت‌های هر فیلد، [پیکربندی](/fa/gateway/configuration) را ببینید.
+
+## شروع سریع
+
+### حداقل مطلق
+
+```json5
+{
+  agents: { defaults: { workspace: "~/.openclaw/workspace" } },
+  channels: { whatsapp: { allowFrom: ["+15555550123"] } },
+}
+```
+
+در `~/.openclaw/openclaw.json` ذخیره کنید و می‌توانید از آن شماره به بات پیام خصوصی بدهید.
+
+### شروع پیشنهادی
+
+```json5
+{
+  agents: {
+    defaults: {
+      workspace: "~/.openclaw/workspace",
+      model: { primary: "anthropic/claude-sonnet-4-6" },
+    },
+    list: [
+      {
+        id: "main",
+        identity: {
+          name: "Clawd",
+          theme: "helpful assistant",
+          emoji: "🦞",
+        },
+      },
+    ],
+  },
+  channels: {
+    whatsapp: {
+      allowFrom: ["+15555550123"],
+      groups: { "*": { requireMention: true } },
+    },
+  },
+  messages: {
+    visibleReplies: "automatic",
+    groupChat: {
+      visibleReplies: "message_tool", // default; use "automatic" for legacy room replies
+    },
+  },
+}
+```
+
+## مثال گسترش‌یافته (گزینه‌های اصلی)
+
+> JSON5 به شما امکان می‌دهد از کامنت‌ها و ویرگول‌های انتهایی استفاده کنید. JSON معمولی هم کار می‌کند.
+
+```json5
+{
+  // Environment + shell
+  env: {
+    OPENROUTER_API_KEY: "sk-or-...",
+    vars: {
+      GROQ_API_KEY: "gsk-...",
+    },
+    shellEnv: {
+      enabled: true,
+      timeoutMs: 15000,
+    },
+  },
+
+  // Auth profile metadata (secrets live in auth-profiles.json)
+  auth: {
+    profiles: {
+      "anthropic:default": { provider: "anthropic", mode: "api_key" },
+      "anthropic:work": { provider: "anthropic", mode: "api_key" },
+      "openai:default": { provider: "openai", mode: "api_key" },
+      "openai-codex:personal": { provider: "openai-codex", mode: "oauth" },
+    },
+    order: {
+      anthropic: ["anthropic:default", "anthropic:work"],
+      openai: ["openai:default"],
+      "openai-codex": ["openai-codex:personal"],
+    },
+  },
+
+  // Identity is per agent — set it on agents.list[].identity below.
+
+  // Logging
+  logging: {
+    level: "info",
+    file: "/tmp/openclaw/openclaw.log",
+    consoleLevel: "info",
+    consoleStyle: "pretty",
+    redactSensitive: "tools",
+  },
+
+  // Message formatting
+  messages: {
+    messagePrefix: "[openclaw]",
+    visibleReplies: "automatic",
+    responsePrefix: ">",
+    ackReaction: "👀",
+    ackReactionScope: "group-mentions",
+    groupChat: {
+      historyLimit: 50,
+      visibleReplies: "message_tool", // normal final replies stay private in groups/channels
+    },
+    queue: {
+      mode: "steer",
+      debounceMs: 500,
+      cap: 20,
+      drop: "summarize",
+      byChannel: {
+        whatsapp: "steer",
+        telegram: "steer",
+        discord: "steer",
+        slack: "steer",
+        signal: "steer",
+        imessage: "steer",
+        webchat: "steer",
+      },
+    },
+  },
+
+  // Tooling
+  tools: {
+    media: {
+      audio: {
+        enabled: true,
+        maxBytes: 20971520,
+        models: [
+          { provider: "openai", model: "gpt-4o-mini-transcribe" },
+          // Optional CLI fallback (Whisper binary):
+          // { type: "cli", command: "whisper", args: ["--model", "base", "{{MediaPath}}"] }
+        ],
+        timeoutSeconds: 120,
+      },
+      video: {
+        enabled: true,
+        maxBytes: 52428800,
+        models: [{ provider: "google", model: "gemini-3-flash-preview" }],
+      },
+    },
+  },
+
+  // Session behavior
+  session: {
+    scope: "per-sender",
+    dmScope: "per-channel-peer", // recommended for multi-user inboxes
+    reset: {
+      mode: "daily",
+      atHour: 4,
+      idleMinutes: 60,
+    },
+    resetByChannel: {
+      discord: { mode: "idle", idleMinutes: 10080 },
+    },
+    resetTriggers: ["/new", "/reset"],
+    store: "~/.openclaw/agents/default/sessions/sessions.json",
+    maintenance: {
+      mode: "warn",
+      pruneAfter: "30d",
+      maxEntries: 500,
+      resetArchiveRetention: "30d", // duration or false
+      maxDiskBytes: "500mb", // optional
+      highWaterBytes: "400mb", // optional (defaults to 80% of maxDiskBytes)
+    },
+    typingIntervalSeconds: 5,
+    sendPolicy: {
+      default: "allow",
+      rules: [{ action: "deny", match: { channel: "discord", chatType: "group" } }],
+    },
+  },
+
+  // Channels
+  channels: {
+    whatsapp: {
+      dmPolicy: "pairing",
+      allowFrom: ["+15555550123"],
+      groupPolicy: "allowlist",
+      groupAllowFrom: ["+15555550123"],
+      groups: { "*": { requireMention: true } },
+    },
+
+    telegram: {
+      enabled: true,
+      botToken: "YOUR_TELEGRAM_BOT_TOKEN",
+      allowFrom: ["123456789"],
+      groupPolicy: "allowlist",
+      groupAllowFrom: ["123456789"],
+      groups: { "*": { requireMention: true } },
+    },
+
+    discord: {
+      enabled: true,
+      token: "YOUR_DISCORD_BOT_TOKEN",
+      dm: { enabled: true, allowFrom: ["123456789012345678"] },
+      guilds: {
+        "123456789012345678": {
+          slug: "friends-of-openclaw",
+          requireMention: false,
+          channels: {
+            general: { allow: true },
+            help: { allow: true, requireMention: true },
+          },
+        },
+      },
+    },
+
+    slack: {
+      enabled: true,
+      botToken: "xoxb-REPLACE_ME",
+      appToken: "xapp-REPLACE_ME",
+      channels: {
+        "#general": { allow: true, requireMention: true },
+      },
+      dm: { enabled: true, allowFrom: ["U123"] },
+      slashCommand: {
+        enabled: true,
+        name: "openclaw",
+        sessionPrefix: "slack:slash",
+        ephemeral: true,
+      },
+    },
+  },
+
+  // Agent runtime
+  agents: {
+    defaults: {
+      workspace: "~/.openclaw/workspace",
+      userTimezone: "America/Chicago",
+      model: {
+        primary: "anthropic/claude-sonnet-4-6",
+        fallbacks: ["anthropic/claude-opus-4-6", "openai/gpt-5.4"],
+      },
+      imageModel: {
+        primary: "openrouter/anthropic/claude-sonnet-4-6",
+      },
+      models: {
+        "anthropic/claude-opus-4-6": { alias: "opus" },
+        "anthropic/claude-sonnet-4-6": { alias: "sonnet" },
+        "openai/gpt-5.4": { alias: "gpt" },
+      },
+      skills: ["github", "weather"], // inherited by agents that omit list[].skills
+      thinkingDefault: "low",
+      verboseDefault: "off",
+      toolProgressDetail: "explain",
+      reasoningDefault: "off",
+      elevatedDefault: "on",
+      blockStreamingDefault: "off",
+      blockStreamingBreak: "text_end",
+      blockStreamingChunk: {
+        minChars: 800,
+        maxChars: 1200,
+        breakPreference: "paragraph",
+      },
+      blockStreamingCoalesce: {
+        idleMs: 1000,
+      },
+      humanDelay: {
+        mode: "natural",
+      },
+      timeoutSeconds: 600,
+      mediaMaxMb: 5,
+      typingIntervalSeconds: 5,
+      maxConcurrent: 3,
+      heartbeat: {
+        every: "30m",
+        model: "anthropic/claude-sonnet-4-6",
+        target: "last",
+        directPolicy: "allow", // allow (default) | block
+        to: "+15555550123",
+        prompt: "HEARTBEAT",
+        ackMaxChars: 300,
+      },
+      memorySearch: {
+        provider: "gemini",
+        model: "gemini-embedding-001",
+        remote: {
+          apiKey: "${GEMINI_API_KEY}",
+        },
+        extraPaths: ["../team-docs", "/srv/shared-notes"],
+      },
+      sandbox: {
+        mode: "non-main",
+        scope: "session", // preferred over legacy perSession: true
+        workspaceRoot: "~/.openclaw/sandboxes",
+        docker: {
+          image: "openclaw-sandbox:bookworm-slim",
+          workdir: "/workspace",
+          readOnlyRoot: true,
+          tmpfs: ["/tmp", "/var/tmp", "/run"],
+          network: "none",
+          user: "1000:1000",
+        },
+        browser: {
+          enabled: false,
+        },
+      },
+    },
+    list: [
+      {
+        id: "main",
+        default: true,
+        identity: {
+          name: "Samantha",
+          theme: "helpful sloth",
+          emoji: "🦥",
+        },
+        // inherits defaults.skills -> github, weather
+        groupChat: {
+          mentionPatterns: ["@openclaw", "openclaw"],
+        },
+        thinkingDefault: "high", // per-agent thinking override
+        reasoningDefault: "on", // per-agent reasoning visibility
+        fastModeDefault: false, // per-agent fast mode
+      },
+      {
+        id: "quick",
+        skills: [], // no skills for this agent
+        fastModeDefault: true, // this agent always runs fast
+        thinkingDefault: "off",
+      },
+    ],
+  },
+
+  tools: {
+    allow: ["exec", "process", "read", "write", "edit", "apply_patch"],
+    deny: ["browser", "canvas"],
+    exec: {
+      backgroundMs: 10000,
+      timeoutSec: 1800,
+      cleanupMs: 1800000,
+    },
+    elevated: {
+      enabled: true,
+      allowFrom: {
+        whatsapp: ["+15555550123"],
+        telegram: ["123456789"],
+        discord: ["123456789012345678"],
+        slack: ["U123"],
+        signal: ["+15555550123"],
+        imessage: ["user@example.com"],
+        webchat: ["session:demo"],
+      },
+    },
+  },
+
+  // Custom model providers
+  models: {
+    mode: "merge",
+    providers: {
+      "custom-proxy": {
+        baseUrl: "http://localhost:4000/v1",
+        apiKey: "LITELLM_KEY",
+        api: "openai-responses",
+        authHeader: true,
+        headers: { "X-Proxy-Region": "us-west" },
+        models: [
+          {
+            id: "llama-3.1-8b",
+            name: "Llama 3.1 8B",
+            api: "openai-responses",
+            reasoning: false,
+            input: ["text"],
+            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+            contextWindow: 128000,
+            maxTokens: 32000,
+          },
+        ],
+      },
+    },
+  },
+
+  // Cron jobs
+  cron: {
+    enabled: true,
+    store: "~/.openclaw/cron/cron.json",
+    maxConcurrentRuns: 2, // cron dispatch + isolated cron agent-turn execution
+    sessionRetention: "24h",
+    runLog: {
+      maxBytes: "2mb",
+      keepLines: 2000,
+    },
+  },
+
+  // Webhooks
+  hooks: {
+    enabled: true,
+    path: "/hooks",
+    token: "shared-secret",
+    presets: ["gmail"],
+    transformsDir: "~/.openclaw/hooks/transforms",
+    mappings: [
+      {
+        id: "gmail-hook",
+        match: { path: "gmail" },
+        action: "agent",
+        wakeMode: "now",
+        name: "Gmail",
+        sessionKey: "hook:gmail:{{messages[0].id}}",
+        messageTemplate: "From: {{messages[0].from}}\nSubject: {{messages[0].subject}}",
+        textTemplate: "{{messages[0].snippet}}",
+        deliver: true,
+        channel: "last",
+        to: "+15555550123",
+        thinking: "low",
+        timeoutSeconds: 300,
+        transform: {
+          module: "gmail.js",
+          export: "transformGmail",
+        },
+      },
+    ],
+    gmail: {
+      account: "openclaw@gmail.com",
+      label: "INBOX",
+      topic: "projects/<project-id>/topics/gog-gmail-watch",
+      subscription: "gog-gmail-watch-push",
+      pushToken: "shared-push-token",
+      hookUrl: "http://127.0.0.1:18789/hooks/gmail",
+      includeBody: true,
+      maxBytes: 20000,
+      renewEveryMinutes: 720,
+      serve: { bind: "127.0.0.1", port: 8788, path: "/" },
+      tailscale: { mode: "funnel", path: "/gmail-pubsub" },
+    },
+  },
+
+  // Gateway + networking
+  gateway: {
+    mode: "local",
+    port: 18789,
+    bind: "loopback",
+    controlUi: { enabled: true, basePath: "/openclaw" },
+    auth: {
+      mode: "token",
+      token: "gateway-token",
+      allowTailscale: true,
+    },
+    tailscale: { mode: "serve", resetOnExit: false },
+    remote: { url: "ws://gateway.tailnet:18789", token: "remote-token" },
+    reload: { mode: "hybrid", debounceMs: 300 },
+  },
+
+  skills: {
+    allowBundled: ["gemini", "peekaboo"],
+    load: {
+      extraDirs: ["~/Projects/agent-scripts/skills"],
+      allowSymlinkTargets: ["~/Projects/agent-scripts/skills"],
+    },
+    install: {
+      preferBrew: true,
+      nodeManager: "npm", // npm | pnpm | yarn | bun
+      allowUploadedArchives: false,
+    },
+    entries: {
+      "image-lab": {
+        enabled: true,
+        apiKey: "GEMINI_KEY_HERE",
+        env: { GEMINI_API_KEY: "GEMINI_KEY_HERE" },
+      },
+      peekaboo: { enabled: true },
+    },
+  },
+}
+```
+
+### مخزن Skills هم‌سطح با پیوند نمادین
+
+وقتی ریشهٔ یک Skills داخلی شامل یک پیوند نمادین به یک مخزن هم‌سطح است، از این استفاده کنید؛ برای
+مثال `~/.agents/skills/manager -> ~/Projects/manager/skills`.
+
+```json5
+{
+  skills: {
+    load: {
+      extraDirs: ["~/Projects/manager/skills"],
+      allowSymlinkTargets: ["~/Projects/manager/skills"],
+    },
+  },
+}
+```
+
+- `extraDirs` مخزن هم‌سطح را به‌عنوان یک ریشهٔ صریح Skills اسکن می‌کند.
+- `allowSymlinkTargets` اجازه می‌دهد پوشه‌های Skills دارای پیوند نمادین به آن ریشهٔ واقعیِ مورد اعتماد
+  resolve شوند، بدون اینکه خروج دلخواه از طریق پیوند نمادین مجاز شود.
+
+## الگوهای رایج
+
+### خط پایهٔ مشترک Skills با یک بازنویسی
+
+```json5
+{
+  agents: {
+    defaults: {
+      workspace: "~/.openclaw/workspace",
+      skills: ["github", "weather"],
+    },
+    list: [
+      { id: "main", default: true },
+      { id: "docs", workspace: "~/.openclaw/workspace-docs", skills: ["docs-search"] },
+    ],
+  },
+}
+```
+
+- `agents.defaults.skills` خط پایهٔ مشترک است.
+- `agents.list[].skills` آن خط پایه را برای یک agent جایگزین می‌کند.
+- وقتی یک agent نباید هیچ Skillsی ببیند، از `skills: []` استفاده کنید.
+
+### راه‌اندازی چندسکویی
+
+```json5
+{
+  agents: { defaults: { workspace: "~/.openclaw/workspace" } },
+  channels: {
+    whatsapp: { allowFrom: ["+15555550123"] },
+    telegram: {
+      enabled: true,
+      botToken: "YOUR_TOKEN",
+      allowFrom: ["123456789"],
+    },
+    discord: {
+      enabled: true,
+      token: "YOUR_TOKEN",
+      dm: { allowFrom: ["123456789012345678"] },
+    },
+  },
+}
+```
+
+### تأیید خودکار شبکهٔ Nodeهای مورد اعتماد
+
+جفت‌سازی دستگاه را دستی نگه دارید، مگر اینکه مسیر شبکه را کنترل کنید. برای یک آزمایشگاه اختصاصی یا زیرشبکهٔ tailnet، می‌توانید با CIDRها یا IPهای دقیق، تأیید خودکار دستگاه Node در نخستین اتصال را فعال کنید:
+
+```json5
+{
+  gateway: {
+    nodes: {
+      pairing: {
+        autoApproveCidrs: ["192.168.1.0/24", "fd00:1234:5678::/64"],
+      },
+    },
+  },
+}
+```
+
+وقتی تنظیم نشده باشد، این قابلیت غیرفعال می‌ماند. این فقط برای جفت‌سازی تازهٔ `role: node` بدون محدوده‌های درخواستی اعمال می‌شود. کلاینت‌های اپراتور/مرورگر و ارتقاهای نقش، محدوده، فراداده یا کلید عمومی همچنان به تأیید دستی نیاز دارند.
+
+### حالت DM امن (صندوق ورودی مشترک / DMهای چندکاربره)
+
+اگر بیش از یک نفر می‌تواند به ربات شما DM بفرستد (چندین ورودی در `allowFrom`، تأییدهای جفت‌سازی برای چند نفر، یا `dmPolicy: "open"`)، **حالت DM امن** را فعال کنید تا DMهای فرستنده‌های مختلف به‌صورت پیش‌فرض یک زمینهٔ مشترک نداشته باشند:
+
+```json5
+{
+  // Secure DM mode (recommended for multi-user or sensitive DM agents)
+  session: { dmScope: "per-channel-peer" },
+
+  channels: {
+    // Example: WhatsApp multi-user inbox
+    whatsapp: {
+      dmPolicy: "allowlist",
+      allowFrom: ["+15555550123", "+15555550124"],
+    },
+
+    // Example: Discord multi-user inbox
+    discord: {
+      enabled: true,
+      token: "YOUR_DISCORD_BOT_TOKEN",
+      dm: { enabled: true, allowFrom: ["123456789012345678", "987654321098765432"] },
+    },
+  },
+}
+```
+
+برای Discord/Slack/Google Chat/Microsoft Teams/Mattermost/IRC، مجوزدهی فرستنده به‌صورت پیش‌فرض ابتدا بر اساس شناسه انجام می‌شود.
+تطبیق مستقیم نام/ایمیل/نام مستعارِ قابل تغییر را با `dangerouslyAllowNameMatching: true` هر کانال فقط زمانی فعال کنید که صراحتاً این ریسک را پذیرفته باشید.
+
+### کلید API Anthropic + جایگزین MiniMax
+
+```json5
+{
+  auth: {
+    profiles: {
+      "anthropic:api": {
+        provider: "anthropic",
+        mode: "api_key",
+      },
+    },
+    order: {
+      anthropic: ["anthropic:api"],
+    },
+  },
+  models: {
+    providers: {
+      minimax: {
+        baseUrl: "https://api.minimax.io/anthropic",
+        api: "anthropic-messages",
+        apiKey: "${MINIMAX_API_KEY}",
+      },
+    },
+  },
+  agents: {
+    defaults: {
+      workspace: "~/.openclaw/workspace",
+      model: {
+        primary: "anthropic/claude-opus-4-6",
+        fallbacks: ["minimax/MiniMax-M2.7"],
+      },
+    },
+  },
+}
+```
+
+### بات کاری (دسترسی محدود)
+
+```json5
+{
+  agents: {
+    defaults: {
+      workspace: "~/work-openclaw",
+      elevatedDefault: "off",
+    },
+    list: [
+      {
+        id: "main",
+        identity: {
+          name: "WorkBot",
+          theme: "professional assistant",
+        },
+      },
+    ],
+  },
+  channels: {
+    slack: {
+      enabled: true,
+      botToken: "xoxb-...",
+      channels: {
+        "#engineering": { allow: true, requireMention: true },
+        "#general": { allow: true, requireMention: true },
+      },
+    },
+  },
+}
+```
+
+### فقط مدل‌های محلی
+
+```json5
+{
+  agents: {
+    defaults: {
+      workspace: "~/.openclaw/workspace",
+      model: { primary: "lmstudio/my-local-model" },
+    },
+  },
+  models: {
+    mode: "merge",
+    providers: {
+      lmstudio: {
+        baseUrl: "http://127.0.0.1:1234/v1",
+        apiKey: "lmstudio",
+        api: "openai-responses",
+        models: [
+          {
+            id: "my-local-model",
+            name: "Local Model",
+            reasoning: false,
+            input: ["text"],
+            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+            contextWindow: 196608,
+            maxTokens: 8192,
+          },
+        ],
+      },
+    },
+  },
+}
+```
+
+## نکته‌ها
+
+- اگر `dmPolicy: "open"` را تنظیم می‌کنید، فهرست متناظر `allowFrom` باید شامل `"*"` باشد.
+- شناسه‌های ارائه‌دهنده متفاوت‌اند (شماره تلفن‌ها، شناسه‌های کاربر، شناسه‌های کانال). برای تأیید قالب، از مستندات ارائه‌دهنده استفاده کنید.
+- بخش‌های اختیاری برای افزودن در آینده: `web`، `browser`، `ui`، `discovery`، `plugins`، `talk`، `signal`، `imessage`.
+- برای نکته‌های عمیق‌تر درباره راه‌اندازی، [ارائه‌دهندگان](/fa/providers) و [عیب‌یابی](/fa/gateway/troubleshooting) را ببینید.
+
+## مرتبط
+
+- [مرجع پیکربندی](/fa/gateway/configuration-reference)
+- [پیکربندی](/fa/gateway/configuration)

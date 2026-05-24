@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Overview
+---
+doc-schema-version: 1
+summary: "OpenClaw tools, skills, and plugins overview: what agents can call and how to extend them"
+read_when:
+  - You want to understand what tools OpenClaw provides
+  - You are deciding between built-in tools, skills, and plugins
+  - You need the right docs entry point for tool policy, automation, or agent coordination
+title: "Overview"
+---
 
 Use this page to choose the right Capabilities surface. **Tools** are callable
 actions, **skills** teach agents how to work, and **plugins** add runtime
@@ -40,6 +44,7 @@ only when the agent should see fewer tools or needs explicit host access.
     The model only sees tools that survive the active profile, allow/deny
     policy, provider restrictions, sandbox state, channel permissions, and
     plugin availability.
+
   </Step>
 
   <Step title="Use a skill when the agent needs instructions">
@@ -51,6 +56,7 @@ only when the agent should see fewer tools or needs explicit host access.
     skill root, or plugin package.
 
     [Skills](/tools/skills) | [Creating skills](/tools/creating-skills) | [Skills config](/tools/skills-config)
+
   </Step>
 
   <Step title="Use a plugin when OpenClaw needs a new capability">
@@ -62,6 +68,7 @@ only when the agent should see fewer tools or needs explicit host access.
     archives.
 
     [Install and configure plugins](/tools/plugin) | [Build plugins](/plugins/building-plugins) | [Plugin SDK](/plugins/sdk-overview)
+
   </Step>
 </Steps>
 
@@ -85,9 +92,9 @@ semantics, use [Tools and custom providers](/gateway/config-tools).
 | Large PI catalogs      | Search and call many eligible tools without sending every schema to the model | `tool_search_code`, `tool_search`, `tool_describe`                   | [Tool Search](/tools/tool-search)                                      |
 
 <Note>
-  Tool Search is an experimental PI-agent surface. Codex harness runs use
-  Codex-native code mode, native tool search, deferred dynamic tools, and nested
-  tool calls instead of `tools.toolSearch`.
+Tool Search is an experimental PI-agent surface. Codex harness runs use
+Codex-native code mode, native tool search, deferred dynamic tools, and nested
+tool calls instead of `tools.toolSearch`.
 </Note>
 
 ## Plugin-provided tools
@@ -99,14 +106,14 @@ for contract details.
 
 Common plugin-provided tools include:
 
-* [Diffs](/tools/diffs) for rendering file and markdown diffs
-* [LLM Task](/tools/llm-task) for JSON-only workflow steps
-* [Lobster](/tools/lobster) for typed workflows with resumable approvals
-* [Tokenjuice](/tools/tokenjuice) for compacting noisy `exec` and `bash` tool
+- [Diffs](/tools/diffs) for rendering file and markdown diffs
+- [LLM Task](/tools/llm-task) for JSON-only workflow steps
+- [Lobster](/tools/lobster) for typed workflows with resumable approvals
+- [Tokenjuice](/tools/tokenjuice) for compacting noisy `exec` and `bash` tool
   output
-* [Tool Search](/tools/tool-search) for discovering and calling large tool
+- [Tool Search](/tools/tool-search) for discovering and calling large tool
   catalogs without putting every schema in the prompt
-* [Canvas](/plugins/reference/canvas) for node Canvas control and A2UI
+- [Canvas](/plugins/reference/canvas) for node Canvas control and A2UI
   rendering
 
 ## Configure access and approvals
@@ -116,30 +123,30 @@ model does not receive that tool's schema for the turn. A run can lose tools
 because of global config, per-agent config, channel policy, provider
 restrictions, sandbox rules, channel/runtime policy, or plugin availability.
 
-* [Tools and custom providers](/gateway/config-tools) documents tool profiles,
+- [Tools and custom providers](/gateway/config-tools) documents tool profiles,
   allow/deny lists, provider-specific restrictions, loop detection, and
   provider-backed tool settings.
-* [Exec approvals](/tools/exec-approvals) documents host command approval
+- [Exec approvals](/tools/exec-approvals) documents host command approval
   policy.
-* [Elevated exec](/tools/elevated) documents controlled execution outside the
+- [Elevated exec](/tools/elevated) documents controlled execution outside the
   sandbox.
-* [Sandbox vs tool policy vs elevated](/gateway/sandbox-vs-tool-policy-vs-elevated) explains which layer controls file and process access.
-* [Per-agent sandbox and tool restrictions](/tools/multi-agent-sandbox-tools)
+- [Sandbox vs tool policy vs elevated](/gateway/sandbox-vs-tool-policy-vs-elevated) explains which layer controls file and process access.
+- [Per-agent sandbox and tool restrictions](/tools/multi-agent-sandbox-tools)
   documents agent-specific restrictions for delegated runs.
 
 ## Extend capabilities
 
 Choose the extension path by the job you need OpenClaw to do:
 
-* Install or manage an existing plugin with [Plugins](/tools/plugin).
-* Build a new integration, provider, channel, tool, or hook with
+- Install or manage an existing plugin with [Plugins](/tools/plugin).
+- Build a new integration, provider, channel, tool, or hook with
   [Build plugins](/plugins/building-plugins).
-* Add or tune reusable agent instructions with [Skills](/tools/skills) and
+- Add or tune reusable agent instructions with [Skills](/tools/skills) and
   [Creating skills](/tools/creating-skills).
-* Package reusable workflow material with
+- Package reusable workflow material with
   [Skill workshop](/plugins/skill-workshop) when the workflow belongs in a
   plugin-distributed skill bundle.
-* Use [Plugin SDK](/plugins/sdk-overview) and [Plugin manifest](/plugins/manifest) when you need implementation contracts.
+- Use [Plugin SDK](/plugins/sdk-overview) and [Plugin manifest](/plugins/manifest) when you need implementation contracts.
 
 ## Troubleshoot missing tools
 
@@ -162,10 +169,10 @@ current turn:
 
 ## Related
 
-* [Automation](/automation) for cron, tasks, heartbeat, commitments, hooks, standing orders, and Task Flow
-* [Agents](/concepts/agent) for the agent model, sessions, memory, and multi-agent coordination
-* [Tools and custom providers](/gateway/config-tools) for the canonical tool policy reference
-* [Plugins](/tools/plugin) for plugin installation and management
-* [Plugin SDK](/plugins/sdk-overview) for plugin author reference
-* [Skills](/tools/skills) for skill load order, gating, and config
-* [Tool Search](/tools/tool-search) for compact PI tool catalog discovery
+- [Automation](/automation) for cron, tasks, heartbeat, commitments, hooks, standing orders, and Task Flow
+- [Agents](/concepts/agent) for the agent model, sessions, memory, and multi-agent coordination
+- [Tools and custom providers](/gateway/config-tools) for the canonical tool policy reference
+- [Plugins](/tools/plugin) for plugin installation and management
+- [Plugin SDK](/plugins/sdk-overview) for plugin author reference
+- [Skills](/tools/skills) for skill load order, gating, and config
+- [Tool Search](/tools/tool-search) for compact PI tool catalog discovery

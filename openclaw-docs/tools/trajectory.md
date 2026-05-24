@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Trajectory bundles
+---
+summary: "Export redacted trajectory bundles for debugging an OpenClaw agent session"
+read_when:
+  - Debugging why an agent answered, failed, or called tools a certain way
+  - Exporting a support bundle for an OpenClaw session
+  - Investigating prompt context, tool calls, runtime errors, or usage metadata
+  - Disabling or relocating trajectory capture
+title: "Trajectory bundles"
+---
 
 Trajectory capture is OpenClaw's per-session flight recorder. It records a
 structured timeline for each agent run, then `/export-trajectory` packages the
@@ -10,11 +14,11 @@ current session into a redacted support bundle.
 
 Use it when you need to answer questions like:
 
-* What prompt, system prompt, and tools were sent to the model?
-* Which transcript messages and tool calls led to this answer?
-* Did the run time out, abort, compact, or hit a provider error?
-* Which model, plugins, skills, and runtime settings were active?
-* What usage and prompt-cache metadata did the provider return?
+- What prompt, system prompt, and tools were sent to the model?
+- Which transcript messages and tool calls led to this answer?
+- Did the run time out, abort, compact, or hit a provider error?
+- Which model, plugins, skills, and runtime settings were active?
+- What usage and prompt-cache metadata did the provider return?
 
 If you are filing a broad support report for a live Gateway issue, start with
 [`/diagnostics`](/gateway/diagnostics#chat-command). Diagnostics collects the
@@ -27,25 +31,25 @@ timeline.
 
 Send this in the active session:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 /export-trajectory
 ```
 
 Alias:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 /trajectory
 ```
 
 OpenClaw writes the bundle under the workspace:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 .openclaw/trajectory-exports/openclaw-trajectory-<session>-<timestamp>/
 ```
 
 You can choose a relative output directory name:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 /export-trajectory bug-1234
 ```
 
@@ -62,7 +66,7 @@ trajectory details back to the shared room.
 For local inspection or support workflows, you can also run the approved command
 path directly:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw sessions export-trajectory --session-key "agent:main:telegram:direct:123" --workspace .
 ```
 
@@ -77,28 +81,28 @@ Trajectory capture is on by default for OpenClaw agent runs.
 
 Runtime events include:
 
-* `session.started`
-* `trace.metadata`
-* `context.compiled`
-* `prompt.submitted`
-* `model.fallback_step`, including the source model, next model, failure reason/detail, chain position, and whether fallback advanced, succeeded, or exhausted the chain
-* `model.completed`
-* `trace.artifacts`
-* `session.ended`
+- `session.started`
+- `trace.metadata`
+- `context.compiled`
+- `prompt.submitted`
+- `model.fallback_step`, including the source model, next model, failure reason/detail, chain position, and whether fallback advanced, succeeded, or exhausted the chain
+- `model.completed`
+- `trace.artifacts`
+- `session.ended`
 
 Transcript events are also reconstructed from the active session branch:
 
-* user messages
-* assistant messages
-* tool calls
-* tool results
-* compactions
-* model changes
-* labels and custom session entries
+- user messages
+- assistant messages
+- tool calls
+- tool results
+- compactions
+- model changes
+- labels and custom session entries
 
 Events are written as JSON Lines with this schema marker:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "traceSchema": "openclaw-trajectory",
   "schemaVersion": 1
@@ -127,20 +131,20 @@ when the session did not capture the corresponding runtime data.
 
 By default, runtime trajectory events are written beside the session file:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 <session>.trajectory.jsonl
 ```
 
 OpenClaw also writes a best-effort pointer file beside the session:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 <session>.trajectory-path.json
 ```
 
 Set `OPENCLAW_TRAJECTORY_DIR` to store runtime trajectory sidecars in a
 dedicated directory:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export OPENCLAW_TRAJECTORY_DIR=/var/lib/openclaw/trajectories
 ```
 
@@ -156,7 +160,7 @@ belongs to that session.
 
 Set `OPENCLAW_TRAJECTORY=0` before starting OpenClaw:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export OPENCLAW_TRAJECTORY=0
 ```
 
@@ -170,7 +174,7 @@ OpenClaw flushes runtime trajectory sidecars during agent cleanup. The default
 cleanup timeout is 10,000 ms. On slow disks or large stores, set
 `OPENCLAW_TRAJECTORY_FLUSH_TIMEOUT_MS` before starting OpenClaw:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export OPENCLAW_TRAJECTORY_FLUSH_TIMEOUT_MS=30000
 ```
 
@@ -183,19 +187,19 @@ that do not pass an explicit timeout, set `OPENCLAW_AGENT_CLEANUP_TIMEOUT_MS`.
 Trajectory bundles are designed for support and debugging, not public posting.
 OpenClaw redacts sensitive values before writing export files:
 
-* credentials and known secret-like payload fields
-* image data
-* local state paths
-* workspace paths, replaced with `$WORKSPACE_DIR`
-* home directory paths, where detected
+- credentials and known secret-like payload fields
+- image data
+- local state paths
+- workspace paths, replaced with `$WORKSPACE_DIR`
+- home directory paths, where detected
 
 The exporter also bounds input size:
 
-* runtime sidecar files: live capture stops at 10 MiB and records a truncation event when space remains; export accepts existing runtime sidecars up to 50 MiB
-* session files: 50 MiB
-* runtime events: 200,000
-* total exported events: 250,000
-* individual runtime event lines are truncated above 256 KiB
+- runtime sidecar files: live capture stops at 10 MiB and records a truncation event when space remains; export accepts existing runtime sidecars up to 50 MiB
+- session files: 50 MiB
+- runtime events: 200,000
+- total exported events: 250,000
+- individual runtime event lines are truncated above 256 KiB
 
 Review bundles before sharing them outside your team. Redaction is best-effort
 and cannot know every application-specific secret.
@@ -204,22 +208,22 @@ and cannot know every application-specific secret.
 
 If the export has no runtime events:
 
-* confirm OpenClaw was started without `OPENCLAW_TRAJECTORY=0`
-* check whether `OPENCLAW_TRAJECTORY_DIR` points to a writable directory
-* run another message in the session, then export again
-* inspect `manifest.json` for `runtimeEventCount`
+- confirm OpenClaw was started without `OPENCLAW_TRAJECTORY=0`
+- check whether `OPENCLAW_TRAJECTORY_DIR` points to a writable directory
+- run another message in the session, then export again
+- inspect `manifest.json` for `runtimeEventCount`
 
 If the command rejects the output path:
 
-* use a relative name like `bug-1234`
-* do not pass `/tmp/...` or `~/...`
-* keep the export inside `.openclaw/trajectory-exports/`
+- use a relative name like `bug-1234`
+- do not pass `/tmp/...` or `~/...`
+- keep the export inside `.openclaw/trajectory-exports/`
 
 If the export fails with a size error, the session or sidecar exceeded the
 export safety limits. Start a new session or export a smaller reproduction.
 
 ## Related
 
-* [Diffs](/tools/diffs)
-* [Session management](/concepts/session)
-* [Exec tool](/tools/exec)
+- [Diffs](/tools/diffs)
+- [Session management](/concepts/session)
+- [Exec tool](/tools/exec)

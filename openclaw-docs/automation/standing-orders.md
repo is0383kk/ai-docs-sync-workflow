@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Standing orders
+---
+summary: "Define permanent operating authority for autonomous agent programs"
+read_when:
+  - Setting up autonomous agent workflows that run without per-task prompting
+  - Defining what the agent can do independently vs. what needs human approval
+  - Structuring multi-program agents with clear boundaries and escalation rules
+title: "Standing orders"
+---
 
 Standing orders grant your agent **permanent operating authority** for defined programs. Instead of giving individual task instructions each time, you define programs with clear scope, triggers, and escalation rules - and the agent executes autonomously within those boundaries.
 
@@ -12,17 +15,17 @@ This is the difference between telling your assistant "send the weekly report" e
 
 **Without standing orders:**
 
-* You must prompt the agent for every task
-* The agent sits idle between requests
-* Routine work gets forgotten or delayed
-* You become the bottleneck
+- You must prompt the agent for every task
+- The agent sits idle between requests
+- Routine work gets forgotten or delayed
+- You become the bottleneck
 
 **With standing orders:**
 
-* The agent executes autonomously within defined boundaries
-* Routine work happens on schedule without prompting
-* You only get involved for exceptions and approvals
-* The agent fills idle time productively
+- The agent executes autonomously within defined boundaries
+- Routine work happens on schedule without prompting
+- You only get involved for exceptions and approvals
+- The agent fills idle time productively
 
 ## How they work
 
@@ -38,12 +41,12 @@ Each program specifies:
 The agent loads these instructions every session via the workspace bootstrap files (see [Agent Workspace](/concepts/agent-workspace) for the full list of auto-injected files) and executes against them, combined with [cron jobs](/automation/cron-jobs) for time-based enforcement.
 
 <Tip>
-  Put standing orders in `AGENTS.md` to guarantee they're loaded every session. The workspace bootstrap automatically injects `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `BOOTSTRAP.md`, and `MEMORY.md` - but not arbitrary files in subdirectories.
+Put standing orders in `AGENTS.md` to guarantee they're loaded every session. The workspace bootstrap automatically injects `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `BOOTSTRAP.md`, and `MEMORY.md` - but not arbitrary files in subdirectories.
 </Tip>
 
 ## Anatomy of a standing order
 
-```markdown theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```markdown
 ## Program: Weekly Status Report
 
 **Authority:** Compile data, generate report, deliver to stakeholders
@@ -80,7 +83,7 @@ Agent: Reads standing orders → executes steps → reports results
 
 The cron job prompt should reference the standing order rather than duplicating it:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron add \
   --name daily-inbox-triage \
   --cron "0 8 * * 1-5" \
@@ -96,7 +99,7 @@ openclaw cron add \
 
 ### Example 1: content and social media (weekly cycle)
 
-```markdown theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```markdown
 ## Program: Content & Social Media
 
 **Authority:** Draft content, schedule posts, compile engagement reports
@@ -119,7 +122,7 @@ openclaw cron add \
 
 ### Example 2: finance operations (event-triggered)
 
-```markdown theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```markdown
 ## Program: Financial Processing
 
 **Authority:** Process transaction data, generate reports, send summaries
@@ -145,7 +148,7 @@ openclaw cron add \
 
 ### Example 3: monitoring and alerts (continuous)
 
-```markdown theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```markdown
 ## Program: System Monitoring
 
 **Authority:** Check system health, restart services, send alerts
@@ -177,7 +180,7 @@ Standing orders work best when combined with strict execution discipline. Every 
 2. **Verify** - Confirm the result is correct (file exists, message delivered, data parsed)
 3. **Report** - Tell the owner what was done and what was verified
 
-```markdown theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```markdown
 ### Execution rules
 
 - Every task follows Execute-Verify-Report. No exceptions.
@@ -194,7 +197,7 @@ This pattern prevents the most common agent failure mode: acknowledging a task w
 
 For agents managing multiple concerns, organize standing orders as separate programs with clear boundaries:
 
-```markdown theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```markdown
 ## Program 1: [Domain A] (Weekly)
 
 ...
@@ -215,33 +218,33 @@ For agents managing multiple concerns, organize standing orders as separate prog
 
 Each program should have:
 
-* Its own **trigger cadence** (weekly, monthly, event-driven, continuous)
-* Its own **approval gates** (some programs need more oversight than others)
-* Clear **boundaries** (the agent should know where one program ends and another begins)
+- Its own **trigger cadence** (weekly, monthly, event-driven, continuous)
+- Its own **approval gates** (some programs need more oversight than others)
+- Clear **boundaries** (the agent should know where one program ends and another begins)
 
 ## Best practices
 
 ### Do
 
-* Start with narrow authority and expand as trust builds
-* Define explicit approval gates for high-risk actions
-* Include "What NOT to do" sections - boundaries matter as much as permissions
-* Combine with cron jobs for reliable time-based execution
-* Review agent logs weekly to verify standing orders are being followed
-* Update standing orders as your needs evolve - they're living documents
+- Start with narrow authority and expand as trust builds
+- Define explicit approval gates for high-risk actions
+- Include "What NOT to do" sections - boundaries matter as much as permissions
+- Combine with cron jobs for reliable time-based execution
+- Review agent logs weekly to verify standing orders are being followed
+- Update standing orders as your needs evolve - they're living documents
 
 ### Avoid
 
-* Grant broad authority on day one ("do whatever you think is best")
-* Skip escalation rules - every program needs a "when to stop and ask" clause
-* Assume the agent will remember verbal instructions - put everything in the file
-* Mix concerns in a single program - separate programs for separate domains
-* Forget to enforce with cron jobs - standing orders without triggers become suggestions
+- Grant broad authority on day one ("do whatever you think is best")
+- Skip escalation rules - every program needs a "when to stop and ask" clause
+- Assume the agent will remember verbal instructions - put everything in the file
+- Mix concerns in a single program - separate programs for separate domains
+- Forget to enforce with cron jobs - standing orders without triggers become suggestions
 
 ## Related
 
-* [Automation](/automation): all automation mechanisms at a glance.
-* [Cron jobs](/automation/cron-jobs): schedule enforcement for standing orders.
-* [Hooks](/automation/hooks): event-driven scripts for agent lifecycle events.
-* [Webhooks](/automation/cron-jobs#webhooks): inbound HTTP event triggers.
-* [Agent workspace](/concepts/agent-workspace): where standing orders live, including the full list of auto-injected bootstrap files (`AGENTS.md`, `SOUL.md`, etc.).
+- [Automation](/automation): all automation mechanisms at a glance.
+- [Cron jobs](/automation/cron-jobs): schedule enforcement for standing orders.
+- [Hooks](/automation/hooks): event-driven scripts for agent lifecycle events.
+- [Webhooks](/automation/cron-jobs#webhooks): inbound HTTP event triggers.
+- [Agent workspace](/concepts/agent-workspace): where standing orders live, including the full list of auto-injected bootstrap files (`AGENTS.md`, `SOUL.md`, etc.).

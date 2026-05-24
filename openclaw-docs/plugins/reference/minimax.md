@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# MiniMax plugin
+---
+summary: "Adds MiniMax, MiniMax Portal model provider support to OpenClaw."
+read_when:
+  - You are installing, configuring, or auditing the minimax plugin
+title: "MiniMax plugin"
+---
 
 # MiniMax plugin
 
@@ -10,8 +11,8 @@ Adds MiniMax, MiniMax Portal model provider support to OpenClaw.
 
 ## Distribution
 
-* Package: `@openclaw/minimax-provider`
-* Install route: included in OpenClaw
+- Package: `@openclaw/minimax-provider`
+- Install route: included in OpenClaw
 
 ## Surface
 
@@ -19,4 +20,4 @@ providers: minimax, minimax-portal; contracts: imageGenerationProviders, mediaUn
 
 ## Related docs
 
-* [minimax](/providers/minimax)
+- [minimax](/providers/minimax)

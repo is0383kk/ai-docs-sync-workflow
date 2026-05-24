@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Matrix QA
+---
+summary: "Maintainer reference for the Docker-backed Matrix live QA lane: CLI, profiles, env vars, scenarios, and output artifacts."
+read_when:
+  - Running pnpm openclaw qa matrix locally
+  - Adding or selecting Matrix QA scenarios
+  - Triaging Matrix QA failures, timeouts, or stuck cleanup
+title: "Matrix QA"
+---
 
 The Matrix QA lane runs the bundled `@openclaw/matrix` plugin against a disposable Tuwunel homeserver in Docker, with temporary driver, SUT, and observer accounts plus seeded rooms. It is the live transport-real coverage for Matrix.
 
@@ -12,7 +15,7 @@ For broader QA framework context, see [QA overview](/concepts/qa-e2e-automation)
 
 ## Quick start
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm openclaw qa matrix --profile fast --fail-fast
 ```
 
@@ -29,7 +32,7 @@ Plain `pnpm openclaw qa matrix` runs `--profile all` and does not stop on first 
 
 ## CLI
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 pnpm openclaw qa matrix [options]
 ```
 
@@ -77,17 +80,17 @@ The exact mapping lives in `extensions/qa-matrix/src/runners/contract/scenario-c
 
 The full scenario id list is the `MatrixQaScenarioId` union in `extensions/qa-matrix/src/runners/contract/scenario-catalog.ts:15`. Categories include:
 
-* threading - `matrix-thread-*`, `matrix-subagent-thread-spawn`
-* top-level / DM / room - `matrix-top-level-reply-shape`, `matrix-room-*`, `matrix-dm-*`
-* streaming and tool progress - `matrix-room-partial-streaming-preview`, `matrix-room-quiet-streaming-preview`, `matrix-room-tool-progress-*`, `matrix-room-block-streaming`
-* media - `matrix-media-type-coverage`, `matrix-room-image-understanding-attachment`, `matrix-attachment-only-ignored`, `matrix-unsupported-media-safe`
-* routing - `matrix-room-autojoin-invite`, `matrix-secondary-room-*`
-* reactions - `matrix-reaction-*`
-* approvals - `matrix-approval-*` (exec/plugin metadata, chunked fallback, deny reactions, threads, and `target: "both"` routing)
-* restart and replay - `matrix-restart-*`, `matrix-stale-sync-replay-dedupe`, `matrix-room-membership-loss`, `matrix-homeserver-restart-resume`, `matrix-initial-catchup-then-incremental`
-* mention gating, bot-to-bot, and allowlists - `matrix-mention-*`, `matrix-allowbots-*`, `matrix-allowlist-*`, `matrix-multi-actor-ordering`, `matrix-inbound-edit-*`, `matrix-mxid-prefixed-command-block`, `matrix-observer-allowlist-override`
-* E2EE - `matrix-e2ee-*` (basic reply, thread follow-up, bootstrap, recovery key lifecycle, state-loss variants, server backup behavior, device hygiene, SAS / QR / DM verification, restart, artifact redaction)
-* E2EE CLI - `matrix-e2ee-cli-*` (encryption setup, idempotent setup, bootstrap failure, recovery-key lifecycle, multi-account, gateway-reply round-trip, self-verification)
+- threading - `matrix-thread-*`, `matrix-subagent-thread-spawn`
+- top-level / DM / room - `matrix-top-level-reply-shape`, `matrix-room-*`, `matrix-dm-*`
+- streaming and tool progress - `matrix-room-partial-streaming-preview`, `matrix-room-quiet-streaming-preview`, `matrix-room-tool-progress-*`, `matrix-room-block-streaming`
+- media - `matrix-media-type-coverage`, `matrix-room-image-understanding-attachment`, `matrix-attachment-only-ignored`, `matrix-unsupported-media-safe`
+- routing - `matrix-room-autojoin-invite`, `matrix-secondary-room-*`
+- reactions - `matrix-reaction-*`
+- approvals - `matrix-approval-*` (exec/plugin metadata, chunked fallback, deny reactions, threads, and `target: "both"` routing)
+- restart and replay - `matrix-restart-*`, `matrix-stale-sync-replay-dedupe`, `matrix-room-membership-loss`, `matrix-homeserver-restart-resume`, `matrix-initial-catchup-then-incremental`
+- mention gating, bot-to-bot, and allowlists - `matrix-mention-*`, `matrix-allowbots-*`, `matrix-allowlist-*`, `matrix-multi-actor-ordering`, `matrix-inbound-edit-*`, `matrix-mxid-prefixed-command-block`, `matrix-observer-allowlist-override`
+- E2EE - `matrix-e2ee-*` (basic reply, thread follow-up, bootstrap, recovery key lifecycle, state-loss variants, server backup behavior, device hygiene, SAS / QR / DM verification, restart, artifact redaction)
+- E2EE CLI - `matrix-e2ee-cli-*` (encryption setup, idempotent setup, bootstrap failure, recovery-key lifecycle, multi-account, gateway-reply round-trip, self-verification)
 
 Pass `--scenario <id>` (repeatable) to run a hand-picked set; combine with `--profile all` to ignore profile gating.
 
@@ -109,20 +112,20 @@ Pass `--scenario <id>` (repeatable) to run a hand-picked set; combine with `--pr
 
 Written to `--output-dir`:
 
-* `matrix-qa-report.md` - Markdown protocol report (what passed, failed, was skipped, and why).
-* `matrix-qa-summary.json` - Structured summary suitable for CI parsing and dashboards.
-* `matrix-qa-observed-events.json` - Observed Matrix events from the driver and observer clients. Bodies are redacted unless `OPENCLAW_QA_MATRIX_CAPTURE_CONTENT=1`; approval metadata is summarized with selected safe fields and truncated command preview.
-* `matrix-qa-output.log` - Combined stdout/stderr from the run. If `OPENCLAW_RUN_NODE_OUTPUT_LOG` is set, the outer launcher's log is reused instead.
+- `matrix-qa-report.md` - Markdown protocol report (what passed, failed, was skipped, and why).
+- `matrix-qa-summary.json` - Structured summary suitable for CI parsing and dashboards.
+- `matrix-qa-observed-events.json` - Observed Matrix events from the driver and observer clients. Bodies are redacted unless `OPENCLAW_QA_MATRIX_CAPTURE_CONTENT=1`; approval metadata is summarized with selected safe fields and truncated command preview.
+- `matrix-qa-output.log` - Combined stdout/stderr from the run. If `OPENCLAW_RUN_NODE_OUTPUT_LOG` is set, the outer launcher's log is reused instead.
 
 The default output dir is `<repo>/.artifacts/qa-e2e/matrix-<timestamp>` so successive runs do not overwrite each other.
 
 ## Triage tips
 
-* **Run hangs near the end:** `matrix-js-sdk` native crypto handles can outlive the harness. The default forces a clean `process.exit` after artifact write; if you have unset `OPENCLAW_QA_MATRIX_DISABLE_FORCE_EXIT=1`, expect the process to linger.
-* **Cleanup error:** look for the printed recovery command (a `docker compose ... down --remove-orphans` invocation) and run it manually to release the homeserver port.
-* **Flaky negative-assertion windows in CI:** lower `OPENCLAW_QA_MATRIX_NO_REPLY_WINDOW_MS` (default 8 s) when CI is fast; raise it on slow shared runners.
-* **Need redacted bodies for a bug report:** rerun with `OPENCLAW_QA_MATRIX_CAPTURE_CONTENT=1` and attach `matrix-qa-observed-events.json`. Treat the resulting artifact as sensitive.
-* **Different Tuwunel version:** point `OPENCLAW_QA_MATRIX_TUWUNEL_IMAGE` at the version under test. The lane checks in only the pinned default image.
+- **Run hangs near the end:** `matrix-js-sdk` native crypto handles can outlive the harness. The default forces a clean `process.exit` after artifact write; if you have unset `OPENCLAW_QA_MATRIX_DISABLE_FORCE_EXIT=1`, expect the process to linger.
+- **Cleanup error:** look for the printed recovery command (a `docker compose ... down --remove-orphans` invocation) and run it manually to release the homeserver port.
+- **Flaky negative-assertion windows in CI:** lower `OPENCLAW_QA_MATRIX_NO_REPLY_WINDOW_MS` (default 8 s) when CI is fast; raise it on slow shared runners.
+- **Need redacted bodies for a bug report:** rerun with `OPENCLAW_QA_MATRIX_CAPTURE_CONTENT=1` and attach `matrix-qa-observed-events.json`. Treat the resulting artifact as sensitive.
+- **Different Tuwunel version:** point `OPENCLAW_QA_MATRIX_TUWUNEL_IMAGE` at the version under test. The lane checks in only the pinned default image.
 
 ## Live transport contract
 
@@ -130,7 +133,7 @@ Matrix is one of three live transport lanes (Matrix, Telegram, Discord) that sha
 
 ## Related
 
-* [QA overview](/concepts/qa-e2e-automation) - overall QA stack and live transport contract
-* [QA Channel](/channels/qa-channel) - synthetic channel adapter for repo-backed scenarios
-* [Testing](/help/testing) - running tests and adding QA coverage
-* [Matrix](/channels/matrix) - the channel plugin under test
+- [QA overview](/concepts/qa-e2e-automation) - overall QA stack and live transport contract
+- [QA Channel](/channels/qa-channel) - synthetic channel adapter for repo-backed scenarios
+- [Testing](/help/testing) - running tests and adding QA coverage
+- [Matrix](/channels/matrix) - the channel plugin under test

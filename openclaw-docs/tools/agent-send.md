@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Agent send
+---
+summary: "Run agent turns from the CLI and optionally deliver replies to channels"
+read_when:
+  - You want to trigger agent runs from scripts or the command line
+  - You need to deliver agent replies to a chat channel programmatically
+title: "Agent send"
+---
 
 `openclaw agent` runs a single agent turn from the command line without needing
 an inbound chat message. Use it for scripted workflows, testing, and
@@ -12,15 +14,16 @@ programmatic delivery.
 
 <Steps>
   <Step title="Run a simple agent turn">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw agent --agent main --message "What is the weather today?"
     ```
 
     This sends the message through the Gateway and prints the reply.
+
   </Step>
 
   <Step title="Target a specific agent or session">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     # Target a specific agent
     openclaw agent --agent ops --message "Summarize logs"
 
@@ -33,10 +36,11 @@ programmatic delivery.
     # Target an exact session key
     openclaw agent --session-key agent:ops:incident-42 --message "Summarize status"
     ```
+
   </Step>
 
   <Step title="Deliver the reply to a channel">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     # Deliver to WhatsApp (default channel)
     openclaw agent --to +15555550123 --message "Report ready" --deliver
 
@@ -44,6 +48,7 @@ programmatic delivery.
     openclaw agent --agent ops --message "Generate report" \
       --deliver --reply-channel slack --reply-to "#reports"
     ```
+
   </Step>
 </Steps>
 
@@ -69,12 +74,12 @@ programmatic delivery.
 
 ## Behavior
 
-* By default, the CLI goes **through the Gateway**. Add `--local` to force the
+- By default, the CLI goes **through the Gateway**. Add `--local` to force the
   embedded runtime on the current machine.
-* If the Gateway is unreachable, the CLI **falls back** to the local embedded run.
-* Session selection: `--to` derives the session key (group/channel targets
+- If the Gateway is unreachable, the CLI **falls back** to the local embedded run.
+- Session selection: `--to` derives the session key (group/channel targets
   preserve isolation; direct chats collapse to `main`).
-* `--session-key` selects an explicit key. Agent-prefixed keys must use
+- `--session-key` selects an explicit key. Agent-prefixed keys must use
   `agent:<agent-id>:<session-key>`, and `--agent` must match that agent id when
   both are supplied. Bare non-sentinel keys are scoped to `--agent` when
   supplied; for example, `--agent ops --session-key incident-42` routes to
@@ -82,15 +87,15 @@ programmatic delivery.
   to the configured default agent. Literal `global` and `unknown` remain
   unscoped only when no `--agent` is supplied; in that case, embedded fallback
   and store ownership use the configured default agent.
-* Thinking and verbose flags persist into the session store.
-* Output: plain text by default, or `--json` for structured payload + metadata.
-* With `--json --deliver`, the JSON includes delivery status for sent,
+- Thinking and verbose flags persist into the session store.
+- Output: plain text by default, or `--json` for structured payload + metadata.
+- With `--json --deliver`, the JSON includes delivery status for sent,
   suppressed, partial, and failed sends. See
   [JSON delivery status](/cli/agent#json-delivery-status).
 
 ## Examples
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Simple turn with JSON output
 openclaw agent --to +15555550123 --message "Trace logs" --verbose on --json
 
@@ -113,15 +118,12 @@ openclaw agent --agent ops --message "Alert" --deliver --reply-channel telegram 
   <Card title="Agent CLI reference" href="/cli/agent" icon="terminal">
     Full `openclaw agent` flag and option reference.
   </Card>
-
   <Card title="Sub-agents" href="/tools/subagents" icon="users">
     Background sub-agent spawning.
   </Card>
-
   <Card title="Sessions" href="/concepts/session" icon="comments">
     How session keys work and how `--to`, `--agent`, and `--session-id` resolve them.
   </Card>
-
   <Card title="Slash commands" href="/tools/slash-commands" icon="slash">
     Native command catalog used inside agent sessions.
   </Card>

@@ -1,8 +1,8 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# How it works
+---
+summary: "How ClawHub listings, versions, installs, publishing, scans, and updates work."
+read_when:
+  - Understanding listings, versions, installs, publishing, and moderation
+---
 
 # How ClawHub Works
 
@@ -14,12 +14,12 @@ gives OpenClaw enough metadata to install and update those packages safely.
 
 Each public listing is a registry record with:
 
-* an owner and slug or package name
-* one or more published versions
-* metadata, summary, files, and source attribution
-* changelog and tag information such as `latest`
-* download, install, star, and comment signals
-* security scan and moderation status
+- an owner and slug or package name
+- one or more published versions
+- metadata, summary, files, and source attribution
+- changelog and tag information such as `latest`
+- download, install, star, and comment signals
+- security scan and moderation status
 
 The listing page is the canonical place for users to inspect what a skill or
 plugin claims to do before installing it.
@@ -49,7 +49,7 @@ digests.
 Use an explicit ClawHub install source when you want the registry to be the
 source of truth:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install clawhub:<package>
 ```
 
@@ -58,7 +58,7 @@ openclaw plugins install clawhub:<package>
 Publishing creates a new immutable version record. Publishers use the `clawhub`
 CLI for authenticated registry workflows:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub skill publish ./my-skill
 clawhub package publish <source> --family code-plugin --dry-run
 clawhub package publish <source> --family code-plugin
@@ -71,7 +71,7 @@ surface the published metadata, files, source attribution, and scan status.
 
 OpenClaw install commands use ClawHub as a package source:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw skills install <skill-slug>
 openclaw plugins install clawhub:<package>
 ```

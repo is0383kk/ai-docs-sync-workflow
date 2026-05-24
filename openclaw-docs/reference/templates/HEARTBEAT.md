@@ -1,10 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
+---
+summary: "Workspace template for HEARTBEAT.md"
+title: "HEARTBEAT.md template"
+read_when:
+  - Bootstrapping a workspace manually
+---
 
-# HEARTBEAT.md template
-
-```markdown theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```markdown
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
 # Add tasks below when you want the agent to check something periodically.
@@ -12,4 +13,4 @@
 
 ## Related
 
-* [Heartbeat config](/gateway/config-agents)
+- [Heartbeat config](/gateway/config-agents)

@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Agent runtimes
+---
+summary: "How OpenClaw separates model providers, models, channels, and agent runtimes"
+title: "Agent runtimes"
+read_when:
+  - You are choosing between PI, Codex, ACP, or another native agent runtime
+  - You are confused by provider/model/runtime labels in status or config
+  - You are documenting support parity for a native harness
+---
 
 An **agent runtime** is the component that owns one prepared model loop: it
 receives the prompt, drives model output, handles native tool calls, and returns
@@ -28,10 +31,10 @@ runtime policy where needed.
 
 There are two runtime families:
 
-* **Embedded harnesses** run inside OpenClaw's prepared agent loop. Today this
+- **Embedded harnesses** run inside OpenClaw's prepared agent loop. Today this
   is the built-in `pi` runtime plus registered plugin harnesses such as
   `codex`.
-* **CLI backends** run a local CLI process while keeping the model ref
+- **CLI backends** run a local CLI process while keeping the model ref
   canonical. For example, `anthropic/claude-opus-4-7` with
   a model-scoped `agentRuntime.id: "claude-cli"` means "select the Anthropic
   model, execute through Claude CLI." `claude-cli` is not an embedded harness id
@@ -58,7 +61,7 @@ non-agent OpenAI API surface is being used.
 The common ChatGPT/Codex subscription setup uses Codex OAuth for auth, but keeps
 the model ref as `openai/*` and selects the `codex` runtime:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -128,9 +131,9 @@ Different runtimes own different amounts of the loop.
 
 This ownership split is the main design rule:
 
-* If OpenClaw owns the surface, OpenClaw can provide normal plugin hook behavior.
-* If the native runtime owns the surface, OpenClaw needs runtime events or native hooks.
-* If the native runtime owns canonical thread state, OpenClaw should mirror and project context, not rewrite unsupported internals.
+- If OpenClaw owns the surface, OpenClaw can provide normal plugin hook behavior.
+- If the native runtime owns the surface, OpenClaw needs runtime events or native hooks.
+- If the native runtime owns canonical thread state, OpenClaw should mirror and project context, not rewrite unsupported internals.
 
 ## Runtime selection
 
@@ -163,7 +166,7 @@ selection/runtime error; it is never silently routed back to PI.
 CLI backend aliases are different from embedded harness ids. The preferred
 Claude CLI form is:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -222,19 +225,19 @@ The Codex runtime support contract is documented in
 Status output may show both `Execution` and `Runtime` labels. Read them as
 diagnostics, not as provider names.
 
-* A model ref such as `openai/gpt-5.5` tells you the selected provider/model.
-* A runtime id such as `codex` tells you which loop is executing the turn.
-* A channel label such as Telegram or Discord tells you where the conversation is happening.
+- A model ref such as `openai/gpt-5.5` tells you the selected provider/model.
+- A runtime id such as `codex` tells you which loop is executing the turn.
+- A channel label such as Telegram or Discord tells you where the conversation is happening.
 
 If a run still shows an unexpected runtime, inspect the selected provider/model
 runtime policy first. Legacy session runtime pins no longer decide routing.
 
 ## Related
 
-* [Codex harness](/plugins/codex-harness)
-* [Codex harness runtime](/plugins/codex-harness-runtime)
-* [OpenAI](/providers/openai)
-* [Agent harness plugins](/plugins/sdk-agent-harness)
-* [Agent loop](/concepts/agent-loop)
-* [Models](/concepts/models)
-* [Status](/cli/status)
+- [Codex harness](/plugins/codex-harness)
+- [Codex harness runtime](/plugins/codex-harness-runtime)
+- [OpenAI](/providers/openai)
+- [Agent harness plugins](/plugins/sdk-agent-harness)
+- [Agent loop](/concepts/agent-loop)
+- [Models](/concepts/models)
+- [Status](/cli/status)

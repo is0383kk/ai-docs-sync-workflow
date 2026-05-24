@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Migration guide
+---
+summary: "Migration hub: cross-system imports, machine-to-machine moves, and plugin upgrades"
+read_when:
+  - You are moving OpenClaw to a new laptop or server
+  - You are coming from another agent system and want to keep state
+  - You are upgrading an in-place plugin
+title: "Migration guide"
+---
 
 OpenClaw supports three migration paths: importing from another agent system, moving an existing install to a new machine, and upgrading a plugin in place.
 
@@ -14,7 +17,6 @@ Use the bundled migration providers to bring instructions, MCP servers, skills, 
   <Card title="Migrating from Claude" href="/install/migrating-claude" icon="brain">
     Import Claude Code and Claude Desktop state, including `CLAUDE.md`, MCP servers, skills, and project commands.
   </Card>
-
   <Card title="Migrating from Hermes" href="/install/migrating-hermes" icon="feather">
     Import Hermes config, providers, MCP servers, memory, skills, and supported `.env` keys.
   </Card>
@@ -26,14 +28,14 @@ The CLI entry point is [`openclaw migrate`](/cli/migrate). Onboarding can also o
 
 Copy the **state directory** (`~/.openclaw/` by default) and your **workspace** to preserve:
 
-* **Config** — `openclaw.json` and all gateway settings.
-* **Auth** — per-agent `auth-profiles.json` (API keys plus OAuth), plus any channel or provider state under `credentials/`.
-* **Sessions** — conversation history and agent state.
-* **Channel state** — WhatsApp login, Telegram session, and similar.
-* **Workspace files** — `MEMORY.md`, `USER.md`, skills, and prompts.
+- **Config** — `openclaw.json` and all gateway settings.
+- **Auth** — per-agent `auth-profiles.json` (API keys plus OAuth), plus any channel or provider state under `credentials/`.
+- **Sessions** — conversation history and agent state.
+- **Channel state** — WhatsApp login, Telegram session, and similar.
+- **Workspace files** — `MEMORY.md`, `USER.md`, skills, and prompts.
 
 <Tip>
-  Run `openclaw status` on the old machine to confirm your state directory path. Custom profiles use `~/.openclaw-<profile>/` or a path set via `OPENCLAW_STATE_DIR`.
+Run `openclaw status` on the old machine to confirm your state directory path. Custom profiles use `~/.openclaw-<profile>/` or a path set via `OPENCLAW_STATE_DIR`.
 </Tip>
 
 ### Migration steps
@@ -42,13 +44,14 @@ Copy the **state directory** (`~/.openclaw/` by default) and your **workspace** 
   <Step title="Stop the gateway and back up">
     On the **old** machine, stop the gateway so files are not changing mid-copy, then archive:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw gateway stop
     cd ~
     tar -czf openclaw-state.tgz .openclaw
     ```
 
     If you use multiple profiles (for example `~/.openclaw-work`), archive each separately.
+
   </Step>
 
   <Step title="Install OpenClaw on the new machine">
@@ -58,28 +61,30 @@ Copy the **state directory** (`~/.openclaw/` by default) and your **workspace** 
   <Step title="Copy state directory and workspace">
     Transfer the archive via `scp`, `rsync -a`, or an external drive, then extract:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     cd ~
     tar -xzf openclaw-state.tgz
     ```
 
     Ensure hidden directories were included and file ownership matches the user that will run the gateway.
+
   </Step>
 
   <Step title="Run doctor and verify">
     On the new machine, run [Doctor](/gateway/doctor) to apply config migrations and repair services:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw doctor
     openclaw gateway restart
     openclaw status
     ```
+
   </Step>
 </Steps>
 
 If Telegram or Discord uses the default env fallback (`TELEGRAM_BOT_TOKEN` or `DISCORD_BOT_TOKEN`), verify the migrated state-dir `.env` contains those keys without printing the secret values:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 awk -F= '/^(TELEGRAM_BOT_TOKEN|DISCORD_BOT_TOKEN)=/ { print $1 "=present" }' ~/.openclaw/.env
 ```
 
@@ -113,20 +118,20 @@ awk -F= '/^(TELEGRAM_BOT_TOKEN|DISCORD_BOT_TOKEN)=/ { print $1 "=present" }' ~/.
 
 On the new machine, confirm:
 
-* [ ] `openclaw status` shows the gateway running.
-* [ ] Channels are still connected (no re-pairing needed).
-* [ ] The dashboard opens and shows existing sessions.
-* [ ] Workspace files (memory, configs) are present.
+- [ ] `openclaw status` shows the gateway running.
+- [ ] Channels are still connected (no re-pairing needed).
+- [ ] The dashboard opens and shows existing sessions.
+- [ ] Workspace files (memory, configs) are present.
 
 ## Upgrade a plugin in place
 
 In-place plugin upgrades preserve the same plugin id and config keys but may move on-disk state into the current layout. Plugin-specific upgrade guides live alongside their channels:
 
-* [Matrix migration](/channels/matrix-migration): encrypted-state recovery limits, automatic snapshot behavior, and manual recovery commands.
+- [Matrix migration](/channels/matrix-migration): encrypted-state recovery limits, automatic snapshot behavior, and manual recovery commands.
 
 ## Related
 
-* [`openclaw migrate`](/cli/migrate): CLI reference for cross-system imports.
-* [Install overview](/install): all installation methods.
-* [Doctor](/gateway/doctor): post-migration health check.
-* [Uninstall](/install/uninstall): removing OpenClaw cleanly.
+- [`openclaw migrate`](/cli/migrate): CLI reference for cross-system imports.
+- [Install overview](/install): all installation methods.
+- [Doctor](/gateway/doctor): post-migration health check.
+- [Uninstall](/install/uninstall): removing OpenClaw cleanly.

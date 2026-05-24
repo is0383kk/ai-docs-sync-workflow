@@ -1,0 +1,118 @@
+---
+read_when:
+    - Ви хочете переглянути, перевірити або скасувати записи фонових завдань
+    - Ви документуєте команди потоку завдань у розділі `openclaw tasks flow`
+summary: Довідник CLI для `openclaw tasks` (реєстр фонових завдань і стан TaskFlow)
+title: '`openclaw tasks`'
+x-i18n:
+    generated_at: "2026-05-11T20:30:16Z"
+    model: gpt-5.5
+    provider: openai
+    source_hash: 7bbb97690124a8e59ec5e6a517f33166ad449ee6268894ab132ad9cb69dcaa81
+    source_path: cli/tasks.md
+    workflow: 16
+---
+
+Переглядайте довговічні фонові завдання та стан Task Flow. Без підкоманди
+`openclaw tasks` еквівалентна `openclaw tasks list`.
+
+Див. [Фонові завдання](/uk/automation/tasks), щоб дізнатися про життєвий цикл і модель доставки.
+
+## Використання
+
+```bash
+openclaw tasks
+openclaw tasks list
+openclaw tasks list --runtime acp
+openclaw tasks list --status running
+openclaw tasks show <lookup>
+openclaw tasks notify <lookup> state_changes
+openclaw tasks cancel <lookup>
+openclaw tasks audit
+openclaw tasks maintenance
+openclaw tasks maintenance --apply
+openclaw tasks flow list
+openclaw tasks flow show <lookup>
+openclaw tasks flow cancel <lookup>
+```
+
+## Кореневі параметри
+
+- `--json`: вивести JSON.
+- `--runtime <name>`: фільтрувати за типом: `subagent`, `acp`, `cron` або `cli`.
+- `--status <name>`: фільтрувати за статусом: `queued`, `running`, `succeeded`, `failed`, `timed_out`, `cancelled` або `lost`.
+
+## Підкоманди
+
+### `list`
+
+```bash
+openclaw tasks list [--runtime <name>] [--status <name>] [--json]
+```
+
+Виводить відстежувані фонові завдання, починаючи з найновіших.
+
+### `show`
+
+```bash
+openclaw tasks show <lookup> [--json]
+```
+
+Показує одне завдання за ID завдання, ID запуску або ключем сеансу.
+
+### `notify`
+
+```bash
+openclaw tasks notify <lookup> <done_only|state_changes|silent>
+```
+
+Змінює політику сповіщень для завдання, що виконується.
+
+### `cancel`
+
+```bash
+openclaw tasks cancel <lookup>
+```
+
+Скасовує фонове завдання, що виконується.
+
+### `audit`
+
+```bash
+openclaw tasks audit [--severity <warn|error>] [--code <name>] [--limit <n>] [--json]
+```
+
+Виявляє застарілі, втрачені, з помилкою доставки або іншим чином неузгоджені записи завдань і Task Flow. Втрачені завдання, збережені до `cleanupAfter`, є попередженнями; прострочені або втрачені завдання без мітки часу є помилками.
+
+### `maintenance`
+
+```bash
+openclaw tasks maintenance [--apply] [--json]
+```
+
+Попередньо показує або застосовує узгодження завдань і Task Flow, проставлення міток очищення, обрізання
+та очищення реєстру сеансів застарілих запусків Cron.
+Для завдань Cron узгодження використовує збережені журнали запусків/стан завдання перед тим, як позначити
+старе активне завдання як `lost`, тож завершені запуски Cron не стають хибними помилками аудиту
+лише тому, що стан середовища виконання Gateway у пам’яті зник. Офлайн-аудит CLI
+не є авторитетним для локального для процесу набору активних завдань Cron у Gateway. Завдання CLI
+з ID запуску/ID джерела позначаються як `lost`, коли їхній живий контекст запуску Gateway
+зник, навіть якщо старий рядок дочірнього сеансу залишається.
+Під час застосування maintenance також обрізає рядки реєстру сеансів `cron:<jobId>:run:<uuid>`,
+старші за 7 днів, зберігаючи поточні завдання Cron, що виконуються, і залишаючи
+рядки сеансів, не пов’язані з Cron, без змін.
+
+### `flow`
+
+```bash
+openclaw tasks flow list [--status <name>] [--json]
+openclaw tasks flow show <lookup> [--json]
+openclaw tasks flow cancel <lookup>
+```
+
+Переглядає або скасовує довговічний стан Task Flow у реєстрі завдань.
+
+## Пов’язане
+
+- [Довідник CLI](/uk/cli)
+- [Фонові завдання](/uk/automation/tasks)
