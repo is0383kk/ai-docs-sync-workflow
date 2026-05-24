@@ -1,8 +1,13 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# OpenRouter
+---
+summary: "Use OpenRouter's unified API to access many models in OpenClaw"
+read_when:
+  - You want a single API key for many LLMs
+  - You want to run models via OpenRouter in OpenClaw
+  - You want to use OpenRouter for image generation
+  - You want to use OpenRouter for music generation
+  - You want to use OpenRouter for video generation
+title: "OpenRouter"
+---
 
 OpenRouter provides a **unified API** that routes requests to many models behind a single
 endpoint and API key. It is OpenAI-compatible, so most OpenAI SDKs work by switching the base URL.
@@ -13,25 +18,24 @@ endpoint and API key. It is OpenAI-compatible, so most OpenAI SDKs work by switc
   <Step title="Get your API key">
     Create an API key at [openrouter.ai/keys](https://openrouter.ai/keys).
   </Step>
-
   <Step title="Run onboarding">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --auth-choice openrouter-api-key
     ```
   </Step>
-
   <Step title="(Optional) Switch to a specific model">
     Onboarding defaults to `openrouter/auto`. Pick a concrete model later:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw models set openrouter/<provider>/<model>
     ```
+
   </Step>
 </Steps>
 
 ## Config example
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   env: { OPENROUTER_API_KEY: "sk-or-..." },
   agents: {
@@ -45,8 +49,8 @@ endpoint and API key. It is OpenAI-compatible, so most OpenAI SDKs work by switc
 ## Model references
 
 <Note>
-  Model refs follow the pattern `openrouter/<provider>/<model>`. For the full list of
-  available providers and models, see [/concepts/model-providers](/concepts/model-providers).
+Model refs follow the pattern `openrouter/<provider>/<model>`. For the full list of
+available providers and models, see [/concepts/model-providers](/concepts/model-providers).
 </Note>
 
 Bundled fallback examples:
@@ -61,7 +65,7 @@ Bundled fallback examples:
 
 OpenRouter can also back the `image_generate` tool. Use an OpenRouter image model under `agents.defaults.imageGenerationModel`:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   env: { OPENROUTER_API_KEY: "sk-or-..." },
   agents: {
@@ -81,7 +85,7 @@ OpenClaw sends image requests to OpenRouter's chat completions image API with `m
 
 OpenRouter can also back the `video_generate` tool through its asynchronous `/videos` API. Use an OpenRouter video model under `agents.defaults.videoGenerationModel`:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   env: { OPENROUTER_API_KEY: "sk-or-..." },
   agents: {
@@ -110,7 +114,7 @@ OpenRouter can also back the `music_generate` tool through chat completions
 audio output. Use an OpenRouter audio model under
 `agents.defaults.musicGenerationModel`:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   env: { OPENROUTER_API_KEY: "sk-or-..." },
   agents: {
@@ -137,7 +141,7 @@ parameter.
 OpenRouter can also be used as a TTS provider through its OpenAI-compatible
 `/audio/speech` endpoint.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   messages: {
     tts: {
@@ -165,7 +169,7 @@ OpenRouter can transcribe inbound voice/audio attachments through the shared
 This applies to any channel plugin that forwards inbound voice/audio into
 media understanding preflight.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     media: {
@@ -195,8 +199,8 @@ OpenRouter's documented app-attribution headers:
 | `X-OpenRouter-Categories` | `cli-agent,cloud-agent,programming-app,creative-writing,writing-assistant,general-chat,personal-agent` |
 
 <Warning>
-  If you repoint the OpenRouter provider at some other proxy or base URL, OpenClaw
-  does **not** inject those OpenRouter-specific headers or Anthropic cache markers.
+If you repoint the OpenRouter provider at some other proxy or base URL, OpenClaw
+does **not** inject those OpenRouter-specific headers or Anthropic cache markers.
 </Warning>
 
 ## Advanced configuration
@@ -206,7 +210,7 @@ OpenRouter's documented app-attribution headers:
     OpenRouter response caching is opt-in. Enable it per OpenRouter model with
     model params:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -225,13 +229,14 @@ OpenRouter's documented app-attribution headers:
 
     OpenClaw sends `X-OpenRouter-Cache: true` and, when configured,
     `X-OpenRouter-Cache-TTL`. `responseCacheClear: true` forces a refresh for
-    the current request and stores the replacement response. Snake\_case aliases
+    the current request and stores the replacement response. Snake_case aliases
     (`response_cache`, `response_cache_ttl_seconds`, and
     `response_cache_clear`) are also accepted.
 
     This is separate from provider prompt caching and from OpenRouter's
     Anthropic `cache_control` markers. It is only applied on verified
     `openrouter.ai` routes, not custom proxy base URLs.
+
   </Accordion>
 
   <Accordion title="Anthropic cache markers">
@@ -281,7 +286,7 @@ OpenRouter's documented app-attribution headers:
     routing. Configure a default policy for all OpenRouter text-model requests
     with `models.providers.openrouter.params.provider`:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       models: {
         providers: {
@@ -300,14 +305,14 @@ OpenRouter's documented app-attribution headers:
     ```
 
     OpenClaw forwards that object to OpenRouter as the request `provider`
-    payload. Use OpenRouter's documented snake\_case fields, including `sort`,
+    payload. Use OpenRouter's documented snake_case fields, including `sort`,
     `only`, `ignore`, `order`, `allow_fallbacks`, `require_parameters`,
     `data_collection`, `quantizations`, `max_price`, `preferred_max_latency`,
     `preferred_min_throughput`, `zdr`, and `enforce_distillable_text`.
 
     Per-model params still override the provider-wide routing object:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -328,6 +333,7 @@ OpenRouter's documented app-attribution headers:
 
     This only applies on OpenRouter chat-completions routes. Direct Anthropic,
     Google, OpenAI, or custom provider routes ignore OpenRouter routing params.
+
   </Accordion>
 </AccordionGroup>
 
@@ -337,7 +343,6 @@ OpenRouter's documented app-attribution headers:
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
     Full config reference for agents, models, and providers.
   </Card>

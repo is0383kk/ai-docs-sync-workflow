@@ -1,17 +1,19 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Fly.io
+---
+summary: "Step-by-step Fly.io deployment for OpenClaw with persistent storage and HTTPS"
+title: Fly.io
+read_when:
+  - Deploying OpenClaw on Fly.io
+  - Setting up Fly volumes, secrets, and first-run config
+---
 
 **Goal:** OpenClaw Gateway running on a [Fly.io](https://fly.io) machine with persistent storage, automatic HTTPS, and Discord/channel access.
 
 ## What you need
 
-* [flyctl CLI](https://fly.io/docs/hands-on/install-flyctl/) installed
-* Fly.io account (free tier works)
-* Model auth: API key for your chosen model provider
-* Channel credentials: Discord bot token, Telegram token, etc.
+- [flyctl CLI](https://fly.io/docs/hands-on/install-flyctl/) installed
+- Fly.io account (free tier works)
+- Model auth: API key for your chosen model provider
+- Channel credentials: Discord bot token, Telegram token, etc.
 
 ## Beginner quick path
 
@@ -22,7 +24,7 @@
 
 <Steps>
   <Step title="Create the Fly app">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     # Clone the repo
     git clone https://github.com/openclaw/openclaw.git
     cd openclaw
@@ -35,6 +37,7 @@
     ```
 
     **Tip:** Choose a region close to you. Common options: `lhr` (London), `iad` (Virginia), `sjc` (San Jose).
+
   </Step>
 
   <Step title="Configure fly.toml">
@@ -42,7 +45,7 @@
 
     **Security note:** The default config exposes a public URL. For a hardened deployment with no public IP, see [Private Deployment](#private-deployment-hardened) or use `deploy/fly.private.toml`.
 
-    ```toml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```toml
     app = "my-openclaw"  # Your app name
     primary_region = "iad"
 
@@ -86,41 +89,43 @@
     | `internal_port = 3000`         | Must match `--port 3000` (or `OPENCLAW_GATEWAY_PORT`) for Fly health checks |
     | `memory = "2048mb"`            | 512MB is too small; 2GB recommended                                         |
     | `OPENCLAW_STATE_DIR = "/data"` | Persists state on the volume                                                |
+
   </Step>
 
   <Step title="Set secrets">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     # Required: Gateway token (for non-loopback binding)
     fly secrets set OPENCLAW_GATEWAY_TOKEN=$(openssl rand -hex 32)
 
     # Model provider API keys
-    fly secrets set ANTHROPIC_API_KEY=sk-ant-...
+    fly secrets set ANTHROPIC_API_KEY=example-anthropic-key-not-real
 
     # Optional: Other providers
-    fly secrets set OPENAI_API_KEY=sk-...
+    fly secrets set OPENAI_API_KEY=example-openai-key-not-real
     fly secrets set GOOGLE_API_KEY=...
 
     # Channel tokens
-    fly secrets set DISCORD_BOT_TOKEN=MTQ...
+    fly secrets set DISCORD_BOT_TOKEN=example-discord-bot-token
     ```
 
     **Notes:**
 
-    * Non-loopback binds (`--bind lan`) require a valid gateway auth path. This Fly.io example uses `OPENCLAW_GATEWAY_TOKEN`, but `gateway.auth.password` or a correctly configured non-loopback `trusted-proxy` deployment also satisfy the requirement.
-    * Treat these tokens like passwords.
-    * **Prefer env vars over config file** for all API keys and tokens. This keeps secrets out of `openclaw.json` where they could be accidentally exposed or logged.
+    - Non-loopback binds (`--bind lan`) require a valid gateway auth path. This Fly.io example uses `OPENCLAW_GATEWAY_TOKEN`, but `gateway.auth.password` or a correctly configured non-loopback `trusted-proxy` deployment also satisfy the requirement.
+    - Treat these tokens like passwords.
+    - **Prefer env vars over config file** for all API keys and tokens. This keeps secrets out of `openclaw.json` where they could be accidentally exposed or logged.
+
   </Step>
 
   <Step title="Deploy">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     fly deploy
     ```
 
-    First deploy builds the Docker image (\~2-3 minutes). Subsequent deploys are faster.
+    First deploy builds the Docker image (~2-3 minutes). Subsequent deploys are faster.
 
     After deployment, verify:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     fly status
     fly logs
     ```
@@ -131,18 +136,19 @@
     [gateway] listening on ws://0.0.0.0:3000 (PID xxx)
     [discord] logged in to discord as xxx
     ```
+
   </Step>
 
   <Step title="Create config file">
     SSH into the machine to create a proper config:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     fly ssh console
     ```
 
     Create the config directory and file:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     mkdir -p /data
     cat > /data/openclaw.json << 'EOF'
     {
@@ -211,17 +217,18 @@
 
     **Note:** The Discord token can come from either:
 
-    * Environment variable: `DISCORD_BOT_TOKEN` (recommended for secrets)
-    * Config file: `channels.discord.token`
+    - Environment variable: `DISCORD_BOT_TOKEN` (recommended for secrets)
+    - Config file: `channels.discord.token`
 
     If using env var, no need to add token to config. The gateway reads `DISCORD_BOT_TOKEN` automatically.
 
     Restart to apply:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     exit
     fly machine restart <machine-id>
     ```
+
   </Step>
 
   <Step title="Access the Gateway">
@@ -229,7 +236,7 @@
 
     Open in browser:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     fly open
     ```
 
@@ -241,16 +248,17 @@
 
     ### Logs
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     fly logs              # Live logs
     fly logs --no-tail    # Recent logs
     ```
 
     ### SSH Console
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     fly ssh console
     ```
+
   </Step>
 </Steps>
 
@@ -274,14 +282,14 @@ Container keeps restarting or getting killed. Signs: `SIGABRT`, `v8::internal::R
 
 **Fix:** Increase memory in `fly.toml`:
 
-```toml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```toml
 [[vm]]
   memory = "2048mb"
 ```
 
 Or update an existing machine:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 fly machine update <machine-id> --vm-memory 2048 -y
 ```
 
@@ -295,7 +303,7 @@ This happens when the container restarts but the PID lock file persists on the v
 
 **Fix:** Delete the lock file:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 fly ssh console --command "rm -f /data/gateway.*.lock"
 fly machine restart <machine-id>
 ```
@@ -308,7 +316,7 @@ The lock file is at `/data/gateway.*.lock` (not in a subdirectory).
 
 Verify the config exists:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 fly ssh console --command "cat /data/openclaw.json"
 ```
 
@@ -316,7 +324,7 @@ fly ssh console --command "cat /data/openclaw.json"
 
 The `fly ssh console -C` command doesn't support shell redirection. To write a config file:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Use echo + tee (pipe from local to remote)
 echo '{"your":"config"}' | fly ssh console -C "tee /data/openclaw.json"
 
@@ -327,7 +335,7 @@ fly sftp shell
 
 **Note:** `fly sftp` may fail if the file already exists. Delete first:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 fly ssh console --command "rm /data/openclaw.json"
 ```
 
@@ -340,7 +348,7 @@ the state dir is writing to the container filesystem.
 
 ## Updates
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Pull latest changes
 git pull
 
@@ -356,7 +364,7 @@ fly logs
 
 If you need to change the startup command without a full redeploy:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Get machine ID
 fly machines list
 
@@ -377,23 +385,23 @@ For a hardened deployment with **no public exposure**, use the private template.
 
 ### When to use private deployment
 
-* You only make **outbound** calls/messages (no inbound webhooks)
-* You use **ngrok or Tailscale** tunnels for any webhook callbacks
-* You access the gateway via **SSH, proxy, or WireGuard** instead of browser
-* You want the deployment **hidden from internet scanners**
+- You only make **outbound** calls/messages (no inbound webhooks)
+- You use **ngrok or Tailscale** tunnels for any webhook callbacks
+- You access the gateway via **SSH, proxy, or WireGuard** instead of browser
+- You want the deployment **hidden from internet scanners**
 
 ### Setup
 
 Use `deploy/fly.private.toml` instead of the standard config:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Deploy with private config
 fly deploy -c deploy/fly.private.toml
 ```
 
 Or convert an existing deployment:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # List current IPs
 fly ips list -a my-openclaw
 
@@ -422,7 +430,7 @@ Since there's no public URL, use one of these methods:
 
 **Option 1: Local proxy (simplest)**
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Forward local port 3000 to the app
 fly proxy 3000:3000 -a my-openclaw
 
@@ -431,7 +439,7 @@ fly proxy 3000:3000 -a my-openclaw
 
 **Option 2: WireGuard VPN**
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Create WireGuard config (one-time)
 fly wireguard create
 
@@ -441,7 +449,7 @@ fly wireguard create
 
 **Option 3: SSH only**
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 fly ssh console -a my-openclaw
 ```
 
@@ -455,7 +463,7 @@ If you need webhook callbacks (Twilio, Telnyx, etc.) without public exposure:
 
 Example voice-call config with ngrok:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -487,30 +495,30 @@ The ngrok tunnel runs inside the container and provides a public webhook URL wit
 
 ## Notes
 
-* Fly.io uses **x86 architecture** (not ARM)
-* The Dockerfile is compatible with both architectures
-* For WhatsApp/Telegram onboarding, use `fly ssh console`
-* Persistent data lives on the volume at `/data`
-* Signal requires Java + signal-cli; use a custom image and keep memory at 2GB+.
+- Fly.io uses **x86 architecture** (not ARM)
+- The Dockerfile is compatible with both architectures
+- For WhatsApp/Telegram onboarding, use `fly ssh console`
+- Persistent data lives on the volume at `/data`
+- Signal requires Java + signal-cli; use a custom image and keep memory at 2GB+.
 
 ## Cost
 
 With the recommended config (`shared-cpu-2x`, 2GB RAM):
 
-* \~\$10-15/month depending on usage
-* Free tier includes some allowance
+- ~$10-15/month depending on usage
+- Free tier includes some allowance
 
 See [Fly.io pricing](https://fly.io/docs/about/pricing/) for details.
 
 ## Next steps
 
-* Set up messaging channels: [Channels](/channels)
-* Configure the Gateway: [Gateway configuration](/gateway/configuration)
-* Keep OpenClaw up to date: [Updating](/install/updating)
+- Set up messaging channels: [Channels](/channels)
+- Configure the Gateway: [Gateway configuration](/gateway/configuration)
+- Keep OpenClaw up to date: [Updating](/install/updating)
 
 ## Related
 
-* [Install overview](/install)
-* [Hetzner](/install/hetzner)
-* [Docker](/install/docker)
-* [VPS hosting](/vps)
+- [Install overview](/install)
+- [Hetzner](/install/hetzner)
+- [Docker](/install/docker)
+- [VPS hosting](/vps)

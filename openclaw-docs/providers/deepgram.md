@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Deepgram
+---
+summary: "Deepgram transcription for inbound voice notes"
+read_when:
+  - You want Deepgram speech-to-text for audio attachments
+  - You want Deepgram streaming transcription for Voice Call
+  - You need a quick Deepgram config example
+title: "Deepgram"
+---
 
 Deepgram is a speech-to-text API. In OpenClaw it is used for inbound
 audio/voice-note transcription through `tools.media.audio` and for Voice Call
@@ -30,10 +33,10 @@ final transcripts as Deepgram returns them.
     ```
     DEEPGRAM_API_KEY=dg_...
     ```
-  </Step>
 
+  </Step>
   <Step title="Enable the audio provider">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       tools: {
         media: {
@@ -46,7 +49,6 @@ final transcripts as Deepgram returns them.
     }
     ```
   </Step>
-
   <Step title="Send a voice note">
     Send an audio message through any connected channel. OpenClaw transcribes it
     via Deepgram and injects the transcript into the reply pipeline.
@@ -65,7 +67,7 @@ final transcripts as Deepgram returns them.
 
 <Tabs>
   <Tab title="With language hint">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       tools: {
         media: {
@@ -78,9 +80,8 @@ final transcripts as Deepgram returns them.
     }
     ```
   </Tab>
-
   <Tab title="With Deepgram options">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       tools: {
         media: {
@@ -117,7 +118,7 @@ for the Voice Call plugin.
 | Endpointing     | `...deepgram.endpointingMs`                                             | `800`                            |
 | Interim results | `...deepgram.interimResults`                                            | `true`                           |
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -143,9 +144,9 @@ for the Voice Call plugin.
 ```
 
 <Note>
-  Voice Call receives telephony audio as 8 kHz G.711 u-law. The Deepgram
-  streaming provider defaults to `encoding: "mulaw"` and `sampleRate: 8000`, so
-  Twilio media frames can be forwarded directly.
+Voice Call receives telephony audio as 8 kHz G.711 u-law. The Deepgram
+streaming provider defaults to `encoding: "mulaw"` and `sampleRate: 8000`, so
+Twilio media frames can be forwarded directly.
 </Note>
 
 ## Notes
@@ -155,12 +156,10 @@ for the Voice Call plugin.
     Authentication follows the standard provider auth order. `DEEPGRAM_API_KEY` is
     the simplest path.
   </Accordion>
-
   <Accordion title="Proxy and custom endpoints">
     Override endpoints or headers with `tools.media.audio.baseUrl` and
     `tools.media.audio.headers` when using a proxy.
   </Accordion>
-
   <Accordion title="Output behavior">
     Output follows the same audio rules as other providers (size caps, timeouts,
     transcript injection).
@@ -173,15 +172,12 @@ for the Voice Call plugin.
   <Card title="Media tools" href="/tools/media-overview" icon="photo-film">
     Audio, image, and video processing pipeline overview.
   </Card>
-
   <Card title="Configuration" href="/gateway/configuration" icon="gear">
     Full config reference including media tool settings.
   </Card>
-
   <Card title="Troubleshooting" href="/help/troubleshooting" icon="wrench">
     Common issues and debugging steps.
   </Card>
-
   <Card title="FAQ" href="/help/faq" icon="circle-question">
     Frequently asked questions about OpenClaw setup.
   </Card>

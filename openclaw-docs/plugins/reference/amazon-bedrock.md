@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Amazon Bedrock plugin
+---
+summary: "Adds Amazon Bedrock model provider support to OpenClaw."
+read_when:
+  - You are installing, configuring, or auditing the amazon-bedrock plugin
+title: "Amazon Bedrock plugin"
+---
 
 # Amazon Bedrock plugin
 
@@ -10,8 +11,8 @@ Adds Amazon Bedrock model provider support to OpenClaw.
 
 ## Distribution
 
-* Package: `@openclaw/amazon-bedrock-provider`
-* Install route: npm; ClawHub
+- Package: `@openclaw/amazon-bedrock-provider`
+- Install route: npm; ClawHub
 
 ## Surface
 
@@ -19,4 +20,4 @@ providers: amazon-bedrock; contracts: memoryEmbeddingProviders
 
 ## Related docs
 
-* [amazon-bedrock](/providers/bedrock)
+- [amazon-bedrock](/providers/bedrock)

@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Ambient room events
+---
+summary: "Let supported group rooms provide quiet context unless the agent sends with the message tool"
+read_when:
+  - Configuring always-on group or channel rooms
+  - You want the agent to watch room chatter without posting final text automatically
+  - Debugging typing and token usage with no visible room message
+title: "Ambient room events"
+sidebarTitle: "Ambient room events"
+---
 
 Ambient room events let OpenClaw process unmentioned group or channel chatter as quiet context. The agent can update memory and session state, but the room stays silent unless the agent explicitly calls the `message` tool.
 
@@ -14,7 +18,7 @@ Supported today: Discord guild channels, Slack channels and private channels, Sl
 
 Set the global group-chat behavior:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   messages: {
     groupChat: {
@@ -34,17 +38,17 @@ After saving the config, the Gateway hot-reloads `messages` settings. Restart on
 
 With `messages.groupChat.unmentionedInbound: "room_event"`:
 
-* unmentioned allowed group or channel messages become quiet room events
-* mentioned messages stay user requests
-* text commands and native commands stay user requests
-* abort or stop requests stay user requests
-* direct messages stay user requests
+- unmentioned allowed group or channel messages become quiet room events
+- mentioned messages stay user requests
+- text commands and native commands stay user requests
+- abort or stop requests stay user requests
+- direct messages stay user requests
 
 Room events use strict visible delivery. Final assistant text is private. The agent must call `message(action=send)` to post in the room.
 
 ## Discord example
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   messages: {
     groupChat: {
@@ -69,7 +73,7 @@ Room events use strict visible delivery. Final assistant text is private. The ag
 
 Use per-channel Discord config when only one channel should be ambient:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     discord: {
@@ -92,7 +96,7 @@ Use per-channel Discord config when only one channel should be ambient:
 
 Slack channel allowlists are ID-first. Use channel IDs such as `C12345678`, not `#channel-name`.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   messages: {
     groupChat: {
@@ -119,7 +123,7 @@ Slack channel allowlists are ID-first. Use channel IDs such as `C12345678`, not 
 
 For Telegram groups, the bot must be able to see normal group messages. If `requireMention: false`, disable BotFather privacy mode or use another Telegram setup that delivers full group traffic to the bot.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   messages: {
     groupChat: {
@@ -147,7 +151,7 @@ Telegram group IDs are usually negative numbers such as `-1001234567890`. Read `
 
 Use an agent override when several agents share the same room but only one should treat unmentioned chatter as ambient context:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   messages: {
     groupChat: {
@@ -202,9 +206,9 @@ If Slack ambient rooms do not trigger, verify the channel key is the Slack chann
 
 ## Related
 
-* [Groups](/channels/groups)
-* [Discord](/channels/discord)
-* [Slack](/channels/slack)
-* [Telegram](/channels/telegram)
-* [Channel troubleshooting](/channels/troubleshooting)
-* [Channel configuration reference](/gateway/config-channels)
+- [Groups](/channels/groups)
+- [Discord](/channels/discord)
+- [Slack](/channels/slack)
+- [Telegram](/channels/telegram)
+- [Channel troubleshooting](/channels/troubleshooting)
+- [Channel configuration reference](/gateway/config-channels)

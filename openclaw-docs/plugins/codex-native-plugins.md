@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Native Codex plugins
+---
+summary: "Configure migrated native Codex plugins for Codex-mode OpenClaw agents"
+title: "Native Codex plugins"
+read_when:
+  - You want Codex-mode OpenClaw agents to use native Codex plugins
+  - You are migrating source-installed openai-curated Codex plugins
+  - You are troubleshooting codexPlugins, app inventory, destructive actions, or plugin app diagnostics
+---
 
 Native Codex plugin support lets a Codex-mode OpenClaw agent use Codex
 app-server's own app and plugin capabilities inside the same Codex thread that
@@ -16,12 +19,12 @@ Use this page after the base [Codex harness](/plugins/codex-harness) is working.
 
 ## Requirements
 
-* The selected OpenClaw agent runtime must be the native Codex harness.
-* `plugins.entries.codex.enabled` must be true.
-* `plugins.entries.codex.config.codexPlugins.enabled` must be true.
-* V1 supports only `openai-curated` plugins that migration observed as
+- The selected OpenClaw agent runtime must be the native Codex harness.
+- `plugins.entries.codex.enabled` must be true.
+- `plugins.entries.codex.config.codexPlugins.enabled` must be true.
+- V1 supports only `openai-curated` plugins that migration observed as
   source-installed in the source Codex home.
-* The target Codex app-server must be able to see the expected marketplace,
+- The target Codex app-server must be able to see the expected marketplace,
   plugin, and app inventory.
 
 `codexPlugins` has no effect on PI runs, normal OpenAI provider runs, ACP
@@ -32,20 +35,20 @@ Codex app-server threads with native `apps` config.
 
 Preview migration from the source Codex home:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw migrate codex --dry-run
 ```
 
 Use strict source app verification when you want migration to check source app
 accessibility before planning native plugin activation:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw migrate codex --dry-run --verify-plugin-apps
 ```
 
 Apply the migration when the plan looks right:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw migrate apply codex --yes
 ```
 
@@ -53,7 +56,7 @@ Migration writes explicit `codexPlugins` entries for eligible plugins and calls
 Codex app-server `plugin/install` for selected plugins. A typical migrated
 config looks like this:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -87,7 +90,7 @@ A gateway restart is not required for plugin enable or disable changes.
 Use `/codex plugins` when you want to inspect or change configured native Codex
 plugins from the same chat where you operate the Codex harness:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 /codex plugins
 /codex plugins list
 /codex plugins disable google-calendar
@@ -112,10 +115,10 @@ it in OpenClaw.
 
 The integration has three separate states:
 
-* Installed: Codex has the local plugin bundle in the target app-server runtime.
-* Enabled: OpenClaw config is willing to make the plugin available to Codex
+- Installed: Codex has the local plugin bundle in the target app-server runtime.
+- Enabled: OpenClaw config is willing to make the plugin available to Codex
   harness turns.
-* Accessible: Codex app-server confirms the plugin's app entries are available
+- Accessible: Codex app-server confirms the plugin's app entries are available
   for the active account and can be mapped to the migrated plugin identity.
 
 Migration is the durable install/eligibility step. During planning, OpenClaw
@@ -143,20 +146,20 @@ up the updated app set.
 
 V1 is intentionally narrow:
 
-* Only `openai-curated` plugins that were already installed in the source Codex
+- Only `openai-curated` plugins that were already installed in the source Codex
   app-server inventory are migration-eligible.
-* App-backed source plugins must pass the migration-time subscription gate.
+- App-backed source plugins must pass the migration-time subscription gate.
   `--verify-plugin-apps` adds the source app-inventory gate. Subscription-gated
   accounts plus, in verification mode, inaccessible, disabled, missing source
   apps or source app-inventory refresh failures are reported as skipped manual
   items instead of enabled config entries. Unreadable plugin details are skipped
   before the source app-inventory gate.
-* Migration writes explicit plugin identities with `marketplaceName` and
+- Migration writes explicit plugin identities with `marketplaceName` and
   `pluginName`; it does not write local `marketplacePath` cache paths.
-* `codexPlugins.enabled` is the global enablement switch.
-* There is no `plugins["*"]` wildcard and no config key that grants arbitrary
+- `codexPlugins.enabled` is the global enablement switch.
+- There is no `plugins["*"]` wildcard and no config key that grants arbitrary
   install authority.
-* Unsupported marketplaces, cached plugin bundles, hooks, and Codex config files
+- Unsupported marketplaces, cached plugin bundles, hooks, and Codex config files
   are preserved in the migration report for manual review.
 
 ## App inventory and ownership
@@ -168,19 +171,19 @@ from the next `app/list` read.
 
 Migration and runtime use separate cache keys:
 
-* Source migration verification uses the source Codex home and source app-server
+- Source migration verification uses the source Codex home and source app-server
   start options. This runs only when `--verify-plugin-apps` is set, and it
   forces a fresh source `app/list` traversal for that planning run.
-* Target runtime setup uses the target agent's Codex app-server identity when it
+- Target runtime setup uses the target agent's Codex app-server identity when it
   builds the Codex thread app config. Plugin activation invalidates that target
   cache key and then force-refreshes it after `plugin/install`.
 
 A plugin app is exposed only when OpenClaw can map it back to the migrated
 plugin through stable ownership:
 
-* exact app id from plugin detail
-* known MCP server name
-* unique stable metadata
+- exact app id from plugin detail
+- known MCP server name
+- unique stable metadata
 
 Display-name-only or ambiguous ownership is excluded until the next inventory
 refresh proves ownership.
@@ -208,13 +211,13 @@ controlled by each app's `destructive_enabled` policy.
 Destructive plugin elicitations are allowed by default for migrated Codex
 plugins, while unsafe schemas and ambiguous ownership still fail closed:
 
-* Global `allow_destructive_actions` defaults to `true`.
-* Per-plugin `allow_destructive_actions` overrides the global policy for that
+- Global `allow_destructive_actions` defaults to `true`.
+- Per-plugin `allow_destructive_actions` overrides the global policy for that
   plugin.
-* When policy is `false`, OpenClaw returns a deterministic decline.
-* When policy is `true`, OpenClaw auto-accepts only safe schemas it can map to
+- When policy is `false`, OpenClaw returns a deterministic decline.
+- When policy is `true`, OpenClaw auto-accepts only safe schemas it can map to
   an approval response, such as a boolean approve field.
-* Missing plugin identity, ambiguous ownership, a missing turn id, a wrong turn
+- Missing plugin identity, ambiguous ownership, a missing turn id, a wrong turn
   id, or an unsafe elicitation schema declines instead of prompting.
 
 ## Troubleshooting
@@ -266,8 +269,8 @@ schemas and ambiguous plugin identity still fail closed.
 
 ## Related
 
-* [Codex harness](/plugins/codex-harness)
-* [Codex harness reference](/plugins/codex-harness-reference)
-* [Codex harness runtime](/plugins/codex-harness-runtime)
-* [Configuration reference](/gateway/configuration-reference#codex-harness-plugin-config)
-* [Migrate CLI](/cli/migrate)
+- [Codex harness](/plugins/codex-harness)
+- [Codex harness reference](/plugins/codex-harness-reference)
+- [Codex harness runtime](/plugins/codex-harness-runtime)
+- [Configuration reference](/gateway/configuration-reference#codex-harness-plugin-config)
+- [Migrate CLI](/cli/migrate)

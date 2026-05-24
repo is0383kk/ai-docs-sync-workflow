@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Azure Speech
+---
+summary: "Azure AI Speech text-to-speech for OpenClaw replies"
+read_when:
+  - You want Azure Speech synthesis for outbound replies
+  - You need native Ogg Opus voice-note output from Azure Speech
+title: "Azure Speech"
+---
 
 Azure Speech is an Azure AI Speech text-to-speech provider. In OpenClaw it
 synthesizes outbound reply audio as MP3 by default, native Ogg/Opus for voice
@@ -32,10 +34,10 @@ provider-owned output format through `X-Microsoft-OutputFormat`.
     AZURE_SPEECH_KEY=<speech-resource-key>
     AZURE_SPEECH_REGION=eastus
     ```
-  </Step>
 
+  </Step>
   <Step title="Select Azure Speech in messages.tts">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       messages: {
         tts: {
@@ -52,7 +54,6 @@ provider-owned output format through `X-Microsoft-OutputFormat`.
     }
     ```
   </Step>
-
   <Step title="Send a message">
     Send a reply through any connected channel. OpenClaw synthesizes the audio
     with Azure Speech and delivers MP3 for standard audio, or Ogg/Opus when
@@ -82,20 +83,17 @@ provider-owned output format through `X-Microsoft-OutputFormat`.
     `https://<region>.tts.speech.microsoft.com` from `region` unless you
     provide `endpoint` or `baseUrl`.
   </Accordion>
-
   <Accordion title="Voice names">
     Use the Azure Speech voice `ShortName` value, for example
     `en-US-JennyNeural`. The bundled provider can list voices through the
     same Speech resource and filters voices marked deprecated or retired.
   </Accordion>
-
   <Accordion title="Audio outputs">
     Azure accepts output formats such as `audio-24khz-48kbitrate-mono-mp3`,
     `ogg-24khz-16bit-mono-opus`, and `riff-24khz-16bit-mono-pcm`. OpenClaw
     requests Ogg/Opus for `voice-note` targets so channels can send native
     voice bubbles without an extra MP3 conversion.
   </Accordion>
-
   <Accordion title="Alias">
     `azure` is accepted as a provider alias for existing PRs and user config,
     but new config should use `azure-speech` to avoid confusion with Azure
@@ -109,15 +107,12 @@ provider-owned output format through `X-Microsoft-OutputFormat`.
   <Card title="Text-to-speech" href="/tools/tts" icon="waveform-lines">
     TTS overview, providers, and `messages.tts` config.
   </Card>
-
   <Card title="Configuration" href="/gateway/configuration" icon="gear">
     Full config reference including `messages.tts` settings.
   </Card>
-
   <Card title="Providers" href="/providers" icon="grid">
     All bundled OpenClaw providers.
   </Card>
-
   <Card title="Troubleshooting" href="/help/troubleshooting" icon="wrench">
     Common issues and debugging steps.
   </Card>

@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Date and time
+---
+summary: "Date and time handling across envelopes, prompts, tools, and connectors"
+read_when:
+  - You are changing how timestamps are shown to the model or users
+  - You are debugging time formatting in messages or system prompt output
+title: "Date and time"
+---
 
 OpenClaw defaults to **host-local time for transport timestamps** and **user timezone only in the system prompt**.
 Provider timestamps are preserved so tools keep their native semantics (current time is available via `session_status`).
@@ -19,7 +21,7 @@ This envelope timestamp is **host-local by default**, regardless of the provider
 
 You can override this behavior:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -31,12 +33,12 @@ You can override this behavior:
 }
 ```
 
-* `envelopeTimezone: "utc"` uses UTC.
-* `envelopeTimezone: "local"` uses the host timezone.
-* `envelopeTimezone: "user"` uses `agents.defaults.userTimezone` (falls back to host timezone).
-* Use an explicit IANA timezone (e.g., `"America/Chicago"`) for a fixed zone.
-* `envelopeTimestamp: "off"` removes absolute timestamps from envelope headers.
-* `envelopeElapsed: "off"` removes elapsed time suffixes (the `+2m` style).
+- `envelopeTimezone: "utc"` uses UTC.
+- `envelopeTimezone: "local"` uses the host timezone.
+- `envelopeTimezone: "user"` uses `agents.defaults.userTimezone` (falls back to host timezone).
+- Use an explicit IANA timezone (e.g., `"America/Chicago"`) for a fixed zone.
+- `envelopeTimestamp: "off"` removes absolute timestamps from envelope headers.
+- `envelopeElapsed: "off"` removes elapsed time suffixes (the `+2m` style).
 
 ### Examples
 
@@ -82,7 +84,7 @@ System: [2026-01-12 12:19:17 PST] Model switched.
 
 ### Configure user timezone + format
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -93,8 +95,8 @@ System: [2026-01-12 12:19:17 PST] Model switched.
 }
 ```
 
-* `userTimezone` sets the **user-local timezone** for prompt context.
-* `timeFormat` controls **12h/24h display** in the prompt. `auto` follows OS prefs.
+- `userTimezone` sets the **user-local timezone** for prompt context.
+- `timeFormat` controls **12h/24h display** in the prompt. `auto` follows OS prefs.
 
 ## Time format detection (auto)
 
@@ -106,19 +108,19 @@ to avoid repeated system calls.
 
 Channel tools return **provider-native timestamps** and add normalized fields for consistency:
 
-* `timestampMs`: epoch milliseconds (UTC)
-* `timestampUtc`: ISO 8601 UTC string
+- `timestampMs`: epoch milliseconds (UTC)
+- `timestampUtc`: ISO 8601 UTC string
 
 Raw provider fields are preserved so nothing is lost.
 
-* Slack: epoch-like strings from the API
-* Discord: UTC ISO timestamps
-* Telegram/WhatsApp: provider-specific numeric/ISO timestamps
+- Slack: epoch-like strings from the API
+- Discord: UTC ISO timestamps
+- Telegram/WhatsApp: provider-specific numeric/ISO timestamps
 
 If you need local time, convert it downstream using the known timezone.
 
 ## Related docs
 
-* [System Prompt](/concepts/system-prompt)
-* [Timezones](/concepts/timezone)
-* [Messages](/concepts/messages)
+- [System Prompt](/concepts/system-prompt)
+- [Timezones](/concepts/timezone)
+- [Messages](/concepts/messages)

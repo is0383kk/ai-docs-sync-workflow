@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Plugin SDK overview
+---
+summary: "Import map, registration API reference, and SDK architecture"
+title: "Plugin SDK overview"
+sidebarTitle: "Plugin SDK overview"
+read_when:
+  - You need to know which SDK subpath to import from
+  - You want a reference for all registration methods on OpenClawPluginApi
+  - You are looking up a specific SDK export
+---
 
 The plugin SDK is the typed contract between plugins and core. This page is the
 reference for **what to import** and **what you can register**.
@@ -16,14 +20,14 @@ reference for **what to import** and **what you can register**.
 </Note>
 
 <Tip>
-  Looking for a how-to guide instead? Start with [Building plugins](/plugins/building-plugins), use [Channel plugins](/plugins/sdk-channel-plugins) for channel plugins, [Provider plugins](/plugins/sdk-provider-plugins) for provider plugins, [CLI backend plugins](/plugins/cli-backend-plugins) for local AI CLI backends, and [Plugin hooks](/plugins/hooks) for tool or lifecycle hook plugins.
+Looking for a how-to guide instead? Start with [Building plugins](/plugins/building-plugins), use [Channel plugins](/plugins/sdk-channel-plugins) for channel plugins, [Provider plugins](/plugins/sdk-provider-plugins) for provider plugins, [CLI backend plugins](/plugins/cli-backend-plugins) for local AI CLI backends, and [Plugin hooks](/plugins/hooks) for tool or lifecycle hook plugins.
 </Tip>
 
 ## Import convention
 
 Always import from a specific subpath:
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 import { defineChannelPluginEntry } from "openclaw/plugin-sdk/channel-core";
 ```
@@ -50,15 +54,15 @@ pattern for new plugins.
   barrels or add a narrow generic SDK contract when a need is truly
   cross-channel.
 
-  A small set of bundled-plugin helper seams still appear in the generated export
-  map when they have tracked owner usage. They exist for bundled-plugin
-  maintenance only and are not recommended import paths for new third-party
-  plugins.
+A small set of bundled-plugin helper seams still appear in the generated export
+map when they have tracked owner usage. They exist for bundled-plugin
+maintenance only and are not recommended import paths for new third-party
+plugins.
 
-  `openclaw/plugin-sdk/discord` and `openclaw/plugin-sdk/telegram-account` are
-  also kept as deprecated compatibility facades for tracked owner usage. Do not
-  copy those import paths into new plugins; use injected runtime helpers and
-  generic channel SDK subpaths instead.
+`openclaw/plugin-sdk/discord` and `openclaw/plugin-sdk/telegram-account` are
+also kept as deprecated compatibility facades for tracked owner usage. Do not
+copy those import paths into new plugins; use injected runtime helpers and
+generic channel SDK subpaths instead.
 </Warning>
 
 ## Subpath reference
@@ -126,7 +130,7 @@ provider- or plugin-specific policy to core prompt builders.
 Guidance entries may be legacy strings, which apply to every prompt surface, or
 structured entries:
 
-```ts theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```ts
 agentPromptGuidance: [
   "Global command hint.",
   { text: "Only show this in the main PI prompt.", surfaces: ["pi_main"] },
@@ -185,18 +189,18 @@ plugins.
 
 Use the grouped namespaces for new plugin code:
 
-* `api.session.state.registerSessionExtension(...)`
-* `api.session.workflow.enqueueNextTurnInjection(...)`
-* `api.session.workflow.registerSessionSchedulerJob(...)`
-* `api.session.workflow.sendSessionAttachment(...)`
-* `api.session.workflow.scheduleSessionTurn(...)`
-* `api.session.workflow.unscheduleSessionTurnsByTag(...)`
-* `api.session.controls.registerSessionAction(...)`
-* `api.session.controls.registerControlUiDescriptor(...)`
-* `api.agent.events.registerAgentEventSubscription(...)`
-* `api.agent.events.emitAgentEvent(...)`
-* `api.runContext.setRunContext(...)` / `getRunContext(...)` / `clearRunContext(...)`
-* `api.lifecycle.registerRuntimeLifecycle(...)`
+- `api.session.state.registerSessionExtension(...)`
+- `api.session.workflow.enqueueNextTurnInjection(...)`
+- `api.session.workflow.registerSessionSchedulerJob(...)`
+- `api.session.workflow.sendSessionAttachment(...)`
+- `api.session.workflow.scheduleSessionTurn(...)`
+- `api.session.workflow.unscheduleSessionTurnsByTag(...)`
+- `api.session.controls.registerSessionAction(...)`
+- `api.session.controls.registerControlUiDescriptor(...)`
+- `api.agent.events.registerAgentEventSubscription(...)`
+- `api.agent.events.emitAgentEvent(...)`
+- `api.runContext.setRunContext(...)` / `getRunContext(...)` / `clearRunContext(...)`
+- `api.lifecycle.registerRuntimeLifecycle(...)`
 
 The equivalent flat methods remain available as deprecated compatibility
 aliases for existing plugins. Do not add new plugin code that calls
@@ -216,13 +220,13 @@ turn when the work itself needs durable multi-step Task Flow state.
 
 The contracts intentionally split authority:
 
-* External plugins can own session extensions, UI descriptors, commands, tool
+- External plugins can own session extensions, UI descriptors, commands, tool
   metadata, next-turn injections, and normal hooks.
-* Trusted tool policies run before ordinary `before_tool_call` hooks and are
+- Trusted tool policies run before ordinary `before_tool_call` hooks and are
   bundled-only because they participate in host safety policy.
-* Reserved command ownership is bundled-only. External plugins should use their
+- Reserved command ownership is bundled-only. External plugins should use their
   own command names or aliases.
-* `allowPromptInjection=false` disables prompt-mutating hooks including
+- `allowPromptInjection=false` disables prompt-mutating hooks including
   `agent_turn_prepare`, `before_prompt_build`, `heartbeat_prompt_contribution`,
   prompt fields from legacy `before_agent_start`, and
   `enqueueNextTurnInjection`.
@@ -249,11 +253,11 @@ Examples of non-Plan consumers:
   feeds that result back into the model. This is the trusted runtime-neutral
   seam for async output reducers such as tokenjuice.
 
-  Bundled plugins must declare `contracts.agentToolResultMiddleware` for each
-  targeted runtime, for example `["pi", "codex"]`. External plugins
-  cannot register this middleware; keep normal OpenClaw plugin hooks for work
-  that does not need pre-model tool-result timing. The old Pi-only embedded
-  extension factory registration path has been removed.
+Bundled plugins must declare `contracts.agentToolResultMiddleware` for each
+targeted runtime, for example `["pi", "codex"]`. External plugins
+cannot register this middleware; keep normal OpenClaw plugin hooks for work
+that does not need pre-model tool-result timing. The old Pi-only embedded
+extension factory registration path has been removed.
 </Accordion>
 
 ### Gateway discovery registration
@@ -264,7 +268,7 @@ service during Gateway startup when local discovery is enabled, passes the
 current Gateway ports and non-secret TXT hint data, and calls the returned
 `stop` handler during Gateway shutdown.
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 api.registerGatewayDiscoveryService({
   id: "my-discovery",
   async advertise(ctx) {
@@ -286,10 +290,10 @@ own trust.
 
 `api.registerCli(registrar, opts?)` accepts two kinds of command metadata:
 
-* `commands`: explicit command names owned by the registrar
-* `descriptors`: parse-time command descriptors used for CLI help,
+- `commands`: explicit command names owned by the registrar
+- `descriptors`: parse-time command descriptors used for CLI help,
   routing, and lazy plugin CLI registration
-* `parentPath`: optional parent command path for nested command groups, such as
+- `parentPath`: optional parent command path for nested command groups, such as
   `["nodes"]`
 
 For paired-node features, prefer
@@ -301,7 +305,7 @@ If you want a plugin command to stay lazy-loaded in the normal root CLI path,
 provide `descriptors` that cover every top-level command root exposed by that
 registrar.
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 api.registerCli(
   async ({ program }) => {
     const { registerMatrixCli } = await import("./src/cli.js");
@@ -321,7 +325,7 @@ api.registerCli(
 
 Nested commands receive the resolved parent command as `program`:
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 api.registerCli(
   async ({ program }) => {
     const { registerNodesCanvasCommands } = await import("./src/cli.js");
@@ -349,13 +353,13 @@ descriptor-backed placeholders for parse-time lazy loading.
 `api.registerCliBackend(...)` lets a plugin own the default config for a local
 AI CLI backend such as `claude-cli` or `my-cli`.
 
-* The backend `id` becomes the provider prefix in model refs like `my-cli/gpt-5`.
-* The backend `config` uses the same shape as `agents.defaults.cliBackends.<id>`.
-* User config still wins. OpenClaw merges `agents.defaults.cliBackends.<id>` over the
+- The backend `id` becomes the provider prefix in model refs like `my-cli/gpt-5`.
+- The backend `config` uses the same shape as `agents.defaults.cliBackends.<id>`.
+- User config still wins. OpenClaw merges `agents.defaults.cliBackends.<id>` over the
   plugin default before running the CLI.
-* Use `normalizeConfig` when a backend needs compatibility rewrites after merge
+- Use `normalizeConfig` when a backend needs compatibility rewrites after merge
   (for example normalizing old flag shapes).
-* Use `resolveExecutionArgs` for request-scoped argv rewrites that belong to
+- Use `resolveExecutionArgs` for request-scoped argv rewrites that belong to
   the CLI dialect, such as mapping OpenClaw thinking levels to a native effort
   flag.
 
@@ -378,20 +382,20 @@ For an end-to-end authoring guide, see
 | ---------------------------------------------- | ---------------------------------------------- |
 | `api.registerMemoryEmbeddingProvider(adapter)` | Memory embedding adapter for the active plugin |
 
-* `registerMemoryCapability` is the preferred exclusive memory-plugin API.
-* `registerMemoryCapability` may also expose `publicArtifacts.listArtifacts(...)`
+- `registerMemoryCapability` is the preferred exclusive memory-plugin API.
+- `registerMemoryCapability` may also expose `publicArtifacts.listArtifacts(...)`
   so companion plugins can consume exported memory artifacts through
   `openclaw/plugin-sdk/memory-host-core` instead of reaching into a specific
   memory plugin's private layout.
-* `registerMemoryPromptSection`, `registerMemoryFlushPlan`, and
+- `registerMemoryPromptSection`, `registerMemoryFlushPlan`, and
   `registerMemoryRuntime` are legacy-compatible exclusive memory-plugin APIs.
-* `MemoryFlushPlan.model` can pin the flush turn to an exact `provider/model`
+- `MemoryFlushPlan.model` can pin the flush turn to an exact `provider/model`
   reference, such as `ollama/qwen3:8b`, without inheriting the active fallback
   chain.
-* `registerMemoryEmbeddingProvider` lets the active memory plugin register one
+- `registerMemoryEmbeddingProvider` lets the active memory plugin register one
   or more embedding adapter ids (for example `openai`, `gemini`, or a custom
   plugin-defined id).
-* User config such as `agents.defaults.memorySearch.provider` and
+- User config such as `agents.defaults.memorySearch.provider` and
   `agents.defaults.memorySearch.fallback` resolves against those registered
   adapter ids.
 
@@ -407,17 +411,17 @@ semantics.
 
 ### Hook decision semantics
 
-* `before_tool_call`: returning `{ block: true }` is terminal. Once any handler sets it, lower-priority handlers are skipped.
-* `before_tool_call`: returning `{ block: false }` is treated as no decision (same as omitting `block`), not as an override.
-* `before_install`: returning `{ block: true }` is terminal. Once any handler sets it, lower-priority handlers are skipped.
-* `before_install`: returning `{ block: false }` is treated as no decision (same as omitting `block`), not as an override.
-* `reply_dispatch`: returning `{ handled: true, ... }` is terminal. Once any handler claims dispatch, lower-priority handlers and the default model dispatch path are skipped.
-* `message_sending`: returning `{ cancel: true }` is terminal. Once any handler sets it, lower-priority handlers are skipped.
-* `message_sending`: returning `{ cancel: false }` is treated as no decision (same as omitting `cancel`), not as an override.
-* `message_received`: use the typed `threadId` field when you need inbound thread/topic routing. Keep `metadata` for channel-specific extras.
-* `message_sending`: use typed `replyToId` / `threadId` routing fields before falling back to channel-specific `metadata`.
-* `gateway_start`: use `ctx.config`, `ctx.workspaceDir`, and `ctx.getCron?.()` for gateway-owned startup state instead of relying on internal `gateway:startup` hooks.
-* `cron_changed`: observe gateway-owned cron lifecycle changes. Use `event.job?.state?.nextRunAtMs` and `ctx.getCron?.()` when syncing external wake schedulers, and keep OpenClaw as the source of truth for due checks and execution.
+- `before_tool_call`: returning `{ block: true }` is terminal. Once any handler sets it, lower-priority handlers are skipped.
+- `before_tool_call`: returning `{ block: false }` is treated as no decision (same as omitting `block`), not as an override.
+- `before_install`: returning `{ block: true }` is terminal. Once any handler sets it, lower-priority handlers are skipped.
+- `before_install`: returning `{ block: false }` is treated as no decision (same as omitting `block`), not as an override.
+- `reply_dispatch`: returning `{ handled: true, ... }` is terminal. Once any handler claims dispatch, lower-priority handlers and the default model dispatch path are skipped.
+- `message_sending`: returning `{ cancel: true }` is terminal. Once any handler sets it, lower-priority handlers are skipped.
+- `message_sending`: returning `{ cancel: false }` is treated as no decision (same as omitting `cancel`), not as an override.
+- `message_received`: use the typed `threadId` field when you need inbound thread/topic routing. Keep `metadata` for channel-specific extras.
+- `message_sending`: use typed `replyToId` / `threadId` routing fields before falling back to channel-specific `metadata`.
+- `gateway_start`: use `ctx.config`, `ctx.workspaceDir`, and `ctx.getCron?.()` for gateway-owned startup state instead of relying on internal `gateway:startup` hooks.
+- `cron_changed`: observe gateway-owned cron lifecycle changes. Use `event.job?.state?.nextRunAtMs` and `ctx.getCron?.()` when syncing external wake schedulers, and keep OpenClaw as the source of truth for due checks and execution.
 
 ### API object fields
 
@@ -466,11 +470,11 @@ Provider plugins can expose a narrow plugin-local contract barrel when a
 helper is intentionally provider-specific and does not belong in a generic SDK
 subpath yet. Bundled examples:
 
-* **Anthropic**: public `api.ts` / `contract-api.ts` seam for Claude
+- **Anthropic**: public `api.ts` / `contract-api.ts` seam for Claude
   beta-header and `service_tier` stream helpers.
-* **`@openclaw/openai-provider`**: `api.ts` exports provider builders,
+- **`@openclaw/openai-provider`**: `api.ts` exports provider builders,
   default-model helpers, and realtime provider builders.
-* **`@openclaw/openrouter-provider`**: `api.ts` exports the provider builder
+- **`@openclaw/openrouter-provider`**: `api.ts` exports the provider builder
   plus onboarding/config helpers.
 
 <Warning>
@@ -486,23 +490,18 @@ subpath yet. Bundled examples:
   <Card title="Entry points" icon="door-open" href="/plugins/sdk-entrypoints">
     `definePluginEntry` and `defineChannelPluginEntry` options.
   </Card>
-
   <Card title="Runtime helpers" icon="gears" href="/plugins/sdk-runtime">
     Full `api.runtime` namespace reference.
   </Card>
-
   <Card title="Setup and config" icon="sliders" href="/plugins/sdk-setup">
     Packaging, manifests, and config schemas.
   </Card>
-
   <Card title="Testing" icon="vial" href="/plugins/sdk-testing">
     Test utilities and lint rules.
   </Card>
-
   <Card title="SDK migration" icon="arrows-turn-right" href="/plugins/sdk-migration">
     Migrating from deprecated surfaces.
   </Card>
-
   <Card title="Plugin internals" icon="diagram-project" href="/plugins/architecture">
     Deep architecture and capability model.
   </Card>

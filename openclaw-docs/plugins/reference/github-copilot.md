@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# GitHub Copilot plugin
+---
+summary: "Adds GitHub Copilot model provider support to OpenClaw."
+read_when:
+  - You are installing, configuring, or auditing the github-copilot plugin
+title: "GitHub Copilot plugin"
+---
 
 # GitHub Copilot plugin
 
@@ -10,8 +11,8 @@ Adds GitHub Copilot model provider support to OpenClaw.
 
 ## Distribution
 
-* Package: `@openclaw/github-copilot-provider`
-* Install route: included in OpenClaw
+- Package: `@openclaw/github-copilot-provider`
+- Install route: included in OpenClaw
 
 ## Surface
 
@@ -19,4 +20,4 @@ providers: github-copilot; contracts: memoryEmbeddingProviders
 
 ## Related docs
 
-* [github-copilot](/providers/github-copilot)
+- [github-copilot](/providers/github-copilot)

@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Diffs plugin
+---
+summary: "Read-only diff viewer and file renderer for agents."
+read_when:
+  - You are installing, configuring, or auditing the diffs plugin
+title: "Diffs plugin"
+---
 
 # Diffs plugin
 
@@ -10,8 +11,8 @@ Read-only diff viewer and file renderer for agents.
 
 ## Distribution
 
-* Package: `@openclaw/diffs`
-* Install route: npm; ClawHub
+- Package: `@openclaw/diffs`
+- Install route: npm; ClawHub
 
 ## Surface
 

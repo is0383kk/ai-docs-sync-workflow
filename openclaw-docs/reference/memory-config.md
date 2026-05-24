@@ -1,8 +1,13 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Memory configuration reference
+---
+summary: "All configuration knobs for memory search, embedding providers, QMD, hybrid search, and multimodal indexing"
+title: "Memory configuration reference"
+sidebarTitle: "Memory config"
+read_when:
+  - You want to configure memory search providers or embedding models
+  - You want to set up the QMD backend
+  - You want to tune hybrid search, MMR, or temporal decay
+  - You want to enable multimodal memory indexing
+---
 
 This page lists every configuration knob for OpenClaw memory search. For conceptual overviews, see:
 
@@ -10,19 +15,15 @@ This page lists every configuration knob for OpenClaw memory search. For concept
   <Card title="Memory overview" href="/concepts/memory">
     How memory works.
   </Card>
-
   <Card title="Builtin engine" href="/concepts/memory-builtin">
     Default SQLite backend.
   </Card>
-
   <Card title="QMD engine" href="/concepts/memory-qmd">
     Local-first sidecar.
   </Card>
-
   <Card title="Memory search" href="/concepts/memory-search">
     Search pipeline and tuning.
   </Card>
-
   <Card title="Active memory" href="/concepts/active-memory">
     Memory sub-agent for interactive sessions.
   </Card>
@@ -31,17 +32,17 @@ This page lists every configuration knob for OpenClaw memory search. For concept
 All memory search settings live under `agents.defaults.memorySearch` in `openclaw.json` unless noted otherwise.
 
 <Note>
-  If you are looking for the **active memory** feature toggle and sub-agent config, that lives under `plugins.entries.active-memory` instead of `memorySearch`.
+If you are looking for the **active memory** feature toggle and sub-agent config, that lives under `plugins.entries.active-memory` instead of `memorySearch`.
 
-  Active memory uses a two-gate model:
+Active memory uses a two-gate model:
 
-  1. the plugin must be enabled and target the current agent id
-  2. the request must be an eligible interactive persistent chat session
+1. the plugin must be enabled and target the current agent id
+2. the request must be an eligible interactive persistent chat session
 
-  See [Active Memory](/concepts/active-memory) for the activation model, plugin-owned config, transcript persistence, and safe rollout pattern.
+See [Active Memory](/concepts/active-memory) for the activation model, plugin-owned config, transcript persistence, and safe rollout pattern.
 </Note>
 
-***
+---
 
 ## Provider selection
 
@@ -60,31 +61,24 @@ When `provider` is not set, OpenClaw selects the first available:
   <Step title="local">
     Selected if `memorySearch.local.modelPath` is configured and the file exists.
   </Step>
-
   <Step title="github-copilot">
     Selected if a GitHub Copilot token can be resolved (env var or auth profile).
   </Step>
-
   <Step title="openai">
     Selected if an OpenAI key can be resolved.
   </Step>
-
   <Step title="gemini">
     Selected if a Gemini key can be resolved.
   </Step>
-
   <Step title="voyage">
     Selected if a Voyage key can be resolved.
   </Step>
-
   <Step title="mistral">
     Selected if a Mistral key can be resolved.
   </Step>
-
   <Step title="deepinfra">
     Selected if a DeepInfra key can be resolved.
   </Step>
-
   <Step title="bedrock">
     Selected if the AWS SDK credential chain resolves (instance role, access keys, profile, SSO, web identity, or shared config).
   </Step>
@@ -96,7 +90,7 @@ When `provider` is not set, OpenClaw selects the first available:
 
 `memorySearch.provider` can point at a custom `models.providers.<id>` entry. OpenClaw resolves that provider's `api` owner for the embedding adapter while preserving the custom provider id for endpoint, auth, and model-prefix handling. This lets multi-GPU or multi-host setups dedicate memory embeddings to a specific local endpoint:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   models: {
     providers: {
@@ -135,10 +129,10 @@ Remote embeddings require an API key. Bedrock uses the AWS SDK default credentia
 | Voyage         | `VOYAGE_API_KEY`                                   | `models.providers.voyage.apiKey`    |
 
 <Note>
-  Codex OAuth covers chat/completions only and does not satisfy embedding requests.
+Codex OAuth covers chat/completions only and does not satisfy embedding requests.
 </Note>
 
-***
+---
 
 ## Remote endpoint config
 
@@ -147,16 +141,14 @@ For custom OpenAI-compatible endpoints or overriding provider defaults:
 <ParamField path="remote.baseUrl" type="string">
   Custom API base URL.
 </ParamField>
-
 <ParamField path="remote.apiKey" type="string">
   Override API key.
 </ParamField>
-
 <ParamField path="remote.headers" type="object">
   Extra HTTP headers (merged with provider defaults).
 </ParamField>
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -173,7 +165,7 @@ For custom OpenAI-compatible endpoints or overriding provider defaults:
 }
 ```
 
-***
+---
 
 ## Provider-specific config
 
@@ -185,20 +177,20 @@ For custom OpenAI-compatible endpoints or overriding provider defaults:
     | `outputDimensionality` | `number` | `3072`                 | For Embedding 2: 768, 1536, or 3072        |
 
     <Warning>
-      Changing model or `outputDimensionality` triggers an automatic full reindex.
+    Changing model or `outputDimensionality` triggers an automatic full reindex.
     </Warning>
-  </Accordion>
 
+  </Accordion>
   <Accordion title="OpenAI-compatible input types">
     OpenAI-compatible embedding endpoints can opt into provider-specific `input_type` request fields. This is useful for asymmetric embedding models that require different labels for query and document embeddings.
 
-    | Key                 | Type     | Default | Description                                           |
-    | ------------------- | -------- | ------- | ----------------------------------------------------- |
-    | `inputType`         | `string` | unset   | Shared `input_type` for query and document embeddings |
-    | `queryInputType`    | `string` | unset   | Query-time `input_type`; overrides `inputType`        |
-    | `documentInputType` | `string` | unset   | Index/document `input_type`; overrides `inputType`    |
+    | Key                 | Type     | Default | Description                                             |
+    | ------------------- | -------- | ------- | ------------------------------------------------------- |
+    | `inputType`         | `string` | unset   | Shared `input_type` for query and document embeddings   |
+    | `queryInputType`    | `string` | unset   | Query-time `input_type`; overrides `inputType`          |
+    | `documentInputType` | `string` | unset   | Index/document `input_type`; overrides `inputType`      |
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -218,14 +210,14 @@ For custom OpenAI-compatible endpoints or overriding provider defaults:
     ```
 
     Changing these values affects embedding cache identity for provider batch indexing and should be followed by a memory reindex when the upstream model treats the labels differently.
-  </Accordion>
 
+  </Accordion>
   <Accordion title="Bedrock">
     ### Bedrock embedding config
 
     Bedrock uses the AWS SDK default credential chain — no API keys needed. If OpenClaw runs on EC2 with a Bedrock-enabled instance role, just set the provider and model:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -272,7 +264,7 @@ For custom OpenAI-compatible endpoints or overriding provider defaults:
 
     **IAM permissions:** the IAM role or user needs:
 
-    ```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json
     {
       "Effect": "Allow",
       "Action": "bedrock:InvokeModel",
@@ -285,25 +277,26 @@ For custom OpenAI-compatible endpoints or overriding provider defaults:
     ```
     arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v2:0
     ```
+
   </Accordion>
-
   <Accordion title="Local (GGUF + node-llama-cpp)">
-    | Key                   | Type               | Default                | Description                                                                                                                                                                                                                                                                                                            |
-    | --------------------- | ------------------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `local.modelPath`     | `string`           | auto-downloaded        | Path to GGUF model file                                                                                                                                                                                                                                                                                                |
-    | `local.modelCacheDir` | `string`           | node-llama-cpp default | Cache dir for downloaded models                                                                                                                                                                                                                                                                                        |
-    | `local.contextSize`   | `number \| "auto"` | `4096`                 | Context window size for the embedding context. 4096 covers typical chunks (128–512 tokens) while bounding non-weight VRAM. Lower to 1024–2048 on constrained hosts. `"auto"` uses the model's trained maximum — not recommended for 8B+ models (Qwen3-Embedding-8B: 40 960 tokens → \~32 GB VRAM vs \~8.8 GB at 4096). |
+    | Key                   | Type               | Default                | Description                                                                                                                                                                                                                                                                                                          |
+    | --------------------- | ------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `local.modelPath`     | `string`           | auto-downloaded        | Path to GGUF model file                                                                                                                                                                                                                                                                                              |
+    | `local.modelCacheDir` | `string`           | node-llama-cpp default | Cache dir for downloaded models                                                                                                                                                                                                                                                                                      |
+    | `local.contextSize`   | `number \| "auto"` | `4096`                 | Context window size for the embedding context. 4096 covers typical chunks (128–512 tokens) while bounding non-weight VRAM. Lower to 1024–2048 on constrained hosts. `"auto"` uses the model's trained maximum — not recommended for 8B+ models (Qwen3-Embedding-8B: 40 960 tokens → ~32 GB VRAM vs ~8.8 GB at 4096). |
 
-    Default model: `embeddinggemma-300m-qat-Q8_0.gguf` (\~0.6 GB, auto-downloaded). Source checkouts still require native build approval: `pnpm approve-builds` then `pnpm rebuild node-llama-cpp`.
+    Default model: `embeddinggemma-300m-qat-Q8_0.gguf` (~0.6 GB, auto-downloaded). Source checkouts still require native build approval: `pnpm approve-builds` then `pnpm rebuild node-llama-cpp`.
 
     Use the standalone CLI to verify the same provider path the Gateway uses:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw memory status --deep --agent main
     openclaw memory index --force --agent main
     ```
 
     If `provider` is `auto`, `local` is selected only when `local.modelPath` points to an existing local file. `hf:` and HTTP(S) model references can still be used explicitly with `provider: "local"`, but they do not make `auto` select local before the model is available on disk.
+
   </Accordion>
 </AccordionGroup>
 
@@ -312,10 +305,10 @@ For custom OpenAI-compatible endpoints or overriding provider defaults:
 <ParamField path="sync.embeddingBatchTimeoutSeconds" type="number">
   Override the timeout for inline embedding batches during memory indexing.
 
-  Unset uses the provider default: 600 seconds for local/self-hosted providers such as `local`, `ollama`, and `lmstudio`, and 120 seconds for hosted providers. Increase this when local CPU-bound embedding batches are healthy but slow.
+Unset uses the provider default: 600 seconds for local/self-hosted providers such as `local`, `ollama`, and `lmstudio`, and 120 seconds for hosted providers. Increase this when local CPU-bound embedding batches are healthy but slow.
 </ParamField>
 
-***
+---
 
 ## Hybrid search config
 
@@ -335,7 +328,6 @@ All under `memorySearch.query.hybrid`:
     | `mmr.enabled` | `boolean` | `false` | Enable MMR re-ranking                |
     | `mmr.lambda`  | `number`  | `0.7`   | 0 = max diversity, 1 = max relevance |
   </Tab>
-
   <Tab title="Temporal decay (recency)">
     | Key                          | Type      | Default | Description               |
     | ---------------------------- | --------- | ------- | ------------------------- |
@@ -343,12 +335,13 @@ All under `memorySearch.query.hybrid`:
     | `temporalDecay.halfLifeDays` | `number`  | `30`    | Score halves every N days |
 
     Evergreen files (`MEMORY.md`, non-dated files in `memory/`) are never decayed.
+
   </Tab>
 </Tabs>
 
 ### Full example
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -367,7 +360,7 @@ All under `memorySearch.query.hybrid`:
 }
 ```
 
-***
+---
 
 ## Additional memory paths
 
@@ -375,7 +368,7 @@ All under `memorySearch.query.hybrid`:
 | ------------ | ---------- | ---------------------------------------- |
 | `extraPaths` | `string[]` | Additional directories or files to index |
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -391,7 +384,7 @@ Paths can be absolute or workspace-relative. Directories are scanned recursively
 
 For agent-scoped cross-agent transcript search, use `agents.list[].memorySearch.qmd.extraCollections` instead of `memory.qmd.paths`. Those extra collections follow the same `{ path, name, pattern? }` shape, but they are merged per agent and can preserve explicit shared names when the path points outside the current workspace. If the same resolved path appears in both `memory.qmd.paths` and `memorySearch.qmd.extraCollections`, QMD keeps the first entry and skips the duplicate.
 
-***
+---
 
 ## Multimodal memory (Gemini)
 
@@ -404,23 +397,23 @@ Index images and audio alongside Markdown using Gemini Embedding 2:
 | `multimodal.maxFileBytes` | `number`   | `10000000` | Max file size for indexing             |
 
 <Note>
-  Only applies to files in `extraPaths`. Default memory roots stay Markdown-only. Requires `gemini-embedding-2-preview`. `fallback` must be `"none"`.
+Only applies to files in `extraPaths`. Default memory roots stay Markdown-only. Requires `gemini-embedding-2-preview`. `fallback` must be `"none"`.
 </Note>
 
 Supported formats: `.jpg`, `.jpeg`, `.png`, `.webp`, `.gif`, `.heic`, `.heif` (images); `.mp3`, `.wav`, `.ogg`, `.opus`, `.m4a`, `.aac`, `.flac` (audio).
 
-***
+---
 
 ## Embedding cache
 
 | Key                | Type      | Default | Description                      |
 | ------------------ | --------- | ------- | -------------------------------- |
-| `cache.enabled`    | `boolean` | `false` | Cache chunk embeddings in SQLite |
+| `cache.enabled`    | `boolean` | `true`  | Cache chunk embeddings in SQLite |
 | `cache.maxEntries` | `number`  | `50000` | Max cached embeddings            |
 
 Prevents re-embedding unchanged text during reindex or transcript updates.
 
-***
+---
 
 ## Batch indexing
 
@@ -439,7 +432,7 @@ Available for `openai`, `gemini`, and `voyage`. OpenAI batch is typically fastes
 
 This is separate from `sync.embeddingBatchTimeoutSeconds`, which controls the timeout for inline embedding calls.
 
-***
+---
 
 ## Session memory search (experimental)
 
@@ -453,10 +446,10 @@ Index session transcripts and surface them via `memory_search`:
 | `sync.sessions.deltaMessages` | `number`   | `50`         | Message threshold for reindex           |
 
 <Warning>
-  Session indexing is opt-in and runs asynchronously. Results can be slightly stale. Session logs live on disk, so treat filesystem access as the trust boundary.
+Session indexing is opt-in and runs asynchronously. Results can be slightly stale. Session logs live on disk, so treat filesystem access as the trust boundary.
 </Warning>
 
-***
+---
 
 ## SQLite vector acceleration (sqlite-vec)
 
@@ -467,7 +460,7 @@ Index session transcripts and surface them via `memory_search`:
 
 When sqlite-vec is unavailable, OpenClaw falls back to in-process cosine similarity automatically.
 
-***
+---
 
 ## Index storage
 
@@ -476,7 +469,7 @@ When sqlite-vec is unavailable, OpenClaw falls back to in-process cosine similar
 | `store.path`          | `string` | `~/.openclaw/memory/{agentId}.sqlite` | Index location (supports `{agentId}` token) |
 | `store.fts.tokenizer` | `string` | `unicode61`                           | FTS5 tokenizer (`unicode61` or `trigram`)   |
 
-***
+---
 
 ## QMD backend config
 
@@ -497,25 +490,24 @@ Set `memory.backend = "qmd"` to enable. All QMD settings live under `memory.qmd`
 OpenClaw prefers current QMD collection and MCP query shapes, but keeps older QMD releases working by trying compatible collection pattern flags and older MCP tool names when needed. When QMD advertises support for multiple collection filters, same-source collections are searched with one QMD process; older QMD builds keep the per-collection compatibility path. Same-source means durable memory collections are grouped together, while session transcript collections remain a separate group so source diversification still has both inputs.
 
 <Note>
-  QMD model overrides stay on the QMD side, not OpenClaw config. If you need to override QMD's models globally, set environment variables such as `QMD_EMBED_MODEL`, `QMD_RERANK_MODEL`, and `QMD_GENERATE_MODEL` in the gateway runtime environment.
+QMD model overrides stay on the QMD side, not OpenClaw config. If you need to override QMD's models globally, set environment variables such as `QMD_EMBED_MODEL`, `QMD_RERANK_MODEL`, and `QMD_GENERATE_MODEL` in the gateway runtime environment.
 </Note>
 
 <AccordionGroup>
   <Accordion title="Update schedule">
-    | Key                       | Type      | Default  | Description                                                                      |
-    | ------------------------- | --------- | -------- | -------------------------------------------------------------------------------- |
-    | `update.interval`         | `string`  | `5m`     | Refresh interval                                                                 |
-    | `update.debounceMs`       | `number`  | `15000`  | Debounce file changes                                                            |
-    | `update.onBoot`           | `boolean` | `true`   | Refresh when the long-lived QMD manager opens; also gates opt-in startup refresh |
-    | `update.startup`          | `string`  | `off`    | Optional gateway-start refresh: `off`, `idle`, or `immediate`                    |
-    | `update.startupDelayMs`   | `number`  | `120000` | Delay before `startup: "idle"` refresh runs                                      |
-    | `update.waitForBootSync`  | `boolean` | `false`  | Block manager opening until its initial refresh completes                        |
-    | `update.embedInterval`    | `string`  | --       | Separate embed cadence                                                           |
-    | `update.commandTimeoutMs` | `number`  | --       | Timeout for QMD commands                                                         |
-    | `update.updateTimeoutMs`  | `number`  | --       | Timeout for QMD update operations                                                |
-    | `update.embedTimeoutMs`   | `number`  | --       | Timeout for QMD embed operations                                                 |
+    | Key                       | Type      | Default | Description                           |
+    | ------------------------- | --------- | ------- | ------------------------------------- |
+    | `update.interval`         | `string`  | `5m`    | Refresh interval                      |
+    | `update.debounceMs`       | `number`  | `15000` | Debounce file changes                 |
+    | `update.onBoot`           | `boolean` | `true`  | Refresh when the long-lived QMD manager opens; also gates opt-in startup refresh |
+    | `update.startup`          | `string`  | `off`   | Optional gateway-start refresh: `off`, `idle`, or `immediate` |
+    | `update.startupDelayMs`   | `number`  | `120000` | Delay before `startup: "idle"` refresh runs |
+    | `update.waitForBootSync`  | `boolean` | `false` | Block manager opening until its initial refresh completes |
+    | `update.embedInterval`    | `string`  | --      | Separate embed cadence                |
+    | `update.commandTimeoutMs` | `number`  | --      | Timeout for QMD commands              |
+    | `update.updateTimeoutMs`  | `number`  | --      | Timeout for QMD update operations     |
+    | `update.embedTimeoutMs`   | `number`  | --      | Timeout for QMD embed operations      |
   </Accordion>
-
   <Accordion title="Limits">
     | Key                       | Type     | Default | Description                |
     | ------------------------- | -------- | ------- | -------------------------- |
@@ -524,11 +516,10 @@ OpenClaw prefers current QMD collection and MCP query shapes, but keeps older QM
     | `limits.maxInjectedChars` | `number` | --      | Clamp total injected chars |
     | `limits.timeoutMs`        | `number` | `4000`  | Search timeout             |
   </Accordion>
-
   <Accordion title="Scope">
     Controls which sessions can receive QMD search results. Same schema as [`session.sendPolicy`](/gateway/config-agents#session):
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       memory: {
         qmd: {
@@ -544,8 +535,8 @@ OpenClaw prefers current QMD collection and MCP query shapes, but keeps older QM
     The shipped default allows direct and channel sessions, while still denying groups.
 
     Default is DM-only. `match.keyPrefix` matches the normalized session key; `match.rawKeyPrefix` matches the raw key including `agent:<id>:`.
-  </Accordion>
 
+  </Accordion>
   <Accordion title="Citations">
     `memory.citations` applies to all backends:
 
@@ -554,6 +545,7 @@ OpenClaw prefers current QMD collection and MCP query shapes, but keeps older QM
     | `auto` (default) | Include `Source: <path#line>` footer in snippets    |
     | `on`             | Always include footer                               |
     | `off`            | Omit footer (path still passed to agent internally) |
+
   </Accordion>
 </AccordionGroup>
 
@@ -561,7 +553,7 @@ QMD boot refreshes use a one-shot subprocess path during gateway startup. The lo
 
 ### Full QMD example
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   memory: {
     backend: "qmd",
@@ -580,7 +572,7 @@ QMD boot refreshes use a one-shot subprocess path during gateway startup. The lo
 }
 ```
 
-***
+---
 
 ## Dreaming
 
@@ -600,7 +592,7 @@ For conceptual behavior and slash commands, see [Dreaming](/concepts/dreaming).
 
 ### Example
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -623,15 +615,16 @@ For conceptual behavior and slash commands, see [Dreaming](/concepts/dreaming).
 ```
 
 <Note>
-  * Dreaming writes machine state to `memory/.dreams/`.
-  * Dreaming writes human-readable narrative output to `DREAMS.md` (or existing `dreams.md`).
-  * `dreaming.model` uses the existing plugin subagent trust gate; set `plugins.entries.memory-core.subagent.allowModelOverride: true` before enabling it.
-  * Dream Diary retries once with the session default model when the configured model is unavailable. Trust or allowlist failures are logged and are not silently retried.
-  * The light/deep/REM phase policy and thresholds are internal behavior, not user-facing config.
+- Dreaming writes machine state to `memory/.dreams/`.
+- Dreaming writes human-readable narrative output to `DREAMS.md` (or existing `dreams.md`).
+- `dreaming.model` uses the existing plugin subagent trust gate; set `plugins.entries.memory-core.subagent.allowModelOverride: true` before enabling it.
+- Dream Diary retries once with the session default model when the configured model is unavailable. Trust or allowlist failures are logged and are not silently retried.
+- The light/deep/REM phase policy and thresholds are internal behavior, not user-facing config.
+
 </Note>
 
 ## Related
 
-* [Configuration reference](/gateway/configuration-reference)
-* [Memory overview](/concepts/memory)
-* [Memory search](/concepts/memory-search)
+- [Configuration reference](/gateway/configuration-reference)
+- [Memory overview](/concepts/memory)
+- [Memory search](/concepts/memory-search)

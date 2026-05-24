@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# xAI plugin
+---
+summary: "Adds xAI model provider support to OpenClaw."
+read_when:
+  - You are installing, configuring, or auditing the xai plugin
+title: "xAI plugin"
+---
 
 # xAI plugin
 
@@ -10,8 +11,8 @@ Adds xAI model provider support to OpenClaw.
 
 ## Distribution
 
-* Package: `@openclaw/xai-plugin`
-* Install route: included in OpenClaw
+- Package: `@openclaw/xai-plugin`
+- Install route: included in OpenClaw
 
 ## Surface
 
@@ -19,4 +20,4 @@ providers: xai; contracts: imageGenerationProviders, mediaUnderstandingProviders
 
 ## Related docs
 
-* [xai](/providers/xai)
+- [xai](/providers/xai)

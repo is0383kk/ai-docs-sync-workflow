@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# macOS dev setup
+---
+summary: "Setup guide for developers working on the OpenClaw macOS app"
+read_when:
+  - Setting up the macOS development environment
+title: "macOS dev setup"
+---
 
 # macOS developer setup
 
@@ -19,7 +20,7 @@ Before building the app, ensure you have the following installed:
 
 Install the project-wide dependencies:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm install
 ```
 
@@ -27,7 +28,7 @@ pnpm install
 
 To build the macOS app and package it into `dist/OpenClaw.app`, run:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 ./scripts/package-mac-app.sh
 ```
 
@@ -50,7 +51,7 @@ The macOS app expects a global `openclaw` CLI install to manage background tasks
 
 Alternatively, install it manually:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 npm install -g openclaw@<version>
 ```
 
@@ -65,12 +66,12 @@ The macOS app build expects the latest macOS SDK and Swift 6.2 toolchain.
 
 **System dependencies (required):**
 
-* **Latest macOS version available in Software Update** (required by Xcode 26.2 SDKs)
-* **Xcode 26.2** (Swift 6.2 toolchain)
+- **Latest macOS version available in Software Update** (required by Xcode 26.2 SDKs)
+- **Xcode 26.2** (Swift 6.2 toolchain)
 
 **Checks:**
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 xcodebuild -version
 xcrun swift --version
 ```
@@ -85,7 +86,7 @@ If the app crashes when you try to allow **Speech Recognition** or **Microphone*
 
 1. Reset the TCC permissions:
 
-   ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+   ```bash
    tccutil reset All ai.openclaw.mac.debug
    ```
 
@@ -95,7 +96,7 @@ If the app crashes when you try to allow **Speech Recognition** or **Microphone*
 
 If the gateway status stays on "Starting...", check if a zombie process is holding the port:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw gateway status
 openclaw gateway stop
 
@@ -107,5 +108,5 @@ If a manual run is holding the port, stop that process (Ctrl+C). As a last resor
 
 ## Related
 
-* [macOS app](/platforms/macos)
-* [Install overview](/install)
+- [macOS app](/platforms/macos)
+- [Install overview](/install)

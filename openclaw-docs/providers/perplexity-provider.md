@@ -1,14 +1,16 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Perplexity
+---
+summary: "Perplexity web search provider setup (API key, search modes, filtering)"
+title: "Perplexity"
+read_when:
+  - You want to configure Perplexity as a web search provider
+  - You need the Perplexity API key or OpenRouter proxy setup
+---
 
 The Perplexity plugin provides web search capabilities through the Perplexity
 Search API or Perplexity Sonar via OpenRouter.
 
 <Note>
-  This page is the Perplexity **provider** setup. For the Perplexity **tool** (how the agent uses it), see [Perplexity tool](/tools/perplexity-search).
+This page is the Perplexity **provider** setup. For the Perplexity **tool** (how the agent uses it), see [Perplexity tool](/tools/perplexity-search).
 </Note>
 
 | Property    | Value                                                                  |
@@ -23,17 +25,17 @@ Search API or Perplexity Sonar via OpenRouter.
   <Step title="Set the API key">
     Run the interactive web-search configuration flow:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw configure --section web
     ```
 
     Or set the key directly:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw config set plugins.entries.perplexity.config.webSearch.apiKey "pplx-xxxxxxxxxxxx"
     ```
-  </Step>
 
+  </Step>
   <Step title="Start searching">
     The agent will automatically use Perplexity for web searches once the key is
     configured. No additional steps are required.
@@ -50,7 +52,6 @@ The plugin auto-selects the transport based on API key prefix:
     API. This transport returns structured results and supports domain, language,
     and date filters (see filtering options below).
   </Tab>
-
   <Tab title="OpenRouter / Sonar (sk-or-)">
     When your key starts with `sk-or-`, OpenClaw routes through OpenRouter using
     the Perplexity Sonar model. This transport returns AI-synthesized answers with
@@ -66,8 +67,8 @@ The plugin auto-selects the transport based on API key prefix:
 ## Native API filtering
 
 <Note>
-  Filtering options are only available when using the native Perplexity API
-  (`pplx-` key). OpenRouter/Sonar searches do not support these parameters.
+Filtering options are only available when using the native Perplexity API
+(`pplx-` key). OpenRouter/Sonar searches do not support these parameters.
 </Note>
 
 When using the native Perplexity API, searches support the following filters:
@@ -88,11 +89,12 @@ When using the native Perplexity API, searches support the following filters:
     `PERPLEXITY_API_KEY` is available to that process.
 
     <Warning>
-      A key exported only in an interactive shell will not be visible to a
-      launchd/systemd daemon unless that environment is explicitly imported. Set
-      the key in `~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway
-      process can read it.
+    A key exported only in an interactive shell will not be visible to a
+    launchd/systemd daemon unless that environment is explicitly imported. Set
+    the key in `~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway
+    process can read it.
     </Warning>
+
   </Accordion>
 
   <Accordion title="OpenRouter proxy setup">
@@ -102,9 +104,10 @@ When using the native Perplexity API, searches support the following filters:
     automatically.
 
     <Tip>
-      The OpenRouter transport is useful if you already have an OpenRouter account
-      and want consolidated billing across multiple providers.
+    The OpenRouter transport is useful if you already have an OpenRouter account
+    and want consolidated billing across multiple providers.
     </Tip>
+
   </Accordion>
 </AccordionGroup>
 
@@ -114,7 +117,6 @@ When using the native Perplexity API, searches support the following filters:
   <Card title="Perplexity search tool" href="/tools/perplexity-search" icon="magnifying-glass">
     How the agent invokes Perplexity searches and interprets results.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
     Full configuration reference including plugin entries.
   </Card>

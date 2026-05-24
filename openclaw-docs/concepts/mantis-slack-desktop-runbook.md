@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Mantis Slack desktop runbook
+---
+summary: "Operator runbook for Mantis Slack desktop QA: GitHub dispatch, local CLI, warm VNC leases, hydrate modes, timing interpretation, artifacts, and failure handling."
+read_when:
+  - Running Mantis Slack desktop QA from GitHub or locally
+  - Debugging slow Mantis Slack desktop runs
+  - Choosing source, prehydrated, or warm-lease mode
+  - Posting screenshot and video evidence to a PR
+title: "Mantis Slack desktop runbook"
+---
 
 Mantis Slack desktop QA is the real-UI lane for Slack-class bugs that need a
 Linux desktop, VNC rescue, Slack Web, a real OpenClaw gateway, screenshots,
@@ -14,13 +18,13 @@ Use it when unit tests or the headless Slack live lane cannot prove the bug.
 
 Mantis uses three different storage layers:
 
-* Provider image: owned by Crabbox and stored in the cloud provider account.
+- Provider image: owned by Crabbox and stored in the cloud provider account.
   It contains machine capabilities such as Chrome/Chromium, ffmpeg, scrot,
   Node/corepack/pnpm, native build tools, and empty cache directories.
-* Warm lease state: owned by the current operator session. It can contain a
+- Warm lease state: owned by the current operator session. It can contain a
   logged-in browser profile, `/var/cache/crabbox/pnpm`, and a prepared source
   checkout while the lease is alive.
-* Mantis artifacts: owned by the OpenClaw run. They live under
+- Mantis artifacts: owned by the OpenClaw run. They live under
   `.artifacts/qa-e2e/mantis/...`, then GitHub Actions uploads them and the
   Mantis GitHub App comments inline evidence on the PR.
 
@@ -31,7 +35,7 @@ Never put secrets, browser cookies, Slack login state, repository checkouts,
 
 Run the workflow from `main`:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 gh workflow run mantis-slack-desktop-smoke.yml \
   --ref main \
   -f candidate_ref=<trusted-ref-or-sha> \
@@ -48,15 +52,15 @@ from `openclaw/openclaw`.
 
 The workflow writes:
 
-* uploaded artifact: `mantis-slack-desktop-smoke-<run-id>-<attempt>`;
-* inline PR comment from the Mantis GitHub App;
-* `slack-desktop-smoke.png`;
-* `slack-desktop-smoke.mp4`;
-* `slack-desktop-smoke-preview.gif`;
-* `slack-desktop-smoke-change.mp4`;
-* `mantis-slack-desktop-smoke-summary.json`;
-* `mantis-slack-desktop-smoke-report.md`;
-* remote logs such as `slack-desktop-command.log`, `openclaw-gateway.log`,
+- uploaded artifact: `mantis-slack-desktop-smoke-<run-id>-<attempt>`;
+- inline PR comment from the Mantis GitHub App;
+- `slack-desktop-smoke.png`;
+- `slack-desktop-smoke.mp4`;
+- `slack-desktop-smoke-preview.gif`;
+- `slack-desktop-smoke-change.mp4`;
+- `mantis-slack-desktop-smoke-summary.json`;
+- `mantis-slack-desktop-smoke-report.md`;
+- remote logs such as `slack-desktop-command.log`, `openclaw-gateway.log`,
   `chrome.log`, and `ffmpeg.log`.
 
 The PR comment is updated in place by the hidden
@@ -66,7 +70,7 @@ The PR comment is updated in place by the hidden
 
 Cold source proof:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm openclaw qa mantis slack-desktop-smoke \
   --provider aws \
   --class standard \
@@ -82,7 +86,7 @@ pnpm openclaw qa mantis slack-desktop-smoke \
 
 Keep the VM for VNC rescue:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm openclaw qa mantis slack-desktop-smoke \
   --provider aws \
   --class standard \
@@ -93,13 +97,13 @@ pnpm openclaw qa mantis slack-desktop-smoke \
 
 Open VNC:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 crabbox vnc --provider aws --id <cbx_id> --open
 ```
 
 Reuse a warm lease:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm openclaw qa mantis slack-desktop-smoke \
   --provider aws \
   --lease-id <cbx_id-or-slug> \
@@ -111,6 +115,34 @@ pnpm openclaw qa mantis slack-desktop-smoke \
 Use `--hydrate-mode prehydrated` only when the reused remote workspace already
 has `node_modules` and a built `dist/`. Mantis fails closed if those are
 missing.
+
+Prove native Slack approval UI:
+
+```bash
+pnpm openclaw qa mantis slack-desktop-smoke \
+  --provider aws \
+  --class standard \
+  --approval-checkpoints \
+  --credential-source convex \
+  --credential-role maintainer \
+  --hydrate-mode source
+```
+
+Approval checkpoint mode is mutually exclusive with `--gateway-setup`. It runs
+the opt-in `slack-approval-exec-native` and `slack-approval-plugin-native`
+scenarios unless you pass explicit approval checkpoint `--scenario` flags; other
+Slack scenarios are rejected before the VM starts. The Slack QA runner writes
+each checkpoint JSON file from the real Slack API message it observed, then the
+remote watcher renders that message snapshot into
+`approval-checkpoints/<scenario>-pending.png` and
+`approval-checkpoints/<scenario>-resolved.png`. The run fails if any checkpoint
+JSON, message evidence, ack JSON, or rendered screenshot is missing or empty.
+
+Cold GitHub Actions leases do not have Slack Web cookies, so their browser
+capture can land on Slack sign-in. For approval checkpoint proof, trust the
+rendered checkpoint images and Slack QA artifacts rather than
+`slack-desktop-smoke.png`. Use a kept warm lease with a manually logged-in Slack
+Web profile only when the browser screenshot itself must show Slack Web.
 
 ## Hydrate modes
 
@@ -127,39 +159,40 @@ uses `/var/cache/crabbox/pnpm` when present.
 
 `mantis-slack-desktop-smoke-report.md` includes phase timings:
 
-* `crabbox.warmup`: cloud provider boot, desktop/browser readiness, and SSH.
-* `crabbox.inspect`: lease metadata lookup.
-* `credentials.prepare`: Convex credential lease acquisition.
-* `crabbox.remote_run`: sync, browser launch, OpenClaw install/build or
+- `crabbox.warmup`: cloud provider boot, desktop/browser readiness, and SSH.
+- `crabbox.inspect`: lease metadata lookup.
+- `credentials.prepare`: Convex credential lease acquisition.
+- `crabbox.remote_run`: sync, browser launch, OpenClaw install/build or
   hydrate validation, gateway startup, screenshot, and video capture.
-* `artifacts.copy`: rsync back from the VM.
+- `artifacts.copy`: rsync back from the VM.
 
 `crabbox.remote_run` can be marked `accepted` when Crabbox returns a non-zero
-remote status after Mantis has copied metadata proving that the OpenClaw gateway
-is alive and the setup completed. Treat `accepted` as pass-with-explanation,
-not a failed scenario.
+remote status after Mantis has copied metadata proving that either the OpenClaw
+gateway setup completed or the Slack QA command itself exited successfully.
+Treat `accepted` as pass-with-explanation, not a failed scenario.
 
 If the run is slow:
 
-* warmup dominates: prebake or promote a better Crabbox provider image;
-* remote\_run dominates in `source`: use a warm lease, improve pnpm store reuse,
+- warmup dominates: prebake or promote a better Crabbox provider image;
+- remote_run dominates in `source`: use a warm lease, improve pnpm store reuse,
   or move machine prerequisites into the provider image;
-* remote\_run dominates in `prehydrated`: the remote workspace was not actually
+- remote_run dominates in `prehydrated`: the remote workspace was not actually
   ready, or the gateway/browser/Slack setup is slow;
-* artifact copy dominates: inspect video size and artifact directory contents.
+- artifact copy dominates: inspect video size and artifact directory contents.
 
 ## Evidence checklist
 
 A good PR comment should show:
 
-* scenario id and candidate SHA;
-* GitHub Actions run URL;
-* artifact URL;
-* inline screenshot;
-* inline animated preview when available;
-* full MP4 and trimmed MP4 links;
-* pass/fail status;
-* timing summary in the attached report.
+- scenario id and candidate SHA;
+- GitHub Actions run URL;
+- artifact URL;
+- inline approval checkpoint screenshot, or a Slack Web screenshot from a
+  logged-in warm lease;
+- inline animated preview when available;
+- full MP4 and trimmed MP4 links;
+- pass/fail status;
+- timing summary in the attached report.
 
 Do not commit screenshots or videos into the repository. Keep them in GitHub
 Actions artifacts or the PR comment.
@@ -172,7 +205,7 @@ install/build failure.
 
 If the VM run fails but screenshots were copied back, inspect:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 cat mantis-slack-desktop-smoke-report.md
 cat mantis-slack-desktop-smoke-summary.json
 cat slack-desktop-command.log
@@ -184,7 +217,7 @@ cat ffmpeg.log
 If the run kept the lease, open VNC with the report's `crabbox vnc ...` command.
 Stop the lease when done:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 crabbox stop --provider aws <cbx_id-or-slug>
 ```
 
@@ -193,6 +226,6 @@ If Slack login expired, repair it in VNC on a kept lease and rerun with
 
 ## Related
 
-* [QA overview](/concepts/qa-e2e-automation)
-* [Slack channel](/channels/slack)
-* [Testing](/help/testing)
+- [QA overview](/concepts/qa-e2e-automation)
+- [Slack channel](/channels/slack)
+- [Testing](/help/testing)

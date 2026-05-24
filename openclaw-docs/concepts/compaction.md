@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Compaction
+---
+summary: "How OpenClaw summarizes long conversations to stay within model limits"
+read_when:
+  - You want to understand auto-compaction and /compact
+  - You are debugging long sessions hitting context limits
+title: "Compaction"
+---
 
 Every model has a context window: the maximum number of tokens it can process. When a conversation approaches that limit, OpenClaw **compacts** older messages into a summary so the chat can continue.
 
@@ -22,24 +24,25 @@ Auto-compaction is on by default. It runs when the session nears the context lim
 
 You will see:
 
-* `embedded run auto-compaction start` / `complete` in normal Gateway logs.
-* `🧹 Auto-compaction complete` in verbose mode.
-* `/status` showing `🧹 Compactions: <count>`.
+- `embedded run auto-compaction start` / `complete` in normal Gateway logs.
+- `🧹 Auto-compaction complete` in verbose mode.
+- `/status` showing `🧹 Compactions: <count>`.
 
 <Info>
-  Before compacting, OpenClaw automatically reminds the agent to save important notes to [memory](/concepts/memory) files. This prevents context loss.
+Before compacting, OpenClaw automatically reminds the agent to save important notes to [memory](/concepts/memory) files. This prevents context loss.
 </Info>
 
 <AccordionGroup>
   <Accordion title="Recognized overflow signatures">
     OpenClaw detects context overflow from these provider error patterns:
 
-    * `request_too_large`
-    * `context length exceeded`
-    * `input exceeds the maximum number of tokens`
-    * `input token count exceeds the maximum number of input tokens`
-    * `input is too long for the model`
-    * `ollama error: context length exceeded`
+    - `request_too_large`
+    - `context length exceeded`
+    - `input exceeds the maximum number of tokens`
+    - `input token count exceeds the maximum number of input tokens`
+    - `input is too long for the model`
+    - `ollama error: context length exceeded`
+
   </Accordion>
 </AccordionGroup>
 
@@ -61,7 +64,7 @@ Configure compaction under `agents.defaults.compaction` in your `openclaw.json`.
 
 By default, compaction uses the agent's primary model. Set `agents.defaults.compaction.model` to delegate summarization to a more capable or specialized model. The override accepts any `provider/model-id` string:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "agents": {
     "defaults": {
@@ -75,7 +78,7 @@ By default, compaction uses the agent's primary model. Set `agents.defaults.comp
 
 This works with local models too, for example a second Ollama model dedicated to summarization:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "agents": {
     "defaults": {
@@ -98,7 +101,7 @@ Compaction summarization preserves opaque identifiers by default (`identifierPol
 When `agents.defaults.compaction.maxActiveTranscriptBytes` is set, OpenClaw triggers normal local compaction before a run if the active JSONL reaches that size. This is useful for long-running sessions where provider-side context management may keep model context healthy while the local transcript keeps growing. It does not split raw JSONL bytes; it asks the normal compaction pipeline to create a semantic summary.
 
 <Warning>
-  The byte guard requires `truncateAfterCompaction: true`. Without transcript rotation, the active file would not shrink and the guard remains inactive.
+The byte guard requires `truncateAfterCompaction: true`. Without transcript rotation, the active file would not shrink and the guard remains inactive.
 </Warning>
 
 ### Successor transcripts
@@ -116,7 +119,7 @@ skips the large debug snapshot instead of doubling disk usage.
 
 By default, compaction runs silently. Set `notifyUser` to show brief status messages when compaction starts and completes:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -132,7 +135,7 @@ By default, compaction runs silently. Set `notifyUser` to show brief status mess
 
 Before compaction, OpenClaw can run a **silent memory flush** turn to store durable notes to disk. Set `agents.defaults.compaction.memoryFlush.model` when this housekeeping turn should use a local model instead of the active conversation model:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "agents": {
     "defaults": {
@@ -154,7 +157,7 @@ Plugins can register a custom compaction provider via `registerCompactionProvide
 
 To use a registered provider, set its id in your config:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "agents": {
     "defaults": {
@@ -169,7 +172,7 @@ To use a registered provider, set its id in your config:
 Setting a `provider` automatically forces `mode: "safeguard"`. Providers receive the same compaction instructions and identifier-preservation policy as the built-in path, and OpenClaw still preserves recent-turn and split-turn suffix context after provider output.
 
 <Note>
-  If the provider fails or returns an empty result, OpenClaw falls back to built-in LLM summarization.
+If the provider fails or returns an empty result, OpenClaw falls back to built-in LLM summarization.
 </Note>
 
 ## Compaction vs pruning
@@ -194,7 +197,7 @@ For advanced configuration (reserve tokens, identifier preservation, custom cont
 
 ## Related
 
-* [Session](/concepts/session): session management and lifecycle.
-* [Session pruning](/concepts/session-pruning): trimming tool results.
-* [Context](/concepts/context): how context is built for agent turns.
-* [Hooks](/automation/hooks): compaction lifecycle hooks (`before_compaction`, `after_compaction`).
+- [Session](/concepts/session): session management and lifecycle.
+- [Session pruning](/concepts/session-pruning): trimming tool results.
+- [Context](/concepts/context): how context is built for agent turns.
+- [Hooks](/automation/hooks): compaction lifecycle hooks (`before_compaction`, `after_compaction`).

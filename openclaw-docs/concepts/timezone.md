@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Timezones
+---
+summary: "Where timezones show up in OpenClaw — envelopes, tool payloads, system prompt"
+read_when:
+  - You want a quick mental model for timezone handling
+  - You are deciding where to set or override a timezone
+title: "Timezones"
+---
 
 OpenClaw standardizes timestamps so the model sees a **single reference time** instead of a mix of provider-local clocks. There are three surfaces where timezones show up, each with its own purpose:
 
@@ -18,7 +20,7 @@ The system prompt deliberately omits the live clock to keep prompt caching stabl
 
 ## Setting the user timezone
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -32,14 +34,14 @@ If `userTimezone` is unset, OpenClaw resolves the host timezone at runtime (no c
 
 ## When to override
 
-* **Use UTC envelopes** (`envelopeTimezone: "utc"`) when you want stable timestamps across hosts in different regions, or when you want UTC-aligned logs to match diagnostics output.
-* **Use a fixed IANA zone** (e.g. `"Europe/Vienna"`) when the gateway host is in one zone but the user is in another and you want envelopes to read in the user's zone regardless of host migration.
-* **Set `envelopeTimestamp: "off"`** for low-token envelopes when timestamp context is not useful for the conversation.
+- **Use UTC envelopes** (`envelopeTimezone: "utc"`) when you want stable timestamps across hosts in different regions, or when you want UTC-aligned logs to match diagnostics output.
+- **Use a fixed IANA zone** (e.g. `"Europe/Vienna"`) when the gateway host is in one zone but the user is in another and you want envelopes to read in the user's zone regardless of host migration.
+- **Set `envelopeTimestamp: "off"`** for low-token envelopes when timestamp context is not useful for the conversation.
 
 For the full behavior reference, examples per provider, and elapsed-time formatting, see [Date & Time](/date-time).
 
 ## Related
 
-* [Date & Time](/date-time) — full envelope/tool/prompt behavior and examples.
-* [Heartbeat](/gateway/heartbeat) — active hours use timezone for scheduling.
-* [Cron Jobs](/automation/cron-jobs) — cron expressions use timezone for scheduling.
+- [Date & Time](/date-time) — full envelope/tool/prompt behavior and examples.
+- [Heartbeat](/gateway/heartbeat) — active hours use timezone for scheduling.
+- [Cron Jobs](/automation/cron-jobs) — cron expressions use timezone for scheduling.

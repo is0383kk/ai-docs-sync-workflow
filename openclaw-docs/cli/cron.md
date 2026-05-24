@@ -1,15 +1,17 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Cron
+---
+summary: "CLI reference for `openclaw cron` (schedule and run background jobs)"
+read_when:
+  - You want scheduled jobs and wakeups
+  - You are debugging cron execution and logs
+title: "Cron"
+---
 
 # `openclaw cron`
 
 Manage cron jobs for the Gateway scheduler.
 
 <Tip>
-  Run `openclaw cron --help` for the full command surface. See [Cron jobs](/automation/cron-jobs) for the conceptual guide.
+Run `openclaw cron --help` for the full command surface. See [Cron jobs](/automation/cron-jobs) for the conceptual guide.
 </Tip>
 
 ## Sessions
@@ -18,12 +20,12 @@ Manage cron jobs for the Gateway scheduler.
 
 <AccordionGroup>
   <Accordion title="Session keys">
-    * `main` binds to the agent's main session.
-    * `isolated` creates a fresh transcript and session id for each run.
-    * `current` binds to the active session at creation time.
-    * `session:<id>` pins to an explicit persistent session key.
-  </Accordion>
+    - `main` binds to the agent's main session.
+    - `isolated` creates a fresh transcript and session id for each run.
+    - `current` binds to the active session at creation time.
+    - `session:<id>` pins to an explicit persistent session key.
 
+  </Accordion>
   <Accordion title="Isolated session semantics">
     Isolated runs reset ambient conversation context. Channel and group routing, send/queue policy, elevation, origin, and ACP runtime binding are reset for the new run. Safe preferences and explicit user-selected model or auth overrides can carry across runs.
   </Accordion>
@@ -36,17 +38,17 @@ Manage cron jobs for the Gateway scheduler.
 Provider-prefixed targets can disambiguate unresolved announce channels. For example, `to: "telegram:123"` selects Telegram when `delivery.channel` is omitted or `last`. Only prefixes advertised by the loaded plugin are provider selectors. If `delivery.channel` is explicit, the prefix must match that channel; `channel: "whatsapp"` with `to: "telegram:123"` is rejected. Service prefixes such as `imessage:` and `sms:` remain channel-owned target syntax.
 
 <Note>
-  Isolated `cron add` jobs default to `--announce` delivery. Use `--no-deliver` to keep output internal. `--deliver` remains as a deprecated alias for `--announce`.
+Isolated `cron add` jobs default to `--announce` delivery. Use `--no-deliver` to keep output internal. `--deliver` remains as a deprecated alias for `--announce`.
 </Note>
 
 ### Delivery ownership
 
 Isolated cron chat delivery is shared between the agent and the runner:
 
-* The agent can send directly using the `message` tool when a chat route is available.
-* `announce` fallback-delivers the final reply only when the agent did not send directly to the resolved target.
-* `webhook` posts the finished payload to a URL.
-* `none` disables runner fallback delivery.
+- The agent can send directly using the `message` tool when a chat route is available.
+- `announce` fallback-delivers the final reply only when the agent did not send directly to the resolved target.
+- `webhook` posts the finished payload to a URL.
+- `none` disables runner fallback delivery.
 
 `--announce` is runner fallback delivery for the final reply. `--no-deliver` disables that fallback but does not remove the agent's `message` tool when a chat route is available.
 
@@ -61,7 +63,7 @@ Failure notifications resolve in this order:
 3. The job's primary announce target (when no explicit failure destination is set).
 
 <Note>
-  Main-session jobs may only use `delivery.failureDestination` when primary delivery mode is `webhook`. Isolated jobs accept it in all modes.
+Main-session jobs may only use `delivery.failureDestination` when primary delivery mode is `webhook`. Isolated jobs accept it in all modes.
 </Note>
 
 Note: isolated cron runs treat run-level agent failures as job errors even when
@@ -83,7 +85,7 @@ reported as pre-model cron failures.
 `--at <datetime>` schedules a one-shot run. Offset-less datetimes are treated as UTC unless you also pass `--tz <iana>`, which interprets the wall-clock time in the given timezone.
 
 <Note>
-  One-shot jobs delete after success by default. Use `--keep-after-run` to preserve them.
+One-shot jobs delete after success by default. Use `--keep-after-run` to preserve them.
 </Note>
 
 ### Recurring jobs
@@ -100,21 +102,21 @@ Note: cron job definitions live in `jobs.json`, while pending runtime state live
 
 `openclaw cron run <job-id>` force-runs by default and returns as soon as the manual run is queued. Successful responses include `{ ok: true, enqueued: true, runId }`. Use the returned `runId` to inspect the later result:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron run <job-id>
 openclaw cron runs --id <job-id> --run-id <run-id>
 ```
 
 Add `--wait` when a script should block until that exact queued run records a terminal status:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron run <job-id> --wait --wait-timeout 10m --poll-interval 2s
 ```
 
 With `--wait`, the CLI still calls `cron.run` first, then polls `cron.runs` for the returned `runId`. The command exits `0` only when the run finishes with status `ok`. It exits non-zero when the run finishes with `error` or `skipped`, when the Gateway response does not include a `runId`, or when `--wait-timeout` expires. `--poll-interval` must be greater than zero.
 
 <Note>
-  Use `--due` when you want the manual command to run only if the job is currently due. If `--due --wait` does not enqueue a run, the command returns the normal non-run response instead of polling.
+Use `--due` when you want the manual command to run only if the job is currently due. If `--due --wait` does not enqueue a run, the command returns the normal non-run response instead of polling.
 </Note>
 
 ## Models
@@ -122,15 +124,15 @@ With `--wait`, the CLI still calls `cron.run` first, then polls `cron.runs` for 
 `cron add|edit --model <ref>` selects an allowed model for the job.
 
 <Warning>
-  If the model is not allowed or cannot be resolved, cron fails the run with an explicit validation error instead of falling back to the job's agent or default model selection.
+If the model is not allowed or cannot be resolved, cron fails the run with an explicit validation error instead of falling back to the job's agent or default model selection.
 </Warning>
 
 Cron `--model` is a **job primary**, not a chat-session `/model` override. That means:
 
-* Configured model fallbacks still apply when the selected job model fails.
-* Per-job payload `fallbacks` replaces the configured fallback list when present.
-* An empty per-job fallback list (`fallbacks: []` in the job payload/API) makes the cron run strict.
-* When a job has `--model` but no fallback list is configured, OpenClaw passes an explicit empty fallback override so the agent primary is not appended as a hidden retry target.
+- Configured model fallbacks still apply when the selected job model fails.
+- Per-job payload `fallbacks` replaces the configured fallback list when present.
+- An empty per-job fallback list (`fallbacks: []` in the job payload/API) makes the cron run strict.
+- When a job has `--model` but no fallback list is configured, OpenClaw passes an explicit empty fallback override so the agent primary is not appended as a hidden retry target.
 
 `openclaw doctor` reports jobs that already have `payload.model` set, including provider namespace counts and mismatches against `agents.defaults.model`. Use that check when auth, provider, or billing behavior looks different between live chat and scheduled jobs.
 
@@ -173,50 +175,50 @@ Cron does not classify final-output prose or approval-looking refusal phrases as
 
 Retention and pruning are controlled in config:
 
-* `cron.sessionRetention` (default `24h`) prunes completed isolated run sessions.
-* `cron.runLog.maxBytes` and `cron.runLog.keepLines` prune `~/.openclaw/cron/runs/<jobId>.jsonl`.
+- `cron.sessionRetention` (default `24h`) prunes completed isolated run sessions.
+- `cron.runLog.maxBytes` and `cron.runLog.keepLines` prune `~/.openclaw/cron/runs/<jobId>.jsonl`.
 
 ## Migrating older jobs
 
 <Note>
-  If you have cron jobs from before the current delivery and store format, run `openclaw doctor --fix`. Doctor normalizes legacy cron fields (`jobId`, `schedule.cron`, top-level delivery fields including legacy `threadId`, payload `provider` delivery aliases) and migrates simple `notify: true` webhook fallback jobs to explicit webhook delivery when `cron.webhook` is configured.
+If you have cron jobs from before the current delivery and store format, run `openclaw doctor --fix`. Doctor normalizes legacy cron fields (`jobId`, `schedule.cron`, top-level delivery fields including legacy `threadId`, payload `provider` delivery aliases) and migrates simple `notify: true` webhook fallback jobs to explicit webhook delivery when `cron.webhook` is configured.
 </Note>
 
 ## Common edits
 
 Update delivery settings without changing the message:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron edit <job-id> --announce --channel telegram --to "123456789"
 ```
 
 Disable delivery for an isolated job:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron edit <job-id> --no-deliver
 ```
 
 Enable lightweight bootstrap context for an isolated job:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron edit <job-id> --light-context
 ```
 
 Announce to a specific channel:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron edit <job-id> --announce --channel slack --to "channel:C1234567890"
 ```
 
 Announce to a Telegram forum topic:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron edit <job-id> --announce --channel telegram --to "-1001234567890" --thread-id 42
 ```
 
 Create an isolated job with lightweight bootstrap context:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron add \
   --name "Lightweight morning brief" \
   --cron "0 7 * * *" \
@@ -232,7 +234,7 @@ openclaw cron add \
 
 Manual run and inspection:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron list
 openclaw cron list --agent ops
 openclaw cron get <job-id>
@@ -255,7 +257,7 @@ openclaw cron runs --id <job-id> --run-id <run-id>
 
 Agent and session retargeting:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron edit <job-id> --agent ops
 openclaw cron edit <job-id> --clear-agent
 openclaw cron edit <job-id> --session current
@@ -266,7 +268,7 @@ openclaw cron edit <job-id> --session "session:daily-brief"
 
 Delivery tweaks:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw cron edit <job-id> --announce --channel slack --to "channel:C1234567890"
 openclaw cron edit <job-id> --best-effort-deliver
 openclaw cron edit <job-id> --no-best-effort-deliver
@@ -275,5 +277,5 @@ openclaw cron edit <job-id> --no-deliver
 
 ## Related
 
-* [CLI reference](/cli)
-* [Scheduled tasks](/automation/cron-jobs)
+- [CLI reference](/cli)
+- [Scheduled tasks](/automation/cron-jobs)

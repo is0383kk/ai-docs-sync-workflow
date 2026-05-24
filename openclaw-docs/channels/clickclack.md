@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# ClickClack
+---
+summary: "ClickClack bot-token channel setup and target syntax"
+read_when:
+  - Connecting OpenClaw to a ClickClack workspace
+  - Testing ClickClack bot identities
+title: "ClickClack"
+---
 
 ClickClack connects OpenClaw to a self-hosted ClickClack workspace through first-class ClickClack bot tokens.
 
@@ -12,7 +14,7 @@ Use this when you want an OpenClaw agent to appear as a ClickClack bot user. Cli
 
 Create a bot token in ClickClack:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clickclack admin bot create \
   --workspace <workspace_id_or_slug> \
   --name "OpenClaw" \
@@ -25,7 +27,7 @@ For a user-owned bot, add `--owner <user_id>`.
 
 Configure OpenClaw:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -52,7 +54,7 @@ Configure OpenClaw:
 
 Then run:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export CLICKCLACK_BOT_TOKEN="ccb_..."
 openclaw gateway
 ```
@@ -61,7 +63,7 @@ openclaw gateway
 
 Each account opens its own ClickClack realtime connection and uses its own bot token.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -106,13 +108,13 @@ agent route.
 
 ## Targets
 
-* `channel:<name-or-id>` sends to a workspace channel. Bare targets default to `channel:`.
-* `dm:<user_id>` creates or reuses a direct conversation with that user.
-* `thread:<message_id>` replies in an existing thread.
+- `channel:<name-or-id>` sends to a workspace channel. Bare targets default to `channel:`.
+- `dm:<user_id>` creates or reuses a direct conversation with that user.
+- `thread:<message_id>` replies in an existing thread.
 
 Examples:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw message send --channel clickclack --target channel:general --message "hello"
 openclaw message send --channel clickclack --target dm:usr_123 --message "hello"
 openclaw message send --channel clickclack --target thread:msg_123 --message "following up"
@@ -122,15 +124,15 @@ openclaw message send --channel clickclack --target thread:msg_123 --message "fo
 
 ClickClack token scopes are enforced by the ClickClack API.
 
-* `bot:read`: read workspace/channel/message/thread/DM/realtime/profile data.
-* `bot:write`: `bot:read` plus channel messages, thread replies, DMs, and uploads.
-* `bot:admin`: `bot:write` plus channel creation.
+- `bot:read`: read workspace/channel/message/thread/DM/realtime/profile data.
+- `bot:write`: `bot:read` plus channel messages, thread replies, DMs, and uploads.
+- `bot:admin`: `bot:write` plus channel creation.
 
 OpenClaw only needs `bot:write` for normal agent chat.
 
 ## Troubleshooting
 
-* `ClickClack is not configured`: set `channels.clickclack.token` or `CLICKCLACK_BOT_TOKEN`.
-* `workspace not found`: set `workspace` to the workspace id or slug returned by ClickClack.
-* No inbound replies: confirm the token has realtime read access and the bot is not replying to its own messages.
-* Channel sends fail: verify the bot is a member of the workspace and has `bot:write`.
+- `ClickClack is not configured`: set `channels.clickclack.token` or `CLICKCLACK_BOT_TOKEN`.
+- `workspace not found`: set `workspace` to the workspace id or slug returned by ClickClack.
+- No inbound replies: confirm the token has realtime read access and the bot is not replying to its own messages.
+- Channel sends fail: verify the bot is a member of the workspace and has `bot:write`.

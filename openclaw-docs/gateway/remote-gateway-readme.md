@@ -1,18 +1,18 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Remote gateway setup
+---
+summary: "SSH tunnel setup for OpenClaw.app connecting to a remote gateway"
+read_when: "Connecting the macOS app to a remote gateway over SSH"
+title: "Remote gateway setup"
+---
 
 > This content has been merged into [Remote Access](/gateway/remote#macos-persistent-ssh-tunnel-via-launchagent). See that page for the current guide.
 
-# Running OpenClaw\.app with a Remote Gateway
+# Running OpenClaw.app with a Remote Gateway
 
-OpenClaw\.app uses SSH tunneling to connect to a remote gateway. This guide shows you how to set it up.
+OpenClaw.app uses SSH tunneling to connect to a remote gateway. This guide shows you how to set it up.
 
 ## Overview
 
-```mermaid theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```mermaid
 flowchart TB
     subgraph Client["Client Machine"]
         direction TB
@@ -39,7 +39,7 @@ flowchart TB
 
 Edit `~/.ssh/config` and add:
 
-```ssh theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```ssh
 Host remote-gateway
     HostName <REMOTE_IP>          # e.g., 172.27.187.184
     User <REMOTE_USER>            # e.g., jefferson
@@ -53,13 +53,13 @@ Replace `<REMOTE_IP>` and `<REMOTE_USER>` with your values.
 
 Copy your public key to the remote machine (enter password once):
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 ssh-copy-id -i ~/.ssh/id_rsa <REMOTE_USER>@<REMOTE_IP>
 ```
 
 ### Step 3: Configure Remote Gateway Auth
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw config set gateway.remote.token "<your-token>"
 ```
 
@@ -69,20 +69,20 @@ remote-client setup is `gateway.remote.token` / `gateway.remote.password`.
 
 ### Step 4: Start SSH Tunnel
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 ssh -N remote-gateway &
 ```
 
-### Step 5: Restart OpenClaw\.app
+### Step 5: Restart OpenClaw.app
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Quit OpenClaw.app (⌘Q), then reopen:
 open /path/to/OpenClaw.app
 ```
 
 The app will now connect to the remote gateway through the SSH tunnel.
 
-***
+---
 
 ## Auto-Start Tunnel on Login
 
@@ -92,7 +92,7 @@ To have the SSH tunnel start automatically when you log in, create a Launch Agen
 
 Save this as `~/Library/LaunchAgents/ai.openclaw.ssh-tunnel.plist`:
 
-```xml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -115,42 +115,42 @@ Save this as `~/Library/LaunchAgents/ai.openclaw.ssh-tunnel.plist`:
 
 ### Load the Launch Agent
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 launchctl bootstrap gui/$UID ~/Library/LaunchAgents/ai.openclaw.ssh-tunnel.plist
 ```
 
 The tunnel will now:
 
-* Start automatically when you log in
-* Restart if it crashes
-* Keep running in the background
+- Start automatically when you log in
+- Restart if it crashes
+- Keep running in the background
 
 Legacy note: remove any leftover `com.openclaw.ssh-tunnel` LaunchAgent if present.
 
-***
+---
 
 ## Troubleshooting
 
 **Check if tunnel is running:**
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 ps aux | grep "ssh -N remote-gateway" | grep -v grep
 lsof -i :18789
 ```
 
 **Restart the tunnel:**
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 launchctl kickstart -k gui/$UID/ai.openclaw.ssh-tunnel
 ```
 
 **Stop the tunnel:**
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 launchctl bootout gui/$UID/ai.openclaw.ssh-tunnel
 ```
 
-***
+---
 
 ## How it works
 
@@ -161,9 +161,9 @@ launchctl bootout gui/$UID/ai.openclaw.ssh-tunnel
 | `KeepAlive`                          | Automatically restarts tunnel if it crashes                  |
 | `RunAtLoad`                          | Starts tunnel when the agent loads                           |
 
-OpenClaw\.app connects to `ws://127.0.0.1:18789` on your client machine. The SSH tunnel forwards that connection to port 18789 on the remote machine where the Gateway is running.
+OpenClaw.app connects to `ws://127.0.0.1:18789` on your client machine. The SSH tunnel forwards that connection to port 18789 on the remote machine where the Gateway is running.
 
 ## Related
 
-* [Remote access](/gateway/remote)
-* [Tailscale](/gateway/tailscale)
+- [Remote access](/gateway/remote)
+- [Tailscale](/gateway/tailscale)

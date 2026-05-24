@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Plugin entry points
+---
+summary: "Reference for defineToolPlugin, definePluginEntry, defineChannelPluginEntry, and defineSetupPluginEntry"
+title: "Plugin entry points"
+sidebarTitle: "Entry Points"
+read_when:
+  - You need the exact type signature of defineToolPlugin, definePluginEntry, or defineChannelPluginEntry
+  - You want to understand registration mode (full vs setup vs CLI metadata)
+  - You are looking up entry point options
+---
 
 Every plugin exports a default entry object. The SDK provides helpers for
 creating them.
@@ -10,7 +14,7 @@ creating them.
 For installed plugins, `package.json` should point runtime loading at built
 JavaScript when available:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "openclaw": {
     "extensions": ["./src/index.ts"],
@@ -51,7 +55,7 @@ schemas, wraps plain return values in the OpenClaw tool-result format, and
 exposes static metadata that `openclaw plugins build` writes into the plugin
 manifest.
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import { Type } from "typebox";
 import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
 
@@ -76,13 +80,13 @@ export default defineToolPlugin({
 });
 ```
 
-* `configSchema` is optional. When omitted, OpenClaw uses a strict empty object
+- `configSchema` is optional. When omitted, OpenClaw uses a strict empty object
   schema and the generated manifest still includes `configSchema`.
-* `execute` returns a plain string or JSON-serializable value. The helper wraps
+- `execute` returns a plain string or JSON-serializable value. The helper wraps
   it as a text tool result with `details`.
-* Tool names are static. `openclaw plugins build` derives `contracts.tools`
+- Tool names are static. `openclaw plugins build` derives `contracts.tools`
   from the declared tools, so authors do not duplicate names by hand.
-* Runtime loading stays strict. Installed plugins still need
+- Runtime loading stays strict. Installed plugins still need
   `openclaw.plugin.json` and `package.json` `openclaw.extensions`; OpenClaw does
   not execute plugin code to infer missing manifest data.
 
@@ -93,7 +97,7 @@ export default defineToolPlugin({
 For provider plugins, advanced tool plugins, hook plugins, and anything that is
 **not** a messaging channel.
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 
 export default definePluginEntry({
@@ -120,10 +124,10 @@ export default definePluginEntry({
 | `configSchema` | `OpenClawPluginConfigSchema \| () => OpenClawPluginConfigSchema` | No       | Empty object schema |
 | `register`     | `(api: OpenClawPluginApi) => void`                               | Yes      | -                   |
 
-* `id` must match your `openclaw.plugin.json` manifest.
-* `kind` is for exclusive slots: `"memory"` or `"context-engine"`.
-* `configSchema` can be a function for lazy evaluation.
-* OpenClaw resolves and memoizes that schema on first access, so expensive schema
+- `id` must match your `openclaw.plugin.json` manifest.
+- `kind` is for exclusive slots: `"memory"` or `"context-engine"`.
+- `configSchema` can be a function for lazy evaluation.
+- OpenClaw resolves and memoizes that schema on first access, so expensive schema
   builders only run once.
 
 ## `defineChannelPluginEntry`
@@ -134,7 +138,7 @@ Wraps `definePluginEntry` with channel-specific wiring. Automatically calls
 `api.registerChannel({ plugin })`, exposes an optional root-help CLI metadata
 seam, and gates `registerFull` on registration mode.
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import { defineChannelPluginEntry } from "openclaw/plugin-sdk/channel-core";
 
 export default defineChannelPluginEntry({
@@ -163,24 +167,24 @@ export default defineChannelPluginEntry({
 | `registerCliMetadata` | `(api: OpenClawPluginApi) => void`                               | No       | -                   |
 | `registerFull`        | `(api: OpenClawPluginApi) => void`                               | No       | -                   |
 
-* `setRuntime` is called during registration so you can store the runtime reference
+- `setRuntime` is called during registration so you can store the runtime reference
   (typically via `createPluginRuntimeStore`). It is skipped during CLI metadata
   capture.
-* `registerCliMetadata` runs during `api.registrationMode === "cli-metadata"`,
+- `registerCliMetadata` runs during `api.registrationMode === "cli-metadata"`,
   `api.registrationMode === "discovery"`, and
   `api.registrationMode === "full"`.
   Use it as the canonical place for channel-owned CLI descriptors so root help
   stays non-activating, discovery snapshots include static command metadata, and
   normal CLI command registration remains compatible with full plugin loads.
-* Discovery registration is non-activating, not import-free. OpenClaw may
+- Discovery registration is non-activating, not import-free. OpenClaw may
   evaluate the trusted plugin entry and channel plugin module to build the
   snapshot, so keep top-level imports side-effect-free and put sockets,
   clients, workers, and services behind `"full"`-only paths.
-* `registerFull` only runs when `api.registrationMode === "full"`. It is skipped
+- `registerFull` only runs when `api.registrationMode === "full"`. It is skipped
   during setup-only loading.
-* Like `definePluginEntry`, `configSchema` can be a lazy factory and OpenClaw
+- Like `definePluginEntry`, `configSchema` can be a lazy factory and OpenClaw
   memoizes the resolved schema on first access.
-* For plugin-owned root CLI commands, prefer `api.registerCli(..., { descriptors: [...] })`
+- For plugin-owned root CLI commands, prefer `api.registerCli(..., { descriptors: [...] })`
   when you want the command to stay lazy-loaded without disappearing from the
   root CLI parse tree. For paired-node feature commands, prefer
   `api.registerNodeCliFeature(...)` so the command lands under `openclaw nodes`.
@@ -189,7 +193,7 @@ export default defineChannelPluginEntry({
   parent command before calling the plugin. For channel plugins, prefer
   registering those descriptors from `registerCliMetadata(...)` and keep
   `registerFull(...)` focused on runtime-only work.
-* If `registerFull(...)` also registers gateway RPC methods, keep them on a
+- If `registerFull(...)` also registers gateway RPC methods, keep them on a
   plugin-specific prefix. Reserved core admin namespaces (`config.*`,
   `exec.approvals.*`, `wizard.*`, `update.*`) are always coerced to
   `operator.admin`.
@@ -201,7 +205,7 @@ export default defineChannelPluginEntry({
 For the lightweight `setup-entry.ts` file. Returns just `{ plugin }` with no
 runtime or CLI wiring.
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import { defineSetupPluginEntry } from "openclaw/plugin-sdk/channel-core";
 
 export default defineSetupPluginEntry(myChannelPlugin);
@@ -214,11 +218,11 @@ unconfigured, or when deferred loading is enabled. See
 In practice, pair `defineSetupPluginEntry(...)` with the narrow setup helper
 families:
 
-* `openclaw/plugin-sdk/setup-runtime` for runtime-safe setup helpers such as
+- `openclaw/plugin-sdk/setup-runtime` for runtime-safe setup helpers such as
   `createSetupTranslator`, import-safe setup patch adapters, lookup-note output,
   `promptResolvedAllowFrom`, `splitSetupEntries`, and delegated setup proxies
-* `openclaw/plugin-sdk/channel-setup` for optional-install setup surfaces
-* `openclaw/plugin-sdk/setup-tools` for setup/install CLI/archive/docs helpers
+- `openclaw/plugin-sdk/channel-setup` for optional-install setup surfaces
+- `openclaw/plugin-sdk/setup-tools` for setup/install CLI/archive/docs helpers
 
 Keep heavy SDKs, CLI registration, and long-lived runtime services in the full
 entry.
@@ -229,7 +233,7 @@ Bundled workspace channels that split setup and runtime surfaces can use
 setup entry keep setup-safe plugin/secrets exports while still exposing a
 runtime setter:
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import { defineBundledChannelSetupEntry } from "openclaw/plugin-sdk/channel-entry-contract";
 
 export default defineBundledChannelSetupEntry({
@@ -263,7 +267,7 @@ setter before the full channel entry loads.
 `defineChannelPluginEntry` handles this split automatically. If you use
 `definePluginEntry` directly for a channel, check mode yourself:
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 register(api) {
   if (
     api.registrationMode === "cli-metadata" ||
@@ -297,15 +301,15 @@ provider/client SDK bootstraps still belong in `"full"`.
 
 For CLI registrars specifically:
 
-* use `descriptors` when the registrar owns one or more root commands and you
+- use `descriptors` when the registrar owns one or more root commands and you
   want OpenClaw to lazy-load the real CLI module on first invocation
-* make sure those descriptors cover every top-level command root exposed by the
+- make sure those descriptors cover every top-level command root exposed by the
   registrar
-* keep descriptor command names to letters, numbers, hyphen, and underscore,
+- keep descriptor command names to letters, numbers, hyphen, and underscore,
   starting with a letter or number; OpenClaw rejects descriptor names outside
   that shape and strips terminal control sequences from descriptions before
   rendering help
-* use `commands` alone only for eager compatibility paths
+- use `commands` alone only for eager compatibility paths
 
 ## Plugin shapes
 
@@ -322,8 +326,8 @@ Use `openclaw plugins inspect <id>` to see a plugin's shape.
 
 ## Related
 
-* [SDK Overview](/plugins/sdk-overview) - registration API and subpath reference
-* [Runtime Helpers](/plugins/sdk-runtime) - `api.runtime` and `createPluginRuntimeStore`
-* [Setup and Config](/plugins/sdk-setup) - manifest, setup entry, deferred loading
-* [Channel Plugins](/plugins/sdk-channel-plugins) - building the `ChannelPlugin` object
-* [Provider Plugins](/plugins/sdk-provider-plugins) - provider registration and hooks
+- [SDK Overview](/plugins/sdk-overview) - registration API and subpath reference
+- [Runtime Helpers](/plugins/sdk-runtime) - `api.runtime` and `createPluginRuntimeStore`
+- [Setup and Config](/plugins/sdk-setup) - manifest, setup entry, deferred loading
+- [Channel Plugins](/plugins/sdk-channel-plugins) - building the `ChannelPlugin` object
+- [Provider Plugins](/plugins/sdk-provider-plugins) - provider registration and hooks

@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Skill format
+---
+summary: "Skill folder format, required files, allowed file types, limits."
+read_when:
+  - Publishing skills
+  - Debugging publish/sync failures
+---
 
 # Skill format
 
@@ -12,27 +13,27 @@ A skill is a folder.
 
 Required:
 
-* `SKILL.md` (or `skill.md`)
+- `SKILL.md` (or `skill.md`)
 
 Optional:
 
-* any supporting *text-based* files (see “Allowed files”)
-* `.clawhubignore` (ignore patterns for publish/sync, legacy `.clawdhubignore`)
-* `.gitignore` (also honored)
+- any supporting _text-based_ files (see “Allowed files”)
+- `.clawhubignore` (ignore patterns for publish/sync, legacy `.clawdhubignore`)
+- `.gitignore` (also honored)
 
 Local install metadata (written by the CLI):
 
-* `<skill>/.clawhub/origin.json` (legacy `.clawdhub`)
+- `<skill>/.clawhub/origin.json` (legacy `.clawdhub`)
 
 Workdir install state (written by the CLI):
 
-* `<workdir>/.clawhub/lock.json` (legacy `.clawdhub`)
+- `<workdir>/.clawhub/lock.json` (legacy `.clawdhub`)
 
 ## `SKILL.md`
 
-* Markdown with optional YAML frontmatter.
-* The server extracts metadata from frontmatter during publish.
-* `description` is used as the skill summary in the UI/search.
+- Markdown with optional YAML frontmatter.
+- The server extracts metadata from frontmatter during publish.
+- `description` is used as the skill summary in the UI/search.
 
 ## Frontmatter metadata
 
@@ -40,7 +41,7 @@ Skill metadata is declared in the YAML frontmatter at the top of your `SKILL.md`
 
 ### Basic frontmatter
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 ---
 name: my-skill
 description: Short summary of what this skill does.
@@ -52,7 +53,7 @@ version: 1.0.0
 
 Declare your skill's runtime requirements under `metadata.openclaw` (aliases: `metadata.clawdbot`, `metadata.clawdis`).
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 ---
 name: my-skill
 description: Manage tasks via the Todoist API.
@@ -92,7 +93,7 @@ Use `requires.env` for environment variables that must be present before the ski
 
 If your skill needs dependencies installed, declare them in the `install` array:
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 metadata:
   openclaw:
     install:
@@ -110,7 +111,7 @@ Supported install kinds: `brew`, `node`, `go`, `uv`.
 
 Declare optional environment variables under `metadata.openclaw.envVars` and set `required: false`. Do not add optional entries to `requires.env`, because `requires.env` means the skill cannot run without them.
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 metadata:
   openclaw:
     primaryEnv: TODOIST_API_KEY
@@ -129,7 +130,7 @@ ClawHub's security analysis checks that what your skill declares matches what it
 
 ### Example: complete frontmatter
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 ---
 name: todoist-cli
 description: Manage Todoist tasks, projects, and labels from the command line.
@@ -158,34 +159,34 @@ metadata:
 
 Only “text-based” files are accepted by publish.
 
-* Extension allowlist is in `packages/schema/src/textFiles.ts` (`TEXT_FILE_EXTENSIONS`).
-* Script files are still scanned after upload; PowerShell `.ps1`, `.psm1`, and `.psd1` files are accepted as text.
-* Content types starting with `text/` are treated as text; plus a small allowlist (JSON/YAML/TOML/JS/TS/Markdown/SVG).
+- Extension allowlist is in `packages/schema/src/textFiles.ts` (`TEXT_FILE_EXTENSIONS`).
+- Script files are still scanned after upload; PowerShell `.ps1`, `.psm1`, and `.psd1` files are accepted as text.
+- Content types starting with `text/` are treated as text; plus a small allowlist (JSON/YAML/TOML/JS/TS/Markdown/SVG).
 
 Limits (server-side):
 
-* Total bundle size: 50MB.
-* Embedding text includes `SKILL.md` + up to \~40 non-`.md` files (best-effort cap).
+- Total bundle size: 50MB.
+- Embedding text includes `SKILL.md` + up to ~40 non-`.md` files (best-effort cap).
 
 ## Slugs
 
-* Derived from folder name by default.
-* Must be lowercase and URL-safe: `^[a-z0-9][a-z0-9-]*$`.
+- Derived from folder name by default.
+- Must be lowercase and URL-safe: `^[a-z0-9][a-z0-9-]*$`.
 
 ## Versioning + tags
 
-* Each publish creates a new version (semver).
-* Tags are string pointers to a version; `latest` is commonly used.
+- Each publish creates a new version (semver).
+- Tags are string pointers to a version; `latest` is commonly used.
 
 ## License
 
-* All skills published on ClawHub are licensed under `MIT-0`.
-* Anyone may use, modify, and redistribute published skills, including commercially.
-* Attribution is not required.
-* Do not add conflicting license terms in `SKILL.md`; ClawHub does not support per-skill license overrides.
+- All skills published on ClawHub are licensed under `MIT-0`.
+- Anyone may use, modify, and redistribute published skills, including commercially.
+- Attribution is not required.
+- Do not add conflicting license terms in `SKILL.md`; ClawHub does not support per-skill license overrides.
 
 ## Paid skills
 
-* ClawHub does not support paid skills, per-skill pricing, paywalls, or revenue sharing.
-* Do not add pricing metadata to `SKILL.md`; it is not part of the skill format and will not make a published skill paid.
-* If your skill integrates with a paid third-party service, document the external cost and required account clearly in the skill instructions and env declarations (`requires.env` for required variables, or `envVars` with `required: false` for optional variables).
+- ClawHub does not support paid skills, per-skill pricing, paywalls, or revenue sharing.
+- Do not add pricing metadata to `SKILL.md`; it is not part of the skill format and will not make a published skill paid.
+- If your skill integrates with a paid third-party service, document the external cost and required account clearly in the skill instructions and env declarations (`requires.env` for required variables, or `envVars` with `required: false` for optional variables).

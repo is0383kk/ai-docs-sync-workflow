@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Render
+---
+summary: "Deploy OpenClaw on Render with Infrastructure-as-Code"
+read_when:
+  - Deploying OpenClaw to Render
+  - You want a declarative cloud deploy with Render Blueprints
+title: "Render"
+---
 
 # Render
 
@@ -10,8 +12,8 @@ Deploy OpenClaw on Render using Infrastructure as Code. The included `render.yam
 
 ## Prerequisites
 
-* A [Render account](https://render.com) (free tier available)
-* An API key from your preferred [model provider](/providers)
+- A [Render account](https://render.com) (free tier available)
+- An API key from your preferred [model provider](/providers)
 
 ## Deploy with a Render Blueprint
 
@@ -29,7 +31,7 @@ Once deployed, your service URL follows the pattern `https://<service-name>.onre
 Render Blueprints are YAML files that define your infrastructure. The `render.yaml` in this
 repository configures everything needed to run OpenClaw:
 
-```yaml theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```yaml
 services:
   - type: web
     name: openclaw
@@ -89,9 +91,9 @@ instead.
 
 View real-time logs in **Dashboard → your service → Logs**. Filter by:
 
-* Build logs (Docker image creation)
-* Deploy logs (service startup)
-* Runtime logs (application output)
+- Build logs (Docker image creation)
+- Deploy logs (service startup)
+- Runtime logs (application output)
 
 ### Shell access
 
@@ -116,8 +118,8 @@ If you use the original OpenClaw repository, Render will not auto-deploy your Op
 
 Render supports horizontal and vertical scaling:
 
-* **Vertical**: Change the plan to get more CPU/RAM
-* **Horizontal**: Increase instance count (Standard plan and above)
+- **Vertical**: Change the plan to get more CPU/RAM
+- **Horizontal**: Increase instance count (Standard plan and above)
 
 For OpenClaw, vertical scaling is usually sufficient. Horizontal scaling requires sticky sessions or external state management.
 
@@ -126,7 +128,7 @@ For OpenClaw, vertical scaling is usually sufficient. Horizontal scaling require
 Export your state, config, auth profiles, and workspace at any time using the
 shell access in the Render Dashboard:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw backup create
 ```
 
@@ -139,8 +141,8 @@ workspace. See [Backup](/cli/backup) for details.
 
 Check the deploy logs in the Render Dashboard. Common issues:
 
-* Missing `OPENCLAW_GATEWAY_TOKEN` — verify it is set in **Dashboard → Environment**
-* Port mismatch — ensure `OPENCLAW_GATEWAY_PORT=8080` is set so the gateway binds to the port Render expects
+- Missing `OPENCLAW_GATEWAY_TOKEN` — verify it is set in **Dashboard → Environment**
+- Port mismatch — ensure `OPENCLAW_GATEWAY_PORT=8080` is set so the gateway binds to the port Render expects
 
 ### Slow cold starts (free tier)
 
@@ -155,11 +157,11 @@ regularly export a full backup via `openclaw backup create` in the Render shell.
 
 Render expects a 200 response from `/health` within 30 seconds. If builds succeed but deploys fail, the service may be taking too long to start. Check:
 
-* Build logs for errors
-* Whether the container runs locally with `docker build && docker run`
+- Build logs for errors
+- Whether the container runs locally with `docker build && docker run`
 
 ## Next steps
 
-* Set up messaging channels: [Channels](/channels)
-* Configure the Gateway: [Gateway configuration](/gateway/configuration)
-* Keep OpenClaw up to date: [Updating](/install/updating)
+- Set up messaging channels: [Channels](/channels)
+- Configure the Gateway: [Gateway configuration](/gateway/configuration)
+- Keep OpenClaw up to date: [Updating](/install/updating)

@@ -1,22 +1,24 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Diagnostics flags
+---
+summary: "Diagnostics flags for targeted debug logs"
+read_when:
+  - You need targeted debug logs without raising global logging levels
+  - You need to capture subsystem-specific logs for support
+title: "Diagnostics flags"
+---
 
 Diagnostics flags let you enable targeted debug logs without turning on verbose logging everywhere. Flags are opt-in and have no effect unless a subsystem checks them.
 
 ## How it works
 
-* Flags are strings (case-insensitive).
-* You can enable flags in config or via an env override.
-* Wildcards are supported:
-  * `telegram.*` matches `telegram.http`
-  * `*` enables all flags
+- Flags are strings (case-insensitive).
+- You can enable flags in config or via an env override.
+- Wildcards are supported:
+  - `telegram.*` matches `telegram.http`
+  - `*` enables all flags
 
 ## Enable via config
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "diagnostics": {
     "flags": ["telegram.http"]
@@ -26,7 +28,7 @@ Diagnostics flags let you enable targeted debug logs without turning on verbose 
 
 Multiple flags:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "diagnostics": {
     "flags": ["telegram.http", "brave.http", "gateway.*"]
@@ -38,13 +40,13 @@ Restart the gateway after changing flags.
 
 ## Env override (one-off)
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 OPENCLAW_DIAGNOSTICS=telegram.http,telegram.payload
 ```
 
 Disable all flags:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 OPENCLAW_DIAGNOSTICS=0
 ```
 
@@ -53,7 +55,7 @@ OPENCLAW_DIAGNOSTICS=0
 The `timeline` flag writes structured startup and runtime timing events for
 external QA harnesses:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 OPENCLAW_DIAGNOSTICS=timeline \
 OPENCLAW_DIAGNOSTICS_TIMELINE_PATH=/tmp/openclaw-timeline.jsonl \
 openclaw gateway run
@@ -61,7 +63,7 @@ openclaw gateway run
 
 You can also enable it in config:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "diagnostics": {
     "flags": ["timeline"]
@@ -99,25 +101,25 @@ If you set `logging.file`, use that path instead. Logs are JSONL (one JSON objec
 
 Pick the latest log file:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 ls -t /tmp/openclaw/openclaw-*.log | head -n 1
 ```
 
 Filter for Telegram HTTP diagnostics:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 rg "telegram http error" /tmp/openclaw/openclaw-*.log
 ```
 
 Filter for Brave Search HTTP diagnostics:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 rg "brave http" /tmp/openclaw/openclaw-*.log
 ```
 
 Or tail while reproducing:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 tail -f /tmp/openclaw/openclaw-$(date +%F).log | rg "telegram http error"
 ```
 
@@ -125,12 +127,12 @@ For remote gateways, you can also use `openclaw logs --follow` (see [/cli/logs](
 
 ## Notes
 
-* If `logging.level` is set higher than `warn`, these logs may be suppressed. Default `info` is fine.
-* `brave.http` logs Brave Search request URLs/query params, response status/timing, and cache hit/miss/write events. It does not log API keys or response bodies, but search queries can be sensitive.
-* Flags are safe to leave enabled; they only affect log volume for the specific subsystem.
-* Use [/logging](/logging) to change log destinations, levels, and redaction.
+- If `logging.level` is set higher than `warn`, these logs may be suppressed. Default `info` is fine.
+- `brave.http` logs Brave Search request URLs/query params, response status/timing, and cache hit/miss/write events. It does not log API keys or response bodies, but search queries can be sensitive.
+- Flags are safe to leave enabled; they only affect log volume for the specific subsystem.
+- Use [/logging](/logging) to change log destinations, levels, and redaction.
 
 ## Related
 
-* [Gateway diagnostics](/gateway/diagnostics)
-* [Gateway troubleshooting](/gateway/troubleshooting)
+- [Gateway diagnostics](/gateway/diagnostics)
+- [Gateway troubleshooting](/gateway/troubleshooting)

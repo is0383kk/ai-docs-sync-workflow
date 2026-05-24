@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Channel routing
+---
+summary: "Routing rules per channel (WhatsApp, Telegram, Discord, Slack) and shared context"
+read_when:
+  - Changing channel routing or inbox behavior
+title: "Channel routing"
+---
 
 # Channels & routing
 
@@ -12,13 +13,13 @@ host configuration.
 
 ## Key terms
 
-* **Channel**: `telegram`, `whatsapp`, `discord`, `irc`, `googlechat`, `slack`, `signal`, `imessage`, `line`, plus plugin channels. `webchat` is the internal WebChat UI channel and is not a configurable outbound channel.
-* **AccountId**: per-channel account instance (when supported).
-* Optional channel default account: `channels.<channel>.defaultAccount` chooses
+- **Channel**: `telegram`, `whatsapp`, `discord`, `irc`, `googlechat`, `slack`, `signal`, `imessage`, `line`, plus plugin channels. `webchat` is the internal WebChat UI channel and is not a configurable outbound channel.
+- **AccountId**: per-channel account instance (when supported).
+- Optional channel default account: `channels.<channel>.defaultAccount` chooses
   which account is used when an outbound path does not specify `accountId`.
-  * In multi-account setups, set an explicit default (`defaultAccount` or `accounts.default`) when two or more accounts are configured. Without it, fallback routing may pick the first normalized account ID.
-* **AgentId**: an isolated workspace + session store ("brain").
-* **SessionKey**: the bucket key used to store context and control concurrency.
+  - In multi-account setups, set an explicit default (`defaultAccount` or `accounts.default`) when two or more accounts are configured. Without it, fallback routing may pick the first normalized account ID.
+- **AgentId**: an isolated workspace + session store ("brain").
+- **SessionKey**: the bucket key used to store context and control concurrency.
 
 ## Outbound target prefixes
 
@@ -30,7 +31,7 @@ Target-kind and service prefixes such as `channel:<id>`, `user:<id>`, `room:<id>
 
 Direct messages collapse to the agent's **main** session by default:
 
-* `agent:<agentId>:<mainKey>` (default: `agent:main:main`)
+- `agent:<agentId>:<mainKey>` (default: `agent:main:main`)
 
 Even when direct-message conversation history is shared with main, sandbox and
 tool policy use a derived per-account direct-chat runtime key for external DMs
@@ -38,18 +39,18 @@ so channel-originated messages are not treated like local main-session runs.
 
 Groups and channels remain isolated per channel:
 
-* Groups: `agent:<agentId>:<channel>:group:<id>`
-* Channels/rooms: `agent:<agentId>:<channel>:channel:<id>`
+- Groups: `agent:<agentId>:<channel>:group:<id>`
+- Channels/rooms: `agent:<agentId>:<channel>:channel:<id>`
 
 Threads:
 
-* Slack/Discord threads append `:thread:<threadId>` to the base key.
-* Telegram forum topics embed `:topic:<topicId>` in the group key.
+- Slack/Discord threads append `:thread:<threadId>` to the base key.
+- Telegram forum topics embed `:topic:<topicId>` in the group key.
 
 Examples:
 
-* `agent:main:telegram:group:-1001234567890:topic:42`
-* `agent:main:discord:channel:123456:thread:987654`
+- `agent:main:telegram:group:-1001234567890:topic:42`
+- `agent:main:discord:channel:123456:thread:987654`
 
 ## Main DM route pinning
 
@@ -57,9 +58,9 @@ When `session.dmScope` is `main`, direct messages may share one main session.
 To prevent the session's `lastRoute` from being overwritten by non-owner DMs,
 OpenClaw infers a pinned owner from `allowFrom` when all of these are true:
 
-* `allowFrom` has exactly one non-wildcard entry.
-* The entry can be normalized to a concrete sender ID for that channel.
-* The inbound DM sender does not match that pinned owner.
+- `allowFrom` has exactly one non-wildcard entry.
+- The entry can be normalized to a concrete sender ID for that channel.
+- The inbound DM sender does not match that pinned owner.
 
 In that mismatch case, OpenClaw still records inbound session metadata, but it
 skips updating the main session `lastRoute`.
@@ -94,7 +95,7 @@ Broadcast groups let you run **multiple agents** for the same peer **when OpenCl
 
 Config:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   broadcast: {
     strategy: "parallel",
@@ -108,12 +109,12 @@ See: [Broadcast Groups](/channels/broadcast-groups).
 
 ## Config overview
 
-* `agents.list`: named agent definitions (workspace, model, etc.).
-* `bindings`: map inbound channels/accounts/peers to agents.
+- `agents.list`: named agent definitions (workspace, model, etc.).
+- `bindings`: map inbound channels/accounts/peers to agents.
 
 Example:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     list: [{ id: "support", name: "Support", workspace: "~/.openclaw/workspace-support" }],
@@ -129,8 +130,8 @@ Example:
 
 Session stores live under the state directory (default `~/.openclaw`):
 
-* `~/.openclaw/agents/<agentId>/sessions/sessions.json`
-* JSONL transcripts live alongside the store
+- `~/.openclaw/agents/<agentId>/sessions/sessions.json`
+- JSONL transcripts live alongside the store
 
 You can override the store path via `session.store` and `{agentId}` templating.
 
@@ -149,13 +150,13 @@ agent in one place.
 
 Inbound replies include:
 
-* `ReplyToId`, `ReplyToBody`, and `ReplyToSender` when available.
-* Quoted context is appended to `Body` as a `[Replying to ...]` block.
+- `ReplyToId`, `ReplyToBody`, and `ReplyToSender` when available.
+- Quoted context is appended to `Body` as a `[Replying to ...]` block.
 
 This is consistent across channels.
 
 ## Related
 
-* [Groups](/channels/groups)
-* [Broadcast groups](/channels/broadcast-groups)
-* [Pairing](/channels/pairing)
+- [Groups](/channels/groups)
+- [Broadcast groups](/channels/broadcast-groups)
+- [Pairing](/channels/pairing)

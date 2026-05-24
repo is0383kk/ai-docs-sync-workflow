@@ -1,27 +1,29 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Auth credential semantics
+---
+summary: "Canonical credential eligibility and resolution semantics for auth profiles"
+title: "Auth credential semantics"
+read_when:
+  - Working on auth profile resolution or credential routing
+  - Debugging model auth failures or profile order
+---
 
 This document defines the canonical credential eligibility and resolution semantics used across:
 
-* `resolveAuthProfileOrder`
-* `resolveApiKeyForProfile`
-* `models status --probe`
-* `doctor-auth`
+- `resolveAuthProfileOrder`
+- `resolveApiKeyForProfile`
+- `models status --probe`
+- `doctor-auth`
 
 The goal is to keep selection-time and runtime behavior aligned.
 
 ## Stable probe reason codes
 
-* `ok`
-* `excluded_by_auth_order`
-* `missing_credential`
-* `invalid_expires`
-* `expired`
-* `unresolved_ref`
-* `no_model`
+- `ok`
+- `excluded_by_auth_order`
+- `missing_credential`
+- `invalid_expires`
+- `expired`
+- `unresolved_ref`
+- `no_model`
 
 ## Token credentials
 
@@ -50,11 +52,11 @@ copying secret material into its own `auth-profiles.json`.
 
 Explicit copy flows, such as `openclaw agents add`, use this portability policy:
 
-* `api_key` profiles are portable unless `copyToAgents: false`.
-* `token` profiles are portable unless `copyToAgents: false`.
-* `oauth` profiles are not portable by default because refresh tokens can be
+- `api_key` profiles are portable unless `copyToAgents: false`.
+- `token` profiles are portable unless `copyToAgents: false`.
+- `oauth` profiles are not portable by default because refresh tokens can be
   single-use or rotation-sensitive.
-* Provider-owned OAuth flows may opt in with `copyToAgents: true` only when
+- Provider-owned OAuth flows may opt in with `copyToAgents: true` only when
   copying refresh material across agents is known safe.
 
 Non-portable profiles remain available through read-through inheritance unless
@@ -74,39 +76,39 @@ removes the marker from the credential store.
 
 ## Explicit auth order filtering
 
-* When `auth.order.<provider>` or the auth-store order override is set for a
+- When `auth.order.<provider>` or the auth-store order override is set for a
   provider, `models status --probe` only probes profile ids that remain in the
   resolved auth order for that provider.
-* A stored profile for that provider that is omitted from the explicit order is
+- A stored profile for that provider that is omitted from the explicit order is
   not silently tried later. Probe output reports it with
   `reasonCode: excluded_by_auth_order` and the detail
   `Excluded by auth.order for this provider.`
 
 ## Probe target resolution
 
-* Probe targets can come from auth profiles, environment credentials, or
+- Probe targets can come from auth profiles, environment credentials, or
   `models.json`.
-* If a provider has credentials but OpenClaw cannot resolve a probeable model
+- If a provider has credentials but OpenClaw cannot resolve a probeable model
   candidate for it, `models status --probe` reports `status: no_model` with
   `reasonCode: no_model`.
 
 ## External CLI credential discovery
 
-* Runtime-only credentials owned by external CLIs are discovered only when the
+- Runtime-only credentials owned by external CLIs are discovered only when the
   provider, runtime, or auth profile is in scope for the current operation, or
   when a stored local profile for that external source already exists.
-* Auth-store callers should choose an explicit external-CLI discovery mode:
+- Auth-store callers should choose an explicit external-CLI discovery mode:
   `none` for persisted/plugin auth only, `existing` for refreshing already
   stored external CLI profiles, or `scoped` for a concrete provider/profile set.
-* Read-only/status paths pass `allowKeychainPrompt: false`; they use file-backed
+- Read-only/status paths pass `allowKeychainPrompt: false`; they use file-backed
   external CLI credentials only and do not read or reuse macOS Keychain results.
 
 ## OAuth SecretRef Policy Guard
 
-* SecretRef input is for static credentials only.
-* If a profile credential is `type: "oauth"`, SecretRef objects are not supported for that profile credential material.
-* If `auth.profiles.<id>.mode` is `"oauth"`, SecretRef-backed `keyRef`/`tokenRef` input for that profile is rejected.
-* Violations are hard failures in startup/reload auth resolution paths.
+- SecretRef input is for static credentials only.
+- If a profile credential is `type: "oauth"`, SecretRef objects are not supported for that profile credential material.
+- If `auth.profiles.<id>.mode` is `"oauth"`, SecretRef-backed `keyRef`/`tokenRef` input for that profile is rejected.
+- Violations are hard failures in startup/reload auth resolution paths.
 
 ## Legacy-Compatible Messaging
 
@@ -118,5 +120,5 @@ Human-friendly detail and stable reason codes may be added on subsequent lines.
 
 ## Related
 
-* [Secrets management](/gateway/secrets)
-* [Auth storage](/concepts/oauth)
+- [Secrets management](/gateway/secrets)
+- [Auth storage](/concepts/oauth)

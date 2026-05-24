@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Exec approvals — advanced
+---
+summary: "Advanced exec approvals: safe bins, interpreter binding, approval forwarding, native delivery"
+read_when:
+  - Configuring safe bins or custom safe-bin profiles
+  - Forwarding approvals to Slack/Discord/Telegram or other chat channels
+  - Implementing a native approval client for a channel
+title: "Exec approvals — advanced"
+---
 
 Advanced exec-approval topics: the `safeBins` fast-path, interpreter/runtime
 binding, and approval-forwarding to chat channels (including native delivery).
@@ -17,11 +20,11 @@ can only operate on the incoming stream. Treat this as a narrow fast-path for
 stream filters, not a general trust list.
 
 <Warning>
-  Do **not** add interpreter or runtime binaries (for example `python3`, `node`,
-  `ruby`, `bash`, `sh`, `zsh`) to `safeBins`. If a command can evaluate code,
-  execute subcommands, or read files by design, prefer explicit allowlist entries
-  and keep approval prompts enabled. Custom safe bins must define an explicit
-  profile in `tools.exec.safeBinProfiles.<bin>`.
+Do **not** add interpreter or runtime binaries (for example `python3`, `node`,
+`ruby`, `bash`, `sh`, `zsh`) to `safeBins`. If a command can evaluate code,
+execute subcommands, or read files by design, prefer explicit allowlist entries
+and keep approval prompts enabled. Custom safe bins must define an explicit
+profile in `tools.exec.safeBinProfiles.<bin>`.
 </Warning>
 
 Default safe bins:
@@ -49,10 +52,10 @@ Denied flags by safe-bin profile:
 
 [//]: # "SAFE_BIN_DENIED_FLAGS:START"
 
-* `grep`: `--dereference-recursive`, `--directories`, `--exclude-from`, `--file`, `--recursive`, `-R`, `-d`, `-f`, `-r`
-* `jq`: `--argfile`, `--from-file`, `--library-path`, `--rawfile`, `--slurpfile`, `-L`, `-f`
-* `sort`: `--compress-program`, `--files0-from`, `--output`, `--random-source`, `--temporary-directory`, `-T`, `-o`
-* `wc`: `--files0-from`
+- `grep`: `--dereference-recursive`, `--directories`, `--exclude-from`, `--file`, `--recursive`, `-R`, `-d`, `-f`, `-r`
+- `jq`: `--argfile`, `--from-file`, `--library-path`, `--rawfile`, `--slurpfile`, `-L`, `-f`
+- `sort`: `--compress-program`, `--files0-from`, `--output`, `--random-source`, `--temporary-directory`, `-T`, `-o`
+- `wc`: `--files0-from`
 
 [//]: # "SAFE_BIN_DENIED_FLAGS:END"
 
@@ -109,16 +112,16 @@ automatically.
 
 Configuration location:
 
-* `safeBins` comes from config (`tools.exec.safeBins` or per-agent `agents.list[].tools.exec.safeBins`).
-* `safeBinTrustedDirs` comes from config (`tools.exec.safeBinTrustedDirs` or per-agent `agents.list[].tools.exec.safeBinTrustedDirs`).
-* `safeBinProfiles` comes from config (`tools.exec.safeBinProfiles` or per-agent `agents.list[].tools.exec.safeBinProfiles`). Per-agent profile keys override global keys.
-* allowlist entries live in host-local `~/.openclaw/exec-approvals.json` under `agents.<id>.allowlist` (or via Control UI / `openclaw approvals allowlist ...`).
-* `openclaw security audit` warns with `tools.exec.safe_bins_interpreter_unprofiled` when interpreter/runtime bins appear in `safeBins` without explicit profiles.
-* `openclaw doctor --fix` can scaffold missing custom `safeBinProfiles.<bin>` entries as `{}` (review and tighten afterward). Interpreter/runtime bins are not auto-scaffolded.
+- `safeBins` comes from config (`tools.exec.safeBins` or per-agent `agents.list[].tools.exec.safeBins`).
+- `safeBinTrustedDirs` comes from config (`tools.exec.safeBinTrustedDirs` or per-agent `agents.list[].tools.exec.safeBinTrustedDirs`).
+- `safeBinProfiles` comes from config (`tools.exec.safeBinProfiles` or per-agent `agents.list[].tools.exec.safeBinProfiles`). Per-agent profile keys override global keys.
+- allowlist entries live in host-local `~/.openclaw/exec-approvals.json` under `agents.<id>.allowlist` (or via Control UI / `openclaw approvals allowlist ...`).
+- `openclaw security audit` warns with `tools.exec.safe_bins_interpreter_unprofiled` when interpreter/runtime bins appear in `safeBins` without explicit profiles.
+- `openclaw doctor --fix` can scaffold missing custom `safeBinProfiles.<bin>` entries as `{}` (review and tighten afterward). Interpreter/runtime bins are not auto-scaffolded.
 
 Custom profile example:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     exec: {
@@ -144,16 +147,16 @@ or approval prompt.
 
 Approval-backed interpreter/runtime runs are intentionally conservative:
 
-* Exact argv/cwd/env context is always bound.
-* Direct shell script and direct runtime file forms are best-effort bound to one concrete local
+- Exact argv/cwd/env context is always bound.
+- Direct shell script and direct runtime file forms are best-effort bound to one concrete local
   file snapshot.
-* Common package-manager wrapper forms that still resolve to one direct local file (for example
+- Common package-manager wrapper forms that still resolve to one direct local file (for example
   `pnpm exec`, `pnpm node`, `npm exec`, `npx`) are unwrapped before binding.
-* If OpenClaw cannot identify exactly one concrete local file for an interpreter/runtime command
+- If OpenClaw cannot identify exactly one concrete local file for an interpreter/runtime command
   (for example package scripts, eval forms, runtime-specific loader chains, or ambiguous multi-file
   forms), approval-backed execution is denied instead of claiming semantic coverage it does not
   have.
-* For those workflows, prefer sandboxing, a separate host boundary, or an explicit trusted
+- For those workflows, prefer sandboxing, a separate host boundary, or an explicit trusted
   allowlist/full workflow where the operator accepts the broader runtime semantics.
 
 When approvals are required, the exec tool returns immediately with an approval id. Use that id to
@@ -165,10 +168,10 @@ surfaced as a terminal denial rather than an agent-waking system event.
 
 After an approved async exec finishes, OpenClaw sends a followup `agent` turn to the same session.
 
-* If a valid external delivery target exists (deliverable channel plus target `to`), followup delivery uses that channel.
-* In webchat-only or internal-session flows with no external target, followup delivery stays session-only (`deliver: false`).
-* If a caller explicitly requests strict external delivery with no resolvable external channel, the request fails with `INVALID_REQUEST`.
-* If `bestEffortDeliver` is enabled and no external channel can be resolved, delivery is downgraded to session-only instead of failing.
+- If a valid external delivery target exists (deliverable channel plus target `to`), followup delivery uses that channel.
+- In webchat-only or internal-session flows with no external target, followup delivery stays session-only (`deliver: false`).
+- If a caller explicitly requests strict external delivery with no resolvable external channel, the request fails with `INVALID_REQUEST`.
+- If `bestEffortDeliver` is enabled and no external channel can be resolved, delivery is downgraded to session-only instead of failing.
 
 ## Approval forwarding to chat channels
 
@@ -177,7 +180,7 @@ them with `/approve`. This uses the normal outbound delivery pipeline.
 
 Config:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   approvals: {
     exec: {
@@ -209,7 +212,7 @@ The `/approve` command handles both exec approvals and plugin approvals. If the 
 Plugin approval forwarding uses the same delivery pipeline as exec approvals but has its own
 independent config under `approvals.plugin`. Enabling or disabling one does not affect the other.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   approvals: {
     plugin: {
@@ -270,19 +273,21 @@ exact `/approve <id> <decision>` command so the request can still be resolved.
 
 Generic model:
 
-* host exec policy still decides whether exec approval is required
-* `approvals.exec` controls forwarding approval prompts to other chat destinations
-* `channels.<channel>.execApprovals` controls whether that channel acts as a native approval client
-* Slack plugin approvals can use Slack's native approval client when the request comes from Slack
+- host exec policy still decides whether exec approval is required
+- `approvals.exec` controls forwarding approval prompts to other chat destinations
+- `channels.<channel>.execApprovals` controls whether that channel acts as a native approval client
+- Slack plugin approvals can use Slack's native approval client when the request comes from Slack
   and Slack plugin approvers resolve; `approvals.plugin` can also route plugin approvals to Slack
   sessions or targets even when Slack exec approvals are disabled
+- WhatsApp emoji approval delivery is gated by `approvals.exec` and `approvals.plugin`, while
+  approval reactions require explicit WhatsApp approvers from `channels.whatsapp.allowFrom` or `"*"`
 
 Native approval clients auto-enable DM-first delivery when all of these are true:
 
-* the channel supports native approval delivery
-* approvers can be resolved from explicit `execApprovals.approvers` or owner
+- the channel supports native approval delivery
+- approvers can be resolved from explicit `execApprovals.approvers` or owner
   identity such as `commands.ownerAllowFrom`
-* `channels.<channel>.execApprovals.enabled` is unset or `"auto"`
+- `channels.<channel>.execApprovals.enabled` is unset or `"auto"`
 
 Set `enabled: false` to disable a native approval client explicitly. Set `enabled: true` to force
 it on when approvers resolve. Public origin-chat delivery stays explicit through
@@ -290,39 +295,43 @@ it on when approvers resolve. Public origin-chat delivery stays explicit through
 
 FAQ: [Why are there two exec approval configs for chat approvals?](/help/faq-first-run#why-are-there-two-exec-approval-configs-for-chat-approvals)
 
-* Discord: `channels.discord.execApprovals.*`
-* Slack: `channels.slack.execApprovals.*`
-* Telegram: `channels.telegram.execApprovals.*`
+- Discord: `channels.discord.execApprovals.*`
+- Slack: `channels.slack.execApprovals.*`
+- Telegram: `channels.telegram.execApprovals.*`
+- WhatsApp: use `approvals.exec` and `approvals.plugin` to route approval prompts to WhatsApp
 
 These native approval clients add DM routing and optional channel fanout on top of the shared
 same-chat `/approve` flow and shared approval buttons.
 
 Shared behavior:
 
-* Slack, Matrix, Microsoft Teams, and similar deliverable chats use the normal channel auth model
+- Slack, Matrix, Microsoft Teams, and similar deliverable chats use the normal channel auth model
   for same-chat `/approve`
-* when a native approval client auto-enables, the default native delivery target is approver DMs
-* for Discord and Telegram, only resolved approvers can approve or deny
-* Discord approvers can be explicit (`execApprovals.approvers`) or inferred from `commands.ownerAllowFrom`
-* Telegram approvers can be explicit (`execApprovals.approvers`) or inferred from `commands.ownerAllowFrom`
-* Slack approvers can be explicit (`execApprovals.approvers`) or inferred from `commands.ownerAllowFrom`
-* Slack plugin approval DMs use Slack plugin approvers from `allowFrom` and account default
+- when a native approval client auto-enables, the default native delivery target is approver DMs
+- for Discord and Telegram, only resolved approvers can approve or deny
+- Discord approvers can be explicit (`execApprovals.approvers`) or inferred from `commands.ownerAllowFrom`
+- Telegram approvers can be explicit (`execApprovals.approvers`) or inferred from `commands.ownerAllowFrom`
+- Slack approvers can be explicit (`execApprovals.approvers`) or inferred from `commands.ownerAllowFrom`
+- Slack plugin approval DMs use Slack plugin approvers from `allowFrom` and account default
   routing, not Slack exec approvers
-* Slack native buttons preserve approval id kind, so `plugin:` ids can resolve plugin approvals
+- Slack native buttons preserve approval id kind, so `plugin:` ids can resolve plugin approvals
   without a second Slack-local fallback layer
-* Matrix native DM/channel routing and reaction shortcuts handle both exec and plugin approvals;
+- WhatsApp emoji approvals handle both exec and plugin prompts only when the matching top-level
+  forwarding family is enabled and routes to WhatsApp; target-only WhatsApp forwarding stays on
+  the shared forwarding path unless it matches the same native origin target
+- Matrix native DM/channel routing and reaction shortcuts handle both exec and plugin approvals;
   plugin authorization still comes from `channels.matrix.dm.allowFrom`
-* Matrix native prompts include `com.openclaw.approval` custom event content on the first prompt
+- Matrix native prompts include `com.openclaw.approval` custom event content on the first prompt
   event so OpenClaw-aware Matrix clients can read structured approval state while stock clients
   keep the plain-text `/approve` fallback
-* the requester does not need to be an approver
-* the originating chat can approve directly with `/approve` when that chat already supports commands and replies
-* native Discord approval buttons route by approval id kind: `plugin:` ids go
+- the requester does not need to be an approver
+- the originating chat can approve directly with `/approve` when that chat already supports commands and replies
+- native Discord approval buttons route by approval id kind: `plugin:` ids go
   straight to plugin approvals, everything else goes to exec approvals
-* native Telegram approval buttons follow the same bounded exec-to-plugin fallback as `/approve`
-* when native `target` enables origin-chat delivery, approval prompts include the command text
-* pending exec approvals expire after 30 minutes by default
-* if no operator UI or configured approval client can accept the request, the prompt falls back to `askFallback`
+- native Telegram approval buttons follow the same bounded exec-to-plugin fallback as `/approve`
+- when native `target` enables origin-chat delivery, approval prompts include the command text
+- pending exec approvals expire after 30 minutes by default
+- if no operator UI or configured approval client can accept the request, the prompt falls back to `askFallback`
 
 Sensitive owner-only group commands such as `/diagnostics` and `/export-trajectory` use private
 owner routing for approval prompts and final results. OpenClaw first tries a private route on the
@@ -337,8 +346,8 @@ topics, OpenClaw preserves the topic for the approval prompt and the post-approv
 
 See:
 
-* [Discord](/channels/discord)
-* [Telegram](/channels/telegram)
+- [Discord](/channels/discord)
+- [Telegram](/channels/telegram)
 
 ### macOS IPC flow
 
@@ -351,13 +360,77 @@ Gateway -> Node Service (WS)
 
 Security notes:
 
-* Unix socket mode `0600`, token stored in `exec-approvals.json`.
-* Same-UID peer check.
-* Challenge/response (nonce + HMAC token + request hash) + short TTL.
+- Unix socket mode `0600`, token stored in `exec-approvals.json`.
+- Same-UID peer check.
+- Challenge/response (nonce + HMAC token + request hash) + short TTL.
+
+## FAQ
+
+### When would `accountId` and `threadId` be used on an approval target?
+
+Use `accountId` when the channel has multiple configured identities and the approval prompt must
+leave through one specific account. Use `threadId` when the destination supports topics or
+threads and the prompt should stay inside that thread instead of the top-level chat.
+
+A concrete Telegram case is an operations supergroup with forum topics and two Telegram bot
+accounts. The `to` value names the supergroup, `accountId` selects the bot account, and `threadId`
+selects the forum topic:
+
+```json5
+{
+  approvals: {
+    exec: {
+      enabled: true,
+      mode: "targets",
+      targets: [
+        {
+          channel: "telegram",
+          to: "-1001234567890",
+          accountId: "ops-bot",
+          threadId: "77",
+        },
+      ],
+    },
+  },
+  channels: {
+    telegram: {
+      accounts: {
+        default: {
+          name: "Primary bot",
+          botToken: "env:TELEGRAM_PRIMARY_BOT_TOKEN",
+        },
+        "ops-bot": {
+          name: "Operations bot",
+          botToken: "env:TELEGRAM_OPS_BOT_TOKEN",
+        },
+      },
+    },
+  },
+}
+```
+
+With that setup, forwarded exec approvals are posted by the `ops-bot` Telegram account into topic
+`77` of chat `-1001234567890`. A target without `accountId` uses the channel's default account, and
+a target without `threadId` posts to the top-level destination.
+
+### When approvals are sent to a session, can anyone in that session approve them?
+
+No. Session delivery only controls where the prompt appears. It does not by itself authorize every
+participant in that chat to approve.
+
+For generic same-chat `/approve`, the sender must already be authorized for commands in that
+channel session. If the channel exposes explicit approval approvers, those approvers can authorize
+the `/approve` action even when they are not otherwise command-authorized in that session.
+
+Some channels are stricter. Discord, Telegram, Matrix, Slack native approval DMs, and similar
+native approval clients use their resolved approver lists for approval authorization. For example,
+a Telegram forum-topic approval prompt can be visible to everyone in the topic, but only numeric
+Telegram user IDs resolved from `channels.telegram.execApprovals.approvers` or
+`commands.ownerAllowFrom` can approve or deny it.
 
 ## Related
 
-* [Exec approvals](/tools/exec-approvals) — core policy and approval flow
-* [Exec tool](/tools/exec)
-* [Elevated mode](/tools/elevated)
-* [Skills](/tools/skills) — skill-backed auto-allow behavior
+- [Exec approvals](/tools/exec-approvals) — core policy and approval flow
+- [Exec tool](/tools/exec)
+- [Elevated mode](/tools/elevated)
+- [Skills](/tools/skills) — skill-backed auto-allow behavior

@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Channel ingress API
+---
+summary: "Experimental channel ingress API for inbound message authorization"
+read_when:
+  - Building or migrating a messaging channel plugin
+  - Changing DM or group allowlists, route gates, command auth, event auth, or mention activation
+  - Reviewing channel ingress redaction or SDK compatibility boundaries
+title: "Channel ingress API"
+sidebarTitle: "Channel Ingress"
+---
 
 # Channel ingress API
 
@@ -17,7 +21,7 @@ mention activation, redacted diagnostics, and admission.
 
 ## Runtime Resolver
 
-```ts theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```ts
 import {
   defineStableChannelIngressIdentity,
   resolveChannelMessageIngress,
@@ -58,11 +62,11 @@ access groups, policy, and conversation kind.
 
 Bundled plugins should consume modern projections directly:
 
-* `ingress`: ordered gate decision and admission
-* `senderAccess`: sender/conversation authorization only
-* `routeAccess`: route and route-sender projection
-* `commandAccess`: command authorization; false when no command gate ran
-* `activationAccess`: mention/activation result
+- `ingress`: ordered gate decision and admission
+- `senderAccess`: sender/conversation authorization only
+- `routeAccess`: route and route-sender projection
+- `commandAccess`: command authorization; false when no command gate ran
+- `activationAccess`: mention/activation result
 
 Event authorization remains available on the ordered `ingress.graph` and the
 decisive `ingress.reasonCode`; no separate event projection is emitted.
@@ -93,7 +97,7 @@ Use `mayPair: false` for reactions, buttons, callbacks, and native commands.
 
 Use route descriptors for room, topic, guild, thread, or nested route policy:
 
-```ts theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```ts
 route: {
   id: "room",
   allowed: roomAllowed,
@@ -127,7 +131,7 @@ diagnostic ids.
 
 ## Verification
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 pnpm test src/channels/message-access/message-access.test.ts src/plugin-sdk/channel-ingress-runtime.test.ts
 pnpm plugin-sdk:api:check
 ```

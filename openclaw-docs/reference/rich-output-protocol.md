@@ -1,15 +1,17 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Rich output protocol
+---
+summary: "Rich output shortcode protocol for embeds, media, audio hints, and replies"
+read_when:
+  - Changing assistant output rendering in the Control UI
+  - Debugging `[embed ...]`, `MEDIA:`, reply, or audio presentation directives
+title: "Rich output protocol"
+---
 
 Assistant output can carry a small set of delivery/render directives:
 
-* `MEDIA:` for attachment delivery
-* `[[audio_as_voice]]` for audio presentation hints
-* `[[reply_to_current]]` / `[[reply_to:<id>]]` for reply metadata
-* `[embed ...]` for Control UI rich rendering
+- `MEDIA:` for attachment delivery
+- `[[audio_as_voice]]` for audio presentation hints
+- `[[reply_to_current]]` / `[[reply_to:<id>]]` for reply metadata
+- `[embed ...]` for Control UI rich rendering
 
 Remote `MEDIA:` attachments must be public `https:` URLs. Plain `http:`,
 loopback, link-local, private, and internal hostnames are ignored as attachment
@@ -18,6 +20,28 @@ directives; server-side media fetchers still enforce their own network guards.
 Local `MEDIA:` attachments can use absolute paths, workspace-relative paths, or
 home-relative `~/` paths. They still pass through the agent file-read policy and
 media type checks before delivery.
+
+<Warning>
+`MEDIA:` is parsed only as plain text. Wrapping the directive in Markdown
+formatting (bold, inline code, fenced code) prevents the parser from
+recognizing it, and the attachment is silently dropped from delivery.
+
+Valid:
+
+```text
+MEDIA:/workspace/image.png
+```
+
+Invalid (parsed as prose, no attachment delivered):
+
+```text
+**MEDIA:/workspace/image.png**
+`MEDIA:/workspace/image.png`
+Here is your image: MEDIA:/workspace/image.png
+```
+
+Keep `MEDIA:` on its own line, in plain text, with no surrounding formatting.
+</Warning>
 
 Plain Markdown image syntax stays text by default. Channels that intentionally
 map Markdown image replies to media attachments opt in at their outbound
@@ -37,24 +61,24 @@ from the final payload.
 
 Self-closing example:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 [embed ref="cv_123" title="Status" /]
 ```
 
 Rules:
 
-* `[view ...]` is no longer valid for new output.
-* Embed shortcodes render in the assistant message surface only.
-* Only URL-backed embeds are rendered. Use `ref="..."` or `url="..."`.
-* Block-form inline HTML embed shortcodes are not rendered.
-* The web UI strips the shortcode from visible text and renders the embed inline.
-* `MEDIA:` is not an embed alias and should not be used for rich embed rendering.
+- `[view ...]` is no longer valid for new output.
+- Embed shortcodes render in the assistant message surface only.
+- Only URL-backed embeds are rendered. Use `ref="..."` or `url="..."`.
+- Block-form inline HTML embed shortcodes are not rendered.
+- The web UI strips the shortcode from visible text and renders the embed inline.
+- `MEDIA:` is not an embed alias and should not be used for rich embed rendering.
 
 ## Stored rendering shape
 
 The normalized/stored assistant content block is a structured `canvas` item:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "type": "canvas",
   "preview": {
@@ -73,5 +97,5 @@ Stored/rendered rich blocks use this `canvas` shape directly. `present_view` is 
 
 ## Related
 
-* [RPC adapters](/reference/rpc)
-* [Typebox](/concepts/typebox)
+- [RPC adapters](/reference/rpc)
+- [Typebox](/concepts/typebox)

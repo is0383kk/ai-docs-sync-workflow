@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Cloudflare AI gateway
+---
+summary: "Cloudflare AI Gateway setup (auth + model selection)"
+title: "Cloudflare AI gateway"
+read_when:
+  - You want to use Cloudflare AI Gateway with OpenClaw
+  - You need the account ID, gateway ID, or API key env var
+---
 
 Cloudflare AI Gateway sits in front of provider APIs and lets you add analytics, caching, and controls. For Anthropic, OpenClaw uses the Anthropic Messages API through your Gateway endpoint.
 
@@ -14,7 +16,7 @@ Cloudflare AI Gateway sits in front of provider APIs and lets you add analytics,
 | API key       | `CLOUDFLARE_AI_GATEWAY_API_KEY` (your provider API key for requests through the Gateway) |
 
 <Note>
-  For Anthropic models routed through Cloudflare AI Gateway, use your **Anthropic API key** as the provider key.
+For Anthropic models routed through Cloudflare AI Gateway, use your **Anthropic API key** as the provider key.
 </Note>
 
 When thinking is enabled for Anthropic Messages models, OpenClaw strips trailing
@@ -28,17 +30,17 @@ non-thinking prefill remains available.
   <Step title="Set the provider API key and Gateway details">
     Run onboarding and choose the Cloudflare AI Gateway auth option:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --auth-choice cloudflare-ai-gateway-api-key
     ```
 
     This prompts for your account ID, gateway ID, and API key.
-  </Step>
 
+  </Step>
   <Step title="Set a default model">
     Add the model to your OpenClaw config:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -47,10 +49,10 @@ non-thinking prefill remains available.
       },
     }
     ```
-  </Step>
 
+  </Step>
   <Step title="Verify the model is available">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw models list --provider cloudflare-ai-gateway
     ```
   </Step>
@@ -60,7 +62,7 @@ non-thinking prefill remains available.
 
 For scripted or CI setups, pass all values on the command line:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard --non-interactive \
   --mode local \
   --auth-choice cloudflare-ai-gateway-api-key \
@@ -75,7 +77,7 @@ openclaw onboard --non-interactive \
   <Accordion title="Authenticated gateways">
     If you enabled Gateway authentication in Cloudflare, add the `cf-aig-authorization` header. This is **in addition to** your provider API key.
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       models: {
         providers: {
@@ -90,16 +92,18 @@ openclaw onboard --non-interactive \
     ```
 
     <Tip>
-      The `cf-aig-authorization` header authenticates with the Cloudflare Gateway itself, while the provider API key (for example, your Anthropic key) authenticates with the upstream provider.
+    The `cf-aig-authorization` header authenticates with the Cloudflare Gateway itself, while the provider API key (for example, your Anthropic key) authenticates with the upstream provider.
     </Tip>
+
   </Accordion>
 
   <Accordion title="Environment note">
     If the Gateway runs as a daemon (launchd/systemd), make sure `CLOUDFLARE_AI_GATEWAY_API_KEY` is available to that process.
 
     <Warning>
-      A key exported only in an interactive shell will not help a launchd/systemd daemon unless that environment is imported there as well. Set the key in `~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway process can read it.
+    A key exported only in an interactive shell will not help a launchd/systemd daemon unless that environment is imported there as well. Set the key in `~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway process can read it.
     </Warning>
+
   </Accordion>
 </AccordionGroup>
 
@@ -109,7 +113,6 @@ openclaw onboard --non-interactive \
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Troubleshooting" href="/help/troubleshooting" icon="wrench">
     General troubleshooting and FAQ.
   </Card>

@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Grok search
+---
+summary: "Grok web search via xAI web-grounded responses"
+read_when:
+  - You want to use Grok for web_search
+  - You want to use xAI OAuth or an XAI_API_KEY for web search
+title: "Grok search"
+---
 
 OpenClaw supports Grok as a `web_search` provider, using xAI web-grounded
 responses to produce AI-synthesized answers backed by live search results
@@ -22,17 +24,17 @@ query.
 
 If you choose **Grok** during:
 
-* `openclaw onboard`
-* `openclaw configure --section web`
+- `openclaw onboard`
+- `openclaw configure --section web`
 
 OpenClaw can use an existing xAI OAuth profile without prompting for a separate
 web-search key. If OAuth is not available, it falls back to xAI API-key setup.
 OpenClaw can also show a separate follow-up step to enable `x_search` with the
 same xAI credential. That follow-up:
 
-* only appears after you choose Grok for `web_search`
-* is not a separate top-level web-search provider choice
-* can optionally set the `x_search` model during the same flow
+- only appears after you choose Grok for `web_search`
+- is not a separate top-level web-search provider choice
+- can optionally set the `x_search` model during the same flow
 
 If you skip it, you can enable or change `x_search` later in config.
 
@@ -43,29 +45,29 @@ If you skip it, you can enable or change `x_search` later in config.
     If you already signed in with xAI during onboarding or model auth, choose
     Grok as the `web_search` provider. No separate API key is required:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --auth-choice xai-oauth
     openclaw config set tools.web.search.provider grok
     ```
-  </Step>
 
+  </Step>
   <Step title="Use an API key fallback">
     Get an API key from [xAI](https://console.x.ai/) when OAuth is unavailable
     or you intentionally want key-backed web-search config.
   </Step>
-
   <Step title="Store the key">
     Set `XAI_API_KEY` in the Gateway environment, or configure via:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw configure --section web
     ```
+
   </Step>
 </Steps>
 
 ## Config
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -89,7 +91,8 @@ If you skip it, you can enable or change `x_search` later in config.
 }
 ```
 
-**Credential alternatives:** sign in with `openclaw models auth login --provider xai --method oauth`, set `XAI_API_KEY` in the Gateway environment,
+**Credential alternatives:** sign in with `openclaw models auth login
+--provider xai --method oauth`, set `XAI_API_KEY` in the Gateway environment,
 or store `plugins.entries.xai.config.webSearch.apiKey`. For a gateway install,
 put env vars in `~/.openclaw/.env`.
 
@@ -121,6 +124,6 @@ uses the same `webSearch.baseUrl` fallback unless
 
 ## Related
 
-* [Web Search overview](/tools/web) -- all providers and auto-detection
-* [x\_search in Web Search](/tools/web#x_search) -- first-class X search via xAI
-* [Gemini Search](/tools/gemini-search) -- AI-synthesized answers via Google grounding
+- [Web Search overview](/tools/web) -- all providers and auto-detection
+- [x_search in Web Search](/tools/web#x_search) -- first-class X search via xAI
+- [Gemini Search](/tools/gemini-search) -- AI-synthesized answers via Google grounding

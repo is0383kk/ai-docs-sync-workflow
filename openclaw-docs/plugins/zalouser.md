@@ -1,13 +1,15 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Zalo personal plugin
+---
+summary: "Zalo Personal plugin: QR login + messaging via native zca-js (plugin install + channel config + tool)"
+read_when:
+  - You want Zalo Personal (unofficial) support in OpenClaw
+  - You are configuring or developing the zalouser plugin
+title: "Zalo personal plugin"
+---
 
 Zalo Personal support for OpenClaw via a plugin, using native `zca-js` to automate a normal Zalo user account.
 
 <Warning>
-  Unofficial automation may lead to account suspension or ban. Use at your own risk.
+Unofficial automation may lead to account suspension or ban. Use at your own risk.
 </Warning>
 
 ## Naming
@@ -26,7 +28,7 @@ No external `zca`/`openzca` CLI binary is required.
 
 ### Option A: install from npm
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install @openclaw/zalouser
 ```
 
@@ -37,7 +39,7 @@ Restart the Gateway afterwards.
 
 ### Option B: install from a local folder (dev)
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 PLUGIN_SRC=./path/to/local/zalouser-plugin
 openclaw plugins install "$PLUGIN_SRC"
 cd "$PLUGIN_SRC" && pnpm install
@@ -49,7 +51,7 @@ Restart the Gateway afterwards.
 
 Channel config lives under `channels.zalouser` (not `plugins.entries.*`):
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     zalouser: {
@@ -62,7 +64,7 @@ Channel config lives under `channels.zalouser` (not `plugins.entries.*`):
 
 ## CLI
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw channels login --channel zalouser
 openclaw channels logout --channel zalouser
 openclaw channels status --probe
@@ -80,5 +82,5 @@ Channel message actions also support `react` for message reactions.
 
 ## Related
 
-* [Building plugins](/plugins/building-plugins)
-* [ClawHub](/clawhub)
+- [Building plugins](/plugins/building-plugins)
+- [ClawHub](/clawhub)

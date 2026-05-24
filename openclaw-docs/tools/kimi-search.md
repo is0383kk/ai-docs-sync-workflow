@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Kimi search
+---
+summary: "Kimi web search via Moonshot web search"
+read_when:
+  - You want to use Kimi for web_search
+  - You need a KIMI_API_KEY or MOONSHOT_API_KEY
+title: "Kimi search"
+---
 
 OpenClaw supports Kimi as a `web_search` provider, using Moonshot web search
 to produce AI-synthesized answers with citations.
@@ -13,28 +15,28 @@ to produce AI-synthesized answers with citations.
   <Step title="Create a key">
     Get an API key from [Moonshot AI](https://platform.moonshot.cn/).
   </Step>
-
   <Step title="Store the key">
     Set `KIMI_API_KEY` or `MOONSHOT_API_KEY` in the Gateway environment, or
     configure via:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw configure --section web
     ```
+
   </Step>
 </Steps>
 
 When you choose **Kimi** during `openclaw onboard` or
 `openclaw configure --section web`, OpenClaw can also ask for:
 
-* the Moonshot API region:
-  * `https://api.moonshot.ai/v1`
-  * `https://api.moonshot.cn/v1`
-* the default Kimi web-search model (defaults to `kimi-k2.6`)
+- the Moonshot API region:
+  - `https://api.moonshot.ai/v1`
+  - `https://api.moonshot.cn/v1`
+- the default Kimi web-search model (defaults to `kimi-k2.6`)
 
 ## Config
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -97,7 +99,7 @@ Provider-specific filters are not currently supported.
 
 ## Related
 
-* [Web Search overview](/tools/web) -- all providers and auto-detection
-* [Moonshot AI](/providers/moonshot) -- Moonshot model + Kimi Coding provider docs
-* [Gemini Search](/tools/gemini-search) -- AI-synthesized answers via Google grounding
-* [Grok Search](/tools/grok-search) -- AI-synthesized answers via xAI grounding
+- [Web Search overview](/tools/web) -- all providers and auto-detection
+- [Moonshot AI](/providers/moonshot) -- Moonshot model + Kimi Coding provider docs
+- [Gemini Search](/tools/gemini-search) -- AI-synthesized answers via Google grounding
+- [Grok Search](/tools/grok-search) -- AI-synthesized answers via xAI grounding

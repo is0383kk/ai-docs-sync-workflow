@@ -1,27 +1,28 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# TOOLS.md template
+---
+summary: "Workspace template for TOOLS.md"
+title: "TOOLS.md template"
+read_when:
+  - Bootstrapping a workspace manually
+---
 
 # TOOLS.md - Local Notes
 
-Skills define *how* tools work. This file is for *your* specifics — the stuff that's unique to your setup.
+Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
 
 ## What Goes Here
 
 Things like:
 
-* Camera names and locations
-* SSH hosts and aliases
-* Preferred voices for TTS
-* Speaker/room names
-* Device nicknames
-* Anything environment-specific
+- Camera names and locations
+- SSH hosts and aliases
+- Preferred voices for TTS
+- Speaker/room names
+- Device nicknames
+- Anything environment-specific
 
 ## Examples
 
-```markdown theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```markdown
 ### Cameras
 
 - living-room → Main area, 180° wide angle
@@ -41,10 +42,10 @@ Things like:
 
 Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
 
-***
+---
 
 Add whatever helps you do your job. This is your cheat sheet.
 
 ## Related
 
-* [Agent workspace](/concepts/agent-workspace)
+- [Agent workspace](/concepts/agent-workspace)

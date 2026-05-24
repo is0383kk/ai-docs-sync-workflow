@@ -1,19 +1,22 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Channel presentation refactor plan
+---
+summary: Decouple semantic message presentation from channel native UI renderers.
+title: Channel presentation refactor plan
+read_when:
+  - Refactoring channel message UI, interactive payloads, or native channel renderers
+  - Changing message tool capabilities, delivery hints, or cross-context markers
+  - Debugging Discord Carbon import fanout or channel plugin runtime laziness
+---
 
 ## Status
 
 Implemented for the shared agent, CLI, plugin capability, and outbound delivery surfaces:
 
-* `ReplyPayload.presentation` carries semantic message UI.
-* `ReplyPayload.delivery.pin` carries sent-message pin requests.
-* Shared message actions expose `presentation`, `delivery`, and `pin` instead of provider-native `components`, `blocks`, `buttons`, or `card`.
-* Core renders or auto-degrades presentation through plugin-declared outbound capabilities.
-* Discord, Slack, Telegram, Mattermost, MS Teams, and Feishu renderers consume the generic contract.
-* Discord channel control-plane code no longer imports Carbon-backed UI containers.
+- `ReplyPayload.presentation` carries semantic message UI.
+- `ReplyPayload.delivery.pin` carries sent-message pin requests.
+- Shared message actions expose `presentation`, `delivery`, and `pin` instead of provider-native `components`, `blocks`, `buttons`, or `card`.
+- Core renders or auto-degrades presentation through plugin-declared outbound capabilities.
+- Discord, Slack, Telegram, Mattermost, MS Teams, and Feishu renderers consume the generic contract.
+- Discord channel control-plane code no longer imports Carbon-backed UI containers.
 
 Canonical docs now live in [Message Presentation](/plugins/message-presentation).
 Keep this plan as historical implementation context; update the canonical guide
@@ -23,35 +26,35 @@ for contract, renderer, or fallback behavior changes.
 
 Channel UI is currently split across several incompatible surfaces:
 
-* Core owns a Discord-shaped cross-context renderer hook through `buildCrossContextComponents`.
-* Discord `channel.ts` can import native Carbon UI through `DiscordUiContainer`, which pulls runtime UI dependencies into the channel plugin control plane.
-* The agent and CLI expose native payload escape hatches such as Discord `components`, Slack `blocks`, Telegram or Mattermost `buttons`, and Teams or Feishu `card`.
-* `ReplyPayload.channelData` carries both transport hints and native UI envelopes.
-* The generic `interactive` model exists, but it is narrower than the richer layouts already used by Discord, Slack, Teams, Feishu, LINE, Telegram, and Mattermost.
+- Core owns a Discord-shaped cross-context renderer hook through `buildCrossContextComponents`.
+- Discord `channel.ts` can import native Carbon UI through `DiscordUiContainer`, which pulls runtime UI dependencies into the channel plugin control plane.
+- The agent and CLI expose native payload escape hatches such as Discord `components`, Slack `blocks`, Telegram or Mattermost `buttons`, and Teams or Feishu `card`.
+- `ReplyPayload.channelData` carries both transport hints and native UI envelopes.
+- The generic `interactive` model exists, but it is narrower than the richer layouts already used by Discord, Slack, Teams, Feishu, LINE, Telegram, and Mattermost.
 
 This makes core aware of native UI shapes, weakens plugin runtime laziness, and gives agents too many provider-specific ways to express the same message intent.
 
 ## Goals
 
-* Core decides the best semantic presentation for a message from declared capabilities.
-* Extensions declare capabilities and render semantic presentation into native transport payloads.
-* Web Control UI remains separate from chat native UI.
-* Native channel payloads are not exposed through the shared agent or CLI message surface.
-* Unsupported presentation features auto-degrade to the best text representation.
-* Delivery behavior such as pinning a sent message is generic delivery metadata, not presentation.
+- Core decides the best semantic presentation for a message from declared capabilities.
+- Extensions declare capabilities and render semantic presentation into native transport payloads.
+- Web Control UI remains separate from chat native UI.
+- Native channel payloads are not exposed through the shared agent or CLI message surface.
+- Unsupported presentation features auto-degrade to the best text representation.
+- Delivery behavior such as pinning a sent message is generic delivery metadata, not presentation.
 
 ## Non goals
 
-* No backwards compatibility shim for `buildCrossContextComponents`.
-* No public native escape hatches for `components`, `blocks`, `buttons`, or `card`.
-* No core imports of channel-native UI libraries.
-* No provider-specific SDK seams for bundled channels.
+- No backwards compatibility shim for `buildCrossContextComponents`.
+- No public native escape hatches for `components`, `blocks`, `buttons`, or `card`.
+- No core imports of channel-native UI libraries.
+- No provider-specific SDK seams for bundled channels.
 
 ## Target model
 
 Add a core-owned `presentation` field to `ReplyPayload`.
 
-```ts theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```ts
 type MessagePresentationTone = "neutral" | "info" | "success" | "warning" | "danger";
 
 type MessagePresentation = {
@@ -82,9 +85,9 @@ type MessagePresentationOption = {
 
 `interactive` becomes a subset of `presentation` during migration:
 
-* `interactive` text block maps to `presentation.blocks[].type = "text"`.
-* `interactive` buttons block maps to `presentation.blocks[].type = "buttons"`.
-* `interactive` select block maps to `presentation.blocks[].type = "select"`.
+- `interactive` text block maps to `presentation.blocks[].type = "text"`.
+- `interactive` buttons block maps to `presentation.blocks[].type = "buttons"`.
+- `interactive` select block maps to `presentation.blocks[].type = "select"`.
 
 The external agent and CLI schemas now use `presentation`; `interactive` remains an internal legacy parser/rendering helper for existing reply producers.
 The public producer-facing API treats `interactive` as deprecated. Runtime
@@ -95,7 +98,7 @@ work while new code emits `presentation`.
 
 Add a core-owned `delivery` field for send behavior that is not UI.
 
-```ts theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```ts
 type ReplyPayloadDelivery = {
   pin?:
     | boolean
@@ -109,10 +112,10 @@ type ReplyPayloadDelivery = {
 
 Semantics:
 
-* `delivery.pin = true` means pin the first successfully delivered message.
-* `notify` defaults to `false`.
-* `required` defaults to `false`; unsupported channels or failed pinning auto-degrade by continuing delivery.
-* Manual `pin`, `unpin`, and `list-pins` message actions remain for existing messages.
+- `delivery.pin = true` means pin the first successfully delivered message.
+- `notify` defaults to `false`.
+- `required` defaults to `false`; unsupported channels or failed pinning auto-degrade by continuing delivery.
+- Manual `pin`, `unpin`, and `list-pins` message actions remain for existing messages.
 
 Current Telegram ACP topic binding should move from `channelData.telegram.pin = true` to `delivery.pin = true`.
 
@@ -120,7 +123,7 @@ Current Telegram ACP topic binding should move from `channelData.telegram.pin = 
 
 Add presentation and delivery render hooks to the runtime outbound adapter, not the control-plane channel plugin.
 
-```ts theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```ts
 type ChannelPresentationCapabilities = {
   supported: boolean;
   buttons?: boolean;
@@ -181,60 +184,60 @@ type ChannelOutboundAdapter = {
 
 Core behavior:
 
-* Resolve target channel and runtime adapter.
-* Ask for presentation capabilities.
-* Degrade unsupported blocks and apply generic capability limits before
+- Resolve target channel and runtime adapter.
+- Ask for presentation capabilities.
+- Degrade unsupported blocks and apply generic capability limits before
   rendering.
-* Call `renderPresentation`.
-* If no renderer exists, convert presentation to text fallback.
-* After successful send, call `pinDeliveredMessage` when `delivery.pin` is requested and supported.
+- Call `renderPresentation`.
+- If no renderer exists, convert presentation to text fallback.
+- After successful send, call `pinDeliveredMessage` when `delivery.pin` is requested and supported.
 
 ## Channel mapping
 
 Discord:
 
-* Render `presentation` to components v2 and Carbon containers in runtime-only modules.
-* Keep accent color helpers in light modules.
-* Remove `DiscordUiContainer` imports from channel plugin control-plane code.
+- Render `presentation` to components v2 and Carbon containers in runtime-only modules.
+- Keep accent color helpers in light modules.
+- Remove `DiscordUiContainer` imports from channel plugin control-plane code.
 
 Slack:
 
-* Render `presentation` to Block Kit.
-* Remove agent and CLI `blocks` input.
+- Render `presentation` to Block Kit.
+- Remove agent and CLI `blocks` input.
 
 Telegram:
 
-* Render text, context, and dividers as text.
-* Render actions and select as inline keyboards when configured and allowed for the target surface.
-* Use text fallback when inline buttons are disabled.
-* Move ACP topic pinning to `delivery.pin`.
+- Render text, context, and dividers as text.
+- Render actions and select as inline keyboards when configured and allowed for the target surface.
+- Use text fallback when inline buttons are disabled.
+- Move ACP topic pinning to `delivery.pin`.
 
 Mattermost:
 
-* Render actions as interactive buttons where configured.
-* Render other blocks as text fallback.
+- Render actions as interactive buttons where configured.
+- Render other blocks as text fallback.
 
 MS Teams:
 
-* Render `presentation` to Adaptive Cards.
-* Keep manual pin/unpin/list-pins actions.
-* Optionally implement `pinDeliveredMessage` if Graph support is reliable for the target conversation.
+- Render `presentation` to Adaptive Cards.
+- Keep manual pin/unpin/list-pins actions.
+- Optionally implement `pinDeliveredMessage` if Graph support is reliable for the target conversation.
 
 Feishu:
 
-* Render `presentation` to interactive cards.
-* Keep manual pin/unpin/list-pins actions.
-* Optionally implement `pinDeliveredMessage` for sent-message pinning if API behavior is reliable.
+- Render `presentation` to interactive cards.
+- Keep manual pin/unpin/list-pins actions.
+- Optionally implement `pinDeliveredMessage` for sent-message pinning if API behavior is reliable.
 
 LINE:
 
-* Render `presentation` to Flex or template messages where possible.
-* Fall back to text for unsupported blocks.
-* Remove LINE UI payloads from `channelData`.
+- Render `presentation` to Flex or template messages where possible.
+- Fall back to text for unsupported blocks.
+- Remove LINE UI payloads from `channelData`.
 
 Plain or limited channels:
 
-* Convert presentation to text with conservative formatting.
+- Convert presentation to text with conservative formatting.
 
 ## Refactor steps
 
@@ -260,22 +263,22 @@ Steps 1-11 and 13-14 are implemented in this refactor for the shared agent, CLI,
 
 Add or update:
 
-* Presentation normalization tests.
-* Presentation auto-degrade tests for unsupported blocks.
-* Cross-context marker tests for plugin dispatch and core delivery paths.
-* Channel render matrix tests for Discord, Slack, Telegram, Mattermost, MS Teams, Feishu, LINE, and text fallback.
-* Message tool schema tests proving native fields are gone.
-* CLI tests proving native flags are gone.
-* Discord entrypoint import-laziness regression covering Carbon.
-* Delivery pin tests covering Telegram and generic fallback.
+- Presentation normalization tests.
+- Presentation auto-degrade tests for unsupported blocks.
+- Cross-context marker tests for plugin dispatch and core delivery paths.
+- Channel render matrix tests for Discord, Slack, Telegram, Mattermost, MS Teams, Feishu, LINE, and text fallback.
+- Message tool schema tests proving native fields are gone.
+- CLI tests proving native flags are gone.
+- Discord entrypoint import-laziness regression covering Carbon.
+- Delivery pin tests covering Telegram and generic fallback.
 
 ## Open questions
 
-* Should `delivery.pin` be implemented for Discord, Slack, MS Teams, and Feishu in the first pass, or only Telegram first?
-* Should `delivery` eventually absorb existing fields such as `replyToId`, `replyToCurrent`, `silent`, and `audioAsVoice`, or stay focused on post-send behaviors?
-* Should presentation support images or file references directly, or should media remain separate from UI layout for now?
+- Should `delivery.pin` be implemented for Discord, Slack, MS Teams, and Feishu in the first pass, or only Telegram first?
+- Should `delivery` eventually absorb existing fields such as `replyToId`, `replyToCurrent`, `silent`, and `audioAsVoice`, or stay focused on post-send behaviors?
+- Should presentation support images or file references directly, or should media remain separate from UI layout for now?
 
 ## Related
 
-* [Channels overview](/channels)
-* [Message presentation](/plugins/message-presentation)
+- [Channels overview](/channels)
+- [Message presentation](/plugins/message-presentation)

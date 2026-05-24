@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Nostr
+---
+summary: "Nostr DM channel via NIP-04 encrypted messages"
+read_when:
+  - You want OpenClaw to receive DMs via Nostr
+  - You're setting up decentralized messaging
+title: "Nostr"
+---
 
 **Status:** Optional bundled plugin (disabled by default until configured).
 
@@ -15,11 +17,11 @@ builds do not need a separate install.
 
 ### Older/custom installs
 
-* Onboarding (`openclaw onboard`) and `openclaw channels add` still surface
+- Onboarding (`openclaw onboard`) and `openclaw channels add` still surface
   Nostr from the shared channel catalog.
-* If your build excludes bundled Nostr, install the npm package directly.
+- If your build excludes bundled Nostr, install the npm package directly.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install @openclaw/nostr
 ```
 
@@ -28,7 +30,7 @@ version only when you need a reproducible install.
 
 Use a local checkout (dev workflows):
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install --link <path-to-local-nostr-plugin>
 ```
 
@@ -36,7 +38,7 @@ Restart the Gateway after installing or enabling plugins.
 
 ### Non-interactive setup
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw channels add --channel nostr --private-key "$NOSTR_PRIVATE_KEY"
 openclaw channels add --channel nostr --private-key "$NOSTR_PRIVATE_KEY" --relay-urls "wss://relay.damus.io,wss://relay.primal.net"
 ```
@@ -47,14 +49,14 @@ Use `--use-env` to keep `NOSTR_PRIVATE_KEY` in the environment instead of storin
 
 1. Generate a Nostr keypair (if needed):
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Using nak
 nak key generate
 ```
 
 2. Add to config:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     nostr: {
@@ -66,7 +68,7 @@ nak key generate
 
 3. Export the key:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export NOSTR_PRIVATE_KEY="nsec1..."
 ```
 
@@ -74,15 +76,15 @@ export NOSTR_PRIVATE_KEY="nsec1..."
 
 ## Configuration reference
 
-| Key          | Type      | Default                                     | Description                         |
-| ------------ | --------- | ------------------------------------------- | ----------------------------------- |
-| `privateKey` | string    | required                                    | Private key in `nsec` or hex format |
-| `relays`     | string\[] | `['wss://relay.damus.io', 'wss://nos.lol']` | Relay URLs (WebSocket)              |
-| `dmPolicy`   | string    | `pairing`                                   | DM access policy                    |
-| `allowFrom`  | string\[] | `[]`                                        | Allowed sender pubkeys              |
-| `enabled`    | boolean   | `true`                                      | Enable/disable channel              |
-| `name`       | string    | -                                           | Display name                        |
-| `profile`    | object    | -                                           | NIP-01 profile metadata             |
+| Key          | Type     | Default                                     | Description                         |
+| ------------ | -------- | ------------------------------------------- | ----------------------------------- |
+| `privateKey` | string   | required                                    | Private key in `nsec` or hex format |
+| `relays`     | string[] | `['wss://relay.damus.io', 'wss://nos.lol']` | Relay URLs (WebSocket)              |
+| `dmPolicy`   | string   | `pairing`                                   | DM access policy                    |
+| `allowFrom`  | string[] | `[]`                                        | Allowed sender pubkeys              |
+| `enabled`    | boolean  | `true`                                      | Enable/disable channel              |
+| `name`       | string   | -                                           | Display name                        |
+| `profile`    | object   | -                                           | NIP-01 profile metadata             |
 
 ## Profile metadata
 
@@ -90,7 +92,7 @@ Profile data is published as a NIP-01 `kind:0` event. You can manage it from the
 
 Example:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     nostr: {
@@ -112,27 +114,27 @@ Example:
 
 Notes:
 
-* Profile URLs must use `https://`.
-* Importing from relays merges fields and preserves local overrides.
+- Profile URLs must use `https://`.
+- Importing from relays merges fields and preserves local overrides.
 
 ## Access control
 
 ### DM policies
 
-* **pairing** (default): unknown senders get a pairing code.
-* **allowlist**: only pubkeys in `allowFrom` can DM.
-* **open**: public inbound DMs (requires `allowFrom: ["*"]`).
-* **disabled**: ignore inbound DMs.
+- **pairing** (default): unknown senders get a pairing code.
+- **allowlist**: only pubkeys in `allowFrom` can DM.
+- **open**: public inbound DMs (requires `allowFrom: ["*"]`).
+- **disabled**: ignore inbound DMs.
 
 Enforcement notes:
 
-* Inbound event signatures are verified before sender policy and NIP-04 decryption, so forged events are rejected early.
-* Pairing replies are sent without processing the original DM body.
-* Inbound DMs are rate-limited and oversized payloads are dropped before decrypt.
+- Inbound event signatures are verified before sender policy and NIP-04 decryption, so forged events are rejected early.
+- Pairing replies are sent without processing the original DM body.
+- Inbound DMs are rate-limited and oversized payloads are dropped before decrypt.
 
 ### Allowlist example
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     nostr: {
@@ -148,14 +150,14 @@ Enforcement notes:
 
 Accepted formats:
 
-* **Private key:** `nsec...` or 64-char hex
-* **Pubkeys (`allowFrom`):** `npub...` or hex
+- **Private key:** `nsec...` or 64-char hex
+- **Pubkeys (`allowFrom`):** `npub...` or hex
 
 ## Relays
 
 Defaults: `relay.damus.io` and `nos.lol`.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     nostr: {
@@ -168,10 +170,10 @@ Defaults: `relay.damus.io` and `nos.lol`.
 
 Tips:
 
-* Use 2-3 relays for redundancy.
-* Avoid too many relays (latency, duplication).
-* Paid relays can improve reliability.
-* Local relays are fine for testing (`ws://localhost:7777`).
+- Use 2-3 relays for redundancy.
+- Avoid too many relays (latency, duplication).
+- Paid relays can improve reliability.
+- Local relays are fine for testing (`ws://localhost:7777`).
 
 ## Protocol support
 
@@ -186,12 +188,12 @@ Tips:
 
 ### Local relay
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Start strfry
 docker run -p 7777:7777 ghcr.io/hoytech/strfry
 ```
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   channels: {
     nostr: {
@@ -213,39 +215,39 @@ docker run -p 7777:7777 ghcr.io/hoytech/strfry
 
 ### Not receiving messages
 
-* Verify the private key is valid.
-* Ensure relay URLs are reachable and use `wss://` (or `ws://` for local).
-* Confirm `enabled` is not `false`.
-* Check Gateway logs for relay connection errors.
+- Verify the private key is valid.
+- Ensure relay URLs are reachable and use `wss://` (or `ws://` for local).
+- Confirm `enabled` is not `false`.
+- Check Gateway logs for relay connection errors.
 
 ### Not sending responses
 
-* Check relay accepts writes.
-* Verify outbound connectivity.
-* Watch for relay rate limits.
+- Check relay accepts writes.
+- Verify outbound connectivity.
+- Watch for relay rate limits.
 
 ### Duplicate responses
 
-* Expected when using multiple relays.
-* Messages are deduplicated by event ID; only the first delivery triggers a response.
+- Expected when using multiple relays.
+- Messages are deduplicated by event ID; only the first delivery triggers a response.
 
 ## Security
 
-* Never commit private keys.
-* Use environment variables for keys.
-* Consider `allowlist` for production bots.
-* Signatures are verified before sender policy, and sender policy is enforced before decrypt, so forged events are rejected early and unknown senders cannot force full crypto work.
+- Never commit private keys.
+- Use environment variables for keys.
+- Consider `allowlist` for production bots.
+- Signatures are verified before sender policy, and sender policy is enforced before decrypt, so forged events are rejected early and unknown senders cannot force full crypto work.
 
 ## Limitations (MVP)
 
-* Direct messages only (no group chats).
-* No media attachments.
-* NIP-04 only (NIP-17 gift-wrap planned).
+- Direct messages only (no group chats).
+- No media attachments.
+- NIP-04 only (NIP-17 gift-wrap planned).
 
 ## Related
 
-* [Channels Overview](/channels) — all supported channels
-* [Pairing](/channels/pairing) — DM authentication and pairing flow
-* [Groups](/channels/groups) — group chat behavior and mention gating
-* [Channel Routing](/channels/channel-routing) — session routing for messages
-* [Security](/gateway/security) — access model and hardening
+- [Channels Overview](/channels) — all supported channels
+- [Pairing](/channels/pairing) — DM authentication and pairing flow
+- [Groups](/channels/groups) — group chat behavior and mention gating
+- [Channel Routing](/channels/channel-routing) — session routing for messages
+- [Security](/gateway/security) — access model and hardening

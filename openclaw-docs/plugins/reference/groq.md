@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Groq plugin
+---
+summary: "Adds Groq model provider support to OpenClaw."
+read_when:
+  - You are installing, configuring, or auditing the groq plugin
+title: "Groq plugin"
+---
 
 # Groq plugin
 
@@ -10,8 +11,8 @@ Adds Groq model provider support to OpenClaw.
 
 ## Distribution
 
-* Package: `@openclaw/groq-provider`
-* Install route: included in OpenClaw
+- Package: `@openclaw/groq-provider`
+- Install route: included in OpenClaw
 
 ## Surface
 
@@ -19,4 +20,4 @@ providers: groq; contracts: mediaUnderstandingProviders
 
 ## Related docs
 
-* [groq](/providers/groq)
+- [groq](/providers/groq)

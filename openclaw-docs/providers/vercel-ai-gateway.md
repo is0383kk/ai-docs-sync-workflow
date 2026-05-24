@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Vercel AI gateway
+---
+summary: "Vercel AI Gateway setup (auth + model selection)"
+title: "Vercel AI gateway"
+read_when:
+  - You want to use Vercel AI Gateway with OpenClaw
+  - You need the API key env var or CLI auth choice
+---
 
 The [Vercel AI Gateway](https://vercel.com/ai-gateway) provides a unified API to
 access hundreds of models through a single endpoint.
@@ -15,10 +17,10 @@ access hundreds of models through a single endpoint.
 | Model catalog | Auto-discovered via `/v1/models` |
 
 <Tip>
-  OpenClaw auto-discovers the Gateway `/v1/models` catalog, so
-  `/models vercel-ai-gateway` includes current model refs such as
-  `vercel-ai-gateway/openai/gpt-5.5` and
-  `vercel-ai-gateway/moonshotai/kimi-k2.6`.
+OpenClaw auto-discovers the Gateway `/v1/models` catalog, so
+`/models vercel-ai-gateway` includes current model refs such as
+`vercel-ai-gateway/openai/gpt-5.5` and
+`vercel-ai-gateway/moonshotai/kimi-k2.6`.
 </Tip>
 
 ## Getting started
@@ -27,15 +29,15 @@ access hundreds of models through a single endpoint.
   <Step title="Set the API key">
     Run onboarding and choose the AI Gateway auth option:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --auth-choice ai-gateway-api-key
     ```
-  </Step>
 
+  </Step>
   <Step title="Set a default model">
     Add the model to your OpenClaw config:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -44,10 +46,10 @@ access hundreds of models through a single endpoint.
       },
     }
     ```
-  </Step>
 
+  </Step>
   <Step title="Verify the model is available">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw models list --provider vercel-ai-gateway
     ```
   </Step>
@@ -57,7 +59,7 @@ access hundreds of models through a single endpoint.
 
 For scripted or CI setups, pass all values on the command line:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard --non-interactive \
   --mode local \
   --auth-choice ai-gateway-api-key \
@@ -75,8 +77,8 @@ runtime:
 | `vercel-ai-gateway/opus-4.6`        | `vercel-ai-gateway/anthropic/claude-opus-4-6` |
 
 <Tip>
-  You can use either the shorthand or the fully qualified model ref in your
-  configuration. OpenClaw resolves the canonical form automatically.
+You can use either the shorthand or the fully qualified model ref in your
+configuration. OpenClaw resolves the canonical form automatically.
 </Tip>
 
 ## Advanced configuration
@@ -87,11 +89,12 @@ runtime:
     `AI_GATEWAY_API_KEY` is available to that process.
 
     <Warning>
-      A key exported only in an interactive shell will not be visible to a
-      launchd/systemd daemon unless that environment is explicitly imported. Set
-      the key in `~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway
-      process can read it.
+    A key exported only in an interactive shell will not be visible to a
+    launchd/systemd daemon unless that environment is explicitly imported. Set
+    the key in `~/.openclaw/.env` or via `env.shellEnv` to ensure the gateway
+    process can read it.
     </Warning>
+
   </Accordion>
 
   <Accordion title="Provider routing">
@@ -102,7 +105,6 @@ runtime:
     MoonshotAI. Your single `AI_GATEWAY_API_KEY` handles authentication for all
     upstream providers.
   </Accordion>
-
   <Accordion title="Thinking levels">
     `/think` options follow trusted upstream model prefixes when OpenClaw knows
     the upstream provider contract. `vercel-ai-gateway/anthropic/...` uses the
@@ -120,7 +122,6 @@ runtime:
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Troubleshooting" href="/help/troubleshooting" icon="wrench">
     General troubleshooting and FAQ.
   </Card>

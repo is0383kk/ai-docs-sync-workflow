@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Openshell plugin
+---
+summary: "Sandbox backend powered by the NVIDIA OpenShell CLI with mirrored local workspaces and SSH-based command execution."
+read_when:
+  - You are installing, configuring, or auditing the openshell plugin
+title: "Openshell plugin"
+---
 
 # Openshell plugin
 
@@ -10,8 +11,8 @@ Sandbox backend powered by the NVIDIA OpenShell CLI with mirrored local workspac
 
 ## Distribution
 
-* Package: `@openclaw/openshell-sandbox`
-* Install route: npm; ClawHub
+- Package: `@openclaw/openshell-sandbox`
+- Install route: npm; ClawHub
 
 ## Surface
 

@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Security Audits
+---
+summary: "How to understand ClawHub security audit results before installing a skill or plugin."
+read_when:
+  - Understanding ClawHub security audit results
+  - Deciding whether to install a skill or plugin
+  - Explaining ClawHub audit status, risk level, or findings
+title: "Security Audits"
+sidebarTitle: "Security Audits"
+---
 
 # Security Audits
 
@@ -21,12 +25,12 @@ See also [Acceptable usage](/clawhub/acceptable-usage) and
 
 Before installing, review:
 
-* the overall audit status
-* the risk level
-* any listed findings
-* the publisher note, when present
-* required credentials, permissions, or environment variables
-* owner, source, version, changelog, downloads, stars, and other trust signals
+- the overall audit status
+- the risk level
+- any listed findings
+- the publisher note, when present
+- required credentials, permissions, or environment variables
+- owner, source, version, changelog, downloads, stars, and other trust signals
 
 Install only content you understand and trust.
 
@@ -60,8 +64,8 @@ you use it as intended.
 
 Risk level and audit status answer different questions:
 
-* Risk level asks: "How much power is here?"
-* Audit status asks: "What should I do with this result?"
+- Risk level asks: "How much power is here?"
+- Audit status asks: "What should I do with this result?"
 
 For example, a publishing skill may show `Review` with `Medium` risk. That does
 not mean it is malicious. It means the skill appears purpose-aligned, but can
@@ -71,10 +75,10 @@ act with meaningful account authority.
 
 Findings explain why an audit result was shown. Each finding usually includes:
 
-* what it means
-* why it was flagged
-* the relevant skill or plugin content
-* a recommendation
+- what it means
+- why it was flagged
+- the relevant skill or plugin content
+- a recommendation
 
 Findings may be labeled `Info`, `Low`, `Medium`, `High`, or `Critical`. Higher
 severity findings contribute more strongly to risk level and audit status.
@@ -86,12 +90,12 @@ stays focused on useful evidence.
 
 ClawHub audits submitted release artifacts, including:
 
-* skill instructions or plugin metadata
-* declared environment variables and permissions
-* install instructions and package metadata
-* included files and file manifests
-* compatibility and capability metadata
-* optional publisher notes explaining unusual behavior
+- skill instructions or plugin metadata
+- declared environment variables and permissions
+- install instructions and package metadata
+- included files and file manifests
+- compatibility and capability metadata
+- optional publisher notes explaining unusual behavior
 
 The main question is coherence: do the name, summary, metadata, requested
 authority, and actual content line up with what users would reasonably expect?
@@ -102,7 +106,7 @@ power is expected, disclosed, and proportionate.
 
 Artifact pages link to the full audit at:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 /<owner>/<slug>/security-audit
 ```
 
@@ -133,19 +137,19 @@ reputation signals that complement ClawHub's agent-aware review. When vendor
 engine counts are available, the audit summarizes them in plain language, such
 as:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 62/62 vendors flagged this skill as clean.
 ```
 
 or:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 2/64 vendors flagged this skill as malicious, 1/64 flagged it as suspicious, and 61/64 flagged it as clean.
 ```
 
 When ClawHub has no vendor-count telemetry to summarize, the audit says:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 No VirusTotal findings
 ```
 

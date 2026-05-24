@@ -1,42 +1,45 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Backup
+---
+summary: "CLI reference for `openclaw backup` (create local backup archives)"
+read_when:
+  - You want a first-class backup archive for local OpenClaw state
+  - You want to preview which paths would be included before reset or uninstall
+title: "Backup"
+---
 
 # `openclaw backup`
 
 Create a local backup archive for OpenClaw state, config, auth profiles, channel/provider credentials, sessions, and optionally workspaces.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw backup create
 openclaw backup create --output ~/Backups
 openclaw backup create --dry-run --json
 openclaw backup create --verify
 openclaw backup create --no-include-workspace
 openclaw backup create --only-config
-openclaw backup verify ./2026-03-09T00-00-00.000Z-openclaw-backup.tar.gz
+openclaw backup verify ./2026-03-09T08-00-00.000+08-00-openclaw-backup.tar.gz
 ```
 
 ## Notes
 
-* The archive includes a `manifest.json` file with the resolved source paths and archive layout.
-* Default output is a timestamped `.tar.gz` archive in the current working directory.
-* If the current working directory is inside a backed-up source tree, OpenClaw falls back to your home directory for the default archive location.
-* Existing archive files are never overwritten.
-* Output paths inside the source state/workspace trees are rejected to avoid self-inclusion.
-* `openclaw backup verify <archive>` validates that the archive contains exactly one root manifest, rejects traversal-style archive paths, and checks that every manifest-declared payload exists in the tarball.
-* `openclaw backup create --verify` runs that validation immediately after writing the archive.
-* `openclaw backup create --only-config` backs up just the active JSON config file.
+- The archive includes a `manifest.json` file with the resolved source paths and archive layout.
+- Default output is a timestamped `.tar.gz` archive in the current working directory.
+- Timestamped backup filenames use your machine's local timezone and include the UTC offset.
+- If the current working directory is inside a backed-up source tree, OpenClaw falls back to your home directory for the default archive location.
+- Existing archive files are never overwritten.
+- Output paths inside the source state/workspace trees are rejected to avoid self-inclusion.
+- `openclaw backup verify <archive>` validates that the archive contains exactly one root manifest, rejects traversal-style archive paths, and checks that every manifest-declared payload exists in the tarball.
+- `openclaw backup create --verify` runs that validation immediately after writing the archive.
+- `openclaw backup create --only-config` backs up just the active JSON config file.
 
 ## What gets backed up
 
 `openclaw backup create` plans backup sources from your local OpenClaw install:
 
-* The state directory returned by OpenClaw's local state resolver, usually `~/.openclaw`
-* The active config file path
-* The resolved `credentials/` directory when it exists outside the state directory
-* Workspace directories discovered from the current config, unless you pass `--no-include-workspace`
+- The state directory returned by OpenClaw's local state resolver, usually `~/.openclaw`
+- The active config file path
+- The resolved `credentials/` directory when it exists outside the state directory
+- Workspace directories discovered from the current config, unless you pass `--no-include-workspace`
 
 Model auth profiles are already part of the state directory under
 `agents/<agentId>/agent/auth-profiles.json`, so they are normally covered by the
@@ -66,7 +69,7 @@ missing dependencies.
 
 If you still want a partial backup in that situation, rerun:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw backup create --no-include-workspace
 ```
 
@@ -81,10 +84,10 @@ OpenClaw does not enforce a built-in maximum backup size or per-file size limit.
 
 Practical limits come from the local machine and destination filesystem:
 
-* Available space for the temporary archive write plus the final archive
-* Time to walk large workspace trees and compress them into a `.tar.gz`
-* Time to rescan the archive if you use `openclaw backup create --verify` or run `openclaw backup verify`
-* Filesystem behavior at the destination path. OpenClaw prefers a no-overwrite hard-link publish step and falls back to exclusive copy when hard links are unsupported
+- Available space for the temporary archive write plus the final archive
+- Time to walk large workspace trees and compress them into a `.tar.gz`
+- Time to rescan the archive if you use `openclaw backup create --verify` or run `openclaw backup verify`
+- Filesystem behavior at the destination path. OpenClaw prefers a no-overwrite hard-link publish step and falls back to exclusive copy when hard links are unsupported
 
 Large workspaces are usually the main driver of archive size. If you want a smaller or faster backup, use `--no-include-workspace`.
 
@@ -92,4 +95,4 @@ For the smallest archive, use `--only-config`.
 
 ## Related
 
-* [CLI reference](/cli)
+- [CLI reference](/cli)

@@ -1,15 +1,18 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Moonshot AI
+---
+summary: "Configure Moonshot K2 vs Kimi Coding (separate providers + keys)"
+read_when:
+  - You want Moonshot K2 (Moonshot Open Platform) vs Kimi Coding setup
+  - You need to understand separate endpoints, keys, and model refs
+  - You want copy/paste config for either provider
+title: "Moonshot AI"
+---
 
 Moonshot provides the Kimi API with OpenAI-compatible endpoints. Configure the
 provider and set the default model to `moonshot/kimi-k2.6`, or use
 Kimi Coding with `kimi/kimi-for-coding`.
 
 <Warning>
-  Moonshot and Kimi Coding are **separate providers**. Keys are not interchangeable, endpoints differ, and model refs differ (`moonshot/...` vs `kimi/...`).
+Moonshot and Kimi Coding are **separate providers**. Keys are not interchangeable, endpoints differ, and model refs differ (`moonshot/...` vs `kimi/...`).
 </Warning>
 
 ## Built-in model catalog
@@ -42,26 +45,24 @@ Choose your provider and follow the setup steps.
 
     <Steps>
       <Step title="Choose your endpoint region">
-        | Auth choice           | Endpoint                     | Region        |
-        | --------------------- | ---------------------------- | ------------- |
-        | `moonshot-api-key`    | `https://api.moonshot.ai/v1` | International |
-        | `moonshot-api-key-cn` | `https://api.moonshot.cn/v1` | China         |
+        | Auth choice            | Endpoint                       | Region        |
+        | ---------------------- | ------------------------------ | ------------- |
+        | `moonshot-api-key`     | `https://api.moonshot.ai/v1`   | International |
+        | `moonshot-api-key-cn`  | `https://api.moonshot.cn/v1`   | China         |
       </Step>
-
       <Step title="Run onboarding">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw onboard --auth-choice moonshot-api-key
         ```
 
         Or for the China endpoint:
 
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw onboard --auth-choice moonshot-api-key-cn
         ```
       </Step>
-
       <Step title="Set a default model">
-        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```json5
         {
           agents: {
             defaults: {
@@ -71,18 +72,16 @@ Choose your provider and follow the setup steps.
         }
         ```
       </Step>
-
       <Step title="Verify models are available">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw models list --provider moonshot
         ```
       </Step>
-
       <Step title="Run a live smoke test">
         Use an isolated state dir when you want to verify model access and cost
         tracking without touching your normal sessions:
 
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         OPENCLAW_CONFIG_PATH=/tmp/openclaw-kimi/openclaw.json \
         OPENCLAW_STATE_DIR=/tmp/openclaw-kimi \
         openclaw agent --local \
@@ -101,7 +100,7 @@ Choose your provider and follow the setup steps.
 
     ### Config example
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       env: { MOONSHOT_API_KEY: "sk-..." },
       agents: {
@@ -179,24 +178,24 @@ Choose your provider and follow the setup steps.
       },
     }
     ```
+
   </Tab>
 
   <Tab title="Kimi Coding">
     **Best for:** code-focused tasks via the Kimi Coding endpoint.
 
     <Note>
-      Kimi Coding uses a different API key and provider prefix (`kimi/...`) than Moonshot (`moonshot/...`). The stable API model ref is `kimi/kimi-for-coding`; legacy refs `kimi/kimi-code` and `kimi/k2p5` remain accepted and normalize to that API model id.
+    Kimi Coding uses a different API key and provider prefix (`kimi/...`) than Moonshot (`moonshot/...`). The stable API model ref is `kimi/kimi-for-coding`; legacy refs `kimi/kimi-code` and `kimi/k2p5` remain accepted and normalize to that API model id.
     </Note>
 
     <Steps>
       <Step title="Run onboarding">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw onboard --auth-choice kimi-code-api-key
         ```
       </Step>
-
       <Step title="Set a default model">
-        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```json5
         {
           agents: {
             defaults: {
@@ -206,9 +205,8 @@ Choose your provider and follow the setup steps.
         }
         ```
       </Step>
-
       <Step title="Verify the model is available">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw models list --provider kimi
         ```
       </Step>
@@ -216,7 +214,7 @@ Choose your provider and follow the setup steps.
 
     ### Config example
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       env: { KIMI_API_KEY: "sk-..." },
       agents: {
@@ -229,6 +227,7 @@ Choose your provider and follow the setup steps.
       },
     }
     ```
+
   </Tab>
 </Tabs>
 
@@ -239,27 +238,28 @@ search.
 
 <Steps>
   <Step title="Run interactive web search setup">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw configure --section web
     ```
 
     Choose **Kimi** in the web-search section to store
     `plugins.entries.moonshot.config.webSearch.*`.
-  </Step>
 
+  </Step>
   <Step title="Configure the web search region and model">
     Interactive setup prompts for:
 
-    | Setting          | Options                                                                              |
-    | ---------------- | ------------------------------------------------------------------------------------ |
-    | API region       | `https://api.moonshot.ai/v1` (international) or `https://api.moonshot.cn/v1` (China) |
-    | Web search model | Defaults to `kimi-k2.6`                                                              |
+    | Setting             | Options                                                              |
+    | ------------------- | -------------------------------------------------------------------- |
+    | API region          | `https://api.moonshot.ai/v1` (international) or `https://api.moonshot.cn/v1` (China) |
+    | Web search model    | Defaults to `kimi-k2.6`                                             |
+
   </Step>
 </Steps>
 
 Config lives under `plugins.entries.moonshot.config.webSearch`:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -290,12 +290,12 @@ Config lives under `plugins.entries.moonshot.config.webSearch`:
   <Accordion title="Native thinking mode">
     Moonshot Kimi supports binary native thinking:
 
-    * `thinking: { type: "enabled" }`
-    * `thinking: { type: "disabled" }`
+    - `thinking: { type: "enabled" }`
+    - `thinking: { type: "disabled" }`
 
     Configure it per model via `agents.defaults.models.<provider/model>.params`:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -313,13 +313,13 @@ Config lives under `plugins.entries.moonshot.config.webSearch`:
 
     OpenClaw also maps runtime `/think` levels for Moonshot:
 
-    | `/think` level    | Moonshot behavior        |
-    | ----------------- | ------------------------ |
-    | `/think off`      | `thinking.type=disabled` |
-    | Any non-off level | `thinking.type=enabled`  |
+    | `/think` level       | Moonshot behavior          |
+    | -------------------- | -------------------------- |
+    | `/think off`         | `thinking.type=disabled`   |
+    | Any non-off level    | `thinking.type=enabled`    |
 
     <Warning>
-      When Moonshot thinking is enabled, `tool_choice` must be `auto` or `none`. OpenClaw normalizes incompatible `tool_choice` values to `auto` for compatibility.
+    When Moonshot thinking is enabled, `tool_choice` must be `auto` or `none`. OpenClaw normalizes incompatible `tool_choice` values to `auto` for compatibility.
     </Warning>
 
     Kimi K2.6 also accepts an optional `thinking.keep` field that controls
@@ -328,7 +328,7 @@ Config lives under `plugins.entries.moonshot.config.webSearch`:
     default strategy. OpenClaw only forwards `thinking.keep` for
     `moonshot/kimi-k2.6` and strips it from other models.
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -343,14 +343,15 @@ Config lives under `plugins.entries.moonshot.config.webSearch`:
       },
     }
     ```
+
   </Accordion>
 
   <Accordion title="Tool call id sanitization">
-    Moonshot Kimi serves tool\_call ids shaped like `functions.<name>:<index>`. OpenClaw preserves them unchanged so multi-turn tool calls keep working.
+    Moonshot Kimi serves tool_call ids shaped like `functions.<name>:<index>`. OpenClaw preserves them unchanged so multi-turn tool calls keep working.
 
     To force strict sanitization on a custom OpenAI-compatible provider, set `sanitizeToolCallIds: true`:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       models: {
         providers: {
@@ -362,6 +363,7 @@ Config lives under `plugins.entries.moonshot.config.webSearch`:
       },
     }
     ```
+
   </Accordion>
 
   <Accordion title="Streaming usage compatibility">
@@ -375,19 +377,21 @@ Config lives under `plugins.entries.moonshot.config.webSearch`:
     and cache-read tokens is also converted into local estimated USD cost for
     `/status`, `/usage full`, `/usage cost`, and transcript-backed session
     accounting.
+
   </Accordion>
 
   <Accordion title="Endpoint and model ref reference">
-    | Provider    | Model ref prefix | Endpoint                     | Auth env var                         |
-    | ----------- | ---------------- | ---------------------------- | ------------------------------------ |
-    | Moonshot    | `moonshot/`      | `https://api.moonshot.ai/v1` | `MOONSHOT_API_KEY`                   |
-    | Moonshot CN | `moonshot/`      | `https://api.moonshot.cn/v1` | `MOONSHOT_API_KEY`                   |
-    | Kimi Coding | `kimi/`          | Kimi Coding endpoint         | `KIMI_API_KEY`                       |
-    | Web search  | N/A              | Same as Moonshot API region  | `KIMI_API_KEY` or `MOONSHOT_API_KEY` |
+    | Provider   | Model ref prefix | Endpoint                      | Auth env var        |
+    | ---------- | ---------------- | ----------------------------- | ------------------- |
+    | Moonshot   | `moonshot/`      | `https://api.moonshot.ai/v1`  | `MOONSHOT_API_KEY`  |
+    | Moonshot CN| `moonshot/`      | `https://api.moonshot.cn/v1`  | `MOONSHOT_API_KEY`  |
+    | Kimi Coding| `kimi/`          | Kimi Coding endpoint          | `KIMI_API_KEY`      |
+    | Web search | N/A              | Same as Moonshot API region   | `KIMI_API_KEY` or `MOONSHOT_API_KEY` |
 
-    * Kimi web search uses `KIMI_API_KEY` or `MOONSHOT_API_KEY`, and defaults to `https://api.moonshot.ai/v1` with model `kimi-k2.6`.
-    * Override pricing and context metadata in `models.providers` if needed.
-    * If Moonshot publishes different context limits for a model, adjust `contextWindow` accordingly.
+    - Kimi web search uses `KIMI_API_KEY` or `MOONSHOT_API_KEY`, and defaults to `https://api.moonshot.ai/v1` with model `kimi-k2.6`.
+    - Override pricing and context metadata in `models.providers` if needed.
+    - If Moonshot publishes different context limits for a model, adjust `contextWindow` accordingly.
+
   </Accordion>
 </AccordionGroup>
 
@@ -397,15 +401,12 @@ Config lives under `plugins.entries.moonshot.config.webSearch`:
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Web search" href="/tools/web" icon="magnifying-glass">
     Configuring web search providers including Kimi.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
     Full config schema for providers, models, and plugins.
   </Card>
-
   <Card title="Moonshot Open Platform" href="https://platform.moonshot.ai" icon="globe">
     Moonshot API key management and documentation.
   </Card>

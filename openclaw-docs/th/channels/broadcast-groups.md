@@ -1,0 +1,479 @@
+---
+read_when:
+    - การกำหนดค่ากลุ่มกระจายข้อความ
+    - การดีบักการตอบกลับแบบหลายเอเจนต์ใน WhatsApp
+sidebarTitle: Broadcast groups
+status: experimental
+summary: ส่งข้อความ WhatsApp แบบกระจายไปยังเอเจนต์หลายตัว
+title: กลุ่มกระจายข้อความ
+x-i18n:
+    generated_at: "2026-05-04T02:21:38Z"
+    model: gpt-5.5
+    provider: openai
+    source_hash: eab43d3c3ffddb360340469433d74a380fbab98e662b2463a54f62eafc375b55
+    source_path: channels/broadcast-groups.md
+    workflow: 16
+---
+
+<Note>
+**สถานะ:** ทดลอง เพิ่มใน 2026.1.9
+</Note>
+
+## ภาพรวม
+
+กลุ่มบรอดคาสต์ช่วยให้เอเจนต์หลายตัวประมวลผลและตอบกลับข้อความเดียวกันได้พร้อมกัน วิธีนี้ช่วยให้คุณสร้างทีมเอเจนต์เฉพาะทางที่ทำงานร่วมกันในกลุ่ม WhatsApp หรือ DM เดียว โดยทั้งหมดใช้หมายเลขโทรศัพท์เดียว
+
+ขอบเขตปัจจุบัน: **เฉพาะ WhatsApp เท่านั้น** (ช่องทางเว็บ)
+
+กลุ่มบรอดคาสต์จะถูกประเมินหลังจากรายการอนุญาตของช่องทางและกฎการเปิดใช้งานกลุ่ม ในกลุ่ม WhatsApp หมายความว่าการบรอดคาสต์จะเกิดขึ้นเมื่อ OpenClaw ปกติควรตอบกลับ (เช่น เมื่อถูกกล่าวถึง ขึ้นอยู่กับการตั้งค่ากลุ่มของคุณ)
+
+## กรณีการใช้งาน
+
+<AccordionGroup>
+  <Accordion title="1. ทีมเอเจนต์เฉพาะทาง">
+    ปรับใช้เอเจนต์หลายตัวที่มีความรับผิดชอบแบบแยกย่อยและชัดเจน:
+
+    ```
+    Group: "Development Team"
+    Agents:
+      - CodeReviewer (reviews code snippets)
+      - DocumentationBot (generates docs)
+      - SecurityAuditor (checks for vulnerabilities)
+      - TestGenerator (suggests test cases)
+    ```
+
+    เอเจนต์แต่ละตัวจะประมวลผลข้อความเดียวกันและให้มุมมองเฉพาะทางของตน
+
+  </Accordion>
+  <Accordion title="2. การรองรับหลายภาษา">
+    ```
+    Group: "International Support"
+    Agents:
+      - Agent_EN (responds in English)
+      - Agent_DE (responds in German)
+      - Agent_ES (responds in Spanish)
+    ```
+  </Accordion>
+  <Accordion title="3. เวิร์กโฟลว์การประกันคุณภาพ">
+    ```
+    Group: "Customer Support"
+    Agents:
+      - SupportAgent (provides answer)
+      - QAAgent (reviews quality, only responds if issues found)
+    ```
+  </Accordion>
+  <Accordion title="4. งานอัตโนมัติ">
+    ```
+    Group: "Project Management"
+    Agents:
+      - TaskTracker (updates task database)
+      - TimeLogger (logs time spent)
+      - ReportGenerator (creates summaries)
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## การกำหนดค่า
+
+### การตั้งค่าพื้นฐาน
+
+เพิ่มส่วน `broadcast` ระดับบนสุด (ถัดจาก `bindings`) คีย์คือ WhatsApp peer ids:
+
+- แชตกลุ่ม: group JID (เช่น `120363403215116621@g.us`)
+- DM: หมายเลขโทรศัพท์ E.164 (เช่น `+15551234567`)
+
+```json
+{
+  "broadcast": {
+    "120363403215116621@g.us": ["alfred", "baerbel", "assistant3"]
+  }
+}
+```
+
+**ผลลัพธ์:** เมื่อ OpenClaw ควรตอบกลับในแชตนี้ ระบบจะรันเอเจนต์ทั้งสามตัว
+
+### กลยุทธ์การประมวลผล
+
+ควบคุมวิธีที่เอเจนต์ประมวลผลข้อความ:
+
+<Tabs>
+  <Tab title="parallel (ค่าเริ่มต้น)">
+    เอเจนต์ทั้งหมดประมวลผลพร้อมกัน:
+
+    ```json
+    {
+      "broadcast": {
+        "strategy": "parallel",
+        "120363403215116621@g.us": ["alfred", "baerbel"]
+      }
+    }
+    ```
+
+  </Tab>
+  <Tab title="sequential">
+    เอเจนต์ประมวลผลตามลำดับ (ตัวหนึ่งรอให้ตัวก่อนหน้าทำงานเสร็จ):
+
+    ```json
+    {
+      "broadcast": {
+        "strategy": "sequential",
+        "120363403215116621@g.us": ["alfred", "baerbel"]
+      }
+    }
+    ```
+
+  </Tab>
+</Tabs>
+
+### ตัวอย่างแบบสมบูรณ์
+
+```json
+{
+  "agents": {
+    "list": [
+      {
+        "id": "code-reviewer",
+        "name": "Code Reviewer",
+        "workspace": "/path/to/code-reviewer",
+        "sandbox": { "mode": "all" }
+      },
+      {
+        "id": "security-auditor",
+        "name": "Security Auditor",
+        "workspace": "/path/to/security-auditor",
+        "sandbox": { "mode": "all" }
+      },
+      {
+        "id": "docs-generator",
+        "name": "Documentation Generator",
+        "workspace": "/path/to/docs-generator",
+        "sandbox": { "mode": "all" }
+      }
+    ]
+  },
+  "broadcast": {
+    "strategy": "parallel",
+    "120363403215116621@g.us": ["code-reviewer", "security-auditor", "docs-generator"],
+    "120363424282127706@g.us": ["support-en", "support-de"],
+    "+15555550123": ["assistant", "logger"]
+  }
+}
+```
+
+## วิธีการทำงาน
+
+### ลำดับการไหลของข้อความ
+
+<Steps>
+  <Step title="ข้อความขาเข้ามาถึง">
+    ข้อความกลุ่ม WhatsApp หรือ DM มาถึง
+  </Step>
+  <Step title="ตรวจสอบการบรอดคาสต์">
+    ระบบตรวจสอบว่า peer ID อยู่ใน `broadcast` หรือไม่
+  </Step>
+  <Step title="ถ้าอยู่ในรายการบรอดคาสต์">
+    - เอเจนต์ทั้งหมดที่ระบุไว้จะประมวลผลข้อความ
+    - เอเจนต์แต่ละตัวมีคีย์เซสชันและบริบทที่แยกจากกัน
+    - เอเจนต์ประมวลผลแบบขนาน (ค่าเริ่มต้น) หรือตามลำดับ
+
+  </Step>
+  <Step title="ถ้าไม่อยู่ในรายการบรอดคาสต์">
+    ใช้การกำหนดเส้นทางปกติ (binding แรกที่ตรงกัน)
+  </Step>
+</Steps>
+
+<Note>
+กลุ่มบรอดคาสต์ไม่ข้ามรายการอนุญาตของช่องทางหรือกฎการเปิดใช้งานกลุ่ม (การกล่าวถึง/คำสั่ง/ฯลฯ) กลุ่มเหล่านี้เปลี่ยนเฉพาะ _เอเจนต์ตัวใดที่จะรัน_ เมื่อข้อความมีสิทธิ์ถูกประมวลผล
+</Note>
+
+### การแยกเซสชัน
+
+เอเจนต์แต่ละตัวในกลุ่มบรอดคาสต์จะรักษาสิ่งต่อไปนี้แยกจากกันโดยสมบูรณ์:
+
+- **คีย์เซสชัน** (`agent:alfred:whatsapp:group:120363...` เทียบกับ `agent:baerbel:whatsapp:group:120363...`)
+- **ประวัติการสนทนา** (เอเจนต์จะไม่เห็นข้อความของเอเจนต์อื่น)
+- **เวิร์กสเปซ** (sandbox แยกกันหากกำหนดค่าไว้)
+- **การเข้าถึงเครื่องมือ** (รายการอนุญาต/ปฏิเสธต่างกัน)
+- **หน่วยความจำ/บริบท** (IDENTITY.md, SOUL.md ฯลฯ แยกกัน)
+- **บัฟเฟอร์บริบทกลุ่ม** (ข้อความกลุ่มล่าสุดที่ใช้เป็นบริบท) ถูกแชร์ต่อ peer ดังนั้นเอเจนต์บรอดคาสต์ทั้งหมดจะเห็นบริบทเดียวกันเมื่อถูกทริกเกอร์
+
+สิ่งนี้ช่วยให้เอเจนต์แต่ละตัวมี:
+
+- บุคลิกที่แตกต่างกัน
+- การเข้าถึงเครื่องมือต่างกัน (เช่น อ่านอย่างเดียว เทียบกับ อ่าน-เขียน)
+- โมเดลต่างกัน (เช่น opus เทียบกับ sonnet)
+- Skills ที่ติดตั้งต่างกัน
+
+### ตัวอย่าง: เซสชันที่แยกจากกัน
+
+ในกลุ่ม `120363403215116621@g.us` ที่มีเอเจนต์ `["alfred", "baerbel"]`:
+
+<Tabs>
+  <Tab title="บริบทของ Alfred">
+    ```
+    Session: agent:alfred:whatsapp:group:120363403215116621@g.us
+    History: [user message, alfred's previous responses]
+    Workspace: /Users/user/openclaw-alfred/
+    Tools: read, write, exec
+    ```
+  </Tab>
+  <Tab title="บริบทของ Bärbel">
+    ```
+    Session: agent:baerbel:whatsapp:group:120363403215116621@g.us
+    History: [user message, baerbel's previous responses]
+    Workspace: /Users/user/openclaw-baerbel/
+    Tools: read only
+    ```
+  </Tab>
+</Tabs>
+
+## แนวทางปฏิบัติที่ดีที่สุด
+
+<AccordionGroup>
+  <Accordion title="1. ให้เอเจนต์มีขอบเขตชัดเจน">
+    ออกแบบเอเจนต์แต่ละตัวให้มีความรับผิดชอบเดียวที่ชัดเจน:
+
+    ```json
+    {
+      "broadcast": {
+        "DEV_GROUP": ["formatter", "linter", "tester"]
+      }
+    }
+    ```
+
+    ✅ **ดี:** เอเจนต์แต่ละตัวมีงานเดียว ❌ **ไม่ดี:** เอเจนต์ "dev-helper" แบบทั่วไปตัวเดียว
+
+  </Accordion>
+  <Accordion title="2. ใช้ชื่อที่สื่อความหมาย">
+    ทำให้ชัดเจนว่าเอเจนต์แต่ละตัวทำอะไร:
+
+    ```json
+    {
+      "agents": {
+        "security-scanner": { "name": "Security Scanner" },
+        "code-formatter": { "name": "Code Formatter" },
+        "test-generator": { "name": "Test Generator" }
+      }
+    }
+    ```
+
+  </Accordion>
+  <Accordion title="3. กำหนดค่าการเข้าถึงเครื่องมือที่แตกต่างกัน">
+    ให้เอเจนต์เข้าถึงเฉพาะเครื่องมือที่จำเป็น:
+
+    ```json
+    {
+      "agents": {
+        "reviewer": {
+          "tools": { "allow": ["read", "exec"] }
+        },
+        "fixer": {
+          "tools": { "allow": ["read", "write", "edit", "exec"] }
+        }
+      }
+    }
+    ```
+
+    `reviewer` อ่านได้อย่างเดียว `fixer` อ่านและเขียนได้
+
+  </Accordion>
+  <Accordion title="4. ตรวจสอบประสิทธิภาพ">
+    เมื่อมีเอเจนต์จำนวนมาก ให้พิจารณา:
+
+    - ใช้ `"strategy": "parallel"` (ค่าเริ่มต้น) เพื่อความเร็ว
+    - จำกัดกลุ่มบรอดคาสต์ไว้ที่ 5-10 เอเจนต์
+    - ใช้โมเดลที่เร็วกว่าสำหรับเอเจนต์ที่เรียบง่ายกว่า
+
+  </Accordion>
+  <Accordion title="5. จัดการความล้มเหลวอย่างเหมาะสม">
+    เอเจนต์ล้มเหลวแยกจากกัน ข้อผิดพลาดของเอเจนต์ตัวหนึ่งจะไม่บล็อกตัวอื่น:
+
+    ```
+    Message → [Agent A ✓, Agent B ✗ error, Agent C ✓]
+    Result: Agent A and C respond, Agent B logs error
+    ```
+
+  </Accordion>
+</AccordionGroup>
+
+## ความเข้ากันได้
+
+### ผู้ให้บริการ
+
+ปัจจุบันกลุ่มบรอดคาสต์ทำงานกับ:
+
+- ✅ WhatsApp (นำไปใช้แล้ว)
+- 🚧 Telegram (วางแผนไว้)
+- 🚧 Discord (วางแผนไว้)
+- 🚧 Slack (วางแผนไว้)
+
+### การกำหนดเส้นทาง
+
+กลุ่มบรอดคาสต์ทำงานควบคู่กับการกำหนดเส้นทางที่มีอยู่:
+
+```json
+{
+  "bindings": [
+    {
+      "match": { "channel": "whatsapp", "peer": { "kind": "group", "id": "GROUP_A" } },
+      "agentId": "alfred"
+    }
+  ],
+  "broadcast": {
+    "GROUP_B": ["agent1", "agent2"]
+  }
+}
+```
+
+- `GROUP_A`: มีเพียง alfred ที่ตอบกลับ (การกำหนดเส้นทางปกติ)
+- `GROUP_B`: agent1 และ agent2 ตอบกลับ (บรอดคาสต์)
+
+<Note>
+**ลำดับความสำคัญ:** `broadcast` มีลำดับความสำคัญสูงกว่า `bindings`
+</Note>
+
+## การแก้ไขปัญหา
+
+<AccordionGroup>
+  <Accordion title="เอเจนต์ไม่ตอบกลับ">
+    **ตรวจสอบ:**
+
+    1. Agent IDs มีอยู่ใน `agents.list`
+    2. รูปแบบ peer ID ถูกต้อง (เช่น `120363403215116621@g.us`)
+    3. เอเจนต์ไม่อยู่ในรายการปฏิเสธ
+
+    **ดีบัก:**
+
+    ```bash
+    tail -f ~/.openclaw/logs/gateway.log | grep broadcast
+    ```
+
+  </Accordion>
+  <Accordion title="มีเอเจนต์เพียงตัวเดียวที่ตอบกลับ">
+    **สาเหตุ:** peer ID อาจอยู่ใน `bindings` แต่ไม่อยู่ใน `broadcast`
+
+    **วิธีแก้:** เพิ่มลงในการกำหนดค่า broadcast หรือลบออกจาก bindings
+
+  </Accordion>
+  <Accordion title="ปัญหาด้านประสิทธิภาพ">
+    หากช้าเมื่อมีเอเจนต์จำนวนมาก:
+
+    - ลดจำนวนเอเจนต์ต่อกลุ่ม
+    - ใช้โมเดลที่เบากว่า (sonnet แทน opus)
+    - ตรวจสอบเวลาเริ่มต้นของ sandbox
+
+  </Accordion>
+</AccordionGroup>
+
+## ตัวอย่าง
+
+<AccordionGroup>
+  <Accordion title="ตัวอย่างที่ 1: ทีมรีวิวโค้ด">
+    ```json
+    {
+      "broadcast": {
+        "strategy": "parallel",
+        "120363403215116621@g.us": [
+          "code-formatter",
+          "security-scanner",
+          "test-coverage",
+          "docs-checker"
+        ]
+      },
+      "agents": {
+        "list": [
+          {
+            "id": "code-formatter",
+            "workspace": "~/agents/formatter",
+            "tools": { "allow": ["read", "write"] }
+          },
+          {
+            "id": "security-scanner",
+            "workspace": "~/agents/security",
+            "tools": { "allow": ["read", "exec"] }
+          },
+          {
+            "id": "test-coverage",
+            "workspace": "~/agents/testing",
+            "tools": { "allow": ["read", "exec"] }
+          },
+          { "id": "docs-checker", "workspace": "~/agents/docs", "tools": { "allow": ["read"] } }
+        ]
+      }
+    }
+    ```
+
+    **ผู้ใช้ส่ง:** ชิ้นส่วนโค้ด
+
+    **คำตอบ:**
+
+    - code-formatter: "แก้การเยื้องและเพิ่ม type hints แล้ว"
+    - security-scanner: "⚠️ ช่องโหว่ SQL injection ในบรรทัดที่ 12"
+    - test-coverage: "Coverage อยู่ที่ 45% ยังขาดเทสต์สำหรับกรณีข้อผิดพลาด"
+    - docs-checker: "ไม่มี docstring สำหรับฟังก์ชัน `process_data`"
+
+  </Accordion>
+  <Accordion title="ตัวอย่างที่ 2: การรองรับหลายภาษา">
+    ```json
+    {
+      "broadcast": {
+        "strategy": "sequential",
+        "+15555550123": ["detect-language", "translator-en", "translator-de"]
+      },
+      "agents": {
+        "list": [
+          { "id": "detect-language", "workspace": "~/agents/lang-detect" },
+          { "id": "translator-en", "workspace": "~/agents/translate-en" },
+          { "id": "translator-de", "workspace": "~/agents/translate-de" }
+        ]
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## ข้อมูลอ้างอิง API
+
+### สคีมาการกำหนดค่า
+
+```typescript
+interface OpenClawConfig {
+  broadcast?: {
+    strategy?: "parallel" | "sequential";
+    [peerId: string]: string[];
+  };
+}
+```
+
+### ฟิลด์
+
+<ParamField path="strategy" type='"parallel" | "sequential"' default='"parallel"'>
+  วิธีประมวลผลเอเจนต์ `parallel` รันเอเจนต์ทั้งหมดพร้อมกัน ส่วน `sequential` รันตามลำดับในอาร์เรย์
+</ParamField>
+<ParamField path="[peerId]" type="string[]">
+  WhatsApp group JID, หมายเลข E.164 หรือ peer ID อื่น ค่าเป็นอาร์เรย์ของ agent IDs ที่ควรประมวลผลข้อความ
+</ParamField>
+
+## ข้อจำกัด
+
+1. **จำนวนเอเจนต์สูงสุด:** ไม่มีขีดจำกัดตายตัว แต่เอเจนต์ 10+ ตัวอาจทำงานช้า
+2. **บริบทที่แชร์:** เอเจนต์จะไม่เห็นคำตอบของกันและกัน (โดยออกแบบไว้เช่นนั้น)
+3. **ลำดับข้อความ:** คำตอบแบบขนานอาจมาถึงในลำดับใดก็ได้
+4. **ขีดจำกัดอัตรา:** เอเจนต์ทั้งหมดนับรวมในขีดจำกัดอัตราของ WhatsApp
+
+## การปรับปรุงในอนาคต
+
+ฟีเจอร์ที่วางแผนไว้:
+
+- [ ] โหมดบริบทที่แชร์ (เอเจนต์เห็นคำตอบของกันและกัน)
+- [ ] การประสานงานของเอเจนต์ (เอเจนต์สามารถส่งสัญญาณหากันได้)
+- [ ] การเลือกเอเจนต์แบบไดนามิก (เลือกเอเจนต์ตามเนื้อหาข้อความ)
+- [ ] ลำดับความสำคัญของเอเจนต์ (เอเจนต์บางตัวตอบกลับก่อนตัวอื่น)
+
+## ที่เกี่ยวข้อง
+
+- [การกำหนดเส้นทางช่องทาง](/th/channels/channel-routing)
+- [กลุ่ม](/th/channels/groups)
+- [เครื่องมือ sandbox สำหรับหลาย agent](/th/tools/multi-agent-sandbox-tools)
+- [การจับคู่](/th/channels/pairing)
+- [การจัดการ session](/th/concepts/session)

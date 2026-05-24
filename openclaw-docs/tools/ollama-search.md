@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Ollama web search
+---
+summary: "Ollama Web Search via a local Ollama host or the hosted Ollama API"
+read_when:
+  - You want to use Ollama for web_search
+  - You want a key-free web_search provider
+  - You want to use hosted Ollama Web Search with OLLAMA_API_KEY
+  - You need Ollama Web Search setup guidance
+title: "Ollama web search"
+---
 
 OpenClaw supports **Ollama Web Search** as a bundled `web_search` provider. It
 uses Ollama's web-search API and returns structured results with titles, URLs,
@@ -11,8 +15,8 @@ and snippets.
 For local or self-hosted Ollama, this setup does not need an API key by
 default. It does require:
 
-* an Ollama host that is reachable from OpenClaw
-* `ollama signin`
+- an Ollama host that is reachable from OpenClaw
+- `ollama signin`
 
 For direct hosted search, set the Ollama provider base URL to `https://ollama.com`
 and provide a real `OLLAMA_API_KEY`.
@@ -23,23 +27,23 @@ and provide a real `OLLAMA_API_KEY`.
   <Step title="Start Ollama">
     Make sure Ollama is installed and running.
   </Step>
-
   <Step title="Sign in">
     Run:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     ollama signin
     ```
-  </Step>
 
+  </Step>
   <Step title="Choose Ollama Web Search">
     Run:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw configure --section web
     ```
 
     Then select **Ollama Web Search** as the provider.
+
   </Step>
 </Steps>
 
@@ -48,7 +52,7 @@ configured host.
 
 ## Config
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     web: {
@@ -62,7 +66,7 @@ configured host.
 
 Optional Ollama host override:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -81,7 +85,7 @@ Optional Ollama host override:
 If you already configure Ollama as a model provider, the web-search provider can
 reuse that host instead:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   models: {
     providers: {
@@ -103,7 +107,7 @@ for requests to that configured host.
 
 Direct hosted Ollama Web Search:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   models: {
     providers: {
@@ -125,25 +129,25 @@ Direct hosted Ollama Web Search:
 
 ## Notes
 
-* No web-search-specific API key field is required for this provider.
-* If the Ollama host is auth-protected, OpenClaw reuses the normal Ollama
+- No web-search-specific API key field is required for this provider.
+- If the Ollama host is auth-protected, OpenClaw reuses the normal Ollama
   provider API key when present.
-* If `baseUrl` is `https://ollama.com`, OpenClaw calls
+- If `baseUrl` is `https://ollama.com`, OpenClaw calls
   `https://ollama.com/api/web_search` directly and sends the configured Ollama
   API key as bearer auth.
-* If the configured host does not expose web search and `OLLAMA_API_KEY` is set,
+- If the configured host does not expose web search and `OLLAMA_API_KEY` is set,
   OpenClaw can fall back to `https://ollama.com/api/web_search` without sending
   that env key to the local host.
-* OpenClaw warns during setup if Ollama is unreachable or not signed in, but
+- OpenClaw warns during setup if Ollama is unreachable or not signed in, but
   it does not block selection.
-* Runtime auto-detect can fall back to Ollama Web Search when no higher-priority
+- Runtime auto-detect can fall back to Ollama Web Search when no higher-priority
   credentialed provider is configured.
-* Local Ollama daemon hosts use the local proxy endpoint
+- Local Ollama daemon hosts use the local proxy endpoint
   `/api/experimental/web_search`, which signs and forwards to Ollama Cloud.
-* `https://ollama.com` hosts use the public hosted endpoint
+- `https://ollama.com` hosts use the public hosted endpoint
   `/api/web_search` directly with bearer API-key auth.
 
 ## Related
 
-* [Web Search overview](/tools/web) -- all providers and auto-detection
-* [Ollama](/providers/ollama) -- Ollama model setup and cloud/local modes
+- [Web Search overview](/tools/web) -- all providers and auto-detection
+- [Ollama](/providers/ollama) -- Ollama model setup and cloud/local modes

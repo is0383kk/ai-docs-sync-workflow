@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Tool Search
+---
+summary: "Tool Search: compact large PI tool catalogs behind search, describe, and call"
+title: "Tool Search"
+read_when:
+  - You want PI agents to use a large tool catalog without adding every tool schema to the prompt
+  - You want OpenClaw tools, MCP tools, and client tools exposed through one compact PI surface
+  - You are implementing or debugging tool discovery for PI runs
+---
 
 Tool Search is an experimental OpenClaw PI-agent feature. It gives PI agents one
 compact way to discover and call large tool catalogs. It is useful when the run
@@ -17,7 +20,7 @@ When enabled for PI, the model receives one `tool_search_code` tool by default.
 That tool runs a short JavaScript body in an isolated Node subprocess with an
 `openclaw.tools` bridge:
 
-```js theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```js
 const hits = await openclaw.tools.search("create a GitHub issue");
 const tool = await openclaw.tools.describe(hits[0].id);
 return await openclaw.tools.call(tool.id, {
@@ -58,8 +61,8 @@ normal policy, approval, hook, logging, and result handling still apply.
 
 `tools.toolSearch` has two model-facing modes:
 
-* `code`: exposes `tool_search_code`, the default compact JavaScript bridge.
-* `tools`: exposes `tool_search`, `tool_describe`, and `tool_call` as plain
+- `code`: exposes `tool_search_code`, the default compact JavaScript bridge.
+- `tools`: exposes `tool_search`, `tool_describe`, and `tool_call` as plain
   structured tools for providers that should not receive code.
 
 Both modes use the same catalog and execution path. The only difference is the
@@ -82,12 +85,12 @@ selection.
 
 Tool Search changes the shape:
 
-* direct tools: the model sees every selected schema before the first token
-* Tool Search code mode: the model sees one compact code tool and a short API
+- direct tools: the model sees every selected schema before the first token
+- Tool Search code mode: the model sees one compact code tool and a short API
   contract
-* Tool Search tools mode: the model sees three compact structured fallback
+- Tool Search tools mode: the model sees three compact structured fallback
   tools
-* during the turn: the model loads only the tool schemas it actually needs
+- during the turn: the model loads only the tool schemas it actually needs
 
 Direct tool exposure is still the right default for small catalogs. Tool Search
 is best when one run can see many tools, especially from MCP servers or
@@ -100,7 +103,7 @@ client-provided app tools.
 Searches the effective catalog for the current run. Results are compact and safe
 to put back into prompt context.
 
-```js theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```js
 const hits = await openclaw.tools.search("calendar event", { limit: 5 });
 ```
 
@@ -108,7 +111,7 @@ const hits = await openclaw.tools.search("calendar event", { limit: 5 });
 
 Loads full metadata for one search result, including the exact input schema.
 
-```js theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```js
 const calendarCreate = await openclaw.tools.describe("mcp:calendar:create_event");
 ```
 
@@ -116,7 +119,7 @@ const calendarCreate = await openclaw.tools.describe("mcp:calendar:create_event"
 
 Calls a selected tool through OpenClaw.
 
-```js theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```js
 await openclaw.tools.call(calendarCreate.id, {
   summary: "Planning",
   start: "2026-05-09T14:00:00Z",
@@ -125,9 +128,9 @@ await openclaw.tools.call(calendarCreate.id, {
 
 The structured fallback mode exposes the same operations as tools:
 
-* `tool_search`
-* `tool_describe`
-* `tool_call`
+- `tool_search`
+- `tool_describe`
+- `tool_call`
 
 ## Runtime boundary
 
@@ -139,31 +142,31 @@ after async continuations.
 
 The runtime exposes only:
 
-* `console.log`, `console.warn`, and `console.error`
-* `openclaw.tools.search`
-* `openclaw.tools.describe`
-* `openclaw.tools.call`
+- `console.log`, `console.warn`, and `console.error`
+- `openclaw.tools.search`
+- `openclaw.tools.describe`
+- `openclaw.tools.call`
 
 Normal OpenClaw behavior still applies to final calls:
 
-* tool allow and deny policies
-* per-agent and per-sandbox tool restrictions
-* channel/runtime tool policy
-* approval hooks
-* plugin `before_tool_call` hooks
-* session identity, logs, and telemetry
+- tool allow and deny policies
+- per-agent and per-sandbox tool restrictions
+- channel/runtime tool policy
+- approval hooks
+- plugin `before_tool_call` hooks
+- session identity, logs, and telemetry
 
 ## Config
 
 Enable Tool Search for PI runs with the default code bridge:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw config set tools.toolSearch true
 ```
 
 Equivalent JSON:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     toolSearch: true,
@@ -173,7 +176,7 @@ Equivalent JSON:
 
 Use the structured fallback tools instead for PI runs:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     toolSearch: {
@@ -185,7 +188,7 @@ Use the structured fallback tools instead for PI runs:
 
 Tune code-mode timeout and search result limits:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     toolSearch: {
@@ -200,7 +203,7 @@ Tune code-mode timeout and search result limits:
 
 Disable it:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     toolSearch: false,
@@ -212,24 +215,24 @@ Disable it:
 
 Tool Search records enough telemetry to compare it with direct tool exposure:
 
-* total serialized tool and prompt bytes sent to the harness
-* catalog size and source breakdown
-* search, describe, and call counts
-* final tool calls executed through OpenClaw
-* selected tool ids and sources
+- total serialized tool and prompt bytes sent to the harness
+- catalog size and source breakdown
+- search, describe, and call counts
+- final tool calls executed through OpenClaw
+- selected tool ids and sources
 
 Session logs should make it possible to answer:
 
-* how many tool schemas the model saw up front
-* how many search and describe operations it performed
-* which final tool was called
-* whether the result came from OpenClaw, MCP, or a client tool
+- how many tool schemas the model saw up front
+- how many search and describe operations it performed
+- which final tool was called
+- whether the result came from OpenClaw, MCP, or a client tool
 
 ## E2E validation
 
 The gateway E2E runner proves both paths with the PI harness:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 node --import tsx scripts/tool-search-gateway-e2e.ts
 ```
 
@@ -250,17 +253,17 @@ The regression proves:
 
 Tool Search should fail closed:
 
-* if a tool is not in the effective policy, search should not return it
-* if a selected tool becomes unavailable, `tool_call` should fail
-* if policy or approval blocks execution, the call result should report that
+- if a tool is not in the effective policy, search should not return it
+- if a selected tool becomes unavailable, `tool_call` should fail
+- if policy or approval blocks execution, the call result should report that
   block instead of bypassing it
-* if the code bridge cannot create an isolated runtime, use `mode: "tools"` or
+- if the code bridge cannot create an isolated runtime, use `mode: "tools"` or
   disable Tool Search for that deployment
 
 ## Related
 
-* [Tools and plugins](/tools)
-* [Multi-agent sandbox and tools](/tools/multi-agent-sandbox-tools)
-* [Exec tool](/tools/exec)
-* [ACP agents setup](/tools/acp-agents-setup)
-* [Building plugins](/plugins/building-plugins)
+- [Tools and plugins](/tools)
+- [Multi-agent sandbox and tools](/tools/multi-agent-sandbox-tools)
+- [Exec tool](/tools/exec)
+- [ACP agents setup](/tools/acp-agents-setup)
+- [Building plugins](/plugins/building-plugins)

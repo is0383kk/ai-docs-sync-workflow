@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Amazon Bedrock
+---
+summary: "Use Amazon Bedrock (Converse API) models with OpenClaw"
+read_when:
+  - You want to use Amazon Bedrock models with OpenClaw
+  - You need AWS credential/region setup for model calls
+title: "Amazon Bedrock"
+---
 
 OpenClaw can use **Amazon Bedrock** models via pi-ai's **Bedrock Converse**
 streaming provider. Bedrock auth uses the **AWS SDK default credential chain**,
@@ -25,8 +27,8 @@ Choose your preferred auth method and follow the setup steps.
 
     <Steps>
       <Step title="Set AWS credentials on the gateway host">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
-        export AWS_ACCESS_KEY_ID="AKIA..."
+        ```bash
+        export AWS_ACCESS_KEY_ID="EXAMPLE_AWS_ACCESS_KEY_ID"
         export AWS_SECRET_ACCESS_KEY="..."
         export AWS_REGION="us-east-1"
         # Optional:
@@ -36,11 +38,10 @@ Choose your preferred auth method and follow the setup steps.
         export AWS_BEARER_TOKEN_BEDROCK="..."
         ```
       </Step>
-
       <Step title="Add a Bedrock provider and model to your config">
         No `apiKey` is required. Configure the provider with `auth: "aws-sdk"`:
 
-        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```json5
         {
           models: {
             providers: {
@@ -70,17 +71,17 @@ Choose your preferred auth method and follow the setup steps.
         }
         ```
       </Step>
-
       <Step title="Verify models are available">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw models list
         ```
       </Step>
     </Steps>
 
     <Tip>
-      With env-marker auth (`AWS_ACCESS_KEY_ID`, `AWS_PROFILE`, or `AWS_BEARER_TOKEN_BEDROCK`), OpenClaw auto-enables the implicit Bedrock provider for model discovery without extra config.
+    With env-marker auth (`AWS_ACCESS_KEY_ID`, `AWS_PROFILE`, or `AWS_BEARER_TOKEN_BEDROCK`), OpenClaw auto-enables the implicit Bedrock provider for model discovery without extra config.
     </Tip>
+
   </Tab>
 
   <Tab title="EC2 instance roles (IMDS)">
@@ -90,44 +91,43 @@ Choose your preferred auth method and follow the setup steps.
       <Step title="Enable discovery explicitly">
         When using IMDS, OpenClaw cannot detect AWS auth from env markers alone, so you must opt in:
 
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw config set plugins.entries.amazon-bedrock.config.discovery.enabled true
         openclaw config set plugins.entries.amazon-bedrock.config.discovery.region us-east-1
         ```
       </Step>
-
       <Step title="Optionally add an env marker for auto mode">
         If you also want the env-marker auto-detection path to work (for example, for `openclaw status` surfaces):
 
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         export AWS_PROFILE=default
         export AWS_REGION=us-east-1
         ```
 
         You do **not** need a fake API key.
       </Step>
-
       <Step title="Verify models are discovered">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw models list
         ```
       </Step>
     </Steps>
 
     <Warning>
-      The IAM role attached to your EC2 instance must have the following permissions:
+    The IAM role attached to your EC2 instance must have the following permissions:
 
-      * `bedrock:InvokeModel`
-      * `bedrock:InvokeModelWithResponseStream`
-      * `bedrock:ListFoundationModels` (for automatic discovery)
-      * `bedrock:ListInferenceProfiles` (for inference profile discovery)
+    - `bedrock:InvokeModel`
+    - `bedrock:InvokeModelWithResponseStream`
+    - `bedrock:ListFoundationModels` (for automatic discovery)
+    - `bedrock:ListInferenceProfiles` (for inference profile discovery)
 
-      Or attach the managed policy `AmazonBedrockFullAccess`.
+    Or attach the managed policy `AmazonBedrockFullAccess`.
     </Warning>
 
     <Note>
-      You only need `AWS_PROFILE=default` if you specifically want an env marker for auto mode or status surfaces. The actual Bedrock runtime auth path uses the AWS SDK default chain, so IMDS instance-role auth works even without env markers.
+    You only need `AWS_PROFILE=default` if you specifically want an env marker for auto mode or status surfaces. The actual Bedrock runtime auth path uses the AWS SDK default chain, so IMDS instance-role auth works even without env markers.
     </Note>
+
   </Tab>
 </Tabs>
 
@@ -139,26 +139,26 @@ and **text output**. Discovery uses `bedrock:ListFoundationModels` and
 
 How the implicit provider is enabled:
 
-* If `plugins.entries.amazon-bedrock.config.discovery.enabled` is `true`,
+- If `plugins.entries.amazon-bedrock.config.discovery.enabled` is `true`,
   OpenClaw will try discovery even when no AWS env marker is present.
-* If `plugins.entries.amazon-bedrock.config.discovery.enabled` is unset,
+- If `plugins.entries.amazon-bedrock.config.discovery.enabled` is unset,
   OpenClaw only auto-adds the
   implicit Bedrock provider when it sees one of these AWS auth markers:
   `AWS_BEARER_TOKEN_BEDROCK`, `AWS_ACCESS_KEY_ID` +
   `AWS_SECRET_ACCESS_KEY`, or `AWS_PROFILE`.
-* The actual Bedrock runtime auth path still uses the AWS SDK default chain, so
+- The actual Bedrock runtime auth path still uses the AWS SDK default chain, so
   shared config, SSO, and IMDS instance-role auth can work even when discovery
   needed `enabled: true` to opt in.
 
 <Note>
-  For explicit `models.providers["amazon-bedrock"]` entries, OpenClaw can still resolve Bedrock env-marker auth early from AWS env markers such as `AWS_BEARER_TOKEN_BEDROCK` without forcing full runtime auth loading. The actual model-call auth path still uses the AWS SDK default chain.
+For explicit `models.providers["amazon-bedrock"]` entries, OpenClaw can still resolve Bedrock env-marker auth early from AWS env markers such as `AWS_BEARER_TOKEN_BEDROCK` without forcing full runtime auth loading. The actual model-call auth path still uses the AWS SDK default chain.
 </Note>
 
 <AccordionGroup>
   <Accordion title="Discovery config options">
     Config options live under `plugins.entries.amazon-bedrock.config.discovery`:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       plugins: {
         entries: {
@@ -179,14 +179,15 @@ How the implicit provider is enabled:
     }
     ```
 
-    | Option                 | Default                                           | Description                                                                                                                               |
-    | ---------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-    | `enabled`              | auto                                              | In auto mode, OpenClaw only enables the implicit Bedrock provider when it sees a supported AWS env marker. Set `true` to force discovery. |
-    | `region`               | `AWS_REGION` / `AWS_DEFAULT_REGION` / `us-east-1` | AWS region used for discovery API calls.                                                                                                  |
-    | `providerFilter`       | (all)                                             | Matches Bedrock provider names (for example `anthropic`, `amazon`).                                                                       |
-    | `refreshInterval`      | `3600`                                            | Cache duration in seconds. Set to `0` to disable caching.                                                                                 |
-    | `defaultContextWindow` | `32000`                                           | Context window used for discovered models (override if you know your model limits).                                                       |
-    | `defaultMaxTokens`     | `4096`                                            | Max output tokens used for discovered models (override if you know your model limits).                                                    |
+    | Option | Default | Description |
+    | ------ | ------- | ----------- |
+    | `enabled` | auto | In auto mode, OpenClaw only enables the implicit Bedrock provider when it sees a supported AWS env marker. Set `true` to force discovery. |
+    | `region` | `AWS_REGION` / `AWS_DEFAULT_REGION` / `us-east-1` | AWS region used for discovery API calls. |
+    | `providerFilter` | (all) | Matches Bedrock provider names (for example `anthropic`, `amazon`). |
+    | `refreshInterval` | `3600` | Cache duration in seconds. Set to `0` to disable caching. |
+    | `defaultContextWindow` | `32000` | Context window used for discovered models (override if you know your model limits). |
+    | `defaultMaxTokens` | `4096` | Max output tokens used for discovered models (override if you know your model limits). |
+
   </Accordion>
 </AccordionGroup>
 
@@ -195,7 +196,7 @@ How the implicit provider is enabled:
 This walkthrough creates an IAM role, attaches Bedrock permissions, associates
 the instance profile, and enables OpenClaw discovery on the EC2 host.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # 1. Create IAM role and instance profile
 aws iam create-role --role-name EC2-Bedrock-Access \
   --assume-role-policy-document '{
@@ -252,24 +253,25 @@ openclaw models list
     No extra configuration is needed. As long as discovery is enabled and the IAM
     principal has `bedrock:ListInferenceProfiles`, profiles appear alongside
     foundation models in `openclaw models list`.
+
   </Accordion>
 
   <Accordion title="Service tier">
     Some Bedrock models support a `service_tier` parameter to optimize for cost
     or latency. The following tiers are available:
 
-    | Tier       | Description                                                          |
-    | ---------- | -------------------------------------------------------------------- |
-    | `default`  | Standard Bedrock tier                                                |
-    | `flex`     | Discounted processing for workloads that can tolerate longer latency |
-    | `priority` | Prioritized processing for latency-sensitive workloads               |
-    | `reserved` | Reserved capacity for steady-state workloads                         |
+    | Tier | Description |
+    |------|-------------|
+    | `default` | Standard Bedrock tier |
+    | `flex` | Discounted processing for workloads that can tolerate longer latency |
+    | `priority` | Prioritized processing for latency-sensitive workloads |
+    | `reserved` | Reserved capacity for steady-state workloads |
 
     Set `serviceTier` (or `service_tier`) via `agents.defaults.params` for
     Bedrock model requests, or per-model in
     `agents.defaults.models["<model-key>"].params`:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -294,6 +296,7 @@ openclaw models list
     it may say "The provided model identifier is invalid" rather than indicating
     an unsupported service tier. If you see this error, check whether the model
     supports the requested tier.
+
   </Accordion>
 
   <Accordion title="Claude Opus 4.7 temperature">
@@ -314,7 +317,7 @@ openclaw models list
     topic denial, word filters, sensitive information filters, and contextual
     grounding checks.
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       plugins: {
         entries: {
@@ -333,16 +336,17 @@ openclaw models list
     }
     ```
 
-    | Option                 | Required | Description                                                                                                |
-    | ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-    | `guardrailIdentifier`  | Yes      | Guardrail ID (e.g. `abc123`) or full ARN (e.g. `arn:aws:bedrock:us-east-1:123456789012:guardrail/abc123`). |
-    | `guardrailVersion`     | Yes      | Published version number, or `"DRAFT"` for the working draft.                                              |
-    | `streamProcessingMode` | No       | `"sync"` or `"async"` for guardrail evaluation during streaming. If omitted, Bedrock uses its default.     |
-    | `trace`                | No       | `"enabled"` or `"enabled_full"` for debugging; omit or set `"disabled"` for production.                    |
+    | Option | Required | Description |
+    | ------ | -------- | ----------- |
+    | `guardrailIdentifier` | Yes | Guardrail ID (e.g. `abc123`) or full ARN (e.g. `arn:aws:bedrock:us-east-1:123456789012:guardrail/abc123`). |
+    | `guardrailVersion` | Yes | Published version number, or `"DRAFT"` for the working draft. |
+    | `streamProcessingMode` | No | `"sync"` or `"async"` for guardrail evaluation during streaming. If omitted, Bedrock uses its default. |
+    | `trace` | No | `"enabled"` or `"enabled_full"` for debugging; omit or set `"disabled"` for production. |
 
     <Warning>
-      The IAM principal used by the gateway must have the `bedrock:ApplyGuardrail` permission in addition to the standard invoke permissions.
+    The IAM principal used by the gateway must have the `bedrock:ApplyGuardrail` permission in addition to the standard invoke permissions.
     </Warning>
+
   </Accordion>
 
   <Accordion title="Embeddings for memory search">
@@ -350,7 +354,7 @@ openclaw models list
     [memory search](/concepts/memory-search). This is configured separately from the
     inference provider -- set `agents.defaults.memorySearch.provider` to `"bedrock"`:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -372,21 +376,22 @@ openclaw models list
     Embed, Cohere Embed (v3, v4), and TwelveLabs Marengo. See
     [Memory configuration reference -- Bedrock](/reference/memory-config#bedrock-embedding-config)
     for the full model list and dimension options.
+
   </Accordion>
 
   <Accordion title="Notes and caveats">
-    * Bedrock requires **model access** enabled in your AWS account/region.
-    * Automatic discovery needs the `bedrock:ListFoundationModels` and
+    - Bedrock requires **model access** enabled in your AWS account/region.
+    - Automatic discovery needs the `bedrock:ListFoundationModels` and
       `bedrock:ListInferenceProfiles` permissions.
-    * If you rely on auto mode, set one of the supported AWS auth env markers on the
+    - If you rely on auto mode, set one of the supported AWS auth env markers on the
       gateway host. If you prefer IMDS/shared-config auth without env markers, set
       `plugins.entries.amazon-bedrock.config.discovery.enabled: true`.
-    * OpenClaw surfaces the credential source in this order: `AWS_BEARER_TOKEN_BEDROCK`,
+    - OpenClaw surfaces the credential source in this order: `AWS_BEARER_TOKEN_BEDROCK`,
       then `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`, then `AWS_PROFILE`, then the
       default AWS SDK chain.
-    * Reasoning support depends on the model; check the Bedrock model card for
+    - Reasoning support depends on the model; check the Bedrock model card for
       current capabilities.
-    * If you prefer a managed key flow, you can also place an OpenAI-compatible
+    - If you prefer a managed key flow, you can also place an OpenAI-compatible
       proxy in front of Bedrock and configure it as an OpenAI provider instead.
   </Accordion>
 </AccordionGroup>
@@ -397,15 +402,12 @@ openclaw models list
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Memory search" href="/concepts/memory-search" icon="magnifying-glass">
     Bedrock embeddings for memory search configuration.
   </Card>
-
   <Card title="Memory config reference" href="/reference/memory-config#bedrock-embedding-config" icon="database">
     Full Bedrock embedding model list and dimension options.
   </Card>
-
   <Card title="Troubleshooting" href="/help/troubleshooting" icon="wrench">
     General troubleshooting and FAQ.
   </Card>

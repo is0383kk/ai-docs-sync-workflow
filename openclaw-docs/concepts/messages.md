@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Messages
+---
+summary: "Message flow, sessions, queueing, and reasoning visibility"
+read_when:
+  - Explaining how inbound messages become replies
+  - Clarifying sessions, queueing modes, or streaming behavior
+  - Documenting reasoning visibility and usage implications
+title: "Messages"
+---
 
 OpenClaw handles inbound messages through a pipeline of session resolution, queueing, streaming, tool execution, and reasoning visibility. This page maps the path from inbound message to reply.
 
@@ -18,9 +21,9 @@ Inbound message
 
 Key knobs live in configuration:
 
-* `messages.*` for prefixes, queueing, and group behavior.
-* `agents.defaults.*` for block streaming and chunking defaults.
-* Channel overrides (`channels.whatsapp.*`, `channels.telegram.*`, etc.) for caps and streaming toggles.
+- `messages.*` for prefixes, queueing, and group behavior.
+- `agents.defaults.*` for block streaming and chunking defaults.
+- Channel overrides (`channels.whatsapp.*`, `channels.telegram.*`, etc.) for caps and streaming toggles.
 
 See [Configuration](/gateway/configuration) for full schema.
 
@@ -38,7 +41,7 @@ and uses the most recent message for reply threading/IDs.
 
 Config (global default + per-channel overrides):
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   messages: {
     inbound: {
@@ -55,16 +58,16 @@ Config (global default + per-channel overrides):
 
 Notes:
 
-* Debounce applies to **text-only** messages; media/attachments flush immediately.
-* Control commands bypass debouncing so they remain standalone. Channels that explicitly opt in to same-sender DM coalescing can keep DM commands inside the debounce window so a split-send payload can join the same agent turn.
+- Debounce applies to **text-only** messages; media/attachments flush immediately.
+- Control commands bypass debouncing so they remain standalone. Channels that explicitly opt in to same-sender DM coalescing can keep DM commands inside the debounce window so a split-send payload can join the same agent turn.
 
 ## Sessions and devices
 
 Sessions are owned by the gateway, not by clients.
 
-* Direct chats collapse into the agent main session key.
-* Groups/channels get their own session keys.
-* The session store and transcripts live on the gateway host.
+- Direct chats collapse into the agent main session key.
+- Groups/channels get their own session keys.
+- The session store and transcripts live on the gateway host.
 
 Multiple devices/channels can map to the same session, but history is not fully
 synced back to every client. Recommendation: use one primary device for long
@@ -80,34 +83,34 @@ runtime metadata for UI rendering, diagnostics, media delivery, and plugins.
 
 OpenClaw keeps that boundary explicit:
 
-* `toolResult.details` is stripped before provider replay and compaction input.
-* Persisted session transcripts keep only bounded `details`; oversized metadata
+- `toolResult.details` is stripped before provider replay and compaction input.
+- Persisted session transcripts keep only bounded `details`; oversized metadata
   is replaced with a compact summary marked `persistedDetailsTruncated: true`.
-* Plugins and tools should put text the model must read in `content`, not only
+- Plugins and tools should put text the model must read in `content`, not only
   in `details`.
 
 ## Inbound bodies and history context
 
 OpenClaw separates the **prompt body** from the **command body**:
 
-* `BodyForAgent`: primary model-facing text for the current message. Channel
+- `BodyForAgent`: primary model-facing text for the current message. Channel
   plugins should keep this focused on the sender's current prompt-bearing text.
-* `Body`: legacy prompt fallback. This may include channel envelopes and
+- `Body`: legacy prompt fallback. This may include channel envelopes and
   optional history wrappers, but current channels should not rely on it as the
   primary model input when `BodyForAgent` is available.
-* `CommandBody`: raw user text for directive/command parsing.
-* `RawBody`: legacy alias for `CommandBody` (kept for compatibility).
+- `CommandBody`: raw user text for directive/command parsing.
+- `RawBody`: legacy alias for `CommandBody` (kept for compatibility).
 
 When a channel supplies history, it uses a shared wrapper:
 
-* `[Chat messages since your last reply - for context]`
-* `[Current message - respond to this]`
+- `[Chat messages since your last reply - for context]`
+- `[Current message - respond to this]`
 
 For **non-direct chats** (groups/channels/rooms), the **current message body** is prefixed with the
 sender label (same style used for history entries). This keeps real-time and queued/history
 messages consistent in the agent prompt.
 
-History buffers are **pending-only**: they include group messages that did *not*
+History buffers are **pending-only**: they include group messages that did _not_
 trigger a run (for example, mention-gated messages) and **exclude** messages
 already in the session transcript.
 
@@ -126,10 +129,10 @@ If a run is already active, inbound messages are steered into the current run by
 default. `messages.queue` selects whether active-run messages steer, queue for
 later, collect into one later turn, or interrupt the active run.
 
-* Configure via `messages.queue` (and `messages.queue.byChannel`).
-* Default mode is `steer`, with a 500ms debounce for Codex steering batches and
+- Configure via `messages.queue` (and `messages.queue.byChannel`).
+- Default mode is `steer`, with a 500ms debounce for Codex steering batches and
   followup/collect queues.
-* Modes: `steer`, `followup`, `collect`, and `interrupt`.
+- Modes: `steer`, `followup`, `collect`, and `interrupt`.
 
 Details: [Command queue](/concepts/queue) and [Steering queue](/concepts/queue-steering).
 
@@ -148,12 +151,12 @@ Chunking respects channel text limits and avoids splitting fenced code.
 
 Key settings:
 
-* `agents.defaults.blockStreamingDefault` (`on|off`, default off)
-* `agents.defaults.blockStreamingBreak` (`text_end|message_end`)
-* `agents.defaults.blockStreamingChunk` (`minChars|maxChars|breakPreference`)
-* `agents.defaults.blockStreamingCoalesce` (idle-based batching)
-* `agents.defaults.humanDelay` (human-like pause between block replies)
-* Channel overrides: `*.blockStreaming` and `*.blockStreamingCoalesce` (non-Telegram channels require explicit `*.blockStreaming: true`)
+- `agents.defaults.blockStreamingDefault` (`on|off`, default off)
+- `agents.defaults.blockStreamingBreak` (`text_end|message_end`)
+- `agents.defaults.blockStreamingChunk` (`minChars|maxChars|breakPreference`)
+- `agents.defaults.blockStreamingCoalesce` (idle-based batching)
+- `agents.defaults.humanDelay` (human-like pause between block replies)
+- Channel overrides: `*.blockStreaming` and `*.blockStreamingCoalesce` (non-Telegram channels require explicit `*.blockStreaming: true`)
 
 Details: [Streaming + chunking](/concepts/streaming).
 
@@ -161,9 +164,9 @@ Details: [Streaming + chunking](/concepts/streaming).
 
 OpenClaw can expose or hide model reasoning:
 
-* `/reasoning on|off|stream` controls visibility.
-* Reasoning content still counts toward token usage when produced by the model.
-* Telegram supports reasoning stream into a transient draft bubble that is deleted after final delivery; use `/reasoning on` for persistent reasoning output.
+- `/reasoning on|off|stream` controls visibility.
+- Reasoning content still counts toward token usage when produced by the model.
+- Telegram supports reasoning stream into a transient draft bubble that is deleted after final delivery; use `/reasoning on` for persistent reasoning output.
 
 Details: [Thinking + reasoning directives](/tools/thinking) and [Token use](/reference/token-use).
 
@@ -171,8 +174,8 @@ Details: [Thinking + reasoning directives](/tools/thinking) and [Token use](/ref
 
 Outbound message formatting is centralized in `messages`:
 
-* `messages.responsePrefix`, `channels.<channel>.responsePrefix`, and `channels.<channel>.accounts.<id>.responsePrefix` (outbound prefix cascade), plus `channels.whatsapp.messagePrefix` (WhatsApp inbound prefix)
-* Reply threading via `replyToMode` and per-channel defaults
+- `messages.responsePrefix`, `channels.<channel>.responsePrefix`, and `channels.<channel>.accounts.<id>.responsePrefix` (outbound prefix cascade), plus `channels.whatsapp.messagePrefix` (WhatsApp inbound prefix)
+- Reply threading via `replyToMode` and per-channel defaults
 
 Details: [Configuration](/gateway/config-agents#messages) and channel docs.
 
@@ -183,13 +186,13 @@ When a turn also has pending tool media, such as generated TTS audio, OpenClaw
 strips the silent text but still delivers the media attachment.
 OpenClaw resolves that behavior by conversation type:
 
-* Direct conversations never receive `NO_REPLY` prompt guidance. If a direct
+- Direct conversations never receive `NO_REPLY` prompt guidance. If a direct
   run accidentally returns a bare silent token, OpenClaw suppresses it instead
   of rewriting or delivering it.
-* Groups/channels allow silence by default only for automatic group replies.
+- Groups/channels allow silence by default only for automatic group replies.
   In `message_tool` visible-reply mode, silence means the model does not call
   `message(action=send)`.
-* Internal orchestration allows silence by default.
+- Internal orchestration allows silence by default.
 
 OpenClaw also uses silent replies for internal runner failures that happen
 before any assistant reply in non-direct chats, so groups/channels do not see
@@ -204,8 +207,8 @@ instead of rewriting sentinel text into fallback chatter.
 
 ## Related
 
-* [Message lifecycle refactor](/concepts/message-lifecycle-refactor) - target durable send and receive design
-* [Streaming](/concepts/streaming) — real-time message delivery
-* [Retry](/concepts/retry) — message delivery retry behavior
-* [Queue](/concepts/queue) — message processing queue
-* [Channels](/channels) — messaging platform integrations
+- [Message lifecycle refactor](/concepts/message-lifecycle-refactor) - target durable send and receive design
+- [Streaming](/concepts/streaming) — real-time message delivery
+- [Retry](/concepts/retry) — message delivery retry behavior
+- [Queue](/concepts/queue) — message processing queue
+- [Channels](/channels) — messaging platform integrations

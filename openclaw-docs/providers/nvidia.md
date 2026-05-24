@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# NVIDIA
+---
+summary: "Use NVIDIA's OpenAI-compatible API in OpenClaw"
+read_when:
+  - You want to use open models in OpenClaw for free
+  - You need NVIDIA_API_KEY setup
+title: "NVIDIA"
+---
 
 NVIDIA provides an OpenAI-compatible API at `https://integrate.api.nvidia.com/v1` for
 open models for free. Authenticate with an API key from
@@ -14,36 +16,34 @@ open models for free. Authenticate with an API key from
   <Step title="Get your API key">
     Create an API key at [build.nvidia.com](https://build.nvidia.com/settings/api-keys).
   </Step>
-
   <Step title="Export the key and run onboarding">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     export NVIDIA_API_KEY="nvapi-..."
     openclaw onboard --auth-choice nvidia-api-key
     ```
   </Step>
-
   <Step title="Set an NVIDIA model">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw models set nvidia/nvidia/nemotron-3-super-120b-a12b
     ```
   </Step>
 </Steps>
 
 <Warning>
-  If you pass `--nvidia-api-key` instead of the env var, the value lands in shell
-  history and `ps` output. Prefer the `NVIDIA_API_KEY` environment variable when
-  possible.
+If you pass `--nvidia-api-key` instead of the env var, the value lands in shell
+history and `ps` output. Prefer the `NVIDIA_API_KEY` environment variable when
+possible.
 </Warning>
 
 For non-interactive setup, you can also pass the key directly:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard --auth-choice nvidia-api-key --nvidia-api-key "nvapi-..."
 ```
 
 ## Config example
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   env: { NVIDIA_API_KEY: "nvapi-..." },
   models: {
@@ -95,7 +95,7 @@ openclaw onboard --auth-choice nvidia-api-key --nvidia-api-key "nvapi-..."
     entries, raise the provider timeout instead of raising the whole agent
     runtime timeout:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       models: {
         providers: {
@@ -118,13 +118,14 @@ openclaw onboard --auth-choice nvidia-api-key --nvidia-api-key "nvapi-..."
       },
     }
     ```
+
   </Accordion>
 </AccordionGroup>
 
 <Tip>
-  NVIDIA models are currently free to use. Check
-  [build.nvidia.com](https://build.nvidia.com/) for the latest availability and
-  rate-limit details.
+NVIDIA models are currently free to use. Check
+[build.nvidia.com](https://build.nvidia.com/) for the latest availability and
+rate-limit details.
 </Tip>
 
 ## Related
@@ -133,7 +134,6 @@ openclaw onboard --auth-choice nvidia-api-key --nvidia-api-key "nvapi-..."
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
     Full config reference for agents, models, and providers.
   </Card>

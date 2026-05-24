@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Lobster plugin
+---
+summary: "Typed workflow tool with resumable approvals."
+read_when:
+  - You are installing, configuring, or auditing the lobster plugin
+title: "Lobster plugin"
+---
 
 # Lobster plugin
 
@@ -10,8 +11,8 @@ Typed workflow tool with resumable approvals.
 
 ## Distribution
 
-* Package: `@openclaw/lobster`
-* Install route: npm; ClawHub
+- Package: `@openclaw/lobster`
+- Install route: npm; ClawHub
 
 ## Surface
 

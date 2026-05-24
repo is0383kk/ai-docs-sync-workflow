@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Elevenlabs plugin
+---
+summary: "Adds media understanding provider support. Adds realtime transcription provider support. Adds text-to-speech provider support."
+read_when:
+  - You are installing, configuring, or auditing the elevenlabs plugin
+title: "Elevenlabs plugin"
+---
 
 # Elevenlabs plugin
 
@@ -10,8 +11,8 @@ Adds media understanding provider support. Adds realtime transcription provider 
 
 ## Distribution
 
-* Package: `@openclaw/elevenlabs-speech`
-* Install route: included in OpenClaw
+- Package: `@openclaw/elevenlabs-speech`
+- Install route: included in OpenClaw
 
 ## Surface
 
@@ -19,4 +20,4 @@ contracts: mediaUnderstandingProviders, realtimeTranscriptionProviders, speechPr
 
 ## Related docs
 
-* [elevenlabs](/providers/elevenlabs)
+- [elevenlabs](/providers/elevenlabs)

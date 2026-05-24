@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Together AI
+---
+summary: "Together AI setup (auth + model selection)"
+title: "Together AI"
+read_when:
+  - You want to use Together AI with OpenClaw
+  - You need the API key env var or CLI auth choice
+---
 
 [Together AI](https://together.ai) provides access to leading open-source
 models including Llama, DeepSeek, Kimi, and more through a unified API.
@@ -21,15 +23,13 @@ models including Llama, DeepSeek, Kimi, and more through a unified API.
     Create an API key at
     [api.together.ai/settings/api-keys](https://api.together.ai/settings/api-keys).
   </Step>
-
   <Step title="Run onboarding">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --auth-choice together-api-key
     ```
   </Step>
-
   <Step title="Set a default model">
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       agents: {
         defaults: {
@@ -43,7 +43,7 @@ models including Llama, DeepSeek, Kimi, and more through a unified API.
 
 ### Non-interactive example
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw onboard --non-interactive \
   --mode local \
   --auth-choice together-api-key \
@@ -51,8 +51,8 @@ openclaw onboard --non-interactive \
 ```
 
 <Note>
-  The onboarding preset sets `together/moonshotai/Kimi-K2.5` as the default
-  model.
+The onboarding preset sets `together/moonshotai/Kimi-K2.5` as the default
+model.
 </Note>
 
 ## Built-in catalog
@@ -83,7 +83,7 @@ shared `video_generate` tool.
 
 To use Together as the default video provider:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -96,8 +96,8 @@ To use Together as the default video provider:
 ```
 
 <Tip>
-  See [Video Generation](/tools/video-generation) for the shared tool parameters,
-  provider selection, and failover behavior.
+See [Video Generation](/tools/video-generation) for the shared tool parameters,
+provider selection, and failover behavior.
 </Tip>
 
 <AccordionGroup>
@@ -107,17 +107,19 @@ To use Together as the default video provider:
     `~/.openclaw/.env` or via `env.shellEnv`).
 
     <Warning>
-      Keys set only in your interactive shell are not visible to daemon-managed
-      gateway processes. Use `~/.openclaw/.env` or `env.shellEnv` config for
-      persistent availability.
+    Keys set only in your interactive shell are not visible to daemon-managed
+    gateway processes. Use `~/.openclaw/.env` or `env.shellEnv` config for
+    persistent availability.
     </Warning>
+
   </Accordion>
 
   <Accordion title="Troubleshooting">
-    * Verify your key works: `openclaw models list --provider together`
-    * If models are not appearing, confirm the API key is set in the correct
+    - Verify your key works: `openclaw models list --provider together`
+    - If models are not appearing, confirm the API key is set in the correct
       environment for your Gateway process.
-    * Model refs use the form `together/<model-id>`.
+    - Model refs use the form `together/<model-id>`.
+
   </Accordion>
 </AccordionGroup>
 
@@ -127,15 +129,12 @@ To use Together as the default video provider:
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Provider rules, model refs, and failover behavior.
   </Card>
-
   <Card title="Video generation" href="/tools/video-generation" icon="video">
     Shared video generation tool parameters and provider selection.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
     Full config schema including provider settings.
   </Card>
-
   <Card title="Together AI" href="https://together.ai" icon="arrow-up-right-from-square">
     Together AI dashboard, API docs, and pricing.
   </Card>

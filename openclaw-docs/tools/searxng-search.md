@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# SearXNG search
+---
+summary: "SearXNG web search -- self-hosted, key-free meta-search provider"
+read_when:
+  - You want a self-hosted web search provider
+  - You want to use SearXNG for web_search
+  - You need a privacy-focused or air-gapped search option
+title: "SearXNG search"
+---
 
 OpenClaw supports [SearXNG](https://docs.searxng.org/) as a **self-hosted,
 key-free** `web_search` provider. SearXNG is an open-source meta-search engine
@@ -10,39 +13,40 @@ that aggregates results from Google, Bing, DuckDuckGo, and other sources.
 
 Advantages:
 
-* **Free and unlimited** -- no API key or commercial subscription required
-* **Privacy / air-gap** -- queries never leave your network
-* **Works anywhere** -- no region restrictions on commercial search APIs
+- **Free and unlimited** -- no API key or commercial subscription required
+- **Privacy / air-gap** -- queries never leave your network
+- **Works anywhere** -- no region restrictions on commercial search APIs
 
 ## Setup
 
 <Steps>
   <Step title="Run a SearXNG instance">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     docker run -d -p 8888:8080 searxng/searxng
     ```
 
     Or use any existing SearXNG deployment you have access to. See the
     [SearXNG documentation](https://docs.searxng.org/) for production setup.
-  </Step>
 
+  </Step>
   <Step title="Configure">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw configure --section web
     # Select "searxng" as the provider
     ```
 
     Or set the env var and let auto-detection find it:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     export SEARXNG_BASE_URL="http://localhost:8888"
     ```
+
   </Step>
 </Steps>
 
 ## Config
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     web: {
@@ -56,7 +60,7 @@ Advantages:
 
 Plugin-level settings for the SearXNG instance:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -78,10 +82,10 @@ The `baseUrl` field also accepts SecretRef objects.
 
 Transport rules:
 
-* `https://` works for public or private SearXNG hosts
-* `http://` is only accepted for trusted private-network or loopback hosts
-* public SearXNG hosts must use `https://`
-* private/internal hosts use the self-hosted network guard; public `https://`
+- `https://` works for public or private SearXNG hosts
+- `http://` is only accepted for trusted private-network or loopback hosts
+- public SearXNG hosts must use `https://`
+- private/internal hosts use the self-hosted network guard; public `https://`
   hosts stay on the strict web-search guard and cannot redirect to private
   addresses
 
@@ -89,7 +93,7 @@ Transport rules:
 
 Set `SEARXNG_BASE_URL` as an alternative to config:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export SEARXNG_BASE_URL="http://localhost:8888"
 ```
 
@@ -107,21 +111,21 @@ key wins first).
 
 ## Notes
 
-* **JSON API** -- uses SearXNG's native `format=json` endpoint, not HTML scraping
-* **Image result URLs** -- image-category results include `img_src` when SearXNG
+- **JSON API** -- uses SearXNG's native `format=json` endpoint, not HTML scraping
+- **Image result URLs** -- image-category results include `img_src` when SearXNG
   returns a direct image URL
-* **No API key** -- works with any SearXNG instance out of the box
-* **Base URL validation** -- `baseUrl` must be a valid `http://` or `https://`
+- **No API key** -- works with any SearXNG instance out of the box
+- **Base URL validation** -- `baseUrl` must be a valid `http://` or `https://`
   URL; public hosts must use `https://`
-* **Network guard** -- private/internal SearXNG endpoints opt in to
+- **Network guard** -- private/internal SearXNG endpoints opt in to
   private-network access; public `https://` SearXNG endpoints keep strict SSRF
   protection
-* **Auto-detection order** -- SearXNG is checked last (order 200) in
+- **Auto-detection order** -- SearXNG is checked last (order 200) in
   auto-detection. API-backed providers with configured keys run first, then
   DuckDuckGo (order 100), then Ollama Web Search (order 110)
-* **Self-hosted** -- you control the instance, queries, and upstream search engines
-* **Categories** default to `general` when not configured
-* **Category fallback** -- if a non-`general` category request succeeds but
+- **Self-hosted** -- you control the instance, queries, and upstream search engines
+- **Categories** default to `general` when not configured
+- **Category fallback** -- if a non-`general` category request succeeds but
   returns zero results, OpenClaw retries the same query once with `general`
   before returning an empty result set
 
@@ -132,6 +136,6 @@ key wins first).
 
 ## Related
 
-* [Web Search overview](/tools/web) -- all providers and auto-detection
-* [DuckDuckGo Search](/tools/duckduckgo-search) -- another key-free fallback
-* [Brave Search](/tools/brave-search) -- structured results with free tier
+- [Web Search overview](/tools/web) -- all providers and auto-detection
+- [DuckDuckGo Search](/tools/duckduckgo-search) -- another key-free fallback
+- [Brave Search](/tools/brave-search) -- structured results with free tier

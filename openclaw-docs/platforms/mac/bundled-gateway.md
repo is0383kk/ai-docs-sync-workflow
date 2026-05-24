@@ -1,10 +1,13 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
+---
+summary: "Gateway runtime on macOS (external launchd service)"
+read_when:
+  - Packaging OpenClaw.app
+  - Debugging the macOS gateway launchd service
+  - Installing the gateway CLI for macOS
+title: "Gateway on macOS"
+---
 
-# Gateway on macOS
-
-OpenClaw\.app no longer bundles Node/Bun or the Gateway runtime. The macOS app
+OpenClaw.app no longer bundles Node/Bun or the Gateway runtime. The macOS app
 expects an **external** `openclaw` CLI install, does not spawn the Gateway as a
 child process, and manages a per-user launchd service to keep the Gateway
 running (or attaches to an existing local Gateway if one is already running).
@@ -13,7 +16,7 @@ running (or attaches to an existing local Gateway if one is already running).
 
 Node 24 is the default runtime on the Mac. Node 22 LTS, currently `22.19+`, still works for compatibility. Then install `openclaw` globally:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 npm install -g openclaw@<version>
 ```
 
@@ -25,29 +28,29 @@ detected package manager. Node remains the recommended Gateway runtime.
 
 Label:
 
-* `ai.openclaw.gateway` (or `ai.openclaw.<profile>`; legacy `com.openclaw.*` may remain)
+- `ai.openclaw.gateway` (or `ai.openclaw.<profile>`; legacy `com.openclaw.*` may remain)
 
 Plist location (per-user):
 
-* `~/Library/LaunchAgents/ai.openclaw.gateway.plist`
+- `~/Library/LaunchAgents/ai.openclaw.gateway.plist`
   (or `~/Library/LaunchAgents/ai.openclaw.<profile>.plist`)
 
 Manager:
 
-* The macOS app owns LaunchAgent install/update in Local mode.
-* The CLI can also install it: `openclaw gateway install`.
+- The macOS app owns LaunchAgent install/update in Local mode.
+- The CLI can also install it: `openclaw gateway install`.
 
 Behavior:
 
-* "OpenClaw Active" enables/disables the LaunchAgent.
-* App quit does **not** stop the gateway (launchd keeps it alive).
-* If a Gateway is already running on the configured port, the app attaches to
+- "OpenClaw Active" enables/disables the LaunchAgent.
+- App quit does **not** stop the gateway (launchd keeps it alive).
+- If a Gateway is already running on the configured port, the app attaches to
   it instead of starting a new one.
 
 Logging:
 
-* launchd stdout: `~/Library/Logs/openclaw/gateway.log` (profiles use `gateway-<profile>.log`)
-* launchd stderr: suppressed
+- launchd stdout: `~/Library/Logs/openclaw/gateway.log` (profiles use `gateway-<profile>.log`)
+- launchd stderr: suppressed
 
 ## Version compatibility
 
@@ -56,7 +59,7 @@ incompatible, update the global CLI to match the app version.
 
 ## Smoke check
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw --version
 
 OPENCLAW_SKIP_CHANNELS=1 \
@@ -66,11 +69,11 @@ openclaw gateway --port 18999 --bind loopback
 
 Then:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw gateway call health --url ws://127.0.0.1:18999 --timeout 3000
 ```
 
 ## Related
 
-* [macOS app](/platforms/macos)
-* [Gateway runbook](/gateway)
+- [macOS app](/platforms/macos)
+- [Gateway runbook](/gateway)

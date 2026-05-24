@@ -1,0 +1,350 @@
+---
+read_when:
+    - یکپارچه‌سازی کلاینت‌هایی که با OpenResponses API کار می‌کنند
+    - به ورودی‌های مبتنی بر آیتم، فراخوانی‌های ابزار کلاینت، یا رویدادهای SSE نیاز دارید
+summary: ارائهٔ یک نقطهٔ پایانی HTTP سازگار با OpenResponses در مسیر /v1/responses از Gateway
+title: رابط برنامه‌نویسی OpenResponses
+x-i18n:
+    generated_at: "2026-05-06T09:19:20Z"
+    model: gpt-5.5
+    provider: openai
+    source_hash: 69d46dc448a8856a6f3213f2fbfdba000a342ec4dcf258435b7029102cfb8119
+    source_path: gateway/openresponses-http-api.md
+    workflow: 16
+---
+
+Gateway مربوط به OpenClaw می‌تواند یک endpoint سازگار با OpenResponses با مسیر `POST /v1/responses` ارائه کند.
+
+این endpoint به‌صورت **پیش‌فرض غیرفعال** است. ابتدا آن را در پیکربندی فعال کنید.
+
+- `POST /v1/responses`
+- همان پورت Gateway (چندگانه‌سازی WS + HTTP): `http://<gateway-host>:<port>/v1/responses`
+
+در پشت صحنه، درخواست‌ها مانند یک اجرای عادی عامل Gateway اجرا می‌شوند (همان مسیر کدی که
+`openclaw agent` استفاده می‌کند)، بنابراین مسیریابی/مجوزها/پیکربندی با Gateway شما مطابقت دارند.
+
+## احراز هویت، امنیت و مسیریابی
+
+رفتار عملیاتی با [تکمیل‌های گفت‌وگوی OpenAI](/fa/gateway/openai-http-api) مطابقت دارد:
+
+- از مسیر احراز هویت HTTP متناظر در Gateway استفاده کنید:
+  - احراز هویت با راز مشترک (`gateway.auth.mode="token"` یا `"password"`): `Authorization: Bearer <token-or-password>`
+  - احراز هویت trusted-proxy (`gateway.auth.mode="trusted-proxy"`): headerهای proxy آگاه از هویت از یک منبع proxy قابل‌اعتماد پیکربندی‌شده؛ proxyهای loopback روی همان میزبان به `gateway.auth.trustedProxy.allowLoopback = true` صریح نیاز دارند
+  - احراز هویت باز private-ingress (`gateway.auth.mode="none"`): بدون header احراز هویت
+- این endpoint را به‌عنوان دسترسی کامل اپراتور برای نمونه gateway در نظر بگیرید
+- برای حالت‌های احراز هویت با راز مشترک (`token` و `password`)، مقدارهای محدودتر `x-openclaw-scopes` اعلام‌شده توسط bearer را نادیده بگیرید و پیش‌فرض‌های عادی اپراتور کامل را بازگردانید
+- برای حالت‌های HTTP حامل هویت قابل‌اعتماد (برای مثال احراز هویت trusted proxy یا `gateway.auth.mode="none"`)، وقتی `x-openclaw-scopes` وجود دارد آن را رعایت کنید و در غیر این صورت به مجموعه scope پیش‌فرض عادی اپراتور برگردید
+- عامل‌ها را با `model: "openclaw"`، `model: "openclaw/default"`، `model: "openclaw/<agentId>"`، یا `x-openclaw-agent-id` انتخاب کنید
+- وقتی می‌خواهید مدل backend عامل انتخاب‌شده را بازنویسی کنید، از `x-openclaw-model` استفاده کنید
+- برای مسیریابی صریح session از `x-openclaw-session-key` استفاده کنید
+- وقتی context یک کانال ingress ساختگی غیرپیش‌فرض می‌خواهید، از `x-openclaw-message-channel` استفاده کنید
+
+ماتریس احراز هویت:
+
+- `gateway.auth.mode="token"` یا `"password"` + `Authorization: Bearer ...`
+  - مالکیت راز مشترک اپراتور gateway را اثبات می‌کند
+  - `x-openclaw-scopes` محدودتر را نادیده می‌گیرد
+  - مجموعه scope پیش‌فرض کامل اپراتور را بازمی‌گرداند:
+    `operator.admin`, `operator.approvals`, `operator.pairing`,
+    `operator.read`, `operator.talk.secrets`, `operator.write`
+  - نوبت‌های گفت‌وگو در این endpoint را به‌عنوان نوبت‌های فرستنده-مالک در نظر می‌گیرد
+- حالت‌های HTTP حامل هویت قابل‌اعتماد (برای مثال احراز هویت trusted proxy، یا `gateway.auth.mode="none"` روی private ingress)
+  - وقتی header وجود دارد، `x-openclaw-scopes` را رعایت می‌کنند
+  - وقتی header وجود ندارد، به مجموعه scope پیش‌فرض عادی اپراتور برمی‌گردند
+  - فقط زمانی معنای مالک را از دست می‌دهند که فراخواننده scopeها را صراحتاً محدود کند و `operator.admin` را حذف کند
+
+این endpoint را با `gateway.http.endpoints.responses.enabled` فعال یا غیرفعال کنید.
+
+همین سطح سازگاری همچنین شامل موارد زیر است:
+
+- `GET /v1/models`
+- `GET /v1/models/{id}`
+- `POST /v1/embeddings`
+- `POST /v1/chat/completions`
+
+برای توضیح مرجع درباره اینکه مدل‌های هدف‌گذاری عامل، `openclaw/default`، عبور مستقیم embeddingها، و بازنویسی‌های مدل backend چگونه در کنار هم قرار می‌گیرند، [تکمیل‌های گفت‌وگوی OpenAI](/fa/gateway/openai-http-api#agent-first-model-contract) و [فهرست مدل و مسیریابی عامل](/fa/gateway/openai-http-api#model-list-and-agent-routing) را ببینید.
+
+## رفتار session
+
+به‌صورت پیش‌فرض، endpoint **برای هر درخواست بدون وضعیت** است (در هر فراخوانی یک کلید session جدید تولید می‌شود).
+
+اگر درخواست شامل رشته `user` در OpenResponses باشد، Gateway از آن یک کلید session پایدار مشتق می‌کند،
+بنابراین فراخوانی‌های تکراری می‌توانند یک session عامل را به اشتراک بگذارند.
+
+## شکل درخواست (پشتیبانی‌شده)
+
+درخواست از API مربوط به OpenResponses با ورودی مبتنی بر item پیروی می‌کند. پشتیبانی فعلی:
+
+- `input`: رشته یا آرایه‌ای از objectهای item.
+- `instructions`: در system prompt ادغام می‌شود.
+- `tools`: تعریف‌های ابزار client (ابزارهای function).
+- `tool_choice`: ابزارهای client را فیلتر یا الزامی می‌کند.
+- `stream`: جریان‌دهی SSE را فعال می‌کند.
+- `max_output_tokens`: محدودیت خروجی به‌صورت بهترین تلاش (وابسته به provider).
+- `user`: مسیریابی session پایدار.
+
+پذیرفته می‌شوند اما **در حال حاضر نادیده گرفته می‌شوند**:
+
+- `max_tool_calls`
+- `reasoning`
+- `metadata`
+- `store`
+- `truncation`
+
+پشتیبانی‌شده:
+
+- `previous_response_id`: وقتی درخواست در همان محدوده عامل/کاربر/session درخواستی باقی بماند، OpenClaw از session پاسخ قبلی دوباره استفاده می‌کند.
+
+## Itemها (`input`)
+
+### `message`
+
+نقش‌ها: `system`، `developer`، `user`، `assistant`.
+
+- `system` و `developer` به system prompt افزوده می‌شوند.
+- جدیدترین item از نوع `user` یا `function_call_output` به «پیام فعلی» تبدیل می‌شود.
+- پیام‌های قبلی user/assistant به‌عنوان تاریخچه برای context گنجانده می‌شوند.
+
+### `function_call_output` (ابزارهای مبتنی بر نوبت)
+
+نتایج ابزار را به مدل برگردانید:
+
+```json
+{
+  "type": "function_call_output",
+  "call_id": "call_123",
+  "output": "{\"temperature\": \"72F\"}"
+}
+```
+
+### `reasoning` و `item_reference`
+
+برای سازگاری schema پذیرفته می‌شوند اما هنگام ساخت prompt نادیده گرفته می‌شوند.
+
+## ابزارها (ابزارهای function سمت client)
+
+ابزارها را با `tools: [{ type: "function", function: { name, description?, parameters? } }]` ارائه کنید.
+
+اگر عامل تصمیم بگیرد ابزاری را فراخوانی کند، پاسخ یک item خروجی `function_call` برمی‌گرداند.
+سپس برای ادامه نوبت، یک درخواست پیگیری با `function_call_output` ارسال می‌کنید.
+
+## تصاویر (`input_image`)
+
+از منابع base64 یا URL پشتیبانی می‌کند:
+
+```json
+{
+  "type": "input_image",
+  "source": { "type": "url", "url": "https://example.com/image.png" }
+}
+```
+
+نوع‌های MIME مجاز (فعلی): `image/jpeg`، `image/png`، `image/gif`، `image/webp`، `image/heic`، `image/heif`.
+حداکثر اندازه (فعلی): 10MB.
+
+## فایل‌ها (`input_file`)
+
+از منابع base64 یا URL پشتیبانی می‌کند:
+
+```json
+{
+  "type": "input_file",
+  "source": {
+    "type": "base64",
+    "media_type": "text/plain",
+    "data": "SGVsbG8gV29ybGQh",
+    "filename": "hello.txt"
+  }
+}
+```
+
+نوع‌های MIME مجاز (فعلی): `text/plain`، `text/markdown`، `text/html`، `text/csv`,
+`application/json`، `application/pdf`.
+
+حداکثر اندازه (فعلی): 5MB.
+
+رفتار فعلی:
+
+- محتوای فایل decode می‌شود و به **system prompt** افزوده می‌شود، نه پیام کاربر،
+  بنابراین موقتی باقی می‌ماند (در تاریخچه session پایدار نمی‌شود).
+- متن decode‌شده فایل پیش از افزوده شدن، به‌عنوان **محتوای خارجی نامطمئن** بسته‌بندی می‌شود،
+  بنابراین byteهای فایل به‌عنوان داده در نظر گرفته می‌شوند، نه دستورالعمل‌های قابل‌اعتماد.
+- بلوک تزریق‌شده از نشانگرهای مرزی صریح مانند
+  `<<<EXTERNAL_UNTRUSTED_CONTENT id="...">>>` /
+  `<<<END_EXTERNAL_UNTRUSTED_CONTENT id="...">>>` استفاده می‌کند و شامل یک خط metadata با
+  `Source: External` است.
+- این مسیر ورودی فایل عمداً banner بلند `SECURITY NOTICE:` را حذف می‌کند تا
+  بودجه prompt حفظ شود؛ نشانگرهای مرزی و metadata همچنان سر جای خود باقی می‌مانند.
+- PDFها ابتدا برای متن parse می‌شوند. اگر متن کمی پیدا شود، صفحه‌های اول
+  به تصویر rasterize می‌شوند و به مدل فرستاده می‌شوند، و بلوک فایل تزریق‌شده از
+  placeholder `[PDF content rendered to images]` استفاده می‌کند.
+
+parse کردن PDF توسط Plugin همراه `document-extract` ارائه می‌شود که از build legacy و سازگار با Node مربوط به `pdfjs-dist` استفاده می‌کند (بدون worker). build مدرن PDF.js
+به workerهای مرورگر/DOM globalها نیاز دارد، بنابراین در Gateway استفاده نمی‌شود.
+
+پیش‌فرض‌های دریافت URL:
+
+- `files.allowUrl`: `true`
+- `images.allowUrl`: `true`
+- `maxUrlParts`: `8` (مجموع بخش‌های مبتنی بر URL از `input_file` + `input_image` در هر درخواست)
+- درخواست‌ها محافظت می‌شوند (حل DNS، مسدودسازی IP خصوصی، سقف redirect، timeoutها).
+- allowlistهای اختیاری hostname برای هر نوع ورودی پشتیبانی می‌شوند (`files.urlAllowlist`، `images.urlAllowlist`).
+  - میزبان دقیق: `"cdn.example.com"`
+  - زیردامنه‌های wildcard: `"*.assets.example.com"` (با apex مطابقت ندارد)
+  - allowlistهای خالی یا حذف‌شده یعنی هیچ محدودیت allowlist برای hostname وجود ندارد.
+- برای غیرفعال کردن کامل دریافت‌های مبتنی بر URL، `files.allowUrl: false` و/یا `images.allowUrl: false` را تنظیم کنید.
+
+## محدودیت‌های فایل + تصویر (پیکربندی)
+
+پیش‌فرض‌ها را می‌توان زیر `gateway.http.endpoints.responses` تنظیم کرد:
+
+```json5
+{
+  gateway: {
+    http: {
+      endpoints: {
+        responses: {
+          enabled: true,
+          maxBodyBytes: 20000000,
+          maxUrlParts: 8,
+          files: {
+            allowUrl: true,
+            urlAllowlist: ["cdn.example.com", "*.assets.example.com"],
+            allowedMimes: [
+              "text/plain",
+              "text/markdown",
+              "text/html",
+              "text/csv",
+              "application/json",
+              "application/pdf",
+            ],
+            maxBytes: 5242880,
+            maxChars: 200000,
+            maxRedirects: 3,
+            timeoutMs: 10000,
+            pdf: {
+              maxPages: 4,
+              maxPixels: 4000000,
+              minTextChars: 200,
+            },
+          },
+          images: {
+            allowUrl: true,
+            urlAllowlist: ["images.example.com"],
+            allowedMimes: [
+              "image/jpeg",
+              "image/png",
+              "image/gif",
+              "image/webp",
+              "image/heic",
+              "image/heif",
+            ],
+            maxBytes: 10485760,
+            maxRedirects: 3,
+            timeoutMs: 10000,
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+پیش‌فرض‌ها هنگام حذف شدن:
+
+- `maxBodyBytes`: 20MB
+- `maxUrlParts`: 8
+- `files.maxBytes`: 5MB
+- `files.maxChars`: 200k
+- `files.maxRedirects`: 3
+- `files.timeoutMs`: 10s
+- `files.pdf.maxPages`: 4
+- `files.pdf.maxPixels`: 4,000,000
+- `files.pdf.minTextChars`: 200
+- `images.maxBytes`: 10MB
+- `images.maxRedirects`: 3
+- `images.timeoutMs`: 10s
+- منابع HEIC/HEIF از نوع `input_image` پذیرفته می‌شوند و پیش از تحویل به provider به JPEG نرمال‌سازی می‌شوند.
+
+نکته امنیتی:
+
+- allowlistهای URL پیش از fetch و در hopهای redirect اعمال می‌شوند.
+- allowlist کردن یک hostname مسدودسازی IP خصوصی/داخلی را دور نمی‌زند.
+- برای gatewayهای در معرض اینترنت، علاوه بر محافظ‌های سطح برنامه، کنترل‌های egress شبکه را اعمال کنید.
+  [امنیت](/fa/gateway/security) را ببینید.
+
+## جریان‌دهی (SSE)
+
+برای دریافت Server-Sent Events (SSE)، `stream: true` را تنظیم کنید:
+
+- `Content-Type: text/event-stream`
+- هر خط event به‌صورت `event: <type>` و `data: <json>` است
+- جریان با `data: [DONE]` پایان می‌یابد
+
+نوع‌های event که در حال حاضر منتشر می‌شوند:
+
+- `response.created`
+- `response.in_progress`
+- `response.output_item.added`
+- `response.content_part.added`
+- `response.output_text.delta`
+- `response.output_text.done`
+- `response.content_part.done`
+- `response.output_item.done`
+- `response.completed`
+- `response.failed` (در صورت خطا)
+
+## استفاده
+
+وقتی provider زیرین شمارش tokenها را گزارش کند، `usage` پر می‌شود.
+OpenClaw aliasهای رایج به سبک OpenAI را پیش از رسیدن این شمارنده‌ها به
+سطح‌های status/session پایین‌دستی نرمال‌سازی می‌کند، از جمله `input_tokens` / `output_tokens`
+و `prompt_tokens` / `completion_tokens`.
+
+## خطاها
+
+خطاها از یک object JSON مانند زیر استفاده می‌کنند:
+
+```json
+{ "error": { "message": "...", "type": "invalid_request_error" } }
+```
+
+موارد رایج:
+
+- `401` احراز هویت ناموجود/نامعتبر
+- `400` بدنه درخواست نامعتبر
+- `405` روش نادرست
+
+## مثال‌ها
+
+بدون جریان‌دهی:
+
+```bash
+curl -sS http://127.0.0.1:18789/v1/responses \
+  -H 'Authorization: Bearer YOUR_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -H 'x-openclaw-agent-id: main' \
+  -d '{
+    "model": "openclaw",
+    "input": "hi"
+  }'
+```
+
+با جریان‌دهی:
+
+```bash
+curl -N http://127.0.0.1:18789/v1/responses \
+  -H 'Authorization: Bearer YOUR_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -H 'x-openclaw-agent-id: main' \
+  -d '{
+    "model": "openclaw",
+    "stream": true,
+    "input": "hi"
+  }'
+```
+
+## مرتبط
+
+- [تکمیل‌های گفت‌وگوی OpenAI](/fa/gateway/openai-http-api)
+- [OpenAI](/fa/providers/openai)

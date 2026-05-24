@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# OpenCode
+---
+summary: "Use OpenCode Zen and Go catalogs with OpenClaw"
+read_when:
+  - You want OpenCode-hosted model access
+  - You want to pick between the Zen and Go catalogs
+title: "OpenCode"
+---
 
 OpenCode exposes two hosted catalogs in OpenClaw:
 
@@ -23,29 +25,28 @@ as one OpenCode setup.
 
     <Steps>
       <Step title="Run onboarding">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw onboard --auth-choice opencode-zen
         ```
 
         Or pass the key directly:
 
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw onboard --opencode-zen-api-key "$OPENCODE_API_KEY"
         ```
       </Step>
-
       <Step title="Set a Zen model as the default">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw config set agents.defaults.model.primary "opencode/claude-opus-4-6"
         ```
       </Step>
-
       <Step title="Verify models are available">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw models list --provider opencode
         ```
       </Step>
     </Steps>
+
   </Tab>
 
   <Tab title="Go catalog">
@@ -53,35 +54,34 @@ as one OpenCode setup.
 
     <Steps>
       <Step title="Run onboarding">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw onboard --auth-choice opencode-go
         ```
 
         Or pass the key directly:
 
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw onboard --opencode-go-api-key "$OPENCODE_API_KEY"
         ```
       </Step>
-
       <Step title="Set a Go model as the default">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw config set agents.defaults.model.primary "opencode-go/kimi-k2.6"
         ```
       </Step>
-
       <Step title="Verify models are available">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw models list --provider opencode-go
         ```
       </Step>
     </Steps>
+
   </Tab>
 </Tabs>
 
 ## Config example
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   env: { OPENCODE_API_KEY: "sk-..." },
   agents: { defaults: { model: { primary: "opencode/claude-opus-4-6" } } },
@@ -133,8 +133,8 @@ as one OpenCode setup.
 </AccordionGroup>
 
 <Tip>
-  Entering one OpenCode key during setup stores credentials for both the Zen and
-  Go runtime providers, so you only need to onboard once.
+Entering one OpenCode key during setup stores credentials for both the Zen and
+Go runtime providers, so you only need to onboard once.
 </Tip>
 
 ## Related
@@ -143,7 +143,6 @@ as one OpenCode setup.
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>
-
   <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
     Full config reference for agents, models, and providers.
   </Card>

@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Community plugins
+---
+summary: "Find and publish community-maintained OpenClaw plugins"
+read_when:
+  - You want to find third-party OpenClaw plugins
+  - You want to publish or list your own plugin on ClawHub
+title: "Community plugins"
+doc-schema-version: 1
+---
 
 Community plugins are third-party packages that extend OpenClaw with channels,
 tools, providers, hooks, or other capabilities. Use [ClawHub](/clawhub) as the
@@ -12,19 +15,19 @@ primary discovery surface for public community plugins.
 
 Search ClawHub from the CLI:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins search "calendar"
 ```
 
 Install a ClawHub plugin with an explicit source prefix:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install clawhub:<package-name>
 ```
 
 npm remains a supported direct-install path during the launch cutover:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install npm:<package-name>
 ```
 
@@ -39,7 +42,7 @@ discover and install them. ClawHub owns the live package listing, release
 history, scan status, and install hints; the docs do not maintain a static
 third-party plugin catalog.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub package publish your-org/your-plugin --dry-run
 clawhub package publish your-org/your-plugin
 ```
@@ -61,14 +64,14 @@ Use this checklist before you publish:
 
 Use these pages for the full publishing contract:
 
-* [ClawHub publishing](/clawhub/publishing) explains owners, scopes, releases,
+- [ClawHub publishing](/clawhub/publishing) explains owners, scopes, releases,
   review, package validation, and package transfer.
-* [Building plugins](/plugins/building-plugins) shows the plugin package shape
+- [Building plugins](/plugins/building-plugins) shows the plugin package shape
   and first publish workflow.
-* [Plugin manifest](/plugins/manifest) defines native plugin manifest fields.
+- [Plugin manifest](/plugins/manifest) defines native plugin manifest fields.
 
 ## Related
 
-* [Plugins](/tools/plugin) - install, configure, restart, and troubleshoot
-* [Manage plugins](/plugins/manage-plugins) - command examples
-* [ClawHub publishing](/clawhub/publishing) - publish and release rules
+- [Plugins](/tools/plugin) - install, configure, restart, and troubleshoot
+- [Manage plugins](/plugins/manage-plugins) - command examples
+- [ClawHub publishing](/clawhub/publishing) - publish and release rules

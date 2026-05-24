@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# System
+---
+summary: "CLI reference for `openclaw system` (system events, heartbeat, presence)"
+read_when:
+  - You want to enqueue a system event without creating a cron job
+  - You need to enable or disable heartbeats
+  - You want to inspect system presence entries
+title: "System"
+---
 
 # `openclaw system`
 
@@ -11,14 +14,14 @@ and view presence.
 
 All `system` subcommands use Gateway RPC and accept the shared client flags:
 
-* `--url <url>`
-* `--token <token>`
-* `--timeout <ms>`
-* `--expect-final`
+- `--url <url>`
+- `--token <token>`
+- `--timeout <ms>`
+- `--expect-final`
 
 ## Common commands
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw system event --text "Check for urgent follow-ups" --mode now
 openclaw system event --text "Check for urgent follow-ups" --url ws://127.0.0.1:18789 --token "$OPENCLAW_GATEWAY_TOKEN"
 openclaw system heartbeat enable
@@ -45,26 +48,26 @@ async-task completion back to the channel that started it).
 
 Flags:
 
-* `--text <text>`: required system event text.
-* `--mode <mode>`: `now` or `next-heartbeat` (default).
-* `--session-key <sessionKey>`: optional; target a specific agent session
+- `--text <text>`: required system event text.
+- `--mode <mode>`: `now` or `next-heartbeat` (default).
+- `--session-key <sessionKey>`: optional; target a specific agent session
   instead of the agent's main session. Keys that do not belong to the
   resolved agent fall back to the agent's main session.
-* `--json`: machine-readable output.
-* `--url`, `--token`, `--timeout`, `--expect-final`: shared Gateway RPC flags.
+- `--json`: machine-readable output.
+- `--url`, `--token`, `--timeout`, `--expect-final`: shared Gateway RPC flags.
 
 ## `system heartbeat last|enable|disable`
 
 Heartbeat controls:
 
-* `last`: show the last heartbeat event.
-* `enable`: turn heartbeats back on (use this if they were disabled).
-* `disable`: pause heartbeats.
+- `last`: show the last heartbeat event.
+- `enable`: turn heartbeats back on (use this if they were disabled).
+- `disable`: pause heartbeats.
 
 Flags:
 
-* `--json`: machine-readable output.
-* `--url`, `--token`, `--timeout`, `--expect-final`: shared Gateway RPC flags.
+- `--json`: machine-readable output.
+- `--url`, `--token`, `--timeout`, `--expect-final`: shared Gateway RPC flags.
 
 ## `system presence`
 
@@ -73,14 +76,14 @@ instances, and similar status lines).
 
 Flags:
 
-* `--json`: machine-readable output.
-* `--url`, `--token`, `--timeout`, `--expect-final`: shared Gateway RPC flags.
+- `--json`: machine-readable output.
+- `--url`, `--token`, `--timeout`, `--expect-final`: shared Gateway RPC flags.
 
 ## Notes
 
-* Requires a running Gateway reachable by your current config (local or remote).
-* System events are ephemeral and not persisted across restarts.
+- Requires a running Gateway reachable by your current config (local or remote).
+- System events are ephemeral and not persisted across restarts.
 
 ## Related
 
-* [CLI reference](/cli)
+- [CLI reference](/cli)

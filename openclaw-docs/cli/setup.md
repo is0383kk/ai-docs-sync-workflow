@@ -1,15 +1,18 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Setup
+---
+summary: "CLI reference for `openclaw setup` (initialize config plus workspace, optionally run onboarding)"
+read_when:
+  - You're doing first-run setup without full CLI onboarding
+  - You want to set the default workspace path
+  - You need every flag and how setup decides between baseline and wizard mode
+title: "Setup"
+---
 
 # `openclaw setup`
 
 Initialize the baseline config and agent workspace. With any onboarding flag present, also runs the wizard.
 
 <Note>
-  `openclaw setup` is for mutable config installs. In Nix mode (`OPENCLAW_NIX_MODE=1`) OpenClaw refuses setup writes because the config file is managed by Nix. Use the first-party [nix-openclaw Quick Start](https://github.com/openclaw/nix-openclaw#quick-start) or the equivalent source config for another Nix package.
+`openclaw setup` is for mutable config installs. In Nix mode (`OPENCLAW_NIX_MODE=1`) OpenClaw refuses setup writes because the config file is managed by Nix. Use the first-party [nix-openclaw Quick Start](https://github.com/openclaw/nix-openclaw#quick-start) or the equivalent source config for another Nix package.
 </Note>
 
 ## Options
@@ -34,7 +37,7 @@ Initialize the baseline config and agent workspace. With any onboarding flag pre
 
 ## Examples
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw setup
 openclaw setup --workspace ~/.openclaw/workspace
 openclaw setup --wizard
@@ -44,13 +47,13 @@ openclaw setup --non-interactive --mode remote --remote-url wss://gateway-host:1
 
 ## Notes
 
-* Plain `openclaw setup` initializes config and workspace without running the full onboarding flow.
-* After plain setup, run `openclaw onboard` for the full guided journey, `openclaw configure` for targeted changes, or `openclaw channels add` to add channel accounts.
-* If Hermes state is detected, interactive onboarding can offer migration automatically. Import onboarding requires a fresh setup; use [Migrate](/cli/migrate) for dry-run plans, backups, and overwrite mode outside onboarding.
+- Plain `openclaw setup` initializes config and workspace without running the full onboarding flow.
+- After plain setup, run `openclaw onboard` for the full guided journey, `openclaw configure` for targeted changes, or `openclaw channels add` to add channel accounts.
+- If Hermes state is detected, interactive onboarding can offer migration automatically. Import onboarding requires a fresh setup; use [Migrate](/cli/migrate) for dry-run plans, backups, and overwrite mode outside onboarding.
 
 ## Related
 
-* [CLI reference](/cli)
-* [Onboarding (CLI)](/start/wizard)
-* [Getting started](/start/getting-started)
-* [Install overview](/install)
+- [CLI reference](/cli)
+- [Onboarding (CLI)](/start/wizard)
+- [Getting started](/start/getting-started)
+- [Install overview](/install)

@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Docs
+---
+summary: "CLI reference for `openclaw docs` (search the live docs index)"
+read_when:
+  - You want to search the live OpenClaw docs from the terminal
+  - You need to know which helper binaries the docs CLI shells out to
+title: "Docs"
+---
 
 # `openclaw docs`
 
@@ -10,7 +12,7 @@ Search the live OpenClaw docs index from the terminal. The command shells out to
 
 ## Usage
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw docs                       # print docs entrypoint and example search
 openclaw docs <query...>            # search the live docs index
 ```
@@ -23,7 +25,7 @@ Arguments:
 
 ## Examples
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw docs browser existing-session
 openclaw docs sandbox allowHostControl
 openclaw docs gateway token secretref
@@ -43,7 +45,7 @@ To resolve `mcporter`, OpenClaw checks in order:
 
 If none are available, the command fails with a hint to install `pnpm` (`npm install -g pnpm`).
 
-The search call uses a fixed 30 second timeout. Result snippets are truncated to \~220 characters per entry.
+The search call uses a fixed 30 second timeout. Result snippets are truncated to ~220 characters per entry.
 
 ## Output
 
@@ -51,7 +53,7 @@ In a rich (TTY) terminal, results render as a heading followed by a bullet list.
 
 In non-rich output (piped, `--no-color`, scripts), the same data renders as Markdown:
 
-```markdown theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```markdown
 # Docs search: <query>
 
 - [Title](https://docs.openclaw.ai/...) - snippet
@@ -67,5 +69,5 @@ In non-rich output (piped, `--no-color`, scripts), the same data renders as Mark
 
 ## Related
 
-* [CLI reference](/cli)
-* [Live docs](https://docs.openclaw.ai)
+- [CLI reference](/cli)
+- [Live docs](https://docs.openclaw.ai)

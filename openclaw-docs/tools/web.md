@@ -1,8 +1,13 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Web search
+---
+summary: "web_search, x_search, and web_fetch -- search the web, search X posts, or fetch page content"
+title: "Web search"
+sidebarTitle: "Web Search"
+read_when:
+  - You want to enable or configure web_search
+  - You want to enable or configure x_search
+  - You need to choose a search provider
+  - You want to understand auto-detection and provider fallback
+---
 
 The `web_search` tool searches the web using your configured provider and
 returns results. Results are cached by query for 15 minutes (configurable).
@@ -25,29 +30,27 @@ local while `web_search` and `x_search` can use xAI Responses under the hood.
     key-free, while others use API keys. See the provider pages below for
     details.
   </Step>
-
   <Step title="Configure">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw configure --section web
     ```
-
     This stores the provider and any needed credential. You can also set an env
     var (for example `BRAVE_API_KEY`) and skip this step for API-backed
     providers.
   </Step>
-
   <Step title="Use it">
     The agent can now call `web_search`:
 
-    ```javascript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```javascript
     await web_search({ query: "OpenClaw plugin SDK" });
     ```
 
     For X posts, use:
 
-    ```javascript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```javascript
     await x_search({ query: "dinner recipes" });
     ```
+
   </Step>
 </Steps>
 
@@ -57,47 +60,36 @@ local while `web_search` and `x_search` can use xAI Responses under the hood.
   <Card title="Brave Search" icon="shield" href="/tools/brave-search">
     Structured results with snippets. Supports `llm-context` mode, country/language filters. Free tier available.
   </Card>
-
   <Card title="DuckDuckGo" icon="bird" href="/tools/duckduckgo-search">
     Key-free fallback. No API key needed. Unofficial HTML-based integration.
   </Card>
-
   <Card title="Exa" icon="brain" href="/tools/exa-search">
     Neural + keyword search with content extraction (highlights, text, summaries).
   </Card>
-
   <Card title="Firecrawl" icon="flame" href="/tools/firecrawl">
     Structured results. Best paired with `firecrawl_search` and `firecrawl_scrape` for deep extraction.
   </Card>
-
   <Card title="Gemini" icon="sparkles" href="/tools/gemini-search">
     AI-synthesized answers with citations via Google Search grounding.
   </Card>
-
   <Card title="Grok" icon="zap" href="/tools/grok-search">
     AI-synthesized answers with citations via xAI web grounding.
   </Card>
-
   <Card title="Kimi" icon="moon" href="/tools/kimi-search">
     AI-synthesized answers with citations via Moonshot web search; ungrounded chat fallbacks fail explicitly.
   </Card>
-
   <Card title="MiniMax Search" icon="globe" href="/tools/minimax-search">
     Structured results via the MiniMax Token Plan search API.
   </Card>
-
   <Card title="Ollama Web Search" icon="globe" href="/tools/ollama-search">
     Search via a signed-in local Ollama host or the hosted Ollama API.
   </Card>
-
   <Card title="Perplexity" icon="search" href="/tools/perplexity-search">
     Structured results with content extraction controls and domain filtering.
   </Card>
-
   <Card title="SearXNG" icon="server" href="/tools/searxng-search">
     Self-hosted meta-search. No API key needed. Aggregates Google, Bing, DuckDuckGo, and more.
   </Card>
-
   <Card title="Tavily" icon="globe" href="/tools/tavily">
     Structured results with search depth, topic filtering, and `tavily_extract` for URL extraction.
   </Card>
@@ -130,13 +122,13 @@ Direct OpenAI Responses models use OpenAI's hosted `web_search` tool automatical
 
 Codex-capable models can optionally use the provider-native Responses `web_search` tool instead of OpenClaw's managed `web_search` function.
 
-* Configure it under `tools.web.search.openaiCodex`
-* It only activates for Codex-capable models (`openai-codex/*` or providers using `api: "openai-codex-responses"`)
-* Managed `web_search` still applies to non-Codex models
-* `mode: "cached"` is the default and recommended setting
-* `tools.web.search.enabled: false` disables both managed and native search
+- Configure it under `tools.web.search.openaiCodex`
+- It only activates for Codex-capable models (`openai-codex/*` or providers using `api: "openai-codex-responses"`)
+- Managed `web_search` still applies to non-Codex models
+- `mode: "cached"` is the default and recommended setting
+- `tools.web.search.enabled: false` disables both managed and native search
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     web: {
@@ -216,7 +208,7 @@ error prompting you to configure one).
 
 ## Config
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     web: {
@@ -237,7 +229,8 @@ Provider-specific config (API keys, base URLs, modes) lives under
 `models.providers.google.apiKey` and `models.providers.google.baseUrl` as lower-priority
 fallbacks after its dedicated web-search config and `GEMINI_API_KEY`. See the
 provider pages for examples.
-Grok can also reuse an xAI OAuth auth profile from `openclaw models auth login --provider xai --method oauth`; API-key config remains the fallback.
+Grok can also reuse an xAI OAuth auth profile from `openclaw models auth login
+--provider xai --method oauth`; API-key config remains the fallback.
 
 `tools.web.search.provider` is validated against the web-search provider ids
 declared by bundled and installed plugin manifests. A typo such as `"brvae"`
@@ -249,19 +242,19 @@ plugin or run `openclaw doctor --fix` to clean up the stale config.
 
 `web_fetch` fallback provider selection is separate:
 
-* choose it with `tools.web.fetch.provider`
-* or omit that field and let OpenClaw auto-detect the first ready web-fetch
+- choose it with `tools.web.fetch.provider`
+- or omit that field and let OpenClaw auto-detect the first ready web-fetch
   provider from available credentials
-* non-sandboxed `web_fetch` can use installed plugin providers that declare
+- non-sandboxed `web_fetch` can use installed plugin providers that declare
   `contracts.webFetchProviders`; sandboxed fetches stay bundled-only
-* today the bundled web-fetch provider is Firecrawl, configured under
+- today the bundled web-fetch provider is Firecrawl, configured under
   `plugins.entries.firecrawl.config.webFetch.*`
 
 When you choose **Kimi** during `openclaw onboard` or
 `openclaw configure --section web`, OpenClaw can also ask for:
 
-* the Moonshot API region (`https://api.moonshot.ai/v1` or `https://api.moonshot.cn/v1`)
-* the default Kimi web-search model (defaults to `kimi-k2.6`)
+- the Moonshot API region (`https://api.moonshot.ai/v1` or `https://api.moonshot.cn/v1`)
+- the default Kimi web-search model (defaults to `kimi-k2.6`)
 
 For `x_search`, configure `plugins.entries.xai.config.xSearch.*`. It uses the
 same xAI auth profile as chat, or the `XAI_API_KEY` / plugin web-search
@@ -279,7 +272,7 @@ show the `x_search` prompt.
   <Tab title="Config file">
     Run `openclaw configure --section web` or set the key directly:
 
-    ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```json5
     {
       plugins: {
         entries: {
@@ -294,17 +287,18 @@ show the `x_search` prompt.
       },
     }
     ```
-  </Tab>
 
+  </Tab>
   <Tab title="Environment variable">
     Set the provider env var in the Gateway process environment:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     export BRAVE_API_KEY="YOUR_KEY"
     ```
 
     For a gateway install, put it in `~/.openclaw/.env`.
     See [Env vars](/help/faq#env-vars-and-env-loading).
+
   </Tab>
 </Tabs>
 
@@ -339,10 +333,10 @@ show the `x_search` prompt.
   SearXNG accepts `http://` only for trusted private-network or loopback hosts;
   public SearXNG endpoints must use `https://`.
   Firecrawl and Tavily only support `query` and `count` through `web_search`
-  \-- use their dedicated tools for advanced options.
+  -- use their dedicated tools for advanced options.
 </Warning>
 
-## x\_search
+## x_search
 
 `x_search` queries X (formerly Twitter) posts using xAI and returns
 AI-synthesized answers with citations. It accepts natural-language queries and
@@ -358,9 +352,9 @@ tool on the request that serves this tool call.
   run a second `x_search` query focused on that exact post.
 </Note>
 
-### x\_search config
+### x_search config
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -391,7 +385,7 @@ tool on the request that serves this tool call.
 it falls back to `plugins.entries.xai.config.webSearch.baseUrl`, then the
 legacy `tools.web.search.grok.baseUrl`, and finally the public xAI endpoint.
 
-### x\_search parameters
+### x_search parameters
 
 | Parameter                    | Description                                            |
 | ---------------------------- | ------------------------------------------------------ |
@@ -403,9 +397,9 @@ legacy `tools.web.search.grok.baseUrl`, and finally the public xAI endpoint.
 | `enable_image_understanding` | Let xAI inspect images attached to matching posts      |
 | `enable_video_understanding` | Let xAI inspect videos attached to matching posts      |
 
-### x\_search example
+### x_search example
 
-```javascript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```javascript
 await x_search({
   query: "dinner recipes",
   allowed_x_handles: ["nytfood"],
@@ -413,7 +407,7 @@ await x_search({
 });
 ```
 
-```javascript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```javascript
 // Per-post stats: use the exact status URL or status ID when possible
 await x_search({
   query: "https://x.com/huntharo/status/1905678901234567890",
@@ -422,7 +416,7 @@ await x_search({
 
 ## Examples
 
-```javascript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```javascript
 // Basic search
 await web_search({ query: "OpenClaw plugin SDK" });
 
@@ -450,7 +444,7 @@ await web_search({
 
 If you use tool profiles or allowlists, add `web_search`, `x_search`, or `group:web`:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   tools: {
     allow: ["web_search", "x_search"],
@@ -461,7 +455,7 @@ If you use tool profiles or allowlists, add `web_search`, `x_search`, or `group:
 
 ## Related
 
-* [Web Fetch](/tools/web-fetch) -- fetch a URL and extract readable content
-* [Web Browser](/tools/browser) -- full browser automation for JS-heavy sites
-* [Grok Search](/tools/grok-search) -- Grok as the `web_search` provider
-* [Ollama Web Search](/tools/ollama-search) -- key-free web search through your Ollama host
+- [Web Fetch](/tools/web-fetch) -- fetch a URL and extract readable content
+- [Web Browser](/tools/browser) -- full browser automation for JS-heavy sites
+- [Grok Search](/tools/grok-search) -- Grok as the `web_search` provider
+- [Ollama Web Search](/tools/ollama-search) -- key-free web search through your Ollama host

@@ -1,0 +1,22 @@
+---
+read_when:
+    - Anda menginginkan gambaran ringkas tentang model jaringan Gateway
+redirect: /network#core-model
+summary: Alihkan ke /network#core-model
+title: Model jaringan
+x-i18n:
+    generated_at: "2026-05-06T09:12:34Z"
+    model: gpt-5.5
+    provider: openai
+    source_hash: a0ef2806cfb539157d827fe9c2ffddc914aa680e3ef318c211b2ec1f374cfed2
+    source_path: gateway/network-model.md
+    workflow: 16
+---
+
+Konten ini telah digabungkan ke [Jaringan — Model inti](/id/network#core-model).
+
+## Terkait
+
+- [Akses jarak jauh](/id/gateway/remote)
+- [Autentikasi proksi tepercaya](/id/gateway/trusted-proxy-auth)
+- [Protokol Gateway](/id/gateway/protocol)

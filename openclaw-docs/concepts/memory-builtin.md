@@ -1,19 +1,21 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Builtin memory engine
+---
+summary: "The default SQLite-based memory backend with keyword, vector, and hybrid search"
+title: "Builtin memory engine"
+read_when:
+  - You want to understand the default memory backend
+  - You want to configure embedding providers or hybrid search
+---
 
 The builtin engine is the default memory backend. It stores your memory index in
 a per-agent SQLite database and needs no extra dependencies to get started.
 
 ## What it provides
 
-* **Keyword search** via FTS5 full-text indexing (BM25 scoring).
-* **Vector search** via embeddings from any supported provider.
-* **Hybrid search** that combines both for best results.
-* **CJK support** via trigram tokenization for Chinese, Japanese, and Korean.
-* **sqlite-vec acceleration** for in-database vector queries (optional).
+- **Keyword search** via FTS5 full-text indexing (BM25 scoring).
+- **Vector search** via embeddings from any supported provider.
+- **Hybrid search** that combines both for best results.
+- **CJK support** via trigram tokenization for Chinese, Japanese, and Korean.
+- **sqlite-vec acceleration** for in-database vector queries (optional).
 
 ## Getting started
 
@@ -22,7 +24,7 @@ engine auto-detects it and enables vector search. No config needed.
 
 To set a provider explicitly:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -40,7 +42,7 @@ To force the built-in local embedding provider, install the optional
 `node-llama-cpp` runtime package next to OpenClaw, then point `local.modelPath`
 at a GGUF file:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   agents: {
     defaults: {
@@ -73,31 +75,31 @@ order shown. Set `memorySearch.provider` to override.
 
 ## How indexing works
 
-OpenClaw indexes `MEMORY.md` and `memory/*.md` into chunks (\~400 tokens with
+OpenClaw indexes `MEMORY.md` and `memory/*.md` into chunks (~400 tokens with
 80-token overlap) and stores them in a per-agent SQLite database.
 
-* **Index location:** `~/.openclaw/memory/<agentId>.sqlite`
-* **Storage maintenance:** SQLite WAL sidecars are bounded with periodic and
+- **Index location:** `~/.openclaw/memory/<agentId>.sqlite`
+- **Storage maintenance:** SQLite WAL sidecars are bounded with periodic and
   shutdown checkpoints.
-* **File watching:** changes to memory files trigger a debounced reindex (1.5s).
-* **Auto-reindex:** when the embedding provider, model, or chunking config
+- **File watching:** changes to memory files trigger a debounced reindex (1.5s).
+- **Auto-reindex:** when the embedding provider, model, or chunking config
   changes, the entire index is rebuilt automatically.
-* **Reindex on demand:** `openclaw memory index --force`
+- **Reindex on demand:** `openclaw memory index --force`
 
 <Info>
-  You can also index Markdown files outside the workspace with
-  `memorySearch.extraPaths`. See the
-  [configuration reference](/reference/memory-config#additional-memory-paths).
+You can also index Markdown files outside the workspace with
+`memorySearch.extraPaths`. See the
+[configuration reference](/reference/memory-config#additional-memory-paths).
 </Info>
 
 ## When to use
 
 The builtin engine is the right choice for most users:
 
-* Works out of the box with no extra dependencies.
-* Handles keyword and vector search well.
-* Supports all embedding providers.
-* Hybrid search combines the best of both retrieval approaches.
+- Works out of the box with no extra dependencies.
+- Handles keyword and vector search well.
+- Supports all embedding providers.
+- Hybrid search combines the best of both retrieval approaches.
 
 Consider switching to [QMD](/concepts/memory-qmd) if you need reranking, query
 expansion, or want to index directories outside the workspace.
@@ -112,7 +114,7 @@ detected, set one explicitly or add an API key.
 
 **Local provider not detected?** Confirm the local path exists and run:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw memory status --deep --agent main
 openclaw memory index --force --agent main
 ```
@@ -139,6 +141,6 @@ other config knobs, see the
 
 ## Related
 
-* [Memory overview](/concepts/memory)
-* [Memory search](/concepts/memory-search)
-* [Active memory](/concepts/active-memory)
+- [Memory overview](/concepts/memory)
+- [Memory search](/concepts/memory-search)
+- [Active memory](/concepts/active-memory)

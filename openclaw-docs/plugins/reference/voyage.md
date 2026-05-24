@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Voyage plugin
+---
+summary: "Adds memory embedding provider support."
+read_when:
+  - You are installing, configuring, or auditing the voyage plugin
+title: "Voyage plugin"
+---
 
 # Voyage plugin
 
@@ -10,8 +11,8 @@ Adds memory embedding provider support.
 
 ## Distribution
 
-* Package: `@openclaw/voyage-provider`
-* Install route: included in OpenClaw
+- Package: `@openclaw/voyage-provider`
+- Install route: included in OpenClaw
 
 ## Surface
 

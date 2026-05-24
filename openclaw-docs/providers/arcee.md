@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Arcee AI
+---
+summary: "Arcee AI setup (auth + model selection)"
+title: "Arcee AI"
+read_when:
+  - You want to use Arcee AI with OpenClaw
+  - You need the API key env var or CLI auth choice
+---
 
 [Arcee AI](https://arcee.ai) provides access to the Trinity family of mixture-of-experts models through an OpenAI-compatible API. All Trinity models are Apache 2.0 licensed.
 
@@ -23,15 +25,13 @@ Arcee AI models can be accessed directly via the Arcee platform or through [Open
       <Step title="Get an API key">
         Create an API key at [Arcee AI](https://chat.arcee.ai/).
       </Step>
-
       <Step title="Run onboarding">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw onboard --auth-choice arceeai-api-key
         ```
       </Step>
-
       <Step title="Set a default model">
-        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```json5
         {
           agents: {
             defaults: {
@@ -49,15 +49,13 @@ Arcee AI models can be accessed directly via the Arcee platform or through [Open
       <Step title="Get an API key">
         Create an API key at [OpenRouter](https://openrouter.ai/keys).
       </Step>
-
       <Step title="Run onboarding">
-        ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```bash
         openclaw onboard --auth-choice arceeai-openrouter
         ```
       </Step>
-
       <Step title="Set a default model">
-        ```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+        ```json5
         {
           agents: {
             defaults: {
@@ -70,6 +68,7 @@ Arcee AI models can be accessed directly via the Arcee platform or through [Open
         The same model refs work for both direct and OpenRouter setups (for example `arcee/trinity-large-thinking`).
       </Step>
     </Steps>
+
   </Tab>
 </Tabs>
 
@@ -77,7 +76,7 @@ Arcee AI models can be accessed directly via the Arcee platform or through [Open
 
 <Tabs>
   <Tab title="Direct (Arcee platform)">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice arceeai-api-key \
@@ -86,7 +85,7 @@ Arcee AI models can be accessed directly via the Arcee platform or through [Open
   </Tab>
 
   <Tab title="Via OpenRouter">
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw onboard --non-interactive \
       --mode local \
       --auth-choice arceeai-openrouter \
@@ -106,7 +105,7 @@ OpenClaw currently ships this bundled Arcee catalog:
 | `arcee/trinity-mini`           | Trinity Mini 26B       | text  | 128K    | $0.045 / $0.15       | Fast and cost-efficient; function calling |
 
 <Tip>
-  The onboarding preset sets `arcee/trinity-large-thinking` as the default model.
+The onboarding preset sets `arcee/trinity-large-thinking` as the default model.
 </Tip>
 
 ## Supported features
@@ -139,7 +138,6 @@ OpenClaw currently ships this bundled Arcee catalog:
   <Card title="OpenRouter" href="/providers/openrouter" icon="shuffle">
     Access Arcee models and many others through a single API key.
   </Card>
-
   <Card title="Model selection" href="/concepts/model-providers" icon="layers">
     Choosing providers, model refs, and failover behavior.
   </Card>

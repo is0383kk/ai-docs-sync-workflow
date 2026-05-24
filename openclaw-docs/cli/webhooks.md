@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Webhooks
+---
+summary: "CLI reference for `openclaw webhooks` (Gmail Pub/Sub setup and runner)"
+read_when:
+  - You want to wire Gmail Pub/Sub events into OpenClaw
+  - You need the full flag list and default values
+title: "Webhooks"
+---
 
 # `openclaw webhooks`
 
@@ -10,7 +12,7 @@ Webhook helpers and integrations. Today this surface is scoped to Gmail Pub/Sub 
 
 ## Subcommands
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw webhooks gmail setup --account <email> [...]
 openclaw webhooks gmail run   [--account <email>] [...]
 ```
@@ -24,7 +26,7 @@ openclaw webhooks gmail run   [--account <email>] [...]
 
 Configure Gmail watch, Pub/Sub, and OpenClaw webhook delivery.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw webhooks gmail setup --account you@example.com
 openclaw webhooks gmail setup --account you@example.com --project my-gcp-project --json
 openclaw webhooks gmail setup --account you@example.com --hook-url https://gateway.example.com/hooks/gmail
@@ -83,15 +85,15 @@ openclaw webhooks gmail setup --account you@example.com --hook-url https://gatew
 
 Run `gog watch serve` plus the watch auto-renew loop in the foreground.
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw webhooks gmail run --account you@example.com
 ```
 
 `run` accepts the same `gog watch serve`, OpenClaw delivery, Pub/Sub, and Tailscale flags as `setup`, except:
 
-* `--account` is **optional** on `run` (it falls back to the configured account).
-* `run` does **not** accept `--project`, `--push-endpoint`, or `--json`.
-* `run` flags have no built-in defaults; missing values fall back to the values written by `setup`.
+- `--account` is **optional** on `run` (it falls back to the configured account).
+- `run` does **not** accept `--project`, `--push-endpoint`, or `--json`.
+- `run` flags have no built-in defaults; missing values fall back to the values written by `setup`.
 
 | Category          | Flags                                                                            |
 | ----------------- | -------------------------------------------------------------------------------- |
@@ -101,7 +103,7 @@ openclaw webhooks gmail run --account you@example.com
 | Tailscale         | `--tailscale`, `--tailscale-path`, `--tailscale-target`                          |
 
 <Note>
-  For `run`, the `--topic` value is the full Pub/Sub topic path (`projects/.../topics/...`), not just the short topic name.
+For `run`, the `--topic` value is the full Pub/Sub topic path (`projects/.../topics/...`), not just the short topic name.
 </Note>
 
 ## End-to-end flow
@@ -110,6 +112,6 @@ See [Gmail Pub/Sub integration](/automation/cron-jobs#gmail-pubsub-integration) 
 
 ## Related
 
-* [CLI reference](/cli)
-* [Webhook automation](/automation/webhook)
-* [Gmail Pub/Sub](/automation/cron-jobs#gmail-pubsub-integration)
+- [CLI reference](/cli)
+- [Webhook automation](/automation/webhook)
+- [Gmail Pub/Sub](/automation/cron-jobs#gmail-pubsub-integration)

@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Security
+---
+summary: "CLI reference for `openclaw security` (audit and fix common security footguns)"
+read_when:
+  - You want to run a quick security audit on config/state
+  - You want to apply safe "fix" suggestions (permissions, tighten defaults)
+title: "Security"
+---
 
 # `openclaw security`
 
@@ -10,11 +12,11 @@ Security tools (audit + optional fixes).
 
 Related:
 
-* Security guide: [Security](/gateway/security)
+- Security guide: [Security](/gateway/security)
 
 ## Audit
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw security audit
 openclaw security audit --deep
 openclaw security audit --deep --password <password>
@@ -46,7 +48,7 @@ Intentional standing findings can be accepted with `security.audit.suppressions`
 Each suppression matches an exact `checkId` and can be narrowed with
 `titleIncludes` and/or `detailIncludes` case-insensitive substrings:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "security": {
     "audit": {
@@ -75,22 +77,22 @@ with `security="full"` and `ask="off"` for trusted local automation.
 
 SecretRef behavior:
 
-* `security audit` resolves supported SecretRefs in read-only mode for its targeted paths.
-* If a SecretRef is unavailable in the current command path, audit continues and reports `secretDiagnostics` (instead of crashing).
-* `--token` and `--password` only override deep-probe auth for that command invocation; they do not rewrite config or SecretRef mappings.
+- `security audit` resolves supported SecretRefs in read-only mode for its targeted paths.
+- If a SecretRef is unavailable in the current command path, audit continues and reports `secretDiagnostics` (instead of crashing).
+- `--token` and `--password` only override deep-probe auth for that command invocation; they do not rewrite config or SecretRef mappings.
 
 ## JSON output
 
 Use `--json` for CI/policy checks:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw security audit --json | jq '.summary'
 openclaw security audit --deep --json | jq '.findings[] | select(.severity=="critical") | .checkId'
 ```
 
 If `--fix` and `--json` are combined, output includes both fix actions and final report:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw security audit --fix --json | jq '{fix: .fix.ok, summary: .report.summary}'
 ```
 
@@ -98,25 +100,25 @@ openclaw security audit --fix --json | jq '{fix: .fix.ok, summary: .report.summa
 
 `--fix` applies safe, deterministic remediations:
 
-* flips common `groupPolicy="open"` to `groupPolicy="allowlist"` (including account variants in supported channels)
-* when WhatsApp group policy flips to `allowlist`, seeds `groupAllowFrom` from
+- flips common `groupPolicy="open"` to `groupPolicy="allowlist"` (including account variants in supported channels)
+- when WhatsApp group policy flips to `allowlist`, seeds `groupAllowFrom` from
   the stored `allowFrom` file when that list exists and config does not already
   define `allowFrom`
-* sets `logging.redactSensitive` from `"off"` to `"tools"`
-* tightens permissions for state/config and common sensitive files
+- sets `logging.redactSensitive` from `"off"` to `"tools"`
+- tightens permissions for state/config and common sensitive files
   (`credentials/*.json`, `auth-profiles.json`, `sessions.json`, session
   `*.jsonl`)
-* also tightens config include files referenced from `openclaw.json`
-* uses `chmod` on POSIX hosts and `icacls` resets on Windows
+- also tightens config include files referenced from `openclaw.json`
+- uses `chmod` on POSIX hosts and `icacls` resets on Windows
 
 `--fix` does **not**:
 
-* rotate tokens/passwords/API keys
-* disable tools (`gateway`, `cron`, `exec`, etc.)
-* change gateway bind/auth/network exposure choices
-* remove or rewrite plugins/skills
+- rotate tokens/passwords/API keys
+- disable tools (`gateway`, `cron`, `exec`, etc.)
+- change gateway bind/auth/network exposure choices
+- remove or rewrite plugins/skills
 
 ## Related
 
-* [CLI reference](/cli)
-* [Security audit](/gateway/security)
+- [CLI reference](/cli)
+- [Security audit](/gateway/security)

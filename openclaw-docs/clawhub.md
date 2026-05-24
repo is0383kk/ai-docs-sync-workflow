@@ -1,15 +1,20 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# ClawHub
+---
+summary: "Public ClawHub overview for discovery, install, publish, security, and the clawhub CLI."
+read_when:
+  - Explaining what ClawHub is
+  - Searching for, installing, or updating skills or plugins
+  - Publishing skills or plugins to the registry
+  - Choosing between openclaw and clawhub CLI flows
+title: "ClawHub"
+sidebarTitle: "ClawHub"
+---
 
 # ClawHub
 
 ClawHub is the public registry for OpenClaw skills and plugins.
 
-* Use native `openclaw` commands to search, install, and update skills and to install plugins from ClawHub.
-* Use the separate `clawhub` CLI for registry auth, publishing, delete/undelete, and sync workflows.
+- Use native `openclaw` commands to search, install, and update skills and to install plugins from ClawHub.
+- Use the separate `clawhub` CLI for registry auth, publishing, delete/undelete, and sync workflows.
 
 Site: [clawhub.ai](https://clawhub.ai)
 
@@ -17,7 +22,7 @@ Site: [clawhub.ai](https://clawhub.ai)
 
 Search and install skills with OpenClaw:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw skills search "calendar"
 openclaw skills install <skill-slug>
 openclaw skills update --all
@@ -25,7 +30,7 @@ openclaw skills update --all
 
 Search and install plugins with OpenClaw:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins search "calendar"
 openclaw plugins install clawhub:<package>
 openclaw plugins update --all
@@ -34,7 +39,7 @@ openclaw plugins update --all
 Install the ClawHub CLI when you want registry-authenticated workflows such as
 publish, sync, or delete/undelete:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 npm i -g clawhub
 # or
 pnpm add -g clawhub
@@ -72,7 +77,7 @@ later updates.
 
 The ClawHub CLI is for registry-authenticated work:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub login
 clawhub whoami
 clawhub search "postgres backups"
@@ -86,7 +91,7 @@ clawhub sync --all
 
 The CLI also has skill install/update commands for direct registry workflows:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub install <slug>
 clawhub update <slug>
 clawhub update --all
@@ -100,22 +105,22 @@ and record installed versions in `.clawhub/lock.json`.
 
 Publish skills from a local folder containing `SKILL.md`:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub skill publish <path>
 ```
 
 Common publish options:
 
-* `--slug <slug>`: skill slug.
-* `--name <name>`: display name.
-* `--version <version>`: semver version.
-* `--changelog <text>`: changelog text.
-* `--tags <tags>`: comma-separated tags, defaulting to `latest`.
+- `--slug <slug>`: skill slug.
+- `--name <name>`: display name.
+- `--version <version>`: semver version.
+- `--changelog <text>`: changelog text.
+- `--tags <tags>`: comma-separated tags, defaulting to `latest`.
 
 Publish plugins from a local folder, `owner/repo`, `owner/repo@ref`, or a GitHub
 URL:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 clawhub package publish <source>
 ```
 
@@ -148,7 +153,7 @@ hide or restore content, and ban abusive accounts. See
 When you run `clawhub sync` while logged in, the CLI sends a minimal snapshot so
 ClawHub can compute install counts. Disable this with:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export CLAWHUB_DISABLE_TELEMETRY=1
 ```
 

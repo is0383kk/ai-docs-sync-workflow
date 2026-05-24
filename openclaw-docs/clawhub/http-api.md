@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Http api
+---
+summary: "HTTP API reference (public + CLI endpoints + auth)."
+read_when:
+  - Adding/changing endpoints
+  - Debugging CLI ↔ registry requests
+---
 
 # HTTP API
 
@@ -24,38 +25,33 @@ precedence.
 
 Enforcement model:
 
-* Anonymous requests: enforced per IP.
-
-* Authenticated requests (valid Bearer token): enforced per user bucket.
-
-* If token is missing/invalid, behavior falls back to IP enforcement.
-
-* Authenticated write endpoints should not return a bare `Unauthorized` when
+- Anonymous requests: enforced per IP.
+- Authenticated requests (valid Bearer token): enforced per user bucket.
+- If token is missing/invalid, behavior falls back to IP enforcement.
+- Authenticated write endpoints should not return a bare `Unauthorized` when
   the server knows the reason. Missing tokens, invalid/revoked tokens, and
   deleted/banned/disabled accounts should each get actionable text so CLI
   clients can tell users what blocked them.
 
-* Read: 3000/min per IP, 12000/min per key
-
-* Write: 300/min per IP, 3000/min per key
-
-* Download: 1200/min per IP, 6000/min per key (download endpoints)
+- Read: 3000/min per IP, 12000/min per key
+- Write: 300/min per IP, 3000/min per key
+- Download: 1200/min per IP, 6000/min per key (download endpoints)
 
 Headers:
 
-* Legacy compatibility: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
-* Standardized: `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`
-* On `429`: `Retry-After`
+- Legacy compatibility: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+- Standardized: `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`
+- On `429`: `Retry-After`
 
 Header semantics:
 
-* `X-RateLimit-Reset`: absolute Unix epoch seconds
-* `RateLimit-Reset`: seconds until reset (delay)
-* `Retry-After`: seconds to wait before retry (delay) on `429`
+- `X-RateLimit-Reset`: absolute Unix epoch seconds
+- `RateLimit-Reset`: seconds until reset (delay)
+- `Retry-After`: seconds to wait before retry (delay) on `429`
 
 Example `429` response:
 
-```http theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```http
 HTTP/2 429
 content-type: text/plain; charset=utf-8
 x-ratelimit-limit: 20
@@ -71,15 +67,15 @@ Rate limit exceeded
 
 Client guidance:
 
-* If `Retry-After` exists, wait that many seconds before retry.
-* Use jittered backoff to avoid synchronized retries.
-* If `Retry-After` is missing, fallback to `RateLimit-Reset` (or compute from `X-RateLimit-Reset`).
+- If `Retry-After` exists, wait that many seconds before retry.
+- Use jittered backoff to avoid synchronized retries.
+- If `Retry-After` is missing, fallback to `RateLimit-Reset` (or compute from `X-RateLimit-Reset`).
 
 IP source:
 
-* Uses `cf-connecting-ip` (Cloudflare) for client IP by default.
-* ClawHub uses trusted forwarding headers to identify client IPs at the edge.
-* If no trusted client IP is available, anonymous download requests use an endpoint-scoped fallback bucket instead of one global `ip:unknown` bucket. Anonymous read/write requests still use the shared unknown bucket so missing-IP routing remains visible and conservative.
+- Uses `cf-connecting-ip` (Cloudflare) for client IP by default.
+- ClawHub uses trusted forwarding headers to identify client IPs at the edge.
+- If no trusted client IP is available, anonymous download requests use an endpoint-scoped fallback bucket instead of one global `ip:unknown` bucket. Anonymous read/write requests still use the shared unknown bucket so missing-IP routing remains visible and conservative.
 
 ## Error responses
 
@@ -96,15 +92,15 @@ ignored for compatibility, but recognized query parameters with invalid values r
 
 Query params:
 
-* `q` (required): query string
-* `limit` (optional): integer
-* `highlightedOnly` (optional): `true` to filter to highlighted skills
-* `nonSuspiciousOnly` (optional): `true` to hide suspicious (`flagged.suspicious`) skills
-* `nonSuspicious` (optional): legacy alias for `nonSuspiciousOnly`
+- `q` (required): query string
+- `limit` (optional): integer
+- `highlightedOnly` (optional): `true` to filter to highlighted skills
+- `nonSuspiciousOnly` (optional): `true` to hide suspicious (`flagged.suspicious`) skills
+- `nonSuspicious` (optional): legacy alias for `nonSuspiciousOnly`
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "results": [
     {
@@ -127,41 +123,41 @@ Response:
 
 Notes:
 
-* Results are returned in relevance order (embedding similarity + exact slug/name token boosts + popularity prior from downloads).
-* Relevance is stronger than popularity. A precise slug or display-name token match can outrank a looser match with many more downloads.
-* ASCII text is tokenized on word and punctuation boundaries. For example, `personal-map` contains a standalone `map` token, while `amap-jsapi-skill` contains `amap`, `jsapi`, and `skill`; searching for `map` therefore gives `personal-map` a stronger lexical match than `amap-jsapi-skill`.
-* Downloads are used as a small log-scaled prior and tie-breaker, not as the primary ranking signal. High-download skills can rank lower when the query text is a weaker match.
-* Suspicious or hidden moderation state can remove a skill from public search depending on caller filters and current moderation status.
+- Results are returned in relevance order (embedding similarity + exact slug/name token boosts + popularity prior from downloads).
+- Relevance is stronger than popularity. A precise slug or display-name token match can outrank a looser match with many more downloads.
+- ASCII text is tokenized on word and punctuation boundaries. For example, `personal-map` contains a standalone `map` token, while `amap-jsapi-skill` contains `amap`, `jsapi`, and `skill`; searching for `map` therefore gives `personal-map` a stronger lexical match than `amap-jsapi-skill`.
+- Downloads are used as a small log-scaled prior and tie-breaker, not as the primary ranking signal. High-download skills can rank lower when the query text is a weaker match.
+- Suspicious or hidden moderation state can remove a skill from public search depending on caller filters and current moderation status.
 
 Publisher discoverability guidance:
 
-* Put the terms users will literally search for in the display name, summary, and tags. Use a standalone slug token only when it is also a stable identity you want to keep.
-* Do not rename a slug just to chase one query unless the new slug is a better long-term canonical name. Old slugs become redirect aliases, but the canonical URL, displayed slug, and future search digests use the new slug.
-* Rename aliases preserve resolution for old URLs and installs that resolve through the registry, but search ranking is based on the canonical skill metadata after the rename has indexed. Existing stats stay with the skill.
-* If a skill is unexpectedly invisible, check moderation state first with `clawhub inspect <slug>` while logged in before changing ranking-related metadata.
+- Put the terms users will literally search for in the display name, summary, and tags. Use a standalone slug token only when it is also a stable identity you want to keep.
+- Do not rename a slug just to chase one query unless the new slug is a better long-term canonical name. Old slugs become redirect aliases, but the canonical URL, displayed slug, and future search digests use the new slug.
+- Rename aliases preserve resolution for old URLs and installs that resolve through the registry, but search ranking is based on the canonical skill metadata after the rename has indexed. Existing stats stay with the skill.
+- If a skill is unexpectedly invisible, check moderation state first with `clawhub inspect <slug>` while logged in before changing ranking-related metadata.
 
 ### `GET /api/v1/skills`
 
 Query params:
 
-* `limit` (optional): integer (1–200)
-* `cursor` (optional): pagination cursor for any non-`trending` sort
-* `sort` (optional): `updated` (default), `createdAt` (alias: `newest`), `downloads`, `stars` (alias: `rating`), `installsCurrent` (alias: `installs`), `installsAllTime`, `trending`
-* `nonSuspiciousOnly` (optional): `true` to hide suspicious (`flagged.suspicious`) skills
-* `nonSuspicious` (optional): legacy alias for `nonSuspiciousOnly`
+- `limit` (optional): integer (1–200)
+- `cursor` (optional): pagination cursor for any non-`trending` sort
+- `sort` (optional): `updated` (default), `createdAt` (alias: `newest`), `downloads`, `stars` (alias: `rating`), `installsCurrent` (alias: `installs`), `installsAllTime`, `trending`
+- `nonSuspiciousOnly` (optional): `true` to hide suspicious (`flagged.suspicious`) skills
+- `nonSuspicious` (optional): legacy alias for `nonSuspiciousOnly`
 
 Invalid `sort` values return `400`.
 
 Notes:
 
-* `trending` ranks by installs in the last 7 days (telemetry-based).
-* `createdAt` is stable for new-skill crawls; `updated` changes when existing skills are republished.
-* When `nonSuspiciousOnly=true`, cursor-based sorts may return fewer than `limit` items on a page because suspicious skills are filtered after page retrieval.
-* Use `nextCursor` to continue pagination when present. A short page does not by itself mean end-of-results.
+- `trending` ranks by installs in the last 7 days (telemetry-based).
+- `createdAt` is stable for new-skill crawls; `updated` changes when existing skills are republished.
+- When `nonSuspiciousOnly=true`, cursor-based sorts may return fewer than `limit` items on a page because suspicious skills are filtered after page retrieval.
+- Use `nextCursor` to continue pagination when present. A short page does not by itself mean end-of-results.
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "items": [
     {
@@ -184,7 +180,7 @@ Response:
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "skill": {
     "slug": "gifgrep",
@@ -212,11 +208,11 @@ Response:
 
 Notes:
 
-* Old slugs created by owner rename/merge flows resolve to the canonical skill.
-* `metadata.os`: OS restrictions declared in skill frontmatter (e.g. `["macos"]`, `["linux"]`). `null` if not declared.
-* `metadata.systems`: Nix system targets (e.g. `["aarch64-darwin", "x86_64-linux"]`). `null` if not declared.
-* `metadata` is `null` if the skill has no platform metadata.
-* `moderation` is included only when the skill is flagged or the owner is viewing it.
+- Old slugs created by owner rename/merge flows resolve to the canonical skill.
+- `metadata.os`: OS restrictions declared in skill frontmatter (e.g. `["macos"]`, `["linux"]`). `null` if not declared.
+- `metadata.systems`: Nix system targets (e.g. `["aarch64-darwin", "x86_64-linux"]`). `null` if not declared.
+- `metadata` is `null` if the skill has no platform metadata.
+- `moderation` is included only when the skill is flagged or the owner is viewing it.
 
 ### `GET /api/v1/skills/{slug}/moderation`
 
@@ -224,7 +220,7 @@ Returns structured moderation state.
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "moderation": {
     "isSuspicious": true,
@@ -251,9 +247,9 @@ Response:
 
 Notes:
 
-* Owners and moderators can access moderation details for hidden skills.
-* Public callers only get `200` for already-flagged visible skills.
-* Evidence is redacted for public callers and only includes raw snippets for owners/moderators.
+- Owners and moderators can access moderation details for hidden skills.
+- Public callers only get `200` for already-flagged visible skills.
+- Evidence is redacted for public callers and only includes raw snippets for owners/moderators.
 
 ### `POST /api/v1/skills/{slug}/report`
 
@@ -262,17 +258,17 @@ to a version, and feed the skill report queue.
 
 Auth:
 
-* Requires an API token.
+- Requires an API token.
 
 Request:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "reason": "Suspicious install step", "version": "1.2.3" }
 ```
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "ok": true,
   "reported": true,
@@ -289,13 +285,13 @@ Moderator/admin endpoint for skill report intake.
 
 Query params:
 
-* `status` (optional): `open` (default), `confirmed`, `dismissed`, or `all`
-* `limit` (optional): integer (1-200)
-* `cursor` (optional): pagination cursor
+- `status` (optional): `open` (default), `confirmed`, `dismissed`, or `all`
+- `limit` (optional): integer (1-200)
+- `cursor` (optional): pagination cursor
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "items": [
     {
@@ -329,7 +325,7 @@ Moderator/admin endpoint for resolving or reopening skill reports.
 
 Request:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "status": "confirmed", "note": "Reviewed and hid affected version.", "finalAction": "hide" }
 ```
 
@@ -341,14 +337,14 @@ report to hide the skill in the same auditable workflow.
 
 Query params:
 
-* `limit` (optional): integer
-* `cursor` (optional): pagination cursor
+- `limit` (optional): integer
+- `cursor` (optional): pagination cursor
 
 ### `GET /api/v1/skills/{slug}/versions/{version}`
 
 Returns version metadata + files list.
 
-* `version.security` includes normalized scan verification status and scanner details
+- `version.security` includes normalized scan verification status and scanner details
   (VirusTotal + LLM), when available.
 
 ### `GET /api/v1/skills/{slug}/scan`
@@ -357,20 +353,20 @@ Returns security scan verification details for a skill version.
 
 Query params:
 
-* `version` (optional): specific version string.
-* `tag` (optional): resolve a tagged version (for example `latest`).
+- `version` (optional): specific version string.
+- `tag` (optional): resolve a tagged version (for example `latest`).
 
 Notes:
 
-* If neither `version` nor `tag` is provided, uses the latest version.
-* Includes normalized verification status plus scanner-specific details.
-* `security.capabilityTags` includes deterministic capability/risk labels such as
+- If neither `version` nor `tag` is provided, uses the latest version.
+- Includes normalized verification status plus scanner-specific details.
+- `security.capabilityTags` includes deterministic capability/risk labels such as
   `crypto`, `financial-authority`, `requires-wallet`, `can-make-purchases`,
   `can-sign-transactions`, `requires-paid-service`, `requires-oauth-token`, and
   `posts-externally` when detected.
-* `security.hasScanResult` is `true` only when a scanner produced a definitive verdict (`clean`, `suspicious`, or `malicious`).
-* `moderation` is a current skill-level moderation snapshot derived from the latest version.
-* When querying a historical version, check `moderation.matchesRequestedVersion` and `moderation.sourceVersion` before treating `moderation` and `security` as the same version context.
+- `security.hasScanResult` is `true` only when a scanner produced a definitive verdict (`clean`, `suspicious`, or `malicious`).
+- `moderation` is a current skill-level moderation snapshot derived from the latest version.
+- When querying a historical version, check `moderation.matchesRequestedVersion` and `moderation.sourceVersion` before treating `moderation` and `security` as the same version context.
 
 ### `GET /api/v1/skills/{slug}/file`
 
@@ -378,58 +374,58 @@ Returns raw text content.
 
 Query params:
 
-* `path` (required)
-* `version` (optional)
-* `tag` (optional)
+- `path` (required)
+- `version` (optional)
+- `tag` (optional)
 
 Notes:
 
-* Defaults to latest version.
-* File size limit: 200KB.
+- Defaults to latest version.
+- File size limit: 200KB.
 
 ### `GET /api/v1/packages`
 
 Unified catalog endpoint for:
 
-* skills
-* code plugins
-* bundle plugins
+- skills
+- code plugins
+- bundle plugins
 
 Query params:
 
-* `limit` (optional): integer (1–100)
-* `cursor` (optional): pagination cursor
-* `family` (optional): `skill`, `code-plugin`, or `bundle-plugin`
-* `channel` (optional): `official`, `community`, or `private`
-* `isOfficial` (optional): `true` or `false`
-* `executesCode` (optional): `true` or `false`
-* `capabilityTag` (optional): capability filter for plugin packages
-* `category` (optional): plugin category filter. Supported only when the
+- `limit` (optional): integer (1–100)
+- `cursor` (optional): pagination cursor
+- `family` (optional): `skill`, `code-plugin`, or `bundle-plugin`
+- `channel` (optional): `official`, `community`, or `private`
+- `isOfficial` (optional): `true` or `false`
+- `executesCode` (optional): `true` or `false`
+- `capabilityTag` (optional): capability filter for plugin packages
+- `category` (optional): plugin category filter. Supported only when the
   request is scoped to plugin packages (`/api/v1/plugins`,
   `/api/v1/code-plugins`, `/api/v1/bundle-plugins`, or package endpoints with
   `family=code-plugin`/`family=bundle-plugin`).
-* `target` / `hostTarget` (optional): shorthand for `host:<target>`
-* `os`, `arch`, `libc` (optional): shorthand for host capability filters
-* `requiresBrowser`, `requiresDesktop`, `requiresNativeDeps`,
+- `target` / `hostTarget` (optional): shorthand for `host:<target>`
+- `os`, `arch`, `libc` (optional): shorthand for host capability filters
+- `requiresBrowser`, `requiresDesktop`, `requiresNativeDeps`,
   `requiresExternalService`, `requiresBinary`, `requiresOsPermission`
   (optional): `true`/`1` shorthand for environment requirement tags
-* `externalService`, `binary`, `osPermission` (optional): shorthand for named
+- `externalService`, `binary`, `osPermission` (optional): shorthand for named
   environment requirement tags
-* `artifactKind` (optional): `legacy-zip` or `npm-pack`
-* `npmMirror` (optional): `true`/`1` to show ClawPack-backed package versions
+- `artifactKind` (optional): `legacy-zip` or `npm-pack`
+- `npmMirror` (optional): `true`/`1` to show ClawPack-backed package versions
   available through the npm mirror
 
 Notes:
 
-* Invalid values for `family`, `channel`, `isOfficial`, `executesCode`,
+- Invalid values for `family`, `channel`, `isOfficial`, `executesCode`,
   `featured`, `highlightedOnly`, `artifactKind`, or boolean capability shorthands
   return `400`. Unknown query parameters are ignored.
-* `GET /api/v1/code-plugins` and `GET /api/v1/bundle-plugins` remain fixed-family aliases.
-* Skill entries stay backed by the skill registry and can still be published only through `POST /api/v1/skills`.
-* `POST /api/v1/packages` is still only for code-plugin and bundle-plugin releases.
-* Anonymous callers only see public package channels.
-* Authenticated callers can see private packages for publishers they belong to in list/search results.
-* `channel=private` only returns packages the authenticated caller can read.
+- `GET /api/v1/code-plugins` and `GET /api/v1/bundle-plugins` remain fixed-family aliases.
+- Skill entries stay backed by the skill registry and can still be published only through `POST /api/v1/skills`.
+- `POST /api/v1/packages` is still only for code-plugin and bundle-plugin releases.
+- Anonymous callers only see public package channels.
+- Authenticated callers can see private packages for publishers they belong to in list/search results.
+- `channel=private` only returns packages the authenticated caller can read.
 
 ### `GET /api/v1/packages/search`
 
@@ -437,32 +433,32 @@ Unified catalog search across skills + plugin packages.
 
 Query params:
 
-* `q` (required): query string
-* `limit` (optional): integer (1–100)
-* `family` (optional): `skill`, `code-plugin`, or `bundle-plugin`
-* `channel` (optional): `official`, `community`, or `private`
-* `isOfficial` (optional): `true` or `false`
-* `executesCode` (optional): `true` or `false`
-* `capabilityTag` (optional): capability filter for plugin packages
-* `category` (optional): plugin category filter. Supported only when the
+- `q` (required): query string
+- `limit` (optional): integer (1–100)
+- `family` (optional): `skill`, `code-plugin`, or `bundle-plugin`
+- `channel` (optional): `official`, `community`, or `private`
+- `isOfficial` (optional): `true` or `false`
+- `executesCode` (optional): `true` or `false`
+- `capabilityTag` (optional): capability filter for plugin packages
+- `category` (optional): plugin category filter. Supported only when the
   request is scoped to plugin packages.
-* `target` / `hostTarget`, `os`, `arch`, `libc`, `requiresBrowser`,
+- `target` / `hostTarget`, `os`, `arch`, `libc`, `requiresBrowser`,
   `requiresDesktop`, `requiresNativeDeps`, `requiresExternalService`,
   `requiresBinary`, `requiresOsPermission`, `externalService`, `binary`, and
   `osPermission` are accepted as shorthands for common capability tags
-* `artifactKind` (optional): `legacy-zip` or `npm-pack`
-* `npmMirror` (optional): `true`/`1` to search ClawPack-backed package versions
+- `artifactKind` (optional): `legacy-zip` or `npm-pack`
+- `npmMirror` (optional): `true`/`1` to search ClawPack-backed package versions
   available through the npm mirror
 
 Notes:
 
-* Invalid values for `family`, `channel`, `isOfficial`, `executesCode`,
+- Invalid values for `family`, `channel`, `isOfficial`, `executesCode`,
   `featured`, `highlightedOnly`, `artifactKind`, or boolean capability shorthands
   return `400`. Unknown query parameters are ignored.
-* Anonymous callers only see public package channels.
-* Authenticated callers can search private packages for publishers they belong to.
-* `channel=private` only returns packages the authenticated caller can read.
-* Artifact filters are backed by indexed capability tags:
+- Anonymous callers only see public package channels.
+- Authenticated callers can search private packages for publishers they belong to.
+- `channel=private` only returns packages the authenticated caller can read.
+- Artifact filters are backed by indexed capability tags:
   `artifact:legacy-zip`, `artifact:npm-pack`, and `npm-mirror:available`.
 
 ### `GET /api/v1/plugins`
@@ -471,12 +467,12 @@ Plugin-only catalog browse across code-plugin and bundle-plugin packages.
 
 Query params:
 
-* `limit` (optional): integer (1-100)
-* `cursor` (optional): pagination cursor
-* `isOfficial` (optional): `true` or `false`
-* `executesCode` (optional): `true` or `false`
-* `capabilityTag` (optional): capability filter for plugin packages
-* `category` (optional): plugin category filter. Current values:
+- `limit` (optional): integer (1-100)
+- `cursor` (optional): pagination cursor
+- `isOfficial` (optional): `true` or `false`
+- `executesCode` (optional): `true` or `false`
+- `capabilityTag` (optional): capability filter for plugin packages
+- `category` (optional): plugin category filter. Current values:
   `channels`, `mcp-tooling`, `data`, `security`, `observability`,
   `automation`, `deployment`, `dev-tools`.
 
@@ -486,21 +482,21 @@ Plugin-only search across code-plugin and bundle-plugin packages.
 
 Query params:
 
-* `q` (required): query string
-* `limit` (optional): integer (1-100)
-* `isOfficial` (optional): `true` or `false`
-* `executesCode` (optional): `true` or `false`
-* `capabilityTag` (optional): capability filter for plugin packages
-* `category` (optional): plugin category filter. Current values:
+- `q` (required): query string
+- `limit` (optional): integer (1-100)
+- `isOfficial` (optional): `true` or `false`
+- `executesCode` (optional): `true` or `false`
+- `capabilityTag` (optional): capability filter for plugin packages
+- `category` (optional): plugin category filter. Current values:
   `channels`, `mcp-tooling`, `data`, `security`, `observability`,
   `automation`, `deployment`, `dev-tools`.
 
 Notes:
 
-* Category filtering is a real API filter backed by plugin category digest
+- Category filtering is a real API filter backed by plugin category digest
   rows, not a search-query rewrite.
-* Results are returned in relevance order and do not currently paginate.
-* Browser UI sort controls for plugin search reorder the loaded relevance results,
+- Results are returned in relevance order and do not currently paginate.
+- Browser UI sort controls for plugin search reorder the loaded relevance results,
   matching the current `/skills` browse behavior.
 
 ### `GET /api/v1/packages/{name}`
@@ -509,8 +505,8 @@ Returns package detail metadata.
 
 Notes:
 
-* Skills can also resolve through this route in the unified catalog.
-* Private packages return `404` unless the caller can read the owning publisher.
+- Skills can also resolve through this route in the unified catalog.
+- Private packages return `404` unless the caller can read the owning publisher.
 
 ### `DELETE /api/v1/packages/{name}`
 
@@ -518,7 +514,7 @@ Soft-deletes a package and all releases.
 
 Notes:
 
-* Requires an API token for the package owner, an org publisher owner/admin,
+- Requires an API token for the package owner, an org publisher owner/admin,
   platform moderator, or platform admin.
 
 ### `GET /api/v1/packages/{name}/versions`
@@ -527,12 +523,12 @@ Returns version history.
 
 Query params:
 
-* `limit` (optional): integer (1–100)
-* `cursor` (optional): pagination cursor
+- `limit` (optional): integer (1–100)
+- `cursor` (optional): pagination cursor
 
 Notes:
 
-* Private packages return `404` unless the caller can read the owning publisher.
+- Private packages return `404` unless the caller can read the owning publisher.
 
 ### `GET /api/v1/packages/{name}/versions/{version}`
 
@@ -541,12 +537,12 @@ capabilities, verification, artifact metadata, and scan data.
 
 Notes:
 
-* `version.artifact.kind` is `legacy-zip` for old-world package archives or
+- `version.artifact.kind` is `legacy-zip` for old-world package archives or
   `npm-pack` for ClawPack-backed releases.
-* ClawPack releases include npm-compatible `npmIntegrity`, `npmShasum`, and
+- ClawPack releases include npm-compatible `npmIntegrity`, `npmShasum`, and
   `npmTarballName` fields.
-* `version.sha256hash`, `version.vtAnalysis`, `version.llmAnalysis`, and `version.staticScan` are included when scan data exists.
-* Private packages return `404` unless the caller can read the owning publisher.
+- `version.sha256hash`, `version.vtAnalysis`, `version.llmAnalysis`, and `version.staticScan` are included when scan data exists.
+- Private packages return `404` unless the caller can read the owning publisher.
 
 ### `GET /api/v1/packages/{name}/versions/{version}/security`
 
@@ -556,12 +552,12 @@ resolved release can be installed.
 
 Auth:
 
-* Public read endpoint. No owner, publisher, moderator, or admin token is
+- Public read endpoint. No owner, publisher, moderator, or admin token is
   required.
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "package": {
     "name": "@openclaw/example-plugin",
@@ -591,34 +587,34 @@ Response:
 
 Response fields:
 
-* `package.name`, `package.displayName`, and `package.family` identify the
+- `package.name`, `package.displayName`, and `package.family` identify the
   resolved registry package.
-* `release.releaseId`, `release.version`, and `release.createdAt` identify the
+- `release.releaseId`, `release.version`, and `release.createdAt` identify the
   exact release that was evaluated.
-* `release.artifactKind`, `release.artifactSha256`, `release.npmIntegrity`,
+- `release.artifactKind`, `release.artifactSha256`, `release.npmIntegrity`,
   `release.npmShasum`, and `release.npmTarballName` are present when known for
   the release artifact.
-* `trust.scanStatus` is the effective trust status derived from scanner inputs
+- `trust.scanStatus` is the effective trust status derived from scanner inputs
   and manual release moderation.
-* `trust.moderationState` is nullable. It is `null` when no manual release
+- `trust.moderationState` is nullable. It is `null` when no manual release
   moderation exists.
-* `trust.blockedFromDownload` is the install block signal. OpenClaw and other
+- `trust.blockedFromDownload` is the install block signal. OpenClaw and other
   install clients should block installation when this value is `true` instead of
   re-deriving blocking rules from scanner or moderation fields.
-* `trust.reasons` is the user-facing and audit explanation list. Reason codes
+- `trust.reasons` is the user-facing and audit explanation list. Reason codes
   are stable, compact strings such as `manual:quarantined`, `scan:malicious`,
   `static:malicious`, `vt:suspicious`, and `package:malicious`.
-* `trust.pending` means one or more trust inputs are still awaiting completion.
-* `trust.stale` means the trust summary was computed from outdated inputs and
+- `trust.pending` means one or more trust inputs are still awaiting completion.
+- `trust.stale` means the trust summary was computed from outdated inputs and
   should be treated as requiring refresh before a high-confidence allow decision.
 
 Notes:
 
-* This endpoint is version-exact. Clients should call it after resolving the
+- This endpoint is version-exact. Clients should call it after resolving the
   package version they intend to install, not just after reading the latest
   package metadata.
-* Private packages return `404` unless the caller can read the owning publisher.
-* This endpoint is intentionally narrower than owner/moderator moderation
+- Private packages return `404` unless the caller can read the owning publisher.
+- This endpoint is intentionally narrower than owner/moderator moderation
   endpoints. It exposes the install decision and public explanation, not
   reporter identities, report bodies, private evidence, or internal review
   timelines.
@@ -629,11 +625,11 @@ Returns the explicit artifact resolver metadata for a package version.
 
 Notes:
 
-* Legacy package versions return a `legacy-zip` artifact and a legacy ZIP
+- Legacy package versions return a `legacy-zip` artifact and a legacy ZIP
   `downloadUrl`.
-* ClawPack versions return an `npm-pack` artifact, npm integrity fields, a
+- ClawPack versions return an `npm-pack` artifact, npm integrity fields, a
   `tarballUrl`, and the legacy ZIP compatibility URL.
-* This is the OpenClaw resolver surface; it avoids guessing archive format from
+- This is the OpenClaw resolver surface; it avoids guessing archive format from
   a shared URL.
 
 ### `GET /api/v1/packages/{name}/versions/{version}/artifact/download`
@@ -642,9 +638,9 @@ Downloads the version artifact through the explicit resolver path.
 
 Notes:
 
-* ClawPack versions stream the exact uploaded npm-pack `.tgz` bytes.
-* Legacy ZIP versions redirect to `/api/v1/packages/{name}/download?version=`.
-* Uses the download rate bucket.
+- ClawPack versions stream the exact uploaded npm-pack `.tgz` bytes.
+- Legacy ZIP versions redirect to `/api/v1/packages/{name}/download?version=`.
+- Uses the download rate bucket.
 
 ### `GET /api/v1/packages/{name}/readiness`
 
@@ -652,18 +648,18 @@ Returns computed readiness for future OpenClaw consumption.
 
 Readiness checks cover:
 
-* official channel status
-* latest version availability
-* ClawPack npm-pack artifact availability
-* artifact digest
-* source repo and commit provenance
-* OpenClaw compatibility metadata
-* host targets
-* scan state
+- official channel status
+- latest version availability
+- ClawPack npm-pack artifact availability
+- artifact digest
+- source repo and commit provenance
+- OpenClaw compatibility metadata
+- host targets
+- scan state
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "package": {
     "name": "@openclaw/example-plugin",
@@ -691,19 +687,19 @@ Moderator endpoint for listing official OpenClaw plugin migration rows.
 
 Auth:
 
-* Requires an API token for a moderator or admin user.
+- Requires an API token for a moderator or admin user.
 
 Query params:
 
-* `phase` (optional): `planned`, `published`, `clawpack-ready`,
+- `phase` (optional): `planned`, `published`, `clawpack-ready`,
   `legacy-zip-only`, `metadata-ready`, `blocked`, `ready-for-openclaw`, or
   `all` (default).
-* `limit` (optional): integer (1-100)
-* `cursor` (optional): pagination cursor
+- `limit` (optional): integer (1-100)
+- `cursor` (optional): pagination cursor
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "items": [
     {
@@ -737,11 +733,11 @@ Admin endpoint for creating or updating an official plugin migration row.
 
 Auth:
 
-* Requires an API token for an admin user.
+- Requires an API token for an admin user.
 
 Request body:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "bundledPluginId": "core.search",
   "packageName": "@openclaw/search-plugin",
@@ -761,10 +757,10 @@ Request body:
 
 Notes:
 
-* `bundledPluginId` is normalized to lowercase and is the stable upsert key.
-* `packageName` is npm-name normalized; the package can be missing for planned
+- `bundledPluginId` is normalized to lowercase and is the stable upsert key.
+- `packageName` is npm-name normalized; the package can be missing for planned
   migrations.
-* This tracks migration readiness only. It does not mutate OpenClaw or generate
+- This tracks migration readiness only. It does not mutate OpenClaw or generate
   ClawPacks.
 
 ### `GET /api/v1/packages/moderation/queue`
@@ -773,24 +769,24 @@ Moderator/admin endpoint for package release review queues.
 
 Auth:
 
-* Requires an API token for a moderator or admin user.
+- Requires an API token for a moderator or admin user.
 
 Query params:
 
-* `status` (optional): `open` (default), `blocked`, `manual`, or `all`
-* `limit` (optional): integer (1-100)
-* `cursor` (optional): pagination cursor
+- `status` (optional): `open` (default), `blocked`, `manual`, or `all`
+- `limit` (optional): integer (1-100)
+- `cursor` (optional): pagination cursor
 
 Status meanings:
 
-* `open`: suspicious, malicious, pending, quarantined, revoked, or reported releases.
-* `blocked`: quarantined, revoked, or malicious releases.
-* `manual`: any release with a manual moderation override.
-* `all`: any release with a manual override, non-clean scan state, or package report.
+- `open`: suspicious, malicious, pending, quarantined, revoked, or reported releases.
+- `blocked`: quarantined, revoked, or malicious releases.
+- `manual`: any release with a manual moderation override.
+- `all`: any release with a manual override, non-clean scan state, or package report.
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "items": [
     {
@@ -828,17 +824,17 @@ approve, quarantine, or revoke artifacts.
 
 Auth:
 
-* Requires an API token.
+- Requires an API token.
 
 Request:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "reason": "Suspicious native binary", "version": "1.2.3" }
 ```
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "ok": true,
   "reported": true,
@@ -855,17 +851,17 @@ Moderator/admin endpoint for package report intake.
 
 Auth:
 
-* Requires an API token for a moderator or admin user.
+- Requires an API token for a moderator or admin user.
 
 Query params:
 
-* `status` (optional): `open` (default), `confirmed`, `dismissed`, or `all`
-* `limit` (optional): integer (1-100)
-* `cursor` (optional): pagination cursor
+- `status` (optional): `open` (default), `confirmed`, `dismissed`, or `all`
+- `limit` (optional): integer (1-100)
+- `cursor` (optional): pagination cursor
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "items": [
     {
@@ -900,12 +896,12 @@ Owner/moderator endpoint for package moderation visibility.
 
 Auth:
 
-* Requires an API token for the package owner, publisher member, moderator, or
+- Requires an API token for the package owner, publisher member, moderator, or
   admin user.
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "package": {
     "packageId": "packages:...",
@@ -938,7 +934,7 @@ Moderator/admin endpoint for resolving or reopening package reports.
 
 Request:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "status": "confirmed",
   "note": "Reviewed and quarantined affected release.",
@@ -953,7 +949,7 @@ same auditable workflow.
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "ok": true,
   "reportId": "packageReports:...",
@@ -969,15 +965,15 @@ Moderator/admin endpoint for package release review.
 
 Request:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "state": "quarantined", "reason": "Suspicious native payload." }
 ```
 
 Supported states:
 
-* `approved`: manually reviewed and allowed.
-* `quarantined`: blocked pending follow-up.
-* `revoked`: blocked after a release was previously trusted.
+- `approved`: manually reviewed and allowed.
+- `quarantined`: blocked pending follow-up.
+- `revoked`: blocked after a release was previously trusted.
 
 Quarantined and revoked releases return `403` from artifact download routes.
 Every change writes an audit log entry.
@@ -989,7 +985,7 @@ explicit artifact-kind metadata.
 
 Request body:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "cursor": null,
   "batchSize": 100,
@@ -999,7 +995,7 @@ Request body:
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "ok": true,
   "scanned": 100,
@@ -1012,11 +1008,11 @@ Response:
 
 Notes:
 
-* Defaults to dry-run.
-* Releases without ClawPack storage are labeled `legacy-zip`.
-* Existing ClawPack-backed rows missing `artifactKind` are repaired as
+- Defaults to dry-run.
+- Releases without ClawPack storage are labeled `legacy-zip`.
+- Existing ClawPack-backed rows missing `artifactKind` are repaired as
   `npm-pack`.
-* This does not generate ClawPacks or mutate artifact bytes.
+- This does not generate ClawPacks or mutate artifact bytes.
 
 ### `GET /api/v1/packages/{name}/file`
 
@@ -1024,18 +1020,18 @@ Returns raw text content for a package file.
 
 Query params:
 
-* `path` (required)
-* `version` (optional)
-* `tag` (optional)
+- `path` (required)
+- `version` (optional)
+- `tag` (optional)
 
 Notes:
 
-* Defaults to the latest release.
-* Uses the read rate bucket, not the download bucket.
-* Binary files return `415`.
-* File size limit: 200KB.
-* Pending VirusTotal scans do not block reads; malicious releases may still be withheld elsewhere.
-* Private packages return `404` unless the caller can read the owning publisher.
+- Defaults to the latest release.
+- Uses the read rate bucket, not the download bucket.
+- Binary files return `415`.
+- File size limit: 200KB.
+- Pending VirusTotal scans do not block reads; malicious releases may still be withheld elsewhere.
+- Private packages return `404` unless the caller can read the owning publisher.
 
 ### `GET /api/v1/packages/{name}/download`
 
@@ -1043,21 +1039,21 @@ Downloads the legacy deterministic ZIP archive for a package release.
 
 Query params:
 
-* `version` (optional)
-* `tag` (optional)
+- `version` (optional)
+- `tag` (optional)
 
 Notes:
 
-* Defaults to the latest release.
-* Skills redirect to `GET /api/v1/download`.
-* Plugin/package archives are zip files with a `package/` root so old OpenClaw
+- Defaults to the latest release.
+- Skills redirect to `GET /api/v1/download`.
+- Plugin/package archives are zip files with a `package/` root so old OpenClaw
   clients keep working.
-* This route stays ZIP-only. It does not stream ClawPack `.tgz` files.
-* Responses include `ETag`, `Digest`, `X-ClawHub-Artifact-Type`, and
+- This route stays ZIP-only. It does not stream ClawPack `.tgz` files.
+- Responses include `ETag`, `Digest`, `X-ClawHub-Artifact-Type`, and
   `X-ClawHub-Artifact-Sha256` headers for resolver integrity checks.
-* Registry-only metadata is not injected into the downloaded archive.
-* Pending VirusTotal scans do not block downloads; malicious releases return `403`.
-* Private packages return `404` unless the caller is the owner.
+- Registry-only metadata is not injected into the downloaded archive.
+- Pending VirusTotal scans do not block downloads; malicious releases return `403`.
+- Private packages return `404` unless the caller is the owner.
 
 ### `GET /api/npm/{package}`
 
@@ -1065,11 +1061,11 @@ Returns an npm-compatible packument for ClawPack-backed package versions.
 
 Notes:
 
-* Only versions with uploaded ClawPack npm-pack tarballs are listed.
-* Legacy ZIP-only versions are intentionally omitted.
-* `dist.tarball`, `dist.integrity`, and `dist.shasum` use npm-compatible
+- Only versions with uploaded ClawPack npm-pack tarballs are listed.
+- Legacy ZIP-only versions are intentionally omitted.
+- `dist.tarball`, `dist.integrity`, and `dist.shasum` use npm-compatible
   fields so users can point npm at the mirror if they choose.
-* Scoped package packuments support both `/api/npm/@scope/name` and npm's
+- Scoped package packuments support both `/api/npm/@scope/name` and npm's
   encoded `/api/npm/@scope%2Fname` request path.
 
 ### `GET /api/npm/{package}/-/{tarball}.tgz`
@@ -1078,9 +1074,9 @@ Streams the exact uploaded ClawPack tarball bytes for npm mirror clients.
 
 Notes:
 
-* Uses the download rate bucket.
-* Download headers include ClawHub SHA-256 plus npm integrity/shasum metadata.
-* Moderation and private package access checks still apply.
+- Uses the download rate bucket.
+- Download headers include ClawHub SHA-256 plus npm integrity/shasum metadata.
+- Moderation and private package access checks still apply.
 
 ### `GET /api/v1/resolve`
 
@@ -1088,12 +1084,12 @@ Used by the CLI to map a local fingerprint to a known version.
 
 Query params:
 
-* `slug` (required)
-* `hash` (required): 64-char hex sha256 of the bundle fingerprint
+- `slug` (required)
+- `hash` (required): 64-char hex sha256 of the bundle fingerprint
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "slug": "gifgrep", "match": { "version": "1.2.2" }, "latestVersion": { "version": "1.2.3" } }
 ```
 
@@ -1103,15 +1099,15 @@ Downloads a zip of a skill version.
 
 Query params:
 
-* `slug` (required)
-* `version` (optional): semver string
-* `tag` (optional): tag name (e.g. `latest`)
+- `slug` (required)
+- `version` (optional): semver string
+- `tag` (optional): tag name (e.g. `latest`)
 
 Notes:
 
-* If neither `version` nor `tag` is provided, the latest version is used.
-* Soft-deleted versions return `410`.
-* Download stats are counted as unique identities per hour (`userId` when API token is valid, otherwise IP).
+- If neither `version` nor `tag` is provided, the latest version is used.
+- Soft-deleted versions return `410`.
+- Download stats are counted as unique identities per hour (`userId` when API token is valid, otherwise IP).
 
 ## Auth endpoints (Bearer token)
 
@@ -1129,11 +1125,11 @@ Validates token and returns the user handle.
 
 Publishes a new version.
 
-* Preferred: `multipart/form-data` with `payload` JSON + `files[]` blobs.
-* JSON body with `files` (storageId-based) is also accepted.
-* Optional payload field: `ownerHandle`. When present, the API resolves that
+- Preferred: `multipart/form-data` with `payload` JSON + `files[]` blobs.
+- JSON body with `files` (storageId-based) is also accepted.
+- Optional payload field: `ownerHandle`. When present, the API resolves that
   publisher server-side and requires the actor to have publisher access.
-* Optional payload field: `migrateOwner`. When `true` with `ownerHandle`, an
+- Optional payload field: `migrateOwner`. When `true` with `ownerHandle`, an
   existing skill may move to that owner if the actor is an admin/owner on both
   the current and target publishers. Without this opt-in, owner changes are
   rejected.
@@ -1142,22 +1138,22 @@ Publishes a new version.
 
 Publishes a code-plugin or bundle-plugin release.
 
-* Requires Bearer token auth.
-* Preferred: `multipart/form-data` with `payload` JSON + `files[]` blobs.
-* JSON body with `files` (storageId-based) is also accepted.
-* Optional payload field: `ownerHandle`. When present, only admins may publish on behalf of that owner.
+- Requires Bearer token auth.
+- Preferred: `multipart/form-data` with `payload` JSON + `files[]` blobs.
+- JSON body with `files` (storageId-based) is also accepted.
+- Optional payload field: `ownerHandle`. When present, only admins may publish on behalf of that owner.
 
 Validation highlights:
 
-* `family` must be `code-plugin` or `bundle-plugin`.
-* Plugin packages require `openclaw.plugin.json`. ClawPack `.tgz` uploads must
+- `family` must be `code-plugin` or `bundle-plugin`.
+- Plugin packages require `openclaw.plugin.json`. ClawPack `.tgz` uploads must
   contain it at `package/openclaw.plugin.json`.
-* Code plugins require `package.json`, source repo metadata, source commit
+- Code plugins require `package.json`, source repo metadata, source commit
   metadata, config schema metadata, `openclaw.compat.pluginApi`, and
   `openclaw.build.openclawVersion`.
-* `openclaw.hostTargets` and `openclaw.environment` are optional metadata.
-* Only trusted publishers may publish to the `official` channel.
-* On-behalf publishes still validate official-channel eligibility against the target owner account.
+- `openclaw.hostTargets` and `openclaw.environment` are optional metadata.
+- Only trusted publishers may publish to the `official` channel.
+- On-behalf publishes still validate official-channel eligibility against the target owner account.
 
 ### `DELETE /api/v1/skills/{slug}` / `POST /api/v1/skills/{slug}/undelete`
 
@@ -1165,7 +1161,7 @@ Soft-delete / restore a skill (owner, moderator, or admin).
 
 Optional JSON body:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "reason": "Held for moderation pending legal review." }
 ```
 
@@ -1176,25 +1172,25 @@ Moderator/admin hides and security removals do not expire this way.
 
 Delete response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "ok": true, "slugReservedUntil": 1730000000000 }
 ```
 
 Status codes:
 
-* `200`: ok
-* `401`: unauthorized
-* `403`: forbidden
-* `404`: skill/user not found
-* `500`: internal server error
+- `200`: ok
+- `401`: unauthorized
+- `403`: forbidden
+- `404`: skill/user not found
+- `500`: internal server error
 
 ### `POST /api/v1/users/publisher`
 
 Admin-only. Ensures an org publisher exists for a handle. If the handle still points at a
 legacy shared user/personal publisher, the endpoint migrates it into an org publisher first.
 
-* Body: `{ "handle": "openclaw", "displayName": "OpenClaw", "trusted": true }`
-* Response: `{ "ok": true, "publisherId": "...", "handle": "openclaw", "created": true, "migrated": false, "trusted": true }`
+- Body: `{ "handle": "openclaw", "displayName": "OpenClaw", "trusted": true }`
+- Response: `{ "ok": true, "publisherId": "...", "handle": "openclaw", "created": true, "migrated": false, "trusted": true }`
 
 ### `POST /api/v1/publishers`
 
@@ -1202,9 +1198,9 @@ Authenticated self-serve org publisher creation. Creates a new org publisher and
 caller as owner. This endpoint does not migrate existing user/personal handles and does
 not mark the publisher trusted/official.
 
-* Body: `{ "handle": "opik", "displayName": "Opik" }`
-* Response: `{ "ok": true, "publisherId": "...", "handle": "opik", "created": true, "trusted": false }`
-* Returns `409` when the handle is already used by a publisher, user, or personal publisher.
+- Body: `{ "handle": "opik", "displayName": "Opik" }`
+- Response: `{ "ok": true, "publisherId": "...", "handle": "opik", "created": true, "trusted": false }`
+- Returns `409` when the handle is already used by a publisher, user, or personal publisher.
 
 ### `POST /api/v1/users/reserve`
 
@@ -1212,36 +1208,36 @@ Admin-only. Reserves root slugs and package names for a rightful owner without p
 release. Package names become private placeholder packages with no release rows, so the same
 owner can later publish the real code-plugin or bundle-plugin release into that name.
 
-* Body: `{ "handle": "openclaw", "slugs": ["diffs"], "packageNames": ["@openclaw/diffs"], "reason": "reserved for official OpenClaw plugin" }`
-* Response: `{ "ok": true, "succeeded": 2, "failed": 0, "results": [{ "kind": "slug", "name": "diffs", "ok": true, "action": "reserved" }] }`
+- Body: `{ "handle": "openclaw", "slugs": ["diffs"], "packageNames": ["@openclaw/diffs"], "reason": "reserved for official OpenClaw plugin" }`
+- Response: `{ "ok": true, "succeeded": 2, "failed": 0, "results": [{ "kind": "slug", "name": "diffs", "ok": true, "action": "reserved" }] }`
 
 ### Owner slug management endpoints
 
-* `POST /api/v1/skills/{slug}/rename`
-  * Body: `{ "newSlug": "new-canonical-slug" }`
-  * Response: `{ "ok": true, "slug": "new-canonical-slug", "previousSlug": "old-slug" }`
-* `POST /api/v1/skills/{slug}/merge`
-  * Body: `{ "targetSlug": "canonical-target-slug" }`
-  * Response: `{ "ok": true, "sourceSlug": "old-slug", "targetSlug": "canonical-target-slug" }`
+- `POST /api/v1/skills/{slug}/rename`
+  - Body: `{ "newSlug": "new-canonical-slug" }`
+  - Response: `{ "ok": true, "slug": "new-canonical-slug", "previousSlug": "old-slug" }`
+- `POST /api/v1/skills/{slug}/merge`
+  - Body: `{ "targetSlug": "canonical-target-slug" }`
+  - Response: `{ "ok": true, "sourceSlug": "old-slug", "targetSlug": "canonical-target-slug" }`
 
 Notes:
 
-* Both endpoints require API token auth and only work for the skill owner.
-* `rename` preserves the previous slug as a redirect alias.
-* `merge` hides the source listing and redirects the source slug to the target listing.
+- Both endpoints require API token auth and only work for the skill owner.
+- `rename` preserves the previous slug as a redirect alias.
+- `merge` hides the source listing and redirects the source slug to the target listing.
 
 ### Transfer ownership endpoints
 
-* `POST /api/v1/skills/{slug}/transfer`
-  * Body: `{ "toUserHandle": "target_handle", "message": "optional" }`
-  * Response: `{ "ok": true, "transferId": "skillOwnershipTransfers:...", "toUserHandle": "target_handle", "expiresAt": 1730000000000 }`
-* `POST /api/v1/skills/{slug}/transfer/accept`
-* `POST /api/v1/skills/{slug}/transfer/reject`
-* `POST /api/v1/skills/{slug}/transfer/cancel`
-  * Response (accept/reject/cancel): `{ "ok": true, "skillSlug": "demo-skill?" }`
-* `GET /api/v1/transfers/incoming`
-* `GET /api/v1/transfers/outgoing`
-  * Response shape: `{ "transfers": [{ "_id": "...", "skill": { "slug": "demo", "displayName": "Demo" }, "fromUser"|"toUser": { "handle": "..." }, "message": "...", "requestedAt": 0, "expiresAt": 0 }] }`
+- `POST /api/v1/skills/{slug}/transfer`
+  - Body: `{ "toUserHandle": "target_handle", "message": "optional" }`
+  - Response: `{ "ok": true, "transferId": "skillOwnershipTransfers:...", "toUserHandle": "target_handle", "expiresAt": 1730000000000 }`
+- `POST /api/v1/skills/{slug}/transfer/accept`
+- `POST /api/v1/skills/{slug}/transfer/reject`
+- `POST /api/v1/skills/{slug}/transfer/cancel`
+  - Response (accept/reject/cancel): `{ "ok": true, "skillSlug": "demo-skill?" }`
+- `GET /api/v1/transfers/incoming`
+- `GET /api/v1/transfers/outgoing`
+  - Response shape: `{ "transfers": [{ "_id": "...", "skill": { "slug": "demo", "displayName": "Demo" }, "fromUser"|"toUser": { "handle": "..." }, "message": "...", "requestedAt": 0, "expiresAt": 0 }] }`
 
 ### `POST /api/v1/users/ban`
 
@@ -1249,19 +1245,19 @@ Ban a user and hard-delete owned skills (moderator/admin only).
 
 Body:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "handle": "user_handle", "reason": "optional ban reason" }
 ```
 
 or
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "userId": "users_...", "reason": "optional ban reason" }
 ```
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "ok": true, "alreadyBanned": false, "deletedSkills": 3 }
 ```
 
@@ -1271,19 +1267,19 @@ Unban a user and restore eligible skills (admin only).
 
 Body:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "handle": "user_handle", "reason": "optional unban reason" }
 ```
 
 or
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "userId": "users_...", "reason": "optional unban reason" }
 ```
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "ok": true, "alreadyUnbanned": false, "restoredSkills": 3 }
 ```
 
@@ -1294,19 +1290,19 @@ content (admin only). Defaults to dry-run unless `dryRun` is `false`.
 
 Body:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "handle": "user_handle", "reason": "bulk publishing spam", "dryRun": true }
 ```
 
 or
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "userId": "users_...", "reason": "bulk publishing spam", "dryRun": false }
 ```
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "ok": true,
   "dryRun": false,
@@ -1324,19 +1320,19 @@ Change a user role (admin only).
 
 Body:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "handle": "user_handle", "role": "moderator" }
 ```
 
 or
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "userId": "users_...", "role": "admin" }
 ```
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "ok": true, "role": "moderator" }
 ```
 
@@ -1346,13 +1342,13 @@ List or search users (admin only).
 
 Query params:
 
-* `q` (optional): search query
-* `query` (optional): alias for `q`
-* `limit` (optional): max results (default 20, max 200)
+- `q` (optional): search query
+- `query` (optional): alias for `q`
+- `limit` (optional): max results (default 20, max 200)
 
 Response:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "items": [
     {
@@ -1373,11 +1369,11 @@ Add/remove a star (highlights). Both endpoints are idempotent.
 
 Responses:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "ok": true, "starred": true, "alreadyStarred": false }
 ```
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "ok": true, "unstarred": true, "alreadyUnstarred": false }
 ```
 
@@ -1385,12 +1381,12 @@ Responses:
 
 Still supported for older CLI versions:
 
-* `GET /api/cli/whoami`
-* `POST /api/cli/upload-url`
-* `POST /api/cli/publish`
-* `POST /api/cli/telemetry/sync`
-* `POST /api/cli/skill/delete`
-* `POST /api/cli/skill/undelete`
+- `GET /api/cli/whoami`
+- `POST /api/cli/upload-url`
+- `POST /api/cli/publish`
+- `POST /api/cli/telemetry/sync`
+- `POST /api/cli/skill/delete`
+- `POST /api/cli/skill/undelete`
 
 See `DEPRECATIONS.md` for removal plan.
 
@@ -1398,12 +1394,12 @@ See `DEPRECATIONS.md` for removal plan.
 
 The CLI can discover registry/auth settings from the site:
 
-* `/.well-known/clawhub.json` (JSON, preferred)
-* `/.well-known/clawdhub.json` (legacy)
+- `/.well-known/clawhub.json` (JSON, preferred)
+- `/.well-known/clawdhub.json` (legacy)
 
 Schema:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 { "apiBase": "https://clawhub.ai", "authBase": "https://clawhub.ai", "minCliVersion": "0.0.5" }
 ```
 

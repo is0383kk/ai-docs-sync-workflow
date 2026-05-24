@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# MiniMax search
+---
+summary: "MiniMax Search via the Token Plan search API"
+read_when:
+  - You want to use MiniMax for web_search
+  - You need a MiniMax Token Plan key or OAuth token
+  - You want MiniMax CN/global search host guidance
+title: "MiniMax search"
+---
 
 OpenClaw supports MiniMax as a `web_search` provider through the MiniMax
 Token Plan search API. It returns structured search results with titles, URLs,
@@ -16,13 +19,13 @@ snippets, and related queries.
     [MiniMax Platform](https://platform.minimax.io/user-center/basic-information/interface-key).
     OAuth setups can reuse `MINIMAX_OAUTH_TOKEN` instead.
   </Step>
-
   <Step title="Store the key">
     Set `MINIMAX_CODE_PLAN_KEY` in the Gateway environment, or configure via:
 
-    ```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+    ```bash
     openclaw configure --section web
     ```
+
   </Step>
 </Steps>
 
@@ -33,7 +36,7 @@ be accepted by the Token Plan search endpoint.
 
 ## Config
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -65,8 +68,8 @@ For a gateway install, put it in `~/.openclaw/.env`.
 
 MiniMax Search uses these endpoints:
 
-* Global: `https://api.minimax.io/v1/coding_plan/search`
-* CN: `https://api.minimaxi.com/v1/coding_plan/search`
+- Global: `https://api.minimax.io/v1/coding_plan/search`
+- CN: `https://api.minimaxi.com/v1/coding_plan/search`
 
 If `plugins.entries.minimax.config.webSearch.region` is unset, OpenClaw resolves
 the region in this order:
@@ -95,5 +98,5 @@ Provider-specific filters are not currently supported.
 
 ## Related
 
-* [Web Search overview](/tools/web) -- all providers and auto-detection
-* [MiniMax](/providers/minimax) -- model, image, speech, and auth setup
+- [Web Search overview](/tools/web) -- all providers and auto-detection
+- [MiniMax](/providers/minimax) -- model, image, speech, and auth setup

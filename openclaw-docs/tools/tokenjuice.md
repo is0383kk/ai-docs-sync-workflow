@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Tokenjuice
+---
+summary: "Compact noisy exec and bash tool results with an optional bundled plugin"
+title: "Tokenjuice"
+read_when:
+  - You want shorter `exec` or `bash` tool results in OpenClaw
+  - You want to enable the bundled tokenjuice plugin
+  - You need to understand what tokenjuice changes and what it leaves raw
+---
 
 `tokenjuice` is an optional bundled plugin that compacts noisy `exec` and `bash`
 tool results after the command has already run.
@@ -18,13 +21,13 @@ trims the output before it goes back into the active harness session.
 
 Fast path:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw config set plugins.entries.tokenjuice.enabled true
 ```
 
 Equivalent:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins enable tokenjuice
 ```
 
@@ -33,7 +36,7 @@ or `tokenjuice install openclaw` step.
 
 If you prefer editing config directly:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -47,10 +50,10 @@ If you prefer editing config directly:
 
 ## What tokenjuice changes
 
-* Compacts noisy `exec` and `bash` results before they are fed back into the session.
-* Keeps the original command execution untouched.
-* Preserves exact file-content reads and other commands that tokenjuice should leave raw.
-* Stays opt-in: disable the plugin if you want verbatim output everywhere.
+- Compacts noisy `exec` and `bash` results before they are fed back into the session.
+- Keeps the original command execution untouched.
+- Preserves exact file-content reads and other commands that tokenjuice should leave raw.
+- Stays opt-in: disable the plugin if you want verbatim output everywhere.
 
 ## Verify it is working
 
@@ -61,18 +64,18 @@ If you prefer editing config directly:
 
 ## Disable the plugin
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw config set plugins.entries.tokenjuice.enabled false
 ```
 
 Or:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins disable tokenjuice
 ```
 
 ## Related
 
-* [Exec tool](/tools/exec)
-* [Thinking levels](/tools/thinking)
-* [Context engine](/concepts/context-engine)
+- [Exec tool](/tools/exec)
+- [Thinking levels](/tools/thinking)
+- [Context engine](/concepts/context-engine)

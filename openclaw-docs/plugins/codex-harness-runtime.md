@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Codex harness runtime
+---
+summary: "Runtime boundaries, hooks, tools, permissions, and diagnostics for the Codex harness"
+title: "Codex harness runtime"
+read_when:
+  - You need the Codex harness runtime support contract
+  - You are debugging native Codex tools, hooks, compaction, or feedback upload
+  - You are changing plugin behavior across PI and Codex harness turns
+---
 
 This page documents the runtime contract for Codex harness turns. For setup and
 routing, start with [Codex harness](/plugins/codex-harness). For config fields,
@@ -235,10 +238,10 @@ turn has no assistant text.
 
 ## Related
 
-* [Codex harness](/plugins/codex-harness)
-* [Codex harness reference](/plugins/codex-harness-reference)
-* [Native Codex plugins](/plugins/codex-native-plugins)
-* [Plugin hooks](/plugins/hooks)
-* [Agent harness plugins](/plugins/sdk-agent-harness)
-* [Diagnostics export](/gateway/diagnostics)
-* [Trajectory export](/tools/trajectory)
+- [Codex harness](/plugins/codex-harness)
+- [Codex harness reference](/plugins/codex-harness-reference)
+- [Native Codex plugins](/plugins/codex-native-plugins)
+- [Plugin hooks](/plugins/hooks)
+- [Agent harness plugins](/plugins/sdk-agent-harness)
+- [Diagnostics export](/gateway/diagnostics)
+- [Trajectory export](/tools/trajectory)

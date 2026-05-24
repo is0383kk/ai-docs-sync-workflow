@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Discord plugin
+---
+summary: "Adds the Discord channel surface for sending and receiving OpenClaw messages."
+read_when:
+  - You are installing, configuring, or auditing the discord plugin
+title: "Discord plugin"
+---
 
 # Discord plugin
 
@@ -10,13 +11,13 @@ Adds the Discord channel surface for sending and receiving OpenClaw messages.
 
 ## Distribution
 
-* Package: `@openclaw/discord`
-* Install route: npm; ClawHub
+- Package: `@openclaw/discord`
+- Install route: npm; ClawHub
 
 ## Surface
 
-channels: discord
+channels: discord; contracts: meetingNotesSourceProviders
 
 ## Related docs
 
-* [discord](/channels/discord)
+- [discord](/channels/discord)

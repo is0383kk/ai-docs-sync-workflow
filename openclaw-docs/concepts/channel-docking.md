@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Channel docking
+---
+summary: "Move one OpenClaw session's reply route between linked chat channels"
+title: "Channel docking"
+read_when:
+  - You want replies for one active session to move from Telegram to Discord, Slack, Mattermost, or another linked channel
+  - You are configuring session.identityLinks for cross-channel direct messages
+  - A /dock command says the sender is not linked or no active session exists
+---
 
 Channel docking is call forwarding for one OpenClaw session.
 
@@ -13,7 +16,7 @@ that session are delivered.
 
 Alice can message OpenClaw on Telegram and Discord:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   session: {
     identityLinks: {
@@ -25,7 +28,7 @@ Alice can message OpenClaw on Telegram and Discord:
 
 If Alice sends this from Telegram:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 /dock_discord
 ```
 
@@ -55,7 +58,7 @@ Common flow:
 Docking requires `session.identityLinks`. The source sender and target peer
 must be in the same identity group:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   session: {
     identityLinks: {
@@ -108,12 +111,12 @@ delivery for that session.
 
 Docking does not:
 
-* create channel accounts
-* connect a new Discord, Telegram, Slack, or Mattermost bot
-* grant access to a user
-* bypass channel allowlists or DM policies
-* move transcript history to another session
-* make unrelated users share a session
+- create channel accounts
+- connect a new Discord, Telegram, Slack, or Mattermost bot
+- grant access to a user
+- bypass channel allowlists or DM policies
+- move transcript history to another session
+- make unrelated users share a session
 
 It only changes the delivery route for the current session.
 

@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Publishing
+---
+summary: "How ClawHub publishing works for skills, plugins, owners, scopes, releases, and review."
+read_when:
+  - Publishing a skill or plugin
+  - Debugging owner or package scope errors
+  - Adding publish UI, CLI, or backend behavior
+---
 
 # Publishing
 
@@ -21,13 +23,13 @@ where you have publisher access.
 
 Skills are published from a skill folder. The public page is:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 https://clawhub.ai/<owner>/<slug>
 ```
 
 Example:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 https://clawhub.ai/alice/review-helper
 ```
 
@@ -39,7 +41,7 @@ To move an existing skill to another owner while publishing a new version, choos
 the new owner and explicitly confirm the ownership move. In the CLI/API, pass the
 target owner plus the migration opt-in:
 
-```sh theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```sh
 clawhub skill publish ./review-helper --owner openclaw --migrate-owner --version 1.2.0
 ```
 
@@ -53,7 +55,7 @@ alias/redirect path.
 Plugins use npm-style package names. Scoped package names include the owner in
 the first part of the name:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 @owner/package-name
 ```
 
@@ -83,7 +85,7 @@ If validation fails, the release is not created.
 If the package scope and selected owner do not match, ClawHub rejects the
 publish:
 
-```text theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```text
 Package scope "@openclaw" must match selected owner "@vintageayu".
 Publish as "@openclaw" or rename this package to "@vintageayu/dronzer".
 ```
@@ -94,7 +96,7 @@ package so the scope matches the owner you can publish as.
 If the package name already has the right scope but the package is owned by the
 wrong publisher, transfer ownership instead:
 
-```sh theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```sh
 clawhub package transfer @opik/opik-openclaw --to opik
 ```
 

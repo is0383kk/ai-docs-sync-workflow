@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# ComfyUI plugin
+---
+summary: "Adds ComfyUI model provider support to OpenClaw."
+read_when:
+  - You are installing, configuring, or auditing the comfy plugin
+title: "ComfyUI plugin"
+---
 
 # ComfyUI plugin
 
@@ -10,8 +11,8 @@ Adds ComfyUI model provider support to OpenClaw.
 
 ## Distribution
 
-* Package: `@openclaw/comfy-provider`
-* Install route: included in OpenClaw
+- Package: `@openclaw/comfy-provider`
+- Install route: included in OpenClaw
 
 ## Surface
 
@@ -19,4 +20,4 @@ providers: comfy; contracts: imageGenerationProviders, musicGenerationProviders,
 
 ## Related docs
 
-* [comfy](/providers/comfy)
+- [comfy](/providers/comfy)

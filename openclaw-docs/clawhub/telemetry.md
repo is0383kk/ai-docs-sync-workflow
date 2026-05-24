@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Telemetry
+---
+summary: "Install telemetry collected via `clawhub sync` + opt-out."
+read_when:
+  - Working on telemetry / privacy controls
+  - Questions about what data is collected
+---
 
 # Telemetry
 
@@ -13,9 +14,9 @@ This is based on the CLI `clawhub sync` command.
 
 Telemetry is only sent when:
 
-* You are **logged in** in the CLI (we already require auth for sync/publish flows).
-* You run `clawhub sync`.
-* Telemetry is **not disabled** (see “How to disable” below).
+- You are **logged in** in the CLI (we already require auth for sync/publish flows).
+- You run `clawhub sync`.
+- Telemetry is **not disabled** (see “How to disable” below).
 
 If you are not logged in, nothing is reported.
 
@@ -25,30 +26,30 @@ On each `clawhub sync`, the CLI reports a **full snapshot** of what it found, gr
 
 For each root we store:
 
-* `rootId`: a **SHA-256 hash** of the canonical root path (server never sees the raw path).
-* `label`: a human-readable label derived from the last two path segments (home paths are shown with `~`).
-* `firstSeenAt`, `lastSeenAt`, optional `expiredAt`.
+- `rootId`: a **SHA-256 hash** of the canonical root path (server never sees the raw path).
+- `label`: a human-readable label derived from the last two path segments (home paths are shown with `~`).
+- `firstSeenAt`, `lastSeenAt`, optional `expiredAt`.
 
 For each skill found under a root we store:
 
-* `skillId` (resolved by slug; only skills that exist in the registry are tracked).
-* `firstSeenAt`, `lastSeenAt`.
-* `lastVersion` (best-effort; currently the registry-matched version if known).
-* optional `removedAt` when a previously-reported install disappears from a root.
+- `skillId` (resolved by slug; only skills that exist in the registry are tracked).
+- `firstSeenAt`, `lastSeenAt`.
+- `lastVersion` (best-effort; currently the registry-matched version if known).
+- optional `removedAt` when a previously-reported install disappears from a root.
 
-### What we do *not* collect
+### What we do _not_ collect
 
-* No raw absolute folder paths (only hashed `rootId` + a short display label).
-* No file contents.
-* No per-run logs, prompts, or other CLI output.
-* No tracking for skills that aren’t uploaded to the registry (unknown slugs are ignored).
+- No raw absolute folder paths (only hashed `rootId` + a short display label).
+- No file contents.
+- No per-run logs, prompts, or other CLI output.
+- No tracking for skills that aren’t uploaded to the registry (unknown slugs are ignored).
 
 ## Install counts
 
 We maintain two counters per skill:
 
-* `installsCurrent`: unique users who currently have the skill installed in at least one active root.
-* `installsAllTime`: unique users who have ever reported the skill installed.
+- `installsCurrent`: unique users who currently have the skill installed in at least one active root.
+- `installsAllTime`: unique users who have ever reported the skill installed.
 
 ### Multiple roots
 
@@ -58,9 +59,9 @@ If you sync from multiple folders, we treat each scan root independently. A skil
 
 Because `sync` reports the full set per root:
 
-* If a skill disappears from a root on the next sync, we mark it removed for that root.
-* If the skill is removed from all of your roots, it no longer counts toward `installsCurrent`.
-* `installsAllTime` never decreases unless you delete telemetry (see below).
+- If a skill disappears from a root on the next sync, we mark it removed for that root.
+- If the skill is removed from all of your roots, it no longer counts toward `installsCurrent`.
+- `installsAllTime` never decreases unless you delete telemetry (see below).
 
 ### Staleness (120 days)
 
@@ -71,9 +72,9 @@ This is evaluated lazily (on the next telemetry report) to avoid background jobs
 
 ClawHub provides a private “Installed” tab on your own profile:
 
-* Shows the exact roots + installed skills we store.
-* Includes a **JSON export** view.
-* Includes a **Delete telemetry** action to remove all stored telemetry for your account.
+- Shows the exact roots + installed skills we store.
+- Includes a **JSON export** view.
+- Includes a **Delete telemetry** action to remove all stored telemetry for your account.
 
 Everyone else only sees **aggregated install counters**; no one else can see your roots/folders.
 
@@ -83,7 +84,7 @@ Deleting your account also deletes your telemetry data.
 
 Set the environment variable:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export CLAWHUB_DISABLE_TELEMETRY=1
 ```
 

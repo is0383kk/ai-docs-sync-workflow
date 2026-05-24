@@ -1,8 +1,12 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Plugin install overrides
+---
+summary: "Test packaged plugin overrides with setup-time install flows"
+read_when:
+  - Testing onboarding or setup flows against a locally packed plugin
+  - Verifying a plugin package before publishing it
+  - Replacing an automatic plugin install with a test artifact
+title: "Plugin install overrides"
+sidebarTitle: "Install overrides"
+---
 
 Plugin install overrides let maintainers test setup-time plugin installs against
 a specific npm package or local npm-pack tarball. They are for E2E and package
@@ -10,15 +14,15 @@ validation only. Normal users should install plugins with
 [`openclaw plugins install`](/cli/plugins).
 
 <Warning>
-  Overrides execute plugin code from the source you provide. Use them only in an
-  isolated state directory or disposable test machine.
+Overrides execute plugin code from the source you provide. Use them only in an
+isolated state directory or disposable test machine.
 </Warning>
 
 ## Environment
 
 Overrides are disabled unless both variables are set:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 export OPENCLAW_ALLOW_PLUGIN_INSTALL_OVERRIDES=1
 export OPENCLAW_PLUGIN_INSTALL_OVERRIDES='{
   "codex": "npm-pack:/tmp/openclaw-codex-2026.5.8.tgz",
@@ -28,8 +32,8 @@ export OPENCLAW_PLUGIN_INSTALL_OVERRIDES='{
 
 The override map is JSON keyed by plugin id. Values support:
 
-* `npm:<registry-spec>` for registry packages and exact versions or tags
-* `npm-pack:<path.tgz>` for local tarballs produced by `npm pack`
+- `npm:<registry-spec>` for registry packages and exact versions or tags
+- `npm-pack:<path.tgz>` for local tarballs produced by `npm pack`
 
 Relative `npm-pack:` paths resolve from the current working directory.
 
@@ -55,7 +59,7 @@ the trusted shell, CI job, or remote test command that launches OpenClaw.
 Use an isolated state directory so package installs and install records do not
 touch your normal OpenClaw state:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 npm pack extensions/codex --pack-destination /tmp
 
 OPENCLAW_STATE_DIR="$(mktemp -d)" \
@@ -66,7 +70,7 @@ pnpm openclaw onboard --mode local
 
 Verify the installed package under the state directory:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 find "$OPENCLAW_STATE_DIR/npm/node_modules" -maxdepth 3 -name package.json -print
 grep -R '"@openclaw/codex"' "$OPENCLAW_STATE_DIR/npm/package-lock.json"
 ```

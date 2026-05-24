@@ -1,8 +1,10 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Honcho memory
+---
+summary: "AI-native cross-session memory via the Honcho plugin"
+title: "Honcho memory"
+read_when:
+  - You want persistent memory that works across sessions and channels
+  - You want AI-powered recall and user modeling
+---
 
 [Honcho](https://honcho.dev) adds AI-native memory to OpenClaw. It persists
 conversations to a dedicated service and builds user and agent models over time,
@@ -11,14 +13,14 @@ files.
 
 ## What it provides
 
-* **Cross-session memory** -- conversations are persisted after every turn, so
+- **Cross-session memory** -- conversations are persisted after every turn, so
   context carries across session resets, compaction, and channel switches.
-* **User modeling** -- Honcho maintains a profile for each user (preferences,
+- **User modeling** -- Honcho maintains a profile for each user (preferences,
   facts, communication style) and for the agent (personality, learned
   behaviors).
-* **Semantic search** -- search over observations from past conversations, not
+- **Semantic search** -- search over observations from past conversations, not
   just the current session.
-* **Multi-agent awareness** -- parent agents automatically track spawned
+- **Multi-agent awareness** -- parent agents automatically track spawned
   sub-agents, with parents added as observers in child sessions.
 
 ## Available tools
@@ -34,7 +36,7 @@ Honcho registers tools that the agent can use during conversation:
 | `honcho_search_messages`    | Find messages across sessions (filter by sender, date) |
 | `honcho_session`            | Current session history and summary                    |
 
-**Q\&A (LLM-powered):**
+**Q&A (LLM-powered):**
 
 | Tool         | What it does                                                              |
 | ------------ | ------------------------------------------------------------------------- |
@@ -44,7 +46,7 @@ Honcho registers tools that the agent can use during conversation:
 
 Install the plugin and run setup:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install @honcho-ai/openclaw-honcho
 openclaw honcho setup
 openclaw gateway --force
@@ -54,16 +56,16 @@ The setup command prompts for your API credentials, writes the config, and
 optionally migrates existing workspace memory files.
 
 <Info>
-  Honcho can run entirely locally (self-hosted) or via the managed API at
-  `api.honcho.dev`. No external dependencies are required for the self-hosted
-  option.
+Honcho can run entirely locally (self-hosted) or via the managed API at
+`api.honcho.dev`. No external dependencies are required for the self-hosted
+option.
 </Info>
 
 ## Configuration
 
 Settings live under `plugins.entries["openclaw-honcho"].config`:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -89,8 +91,8 @@ If you have existing workspace memory files (`USER.md`, `MEMORY.md`,
 offers to migrate them.
 
 <Info>
-  Migration is non-destructive -- files are uploaded to Honcho. Originals are
-  never deleted or moved.
+Migration is non-destructive -- files are uploaded to Honcho. Originals are
+never deleted or moved.
 </Info>
 
 ## How it works
@@ -120,7 +122,7 @@ Honcho's cross-session memory.
 
 ## CLI commands
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw honcho setup                        # Configure API key and migrate files
 openclaw honcho status                       # Check connection status
 openclaw honcho ask <question>               # Query Honcho about the user
@@ -129,14 +131,14 @@ openclaw honcho search <query> [-k N] [-d D] # Semantic search over memory
 
 ## Further reading
 
-* [Plugin source code](https://github.com/plastic-labs/openclaw-honcho)
-* [Honcho documentation](https://docs.honcho.dev)
-* [Honcho OpenClaw integration guide](https://docs.honcho.dev/v3/guides/integrations/openclaw)
-* [Memory](/concepts/memory) -- OpenClaw memory overview
-* [Context Engines](/concepts/context-engine) -- how plugin context engines work
+- [Plugin source code](https://github.com/plastic-labs/openclaw-honcho)
+- [Honcho documentation](https://docs.honcho.dev)
+- [Honcho OpenClaw integration guide](https://docs.honcho.dev/v3/guides/integrations/openclaw)
+- [Memory](/concepts/memory) -- OpenClaw memory overview
+- [Context Engines](/concepts/context-engine) -- how plugin context engines work
 
 ## Related
 
-* [Memory overview](/concepts/memory)
-* [Builtin memory engine](/concepts/memory-builtin)
-* [QMD memory engine](/concepts/memory-qmd)
+- [Memory overview](/concepts/memory)
+- [Builtin memory engine](/concepts/memory-builtin)
+- [QMD memory engine](/concepts/memory-qmd)

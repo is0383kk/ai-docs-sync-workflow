@@ -1,8 +1,11 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Codex harness reference
+---
+summary: "Configuration, auth, discovery, and app-server reference for the Codex harness"
+title: "Codex harness reference"
+read_when:
+  - You need every Codex harness config field
+  - You are changing app-server transport, auth, discovery, or timeout behavior
+  - You are debugging Codex harness startup, model discovery, or environment isolation
+---
 
 This reference covers the detailed configuration for the bundled `codex`
 plugin. For setup and routing decisions, start with
@@ -12,7 +15,7 @@ plugin. For setup and routing decisions, start with
 
 All Codex harness settings live under `plugins.entries.codex.config`.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -49,7 +52,7 @@ Supported top-level fields:
 By default, OpenClaw starts the managed Codex binary shipped with the bundled
 plugin:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 codex app-server --listen stdio://
 ```
 
@@ -60,7 +63,7 @@ executable.
 
 For an already-running app-server, use WebSocket transport:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -121,7 +124,7 @@ for the sandbox default decision.
 
 Set `appServer.mode: "guardian"` for Codex guardian-reviewed approvals:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -172,7 +175,7 @@ host. Use `appServer.experimental.sandboxExecServer: true` only when you want to
 try Codex's remote environment support with OpenClaw's sandbox backend. This
 preview path requires Codex app-server 0.132.0 or newer.
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -239,7 +242,7 @@ plugin registry and skill loader. Personal Codex `~/.codex` assets do not. If
 you have useful Codex CLI skills or plugins from a Codex home that should become
 part of an OpenClaw agent, inventory them explicitly:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw migrate codex --dry-run
 openclaw migrate apply codex --yes
 ```
@@ -247,7 +250,7 @@ openclaw migrate apply codex --yes
 If a deployment needs additional environment isolation, add those variables to
 `appServer.clearEnv`:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -274,13 +277,13 @@ subprocesses can use normal user-home state.
 Codex dynamic tools default to `searchable` loading. OpenClaw does not expose
 dynamic tools that duplicate Codex-native workspace operations:
 
-* `read`
-* `write`
-* `edit`
-* `apply_patch`
-* `exec`
-* `process`
-* `update_plan`
+- `read`
+- `write`
+- `edit`
+- `apply_patch`
+- `exec`
+- `process`
+- `update_plan`
 
 Most remaining OpenClaw integration tools, such as messaging, media, cron,
 browser, nodes, gateway, `heartbeat_respond`, and `web_search`, are available
@@ -301,13 +304,13 @@ OpenClaw-owned dynamic tool calls are bounded independently from
 `appServer.requestTimeoutMs`. Each Codex `item/tool/call` request uses the first
 available timeout in this order:
 
-* A positive per-call `timeoutMs` argument.
-* For `image_generate`, `agents.defaults.imageGenerationModel.timeoutMs`.
-* For `image_generate` without a configured timeout, the 120 second
+- A positive per-call `timeoutMs` argument.
+- For `image_generate`, `agents.defaults.imageGenerationModel.timeoutMs`.
+- For `image_generate` without a configured timeout, the 120 second
   image-generation default.
-* For the media-understanding `image` tool, `tools.media.image.timeoutSeconds`
+- For the media-understanding `image` tool, `tools.media.image.timeoutSeconds`
   converted to milliseconds, or the 60 second media default.
-* The 30 second dynamic-tool default.
+- The 30 second dynamic-tool default.
 
 Dynamic tool budgets are capped at 600000 ms. On timeout, OpenClaw aborts the
 tool signal where supported and returns a failed dynamic-tool response to Codex
@@ -346,9 +349,9 @@ for that harness and account.
 
 If discovery fails or times out, OpenClaw uses a bundled fallback catalog for:
 
-* GPT-5.5
-* GPT-5.4 mini
-* GPT-5.2
+- GPT-5.5
+- GPT-5.4 mini
+- GPT-5.2
 
 The current bundled harness is `@openai/codex` `0.132.0`. A `model/list` probe
 against that bundled app-server returned:
@@ -367,7 +370,7 @@ specialized flows, but they are not normal model-picker choices.
 
 Tune discovery under `plugins.entries.codex.config.discovery`:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -388,7 +391,7 @@ Tune discovery under `plugins.entries.codex.config.discovery`:
 Disable discovery when you want startup to avoid probing Codex and use only the
 fallback catalog:
 
-```json5 theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json5
 {
   plugins: {
     entries: {
@@ -424,11 +427,11 @@ forwarded as OpenClaw turn input reference context.
 
 Environment overrides remain available for local testing:
 
-* `OPENCLAW_CODEX_APP_SERVER_BIN`
-* `OPENCLAW_CODEX_APP_SERVER_ARGS`
-* `OPENCLAW_CODEX_APP_SERVER_MODE=yolo|guardian`
-* `OPENCLAW_CODEX_APP_SERVER_APPROVAL_POLICY`
-* `OPENCLAW_CODEX_APP_SERVER_SANDBOX`
+- `OPENCLAW_CODEX_APP_SERVER_BIN`
+- `OPENCLAW_CODEX_APP_SERVER_ARGS`
+- `OPENCLAW_CODEX_APP_SERVER_MODE=yolo|guardian`
+- `OPENCLAW_CODEX_APP_SERVER_APPROVAL_POLICY`
+- `OPENCLAW_CODEX_APP_SERVER_SANDBOX`
 
 `OPENCLAW_CODEX_APP_SERVER_BIN` bypasses the managed binary when
 `appServer.command` is unset.
@@ -441,9 +444,9 @@ same reviewed file as the rest of the Codex harness setup.
 
 ## Related
 
-* [Codex harness](/plugins/codex-harness)
-* [Codex harness runtime](/plugins/codex-harness-runtime)
-* [Native Codex plugins](/plugins/codex-native-plugins)
-* [Codex Computer Use](/plugins/codex-computer-use)
-* [OpenAI provider](/providers/openai)
-* [Configuration reference](/gateway/configuration-reference)
+- [Codex harness](/plugins/codex-harness)
+- [Codex harness runtime](/plugins/codex-harness-runtime)
+- [Native Codex plugins](/plugins/codex-native-plugins)
+- [Codex Computer Use](/plugins/codex-computer-use)
+- [OpenAI provider](/providers/openai)
+- [Configuration reference](/gateway/configuration-reference)

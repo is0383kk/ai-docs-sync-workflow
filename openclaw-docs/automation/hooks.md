@@ -1,21 +1,35 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Hooks
+---
+summary: "Hooks: event-driven automation for commands and lifecycle events"
+read_when:
+  - You want event-driven automation for /new, /reset, /stop, and agent lifecycle events
+  - You want to build, install, or debug hooks
+title: "Hooks"
+---
 
 Hooks are small scripts that run when something happens inside the Gateway. They can be discovered from directories and inspected with `openclaw hooks`. The Gateway loads internal hooks only after you enable hooks or configure at least one hook entry, hook pack, legacy handler, or extra hook directory.
 
 There are two kinds of hooks in OpenClaw:
 
-* **Internal hooks** (this page): run inside the Gateway when agent events fire, like `/new`, `/reset`, `/stop`, or lifecycle events.
-* **Webhooks**: external HTTP endpoints that let other systems trigger work in OpenClaw. See [Webhooks](/automation/cron-jobs#webhooks).
+- **Internal hooks** (this page): run inside the Gateway when agent events fire, like `/new`, `/reset`, `/stop`, or lifecycle events.
+- **Webhooks**: external HTTP endpoints that let other systems trigger work in OpenClaw. See [Webhooks](/automation/cron-jobs#webhooks).
 
 Hooks can also be bundled inside plugins. `openclaw hooks list` shows both standalone hooks and plugin-managed hooks.
 
+## Choose the right surface
+
+OpenClaw has several extension surfaces that look similar but solve different problems:
+
+| If you want to...                                                                                                     | Use...                                | Why                                                                                           |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Save a snapshot on `/new`, log `/reset`, call an external API after `message:sent`, or add coarse operator automation | Internal hooks (`HOOK.md`, this page) | File-based hooks are meant for operator-managed side effects and command/lifecycle automation |
+| Rewrite prompts, block tools, cancel outbound messages, or add ordered middleware/policy                              | Typed plugin hooks via `api.on(...)`  | Typed hooks have explicit contracts, priorities, merge rules, and block/cancel semantics      |
+| Add telemetry-only export or observability                                                                            | Diagnostic events                     | Observability is a separate event bus, not a policy hook surface                              |
+
+Use internal hooks when you want automation that behaves like a small installed integration. Use typed plugin hooks when you need runtime lifecycle control.
+
 ## Quick start
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # List available hooks
 openclaw hooks list
 
@@ -63,7 +77,7 @@ my-hook/
 
 ### HOOK.md format
 
-```markdown theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```markdown
 ---
 name: my-hook
 description: "Short description of what this hook does"
@@ -90,7 +104,7 @@ Detailed documentation goes here.
 
 ### Handler implementation
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 const handler = async (event) => {
   if (event.type !== "command" || event.action !== "new") {
     return;
@@ -99,14 +113,19 @@ const handler = async (event) => {
   console.log(`[my-hook] New command triggered`);
   // Your logic here
 
-  // Optionally send message to user
+  // Optionally send a reply on replyable surfaces
   event.messages.push("Hook executed!");
 };
 
 export default handler;
 ```
 
-Each event includes: `type`, `action`, `sessionKey`, `timestamp`, `messages` (push to send to user), and `context` (event-specific data). Agent and tool plugin hook contexts can also include `trace`, a read-only W3C-compatible diagnostic trace context that plugins may pass into structured logs for OTEL correlation.
+Each event includes: `type`, `action`, `sessionKey`, `timestamp`, `messages` (push replies here on replyable surfaces only), and `context` (event-specific data). Agent and tool plugin hook contexts can also include `trace`, a read-only W3C-compatible diagnostic trace context that plugins may pass into structured logs for OTEL correlation.
+
+`event.messages` is only delivered automatically on replyable surfaces such as
+`command:*` and `message:received`. Lifecycle-only events such as
+`agent:bootstrap`, `session:*`, `gateway:*`, or `message:sent` do not have a
+reply channel and ignore pushed messages.
 
 ### Event context highlights
 
@@ -135,7 +154,7 @@ plugin hook `before_agent_finalize` instead. See [Plugin hooks](/plugins/hooks).
 
 Use `gateway:pre-restart` for short restart notices while channels are still available:
 
-```typescript theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```typescript
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -177,7 +196,7 @@ The Gateway skips internal hook discovery on startup until internal hooks are co
 
 Hook packs are npm packages that export hooks via `openclaw.hooks` in `package.json`. Install with:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw plugins install <path-or-spec>
 ```
 
@@ -195,21 +214,21 @@ Npm specs are registry-only (package name + optional exact version or dist-tag).
 
 Enable any bundled hook:
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw hooks enable <hook-name>
 ```
 
-<a id="session-memory" />
+<a id="session-memory"></a>
 
 ### session-memory details
 
 Extracts the last 15 user/assistant messages and saves to `<workspace>/memory/YYYY-MM-DD-HHMM.md` using the host local date. Memory capture runs in the background so `/new` and `/reset` acknowledgements are not delayed by transcript reads or optional slug generation. Set `hooks.internal.entries.session-memory.llmSlug: true` to generate descriptive filename slugs with the configured model. Requires `workspace.dir` to be configured.
 
-<a id="bootstrap-extra-files" />
+<a id="bootstrap-extra-files"></a>
 
 ### bootstrap-extra-files config
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "hooks": {
     "internal": {
@@ -226,19 +245,19 @@ Extracts the last 15 user/assistant messages and saves to `<workspace>/memory/YY
 
 Paths resolve relative to workspace. Only recognized bootstrap basenames are loaded (`AGENTS.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `BOOTSTRAP.md`, `MEMORY.md`).
 
-<a id="command-logger" />
+<a id="command-logger"></a>
 
 ### command-logger details
 
 Logs every slash command to `~/.openclaw/logs/commands.log`.
 
-<a id="compaction-notifier" />
+<a id="compaction-notifier"></a>
 
 ### compaction-notifier details
 
 Sends short status messages into the current conversation when OpenClaw starts and finishes compacting the session transcript. This makes long turns less confusing on chat surfaces because the user can see that the assistant is summarizing context and will continue after compaction.
 
-<a id="boot-md" />
+<a id="boot-md"></a>
 
 ### boot-md details
 
@@ -251,11 +270,16 @@ intercepting tool calls, modifying prompts, controlling message flow, and more.
 Use plugin hooks when you need `before_tool_call`, `before_agent_reply`,
 `before_install`, or other in-process lifecycle hooks.
 
+Plugin-managed internal hooks are different: they participate in this page's
+coarse command/lifecycle event system and show up in `openclaw hooks list` as
+`plugin:<id>`. Use those for side effects and compatibility with hook packs, not
+for ordered middleware or policy gates.
+
 For the complete plugin hook reference, see [Plugin hooks](/plugins/hooks).
 
 ## Configuration
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "hooks": {
     "internal": {
@@ -271,7 +295,7 @@ For the complete plugin hook reference, see [Plugin hooks](/plugins/hooks).
 
 Per-hook environment variables:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "hooks": {
     "internal": {
@@ -288,7 +312,7 @@ Per-hook environment variables:
 
 Extra hook directories:
 
-```json theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```json
 {
   "hooks": {
     "internal": {
@@ -301,12 +325,12 @@ Extra hook directories:
 ```
 
 <Note>
-  The legacy `hooks.internal.handlers` array config format is still supported for backwards compatibility, but new hooks should use the discovery-based system.
+The legacy `hooks.internal.handlers` array config format is still supported for backwards compatibility, but new hooks should use the discovery-based system.
 </Note>
 
 ## CLI reference
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # List all hooks (add --eligible, --verbose, or --json)
 openclaw hooks list
 
@@ -323,16 +347,16 @@ openclaw hooks disable <hook-name>
 
 ## Best practices
 
-* **Keep handlers fast.** Hooks run during command processing. Fire-and-forget heavy work with `void processInBackground(event)`.
-* **Handle errors gracefully.** Wrap risky operations in try/catch; do not throw so other handlers can run.
-* **Filter events early.** Return immediately if the event type/action is not relevant.
-* **Use specific event keys.** Prefer `"events": ["command:new"]` over `"events": ["command"]` to reduce overhead.
+- **Keep handlers fast.** Hooks run during command processing. Fire-and-forget heavy work with `void processInBackground(event)`.
+- **Handle errors gracefully.** Wrap risky operations in try/catch; do not throw so other handlers can run.
+- **Filter events early.** Return immediately if the event type/action is not relevant.
+- **Use specific event keys.** Prefer `"events": ["command:new"]` over `"events": ["command"]` to reduce overhead.
 
 ## Troubleshooting
 
 ### Hook not discovered
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 # Verify directory structure
 ls -la ~/.openclaw/hooks/my-hook/
 # Should show: HOOK.md, handler.ts
@@ -343,7 +367,7 @@ openclaw hooks list
 
 ### Hook not eligible
 
-```bash theme={"theme":{"light":"min-light","dark":"min-dark"}}
+```bash
 openclaw hooks info my-hook
 ```
 
@@ -357,7 +381,7 @@ Check for missing binaries (PATH), environment variables, config values, or OS c
 
 ## Related
 
-* [CLI Reference: hooks](/cli/hooks)
-* [Webhooks](/automation/cron-jobs#webhooks)
-* [Plugin hooks](/plugins/hooks) — in-process plugin lifecycle hooks
-* [Configuration](/gateway/configuration-reference#hooks)
+- [CLI Reference: hooks](/cli/hooks)
+- [Webhooks](/automation/cron-jobs#webhooks)
+- [Plugin hooks](/plugins/hooks) — in-process plugin lifecycle hooks
+- [Configuration](/gateway/configuration-reference#hooks)

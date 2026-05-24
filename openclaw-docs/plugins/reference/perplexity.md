@@ -1,8 +1,9 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.openclaw.ai/llms.txt
-> Use this file to discover all available pages before exploring further.
-
-# Perplexity plugin
+---
+summary: "Adds web search provider support."
+read_when:
+  - You are installing, configuring, or auditing the perplexity plugin
+title: "Perplexity plugin"
+---
 
 # Perplexity plugin
 
@@ -10,8 +11,8 @@ Adds web search provider support.
 
 ## Distribution
 
-* Package: `@openclaw/perplexity-plugin`
-* Install route: included in OpenClaw
+- Package: `@openclaw/perplexity-plugin`
+- Install route: included in OpenClaw
 
 ## Surface
 
@@ -19,4 +20,4 @@ contracts: webSearchProviders
 
 ## Related docs
 
-* [perplexity](/tools/perplexity-search)
+- [perplexity](/tools/perplexity-search)
