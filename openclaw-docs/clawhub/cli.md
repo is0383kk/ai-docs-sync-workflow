@@ -178,14 +178,10 @@ Stores your API token + cached registry URL.
 - Publishing a skill means it is released under `MIT-0` on ClawHub.
 - Published skills are free to use, modify, and redistribute without attribution.
 - ClawHub does not support paid skills or per-skill pricing.
-- `--clawscan-note <text>` adds a ClawScan note. This note gives ClawScan
-  context for behavior that may otherwise look unusual, such as network access,
-  native host access, or provider-specific credentials. The note is stored on
-  the published version.
 - Legacy alias: `publish <path>`.
 
 ```bash
-clawhub skill publish ./my-skill --clawscan-note "Uses network access only to call the user-configured Weather API."
+clawhub skill publish ./my-skill --version 1.0.0
 ```
 
 ### `delete <slug>`
@@ -482,16 +478,12 @@ clawhub publisher create opik --display-name "Opik"
 - `--dry-run` previews the resolved publish payload without uploading.
 - `--json` emits machine-readable output for CI.
 - `--owner <handle>` publishes under a user or org publisher handle when the actor has publisher access.
-- `--clawscan-note <text>` adds a ClawScan note. This note gives ClawScan
-  context for behavior that may otherwise look unusual, such as network access,
-  native host access, or provider-specific credentials. The note is stored on
-  the published release.
 - Scoped package names must match the selected owner. See `docs/publishing.md`.
 - Existing flags (`--family`, `--name`, `--version`, `--source-repo`, `--source-commit`, `--source-ref`, `--source-path`) still work as overrides.
 - Private GitHub repos require `GITHUB_TOKEN`.
 
 ```bash
-clawhub package publish ./plugin.tgz --clawscan-note "Native host access is limited to the local OpenClaw bridge."
+clawhub package publish ./plugin.tgz --owner openclaw
 ```
 
 #### Recommended local flow
@@ -557,7 +549,7 @@ Notes:
 #### GitHub Actions
 
 ClawHub also ships an official reusable workflow at
-[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/d854449610b166a69d2a1d4913153aebd2b4fd64/.github/workflows/package-publish.yml)
+[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/ff48b2cc70206f34e07b5a15f44a6f234e6d659b/.github/workflows/package-publish.yml)
 for plugin repos.
 
 Typical caller setup:
