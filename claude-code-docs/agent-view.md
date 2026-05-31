@@ -174,7 +174,7 @@ Press `←` on an empty prompt to detach and return to agent view. If a dialog h
 
 Detaching never stops a background session: `←`, `Ctrl+Z`, `/exit`, and double `Ctrl+C` or double `Ctrl+D` all leave it running. To end a session from inside it, run `/stop`.
 
-After you've dispatched or backgrounded a session, pressing `←` on an empty prompt works from any Claude Code session, not only ones you attached to from agent view. It backgrounds the current session and opens agent view with that row selected, so you can switch sessions without leaving the terminal. The row is created even from a fresh session with no conversation history, so `→` returns to it. When that row is the only one, agent view shows an onboarding hint below it. You can turn this shortcut off in `/config` (the `leftArrowOpensAgents` setting).
+Pressing `←` on an empty prompt works from any Claude Code session, not only ones you attached to from agent view. It backgrounds the current session and opens agent view with that row selected, so you can switch sessions without leaving the terminal. The row is created even from a fresh session with no conversation history, so `→` returns to it. When that row is the only one, agent view shows an onboarding hint below it. You can turn this shortcut off in `/config` (the `leftArrowOpensAgents` setting).
 
 ### Organize the list
 
@@ -244,6 +244,7 @@ Prefix or mention parts of the prompt to control how the session starts:
 | `@<agent-name>`                   | Mention a custom subagent anywhere in the prompt to run it as the main agent                                                                                   |
 | `@<repo>`                         | Mention a repository under the directory you opened agent view from to run the session there                                                                   |
 | `/<command>`                      | Suggest [skills](/en/skills) and [commands](/en/commands) to dispatch as the prompt                                                                            |
+| `! <command>`                     | Run a shell command as a background job instead of starting a Claude session. The job appears as a row you can attach to, watch, and detach from               |
 | `#<number>` or a pull request URL | If a session is already working on that PR, select it instead of dispatching                                                                                   |
 | `Shift+Enter`                     | Dispatch and immediately attach to the new session                                                                                                             |
 
@@ -310,6 +311,24 @@ backgrounded · 7c5dcf5d · flaky-test-fix
   claude stop 7c5dcf5d      stop this session
 ```
 
+#### Run a shell command
+
+To run a shell command as a background job instead of a Claude session, type `!` as the first character of the agent view dispatch input. The `!` shows as a prefix and everything you type after it is the command. The following example dispatches `pytest -x` from the agent view input box:
+
+```text theme={null}
+! pytest -x
+```
+
+Press `Enter` to start the job. The same job can also be launched directly from your shell with `--exec`:
+
+```bash theme={null}
+claude --bg --exec 'pytest -x'
+```
+
+The command runs as a PTY-backed job and appears as a row in agent view, with the most recent line of output as its status. A shell job runs the command in place of Claude, so no model is invoked and the output is not sent to any session.
+
+To see the output, attach to the row, press `Space` to peek without attaching, or run `claude logs <id>` from your shell. The captured output stays in memory and is not written to disk. The row and its output clean up automatically about five minutes after the command exits, so read it before then if you need the result.
+
 ### How file edits are isolated
 
 Every background session, whether started from agent view, `/bg`, or `claude --bg`, starts in your working directory. Before editing files, Claude moves the session into an isolated [git worktree](/en/worktrees) under `.claude/worktrees/`, so parallel sessions can read the same checkout but each writes to its own.
@@ -360,17 +379,25 @@ The [permission mode](/en/permissions) depends on how you started the session. B
 
 The permission mode you start a background session with persists when the supervisor later [stops and restarts](#the-supervisor-process) the session's process. A session you launched with `claude --bg --dangerously-skip-permissions` or `claude --bg --permission-mode bypassPermissions` stays in `bypassPermissions` after that restart instead of falling back to the directory's `defaultMode`.
 
-To set defaults for every session you dispatch from agent view, pass any of `--permission-mode`, `--model`, or `--effort` when opening it:
+To set defaults for every session you dispatch from agent view, pass any of `--permission-mode`, `--model`, `--effort`, or `--agent` when opening it:
 
 ```bash theme={null}
 claude agents --permission-mode plan --model opus --effort high
 ```
 
+`--agent` sets the [subagent](/en/sub-agents) used when a dispatch prompt does not name one, either with `@name` or as the first word. It defaults to the [`agent` setting](/en/settings#available-settings) if one is set, otherwise the built-in catch-all `claude` agent. Naming a subagent in the dispatch input overrides both.
+
 `claude agents` also accepts `--dangerously-skip-permissions` as shorthand for `--permission-mode bypassPermissions`, and `--allow-dangerously-skip-permissions` to make `bypassPermissions` available in each dispatched session's `Shift+Tab` cycle without starting in that mode. Both match the [top-level CLI flags](/en/cli-reference).
 
-<Note>
-  Passing `--permission-mode`, `--model`, `--effort`, or `--dangerously-skip-permissions` to `claude agents` requires Claude Code v2.1.142 or later. {/* min-version: 2.1.143 */}`--allow-dangerously-skip-permissions` on `claude agents` requires v2.1.143 or later. Earlier versions reject these flags with an unknown-option error.
-</Note>
+These flags were added across releases. Earlier versions reject them with an unknown-option error.
+
+| Flag or setting                                                              | Minimum version                       |
+| :--------------------------------------------------------------------------- | :------------------------------------ |
+| `--permission-mode`, `--model`, `--effort`, `--dangerously-skip-permissions` | v2.1.142 {/* min-version: 2.1.142 */} |
+| `--allow-dangerously-skip-permissions`                                       | v2.1.143 {/* min-version: 2.1.143 */} |
+| `--agent`, and honoring the `agent` setting for dispatched sessions          | v2.1.157 {/* min-version: 2.1.157 */} |
+
+Before v2.1.157, agent view ignores the `agent` setting and dispatches the built-in `claude` agent.
 
 The active defaults appear in the footer below the dispatch input.
 
