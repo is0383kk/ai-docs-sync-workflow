@@ -1,5 +1,5 @@
 ---
-summary: "CLI reference: commands, flags, config, lockfile, sync behavior."
+summary: "CLI reference: commands, flags, config, lockfile, and sync behavior."
 read_when:
   - Using the ClawHub CLI
   - Debugging install, update, publish, or sync
@@ -141,6 +141,8 @@ Stores your API token + cached registry URL.
 ### `uninstall <slug>`
 
 - Removes `<workdir>/<dir>/<slug>` and deletes the lockfile entry.
+- Sends best-effort telemetry while logged in so current install counts can be
+  deactivated.
 - Interactive: asks for confirmation.
 - Non-interactive (`--no-input`): requires `--yes`.
 
@@ -223,7 +225,7 @@ clawhub scan download @scope/demo --version 2.0.0 --kind plugin --output report.
 #### GitHub Actions
 
 ClawHub ships an official reusable workflow at
-[`/.github/workflows/skill-publish.yml`](https://github.com/openclaw/clawhub/blob/2c623b3bebbf1277c6c005e3bc55721e9f568fa7/.github/workflows/skill-publish.yml)
+[`/.github/workflows/skill-publish.yml`](https://github.com/openclaw/clawhub/blob/2c9aa36dcb422042e2512c1feb1d08c866524677/.github/workflows/skill-publish.yml)
 for skill repos and catalog repos.
 
 Typical catalog setup:
@@ -403,6 +405,31 @@ Examples:
 clawhub package verify ./example-plugin-1.2.3.tgz --package @openclaw/example-plugin --version 1.2.3
 clawhub package verify ./example-plugin-1.2.3.tgz --sha256 <hex>
 ```
+
+### `package validate <source>`
+
+- Runs the ClawHub CLI's bundled Plugin Inspector against a local plugin package
+  folder.
+- Defaults to offline/static validation, without locating or importing a local
+  OpenClaw checkout.
+- Hard compatibility errors exit non-zero. Warning-only findings are printed but
+  exit zero.
+- Flags:
+  - `--out <dir>`: write Plugin Inspector reports to this directory.
+  - `--openclaw <path>`: inspect against an explicit local OpenClaw checkout.
+  - `--runtime`: enable runtime capture; imports plugin code.
+  - `--allow-execute`: allow runtime capture in an isolated workspace.
+  - `--no-mock-sdk`: disable mocked OpenClaw SDK during runtime capture.
+  - `--json`: machine-readable output.
+
+Example:
+
+```bash
+clawhub package validate ./example-plugin
+```
+
+If validation reports a package, manifest, SDK import, or artifact finding, see
+[Plugin validation fixes](/clawhub/plugin-validation-fixes), then rerun the command.
 
 ### `package delete <name>`
 
@@ -621,11 +648,13 @@ Notes:
   more detailed compatibility metadata.
 - If you are using an older `clawhub` CLI release, upgrade before publishing so
   the local preflight checks run before upload.
+- If validation reports a remediation code, see
+  [Plugin validation fixes](/clawhub/plugin-validation-fixes).
 
 #### GitHub Actions
 
 ClawHub also ships an official reusable workflow at
-[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/2c623b3bebbf1277c6c005e3bc55721e9f568fa7/.github/workflows/package-publish.yml)
+[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/2c9aa36dcb422042e2512c1feb1d08c866524677/.github/workflows/package-publish.yml)
 for plugin repos.
 
 Typical caller setup:
@@ -690,10 +719,15 @@ Notes:
   - `--bump patch|minor|major` (default: patch)
   - `--changelog <text>` (non-interactive)
   - `--tags a,b,c` (default: latest)
-  - `--concurrency <n>` (default: 4)
+  - `--concurrency <n>`
   - `--source-repo <repo>`, `--source-commit <sha>`, `--source-ref <ref>` for GitHub provenance
 
-Telemetry:
+`sync` does not report install telemetry.
 
-- Sent during `sync` when logged in, unless `CLAWHUB_DISABLE_TELEMETRY=1` (legacy `CLAWDHUB_DISABLE_TELEMETRY=1`).
+### Install telemetry
+
+- Sent after `clawhub install <slug>` when logged in, unless
+  `CLAWHUB_DISABLE_TELEMETRY=1` is set.
+- Reporting is best-effort. Install commands do not fail if telemetry is
+  unavailable.
 - Details: `docs/telemetry.md`.
