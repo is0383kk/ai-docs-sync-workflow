@@ -123,10 +123,10 @@ Response:
 
 Notes:
 
-- Results are returned in relevance order (embedding similarity + exact slug/name token boosts + a small popularity prior from stars, all-time installs, and downloads).
+- Results are returned in relevance order (embedding similarity + exact slug/name token boosts + a small popularity prior from stars and downloads).
 - Relevance is stronger than popularity. A precise slug or display-name token match can outrank a looser match with many more downloads.
 - ASCII text is tokenized on word and punctuation boundaries. For example, `personal-map` contains a standalone `map` token, while `amap-jsapi-skill` contains `amap`, `jsapi`, and `skill`; searching for `map` therefore gives `personal-map` a stronger lexical match than `amap-jsapi-skill`.
-- Popularity is log-scaled and capped. Stars carry the strongest weight, all-time installs carry a smaller weight, and downloads are only a tiny fallback signal. High-download skills can rank lower when the query text is a weaker match.
+- Popularity is log-scaled and capped. Stars carry the strongest weight, and downloads are the fallback popularity signal. High-download skills can rank lower when the query text is a weaker match.
 - Suspicious or hidden moderation state can remove a skill from public search depending on caller filters and current moderation status.
 
 Publisher discoverability guidance:
@@ -150,7 +150,7 @@ Invalid `sort` values return `400`.
 
 Notes:
 
-- `recommended` ranks by stars, then all-time installs, then downloads, then `updatedAt`.
+- `recommended` ranks by stars, then downloads, then `updatedAt`.
 - `trending` ranks by installs in the last 7 days (telemetry-based).
 - `createdAt` is stable for new-skill crawls; `updated` changes when existing skills are republished.
 - When `nonSuspiciousOnly=true`, cursor-based sorts may return fewer than `limit` items on a page because suspicious skills are filtered after page retrieval.
@@ -440,7 +440,8 @@ Notes:
 - `ok` is `true` only when the selected version has a generated Skill Card, is not malware-blocked by moderation, and ClawScan verification is clean.
 - Skill identity, publisher identity, and selected version metadata are top-level envelope fields (`slug`, `displayName`, `publisherHandle`, `version`, `resolvedFrom`, `tag`, `createdAt`) so shell automation can read them without unpacking nested wrappers.
 - `security` is the top-level ClawScan/security verdict. Automation should key off `ok`, `decision`, `reasons`, and `security.status`.
-- `security.signals` contains supporting scanner evidence such as `staticScan`, `virusTotal`, `skillSpector`, and `dependencyRegistry`.
+- `security.signals` contains supporting scanner evidence such as `staticScan`, `virusTotal`, and `skillSpector`.
+- `security.signals.dependencyRegistry` is retained for v1 response compatibility, but the dependency registry existence scanner is retired and this key is always `null`.
 - `provenance` is `server-resolved-github-import` only when ClawHub resolved and stored a GitHub repo/ref/commit/path during publish or import; otherwise it is `unavailable`.
 
 ### `POST /api/v1/skills/-/security-verdicts`
@@ -463,6 +464,7 @@ Notes:
 - Results are per item; one missing skill or version does not fail the whole response.
 - The response is security-only. It does not include Skill Card data, generated card status, artifact file lists, or detailed scanner payloads.
 - `security.signals` contains status-level supporting evidence only; use `/scan` or the ClawHub security-audit page for full scanner details.
+- `security.signals.dependencyRegistry` is retained for v1 response compatibility, but the dependency registry existence scanner is retired and this key is always `null`.
 - Skill Card absence does not affect this endpoint's `ok`, `decision`, or `reasons`; clients should read installed `skill-card.md` locally when they need card content.
 - Use `/verify` when you need the single-skill Skill Card verification envelope, `/card` when you need generated card markdown, and `/scan` when you need detailed scanner data.
 
@@ -1157,42 +1159,6 @@ Supported states:
 Quarantined and revoked releases return `403` from artifact download routes.
 Every change writes an audit log entry.
 
-### `POST /api/v1/packages/backfill/artifacts`
-
-Admin-only maintenance endpoint for labeling older package releases with
-explicit artifact-kind metadata.
-
-Request body:
-
-```json
-{
-  "cursor": null,
-  "batchSize": 100,
-  "dryRun": true
-}
-```
-
-Response:
-
-```json
-{
-  "ok": true,
-  "scanned": 100,
-  "updated": 12,
-  "nextCursor": "cursor...",
-  "done": false,
-  "dryRun": true
-}
-```
-
-Notes:
-
-- Defaults to dry-run.
-- Releases without ClawPack storage are labeled `legacy-zip`.
-- Existing ClawPack-backed rows missing `artifactKind` are repaired as
-  `npm-pack`.
-- This does not generate ClawPacks or mutate artifact bytes.
-
 ### `GET /api/v1/packages/{name}/file`
 
 Returns raw text content for a package file.
@@ -1574,7 +1540,7 @@ Still supported for older CLI versions:
 - `GET /api/cli/whoami`
 - `POST /api/cli/upload-url`
 - `POST /api/cli/publish`
-- `POST /api/cli/telemetry/sync`
+- `POST /api/cli/telemetry/install`
 - `POST /api/cli/skill/delete`
 - `POST /api/cli/skill/undelete`
 
