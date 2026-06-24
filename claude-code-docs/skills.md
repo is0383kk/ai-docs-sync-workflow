@@ -822,6 +822,8 @@ If Claude doesn't use your skill when expected:
 3. Try rephrasing your request to match the description more closely
 4. Invoke it directly with `/skill-name` if the skill is user-invocable
 
+If the frontmatter YAML is malformed, Claude Code loads the skill body with empty metadata, so `/skill-name` still works but Claude has no `description` to match against. Run with `--debug` to see the parse error.
+
 ### Skill triggers too often
 
 If Claude uses your skill when you don't want it:
@@ -846,3 +848,4 @@ To raise the budget, set the [`skillListingBudgetFraction`](/en/settings#availab
 * **[Memory](/en/memory)**: manage CLAUDE.md files for persistent context
 * **[Commands](/en/commands)**: reference for built-in commands and bundled skills
 * **[Permissions](/en/permissions)**: control tool and skill access
+* **[Claude Tag skills](https://claude.com/docs/claude-tag/admins/skills-repo)**: project skills committed to a repo also load when that repo is used in a Claude Tag channel
