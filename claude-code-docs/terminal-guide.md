@@ -114,7 +114,7 @@ Follow these steps to optionally install Git for Windows, set up PowerShell, and
   </Step>
 
   <Step title="Start Claude Code">
-    Close PowerShell and open a new PowerShell window so it recognizes the newly installed `claude` command. Then type:
+    Run `claude`. If PowerShell says `'claude' is not recognized`, the install directory isn't on your PATH yet. Follow the ['claude is not recognized'](#windows-troubleshooting) fix below, then open a new PowerShell window and try again.
 
     ```powershell theme={null}
     claude
@@ -193,9 +193,7 @@ You don't have to use the terminal. Claude Code is also available in:
 If you run into problems installing on macOS or Linux, check these common issues:
 
 <Accordion title="'command not found: claude'">
-  If you see `command not found: claude` after installing, your terminal needs to reload its settings. Close the Terminal window and open a new one, then try `claude` again.
-
-  If it still doesn't work, add the install directory to your PATH.
+  If you see `command not found: claude` after installing, the folder where the installer put `claude` isn't in your PATH. The installer prints the exact fix under `Setup notes` at the end of the install, so run that command, or use the one for your shell below.
 
   For Zsh, the macOS default shell:
 
@@ -211,7 +209,7 @@ If you run into problems installing on macOS or Linux, check these common issues
   source ~/.bashrc
   ```
 
-  Then try `claude` again. For more details, see [fix your PATH](/en/troubleshoot-install#verify-your-path).
+  Then open a new terminal and try `claude` again. If it still isn't found, check that the file `~/.local/bin/claude` exists. If it doesn't, the install didn't finish. For more details, see [fix your PATH](/en/troubleshoot-install#verify-your-path).
 </Accordion>
 
 <Accordion title="Error with HTML code or 'syntax error near unexpected token'">
@@ -276,9 +274,7 @@ If you run into problems installing on Windows, check these common issues:
 </Accordion>
 
 <Accordion title="'claude is not recognized'">
-  Restart your computer and try again. This usually fixes the problem.
-
-  If restarting didn't help, run these commands to add Claude Code to your PATH:
+  This error means the install directory isn't in your PATH. Run these commands in PowerShell to add it:
 
   ```powershell theme={null}
   $currentPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
