@@ -2,22 +2,23 @@
 read_when:
     - Kubernetes 클러스터에서 OpenClaw를 실행하려는 경우
     - Kubernetes 환경에서 OpenClaw를 테스트하려는 경우
-summary: Kustomize를 사용하여 OpenClaw Gateway를 Kubernetes 클러스터에 배포하기
+summary: Kustomize로 Kubernetes 클러스터에 OpenClaw Gateway 배포하기
 title: Kubernetes
 x-i18n:
-    generated_at: "2026-05-06T06:30:32Z"
+    generated_at: "2026-06-28T20:43:24Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: c38e42ae9121864333574b668d95f4d1112cada30cd525613d2371f176de4505
+    source_hash: 5a38c2754b4a5267e79854958a252b2e4bc9811da191d8ccf3ac597534cc8e7a
     source_path: install/kubernetes.md
     workflow: 16
 ---
 
-OpenClaw를 Kubernetes에서 실행하기 위한 최소 시작점입니다. 프로덕션 준비가 완료된 배포가 아닙니다. 핵심 리소스를 다루며, 사용자의 환경에 맞게 조정하는 것을 전제로 합니다.
+OpenClaw를 Kubernetes에서 실행하기 위한 최소 시작점입니다. 프로덕션 준비가 된 배포가 아닙니다. 핵심 리소스를 다루며, 사용자의 환경에 맞게 조정하는 것을 전제로 합니다.
 
 ## Helm을 사용하지 않는 이유
 
-OpenClaw는 몇 가지 구성 파일이 있는 단일 컨테이너입니다. 중요한 사용자 지정은 인프라 템플릿이 아니라 에이전트 콘텐츠(마크다운 파일, skills, 구성 재정의)에 있습니다. Kustomize는 Helm 차트의 오버헤드 없이 오버레이를 처리합니다. 배포가 더 복잡해지면 이 매니페스트 위에 Helm 차트를 계층화할 수 있습니다.
+OpenClaw는 몇 가지 구성 파일이 있는 단일 컨테이너입니다. 중요한 사용자 지정은 인프라 템플릿이 아니라 에이전트 콘텐츠(마크다운 파일, Skills, 구성 재정의)에 있습니다. Kustomize는 Helm 차트의 부담 없이 오버레이를 처리합니다. 배포가 더 복잡해지면 이 매니페스트 위에 Helm 차트를 레이어로 올릴 수 있습니다.
 
 ## 필요한 것
 
@@ -43,11 +44,11 @@ Control UI에 대해 구성된 공유 시크릿을 가져옵니다. 이 배포 �
 kubectl get secret openclaw-secrets -n openclaw -o jsonpath='{.data.OPENCLAW_GATEWAY_TOKEN}' | base64 -d
 ```
 
-로컬 디버깅을 위해 `./scripts/k8s/deploy.sh --show-token`은 배포 후 토큰을 출력합니다.
+로컬 디버깅의 경우, `./scripts/k8s/deploy.sh --show-token`은 배포 후 토큰을 출력합니다.
 
-## Kind로 로컬 테스트
+## Kind를 사용한 로컬 테스트
 
-클러스터가 없다면 [Kind](https://kind.sigs.k8s.io/)로 로컬에 하나를 생성하세요.
+클러스터가 없다면 [Kind](https://kind.sigs.k8s.io/)로 로컬에 클러스터를 생성하세요.
 
 ```bash
 ./scripts/k8s/create-kind.sh           # auto-detects docker or podman
@@ -60,7 +61,7 @@ kubectl get secret openclaw-secrets -n openclaw -o jsonpath='{.data.OPENCLAW_GAT
 
 ### 1) 배포
 
-**옵션 A** — 환경 변수의 API 키(한 단계):
+**옵션 A** — 환경 변수에 API 키 설정(한 단계):
 
 ```bash
 # Replace with your provider: ANTHROPIC, GEMINI, OPENAI, or OPENROUTER
@@ -68,7 +69,7 @@ export <PROVIDER>_API_KEY="..."
 ./scripts/k8s/deploy.sh
 ```
 
-스크립트는 API 키와 자동 생성된 Gateway 토큰이 포함된 Kubernetes Secret을 만든 다음 배포합니다. Secret이 이미 있으면 현재 Gateway 토큰과 변경되지 않는 모든 제공자 키를 보존합니다.
+이 스크립트는 API 키와 자동 생성된 Gateway 토큰이 포함된 Kubernetes Secret을 만든 다음 배포합니다. Secret이 이미 있으면 현재 Gateway 토큰과 변경되지 않는 모든 제공자 키를 보존합니다.
 
 **옵션 B** — 시크릿을 별도로 생성:
 
@@ -144,18 +145,18 @@ OPENCLAW_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh
 `scripts/k8s/manifests/deployment.yaml`의 `image` 필드를 편집합니다.
 
 ```yaml
-image: ghcr.io/openclaw/openclaw:latest # or pin to a specific version from https://github.com/openclaw/openclaw/releases
+image: ghcr.io/openclaw/openclaw:latest # primary; official Docker Hub mirror: openclaw/openclaw:latest
 ```
 
-### 포트 포워딩을 넘어 노출
+### 포트 포워딩 너머로 노출
 
-기본 매니페스트는 pod 내부에서 Gateway를 loopback에 바인딩합니다. 이는 `kubectl port-forward`와 함께 작동하지만, pod IP에 도달해야 하는 Kubernetes `Service` 또는 Ingress 경로에서는 작동하지 않습니다.
+기본 매니페스트는 Gateway를 포드 내부의 루프백에 바인딩합니다. 이는 `kubectl port-forward`와 함께 동작하지만, 포드 IP에 도달해야 하는 Kubernetes `Service` 또는 Ingress 경로에서는 동작하지 않습니다.
 
-Ingress 또는 로드 밸런서를 통해 Gateway를 노출하려는 경우:
+Ingress 또는 로드 밸런서를 통해 Gateway를 노출하려면:
 
-- `scripts/k8s/manifests/configmap.yaml`의 Gateway 바인딩을 `loopback`에서 배포 모델에 맞는 non-loopback 바인딩으로 변경합니다
-- Gateway 인증을 활성화된 상태로 유지하고 적절한 TLS 종료 엔트리포인트를 사용합니다
-- 지원되는 웹 보안 모델을 사용하여 원격 접근용 Control UI를 구성합니다(예: HTTPS/Tailscale Serve 및 필요 시 명시적으로 허용된 origin)
+- `scripts/k8s/manifests/configmap.yaml`의 Gateway 바인딩을 `loopback`에서 배포 모델과 일치하는 비루프백 바인딩으로 변경합니다
+- Gateway 인증을 활성화한 상태로 유지하고 적절한 TLS 종료 진입점을 사용합니다
+- 지원되는 웹 보안 모델을 사용해 원격 액세스용 Control UI를 구성합니다(예: 필요한 경우 HTTPS/Tailscale Serve 및 명시적으로 허용된 오리진)
 
 ## 재배포
 
@@ -163,24 +164,24 @@ Ingress 또는 로드 밸런서를 통해 Gateway를 노출하려는 경우:
 ./scripts/k8s/deploy.sh
 ```
 
-이 명령은 모든 매니페스트를 적용하고 pod를 다시 시작하여 구성 또는 시크릿 변경 사항을 반영합니다.
+이 명령은 모든 매니페스트를 적용하고 구성 또는 시크릿 변경 사항을 반영하도록 포드를 다시 시작합니다.
 
-## 정리
+## 제거
 
 ```bash
 ./scripts/k8s/deploy.sh --delete
 ```
 
-이 명령은 네임스페이스와 그 안의 모든 리소스(PVC 포함)를 삭제합니다.
+이 명령은 PVC를 포함해 네임스페이스와 그 안의 모든 리소스를 삭제합니다.
 
 ## 아키텍처 참고 사항
 
-- Gateway는 기본적으로 pod 내부의 loopback에 바인딩되므로 포함된 설정은 `kubectl port-forward`용입니다
-- 클러스터 범위 리소스가 없습니다. 모든 것은 단일 네임스페이스 안에 있습니다
-- 보안: `readOnlyRootFilesystem`, `drop: ALL` capabilities, non-root 사용자(UID 1000)
-- 기본 구성은 Control UI를 더 안전한 로컬 접근 경로에 유지합니다. loopback 바인딩과 `kubectl port-forward`를 `http://127.0.0.1:18789`로 사용합니다
-- localhost 접근을 넘어서는 경우 지원되는 원격 모델을 사용하세요. HTTPS/Tailscale과 적절한 Gateway 바인딩 및 Control UI origin 설정
-- 시크릿은 임시 디렉터리에서 생성되어 클러스터에 직접 적용됩니다. repo checkout에는 시크릿 자료가 기록되지 않습니다
+- Gateway는 기본적으로 포드 내부의 루프백에 바인딩되므로 포함된 설정은 `kubectl port-forward`용입니다
+- 클러스터 범위 리소스 없음 — 모든 것이 단일 네임스페이스에 있습니다
+- 보안: `readOnlyRootFilesystem`, `drop: ALL` capabilities, 루트가 아닌 사용자(UID 1000)
+- 기본 구성은 Control UI를 더 안전한 로컬 액세스 경로에 유지합니다: 루프백 바인딩과 `kubectl port-forward`를 통한 `http://127.0.0.1:18789`
+- localhost 액세스를 넘어서는 경우 지원되는 원격 모델을 사용하세요: HTTPS/Tailscale과 적절한 Gateway 바인딩 및 Control UI 오리진 설정
+- 시크릿은 임시 디렉터리에서 생성되어 클러스터에 직접 적용됩니다 — 시크릿 자료는 repo checkout에 기록되지 않습니다
 
 ## 파일 구조
 
@@ -199,5 +200,5 @@ scripts/k8s/
 ## 관련 항목
 
 - [Docker](/ko/install/docker)
-- [Docker VM runtime](/ko/install/docker-vm-runtime)
+- [Docker VM 런타임](/ko/install/docker-vm-runtime)
 - [설치 개요](/ko/install)

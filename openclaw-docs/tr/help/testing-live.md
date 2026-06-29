@@ -1,35 +1,32 @@
 ---
 read_when:
-    - Canlı model matrisi / CLI arka ucu / ACP / media-provider smoke testlerini çalıştırma
+    - Canlı model matrisi / CLI arka ucu / ACP / medya sağlayıcısı smoke testlerini çalıştırma
     - Canlı test kimlik bilgisi çözümlemesinde hata ayıklama
     - Sağlayıcıya özgü yeni bir canlı test ekleme
 sidebarTitle: Live tests
 summary: 'Canlı (ağa erişen) testler: model matrisi, CLI arka uçları, ACP, medya sağlayıcıları, kimlik bilgileri'
-title: 'Test: canlı paketler'
+title: 'Test: canlı test paketleri'
 x-i18n:
-    generated_at: "2026-05-10T19:40:28Z"
+    generated_at: "2026-06-28T20:43:40Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: cb020672cd71d03b2cfc78b135c7c39862823c421c0f2f31bae69a42f9c3437f
+    source_hash: 087ec52b395131889d4ae113f304d71199c58dc9f61a1a5e1e511ae4c5b48c0b
     source_path: help/testing-live.md
     workflow: 16
 ---
 
-Hızlı başlangıç, QA çalıştırıcıları, birim/entegrasyon paketleri ve Docker akışları için
-[Test Etme](/tr/help/testing) bölümüne bakın. Bu sayfa **canlı** (ağa dokunan) test
-paketlerini kapsar: model matrisi, CLI arka uçları, ACP ve medya sağlayıcısı canlı testleri ile
+Hızlı başlangıç, QA çalıştırıcıları, unit/integration paketleri ve Docker akışları için bkz.
+[Testing](/tr/help/testing). Bu sayfa **live** (ağa temas eden) test
+paketlerini kapsar: model matrisi, CLI arka uçları, ACP ve medya sağlayıcısı live testleri, ayrıca
 kimlik bilgisi yönetimi.
 
-## Canlı: yerel profil duman komutları
+## Live: yerel smoke komutları
 
-Geçici canlı kontrollerden önce `~/.profile` dosyasını kaynak olarak yükleyin; böylece sağlayıcı anahtarları ve yerel araç
-yolları kabuğunuzla eşleşir:
+Geçici live kontrollerden önce gerekli sağlayıcı anahtarını işlem ortamında
+dışa aktarın.
 
-```bash
-source ~/.profile
-```
-
-Güvenli medya duman testi:
+Güvenli medya smoke:
 
 ```bash
 pnpm openclaw infer tts convert --local --json \
@@ -37,28 +34,28 @@ pnpm openclaw infer tts convert --local --json \
   --output /tmp/openclaw-live-smoke.mp3
 ```
 
-Güvenli sesli arama hazır olma duman testi:
+Güvenli sesli arama hazırlık smoke'u:
 
 ```bash
 pnpm openclaw voicecall setup --json
 pnpm openclaw voicecall smoke --to "+15555550123"
 ```
 
-`voicecall smoke`, `--yes` de bulunmadığı sürece kuru çalıştırmadır. `--yes` seçeneğini yalnızca
+`voicecall smoke`, `--yes` de mevcut değilse kuru çalıştırmadır. `--yes` seçeneğini yalnızca
 bilerek gerçek bir bildirim araması yapmak istediğinizde kullanın. Twilio, Telnyx ve
-Plivo için başarılı bir hazır olma kontrolü herkese açık bir webhook URL'si gerektirir; yalnızca local loopback/özel
-geri dönüşler tasarım gereği reddedilir.
+Plivo için başarılı bir hazırlık kontrolü herkese açık bir webhook URL'si gerektirir; yalnızca yerel
+loopback/özel yedekler tasarım gereği reddedilir.
 
-## Canlı: Android node yetenek taraması
+## Live: Android node yetenek taraması
 
 - Test: `src/gateway/android-node.capabilities.live.test.ts`
 - Betik: `pnpm android:test:integration`
-- Amaç: bağlı bir Android node tarafından **şu anda duyurulan her komutu** çağırmak ve komut sözleşmesi davranışını doğrulamak.
+- Hedef: bağlı bir Android node tarafından **şu anda duyurulan her komutu** çağırmak ve komut sözleşmesi davranışını doğrulamak.
 - Kapsam:
-  - Ön koşullu/manuel kurulum (paket uygulamayı yüklemez/çalıştırmaz/eşleştirmez).
-  - Seçilen Android node için komut komut Gateway `node.invoke` doğrulaması.
+  - Önkoşullu/manuel kurulum (paket uygulamayı yüklemez/çalıştırmaz/eşleştirmez).
+  - Seçilen Android node için komut komut gateway `node.invoke` doğrulaması.
 - Gerekli ön kurulum:
-  - Android uygulaması zaten bağlı ve Gateway ile eşleştirilmiş olmalı.
+  - Android uygulaması zaten bağlı + gateway ile eşleştirilmiş olmalı.
   - Uygulama ön planda tutulmalı.
   - Geçmesini beklediğiniz yetenekler için izinler/yakalama onayı verilmiş olmalı.
 - İsteğe bağlı hedef geçersiz kılmaları:
@@ -66,76 +63,79 @@ geri dönüşler tasarım gereği reddedilir.
   - `OPENCLAW_ANDROID_GATEWAY_URL` / `OPENCLAW_ANDROID_GATEWAY_TOKEN` / `OPENCLAW_ANDROID_GATEWAY_PASSWORD`.
 - Tam Android kurulum ayrıntıları: [Android Uygulaması](/tr/platforms/android)
 
-## Canlı: model duman testi (profil anahtarları)
+## Live: model smoke'u (profil anahtarları)
 
-Hataları yalıtabilmemiz için canlı testler iki katmana ayrılır:
+Live testler iki katmana ayrılır, böylece hataları yalıtabiliriz:
 
-- "Doğrudan model", sağlayıcının/modelin verilen anahtarla hiç yanıt verip veremediğini söyler.
-- "Gateway duman testi", o model için tam gateway+agent işlem hattının çalışıp çalışmadığını söyler (oturumlar, geçmiş, araçlar, sandbox ilkesi vb.).
+- "Doğrudan model" bize sağlayıcı/modelin verilen anahtarla genel olarak yanıt verip veremediğini söyler.
+- "Gateway smoke" bize tam gateway+agent işlem hattının o model için çalışıp çalışmadığını söyler (oturumlar, geçmiş, araçlar, sandbox politikası vb.).
 
 ### Katman 1: Doğrudan model tamamlama (gateway yok)
 
 - Test: `src/agents/models.profiles.live.test.ts`
-- Amaç:
-  - Keşfedilen modelleri numaralandırmak
+- Hedef:
+  - Keşfedilen modelleri listelemek
   - Kimlik bilgileriniz olan modelleri seçmek için `getApiKeyForModel` kullanmak
   - Model başına küçük bir tamamlama çalıştırmak (ve gerektiğinde hedefli regresyonlar)
 - Etkinleştirme:
   - `pnpm test:live` (veya Vitest'i doğrudan çağırıyorsanız `OPENCLAW_LIVE_TEST=1`)
-- Bu paketi gerçekten çalıştırmak için `OPENCLAW_LIVE_MODELS=modern` (veya modern için takma ad olan `all`) ayarlayın; aksi halde `pnpm test:live` odağını Gateway duman testinde tutmak için atlar
-- Model seçme:
-  - Modern izin listesini çalıştırmak için `OPENCLAW_LIVE_MODELS=modern` (Opus/Sonnet 4.6+, GPT-5.2 + Codex, Gemini 3, DeepSeek V4, GLM 4.7, MiniMax M2.7, Grok 4.3)
+- Bu paketi gerçekten çalıştırmak için `OPENCLAW_LIVE_MODELS=modern`, `small` veya `all` (modern için takma ad) ayarlayın; aksi halde `pnpm test:live` komutunu gateway smoke'una odaklı tutmak için atlanır
+- Modelleri seçme:
+  - Modern izin listesini çalıştırmak için `OPENCLAW_LIVE_MODELS=modern` (Opus/Sonnet 4.6+, GPT-5.2 + Codex, Gemini 3, DeepSeek V4, GLM 5.1, MiniMax M3, Grok 4.3)
+  - Kısıtlı küçük model izin listesini çalıştırmak için `OPENCLAW_LIVE_MODELS=small` (Qwen 8B/9B local uyumlu rotalar, Ollama Gemma, OpenRouter Qwen/GLM ve Z.AI GLM)
   - `OPENCLAW_LIVE_MODELS=all`, modern izin listesi için bir takma addır
-  - veya `OPENCLAW_LIVE_MODELS="openai/gpt-5.5,openai-codex/gpt-5.5,anthropic/claude-opus-4-6,..."` (virgüllü izin listesi)
-  - Modern/all taramaları varsayılan olarak seçilmiş yüksek sinyalli bir sınır kullanır; kapsamlı bir modern tarama için `OPENCLAW_LIVE_MAX_MODELS=0`, daha küçük bir sınır için pozitif bir sayı ayarlayın.
-  - Kapsamlı taramalar, tüm doğrudan model testi zaman aşımı için `OPENCLAW_LIVE_TEST_TIMEOUT_MS` kullanır. Varsayılan: 60 dakika.
-  - Doğrudan model yoklamaları varsayılan olarak 20 yönlü paralellikle çalışır; geçersiz kılmak için `OPENCLAW_LIVE_MODEL_CONCURRENCY` ayarlayın.
-- Sağlayıcı seçme:
-  - `OPENCLAW_LIVE_PROVIDERS="google,google-antigravity,google-gemini-cli"` (virgüllü izin listesi)
+  - veya `OPENCLAW_LIVE_MODELS="openai/gpt-5.5,anthropic/claude-opus-4-6,..."` (virgülle ayrılmış izin listesi)
+  - Yerel Ollama küçük model çalıştırmaları varsayılan olarak `http://127.0.0.1:11434` kullanır; `OPENCLAW_LIVE_OLLAMA_BASE_URL` değerini yalnızca LAN, özel veya Ollama Cloud uç noktaları için ayarlayın.
+  - Modern/all ve small taramaları varsayılan olarak kendi seçilmiş sınırlarını kullanır; kapsamlı bir seçili profil taraması için `OPENCLAW_LIVE_MAX_MODELS=0`, daha küçük bir sınır için pozitif bir sayı ayarlayın.
+  - Kapsamlı taramalar, tüm doğrudan model test zaman aşımı için `OPENCLAW_LIVE_TEST_TIMEOUT_MS` kullanır. Varsayılan: 60 dakika.
+  - Doğrudan model sondaları varsayılan olarak 20 yönlü paralellik ile çalışır; geçersiz kılmak için `OPENCLAW_LIVE_MODEL_CONCURRENCY` ayarlayın.
+- Sağlayıcıları seçme:
+  - `OPENCLAW_LIVE_PROVIDERS="google,google-antigravity,google-gemini-cli"` (virgülle ayrılmış izin listesi)
 - Anahtarların geldiği yer:
-  - Varsayılan olarak: profil deposu ve env geri dönüşleri
-  - Yalnızca **profil deposunu** zorunlu kılmak için `OPENCLAW_LIVE_REQUIRE_PROFILE_KEYS=1` ayarlayın
+  - Varsayılan olarak: profil deposu ve env yedekleri
+  - Yalnızca **profil deposu** zorunlu kılmak için `OPENCLAW_LIVE_REQUIRE_PROFILE_KEYS=1` ayarlayın
 - Bunun var olma nedeni:
   - "sağlayıcı API'si bozuk / anahtar geçersiz" durumunu "gateway agent işlem hattı bozuk" durumundan ayırır
-  - Küçük, yalıtılmış regresyonlar içerir (örnek: OpenAI Responses/Codex Responses akıl yürütme yeniden oynatma + araç çağrısı akışları)
+  - Küçük, yalıtılmış regresyonlar içerir (örnek: OpenAI Responses/Codex Responses reasoning replay + tool-call akışları)
 
-### Katman 2: Gateway + dev agent duman testi ("@openclaw" gerçekte ne yapar)
+### Katman 2: Gateway + geliştirme agent smoke'u ("@openclaw" gerçekte ne yapar)
 
 - Test: `src/gateway/gateway-models.profiles.live.test.ts`
-- Amaç:
-  - İşlem içi bir Gateway başlatmak
+- Hedef:
+  - İşlem içi bir gateway başlatmak
   - Bir `agent:dev:*` oturumu oluşturmak/yamak (çalıştırma başına model geçersiz kılma)
-  - Anahtarı olan modeller üzerinde yineleme yapmak ve şunları doğrulamak:
+  - Anahtarlı modelleri yinelemek ve şunları doğrulamak:
     - "anlamlı" yanıt (araç yok)
-    - gerçek bir araç çağrısı çalışır (okuma yoklaması)
-    - isteğe bağlı ek araç yoklamaları (exec+read yoklaması)
-    - OpenAI regresyon yolları (yalnızca araç çağrısı → takip) çalışmaya devam eder
-- Yoklama ayrıntıları (hataları hızlıca açıklayabilmeniz için):
-  - `read` yoklaması: test çalışma alanına bir nonce dosyası yazar ve agent'tan onu `read` etmesini ve nonce'u geri yansıtmasını ister.
-  - `exec+read` yoklaması: test agent'tan bir temp dosyasına nonce `exec` ile yazmasını, ardından onu geri `read` etmesini ister.
-  - görsel yoklaması: test üretilmiş bir PNG (cat + rastgele kod) ekler ve modelin `cat <CODE>` döndürmesini bekler.
-  - Uygulama referansı: `src/gateway/gateway-models.profiles.live.test.ts` ve `src/gateway/live-image-probe.ts`.
+    - gerçek bir araç çağrısı çalışır (okuma sondası)
+    - isteğe bağlı ek araç sondaları (exec+read sondası)
+    - OpenAI regresyon yolları (yalnızca tool-call → takip) çalışmaya devam eder
+- Sonda ayrıntıları (hataları hızlı açıklayabilmeniz için):
+  - `read` sondası: test, çalışma alanına nonce dosyası yazar ve agent'tan bunu `read` ile okumasını ve nonce'u geri yankılamasını ister.
+  - `exec+read` sondası: test, agent'tan bir nonce'u geçici dosyaya `exec` ile yazmasını, sonra `read` ile geri okumasını ister.
+  - görüntü sondası: test, oluşturulmuş bir PNG (cat + rastgeleleştirilmiş kod) ekler ve modelin `cat <CODE>` döndürmesini bekler.
+  - Uygulama referansı: `src/gateway/gateway-models.profiles.live.test.ts` ve `test/helpers/live-image-probe.ts`.
 - Etkinleştirme:
   - `pnpm test:live` (veya Vitest'i doğrudan çağırıyorsanız `OPENCLAW_LIVE_TEST=1`)
-- Model seçme:
-  - Varsayılan: modern izin listesi (Opus/Sonnet 4.6+, GPT-5.2 + Codex, Gemini 3, DeepSeek V4, GLM 4.7, MiniMax M2.7, Grok 4.3)
+- Modelleri seçme:
+  - Varsayılan: modern izin listesi (Opus/Sonnet 4.6+, GPT-5.2 + Codex, Gemini 3, DeepSeek V4, GLM 4.7, MiniMax M3, Grok 4.3)
+  - Aynı kısıtlı küçük model izin listesini tam gateway+agent işlem hattı üzerinden çalıştırmak için `OPENCLAW_LIVE_GATEWAY_MODELS=small`
   - `OPENCLAW_LIVE_GATEWAY_MODELS=all`, modern izin listesi için bir takma addır
-  - Ya da daraltmak için `OPENCLAW_LIVE_GATEWAY_MODELS="provider/model"` (veya virgüllü liste) ayarlayın
-  - Modern/all gateway taramaları varsayılan olarak seçilmiş yüksek sinyalli bir sınır kullanır; kapsamlı bir modern tarama için `OPENCLAW_LIVE_GATEWAY_MAX_MODELS=0`, daha küçük bir sınır için pozitif bir sayı ayarlayın.
-- Sağlayıcı seçme ("OpenRouter her şey" durumundan kaçınma):
-  - `OPENCLAW_LIVE_GATEWAY_PROVIDERS="google,google-antigravity,google-gemini-cli,openai,anthropic,zai,minimax"` (virgüllü izin listesi)
-- Araç + görsel yoklamaları bu canlı testte her zaman açıktır:
-  - `read` yoklaması + `exec+read` yoklaması (araç stresi)
-  - görsel yoklaması, model görsel giriş desteği duyurduğunda çalışır
+  - Veya daraltmak için `OPENCLAW_LIVE_GATEWAY_MODELS="provider/model"` (veya virgüllü liste) ayarlayın
+  - Modern/all ve small gateway taramaları varsayılan olarak kendi seçilmiş sınırlarını kullanır; kapsamlı bir seçili tarama için `OPENCLAW_LIVE_GATEWAY_MAX_MODELS=0`, daha küçük bir sınır için pozitif bir sayı ayarlayın.
+- Sağlayıcıları seçme ("OpenRouter her şey" durumundan kaçınma):
+  - `OPENCLAW_LIVE_GATEWAY_PROVIDERS="google,google-antigravity,google-gemini-cli,openai,anthropic,zai,minimax"` (virgülle ayrılmış izin listesi)
+- Araç + görüntü sondaları bu live testte her zaman açıktır:
+  - `read` sondası + `exec+read` sondası (araç stresi)
+  - model görüntü girişi desteği duyurduğunda görüntü sondası çalışır
   - Akış (üst düzey):
-    - Test, "CAT" + rastgele kod içeren küçük bir PNG üretir (`src/gateway/live-image-probe.ts`)
-    - Bunu `agent` aracılığıyla `attachments: [{ mimeType: "image/png", content: "<base64>" }]` olarak gönderir
+    - Test, "CAT" + rastgele kod içeren küçük bir PNG oluşturur (`test/helpers/live-image-probe.ts`)
+    - Bunu `agent` üzerinden `attachments: [{ mimeType: "image/png", content: "<base64>" }]` ile gönderir
     - Gateway ekleri `images[]` içine ayrıştırır (`src/gateway/server-methods/agent.ts` + `src/gateway/chat-attachments.ts`)
-    - Gömülü agent modele çok modlu bir kullanıcı iletisi iletir
-    - Doğrulama: yanıt `cat` + kodu içerir (OCR toleransı: küçük hatalara izin verilir)
+    - Gömülü agent, modele çok modlu bir kullanıcı mesajı iletir
+    - Doğrulama: yanıt `cat` + kod içerir (OCR toleransı: küçük hatalara izin verilir)
 
 <Tip>
-Makinenizde neyi test edebileceğinizi (ve tam `provider/model` kimliklerini) görmek için şunu çalıştırın:
+Makinenizde neleri test edebileceğinizi (ve tam `provider/model` kimliklerini) görmek için çalıştırın:
 
 ```bash
 openclaw models list
@@ -144,46 +144,46 @@ openclaw models list --json
 
 </Tip>
 
-## Canlı: CLI arka uç duman testi (Claude, Codex, Gemini veya diğer yerel CLI'lar)
+## Live: CLI arka uç smoke'u (Claude, Gemini veya diğer yerel CLI'lar)
 
 - Test: `src/gateway/gateway-cli-backend.live.test.ts`
-- Amaç: Varsayılan yapılandırmanıza dokunmadan, yerel bir CLI arka ucu kullanarak Gateway + agent işlem hattını doğrulamak.
-- Arka uca özgü duman testi varsayılanları, sahip uzantının `cli-backend.ts` tanımında yaşar.
-- Etkinleştirme:
+- Hedef: varsayılan yapılandırmanıza dokunmadan, yerel bir CLI arka ucu kullanarak Gateway + agent işlem hattını doğrulamak.
+- Arka uca özgü smoke varsayılanları, sahip uzantının `cli-backend.ts` tanımıyla birlikte yaşar.
+- Etkinleştir:
   - `pnpm test:live` (veya Vitest'i doğrudan çağırıyorsanız `OPENCLAW_LIVE_TEST=1`)
   - `OPENCLAW_LIVE_CLI_BACKEND=1`
 - Varsayılanlar:
   - Varsayılan sağlayıcı/model: `claude-cli/claude-sonnet-4-6`
-  - Komut/argüman/görsel davranışı, sahip CLI arka uç plugin metadata'sından gelir.
+  - Komut/args/görüntü davranışı, sahip CLI arka uç plugin metadata'sından gelir.
 - Geçersiz kılmalar (isteğe bağlı):
-  - `OPENCLAW_LIVE_CLI_BACKEND_MODEL="codex-cli/gpt-5.5"`
-  - `OPENCLAW_LIVE_CLI_BACKEND_COMMAND="/full/path/to/codex"`
-  - `OPENCLAW_LIVE_CLI_BACKEND_ARGS='["exec","--json","--color","never","--sandbox","read-only","--skip-git-repo-check"]'`
-  - Gerçek bir görsel eki göndermek için `OPENCLAW_LIVE_CLI_BACKEND_IMAGE_PROBE=1` (yollar prompt içine enjekte edilir). Docker tarifleri açıkça istenmedikçe bunu varsayılan olarak kapalı tutar.
-  - Görsel dosya yollarını prompt enjeksiyonu yerine CLI argümanları olarak geçirmek için `OPENCLAW_LIVE_CLI_BACKEND_IMAGE_ARG="--image"`.
-  - `IMAGE_ARG` ayarlandığında görsel argümanlarının nasıl geçirileceğini denetlemek için `OPENCLAW_LIVE_CLI_BACKEND_IMAGE_MODE="repeat"` (veya `"list"`).
-  - İkinci bir tur göndermek ve sürdürme akışını doğrulamak için `OPENCLAW_LIVE_CLI_BACKEND_RESUME_PROBE=1`.
-  - Seçilen model bir geçiş hedefini desteklediğinde Claude Sonnet -> Opus aynı oturum sürekliliği yoklamasına katılmak için `OPENCLAW_LIVE_CLI_BACKEND_MODEL_SWITCH_PROBE=1`. Docker tarifleri toplam güvenilirlik için bunu varsayılan olarak kapalı tutar.
-  - MCP/araç loopback yoklamasına katılmak için `OPENCLAW_LIVE_CLI_BACKEND_MCP_PROBE=1`. Docker tarifleri açıkça istenmedikçe bunu varsayılan olarak kapalı tutar.
+  - `OPENCLAW_LIVE_CLI_BACKEND_MODEL="claude-cli/claude-sonnet-4-6"`
+  - `OPENCLAW_LIVE_CLI_BACKEND_COMMAND="/full/path/to/claude"`
+  - `OPENCLAW_LIVE_CLI_BACKEND_ARGS='["-p","--output-format","json"]'`
+  - Gerçek bir görüntü eki göndermek için `OPENCLAW_LIVE_CLI_BACKEND_IMAGE_PROBE=1` (yollar isteme enjekte edilir). Docker tarifleri açıkça istenmedikçe bunu varsayılan olarak kapalı tutar.
+  - Görüntü dosyası yollarını istem enjeksiyonu yerine CLI argümanları olarak geçirmek için `OPENCLAW_LIVE_CLI_BACKEND_IMAGE_ARG="--image"`.
+  - `IMAGE_ARG` ayarlandığında görüntü argümanlarının nasıl geçirileceğini kontrol etmek için `OPENCLAW_LIVE_CLI_BACKEND_IMAGE_MODE="repeat"` (veya `"list"`).
+  - İkinci tur göndermek ve sürdürme akışını doğrulamak için `OPENCLAW_LIVE_CLI_BACKEND_RESUME_PROBE=1`.
+  - Seçilen model bir geçiş hedefini desteklediğinde Claude Sonnet -> Opus aynı oturum süreklilik sondasına katılmak için `OPENCLAW_LIVE_CLI_BACKEND_MODEL_SWITCH_PROBE=1`. Docker tarifleri toplu güvenilirlik için bunu varsayılan olarak kapalı tutar.
+  - MCP/araç loopback sondasına katılmak için `OPENCLAW_LIVE_CLI_BACKEND_MCP_PROBE=1`. Docker tarifleri açıkça istenmedikçe bunu varsayılan olarak kapalı tutar.
 
 Örnek:
 
 ```bash
-OPENCLAW_LIVE_CLI_BACKEND=1 \
-  OPENCLAW_LIVE_CLI_BACKEND_MODEL="codex-cli/gpt-5.5" \
+  OPENCLAW_LIVE_CLI_BACKEND=1 \
+  OPENCLAW_LIVE_CLI_BACKEND_MODEL="claude-cli/claude-sonnet-4-6" \
   pnpm test:live src/gateway/gateway-cli-backend.live.test.ts
 ```
 
-Ucuz Gemini MCP yapılandırma duman testi:
+Ucuz Gemini MCP yapılandırma smoke'u:
 
 ```bash
 OPENCLAW_LIVE_TEST=1 \
   pnpm test:live src/agents/cli-runner/bundle-mcp.gemini.live.test.ts
 ```
 
-Bu, Gemini'den yanıt üretmesini istemez. OpenClaw'ın Gemini'ye verdiği aynı sistem
+Bu, Gemini'dan yanıt oluşturmasını istemez. OpenClaw'ın Gemini'ya verdiği aynı sistem
 ayarlarını yazar, ardından kaydedilmiş bir `transport: "streamable-http"` sunucusunun Gemini'nin HTTP MCP
-biçimine normalize edildiğini ve yerel bir streamable-HTTP MCP sunucusuna bağlanabildiğini kanıtlamak için `gemini --debug mcp list` çalıştırır.
+şekline normalleştirildiğini ve yerel bir streamable-HTTP MCP sunucusuna bağlanabildiğini kanıtlamak için `gemini --debug mcp list` çalıştırır.
 
 Docker tarifi:
 
@@ -196,37 +196,36 @@ Tek sağlayıcılı Docker tarifleri:
 ```bash
 pnpm test:docker:live-cli-backend:claude
 pnpm test:docker:live-cli-backend:claude-subscription
-pnpm test:docker:live-cli-backend:codex
 pnpm test:docker:live-cli-backend:gemini
 ```
 
 Notlar:
 
 - Docker çalıştırıcısı `scripts/test-live-cli-backend-docker.sh` konumundadır.
-- Canlı CLI arka uç duman testini repo Docker imajı içinde root olmayan `node` kullanıcısı olarak çalıştırır.
-- CLI duman testi metadata'sını sahip uzantıdan çözer, ardından eşleşen Linux CLI paketini (`@anthropic-ai/claude-code`, `@openai/codex` veya `@google/gemini-cli`) `OPENCLAW_DOCKER_CLI_TOOLS_DIR` konumundaki önbelleğe alınmış yazılabilir öneke (varsayılan: `~/.cache/openclaw/docker-cli-tools`) yükler.
-- `pnpm test:docker:live-cli-backend:claude-subscription`, `claudeAiOauth.subscriptionType` içeren `~/.claude/.credentials.json` ya da `claude setup-token` kaynaklı `CLAUDE_CODE_OAUTH_TOKEN` üzerinden taşınabilir Claude Code abonelik OAuth'u gerektirir. Önce Docker içinde doğrudan `claude -p` kanıtlar, ardından Anthropic API anahtarı env değişkenlerini korumadan iki Gateway CLI arka uç turu çalıştırır. Bu abonelik hattı, Claude şu anda üçüncü taraf uygulama kullanımını normal abonelik planı sınırları yerine ek kullanım faturalaması üzerinden yönlendirdiği için Claude MCP/araç ve görsel yoklamalarını varsayılan olarak devre dışı bırakır.
-- Canlı CLI arka uç duman testi artık Claude, Codex ve Gemini için aynı uçtan uca akışı uygular: metin turu, görsel sınıflandırma turu, ardından gateway CLI üzerinden doğrulanan MCP `cron` araç çağrısı.
-- Claude'un varsayılan duman testi ayrıca oturumu Sonnet'ten Opus'a yamalar ve sürdürülen oturumun önceki bir notu hâlâ hatırladığını doğrular.
+- Live CLI arka uç smoke'unu repo Docker imajı içinde root olmayan `node` kullanıcısı olarak çalıştırır.
+- CLI smoke metadata'sını sahip uzantıdan çözümler, ardından eşleşen Linux CLI paketini (`@anthropic-ai/claude-code` veya `@google/gemini-cli`) `OPENCLAW_DOCKER_CLI_TOOLS_DIR` konumundaki önbelleğe alınmış yazılabilir öneke yükler (varsayılan: `~/.cache/openclaw/docker-cli-tools`).
+- `pnpm test:docker:live-cli-backend:claude-subscription`, `claudeAiOauth.subscriptionType` içeren `~/.claude/.credentials.json` veya `claude setup-token` kaynaklı `CLAUDE_CODE_OAUTH_TOKEN` yoluyla taşınabilir Claude Code abonelik OAuth'u gerektirir. Önce Docker'da doğrudan `claude -p` kanıtlar, ardından Anthropic API anahtarı env var'larını korumadan iki Gateway CLI arka uç turu çalıştırır. Bu abonelik hattı, oturum açılmış aboneliğin kullanım limitlerini tükettiği ve Anthropic, Claude Agent SDK / `claude -p` faturalandırma ve hız sınırı davranışını OpenClaw sürümü olmadan değiştirebildiği için Claude MCP/araç ve görüntü sondalarını varsayılan olarak devre dışı bırakır.
+- Live CLI arka uç smoke'u artık Claude ve Gemini için aynı uçtan uca akışı uygular: metin turu, görüntü sınıflandırma turu, ardından gateway CLI üzerinden doğrulanan MCP `cron` araç çağrısı.
+- Claude'un varsayılan smoke'u ayrıca oturumu Sonnet'ten Opus'a yamalar ve sürdürülen oturumun önceki bir notu hâlâ hatırladığını doğrular.
 
-## Canlı: APNs HTTP/2 proxy erişilebilirliği
+## Live: APNs HTTP/2 proxy erişilebilirliği
 
 - Test: `src/infra/push-apns-http2.live.test.ts`
-- Amaç: yerel bir HTTP CONNECT proxy üzerinden Apple'ın sandbox APNs uç noktasına tünellemek, APNs HTTP/2 doğrulama isteğini göndermek ve Apple'ın gerçek `403 InvalidProviderToken` yanıtının proxy yolu üzerinden geri geldiğini doğrulamak.
-- Etkinleştirme:
+- Hedef: yerel bir HTTP CONNECT proxy üzerinden Apple'ın sandbox APNs uç noktasına tünellemek, APNs HTTP/2 doğrulama isteğini göndermek ve Apple'ın gerçek `403 InvalidProviderToken` yanıtının proxy yolu üzerinden geri geldiğini doğrulamak.
+- Etkinleştir:
   - `OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_APNS_REACHABILITY=1 pnpm test:live src/infra/push-apns-http2.live.test.ts`
 - İsteğe bağlı zaman aşımı:
   - `OPENCLAW_LIVE_APNS_TIMEOUT_MS=30000`
 
-## Canlı: ACP bind duman testi (`/acp spawn ... --bind here`)
+## Live: ACP bind smoke'u (`/acp spawn ... --bind here`)
 
 - Test: `src/gateway/gateway-acp-bind.live.test.ts`
-- Hedef: canlı bir ACP ajanıyla gerçek ACP konuşma bağlama akışını doğrulamak:
+- Amaç: canlı bir ACP ajanıyla gerçek ACP konuşma bağlama akışını doğrulamak:
   - `/acp spawn <agent> --bind here` gönder
   - sentetik bir mesaj kanalı konuşmasını yerinde bağla
   - aynı konuşmada normal bir takip mesajı gönder
   - takip mesajının bağlı ACP oturum dökümüne ulaştığını doğrula
-- Etkinleştir:
+- Etkinleştirme:
   - `pnpm test:live src/gateway/gateway-acp-bind.live.test.ts`
   - `OPENCLAW_LIVE_ACP_BIND=1`
 - Varsayılanlar:
@@ -248,9 +247,9 @@ Notlar:
   - `OPENCLAW_LIVE_ACP_BIND_REQUIRE_CRON=1`
   - `OPENCLAW_LIVE_ACP_BIND_PARENT_MODEL=openai/gpt-5.5`
 - Notlar:
-  - Bu kulvar, testlerin dışarıya teslim ediyormuş gibi davranmadan mesaj kanalı bağlamı ekleyebilmesi için yalnızca yöneticiye açık sentetik kaynak rota alanlarıyla Gateway `chat.send` yüzeyini kullanır.
-  - `OPENCLAW_LIVE_ACP_BIND_AGENT_COMMAND` ayarlanmadığında test, seçili ACP harness ajanı için gömülü `acpx` Plugin'inin yerleşik ajan kayıt defterini kullanır.
-  - Bağlı oturum Cron MCP oluşturma varsayılan olarak en iyi çaba şeklindedir, çünkü harici ACP harness'leri bağlama/görüntü kanıtı geçtikten sonra MCP çağrılarını iptal edebilir; bu bağlama sonrası Cron yoklamasını katı hale getirmek için `OPENCLAW_LIVE_ACP_BIND_REQUIRE_CRON=1` ayarlayın.
+  - Bu hat, testlerin dışa teslim ediyormuş gibi davranmadan mesaj kanalı bağlamı ekleyebilmesi için yalnızca yöneticilere açık sentetik kaynak rota alanlarıyla gateway `chat.send` yüzeyini kullanır.
+  - `OPENCLAW_LIVE_ACP_BIND_AGENT_COMMAND` ayarlanmamışsa test, seçilen ACP test düzeneği ajanı için gömülü `acpx` Plugin'inin yerleşik ajan kayıt defterini kullanır.
+  - Bağlı oturum cron MCP oluşturma varsayılan olarak en iyi çaba şeklindedir; çünkü harici ACP test düzenekleri, bağlama/görüntü kanıtı geçtikten sonra MCP çağrılarını iptal edebilir. Bu bağlama sonrası cron yoklamasını katı hale getirmek için `OPENCLAW_LIVE_ACP_BIND_REQUIRE_CRON=1` ayarlayın.
 
 Örnek:
 
@@ -279,39 +278,41 @@ pnpm test:docker:live-acp-bind:opencode
 Docker notları:
 
 - Docker çalıştırıcısı `scripts/test-live-acp-bind-docker.sh` konumundadır.
-- Varsayılan olarak ACP bağlama smoke testini toplu canlı CLI ajanlarına sırayla karşı çalıştırır: `claude`, `codex`, ardından `gemini`.
+- Varsayılan olarak ACP bind smoke testini toplu canlı CLI ajanlarına sırayla karşı çalıştırır: `claude`, `codex`, ardından `gemini`.
 - Matrisi daraltmak için `OPENCLAW_LIVE_ACP_BIND_AGENTS=claude`, `OPENCLAW_LIVE_ACP_BIND_AGENTS=codex`, `OPENCLAW_LIVE_ACP_BIND_AGENTS=droid`, `OPENCLAW_LIVE_ACP_BIND_AGENTS=gemini` veya `OPENCLAW_LIVE_ACP_BIND_AGENTS=opencode` kullanın.
-- `~/.profile` dosyasını kaynak olarak alır, eşleşen CLI kimlik doğrulama materyalini konteynere hazırlar, ardından eksikse istenen canlı CLI'yi (`@anthropic-ai/claude-code`, `@openai/codex`, Factory Droid via `https://app.factory.ai/cli`, `@google/gemini-cli` veya `opencode-ai`) kurar. ACP arka ucunun kendisi, resmi `acpx` Plugin'inden gömülü `acpx/runtime` paketidir.
-- Droid Docker varyantı ayarlar için `~/.factory` hazırlar, `FACTORY_API_KEY` iletir ve yerel Factory OAuth/keyring kimlik doğrulaması konteynere taşınabilir olmadığı için bu API anahtarını gerektirir. ACPX'in yerleşik `droid exec --output-format acp` kayıt girdisini kullanır.
-- OpenCode Docker varyantı katı bir tek ajanlı regresyon kulvarıdır. `~/.profile` kaynak olarak alındıktan sonra `OPENCLAW_LIVE_ACP_BIND_OPENCODE_MODEL` değerinden (varsayılan `opencode/kimi-k2.6`) geçici bir `OPENCODE_CONFIG_CONTENT` varsayılan modeli yazar ve `pnpm test:docker:live-acp-bind:opencode`, genel bağlama sonrası atlamayı kabul etmek yerine bağlı bir asistan dökümü gerektirir.
-- Doğrudan `acpx` CLI çağrıları, Gateway dışındaki davranışı karşılaştırmak için yalnızca manuel/geçici çözüm yoludur. Docker ACP bağlama smoke testi, OpenClaw'ın gömülü `acpx` çalışma zamanı arka ucunu çalıştırır.
+- Eşleşen CLI kimlik doğrulama malzemesini konteynere yerleştirir, ardından eksikse istenen canlı CLI'ı (`@anthropic-ai/claude-code`, `@openai/codex`, `https://app.factory.ai/cli` üzerinden Factory Droid, `@google/gemini-cli` veya `opencode-ai`) kurar. ACP arka ucunun kendisi, resmi `acpx` Plugin'inden gömülü `acpx/runtime` paketidir.
+- Droid Docker varyantı ayarlar için `~/.factory` dizinini yerleştirir, `FACTORY_API_KEY` iletir ve bu API anahtarını gerektirir; çünkü yerel Factory OAuth/keyring kimlik doğrulaması konteynere taşınabilir değildir. ACPX'in yerleşik `droid exec --output-format acp` kayıt defteri girdisini kullanır.
+- OpenCode Docker varyantı katı bir tek ajanlı regresyon hattıdır. `OPENCLAW_LIVE_ACP_BIND_OPENCODE_MODEL` üzerinden geçici bir `OPENCODE_CONFIG_CONTENT` varsayılan modeli yazar (varsayılan `opencode/kimi-k2.6`) ve `pnpm test:docker:live-acp-bind:opencode`, genel bağlama sonrası atlamayı kabul etmek yerine bağlı bir asistan dökümü gerektirir.
+- Doğrudan `acpx` CLI çağrıları yalnızca Gateway dışında davranışı karşılaştırmak için manuel/geçici çözüm yoludur. Docker ACP bind smoke testi, OpenClaw'ın gömülü `acpx` çalışma zamanı arka ucunu çalıştırır.
 
-## Canlı: Codex uygulama sunucusu harness smoke testi
+## Canlı: Codex uygulama sunucusu test düzeneği smoke testi
 
-- Hedef: Plugin'e ait Codex harness'ini normal gateway
+- Amaç: Plugin'in sahip olduğu Codex test düzeneğini normal gateway
   `agent` yöntemi üzerinden doğrulamak:
   - paketlenmiş `codex` Plugin'ini yükle
   - OpenAI ajan turlarını varsayılan olarak Codex üzerinden yönlendiren `openai/gpt-5.5` seç
-  - Codex harness seçiliyken `openai/gpt-5.5` hedefine ilk gateway ajan turunu gönder
+  - Codex test düzeneği seçiliyken `openai/gpt-5.5` hedefine ilk gateway ajan turunu gönder
   - aynı OpenClaw oturumuna ikinci bir tur gönder ve uygulama sunucusu
-    iş parçacığının devam edebildiğini doğrula
+    iş parçacığının sürdürülebildiğini doğrula
   - aynı gateway komut yolu üzerinden `/codex status` ve `/codex models` çalıştır
-  - isteğe bağlı olarak Guardian tarafından incelenmiş iki yükseltilmiş kabuk yoklaması çalıştır: onaylanması gereken zararsız
-    bir komut ve reddedilmesi gereken sahte gizli bilgi yükleme; böylece ajan geri soru sorar
+  - isteğe bağlı olarak Guardian tarafından incelenen iki yükseltilmiş shell yoklaması çalıştır:
+    onaylanması gereken zararsız bir komut ve reddedilmesi gereken sahte gizli yükleme;
+    böylece ajan geri soru sorar
 - Test: `src/gateway/gateway-codex-harness.live.test.ts`
-- Etkinleştir: `OPENCLAW_LIVE_CODEX_HARNESS=1`
+- Etkinleştirme: `OPENCLAW_LIVE_CODEX_HARNESS=1`
 - Varsayılan model: `openai/gpt-5.5`
 - İsteğe bağlı görüntü yoklaması: `OPENCLAW_LIVE_CODEX_HARNESS_IMAGE_PROBE=1`
 - İsteğe bağlı MCP/araç yoklaması: `OPENCLAW_LIVE_CODEX_HARNESS_MCP_PROBE=1`
 - İsteğe bağlı Guardian yoklaması: `OPENCLAW_LIVE_CODEX_HARNESS_GUARDIAN_PROBE=1`
-- Smoke testi, bozuk bir Codex harness'in sessizce PI'ye geri düşerek geçememesi için sağlayıcı/model `agentRuntime.id: "codex"` değerini zorlar.
-- Kimlik doğrulama: yerel Codex abonelik oturum açmasından Codex uygulama sunucusu kimlik doğrulaması. Docker
-  smoke testleri, geçerli olduğunda Codex dışı yoklamalar için `OPENAI_API_KEY` ve ayrıca isteğe bağlı kopyalanmış `~/.codex/auth.json` ve `~/.codex/config.toml` sağlayabilir.
+- Smoke testi provider/model `agentRuntime.id: "codex"` değerini zorunlu kılar; böylece bozuk bir Codex
+  test düzeneği sessizce OpenClaw'a geri düşerek geçemez.
+- Kimlik doğrulama: yerel Codex abonelik girişinden Codex uygulama sunucusu kimlik doğrulaması. Docker
+  smoke testleri, uygulanabildiğinde Codex dışı yoklamalar için `OPENAI_API_KEY` de sağlayabilir,
+  ayrıca isteğe bağlı kopyalanmış `~/.codex/auth.json` ve `~/.codex/config.toml`.
 
 Yerel tarif:
 
 ```bash
-source ~/.profile
 OPENCLAW_LIVE_CODEX_HARNESS=1 \
   OPENCLAW_LIVE_CODEX_HARNESS_IMAGE_PROBE=1 \
   OPENCLAW_LIVE_CODEX_HARNESS_MCP_PROBE=1 \
@@ -323,22 +324,21 @@ OPENCLAW_LIVE_CODEX_HARNESS=1 \
 Docker tarifi:
 
 ```bash
-source ~/.profile
 pnpm test:docker:live-codex-harness
 ```
 
 Docker notları:
 
 - Docker çalıştırıcısı `scripts/test-live-codex-harness-docker.sh` konumundadır.
-- Bağlanan `~/.profile` dosyasını kaynak olarak alır, `OPENAI_API_KEY` iletir, mevcut olduğunda Codex CLI
-  kimlik doğrulama dosyalarını kopyalar, `@openai/codex` paketini yazılabilir bağlı bir npm
-  önekine kurar, kaynak ağacını hazırlar, ardından yalnızca Codex-harness canlı testini çalıştırır.
+- `OPENAI_API_KEY` değerini geçirir, mevcut olduğunda Codex CLI kimlik doğrulama dosyalarını kopyalar,
+  `@openai/codex` paketini yazılabilir bağlı bir npm
+  önekine kurar, kaynak ağacını yerleştirir, ardından yalnızca Codex test düzeneği canlı testini çalıştırır.
 - Docker varsayılan olarak görüntü, MCP/araç ve Guardian yoklamalarını etkinleştirir. Daha dar bir hata ayıklama
   çalıştırması gerektiğinde `OPENCLAW_LIVE_CODEX_HARNESS_IMAGE_PROBE=0` veya
   `OPENCLAW_LIVE_CODEX_HARNESS_MCP_PROBE=0` veya
   `OPENCLAW_LIVE_CODEX_HARNESS_GUARDIAN_PROBE=0` ayarlayın.
-- Docker aynı açık Codex çalışma zamanı yapılandırmasını kullanır; bu nedenle eski takma adlar veya PI
-  geri dönüşü bir Codex harness regresyonunu gizleyemez.
+- Docker aynı açık Codex çalışma zamanı yapılandırmasını kullanır; böylece eski takma adlar veya OpenClaw
+  geri düşüşü bir Codex test düzeneği regresyonunu gizleyemez.
 
 ### Önerilen canlı tarifler
 
@@ -347,64 +347,75 @@ Dar, açık izin listeleri en hızlı ve en az kararsız olanlardır:
 - Tek model, doğrudan (gateway yok):
   - `OPENCLAW_LIVE_MODELS="openai/gpt-5.5" pnpm test:live src/agents/models.profiles.live.test.ts`
 
+- Küçük model doğrudan profili:
+  - `OPENCLAW_LIVE_MODELS=small pnpm test:live src/agents/models.profiles.live.test.ts`
+
+- Küçük model gateway profili:
+  - `OPENCLAW_LIVE_GATEWAY_MODELS=small pnpm test:live src/gateway/gateway-models.profiles.live.test.ts`
+
+- Ollama Cloud API smoke testi:
+  - `OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_OLLAMA=1 OPENCLAW_LIVE_OLLAMA_BASE_URL=https://ollama.com OPENCLAW_LIVE_OLLAMA_MODEL=glm-5.1:cloud OPENCLAW_LIVE_OLLAMA_WEB_SEARCH=0 pnpm test:live -- extensions/ollama/ollama.live.test.ts`
+
 - Tek model, gateway smoke testi:
   - `OPENCLAW_LIVE_GATEWAY_MODELS="openai/gpt-5.5" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts`
 
-- Birkaç sağlayıcıda araç çağırma:
-  - `OPENCLAW_LIVE_GATEWAY_MODELS="openai/gpt-5.5,openai-codex/gpt-5.5,anthropic/claude-opus-4-6,google/gemini-3-flash-preview,deepseek/deepseek-v4-flash,zai/glm-5.1,minimax/MiniMax-M2.7" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts`
+- Birkaç provider genelinde araç çağırma:
+  - `OPENCLAW_LIVE_GATEWAY_MODELS="openai/gpt-5.5,anthropic/claude-opus-4-6,google/gemini-3-flash-preview,deepseek/deepseek-v4-flash,zai/glm-5.1,minimax/MiniMax-M3" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts`
+
+- Z.AI Coding Plan GLM-5.2 doğrudan smoke testi:
+  - `ZAI_CODING_LIVE_TEST=1 pnpm test:live src/agents/zai.live.test.ts`
 
 - Google odağı (Gemini API anahtarı + Antigravity):
   - Gemini (API anahtarı): `OPENCLAW_LIVE_GATEWAY_MODELS="google/gemini-3-flash-preview" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts`
   - Antigravity (OAuth): `OPENCLAW_LIVE_GATEWAY_MODELS="google-antigravity/claude-opus-4-6-thinking,google-antigravity/gemini-3-pro-high" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts`
 
-- Google uyarlanabilir düşünme smoke testi:
-  - Yerel anahtarlar kabuk profilindeyse: `source ~/.profile`
+- Google uyarlamalı düşünme smoke testi:
   - Gemini 3 dinamik varsayılanı: `pnpm openclaw qa manual --provider-mode live-frontier --model google/gemini-3.1-pro-preview --alt-model google/gemini-3.1-pro-preview --message '/think adaptive Reply exactly: GEMINI_ADAPTIVE_OK' --timeout-ms 180000`
-  - Gemini 2.5 dinamik bütçesi: `pnpm openclaw qa manual --provider-mode live-frontier --model google/gemini-2.5-flash --alt-model google/gemini-2.5-flash --message '/think adaptive Reply exactly: GEMINI25_ADAPTIVE_OK' --timeout-ms 180000`
+  - Gemini 2.5 dinamik bütçe: `pnpm openclaw qa manual --provider-mode live-frontier --model google/gemini-2.5-flash --alt-model google/gemini-2.5-flash --message '/think adaptive Reply exactly: GEMINI25_ADAPTIVE_OK' --timeout-ms 180000`
 
 Notlar:
 
-- `google/...` Gemini API'sini kullanır (API anahtarı).
+- `google/...` Gemini API'ını kullanır (API anahtarı).
 - `google-antigravity/...` Antigravity OAuth köprüsünü kullanır (Cloud Code Assist tarzı ajan uç noktası).
-- `google-gemini-cli/...` makinenizdeki yerel Gemini CLI'yi kullanır (ayrı kimlik doğrulama + araç davranışı özellikleri).
-- Gemini API ve Gemini CLI:
-  - API: OpenClaw, Google'ın barındırılan Gemini API'sini HTTP üzerinden çağırır (API anahtarı / profil kimlik doğrulaması); çoğu kullanıcının "Gemini" derken kastettiği budur.
-  - CLI: OpenClaw yerel bir `gemini` ikili dosyasını kabuk üzerinden çalıştırır; kendi kimlik doğrulaması vardır ve farklı davranabilir (akış/araç desteği/sürüm kayması).
+- `google-gemini-cli/...` makinenizdeki yerel Gemini CLI'ı kullanır (ayrı kimlik doğrulama + araç kullanımına özgü davranışlar).
+- Gemini API ve Gemini CLI karşılaştırması:
+  - API: OpenClaw, HTTP üzerinden Google'ın barındırılan Gemini API'ını çağırır (API anahtarı / profil kimlik doğrulaması); çoğu kullanıcının "Gemini" derken kastettiği budur.
+  - CLI: OpenClaw yerel bir `gemini` ikili dosyasını shell üzerinden çalıştırır; kendi kimlik doğrulaması vardır ve farklı davranabilir (akış/araç desteği/sürüm uyumsuzluğu).
 
 ## Canlı: model matrisi (kapsadıklarımız)
 
 Sabit bir "CI model listesi" yoktur (canlı isteğe bağlıdır), ancak bunlar anahtarları olan bir geliştirme makinesinde düzenli olarak kapsanması **önerilen** modellerdir.
 
-### Modern smoke seti (araç çağırma + görüntü)
+### Modern smoke kümesi (araç çağırma + görüntü)
 
-Bu, çalışır durumda tutmayı beklediğimiz "yaygın modeller" çalıştırmasıdır:
+Çalışmaya devam etmesini beklediğimiz "yaygın modeller" çalıştırması budur:
 
 - OpenAI (Codex dışı): `openai/gpt-5.5`
-- OpenAI Codex OAuth: `openai-codex/gpt-5.5`
+- OpenAI ChatGPT/Codex OAuth: `openai/gpt-5.5`
 - Anthropic: `anthropic/claude-opus-4-6` (veya `anthropic/claude-sonnet-4-6`)
-- Google (Gemini API): `google/gemini-3.1-pro-preview` ve `google/gemini-3-flash-preview` (eski Gemini 2.x modellerinden kaçının)
+- Google (Gemini API): `google/gemini-3.1-pro-preview` ve `google/gemini-3-flash-preview` (daha eski Gemini 2.x modellerinden kaçının)
 - Google (Antigravity): `google-antigravity/claude-opus-4-6-thinking` ve `google-antigravity/gemini-3-flash`
 - DeepSeek: `deepseek/deepseek-v4-flash` ve `deepseek/deepseek-v4-pro`
-- Z.AI (GLM): `zai/glm-5.1`
-- MiniMax: `minimax/MiniMax-M2.7`
+- Z.AI (GLM): `zai/glm-5.1` (genel API) veya `zai/glm-5.2` (Coding Plan)
+- MiniMax: `minimax/MiniMax-M3`
 
 Araçlar + görüntü ile gateway smoke testi çalıştırın:
-`OPENCLAW_LIVE_GATEWAY_MODELS="openai/gpt-5.5,openai-codex/gpt-5.5,anthropic/claude-opus-4-6,google/gemini-3.1-pro-preview,google/gemini-3-flash-preview,google-antigravity/claude-opus-4-6-thinking,google-antigravity/gemini-3-flash,deepseek/deepseek-v4-flash,zai/glm-5.1,minimax/MiniMax-M2.7" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts`
+`OPENCLAW_LIVE_GATEWAY_MODELS="openai/gpt-5.5,anthropic/claude-opus-4-6,google/gemini-3.1-pro-preview,google/gemini-3-flash-preview,google-antigravity/claude-opus-4-6-thinking,google-antigravity/gemini-3-flash,deepseek/deepseek-v4-flash,zai/glm-5.1,minimax/MiniMax-M3" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts`
 
-### Temel: araç çağırma (Read + isteğe bağlı Exec)
+### Temel seviye: araç çağırma (Read + isteğe bağlı Exec)
 
-Her sağlayıcı ailesinden en az birini seçin:
+Her provider ailesi için en az bir tane seçin:
 
 - OpenAI: `openai/gpt-5.5`
 - Anthropic: `anthropic/claude-opus-4-6` (veya `anthropic/claude-sonnet-4-6`)
 - Google: `google/gemini-3-flash-preview` (veya `google/gemini-3.1-pro-preview`)
 - DeepSeek: `deepseek/deepseek-v4-flash`
-- Z.AI (GLM): `zai/glm-5.1`
-- MiniMax: `minimax/MiniMax-M2.7`
+- Z.AI (GLM): `zai/glm-5.1` (genel API) veya `zai/glm-5.2` (Coding Plan)
+- MiniMax: `minimax/MiniMax-M3`
 
-İsteğe bağlı ek kapsam (olması iyi olur):
+İsteğe bağlı ek kapsama (olması iyi olur):
 
-- xAI: `xai/grok-4.3` (veya mevcut en son sürüm)
+- xAI: `xai/grok-4.3` (veya mevcut en yeni)
 - Mistral: `mistral/`… (etkinleştirdiğiniz "tools" yetenekli bir model seçin)
 - Cerebras: `cerebras/`… (erişiminiz varsa)
 - LM Studio: `lmstudio/`… (yerel; araç çağırma API moduna bağlıdır)
@@ -415,35 +426,36 @@ Görüntü yoklamasını çalıştırmak için `OPENCLAW_LIVE_GATEWAY_MODELS` i�
 
 ### Toplayıcılar / alternatif gateway'ler
 
-Anahtarlarınız etkinse şunlar üzerinden test etmeyi de destekliyoruz:
+Anahtarlarınız etkinse şu yollarla test etmeyi de destekliyoruz:
 
 - OpenRouter: `openrouter/...` (yüzlerce model; araç+görüntü yetenekli adayları bulmak için `openclaw models scan` kullanın)
 - OpenCode: Zen için `opencode/...` ve Go için `opencode-go/...` (`OPENCODE_API_KEY` / `OPENCODE_ZEN_API_KEY` üzerinden kimlik doğrulama)
 
-Canlı matrise ekleyebileceğiniz daha fazla sağlayıcı (kimlik bilgileriniz/yapılandırmanız varsa):
+Canlı matrise ekleyebileceğiniz daha fazla provider (kimlik bilgileriniz/yapılandırmanız varsa):
 
-- Yerleşik: `openai`, `openai-codex`, `anthropic`, `google`, `google-vertex`, `google-antigravity`, `google-gemini-cli`, `zai`, `openrouter`, `opencode`, `opencode-go`, `xai`, `groq`, `cerebras`, `mistral`, `github-copilot`
-- `models.providers` üzerinden (özel uç noktalar): `minimax` (bulut/API), ayrıca herhangi bir OpenAI/Anthropic uyumlu proxy (LM Studio, vLLM, LiteLLM vb.)
+- Yerleşik: `openai`, `anthropic`, `google`, `google-vertex`, `google-antigravity`, `google-gemini-cli`, `zai`, `openrouter`, `opencode`, `opencode-go`, `xai`, `groq`, `cerebras`, `mistral`, `github-copilot`
+- `models.providers` üzerinden (özel uç noktalar): `minimax` (bulut/API), ayrıca OpenAI/Anthropic uyumlu herhangi bir proxy (LM Studio, vLLM, LiteLLM vb.)
 
 <Tip>
-Belgelerde "tüm modeller" ifadesini sabit kodlamayın. Yetkili liste, makinenizde `discoverModels(...)` ne döndürüyorsa ve hangi anahtarlar mevcutsa odur.
+Dokümanlarda "tüm modeller" ifadesini sabit kodlamayın. Yetkili liste, makinenizde `discoverModels(...)` ne döndürüyorsa ve hangi anahtarlar kullanılabiliyorsa odur.
 </Tip>
 
 ## Kimlik bilgileri (asla commit etmeyin)
 
 Canlı testler kimlik bilgilerini CLI ile aynı şekilde keşfeder. Pratik sonuçlar:
 
-- CLI çalışıyorsa canlı testler aynı anahtarları bulmalıdır.
-- Bir canlı test "no creds" diyorsa, `openclaw models list` / model seçimini nasıl hata ayıklarsanız aynı şekilde hata ayıklayın.
+- CLI çalışıyorsa, canlı testler de aynı anahtarları bulmalıdır.
+- Bir canlı test "kimlik bilgisi yok" diyorsa, `openclaw models list` / model seçimini nasıl debug ediyorsanız aynı şekilde debug edin.
 
-- Ajan başına kimlik doğrulama profilleri: `~/.openclaw/agents/<agentId>/agent/auth-profiles.json` (canlı testlerde "profil anahtarları" bunun anlamına gelir)
+- Ajan başına kimlik doğrulama profilleri: `~/.openclaw/agents/<agentId>/agent/auth-profiles.json` (canlı testlerde "profil anahtarları" ile kastedilen budur)
 - Yapılandırma: `~/.openclaw/openclaw.json` (veya `OPENCLAW_CONFIG_PATH`)
-- Eski durum dizini: `~/.openclaw/credentials/` (mevcut olduğunda aşamalı canlı ana dizine kopyalanır, ancak ana profil anahtarı deposu değildir)
-- Canlı yerel çalıştırmalar etkin yapılandırmayı, ajan başına `auth-profiles.json` dosyalarını, eski `credentials/` dizinini ve desteklenen harici CLI kimlik doğrulama dizinlerini varsayılan olarak geçici bir test ana dizinine kopyalar; aşamalı canlı ana dizinler `workspace/` ve `sandboxes/` dizinlerini atlar ve probların gerçek ana makine çalışma alanınızdan uzak kalması için `agents.*.workspace` / `agentDir` yol geçersiz kılmaları çıkarılır.
+- Eski durum dizini: `~/.openclaw/credentials/` (varsa hazırlanmış canlı ana dizine kopyalanır, ancak ana profil anahtarı deposu değildir)
+- Canlı yerel çalıştırmalar varsayılan olarak etkin yapılandırmayı, ajan başına `auth-profiles.json` dosyalarını, eski `credentials/` dizinini ve desteklenen harici CLI kimlik doğrulama dizinlerini geçici bir test ana dizinine kopyalar; hazırlanmış canlı ana dizinler `workspace/` ve `sandboxes/` öğelerini atlar, ayrıca `agents.*.workspace` / `agentDir` yol geçersiz kılmaları kaldırılır; böylece problar gerçek ana makine çalışma alanınızın dışında kalır.
 
-Ortam anahtarlarına güvenmek istiyorsanız (ör. `~/.profile` dosyanızda dışa aktarılmış), yerel testleri `source ~/.profile` sonrasında çalıştırın veya aşağıdaki Docker çalıştırıcılarını kullanın (`~/.profile` dosyasını konteynere bağlayabilirler).
+Env anahtarlarına güvenmek istiyorsanız, yerel testlerden önce bunları export edin veya aşağıdaki
+Docker çalıştırıcılarını açık bir `OPENCLAW_PROFILE_FILE` ile kullanın.
 
-## Deepgram canlı (ses dökümü)
+## Deepgram canlı (ses transkripsiyonu)
 
 - Test: `extensions/deepgram/audio.live.test.ts`
 - Etkinleştirme: `DEEPGRAM_API_KEY=... DEEPGRAM_LIVE_TEST=1 pnpm test:live extensions/deepgram/audio.live.test.ts`
@@ -459,24 +471,24 @@ Ortam anahtarlarına güvenmek istiyorsanız (ör. `~/.profile` dosyanızda dı�
 - Test: `extensions/comfy/comfy.live.test.ts`
 - Etkinleştirme: `OPENCLAW_LIVE_TEST=1 COMFY_LIVE_TEST=1 pnpm test:live -- extensions/comfy/comfy.live.test.ts`
 - Kapsam:
-  - Paketle birlikte gelen comfy görüntü, video ve `music_generate` yollarını çalıştırır
+  - Paketlenmiş comfy görsel, video ve `music_generate` yollarını çalıştırır
   - `plugins.entries.comfy.config.<capability>` yapılandırılmadıkça her yeteneği atlar
   - comfy iş akışı gönderimi, yoklama, indirmeler veya Plugin kaydı değiştirildikten sonra kullanışlıdır
 
-## Görüntü oluşturma canlı
+## Görsel üretimi canlı
 
 - Test: `test/image-generation.runtime.live.test.ts`
 - Komut: `pnpm test:live test/image-generation.runtime.live.test.ts`
 - Test düzeneği: `pnpm test:live:media image`
 - Kapsam:
-  - Kayıtlı her görüntü oluşturma sağlayıcı Plugin'ini listeler
-  - Yoklamadan önce eksik sağlayıcı ortam değişkenlerini oturum açma kabuğunuzdan (`~/.profile`) yükler
-  - Varsayılan olarak saklanan kimlik doğrulama profillerinden önce canlı/ortam API anahtarlarını kullanır; böylece `auth-profiles.json` içindeki eski test anahtarları gerçek kabuk kimlik bilgilerini maskelemez
-  - Kullanılabilir kimlik doğrulama/profil/model bulunmayan sağlayıcıları atlar
-  - Yapılandırılan her sağlayıcıyı paylaşılan görüntü oluşturma çalışma zamanı üzerinden çalıştırır:
+  - Kayıtlı her görsel üretimi sağlayıcı Plugin öğesini numaralandırır
+  - Proba başlamadan önce halihazırda export edilmiş sağlayıcı env değişkenlerini kullanır
+  - Varsayılan olarak depolanmış kimlik doğrulama profillerinden önce canlı/env API anahtarlarını kullanır; böylece `auth-profiles.json` içindeki eski test anahtarları gerçek shell kimlik bilgilerini maskelemez
+  - Kullanılabilir kimlik doğrulaması/profili/modeli olmayan sağlayıcıları atlar
+  - Yapılandırılmış her sağlayıcıyı paylaşılan görsel üretimi çalışma zamanı üzerinden çalıştırır:
     - `<provider>:generate`
-    - sağlayıcı düzenleme desteği bildirdiğinde `<provider>:edit`
-- Kapsanan mevcut paketli sağlayıcılar:
+    - sağlayıcı düzenleme desteği beyan ettiğinde `<provider>:edit`
+- Kapsanan mevcut paketlenmiş sağlayıcılar:
   - `deepinfra`
   - `fal`
   - `google`
@@ -491,9 +503,10 @@ Ortam anahtarlarına güvenmek istiyorsanız (ör. `~/.profile` dosyanızda dı�
   - `OPENCLAW_LIVE_IMAGE_GENERATION_MODELS="openai/gpt-image-2,google/gemini-3.1-flash-image-preview,openrouter/google/gemini-3.1-flash-image-preview,xai/grok-imagine-image"`
   - `OPENCLAW_LIVE_IMAGE_GENERATION_CASES="google:flash-generate,google:pro-edit,openrouter:generate,xai:default-generate,xai:default-edit"`
 - İsteğe bağlı kimlik doğrulama davranışı:
-  - profil deposu kimlik doğrulamasını zorlamak ve yalnızca ortam geçersiz kılmalarını yok saymak için `OPENCLAW_LIVE_REQUIRE_PROFILE_KEYS=1`
+  - Profil deposu kimlik doğrulamasını zorunlu kılmak ve yalnızca env geçersiz kılmalarını yok saymak için `OPENCLAW_LIVE_REQUIRE_PROFILE_KEYS=1`
 
-Dağıtılan CLI yolu için, sağlayıcı/çalışma zamanı canlı testi geçtikten sonra bir `infer` hızlı testi ekleyin:
+Gönderilen CLI yolu için, sağlayıcı/çalışma zamanı canlı
+testi geçtikten sonra bir `infer` smoke testi ekleyin:
 
 ```bash
 OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_INFER_CLI_TEST=1 pnpm test:live -- test/image-generation.infer-cli.live.test.ts
@@ -505,22 +518,24 @@ openclaw infer image generate \
   --json
 ```
 
-Bu; CLI argüman ayrıştırmayı, yapılandırma/varsayılan ajan çözümlemeyi, paketle birlikte gelen Plugin etkinleştirmesini, paylaşılan görüntü oluşturma çalışma zamanını ve canlı sağlayıcı isteğini kapsar. Plugin bağımlılıklarının çalışma zamanı yüklemesinden önce mevcut olması beklenir.
+Bu, CLI argüman ayrıştırmasını, yapılandırma/varsayılan ajan çözümlemeyi, paketlenmiş
+Plugin etkinleştirmeyi, paylaşılan görsel üretimi çalışma zamanını ve canlı sağlayıcı
+isteğini kapsar. Plugin bağımlılıklarının çalışma zamanı yüklenmeden önce mevcut olması beklenir.
 
-## Müzik oluşturma canlı
+## Müzik üretimi canlı
 
 - Test: `extensions/music-generation-providers.live.test.ts`
 - Etkinleştirme: `OPENCLAW_LIVE_TEST=1 pnpm test:live -- extensions/music-generation-providers.live.test.ts`
 - Test düzeneği: `pnpm test:live:media music`
 - Kapsam:
-  - Paylaşılan paketli müzik oluşturma sağlayıcı yolunu çalıştırır
+  - Paylaşılan paketlenmiş müzik üretimi sağlayıcısı yolunu çalıştırır
   - Şu anda Google ve MiniMax'i kapsar
-  - Yoklamadan önce sağlayıcı ortam değişkenlerini oturum açma kabuğunuzdan (`~/.profile`) yükler
-  - Varsayılan olarak saklanan kimlik doğrulama profillerinden önce canlı/ortam API anahtarlarını kullanır; böylece `auth-profiles.json` içindeki eski test anahtarları gerçek kabuk kimlik bilgilerini maskelemez
-  - Kullanılabilir kimlik doğrulama/profil/model bulunmayan sağlayıcıları atlar
-  - Mevcut olduğunda bildirilen iki çalışma zamanı modunu da çalıştırır:
+  - Proba başlamadan önce halihazırda export edilmiş sağlayıcı env değişkenlerini kullanır
+  - Varsayılan olarak depolanmış kimlik doğrulama profillerinden önce canlı/env API anahtarlarını kullanır; böylece `auth-profiles.json` içindeki eski test anahtarları gerçek shell kimlik bilgilerini maskelemez
+  - Kullanılabilir kimlik doğrulaması/profili/modeli olmayan sağlayıcıları atlar
+  - Kullanılabilir olduğunda beyan edilen iki çalışma zamanı modunu da çalıştırır:
     - yalnızca istem girdisiyle `generate`
-    - sağlayıcı `capabilities.edit.enabled` bildirdiğinde `edit`
+    - sağlayıcı `capabilities.edit.enabled` beyan ettiğinde `edit`
   - Mevcut paylaşılan hat kapsamı:
     - `google`: `generate`, `edit`
     - `minimax`: `generate`
@@ -529,51 +544,51 @@ Bu; CLI argüman ayrıştırmayı, yapılandırma/varsayılan ajan çözümlemey
   - `OPENCLAW_LIVE_MUSIC_GENERATION_PROVIDERS="google,minimax"`
   - `OPENCLAW_LIVE_MUSIC_GENERATION_MODELS="google/lyria-3-clip-preview,minimax/music-2.6"`
 - İsteğe bağlı kimlik doğrulama davranışı:
-  - profil deposu kimlik doğrulamasını zorlamak ve yalnızca ortam geçersiz kılmalarını yok saymak için `OPENCLAW_LIVE_REQUIRE_PROFILE_KEYS=1`
+  - Profil deposu kimlik doğrulamasını zorunlu kılmak ve yalnızca env geçersiz kılmalarını yok saymak için `OPENCLAW_LIVE_REQUIRE_PROFILE_KEYS=1`
 
-## Video oluşturma canlı
+## Video üretimi canlı
 
 - Test: `extensions/video-generation-providers.live.test.ts`
 - Etkinleştirme: `OPENCLAW_LIVE_TEST=1 pnpm test:live -- extensions/video-generation-providers.live.test.ts`
 - Test düzeneği: `pnpm test:live:media video`
 - Kapsam:
-  - Paylaşılan paketli video oluşturma sağlayıcı yolunu çalıştırır
-  - Varsayılan olarak sürüm için güvenli hızlı test yolunu kullanır: FAL dışı sağlayıcılar, sağlayıcı başına bir metinden videoya isteği, bir saniyelik ıstakoz istemi ve sağlayıcı başına `OPENCLAW_LIVE_VIDEO_GENERATION_TIMEOUT_MS` üzerinden işlem sınırı (varsayılan olarak `180000`)
-  - Sağlayıcı tarafı kuyruk gecikmesi sürüm süresine baskın olabileceğinden varsayılan olarak FAL'ı atlar; açıkça çalıştırmak için `--video-providers fal` veya `OPENCLAW_LIVE_VIDEO_GENERATION_PROVIDERS="fal"` geçirin
-  - Yoklamadan önce sağlayıcı ortam değişkenlerini oturum açma kabuğunuzdan (`~/.profile`) yükler
-  - Varsayılan olarak saklanan kimlik doğrulama profillerinden önce canlı/ortam API anahtarlarını kullanır; böylece `auth-profiles.json` içindeki eski test anahtarları gerçek kabuk kimlik bilgilerini maskelemez
-  - Kullanılabilir kimlik doğrulama/profil/model bulunmayan sağlayıcıları atlar
+  - Paylaşılan paketlenmiş video üretimi sağlayıcısı yolunu çalıştırır
+  - Varsayılan olarak sürüm açısından güvenli smoke test yolunu kullanır: FAL dışı sağlayıcılar, sağlayıcı başına bir metinden videoya isteği, bir saniyelik ıstakoz istemi ve `OPENCLAW_LIVE_VIDEO_GENERATION_TIMEOUT_MS` üzerinden sağlayıcı başına işlem sınırı (varsayılan `180000`)
+  - Sağlayıcı tarafı kuyruk gecikmesi sürüm süresini baskılayabildiği için FAL varsayılan olarak atlanır; açıkça çalıştırmak için `--video-providers fal` veya `OPENCLAW_LIVE_VIDEO_GENERATION_PROVIDERS="fal"` geçin
+  - Proba başlamadan önce halihazırda export edilmiş sağlayıcı env değişkenlerini kullanır
+  - Varsayılan olarak depolanmış kimlik doğrulama profillerinden önce canlı/env API anahtarlarını kullanır; böylece `auth-profiles.json` içindeki eski test anahtarları gerçek shell kimlik bilgilerini maskelemez
+  - Kullanılabilir kimlik doğrulaması/profili/modeli olmayan sağlayıcıları atlar
   - Varsayılan olarak yalnızca `generate` çalıştırır
-  - Mevcut olduğunda bildirilen dönüştürme modlarını da çalıştırmak için `OPENCLAW_LIVE_VIDEO_GENERATION_FULL_MODES=1` ayarlayın:
-    - sağlayıcı `capabilities.imageToVideo.enabled` bildirdiğinde ve seçilen sağlayıcı/model paylaşılan taramada tampon destekli yerel görüntü girdisini kabul ettiğinde `imageToVideo`
-    - sağlayıcı `capabilities.videoToVideo.enabled` bildirdiğinde ve seçilen sağlayıcı/model paylaşılan taramada tampon destekli yerel video girdisini kabul ettiğinde `videoToVideo`
-  - Paylaşılan taramadaki mevcut bildirilen ancak atlanan `imageToVideo` sağlayıcıları:
-    - `vydra`; çünkü paketli `veo3` yalnızca metin destekler ve paketli `kling` uzak görüntü URL'si gerektirir
-  - Sağlayıcıya özgü Vydra kapsamı:
+  - Kullanılabilir olduğunda beyan edilen dönüştürme modlarını da çalıştırmak için `OPENCLAW_LIVE_VIDEO_GENERATION_FULL_MODES=1` ayarlayın:
+    - sağlayıcı `capabilities.imageToVideo.enabled` beyan ettiğinde ve seçilen sağlayıcı/model paylaşılan taramada buffer destekli yerel görsel girdisini kabul ettiğinde `imageToVideo`
+    - sağlayıcı `capabilities.videoToVideo.enabled` beyan ettiğinde ve seçilen sağlayıcı/model paylaşılan taramada buffer destekli yerel video girdisini kabul ettiğinde `videoToVideo`
+  - Paylaşılan taramada beyan edilmiş ama atlanan mevcut `imageToVideo` sağlayıcıları:
+    - `vydra`; çünkü paketlenmiş `veo3` yalnızca metin destekler ve paketlenmiş `kling` uzak görsel URL'si gerektirir
+  - Sağlayıcıya özel Vydra kapsamı:
     - `OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_VYDRA_VIDEO=1 pnpm test:live -- extensions/vydra/vydra.live.test.ts`
-    - bu dosya varsayılan olarak `veo3` metinden videoya yolunu ve uzak görüntü URL fixture'ı kullanan bir `kling` hattını çalıştırır
+    - bu dosya, varsayılan olarak uzak görsel URL fixture'ı kullanan bir `kling` hattına ek olarak `veo3` metinden videoya çalıştırır
   - Mevcut `videoToVideo` canlı kapsamı:
-    - seçilen model `runway/gen4_aleph` olduğunda yalnızca `runway`
-  - Paylaşılan taramadaki mevcut bildirilen ancak atlanan `videoToVideo` sağlayıcıları:
+    - yalnızca seçilen model `runway/gen4_aleph` olduğunda `runway`
+  - Paylaşılan taramada beyan edilmiş ama atlanan mevcut `videoToVideo` sağlayıcıları:
     - `alibaba`, `qwen`, `xai`; çünkü bu yollar şu anda uzak `http(s)` / MP4 referans URL'leri gerektirir
-    - `google`; çünkü mevcut paylaşılan Gemini/Veo hattı yerel tampon destekli girdi kullanır ve bu yol paylaşılan taramada kabul edilmez
-    - `openai`; çünkü mevcut paylaşılan hatta kuruluşa özgü video inpaint/remix erişim garantileri yoktur
+    - `google`; çünkü mevcut paylaşılan Gemini/Veo hattı yerel buffer destekli girdi kullanır ve bu yol paylaşılan taramada kabul edilmez
+    - `openai`; çünkü mevcut paylaşılan hatta kuruluşa özgü video düzenleme erişim garantileri yoktur
 - İsteğe bağlı daraltma:
   - `OPENCLAW_LIVE_VIDEO_GENERATION_PROVIDERS="deepinfra,google,openai,runway"`
   - `OPENCLAW_LIVE_VIDEO_GENERATION_MODELS="google/veo-3.1-fast-generate-preview,openai/sora-2,runway/gen4_aleph"`
-  - FAL dahil olmak üzere varsayılan taramadaki her sağlayıcıyı dahil etmek için `OPENCLAW_LIVE_VIDEO_GENERATION_SKIP_PROVIDERS=""`
-  - agresif bir hızlı test çalıştırması için her sağlayıcı işlem sınırını azaltmak üzere `OPENCLAW_LIVE_VIDEO_GENERATION_TIMEOUT_MS=60000`
+  - FAL dahil varsayılan taramadaki her sağlayıcıyı dahil etmek için `OPENCLAW_LIVE_VIDEO_GENERATION_SKIP_PROVIDERS=""`
+  - Agresif bir smoke çalıştırması için her sağlayıcı işlem sınırını azaltmak üzere `OPENCLAW_LIVE_VIDEO_GENERATION_TIMEOUT_MS=60000`
 - İsteğe bağlı kimlik doğrulama davranışı:
-  - profil deposu kimlik doğrulamasını zorlamak ve yalnızca ortam geçersiz kılmalarını yok saymak için `OPENCLAW_LIVE_REQUIRE_PROFILE_KEYS=1`
+  - Profil deposu kimlik doğrulamasını zorunlu kılmak ve yalnızca env geçersiz kılmalarını yok saymak için `OPENCLAW_LIVE_REQUIRE_PROFILE_KEYS=1`
 
 ## Medya canlı test düzeneği
 
 - Komut: `pnpm test:live:media`
 - Amaç:
-  - Paylaşılan görüntü, müzik ve video canlı paketlerini tek bir depo yerel giriş noktası üzerinden çalıştırır
-  - Eksik sağlayıcı ortam değişkenlerini `~/.profile` dosyasından otomatik yükler
-  - Varsayılan olarak her paketi şu anda kullanılabilir kimlik doğrulaması olan sağlayıcılara otomatik daraltır
-  - `scripts/test-live.mjs` dosyasını yeniden kullanır; böylece Heartbeat ve sessiz mod davranışı tutarlı kalır
+  - Paylaşılan görsel, müzik ve video canlı paketlerini tek bir repo yerel giriş noktası üzerinden çalıştırır
+  - Halihazırda export edilmiş sağlayıcı env değişkenlerini kullanır
+  - Her paketi varsayılan olarak şu anda kullanılabilir kimlik doğrulaması olan sağlayıcılara otomatik daraltır
+  - `scripts/test-live.mjs` öğesini yeniden kullanır; böylece Heartbeat ve sessiz mod davranışı tutarlı kalır
 - Örnekler:
   - `pnpm test:live:media`
   - `pnpm test:live:media image video --providers openai,google,minimax`
@@ -582,4 +597,4 @@ Bu; CLI argüman ayrıştırmayı, yapılandırma/varsayılan ajan çözümlemey
 
 ## İlgili
 
-- [Test Etme](/tr/help/testing) - birim, entegrasyon, QA ve Docker paketleri
+- [Test](/tr/help/testing) - birim, entegrasyon, QA ve Docker paketleri

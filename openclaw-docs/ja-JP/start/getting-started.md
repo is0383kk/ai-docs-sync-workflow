@@ -1,32 +1,33 @@
 ---
 read_when:
     - ゼロからの初回セットアップ
-    - 動作するチャットまでの最短ルートを求めている
-summary: OpenClawをインストールして、数分で最初のチャットを実行します。
+    - 動作するチャットへの最速ルートが必要です
+summary: OpenClaw をインストールして、数分で最初のチャットを実行します。
 title: はじめに
 x-i18n:
-    generated_at: "2026-05-07T13:26:08Z"
+    generated_at: "2026-06-28T20:45:21Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 295ce8fd03320027a77a3aef494f785f0fe58e0f57c72ee63f6f9aca68626c20
+    source_hash: 579ed2b4797dc851b0293b96a4177cc356641b6842fe45c4d48f4e8c224eef75
     source_path: start/getting-started.md
     workflow: 16
 ---
 
 OpenClaw をインストールし、オンボーディングを実行して、AI アシスタントとチャットします — すべて
 約 5 分で完了します。最後には、実行中の Gateway、設定済みの認証、
-そして動作するチャットセッションが手に入ります。
+動作するチャットセッションが用意できます。
 
 ## 必要なもの
 
-- **Node.js** — Node 24 推奨（Node 22.16+ もサポート）
-- モデルプロバイダー（Anthropic、OpenAI、Google など）の **API キー** — オンボーディングで入力を求められます
+- **Node.js** — Node 24 を推奨（Node 22.19+ もサポート）
+- **モデルプロバイダーの API キー**（Anthropic、OpenAI、Google など）— オンボーディングで入力を求められます
 
 <Tip>
-Node のバージョンは `node --version` で確認できます。
-**Windows ユーザー:** ネイティブ Windows と WSL2 の両方がサポートされています。WSL2 のほうが
-安定しており、すべての機能を利用する場合に推奨されます。[Windows](/ja-JP/platforms/windows) を参照してください。
-Node のインストールが必要ですか？[Node setup](/ja-JP/install/node) を参照してください。
+`node --version` で Node のバージョンを確認します。
+**Windows ユーザー:** ネイティブ Windows Hub アプリが最も簡単なデスクトップ経路です。
+PowerShell インストーラーと WSL2 Gateway 経路もサポートされています。[Windows](/ja-JP/platforms/windows) を参照してください。
+Node をインストールする必要がありますか？[Node setup](/ja-JP/install/node) を参照してください。
 </Tip>
 
 ## クイックセットアップ
@@ -40,7 +41,7 @@ Node のインストールが必要ですか？[Node setup](/ja-JP/install/node)
         ```
         <img
   src="/assets/install-script.svg"
-  alt="Install Script Process"
+  alt="インストールスクリプトのプロセス"
   className="rounded-lg"
 />
       </Tab>
@@ -61,10 +62,13 @@ Node のインストールが必要ですか？[Node setup](/ja-JP/install/node)
     openclaw onboard --install-daemon
     ```
 
-    ウィザードは、モデルプロバイダーの選択、API キーの設定、
-    Gateway の設定を順に案内します。所要時間は約 2 分です。
+    ウィザードが、モデルプロバイダーの選択、API キーの設定、
+    Gateway の設定を順に案内します。クイックスタートは通常数分で完了しますが、
+    プロバイダーのサインイン、チャネルのペアリング、デーモンのインストール、ネットワークダウンロード、Skills、
+    または任意の plugins によって、完全なオンボーディングにはより時間がかかる場合があります。任意の
+    手順はスキップでき、後で `openclaw configure` を使って戻れます。
 
-    完全なリファレンスは [オンボーディング（CLI）](/ja-JP/start/wizard) を参照してください。
+    完全なリファレンスは [オンボーディング (CLI)](/ja-JP/start/wizard) を参照してください。
 
   </Step>
   <Step title="Gateway が実行中であることを確認">
@@ -72,7 +76,7 @@ Node のインストールが必要ですか？[Node setup](/ja-JP/install/node)
     openclaw gateway status
     ```
 
-    Gateway がポート 18789 で待ち受けていることが表示されます。
+    Gateway がポート 18789 でリッスンしていることが表示されるはずです。
 
   </Step>
   <Step title="ダッシュボードを開く">
@@ -84,23 +88,23 @@ Node のインストールが必要ですか？[Node setup](/ja-JP/install/node)
 
   </Step>
   <Step title="最初のメッセージを送信">
-    Control UI のチャットにメッセージを入力すると、AI から返信が届くはずです。
+    Control UI チャットにメッセージを入力すると、AI から返信が届くはずです。
 
-    代わりにスマートフォンからチャットしたいですか？最速で設定できるチャンネルは
-    [Telegram](/ja-JP/channels/telegram)（ボットトークンだけ）です。すべての選択肢は [チャンネル](/ja-JP/channels)
+    代わりにスマートフォンからチャットしたいですか？最も素早く設定できるチャネルは
+    [Telegram](/ja-JP/channels/telegram)（ボットトークンだけ）です。すべての選択肢については [チャネル](/ja-JP/channels)
     を参照してください。
 
   </Step>
 </Steps>
 
 <Accordion title="高度: カスタム Control UI ビルドをマウント">
-  ローカライズまたはカスタマイズしたダッシュボードビルドを管理している場合は、
-  `gateway.controlUi.root` に、ビルド済みの静的
-  アセットと `index.html` を含むディレクトリを指定します。
+  ローカライズ済みまたはカスタマイズ済みのダッシュボードビルドを管理している場合は、
+  ビルド済みの静的アセットと `index.html` を含むディレクトリを
+  `gateway.controlUi.root` に指定します。
 
 ```bash
 mkdir -p "$HOME/.openclaw/control-ui-custom"
-# Copy your built static files into that directory.
+# ビルド済みの静的ファイルをそのディレクトリにコピーします。
 ```
 
 次に設定します。
@@ -116,7 +120,7 @@ mkdir -p "$HOME/.openclaw/control-ui-custom"
 }
 ```
 
-Gateway を再起動し、ダッシュボードを開き直します。
+Gateway を再起動し、ダッシュボードを再度開きます。
 
 ```bash
 openclaw gateway restart
@@ -125,10 +129,10 @@ openclaw dashboard
 
 </Accordion>
 
-## 次にやること
+## 次にすること
 
 <Columns>
-  <Card title="チャンネルに接続" href="/ja-JP/channels" icon="message-square">
+  <Card title="チャネルを接続" href="/ja-JP/channels" icon="message-square">
     Discord、Feishu、iMessage、Matrix、Microsoft Teams、Signal、Slack、Telegram、WhatsApp、Zalo など。
   </Card>
   <Card title="ペアリングと安全性" href="/ja-JP/channels/pairing" icon="shield">
@@ -137,15 +141,15 @@ openclaw dashboard
   <Card title="Gateway を設定" href="/ja-JP/gateway/configuration" icon="settings">
     モデル、ツール、サンドボックス、高度な設定。
   </Card>
-  <Card title="ツールを閲覧" href="/ja-JP/tools" icon="wrench">
-    ブラウザー、exec、Web 検索、Skills、Plugin。
+  <Card title="ツールを参照" href="/ja-JP/tools" icon="wrench">
+    ブラウザー、exec、Web 検索、skills、plugins。
   </Card>
 </Columns>
 
 <Accordion title="高度: 環境変数">
-  OpenClaw をサービスアカウントとして実行する場合や、カスタムパスを使いたい場合:
+  OpenClaw をサービスアカウントとして実行する場合、またはカスタムパスを使いたい場合:
 
-- `OPENCLAW_HOME` — 内部パス解決のホームディレクトリ
+- `OPENCLAW_HOME` — 内部パス解決のためのホームディレクトリ
 - `OPENCLAW_STATE_DIR` — 状態ディレクトリを上書き
 - `OPENCLAW_CONFIG_PATH` — 設定ファイルパスを上書き
 
@@ -155,5 +159,5 @@ openclaw dashboard
 ## 関連
 
 - [インストール概要](/ja-JP/install)
-- [チャンネル概要](/ja-JP/channels)
+- [チャネル概要](/ja-JP/channels)
 - [セットアップ](/ja-JP/start/setup)

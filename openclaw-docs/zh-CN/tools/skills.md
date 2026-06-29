@@ -1,66 +1,89 @@
 ---
 read_when:
-    - 添加或修改技能
+    - 添加或修改 Skills
     - 更改技能门控、允许列表或加载规则
-    - 理解技能优先级和快照行为
+    - 理解 Skills 优先级和快照行为
 sidebarTitle: Skills
-summary: Skills：托管式与工作区、门控规则、智能体允许列表和配置接线
+summary: Skills 教你的智能体如何使用工具。了解它们如何加载、优先级如何生效，以及如何配置门控、允许列表和环境注入。
 title: Skills
 x-i18n:
-    generated_at: "2026-05-10T19:51:56Z"
+    generated_at: "2026-06-27T03:32:12Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: a265932a9990e71c0dd6b4444f26efb04019ed979477b0712a3a45569b1b4dff
+    source_hash: e42d89d47125a4d92f68a20d754de571d5582858a9c44618b999a27335e78ab2
     source_path: tools/skills.md
     workflow: 16
 ---
 
-OpenClaw 使用**兼容 [AgentSkills](https://agentskills.io) 的**技能文件夹来教智能体如何使用工具。每个 Skills 都是一个目录，其中包含带有 YAML frontmatter 和说明的 `SKILL.md`。OpenClaw 会加载内置 Skills 以及可选的本地覆盖项，并在加载时根据环境、配置和二进制文件是否存在对它们进行过滤。
+Skills 是 Markdown 指令文件，用来教智能体如何以及何时使用工具。每个 skill 都位于一个目录中，该目录包含一个带有 YAML frontmatter 和 Markdown 正文的 `SKILL.md` 文件。OpenClaw 会加载内置 Skills 以及任何本地覆盖项，并在加载时根据环境、配置和二进制文件是否存在进行过滤。
 
-## 位置和优先级
+<CardGroup cols={2}>
+  <Card title="创建技能" href="/zh-CN/tools/creating-skills" icon="hammer">
+    从零开始构建并测试自定义 skill。
+  </Card>
+  <Card title="技能工作坊" href="/zh-CN/tools/skill-workshop" icon="flask">
+    审阅并批准智能体起草的 skill 提案。
+  </Card>
+  <Card title="Skills 配置" href="/zh-CN/tools/skills-config" icon="gear">
+    完整的 `skills.*` 配置 schema 和智能体允许列表。
+  </Card>
+  <Card title="ClawHub" href="/zh-CN/clawhub" icon="cloud">
+    浏览并安装社区 Skills。
+  </Card>
+</CardGroup>
 
-OpenClaw 从这些来源加载 Skills，**优先级从高到低**：
+## 加载顺序
 
-| #   | 来源                  | 路径                             |
-| --- | --------------------- | -------------------------------- |
-| 1   | 工作区 Skills         | `<workspace>/skills`             |
-| 2   | 项目智能体 Skills     | `<workspace>/.agents/skills`     |
-| 3   | 个人智能体 Skills     | `~/.agents/skills`               |
-| 4   | 托管/本地 Skills      | `~/.openclaw/skills`             |
-| 5   | 内置 Skills           | 随安装包提供                     |
-| 6   | 额外 Skills 文件夹    | `skills.load.extraDirs`（配置）  |
+OpenClaw 会从以下来源加载，**优先级从高到低**。当同一个 skill 名称出现在多个位置时，优先级最高的来源生效。
 
-如果 Skills 名称冲突，优先级最高的来源生效。
+| 优先级 | 来源 | 路径 |
+| ----------- | ---------------------- | --------------------------------------- |
+| 1 — 最高 | 工作区 Skills | `<workspace>/skills` |
+| 2 | 项目智能体 Skills | `<workspace>/.agents/skills` |
+| 3 | 个人智能体 Skills | `~/.agents/skills` |
+| 4 | 托管 / 本地 Skills | `~/.openclaw/skills` |
+| 5 | 内置 Skills | 随安装一起提供 |
+| 6 — 最低 | 额外目录 | `skills.load.extraDirs` + 插件 Skills |
 
-Codex CLI 的原生 `$CODEX_HOME/skills` 目录不是这些 OpenClaw Skills 根目录之一。在 Codex harness 模式下，本地应用服务器启动会使用隔离的每智能体 Codex 主目录，因此个人 Codex CLI Skills 不会被隐式加载。使用 `openclaw migrate codex --dry-run` 盘点它们，并使用 `openclaw migrate codex` 通过交互式复选框提示选择 Skills 目录，然后复制到当前 OpenClaw 智能体工作区。对于非交互式运行，请重复使用 `--skill <name>` 指定要复制的确切 Skills。
+Skill 根目录支持分组布局。只要 `SKILL.md` 出现在已配置根目录下的任意位置，OpenClaw 就会发现一个 skill：
 
-## 每智能体与共享 Skills
+```text
+<workspace>/skills/research/SKILL.md          ✓ found as "research"
+<workspace>/skills/personal/research/SKILL.md ✓ also found as "research"
+```
 
-在**多智能体**设置中，每个智能体都有自己的工作区：
+文件夹路径仅用于组织。skill 的名称、斜杠命令和允许列表键都来自 `name` frontmatter 字段（如果缺少 `name`，则来自目录名）。
 
-| 范围                 | 路径                                        | 对谁可见                    |
-| -------------------- | ------------------------------------------- | --------------------------- |
-| 每智能体             | `<workspace>/skills`                        | 仅该智能体                  |
-| 项目智能体           | `<workspace>/.agents/skills`                | 仅该工作区的智能体          |
-| 个人智能体           | `~/.agents/skills`                          | 该机器上的所有智能体        |
-| 共享托管/本地        | `~/.openclaw/skills`                        | 该机器上的所有智能体        |
-| 共享额外目录         | `skills.load.extraDirs`（最低优先级）       | 该机器上的所有智能体        |
+<Note>
+  Codex CLI 的原生 `$CODEX_HOME/skills` 目录**不是** OpenClaw skill 根目录。使用 `openclaw migrate plan codex` 清点这些 Skills，然后使用 `openclaw migrate codex` 将它们复制到你的 OpenClaw 工作区。
+</Note>
 
-同名 Skills 出现在多个位置 → 优先级最高的来源生效。工作区优先于项目智能体，项目智能体优先于个人智能体，个人智能体优先于托管/本地，托管/本地优先于内置，内置优先于额外目录。
+## 按智能体 Skills 与共享 Skills
 
-## 智能体 Skills allowlist
+在多智能体设置中，每个智能体都有自己的工作区。请使用与你期望可见性匹配的路径：
 
-Skills **位置**和 Skills **可见性**是分开的控制项。位置/优先级决定同名 Skills 的哪个副本生效；智能体 allowlist 决定智能体实际可以使用哪些 Skills。
+| 范围 | 路径 | 对谁可见 |
+| -------------- | ---------------------------- | --------------------------- |
+| 按智能体 | `<workspace>/skills` | 仅该智能体 |
+| 项目智能体 | `<workspace>/.agents/skills` | 仅该工作区的智能体 |
+| 个人智能体 | `~/.agents/skills` | 此机器上的所有智能体 |
+| 共享托管 | `~/.openclaw/skills` | 此机器上的所有智能体 |
+| 额外目录 | `skills.load.extraDirs` | 此机器上的所有智能体 |
+
+## 智能体允许列表
+
+skill **位置**（优先级）和 skill **可见性**（哪个智能体可以使用它）是两个独立控制项。使用允许列表限制智能体可以看到哪些 Skills，无论它们从哪里加载。
 
 ```json5
 {
   agents: {
     defaults: {
-      skills: ["github", "weather"],
+      skills: ["github", "weather"], // shared baseline
     },
     list: [
       { id: "writer" }, // inherits github, weather
-      { id: "docs", skills: ["docs-search"] }, // replaces defaults
+      { id: "docs", skills: ["docs-search"] }, // replaces defaults entirely
       { id: "locked-down", skills: [] }, // no skills
     ],
   },
@@ -68,99 +91,140 @@ Skills **位置**和 Skills **可见性**是分开的控制项。位置/优先�
 ```
 
 <AccordionGroup>
-  <Accordion title="Allowlist 规则">
-    - 默认情况下，省略 `agents.defaults.skills` 表示不限制 Skills。
-    - 省略 `agents.list[].skills` 会继承 `agents.defaults.skills`。
-    - 设置 `agents.list[].skills: []` 表示没有 Skills。
-    - 非空的 `agents.list[].skills` 列表是该智能体的**最终**集合，不会与默认值合并。
-    - 有效 allowlist 会应用于提示构建、Skills 斜杠命令发现、沙箱同步和 Skills 快照。
+  <Accordion title="允许列表规则">
+    - 省略 `agents.defaults.skills`，默认不限制所有 Skills。
+    - 省略 `agents.list[].skills`，继承 `agents.defaults.skills`。
+    - 设置 `agents.list[].skills: []`，不向该智能体暴露任何 Skills。
+    - 非空的 `agents.list[].skills` 列表就是**最终**集合，它不会与默认值合并。
+    - 有效允许列表会应用于提示词构建、斜杠命令发现、沙箱同步和 skill 快照。
 
   </Accordion>
 </AccordionGroup>
 
-## 插件和 Skills
+## 插件与 Skills
 
-插件可以通过在 `openclaw.plugin.json` 中列出 `skills` 目录来附带自己的 Skills（路径相对于插件根目录）。插件启用时会加载插件 Skills。这适合放置特定工具的操作指南：这些指南对于工具描述来说太长，但只要插件已安装就应该可用。例如，浏览器插件会附带一个 `browser-automation` Skills，用于多步骤浏览器控制。
+插件可以通过在 `openclaw.plugin.json` 中列出 `skills` 目录来附带自己的 Skills（路径相对于插件根目录）。插件启用时会加载插件 Skills，例如，浏览器插件会附带一个用于多步骤浏览器控制的 `browser-automation` skill。
 
-插件 Skills 目录会合并到与 `skills.load.extraDirs` 相同的低优先级路径中，因此同名的内置、托管、智能体或工作区 Skills 会覆盖它们。你可以通过插件配置条目上的 `metadata.openclaw.requires.config` 对它们设门槛。
+插件 skill 目录与 `skills.load.extraDirs` 在同一个低优先级层级合并，因此同名的内置、托管、智能体或工作区 skill 会覆盖它们。通过插件配置条目上的 `metadata.openclaw.requires.config` 对其进行门控。
 
-请参阅 [插件](/zh-CN/tools/plugin) 了解发现/配置，并参阅 [工具](/zh-CN/tools) 了解这些 Skills 所教授的工具表面。
+完整插件系统请参阅 [插件](/zh-CN/tools/plugin) 和 [工具](/zh-CN/tools)。
 
-## Skills 工作坊
+## 技能工作坊
 
-可选的实验性 **Skills 工作坊**插件可以根据智能体工作期间观察到的可复用流程创建或更新工作区 Skills。它默认禁用，必须通过 `plugins.entries.skill-workshop` 显式启用。
+[技能工作坊](/zh-CN/tools/skill-workshop) 是智能体与你的活跃 skill 文件之间的提案队列。当智能体发现可复用的工作时，它会起草提案，而不是直接写入 `SKILL.md`。你在任何内容变更前进行审阅并批准。
 
-Skills 工作坊只写入 `<workspace>/skills`，会扫描生成内容，支持待批准或自动安全写入，会隔离不安全提案，并在成功写入后刷新 Skills 快照，使新 Skills 无需重启 Gateway 网关即可可用。
+```bash
+openclaw skills workshop list
+openclaw skills workshop inspect <proposal-id>
+openclaw skills workshop apply <proposal-id>
+```
 
-将它用于类似 _“下次验证 GIF 署名”_ 的修正，或类似媒体 QA 检查清单这类来之不易的工作流。先从待批准开始；仅在可信工作区中审核其提案后再使用自动写入。完整指南：[Skills 工作坊插件](/zh-CN/plugins/skill-workshop)。
+完整生命周期、CLI 参考和配置请参阅 [技能工作坊](/zh-CN/tools/skill-workshop)。
 
-## ClawHub（安装和同步）
+## 从 ClawHub 安装
 
-[ClawHub](https://clawhub.ai) 是 OpenClaw 的公共 Skills 注册表。使用原生 `openclaw skills` 命令进行发现/安装/更新，或使用单独的 `clawhub` CLI 执行发布/同步工作流。完整指南：[ClawHub](/zh-CN/clawhub)。
+[ClawHub](https://clawhub.ai) 是公共 Skills 注册表。使用 `openclaw skills` 命令安装和更新，或使用 `clawhub` CLI 发布和同步。
 
-| 操作                               | 命令                                   |
-| ---------------------------------- | -------------------------------------- |
-| 将 Skills 安装到工作区             | `openclaw skills install <skill-slug>` |
-| 更新所有已安装的 Skills            | `openclaw skills update --all`         |
-| 同步（扫描 + 发布更新）            | `clawhub sync --all`                   |
+| 操作 | 命令 |
+| ---------------------------------- | ------------------------------------------------------ |
+| 将 skill 安装到工作区 | `openclaw skills install @owner/<slug>` |
+| 从 Git 仓库安装 | `openclaw skills install git:owner/repo@ref` |
+| 安装本地 skill 目录 | `openclaw skills install ./path/to/skill --as my-tool` |
+| 为所有本地智能体安装 | `openclaw skills install @owner/<slug> --global` |
+| 更新所有工作区 Skills | `openclaw skills update --all` |
+| 更新共享托管 skill | `openclaw skills update @owner/<slug> --global` |
+| 更新所有共享托管 Skills | `openclaw skills update --all --global` |
+| 验证 skill 的信任封套 | `openclaw skills verify @owner/<slug>` |
+| 打印生成的 Skill Card | `openclaw skills verify @owner/<slug> --card` |
+| 通过 ClawHub CLI 发布 / 同步 | `clawhub sync --all` |
 
-原生 `openclaw skills install` 会安装到活动工作区的 `skills/` 目录。单独的 `clawhub` CLI 也会安装到你当前工作目录下的 `./skills`（或回退到配置的 OpenClaw 工作区）。OpenClaw 会在下一个会话中将其识别为 `<workspace>/skills`。配置的 Skills 根目录也支持一级分组，例如 `skills/<group>/<skill>/SKILL.md`，因此相关的第三方 Skills 可以保存在共享文件夹下，而无需进行宽泛的递归扫描。
+<AccordionGroup>
+  <Accordion title="安装详情">
+    `openclaw skills install` 默认安装到活跃工作区的 `skills/` 目录。添加 `--global` 会安装到共享的 `~/.openclaw/skills` 目录，除非智能体允许列表进一步收窄，否则所有本地智能体都可见。
 
-需要私有、非 ClawHub 交付的 Gateway 网关客户端可以使用 `skills.upload.begin`、`skills.upload.chunk` 和 `skills.upload.commit` 暂存一个 zip Skills 归档，然后使用 `skills.install({ source: "upload", uploadId, slug, force?, sha256? })` 安装已提交的上传。这是面向可信客户端的显式管理员上传路径，不是普通的 `openclaw skills install <slug>` 或 ClawHub 安装流程。它默认关闭，只有在 `openclaw.json` 中设置 `skills.install.allowUploadedArchives: true` 时才可用。上传模式仍会安装到默认智能体工作区的 `skills/<slug>` 目录；归档内部的文件夹名称会被忽略，不作为最终安装目标。
+    Git 和本地安装要求源根目录中有 `SKILL.md`。slug 会在有效时来自 `SKILL.md` frontmatter 的 `name`，然后回退到目录或仓库名称。使用 `--as <slug>` 覆盖。`openclaw skills update` 只跟踪 ClawHub 安装项；要刷新 Git 或本地来源，请重新安装它们。
 
-ClawHub Skills 页面会在安装前显示最新安全扫描状态，并提供 VirusTotal、ClawScan 和静态分析的扫描器详情页。`openclaw skills install <slug>` 仍然只是安装路径；发布者可通过 ClawHub 控制台或 `clawhub skill rescan <slug>` 处理误报。
+  </Accordion>
+  <Accordion title="验证和安全扫描">
+    `openclaw skills verify @owner/<slug>` 会向 ClawHub 请求该 skill 的 `clawhub.skill.verify.v1` 信任封套。已安装的 ClawHub Skills 会根据 `.clawhub/origin.json` 中记录的版本和注册表进行验证。裸 slug 仍可用于已安装或无歧义的现有 Skills，但带 owner 的引用可以避免发布者歧义。
+
+    ClawHub skill 页面会在安装前公开最新安全扫描状态，并为 VirusTotal、ClawScan 和静态分析提供详情页面。当 ClawHub 将验证标记为失败时，该命令会以非零状态退出。发布者可通过 ClawHub 仪表盘或 `clawhub skill rescan @owner/<slug>` 处理误报。
+
+  </Accordion>
+  <Accordion title="私有归档安装">
+    需要非 ClawHub 交付的 Gateway 网关客户端可以通过 `skills.upload.begin`、`skills.upload.chunk` 和 `skills.upload.commit` 暂存 zip skill 归档，然后用 `skills.install({ source: "upload", ... })` 安装。此路径默认关闭，并且需要在 `openclaw.json` 中设置 `skills.install.allowUploadedArchives: true`。普通 ClawHub 安装绝不需要该设置。
+  </Accordion>
+</AccordionGroup>
 
 ## 安全
 
 <Warning>
-将第三方 Skills 视为**不可信代码**。启用前请先阅读。对于不可信输入和高风险工具，优先使用沙箱隔离运行。请参阅[沙箱隔离](/zh-CN/gateway/sandboxing)了解智能体侧控制项。
+  将第三方 Skills 视为**不受信任的代码**。启用前请先阅读。对于不受信任的输入和高风险工具，优先使用沙箱隔离运行。有关智能体侧控制项，请参阅[沙箱隔离](/zh-CN/gateway/sandboxing)。
 </Warning>
 
-- 工作区和额外目录的 Skills 发现只接受解析后的真实路径仍位于配置根目录内的 Skills 根目录和 `SKILL.md` 文件。
-- Gateway 网关私有归档安装默认关闭。显式启用后，它们需要一个已提交的 zip 上传，其中包含 `SKILL.md`，并复用与 ClawHub Skills 安装相同的归档解压、路径遍历、符号链接、强制覆盖和回滚保护。它们由 `skills.install.allowUploadedArchives` 控制；普通 ClawHub 安装不需要该设置。
-- Gateway 网关支持的 Skills 依赖安装（`skills.install`、新手引导和 Skills 设置 UI）会在执行安装器元数据前运行内置危险代码扫描器。默认情况下，`critical` 发现会阻止执行，除非调用方显式设置危险覆盖；可疑发现仍然只会警告。
-- `openclaw skills install <slug>` 不同：它会把 ClawHub Skills 文件夹下载到工作区，并且不使用上面的安装器元数据路径。
-- `skills.entries.*.env` 和 `skills.entries.*.apiKey` 会将密钥注入该智能体轮次的**宿主**进程（不是沙箱）。不要把密钥放进提示和日志。
+<AccordionGroup>
+  <Accordion title="路径包含">
+    工作区、项目智能体和额外目录的 skill 发现只接受解析后的 realpath 仍位于已配置根目录内的 skill 根目录，除非 `skills.load.allowSymlinkTargets` 显式信任目标根目录。只有启用 `skills.workshop.allowSymlinkTargetWrites` 时，技能工作坊才会通过这些受信任目标写入。
+    托管的 `~/.openclaw/skills` 和个人 `~/.agents/skills` 可以包含符号链接的 skill 文件夹，但每个 `SKILL.md` 的 realpath 仍必须位于其解析后的 skill 目录内。
+  </Accordion>
+  <Accordion title="操作员安装策略">
+    配置 `security.installPolicy`，以便在 skill 安装继续之前运行受信任的本地策略命令。该策略会接收元数据和暂存源路径，适用于 ClawHub、上传、Git、本地、更新和依赖安装器路径，并在命令无法返回有效决策时失败关闭。
+  </Accordion>
+  <Accordion title="密钥注入范围">
+    `skills.entries.*.env` 和 `skills.entries.*.apiKey` 只会在该智能体轮次中将密钥注入**宿主**进程，而不是注入沙箱。不要将密钥放入提示词和日志。
+  </Accordion>
+</AccordionGroup>
 
-如需更广泛的威胁模型和检查清单，请参阅[安全](/zh-CN/gateway/security)。
+更广泛的威胁模型和安全检查清单请参阅[安全](/zh-CN/gateway/security)。
 
-## SKILL.md 格式
+## `SKILL.md` 格式
 
-`SKILL.md` 至少必须包含：
+每个 skill 至少需要在 frontmatter 中包含 `name` 和 `description`：
 
 ```markdown
 ---
 name: image-lab
 description: Generate or edit images via a provider-backed image workflow
 ---
+
+When the user asks to generate an image, use the `image_generate` tool...
 ```
 
-OpenClaw 遵循 AgentSkills 规范的布局/意图。嵌入式智能体使用的解析器仅支持**单行** frontmatter 键；`metadata` 应该是一个**单行 JSON 对象**。在说明中使用 `{baseDir}` 引用 Skills 文件夹路径。
+<Note>
+  OpenClaw 遵循 [AgentSkills](https://agentskills.io) 规范。frontmatter 解析器仅支持**单行键**，`metadata` 必须是单行 JSON 对象。使用正文中的 `{baseDir}` 引用 skill 文件夹路径。
+</Note>
 
 ### 可选 frontmatter 键
 
 <ParamField path="homepage" type="string">
   在 macOS Skills UI 中显示为“网站”的 URL。也支持通过 `metadata.openclaw.homepage` 设置。
 </ParamField>
+
 <ParamField path="user-invocable" type="boolean" default="true">
-  当为 `true` 时，Skills 会作为用户斜杠命令暴露。
+  当为 `true` 时，该 skill 会作为用户可调用的斜杠命令暴露。
 </ParamField>
+
 <ParamField path="disable-model-invocation" type="boolean" default="false">
-  当为 `true` 时，OpenClaw 会将该 Skills 的说明排除在智能体的普通提示之外。该 Skills 仍会安装，并且当 `user-invocable` 也为 `true` 时，仍可作为斜杠命令显式运行。
+  当为 `true` 时，OpenClaw 会将该 skill 的指令排除在智能体的常规提示词之外。当 `user-invocable` 也为 `true` 时，该 skill 仍可作为斜杠命令使用。
 </ParamField>
+
 <ParamField path="command-dispatch" type='"tool"'>
-  设置为 `tool` 时，斜杠命令会绕过模型并直接分派到工具。
+  设置为 `tool` 时，斜杠命令会绕过模型，并直接分派到已注册的工具。
 </ParamField>
+
 <ParamField path="command-tool" type="string">
   设置 `command-dispatch: tool` 时要调用的工具名称。
 </ParamField>
+
 <ParamField path="command-arg-mode" type='"raw"' default="raw">
-  对于工具分派，将原始参数字符串转发给工具（不进行核心解析）。工具会以 `{ command: "<raw args>", commandName: "<slash command>", skillName: "<skill name>" }` 调用。
+  对于工具分派，会将原始参数字符串转发给工具，不进行核心解析。工具会收到 `{ command: "<raw args>", commandName: "<slash command>", skillName: "<skill name>" }`。
 </ParamField>
 
-## 门控（加载时过滤器）
+## 门控
 
-OpenClaw 在加载时使用 `metadata`（单行 JSON）过滤 Skills：
+OpenClaw 在加载时使用 `metadata.openclaw`（frontmatter 中的单行
+JSON）筛选 Skills。没有 `metadata.openclaw` 块的 skill 始终符合条件，
+除非被显式禁用。
 
 ```markdown
 ---
@@ -177,55 +241,55 @@ metadata:
 ---
 ```
 
-`metadata.openclaw` 下的字段：
-
 <ParamField path="always" type="boolean">
-  当为 `true` 时，始终包含该技能（跳过其他门控）。
+  当为 `true` 时，始终包含该 skill，并跳过所有其他门控。
 </ParamField>
+
 <ParamField path="emoji" type="string">
-  macOS Skills UI 使用的可选 emoji。
+  在 macOS Skills UI 中显示的可选 emoji。
 </ParamField>
+
 <ParamField path="homepage" type="string">
-  在 macOS Skills UI 中显示为“网站”的可选 URL。
+  在 macOS Skills UI 中显示为 “Website” 的可选 URL。
 </ParamField>
-<ParamField path="os" type='"darwin" | "linux" | "win32"' >
-  可选平台列表。如果设置，该技能仅在这些 OS 上符合条件。
+
+<ParamField path="os" type='"darwin" | "linux" | "win32"'>
+  平台筛选器。设置后，该 skill 仅在列出的 OS 上符合条件。
 </ParamField>
+
 <ParamField path="requires.bins" type="string[]">
-  每一项都必须存在于 `PATH` 上。
+  每个二进制文件都必须存在于 `PATH` 中。
 </ParamField>
+
 <ParamField path="requires.anyBins" type="string[]">
-  至少一项必须存在于 `PATH` 上。
+  至少一个二进制文件必须存在于 `PATH` 中。
 </ParamField>
+
 <ParamField path="requires.env" type="string[]">
-  环境变量必须存在，或在配置中提供。
+  每个环境变量都必须存在于进程中，或通过配置提供。
 </ParamField>
+
 <ParamField path="requires.config" type="string[]">
-  必须为真值的 `openclaw.json` 路径列表。
+  每个 `openclaw.json` 路径都必须为真值。
 </ParamField>
+
 <ParamField path="primaryEnv" type="string">
   与 `skills.entries.<name>.apiKey` 关联的环境变量名称。
 </ParamField>
+
 <ParamField path="install" type="object[]">
-  macOS Skills UI 使用的可选安装器规格（brew/node/go/uv/download）。
+  macOS Skills UI 使用的可选安装器规范（brew / node / go / uv / download）。
 </ParamField>
 
-如果没有 `metadata.openclaw`，该技能始终符合条件（除非在配置中被
-禁用，或对于内置技能被 `skills.allowBundled` 阻止）。
-
 <Note>
-当缺少 `metadata.openclaw` 时，仍会接受旧版 `metadata.clawdbot`
-块，因此较旧的已安装技能会保留它们的依赖门控和安装器提示。新的和更新后的技能应使用
-`metadata.openclaw`。
+  当 `metadata.openclaw` 不存在时，旧版 `metadata.clawdbot` 块仍会被接受，
+  因此较早安装的 Skills 会保留其依赖门控和安装器提示。新的 Skills 应使用
+  `metadata.openclaw`。
 </Note>
 
-### 沙箱隔离注意事项
+### 安装器规范
 
-- `requires.bins` 会在技能加载时在**主机**上检查。
-- 如果智能体处于沙箱隔离中，该二进制文件也必须存在于**容器内**。通过 `agents.defaults.sandbox.docker.setupCommand`（或自定义镜像）安装它。`setupCommand` 会在容器创建后运行一次。包安装还需要网络出口、可写的根 FS，以及沙箱中的 root 用户。
-- 示例：`summarize` 技能（`skills/summarize/SKILL.md`）需要沙箱容器中有 `summarize` CLI 才能在那里运行。
-
-### 安装器规格
+安装器规范会告诉 macOS Skills UI 如何安装依赖：
 
 ```markdown
 ---
@@ -254,25 +318,39 @@ metadata:
 
 <AccordionGroup>
   <Accordion title="Installer selection rules">
-    - 如果列出了多个安装器，Gateway 网关会选择一个首选选项（brew 可用时选择 brew，否则选择 node）。
-    - 如果所有安装器都是 `download`，OpenClaw 会列出每个条目，让你看到可用的构件。
-    - 安装器规格可以包含 `os: ["darwin"|"linux"|"win32"]`，用于按平台筛选选项。
-    - Node 安装会遵循 `openclaw.json` 中的 `skills.install.nodeManager`（默认：npm；选项：npm/pnpm/yarn/bun）。这只影响技能安装；Gateway 网关运行时仍应是 Node - 不建议将 Bun 用于 WhatsApp/Telegram。
-    - Gateway 网关支持的安装器选择由偏好驱动：当安装规格混合多种类型时，如果启用了 `skills.install.preferBrew` 且存在 `brew`，OpenClaw 会优先选择 Homebrew，然后是 `uv`，然后是已配置的 node 管理器，再然后是其他回退选项，如 `go` 或 `download`。
-    - 如果每个安装规格都是 `download`，OpenClaw 会展示所有下载选项，而不是折叠为一个首选安装器。
-
+    - 列出多个安装器时，Gateway 网关会选择一个首选选项
+      （可用时使用 brew，否则使用 node）。
+    - 如果所有安装器都是 `download`，OpenClaw 会列出每个条目，以便你查看
+      所有可用工件。
+    - 规范可以包含 `os: ["darwin"|"linux"|"win32"]`，用于按平台筛选。
+    - Node 安装会遵循 `openclaw.json` 中的 `skills.install.nodeManager`
+      （默认：npm；选项：npm / pnpm / yarn / bun）。这仅影响 skill
+      安装；Gateway 网关运行时仍应使用 Node。
+    - Gateway 网关安装器偏好：Homebrew → uv → 已配置的 node manager →
+      go → download。
   </Accordion>
   <Accordion title="Per-installer details">
-    - **Go 安装：**如果缺少 `go` 且 `brew` 可用，Gateway 网关会先通过 Homebrew 安装 Go，并在可能时将 `GOBIN` 设置为 Homebrew 的 `bin`。
-    - **下载安装：**`url`（必需）、`archive`（`tar.gz` | `tar.bz2` | `zip`）、`extract`（默认：检测到归档时自动）、`stripComponents`、`targetDir`（默认：`~/.openclaw/tools/<skillKey>`）。
-
+    - **Homebrew：** OpenClaw 不会自动安装 Homebrew，也不会将 brew
+      formula 转换为系统包命令。在没有 `brew` 的 Linux 容器中，
+      仅支持 brew 的安装器会被隐藏；请使用自定义镜像或手动安装依赖。
+    - **Go：** 如果缺少 `go` 且 `brew` 可用，Gateway 网关会先通过
+      Homebrew 安装 Go，并将 `GOBIN` 设置为 Homebrew 的 `bin`。
+    - **Download：** `url`（必需）、`archive`（`tar.gz` | `tar.bz2` | `zip`）、
+      `extract`（默认：检测到归档时自动）、`stripComponents`、
+      `targetDir`（默认：`~/.openclaw/tools/<skillKey>`）。
+  </Accordion>
+  <Accordion title="Sandboxing notes">
+    `requires.bins` 会在 skill 加载时于**宿主机**上检查。如果智能体
+    在沙箱中运行，该二进制文件也必须存在于**容器内**。
+    请通过 `agents.defaults.sandbox.docker.setupCommand` 或自定义
+    镜像安装它。`setupCommand` 会在容器创建后运行一次，并要求
+    沙箱中具备网络出口、可写根 FS 和 root 用户。
   </Accordion>
 </AccordionGroup>
 
 ## 配置覆盖
 
-内置和托管技能可以在 `~/.openclaw/openclaw.json` 的 `skills.entries`
-下切换，并提供环境值：
+在 `~/.openclaw/openclaw.json` 的 `skills.entries` 下切换和配置内置或托管的 Skills：
 
 ```json5
 {
@@ -280,10 +358,8 @@ metadata:
     entries: {
       "image-lab": {
         enabled: true,
-        apiKey: { source: "env", provider: "default", id: "GEMINI_API_KEY" }, // or plaintext string
-        env: {
-          GEMINI_API_KEY: "GEMINI_KEY_HERE",
-        },
+        apiKey: { source: "env", provider: "default", id: "GEMINI_API_KEY" },
+        env: { GEMINI_API_KEY: "GEMINI_KEY_HERE" },
         config: {
           endpoint: "https://example.invalid",
           model: "nano-pro",
@@ -297,143 +373,150 @@ metadata:
 ```
 
 <ParamField path="enabled" type="boolean">
-  `false` 会禁用该技能，即使它是内置或已安装的。
-  内置的 `coding-agent` 技能是选择加入的：在将其暴露给智能体之前，设置
-  `skills.entries.coding-agent.enabled: true`，
-  然后确保已安装 `claude`、`codex`、`opencode` 或 `pi` 之一，并已为其自己的 CLI
-  完成身份验证。
-</ParamField>
-<ParamField path="apiKey" type='string | { source, provider, id }'>
-  为声明 `metadata.openclaw.primaryEnv` 的技能提供的便捷配置。支持明文或 SecretRef。
-</ParamField>
-<ParamField path="env" type="Record<string, string>">
-  仅在该变量尚未在进程中设置时注入。
-</ParamField>
-<ParamField path="config" type="object">
-  用于自定义单技能字段的可选包。自定义键必须放在这里。
-</ParamField>
-<ParamField path="allowBundled" type="string[]">
-  仅适用于**内置**技能的可选允许列表。如果设置，只有列表中的内置技能符合条件（托管/工作区技能不受影响）。
+  即使 skill 是内置或已安装的，`false` 也会禁用它。`coding-agent`
+  内置 skill 是选择启用的：设置 `skills.entries.coding-agent.enabled: true`，
+  并确保已安装且已认证 `claude`、`codex`、`opencode` 或其他受支持的 CLI
+  之一。
 </ParamField>
 
-如果技能名称包含连字符，请为键加引号（JSON5 允许带引号的键）。默认情况下，配置键与**技能名称**匹配 - 如果技能
-定义了 `metadata.openclaw.skillKey`，请在 `skills.entries` 下使用该键。
+<ParamField path="apiKey" type='string | { source, provider, id }'>
+  为声明 `metadata.openclaw.primaryEnv` 的 Skills 提供的便捷字段。
+  支持明文字符串或 SecretRef 对象。
+</ParamField>
+
+<ParamField path="env" type="Record<string, string>">
+  为智能体运行注入的环境变量。仅当该变量尚未在进程中设置时才会注入。
+</ParamField>
+
+<ParamField path="config" type="object">
+  用于自定义每个 skill 配置字段的可选包。
+</ParamField>
+
+<ParamField path="allowBundled" type="string[]">
+  仅用于**内置** Skills 的可选允许列表。设置后，只有列表中的内置 Skills
+  符合条件。托管 Skills 和工作区 Skills 不受影响。
+</ParamField>
 
 <Note>
-在 OpenClaw 内部进行原生图像生成/编辑时，请使用核心
-`image_generate` 工具和 `agents.defaults.imageGenerationModel`，而不是
-内置技能。这里的技能示例用于自定义或第三方
-工作流。原生图像分析请使用 `image` 工具和
-`agents.defaults.imageModel`。如果你选择 `openai/*`、`google/*`、
-`fal/*` 或其他提供商特定的图像模型，也要添加该提供商的
-auth/API key。
+  默认情况下，配置键与 **skill 名称**匹配。如果某个 skill 定义了
+  `metadata.openclaw.skillKey`，请在 `skills.entries` 下使用该键。
+  为带连字符的名称加引号：JSON5 允许加引号的键。
 </Note>
 
 ## 环境注入
 
 当智能体运行开始时，OpenClaw 会：
 
-1. 读取技能元数据。
-2. 将 `skills.entries.<key>.env` 和 `skills.entries.<key>.apiKey` 应用于 `process.env`。
-3. 使用**符合条件的**技能构建系统提示词。
-4. 运行结束后恢复原始环境。
+<Steps>
+  <Step title="Reads skill metadata">
+    OpenClaw 会解析该智能体的有效 skill 列表，并应用门控规则、允许列表和配置覆盖。
+  </Step>
+  <Step title="Injects env and API keys">
+    `skills.entries.<key>.env` 和 `skills.entries.<key>.apiKey` 会在运行期间应用到
+    `process.env`。
+  </Step>
+  <Step title="Builds the system prompt">
+    符合条件的 Skills 会被编译成紧凑的 XML 块，并注入到系统提示中。
+  </Step>
+  <Step title="Restores the environment">
+    运行结束后，会恢复原始环境。
+  </Step>
+</Steps>
 
-环境注入的作用域是**智能体运行**，不是全局 shell
-环境。
+<Warning>
+  环境注入的作用域是**宿主机**智能体运行，而不是沙箱。在沙箱内，
+  `env` 和 `apiKey` 不会生效。请参阅
+  [Skills 配置](/zh-CN/tools/skills-config#sandboxed-skills-and-env-vars)，了解如何
+  将密钥传入沙箱隔离的运行。
+</Warning>
 
-对于内置的 `claude-cli` 后端，OpenClaw 还会将同一个
-符合条件的快照实体化为临时 Claude Code 插件，并通过
-`--plugin-dir` 传入。Claude Code 随后可以使用其原生技能解析器，同时
-OpenClaw 仍负责优先级、按智能体允许列表、门控，以及
-`skills.entries.*` env/API key 注入。其他 CLI 后端仅使用
-提示词目录。
+对于内置的 `claude-cli` 后端，OpenClaw 还会将同一个符合条件的 skill
+快照物化为临时 Claude Code 插件，并通过 `--plugin-dir` 传入。
+其他 CLI 后端仅使用提示目录。
 
 ## 快照和刷新
 
-OpenClaw 会在**会话开始时**快照符合条件的技能，并在同一会话的后续轮次中
-复用该列表。对技能或配置的更改会在下一个新会话中生效。
+OpenClaw 会在**会话开始时**为符合条件的 Skills 创建快照，并在该会话的所有后续轮次中复用该列表。对 Skills 或配置的更改会在下一次新会话中生效。
 
-技能可在会话中途在两种情况下刷新：
+会话中途会在两种情况下刷新 Skills：
 
-- 技能观察器已启用。
-- 出现新的符合条件的远程节点。
+- Skills watcher 检测到 `SKILL.md` 更改。
+- 新的符合条件的远程节点连接。
 
-可以把它理解为**热重载**：刷新的列表会在下一个
-智能体轮次中被采用。如果该会话的有效智能体技能允许列表发生变化，
-OpenClaw 会刷新快照，让可见技能与当前智能体保持一致。
+刷新后的列表会在下一次智能体轮次中使用。如果有效的智能体允许列表发生变化，
+OpenClaw 会刷新快照，以保持可见 Skills 对齐。
 
-### Skills 观察器
+<AccordionGroup>
+  <Accordion title="Skills watcher">
+    默认情况下，OpenClaw 会监视 skill 文件夹，并在 `SKILL.md`
+    文件更改时递增快照。在 `skills.load` 下配置：
 
-默认情况下，OpenClaw 会观察技能文件夹，并在 `SKILL.md` 文件变化时更新技能快照。
-在 `skills.load` 下配置：
+    ```json5
+    {
+      skills: {
+        load: {
+          extraDirs: ["~/Projects/agent-scripts/skills"],
+          allowSymlinkTargets: ["~/Projects/manager/skills"],
+          watch: true,
+          watchDebounceMs: 250,
+        },
+      },
+    }
+    ```
 
-```json5
-{
-  skills: {
-    load: {
-      extraDirs: ["~/Projects/agent-scripts/skills"],
-      allowSymlinkTargets: ["~/Projects/manager/skills"],
-      watch: true,
-      watchDebounceMs: 250,
-    },
-  },
-}
-```
+    对于有意使用符号链接的布局，如果 skill 根符号链接指向配置根目录之外，
+    例如 `<workspace>/skills/manager -> ~/Projects/manager/skills`，
+    请使用 `allowSymlinkTargets`。只有当 Skill Workshop 也应通过这些受信任的
+    符号链接路径应用提案时，才启用 `skills.workshop.allowSymlinkTargetWrites`。
 
-对于内置技能根包含符号链接的有意兄弟仓库布局，使用
-`allowSymlinkTargets`，例如
-`~/.agents/skills/manager -> ~/Projects/manager/skills`。目标列表会在 realpath 解析后
-匹配，并应保持狭窄。
+  </Accordion>
+  <Accordion title="Remote macOS nodes (Linux gateway)">
+    如果 Gateway 网关在 Linux 上运行，但连接了一个允许 `system.run` 的
+    **macOS 节点**，且所需二进制文件存在于该节点上，OpenClaw 可以将仅适用于
+    macOS 的 Skills 视为符合条件。智能体应通过 `exec` 工具并使用 `host=node`
+    来运行这些 Skills。
 
-### 远程 macOS 节点（Linux Gateway 网关）
+    离线节点**不会**使仅远程可用的 Skills 可见。如果某个节点停止响应
+    bin 探测，OpenClaw 会清除其缓存的 bin 匹配项。
 
-如果 Gateway 网关运行在 Linux 上，但连接了一个**macOS 节点**且
-允许 `system.run`（Exec 审批安全未设置为 `deny`），
-当所需二进制文件存在于该节点上时，OpenClaw 可以将仅限 macOS 的技能视为符合条件。
-智能体应通过带 `host=node` 的 `exec` 工具执行这些技能。
-
-这依赖于节点报告其命令支持，并通过 `system.which` 或 `system.run`
-进行 bin 探测。离线节点**不会**让仅远程可用的技能可见。
-如果已连接节点停止响应 bin 探测，OpenClaw 会清除其缓存的 bin 匹配，
-这样智能体就不再看到当前无法在那里运行的技能。
+  </Accordion>
+</AccordionGroup>
 
 ## Token 影响
 
-当技能符合条件时，OpenClaw 会将可用技能的紧凑 XML 列表
-注入到系统提示词中（通过 `pi-coding-agent` 中的 `formatSkillsForPrompt`）。
+当 Skills 符合条件时，OpenClaw 会将紧凑的 XML 块注入系统提示。
 成本是确定性的：
 
-- **基础开销**（仅当 ≥1 个技能时）：195 个字符。
-- **每个技能：**97 个字符 + XML 转义后的 `<name>`、`<description>` 和 `<location>` 值长度。
-
-公式（字符）：
-
 ```text
-total = 195 + Σ (97 + len(name_escaped) + len(description_escaped) + len(location_escaped))
+total = 195 + Σ (97 + len(name) + len(description) + len(filepath))
 ```
 
-XML 转义会将 `& < > " '` 扩展为实体（`&amp;`、`&lt;` 等），
-从而增加长度。Token 数会随模型 tokenizer 而变化。粗略的
-OpenAI 风格估计是约 4 个字符/token，因此**97 个字符 ≈ 24 个 token**/每个
-技能，再加上你的实际字段长度。
+- **基础开销**（仅当 ≥ 1 个 skill 时）：约 195 个字符
+- **每个 skill：** 约 97 个字符 + 你的 `name`、`description` 和 `location` 字段长度
+- XML 转义会将 `& < > " '` 扩展为实体，每次出现会增加少量字符
+- 按约 4 字符/token 计算，字段长度之前，97 个字符约等于每个 skill 24 个 token
 
-## 托管技能生命周期
+保持描述简短且有说明性，以尽量减少提示开销。
 
-OpenClaw 随安装（npm 包或 OpenClaw.app）附带一组基线技能作为**内置技能**。
-`~/.openclaw/skills` 用于本地覆盖 - 例如，在不更改
-内置副本的情况下固定或修补某个技能。工作区技能由用户拥有，并会在
-名称冲突时覆盖前两者。
+## 相关内容
 
-## 想找更多技能？
-
-浏览 [https://clawhub.ai](https://clawhub.ai)。完整配置
-schema：[Skills 配置](/zh-CN/tools/skills-config)。
-
-## 相关
-
-- [ClawHub](/zh-CN/clawhub) - 公共技能注册表
-- [创建技能](/zh-CN/tools/creating-skills) - 构建自定义技能
-- [插件](/zh-CN/tools/plugin) - 插件系统概览
-- [Skill Workshop 插件](/zh-CN/plugins/skill-workshop) - 从智能体工作生成技能
-- [Skills 配置](/zh-CN/tools/skills-config) - 技能配置参考
-- [斜杠命令](/zh-CN/tools/slash-commands) - 所有可用斜杠命令
+<CardGroup cols={2}>
+  <Card title="Creating skills" href="/zh-CN/tools/creating-skills" icon="hammer">
+    编写自定义 skill 的分步指南。
+  </Card>
+  <Card title="Skill Workshop" href="/zh-CN/tools/skill-workshop" icon="flask">
+    用于智能体起草 Skills 的提案队列。
+  </Card>
+  <Card title="Skills config" href="/zh-CN/tools/skills-config" icon="gear">
+    完整的 `skills.*` 配置 schema 和智能体允许列表。
+  </Card>
+  <Card title="Slash commands" href="/zh-CN/tools/slash-commands" icon="terminal">
+    skill 斜杠命令如何注册和路由。
+  </Card>
+  <Card title="ClawHub" href="/zh-CN/clawhub" icon="cloud">
+    在公共注册表中浏览和发布 Skills。
+  </Card>
+  <Card title="Plugins" href="/zh-CN/tools/plugin" icon="plug">
+    插件可以随它们所记录的工具一起提供 Skills。
+  </Card>
+</CardGroup>

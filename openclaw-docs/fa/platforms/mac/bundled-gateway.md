@@ -1,69 +1,99 @@
 ---
 read_when:
     - بسته‌بندی OpenClaw.app
-    - اشکال‌زدایی سرویس launchd مربوط به Gateway در macOS
-    - نصب CLI Gateway برای macOS
-summary: محیط اجرای Gateway در macOS (سرویس خارجی launchd)
+    - اشکال‌زدایی سرویس launchd متعلق به Gateway در macOS
+    - نصب CLI درگاه برای macOS
+summary: زمان اجرای Gateway در macOS (سرویس خارجی launchd)
 title: Gateway در macOS
 x-i18n:
-    generated_at: "2026-05-07T13:25:58Z"
+    generated_at: "2026-06-28T00:13:40Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: caf129918c46f8f54026e9db04e8ad5a033148899d3029fe1a362bb14c7f25f8
+    source_hash: 5317e82435ecf179407116339507a666957a8e23a07a49665233b22f22f5b155
     source_path: platforms/mac/bundled-gateway.md
     workflow: 16
 ---
 
-OpenClaw.app دیگر Node/Bun یا زمان اجرای Gateway را همراه خود بسته‌بندی نمی‌کند. برنامه macOS
-انتظار دارد CLI `openclaw` به‌صورت **خارجی** نصب شده باشد، Gateway را به‌عنوان
-فرآیند فرزند اجرا نمی‌کند، و یک سرویس launchd مختص هر کاربر را مدیریت می‌کند تا Gateway
+OpenClaw.app دیگر Node/Bun یا زمان‌اجرای Gateway را همراه خود ارائه نمی‌کند. برنامه macOS
+انتظار دارد CLI **خارجی** `openclaw` نصب شده باشد، Gateway را به‌عنوان
+فرایند فرزند اجرا نمی‌کند، و یک سرویس launchd مخصوص هر کاربر را مدیریت می‌کند تا Gateway
 در حال اجرا بماند (یا اگر یک Gateway محلی از قبل در حال اجرا باشد، به همان متصل می‌شود).
 
 ## نصب CLI (برای حالت محلی الزامی است)
 
-Node 24 زمان اجرای پیش‌فرض در Mac است. Node 22 LTS، در حال حاضر `22.16+`، همچنان برای سازگاری کار می‌کند. سپس `openclaw` را به‌صورت سراسری نصب کنید:
+Node 24 زمان‌اجرای پیش‌فرض روی Mac است. Node 22 LTS، که در حال حاضر `22.19+` است، همچنان برای سازگاری کار می‌کند. سپس `openclaw` را به‌صورت سراسری نصب کنید:
 
 ```bash
 npm install -g openclaw@<version>
 ```
 
 دکمه **Install CLI** در برنامه macOS همان جریان نصب سراسری را اجرا می‌کند که برنامه
-در داخل از آن استفاده می‌کند: ابتدا npm را ترجیح می‌دهد، سپس pnpm، و بعد bun را اگر تنها
-مدیر بسته شناسایی‌شده باشد. Node همچنان زمان اجرای توصیه‌شده برای Gateway است.
+در داخل استفاده می‌کند: ابتدا npm را ترجیح می‌دهد، سپس pnpm، و بعد bun اگر تنها
+مدیر بسته شناسایی‌شده باشد. Node همچنان زمان‌اجرای پیشنهادی Gateway است.
 
 ## Launchd (Gateway به‌عنوان LaunchAgent)
 
 برچسب:
 
-- `ai.openclaw.gateway` (یا `ai.openclaw.<profile>`؛ قالب قدیمی `com.openclaw.*` ممکن است باقی بماند)
+- `ai.openclaw.gateway` (یا `ai.openclaw.<profile>`؛ `com.openclaw.*` قدیمی ممکن است باقی بماند)
 
-محل Plist (مختص هر کاربر):
+مکان Plist (برای هر کاربر):
 
 - `~/Library/LaunchAgents/ai.openclaw.gateway.plist`
   (یا `~/Library/LaunchAgents/ai.openclaw.<profile>.plist`)
 
 مدیر:
 
-- برنامه macOS نصب/به‌روزرسانی LaunchAgent را در حالت محلی بر عهده دارد.
+- برنامه macOS مالک نصب/به‌روزرسانی LaunchAgent در حالت Local است.
 - CLI نیز می‌تواند آن را نصب کند: `openclaw gateway install`.
 
 رفتار:
 
-- «OpenClaw Active»‏ LaunchAgent را فعال/غیرفعال می‌کند.
-- خروج از برنامه Gateway را متوقف نمی‌کند (launchd آن را زنده نگه می‌دارد).
-- اگر یک Gateway از قبل روی پورت پیکربندی‌شده در حال اجرا باشد، برنامه به‌جای
-  شروع نمونه‌ای جدید، به همان متصل می‌شود.
+- «OpenClaw Active» LaunchAgent را فعال/غیرفعال می‌کند.
+- خروج از برنامه Gateway را متوقف **نمی‌کند** (launchd آن را زنده نگه می‌دارد).
+- اگر Gateway از قبل روی پورت پیکربندی‌شده در حال اجرا باشد، برنامه به‌جای
+  شروع نمونه‌ای جدید، به آن متصل می‌شود.
 
-ثبت رخداد:
+ثبت گزارش:
 
-- خروجی استاندارد/خطای launchd: `/tmp/openclaw/openclaw-gateway.log`
+- stdout مربوط به launchd: `~/Library/Logs/openclaw/gateway.log` (پروفایل‌ها از `gateway-<profile>.log` استفاده می‌کنند)
+- stderr مربوط به launchd: سرکوب‌شده
 
 ## سازگاری نسخه
 
-برنامه macOS نسخه Gateway را با نسخه خودش بررسی می‌کند. اگر ناسازگار باشند،
+برنامه macOS نسخه gateway را با نسخه خودش بررسی می‌کند. اگر ناسازگار باشند،
 CLI سراسری را به‌روزرسانی کنید تا با نسخه برنامه مطابقت داشته باشد.
 
-## بررسی Smoke
+## پوشه وضعیت در macOS
+
+وضعیت OpenClaw را روی یک دیسک محلی و غیرهمگام‌سازی‌شده نگه دارید. از iCloud Drive و دیگر
+پوشه‌های همگام‌شده با ابر اجتناب کنید، زیرا تأخیر همگام‌سازی و قفل‌های فایل می‌توانند روی نشست‌ها،
+اعتبارنامه‌ها، و وضعیت Gateway اثر بگذارند.
+
+`OPENCLAW_STATE_DIR` را فقط زمانی روی یک مسیر محلی تنظیم کنید که به override نیاز دارید.
+`openclaw doctor` درباره مسیرهای رایج وضعیت که با ابر همگام می‌شوند هشدار می‌دهد و توصیه می‌کند
+به ذخیره‌سازی محلی برگردید. ببینید
+[متغیرهای محیطی](/fa/help/environment#path-related-env-vars) و
+[Doctor](/fa/gateway/doctor).
+
+## اشکال‌زدایی اتصال برنامه
+
+از CLI اشکال‌زدایی macOS در یک source checkout استفاده کنید تا همان منطق دست‌دهی WebSocket
+و کشف Gateway را که برنامه استفاده می‌کند اجرا کنید:
+
+```bash
+cd apps/macos
+swift run openclaw-mac connect --json
+swift run openclaw-mac discover --timeout 3000 --json
+```
+
+`connect` گزینه‌های `--url`، `--token`، `--timeout`، و `--json` را می‌پذیرد. `discover`
+گزینه‌های `--timeout`، `--json`، و `--include-local` را می‌پذیرد. وقتی لازم است کشف CLI
+را از مشکلات اتصال سمت برنامه جدا کنید، خروجی کشف را با `openclaw gateway discover --json`
+مقایسه کنید.
+
+## بررسی دود
 
 ```bash
 openclaw --version
