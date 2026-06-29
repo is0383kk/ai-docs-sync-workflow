@@ -1,75 +1,91 @@
 ---
 read_when:
-    - Chcesz używać subskrypcji Claude Max z narzędziami kompatybilnymi z OpenAI
-    - Chcesz lokalny serwer API, który opakowuje Claude Code CLI
-    - Chcesz porównać dostęp oparty na subskrypcji i dostęp oparty na kluczu API Anthropic
-summary: Proxy społecznościowe do udostępniania poświadczeń subskrypcji Claude jako endpointu kompatybilnego z OpenAI
+    - Chcesz używać subskrypcji Claude Max z narzędziami zgodnymi z OpenAI
+    - Chcesz lokalny serwer API, który opakowuje CLI Claude Code
+    - Chcesz ocenić dostęp do Anthropic oparty na subskrypcji w porównaniu z dostępem opartym na kluczu API
+summary: Społecznościowy proxy udostępniający poświadczenia subskrypcji Claude jako punkt końcowy zgodny z OpenAI
 title: Proxy API Claude Max
 x-i18n:
-    generated_at: "2026-04-24T09:27:06Z"
-    model: gpt-5.4
+    generated_at: "2026-06-28T20:45:09Z"
+    model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 06c685c2f42f462a319ef404e4980f769e00654afb9637d873b98144e6a41c87
+    source_hash: 5d8800f7d5bd7adf9bff4825a45878a1bbde73b4d54afe4b5b4aa2b1b5523bee
     source_path: providers/claude-max-api-proxy.md
-    workflow: 15
+    workflow: 16
 ---
 
-**claude-max-api-proxy** to narzędzie społeczności, które udostępnia Twoją subskrypcję Claude Max/Pro jako endpoint API kompatybilny z OpenAI. Pozwala to używać subskrypcji z dowolnym narzędziem obsługującym format API OpenAI.
+**claude-max-api-proxy** to narzędzie społecznościowe, które udostępnia Twoją subskrypcję Claude Max/Pro jako zgodny z OpenAI punkt końcowy API. Pozwala to używać subskrypcji z dowolnym narzędziem obsługującym format OpenAI API.
 
 <Warning>
-Ta ścieżka zapewnia tylko zgodność techniczną. Anthropic w przeszłości blokował część użycia subskrypcji
-poza Claude Code. Sam musisz zdecydować, czy chcesz z tego korzystać,
-i sprawdzić aktualne warunki Anthropic, zanim zaczniesz na tym polegać.
+Ta ścieżka służy wyłącznie do zgodności technicznej. Anthropic w przeszłości blokował część użycia subskrypcji
+poza Claude Code. Musisz samodzielnie zdecydować, czy jej używać,
+i zweryfikować bieżące zasady rozliczeń Anthropic, zanim zaczniesz na niej polegać.
+
+Bieżąca dokumentacja pomocy Anthropic mówi, że `claude -p` to użycie Agent SDK/programistyczne.
+Aktualizacja pomocy Anthropic z 15 czerwca 2026 r. wstrzymała zapowiedziany osobny plan kredytów
+Agent SDK. Na razie Claude Agent SDK, `claude -p` oraz użycie aplikacji firm trzecich
+nadal korzystają z limitów użycia zalogowanej subskrypcji.
+
+Przed poleganiem na tej ścieżce sprawdź [artykuł o planie Agent SDK
+Anthropic](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan),
+a także artykuły pomocy Claude Code dla kont
+[Pro/Max](https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan)
+lub
+[Team/Enterprise](https://support.claude.com/en/articles/11845131-use-claude-code-with-your-team-or-enterprise-plan).
 </Warning>
 
-## Dlaczego warto tego używać?
+## Dlaczego tego używać?
 
-| Podejście               | Koszt                                               | Najlepsze do                                |
-| ----------------------- | --------------------------------------------------- | ------------------------------------------- |
-| API Anthropic           | Opłata za token (~$15/M wejścia, $75/M wyjścia dla Opus) | Aplikacje produkcyjne, duży wolumen     |
-| Subskrypcja Claude Max  | $200/miesiąc ryczałtowo                             | Użycie osobiste, rozwój, nieograniczone użycie |
+| Podejście                 | Ścieżka kosztów                                  | Najlepsze dla                               |
+| ------------------------- | ----------------------------------------------- | ------------------------------------------ |
+| Anthropic API             | Płatność za token przez Claude Console lub chmurę | Aplikacje produkcyjne, współdzielona automatyzacja, duża skala |
+| Proxy subskrypcji Claude | Zasady planu i kredytów Claude Code / `claude -p` | Osobiste eksperymenty ze zgodnymi narzędziami |
 
-Jeśli masz subskrypcję Claude Max i chcesz używać jej z narzędziami kompatybilnymi z OpenAI, ten proxy może obniżyć koszt niektórych przepływów pracy. Klucze API pozostają bardziej jednoznaczną ścieżką polityki dla zastosowań produkcyjnych.
+Jeśli masz subskrypcję Claude Max lub Pro i chcesz używać jej z narzędziami
+zgodnymi z OpenAI, ten proxy może pasować do niektórych osobistych przepływów pracy. Nie jest to
+nielimitowana ścieżka z opłatą ryczałtową. Klucze API pozostają jaśniejszą ścieżką zasad i rozliczeń
+dla użycia produkcyjnego.
 
 ## Jak to działa
 
 ```
-Twoja aplikacja → claude-max-api-proxy → Claude Code CLI → Anthropic (przez subskrypcję)
-   (format OpenAI)              (konwertuje format)         (używa Twojego logowania)
+Your App → claude-max-api-proxy → Claude Code CLI / claude -p → Anthropic
+     (OpenAI format)              (converts format)          (uses your login)
 ```
 
 Proxy:
 
 1. Przyjmuje żądania w formacie OpenAI pod `http://localhost:3456/v1/chat/completions`
 2. Konwertuje je na polecenia Claude Code CLI
-3. Zwraca odpowiedzi w formacie OpenAI (obsługiwany streaming)
+3. Zwraca odpowiedzi w formacie OpenAI (obsługiwane jest strumieniowanie)
 
 ## Pierwsze kroki
 
 <Steps>
-  <Step title="Install the proxy">
-    Wymaga Node.js 20+ oraz Claude Code CLI.
+  <Step title="Zainstaluj proxy">
+    Wymaga Node.js 22+ oraz Claude Code CLI.
 
     ```bash
     npm install -g claude-max-api-proxy
 
-    # Zweryfikuj, że Claude CLI jest uwierzytelnione
+    # Verify Claude CLI is authenticated
     claude --version
     ```
 
   </Step>
-  <Step title="Start the server">
+  <Step title="Uruchom serwer">
     ```bash
     claude-max-api
-    # Serwer działa pod http://localhost:3456
+    # Server runs at http://localhost:3456
     ```
   </Step>
-  <Step title="Test the proxy">
+  <Step title="Przetestuj proxy">
     ```bash
     # Health check
     curl http://localhost:3456/health
 
-    # Wyświetl modele
+    # List models
     curl http://localhost:3456/v1/models
 
     # Chat completion
@@ -82,8 +98,8 @@ Proxy:
     ```
 
   </Step>
-  <Step title="Configure OpenClaw">
-    Skieruj OpenClaw na proxy jako niestandardowy endpoint kompatybilny z OpenAI:
+  <Step title="Skonfiguruj OpenClaw">
+    Skieruj OpenClaw na proxy jako niestandardowy punkt końcowy zgodny z OpenAI:
 
     ```json5
     {
@@ -104,29 +120,29 @@ Proxy:
 
 ## Wbudowany katalog
 
-| ID modelu         | Mapuje do       |
+| ID modelu         | Odpowiada       |
 | ----------------- | --------------- |
 | `claude-opus-4`   | Claude Opus 4   |
 | `claude-sonnet-4` | Claude Sonnet 4 |
 | `claude-haiku-4`  | Claude Haiku 4  |
 
-## Zaawansowana konfiguracja
+## Konfiguracja zaawansowana
 
 <AccordionGroup>
-  <Accordion title="Uwagi dotyczące trasy proxy w stylu OpenAI-compatible">
-    Ta ścieżka używa tej samej trasy proxy w stylu OpenAI-compatible co inne niestandardowe
+  <Accordion title="Uwagi dotyczące zgodnej z OpenAI ścieżki typu proxy">
+    Ta ścieżka używa tej samej zgodnej z OpenAI trasy typu proxy co inne niestandardowe
     backendy `/v1`:
 
     - Natywne kształtowanie żądań tylko dla OpenAI nie ma zastosowania
-    - Brak `service_tier`, brak `store` dla Responses, brak wskazówek prompt-cache i brak
-      kształtowania ładunków zgodności z rozumowaniem OpenAI
+    - Brak `service_tier`, brak Responses `store`, brak wskazówek pamięci podręcznej promptów oraz brak
+      kształtowania payloadu zgodnego z reasoning OpenAI
     - Ukryte nagłówki atrybucji OpenClaw (`originator`, `version`, `User-Agent`)
-      nie są wstrzykiwane na URL proxy
+      nie są wstrzykiwane pod adresem URL proxy
 
   </Accordion>
 
-  <Accordion title="Auto-start na macOS przez LaunchAgent">
-    Utwórz LaunchAgent, aby uruchamiać proxy automatycznie:
+  <Accordion title="Automatyczny start na macOS z LaunchAgent">
+    Utwórz LaunchAgent, aby automatycznie uruchamiać proxy:
 
     ```bash
     cat > ~/Library/LaunchAgents/com.claude-max-api.plist << 'EOF'
@@ -160,36 +176,31 @@ Proxy:
   </Accordion>
 </AccordionGroup>
 
-## Linki
-
-- **npm:** [https://www.npmjs.com/package/claude-max-api-proxy](https://www.npmjs.com/package/claude-max-api-proxy)
-- **GitHub:** [https://github.com/atalovesyou/claude-max-api-proxy](https://github.com/atalovesyou/claude-max-api-proxy)
-- **Issues:** [https://github.com/atalovesyou/claude-max-api-proxy/issues](https://github.com/atalovesyou/claude-max-api-proxy/issues)
-
 ## Uwagi
 
-- To **narzędzie społeczności**, nieobsługiwane oficjalnie przez Anthropic ani OpenClaw
+- To **narzędzie społecznościowe**, które nie jest oficjalnie wspierane przez Anthropic ani OpenClaw
 - Wymaga aktywnej subskrypcji Claude Max/Pro z uwierzytelnionym Claude Code CLI
-- Proxy działa lokalnie i nie wysyła danych do żadnych zewnętrznych serwerów
-- Odpowiedzi streamingowe są w pełni obsługiwane
+- Dziedziczy zachowanie rozliczeń, kredytów użycia i limitów szybkości Claude Code `claude -p`
+- Proxy działa lokalnie i nie wysyła danych na żadne serwery firm trzecich
+- Odpowiedzi strumieniowe są w pełni obsługiwane
 
 <Note>
-Dla natywnej integracji Anthropic z Claude CLI albo kluczami API zobacz [Anthropic provider](/pl/providers/anthropic). Dla subskrypcji OpenAI/Codex zobacz [OpenAI provider](/pl/providers/openai).
+Aby użyć natywnej integracji Anthropic z Claude CLI lub kluczami API, zobacz [dostawcę Anthropic](/pl/providers/anthropic). Dla subskrypcji OpenAI/Codex zobacz [dostawcę OpenAI](/pl/providers/openai).
 </Note>
 
 ## Powiązane
 
 <CardGroup cols={2}>
-  <Card title="Anthropic provider" href="/pl/providers/anthropic" icon="bolt">
-    Natywna integracja OpenClaw z Claude CLI albo kluczami API.
+  <Card title="Dostawca Anthropic" href="/pl/providers/anthropic" icon="bolt">
+    Natywna integracja OpenClaw z Claude CLI lub kluczami API.
   </Card>
-  <Card title="OpenAI provider" href="/pl/providers/openai" icon="robot">
+  <Card title="Dostawca OpenAI" href="/pl/providers/openai" icon="robot">
     Dla subskrypcji OpenAI/Codex.
   </Card>
-  <Card title="Model selection" href="/pl/concepts/model-providers" icon="layers">
-    Przegląd wszystkich providerów, referencji modeli i zachowania failover.
+  <Card title="Wybór modelu" href="/pl/concepts/model-providers" icon="layers">
+    Przegląd wszystkich dostawców, odwołań do modeli i zachowania przełączania awaryjnego.
   </Card>
-  <Card title="Configuration" href="/pl/gateway/configuration" icon="gear">
+  <Card title="Konfiguracja" href="/pl/gateway/configuration" icon="gear">
     Pełna dokumentacja konfiguracji.
   </Card>
 </CardGroup>

@@ -1,31 +1,32 @@
 ---
 read_when:
-    - 처음부터 시작하는 초기 설정
-    - 작동하는 채팅을 가장 빠르게 시작하고 싶습니다
-summary: 몇 분 만에 OpenClaw를 설치하고 첫 채팅을 시작하세요.
+    - 처음부터 하는 최초 설정
+    - 작동하는 채팅으로 가는 가장 빠른 경로를 원합니다
+summary: 몇 분 안에 OpenClaw를 설치하고 첫 채팅을 실행하세요.
 title: 시작하기
 x-i18n:
-    generated_at: "2026-05-07T13:25:18Z"
+    generated_at: "2026-06-28T20:44:19Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 295ce8fd03320027a77a3aef494f785f0fe58e0f57c72ee63f6f9aca68626c20
+    source_hash: 579ed2b4797dc851b0293b96a4177cc356641b6842fe45c4d48f4e8c224eef75
     source_path: start/getting-started.md
     workflow: 16
 ---
 
-OpenClaw를 설치하고, 온보딩을 실행한 다음, AI 어시스턴트와 채팅하세요. 모두
+OpenClaw를 설치하고, 온보딩을 실행한 뒤, AI 어시스턴트와 채팅하세요. 모두
 약 5분이면 됩니다. 완료하면 실행 중인 Gateway, 구성된 인증,
-그리고 작동하는 채팅 세션을 갖게 됩니다.
+작동하는 채팅 세션을 갖게 됩니다.
 
 ## 필요한 것
 
-- **Node.js** — Node 24 권장(Node 22.16+도 지원)
+- **Node.js** — Node 24 권장(Node 22.19+도 지원)
 - 모델 제공업체(Anthropic, OpenAI, Google 등)의 **API 키** — 온보딩 중 입력하라는 메시지가 표시됩니다
 
 <Tip>
 `node --version`으로 Node 버전을 확인하세요.
-**Windows 사용자:** 네이티브 Windows와 WSL2가 모두 지원됩니다. WSL2가 더
-안정적이며 전체 경험에 권장됩니다. [Windows](/ko/platforms/windows)를 참조하세요.
+**Windows 사용자:** 네이티브 Windows Hub 앱이 가장 쉬운 데스크톱 경로입니다.
+PowerShell 설치 프로그램과 WSL2 Gateway 경로도 지원됩니다. [Windows](/ko/platforms/windows)를 참조하세요.
 Node를 설치해야 하나요? [Node 설정](/ko/install/node)을 참조하세요.
 </Tip>
 
@@ -62,7 +63,10 @@ Node를 설치해야 하나요? [Node 설정](/ko/install/node)을 참조하세�
     ```
 
     마법사가 모델 제공업체 선택, API 키 설정,
-    Gateway 구성 과정을 안내합니다. 약 2분이 걸립니다.
+    Gateway 구성을 안내합니다. QuickStart는 보통 몇 분이면 끝나지만,
+    제공업체 로그인, 채널 페어링, 데몬 설치, 네트워크 다운로드, Skills,
+    또는 선택적 Plugin 때문에 전체 온보딩 시간이 더 길어질 수 있습니다. 선택 단계는 건너뛰고
+    나중에 `openclaw configure`로 돌아올 수 있습니다.
 
     전체 참조는 [온보딩(CLI)](/ko/start/wizard)을 참조하세요.
 
@@ -72,7 +76,7 @@ Node를 설치해야 하나요? [Node 설정](/ko/install/node)을 참조하세�
     openclaw gateway status
     ```
 
-    Gateway가 포트 18789에서 수신 대기 중인 것을 볼 수 있어야 합니다.
+    Gateway가 포트 18789에서 수신 중인 것을 볼 수 있습니다.
 
   </Step>
   <Step title="대시보드 열기">
@@ -80,27 +84,26 @@ Node를 설치해야 하나요? [Node 설정](/ko/install/node)을 참조하세�
     openclaw dashboard
     ```
 
-    브라우저에서 Control UI가 열립니다. 로드되면 모든 것이 정상 작동 중입니다.
+    브라우저에서 Control UI가 열립니다. 로드되면 모든 것이 작동 중입니다.
 
   </Step>
   <Step title="첫 메시지 보내기">
-    Control UI 채팅에 메시지를 입력하면 AI 답변을 받을 수 있습니다.
+    Control UI 채팅에 메시지를 입력하면 AI 응답을 받을 수 있습니다.
 
     대신 휴대폰에서 채팅하고 싶나요? 가장 빠르게 설정할 수 있는 채널은
-    [Telegram](/ko/channels/telegram)입니다(봇 토큰만 있으면 됩니다). 모든 옵션은 [채널](/ko/channels)을
-    참조하세요.
+    [Telegram](/ko/channels/telegram)(봇 토큰만 필요)입니다. 모든 옵션은 [채널](/ko/channels)을 참조하세요.
 
   </Step>
 </Steps>
 
 <Accordion title="고급: 사용자 지정 Control UI 빌드 마운트">
-  현지화되었거나 사용자 지정된 대시보드 빌드를 유지 관리하는 경우,
-  `gateway.controlUi.root`가 빌드된 정적
-  에셋과 `index.html`이 포함된 디렉터리를 가리키도록 설정하세요.
+  현지화되었거나 사용자 지정된 대시보드 빌드를 유지 관리한다면,
+  빌드된 정적 에셋과 `index.html`이 들어 있는 디렉터리를
+  `gateway.controlUi.root`로 지정하세요.
 
 ```bash
 mkdir -p "$HOME/.openclaw/control-ui-custom"
-# 빌드된 정적 파일을 해당 디렉터리로 복사합니다.
+# 빌드된 정적 파일을 해당 디렉터리에 복사합니다.
 ```
 
 그런 다음 다음을 설정하세요.
@@ -116,7 +119,7 @@ mkdir -p "$HOME/.openclaw/control-ui-custom"
 }
 ```
 
-gateway를 다시 시작하고 대시보드를 다시 여세요.
+Gateway를 다시 시작하고 대시보드를 다시 여세요.
 
 ```bash
 openclaw gateway restart
@@ -135,15 +138,15 @@ openclaw dashboard
     에이전트에게 메시지를 보낼 수 있는 사람을 제어하세요.
   </Card>
   <Card title="Gateway 구성" href="/ko/gateway/configuration" icon="settings">
-    모델, 도구, sandbox, 고급 설정.
+    모델, 도구, 샌드박스, 고급 설정.
   </Card>
-  <Card title="도구 탐색" href="/ko/tools" icon="wrench">
+  <Card title="도구 둘러보기" href="/ko/tools" icon="wrench">
     브라우저, exec, 웹 검색, Skills, Plugin.
   </Card>
 </Columns>
 
 <Accordion title="고급: 환경 변수">
-  OpenClaw를 서비스 계정으로 실행하거나 사용자 지정 경로를 사용하려는 경우:
+  OpenClaw를 서비스 계정으로 실행하거나 사용자 지정 경로를 원한다면:
 
 - `OPENCLAW_HOME` — 내부 경로 확인을 위한 홈 디렉터리
 - `OPENCLAW_STATE_DIR` — 상태 디렉터리 재정의
@@ -152,7 +155,7 @@ openclaw dashboard
 전체 참조: [환경 변수](/ko/help/environment).
 </Accordion>
 
-## 관련 항목
+## 관련
 
 - [설치 개요](/ko/install)
 - [채널 개요](/ko/channels)

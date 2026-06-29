@@ -1,28 +1,29 @@
 ---
 read_when:
-    - Вам потрібно викликати допоміжні функції ядра з плагіна (TTS, STT, генерація зображень, вебпошук, субагент, вузли)
+    - Вам потрібно викликати основні допоміжні функції з plugin (TTS, STT, генерація зображень, вебпошук, субагент, вузли)
     - Ви хочете зрозуміти, що надає api.runtime
-    - Ви звертаєтеся до допоміжних функцій конфігурації, агента або медіа з коду Plugin
+    - Ви отримуєте доступ до допоміжних функцій конфігурації, агента або медіа з коду Plugin
 sidebarTitle: Runtime helpers
-summary: api.runtime -- впроваджені допоміжні засоби середовища виконання, доступні для плагінів
-title: Допоміжні засоби середовища виконання для Plugin
+summary: api.runtime -- ін’єктовані допоміжні засоби середовища виконання, доступні плагінам
+title: Допоміжні засоби середовища виконання Plugin
 x-i18n:
-    generated_at: "2026-05-11T20:51:41Z"
+    generated_at: "2026-06-28T20:44:40Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 9d94d9f69c51711800e557274299b0e84679deda4e48c743bf193b7f32fe8d71
+    source_hash: b2bd70bb36ab8fb0fbecb982f56b1302a2a01a8d7ae6f78d3558fbaa8c28742e
     source_path: plugins/sdk-runtime.md
     workflow: 16
 ---
 
-Довідник для об’єкта `api.runtime`, який впроваджується в кожен plugin під час реєстрації. Використовуйте ці допоміжні функції замість прямого імпорту внутрішніх модулів хоста.
+Довідник для об’єкта `api.runtime`, який впроваджується в кожен плагін під час реєстрації. Використовуйте ці допоміжні функції замість прямого імпорту внутрішніх компонентів хоста.
 
 <CardGroup cols={2}>
   <Card title="Channel plugins" href="/uk/plugins/sdk-channel-plugins">
-    Покроковий посібник, який показує використання цих допоміжних функцій у контексті для channel plugins.
+    Покроковий посібник, який показує використання цих допоміжних функцій у контексті плагінів каналів.
   </Card>
   <Card title="Provider plugins" href="/uk/plugins/sdk-provider-plugins">
-    Покроковий посібник, який показує використання цих допоміжних функцій у контексті для provider plugins.
+    Покроковий посібник, який показує використання цих допоміжних функцій у контексті плагінів провайдерів.
   </Card>
 </CardGroup>
 
@@ -32,36 +33,76 @@ register(api) {
 }
 ```
 
-## Завантаження конфігурації та записи
+## Завантаження й запис конфігурації
 
-Надавайте перевагу конфігурації, яку вже було передано в активний шлях виклику, наприклад `api.config` під час реєстрації або аргумент `cfg` у callback-функціях каналу чи провайдера. Так один знімок процесу проходитиме через усю роботу, замість повторного розбору конфігурації на гарячих шляхах.
+Віддавайте перевагу конфігурації, яку вже передано в активний шлях виклику, наприклад `api.config` під час реєстрації або аргумент `cfg` у callback-функціях каналу чи провайдера. Так один знімок процесу проходить крізь роботу без повторного розбору конфігурації на гарячих шляхах.
 
-Використовуйте `api.runtime.config.current()` лише тоді, коли довготривалому обробнику потрібен поточний знімок процесу, а конфігурацію не було передано цій функції. Повернене значення доступне лише для читання; перед редагуванням клонуйте його або скористайтеся допоміжною функцією мутації.
+Використовуйте `api.runtime.config.current()` лише тоді, коли довготривалому обробнику потрібен поточний знімок процесу й у цю функцію не було передано конфігурацію. Повернене значення доступне тільки для читання; перед редагуванням клонуйте його або використайте допоміжну функцію мутації.
 
-Фабрики інструментів отримують `ctx.runtimeConfig` і `ctx.getRuntimeConfig()`. Використовуйте getter усередині callback-функції `execute` довготривалого інструмента, коли конфігурація може змінитися після створення визначення інструмента.
+Фабрики інструментів отримують `ctx.runtimeConfig` разом із `ctx.getRuntimeConfig()`. Використовуйте getter всередині callback-функції `execute` довготривалого інструмента, коли конфігурація може змінитися після створення визначення інструмента.
 
-Зберігайте зміни за допомогою `api.runtime.config.mutateConfigFile(...)` або `api.runtime.config.replaceConfigFile(...)`. Кожен запис має вибрати явну політику `afterWrite`:
+Зберігайте зміни через `api.runtime.config.mutateConfigFile(...)` або `api.runtime.config.replaceConfigFile(...)`. Кожен запис має вибрати явну політику `afterWrite`:
 
 - `afterWrite: { mode: "auto" }` дозволяє планувальнику перезавантаження Gateway ухвалити рішення.
 - `afterWrite: { mode: "restart", reason: "..." }` примусово виконує чистий перезапуск, коли автор запису знає, що гаряче перезавантаження небезпечне.
-- `afterWrite: { mode: "none", reason: "..." }` пригнічує автоматичне перезавантаження чи перезапуск лише тоді, коли викликач сам відповідає за подальші дії.
+- `afterWrite: { mode: "none", reason: "..." }` пригнічує автоматичне перезавантаження або перезапуск лише тоді, коли викликач сам відповідає за подальші дії.
 
-Допоміжні функції мутації повертають `afterWrite` і типізований підсумок `followUp`, щоб викликачі могли логувати або тестувати, чи вони запитали перезапуск. Gateway і далі відповідає за те, коли цей перезапуск фактично відбудеться.
+Допоміжні функції мутації повертають `afterWrite` разом із типізованим підсумком `followUp`, щоб викликачі могли журналювати або тестувати, чи вони запросили перезапуск. Gateway і надалі відповідає за те, коли цей перезапуск фактично відбудеться.
 
-`api.runtime.config.loadConfig()` і `api.runtime.config.writeConfigFile(...)` є застарілими допоміжними функціями сумісності в межах `runtime-config-load-write`. Вони один раз попереджають під час виконання й залишаються доступними для старих зовнішніх plugins протягом вікна міграції. Вбудовані plugins не повинні їх використовувати; захист межі конфігурації завершується помилкою, якщо код plugin викликає їх або імпортує ці допоміжні функції з підшляхів plugin SDK.
+`api.runtime.config.loadConfig()` і `api.runtime.config.writeConfigFile(...)` є застарілими допоміжними функціями сумісності в межах `runtime-config-load-write`. Вони один раз попереджають під час виконання й залишаються доступними для старих зовнішніх плагінів протягом міграційного вікна. Вбудовані плагіни не повинні їх використовувати; захисні механізми межі конфігурації падають, якщо код плагіна викликає їх або імпортує ці допоміжні функції з підшляхів SDK плагінів.
 
-Для прямих імпортів SDK використовуйте спеціалізовані підшляхи конфігурації замість широкого
-бареля сумісності `openclaw/plugin-sdk/config-runtime`: `config-contracts` для
+Для прямих імпортів SDK використовуйте сфокусовані підшляхи конфігурації замість широкого сумісного barrel
+`openclaw/plugin-sdk/config-runtime`: `config-contracts` для
 типів, `plugin-config-runtime` для перевірок уже завантаженої конфігурації та пошуку
-точки входу plugin, `runtime-config-snapshot` для поточних знімків процесу, а
-`config-mutation` для записів. Тести вбудованих plugin мають мокати ці спеціалізовані
-підшляхи безпосередньо, а не широкий барель сумісності.
+точки входу плагіна, `runtime-config-snapshot` для поточних знімків процесу, і
+`config-mutation` для записів. Тести вбудованих плагінів мають напряму імітувати ці сфокусовані
+підшляхи замість імітації широкого сумісного barrel.
 
-Внутрішній runtime-код OpenClaw має той самий напрям: завантажити конфігурацію один раз на межі CLI, Gateway або процесу, а потім передавати це значення далі. Успішні записи мутації оновлюють runtime-знімок процесу й просувають його внутрішню ревізію; довготривалі кеші мають використовувати ключ кешу, яким володіє runtime, замість локальної серіалізації конфігурації. Довготривалі runtime-модулі мають сканер із нульовою толерантністю до неявних викликів `loadConfig()`; використовуйте переданий `cfg`, запит `context.getRuntimeConfig()` або `getRuntimeConfig()` на явній межі процесу.
+Внутрішній runtime-код OpenClaw має той самий напрям: завантажте конфігурацію один раз на межі CLI, Gateway або процесу, а потім передавайте це значення далі. Успішні записи мутацій оновлюють runtime-знімок процесу та просувають його внутрішню ревізію; довготривалі кеші мають використовувати як ключ runtime-власний ключ кешу замість локальної серіалізації конфігурації. Довготривалі runtime-модулі мають сканер нульової толерантності до неявних викликів `loadConfig()`; використовуйте переданий `cfg`, запит `context.getRuntimeConfig()` або `getRuntimeConfig()` на явній межі процесу.
 
-Шляхи виконання провайдера й каналу мають використовувати активний знімок runtime-конфігурації, а не файловий знімок, повернений для зворотного читання чи редагування конфігурації. Файлові знімки зберігають вихідні значення, як-от маркери SecretRef, для UI та записів; callback-функціям провайдера потрібне розв’язане runtime-представлення. Коли допоміжну функцію можна викликати як з активним вихідним знімком, так і з активним runtime-знімком, перед читанням облікових даних маршрутизуйте через `selectApplicableRuntimeConfig()`.
+Шляхи виконання провайдера й каналу мають використовувати активний runtime-знімок конфігурації, а не файловий знімок, повернений для читання або редагування конфігурації. Файлові знімки зберігають вихідні значення, як-от маркери SecretRef, для UI та записів; callback-функціям провайдера потрібне розв’язане runtime-подання. Коли допоміжну функцію може бути викликано або з активним вихідним знімком, або з активним runtime-знімком, перед читанням облікових даних скеровуйте її через `selectApplicableRuntimeConfig()`.
 
-## Простори імен runtime
+## Повторно використовувані runtime-утиліти
+
+Використовуйте вхідні факти `botLoopProtection` для вхідних повідомлень, створених ботом. Core застосовує спільний in-memory захист із ковзним вікном перед записом сесії та dispatch, не прив’язуючи політику до одного каналу. Захист відстежує ключі `(scopeId, conversationId, participant pair)`, рахує обидва напрямки пари разом, застосовує cooldown після перевищення бюджету вікна та opportunistic обрізає неактивні записи.
+
+Плагіни каналів, які показують цю поведінку операторам, мають віддавати перевагу спільній формі `channels.defaults.botLoopProtection` для базових бюджетів, а потім накладати зверху перевизначення, специфічні для каналу або провайдера. Спільна конфігурація використовує секунди, бо вона видима користувачу:
+
+```typescript
+type ChannelBotLoopProtectionConfig = {
+  enabled?: boolean;
+  maxEventsPerWindow?: number;
+  windowSeconds?: number;
+  cooldownSeconds?: number;
+};
+```
+
+Передавайте нормалізовані факти пари ботів разом із розв’язаним ходом. Core розв’язує defaults, перетворення одиниць і семантику `enabled`:
+
+```typescript
+return {
+  channel: "example",
+  routeSessionKey,
+  storePath,
+  ctxPayload,
+  recordInboundSession,
+  runDispatch,
+  botLoopProtection: {
+    scopeId: "account-1",
+    conversationId: "channel-1",
+    senderId: "bot-a",
+    receiverId: "bot-b",
+    config: channelConfig.botLoopProtection,
+    defaultsConfig: runtimeConfig.channels?.defaults?.botLoopProtection,
+    defaultEnabled: allowBotsMode !== "off",
+  },
+};
+```
+
+Використовуйте `openclaw/plugin-sdk/pair-loop-guard-runtime` напряму лише для кастомних
+двосторонніх циклів подій, які не проходять через спільний runner вхідних відповідей.
+
+## Runtime-простори імен
 
 <AccordionGroup>
   <Accordion title="api.runtime.agent">
@@ -98,42 +139,46 @@ register(api) {
     await api.runtime.agent.ensureAgentWorkspace(cfg);
 
     // Run an embedded agent turn
-    const agentDir = api.runtime.agent.resolveAgentDir(cfg);
     const result = await api.runtime.agent.runEmbeddedAgent({
       sessionId: "my-plugin:task-1",
       runId: crypto.randomUUID(),
-      sessionFile: path.join(agentDir, "sessions", "my-plugin-task-1.jsonl"),
       workspaceDir: api.runtime.agent.resolveAgentWorkspaceDir(cfg),
       prompt: "Summarize the latest changes",
       timeoutMs: api.runtime.agent.resolveAgentTimeoutMs(cfg),
     });
     ```
 
-    `runEmbeddedAgent(...)` — нейтральна допоміжна функція для запуску звичайного ходу агента OpenClaw з коду plugin. Вона використовує те саме розв’язання провайдера й моделі та вибір agent-harness, що й відповіді, запущені каналом.
+    `runEmbeddedAgent(...)` — нейтральна допоміжна функція для запуску звичайного ходу агента OpenClaw з коду плагіна. Вона використовує те саме розв’язання провайдера/моделі та вибір harness агента, що й відповіді, запущені каналом.
 
-    `runEmbeddedPiAgent(...)` залишається alias сумісності.
+    `runEmbeddedPiAgent(...)` залишається застарілим сумісним alias для наявних плагінів. Новий код має використовувати `runEmbeddedAgent(...)`.
 
-    `resolveThinkingPolicy(...)` повертає підтримувані рівні мислення провайдера й моделі та необов’язкове значення за замовчуванням. Provider plugins володіють специфічним для моделі профілем через свої thinking hooks, тому tool plugins мають викликати цю runtime-допоміжну функцію замість імпорту чи дублювання списків провайдерів.
+    `resolveThinkingPolicy(...)` повертає підтримувані провайдером/моделлю рівні мислення та необов’язкове значення default. Плагіни провайдерів володіють профілем, специфічним для моделі, через свої thinking hooks, тому плагіни інструментів мають викликати цю runtime-допоміжну функцію замість імпорту або дублювання списків провайдерів.
 
-    `normalizeThinkingLevel(...)` перетворює користувацький текст, як-от `on`, `x-high` або `extra high`, на канонічний збережений рівень перед перевіркою його за розв’язаною політикою.
+    `normalizeThinkingLevel(...)` перетворює текст користувача, як-от `on`, `x-high` або `extra high`, на канонічний збережений рівень перед перевіркою за розв’язаною політикою.
 
     **Допоміжні функції сховища сесій** розташовані в `api.runtime.agent.session`:
 
     ```typescript
-    const storePath = api.runtime.agent.session.resolveStorePath(cfg);
-    const store = api.runtime.agent.session.loadSessionStore(storePath);
-    await api.runtime.agent.session.updateSessionStore(storePath, (nextStore) => {
-      // Patch one entry without replacing the whole file from stale state.
-      nextStore[sessionKey] = { ...nextStore[sessionKey], thinkingLevel: "high" };
+    const entry = api.runtime.agent.session.getSessionEntry({ agentId, sessionKey });
+    for (const { sessionKey, entry } of api.runtime.agent.session.listSessionEntries({ agentId })) {
+      // Iterate session rows without depending on the legacy sessions.json shape.
+    }
+    await api.runtime.agent.session.patchSessionEntry({
+      agentId,
+      sessionKey,
+      update: (entry) => ({ thinkingLevel: "high" }),
     });
-    const filePath = api.runtime.agent.session.resolveSessionFilePath(cfg, sessionId);
     ```
 
-    Для записів під час виконання надавайте перевагу `updateSessionStore(...)` або `updateSessionStoreEntry(...)`. Вони проходять через записувач сховища сесій, яким володіє Gateway, зберігають паралельні оновлення та повторно використовують гарячий кеш. `saveSessionStore(...)` залишається доступною для сумісності та офлайн-перезаписів у стилі обслуговування.
+    Віддавайте перевагу `getSessionEntry(...)`, `listSessionEntries(...)`, `patchSessionEntry(...)` або `upsertSessionEntry(...)` для workflow сесій. Ці допоміжні функції адресують сесії за ідентичністю агента/сесії, щоб плагіни не залежали від застарілої форми сховища `sessions.json`. Використовуйте `preserveActivity: true` для patch-операцій лише з метаданими, які не мають оновлювати активність сесії, і `replaceEntry: true` лише тоді, коли callback повертає повний запис, а видалені поля мають залишатися видаленими.
+
+    Для читання й запису transcript імпортуйте `openclaw/plugin-sdk/session-transcript-runtime` і використовуйте `resolveSessionTranscriptIdentity(...)`, `resolveSessionTranscriptTarget(...)`, `readSessionTranscriptEvents(...)`, `appendSessionTranscriptMessageByIdentity(...)`, `publishSessionTranscriptUpdateByIdentity(...)` або `withSessionTranscriptWriteLock(...)` з `{ agentId, sessionKey, sessionId }`. Ці API дають плагінам змогу ідентифікувати transcript, читати його події, додавати повідомлення, публікувати оновлення та виконувати пов’язані операції під тим самим блокуванням запису transcript. Передавання `sessionFile`, використання `resolveSessionTranscriptLegacyFileTarget(...)` або імпорт низькорівневих `appendSessionTranscriptMessage(...)` / `emitSessionTranscriptUpdate(...)` з `openclaw/plugin-sdk/agent-harness-runtime` є застарілим; ці шляхи існують лише для legacy-коду, який уже отримує активний артефакт transcript.
+
+    `loadSessionStore(...)`, `saveSessionStore(...)`, `updateSessionStore(...)`, `resolveSessionFilePath(...)` і `resolveAndPersistSessionFile(...)` є застарілими допоміжними функціями сумісності для плагінів, які досі навмисно залежать від застарілої форми всього сховища або transcript-файлу. Новий код плагінів не повинен використовувати ці допоміжні функції, а наявні викликачі мають мігрувати на допоміжні функції записів і допоміжні функції ідентичності transcript.
 
   </Accordion>
   <Accordion title="api.runtime.agent.defaults">
-    Константи стандартної моделі та постачальника:
+    Константи default-моделі та провайдера:
 
     ```typescript
     const model = api.runtime.agent.defaults.model; // e.g. "anthropic/claude-sonnet-4-6"
@@ -143,7 +188,8 @@ register(api) {
   </Accordion>
 
   <Accordion title="api.runtime.llm">
-    Запустіть текстове завершення, яким володіє хост, без імпорту внутрішніх компонентів постачальника або дублювання підготовки моделі, автентифікації чи базової URL-адреси OpenClaw.
+    Запускайте текстове completion, яким володіє хост, без імпорту внутрішніх компонентів провайдера або
+    дублювання підготовки моделі/auth/base URL OpenClaw.
 
     ```typescript
     const result = await api.runtime.llm.complete({
@@ -154,15 +200,20 @@ register(api) {
     });
     ```
 
-    Допоміжна функція використовує той самий шлях підготовки простого завершення, що й вбудоване середовище виконання OpenClaw, а також знімок конфігурації середовища виконання, яким володіє хост. Рушії контексту отримують прив’язану до сесії можливість `llm.complete`, тому виклики моделі використовують агента активної сесії та не повертаються непомітно до стандартного агента. Результат містить атрибуцію постачальника, моделі й агента, а також нормалізоване використання токенів, кешу та орієнтовної вартості, якщо доступно.
+    Допоміжна функція використовує той самий шлях підготовки simple-completion, що й
+    вбудований runtime OpenClaw, а також runtime-знімок конфігурації, яким володіє хост. Context engines
+    отримують прив’язану до сесії capability `llm.complete`, тому виклики моделі використовують
+    агента активної сесії та не виконують непомітний fallback до default-агента. Результат
+    включає атрибуцію провайдера/моделі/агента, а також нормалізоване використання token,
+    cache і орієнтовної вартості, коли воно доступне.
 
     <Warning>
-    Перевизначення моделі потребують явної згоди оператора через `plugins.entries.<id>.llm.allowModelOverride: true` у конфігурації. Використовуйте `plugins.entries.<id>.llm.allowedModels`, щоб обмежити довірені плагіни конкретними канонічними цілями `provider/model`. Завершення між агентами потребують `plugins.entries.<id>.llm.allowAgentIdOverride: true`.
+    Перевизначення моделей потребують явного opt-in оператора через `plugins.entries.<id>.llm.allowModelOverride: true` у конфігурації. Використовуйте `plugins.entries.<id>.llm.allowedModels`, щоб обмежити довірені плагіни конкретними канонічними цілями `provider/model`. Cross-agent completions потребують `plugins.entries.<id>.llm.allowAgentIdOverride: true`.
     </Warning>
 
   </Accordion>
   <Accordion title="api.runtime.subagent">
-    Запускайте та керуйте фоновими виконаннями підагентів.
+    Запускайте фонові subagent-запуски та керуйте ними.
 
     ```typescript
     // Start a subagent run
@@ -190,14 +241,14 @@ register(api) {
     ```
 
     <Warning>
-    Перевизначення моделі (`provider`/`model`) потребують явної згоди оператора через `plugins.entries.<id>.subagent.allowModelOverride: true` у конфігурації. Недовірені плагіни все ще можуть запускати підагентів, але запити на перевизначення відхиляються.
+    Перевизначення моделі (`provider`/`model`) потребує явної згоди оператора через `plugins.entries.<id>.subagent.allowModelOverride: true` у конфігурації. Ненадійні Plugins усе одно можуть запускати субагентів, але запити на перевизначення відхиляються.
     </Warning>
 
-    `deleteSession(...)` може видаляти сесії, створені тим самим плагіном через `api.runtime.subagent.run(...)`. Видалення довільних користувацьких або операторських сесій усе ще потребує Gateway-запиту з областю адміністратора.
+    `deleteSession(...)` може видаляти сеанси, створені тим самим Plugin через `api.runtime.subagent.run(...)`. Видалення довільних сеансів користувача або оператора все ще потребує запиту Gateway з адміністративною областю.
 
   </Accordion>
   <Accordion title="api.runtime.nodes">
-    Перелічуйте підключені вузли та викликайте команду, розміщену на вузлі, з коду плагіна, завантаженого Gateway, або з CLI-команд плагіна. Використовуйте це, коли плагін володіє локальною роботою на спареному пристрої, наприклад мостом браузера чи аудіо на іншому Mac.
+    Перелічуйте підключені вузли та викликайте команду вузла-хоста з коду Plugin, завантаженого Gateway, або з CLI-команд Plugin. Використовуйте це, коли Plugin володіє локальною роботою на спареному пристрої, наприклад браузером або аудіомостом на іншому Mac.
 
     ```typescript
     const { nodes } = await api.runtime.nodes.list({ connected: true });
@@ -210,16 +261,18 @@ register(api) {
     });
     ```
 
-    Усередині Gateway це середовище виконання є внутрішньопроцесним. У CLI-командах плагіна воно викликає налаштований Gateway через RPC, тож команди на кшталт `openclaw googlemeet recover-tab` можуть перевіряти спарені вузли з термінала. Команди вузлів і надалі проходять через звичайне спарювання вузлів Gateway, списки дозволених команд, політики виклику вузлів плагіна та локальну обробку команд вузла.
+    Усередині Gateway це середовище виконання працює в тому самому процесі. У CLI-командах Plugin воно викликає налаштований Gateway через RPC, тому такі команди, як `openclaw googlemeet recover-tab`, можуть перевіряти спарені вузли з термінала. Команди вузлів усе одно проходять звичайне спарювання вузлів Gateway, списки дозволених команд, політики виклику вузлів Plugin і локальну обробку команд на вузлі.
 
-    Плагіни, які надають небезпечні команди, розміщені на вузлі, мають зареєструвати політику виклику вузлів за допомогою `api.registerNodeInvokePolicy(...)`. Політика виконується в Gateway після перевірок списку дозволених команд і перед пересиланням команди вузлу, тому прямі виклики `node.invoke` та інструменти плагінів вищого рівня використовують той самий шлях примусового застосування.
+    Plugins, які відкривають небезпечні команди вузла-хоста, мають зареєструвати політику виклику вузла за допомогою `api.registerNodeInvokePolicy(...)`. Політика виконується в Gateway після перевірок списку дозволених команд і до пересилання команди вузлу, тому прямі виклики `node.invoke` і високорівневі інструменти Plugin використовують той самий шлях примусового застосування.
 
   </Accordion>
   <Accordion title="api.runtime.tasks.managedFlows">
-    Прив’яжіть середовище виконання Task Flow до наявного ключа сесії OpenClaw або довіреного контексту інструмента, а потім створюйте й керуйте Task Flows без передавання власника в кожному виклику.
+    Прив’яжіть середовище виконання Task Flow до наявного ключа сеансу OpenClaw або довіреного контексту інструмента, а потім створюйте Task Flows і керуйте ними без передавання власника під час кожного виклику.
 
-    Task Flow відстежує довговічний стан багатоетапного робочого процесу. Це не планувальник:
-    використовуйте Cron або `api.session.workflow.scheduleSessionTurn(...)` для майбутніх пробуджень, а потім використовуйте `managedFlows` із запланованого ходу, коли ця робота потребує стану потоку, дочірніх завдань, очікувань або скасування.
+    Task Flow відстежує стійкий стан багатокрокового робочого процесу. Це не планувальник:
+    використовуйте Cron або `api.session.workflow.scheduleSessionTurn(...)` для майбутніх
+    пробуджень, а потім використовуйте `managedFlows` із запланованого ходу, коли ця робота
+    потребує стану потоку, дочірніх завдань, очікувань або скасування.
 
     ```typescript
     const taskFlow = api.runtime.tasks.managedFlows.fromToolContext(ctx);
@@ -246,7 +299,7 @@ register(api) {
     });
     ```
 
-    Використовуйте `bindSession({ sessionKey, requesterOrigin })`, коли у вас уже є довірений ключ сесії OpenClaw із власного шару прив’язування. Не прив’язуйте з необробленого введення користувача.
+    Використовуйте `bindSession({ sessionKey, requesterOrigin })`, коли у вас уже є довірений ключ сеансу OpenClaw із власного шару прив’язування. Не прив’язуйте з необробленого введення користувача.
 
   </Accordion>
   <Accordion title="api.runtime.tts">
@@ -272,7 +325,7 @@ register(api) {
     });
     ```
 
-    Використовує основну конфігурацію `messages.tts` і вибір провайдера. Повертає аудіобуфер PCM + частоту дискретизації.
+    Використовує основну конфігурацію `messages.tts` і вибір провайдера. Повертає буфер PCM-аудіо та частоту дискретизації.
 
   </Accordion>
   <Accordion title="api.runtime.mediaUnderstanding">
@@ -334,10 +387,10 @@ register(api) {
     });
     ```
 
-    Повертає `{ text: undefined }`, коли результат не створено (наприклад, пропущене введення).
+    Повертає `{ text: undefined }`, коли вихідні дані не створено, наприклад якщо вхідні дані пропущено.
 
     <Info>
-    `api.runtime.stt.transcribeAudioFile(...)` лишається сумісним псевдонімом для `api.runtime.mediaUnderstanding.transcribeAudioFile(...)`.
+    `api.runtime.stt.transcribeAudioFile(...)` залишається сумісним псевдонімом для `api.runtime.mediaUnderstanding.transcribeAudioFile(...)`.
     </Info>
 
   </Accordion>
@@ -368,7 +421,7 @@ register(api) {
 
   </Accordion>
   <Accordion title="api.runtime.media">
-    Низькорівневі медіаутиліти.
+    Низькорівневі утиліти для медіа.
 
     ```typescript
     const webMedia = await api.runtime.media.loadWebMedia(url);
@@ -393,9 +446,9 @@ register(api) {
 
   </Accordion>
   <Accordion title="api.runtime.config">
-    Поточний знімок конфігурації runtime і транзакційні записи конфігурації. Надавайте перевагу
+    Поточний знімок конфігурації середовища виконання та транзакційні записи конфігурації. Надавайте перевагу
     конфігурації, яку вже передано в активний шлях виклику; використовуйте
-    `current()` лише тоді, коли обробнику безпосередньо потрібен знімок процесу.
+    `current()` лише тоді, коли обробнику потрібен безпосередньо знімок процесу.
 
     ```typescript
     const cfg = api.runtime.config.current();
@@ -409,12 +462,12 @@ register(api) {
 
     `mutateConfigFile(...)` і `replaceConfigFile(...)` повертають значення `followUp`,
     наприклад `{ mode: "restart", requiresRestart: true, reason }`,
-    яке фіксує намір записувача, не забираючи керування перезапуском у
-    gateway.
+    яке фіксує намір записувача, не забираючи контроль перезапуску в
+    Gateway.
 
   </Accordion>
   <Accordion title="api.runtime.system">
-    Утиліти системного рівня.
+    Системні утиліти.
 
     ```typescript
     await api.runtime.system.enqueueSystemEvent(event);
@@ -427,6 +480,13 @@ register(api) {
     const output = await api.runtime.system.runCommandWithTimeout(cmd, args, opts);
     const hint = api.runtime.system.formatNativeDependencyHint(pkg);
     ```
+
+    `runCommandWithTimeout(...)` повертає захоплені `stdout` і `stderr`, необов’язкові
+    лічильники обрізання, `code`, `signal`, `killed`, `termination` і
+    `noOutputTimedOut`. Результати тайм-ауту й тайм-ауту без виводу повідомляють `code: 124`,
+    коли дочірній процес не надає ненульовий код виходу. Виходи за сигналом
+    без тайм-ауту все ще можуть повертати `code: null`, тому використовуйте `termination` і
+    `noOutputTimedOut`, щоб розрізняти причини тайм-ауту.
 
   </Accordion>
   <Accordion title="api.runtime.events">
@@ -481,7 +541,7 @@ register(api) {
     await store.clear();
     ```
 
-    Сховища ключів переживають перезапуски й ізолюються за прив’язаним до runtime ідентифікатором plugin. Використовуйте `registerIfAbsent(...)` для атомарних заявок дедуплікації: він повертає `true`, коли ключ був відсутній або прострочений і зареєстрований, або `false`, коли активне значення вже існує без перезапису його значення, часу створення чи TTL. Обмеження: `maxEntries` на простір імен, 1 000 активних рядків на plugin, JSON-значення до 64KB і необов’язкове завершення строку TTL.
+    Сховища з ключами переживають перезапуски та ізольовані за ідентифікатором Plugin, прив’язаним до середовища виконання. Використовуйте `registerIfAbsent(...)` для атомарних заявок на дедуплікацію: він повертає `true`, коли ключ був відсутній або протермінований і його зареєстровано, або `false`, коли активне значення вже існує без перезапису його значення, часу створення чи TTL. Обмеження: `maxEntries` на простір імен, 6 000 активних рядків на Plugin, JSON-значення до 64 КБ і необов’язкове завершення дії TTL. Коли запис перевищив би ліміт рядків Plugin, середовище виконання може витіснити найстаріші активні рядки з простору імен, у який виконується запис; суміжні простори імен не витісняються для цього запису, а запис усе одно завершується помилкою, якщо простір імен не може звільнити достатньо рядків.
 
     <Warning>
     У цьому випуску лише вбудовані plugins.
@@ -499,9 +559,22 @@ register(api) {
 
   </Accordion>
   <Accordion title="api.runtime.channel">
-    Допоміжні засоби runtime для конкретного каналу (доступні, коли завантажено plugin каналу).
+    Допоміжні засоби середовища виконання, специфічні для каналу (доступні, коли завантажено Plugin каналу).
 
-    `api.runtime.channel.mentions` — це спільна поверхня політики вхідних згадок для вбудованих plugins каналів, які використовують ін’єкцію runtime:
+    `api.runtime.channel.media` — рекомендована поверхня для завантаження та зберігання медіа каналу:
+
+    ```typescript
+    const saved = await api.runtime.channel.media.saveRemoteMedia({
+      url,
+      subdir: "inbound",
+      maxBytes,
+      filePathHint: fileName,
+    });
+    ```
+
+    Використовуйте `saveRemoteMedia(...)`, коли віддалений URL має стати медіа OpenClaw. Використовуйте `saveResponseMedia(...)`, коли Plugin уже отримав `Response` із власною обробкою автентифікації, перенаправлень або allowlist. Використовуйте `readRemoteMediaBuffer(...)` лише тоді, коли Plugin потрібні сирі байти для перевірки, перетворень, розшифрування або повторного завантаження. `fetchRemoteMedia(...)` залишається застарілим сумісним псевдонімом для `readRemoteMediaBuffer(...)`.
+
+    `api.runtime.channel.mentions` — спільна поверхня політики вхідних згадок для вбудованих plugins каналів, які використовують ін’єкцію середовища виконання:
 
     ```typescript
     const mentionMatch = api.runtime.channel.mentions.matchesMentionWithExplicit(text, {
@@ -536,14 +609,14 @@ register(api) {
     - `implicitMentionKindWhen`
     - `resolveInboundMentionDecision`
 
-    `api.runtime.channel.mentions` навмисно не надає старі допоміжні засоби сумісності `resolveMentionGating*`. Надавайте перевагу нормалізованому шляху `{ facts, policy }`.
+    `api.runtime.channel.mentions` навмисно не надає старіші сумісні допоміжні засоби `resolveMentionGating*`. Віддавайте перевагу нормалізованому шляху `{ facts, policy }`.
 
   </Accordion>
 </AccordionGroup>
 
-## Зберігання посилань runtime
+## Зберігання посилань на середовище виконання
 
-Використовуйте `createPluginRuntimeStore`, щоб зберегти посилання runtime для використання поза callback-функцією `register`:
+Використовуйте `createPluginRuntimeStore`, щоб зберегти посилання на середовище виконання для використання поза callback `register`:
 
 <Steps>
   <Step title="Create the store">
@@ -584,7 +657,7 @@ register(api) {
 </Steps>
 
 <Note>
-Надавайте перевагу `pluginId` для ідентичності runtime-сховища. Нижчорівнева форма `key` призначена для нетипових випадків, коли одному plugin навмисно потрібно більше ніж один слот runtime.
+Віддавайте перевагу `pluginId` для ідентичності сховища середовища виконання. Нижчорівнева форма `key` призначена для нетипових випадків, коли одному Plugin навмисно потрібно більше ніж один слот середовища виконання.
 </Note>
 
 ## Інші поля верхнього рівня `api`
@@ -598,23 +671,23 @@ register(api) {
   Відображувана назва Plugin.
 </ParamField>
 <ParamField path="api.config" type="OpenClawConfig">
-  Поточний знімок конфігурації (активний знімок runtime у пам'яті, коли доступний).
+  Поточний знімок конфігурації (активний знімок середовища виконання в пам’яті, коли доступний).
 </ParamField>
 <ParamField path="api.pluginConfig" type="Record<string, unknown>">
   Конфігурація, специфічна для Plugin, з `plugins.entries.<id>.config`.
 </ParamField>
 <ParamField path="api.logger" type="PluginLogger">
-  Логер із заданою областю (`debug`, `info`, `warn`, `error`).
+  Журналювач з областю дії (`debug`, `info`, `warn`, `error`).
 </ParamField>
 <ParamField path="api.registrationMode" type="PluginRegistrationMode">
-  Поточний режим завантаження; `"setup-runtime"` — це полегшене вікно запуску/налаштування перед повним входом.
+  Поточний режим завантаження; `"setup-runtime"` — це полегшене стартове/налаштувальне вікно перед повним входом.
 </ParamField>
 <ParamField path="api.resolvePath(input)" type="(string) => string">
-  Визначає шлях відносно кореня Plugin.
+  Розв’язати шлях відносно кореня Plugin.
 </ParamField>
 
-## Пов'язане
+## Пов’язане
 
-- [Внутрішні механізми Plugin](/uk/plugins/architecture) — модель можливостей і реєстр
+- [Внутрішня будова Plugin](/uk/plugins/architecture) — модель можливостей і реєстр
 - [Точки входу SDK](/uk/plugins/sdk-entrypoints) — параметри `definePluginEntry`
 - [Огляд SDK](/uk/plugins/sdk-overview) — довідник підшляхів

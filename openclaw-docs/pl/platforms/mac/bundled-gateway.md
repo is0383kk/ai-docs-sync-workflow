@@ -1,27 +1,28 @@
 ---
 read_when:
-    - Pakowanie OpenClaw.app
-    - Debugowanie usługi launchd Gateway w macOS
-    - Instalacja CLI Gateway dla macOS
-summary: Środowisko uruchomieniowe Gateway w systemie macOS (zewnętrzna usługa launchd)
+    - Pakietowanie OpenClaw.app
+    - Debugowanie usługi launchd Gateway na macOS
+    - Instalowanie CLI Gateway dla macOS
+summary: Środowisko uruchomieniowe Gateway w macOS (zewnętrzna usługa launchd)
 title: Gateway na macOS
 x-i18n:
-    generated_at: "2026-05-07T13:21:43Z"
+    generated_at: "2026-06-28T00:12:47Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: caf129918c46f8f54026e9db04e8ad5a033148899d3029fe1a362bb14c7f25f8
+    source_hash: 5317e82435ecf179407116339507a666957a8e23a07a49665233b22f22f5b155
     source_path: platforms/mac/bundled-gateway.md
     workflow: 16
 ---
 
-OpenClaw.app nie zawiera już w pakiecie Node/Bun ani środowiska uruchomieniowego Gateway. Aplikacja macOS
+OpenClaw.app nie dołącza już Node/Bun ani środowiska uruchomieniowego Gateway. Aplikacja macOS
 oczekuje **zewnętrznej** instalacji CLI `openclaw`, nie uruchamia Gateway jako
-procesu potomnego i zarządza usługą launchd dla użytkownika, aby utrzymywać Gateway
-w działaniu (lub podłącza się do istniejącego lokalnego Gateway, jeśli już działa).
+procesu podrzędnego i zarządza usługą launchd dla użytkownika, aby utrzymywać Gateway
+w działaniu (albo dołącza do istniejącego lokalnego Gateway, jeśli już działa).
 
-## Zainstaluj CLI (wymagane w trybie lokalnym)
+## Zainstaluj CLI (wymagane dla trybu lokalnego)
 
-Node 24 jest domyślnym środowiskiem uruchomieniowym na Macu. Node 22 LTS, obecnie `22.16+`, nadal działa w celu zachowania zgodności. Następnie zainstaluj `openclaw` globalnie:
+Node 24 jest domyślnym środowiskiem uruchomieniowym na Macu. Node 22 LTS, obecnie `22.19+`, nadal działa ze względu na zgodność. Następnie zainstaluj `openclaw` globalnie:
 
 ```bash
 npm install -g openclaw@<version>
@@ -35,7 +36,7 @@ wykryty menedżer pakietów. Node pozostaje zalecanym środowiskiem uruchomienio
 
 Etykieta:
 
-- `ai.openclaw.gateway` (lub `ai.openclaw.<profile>`; starsze `com.openclaw.*` mogą pozostać)
+- `ai.openclaw.gateway` (lub `ai.openclaw.<profile>`; starsze `com.openclaw.*` może pozostać)
 
 Lokalizacja plist (dla użytkownika):
 
@@ -44,24 +45,53 @@ Lokalizacja plist (dla użytkownika):
 
 Menedżer:
 
-- Aplikacja macOS zarządza instalacją/aktualizacją LaunchAgent w trybie lokalnym.
-- CLI może go również zainstalować: `openclaw gateway install`.
+- Aplikacja macOS odpowiada za instalację/aktualizację LaunchAgent w trybie lokalnym.
+- CLI również może ją zainstalować: `openclaw gateway install`.
 
 Zachowanie:
 
 - „OpenClaw aktywny” włącza/wyłącza LaunchAgent.
-- Zamknięcie aplikacji **nie** zatrzymuje gateway (launchd utrzymuje go przy życiu).
-- Jeśli Gateway już działa na skonfigurowanym porcie, aplikacja podłącza się do
+- Zamknięcie aplikacji **nie** zatrzymuje Gateway (launchd utrzymuje go przy życiu).
+- Jeśli Gateway już działa na skonfigurowanym porcie, aplikacja dołącza do
   niego zamiast uruchamiać nowy.
 
-Logowanie:
+Rejestrowanie:
 
-- stdout/err launchd: `/tmp/openclaw/openclaw-gateway.log`
+- stdout launchd: `~/Library/Logs/openclaw/gateway.log` (profile używają `gateway-<profile>.log`)
+- stderr launchd: wyciszony
 
 ## Zgodność wersji
 
-Aplikacja macOS sprawdza wersję gateway względem własnej wersji. Jeśli są
-niezgodne, zaktualizuj globalny CLI, aby pasował do wersji aplikacji.
+Aplikacja macOS sprawdza wersję Gateway względem własnej wersji. Jeśli są
+niezgodne, zaktualizuj globalne CLI, aby odpowiadało wersji aplikacji.
+
+## Katalog stanu w macOS
+
+Przechowuj stan OpenClaw na lokalnym, niesynchronizowanym dysku. Unikaj iCloud Drive oraz innych
+folderów synchronizowanych z chmurą, ponieważ opóźnienia synchronizacji i blokady plików mogą wpływać na sesje,
+poświadczenia oraz stan Gateway.
+
+Ustaw `OPENCLAW_STATE_DIR` na ścieżkę lokalną tylko wtedy, gdy potrzebujesz nadpisania.
+`openclaw doctor` ostrzega o typowych ścieżkach stanu synchronizowanych z chmurą i zaleca
+powrót do pamięci lokalnej. Zobacz
+[zmienne środowiskowe](/pl/help/environment#path-related-env-vars) i
+[Doctor](/pl/gateway/doctor).
+
+## Debugowanie łączności aplikacji
+
+Użyj debugowego CLI macOS z checkoutu źródłowego, aby wykonać tę samą logikę uzgadniania
+WebSocket Gateway i wykrywania, której używa aplikacja:
+
+```bash
+cd apps/macos
+swift run openclaw-mac connect --json
+swift run openclaw-mac discover --timeout 3000 --json
+```
+
+`connect` przyjmuje `--url`, `--token`, `--timeout` i `--json`. `discover`
+przyjmuje `--timeout`, `--json` i `--include-local`. Porównaj wynik wykrywania
+z `openclaw gateway discover --json`, gdy trzeba oddzielić wykrywanie przez CLI
+od problemów z połączeniem po stronie aplikacji.
 
 ## Kontrola smoke
 
@@ -81,5 +111,5 @@ openclaw gateway call health --url ws://127.0.0.1:18999 --timeout 3000
 
 ## Powiązane
 
-- [Aplikacja macOS](/pl/platforms/macos)
-- [Runbook Gateway](/pl/gateway)
+- [aplikacja macOS](/pl/platforms/macos)
+- [runbook Gateway](/pl/gateway)

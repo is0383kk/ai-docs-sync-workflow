@@ -1,219 +1,95 @@
 ---
 read_when:
-    - Implementowanie funkcji aplikacji macOS
-    - Zmiana cyklu życia Gateway lub mostkowania Node w systemie macOS
-summary: Aplikacja towarzysząca OpenClaw dla macOS (pasek menu + broker Gateway)
+    - Instalowanie aplikacji macOS
+    - Wybór między lokalnym a zdalnym trybem Gateway w systemie macOS
+    - Szukam plików do pobrania wydania aplikacji na macOS
+summary: Zainstaluj i używaj aplikacji OpenClaw na pasku menu macOS
 title: aplikacja macOS
 x-i18n:
-    generated_at: "2026-05-06T09:22:38Z"
+    generated_at: "2026-06-28T00:13:21Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: cc67a88303073bb771fcec09e7366f710a6bd5500f584f8782232deaa69e599d
+    source_hash: 42cd610465f2e60736da4681e028bca3ed3ed00b424028554ea098acc8ea980c
     source_path: platforms/macos.md
     workflow: 16
 ---
 
-Aplikacja macOS jest **towarzyszem na pasku menu** dla OpenClaw. Zarządza uprawnieniami,
-zarządza lokalnie Gateway lub dołącza do niego (launchd albo ręcznie) oraz udostępnia agentowi
-możliwości macOS jako Node.
+Aplikacja macOS jest **towarzyszem paska menu** OpenClaw. Użyj jej, gdy potrzebujesz
+natywnego interfejsu zasobnika, monitów uprawnień macOS, powiadomień, WebChat, wejścia głosowego,
+Canvas albo narzędzi Node hostowanych na Macu, takich jak `system.run`.
 
-## Co robi
+Jeśli potrzebujesz tylko CLI i Gateway, zacznij od [Pierwsze kroki](/pl/start/getting-started).
 
-- Pokazuje natywne powiadomienia i status na pasku menu.
-- Obsługuje monity TCC (Powiadomienia, Dostępność, Nagrywanie ekranu, Mikrofon,
-  Rozpoznawanie mowy, Automatyzacja/AppleScript).
-- Uruchamia Gateway lub łączy się z nim (lokalnie albo zdalnie).
-- Udostępnia narzędzia dostępne tylko w macOS (Canvas, Camera, Screen Recording, `system.run`).
-- Uruchamia lokalną usługę hosta Node w trybie **zdalnym** (launchd) i zatrzymuje ją w trybie **lokalnym**.
-- Opcjonalnie hostuje **PeekabooBridge** do automatyzacji interfejsu użytkownika.
-- Instaluje globalne CLI (`openclaw`) na żądanie przez npm, pnpm lub bun (aplikacja preferuje npm, potem pnpm, potem bun; Node pozostaje zalecanym środowiskiem uruchomieniowym Gateway).
+## Pobieranie
 
-## Tryb lokalny a zdalny
+Pobierz kompilacje aplikacji macOS z
+[wydań OpenClaw na GitHubie](https://github.com/openclaw/openclaw/releases).
+Gdy wydanie zawiera zasoby aplikacji macOS, szukaj:
 
-- **Lokalny** (domyślny): aplikacja dołącza do działającego lokalnego Gateway, jeśli jest obecny;
-  w przeciwnym razie włącza usługę launchd przez `openclaw gateway install`.
-- **Zdalny**: aplikacja łączy się z Gateway przez SSH/Tailscale i nigdy nie uruchamia
-  lokalnego procesu.
-  Aplikacja uruchamia lokalną **usługę hosta Node**, aby zdalny Gateway mógł dotrzeć do tego Maca.
-  Aplikacja nie uruchamia Gateway jako procesu potomnego.
-  Wykrywanie Gateway preferuje teraz nazwy Tailscale MagicDNS zamiast surowych adresów IP tailnet,
-  dzięki czemu aplikacja Mac odzyskuje połączenie bardziej niezawodnie, gdy adresy IP tailnet się zmieniają.
+- `OpenClaw-<version>.dmg` (zalecane)
+- `OpenClaw-<version>.zip`
 
-## Sterowanie launchd
+Niektóre wydania zawierają tylko CLI, materiały dowodowe albo zasoby dla Windows. Jeśli najnowsze
+wydanie nie ma zasobu aplikacji macOS, użyj najnowszego wydania, które go ma, albo zbuduj
+aplikację ze źródeł, korzystając z [konfiguracji środowiska deweloperskiego macOS](/pl/platforms/mac/dev-setup).
 
-Aplikacja zarządza LaunchAgentem użytkownika z etykietą `ai.openclaw.gateway`
-(lub `ai.openclaw.<profile>` przy użyciu `--profile`/`OPENCLAW_PROFILE`; starsze `com.openclaw.*` nadal jest wyładowywane).
-
-```bash
-launchctl kickstart -k gui/$UID/ai.openclaw.gateway
-launchctl bootout gui/$UID/ai.openclaw.gateway
-```
-
-Zastąp etykietę `ai.openclaw.<profile>` podczas uruchamiania nazwanego profilu.
-
-Jeśli LaunchAgent nie jest zainstalowany, włącz go z aplikacji albo uruchom
-`openclaw gateway install`.
-
-## Możliwości Node (Mac)
-
-Aplikacja macOS przedstawia się jako Node. Typowe polecenia:
-
-- Canvas: `canvas.present`, `canvas.navigate`, `canvas.eval`, `canvas.snapshot`, `canvas.a2ui.*`
-- Kamera: `camera.snap`, `camera.clip`
-- Ekran: `screen.snapshot`, `screen.record`
-- System: `system.run`, `system.notify`
-
-Node zgłasza mapę `permissions`, aby agenci mogli decydować, co jest dozwolone.
-
-Usługa Node i IPC aplikacji:
-
-- Gdy bezgłowa usługa hosta Node działa (tryb zdalny), łączy się z Gateway WS jako Node.
-- `system.run` wykonuje się w aplikacji macOS (kontekst UI/TCC) przez lokalne gniazdo Unix; monity i dane wyjściowe pozostają w aplikacji.
-
-Diagram (SCI):
-
-```
-Gateway -> Node Service (WS)
-                 |  IPC (UDS + token + HMAC + TTL)
-                 v
-             Mac App (UI + TCC + system.run)
-```
-
-## Zatwierdzenia uruchomień (system.run)
-
-`system.run` jest kontrolowane przez **zatwierdzenia uruchomień** w aplikacji macOS (Ustawienia → Zatwierdzenia uruchomień).
-Zabezpieczenia, pytanie i allowlist są przechowywane lokalnie na Macu w:
-
-```
-~/.openclaw/exec-approvals.json
-```
-
-Przykład:
-
-```json
-{
-  "version": 1,
-  "defaults": {
-    "security": "deny",
-    "ask": "on-miss"
-  },
-  "agents": {
-    "main": {
-      "security": "allowlist",
-      "ask": "on-miss",
-      "allowlist": [{ "pattern": "/opt/homebrew/bin/rg" }]
-    }
-  }
-}
-```
-
-Uwagi:
-
-- Wpisy `allowlist` są wzorcami glob dla rozpoznanych ścieżek binarnych albo samymi nazwami poleceń dla poleceń wywoływanych przez PATH.
-- Surowy tekst polecenia powłoki zawierający składnię sterowania lub rozwijania powłoki (`&&`, `||`, `;`, `|`, `` ` ``, `$`, `<`, `>`, `(`, `)`) jest traktowany jako nietrafienie allowlist i wymaga jawnego zatwierdzenia (albo dodania binarium powłoki do allowlist).
-- Wybranie „Zawsze zezwalaj” w monicie dodaje to polecenie do allowlist.
-- Nadpisania środowiska `system.run` są filtrowane (usuwane są `PATH`, `DYLD_*`, `LD_*`, `NODE_OPTIONS`, `PYTHON*`, `PERL*`, `RUBYOPT`, `SHELLOPTS`, `PS4`), a następnie scalane ze środowiskiem aplikacji.
-- Dla opakowań powłoki (`bash|sh|zsh ... -c/-lc`) nadpisania środowiska ograniczone do żądania są redukowane do małej jawnej allowlist (`TERM`, `LANG`, `LC_*`, `COLORTERM`, `NO_COLOR`, `FORCE_COLOR`).
-- Dla decyzji „zawsze zezwalaj” w trybie allowlist znane opakowania dyspozytorskie (`env`, `nice`, `nohup`, `stdbuf`, `timeout`) zapisują ścieżki wewnętrznych plików wykonywalnych zamiast ścieżek opakowań. Jeśli odpakowanie nie jest bezpieczne, żaden wpis allowlist nie jest automatycznie zapisywany.
-
-## Linki głębokie
-
-Aplikacja rejestruje schemat URL `openclaw://` dla działań lokalnych.
-
-### `openclaw://agent`
-
-Wyzwala żądanie `agent` w Gateway.
-__OC_I18N_900004__
-Parametry zapytania:
-
-- `message` (wymagany)
-- `sessionKey` (opcjonalny)
-- `thinking` (opcjonalny)
-- `deliver` / `to` / `channel` (opcjonalne)
-- `timeoutSeconds` (opcjonalny)
-- `key` (opcjonalny klucz trybu bezobsługowego)
-
-Bezpieczeństwo:
-
-- Bez `key` aplikacja prosi o potwierdzenie.
-- Bez `key` aplikacja wymusza krótki limit wiadomości dla monitu potwierdzenia i ignoruje `deliver` / `to` / `channel`.
-- Z prawidłowym `key` uruchomienie jest bezobsługowe (przeznaczone do automatyzacji osobistych).
-
-## Przebieg wdrażania (typowy)
+## Pierwsze uruchomienie
 
 1. Zainstaluj i uruchom **OpenClaw.app**.
-2. Ukończ listę kontrolną uprawnień (monity TCC).
-3. Upewnij się, że tryb **lokalny** jest aktywny, a Gateway działa.
-4. Zainstaluj CLI, jeśli chcesz mieć dostęp z terminala.
+2. Wykonaj listę kontrolną uprawnień macOS.
+3. Wybierz tryb **Lokalny** albo **Zdalny**.
+4. Zainstaluj CLI `openclaw`, jeśli aplikacja o to poprosi.
+5. Otwórz WebChat z paska menu i wyślij wiadomość testową.
 
-## Położenie katalogu stanu (macOS)
+Dla ścieżki konfiguracji CLI/Gateway użyj [Pierwsze kroki](/pl/start/getting-started).
+Aby przywrócić uprawnienia, użyj [uprawnień macOS](/pl/platforms/mac/permissions).
 
-Unikaj umieszczania katalogu stanu OpenClaw w iCloud lub innych folderach synchronizowanych z chmurą.
-Ścieżki wspierane synchronizacją mogą dodawać opóźnienia i czasami powodować wyścigi blokad plików/synchronizacji dla
-sesji i poświadczeń.
+## Wybór trybu Gateway
 
-Preferuj lokalną, niesynchronizowaną ścieżkę stanu, taką jak:
-__OC_I18N_900005__
-Jeśli `openclaw doctor` wykryje stan w:
+| Tryb    | Kiedy go używać                                                                                      | Strona szczegółowa                                  |
+| ------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Lokalny | Ten Mac powinien uruchamiać Gateway i utrzymywać go przy życiu za pomocą launchd.                    | [Gateway na macOS](/pl/platforms/mac/bundled-gateway)  |
+| Zdalny  | Inny host uruchamia Gateway, a ten Mac powinien sterować nim przez SSH, LAN albo Tailnet.            | [Sterowanie zdalne](/pl/platforms/mac/remote)          |
 
-- `~/Library/Mobile Documents/com~apple~CloudDocs/...`
-- `~/Library/CloudStorage/...`
+Tryb lokalny wymaga zainstalowanego CLI `openclaw`. Aplikacja może je zainstalować albo możesz
+postępować zgodnie z instrukcją [Gateway na macOS](/pl/platforms/mac/bundled-gateway).
 
-wyświetli ostrzeżenie i zaleci przeniesienie z powrotem do ścieżki lokalnej.
+## Za co odpowiada aplikacja
 
-## Kompilacja i przepływ pracy deweloperskiej (natywny)
+- Stan paska menu, powiadomienia, kondycja i WebChat.
+- Monity uprawnień macOS dotyczące ekranu, mikrofonu, mowy, automatyzacji i dostępności.
+- Lokalne narzędzia Node, takie jak Canvas, przechwytywanie z kamery/ekranu, powiadomienia i `system.run`.
+- Monity zatwierdzania wykonywania dla poleceń hostowanych na Macu.
+- Tunele SSH w trybie zdalnym albo bezpośrednie połączenia z Gateway.
 
-- `cd apps/macos && swift build`
-- `swift run OpenClaw` (albo Xcode)
-- Pakowanie aplikacji: `scripts/package-mac-app.sh`
+Aplikacja **nie** zastępuje Gateway OpenClaw ani ogólnej dokumentacji CLI. Podstawowa
+konfiguracja Gateway, dostawcy, plugins, kanały, narzędzia i zabezpieczenia są opisane w
+osobnej dokumentacji.
 
-## Debugowanie łączności z Gateway (CLI macOS)
+## Strony szczegółowe macOS
 
-Użyj CLI debugowania, aby przećwiczyć ten sam uścisk WebSocket Gateway i tę samą logikę wykrywania,
-których używa aplikacja macOS, bez uruchamiania aplikacji.
-__OC_I18N_900006__
-Opcje połączenia:
+| Zadanie                                      | Czytaj                                                                                               |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Zainstaluj lub debuguj usługę CLI/Gateway    | [Gateway na macOS](/pl/platforms/mac/bundled-gateway)                                                   |
+| Trzymaj stan poza folderami synchronizowanymi z chmurą | [Gateway na macOS](/pl/platforms/mac/bundled-gateway#state-directory-on-macos)                 |
+| Debuguj wykrywanie aplikacji i łączność      | [Gateway na macOS](/pl/platforms/mac/bundled-gateway#debug-app-connectivity)                            |
+| Zrozum zachowanie launchd                    | [Cykl życia Gateway](/pl/platforms/mac/child-process)                                                   |
+| Napraw uprawnienia albo problemy z podpisywaniem/TCC | [uprawnienia macOS](/pl/platforms/mac/permissions)                                             |
+| Połącz się ze zdalnym Gateway                | [Sterowanie zdalne](/pl/platforms/mac/remote)                                                           |
+| Odczytaj stan paska menu i kontrole kondycji | [Pasek menu](/pl/platforms/mac/menu-bar), [Kontrole kondycji](/pl/platforms/mac/health)                    |
+| Użyj wbudowanego interfejsu czatu            | [WebChat](/pl/platforms/mac/webchat)                                                                    |
+| Użyj wybudzania głosem albo push-to-talk     | [Wybudzanie głosem](/pl/platforms/mac/voicewake)                                                        |
+| Użyj Canvas i głębokich linków Canvas        | [Canvas](/pl/platforms/mac/canvas)                                                                      |
+| Hostuj PeekabooBridge do automatyzacji UI    | [Most Peekaboo](/pl/platforms/mac/peekaboo)                                                             |
+| Skonfiguruj zatwierdzanie poleceń            | [Zatwierdzanie wykonywania](/pl/tools/exec-approvals), [szczegóły zaawansowane](/pl/tools/exec-approvals-advanced) |
+| Sprawdź polecenia Node na Macu i IPC aplikacji | [IPC macOS](/pl/platforms/mac/xpc)                                                                    |
+| Przechwyć logi                               | [Logowanie macOS](/pl/platforms/mac/logging)                                                            |
+| Zbuduj ze źródeł                             | [Konfiguracja środowiska deweloperskiego macOS](/pl/platforms/mac/dev-setup)                            |
 
-- `--url <ws://host:port>`: zastąp konfigurację
-- `--mode <local|remote>`: rozwiąż z konfiguracji (domyślnie: konfiguracja albo lokalnie)
-- `--probe`: wymuś świeżą sondę kondycji
-- `--timeout <ms>`: limit czasu żądania (domyślnie: `15000`)
-- `--json`: ustrukturyzowane dane wyjściowe do porównywania
+## Powiązane
 
-Opcje wykrywania:
-
-- `--include-local`: uwzględnij bramy, które zostałyby odfiltrowane jako „lokalne”
-- `--timeout <ms>`: ogólne okno wykrywania (domyślnie: `2000`)
-- `--json`: ustrukturyzowane dane wyjściowe do porównywania
-
-<Tip>
-Porównaj z `openclaw gateway discover --json`, aby sprawdzić, czy potok wykrywania aplikacji macOS (`local.` plus skonfigurowana domena rozległa, z mechanizmami awaryjnymi dla sieci rozległej i Tailscale Serve) różni się od wykrywania CLI Node opartego na `dns-sd`.
-</Tip>
-
-## Mechanika połączenia zdalnego (tunele SSH)
-
-Gdy aplikacja macOS działa w trybie **zdalnym**, otwiera tunel SSH, aby lokalne komponenty UI
-mogły komunikować się ze zdalnym Gateway tak, jakby znajdował się na localhost.
-
-### Tunel sterujący (port WebSocket Gateway)
-
-- **Cel:** kontrole kondycji, status, czat WWW, konfiguracja i inne wywołania płaszczyzny sterowania.
-- **Port lokalny:** port Gateway (domyślnie `18789`), zawsze stabilny.
-- **Port zdalny:** ten sam port Gateway na zdalnym hoście.
-- **Zachowanie:** brak losowego portu lokalnego; aplikacja ponownie używa istniejącego zdrowego tunelu
-  albo uruchamia go ponownie w razie potrzeby.
-- **Kształt SSH:** `ssh -N -L <local>:127.0.0.1:<remote>` z BatchMode +
-  ExitOnForwardFailure + opcjami keepalive.
-- **Raportowanie IP:** tunel SSH używa pętli zwrotnej, więc Gateway zobaczy IP Node
-  jako `127.0.0.1`. Użyj transportu **Direct (ws/wss)**, jeśli chcesz, aby widoczny był rzeczywisty IP klienta
-  (zobacz [zdalny dostęp macOS](/pl/platforms/mac/remote)).
-
-Kroki konfiguracji znajdziesz w [zdalnym dostępie macOS](/pl/platforms/mac/remote). Szczegóły protokołu
-znajdziesz w [protokole Gateway](/pl/gateway/protocol).
-
-## Powiązana dokumentacja
-
-- [Podręcznik operacyjny Gateway](/pl/gateway)
-- [Gateway (macOS)](/pl/platforms/mac/bundled-gateway)
-- [Uprawnienia macOS](/pl/platforms/mac/permissions)
-- [Canvas](/pl/platforms/mac/canvas)
+- [Platformy](/pl/platforms)
+- [Pierwsze kroki](/pl/start/getting-started)
+- [Gateway](/pl/gateway)
+- [Zatwierdzanie wykonywania](/pl/tools/exec-approvals)

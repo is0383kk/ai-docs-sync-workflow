@@ -4,15 +4,16 @@ read_when:
 summary: Trạng thái hỗ trợ, khả năng và cấu hình của bot Discord
 title: Discord
 x-i18n:
-    generated_at: "2026-05-11T20:20:37Z"
+    generated_at: "2026-06-28T20:41:01Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 70107cf53c44f80e42f99f670aacf6eed8b77d839c05bccc853cd91a7273e5aa
+    source_hash: 91bda14cfdd7bf5045413d97c56936ea7150b396e0e7ecd4ac300e1a811377cb
     source_path: channels/discord.md
     workflow: 16
 ---
 
-Sẵn sàng cho DM và các kênh guild thông qua Gateway chính thức của Discord.
+Sẵn sàng cho DM và kênh máy chủ thông qua Discord gateway chính thức.
 
 <CardGroup cols={3}>
   <Card title="Ghép nối" icon="link" href="/vi/channels/pairing">
@@ -22,28 +23,28 @@ Sẵn sàng cho DM và các kênh guild thông qua Gateway chính thức của D
     Hành vi lệnh gốc và danh mục lệnh.
   </Card>
   <Card title="Khắc phục sự cố kênh" icon="wrench" href="/vi/channels/troubleshooting">
-    Quy trình chẩn đoán và sửa lỗi xuyên kênh.
+    Chẩn đoán và quy trình sửa lỗi liên kênh.
   </Card>
 </CardGroup>
 
 ## Thiết lập nhanh
 
-Bạn cần tạo một ứng dụng mới có bot, thêm bot vào máy chủ của bạn, rồi ghép nối bot đó với OpenClaw. Chúng tôi khuyến nghị thêm bot vào máy chủ riêng của chính bạn. Nếu bạn chưa có máy chủ, hãy [tạo một máy chủ trước](https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-server) (chọn **Create My Own > For me and my friends**).
+Bạn sẽ cần tạo một ứng dụng mới với bot, thêm bot vào máy chủ của mình và ghép nối nó với OpenClaw. Chúng tôi khuyên bạn nên thêm bot vào máy chủ riêng của bạn. Nếu bạn chưa có máy chủ, hãy [tạo một máy chủ trước](https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-server) (chọn **Create My Own > For me and my friends**).
 
 <Steps>
-  <Step title="Tạo ứng dụng và bot Discord">
-    Truy cập [Discord Developer Portal](https://discord.com/developers/applications) và nhấp **New Application**. Đặt tên kiểu như "OpenClaw".
+  <Step title="Tạo ứng dụng Discord và bot">
+    Đi tới [Discord Developer Portal](https://discord.com/developers/applications) và nhấp **New Application**. Đặt tên đại loại như "OpenClaw".
 
-    Nhấp **Bot** trên thanh bên. Đặt **Username** thành tên bạn dùng để gọi agent OpenClaw của mình.
+    Nhấp **Bot** trên thanh bên. Đặt **Username** thành bất kỳ tên nào bạn gọi tác nhân OpenClaw của mình.
 
   </Step>
 
-  <Step title="Bật privileged intents">
+  <Step title="Bật các intent đặc quyền">
     Vẫn trên trang **Bot**, cuộn xuống **Privileged Gateway Intents** và bật:
 
     - **Message Content Intent** (bắt buộc)
-    - **Server Members Intent** (khuyến nghị; bắt buộc cho danh sách cho phép theo vai trò và khớp tên với ID)
-    - **Presence Intent** (không bắt buộc; chỉ cần cho cập nhật trạng thái hiện diện)
+    - **Server Members Intent** (khuyến nghị; bắt buộc cho danh sách cho phép theo vai trò và khớp tên sang ID)
+    - **Presence Intent** (tùy chọn; chỉ cần cho cập nhật trạng thái hiện diện)
 
   </Step>
 
@@ -51,7 +52,7 @@ Bạn cần tạo một ứng dụng mới có bot, thêm bot vào máy chủ c�
     Cuộn lại lên trên trang **Bot** và nhấp **Reset Token**.
 
     <Note>
-    Dù tên là vậy, thao tác này tạo token đầu tiên của bạn — không có gì đang được "đặt lại."
+    Dù tên là vậy, thao tác này tạo token đầu tiên của bạn — không có gì bị "đặt lại".
     </Note>
 
     Sao chép token và lưu ở đâu đó. Đây là **Bot Token** của bạn và bạn sẽ cần nó ngay sau đây.
@@ -59,34 +60,37 @@ Bạn cần tạo một ứng dụng mới có bot, thêm bot vào máy chủ c�
   </Step>
 
   <Step title="Tạo URL mời và thêm bot vào máy chủ của bạn">
-    Nhấp **OAuth2** trên thanh bên. Bạn sẽ tạo URL mời với đúng quyền để thêm bot vào máy chủ của mình.
+    Nhấp **OAuth2** trên thanh bên. Bạn sẽ tạo một URL mời với đúng quyền để thêm bot vào máy chủ của mình.
 
     Cuộn xuống **OAuth2 URL Generator** và bật:
 
     - `bot`
     - `applications.commands`
 
-    Phần **Bot Permissions** sẽ xuất hiện bên dưới. Bật ít nhất:
+    Một phần **Bot Permissions** sẽ xuất hiện bên dưới. Bật ít nhất:
 
     **General Permissions**
-      - View Channels
+      - Xem kênh
     **Text Permissions**
-      - Send Messages
-      - Read Message History
-      - Embed Links
-      - Attach Files
-      - Add Reactions (không bắt buộc)
+      - Gửi tin nhắn
+      - Đọc lịch sử tin nhắn
+      - Nhúng liên kết
+      - Đính kèm tệp
+      - Thêm phản ứng (tùy chọn)
 
-    Đây là tập quyền cơ sở cho các kênh văn bản thông thường. Nếu bạn dự định đăng trong các thread Discord, bao gồm quy trình kênh forum hoặc media tạo hoặc tiếp tục một thread, hãy bật cả **Send Messages in Threads**.
-    Sao chép URL được tạo ở cuối, dán vào trình duyệt, chọn máy chủ của bạn, rồi nhấp **Continue** để kết nối. Bây giờ bạn sẽ thấy bot của mình trong máy chủ Discord.
+    Đây là bộ quyền nền tảng cho các kênh văn bản thông thường. Nếu bạn dự định đăng trong các luồng Discord, bao gồm các quy trình kênh diễn đàn hoặc kênh media tạo hoặc tiếp tục một luồng, hãy bật cả **Send Messages in Threads**.
+    Sao chép URL đã tạo ở dưới cùng, dán vào trình duyệt, chọn máy chủ của bạn và nhấp **Continue** để kết nối. Giờ bạn sẽ thấy bot của mình trong máy chủ Discord.
 
   </Step>
 
   <Step title="Bật Developer Mode và thu thập ID của bạn">
     Quay lại ứng dụng Discord, bạn cần bật Developer Mode để có thể sao chép ID nội bộ.
 
-    1. Nhấp **User Settings** (biểu tượng bánh răng cạnh ảnh đại diện của bạn) → **Advanced** → bật **Developer Mode**
-    2. Nhấp chuột phải vào **biểu tượng máy chủ** của bạn trên thanh bên → **Copy Server ID**
+    1. Nhấp **User Settings** (biểu tượng bánh răng cạnh ảnh đại diện của bạn) → Cuộn đến **Developer** trong thanh bên → bật **Developer Mode**
+
+        *(Lưu ý: Trên ứng dụng di động Discord, Developer Mode nằm trong **App Settings** → **Advanced**)*
+
+    2. Nhấp chuột phải vào **biểu tượng máy chủ** của bạn trong thanh bên → **Copy Server ID**
     3. Nhấp chuột phải vào **ảnh đại diện của chính bạn** → **Copy User ID**
 
     Lưu **Server ID** và **User ID** cùng với Bot Token của bạn — bạn sẽ gửi cả ba cho OpenClaw ở bước tiếp theo.
@@ -96,12 +100,12 @@ Bạn cần tạo một ứng dụng mới có bot, thêm bot vào máy chủ c�
   <Step title="Cho phép DM từ thành viên máy chủ">
     Để ghép nối hoạt động, Discord cần cho phép bot gửi DM cho bạn. Nhấp chuột phải vào **biểu tượng máy chủ** của bạn → **Privacy Settings** → bật **Direct Messages**.
 
-    Điều này cho phép thành viên máy chủ (bao gồm bot) gửi DM cho bạn. Giữ bật thiết lập này nếu bạn muốn dùng DM Discord với OpenClaw. Nếu bạn chỉ định dùng kênh guild, bạn có thể tắt DM sau khi ghép nối.
+    Thao tác này cho phép thành viên máy chủ (bao gồm bot) gửi DM cho bạn. Giữ bật nếu bạn muốn dùng DM Discord với OpenClaw. Nếu bạn chỉ định dùng kênh máy chủ, bạn có thể tắt DM sau khi ghép nối.
 
   </Step>
 
-  <Step title="Thiết lập token bot an toàn (không gửi trong chat)">
-    Token bot Discord của bạn là bí mật (giống mật khẩu). Thiết lập nó trên máy đang chạy OpenClaw trước khi nhắn tin cho agent của bạn.
+  <Step title="Đặt token bot của bạn một cách an toàn (không gửi trong chat)">
+    Token bot Discord của bạn là bí mật (giống mật khẩu). Đặt nó trên máy đang chạy OpenClaw trước khi nhắn tin cho tác nhân của bạn.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -120,19 +124,19 @@ openclaw config patch --file ./discord.patch.json5
 openclaw gateway
 ```
 
-    Nếu OpenClaw đã chạy dưới dạng dịch vụ nền, hãy khởi động lại qua ứng dụng OpenClaw Mac hoặc bằng cách dừng rồi khởi động lại tiến trình `openclaw gateway run`.
-    Với bản cài đặt dịch vụ được quản lý, chạy `openclaw gateway install` từ shell có `DISCORD_BOT_TOKEN`, hoặc lưu biến này trong `~/.openclaw/.env`, để dịch vụ có thể phân giải SecretRef env sau khi khởi động lại.
-    Nếu host của bạn bị Discord chặn hoặc giới hạn tốc độ khi tra cứu ứng dụng lúc khởi động, hãy đặt ID ứng dụng/client Discord từ Developer Portal để quá trình khởi động có thể bỏ qua lệnh gọi REST đó. Dùng `channels.discord.applicationId` cho tài khoản mặc định, hoặc `channels.discord.accounts.<accountId>.applicationId` khi bạn chạy nhiều bot Discord.
+    Nếu OpenClaw đã chạy dưới dạng dịch vụ nền, hãy khởi động lại qua ứng dụng OpenClaw Mac hoặc bằng cách dừng và khởi động lại tiến trình `openclaw gateway run`.
+    Với các cài đặt dịch vụ được quản lý, chạy `openclaw gateway install` từ shell có `DISCORD_BOT_TOKEN`, hoặc lưu biến trong `~/.openclaw/.env`, để dịch vụ có thể phân giải env SecretRef sau khi khởi động lại.
+    Nếu máy chủ của bạn bị Discord chặn hoặc giới hạn tốc độ khi tra cứu ứng dụng lúc khởi động, hãy đặt ID ứng dụng/client Discord từ Developer Portal để quá trình khởi động có thể bỏ qua lệnh gọi REST đó. Dùng `channels.discord.applicationId` cho tài khoản mặc định, hoặc `channels.discord.accounts.<accountId>.applicationId` khi bạn chạy nhiều bot Discord.
 
   </Step>
 
   <Step title="Cấu hình OpenClaw và ghép nối">
 
     <Tabs>
-      <Tab title="Hỏi agent của bạn">
-        Chat với agent OpenClaw của bạn trên bất kỳ kênh hiện có nào (ví dụ Telegram) và nói với nó. Nếu Discord là kênh đầu tiên của bạn, hãy dùng tab CLI / cấu hình thay thế.
+      <Tab title="Hỏi tác nhân của bạn">
+        Chat với tác nhân OpenClaw của bạn trên bất kỳ kênh hiện có nào (ví dụ Telegram) và nói với nó. Nếu Discord là kênh đầu tiên của bạn, hãy dùng tab CLI / cấu hình thay thế.
 
-        > "Tôi đã thiết lập token bot Discord trong cấu hình. Vui lòng hoàn tất thiết lập Discord với User ID `<user_id>` và Server ID `<server_id>`."
+        > "Tôi đã đặt token bot Discord trong cấu hình. Vui lòng hoàn tất thiết lập Discord với User ID `<user_id>` và Server ID `<server_id>`."
       </Tab>
       <Tab title="CLI / cấu hình">
         Nếu bạn thích cấu hình dựa trên tệp, hãy đặt:
@@ -152,15 +156,15 @@ openclaw gateway
 }
 ```
 
-        Dự phòng env cho tài khoản mặc định:
+        Env fallback cho tài khoản mặc định:
 
 ```bash
 DISCORD_BOT_TOKEN=...
 ```
 
-        Với thiết lập bằng script hoặc từ xa, ghi cùng khối JSON5 bằng `openclaw config patch --file ./discord.patch.json5 --dry-run` rồi chạy lại không có `--dry-run`. Giá trị `token` dạng văn bản thuần được hỗ trợ. Giá trị SecretRef cũng được hỗ trợ cho `channels.discord.token` trên các provider env/file/exec. Xem [Quản lý bí mật](/vi/gateway/secrets).
+        Để thiết lập bằng script hoặc từ xa, ghi cùng khối JSON5 bằng `openclaw config patch --file ./discord.patch.json5 --dry-run` rồi chạy lại mà không có `--dry-run`. Các giá trị `token` dạng văn bản thuần được hỗ trợ. Giá trị SecretRef cũng được hỗ trợ cho `channels.discord.token` trên các provider env/file/exec. Xem [Quản lý bí mật](/vi/gateway/secrets).
 
-        Với nhiều bot Discord, giữ từng token bot và ID ứng dụng trong tài khoản tương ứng. `channels.discord.applicationId` cấp cao nhất được các tài khoản kế thừa, nên chỉ đặt nó ở đó khi mọi tài khoản đều nên dùng cùng một ID ứng dụng.
+        Với nhiều bot Discord, giữ mỗi token bot và ID ứng dụng dưới tài khoản của nó. `channels.discord.applicationId` cấp cao nhất được các tài khoản kế thừa, nên chỉ đặt ở đó khi mọi tài khoản nên dùng cùng một ID ứng dụng.
 
 ```json5
 {
@@ -188,11 +192,11 @@ DISCORD_BOT_TOKEN=...
   </Step>
 
   <Step title="Phê duyệt lần ghép nối DM đầu tiên">
-    Đợi đến khi Gateway đang chạy, rồi DM cho bot của bạn trong Discord. Bot sẽ phản hồi bằng mã ghép nối.
+    Chờ đến khi gateway đang chạy, rồi gửi DM cho bot của bạn trong Discord. Nó sẽ phản hồi bằng mã ghép nối.
 
     <Tabs>
-      <Tab title="Hỏi agent của bạn">
-        Gửi mã ghép nối cho agent của bạn trên kênh hiện có:
+      <Tab title="Hỏi tác nhân của bạn">
+        Gửi mã ghép nối cho tác nhân của bạn trên kênh hiện có:
 
         > "Phê duyệt mã ghép nối Discord này: `<CODE>`"
       </Tab>
@@ -208,28 +212,28 @@ openclaw pairing approve discord <CODE>
 
     Mã ghép nối hết hạn sau 1 giờ.
 
-    Bây giờ bạn có thể chat với agent của mình trong Discord qua DM.
+    Giờ bạn có thể chat với tác nhân của mình trong Discord qua DM.
 
   </Step>
 </Steps>
 
 <Note>
-Việc phân giải token nhận biết theo tài khoản. Giá trị token trong cấu hình thắng dự phòng env. `DISCORD_BOT_TOKEN` chỉ được dùng cho tài khoản mặc định.
-Nếu hai tài khoản Discord đang bật phân giải thành cùng một token bot, OpenClaw chỉ khởi động một trình giám sát Gateway cho token đó. Token từ cấu hình thắng dự phòng env mặc định; nếu không, tài khoản đang bật đầu tiên thắng và tài khoản trùng lặp được báo là đã tắt.
-Với các lệnh gọi outbound nâng cao (hành động công cụ message/kênh), `token` rõ ràng theo từng lệnh gọi được dùng cho lệnh gọi đó. Điều này áp dụng cho các hành động gửi và đọc/thăm dò (ví dụ read/search/fetch/thread/pins/permissions). Thiết lập chính sách/thử lại của tài khoản vẫn đến từ tài khoản được chọn trong ảnh chụp runtime đang hoạt động.
+Phân giải token có nhận biết tài khoản. Giá trị token trong cấu hình thắng env fallback. `DISCORD_BOT_TOKEN` chỉ được dùng cho tài khoản mặc định.
+Nếu hai tài khoản Discord đã bật phân giải về cùng một token bot, OpenClaw chỉ khởi động một trình giám sát gateway cho token đó. Token từ cấu hình thắng env fallback mặc định; nếu không, tài khoản đã bật đầu tiên thắng và tài khoản trùng lặp được báo cáo là đã tắt.
+Đối với các lệnh gọi đi nâng cao (công cụ tin nhắn/hành động kênh), `token` rõ ràng theo từng lệnh gọi được dùng cho lệnh gọi đó. Điều này áp dụng cho các hành động gửi và đọc/thăm dò (ví dụ read/search/fetch/thread/pins/permissions). Chính sách tài khoản/cài đặt thử lại vẫn lấy từ tài khoản đã chọn trong ảnh chụp nhanh runtime đang hoạt động.
 </Note>
 
-## Khuyến nghị: Thiết lập workspace guild
+## Khuyến nghị: Thiết lập không gian làm việc máy chủ
 
-Sau khi DM hoạt động, bạn có thể thiết lập máy chủ Discord của mình như một workspace đầy đủ, nơi mỗi kênh có phiên agent riêng với ngữ cảnh riêng. Cách này được khuyến nghị cho máy chủ riêng chỉ có bạn và bot của bạn.
+Sau khi DM hoạt động, bạn có thể thiết lập máy chủ Discord làm không gian làm việc đầy đủ, nơi mỗi kênh có phiên tác nhân riêng với ngữ cảnh riêng. Điều này được khuyến nghị cho máy chủ riêng chỉ có bạn và bot của bạn.
 
 <Steps>
-  <Step title="Thêm máy chủ của bạn vào danh sách cho phép guild">
-    Điều này cho phép agent của bạn phản hồi trong bất kỳ kênh nào trên máy chủ của bạn, không chỉ DM.
+  <Step title="Thêm máy chủ của bạn vào danh sách cho phép máy chủ">
+    Thao tác này cho phép tác nhân của bạn phản hồi trong bất kỳ kênh nào trên máy chủ, không chỉ DM.
 
     <Tabs>
-      <Tab title="Hỏi agent của bạn">
-        > "Thêm Discord Server ID `<server_id>` của tôi vào danh sách cho phép guild"
+      <Tab title="Hỏi tác nhân của bạn">
+        > "Thêm Discord Server ID `<server_id>` của tôi vào danh sách cho phép máy chủ"
       </Tab>
       <Tab title="Cấu hình">
 
@@ -254,19 +258,19 @@ Sau khi DM hoạt động, bạn có thể thiết lập máy chủ Discord củ
 
   </Step>
 
-  <Step title="Cho phép phản hồi không cần @mention">
-    Theo mặc định, agent của bạn chỉ phản hồi trong các kênh guild khi được @mention. Với máy chủ riêng, có lẽ bạn muốn agent phản hồi mọi tin nhắn.
+  <Step title="Cho phép phản hồi mà không cần @mention">
+    Theo mặc định, tác nhân của bạn chỉ phản hồi trong kênh máy chủ khi được @mention. Với máy chủ riêng, có lẽ bạn muốn nó phản hồi mọi tin nhắn.
 
-    Trong các kênh guild, phản hồi cuối thông thường của assistant mặc định vẫn ở chế độ riêng tư. Đầu ra Discord hiển thị phải được gửi rõ ràng bằng công cụ `message`, để agent có thể mặc định theo dõi âm thầm và chỉ đăng khi quyết định phản hồi kênh là hữu ích.
+    Trong kênh máy chủ, các phản hồi thông thường mặc định sẽ tự động đăng. Với các phòng chia sẻ luôn bật, hãy chọn `messages.groupChat.visibleReplies: "message_tool"` để tác nhân có thể theo dõi thầm lặng và chỉ đăng khi nó quyết định phản hồi trong kênh là hữu ích. Điều này hoạt động tốt nhất với các mô hình thế hệ mới nhất, đáng tin cậy với công cụ, như GPT 5.5. Các sự kiện phòng nền vẫn im lặng trừ khi công cụ gửi. Xem [Sự kiện phòng nền](/vi/channels/ambient-room-events) để biết cấu hình đầy đủ của chế độ theo dõi thầm lặng.
 
-    Điều này có nghĩa model được chọn phải gọi công cụ một cách đáng tin cậy. Nếu Discord hiển thị đang nhập và log cho thấy có dùng token nhưng không có tin nhắn được đăng, hãy kiểm tra log phiên để tìm văn bản assistant có `didSendViaMessagingTool: false`. Điều đó có nghĩa model đã tạo câu trả lời cuối riêng tư thay vì gọi `message(action=send)`. Chuyển sang model gọi công cụ mạnh hơn, hoặc dùng cấu hình bên dưới để khôi phục phản hồi cuối tự động kiểu cũ.
+    Nếu Discord hiển thị đang nhập và nhật ký cho thấy có sử dụng token nhưng không có tin nhắn được đăng, hãy kiểm tra xem lượt đó có được cấu hình là sự kiện phòng nền hay đã chọn phản hồi hiển thị bằng công cụ tin nhắn hay không.
 
     <Tabs>
-      <Tab title="Hỏi agent của bạn">
-        > "Cho phép agent của tôi phản hồi trên máy chủ này mà không cần được @mentioned"
+      <Tab title="Hỏi tác nhân của bạn">
+        > "Cho phép tác nhân của tôi phản hồi trên máy chủ này mà không cần được @mention"
       </Tab>
       <Tab title="Cấu hình">
-        Đặt `requireMention: false` trong cấu hình guild của bạn:
+        Đặt `requireMention: false` trong cấu hình máy chủ của bạn:
 
 ```json5
 {
@@ -282,67 +286,72 @@ Sau khi DM hoạt động, bạn có thể thiết lập máy chủ Discord củ
 }
 ```
 
-        Để khôi phục phản hồi cuối tự động kiểu cũ cho phòng nhóm/kênh, đặt `messages.groupChat.visibleReplies: "automatic"`.
+        Để yêu cầu gửi bằng công cụ tin nhắn cho phản hồi nhóm/kênh hiển thị, đặt `messages.groupChat.visibleReplies: "message_tool"`.
 
       </Tab>
     </Tabs>
 
   </Step>
 
-  <Step title="Lập kế hoạch cho bộ nhớ trong kênh guild">
-    Theo mặc định, bộ nhớ dài hạn (MEMORY.md) chỉ tải trong phiên DM. Kênh guild không tự động tải MEMORY.md.
+  <Step title="Lập kế hoạch cho bộ nhớ trong kênh máy chủ">
+    Theo mặc định, bộ nhớ dài hạn (MEMORY.md) chỉ tải trong phiên DM. Kênh máy chủ không tự động tải MEMORY.md.
 
     <Tabs>
-      <Tab title="Hỏi agent của bạn">
-        > "Khi tôi đặt câu hỏi trong các kênh Discord, hãy dùng memory_search hoặc memory_get nếu bạn cần ngữ cảnh dài hạn từ MEMORY.md."
+      <Tab title="Hỏi tác nhân của bạn">
+        > "Khi tôi đặt câu hỏi trong kênh Discord, hãy dùng memory_search hoặc memory_get nếu bạn cần ngữ cảnh dài hạn từ MEMORY.md."
       </Tab>
       <Tab title="Thủ công">
-        Nếu bạn cần ngữ cảnh dùng chung trong mọi kênh, hãy đặt các chỉ dẫn ổn định trong `AGENTS.md` hoặc `USER.md` (chúng được chèn vào mọi phiên). Giữ ghi chú dài hạn trong `MEMORY.md` và truy cập chúng theo nhu cầu bằng công cụ bộ nhớ.
+        Nếu bạn cần ngữ cảnh dùng chung trong mọi kênh, hãy đặt các hướng dẫn ổn định trong `AGENTS.md` hoặc `USER.md` (chúng được chèn cho mọi phiên). Giữ ghi chú dài hạn trong `MEMORY.md` và truy cập chúng theo nhu cầu bằng công cụ bộ nhớ.
       </Tab>
     </Tabs>
 
   </Step>
 </Steps>
 
-Bây giờ hãy tạo một vài kênh trên máy chủ Discord của bạn và bắt đầu chat. Agent của bạn có thể thấy tên kênh, và mỗi kênh có phiên cô lập riêng — nên bạn có thể thiết lập `#coding`, `#home`, `#research`, hoặc bất kỳ thứ gì phù hợp với quy trình làm việc của mình.
+Giờ hãy tạo vài kênh trên máy chủ Discord của bạn và bắt đầu chat. Tác nhân của bạn có thể thấy tên kênh, và mỗi kênh có phiên cô lập riêng — nên bạn có thể thiết lập `#coding`, `#home`, `#research`, hoặc bất kỳ thứ gì phù hợp với quy trình làm việc của bạn.
 
-## Model runtime
+## Mô hình runtime
 
 - Gateway sở hữu kết nối Discord.
-- Định tuyến trả lời có tính xác định: các phản hồi đầu vào từ Discord được trả về Discord.
-- Siêu dữ liệu guild/kênh Discord được thêm vào lời nhắc mô hình dưới dạng ngữ cảnh không đáng tin cậy, không phải tiền tố trả lời hiển thị với người dùng. Nếu mô hình sao chép lại phần bao này, OpenClaw sẽ loại bỏ siêu dữ liệu đã sao chép khỏi các phản hồi gửi đi và khỏi ngữ cảnh phát lại trong tương lai.
-- Theo mặc định (`session.dmScope=main`), các cuộc trò chuyện trực tiếp dùng chung phiên chính của tác nhân (`agent:main:main`).
-- Kênh guild là các khóa phiên tách biệt (`agent:<agentId>:discord:channel:<channelId>`).
+- Định tuyến trả lời là xác định: phản hồi gửi vào từ Discord sẽ trả lời lại Discord.
+- Siêu dữ liệu guild/kênh Discord được thêm vào prompt của mô hình dưới dạng ngữ cảnh
+  không đáng tin cậy, không phải tiền tố trả lời hiển thị với người dùng. Nếu mô hình sao chép phong bì đó
+  trở lại, OpenClaw sẽ loại bỏ siêu dữ liệu đã sao chép khỏi phản hồi gửi ra và khỏi
+  ngữ cảnh phát lại trong tương lai.
+- Theo mặc định (`session.dmScope=main`), trò chuyện trực tiếp dùng chung phiên chính của tác nhân (`agent:main:main`).
+- Kênh guild là các khóa phiên biệt lập (`agent:<agentId>:discord:channel:<channelId>`).
 - DM nhóm bị bỏ qua theo mặc định (`channels.discord.dm.groupEnabled=false`).
-- Các lệnh slash gốc chạy trong các phiên lệnh tách biệt (`agent:<agentId>:discord:slash:<userId>`), trong khi vẫn mang `CommandTargetSessionKey` đến phiên hội thoại được định tuyến.
-- Việc gửi thông báo Cron/Heartbeat chỉ có văn bản đến Discord sử dụng câu trả lời cuối cùng hiển thị với trợ lý một lần. Các tải phương tiện và thành phần có cấu trúc vẫn là nhiều tin nhắn khi tác nhân phát ra nhiều tải có thể gửi.
+- Lệnh slash gốc chạy trong các phiên lệnh biệt lập (`agent:<agentId>:discord:slash:<userId>`), trong khi vẫn mang `CommandTargetSessionKey` tới phiên hội thoại được định tuyến.
+- Việc gửi thông báo cron/heartbeat chỉ văn bản tới Discord dùng câu trả lời cuối cùng
+  hiển thị với trợ lý một lần. Payload phương tiện và thành phần có cấu trúc vẫn là
+  nhiều tin nhắn khi tác nhân phát ra nhiều payload có thể gửi được.
 
 ## Kênh diễn đàn
 
-Kênh diễn đàn và kênh phương tiện của Discord chỉ chấp nhận bài đăng trong luồng. OpenClaw hỗ trợ hai cách để tạo chúng:
+Kênh diễn đàn và kênh phương tiện của Discord chỉ chấp nhận bài đăng trong thread. OpenClaw hỗ trợ hai cách để tạo chúng:
 
-- Gửi tin nhắn đến diễn đàn cha (`channel:<forumId>`) để tự động tạo một luồng. Tiêu đề luồng dùng dòng không trống đầu tiên trong tin nhắn của bạn.
-- Dùng `openclaw message thread create` để tạo luồng trực tiếp. Không truyền `--message-id` cho kênh diễn đàn.
+- Gửi tin nhắn tới diễn đàn cha (`channel:<forumId>`) để tự động tạo thread. Tiêu đề thread dùng dòng không rỗng đầu tiên trong tin nhắn của bạn.
+- Dùng `openclaw message thread create` để tạo thread trực tiếp. Không truyền `--message-id` cho kênh diễn đàn.
 
-Ví dụ: gửi đến diễn đàn cha để tạo một luồng
+Ví dụ: gửi tới diễn đàn cha để tạo thread
 
 ```bash
 openclaw message send --channel discord --target channel:<forumId> \
   --message "Topic title\nBody of the post"
 ```
 
-Ví dụ: tạo một luồng diễn đàn rõ ràng
+Ví dụ: tạo rõ ràng một thread diễn đàn
 
 ```bash
 openclaw message thread create --channel discord --target channel:<forumId> \
   --thread-name "Topic title" --message "Body of the post"
 ```
 
-Diễn đàn cha không chấp nhận thành phần Discord. Nếu bạn cần thành phần, hãy gửi đến chính luồng đó (`channel:<threadId>`).
+Diễn đàn cha không chấp nhận thành phần Discord. Nếu bạn cần thành phần, hãy gửi tới chính thread đó (`channel:<threadId>`).
 
 ## Thành phần tương tác
 
-OpenClaw hỗ trợ vùng chứa thành phần Discord v2 cho tin nhắn của tác nhân. Dùng công cụ tin nhắn với tải `components`. Kết quả tương tác được định tuyến trở lại tác nhân dưới dạng tin nhắn đầu vào thông thường và tuân theo các cài đặt Discord `replyToMode` hiện có.
+OpenClaw hỗ trợ container thành phần Discord v2 cho tin nhắn của tác nhân. Dùng công cụ tin nhắn với payload `components`. Kết quả tương tác được định tuyến trở lại tác nhân như tin nhắn gửi vào thông thường và tuân theo các thiết lập Discord `replyToMode` hiện có.
 
 Các khối được hỗ trợ:
 
@@ -350,17 +359,19 @@ Các khối được hỗ trợ:
 - Hàng hành động cho phép tối đa 5 nút hoặc một menu chọn duy nhất
 - Kiểu chọn: `string`, `user`, `role`, `mentionable`, `channel`
 
-Theo mặc định, thành phần chỉ dùng một lần. Đặt `components.reusable=true` để cho phép nút, menu chọn và biểu mẫu được dùng nhiều lần cho đến khi chúng hết hạn.
+Theo mặc định, thành phần chỉ dùng một lần. Đặt `components.reusable=true` để cho phép nút, lựa chọn và biểu mẫu được dùng nhiều lần cho đến khi hết hạn.
 
-Để giới hạn người có thể nhấp một nút, hãy đặt `allowedUsers` trên nút đó (ID người dùng Discord, thẻ hoặc `*`). Khi được cấu hình, người dùng không khớp sẽ nhận một thông báo từ chối tạm thời.
+Để giới hạn người có thể bấm nút, đặt `allowedUsers` trên nút đó (ID người dùng Discord, thẻ, hoặc `*`). Khi được cấu hình, người dùng không khớp sẽ nhận thông báo từ chối tạm thời.
 
-Các lệnh slash `/model` và `/models` mở một bộ chọn mô hình tương tác với các danh sách thả xuống nhà cung cấp, mô hình và runtime tương thích, cộng với một bước Gửi. `/models add` đã không còn được khuyến nghị và giờ trả về thông báo ngừng dùng thay vì đăng ký mô hình từ chat. Phản hồi của bộ chọn là tạm thời và chỉ người dùng gọi lệnh mới có thể sử dụng. Menu chọn của Discord bị giới hạn ở 25 tùy chọn, vì vậy hãy thêm các mục `provider/*` vào `agents.defaults.models` khi bạn muốn bộ chọn chỉ hiển thị các mô hình được khám phá động cho những nhà cung cấp đã chọn, chẳng hạn như `openai-codex` hoặc `vllm`.
+Callback thành phần hết hạn sau 30 phút theo mặc định. Đặt `channels.discord.agentComponents.ttlMs` để thay đổi thời gian tồn tại của registry callback đó cho tài khoản Discord mặc định, hoặc `channels.discord.accounts.<accountId>.agentComponents.ttlMs` để ghi đè một tài khoản trong thiết lập nhiều tài khoản. Giá trị tính bằng mili giây, phải là số nguyên dương, và bị giới hạn ở `86400000` (24 giờ). TTL dài hơn hữu ích cho quy trình review hoặc phê duyệt cần nút tiếp tục dùng được, nhưng chúng cũng kéo dài khoảng thời gian mà một tin nhắn Discord cũ vẫn có thể kích hoạt hành động. Ưu tiên TTL ngắn nhất phù hợp với quy trình, và giữ mặc định khi callback cũ có thể gây bất ngờ.
+
+Các lệnh slash `/model` và `/models` mở một bộ chọn mô hình tương tác với danh sách thả xuống nhà cung cấp, mô hình và runtime tương thích, cộng thêm bước Submit. `/models add` đã bị loại bỏ dần và giờ trả về thông báo ngừng dùng thay vì đăng ký mô hình từ trò chuyện. Phản hồi của bộ chọn là tạm thời và chỉ người dùng đã gọi lệnh mới có thể dùng. Menu chọn của Discord bị giới hạn ở 25 tùy chọn, vì vậy hãy thêm các mục `provider/*` vào `agents.defaults.models` khi bạn muốn bộ chọn chỉ hiển thị các mô hình được phát hiện động cho những nhà cung cấp được chọn như `openai` hoặc `vllm`.
 
 Tệp đính kèm:
 
-- Khối `file` phải trỏ đến một tham chiếu tệp đính kèm (`attachment://<filename>`)
+- Khối `file` phải trỏ tới một tham chiếu tệp đính kèm (`attachment://<filename>`)
 - Cung cấp tệp đính kèm qua `media`/`path`/`filePath` (một tệp); dùng `media-gallery` cho nhiều tệp
-- Dùng `filename` để ghi đè tên tải lên khi tên đó cần khớp với tham chiếu tệp đính kèm
+- Dùng `filename` để ghi đè tên tải lên khi nó cần khớp với tham chiếu tệp đính kèm
 
 Biểu mẫu modal:
 
@@ -425,7 +436,7 @@ Ví dụ:
 ## Kiểm soát truy cập và định tuyến
 
 <Tabs>
-  <Tab title="DM policy">
+  <Tab title="Chính sách DM">
     `channels.discord.dmPolicy` kiểm soát quyền truy cập DM. `channels.discord.allowFrom` là danh sách cho phép DM chuẩn.
 
     - `pairing` (mặc định)
@@ -433,30 +444,30 @@ Ví dụ:
     - `open` (yêu cầu `channels.discord.allowFrom` bao gồm `"*"`)
     - `disabled`
 
-    Nếu chính sách DM không mở, người dùng không xác định sẽ bị chặn (hoặc được nhắc ghép nối trong chế độ `pairing`).
+    Nếu chính sách DM không mở, người dùng không xác định sẽ bị chặn (hoặc được nhắc ghép đôi trong chế độ `pairing`).
 
     Thứ tự ưu tiên nhiều tài khoản:
 
     - `channels.discord.accounts.default.allowFrom` chỉ áp dụng cho tài khoản `default`.
     - Với một tài khoản, `allowFrom` có ưu tiên hơn `dm.allowFrom` cũ.
-    - Tài khoản có tên kế thừa `channels.discord.allowFrom` khi `allowFrom` riêng của chúng và `dm.allowFrom` cũ chưa được đặt.
+    - Tài khoản có tên kế thừa `channels.discord.allowFrom` khi `allowFrom` riêng và `dm.allowFrom` cũ của chúng chưa được đặt.
     - Tài khoản có tên không kế thừa `channels.discord.accounts.default.allowFrom`.
 
     `channels.discord.dm.policy` và `channels.discord.dm.allowFrom` cũ vẫn được đọc để tương thích. `openclaw doctor --fix` di chuyển chúng sang `dmPolicy` và `allowFrom` khi có thể làm vậy mà không thay đổi quyền truy cập.
 
-    Định dạng mục tiêu DM để gửi:
+    Định dạng đích DM để gửi:
 
     - `user:<id>`
-    - lượt nhắc `<@id>`
+    - đề cập `<@id>`
 
-    ID số trần thường được phân giải thành ID kênh khi một mặc định kênh đang hoạt động, nhưng các ID được liệt kê trong DM `allowFrom` hiệu lực của tài khoản được xử lý như mục tiêu DM người dùng để tương thích.
+    ID số trần thường được phân giải như ID kênh khi mặc định kênh đang hoạt động, nhưng các ID được liệt kê trong `allowFrom` DM hiệu lực của tài khoản được coi là đích DM người dùng để tương thích.
 
   </Tab>
 
-  <Tab title="Access groups">
+  <Tab title="Nhóm truy cập">
     DM Discord và ủy quyền lệnh văn bản có thể dùng các mục `accessGroup:<name>` động trong `channels.discord.allowFrom`.
 
-    Tên nhóm truy cập được chia sẻ giữa các kênh tin nhắn. Dùng `type: "message.senders"` cho một nhóm tĩnh có thành viên được biểu diễn theo cú pháp `allowFrom` thông thường của từng kênh, hoặc `type: "discord.channelAudience"` khi đối tượng `ViewChannel` hiện tại của một kênh Discord nên xác định tư cách thành viên động. Hành vi nhóm truy cập dùng chung được ghi lại tại đây: [Nhóm truy cập](/vi/channels/access-groups).
+    Tên nhóm truy cập được chia sẻ giữa các kênh tin nhắn. Dùng `type: "message.senders"` cho một nhóm tĩnh có thành viên được biểu diễn bằng cú pháp `allowFrom` bình thường của từng kênh, hoặc `type: "discord.channelAudience"` khi đối tượng `ViewChannel` hiện tại của một kênh Discord nên xác định tư cách thành viên một cách động. Hành vi nhóm truy cập dùng chung được ghi lại tại đây: [Nhóm truy cập](/vi/channels/access-groups).
 
 ```json5
 {
@@ -479,9 +490,9 @@ Ví dụ:
 }
 ```
 
-    Một kênh văn bản Discord không có danh sách thành viên riêng. `type: "discord.channelAudience"` mô hình hóa tư cách thành viên như sau: người gửi DM là thành viên của guild đã cấu hình và hiện có quyền `ViewChannel` hiệu lực trên kênh đã cấu hình sau khi áp dụng vai trò và ghi đè kênh.
+    Kênh văn bản Discord không có danh sách thành viên riêng. `type: "discord.channelAudience"` mô hình hóa tư cách thành viên như sau: người gửi DM là thành viên của guild được cấu hình và hiện có quyền `ViewChannel` hiệu lực trên kênh được cấu hình sau khi áp dụng vai trò và ghi đè kênh.
 
-    Ví dụ: cho phép bất kỳ ai có thể thấy `#maintainers` gửi DM cho bot, trong khi vẫn đóng DM với tất cả những người khác.
+    Ví dụ: cho phép bất kỳ ai có thể thấy `#maintainers` gửi DM cho bot, đồng thời vẫn đóng DM với mọi người khác.
 
 ```json5
 {
@@ -502,7 +513,7 @@ Ví dụ:
 }
 ```
 
-    Bạn có thể kết hợp các mục động và tĩnh:
+    Bạn có thể trộn các mục động và tĩnh:
 
 ```json5
 {
@@ -522,29 +533,29 @@ Ví dụ:
 }
 ```
 
-    Tra cứu thất bại theo hướng đóng. Nếu Discord trả về `Missing Access`, tra cứu thành viên thất bại, hoặc kênh thuộc về một guild khác, người gửi DM được xem là không được ủy quyền.
+    Tra cứu thất bại theo hướng đóng. Nếu Discord trả về `Missing Access`, tra cứu thành viên thất bại, hoặc kênh thuộc về guild khác, người gửi DM được coi là không được ủy quyền.
 
-    Bật **Server Members Intent** trong Discord Developer Portal cho bot khi dùng nhóm truy cập theo đối tượng kênh. DM không bao gồm trạng thái thành viên guild, nên OpenClaw phân giải thành viên qua Discord REST tại thời điểm ủy quyền.
+    Bật **Server Members Intent** trong Discord Developer Portal cho bot khi dùng nhóm truy cập theo đối tượng kênh. DM không bao gồm trạng thái thành viên guild, vì vậy OpenClaw phân giải thành viên qua Discord REST tại thời điểm ủy quyền.
 
   </Tab>
 
-  <Tab title="Guild policy">
-    Việc xử lý guild được kiểm soát bởi `channels.discord.groupPolicy`:
+  <Tab title="Chính sách guild">
+    Xử lý guild được kiểm soát bởi `channels.discord.groupPolicy`:
 
     - `open`
     - `allowlist`
     - `disabled`
 
-    Đường cơ sở bảo mật khi `channels.discord` tồn tại là `allowlist`.
+    Mức nền an toàn khi `channels.discord` tồn tại là `allowlist`.
 
     Hành vi `allowlist`:
 
     - guild phải khớp với `channels.discord.guilds` (ưu tiên `id`, chấp nhận slug)
     - danh sách cho phép người gửi tùy chọn: `users` (khuyến nghị ID ổn định) và `roles` (chỉ ID vai trò); nếu một trong hai được cấu hình, người gửi được cho phép khi họ khớp với `users` HOẶC `roles`
-    - khớp trực tiếp theo tên/thẻ bị tắt theo mặc định; chỉ bật `channels.discord.dangerouslyAllowNameMatching: true` như chế độ tương thích phá kính khi cần
+    - khớp trực tiếp tên/thẻ bị tắt theo mặc định; chỉ bật `channels.discord.dangerouslyAllowNameMatching: true` như chế độ tương thích phá kính khẩn cấp
     - tên/thẻ được hỗ trợ cho `users`, nhưng ID an toàn hơn; `openclaw security audit` cảnh báo khi dùng mục tên/thẻ
     - nếu một guild có cấu hình `channels`, các kênh không được liệt kê sẽ bị từ chối
-    - nếu một guild không có khối `channels`, tất cả các kênh trong guild đã được đưa vào danh sách cho phép đó đều được cho phép
+    - nếu một guild không có khối `channels`, tất cả kênh trong guild được đưa vào danh sách cho phép đó đều được phép
 
     Ví dụ:
 
@@ -570,23 +581,23 @@ Ví dụ:
 }
 ```
 
-    Nếu bạn chỉ đặt `DISCORD_BOT_TOKEN` và không tạo khối `channels.discord`, dự phòng runtime là `groupPolicy="allowlist"` (có cảnh báo trong nhật ký), ngay cả khi `channels.defaults.groupPolicy` là `open`.
+    Nếu bạn chỉ đặt `DISCORD_BOT_TOKEN` và không tạo khối `channels.discord`, fallback runtime là `groupPolicy="allowlist"` (kèm cảnh báo trong log), ngay cả khi `channels.defaults.groupPolicy` là `open`.
 
   </Tab>
 
-  <Tab title="Mentions and group DMs">
-    Tin nhắn guild mặc định được kiểm soát bằng lượt nhắc.
+  <Tab title="Đề cập và DM nhóm">
+    Tin nhắn guild được chặn theo đề cập theo mặc định.
 
-    Phát hiện lượt nhắc bao gồm:
+    Phát hiện đề cập bao gồm:
 
-    - lượt nhắc bot rõ ràng
-    - mẫu lượt nhắc đã cấu hình (`agents.list[].groupChat.mentionPatterns`, dự phòng `messages.groupChat.mentionPatterns`)
-    - hành vi trả lời ngầm đến bot trong các trường hợp được hỗ trợ
+    - đề cập bot rõ ràng
+    - mẫu đề cập được cấu hình (`agents.list[].groupChat.mentionPatterns`, fallback `messages.groupChat.mentionPatterns`)
+    - hành vi trả lời-ngầm-tới-bot trong các trường hợp được hỗ trợ
 
-    Khi viết tin nhắn Discord gửi đi, hãy dùng cú pháp lượt nhắc chuẩn: `<@USER_ID>` cho người dùng, `<#CHANNEL_ID>` cho kênh và `<@&ROLE_ID>` cho vai trò. Không dùng dạng lượt nhắc biệt danh cũ `<@!USER_ID>`.
+    Khi viết tin nhắn Discord gửi ra, dùng cú pháp đề cập chuẩn: `<@USER_ID>` cho người dùng, `<#CHANNEL_ID>` cho kênh, và `<@&ROLE_ID>` cho vai trò. Không dùng dạng đề cập biệt danh cũ `<@!USER_ID>`.
 
     `requireMention` được cấu hình theo từng guild/kênh (`channels.discord.guilds...`).
-    `ignoreOtherMentions` tùy chọn loại bỏ tin nhắn có nhắc người dùng/vai trò khác nhưng không nhắc bot (không tính @everyone/@here).
+    `ignoreOtherMentions` tùy chọn bỏ qua tin nhắn đề cập người dùng/vai trò khác nhưng không đề cập bot (không tính @everyone/@here).
 
     DM nhóm:
 
@@ -598,7 +609,7 @@ Ví dụ:
 
 ### Định tuyến tác nhân dựa trên vai trò
 
-Dùng `bindings[].match.roles` để định tuyến thành viên guild Discord đến các tác nhân khác nhau theo ID vai trò. Binding dựa trên vai trò chỉ chấp nhận ID vai trò và được đánh giá sau binding ngang hàng hoặc cha-ngang hàng và trước binding chỉ theo guild. Nếu một binding cũng đặt các trường khớp khác (ví dụ `peer` + `guildId` + `roles`), tất cả các trường đã cấu hình phải khớp.
+Sử dụng `bindings[].match.roles` để định tuyến thành viên guild Discord tới các tác nhân khác nhau theo ID vai trò. Các binding dựa trên vai trò chỉ chấp nhận ID vai trò và được đánh giá sau các binding peer hoặc parent-peer và trước các binding chỉ theo guild. Nếu một binding cũng đặt các trường khớp khác (ví dụ `peer` + `guildId` + `roles`), tất cả các trường đã cấu hình đều phải khớp.
 
 ```json5
 {
@@ -625,10 +636,10 @@ Dùng `bindings[].match.roles` để định tuyến thành viên guild Discord 
 ## Lệnh gốc và xác thực lệnh
 
 - `commands.native` mặc định là `"auto"` và được bật cho Discord.
-- Ghi đè theo từng kênh: `channels.discord.commands.native`.
+- Ghi đè theo kênh: `channels.discord.commands.native`.
 - `commands.native=false` bỏ qua việc đăng ký và dọn dẹp lệnh slash của Discord trong quá trình khởi động. Các lệnh đã đăng ký trước đó có thể vẫn hiển thị trong Discord cho đến khi bạn xóa chúng khỏi ứng dụng Discord.
-- Xác thực lệnh gốc dùng cùng danh sách cho phép/chính sách Discord như xử lý tin nhắn thông thường.
-- Các lệnh vẫn có thể hiển thị trong UI Discord với người dùng không được ủy quyền; việc thực thi vẫn áp dụng xác thực OpenClaw và trả về "không được ủy quyền".
+- Xác thực lệnh gốc sử dụng cùng danh sách cho phép/chính sách Discord như xử lý tin nhắn thông thường.
+- Lệnh vẫn có thể hiển thị trong giao diện Discord cho người dùng không được cấp quyền; quá trình thực thi vẫn áp dụng xác thực OpenClaw và trả về "không được cấp quyền".
 
 Xem [Lệnh slash](/vi/tools/slash-commands) để biết danh mục lệnh và hành vi.
 
@@ -640,33 +651,50 @@ Cài đặt lệnh slash mặc định:
 
 <AccordionGroup>
   <Accordion title="Thẻ trả lời và trả lời gốc">
-    Discord hỗ trợ thẻ trả lời trong đầu ra của agent:
+    Discord hỗ trợ thẻ trả lời trong đầu ra của tác nhân:
 
     - `[[reply_to_current]]`
     - `[[reply_to:<id>]]`
 
-    Được kiểm soát bởi `channels.discord.replyToMode`:
+    Được điều khiển bởi `channels.discord.replyToMode`:
 
     - `off` (mặc định)
     - `first`
     - `all`
     - `batched`
 
-    Lưu ý: `off` tắt phân luồng trả lời ngầm định. Các thẻ `[[reply_to_*]]` rõ ràng vẫn được tôn trọng.
-    `first` luôn gắn tham chiếu trả lời gốc ngầm định vào tin nhắn Discord gửi đi đầu tiên cho lượt đó.
-    `batched` chỉ gắn tham chiếu trả lời gốc ngầm định của Discord khi
-    lượt đến là một lô đã khử dội gồm nhiều tin nhắn. Điều này hữu ích
-    khi bạn muốn trả lời gốc chủ yếu cho các cuộc trò chuyện bùng phát khó phân biệt, không phải mọi
-    lượt một tin nhắn.
+    Lưu ý: `off` tắt luồng trả lời ngầm định. Các thẻ `[[reply_to_*]]` tường minh vẫn được tôn trọng.
+    `first` luôn gắn tham chiếu trả lời gốc ngầm định vào tin nhắn Discord gửi ra đầu tiên cho lượt đó.
+    `batched` chỉ gắn tham chiếu trả lời gốc ngầm định của Discord khi sự kiện
+    đầu vào là một lô đã được debounce gồm nhiều tin nhắn. Điều này hữu ích
+    khi bạn muốn trả lời gốc chủ yếu cho các cuộc trò chuyện bùng nổ khó phân định, không phải mọi
+    lượt một tin nhắn đơn lẻ.
 
-    ID tin nhắn được đưa vào ngữ cảnh/lịch sử để agent có thể nhắm tới các tin nhắn cụ thể.
+    ID tin nhắn được hiển thị trong ngữ cảnh/lịch sử để tác nhân có thể nhắm tới các tin nhắn cụ thể.
 
   </Accordion>
 
-  <Accordion title="Bản xem trước phát trực tiếp">
-    OpenClaw có thể stream bản nháp trả lời bằng cách gửi một tin nhắn tạm thời và chỉnh sửa nó khi văn bản đến. `channels.discord.streaming` nhận `off` | `partial` | `block` | `progress` (mặc định). `progress` giữ một bản nháp trạng thái có thể chỉnh sửa và cập nhật nó với tiến trình công cụ cho đến khi gửi bản cuối; nhãn khởi đầu dùng chung là một dòng cuộn, nên nó sẽ cuộn đi như phần còn lại khi có đủ công việc xuất hiện. `streamMode` là alias runtime kế thừa. Chạy `openclaw doctor --fix` để ghi lại cấu hình đã lưu về khóa chuẩn.
+  <Accordion title="Xem trước liên kết">
+    Discord mặc định tạo embed liên kết phong phú cho URL. OpenClaw mặc định chặn các embed được tạo đó trên tin nhắn Discord gửi ra, để URL do tác nhân gửi vẫn là liên kết thuần trừ khi bạn bật:
 
-    Đặt `channels.discord.streaming.mode` thành `off` để tắt chỉnh sửa bản xem trước Discord. Nếu stream khối Discord được bật rõ ràng, OpenClaw bỏ qua stream xem trước để tránh stream hai lần.
+```json5
+{
+  channels: {
+    discord: {
+      suppressEmbeds: false,
+    },
+  },
+}
+```
+
+    Đặt `channels.discord.accounts.<id>.suppressEmbeds` để ghi đè một tài khoản. Các lần gửi bằng công cụ tin nhắn của tác nhân cũng có thể truyền `suppressEmbeds: false` cho một tin nhắn đơn lẻ. Payload Discord `embeds` tường minh không bị chặn bởi cài đặt xem trước liên kết mặc định.
+
+  </Accordion>
+
+  <Accordion title="Xem trước luồng trực tiếp">
+    OpenClaw có thể stream bản nháp trả lời bằng cách gửi một tin nhắn tạm thời và chỉnh sửa nó khi văn bản đến. `channels.discord.streaming` nhận `off` | `partial` | `block` | `progress` (mặc định). `progress` giữ một bản nháp trạng thái có thể chỉnh sửa và cập nhật nó với tiến trình công cụ cho đến khi gửi cuối cùng; nhãn khởi đầu dùng chung là một dòng cuộn, nên nó sẽ cuộn đi như phần còn lại khi có đủ công việc xuất hiện. `streamMode` là bí danh runtime cũ. Chạy `openclaw doctor --fix` để viết lại cấu hình đã lưu sang khóa chuẩn.
+
+    Đặt `channels.discord.streaming.mode` thành `off` để tắt các chỉnh sửa xem trước Discord. Nếu streaming khối của Discord được bật tường minh, OpenClaw sẽ bỏ qua luồng xem trước để tránh streaming hai lần.
 
 ```json5
 {
@@ -677,7 +705,9 @@ Cài đặt lệnh slash mặc định:
         progress: {
           label: "auto",
           maxLines: 8,
+          maxLineChars: 120,
           toolProgress: true,
+          commentary: false,
         },
       },
     },
@@ -686,13 +716,15 @@ Cài đặt lệnh slash mặc định:
 ```
 
     - `partial` chỉnh sửa một tin nhắn xem trước duy nhất khi token đến.
-    - `block` phát các khối cỡ bản nháp (dùng `draftChunk` để tinh chỉnh kích thước và điểm ngắt, được giới hạn bởi `textChunkLimit`).
-    - Media, lỗi và bản cuối trả lời rõ ràng sẽ hủy các chỉnh sửa xem trước đang chờ.
-    - `streaming.preview.toolProgress` (mặc định `true`) kiểm soát việc cập nhật công cụ/tiến trình có dùng lại tin nhắn xem trước hay không.
-    - Các hàng công cụ/tiến trình hiển thị dạng emoji + tiêu đề + chi tiết gọn khi có, ví dụ `🛠️ Bash: run tests` hoặc `🔎 Web Search: for "query"`.
-    - `streaming.preview.commandText` / `streaming.progress.commandText` kiểm soát chi tiết lệnh/thực thi trong các dòng tiến trình gọn: `raw` (mặc định) hoặc `status` (chỉ nhãn công cụ).
+    - `block` phát các đoạn có kích thước bản nháp (dùng `draftChunk` để tinh chỉnh kích thước và điểm ngắt, bị giới hạn bởi `textChunkLimit`).
+    - Kết quả cuối có media, lỗi và trả lời tường minh sẽ hủy các chỉnh sửa xem trước đang chờ.
+    - `streaming.preview.toolProgress` (mặc định `true`) kiểm soát việc cập nhật công cụ/tiến trình có tái sử dụng tin nhắn xem trước hay không.
+    - Các hàng công cụ/tiến trình được hiển thị dưới dạng biểu tượng cảm xúc + tiêu đề + chi tiết gọn khi có, ví dụ `🛠️ Bash: run tests` hoặc `🔎 Web Search: for "query"`.
+    - `streaming.progress.commentary` (mặc định `false`) chọn đưa văn bản bình luận/mở đầu của assistant vào bản nháp tiến trình tạm thời. Bình luận được dọn trước khi hiển thị, vẫn là tạm thời và không thay đổi cách gửi câu trả lời cuối cùng.
+    - `streaming.progress.maxLineChars` kiểm soát ngân sách xem trước tiến trình theo từng dòng. Văn xuôi được rút ngắn theo ranh giới từ; chi tiết lệnh và đường dẫn giữ các hậu tố hữu ích.
+    - `streaming.preview.commandText` / `streaming.progress.commandText` kiểm soát chi tiết lệnh/exec trong các dòng tiến trình gọn: `raw` (mặc định) hoặc `status` (chỉ nhãn công cụ).
 
-    Ẩn văn bản lệnh/thực thi thô trong khi vẫn giữ các dòng tiến trình gọn:
+    Ẩn văn bản lệnh/exec thô trong khi vẫn giữ các dòng tiến trình gọn:
 
     ```json
     {
@@ -710,11 +742,11 @@ Cài đặt lệnh slash mặc định:
     }
     ```
 
-    Stream xem trước chỉ hỗ trợ văn bản; trả lời media quay về cách gửi thông thường. Khi stream `block` được bật rõ ràng, OpenClaw bỏ qua stream xem trước để tránh stream hai lần.
+    Streaming xem trước chỉ hỗ trợ văn bản; trả lời có media quay về cách gửi thông thường. Khi streaming `block` được bật tường minh, OpenClaw bỏ qua luồng xem trước để tránh streaming hai lần.
 
   </Accordion>
 
-  <Accordion title="Lịch sử, ngữ cảnh và hành vi thread">
+  <Accordion title="Lịch sử, ngữ cảnh và hành vi luồng">
     Ngữ cảnh lịch sử guild:
 
     - `channels.discord.historyLimit` mặc định `20`
@@ -726,28 +758,28 @@ Cài đặt lệnh slash mặc định:
     - `channels.discord.dmHistoryLimit`
     - `channels.discord.dms["<user_id>"].historyLimit`
 
-    Hành vi thread:
+    Hành vi luồng:
 
-    - Thread Discord được định tuyến như các phiên kênh và kế thừa cấu hình kênh cha trừ khi bị ghi đè.
-    - Phiên thread kế thừa lựa chọn `/model` cấp phiên của kênh cha làm dự phòng chỉ cho model; lựa chọn `/model` cục bộ của thread vẫn được ưu tiên và lịch sử transcript cha không được sao chép trừ khi bật kế thừa transcript.
-    - `channels.discord.thread.inheritParent` (mặc định `false`) cho phép các auto-thread mới khởi tạo từ transcript cha. Ghi đè theo từng tài khoản nằm dưới `channels.discord.accounts.<id>.thread.inheritParent`.
+    - Luồng Discord được định tuyến như phiên kênh và kế thừa cấu hình kênh cha trừ khi được ghi đè.
+    - Phiên luồng kế thừa lựa chọn `/model` cấp phiên của kênh cha làm dự phòng chỉ theo mô hình; lựa chọn `/model` cục bộ của luồng vẫn được ưu tiên và lịch sử bản ghi kênh cha không được sao chép trừ khi bật kế thừa bản ghi.
+    - `channels.discord.thread.inheritParent` (mặc định `false`) chọn cho các auto-thread mới được khởi tạo từ bản ghi cha. Ghi đè theo tài khoản nằm dưới `channels.discord.accounts.<id>.thread.inheritParent`.
     - Phản ứng của công cụ tin nhắn có thể phân giải mục tiêu DM `user:<id>`.
     - `guilds.<guild>.channels.<channel>.requireMention: false` được giữ nguyên trong dự phòng kích hoạt giai đoạn trả lời.
 
-    Chủ đề kênh được đưa vào dưới dạng ngữ cảnh **không đáng tin cậy**. Danh sách cho phép kiểm soát ai có thể kích hoạt agent, không phải là ranh giới biên tập lại ngữ cảnh bổ sung đầy đủ.
+    Chủ đề kênh được đưa vào làm ngữ cảnh **không đáng tin cậy**. Danh sách cho phép kiểm soát ai có thể kích hoạt tác nhân, không phải ranh giới biên tập lại ngữ cảnh bổ sung đầy đủ.
 
   </Accordion>
 
-  <Accordion title="Phiên ràng buộc với thread cho subagent">
-    Discord có thể ràng buộc một thread với mục tiêu phiên để các tin nhắn tiếp theo trong thread đó tiếp tục được định tuyến đến cùng phiên (bao gồm cả phiên subagent).
+  <Accordion title="Phiên gắn với luồng cho tác nhân phụ">
+    Discord có thể gắn một luồng với mục tiêu phiên để các tin nhắn tiếp theo trong luồng đó tiếp tục định tuyến tới cùng phiên (bao gồm phiên tác nhân phụ).
 
     Lệnh:
 
-    - `/focus <target>` ràng buộc thread hiện tại/mới với mục tiêu subagent/phiên
-    - `/unfocus` xóa ràng buộc thread hiện tại
-    - `/agents` hiển thị các lượt chạy đang hoạt động và trạng thái ràng buộc
-    - `/session idle <duration|off>` kiểm tra/cập nhật tự động bỏ tập trung khi không hoạt động cho ràng buộc đã tập trung
-    - `/session max-age <duration|off>` kiểm tra/cập nhật tuổi tối đa cứng cho ràng buộc đã tập trung
+    - `/focus <target>` gắn luồng hiện tại/mới với mục tiêu tác nhân phụ/phiên
+    - `/unfocus` xóa binding luồng hiện tại
+    - `/agents` hiển thị các lượt chạy đang hoạt động và trạng thái binding
+    - `/session idle <duration|off>` kiểm tra/cập nhật tự động unfocus khi không hoạt động cho các binding đã focus
+    - `/session max-age <duration|off>` kiểm tra/cập nhật tuổi tối đa cứng cho các binding đã focus
 
     Cấu hình:
 
@@ -778,17 +810,17 @@ Cài đặt lệnh slash mặc định:
 
     - `session.threadBindings.*` đặt mặc định toàn cục.
     - `channels.discord.threadBindings.*` ghi đè hành vi Discord.
-    - `spawnSessions` kiểm soát việc tự động tạo/ràng buộc thread cho `sessions_spawn({ thread: true })` và các lần sinh thread ACP. Mặc định: `true`.
-    - `defaultSpawnContext` kiểm soát ngữ cảnh subagent gốc cho các lần sinh ràng buộc với thread. Mặc định: `"fork"`.
-    - Các khóa `spawnSubagentSessions`/`spawnAcpSessions` không còn dùng được di chuyển bởi `openclaw doctor --fix`.
-    - Nếu ràng buộc thread bị tắt cho một tài khoản, `/focus` và các thao tác ràng buộc thread liên quan sẽ không khả dụng.
+    - `spawnSessions` kiểm soát việc tự động tạo/gắn luồng cho `sessions_spawn({ thread: true })` và các lần spawn luồng ACP. Mặc định: `true`.
+    - `defaultSpawnContext` kiểm soát ngữ cảnh tác nhân phụ gốc cho các lần spawn gắn với luồng. Mặc định: `"fork"`.
+    - Các khóa `spawnSubagentSessions`/`spawnAcpSessions` không còn được khuyến nghị được di chuyển bởi `openclaw doctor --fix`.
+    - Nếu binding luồng bị tắt cho một tài khoản, `/focus` và các thao tác binding luồng liên quan sẽ không khả dụng.
 
-    Xem [Sub-agent](/vi/tools/subagents), [Agent ACP](/vi/tools/acp-agents) và [Tham chiếu cấu hình](/vi/gateway/configuration-reference).
+    Xem [Tác nhân phụ](/vi/tools/subagents), [Tác nhân ACP](/vi/tools/acp-agents), và [Tham chiếu cấu hình](/vi/gateway/configuration-reference).
 
   </Accordion>
 
-  <Accordion title="Ràng buộc kênh ACP bền vững">
-    Với các workspace ACP ổn định "luôn bật", hãy cấu hình ràng buộc ACP có kiểu ở cấp cao nhất nhắm tới các cuộc trò chuyện Discord.
+  <Accordion title="Binding kênh ACP bền vững">
+    Đối với các workspace ACP "luôn bật" ổn định, hãy cấu hình binding ACP có kiểu ở cấp cao nhất nhắm tới các cuộc trò chuyện Discord.
 
     Đường dẫn cấu hình:
 
@@ -844,11 +876,11 @@ Cài đặt lệnh slash mặc định:
 
     Ghi chú:
 
-    - `/acp spawn codex --bind here` ràng buộc kênh hoặc thread hiện tại tại chỗ và giữ các tin nhắn tương lai trên cùng phiên ACP. Tin nhắn thread kế thừa ràng buộc kênh cha.
-    - Trong một kênh hoặc thread đã ràng buộc, `/new` và `/reset` đặt lại cùng phiên ACP tại chỗ. Ràng buộc thread tạm thời có thể ghi đè phân giải mục tiêu khi đang hoạt động.
-    - `spawnSessions` kiểm soát việc tạo/ràng buộc thread con qua `--thread auto|here`.
+    - `/acp spawn codex --bind here` gắn kênh hoặc luồng hiện tại tại chỗ và giữ các tin nhắn tương lai trên cùng phiên ACP. Tin nhắn luồng kế thừa binding kênh cha.
+    - Trong một kênh hoặc luồng đã gắn, `/new` và `/reset` đặt lại cùng phiên ACP tại chỗ. Binding luồng tạm thời có thể ghi đè phân giải mục tiêu khi đang hoạt động.
+    - `spawnSessions` kiểm soát việc tạo/gắn luồng con qua `--thread auto|here`.
 
-    Xem [Agent ACP](/vi/tools/acp-agents) để biết chi tiết hành vi ràng buộc.
+    Xem [Tác nhân ACP](/vi/tools/acp-agents) để biết chi tiết hành vi binding.
 
   </Accordion>
 
@@ -858,21 +890,21 @@ Cài đặt lệnh slash mặc định:
     - `off`
     - `own` (mặc định)
     - `all`
-    - `allowlist` (dùng `guilds.<id>.users`)
+    - `allowlist` (sử dụng `guilds.<id>.users`)
 
     Sự kiện phản ứng được chuyển thành sự kiện hệ thống và gắn vào phiên Discord đã định tuyến.
 
   </Accordion>
 
   <Accordion title="Phản ứng xác nhận">
-    `ackReaction` gửi một emoji xác nhận trong khi OpenClaw đang xử lý một tin nhắn đến.
+    `ackReaction` gửi một emoji xác nhận trong khi OpenClaw đang xử lý tin nhắn đầu vào.
 
     Thứ tự phân giải:
 
     - `channels.discord.accounts.<accountId>.ackReaction`
     - `channels.discord.ackReaction`
     - `messages.ackReaction`
-    - emoji nhận diện agent dự phòng (`agents.list[].identity.emoji`, nếu không có thì "👀")
+    - dự phòng emoji định danh tác nhân (`agents.list[].identity.emoji`, nếu không thì "👀")
 
     Ghi chú:
 
@@ -901,7 +933,7 @@ Cài đặt lệnh slash mặc định:
   </Accordion>
 
   <Accordion title="Proxy Gateway">
-    Định tuyến lưu lượng WebSocket Gateway Discord và tra cứu REST khi khởi động (ID ứng dụng + phân giải danh sách cho phép) qua proxy HTTP(S) với `channels.discord.proxy`.
+    Định tuyến lưu lượng WebSocket gateway Discord và các tra cứu REST khi khởi động (ID ứng dụng + phân giải danh sách cho phép) qua proxy HTTP(S) với `channels.discord.proxy`.
 
 ```json5
 {
@@ -913,7 +945,7 @@ Cài đặt lệnh slash mặc định:
 }
 ```
 
-    Ghi đè theo từng tài khoản:
+    Ghi đè theo tài khoản:
 
 ```json5
 {
@@ -949,15 +981,15 @@ Cài đặt lệnh slash mặc định:
 
     Ghi chú:
 
-    - danh sách cho phép có thể dùng `pk:<memberId>`
+    - allowlist có thể dùng `pk:<memberId>`
     - tên hiển thị của thành viên chỉ được khớp theo tên/slug khi `channels.discord.dangerouslyAllowNameMatching: true`
-    - tra cứu dùng ID tin nhắn gốc và bị giới hạn theo cửa sổ thời gian
-    - nếu tra cứu thất bại, tin nhắn được proxy được xử lý như tin nhắn bot và bị bỏ trừ khi `allowBots=true`
+    - việc tra cứu dùng ID tin nhắn gốc và bị giới hạn theo khung thời gian
+    - nếu tra cứu thất bại, tin nhắn được proxy sẽ được xem là tin nhắn bot và bị loại bỏ trừ khi `allowBots=true`
 
   </Accordion>
 
-  <Accordion title="Alias đề cập gửi đi">
-    Dùng `mentionAliases` khi agent cần các lượt đề cập gửi đi xác định cho người dùng Discord đã biết. Khóa là handle không có `@` ở đầu; giá trị là ID người dùng Discord. Handle không xác định, `@everyone`, `@here` và đề cập bên trong code span Markdown được giữ nguyên.
+  <Accordion title="Bí danh đề cập gửi đi">
+    Dùng `mentionAliases` khi agent cần các đề cập gửi đi có tính xác định cho người dùng Discord đã biết. Khóa là handle không có ký tự `@` ở đầu; giá trị là ID người dùng Discord. Các handle không xác định, `@everyone`, `@here`, và đề cập bên trong code span Markdown được giữ nguyên.
 
 ```json5
 {
@@ -981,9 +1013,9 @@ Cài đặt lệnh slash mặc định:
   </Accordion>
 
   <Accordion title="Cấu hình hiện diện">
-    Cập nhật hiện diện được áp dụng khi bạn đặt trường trạng thái hoặc hoạt động, hoặc khi bạn bật hiện diện tự động.
+    Các cập nhật hiện diện được áp dụng khi bạn đặt trường trạng thái hoặc hoạt động, hoặc khi bạn bật hiện diện tự động.
 
-    Ví dụ chỉ trạng thái:
+    Ví dụ chỉ có trạng thái:
 
 ```json5
 {
@@ -995,7 +1027,7 @@ Cài đặt lệnh slash mặc định:
 }
 ```
 
-    Ví dụ hoạt động (trạng thái tùy chỉnh là kiểu hoạt động mặc định):
+    Ví dụ hoạt động (trạng thái tùy chỉnh là loại hoạt động mặc định):
 
 ```json5
 {
@@ -1008,7 +1040,7 @@ Cài đặt lệnh slash mặc định:
 }
 ```
 
-    Ví dụ stream:
+    Ví dụ phát trực tiếp:
 
 ```json5
 {
@@ -1022,7 +1054,7 @@ Cài đặt lệnh slash mặc định:
 }
 ```
 
-    Bản đồ kiểu hoạt động:
+    Bảng ánh xạ loại hoạt động:
 
     - 0: Đang chơi
     - 1: Đang phát trực tiếp (yêu cầu `activityUrl`)
@@ -1031,7 +1063,7 @@ Cài đặt lệnh slash mặc định:
     - 4: Tùy chỉnh (dùng văn bản hoạt động làm trạng thái; emoji là tùy chọn)
     - 5: Đang thi đấu
 
-    Ví dụ tự động hiện diện (tín hiệu sức khỏe runtime):
+    Ví dụ hiện diện tự động (tín hiệu sức khỏe runtime):
 
 ```json5
 {
@@ -1048,16 +1080,16 @@ Cài đặt lệnh slash mặc định:
 }
 ```
 
-    Tự động hiện diện ánh xạ mức khả dụng của runtime sang trạng thái Discord: healthy => online, degraded hoặc unknown => idle, exhausted hoặc unavailable => dnd. Ghi đè văn bản tùy chọn:
+    Hiện diện tự động ánh xạ khả dụng runtime sang trạng thái Discord: khỏe mạnh => online, suy giảm hoặc không xác định => idle, cạn kiệt hoặc không khả dụng => dnd. Các ghi đè văn bản tùy chọn:
 
     - `autoPresence.healthyText`
     - `autoPresence.degradedText`
-    - `autoPresence.exhaustedText` (hỗ trợ phần giữ chỗ `{reason}`)
+    - `autoPresence.exhaustedText` (hỗ trợ placeholder `{reason}`)
 
   </Accordion>
 
-  <Accordion title="Approvals in Discord">
-    Discord hỗ trợ xử lý phê duyệt bằng nút trong DM và có thể tùy chọn đăng lời nhắc phê duyệt trong kênh gốc.
+  <Accordion title="Phê duyệt trong Discord">
+    Discord hỗ trợ xử lý phê duyệt dựa trên nút trong DM và có thể tùy chọn đăng lời nhắc phê duyệt trong kênh khởi nguồn.
 
     Đường dẫn cấu hình:
 
@@ -1066,60 +1098,62 @@ Cài đặt lệnh slash mặc định:
     - `channels.discord.execApprovals.target` (`dm` | `channel` | `both`, mặc định: `dm`)
     - `agentFilter`, `sessionFilter`, `cleanupAfterResolve`
 
-    Discord tự động bật phê duyệt thực thi gốc khi `enabled` chưa được đặt hoặc là `"auto"` và có thể phân giải ít nhất một người phê duyệt, từ `execApprovals.approvers` hoặc từ `commands.ownerAllowFrom`. Discord không suy luận người phê duyệt thực thi từ kênh `allowFrom`, `dm.allowFrom` cũ, hoặc tin nhắn trực tiếp `defaultTo`. Đặt `enabled: false` để tắt rõ ràng Discord dưới dạng ứng dụng phê duyệt gốc.
+    Discord tự động bật phê duyệt exec gốc khi `enabled` không được đặt hoặc là `"auto"` và có thể phân giải ít nhất một người phê duyệt, từ `execApprovals.approvers` hoặc từ `commands.ownerAllowFrom`. Discord không suy luận người phê duyệt exec từ `allowFrom` của kênh, `dm.allowFrom` cũ, hoặc `defaultTo` của tin nhắn trực tiếp. Đặt `enabled: false` để tắt Discord rõ ràng với vai trò client phê duyệt gốc.
 
-    Với các lệnh nhóm nhạy cảm chỉ dành cho chủ sở hữu như `/diagnostics` và `/export-trajectory`, OpenClaw gửi lời nhắc phê duyệt và kết quả cuối cùng ở chế độ riêng tư. Trước tiên, OpenClaw thử DM Discord khi chủ sở hữu gọi lệnh có tuyến chủ sở hữu Discord; nếu không có, OpenClaw quay về tuyến chủ sở hữu khả dụng đầu tiên từ `commands.ownerAllowFrom`, chẳng hạn như Telegram.
+    Với các lệnh nhóm nhạy cảm chỉ dành cho owner như `/diagnostics` và `/export-trajectory`, OpenClaw gửi lời nhắc phê duyệt và kết quả cuối cùng một cách riêng tư. Hệ thống thử DM Discord trước khi owner gọi lệnh có tuyến owner Discord; nếu không có, hệ thống quay về tuyến owner khả dụng đầu tiên từ `commands.ownerAllowFrom`, chẳng hạn như Telegram.
 
-    Khi `target` là `channel` hoặc `both`, lời nhắc phê duyệt sẽ hiển thị trong kênh. Chỉ những người phê duyệt đã được phân giải mới có thể dùng các nút; người dùng khác nhận thông báo từ chối tạm thời. Lời nhắc phê duyệt bao gồm văn bản lệnh, vì vậy chỉ bật gửi qua kênh trong các kênh đáng tin cậy. Nếu không thể suy ra ID kênh từ khóa phiên, OpenClaw quay về gửi qua DM.
+    Khi `target` là `channel` hoặc `both`, lời nhắc phê duyệt hiển thị trong kênh. Chỉ những người phê duyệt đã phân giải mới có thể dùng các nút; người dùng khác nhận một từ chối tạm thời. Lời nhắc phê duyệt bao gồm văn bản lệnh, nên chỉ bật gửi qua kênh trong các kênh đáng tin cậy. Nếu không thể suy ra ID kênh từ khóa phiên, OpenClaw quay về gửi qua DM.
 
-    Discord cũng hiển thị các nút phê duyệt dùng chung được các kênh trò chuyện khác sử dụng. Bộ điều hợp Discord gốc chủ yếu bổ sung định tuyến DM cho người phê duyệt và phát tán ra kênh.
+    Discord cũng hiển thị các nút phê duyệt dùng chung được các kênh chat khác sử dụng. Adapter Discord gốc chủ yếu bổ sung định tuyến DM cho người phê duyệt và fanout kênh.
     Khi các nút đó xuất hiện, chúng là UX phê duyệt chính; OpenClaw
     chỉ nên bao gồm lệnh `/approve` thủ công khi kết quả công cụ cho biết
-    phê duyệt qua trò chuyện không khả dụng hoặc phê duyệt thủ công là đường dẫn duy nhất.
-    Nếu runtime phê duyệt gốc của Discord không hoạt động, OpenClaw giữ cho
-    lời nhắc `/approve <id> <decision>` xác định cục bộ hiển thị. Nếu
-    runtime đang hoạt động nhưng không thể gửi thẻ gốc tới bất kỳ đích nào,
-    OpenClaw gửi thông báo dự phòng trong cùng cuộc trò chuyện với lệnh `/approve`
+    phê duyệt chat không khả dụng hoặc phê duyệt thủ công là đường dẫn duy nhất.
+    Nếu runtime phê duyệt gốc của Discord không hoạt động, OpenClaw giữ
+    lời nhắc `/approve <id> <decision>` xác định cục bộ ở trạng thái hiển thị. Nếu
+    runtime đang hoạt động nhưng không thể gửi thẻ gốc đến bất kỳ mục tiêu nào,
+    OpenClaw gửi một thông báo dự phòng trong cùng chat với lệnh `/approve`
     chính xác từ phê duyệt đang chờ.
 
-    Xác thực Gateway và phân giải phê duyệt tuân theo hợp đồng máy khách Gateway dùng chung (`plugin:` ID phân giải qua `plugin.approval.resolve`; các ID khác qua `exec.approval.resolve`). Phê duyệt hết hạn sau 30 phút theo mặc định.
+    Xác thực Gateway và phân giải phê duyệt tuân theo hợp đồng client Gateway dùng chung (ID `plugin:` phân giải qua `plugin.approval.resolve`; các ID khác qua `exec.approval.resolve`). Theo mặc định, phê duyệt hết hạn sau 30 phút.
 
-    Xem [Phê duyệt thực thi](/vi/tools/exec-approvals).
+    Xem [Phê duyệt exec](/vi/tools/exec-approvals).
 
   </Accordion>
 </AccordionGroup>
 
 ## Công cụ và cổng hành động
 
-Hành động tin nhắn Discord bao gồm nhắn tin, quản trị kênh, kiểm duyệt, hiện diện và hành động siêu dữ liệu.
+Hành động tin nhắn Discord bao gồm nhắn tin, quản trị kênh, điều phối, hiện diện và hành động metadata.
 
 Ví dụ cốt lõi:
 
 - nhắn tin: `sendMessage`, `readMessages`, `editMessage`, `deleteMessage`, `threadReply`
 - phản ứng: `react`, `reactions`, `emojiList`
-- kiểm duyệt: `timeout`, `kick`, `ban`
+- điều phối: `timeout`, `kick`, `ban`
 - hiện diện: `setPresence`
 
-Hành động `event-create` chấp nhận tham số `image` tùy chọn (URL hoặc đường dẫn tệp cục bộ) để đặt ảnh bìa cho sự kiện đã lên lịch.
+Hành động `event-create` chấp nhận tham số `image` tùy chọn (URL hoặc đường dẫn tệp cục bộ) để đặt ảnh bìa sự kiện đã lên lịch.
 
 Cổng hành động nằm dưới `channels.discord.actions.*`.
 
 Hành vi cổng mặc định:
 
-| Nhóm hành động                                                                                                                                                           | Mặc định  |
+| Nhóm hành động                                                                                                                                                           | Mặc định |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
-| reactions, messages, threads, pins, polls, search, memberInfo, roleInfo, channelInfo, channels, voiceStatus, events, stickers, emojiUploads, stickerUploads, permissions | đã bật   |
-| roles                                                                                                                                                                    | đã tắt   |
-| moderation                                                                                                                                                               | đã tắt   |
-| presence                                                                                                                                                                 | đã tắt   |
+| reactions, messages, threads, pins, polls, search, memberInfo, roleInfo, channelInfo, channels, voiceStatus, events, stickers, emojiUploads, stickerUploads, permissions | bật      |
+| roles                                                                                                                                                                    | tắt      |
+| moderation                                                                                                                                                               | tắt      |
+| presence                                                                                                                                                                 | tắt      |
 
-## UI Components v2
+## Giao diện Components v2
 
-OpenClaw dùng Discord components v2 cho phê duyệt thực thi và dấu mốc xuyên ngữ cảnh. Hành động tin nhắn Discord cũng có thể chấp nhận `components` cho UI tùy chỉnh (nâng cao; yêu cầu dựng payload component qua công cụ discord), trong khi `embeds` cũ vẫn khả dụng nhưng không được khuyến nghị.
+OpenClaw dùng Discord components v2 cho phê duyệt exec và marker xuyên ngữ cảnh. Hành động tin nhắn Discord cũng có thể chấp nhận `components` cho giao diện tùy chỉnh (nâng cao; yêu cầu tạo payload component qua công cụ Discord), trong khi `embeds` cũ vẫn có sẵn nhưng không được khuyến nghị.
 
-- `channels.discord.ui.components.accentColor` đặt màu nhấn được các container component của Discord sử dụng (hex).
-- Đặt theo từng tài khoản bằng `channels.discord.accounts.<id>.ui.components.accentColor`.
+- `channels.discord.ui.components.accentColor` đặt màu nhấn được dùng bởi các container component của Discord (hex).
+- Đặt theo từng tài khoản với `channels.discord.accounts.<id>.ui.components.accentColor`.
+- `channels.discord.agentComponents.ttlMs` kiểm soát thời gian các callback component Discord đã gửi còn được đăng ký (mặc định `1800000`, tối đa `86400000`). Đặt theo từng tài khoản với `channels.discord.accounts.<id>.agentComponents.ttlMs`.
 - `embeds` bị bỏ qua khi components v2 xuất hiện.
+- Bản xem trước URL thuần được tắt theo mặc định. Đặt `suppressEmbeds: false` trên một hành động tin nhắn khi một liên kết gửi đi duy nhất cần được mở rộng.
 
 Ví dụ:
 
@@ -1137,22 +1171,22 @@ Ví dụ:
 }
 ```
 
-## Giọng nói
+## Thoại
 
-Discord có hai bề mặt giọng nói riêng biệt: **kênh thoại** thời gian thực (cuộc trò chuyện liên tục) và **tệp đính kèm tin nhắn thoại** (định dạng xem trước dạng sóng). Gateway hỗ trợ cả hai.
+Discord có hai bề mặt thoại riêng biệt: **kênh thoại** thời gian thực (cuộc trò chuyện liên tục) và **tệp đính kèm tin nhắn thoại** (định dạng xem trước dạng sóng). Gateway hỗ trợ cả hai.
 
 ### Kênh thoại
 
 Danh sách kiểm tra thiết lập:
 
 1. Bật Message Content Intent trong Discord Developer Portal.
-2. Bật Server Members Intent khi dùng danh sách cho phép theo vai trò/người dùng.
-3. Mời bot với phạm vi `bot` và `applications.commands`.
-4. Cấp Connect, Speak, Send Messages và Read Message History trong kênh thoại đích.
+2. Bật Server Members Intent khi dùng allowlist vai trò/người dùng.
+3. Mời bot với scope `bot` và `applications.commands`.
+4. Cấp quyền Connect, Speak, Send Messages và Read Message History trong kênh thoại mục tiêu.
 5. Bật lệnh gốc (`commands.native` hoặc `channels.discord.commands.native`).
 6. Cấu hình `channels.discord.voice`.
 
-Dùng `/vc join|leave|status` để điều khiển phiên. Lệnh sử dụng tác tử mặc định của tài khoản và tuân theo cùng các quy tắc danh sách cho phép và chính sách nhóm như các lệnh Discord khác.
+Dùng `/vc join|leave|status` để điều khiển phiên. Lệnh dùng agent mặc định của tài khoản và tuân theo cùng các quy tắc allowlist và chính sách nhóm như các lệnh Discord khác.
 
 ```bash
 /vc join channel:<voice-channel-id>
@@ -1174,7 +1208,7 @@ Ví dụ tự động tham gia:
     discord: {
       voice: {
         enabled: true,
-        model: "openai-codex/gpt-5.5",
+        model: "openai/gpt-5.5",
         autoJoin: [
           {
             guildId: "123456789012345678",
@@ -1194,7 +1228,7 @@ Ví dụ tự động tham gia:
         realtime: {
           provider: "openai",
           model: "gpt-realtime-2",
-          voice: "cedar",
+          speakerVoice: "cedar",
         },
       },
     },
@@ -1204,62 +1238,95 @@ Ví dụ tự động tham gia:
 
 Ghi chú:
 
-- `voice.tts` chỉ ghi đè `messages.tts` cho phát lại giọng nói `stt-tts`. Các chế độ thời gian thực dùng `voice.realtime.voice`.
-- `voice.mode` kiểm soát luồng hội thoại. Mặc định là `agent-proxy`: một giao diện giọng nói thời gian thực xử lý thời điểm lượt nói, ngắt lời và phát lại, ủy quyền công việc nội dung cho tác tử OpenClaw được định tuyến thông qua `openclaw_agent_consult`, và xử lý kết quả như một lời nhắc Discord được nhập từ người nói đó. `stt-tts` giữ luồng STT theo lô cũ cộng với TTS. `bidi` cho phép mô hình thời gian thực trò chuyện trực tiếp đồng thời cung cấp `openclaw_agent_consult` cho bộ não OpenClaw.
-- `voice.agentSession` kiểm soát cuộc hội thoại OpenClaw nào nhận các lượt thoại. Để trống để dùng phiên riêng của kênh thoại, hoặc đặt `{ mode: "target", target: "channel:<text-channel-id>" }` để biến kênh thoại thành phần mở rộng micrô/loa của một phiên kênh văn bản Discord hiện có, chẳng hạn như `#maintainers`.
-- `voice.model` ghi đè bộ não tác tử OpenClaw cho phản hồi thoại Discord và các lượt tham vấn thời gian thực. Để trống để kế thừa mô hình tác tử được định tuyến. Nó tách biệt với `voice.realtime.model`.
-- `agent-proxy` định tuyến lời nói qua `discord-voice`, giúp giữ nguyên ủy quyền chủ sở hữu/công cụ bình thường cho người nói và phiên đích nhưng ẩn công cụ `tts` của tác tử vì thoại Discord sở hữu việc phát lại. Theo mặc định, `agent-proxy` cấp cho lượt tham vấn quyền truy cập công cụ tương đương đầy đủ với chủ sở hữu đối với người nói là chủ sở hữu (`voice.realtime.toolPolicy: "owner"`) và ưu tiên mạnh việc tham vấn tác tử OpenClaw trước các câu trả lời có nội dung (`voice.realtime.consultPolicy: "always"`). Trong chế độ mặc định `always` đó, lớp thời gian thực không tự động nói phần đệm trước câu trả lời tham vấn; nó ghi lại và phiên âm lời nói, sau đó nói câu trả lời OpenClaw đã được định tuyến. Nếu nhiều câu trả lời tham vấn bắt buộc hoàn tất trong khi Discord vẫn đang phát câu trả lời đầu tiên, các câu trả lời lời nói chính xác sau đó được xếp hàng cho đến khi phát lại rảnh thay vì thay thế lời nói giữa câu.
-- Trong chế độ `stt-tts`, STT dùng `tools.media.audio`; `voice.model` không ảnh hưởng đến phiên âm.
-- Trong các chế độ thời gian thực, `voice.realtime.provider`, `voice.realtime.model` và `voice.realtime.voice` cấu hình phiên âm thanh thời gian thực. Với OpenAI Realtime 2 cộng với bộ não Codex, dùng `voice.realtime.model: "gpt-realtime-2"` và `voice.model: "openai-codex/gpt-5.5"`.
-- Nhà cung cấp thời gian thực OpenAI chấp nhận tên sự kiện Realtime 2 hiện tại và các bí danh tương thích Codex kiểu cũ cho sự kiện âm thanh đầu ra và bản phiên âm, để các bản chụp nhà cung cấp tương thích có thể lệch mà không làm mất âm thanh trợ lý.
-- `voice.realtime.bargeIn` kiểm soát việc sự kiện bắt đầu nói của người nói Discord có ngắt phát lại thời gian thực đang hoạt động hay không. Nếu chưa đặt, nó làm theo thiết lập ngắt âm thanh đầu vào của nhà cung cấp thời gian thực.
-- `voice.realtime.minBargeInAudioEndMs` kiểm soát thời lượng phát lại tối thiểu của trợ lý trước khi một lần chen lời thời gian thực OpenAI cắt ngắn âm thanh. Mặc định: `250`. Đặt `0` để ngắt ngay trong phòng ít vọng, hoặc tăng giá trị này cho các thiết lập loa nhiều vọng.
-- Đối với giọng OpenAI khi phát lại trên Discord, đặt `voice.tts.provider: "openai"` và chọn một giọng Text-to-speech trong `voice.tts.openai.voice` hoặc `voice.tts.providers.openai.voice`. `cedar` là một lựa chọn nghe nam tính tốt trên mô hình TTS OpenAI hiện tại.
-- Các ghi đè `systemPrompt` Discord theo từng kênh áp dụng cho các lượt bản phiên âm thoại của kênh thoại đó.
-- Các lượt bản phiên âm thoại suy ra trạng thái chủ sở hữu từ Discord `allowFrom` (hoặc `dm.allowFrom`); người nói không phải chủ sở hữu không thể truy cập các công cụ chỉ dành cho chủ sở hữu (ví dụ `gateway` và `cron`).
-- Thoại Discord là tùy chọn bật thêm đối với cấu hình chỉ văn bản; đặt `channels.discord.voice.enabled=true` (hoặc giữ một khối `channels.discord.voice` hiện có) để bật lệnh `/vc`, runtime thoại và ý định Gateway `GuildVoiceStates`.
-- `channels.discord.intents.voiceStates` có thể ghi đè rõ ràng việc đăng ký ý định trạng thái thoại. Để trống để ý định đi theo trạng thái bật thoại hiệu lực.
-- Nếu `voice.autoJoin` có nhiều mục cho cùng một guild, OpenClaw sẽ tham gia kênh được cấu hình cuối cùng cho guild đó.
-- `voice.allowedChannels` là một danh sách cho phép cư trú tùy chọn. Để trống để cho phép `/vc join` vào bất kỳ kênh thoại Discord được ủy quyền nào. Khi được đặt, `/vc join`, tự động tham gia lúc khởi động và các lần di chuyển trạng thái thoại của bot bị giới hạn trong các mục `{ guildId, channelId }` được liệt kê. Đặt thành mảng rỗng để từ chối mọi lần tham gia thoại Discord. Nếu Discord di chuyển bot ra ngoài danh sách cho phép, OpenClaw rời kênh đó và tham gia lại đích tự động tham gia đã cấu hình khi có.
-- `voice.daveEncryption` và `voice.decryptionFailureTolerance` được truyền qua các tùy chọn tham gia của `@discordjs/voice`.
-- Mặc định của `@discordjs/voice` là `daveEncryption=true` và `decryptionFailureTolerance=24` nếu chưa đặt.
-- OpenClaw mặc định dùng bộ giải mã `opusscript` thuần JS cho nhận thoại Discord. Gói gốc tùy chọn `@discordjs/opus` bị bỏ qua theo chính sách cài đặt pnpm của repo để các cài đặt thông thường, các làn Docker và các bài kiểm thử không liên quan không biên dịch addon gốc. Các máy chủ hiệu năng thoại chuyên dụng có thể chọn dùng bằng `OPENCLAW_DISCORD_OPUS_DECODER=native` sau khi cài đặt addon gốc.
-- `voice.connectTimeoutMs` kiểm soát thời gian chờ Ready ban đầu của `@discordjs/voice` cho `/vc join` và các lần tự động tham gia. Mặc định: `30000`.
-- `voice.reconnectGraceMs` kiểm soát thời gian OpenClaw chờ một phiên thoại đã ngắt kết nối bắt đầu kết nối lại trước khi hủy nó. Mặc định: `15000`.
-- Trong chế độ `stt-tts`, phát lại thoại không dừng chỉ vì một người dùng khác bắt đầu nói. Để tránh vòng lặp phản hồi, OpenClaw bỏ qua việc thu giọng nói mới trong khi TTS đang phát; hãy nói sau khi phát lại hoàn tất cho lượt tiếp theo. Các chế độ thời gian thực chuyển tiếp lượt bắt đầu nói của người nói dưới dạng tín hiệu chen lời đến nhà cung cấp thời gian thực.
-- Trong các chế độ thời gian thực, tiếng vọng từ loa vào micrô đang mở có thể trông giống như chen lời và ngắt phát lại. Với các phòng Discord nhiều vọng, đặt `voice.realtime.providers.openai.interruptResponseOnInputAudio: false` để ngăn OpenAI tự động ngắt khi có âm thanh đầu vào. Thêm `voice.realtime.bargeIn: true` nếu bạn vẫn muốn các sự kiện bắt đầu nói của người nói Discord ngắt phát lại đang hoạt động. Cầu nối thời gian thực OpenAI bỏ qua các lần cắt ngắn phát lại ngắn hơn `voice.realtime.minBargeInAudioEndMs` vì nhiều khả năng là vọng/nhiễu và ghi log là đã bỏ qua thay vì xóa phát lại Discord.
-- `voice.captureSilenceGraceMs` kiểm soát thời gian OpenClaw chờ sau khi Discord báo rằng một người nói đã dừng trước khi hoàn tất phân đoạn âm thanh đó cho STT. Mặc định: `2500`; tăng giá trị này nếu Discord tách các khoảng dừng bình thường thành các bản phiên âm từng phần bị ngắt đoạn.
-- Khi ElevenLabs là nhà cung cấp TTS được chọn, phát lại thoại Discord dùng TTS truyền phát và bắt đầu từ luồng phản hồi của nhà cung cấp. Các nhà cung cấp không hỗ trợ truyền phát sẽ quay lại đường dẫn tệp tạm đã tổng hợp.
-- OpenClaw cũng theo dõi các lỗi giải mã khi nhận và tự động khôi phục bằng cách rời/tham gia lại kênh thoại sau nhiều lần lỗi lặp lại trong một khoảng thời gian ngắn.
-- Nếu log nhận liên tục hiển thị `DecryptionFailed(UnencryptedWhenPassthroughDisabled)` sau khi cập nhật, hãy thu thập báo cáo phụ thuộc và log. Dòng `@discordjs/voice` được đóng gói bao gồm bản sửa padding thượng nguồn từ PR discord.js #11449, đã đóng issue discord.js #11419.
-- Các sự kiện nhận `The operation was aborted` là bình thường khi OpenClaw hoàn tất một phân đoạn người nói đã thu; chúng là chẩn đoán chi tiết, không phải cảnh báo.
-- Log thoại Discord chi tiết bao gồm bản xem trước phiên âm STT một dòng có giới hạn cho mỗi phân đoạn người nói được chấp nhận, để việc gỡ lỗi hiển thị cả phía người dùng và phía phản hồi của tác tử mà không đổ văn bản phiên âm không giới hạn.
-- Trong chế độ `agent-proxy`, phương án dự phòng tham vấn bắt buộc bỏ qua các mảnh bản phiên âm có khả năng chưa hoàn chỉnh, chẳng hạn như văn bản kết thúc bằng `...` hoặc một từ nối ở cuối như `and`, cộng với các câu kết rõ ràng không yêu cầu hành động như “quay lại ngay” hoặc “tạm biệt”. Log hiển thị `forced agent consult skipped reason=...` khi điều này ngăn một câu trả lời cũ trong hàng đợi.
+- `voice.tts` chỉ ghi đè `messages.tts` cho phát lại giọng nói `stt-tts`. Các chế độ thời gian thực dùng `voice.realtime.speakerVoice`.
+- `voice.mode` điều khiển đường dẫn hội thoại. Mặc định là `agent-proxy`: một giao diện giọng nói thời gian thực xử lý thời điểm theo lượt, ngắt lời và phát lại, ủy quyền công việc nội dung cho agent OpenClaw được định tuyến qua `openclaw_agent_consult`, rồi xử lý kết quả như một lời nhắc Discord dạng văn bản từ người nói đó. `stt-tts` giữ luồng STT theo lô cũ cộng với TTS. `bidi` cho phép mô hình thời gian thực trò chuyện trực tiếp trong khi vẫn cung cấp `openclaw_agent_consult` cho bộ não OpenClaw.
+- `voice.agentSession` điều khiển hội thoại OpenClaw nào nhận các lượt giọng nói. Để trống để dùng phiên riêng của kênh thoại, hoặc đặt `{ mode: "target", target: "channel:<text-channel-id>" }` để kênh thoại hoạt động như phần mở rộng micro/loa của một phiên kênh văn bản Discord hiện có, chẳng hạn `#maintainers`.
+- `voice.model` ghi đè bộ não agent OpenClaw cho phản hồi giọng nói Discord và các lượt consult thời gian thực. Để trống để kế thừa mô hình agent được định tuyến. Trường này tách biệt với `voice.realtime.model`.
+- `voice.followUsers` cho phép bot tham gia, di chuyển và rời khỏi giọng nói Discord cùng những người dùng được chọn. Xem [Theo dõi người dùng trong giọng nói](#follow-users-in-voice) để biết quy tắc hành vi và ví dụ.
+- `agent-proxy` định tuyến lời nói qua `discord-voice`, giữ nguyên ủy quyền owner/tool bình thường cho người nói và phiên đích nhưng ẩn tool `tts` của agent vì giọng nói Discord sở hữu việc phát lại. Theo mặc định, `agent-proxy` cấp cho lượt consult quyền truy cập tool đầy đủ tương đương owner đối với người nói là owner (`voice.realtime.toolPolicy: "owner"`) và ưu tiên mạnh việc consult agent OpenClaw trước khi trả lời nội dung (`voice.realtime.consultPolicy: "always"`). Trong chế độ mặc định `always` đó, lớp thời gian thực không tự nói câu đệm trước câu trả lời consult; nó thu và phiên âm lời nói, rồi nói câu trả lời OpenClaw được định tuyến. Nếu nhiều câu trả lời consult bắt buộc hoàn tất trong khi Discord vẫn đang phát câu trả lời đầu tiên, các câu trả lời lời nói chính xác về sau sẽ được xếp hàng cho đến khi phát lại rảnh thay vì thay thế lời nói giữa câu.
+- Ở chế độ `stt-tts`, STT dùng `tools.media.audio`; `voice.model` không ảnh hưởng đến phiên âm.
+- Trong các chế độ thời gian thực, `voice.realtime.provider`, `voice.realtime.model` và `voice.realtime.speakerVoice` cấu hình phiên âm thanh thời gian thực. Với OpenAI Realtime 2 cộng với bộ não Codex, dùng `voice.realtime.model: "gpt-realtime-2"` và `voice.model: "openai/gpt-5.5"`.
+- Các chế độ giọng nói thời gian thực mặc định đưa các tệp hồ sơ nhỏ `IDENTITY.md`, `USER.md` và `SOUL.md` vào chỉ dẫn của provider thời gian thực để các lượt trực tiếp nhanh giữ cùng danh tính, nền tảng người dùng và persona như agent OpenClaw được định tuyến. Đặt `voice.realtime.bootstrapContextFiles` thành một tập con để tùy chỉnh, hoặc `[]` để tắt. Các tệp bootstrap thời gian thực được hỗ trợ chỉ giới hạn ở các tệp hồ sơ đó; `AGENTS.md` vẫn nằm trong ngữ cảnh agent bình thường. Ngữ cảnh hồ sơ được chèn không thay thế `openclaw_agent_consult` cho công việc trong workspace, dữ kiện hiện tại, tra cứu bộ nhớ hoặc hành động có tool hỗ trợ.
+- Trong chế độ thời gian thực OpenAI `agent-proxy`, đặt `voice.realtime.requireWakeName: true` để giữ giọng nói thời gian thực Discord im lặng cho đến khi bản phiên âm bắt đầu hoặc kết thúc bằng tên đánh thức. Tên đánh thức đã cấu hình phải gồm một hoặc hai từ. Nếu `voice.realtime.wakeNames` không được đặt, OpenClaw dùng `name` của agent được định tuyến cộng với `OpenClaw`, rồi dự phòng sang id agent cộng với `OpenClaw`. Cổng tên đánh thức tắt tự phản hồi của provider thời gian thực, định tuyến các lượt được chấp nhận qua đường dẫn consult agent OpenClaw, và đưa ra một xác nhận bằng giọng nói ngắn khi nhận ra tên đánh thức ở đầu từ phiên âm một phần trước khi bản phiên âm cuối cùng đến.
+- Provider thời gian thực OpenAI chấp nhận tên sự kiện Realtime 2 hiện tại và các bí danh cũ tương thích với Codex cho sự kiện âm thanh đầu ra và phiên âm, nên các snapshot provider tương thích có thể trôi lệch mà không làm mất âm thanh assistant.
+- `voice.realtime.bargeIn` điều khiển việc các sự kiện bắt đầu nói của người nói Discord có ngắt phát lại thời gian thực đang hoạt động hay không. Nếu không đặt, trường này theo thiết lập ngắt âm thanh đầu vào của provider thời gian thực.
+- `voice.realtime.minBargeInAudioEndMs` điều khiển thời lượng phát lại assistant tối thiểu trước khi barge-in thời gian thực OpenAI cắt ngắn âm thanh. Mặc định: `250`. Đặt `0` để ngắt ngay trong phòng ít tiếng vọng, hoặc tăng lên cho các thiết lập loa nhiều tiếng vọng.
+- Với giọng OpenAI trên phát lại Discord, đặt `voice.tts.provider: "openai"` và chọn một giọng Text-to-speech dưới `voice.tts.providers.openai.speakerVoice`. `cedar` là một lựa chọn nghe nam tính tốt trên mô hình TTS OpenAI hiện tại.
+- Các ghi đè `systemPrompt` Discord theo kênh áp dụng cho các lượt phiên âm giọng nói của kênh thoại đó.
+- Các lượt phiên âm giọng nói suy ra trạng thái owner từ Discord `allowFrom` (hoặc `dm.allowFrom`) cho các lệnh và hành động kênh bị chặn theo owner. Khả năng hiển thị tool của agent theo chính sách tool đã cấu hình cho phiên được định tuyến.
+- Giọng nói Discord là tùy chọn bật cho cấu hình chỉ văn bản; đặt `channels.discord.voice.enabled=true` (hoặc giữ một khối `channels.discord.voice` hiện có) để bật lệnh `/vc`, runtime giọng nói và Gateway intent `GuildVoiceStates`.
+- `channels.discord.intents.voiceStates` có thể ghi đè tường minh đăng ký intent trạng thái giọng nói. Để trống để intent theo trạng thái bật giọng nói hiệu lực.
+- Nếu `voice.autoJoin` có nhiều mục cho cùng guild, OpenClaw tham gia kênh được cấu hình cuối cùng cho guild đó.
+- `voice.allowedChannels` là một allowlist cư trú tùy chọn. Để trống để cho phép `/vc join` vào bất kỳ kênh thoại Discord được ủy quyền nào. Khi đặt, `/vc join`, tự động tham gia khi khởi động và các lượt di chuyển trạng thái giọng nói của bot bị giới hạn trong các mục `{ guildId, channelId }` được liệt kê. Đặt thành mảng rỗng để từ chối mọi lượt tham gia giọng nói Discord. Nếu Discord di chuyển bot ra ngoài allowlist, OpenClaw rời kênh đó và tham gia lại mục tiêu tự động tham gia đã cấu hình khi có sẵn.
+- `voice.daveEncryption` và `voice.decryptionFailureTolerance` được truyền thẳng tới tùy chọn tham gia `@discordjs/voice`.
+- Mặc định của `@discordjs/voice` là `daveEncryption=true` và `decryptionFailureTolerance=24` nếu không đặt.
+- OpenClaw dùng codec `libopus-wasm` được đóng gói sẵn để nhận giọng nói Discord và phát lại PCM thô thời gian thực. Nó đi kèm một bản dựng libopus WebAssembly được ghim và không yêu cầu addon opus native.
+- `voice.connectTimeoutMs` điều khiển thời gian chờ Ready ban đầu của `@discordjs/voice` cho các nỗ lực `/vc join` và tự động tham gia. Mặc định: `30000`.
+- `voice.reconnectGraceMs` điều khiển thời gian OpenClaw chờ một phiên giọng nói đã ngắt kết nối bắt đầu kết nối lại trước khi hủy phiên đó. Mặc định: `15000`.
+- Ở chế độ `stt-tts`, phát lại giọng nói không dừng chỉ vì người dùng khác bắt đầu nói. Để tránh vòng lặp phản hồi, OpenClaw bỏ qua thu giọng nói mới trong khi TTS đang phát; hãy nói sau khi phát lại kết thúc cho lượt tiếp theo. Các chế độ thời gian thực chuyển tiếp việc người nói bắt đầu nói như tín hiệu barge-in tới provider thời gian thực.
+- Trong các chế độ thời gian thực, tiếng vọng từ loa vào micro đang mở có thể giống barge-in và ngắt phát lại. Với phòng Discord nhiều tiếng vọng, đặt `voice.realtime.providers.openai.interruptResponseOnInputAudio: false` để ngăn OpenAI tự ngắt khi có âm thanh đầu vào. Thêm `voice.realtime.bargeIn: true` nếu bạn vẫn muốn các sự kiện bắt đầu nói của người nói Discord ngắt phát lại đang hoạt động. Cầu nối thời gian thực OpenAI bỏ qua các lượt cắt ngắn phát lại ngắn hơn `voice.realtime.minBargeInAudioEndMs` vì có khả năng là tiếng vọng/nhiễu và ghi log là đã bỏ qua thay vì xóa phát lại Discord.
+- `voice.captureSilenceGraceMs` điều khiển thời gian OpenClaw chờ sau khi Discord báo người nói đã dừng trước khi hoàn tất đoạn âm thanh đó cho STT. Mặc định: `2000`; tăng giá trị này nếu Discord tách các khoảng dừng bình thường thành bản phiên âm từng phần bị vụn.
+- Khi ElevenLabs là provider TTS được chọn, phát lại giọng nói Discord dùng TTS streaming và bắt đầu từ luồng phản hồi của provider. Các provider không hỗ trợ streaming dự phòng về đường dẫn tệp tạm đã tổng hợp.
+- OpenClaw cũng theo dõi lỗi giải mã nhận và tự khôi phục bằng cách rời/tham gia lại kênh thoại sau nhiều lỗi lặp lại trong một khoảng thời gian ngắn.
+- Nếu log nhận liên tục hiển thị `DecryptionFailed(UnencryptedWhenPassthroughDisabled)` sau khi cập nhật, hãy thu thập báo cáo phụ thuộc và log. Dòng `@discordjs/voice` được đóng gói bao gồm bản sửa padding upstream từ discord.js PR #11449, vốn đã đóng discord.js issue #11419.
+- Các sự kiện nhận `The operation was aborted` là điều được kỳ vọng khi OpenClaw hoàn tất một đoạn người nói đã thu; chúng là chẩn đoán chi tiết, không phải cảnh báo.
+- Log giọng nói Discord chi tiết bao gồm bản xem trước phiên âm STT một dòng có giới hạn cho mỗi đoạn người nói được chấp nhận, nên việc gỡ lỗi hiển thị cả phía người dùng và phía phản hồi agent mà không đổ văn bản phiên âm không giới hạn.
+- Trong chế độ `agent-proxy`, dự phòng consult bắt buộc bỏ qua các mảnh phiên âm có khả năng chưa hoàn chỉnh, chẳng hạn văn bản kết thúc bằng `...` hoặc một từ nối ở cuối như `and`, cộng với các câu kết rõ ràng không cần hành động như “be right back” hoặc “bye”. Log hiển thị `forced agent consult skipped reason=...` khi việc này ngăn một câu trả lời đã xếp hàng bị cũ.
 
-Thiết lập opus gốc cho bản checkout từ mã nguồn:
+### Theo dõi người dùng trong giọng nói
 
-```bash
-pnpm install
-mise exec node@22 -- pnpm discord:opus:install
+Dùng `voice.followUsers` khi bạn muốn bot giọng nói Discord ở cùng một hoặc nhiều người dùng Discord đã biết thay vì tham gia một kênh cố định khi khởi động hoặc chờ `/vc join`.
+
+```json5
+{
+  channels: {
+    discord: {
+      voice: {
+        enabled: true,
+        followUsersEnabled: true,
+        followUsers: ["discord:123456789012345678"],
+        allowedChannels: [
+          {
+            guildId: "123456789012345678",
+            channelId: "234567890123456789",
+          },
+        ],
+      },
+    },
+  },
+}
 ```
 
-Dùng Node 22 cho Gateway khi bạn muốn addon gốc dựng sẵn macOS arm64 từ thượng nguồn. Nếu bạn dùng runtime Node khác, trình cài đặt chọn dùng có thể cần chuỗi công cụ dựng từ nguồn `node-gyp` cục bộ.
+Hành vi:
 
-Sau khi cài đặt addon gốc, khởi động Gateway bằng:
+- `followUsers` chấp nhận ID người dùng Discord thô và các giá trị `discord:<id>`. OpenClaw chuẩn hóa cả hai dạng trước khi khớp sự kiện trạng thái giọng nói.
+- `followUsersEnabled` mặc định là `true` khi `followUsers` được cấu hình. Đặt thành `false` để giữ danh sách đã lưu nhưng dừng tự động theo dõi giọng nói.
+- Khi một người dùng được theo dõi tham gia kênh thoại được phép, OpenClaw tham gia kênh đó. Khi người dùng di chuyển, OpenClaw di chuyển cùng họ. Khi người dùng được theo dõi đang hoạt động ngắt kết nối, OpenClaw rời đi.
+- Nếu nhiều người dùng được theo dõi ở trong cùng guild và người dùng được theo dõi đang hoạt động rời đi, OpenClaw di chuyển đến kênh của một người dùng được theo dõi khác đang được theo dõi trước khi rời guild. Nếu nhiều người dùng được theo dõi di chuyển cùng lúc, sự kiện trạng thái giọng nói được quan sát mới nhất sẽ thắng.
+- `allowedChannels` vẫn áp dụng. Người dùng được theo dõi trong kênh không được phép sẽ bị bỏ qua, và một phiên thuộc quyền sở hữu follow sẽ di chuyển đến người dùng được theo dõi khác hoặc rời đi.
+- OpenClaw đối soát các sự kiện trạng thái giọng nói bị bỏ lỡ khi khởi động và theo một khoảng thời gian có giới hạn. Việc đối soát lấy mẫu các guild đã cấu hình và giới hạn lượt tra cứu REST mỗi lần chạy, nên danh sách `followUsers` rất lớn có thể cần hơn một khoảng thời gian để hội tụ.
+- Nếu Discord hoặc quản trị viên di chuyển bot trong khi nó đang theo dõi một người dùng, OpenClaw xây dựng lại phiên giọng nói và giữ quyền sở hữu follow khi đích đến được phép. Nếu bot bị di chuyển ra ngoài `allowedChannels`, OpenClaw rời đi và tham gia lại mục tiêu đã cấu hình khi có.
+- Khôi phục nhận DAVE có thể rời và tham gia lại cùng kênh sau nhiều lỗi giải mã lặp lại. Các phiên thuộc quyền sở hữu follow giữ quyền sở hữu follow của chúng qua đường dẫn khôi phục đó, nên một lần ngắt kết nối của người dùng được theo dõi sau này vẫn rời khỏi kênh.
 
-```bash
-OPENCLAW_DISCORD_OPUS_DECODER=native pnpm gateway:watch
-```
+Chọn giữa các chế độ tham gia:
 
-Log thoại chi tiết sẽ hiển thị `discord voice: opus decoder: @discordjs/opus`. Nếu không có env chọn dùng, hoặc nếu addon gốc bị thiếu hoặc không thể tải trên máy chủ, OpenClaw ghi log `discord voice: opus decoder: opusscript` và tiếp tục nhận thoại qua phương án dự phòng thuần JS.
+- Dùng `followUsers` cho thiết lập cá nhân hoặc vận hành nơi bot nên tự động có mặt trong giọng nói khi bạn có mặt.
+- Dùng `autoJoin` cho bot phòng cố định cần có mặt ngay cả khi không có người dùng được theo dõi nào trong giọng nói.
+- Dùng `/vc join` cho các lượt tham gia một lần hoặc các phòng nơi sự hiện diện giọng nói tự động sẽ gây bất ngờ.
 
-Pipeline STT cộng với TTS:
+Codec giọng nói Discord:
 
-- Thu PCM Discord được chuyển đổi thành tệp tạm WAV.
+- Nhật ký nhận thoại hiển thị `discord voice: opus decoder: libopus-wasm`.
+- Phát lại thời gian thực mã hóa PCM stereo thô 48 kHz sang Opus bằng cùng gói `libopus-wasm` được đóng gói sẵn trước khi chuyển gói tin cho `@discordjs/voice`.
+- Phát lại tệp và luồng từ provider chuyển mã sang PCM stereo thô 48 kHz bằng ffmpeg, rồi dùng `libopus-wasm` cho luồng gói Opus gửi tới Discord.
+
+Quy trình STT cộng TTS:
+
+- Bản ghi PCM của Discord được chuyển đổi thành tệp tạm WAV.
 - `tools.media.audio` xử lý STT, ví dụ `openai/gpt-4o-mini-transcribe`.
-- Bản phiên âm được gửi qua đường vào và định tuyến Discord trong khi LLM phản hồi chạy với chính sách đầu ra thoại ẩn công cụ `tts` của tác tử và yêu cầu văn bản trả về, vì thoại Discord sở hữu việc phát lại TTS cuối cùng.
+- Bản chép lời được gửi qua luồng vào và định tuyến của Discord trong khi LLM phản hồi chạy với chính sách đầu ra thoại ẩn công cụ `tts` của agent và yêu cầu trả về văn bản, vì thoại Discord sở hữu phần phát lại TTS cuối cùng.
 - `voice.model`, khi được đặt, chỉ ghi đè LLM phản hồi cho lượt kênh thoại này.
-- `voice.tts` được hợp nhất đè lên `messages.tts`; các nhà cung cấp có khả năng truyền phát sẽ cấp trực tiếp cho trình phát, nếu không tệp âm thanh kết quả sẽ được phát trong kênh đã tham gia.
+- `voice.tts` được hợp nhất đè lên `messages.tts`; các provider hỗ trợ streaming cấp dữ liệu trực tiếp cho trình phát, nếu không thì tệp âm thanh kết quả sẽ được phát trong kênh đã tham gia.
 
 Ví dụ phiên kênh thoại agent-proxy mặc định:
 
@@ -1269,11 +1336,13 @@ Ví dụ phiên kênh thoại agent-proxy mặc định:
     discord: {
       voice: {
         enabled: true,
-        model: "openai-codex/gpt-5.5",
+        model: "openai/gpt-5.5",
+        followUsersEnabled: true,
+        followUsers: ["123456789012345678"],
         realtime: {
           provider: "openai",
           model: "gpt-realtime-2",
-          voice: "cedar",
+          speakerVoice: "cedar",
         },
       },
     },
@@ -1281,9 +1350,9 @@ Ví dụ phiên kênh thoại agent-proxy mặc định:
 }
 ```
 
-Khi không có khối `voice.agentSession`, mỗi kênh thoại sẽ có phiên OpenClaw được định tuyến riêng. Ví dụ, `/vc join channel:234567890123456789` nói chuyện với phiên của kênh thoại Discord đó. Mô hình thời gian thực chỉ là giao diện thoại phía trước; các yêu cầu nội dung được chuyển cho tác tử OpenClaw đã cấu hình. Nếu mô hình thời gian thực tạo bản phiên âm cuối cùng mà không gọi công cụ tham vấn, OpenClaw buộc tham vấn như một phương án dự phòng để mặc định vẫn hoạt động như đang nói chuyện với tác tử.
+Khi không có khối `voice.agentSession`, mỗi kênh thoại sẽ có phiên OpenClaw được định tuyến riêng. Ví dụ, `/vc join channel:234567890123456789` nói chuyện với phiên dành cho kênh thoại Discord đó. Mô hình thời gian thực chỉ là giao diện thoại phía trước; các yêu cầu thực chất được chuyển cho agent OpenClaw đã cấu hình. Nếu mô hình thời gian thực tạo bản chép lời cuối cùng mà không gọi công cụ consult, OpenClaw buộc consult làm phương án dự phòng để mặc định vẫn hoạt động như đang nói chuyện với agent.
 
-Ví dụ STT cộng với TTS kiểu cũ:
+Ví dụ STT cộng TTS cũ:
 
 ```json5
 {
@@ -1295,9 +1364,11 @@ Ví dụ STT cộng với TTS kiểu cũ:
         model: "openai/gpt-5.4-mini",
         tts: {
           provider: "openai",
-          openai: {
-            model: "gpt-4o-mini-tts",
-            voice: "cedar",
+          providers: {
+            openai: {
+              model: "gpt-4o-mini-tts",
+              speakerVoice: "cedar",
+            },
           },
         },
       },
@@ -1315,11 +1386,11 @@ Ví dụ bidi thời gian thực:
       voice: {
         enabled: true,
         mode: "bidi",
-        model: "openai-codex/gpt-5.5",
+        model: "openai/gpt-5.5",
         realtime: {
           provider: "openai",
           model: "gpt-realtime-2",
-          voice: "cedar",
+          speakerVoice: "cedar",
           toolPolicy: "safe-read-only",
           consultPolicy: "always",
         },
@@ -1329,7 +1400,7 @@ Ví dụ bidi thời gian thực:
 }
 ```
 
-Thoại dưới dạng phần mở rộng của một phiên kênh Discord hiện có:
+Thoại như phần mở rộng của một phiên kênh Discord hiện có:
 
 ```json5
 {
@@ -1338,7 +1409,7 @@ Thoại dưới dạng phần mở rộng của một phiên kênh Discord hiệ
       voice: {
         enabled: true,
         mode: "agent-proxy",
-        model: "openai-codex/gpt-5.5",
+        model: "openai/gpt-5.5",
         agentSession: {
           mode: "target",
           target: "channel:123456789012345678",
@@ -1346,7 +1417,7 @@ Thoại dưới dạng phần mở rộng của một phiên kênh Discord hiệ
         realtime: {
           provider: "openai",
           model: "gpt-realtime-2",
-          voice: "cedar",
+          speakerVoice: "cedar",
         },
       },
     },
@@ -1354,15 +1425,17 @@ Thoại dưới dạng phần mở rộng của một phiên kênh Discord hiệ
 }
 ```
 
-Trong chế độ `agent-proxy`, bot tham gia kênh thoại đã cấu hình, nhưng các lượt tác tử OpenClaw dùng phiên và tác tử được định tuyến bình thường của kênh đích. Phiên thoại thời gian thực nói kết quả trả về vào lại kênh thoại. Tác tử giám sát vẫn có thể dùng các công cụ tin nhắn bình thường theo chính sách công cụ của nó, bao gồm gửi một tin nhắn Discord riêng nếu đó là hành động phù hợp.
+Ở chế độ `agent-proxy`, bot tham gia kênh thoại đã cấu hình, nhưng các lượt agent OpenClaw dùng phiên và agent được định tuyến bình thường của kênh đích. Phiên thoại thời gian thực nói kết quả được trả về lại vào kênh thoại. Agent giám sát vẫn có thể dùng các công cụ tin nhắn bình thường theo chính sách công cụ của nó, bao gồm gửi một tin nhắn Discord riêng nếu đó là hành động phù hợp.
+
+Trong khi một lượt chạy OpenClaw được ủy quyền đang hoạt động, các bản chép lời thoại Discord mới được xử lý như điều khiển lượt chạy trực tiếp trước khi bắt đầu một lượt agent khác. Các cụm từ như "status", "cancel that", "use the smaller fix", hoặc "when you're done also check tests" được phân loại là trạng thái, hủy, điều hướng, hoặc đầu vào theo dõi cho phiên đang hoạt động. Kết quả trạng thái, hủy, điều hướng được chấp nhận, và theo dõi được nói lại vào kênh thoại để người gọi biết OpenClaw đã xử lý yêu cầu hay chưa.
 
 Các dạng đích hữu ích:
 
-- `target: "channel:123456789012345678"` định tuyến qua một phiên kênh văn bản Discord.
+- `target: "channel:123456789012345678"` định tuyến qua phiên kênh văn bản Discord.
 - `target: "123456789012345678"` được xử lý như một đích kênh.
 - `target: "dm:123456789012345678"` hoặc `target: "user:123456789012345678"` định tuyến qua phiên tin nhắn trực tiếp đó.
 
-Ví dụ OpenAI Realtime nhiều vọng:
+Ví dụ OpenAI Realtime có nhiều tiếng vọng:
 
 ```json5
 {
@@ -1371,11 +1444,11 @@ Ví dụ OpenAI Realtime nhiều vọng:
       voice: {
         enabled: true,
         mode: "bidi",
-        model: "openai-codex/gpt-5.5",
+        model: "openai/gpt-5.5",
         realtime: {
           provider: "openai",
           model: "gpt-realtime-2",
-          voice: "cedar",
+          speakerVoice: "cedar",
           bargeIn: true,
           minBargeInAudioEndMs: 500,
           consultPolicy: "always",
@@ -1391,62 +1464,62 @@ Ví dụ OpenAI Realtime nhiều vọng:
 }
 ```
 
-Dùng cấu hình này khi mô hình nghe thấy âm thanh phát lại của chính nó trên Discord qua mic đang mở, nhưng bạn vẫn muốn ngắt nó bằng cách nói. OpenClaw ngăn OpenAI tự động ngắt khi có âm thanh đầu vào thô, trong khi `bargeIn: true` cho phép các sự kiện bắt đầu nói của loa Discord và âm thanh của người nói đã hoạt động hủy các phản hồi thời gian thực đang hoạt động trước khi lượt thu âm tiếp theo đến OpenAI. Các tín hiệu ngắt lời rất sớm có `audioEndMs` thấp hơn `minBargeInAudioEndMs` được xem là có khả năng là tiếng vọng/nhiễu và bị bỏ qua để mô hình không bị ngắt ngay ở khung phát lại đầu tiên.
+Dùng cấu hình này khi mô hình nghe thấy phần phát lại Discord của chính nó qua mic đang mở, nhưng bạn vẫn muốn ngắt nó bằng cách nói. OpenClaw ngăn OpenAI tự động ngắt trên âm thanh đầu vào thô, trong khi `bargeIn: true` cho phép các sự kiện bắt đầu nói của loa Discord và âm thanh người nói đã hoạt động hủy phản hồi thời gian thực đang hoạt động trước khi lượt ghi tiếp theo đến OpenAI. Các tín hiệu barge-in rất sớm với `audioEndMs` thấp hơn `minBargeInAudioEndMs` được xem là có khả năng là tiếng vọng/nhiễu và bị bỏ qua để mô hình không bị cắt ngay ở khung phát lại đầu tiên.
 
-Nhật ký thoại dự kiến:
+Nhật ký thoại mong đợi:
 
 - Khi tham gia: `discord voice: joining ... voiceSession=... supervisorSession=... agentSessionMode=... voiceModel=... realtimeModel=...`
-- Khi thời gian thực khởi động: `discord voice: realtime bridge starting ... autoRespond=false interruptResponse=false bargeIn=false minBargeInAudioEndMs=...`
-- Khi có âm thanh từ người nói: `discord voice: realtime speaker turn opened ...`, `discord voice: realtime input audio started ... outputAudioMs=... outputActive=...`, và `discord voice: realtime speaker turn closed ... chunks=... discordBytes=... realtimeBytes=... interruptedPlayback=...`
+- Khi bắt đầu thời gian thực: `discord voice: realtime bridge starting ... autoRespond=false interruptResponse=false bargeIn=false minBargeInAudioEndMs=...`
+- Khi có âm thanh người nói: `discord voice: realtime speaker turn opened ...`, `discord voice: realtime input audio started ... outputAudioMs=... outputActive=...`, và `discord voice: realtime speaker turn closed ... chunks=... discordBytes=... realtimeBytes=... interruptedPlayback=...`
 - Khi bỏ qua lời nói cũ: `discord voice: realtime forced agent consult skipped reason=incomplete-transcript ...` hoặc `reason=non-actionable-closing ...`
-- Khi phản hồi thời gian thực hoàn tất: `discord voice: realtime audio playback finishing reason=response.done ... audioMs=... chunks=...`
+- Khi hoàn tất phản hồi thời gian thực: `discord voice: realtime audio playback finishing reason=response.done ... audioMs=... chunks=...`
 - Khi dừng/đặt lại phát lại: `discord voice: realtime audio playback stopped reason=... audioMs=... elapsedMs=... chunks=...`
-- Khi tham vấn thời gian thực: `discord voice: realtime consult requested ... voiceSession=... supervisorSession=... question=...`
+- Khi consult thời gian thực: `discord voice: realtime consult requested ... voiceSession=... supervisorSession=... question=...`
 - Khi agent trả lời: `discord voice: agent turn answer ...`
-- Khi xếp hàng lời nói chính xác: `discord voice: realtime exact speech queued ... queued=... outputAudioMs=... outputActive=...`, theo sau là `discord voice: realtime exact speech dequeued reason=player-idle ...`
-- Khi phát hiện ngắt lời: `discord voice: realtime barge-in detected source=speaker-start ...` hoặc `discord voice: realtime barge-in detected source=active-speaker-audio ...`, theo sau là `discord voice: realtime barge-in requested reason=... outputAudioMs=... outputActive=...`
-- Khi ngắt thời gian thực: `discord voice: realtime model interrupt requested client:response.cancel reason=barge-in`, theo sau là `discord voice: realtime model audio truncated client:conversation.item.truncate reason=barge-in audioEndMs=...` hoặc `discord voice: realtime model interrupt confirmed server:response.done status=cancelled ...`
+- Khi xếp hàng lời nói chính xác: `discord voice: realtime exact speech queued ... queued=... outputAudioMs=... outputActive=...`, tiếp theo là `discord voice: realtime exact speech dequeued reason=player-idle ...`
+- Khi phát hiện barge-in: `discord voice: realtime barge-in detected source=speaker-start ...` hoặc `discord voice: realtime barge-in detected source=active-speaker-audio ...`, tiếp theo là `discord voice: realtime barge-in requested reason=... outputAudioMs=... outputActive=...`
+- Khi ngắt thời gian thực: `discord voice: realtime model interrupt requested client:response.cancel reason=barge-in`, tiếp theo là `discord voice: realtime model audio truncated client:conversation.item.truncate reason=barge-in audioEndMs=...` hoặc `discord voice: realtime model interrupt confirmed server:response.done status=cancelled ...`
 - Khi bỏ qua tiếng vọng/nhiễu: `discord voice: realtime model interrupt ignored client:conversation.item.truncate.skipped reason=barge-in audioEndMs=0 minAudioEndMs=250`
-- Khi tắt ngắt lời: `discord voice: realtime capture ignored during playback (barge-in disabled) ...`
-- Khi phát lại đang rảnh: `discord voice: realtime barge-in ignored reason=... outputActive=false ... playbackChunks=0`
+- Khi tắt barge-in: `discord voice: realtime capture ignored during playback (barge-in disabled) ...`
+- Khi phát lại rảnh: `discord voice: realtime barge-in ignored reason=... outputActive=false ... playbackChunks=0`
 
 Để gỡ lỗi âm thanh bị cắt, hãy đọc nhật ký thoại thời gian thực như một dòng thời gian:
 
-1. `realtime audio playback started` nghĩa là Discord đã bắt đầu phát âm thanh của trợ lý. Từ thời điểm này, cầu nối bắt đầu đếm các đoạn đầu ra của trợ lý, byte PCM của Discord, byte thời gian thực của nhà cung cấp và thời lượng âm thanh tổng hợp.
+1. `realtime audio playback started` nghĩa là Discord đã bắt đầu phát âm thanh của assistant. Cầu nối bắt đầu đếm các khối đầu ra của assistant, byte PCM Discord, byte thời gian thực của provider, và thời lượng âm thanh tổng hợp từ thời điểm này.
 2. `realtime speaker turn opened` đánh dấu một người nói Discord trở nên hoạt động. Nếu phát lại đã hoạt động và `bargeIn` được bật, điều này có thể được theo sau bởi `barge-in detected source=speaker-start`.
-3. `realtime input audio started` đánh dấu khung âm thanh thực tế đầu tiên nhận được cho lượt nói đó. `outputActive=true` hoặc `outputAudioMs` khác 0 tại đây nghĩa là mic đang gửi đầu vào trong khi phát lại của trợ lý vẫn đang hoạt động.
-4. `barge-in detected source=active-speaker-audio` nghĩa là OpenClaw đã thấy âm thanh người nói trực tiếp trong khi phát lại của trợ lý đang hoạt động. Điều này hữu ích để phân biệt một lần ngắt thực sự với sự kiện bắt đầu nói của Discord không có âm thanh hữu ích.
-5. `barge-in requested reason=...` nghĩa là OpenClaw đã yêu cầu nhà cung cấp thời gian thực hủy hoặc cắt ngắn phản hồi đang hoạt động. Nhật ký này bao gồm `outputAudioMs`, `outputActive`, và `playbackChunks` để bạn có thể thấy thực tế đã phát bao nhiêu âm thanh của trợ lý trước khi bị ngắt.
+3. `realtime input audio started` đánh dấu khung âm thanh thực tế đầu tiên nhận được cho lượt người nói đó. `outputActive=true` hoặc `outputAudioMs` khác không ở đây nghĩa là mic đang gửi đầu vào trong khi phát lại của assistant vẫn đang hoạt động.
+4. `barge-in detected source=active-speaker-audio` nghĩa là OpenClaw đã thấy âm thanh người nói trực tiếp trong khi phát lại của assistant đang hoạt động. Điều này hữu ích để phân biệt một lần ngắt thực sự với sự kiện bắt đầu nói của Discord không có âm thanh hữu ích.
+5. `barge-in requested reason=...` nghĩa là OpenClaw đã yêu cầu provider thời gian thực hủy hoặc cắt ngắn phản hồi đang hoạt động. Nó bao gồm `outputAudioMs`, `outputActive`, và `playbackChunks` để bạn có thể thấy thực tế đã phát bao nhiêu âm thanh của assistant trước khi bị ngắt.
 6. `realtime audio playback stopped reason=...` là điểm đặt lại phát lại Discord cục bộ. Lý do cho biết ai đã dừng phát lại: `barge-in`, `player-idle`, `provider-clear-audio`, `forced-agent-consult`, `stream-close`, hoặc `session-close`.
-7. `realtime speaker turn closed` tóm tắt lượt đầu vào đã thu. `chunks=0` hoặc `hasAudio=false` nghĩa là lượt nói đã mở nhưng không có âm thanh dùng được đến cầu nối thời gian thực. `interruptedPlayback=true` nghĩa là lượt đầu vào đó chồng lấp với đầu ra của trợ lý và kích hoạt logic ngắt lời.
+7. `realtime speaker turn closed` tóm tắt lượt đầu vào đã ghi. `chunks=0` hoặc `hasAudio=false` nghĩa là lượt người nói đã mở nhưng không có âm thanh dùng được nào đến cầu nối thời gian thực. `interruptedPlayback=true` nghĩa là lượt đầu vào đó chồng lên đầu ra của assistant và kích hoạt logic barge-in.
 
 Các trường hữu ích:
 
-- `outputAudioMs`: thời lượng âm thanh của trợ lý do nhà cung cấp thời gian thực tạo ra trước dòng nhật ký.
-- `audioMs`: thời lượng âm thanh của trợ lý mà OpenClaw đã đếm trước khi phát lại dừng.
-- `elapsedMs`: thời gian theo đồng hồ thực giữa lúc mở và đóng luồng phát lại hoặc lượt nói.
-- `discordBytes`: byte PCM stereo 48 kHz được gửi đến hoặc nhận từ thoại Discord.
-- `realtimeBytes`: byte PCM theo định dạng nhà cung cấp được gửi đến hoặc nhận từ nhà cung cấp thời gian thực.
-- `playbackChunks`: các đoạn âm thanh của trợ lý được chuyển tiếp đến Discord cho phản hồi đang hoạt động.
-- `sinceLastAudioMs`: khoảng cách giữa khung âm thanh người nói được thu cuối cùng và lúc lượt nói đóng.
+- `outputAudioMs`: thời lượng âm thanh assistant do provider thời gian thực tạo trước dòng nhật ký.
+- `audioMs`: thời lượng âm thanh assistant mà OpenClaw đã đếm trước khi phát lại dừng.
+- `elapsedMs`: thời gian thực trôi qua giữa lúc mở và đóng luồng phát lại hoặc lượt người nói.
+- `discordBytes`: byte PCM stereo 48 kHz được gửi tới hoặc nhận từ thoại Discord.
+- `realtimeBytes`: byte PCM theo định dạng provider được gửi tới hoặc nhận từ provider thời gian thực.
+- `playbackChunks`: các khối âm thanh assistant được chuyển tiếp tới Discord cho phản hồi đang hoạt động.
+- `sinceLastAudioMs`: khoảng cách giữa khung âm thanh người nói được ghi gần nhất và lúc lượt người nói đóng.
 
 Các mẫu thường gặp:
 
-- Bị cắt ngay lập tức với `source=active-speaker-audio`, `outputAudioMs` nhỏ và cùng người dùng ở gần thường cho thấy tiếng vọng loa đi vào mic. Tăng `voice.realtime.minBargeInAudioEndMs`, giảm âm lượng loa, dùng tai nghe, hoặc đặt `voice.realtime.providers.openai.interruptResponseOnInputAudio: false`.
-- `source=speaker-start` theo sau bởi `speaker turn closed ... hasAudio=false` nghĩa là Discord đã báo bắt đầu nói nhưng không có âm thanh nào đến OpenClaw. Đó có thể là sự kiện thoại Discord tạm thời, hành vi cổng nhiễu, hoặc một client bật mic trong chốc lát.
-- `audio playback stopped reason=stream-close` mà không có ngắt lời gần đó hoặc `provider-clear-audio` nghĩa là luồng phát lại Discord cục bộ kết thúc ngoài dự kiến. Kiểm tra các nhật ký nhà cung cấp và trình phát Discord ngay trước đó.
-- `capture ignored during playback (barge-in disabled)` nghĩa là OpenClaw cố ý bỏ đầu vào trong khi âm thanh của trợ lý đang hoạt động. Bật `voice.realtime.bargeIn` nếu bạn muốn lời nói ngắt phát lại.
-- `barge-in ignored ... outputActive=false` nghĩa là VAD của Discord hoặc nhà cung cấp đã báo có lời nói, nhưng OpenClaw không có phát lại đang hoạt động để ngắt. Điều này không nên cắt âm thanh.
+- Bị cắt ngay với `source=active-speaker-audio`, `outputAudioMs` nhỏ, và cùng người dùng ở gần thường cho thấy tiếng vọng từ loa đi vào mic. Tăng `voice.realtime.minBargeInAudioEndMs`, giảm âm lượng loa, dùng tai nghe, hoặc đặt `voice.realtime.providers.openai.interruptResponseOnInputAudio: false`.
+- `source=speaker-start` theo sau bởi `speaker turn closed ... hasAudio=false` nghĩa là Discord đã báo một lần bắt đầu nói nhưng không có âm thanh nào đến OpenClaw. Đó có thể là sự kiện thoại Discord thoáng qua, hành vi cổng nhiễu, hoặc client bật mic rất ngắn.
+- `audio playback stopped reason=stream-close` mà không có barge-in gần đó hoặc `provider-clear-audio` nghĩa là luồng phát lại Discord cục bộ đã kết thúc ngoài dự kiến. Kiểm tra các nhật ký provider và trình phát Discord trước đó.
+- `capture ignored during playback (barge-in disabled)` nghĩa là OpenClaw cố ý bỏ đầu vào trong khi âm thanh assistant đang hoạt động. Bật `voice.realtime.bargeIn` nếu bạn muốn lời nói ngắt phát lại.
+- `barge-in ignored ... outputActive=false` nghĩa là VAD của Discord hoặc provider đã báo có lời nói, nhưng OpenClaw không có phát lại đang hoạt động để ngắt. Điều này không nên cắt âm thanh.
 
-Thông tin xác thực được phân giải theo từng thành phần: xác thực tuyến LLM cho `voice.model`, xác thực STT cho `tools.media.audio`, xác thực TTS cho `messages.tts`/`voice.tts`, và xác thực nhà cung cấp thời gian thực cho `voice.realtime.providers` hoặc cấu hình xác thực thông thường của nhà cung cấp.
+Thông tin xác thực được phân giải theo từng thành phần: xác thực tuyến LLM cho `voice.model`, xác thực STT cho `tools.media.audio`, xác thực TTS cho `messages.tts`/`voice.tts`, và xác thực provider thời gian thực cho `voice.realtime.providers` hoặc cấu hình xác thực bình thường của provider.
 
 ### Tin nhắn thoại
 
 Tin nhắn thoại Discord hiển thị bản xem trước dạng sóng và yêu cầu âm thanh OGG/Opus. OpenClaw tự động tạo dạng sóng, nhưng cần `ffmpeg` và `ffprobe` trên máy chủ Gateway để kiểm tra và chuyển đổi.
 
-- Cung cấp **đường dẫn tệp cục bộ** (URL bị từ chối).
+- Cung cấp **đường dẫn tệp cục bộ** (URL sẽ bị từ chối).
 - Bỏ qua nội dung văn bản (Discord từ chối văn bản + tin nhắn thoại trong cùng payload).
-- Mọi định dạng âm thanh đều được chấp nhận; OpenClaw chuyển đổi sang OGG/Opus khi cần.
+- Chấp nhận mọi định dạng âm thanh; OpenClaw chuyển đổi sang OGG/Opus khi cần.
 
 ```bash
 message(action="send", channel="discord", target="channel:123", path="/path/to/audio.mp3", asVoice=true)
@@ -1455,20 +1528,20 @@ message(action="send", channel="discord", target="channel:123", path="/path/to/a
 ## Khắc phục sự cố
 
 <AccordionGroup>
-  <Accordion title="Used disallowed intents or bot sees no guild messages">
+  <Accordion title="Đã dùng intent không được phép hoặc bot không thấy tin nhắn guild">
 
     - bật Message Content Intent
     - bật Server Members Intent khi bạn phụ thuộc vào việc phân giải người dùng/thành viên
-    - khởi động lại Gateway sau khi thay đổi intent
+    - khởi động lại gateway sau khi thay đổi intent
 
   </Accordion>
 
-  <Accordion title="Guild messages blocked unexpectedly">
+  <Accordion title="Tin nhắn guild bị chặn ngoài dự kiến">
 
     - xác minh `groupPolicy`
     - xác minh danh sách cho phép guild trong `channels.discord.guilds`
-    - nếu tồn tại ánh xạ `channels` của guild, chỉ các kênh được liệt kê mới được phép
-    - xác minh hành vi `requireMention` và các mẫu mention
+    - nếu có ánh xạ `channels` của guild, chỉ các kênh được liệt kê mới được cho phép
+    - xác minh hành vi `requireMention` và mẫu mention
 
     Các kiểm tra hữu ích:
 
@@ -1480,29 +1553,29 @@ openclaw logs --follow
 
   </Accordion>
 
-  <Accordion title="Require mention false but still blocked">
+  <Accordion title="Require mention là false nhưng vẫn bị chặn">
     Nguyên nhân thường gặp:
 
-    - `groupPolicy="allowlist"` không có danh sách cho phép guild/kênh khớp
+    - `groupPolicy="allowlist"` mà không có danh sách cho phép guild/kênh khớp
     - `requireMention` được cấu hình sai vị trí (phải nằm dưới `channels.discord.guilds` hoặc mục kênh)
     - người gửi bị chặn bởi danh sách cho phép `users` của guild/kênh
 
   </Accordion>
 
-  <Accordion title="Long-running Discord turns or duplicate replies">
+  <Accordion title="Lượt Discord chạy lâu hoặc trả lời trùng lặp">
 
     Nhật ký điển hình:
 
     - `Slow listener detected ...`
     - `stuck session: sessionKey=agent:...:discord:... state=processing ...`
 
-    Các núm chỉnh hàng đợi Gateway Discord:
+    Các tùy chọn điều chỉnh hàng đợi Discord gateway:
 
     - một tài khoản: `channels.discord.eventQueue.listenerTimeout`
     - nhiều tài khoản: `channels.discord.accounts.<accountId>.eventQueue.listenerTimeout`
-    - mục này chỉ kiểm soát công việc listener của Gateway Discord, không kiểm soát thời lượng lượt agent
+    - tùy chọn này chỉ kiểm soát công việc listener của Discord gateway, không kiểm soát thời lượng lượt agent
 
-    Discord không áp dụng thời hạn chờ thuộc sở hữu kênh cho các lượt agent đang xếp hàng. Listener tin nhắn bàn giao ngay lập tức, và các lần chạy Discord đang xếp hàng giữ nguyên thứ tự theo phiên cho đến khi vòng đời phiên/công cụ/runtime hoàn tất hoặc hủy công việc.
+    Discord không áp dụng timeout do kênh sở hữu cho các lượt agent đã xếp hàng. Message listener bàn giao ngay lập tức, và các lần chạy Discord đã xếp hàng giữ nguyên thứ tự theo phiên cho đến khi vòng đời phiên/công cụ/runtime hoàn tất hoặc hủy bỏ công việc.
 
 ```json5
 {
@@ -1522,42 +1595,42 @@ openclaw logs --follow
 
   </Accordion>
 
-  <Accordion title="Gateway metadata lookup timeout warnings">
-    OpenClaw lấy metadata `/gateway/bot` của Discord trước khi kết nối. Lỗi tạm thời sẽ quay về URL Gateway mặc định của Discord và được giới hạn tần suất trong nhật ký.
+  <Accordion title="Cảnh báo timeout khi tra cứu metadata Gateway">
+    OpenClaw lấy metadata Discord `/gateway/bot` trước khi kết nối. Lỗi tạm thời sẽ fallback về URL gateway mặc định của Discord và được giới hạn tần suất trong nhật ký.
 
-    Các núm chỉnh thời hạn chờ metadata:
+    Các tùy chọn timeout metadata:
 
     - một tài khoản: `channels.discord.gatewayInfoTimeoutMs`
     - nhiều tài khoản: `channels.discord.accounts.<accountId>.gatewayInfoTimeoutMs`
-    - dự phòng env khi cấu hình chưa đặt: `OPENCLAW_DISCORD_GATEWAY_INFO_TIMEOUT_MS`
+    - env fallback khi chưa đặt cấu hình: `OPENCLAW_DISCORD_GATEWAY_INFO_TIMEOUT_MS`
     - mặc định: `30000` (30 giây), tối đa: `120000`
 
   </Accordion>
 
-  <Accordion title="Gateway READY timeout restarts">
-    OpenClaw đợi sự kiện Gateway `READY` của Discord trong lúc khởi động và sau các lần kết nối lại runtime. Thiết lập nhiều tài khoản có giãn cách khởi động có thể cần cửa sổ READY khi khởi động dài hơn mặc định.
+  <Accordion title="Gateway READY timeout khởi động lại">
+    OpenClaw chờ sự kiện gateway `READY` của Discord trong khi khởi động và sau khi runtime kết nối lại. Thiết lập nhiều tài khoản với khởi động lệch thời điểm có thể cần cửa sổ READY khi khởi động dài hơn mặc định.
 
-    Các núm chỉnh thời hạn chờ READY:
+    Các tùy chọn READY timeout:
 
     - khởi động một tài khoản: `channels.discord.gatewayReadyTimeoutMs`
     - khởi động nhiều tài khoản: `channels.discord.accounts.<accountId>.gatewayReadyTimeoutMs`
-    - dự phòng env khi cấu hình khởi động chưa đặt: `OPENCLAW_DISCORD_READY_TIMEOUT_MS`
-    - mặc định khởi động: `15000` (15 giây), tối đa: `120000`
+    - env fallback khi khởi động nếu chưa đặt cấu hình: `OPENCLAW_DISCORD_READY_TIMEOUT_MS`
+    - mặc định khi khởi động: `15000` (15 giây), tối đa: `120000`
     - runtime một tài khoản: `channels.discord.gatewayRuntimeReadyTimeoutMs`
     - runtime nhiều tài khoản: `channels.discord.accounts.<accountId>.gatewayRuntimeReadyTimeoutMs`
-    - dự phòng env runtime khi cấu hình chưa đặt: `OPENCLAW_DISCORD_RUNTIME_READY_TIMEOUT_MS`
+    - env fallback runtime khi chưa đặt cấu hình: `OPENCLAW_DISCORD_RUNTIME_READY_TIMEOUT_MS`
     - mặc định runtime: `30000` (30 giây), tối đa: `120000`
 
   </Accordion>
 
-  <Accordion title="Permissions audit mismatches">
-    Kiểm tra quyền của `channels status --probe` chỉ hoạt động với ID kênh dạng số.
+  <Accordion title="Không khớp khi kiểm tra quyền">
+    Kiểm tra quyền `channels status --probe` chỉ hoạt động với ID kênh dạng số.
 
-    Nếu bạn dùng khóa slug, khớp runtime vẫn có thể hoạt động, nhưng probe không thể xác minh đầy đủ quyền.
+    Nếu bạn dùng khóa slug, việc khớp runtime vẫn có thể hoạt động, nhưng probe không thể xác minh đầy đủ quyền.
 
   </Accordion>
 
-  <Accordion title="DM and pairing issues">
+  <Accordion title="Sự cố DM và ghép cặp">
 
     - DM bị tắt: `channels.discord.dm.enabled=false`
     - chính sách DM bị tắt: `channels.discord.dmPolicy="disabled"` (cũ: `channels.discord.dm.policy`)
@@ -1565,16 +1638,45 @@ openclaw logs --follow
 
   </Accordion>
 
-  <Accordion title="Bot to bot loops">
-    Theo mặc định, các tin nhắn do bot tạo sẽ bị bỏ qua.
+  <Accordion title="Vòng lặp bot với bot">
+    Theo mặc định, tin nhắn do bot tạo sẽ bị bỏ qua.
 
-    Nếu bạn đặt `channels.discord.allowBots=true`, hãy dùng các quy tắc nhắc đến và danh sách cho phép nghiêm ngặt để tránh hành vi lặp vòng.
-    Ưu tiên `channels.discord.allowBots="mentions"` để chỉ chấp nhận tin nhắn của bot có nhắc đến bot.
+    Nếu bạn đặt `channels.discord.allowBots=true`, hãy dùng quy tắc mention và danh sách cho phép nghiêm ngặt để tránh hành vi vòng lặp.
+    Ưu tiên `channels.discord.allowBots="mentions"` để chỉ chấp nhận tin nhắn bot có mention bot.
+
+    OpenClaw cũng cung cấp [bảo vệ vòng lặp bot](/vi/channels/bot-loop-protection) dùng chung. Bất cứ khi nào `allowBots` cho phép tin nhắn do bot tạo đi tới dispatch, Discord ánh xạ sự kiện đầu vào thành các thông tin `(account, channel, bot pair)` và bộ bảo vệ cặp chung sẽ chặn cặp đó sau khi nó vượt quá ngân sách sự kiện đã cấu hình. Bộ bảo vệ ngăn các vòng lặp hai bot mất kiểm soát vốn trước đây phải bị dừng bởi giới hạn tần suất của Discord; nó không ảnh hưởng đến triển khai một bot hoặc các trả lời bot một lần vẫn nằm dưới ngân sách.
+
+    Thiết lập mặc định (hoạt động khi đặt `allowBots`):
+
+    - `maxEventsPerWindow: 20` -- cặp bot có thể trao đổi 20 tin nhắn trong cửa sổ trượt
+    - `windowSeconds: 60` -- độ dài cửa sổ trượt
+    - `cooldownSeconds: 60` -- sau khi ngân sách bị vượt, mọi tin nhắn bot-với-bot bổ sung theo cả hai chiều sẽ bị bỏ trong một phút
+
+    Cấu hình mặc định dùng chung một lần dưới `channels.defaults.botLoopProtection`, rồi ghi đè Discord khi một workflow hợp lệ cần thêm dư địa. Thứ tự ưu tiên là:
+
+    - `channels.discord.accounts.<account>.botLoopProtection`
+    - `channels.discord.botLoopProtection`
+    - `channels.defaults.botLoopProtection`
+    - mặc định tích hợp sẵn
+
+    Discord dùng các khóa chung `maxEventsPerWindow`, `windowSeconds` và `cooldownSeconds`.
 
 ```json5
 {
   channels: {
+    defaults: {
+      botLoopProtection: {
+        maxEventsPerWindow: 20,
+        windowSeconds: 60,
+        cooldownSeconds: 60,
+      },
+    },
     discord: {
+      // Optional Discord-wide override. Account blocks override individual
+      // fields and inherit omitted fields from here.
+      botLoopProtection: {
+        maxEventsPerWindow: 4,
+      },
       accounts: {
         mantis: {
           // Mantis listens to other bots only when they mention her.
@@ -1584,8 +1686,14 @@ openclaw logs --follow
           // Molty listens to all bot-authored Discord messages.
           allowBots: true,
           mentionAliases: {
-            // Lets Molty write "@Mantis" and send a real Discord mention.
+            // Lets Molty write a Mantis Discord mention with the configured user id.
             Mantis: "MANTIS_DISCORD_USER_ID",
+          },
+          botLoopProtection: {
+            // Allow up to five messages per minute before suppressing the pair.
+            maxEventsPerWindow: 5,
+            windowSeconds: 60,
+            cooldownSeconds: 90,
           },
         },
       },
@@ -1596,38 +1704,38 @@ openclaw logs --follow
 
   </Accordion>
 
-  <Accordion title="STT giọng nói bị rớt với DecryptionFailed(...)">
+  <Accordion title="Voice STT bị rớt với DecryptionFailed(...)">
 
-    - giữ OpenClaw luôn cập nhật (`openclaw update`) để có logic khôi phục nhận giọng nói Discord
+    - giữ OpenClaw ở phiên bản hiện tại (`openclaw update`) để có logic khôi phục nhận thoại Discord
     - xác nhận `channels.discord.voice.daveEncryption=true` (mặc định)
-    - bắt đầu từ `channels.discord.voice.decryptionFailureTolerance=24` (mặc định upstream) và chỉ tinh chỉnh nếu cần
-    - theo dõi nhật ký để tìm:
+    - bắt đầu từ `channels.discord.voice.decryptionFailureTolerance=24` (mặc định upstream) và chỉ tinh chỉnh khi cần
+    - theo dõi nhật ký cho:
       - `discord voice: DAVE decrypt failures detected`
       - `discord voice: repeated decrypt failures; attempting rejoin`
-    - nếu lỗi vẫn tiếp diễn sau khi tự động tham gia lại, hãy thu thập nhật ký và so sánh với lịch sử nhận DAVE upstream trong [discord.js #11419](https://github.com/discordjs/discord.js/issues/11419) và [discord.js #11449](https://github.com/discordjs/discord.js/pull/11449)
+    - nếu lỗi vẫn tiếp diễn sau khi tự động tham gia lại, thu thập nhật ký và so sánh với lịch sử nhận DAVE upstream trong [discord.js #11419](https://github.com/discordjs/discord.js/issues/11419) và [discord.js #11449](https://github.com/discordjs/discord.js/pull/11449)
 
   </Accordion>
 </AccordionGroup>
 
-## Tài liệu tham khảo cấu hình
+## Tham chiếu cấu hình
 
-Tài liệu tham khảo chính: [Tài liệu tham khảo cấu hình - Discord](/vi/gateway/config-channels#discord).
+Tham chiếu chính: [Tham chiếu cấu hình - Discord](/vi/gateway/config-channels#discord).
 
-<Accordion title="Các trường Discord tín hiệu cao">
+<Accordion title="Các trường Discord quan trọng">
 
 - khởi động/xác thực: `enabled`, `token`, `accounts.*`, `allowBots`
 - chính sách: `groupPolicy`, `dm.*`, `guilds.*`, `guilds.*.channels.*`
 - lệnh: `commands.native`, `commands.useAccessGroups`, `configWrites`, `slashCommand.*`
 - hàng đợi sự kiện: `eventQueue.listenerTimeout` (ngân sách listener), `eventQueue.maxQueueSize`, `eventQueue.maxConcurrency`
-- Gateway: `gatewayInfoTimeoutMs`, `gatewayReadyTimeoutMs`, `gatewayRuntimeReadyTimeoutMs`
+- gateway: `gatewayInfoTimeoutMs`, `gatewayReadyTimeoutMs`, `gatewayRuntimeReadyTimeoutMs`
 - trả lời/lịch sử: `replyToMode`, `historyLimit`, `dmHistoryLimit`, `dms.*.historyLimit`
-- phân phối: `textChunkLimit`, `chunkMode`, `maxLinesPerMessage`
-- truyền phát: `streaming` (bí danh kế thừa: `streamMode`), `streaming.preview.toolProgress`, `draftChunk`, `blockStreaming`, `blockStreamingCoalesce`
-- phương tiện/thử lại: `mediaMaxMb` (giới hạn lượt tải lên Discord đi ra, mặc định `100MB`), `retry`
+- gửi: `textChunkLimit`, `chunkMode`, `maxLinesPerMessage`
+- streaming: `streaming` (bí danh cũ: `streamMode`), `streaming.preview.toolProgress`, `draftChunk`, `blockStreaming`, `blockStreamingCoalesce`
+- media/thử lại: `mediaMaxMb` (giới hạn upload Discord đi, mặc định `100MB`), `retry`
 - hành động: `actions.*`
 - hiện diện: `activity`, `status`, `activityType`, `activityUrl`
-- giao diện: `ui.components.accentColor`
-- tính năng: `threadBindings`, `bindings[]` cấp cao nhất (`type: "acp"`), `pluralkit`, `execApprovals`, `intents`, `agentComponents`, `heartbeat`, `responsePrefix`
+- UI: `ui.components.accentColor`
+- tính năng: `threadBindings`, `bindings[]` cấp cao nhất (`type: "acp"`), `pluralkit`, `execApprovals`, `intents`, `agentComponents.enabled`, `agentComponents.ttlMs`, `heartbeat`, `responsePrefix`
 
 </Accordion>
 
@@ -1635,27 +1743,27 @@ Tài liệu tham khảo chính: [Tài liệu tham khảo cấu hình - Discord](
 
 - Xem token bot là bí mật (ưu tiên `DISCORD_BOT_TOKEN` trong môi trường được giám sát).
 - Cấp quyền Discord theo nguyên tắc ít đặc quyền nhất.
-- Nếu triển khai/trạng thái lệnh đã cũ, hãy khởi động lại Gateway và kiểm tra lại bằng `openclaw channels status --probe`.
+- Nếu triển khai/trạng thái lệnh đã cũ, hãy khởi động lại gateway và kiểm tra lại bằng `openclaw channels status --probe`.
 
 ## Liên quan
 
 <CardGroup cols={2}>
-  <Card title="Ghép nối" icon="link" href="/vi/channels/pairing">
-    Ghép nối người dùng Discord với Gateway.
+  <Card title="Ghép cặp" icon="link" href="/vi/channels/pairing">
+    Ghép cặp người dùng Discord với gateway.
   </Card>
   <Card title="Nhóm" icon="users" href="/vi/channels/groups">
-    Hành vi nhóm chat và danh sách cho phép.
+    Hành vi trò chuyện nhóm và danh sách cho phép.
   </Card>
   <Card title="Định tuyến kênh" icon="route" href="/vi/channels/channel-routing">
-    Định tuyến tin nhắn đến tới tác nhân.
+    Định tuyến tin nhắn đầu vào tới agent.
   </Card>
   <Card title="Bảo mật" icon="shield" href="/vi/gateway/security">
     Mô hình mối đe dọa và gia cố bảo mật.
   </Card>
-  <Card title="Định tuyến đa tác nhân" icon="sitemap" href="/vi/concepts/multi-agent">
-    Ánh xạ guild và kênh tới tác nhân.
+  <Card title="Định tuyến nhiều agent" icon="sitemap" href="/vi/concepts/multi-agent">
+    Ánh xạ guild và kênh tới agent.
   </Card>
-  <Card title="Lệnh slash" icon="terminal" href="/vi/tools/slash-commands">
-    Hành vi lệnh gốc.
+  <Card title="Slash command" icon="terminal" href="/vi/tools/slash-commands">
+    Hành vi lệnh native.
   </Card>
 </CardGroup>

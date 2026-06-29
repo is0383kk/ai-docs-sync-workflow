@@ -1,31 +1,32 @@
 ---
 read_when:
     - Pierwsza konfiguracja od zera
-    - Chcesz jak najszybciej uruchomić działający czat
-summary: Zainstaluj OpenClaw i rozpocznij pierwszy czat w kilka minut.
+    - Chcesz najszybszej drogi do działającego czatu
+summary: Zainstaluj OpenClaw i uruchom pierwszy czat w kilka minut.
 title: Pierwsze kroki
 x-i18n:
-    generated_at: "2026-05-07T13:25:22Z"
+    generated_at: "2026-06-28T20:45:49Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 295ce8fd03320027a77a3aef494f785f0fe58e0f57c72ee63f6f9aca68626c20
+    source_hash: 579ed2b4797dc851b0293b96a4177cc356641b6842fe45c4d48f4e8c224eef75
     source_path: start/getting-started.md
     workflow: 16
 ---
 
-Zainstaluj OpenClaw, uruchom onboarding i czatuj ze swoim asystentem AI — wszystko w
-około 5 minut. Na końcu będziesz mieć uruchomiony Gateway, skonfigurowane uwierzytelnianie
+Zainstaluj OpenClaw, uruchom onboarding i porozmawiaj ze swoim asystentem AI — wszystko w
+około 5 minut. Na końcu będziesz mieć działający Gateway, skonfigurowane uwierzytelnianie
 i działającą sesję czatu.
 
 ## Czego potrzebujesz
 
-- **Node.js** — zalecany Node 24 (obsługiwany jest także Node 22.16+)
-- **Klucz API** od dostawcy modelu (Anthropic, OpenAI, Google itd.) — onboarding poprosi Cię o niego
+- **Node.js** — zalecany Node 24 (obsługiwany jest też Node 22.19+)
+- **Klucz API** od dostawcy modelu (Anthropic, OpenAI, Google itd.) — onboarding poprosi Cię o jego podanie
 
 <Tip>
 Sprawdź wersję Node poleceniem `node --version`.
-**Użytkownicy Windows:** obsługiwane są zarówno natywny Windows, jak i WSL2. WSL2 jest bardziej
-stabilny i zalecany do pełnego doświadczenia. Zobacz [Windows](/pl/platforms/windows).
+**Użytkownicy Windows:** natywna aplikacja Windows Hub to najprostsza ścieżka desktopowa. Obsługiwane są też
+instalator PowerShell i ścieżki Gateway przez WSL2. Zobacz [Windows](/pl/platforms/windows).
 Musisz zainstalować Node? Zobacz [Konfiguracja Node](/pl/install/node).
 </Tip>
 
@@ -62,7 +63,10 @@ Musisz zainstalować Node? Zobacz [Konfiguracja Node](/pl/install/node).
     ```
 
     Kreator przeprowadzi Cię przez wybór dostawcy modelu, ustawienie klucza API
-    i konfigurację Gateway. Zajmuje to około 2 minut.
+    i konfigurację Gateway. QuickStart zwykle zajmuje tylko kilka minut, ale
+    logowanie do dostawcy, parowanie kanału, instalacja demona, pobieranie z sieci, Skills
+    lub opcjonalne pluginy mogą wydłużyć pełny onboarding. Możesz pominąć opcjonalne
+    kroki i wrócić później poleceniem `openclaw configure`.
 
     Pełną dokumentację znajdziesz w [Onboarding (CLI)](/pl/start/wizard).
 
@@ -72,29 +76,29 @@ Musisz zainstalować Node? Zobacz [Konfiguracja Node](/pl/install/node).
     openclaw gateway status
     ```
 
-    Powinieneś zobaczyć, że Gateway nasłuchuje na porcie 18789.
+    Powinien być widoczny Gateway nasłuchujący na porcie 18789.
 
   </Step>
-  <Step title="Otwórz panel">
+  <Step title="Otwórz dashboard">
     ```bash
     openclaw dashboard
     ```
 
-    To otworzy Control UI w przeglądarce. Jeśli się ładuje, wszystko działa.
+    To otworzy Control UI w przeglądarce. Jeśli się załaduje, wszystko działa.
 
   </Step>
   <Step title="Wyślij pierwszą wiadomość">
-    Wpisz wiadomość w czacie Control UI, a powinieneś otrzymać odpowiedź AI.
+    Wpisz wiadomość w czacie Control UI, a powinna pojawić się odpowiedź AI.
 
-    Wolisz czatować z telefonu? Najszybszym kanałem do skonfigurowania jest
+    Wolisz rozmawiać z telefonu? Najszybszy kanał do skonfigurowania to
     [Telegram](/pl/channels/telegram) (wystarczy token bota). Zobacz [Kanały](/pl/channels),
     aby poznać wszystkie opcje.
 
   </Step>
 </Steps>
 
-<Accordion title="Zaawansowane: zamontuj niestandardową kompilację Control UI">
-  Jeśli utrzymujesz zlokalizowaną lub dostosowaną kompilację panelu, ustaw
+<Accordion title="Zaawansowane: zamontuj niestandardowy build Control UI">
+  Jeśli utrzymujesz zlokalizowany lub dostosowany build dashboardu, ustaw
   `gateway.controlUi.root` na katalog zawierający zbudowane statyczne
   zasoby i `index.html`.
 
@@ -116,7 +120,7 @@ Następnie ustaw:
 }
 ```
 
-Uruchom ponownie Gateway i ponownie otwórz panel:
+Uruchom ponownie Gateway i ponownie otwórz dashboard:
 
 ```bash
 openclaw gateway restart
@@ -138,16 +142,16 @@ openclaw dashboard
     Modele, narzędzia, sandbox i ustawienia zaawansowane.
   </Card>
   <Card title="Przeglądaj narzędzia" href="/pl/tools" icon="wrench">
-    Przeglądarka, exec, wyszukiwanie w sieci, Skills i Plugin.
+    Przeglądarka, exec, wyszukiwanie w sieci, Skills i pluginy.
   </Card>
 </Columns>
 
 <Accordion title="Zaawansowane: zmienne środowiskowe">
-  Jeśli uruchamiasz OpenClaw jako konto usługi albo chcesz użyć niestandardowych ścieżek:
+  Jeśli uruchamiasz OpenClaw jako konto usługi lub chcesz używać niestandardowych ścieżek:
 
 - `OPENCLAW_HOME` — katalog domowy do wewnętrznego rozwiązywania ścieżek
-- `OPENCLAW_STATE_DIR` — zastępuje katalog stanu
-- `OPENCLAW_CONFIG_PATH` — zastępuje ścieżkę pliku konfiguracyjnego
+- `OPENCLAW_STATE_DIR` — nadpisuje katalog stanu
+- `OPENCLAW_CONFIG_PATH` — nadpisuje ścieżkę pliku konfiguracyjnego
 
 Pełna dokumentacja: [Zmienne środowiskowe](/pl/help/environment).
 </Accordion>

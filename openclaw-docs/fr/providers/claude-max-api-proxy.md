@@ -1,52 +1,57 @@
 ---
 read_when:
-    - Vous souhaitez utiliser l’abonnement Claude Max avec des outils compatibles OpenAI
-    - Vous souhaitez un serveur API local qui encapsule Claude Code CLI
-    - Vous souhaitez évaluer l’accès Anthropic basé sur abonnement par rapport à celui basé sur clé API
-summary: Proxy communautaire pour exposer des identifiants d’abonnement Claude comme point de terminaison compatible OpenAI
+    - Vous voulez utiliser l’abonnement Claude Max avec des outils compatibles OpenAI
+    - Vous voulez un serveur d’API local qui encapsule la CLI Claude Code
+    - Vous voulez évaluer l’accès à Anthropic par abonnement par rapport à l’accès basé sur une clé API
+summary: Proxy communautaire pour exposer les identifiants d’abonnement Claude sous forme de point de terminaison compatible avec OpenAI
 title: Proxy API Claude Max
 x-i18n:
-    generated_at: "2026-04-24T07:26:27Z"
-    model: gpt-5.4
+    generated_at: "2026-06-28T20:45:09Z"
+    model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 06c685c2f42f462a319ef404e4980f769e00654afb9637d873b98144e6a41c87
+    source_hash: 5d8800f7d5bd7adf9bff4825a45878a1bbde73b4d54afe4b5b4aa2b1b5523bee
     source_path: providers/claude-max-api-proxy.md
-    workflow: 15
+    workflow: 16
 ---
 
-**claude-max-api-proxy** est un outil communautaire qui expose votre abonnement Claude Max/Pro comme un point de terminaison API compatible OpenAI. Cela vous permet d’utiliser votre abonnement avec n’importe quel outil prenant en charge le format API OpenAI.
+**claude-max-api-proxy** est un outil communautaire qui expose votre abonnement Claude Max/Pro comme un point de terminaison d’API compatible OpenAI. Cela vous permet d’utiliser votre abonnement avec tout outil prenant en charge le format d’API OpenAI.
 
 <Warning>
-Ce chemin n’est qu’une compatibilité technique. Anthropic a déjà bloqué par le passé certains usages d’abonnement en dehors de Claude Code. Vous devez décider vous-même si vous souhaitez l’utiliser et vérifier les conditions actuelles d’Anthropic avant de vous y fier.
+Ce chemin concerne uniquement la compatibilité technique. Anthropic a déjà bloqué par le passé certaines utilisations d’abonnement en dehors de Claude Code. Vous devez décider vous-même si vous souhaitez l’utiliser et vérifier les règles de facturation actuelles d’Anthropic avant de vous y fier.
+
+La documentation de support actuelle d’Anthropic indique que `claude -p` correspond à une utilisation Agent SDK/programmatique. La mise à jour du support d’Anthropic du 15 juin 2026 a suspendu le plan de crédits Agent SDK distinct annoncé. Pour l’instant, Claude Agent SDK, `claude -p` et l’utilisation d’applications tierces consomment toujours les limites d’utilisation de l’abonnement connecté.
+
+Avant de vous fier à ce chemin, consultez l’[article sur le plan Agent SDK](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan) d’Anthropic, ainsi que les articles de support Claude Code pour les comptes [Pro/Max](https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan) ou [Team/Enterprise](https://support.claude.com/en/articles/11845131-use-claude-code-with-your-team-or-enterprise-plan).
 </Warning>
 
 ## Pourquoi l’utiliser ?
 
-| Approche                | Coût                                                 | Meilleur usage                             |
-| ----------------------- | ---------------------------------------------------- | ------------------------------------------ |
-| API Anthropic           | Paiement au token (~15 $/M en entrée, 75 $/M en sortie pour Opus) | Applications de production, gros volume |
-| Abonnement Claude Max   | 200 $/mois forfaitaire                               | Usage personnel, développement, usage illimité |
+| Approche                  | Voie de coût                                   | Idéal pour                                          |
+| ------------------------- | ---------------------------------------------- | --------------------------------------------------- |
+| API Anthropic             | Paiement par jeton via Claude Console ou cloud | Applications de production, automatisation partagée, volume |
+| Proxy d’abonnement Claude | Règles de plan et de crédit Claude Code / `claude -p` | Expériences personnelles avec des outils compatibles |
 
-Si vous avez un abonnement Claude Max et souhaitez l’utiliser avec des outils compatibles OpenAI, ce proxy peut réduire les coûts pour certains workflows. Les clés API restent le chemin de politique le plus clair pour un usage de production.
+Si vous disposez d’un abonnement Claude Max ou Pro et souhaitez l’utiliser avec des outils compatibles OpenAI, ce proxy peut convenir à certains workflows personnels. Ce n’est pas un chemin illimité à tarif forfaitaire. Les clés d’API restent la voie la plus claire en matière de politique et de facturation pour une utilisation en production.
 
 ## Fonctionnement
 
 ```
-Votre app → claude-max-api-proxy → Claude Code CLI → Anthropic (via abonnement)
-   (format OpenAI)              (convertit le format)         (utilise votre connexion)
+Votre application → claude-max-api-proxy → Claude Code CLI / claude -p → Anthropic
+     (format OpenAI)              (convertit le format)          (utilise votre connexion)
 ```
 
 Le proxy :
 
-1. Accepte des requêtes au format OpenAI sur `http://localhost:3456/v1/chat/completions`
+1. Accepte les requêtes au format OpenAI sur `http://localhost:3456/v1/chat/completions`
 2. Les convertit en commandes Claude Code CLI
-3. Renvoie des réponses au format OpenAI (streaming pris en charge)
+3. Renvoie les réponses au format OpenAI (streaming pris en charge)
 
-## Démarrage
+## Bien démarrer
 
 <Steps>
   <Step title="Installer le proxy">
-    Nécessite Node.js 20+ et Claude Code CLI.
+    Nécessite Node.js 22+ et Claude Code CLI.
 
     ```bash
     npm install -g claude-max-api-proxy
@@ -102,22 +107,21 @@ Le proxy :
 
 ## Catalogue intégré
 
-| ID de modèle       | Correspond à      |
-| ------------------ | ----------------- |
-| `claude-opus-4`    | Claude Opus 4     |
-| `claude-sonnet-4`  | Claude Sonnet 4   |
-| `claude-haiku-4`   | Claude Haiku 4    |
+| ID du modèle      | Correspond à    |
+| ----------------- | --------------- |
+| `claude-opus-4`   | Claude Opus 4   |
+| `claude-sonnet-4` | Claude Sonnet 4 |
+| `claude-haiku-4`  | Claude Haiku 4  |
 
 ## Configuration avancée
 
 <AccordionGroup>
-  <Accordion title="Remarques sur le style proxy compatible OpenAI">
-    Ce chemin utilise la même route compatible OpenAI de style proxy que d’autres
-    backends `/v1` personnalisés :
+  <Accordion title="Notes sur le mode proxy compatible OpenAI">
+    Ce chemin utilise la même route compatible OpenAI en mode proxy que les autres backends `/v1` personnalisés :
 
-    - La mise en forme des requêtes réservée à OpenAI natif ne s’applique pas
-    - Pas de `service_tier`, pas de `store` pour Responses, pas d’indices de cache de prompt, ni de mise en forme de charge utile de compatibilité de raisonnement OpenAI
-    - Les en-têtes d’attribution cachés d’OpenClaw (`originator`, `version`, `User-Agent`) ne sont pas injectés sur l’URL du proxy
+    - La mise en forme native des requêtes propre à OpenAI ne s’applique pas
+    - Pas de `service_tier`, pas de `store` Responses, pas d’indices de cache de prompt, ni de mise en forme de payload compatible avec le raisonnement OpenAI
+    - Les en-têtes d’attribution OpenClaw masqués (`originator`, `version`, `User-Agent`) ne sont pas injectés sur l’URL du proxy
 
   </Accordion>
 
@@ -156,34 +160,29 @@ Le proxy :
   </Accordion>
 </AccordionGroup>
 
-## Liens
+## Notes
 
-- **npm :** [https://www.npmjs.com/package/claude-max-api-proxy](https://www.npmjs.com/package/claude-max-api-proxy)
-- **GitHub :** [https://github.com/atalovesyou/claude-max-api-proxy](https://github.com/atalovesyou/claude-max-api-proxy)
-- **Issues :** [https://github.com/atalovesyou/claude-max-api-proxy/issues](https://github.com/atalovesyou/claude-max-api-proxy/issues)
-
-## Remarques
-
-- Il s’agit d’un **outil communautaire**, non officiellement pris en charge par Anthropic ni par OpenClaw
+- Il s’agit d’un **outil communautaire**, non officiellement pris en charge par Anthropic ou OpenClaw
 - Nécessite un abonnement Claude Max/Pro actif avec Claude Code CLI authentifié
-- Le proxy s’exécute localement et n’envoie aucune donnée à des serveurs tiers
+- Hérite du comportement de facturation, de crédits d’utilisation et de limites de débit de Claude Code `claude -p`
+- Le proxy s’exécute localement et n’envoie pas de données à des serveurs tiers
 - Les réponses en streaming sont entièrement prises en charge
 
 <Note>
-Pour l’intégration Anthropic native avec Claude CLI ou des clés API, voir [provider Anthropic](/fr/providers/anthropic). Pour les abonnements OpenAI/Codex, voir [provider OpenAI](/fr/providers/openai).
+Pour l’intégration Anthropic native avec Claude CLI ou des clés d’API, consultez le [fournisseur Anthropic](/fr/providers/anthropic). Pour les abonnements OpenAI/Codex, consultez le [fournisseur OpenAI](/fr/providers/openai).
 </Note>
 
-## Lié
+## Connexe
 
 <CardGroup cols={2}>
-  <Card title="Provider Anthropic" href="/fr/providers/anthropic" icon="bolt">
-    Intégration OpenClaw native avec Claude CLI ou des clés API.
+  <Card title="Fournisseur Anthropic" href="/fr/providers/anthropic" icon="bolt">
+    Intégration OpenClaw native avec Claude CLI ou des clés d’API.
   </Card>
-  <Card title="Provider OpenAI" href="/fr/providers/openai" icon="robot">
+  <Card title="Fournisseur OpenAI" href="/fr/providers/openai" icon="robot">
     Pour les abonnements OpenAI/Codex.
   </Card>
-  <Card title="Sélection de modèle" href="/fr/concepts/model-providers" icon="layers">
-    Vue d’ensemble de tous les providers, références de modèle et comportement de repli.
+  <Card title="Sélection du modèle" href="/fr/concepts/model-providers" icon="layers">
+    Vue d’ensemble de tous les fournisseurs, des références de modèles et du comportement de basculement.
   </Card>
   <Card title="Configuration" href="/fr/gateway/configuration" icon="gear">
     Référence complète de la configuration.

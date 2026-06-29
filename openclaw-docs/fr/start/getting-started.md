@@ -1,32 +1,33 @@
 ---
 read_when:
-    - Configuration initiale à partir de zéro
+    - Première configuration à partir de zéro
     - Vous voulez le chemin le plus rapide vers un chat fonctionnel
-summary: Installez OpenClaw et lancez votre première conversation en quelques minutes.
+summary: Installez OpenClaw et lancez votre première discussion en quelques minutes.
 title: Premiers pas
 x-i18n:
-    generated_at: "2026-05-07T13:26:05Z"
+    generated_at: "2026-06-28T20:45:20Z"
     model: gpt-5.5
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 295ce8fd03320027a77a3aef494f785f0fe58e0f57c72ee63f6f9aca68626c20
+    source_hash: 579ed2b4797dc851b0293b96a4177cc356641b6842fe45c4d48f4e8c224eef75
     source_path: start/getting-started.md
     workflow: 16
 ---
 
-Installez OpenClaw, exécutez l’onboarding et discutez avec votre assistant IA — le tout en
-environ 5 minutes. À la fin, vous aurez un Gateway en cours d’exécution, une authentification configurée
-et une session de chat fonctionnelle.
+Installez OpenClaw, lancez l’onboarding et discutez avec votre assistant IA, le tout en
+environ 5 minutes. À la fin, vous disposerez d’un Gateway en cours d’exécution, d’une authentification configurée
+et d’une session de chat fonctionnelle.
 
 ## Ce dont vous avez besoin
 
-- **Node.js** — Node 24 recommandé (Node 22.16+ également pris en charge)
+- **Node.js** — Node 24 recommandé (Node 22.19+ également pris en charge)
 - **Une clé API** d’un fournisseur de modèles (Anthropic, OpenAI, Google, etc.) — l’onboarding vous la demandera
 
 <Tip>
 Vérifiez votre version de Node avec `node --version`.
-**Utilisateurs Windows :** Windows natif et WSL2 sont tous deux pris en charge. WSL2 est plus
-stable et recommandé pour l’expérience complète. Consultez [Windows](/fr/platforms/windows).
-Besoin d’installer Node ? Consultez [Configuration de Node](/fr/install/node).
+**Utilisateurs Windows :** l’application Windows Hub native est le chemin de bureau le plus simple. Le
+programme d’installation PowerShell et les chemins Gateway WSL2 sont également pris en charge. Voir [Windows](/fr/platforms/windows).
+Vous devez installer Node ? Voir [Configuration de Node](/fr/install/node).
 </Tip>
 
 ## Configuration rapide
@@ -52,17 +53,20 @@ Besoin d’installer Node ? Consultez [Configuration de Node](/fr/install/node).
     </Tabs>
 
     <Note>
-    Autres méthodes d’installation (Docker, Nix, npm) : [Installer](/fr/install).
+    Autres méthodes d’installation (Docker, Nix, npm) : [Installation](/fr/install).
     </Note>
 
   </Step>
-  <Step title="Exécuter l’onboarding">
+  <Step title="Lancer l’onboarding">
     ```bash
     openclaw onboard --install-daemon
     ```
 
     L’assistant vous guide dans le choix d’un fournisseur de modèles, la définition d’une clé API
-    et la configuration du Gateway. Cela prend environ 2 minutes.
+    et la configuration du Gateway. QuickStart ne prend généralement que quelques minutes, mais
+    la connexion au fournisseur, l’association d’un canal, l’installation du daemon, les téléchargements réseau, les skills
+    ou les plugins facultatifs peuvent allonger l’onboarding complet. Vous pouvez ignorer les étapes facultatives
+    et y revenir plus tard avec `openclaw configure`.
 
     Consultez [Onboarding (CLI)](/fr/start/wizard) pour la référence complète.
 
@@ -80,20 +84,20 @@ Besoin d’installer Node ? Consultez [Configuration de Node](/fr/install/node).
     openclaw dashboard
     ```
 
-    Cela ouvre l’interface de contrôle dans votre navigateur. Si elle se charge, tout fonctionne.
+    Cela ouvre l’interface Control UI dans votre navigateur. Si elle se charge, tout fonctionne.
 
   </Step>
   <Step title="Envoyer votre premier message">
-    Saisissez un message dans le chat de l’interface de contrôle et vous devriez recevoir une réponse de l’IA.
+    Saisissez un message dans le chat de l’interface Control UI et vous devriez recevoir une réponse de l’IA.
 
     Vous voulez plutôt discuter depuis votre téléphone ? Le canal le plus rapide à configurer est
-    [Telegram](/fr/channels/telegram) (juste un jeton de bot). Consultez [Canaux](/fr/channels)
+    [Telegram](/fr/channels/telegram) (il suffit d’un token de bot). Voir [Canaux](/fr/channels)
     pour toutes les options.
 
   </Step>
 </Steps>
 
-<Accordion title="Avancé : monter une version personnalisée de l’interface de contrôle">
+<Accordion title="Avancé : monter une version personnalisée de Control UI">
   Si vous maintenez une version localisée ou personnalisée du tableau de bord, faites pointer
   `gateway.controlUi.root` vers un répertoire contenant vos ressources statiques générées
   et `index.html`.
@@ -131,28 +135,28 @@ openclaw dashboard
   <Card title="Connecter un canal" href="/fr/channels" icon="message-square">
     Discord, Feishu, iMessage, Matrix, Microsoft Teams, Signal, Slack, Telegram, WhatsApp, Zalo, et plus encore.
   </Card>
-  <Card title="Appairage et sécurité" href="/fr/channels/pairing" icon="shield">
+  <Card title="Association et sécurité" href="/fr/channels/pairing" icon="shield">
     Contrôlez qui peut envoyer des messages à votre agent.
   </Card>
   <Card title="Configurer le Gateway" href="/fr/gateway/configuration" icon="settings">
-    Modèles, outils, bac à sable et paramètres avancés.
+    Modèles, outils, sandbox et paramètres avancés.
   </Card>
   <Card title="Parcourir les outils" href="/fr/tools" icon="wrench">
-    Navigateur, exec, recherche web, Skills et plugins.
+    Navigateur, exec, recherche web, skills et plugins.
   </Card>
 </Columns>
 
 <Accordion title="Avancé : variables d’environnement">
-  Si vous exécutez OpenClaw avec un compte de service ou si vous voulez des chemins personnalisés :
+  Si vous exécutez OpenClaw avec un compte de service ou souhaitez des chemins personnalisés :
 
 - `OPENCLAW_HOME` — répertoire personnel pour la résolution des chemins internes
-- `OPENCLAW_STATE_DIR` — remplace le répertoire d’état
-- `OPENCLAW_CONFIG_PATH` — remplace le chemin du fichier de configuration
+- `OPENCLAW_STATE_DIR` — remplacer le répertoire d’état
+- `OPENCLAW_CONFIG_PATH` — remplacer le chemin du fichier de configuration
 
 Référence complète : [Variables d’environnement](/fr/help/environment).
 </Accordion>
 
-## Associés
+## Connexe
 
 - [Vue d’ensemble de l’installation](/fr/install)
 - [Vue d’ensemble des canaux](/fr/channels)
