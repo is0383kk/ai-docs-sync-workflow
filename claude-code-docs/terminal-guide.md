@@ -12,7 +12,7 @@ You can use Claude Code even if you've never used a terminal before. This guide 
 * [Windows](#windows)
 
 <Note>
-  Don't want to use the terminal? The Claude Code desktop app lets you skip the terminal entirely. Download it for [macOS](https://claude.ai/api/desktop/darwin/universal/dmg/latest/redirect?utm_source=claude_code\&utm_medium=docs) or [Windows](https://claude.com/download?utm_source=claude_code\&utm_medium=docs), then see the [Desktop quickstart](/en/desktop-quickstart) to get started.
+  Don't want to use the terminal? The Claude Code desktop app lets you skip the terminal entirely. Download it for [macOS](https://claude.ai/api/desktop/darwin/universal/dmg/latest/redirect?utm_source=claude_code\&utm_medium=docs), [Windows](https://claude.com/download?utm_source=claude_code\&utm_medium=docs), or [Linux](https://claude.com/download?utm_source=claude_code\&utm_medium=docs), then see the [Desktop quickstart](/en/desktop-quickstart) to get started.
 </Note>
 
 ## macOS and Linux

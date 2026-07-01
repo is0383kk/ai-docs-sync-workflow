@@ -4,11 +4,11 @@ read_when:
     - インストール、更新、公開のデバッグ
 summary: 'CLI リファレンス: コマンド、フラグ、設定、ロックファイルの動作。'
 x-i18n:
-    generated_at: "2026-06-28T20:41:05Z"
+    generated_at: "2026-06-30T22:04:47Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 3a20b288bab0e81c9ba63e054adc35b66c9013da1e0b310401b3f931c2d0b2a1
+    source_hash: 119900fddb8c80213eb12060c07026527a1ff851546c632bf1f7a909659b1945
     source_path: clawhub/cli.md
     workflow: 16
 ---
@@ -36,12 +36,12 @@ clawhub whoami
 ## グローバルフラグ
 
 - `--workdir <dir>`: 作業ディレクトリ（デフォルト: cwd。設定されている場合は Clawdbot ワークスペースにフォールバック）
-- `--dir <dir>`: workdir 配下のインストールディレクトリ（デフォルト: `skills`）
-- `--site <url>`: ブラウザーログイン用のベース URL（デフォルト: `https://clawhub.ai`）
-- `--registry <url>`: API ベース URL（デフォルト: 検出値。それ以外は `https://clawhub.ai`）
+- `--dir <dir>`: workdir 配下のインストール先ディレクトリ（デフォルト: `skills`）
+- `--site <url>`: ブラウザログイン用のベース URL（デフォルト: `https://clawhub.ai`）
+- `--registry <url>`: API ベース URL（デフォルト: 検出された値。それ以外は `https://clawhub.ai`）
 - `--no-input`: プロンプトを無効化
 
-対応する環境変数:
+環境変数での相当項目:
 
 - `CLAWHUB_SITE`（レガシー `CLAWDHUB_SITE`）
 - `CLAWHUB_REGISTRY`（レガシー `CLAWDHUB_REGISTRY`）
@@ -49,15 +49,15 @@ clawhub whoami
 
 ### HTTP プロキシ
 
-CLI は、企業プロキシや制限されたネットワークの背後にあるシステム向けに、標準の HTTP プロキシ環境変数を尊重します。
+この CLI は、企業プロキシや制限付きネットワークの背後にあるシステム向けに、標準の HTTP プロキシ環境変数を尊重します。
 
 - `HTTPS_PROXY` / `https_proxy`
 - `HTTP_PROXY` / `http_proxy`
 - `NO_PROXY` / `no_proxy`
 
-これらの変数のいずれかが設定されている場合、CLI は送信リクエストを指定されたプロキシ経由でルーティングします。`HTTPS_PROXY` は HTTPS リクエストに、`HTTP_PROXY` は通常の HTTP に使用されます。`NO_PROXY` / `no_proxy` は、特定のホストまたはドメインに対してプロキシをバイパスするために尊重されます。
+これらの変数のいずれかが設定されている場合、CLI は送信リクエストを指定されたプロキシ経由でルーティングします。`HTTPS_PROXY` は HTTPS リクエストに、`HTTP_PROXY` は通常の HTTP に使用されます。`NO_PROXY` / `no_proxy` は、特定のホストまたはドメインでプロキシをバイパスするために尊重されます。
 
-これは、直接の外向き接続がブロックされているシステム（例: Docker コンテナー、プロキシ経由のみインターネットに接続できる Hetzner VPS、企業ファイアウォール）で必要です。
+これは、直接の外向き接続がブロックされているシステム（例: Docker コンテナ、プロキシ経由のみインターネットに接続できる Hetzner VPS、企業ファイアウォール）で必要です。
 
 例:
 
@@ -83,18 +83,18 @@ API トークンとキャッシュされたレジストリ URL を保存しま�
 
 ### `login` / `auth login`
 
-- デフォルト: ブラウザーで `<site>/cli/auth` を開き、ループバックコールバック経由で完了します。
+- デフォルト: ブラウザで `<site>/cli/auth` を開き、ループバックコールバック経由で完了します。
 - ヘッドレス: `clawhub login --token clh_...`
-- リモート/ヘッドレス対話: `clawhub login --device` はコードを出力し、`<site>/cli/device` で認可するまで待機します。
+- リモート/ヘッドレス対話型: `clawhub login --device` はコードを表示し、`<site>/cli/device` で承認している間待機します。
 
 ### `whoami`
 
-- 保存済みトークンを `/api/v1/whoami` 経由で検証します。
+- `/api/v1/whoami` 経由で保存済みトークンを検証します。
 
 ### `token`
 
 - 保存済み API トークンを stdout に出力します。
-- ローカルログイントークンを CI シークレット設定コマンドにパイプする場合に便利です。
+- ローカルログイントークンを CI シークレット設定コマンドへパイプする場合に便利です。
 
 ### `star <skill>` / `unstar <skill>`
 
@@ -105,17 +105,17 @@ API トークンとキャッシュされたレジストリ URL を保存しま�
 ### `search <query...>`
 
 - `/api/v1/search?q=...` を呼び出します。
-- 出力には、スキルの slug、所有者ハンドル、表示名、関連度スコアが含まれます。
-- 検索では、ダウンロード人気度よりも、正確な slug/name トークン一致が優先されます。`map` のような単独の slug トークンは、`amap` 内の部分文字列よりも `personal-map` に強く一致します。
-- 人気度は小さなランキング事前要素であり、最上位表示を保証するものではありません。
-- 表示されるべきスキルが表示されない場合は、メタデータの名前変更前に、ログインした状態で `clawhub inspect @owner/slug` を実行し、所有者に見えるモデレーション診断を確認してください。
+- 出力には、スキル slug、所有者ハンドル、表示名、関連度スコアが含まれます。
+- 検索では、ダウンロード人気度より先に、slug/name トークンの完全一致が優先されます。`map` のような単独の slug トークンは、`amap` の中にある部分文字列よりも `personal-map` に強く一致します。
+- 人気度は小さなランキング事前分布であり、上位表示を保証するものではありません。
+- 表示されるべきスキルが表示されない場合は、メタデータ名を変更する前に、ログインした状態で `clawhub inspect @owner/slug` を実行して、所有者に見えるモデレーション診断を確認してください。
 
 ### `explore`
 
-- `/api/v1/skills?limit=...&sort=createdAt` 経由で最新のスキルを一覧表示します（`createdAt` 降順でソート）。
+- `/api/v1/skills?limit=...&sort=createdAt` 経由で最新のスキルを一覧表示します（`createdAt` desc でソート）。
 - フラグ:
   - `--limit <n>`（1-200、デフォルト: 25）
-  - `--sort newest|updated|rating|downloads|trending`（デフォルト: newest）。レガシーのインストールソートエイリアスも互換性のため引き続き機能します。
+  - `--sort newest|updated|rating|downloads|trending`（デフォルト: newest）。互換性のため、レガシーのインストールソートエイリアスも引き続き動作します。
   - `--json`（機械可読出力）
 - 出力: `<slug>  v<version>  <age>  <summary>`（summary は 50 文字に切り詰め）。
 
@@ -132,10 +132,10 @@ API トークンとキャッシュされたレジストリ URL を保存しま�
 
 ### `install @owner/slug`
 
-- 指定された所有者とスキルの最新バージョンを解決します。
+- 名前付き所有者とスキルの最新バージョンを解決します。
 - `/api/v1/download` 経由で zip をダウンロードします。
 - `<workdir>/<dir>/<slug>` に展開します。
-- pin されたスキルの上書きを拒否します。先に `clawhub unpin <skill>` を実行してください。
+- ピン留めされたスキルの上書きを拒否します。先に `clawhub unpin <skill>` を実行してください。
 - 書き込み先:
   - `<workdir>/.clawhub/lock.json`（レガシー `.clawdhub`）
   - `<skill>/.clawhub/origin.json`（レガシー `.clawdhub`）
@@ -143,9 +143,9 @@ API トークンとキャッシュされたレジストリ URL を保存しま�
 ### `uninstall <skill>`
 
 - `<workdir>/<dir>/<slug>` を削除し、lockfile エントリを削除します。
-- ログイン中は、現在のインストール数を無効化できるようベストエフォートのテレメトリーを送信します。
-- 対話式: 確認を求めます。
-- 非対話式（`--no-input`）: `--yes` が必要です。
+- ログイン中は、現在のインストール数を非アクティブ化できるようにベストエフォートのテレメトリを送信します。
+- 対話型: 確認を求めます。
+- 非対話型（`--no-input`）: `--yes` が必要です。
 
 ### `list`
 
@@ -154,37 +154,37 @@ API トークンとキャッシュされたレジストリ URL を保存しま�
 
 ### `pin <skill>`
 
-- インストール済みスキルを lockfile 内で pinned としてマークします。
-- `--reason <text>` はスキルが固定された理由を記録します。
-- pin されたスキルは `update --all` でスキップされ、直接の `update <skill>` では拒否されます。
-- pin されたスキルは、ローカルのバイト列が誤って置き換えられないよう `install --force` も拒否します。
+- インストール済みスキルを lockfile 内でピン留めとしてマークします。
+- `--reason <text>` は、スキルが固定されている理由を記録します。
+- ピン留めされたスキルは `update --all` でスキップされ、直接の `update <skill>` では拒否されます。
+- ピン留めされたスキルは `install --force` も拒否するため、ローカルのバイト列が誤って置き換えられることはありません。
 
 ### `unpin <skill>`
 
-- インストール済みスキルから lockfile の pin を削除し、今後の更新で変更できるようにします。
+- インストール済みスキルから lockfile のピン留めを削除し、以後の更新で変更できるようにします。
 
 ### `update [@owner/slug]` / `update --all`
 
 - ローカルファイルからフィンガープリントを計算します。
-- フィンガープリントが既知のバージョンと一致する場合: プロンプトはありません。
+- フィンガープリントが既知のバージョンと一致する場合: プロンプトは表示されません。
 - フィンガープリントが一致しない場合:
   - デフォルトでは拒否します
-  - `--force` で上書きします（対話式の場合はプロンプト）
-- pin されたスキルは `--force` でも更新されません。
-- `update <skill>` は pin されたスキルに対して即座に失敗し、先に `clawhub unpin <skill>` を実行するよう伝えます。
-- `update --all` は pin された slug をスキップし、固定されたままの内容の要約を出力します。
+  - `--force` で上書きします（対話型の場合はプロンプト）
+- ピン留めされたスキルは `--force` でも更新されません。
+- `update <skill>` はピン留めされたスキルでは即座に失敗し、先に `clawhub unpin <skill>` を実行するよう伝えます。
+- `update --all` はピン留めされた slug をスキップし、固定されたままの内容の概要を出力します。
 
 ### `skill publish <path>`
 
 - ローカルバンドルのフィンガープリントを ClawHub と比較し、内容がすでに公開済みの場合は正常終了します。
-- 新しいスキルはデフォルトで `1.0.0` になります。変更されたスキルはデフォルトで次の patch バージョンになります。
-- `--version <version>` はバージョンを明示的に選択し、内容が既存バージョンと一致していても公開します。
+- 新しいスキルのデフォルトは `1.0.0` です。変更済みスキルのデフォルトは次のパッチバージョンです。
+- `--version <version>` はバージョンを明示的に選択し、内容が既存バージョンと一致する場合でも公開します。
 - `--dry-run` はアップロードせずに公開を解決します。`--json` は機械可読の結果を出力します。
-- `--owner <handle>` は、実行主体に公開者アクセスがある場合に、org/user の公開者ハンドル配下で公開します。
-- `--migrate-owner` は、新しいバージョンを公開しながら既存のスキルを `--owner` に移動します。両方の公開者に対する admin/owner アクセスが必要です。
+- `--owner <handle>` は、アクターにパブリッシャーアクセスがある場合、org/user のパブリッシャーハンドル配下で公開します。
+- `--migrate-owner` は、新しいバージョンを公開しながら既存スキルを `--owner` に移動します。両方のパブリッシャーで admin/owner アクセスが必要です。
 - 所有者とレビューの動作は `docs/publishing.md` で説明されています。
-- スキルを公開すると、ClawHub 上で `MIT-0` の下にリリースされます。
-- 公開済みスキルは、帰属表示なしで自由に使用、変更、再配布できます。
+- スキルを公開するとは、ClawHub 上で `MIT-0` の下にリリースされることを意味します。
+- 公開されたスキルは、帰属表示なしで自由に使用、変更、再配布できます。
 - ClawHub は有料スキルやスキル単位の価格設定をサポートしていません。
 - レガシーエイリアス: `publish <path>`。
 
@@ -198,19 +198,19 @@ clawhub skill publish ./my-skill --version 2.0.0
 
 ClawHub の再利用可能な
 [`skill-publish.yml`](https://github.com/openclaw/clawhub/blob/main/.github/workflows/skill-publish.yml)
-ワークフローは、1 つの `skill_path`、または `root`（デフォルト: `skills`）直下の各スキルフォルダーに対して `skill publish` を呼び出します。変更されていないスキルはスキップし、同じ自動 patch-version 動作を使用します。
+ワークフローは、1 つの `skill_path`、または `root`（デフォルト: `skills`）直下の各スキルフォルダに対して `skill publish` を呼び出します。変更されていないスキルはスキップし、同じ自動パッチバージョン動作を使用します。
 
 トークンなしでプレビューするには `dry_run: true` を設定します。実際の公開には `clawhub_token` シークレットが必要です。
 
 ### `sync`
 
-- 現在の workdir、設定済みの skills ディレクトリ、および任意の `--root <dir>` フォルダーをスキャンし、`SKILL.md` または `skill.md` を含むローカルスキルフォルダーを探します。
-- 各ローカルスキルのフィンガープリントを ClawHub と比較し、新規または変更されたスキルのみを公開します。
-- 新しいスキルは `1.0.0` として公開されます。変更されたスキルはデフォルトで次の patch バージョンを公開します。より大きな semver ステップで進めるべき更新バッチには `--bump minor|major` を使用します。
+- 現在の workdir、設定済みの skills ディレクトリ、および `--root <dir>` フォルダをスキャンし、`SKILL.md` または `skill.md` を含むローカルスキルフォルダを探します。
+- 各ローカルスキルのフィンガープリントを ClawHub と比較し、新規または変更済みのスキルのみを公開します。
+- 新しいスキルは `1.0.0` として公開されます。変更済みスキルはデフォルトで次のパッチバージョンを公開します。より大きな semver ステップで進めるべき更新バッチには `--bump minor|major` を使用します。
 - `--dry-run` はアップロードせずに公開計画を表示します。`--json` は機械可読の計画を出力します。
-- `--all` は、新規または変更されたすべてのスキルをプロンプトなしで公開します。`--all` がない場合、対話式ターミナルでは公開するスキルを選択できます。
-- `--owner <handle>` は、実行主体に公開者アクセスがある場合に、org/user の公開者ハンドル配下で公開します。
-- `sync` は一方向の公開のみです。インストール、更新、ダウンロード、またはインストール/ダウンロードテレメトリーの報告は行いません。
+- `--all` は、新規または変更済みのすべてのスキルをプロンプトなしで公開します。`--all` がない場合、対話型ターミナルでは公開するスキルを選択できます。
+- `--owner <handle>` は、アクターにパブリッシャーアクセスがある場合、org/user のパブリッシャーハンドル配下で公開します。
+- `sync` は一方向の公開のみです。インストール、更新、ダウンロード、インストール/ダウンロードテレメトリの報告は行いません。
 
 ```bash
 clawhub sync --all --dry-run
@@ -221,13 +221,13 @@ clawhub sync --root ./skills --owner openclaw --bump minor
 ### `scan --slug <slug>`
 
 - `clawhub login` が必要です。
-- `POST /api/v1/skills/-/scan` 経由で ClawHub ClawScan を実行し、その後スキャンが終端状態になるまでポーリングします。
-- スキャンは非同期で、完了まで時間がかかる場合があります。キューに入っている間、ターミナルスピナーには現在の優先スキャン位置と先行するスキャン数が表示されます。
-- 公開済みスキャンには所有権または公開者管理アクセスが必要です。モデレーター/admin は `clawhub-admin` 経由で同じバックエンドを使用できます。
-- `--update` は `--slug` と一緒の場合のみ有効です。成功した公開済みスキャン結果を選択したバージョンに書き戻します。
+- `POST /api/v1/skills/-/scan` 経由で ClawHub ClawScan を実行し、スキャンが終端状態になるまでポーリングします。
+- スキャンは非同期で、完了まで時間がかかる場合があります。キューに入っている間、ターミナルスピナーは現在の優先スキャン位置と前にあるスキャン数を表示します。
+- 公開済みスキャンには、所有権またはパブリッシャー管理アクセスが必要です。モデレーター/admin は `clawhub-admin` 経由で同じバックエンドを使用できます。
+- `--update` は `--slug` と併用した場合にのみ有効です。成功した公開済みスキャン結果を選択したバージョンに書き戻します。
 - `--output <file.zip>` は、`manifest.json`、`clawscan.json`、`skillspector.json`、`static-analysis.json`、`virustotal.json`、`README.md` を含む完全なレポートアーカイブをダウンロードします。
-- `--json` は自動化用に完全なポーリングレスポンスを出力します。
-- ローカルパススキャンはサポートされなくなりました。新しいバージョンをアップロードしてから、`scan download` を使用して、その送信済みバージョンの保存済みスキャン結果を取得してください。
+- `--json` は自動化向けに完全なポーリング応答を出力します。
+- ローカルパススキャンはサポートされなくなりました。新しいバージョンをアップロードしてから、`scan download` を使用して、その送信済みバージョンに保存されたスキャン結果を取得してください。
 
 ```bash
 clawhub scan --slug gifgrep
@@ -238,11 +238,11 @@ clawhub scan --slug gifgrep --update --output report.zip
 ### `scan download <name>`
 
 - `clawhub login` が必要です。
-- ClawHub セキュリティチェックによってブロックまたは非表示にされたバージョンを含め、送信済みのスキルまたは Plugin バージョンの保存済みスキャンレポート ZIP をダウンロードします。
-- スキルのダウンロードはスキル slug を使用し、デフォルトで `--kind skill` になります。
+- ClawHub セキュリティチェックでブロックまたは非表示にされたバージョンを含め、送信済みスキルまたは Plugin バージョンの保存済みスキャンレポート ZIP をダウンロードします。
+- スキルのダウンロードはスキル slug を使用し、デフォルトは `--kind skill` です。
 - Plugin のダウンロードはパッケージ名を使用し、`--kind plugin` が必要です。
-- 作成者が ClawHub によってブロックされた正確な送信済みバージョンを検査できるよう、`--version` は必須です。
-- `--output <file.zip>` は保存先パスを選択します。
+- ClawHub がブロックした正確な送信済みバージョンを作者が検査できるように、`--version` が必要です。
+- `--output <file.zip>` は宛先パスを選択します。
 
 ```bash
 clawhub scan download gifgrep --version 1.2.3
@@ -251,8 +251,8 @@ clawhub scan download @scope/demo --version 2.0.0 --kind plugin --output report.
 
 #### GitHub Actions
 
-ClawHub は、スキルリポジトリとカタログリポジトリ向けに、公式の再利用可能なワークフローを
-[`/.github/workflows/skill-publish.yml`](https://github.com/openclaw/clawhub/blob/f96ae4a54ec9b72177220d4db601ebc0ddf5a1fd/.github/workflows/skill-publish.yml)
+ClawHub は、スキルリポジトリおよびカタログリポジトリ向けに、公式の再利用可能なワークフローを
+[`/.github/workflows/skill-publish.yml`](https://github.com/openclaw/clawhub/blob/d8096dfc039e86ab942ddf9ef117d04849fd84c1/.github/workflows/skill-publish.yml)
 で提供しています。
 
 一般的なカタログ設定:
@@ -284,62 +284,60 @@ jobs:
 
 注記:
 
-- `root` はカタログリポジトリではデフォルトで `skills` になります。
-- 1 つのスキルフォルダーを処理するには `skill_path: skills/review-helper` を渡します。
+- `root` はカタログリポジトリではデフォルトで `skills` です。
+- 1 つのスキルフォルダを処理するには `skill_path: skills/review-helper` を渡します。
 - `owner` は CLI の `--owner` フラグに対応します。認証済みユーザーとして公開する場合は省略します。
-- V1 スキル公開は `clawhub_token` を使用します。GitHub OIDC 信頼済み公開は、現時点ではパッケージのみです。
+- V1 スキル公開は `clawhub_token` を使用します。GitHub OIDC の信頼済み公開は、現時点ではパッケージ専用です。
 
 ### `delete <skill>`
 
-- `--version` なしでは、skill をソフト削除します（所有者、モデレーター、または管理者）。
+- `--version` がない場合、skill をソフト削除します（owner、moderator、または admin）。
 - `DELETE /api/v1/skills/{slug}` を呼び出します。
-- 所有者が開始したソフト削除では、slug が30日間予約されます。コマンドは有効期限を出力します。
-- `--version <version>` は、所有している最新ではない1つのバージョンを、フェイルクローズの
-  バージョン固有ルートを通じて完全に削除します。
-  削除されたバージョンは復元も再公開もできません。現在の最新バージョンを削除する前に、
-  代替を公開してください。プラットフォームスタッフは、このバージョン専用フローで所有権をバイパスしません。
-- `--reason <text>` は、skill 全体のソフト削除と監査ログにモデレーションメモを記録します。
-- `--note <text>` は `--reason` のエイリアスです。
+- owner が開始したソフト削除では slug が 30 日間予約されます。このコマンドは有効期限を出力します。
+- `--version <version>` は、fail-closed の version 固有ルートを通じて、所有している非 latest version を 1 つ完全に削除します。
+  削除された version は復元も再公開もできません。現在の latest version を削除する前に、代替を公開してください。platform staff は、この version 限定フローで所有権をバイパスしません。
+- `--reason <text>` は、skill 全体のソフト削除と audit log に moderation note を記録します。
+- `--note <text>` は `--reason` の alias です。
 - `--yes` は確認をスキップします。
 
 ### `undelete <skill>`
 
-- 非表示の skill を復元します（所有者、モデレーター、または管理者）。
-- バージョンの undelete はありません。完全に削除されたバージョンは復元できません。
+- 非表示の skill を復元します（owner、moderator、または admin）。
+- version の undelete はありません。完全に削除された version は復元できません。
 - `POST /api/v1/skills/{slug}/undelete` を呼び出します。
-- `--reason <text>` は、skill と監査ログにモデレーションメモを記録します。
-- `--note <text>` は `--reason` のエイリアスです。
+- `--reason <text>` は、skill と audit log に moderation note を記録します。
+- `--note <text>` は `--reason` の alias です。
 - `--yes` は確認をスキップします。
 
 ### `hide <skill>`
 
-- skill を非表示にします（所有者、モデレーター、または管理者）。
-- `delete` のエイリアスです。
+- skill を非表示にします（owner、moderator、または admin）。
+- `delete` の alias です。
 
 ### `unhide <skill>`
 
-- skill の非表示を解除します（所有者、モデレーター、または管理者）。
-- `undelete` のエイリアスです。
+- skill の非表示を解除します（owner、moderator、または admin）。
+- `undelete` の alias です。
 
 ### `skill rename <skill> <new-name>`
 
-- 所有している skill の名前を変更し、以前の slug をリダイレクトエイリアスとして保持します。
+- 所有している skill の名前を変更し、以前の slug を redirect alias として保持します。
 - `POST /api/v1/skills/{slug}/rename` を呼び出します。
 - `--yes` は確認をスキップします。
 
 ### `skill merge <source> <target>`
 
-- 所有している1つの skill を、所有している別の skill にマージします。
-- ソース slug は公開一覧に表示されなくなり、ターゲットへのリダイレクトエイリアスになります。
+- 所有している skill の 1 つを、所有している別の skill にマージします。
+- source slug は公開リストへの掲載を停止し、target への redirect alias になります。
 - `POST /api/v1/skills/{sourceSlug}/merge` を呼び出します。
 - `--yes` は確認をスキップします。
 
 ### `transfer`
 
 - 所有権移転ワークフロー。
-- ユーザーハンドルへの移転では、受信者が承認する保留中のリクエストが作成されます。
-- 組織/パブリッシャーハンドルへの移転は、実行者が現在の所有者と移転先パブリッシャーの
-  両方に管理者アクセス権を持つ場合にのみ即時適用されます。
+- user handle への移転では、受信者が承認する保留中のリクエストが作成されます。
+- org/publisher handle への移転は、実行者が現在の owner と移転先 publisher の両方に
+  admin アクセスを持つ場合にのみ、即時適用されます。
 - サブコマンド:
   - `transfer request <skill> <handle> [--message "..."] [--yes]`
   - `transfer list [--outgoing]`
@@ -356,8 +354,8 @@ jobs:
 
 ### `package explore [query...]`
 
-- `GET /api/v1/packages` と `GET /api/v1/packages/search` を通じて、統合パッケージカタログを閲覧または検索します。
-- plugins とその他のパッケージファミリーのエントリにはこれを使用します。トップレベルの `search` は skill 検索サーフェスのままです。
+- `GET /api/v1/packages` と `GET /api/v1/packages/search` を介して、統合 package catalog を閲覧または検索します。
+- これは plugins とその他の package-family entries に使用します。top-level の `search` は引き続き skill search surface です。
 - フラグ:
   - `--family skill|code-plugin|bundle-plugin`
   - `--official`
@@ -383,31 +381,31 @@ clawhub package explore episodic-claw --family code-plugin
 
 ### `package inspect <name>`
 
-- インストールせずにパッケージメタデータを取得します。
-- Plugin メタデータ、互換性、検証、ソース、バージョン/ファイル検査にはこれを使用します。
-- `--version <version>`: 特定のバージョンを検査します（デフォルト: latest）。
-- `--tag <tag>`: タグ付きバージョンを検査します（例: `latest`）。
-- `--versions`: バージョン履歴を一覧表示します（最初のページ）。
-- `--limit <n>`: 一覧表示する最大バージョン数（1-100）。
-- `--files`: 選択されたバージョンのファイルを一覧表示します。
-- `--file <path>`: 生のファイル内容を取得します（テキストファイルのみ、200KB 制限）。
-- `--json`: 機械可読な出力。
+- インストールせずに package metadata を取得します。
+- これは plugin metadata、互換性、検証、source、version/file inspection に使用します。
+- `--version <version>`: 特定の version を検査します（デフォルト: latest）。
+- `--tag <tag>`: tag 付き version を検査します（例: `latest`）。
+- `--versions`: version history を一覧表示します（最初のページ）。
+- `--limit <n>`: 一覧表示する version の最大数（1-100）。
+- `--files`: 選択した version のファイルを一覧表示します。
+- `--file <path>`: raw file content を取得します（text files のみ、200KB 制限）。
+- `--json`: machine-readable output。
 
 ### `package download <name>`
 
 - `GET /api/v1/packages/{name}/versions/{version}/artifact` を通じて
-  パッケージバージョンを解決します。
-- リゾルバーの `downloadUrl` からアーティファクトをダウンロードします。
-- すべてのアーティファクトについて ClawHub SHA-256 を検証します。
-- ClawPack npm-pack アーティファクトでは、npm `sha512` integrity、
-  npm shasum、tarball の `package.json` の name/version も検証します。
-- レガシー ZIP バージョンは、レガシー ZIP ルートを通じてダウンロードされます。
+  package version を解決します。
+- resolver の `downloadUrl` から artifact をダウンロードします。
+- すべての artifact について ClawHub SHA-256 を検証します。
+- ClawPack npm-pack artifact では、npm `sha512` integrity、
+  npm shasum、および tarball の `package.json` name/version も検証します。
+- Legacy ZIP version は legacy ZIP route を通じてダウンロードします。
 - フラグ:
-  - `--version <version>`: 特定のバージョンをダウンロードします。
-  - `--tag <tag>`: タグ付きバージョンをダウンロードします（デフォルト: `latest`）。
-  - `-o, --output <path>`: 出力ファイルまたはディレクトリ。
-  - `--force`: 既存の出力ファイルを上書きします。
-  - `--json`: 機械可読な出力。
+  - `--version <version>`: 特定の version をダウンロードします。
+  - `--tag <tag>`: tag 付き version をダウンロードします（デフォルト: `latest`）。
+  - `-o, --output <path>`: output file または directory。
+  - `--force`: 既存の output file を上書きします。
+  - `--json`: machine-readable output。
 
 例:
 
@@ -418,18 +416,16 @@ clawhub package download @openclaw/example-plugin --version 1.2.3 -o artifacts/
 
 ### `package verify <file>`
 
-- ローカルアーティファクトの ClawHub SHA-256、npm `sha512` integrity、npm shasum を
-  計算します。
-- `--package` を指定すると、ClawHub から期待されるメタデータを解決し、
-  ローカルファイルを公開済みアーティファクトメタデータと比較します。
-- 直接ダイジェストフラグを指定すると、ネットワーク検索なしで検証します。
+- local artifact について、ClawHub SHA-256、npm `sha512` integrity、npm shasum を計算します。
+- `--package` を指定すると、ClawHub から expected metadata を解決し、local file を published artifact metadata と比較します。
+- direct digest flags を指定すると、network lookup なしで検証します。
 - フラグ:
-  - `--package <name>`: 期待されるアーティファクトメタデータを解決するパッケージ名。
-  - `--version <version>` または `--tag <tag>`: 期待されるパッケージバージョン。
-  - `--sha256 <hex>`: 期待される ClawHub SHA-256。
-  - `--npm-integrity <sri>`: 期待される npm integrity。
-  - `--npm-shasum <sha1>`: 期待される npm shasum。
-  - `--json`: 機械可読な出力。
+  - `--package <name>`: expected artifact metadata を解決する package name。
+  - `--version <version>` または `--tag <tag>`: expected package version。
+  - `--sha256 <hex>`: expected ClawHub SHA-256。
+  - `--npm-integrity <sri>`: expected npm integrity。
+  - `--npm-shasum <sha1>`: expected npm shasum。
+  - `--json`: machine-readable output。
 
 例:
 
@@ -440,19 +436,17 @@ clawhub package verify ./example-plugin-1.2.3.tgz --sha256 <hex>
 
 ### `package validate <source>`
 
-- ClawHub CLI にバンドルされた Plugin Inspector を、ローカル Plugin パッケージ
-  フォルダーに対して実行します。
-- デフォルトでは、ローカルの OpenClaw チェックアウトを探したりインポートしたりせずに、
-  オフライン/静的検証を行います。
-- 重大な互換性エラーは非ゼロで終了します。警告のみの検出事項は出力されますが、
-  終了コードはゼロです。
+- local plugin package folder に対して、ClawHub CLI にバンドルされた Plugin Inspector を実行します。
+- local OpenClaw checkout の場所を特定したりインポートしたりせず、デフォルトで offline/static validation を行います。
+- hard compatibility error は非ゼロで終了します。warning-only findings は出力されますが、
+  終了コードは 0 です。
 - フラグ:
-  - `--out <dir>`: Plugin Inspector レポートをこのディレクトリに書き込みます。
-  - `--openclaw <path>`: 明示的なローカル OpenClaw チェックアウトに対して検査します。
-  - `--runtime`: ランタイムキャプチャを有効にします。Plugin コードをインポートします。
-  - `--allow-execute`: 分離されたワークスペースでのランタイムキャプチャを許可します。
-  - `--no-mock-sdk`: ランタイムキャプチャ中のモック OpenClaw SDK を無効にします。
-  - `--json`: 機械可読な出力。
+  - `--out <dir>`: Plugin Inspector reports をこの directory に書き込みます。
+  - `--openclaw <path>`: 明示的な local OpenClaw checkout に対して検査します。
+  - `--runtime`: runtime capture を有効にします。plugin code をインポートします。
+  - `--allow-execute`: isolated workspace での runtime capture を許可します。
+  - `--no-mock-sdk`: runtime capture 中の mocked OpenClaw SDK を無効にします。
+  - `--json`: machine-readable output。
 
 例:
 
@@ -460,23 +454,20 @@ clawhub package verify ./example-plugin-1.2.3.tgz --sha256 <hex>
 clawhub package validate ./example-plugin
 ```
 
-検証でパッケージ、マニフェスト、SDK インポート、またはアーティファクトの検出事項が報告された場合は、
-[Plugin 検証の修正](/ja-JP/clawhub/plugin-validation-fixes)を参照してから、コマンドを再実行してください。
+validation が package、manifest、SDK import、または artifact finding を報告した場合は、
+[Plugin validation fixes](/clawhub/plugin-validation-fixes) を参照してから、コマンドを再実行してください。
 
 ### `package delete <name>`
 
-- `--version` なしでは、パッケージとすべてのリリースをソフト削除します。
-- `--version <version>` は、所有している最新ではない1つのリリースを、フェイルクローズの
-  バージョン固有ルートを通じて完全に削除します。
-  削除されたバージョンは復元も再公開もできません。現在の最新バージョンを削除する前に、
-  代替を公開してください。このバージョン専用フローには、パッケージ所有者または組織パブリッシャー
-  管理者が必要です。プラットフォームスタッフはパッケージ所有権をバイパスしません。
-- パッケージ全体のソフト削除には、パッケージ所有者、組織パブリッシャーの所有者/管理者、プラットフォーム
-  モデレーター、またはプラットフォーム管理者が必要です。
+- `--version` がない場合、package とすべての releases をソフト削除します。
+- `--version <version>` は、fail-closed の version 固有ルートを通じて、所有している非 latest release を 1 つ完全に削除します。
+  削除された version は復元も再公開もできません。現在の latest version を削除する前に、代替を公開してください。この version 限定フローには、package owner または org publisher admin が必要です。platform staff は package 所有権をバイパスしません。
+- package 全体のソフト削除には、package owner、org publisher owner/admin、platform
+  moderator、または platform admin が必要です。
 - フラグ:
-  - `--version <version>`: 最新ではない1つのバージョンを完全に削除します。
+  - `--version <version>`: 非 latest version を 1 つ完全に削除します。
   - `--yes`: 確認をスキップします。
-  - `--json`: 機械可読な出力。
+  - `--json`: machine-readable output。
 
 例:
 
@@ -487,14 +478,14 @@ clawhub package delete @openclaw/example-plugin --version 1.2.3 --yes
 
 ### `package undelete <name>`
 
-- ソフト削除されたパッケージとリリースを復元します。
-- バージョンの undelete はありません。完全に削除されたバージョンは復元できません。
-- パッケージ所有者、組織パブリッシャーの所有者/管理者、プラットフォームモデレーター、
-  またはプラットフォーム管理者が必要です。
+- ソフト削除された package と releases を復元します。
+- version の undelete はありません。完全に削除された version は復元できません。
+- package owner、org publisher owner/admin、platform moderator、
+  または platform admin が必要です。
 - `POST /api/v1/packages/{name}/undelete` を呼び出します。
 - フラグ:
   - `--yes`: 確認をスキップします。
-  - `--json`: 機械可読な出力。
+  - `--json`: machine-readable output。
 
 例:
 
@@ -504,15 +495,15 @@ clawhub package undelete @openclaw/example-plugin --yes
 
 ### `package transfer <name>`
 
-- パッケージを別のパブリッシャーに移転します。
-- プラットフォーム管理者が実行する場合を除き、現在のパッケージ所有者と移転先
-  パブリッシャーの両方に対する管理者アクセス権が必要です。
-- スコープ付きパッケージ名は、一致するスコープ所有者に移転する必要があります。
+- package を別の publisher に移転します。
+- platform admin が実行する場合を除き、現在の package owner と移転先
+  publisher の両方に admin access が必要です。
+- scoped package names は、対応する scope owner に移転する必要があります。
 - `POST /api/v1/packages/{name}/transfer` を呼び出します。
 - フラグ:
-  - `--to <owner>`: 移転先パブリッシャーハンドル。
-  - `--reason <text>`: 任意の監査理由。
-  - `--json`: 機械可読な出力。
+  - `--to <owner>`: 移転先 publisher handle。
+  - `--reason <text>`: 任意の audit reason。
+  - `--json`: machine-readable output。
 
 例:
 
@@ -522,15 +513,14 @@ clawhub package transfer @openclaw/example-plugin --to openclaw
 
 ### `package report`
 
-- パッケージをモデレーターに報告するための認証済みコマンド。
+- package を moderators に報告するための認証済みコマンド。
 - `POST /api/v1/packages/{name}/report` を呼び出します。
-- 報告はパッケージレベルで、任意でバージョンに紐づけられ、
-  レビューのためにモデレーターに表示されます。
-- 報告自体がパッケージを自動的に非表示にしたり、ダウンロードをブロックしたりすることはありません。
+- reports は package-level で、任意で version に紐付けられ、review のため moderators に表示されます。
+- reports だけで packages が自動的に非表示になったり、downloads がブロックされたりすることはありません。
 - フラグ:
-  - `--version <version>`: 報告に添付する任意のパッケージバージョン。
-  - `--reason <text>`: 必須の報告理由。
-  - `--json`: 機械可読な出力。
+  - `--version <version>`: report に添付する任意の package version。
+  - `--reason <text>`: 必須の report reason。
+  - `--json`: machine-readable output。
 
 例:
 
@@ -540,12 +530,12 @@ clawhub package report @openclaw/example-plugin --version 1.2.3 --reason "suspic
 
 ### `package moderation-status`
 
-- パッケージのモデレーション可視性を確認するための所有者コマンド。
+- package moderation visibility を確認する owner コマンド。
 - `GET /api/v1/packages/{name}/moderation` を呼び出します。
-- 現在のパッケージスキャン状態、未解決の報告数、最新リリースの手動
-  モデレーション状態、ダウンロードブロック状態、モデレーション理由を表示します。
+- 現在の package scan state、open report count、latest release manual
+  moderation state、download block state、moderation reasons を表示します。
 - フラグ:
-  - `--json`: 機械可読な出力。
+  - `--json`: machine-readable output。
 
 例:
 
@@ -555,13 +545,13 @@ clawhub package moderation-status @openclaw/example-plugin
 
 ### `package readiness <name>`
 
-- パッケージが将来の OpenClaw 消費に対応できる状態かどうかを確認します。
+- package が将来の OpenClaw consumption に対応できる状態かどうかを確認します。
 - `GET /api/v1/packages/{name}/readiness` を呼び出します。
-- 公式ステータス、ClawPack の可用性、アーティファクトダイジェスト、
-  ソース来歴、OpenClaw 互換性、ホストターゲット、環境メタデータ、
-  スキャン状態に関するブロッカーを報告します。
+- official status、ClawPack availability、artifact digest、
+  source provenance、OpenClaw compatibility、host targets、environment metadata、
+  scan state に関する blockers を報告します。
 - フラグ:
-  - `--json`: 機械可読な出力。
+  - `--json`: machine-readable output。
 
 例:
 
@@ -571,13 +561,11 @@ clawhub package readiness @openclaw/example-plugin
 
 ### `package migration-status <name>`
 
-- バンドルされた OpenClaw plugin を置き換える可能性があるパッケージについて、
-  オペレーター向けの移行ステータスを表示します。
-- `package readiness` と同じ計算済み readiness エンドポイントを呼び出しますが、
-  移行に焦点を当てたステータス、最新バージョン、公式パッケージ状態、チェック、
-  ブロッカーを出力します。
+- bundled OpenClaw plugin を置き換える可能性がある package の operator-oriented migration status を表示します。
+- `package readiness` と同じ computed readiness endpoint を呼び出しますが、
+  migration-focused status、latest version、official-package state、checks、blockers を出力します。
 - フラグ:
-  - `--json`: 機械可読な出力。
+  - `--json`: machine-readable output。
 
 例:
 
@@ -587,10 +575,10 @@ clawhub package migration-status @openclaw/example-plugin
 
 ### `publisher create <handle>`
 
-- 認証済みユーザーが所有する組織パブリッシャーを作成します。
-- ハンドルは小文字に正規化され、`@` 付きでもなしでも渡せます。
-- 新しく作成された組織パブリッシャーは、デフォルトでは信頼済み/公式ではありません。
-- ハンドルが既存のパブリッシャー、ユーザー、または予約済みルートですでに使用されている場合は失敗します。
+- 認証済み user が所有する org publisher を作成します。
+- handle は lowercase に正規化され、`@` ありでもなしでも渡せます。
+- 新しく作成された org publishers は、デフォルトでは trusted/official ではありません。
+- handle が既存の publisher、user、または reserved route で既に使われている場合は失敗します。
 
 ```bash
 clawhub publisher create opik --display-name "Opik"
@@ -605,23 +593,24 @@ clawhub publisher create opik --display-name "Opik"
   - GitHub リポジトリ: `owner/repo` または `owner/repo@ref`
   - GitHub URL: `https://github.com/owner/repo`
 - メタデータは `package.json`、`openclaw.plugin.json`、および
-  `.codex-plugin/plugin.json`、`.claude-plugin/plugin.json`、`.cursor-plugin/plugin.json` などの実際の OpenClaw バンドルマーカーから自動検出されます。
+  `.codex-plugin/plugin.json`、`.claude-plugin/plugin.json`、`.cursor-plugin/plugin.json`
+  などの実際の OpenClaw バンドルマーカーから自動検出されます。
 - `.tgz` ソースは ClawPack として扱われます。CLI は正確な npm-pack
   バイト列をアップロードし、抽出された `package/` の内容は検証と
   メタデータの事前入力にのみ使用します。
-- コード Plugin フォルダーはアップロード前に ClawPack npm tarball にパックされるため、
-  OpenClaw のインストールは正確なアーティファクトを検証できます。バンドル Plugin フォルダーは引き続き
+- コード Plugin フォルダーは、アップロード前に ClawPack npm tarball にパックされるため、
+  OpenClaw インストールは正確なアーティファクトを検証できます。バンドル Plugin フォルダーは引き続き
   抽出ファイルの公開パスを使用します。
-- GitHub ソースの場合、ソース帰属はリポジトリ、解決済みコミット、ref、サブパスから自動入力されます。
-- ローカルフォルダーの場合、origin リモートが GitHub を指していると、ソース帰属はローカル git から自動検出されます。
+- GitHub ソースでは、ソース帰属はリポジトリ、解決済みコミット、ref、サブパスから自動入力されます。
+- ローカルフォルダーでは、origin リモートが GitHub を指している場合、ソース帰属はローカル git から自動検出されます。
 - 外部コード Plugin は `openclaw.compat.pluginApi` と
   `openclaw.build.openclawVersion` を明示的に宣言する必要があります。
   トップレベルの `package.json.version` は公開検証のフォールバックとして使用されません。
 - `--dry-run` はアップロードせずに、解決済みの公開ペイロードをプレビューします。
 - `--json` は CI 向けに機械可読出力を出力します。
-- `--owner <handle>` は、アクターに公開者アクセス権がある場合に、ユーザーまたは組織の公開者ハンドルで公開します。
-- スコープ付きパッケージ名は、選択した所有者と一致している必要があります。`docs/publishing.md` を参照してください。
-- 既存のフラグ (`--family`、`--name`、`--version`、`--source-repo`、`--source-commit`、`--source-ref`、`--source-path`) は引き続き上書きとして機能します。
+- `--owner <handle>` は、アクターに公開者アクセス権がある場合、ユーザーまたは組織の公開者ハンドルで公開します。
+- スコープ付きパッケージ名は選択した所有者と一致する必要があります。`docs/publishing.md` を参照してください。
+- 既存のフラグ (`--family`、`--name`、`--version`、`--source-repo`、`--source-commit`、`--source-ref`、`--source-path`) は引き続きオーバーライドとして機能します。
 - プライベート GitHub リポジトリには `GITHUB_TOKEN` が必要です。
 
 ```bash
@@ -641,7 +630,7 @@ clawhub package publish ./my-plugin-1.2.3.tgz --family code-plugin
 
 #### ローカルフォルダーフロー
 
-コード Plugin の場合、フォルダー公開はパッケージフォルダーから ClawPack アーティファクトをビルドしてアップロードします:
+コード Plugin では、フォルダー公開はパッケージフォルダーから ClawPack アーティファクトを構築してアップロードします:
 
 ```bash
 clawhub package publish ./my-plugin --family code-plugin --dry-run
@@ -650,7 +639,8 @@ clawhub package publish ./my-plugin --family code-plugin
 
 #### `--family code-plugin` 用の最小 `package.json`
 
-外部コード Plugin には、`package.json` 内に少量の OpenClaw メタデータが必要です。この最小マニフェストで公開を成功させるには十分です:
+外部コード Plugin には、`package.json` 内に少量の OpenClaw メタデータが必要です。
+この最小マニフェストで公開は成功できます:
 
 ```json
 {
@@ -676,24 +666,24 @@ clawhub package publish ./my-plugin --family code-plugin
 
 注記:
 
-- `package.json.version` はパッケージのリリースバージョンですが、
-  OpenClaw の互換性/ビルド検証のフォールバックとしては使用されません。
+- `package.json.version` はパッケージのリリースバージョンですが、OpenClaw 互換性/ビルド検証の
+  フォールバックとしては使用されません。
 - `openclaw.hostTargets` と `openclaw.environment` は任意のメタデータです。
-  ClawHub は存在する場合に表示することがありますが、公開には必須ではありません。
+  ClawHub は存在する場合にそれらを表示することがありますが、公開には必須ではありません。
 - `openclaw.compat.minGatewayVersion` と
   `openclaw.build.pluginSdkVersion` は、より詳細な互換性メタデータを公開したい場合の任意の追加項目です。
-- 古い `clawhub` CLI リリースを使用している場合は、公開前にアップグレードして、
-  ローカルの事前チェックがアップロード前に実行されるようにしてください。
+- 古い `clawhub` CLI リリースを使用している場合は、アップロード前にローカルの事前チェックが実行されるよう、
+  公開前にアップグレードしてください。
 - 検証で修復コードが報告された場合は、
-  [Plugin 検証の修正](/ja-JP/clawhub/plugin-validation-fixes) を参照してください。
+  [Plugin 検証の修正](/clawhub/plugin-validation-fixes) を参照してください。
 
 #### GitHub Actions
 
-ClawHub は Plugin リポジトリ向けに、公式の再利用可能なワークフローも
-[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/f96ae4a54ec9b72177220d4db601ebc0ddf5a1fd/.github/workflows/package-publish.yml)
-で提供しています。
+ClawHub は、Plugin リポジトリ向けに
+[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/d8096dfc039e86ab942ddf9ef117d04849fd84c1/.github/workflows/package-publish.yml)
+で公式の再利用可能ワークフローも提供しています。
 
-典型的な呼び出し元の設定:
+典型的な呼び出し側設定:
 
 ```yaml
 name: Package Publish
@@ -726,21 +716,21 @@ jobs:
 
 注記:
 
-- 再利用可能なワークフローは、既定で `source` を呼び出し元リポジトリに設定します。
-- モノレポの場合は、ワークフローが Plugin
-  パッケージフォルダーを公開するように `source_path` を渡します。例: `source_path: extensions/codex`。
-- 再利用可能なワークフローは安定タグまたは完全なコミット SHA に固定してください。`@main` からリリース公開を実行しないでください。
-- `pull_request` では CI を汚さないように `dry_run: true` を使用してください。
-- 実際の公開は `workflow_dispatch` やタグ push などの信頼済みイベントに限定してください。
-- シークレットなしの trusted publishing は `workflow_dispatch` でのみ機能します。タグ push には引き続き `clawhub_token` が必要です。
-- 初回公開、信頼されていないパッケージ、または緊急公開用に `clawhub_token` を利用可能な状態にしておいてください。
+- 再利用可能ワークフローはデフォルトで `source` を呼び出し元リポジトリにします。
+- モノレポでは、ワークフローが Plugin
+  パッケージフォルダーを公開するよう `source_path` を渡します。例: `source_path: extensions/codex`。
+- 再利用可能ワークフローは安定タグまたは完全なコミット SHA に固定してください。`@main` からリリース公開を実行しないでください。
+- `pull_request` では CI を汚染しないように `dry_run: true` を使用する必要があります。
+- 実際の公開は `workflow_dispatch` やタグプッシュなどの信頼済みイベントに限定する必要があります。
+- シークレットなしの信頼済み公開は `workflow_dispatch` でのみ機能します。タグプッシュには引き続き `clawhub_token` が必要です。
+- 初回公開、信頼できないパッケージ、または非常時の公開に備えて `clawhub_token` を利用可能にしておいてください。
 - ワークフローは JSON 結果をアーティファクトとしてアップロードし、ワークフロー出力として公開します。
 
 ### `package trusted-publisher get <name>`
 
-- パッケージの GitHub Actions trusted publisher 設定を表示します。
+- パッケージの GitHub Actions 信頼済み公開者設定を表示します。
 - 設定後にこれを使用して、リポジトリ、ワークフローファイル名、
-  および任意の environment pin を確認します。
+  および任意の環境固定を確認します。
 - フラグ:
   - `--json`: 機械可読出力。
 
@@ -752,24 +742,24 @@ clawhub package trusted-publisher get @openclaw/example-plugin
 
 ### `package trusted-publisher set <name>`
 
-- 既存のパッケージに GitHub Actions trusted publisher 設定をアタッチまたは置換します。
-- パッケージはまず通常の手動またはトークン認証済みの
-  `clawhub package publish` によって作成されている必要があります。
-- 設定後、今後サポートされる GitHub Actions 公開では、
-  長期有効な ClawHub トークンなしで OIDC/trusted publishing を使用できます。
+- 既存のパッケージに GitHub Actions 信頼済み公開者設定を添付または置換します。
+- パッケージは、通常の手動またはトークン認証済みの
+  `clawhub package publish` を通じて先に作成されている必要があります。
+- 設定後、今後サポートされる GitHub Actions 公開では、長期有効な ClawHub トークンなしで
+  OIDC/信頼済み公開を使用できます。
 - `--repository <repo>` は `owner/repo` である必要があります。
-- `--workflow-filename <file>` は
-  `.github/workflows/` 内のワークフローファイル名と一致している必要があります。
+- `--workflow-filename <file>` は `.github/workflows/` 内の
+  ワークフローファイル名と一致する必要があります。
 - `--environment <name>` は任意です。設定されている場合、OIDC クレーム内の GitHub Actions
-  environment は完全に一致している必要があります。
-- ClawHub は、このコマンドの実行時に設定済みの GitHub リポジトリを検証します。
-  公開リポジトリは公開 GitHub メタデータを通じて検証できます。プライベート
-  リポジトリでは、将来の ClawHub GitHub App インストールや別の認可済み
-  GitHub 連携などを通じて、ClawHub がそのリポジトリへの GitHub アクセス権を持っている必要があります。
+  環境は完全に一致する必要があります。
+- ClawHub はこのコマンドの実行時に、設定された GitHub リポジトリを検証します。
+  パブリックリポジトリは GitHub のパブリックメタデータを通じて検証できます。プライベート
+  リポジトリでは、たとえば将来の ClawHub GitHub App インストールまたは別の認可済み
+  GitHub 統合を通じて、ClawHub がそのリポジトリへの GitHub アクセス権を持っている必要があります。
 - フラグ:
   - `--repository <repo>`: GitHub リポジトリ。例: `openclaw/example-plugin`。
   - `--workflow-filename <file>`: ワークフローファイル名。例: `package-publish.yml`。
-  - `--environment <name>`: 任意の完全一致 GitHub Actions environment。
+  - `--environment <name>`: 任意の完全一致 GitHub Actions 環境。
   - `--json`: 機械可読出力。
 
 例:
@@ -783,8 +773,8 @@ clawhub package trusted-publisher set @openclaw/example-plugin \
 
 ### `package trusted-publisher delete <name>`
 
-- パッケージから trusted publisher 設定を削除します。
-- ワークフロー、リポジトリ、または environment pin を無効化または再作成する必要がある場合のロールバックとして使用します。
+- パッケージから信頼済み公開者設定を削除します。
+- ワークフロー、リポジトリ、または環境固定を無効化または再作成する必要がある場合のロールバックとして使用します。
 - 今後の実際の公開では、設定が再度行われるまで通常の認証済み公開を使用する必要があります。
 - フラグ:
   - `--json`: 機械可読出力。
@@ -797,8 +787,8 @@ clawhub package trusted-publisher delete @openclaw/example-plugin
 
 ### インストールテレメトリ
 
-- ログイン済みで `CLAWHUB_DISABLE_TELEMETRY=1` が設定されていない場合、
+- ログインしている場合、`CLAWHUB_DISABLE_TELEMETRY=1` が設定されていない限り、
   `clawhub install <slug>` の後に送信されます。
-- レポートは best-effort です。テレメトリが利用できない場合でも、
-  インストールコマンドは失敗しません。
+- レポートはベストエフォートです。テレメトリが利用できない場合でも、インストールコマンドは
+  失敗しません。
 - 詳細: `docs/telemetry.md`。
