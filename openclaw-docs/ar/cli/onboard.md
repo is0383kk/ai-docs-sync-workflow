@@ -1,21 +1,21 @@
 ---
 read_when:
-    - تريد إعدادًا موجهًا لـ Gateway، ومساحة العمل، والمصادقة، والقنوات، وSkills
+    - تريد إعدادًا موجّهًا لـ Gateway، ومساحة العمل، والمصادقة، والقنوات، وSkills
 summary: مرجع CLI لـ `openclaw onboard` (الإعداد التفاعلي)
-title: الإعداد الأولي
+title: بدء الاستخدام
 x-i18n:
-    generated_at: "2026-06-27T17:23:34Z"
+    generated_at: "2026-07-01T13:04:57Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 4ffee6b90e72f1859634fbd7ccac2f44e88bc37879b9e5b099c33b760cc0e9af
+    source_hash: b8f1f1b1e4f3a9e3c544efede027d50123050660a999ae61573e41cd466bbfa4
     source_path: cli/onboard.md
     workflow: 16
 ---
 
 # `openclaw onboard`
 
-إعداد إرشادي كامل لإعداد Gateway محلي أو بعيد. استخدم هذا عندما تريد أن يرشدك OpenClaw عبر مصادقة النموذج، ومساحة العمل، وGateway، والقنوات، وSkills، والصحة ضمن تدفق واحد.
+تهيئة إرشادية كاملة لإعداد Gateway محلي أو بعيد. استخدم هذا عندما تريد من OpenClaw إرشادك خلال مصادقة النموذج، ومساحة العمل، وGateway، والقنوات، وSkills، والصحة في تدفق واحد.
 
 ## الأدلة ذات الصلة
 
@@ -24,16 +24,16 @@ x-i18n:
     شرح تفصيلي لتدفق CLI التفاعلي.
   </Card>
   <Card title="Onboarding overview" href="/ar/start/onboarding-overview" icon="map">
-    كيف تترابط عملية الإعداد في OpenClaw.
+    كيف تترابط تهيئة OpenClaw.
   </Card>
   <Card title="CLI setup reference" href="/ar/start/wizard-cli-reference" icon="book">
-    المخرجات، والتفاصيل الداخلية، وسلوك كل خطوة.
+    المخرجات، والتفاصيل الداخلية، والسلوك لكل خطوة.
   </Card>
   <Card title="CLI automation" href="/ar/start/wizard-cli-automation" icon="terminal">
-    أعلام غير تفاعلية وإعدادات مبرمجة.
+    أعلام غير تفاعلية وإعدادات مُبرمجة.
   </Card>
   <Card title="macOS app onboarding" href="/ar/start/onboarding" icon="apple">
-    تدفق الإعداد لتطبيق شريط قوائم macOS.
+    تدفق التهيئة لتطبيق شريط قوائم macOS.
   </Card>
 </CardGroup>
 
@@ -50,23 +50,23 @@ openclaw onboard --skip-bootstrap
 openclaw onboard --mode remote --remote-url wss://gateway-host:18789
 ```
 
-يستخدم `--flow import` موفري ترحيل مملوكين للـ Plugin مثل Hermes. يعمل فقط على إعداد OpenClaw جديد؛ إذا كانت هناك ملفات إعدادات أو بيانات اعتماد أو جلسات أو ملفات ذاكرة/هوية مساحة عمل موجودة، فأعد الضبط أو اختر إعدادًا جديدًا قبل الاستيراد.
+يستخدم `--flow import` موفري ترحيل مملوكين للـ plugin مثل Hermes. يعمل فقط على إعداد OpenClaw جديد؛ إذا كانت هناك إعدادات أو بيانات اعتماد أو جلسات أو ملفات ذاكرة/هوية مساحة عمل موجودة، فأعد الضبط أو اختر إعدادًا جديدًا قبل الاستيراد.
 
-يبدأ `--modern` معاينة الإعداد التحاورية من Crestodian. بدون
-`--modern`، يحافظ `openclaw onboard` على تدفق الإعداد الكلاسيكي.
+يبدأ `--modern` معاينة تهيئة Crestodian الحوارية. بدون
+`--modern`، يحافظ `openclaw onboard` على تدفق التهيئة الكلاسيكي.
 
-في تثبيت جديد يكون فيه ملف الإعدادات النشط مفقودًا أو لا يحتوي على إعدادات
-مؤلفة (فارغ أو يحتوي على بيانات وصفية فقط)، يبدأ `openclaw` وحده أيضًا تدفق
-الإعداد الكلاسيكي. بمجرد أن يحتوي ملف إعدادات على إعدادات مؤلفة، يفتح
-`openclaw` وحده Crestodian بدلًا من ذلك.
+في تثبيت جديد حيث يكون ملف الإعداد النشط مفقودًا أو لا يحتوي على إعدادات
+مؤلفة (فارغ أو يحتوي على بيانات وصفية فقط)، يبدأ `openclaw` المجرد أيضًا
+تدفق التهيئة الكلاسيكي. بمجرد أن يحتوي ملف إعداد على إعدادات مؤلفة، يفتح
+`openclaw` المجرد Crestodian بدلًا من ذلك.
 
-يُقبل `ws://` بنص عادي لعناوين Gateway الخاصة بـ loopback، وحروف IP الخاصة، و`.local`، و
-Tailnet `*.ts.net`. للأسماء الأخرى الموثوقة ضمن DNS الخاص، اضبط
-`OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1` في بيئة عملية الإعداد.
+يُقبل النص الصريح `ws://` لعناوين loopback، وعناوين IP الخاصة الحرفية، و`.local`،
+وعناوين Gateway على Tailnet بصيغة `*.ts.net`. لأسماء private-DNS الموثوقة الأخرى، عيّن
+`OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1` في بيئة عملية التهيئة.
 
 ## اللغة المحلية
 
-يستخدم الإعداد التفاعلي لغة معالج CLI للنصوص الثابتة الخاصة بالإعداد. ترتيب
+تستخدم التهيئة التفاعلية لغة معالج CLI لنصوص الإعداد الثابتة. ترتيب
 الحل هو:
 
 1. `OPENCLAW_LOCALE`
@@ -76,8 +76,8 @@ Tailnet `*.ts.net`. للأسماء الأخرى الموثوقة ضمن DNS ال
 5. الرجوع إلى الإنجليزية
 
 لغات المعالج المدعومة هي `en` و`zh-CN` و`zh-TW`. قد تستخدم قيم اللغة المحلية
-صيغة الشرطة السفلية أو لاحقات POSIX مثل `zh_CN.UTF-8`. تبقى أسماء المنتجات،
-وأسماء الأوامر، ومفاتيح الإعدادات، وعناوين URL، ومعرفات المزوّدين، ومعرفات النماذج، وتسميات Plugin/القناة
+أشكال الشرطة السفلية أو لاحقات POSIX مثل `zh_CN.UTF-8`. تظل أسماء المنتجات،
+وأسماء الأوامر، ومفاتيح الإعداد، وعناوين URL، ومعرفات الموفرين، ومعرفات النماذج، وتسميات plugin/channel
 حرفية.
 
 مثال:
@@ -86,7 +86,7 @@ Tailnet `*.ts.net`. للأسماء الأخرى الموثوقة ضمن DNS ال
 OPENCLAW_LOCALE=zh-CN openclaw onboard
 ```
 
-مزوّد مخصص غير تفاعلي:
+موفر مخصص غير تفاعلي:
 
 ```bash
 openclaw onboard --non-interactive \
@@ -99,11 +99,11 @@ openclaw onboard --non-interactive \
   --custom-image-input
 ```
 
-يُعد `--custom-api-key` اختياريًا في الوضع غير التفاعلي. إذا حُذف، يتحقق الإعداد من `CUSTOM_API_KEY`.
-يعلّم OpenClaw معرفات نماذج الرؤية الشائعة على أنها تدعم الصور تلقائيًا. مرّر `--custom-image-input` لمعرفات الرؤية المخصصة غير المعروفة، أو `--custom-text-input` لفرض بيانات وصفية نصية فقط.
+`--custom-api-key` اختياري في الوضع غير التفاعلي. إذا حُذف، تتحقق التهيئة من `CUSTOM_API_KEY`.
+يعلّم OpenClaw معرفات نماذج الرؤية الشائعة كقادرة على الصور تلقائيًا. مرّر `--custom-image-input` لمعرفات الرؤية المخصصة غير المعروفة، أو `--custom-text-input` لفرض بيانات وصفية نصية فقط.
 استخدم `--custom-compatibility openai-responses` لنقاط النهاية المتوافقة مع OpenAI التي تدعم `/v1/responses` ولكن لا تدعم `/v1/chat/completions`.
 
-يدعم LM Studio أيضًا علم مفتاح خاصًا بالمزوّد في الوضع غير التفاعلي:
+يدعم LM Studio أيضًا علم مفتاح خاصًا بالموفر في الوضع غير التفاعلي:
 
 ```bash
 openclaw onboard --non-interactive \
@@ -124,9 +124,9 @@ openclaw onboard --non-interactive \
   --accept-risk
 ```
 
-تكون القيمة الافتراضية لـ `--custom-base-url` هي `http://127.0.0.1:11434`. يُعد `--custom-model-id` اختياريًا؛ إذا حُذف، يستخدم الإعداد القيم الافتراضية المقترحة من Ollama. تعمل هنا أيضًا معرفات النماذج السحابية مثل `kimi-k2.5:cloud`.
+تكون القيمة الافتراضية لـ `--custom-base-url` هي `http://127.0.0.1:11434`. `--custom-model-id` اختياري؛ إذا حُذف، تستخدم التهيئة الإعدادات الافتراضية المقترحة من Ollama. تعمل معرفات النماذج السحابية مثل `kimi-k2.5:cloud` هنا أيضًا.
 
-خزّن مفاتيح المزوّدين كمراجع بدلًا من نص عادي:
+خزّن مفاتيح الموفرين كمراجع بدلًا من نص صريح:
 
 ```bash
 openclaw onboard --non-interactive \
@@ -135,28 +135,28 @@ openclaw onboard --non-interactive \
   --accept-risk
 ```
 
-مع `--secret-input-mode ref`، يكتب الإعداد مراجع مدعومة بالبيئة بدلًا من قيم مفاتيح بنص عادي.
-بالنسبة للمزوّدين المدعومين بملف تعريف مصادقة، يكتب هذا إدخالات `keyRef`؛ وبالنسبة للمزوّدين المخصصين، يكتب `models.providers.<id>.apiKey` كمرجع بيئة (على سبيل المثال `{ source: "env", provider: "default", id: "CUSTOM_API_KEY" }`).
+مع `--secret-input-mode ref`، تكتب التهيئة مراجع مدعومة بمتغيرات البيئة بدلًا من قيم مفاتيح بنص صريح.
+للموفرين المدعومين بملف تعريف المصادقة، يكتب هذا إدخالات `keyRef`؛ وللموفرين المخصصين، يكتب هذا `models.providers.<id>.apiKey` كمرجع بيئة (مثلًا `{ source: "env", provider: "default", id: "CUSTOM_API_KEY" }`).
 
 عقد وضع `ref` غير التفاعلي:
 
-- اضبط متغير بيئة المزوّد في بيئة عملية الإعداد (على سبيل المثال `OPENAI_API_KEY`).
-- لا تمرر أعلام مفاتيح مضمّنة (على سبيل المثال `--openai-api-key`) إلا إذا كان متغير البيئة هذا مضبوطًا أيضًا.
-- إذا مُرر علم مفتاح مضمّن بدون متغير البيئة المطلوب، يفشل الإعداد سريعًا مع إرشادات.
+- عيّن متغير بيئة الموفر في بيئة عملية التهيئة (مثلًا `OPENAI_API_KEY`).
+- لا تمرر أعلام مفاتيح مضمنة (مثلًا `--openai-api-key`) إلا إذا كان متغير البيئة ذاك معيّنًا أيضًا.
+- إذا مُرر علم مفتاح مضمن بدون متغير البيئة المطلوب، تفشل التهيئة سريعًا مع إرشادات.
 
 خيارات رمز Gateway في الوضع غير التفاعلي:
 
-- يخزن `--gateway-auth token --gateway-token <token>` رمزًا بنص عادي.
-- يخزن `--gateway-auth token --gateway-token-ref-env <name>` قيمة `gateway.auth.token` كـ SecretRef بيئي.
+- يخزن `--gateway-auth token --gateway-token <token>` رمزًا بنص صريح.
+- يخزن `--gateway-auth token --gateway-token-ref-env <name>` القيمة `gateway.auth.token` كـ SecretRef بيئي.
 - `--gateway-token` و`--gateway-token-ref-env` متنافيان.
-- يتطلب `--gateway-token-ref-env` متغير بيئة غير فارغ في بيئة عملية الإعداد.
-- مع `--install-daemon`، عندما تتطلب مصادقة الرمز رمزًا، يتم التحقق من رموز Gateway المُدارة عبر SecretRef ولكن لا تُحفظ كنص عادي محلول في بيانات تعريف بيئة خدمة المشرف.
-- مع `--install-daemon`، إذا كان وضع الرمز يتطلب رمزًا وكان SecretRef للرمز المكوّن غير محلول، يفشل الإعداد مغلقًا مع إرشادات معالجة.
-- مع `--install-daemon`، إذا كان كل من `gateway.auth.token` و`gateway.auth.password` مكوّنين وكان `gateway.auth.mode` غير مضبوط، يمنع الإعداد التثبيت حتى يُضبط الوضع صراحة.
-- يكتب الإعداد المحلي `gateway.mode="local"` في الإعدادات. إذا كان ملف إعدادات لاحق يفتقد `gateway.mode`، فتعامل مع ذلك كتلف في الإعدادات أو تعديل يدوي غير مكتمل، وليس كاختصار صالح لوضع محلي.
-- يثبت الإعداد المحلي الـ Plugins المحددة القابلة للتنزيل عندما يتطلبها مسار الإعداد المختار.
-- يكتب الإعداد البعيد معلومات الاتصال فقط لـ Gateway البعيد ولا يثبت حزم Plugin محلية.
-- `--allow-unconfigured` هو مخرج طوارئ منفصل لوقت تشغيل Gateway. لا يعني أن الإعداد يمكنه حذف `gateway.mode`.
+- يتطلب `--gateway-token-ref-env` متغير بيئة غير فارغ في بيئة عملية التهيئة.
+- مع `--install-daemon`، عندما تتطلب مصادقة الرمز رمزًا، تُتحقق رموز Gateway المدارة بـ SecretRef ولكن لا تُحفظ كنص صريح محلول في بيانات وصفية لبيئة خدمة المشرف.
+- مع `--install-daemon`، إذا كان وضع الرمز يتطلب رمزًا وكان SecretRef للرمز المكوّن غير محلول، تفشل التهيئة بإغلاق آمن مع إرشادات إصلاح.
+- مع `--install-daemon`، إذا كان كل من `gateway.auth.token` و`gateway.auth.password` مكوّنين وكان `gateway.auth.mode` غير معيّن، تمنع التهيئة التثبيت حتى يُعيّن الوضع صراحة.
+- تكتب التهيئة المحلية `gateway.mode="local"` في الإعداد. إذا افتقد ملف إعداد لاحق `gateway.mode`، فتعامل مع ذلك كتلف إعداد أو تعديل يدوي غير مكتمل، وليس كاختصار صالح لوضع محلي.
+- تثبت التهيئة المحلية Plugins المختارة القابلة للتنزيل عندما يتطلبها مسار الإعداد المختار.
+- تكتب التهيئة البعيدة معلومات الاتصال فقط لـ Gateway البعيد ولا تثبت حزم plugin محلية.
+- `--allow-unconfigured` هو منفذ هروب منفصل لوقت تشغيل Gateway. لا يعني أن التهيئة يمكنها حذف `gateway.mode`.
 
 مثال:
 
@@ -172,25 +172,25 @@ openclaw onboard --non-interactive \
 
 صحة Gateway المحلي غير التفاعلية:
 
-- ما لم تمرر `--skip-health`، ينتظر الإعداد Gateway محليًا قابلًا للوصول قبل أن يخرج بنجاح.
-- يبدأ `--install-daemon` مسار تثبيت Gateway المُدار أولًا. بدونه، يجب أن يكون لديك Gateway محلي قيد التشغيل بالفعل، على سبيل المثال `openclaw gateway run`.
-- إذا كنت تريد فقط كتابة الإعدادات/مساحة العمل/bootstrap في الأتمتة، فاستخدم `--skip-health`.
-- إذا كنت تدير ملفات مساحة العمل بنفسك، فمرر `--skip-bootstrap` لضبط `agents.defaults.skipBootstrap: true` وتجاوز إنشاء `AGENTS.md` و`SOUL.md` و`TOOLS.md` و`IDENTITY.md` و`USER.md` و`HEARTBEAT.md` و`BOOTSTRAP.md`.
-- على Windows الأصلي، يحاول `--install-daemon` استخدام Scheduled Tasks أولًا ثم يرجع إلى عنصر تسجيل دخول في مجلد بدء التشغيل لكل مستخدم إذا رُفض إنشاء المهمة.
+- ما لم تمرر `--skip-health`، تنتظر التهيئة Gateway محليًا يمكن الوصول إليه قبل أن تخرج بنجاح.
+- يبدأ `--install-daemon` مسار تثبيت Gateway المُدار أولًا. بدونه، يجب أن يكون لديك Gateway محلي قيد التشغيل مسبقًا، مثل `openclaw gateway run`.
+- إذا كنت تريد فقط كتابات الإعداد/مساحة العمل/bootstrap في الأتمتة، فاستخدم `--skip-health`.
+- إذا كنت تدير ملفات مساحة العمل بنفسك، فمرر `--skip-bootstrap` لتعيين `agents.defaults.skipBootstrap: true` وتخطي إنشاء `AGENTS.md` و`SOUL.md` و`TOOLS.md` و`IDENTITY.md` و`USER.md` و`HEARTBEAT.md` و`BOOTSTRAP.md`.
+- على Windows الأصلي، يحاول `--install-daemon` استخدام Scheduled Tasks أولًا ثم يرجع إلى عنصر تسجيل دخول في مجلد Startup لكل مستخدم إذا رُفض إنشاء المهمة.
 
-سلوك الإعداد التفاعلي مع وضع المرجع:
+سلوك التهيئة التفاعلية مع وضع المرجع:
 
-- اختر **استخدام مرجع سر** عند المطالبة.
-- ثم اختر أحد الخيارين:
+- اختر **استخدام مرجع سري** عند المطالبة.
+- ثم اختر أحدهما:
   - متغير بيئة
-  - موفّر أسرار مكوّن (`file` أو `exec`)
-- ينفذ الإعداد تحققًا تمهيديًا سريعًا قبل حفظ المرجع.
-  - إذا فشل التحقق، يعرض الإعداد الخطأ ويتيح لك إعادة المحاولة.
+  - موفر سر مكوّن (`file` أو `exec`)
+- تجري التهيئة تحققًا سريعًا مسبقًا قبل حفظ المرجع.
+  - إذا فشل التحقق، تعرض التهيئة الخطأ وتتيح لك إعادة المحاولة.
 
-### اختيارات نقاط نهاية Z.AI غير التفاعلية
+### اختيارات نقطة نهاية Z.AI غير التفاعلية
 
 <Note>
-يكتشف `--auth-choice zai-api-key` تلقائيًا أفضل نقطة نهاية ونموذج Z.AI
+يكتشف `--auth-choice zai-api-key` أفضل نقطة نهاية ونموذج Z.AI تلقائيًا
 لمفتاحك. تفضل نقاط نهاية Coding Plan `zai/glm-5.2`؛ وتستخدم نقاط نهاية API العامة
 `zai/glm-5.1`. لفرض نقطة نهاية Coding Plan، اختر `zai-coding-global` أو
 `zai-coding-cn`.
@@ -216,33 +216,61 @@ openclaw onboard --non-interactive \
   --mistral-api-key "$MISTRAL_API_KEY"
 ```
 
+## أعلام غير تفاعلية إضافية
+
+مصادقة نموذج قائمة على الرمز (غير تفاعلية؛ تُستخدم مع `--auth-choice token`):
+
+- `--token-provider <id>` — معرف موفر الرمز. يحدد أي موفر يصدر الرمز.
+- `--token <token>` — قيمة الرمز لمصادقة النموذج.
+- `--token-profile-id <id>` — معرف ملف تعريف المصادقة. التخزين العام للرموز يستخدم افتراضيًا `<provider>:manual`؛ وقد تستخدم تدفقات الإعداد المملوكة للموفر افتراضيتها الخاصة، مثل `anthropic:default`.
+- `--token-expires-in <duration>` — مدة انتهاء صلاحية الرمز اختيارية (مثل `365d`، `12h`).
+
+Cloudflare AI Gateway (غير تفاعلي):
+
+- `--cloudflare-ai-gateway-account-id <id>` — معرف حساب Cloudflare للتوجيه عبر Cloudflare AI Gateway.
+- `--cloudflare-ai-gateway-gateway-id <id>` — معرف Cloudflare AI Gateway.
+
+التحكم في تثبيت daemon:
+
+- `--no-install-daemon` — تخطي تثبيت خدمة Gateway صراحة.
+- `--skip-daemon` — اسم مستعار لـ `--no-install-daemon`.
+
+التحكم في إعداد الواجهة والخطاف:
+
+- `--skip-ui` — تخطي مطالبات Control UI / TUI أثناء التهيئة.
+- `--skip-hooks` — تخطي مطالبات إعداد webhook / hook أثناء التهيئة.
+
+كتم المخرجات:
+
+- `--suppress-gateway-token-output` — كتم مخرجات Gateway/UI التي تحتوي على رموز (تلميحات الرموز، وعنوان URL لتسجيل الدخول التلقائي مع رمز مضمن، وتشغيل Control UI التلقائي). مفيد في بيئات الطرفية المشتركة وCI.
+
 ## ملاحظات التدفق
 
 <AccordionGroup>
   <Accordion title="Flow types">
-    - `quickstart`: مطالبات بسيطة، وينشئ رمز Gateway تلقائيًا.
+    - `quickstart`: مطالبات بسيطة، ينشئ رمز Gateway تلقائيًا.
     - `manual`: مطالبات كاملة للمنفذ والربط والمصادقة (اسم مستعار لـ `advanced`).
-    - `import`: يشغّل موفّر ترحيل مكتشفًا، ويعاين الخطة، ثم يطبقها بعد التأكيد.
+    - `import`: يشغّل موفر ترحيل مكتشفًا، ويعاين الخطة، ثم يطبقها بعد التأكيد.
 
   </Accordion>
   <Accordion title="Provider prefiltering">
-    عندما يشير اختيار مصادقة إلى مزوّد مفضل، يرشّح الإعداد مسبقًا منتقيي النموذج الافتراضي وقائمة السماح لذلك المزوّد. بالنسبة إلى Volcengine وBytePlus، يطابق هذا أيضًا متغيرات خطة الترميز (`volcengine-plan/*` و`byteplus-plan/*`).
+    عندما يشير اختيار المصادقة إلى موفر مفضل، ترشح التهيئة مسبقًا منتقيات النموذج الافتراضي وقائمة السماح لذلك الموفر. بالنسبة إلى Volcengine وBytePlus، يطابق هذا أيضًا متغيرات coding-plan (`volcengine-plan/*`، `byteplus-plan/*`).
 
-    إذا لم ينتج عن مرشح المزوّد المفضل أي نماذج محملة بعد، يرجع الإعداد إلى الكتالوج غير المرشح بدلًا من ترك المنتقي فارغًا.
+    إذا لم ينتج مرشح الموفر المفضل أي نماذج محملة بعد، ترجع التهيئة إلى الكتالوج غير المرشح بدلًا من ترك المنتقي فارغًا.
 
   </Accordion>
   <Accordion title="Web-search follow-ups">
-    تشغّل بعض مزوّدات البحث على الويب مطالبات متابعة خاصة بالمزوّد:
+    تؤدي بعض موفري بحث الويب إلى مطالبات متابعة خاصة بالموفر:
 
-    - يمكن أن يعرض **Grok** إعداد `x_search` اختياريًا باستخدام ملف تعريف xAI OAuth نفسه أو مفتاح API نفسه واختيار نموذج `x_search`.
-    - يمكن أن يطلب **Kimi** منطقة Moonshot API (`api.moonshot.ai` مقابل `api.moonshot.cn`) ونموذج بحث الويب الافتراضي لـ Kimi.
+    - يمكن لـ **Grok** تقديم إعداد `x_search` اختياري باستخدام ملف تعريف xAI OAuth نفسه أو مفتاح API واختيار نموذج `x_search`.
+    - يمكن لـ **Kimi** طلب منطقة Moonshot API (`api.moonshot.ai` مقابل `api.moonshot.cn`) ونموذج بحث الويب الافتراضي من Kimi.
 
   </Accordion>
   <Accordion title="Other behaviors">
-    - سلوك نطاق DM في الإعداد المحلي: [مرجع إعداد CLI](/ar/start/wizard-cli-reference#outputs-and-internals).
+    - سلوك نطاق الرسائل المباشرة في التهيئة المحلية: [مرجع إعداد CLI](/ar/start/wizard-cli-reference#outputs-and-internals).
     - أسرع محادثة أولى: `openclaw dashboard` (Control UI، بدون إعداد قناة).
-    - مزوّد مخصص: صِل أي نقطة نهاية متوافقة مع OpenAI أو Anthropic، بما في ذلك المزوّدون المستضافون غير المدرجين. استخدم Unknown للاكتشاف التلقائي.
-    - إذا اكتُشفت حالة Hermes، يعرض الإعداد تدفق ترحيل. استخدم [الترحيل](/ar/cli/migrate) لخطط dry-run، ووضع الاستبدال، والتقارير، والتعيينات الدقيقة.
+    - موفر مخصص: اتصل بأي نقطة نهاية متوافقة مع OpenAI أو Anthropic، بما في ذلك الموفرون المستضافون غير المدرجين. استخدم Unknown للاكتشاف التلقائي.
+    - إذا اكتُشفت حالة Hermes، تعرض التهيئة تدفق ترحيل. استخدم [الترحيل](/ar/cli/migrate) لخطط dry-run، ووضع الاستبدال، والتقارير، والتعيينات الدقيقة.
 
   </Accordion>
 </AccordionGroup>
@@ -255,8 +283,8 @@ openclaw configure
 openclaw agents add <name>
 ```
 
-استخدم `openclaw setup` بدلًا من ذلك عندما تحتاج فقط إلى إعدادات/مساحة عمل أساسية. استخدم `openclaw configure` لاحقًا للتغييرات المستهدفة و`openclaw channels add` لإعداد القنوات فقط.
+استخدم `openclaw setup` كنقطة دخول التهيئة الإرشادية نفسها. استخدم `openclaw setup --baseline` عندما تحتاج فقط إلى إعداد/مساحة عمل أساسيين، و`openclaw configure` لاحقًا للتغييرات المستهدفة، و`openclaw channels add` لإعداد القنوات فقط.
 
 <Note>
-لا يعني `--json` الوضع غير التفاعلي. استخدم `--non-interactive` للبرامج النصية.
+لا يعني `--json` الوضع غير التفاعلي. استخدم `--non-interactive` للسكربتات.
 </Note>
