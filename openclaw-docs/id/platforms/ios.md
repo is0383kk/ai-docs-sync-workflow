@@ -1,16 +1,16 @@
 ---
 read_when:
-    - Memasangkan atau menghubungkan ulang node iOS
+    - Memasangkan atau menghubungkan kembali node iOS
     - Menjalankan aplikasi iOS dari sumber
     - Men-debug penemuan Gateway atau perintah kanvas
-summary: 'Aplikasi node iOS: menghubungkan ke Gateway, pairing, kanvas, dan pemecahan masalah'
-title: aplikasi iOS
+summary: 'Aplikasi node iOS: menghubungkan ke Gateway, penyandingan, kanvas, dan pemecahan masalah'
+title: Aplikasi iOS
 x-i18n:
-    generated_at: "2026-06-27T17:42:35Z"
+    generated_at: "2026-07-04T18:21:04Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 1a93381fd2b95316e05a555bee45b9aed5572679b4b1f10f7f9e40c1a69faf17
+    source_hash: ad6d272518b36564562256f55ffc320c0c4d2b954914ac73c23e450fa7acee0b
     source_path: platforms/ios.md
     workflow: 16
 ---
@@ -20,7 +20,7 @@ Ketersediaan: build aplikasi iPhone didistribusikan melalui kanal Apple saat dia
 ## Fungsinya
 
 - Terhubung ke Gateway melalui WebSocket (LAN atau tailnet).
-- Mengekspos kemampuan node: Canvas, snapshot layar, tangkapan Camera, Location, mode Talk, Voice wake.
+- Mengekspos kapabilitas node: Canvas, snapshot Layar, pengambilan Kamera, Lokasi, mode Bicara, bangun Suara.
 - Menerima perintah `node.invoke` dan melaporkan peristiwa status node.
 
 ## Persyaratan
@@ -31,29 +31,44 @@ Ketersediaan: build aplikasi iPhone didistribusikan melalui kanal Apple saat dia
   - Tailnet melalui DNS-SD unicast (contoh domain: `openclaw.internal.`), **atau**
   - Host/port manual (fallback).
 
-## Mulai cepat (pasangkan + hubungkan)
+## Mulai cepat (pair + connect)
 
-1. Mulai Gateway:
+1. Mulai Gateway terautentikasi dengan rute yang dapat dijangkau ponsel Anda. Tailscale
+   Serve adalah jalur jarak jauh yang direkomendasikan:
 
 ```bash
-openclaw gateway --port 18789
+openclaw gateway --port 18789 --tailscale serve
 ```
 
-2. Di aplikasi iOS, buka Settings dan pilih gateway yang ditemukan (atau aktifkan Manual Host dan masukkan host/port).
+Untuk penyiapan LAN yang sama dan tepercaya, gunakan `gateway.bind: "lan"` yang terautentikasi
+sebagai gantinya. Bind loopback default tidak dapat dijangkau dari ponsel. Jika
+Gateway belum dikonfigurasi, jalankan `openclaw onboard` terlebih dahulu agar pembuatan
+kode penyiapan memiliki jalur autentikasi token atau kata sandi.
 
-3. Setujui permintaan pemasangan di host gateway:
+2. Buka [UI Kontrol](/id/web/control-ui), pilih **Node**, dan klik
+   **Pasangkan perangkat mobile** di kartu **Perangkat**.
+
+3. Di aplikasi iOS, buka **Pengaturan** → **Gateway**, pindai kode QR (atau tempel
+   kode penyiapan), lalu hubungkan.
+
+4. Aplikasi resmi terhubung secara otomatis. Jika **Perangkat** menampilkan permintaan
+   tertunda, tinjau peran dan cakupannya sebelum menyetujuinya.
+
+Tombol UI Kontrol memerlukan sesi yang sudah dipasangkan dengan `operator.admin`.
+Sebagai fallback terminal, pilih gateway yang ditemukan di aplikasi iOS (atau aktifkan
+Host Manual dan masukkan host/port), lalu setujui permintaan di host Gateway:
 
 ```bash
 openclaw devices list
 openclaw devices approve <requestId>
 ```
 
-Jika aplikasi mencoba kembali pemasangan dengan detail auth yang berubah (role/scopes/public key),
+Jika aplikasi mencoba ulang pemasangan dengan detail autentikasi yang berubah (peran/cakupan/kunci publik),
 permintaan tertunda sebelumnya digantikan dan `requestId` baru dibuat.
-Jalankan `openclaw devices list` lagi sebelum persetujuan.
+Jalankan `openclaw devices list` lagi sebelum menyetujui.
 
 Opsional: jika node iOS selalu terhubung dari subnet yang dikontrol ketat, Anda
-dapat memilih persetujuan otomatis node pertama kali dengan CIDR eksplisit atau IP persis:
+dapat ikut serta dalam persetujuan otomatis node pertama kali dengan CIDR eksplisit atau IP persis:
 
 ```json5
 {
@@ -67,11 +82,11 @@ dapat memilih persetujuan otomatis node pertama kali dengan CIDR eksplisit atau 
 }
 ```
 
-Ini dinonaktifkan secara default. Ini hanya berlaku untuk pemasangan `role: node` baru
-tanpa scopes yang diminta. Pemasangan operator/browser dan perubahan role, scope, metadata, atau
-public-key apa pun tetap memerlukan persetujuan manual.
+Ini dinonaktifkan secara default. Ini hanya berlaku untuk pemasangan `role: node` baru dengan
+tanpa cakupan yang diminta. Pemasangan operator/browser dan perubahan peran, cakupan, metadata, atau
+kunci publik apa pun tetap memerlukan persetujuan manual.
 
-4. Verifikasi koneksi:
+5. Verifikasi koneksi:
 
 ```bash
 openclaw nodes status
@@ -80,12 +95,12 @@ openclaw gateway call node.list --params "{}"
 
 ## Push berbasis relay untuk build resmi
 
-Build iOS resmi yang didistribusikan menggunakan relay push eksternal, bukan menerbitkan token APNs
-mentah ke gateway.
+Build iOS resmi yang didistribusikan menggunakan relay push eksternal alih-alih menerbitkan token APNs mentah
+ke gateway.
 
-Build resmi/TestFlight dari jalur rilis App Store publik menggunakan relay terhosting di `https://ios-push-relay.openclaw.ai`.
+Build App Store resmi dari jalur rilis publik menggunakan relay terhosting di `https://ios-push-relay.openclaw.ai`.
 
-Deployment relay khusus memerlukan jalur build/deployment iOS yang sengaja dipisahkan, dengan URL relay yang cocok dengan URL relay gateway. Jalur rilis App Store publik tidak menerima override URL relay khusus. Jika Anda menggunakan build relay khusus, tetapkan URL relay gateway yang sesuai:
+Deployment relay kustom memerlukan jalur build/deployment iOS yang sengaja terpisah, dengan URL relay yang cocok dengan URL relay gateway. Jalur rilis App Store publik tidak menerima override URL relay kustom. Jika Anda menggunakan build relay kustom, atur URL relay gateway yang cocok:
 
 ```json5
 {
@@ -101,83 +116,83 @@ Deployment relay khusus memerlukan jalur build/deployment iOS yang sengaja dipis
 }
 ```
 
-Cara alurnya bekerja:
+Cara alur bekerja:
 
 - Aplikasi iOS mendaftar ke relay menggunakan App Attest dan JWS transaksi aplikasi StoreKit.
-- Relay mengembalikan handle relay buram beserta grant pengiriman yang tercakup pada pendaftaran.
-- Aplikasi iOS mengambil identitas gateway yang dipasangkan dan menyertakannya dalam pendaftaran relay, sehingga pendaftaran berbasis relay didelegasikan ke gateway spesifik tersebut.
-- Aplikasi meneruskan pendaftaran berbasis relay tersebut ke gateway yang dipasangkan dengan `push.apns.register`.
-- Gateway menggunakan handle relay tersimpan tersebut untuk `push.test`, wake latar belakang, dan wake nudges.
-- URL relay gateway khusus harus cocok dengan URL relay yang tertanam dalam build iOS.
-- Jika aplikasi kemudian terhubung ke gateway lain atau build dengan URL dasar relay yang berbeda, aplikasi menyegarkan pendaftaran relay alih-alih menggunakan ulang binding lama.
+- Relay mengembalikan handle relay buram plus grant pengiriman yang dicakup untuk registrasi.
+- Aplikasi iOS mengambil identitas gateway yang dipasangkan dan menyertakannya dalam registrasi relay, sehingga registrasi berbasis relay didelegasikan ke gateway spesifik tersebut.
+- Aplikasi meneruskan registrasi berbasis relay itu ke gateway yang dipasangkan dengan `push.apns.register`.
+- Gateway menggunakan handle relay tersimpan itu untuk `push.test`, bangun latar belakang, dan dorongan bangun.
+- URL relay gateway kustom harus cocok dengan URL relay yang disematkan ke dalam build iOS.
+- Jika aplikasi kemudian terhubung ke gateway lain atau build dengan URL dasar relay yang berbeda, aplikasi menyegarkan registrasi relay alih-alih menggunakan ulang binding lama.
 
 Yang **tidak** diperlukan gateway untuk jalur ini:
 
-- Tidak ada token relay seluruh deployment.
-- Tidak ada kunci APNs langsung untuk pengiriman resmi/TestFlight berbasis relay.
+- Tidak ada token relay di seluruh deployment.
+- Tidak ada kunci APNs langsung untuk pengiriman berbasis relay App Store resmi.
 
 Alur operator yang diharapkan:
 
-1. Instal build iOS resmi/TestFlight.
-2. Opsional: tetapkan `gateway.push.apns.relay.baseUrl` pada gateway hanya saat menggunakan build relay khusus yang sengaja dipisahkan.
+1. Instal aplikasi iOS resmi.
+2. Opsional: atur `gateway.push.apns.relay.baseUrl` di gateway hanya saat menggunakan build relay kustom yang sengaja terpisah.
 3. Pasangkan aplikasi ke gateway dan biarkan selesai terhubung.
-4. Aplikasi menerbitkan `push.apns.register` secara otomatis setelah memiliki token APNs, sesi operator terhubung, dan pendaftaran relay berhasil.
-5. Setelah itu, `push.test`, wake untuk tersambung kembali, dan wake nudges dapat menggunakan pendaftaran berbasis relay yang tersimpan.
+4. Aplikasi menerbitkan `push.apns.register` secara otomatis setelah memiliki token APNs, sesi operator terhubung, dan registrasi relay berhasil.
+5. Setelah itu, `push.test`, bangun ulang koneksi, dan dorongan bangun dapat menggunakan registrasi berbasis relay yang tersimpan.
 
 ## Beacon hidup latar belakang
 
-Saat iOS membangunkan aplikasi untuk silent push, background refresh, atau peristiwa significant-location, aplikasi
-mencoba penyambungan ulang node singkat lalu memanggil `node.event` dengan `event: "node.presence.alive"`.
+Saat iOS membangunkan aplikasi untuk push senyap, penyegaran latar belakang, atau peristiwa lokasi signifikan, aplikasi
+mencoba koneksi ulang node singkat lalu memanggil `node.event` dengan `event: "node.presence.alive"`.
 Gateway mencatat ini sebagai `lastSeenAtMs`/`lastSeenReason` pada metadata node/perangkat yang dipasangkan hanya
 setelah identitas perangkat node terautentikasi diketahui.
 
-Aplikasi menganggap wake latar belakang berhasil dicatat hanya saat respons gateway menyertakan
+Aplikasi menganggap bangun latar belakang berhasil dicatat hanya ketika respons gateway menyertakan
 `handled: true`. Gateway lama mungkin mengakui `node.event` dengan `{ "ok": true }`; respons itu
-kompatibel tetapi tidak dihitung sebagai pembaruan last-seen yang tahan lama.
+kompatibel tetapi tidak dihitung sebagai pembaruan terakhir-terlihat yang tahan lama.
 
 Catatan kompatibilitas:
 
 - `OPENCLAW_APNS_RELAY_BASE_URL` masih berfungsi sebagai override env sementara untuk gateway.
 - Jalur rilis App Store publik menolak `OPENCLAW_PUSH_RELAY_BASE_URL` untuk build iOS.
 
-## Alur autentikasi dan kepercayaan
+## Autentikasi dan alur kepercayaan
 
-Relay ada untuk menegakkan dua batasan yang tidak dapat disediakan APNs langsung di gateway untuk
+Relay ada untuk menegakkan dua batasan yang tidak dapat disediakan APNs-langsung-di-gateway untuk
 build iOS resmi:
 
 - Hanya build iOS OpenClaw asli yang didistribusikan melalui Apple yang dapat menggunakan relay terhosting.
-- Gateway dapat mengirim push berbasis relay hanya untuk perangkat iOS yang dipasangkan dengan
-  gateway spesifik tersebut.
+- Gateway dapat mengirim push berbasis relay hanya untuk perangkat iOS yang dipasangkan dengan gateway spesifik
+  tersebut.
 
 Hop demi hop:
 
 1. `iOS app -> gateway`
-   - Aplikasi pertama-tama dipasangkan dengan gateway melalui alur auth Gateway normal.
-   - Ini memberi aplikasi sesi node terautentikasi beserta sesi operator terautentikasi.
+   - Aplikasi pertama-tama dipasangkan dengan gateway melalui alur autentikasi Gateway normal.
+   - Itu memberi aplikasi sesi node terautentikasi plus sesi operator terautentikasi.
    - Sesi operator digunakan untuk memanggil `gateway.identity.get`.
 
 2. `iOS app -> relay`
-   - Aplikasi memanggil endpoint pendaftaran relay melalui HTTPS.
-   - Pendaftaran menyertakan bukti App Attest beserta JWS transaksi aplikasi StoreKit.
-   - Relay memvalidasi bundle ID, bukti App Attest, dan bukti distribusi Apple, serta mengharuskan
+   - Aplikasi memanggil endpoint registrasi relay melalui HTTPS.
+   - Registrasi menyertakan bukti App Attest plus JWS transaksi aplikasi StoreKit.
+   - Relay memvalidasi bundle ID, bukti App Attest, dan bukti distribusi Apple, serta mewajibkan
      jalur distribusi resmi/produksi.
-   - Inilah yang memblokir build Xcode/dev lokal dari penggunaan relay terhosting. Build lokal mungkin
-     ditandatangani, tetapi tidak memenuhi bukti distribusi resmi Apple yang diharapkan relay.
+   - Inilah yang memblokir build Xcode/dev lokal dari penggunaan relay terhosting. Build lokal dapat
+     ditandatangani, tetapi tidak memenuhi bukti distribusi Apple resmi yang diharapkan relay.
 
 3. `gateway identity delegation`
-   - Sebelum pendaftaran relay, aplikasi mengambil identitas gateway yang dipasangkan dari
+   - Sebelum registrasi relay, aplikasi mengambil identitas gateway yang dipasangkan dari
      `gateway.identity.get`.
-   - Aplikasi menyertakan identitas gateway tersebut dalam payload pendaftaran relay.
-   - Relay mengembalikan handle relay dan grant pengiriman yang tercakup pada pendaftaran yang didelegasikan ke
+   - Aplikasi menyertakan identitas gateway itu dalam payload registrasi relay.
+   - Relay mengembalikan handle relay dan grant pengiriman yang dicakup untuk registrasi yang didelegasikan ke
      identitas gateway tersebut.
 
 4. `gateway -> relay`
    - Gateway menyimpan handle relay dan grant pengiriman dari `push.apns.register`.
-   - Pada `push.test`, wake untuk tersambung kembali, dan wake nudges, gateway menandatangani permintaan pengiriman dengan
+   - Pada `push.test`, bangun ulang koneksi, dan dorongan bangun, gateway menandatangani permintaan kirim dengan
      identitas perangkatnya sendiri.
-   - Relay memverifikasi baik grant pengiriman yang tersimpan maupun tanda tangan gateway terhadap identitas
-     gateway yang didelegasikan dari pendaftaran.
-   - Gateway lain tidak dapat menggunakan ulang pendaftaran tersimpan tersebut, sekalipun entah bagaimana memperoleh handle-nya.
+   - Relay memverifikasi grant pengiriman tersimpan dan tanda tangan gateway terhadap identitas
+     gateway yang didelegasikan dari registrasi.
+   - Gateway lain tidak dapat menggunakan ulang registrasi tersimpan itu, meskipun entah bagaimana memperoleh handle tersebut.
 
 5. `relay -> APNs`
    - Relay memiliki kredensial APNs produksi dan token APNs mentah untuk build resmi.
@@ -186,10 +201,10 @@ Hop demi hop:
 
 Mengapa desain ini dibuat:
 
-- Untuk menjaga kredensial APNs produksi tetap di luar gateway pengguna.
-- Untuk menghindari penyimpanan token APNs build resmi mentah di gateway.
-- Untuk mengizinkan penggunaan relay terhosting hanya bagi build OpenClaw resmi/TestFlight.
-- Untuk mencegah satu gateway mengirim push wake ke perangkat iOS yang dimiliki gateway lain.
+- Untuk menjaga kredensial APNs produksi tetap berada di luar gateway pengguna.
+- Untuk menghindari penyimpanan token APNs mentah build resmi di gateway.
+- Untuk mengizinkan penggunaan relay terhosting hanya bagi build iOS OpenClaw resmi.
+- Untuk mencegah satu gateway mengirim push bangun ke perangkat iOS milik gateway lain.
 
 Build lokal/manual tetap menggunakan APNs langsung. Jika Anda menguji build tersebut tanpa relay,
 gateway tetap memerlukan kredensial APNs langsung:
@@ -201,8 +216,8 @@ export OPENCLAW_APNS_PRIVATE_KEY_P8="$(cat /path/to/AuthKey_KEYID.p8)"
 ```
 
 Ini adalah env vars runtime host gateway, bukan pengaturan Fastlane. `apps/ios/fastlane/.env` hanya menyimpan
-auth App Store Connect / TestFlight seperti `APP_STORE_CONNECT_KEY_ID` dan
-`APP_STORE_CONNECT_ISSUER_ID`; itu tidak mengonfigurasi pengiriman APNs langsung untuk build iOS lokal.
+autentikasi App Store Connect seperti `APP_STORE_CONNECT_KEY_ID` dan
+`APP_STORE_CONNECT_ISSUER_ID`; file itu tidak mengonfigurasi pengiriman APNs langsung untuk build iOS lokal.
 
 Penyimpanan host gateway yang direkomendasikan:
 
@@ -216,23 +231,23 @@ export OPENCLAW_APNS_PRIVATE_KEY_PATH="$HOME/.openclaw/credentials/apns/AuthKey_
 
 Jangan commit file `.p8` atau menempatkannya di bawah checkout repo.
 
-## Jalur discovery
+## Jalur penemuan
 
 ### Bonjour (LAN)
 
-Aplikasi iOS menelusuri `_openclaw-gw._tcp` pada `local.` dan, saat dikonfigurasi, domain
-discovery DNS-SD area luas yang sama. Gateway dalam LAN yang sama muncul otomatis dari `local.`;
-discovery lintas jaringan dapat menggunakan domain area luas yang dikonfigurasi tanpa mengubah jenis beacon.
+Aplikasi iOS menelusuri `_openclaw-gw._tcp` pada `local.` dan, saat dikonfigurasi, domain penemuan DNS-SD
+area luas yang sama. Gateway pada LAN yang sama muncul otomatis dari `local.`;
+penemuan lintas jaringan dapat menggunakan domain area luas yang dikonfigurasi tanpa mengubah jenis beacon.
 
 ### Tailnet (lintas jaringan)
 
 Jika mDNS diblokir, gunakan zona DNS-SD unicast (pilih domain; contoh:
-`openclaw.internal.`) dan split DNS Tailscale.
+`openclaw.internal.`) dan Tailscale split DNS.
 Lihat [Bonjour](/id/gateway/bonjour) untuk contoh CoreDNS.
 
 ### Host/port manual
 
-Di Settings, aktifkan **Manual Host** dan masukkan host gateway + port (default `18789`).
+Di Pengaturan, aktifkan **Host Manual** dan masukkan host gateway + port (default `18789`).
 
 ## Canvas + A2UI
 
@@ -245,22 +260,22 @@ openclaw nodes invoke --node "iOS Node" --command canvas.navigate --params '{"ur
 Catatan:
 
 - Host canvas Gateway menyajikan `/__openclaw__/canvas/` dan `/__openclaw__/a2ui/`.
-- Ini disajikan dari server HTTP Gateway (port yang sama dengan `gateway.port`, default `18789`).
+- Disajikan dari server HTTP Gateway (port yang sama dengan `gateway.port`, default `18789`).
 - Node iOS mempertahankan scaffold bawaan sebagai tampilan default yang terhubung. `canvas.a2ui.push` dan `canvas.a2ui.reset` menggunakan halaman A2UI bawaan milik aplikasi.
-- Halaman A2UI Gateway jarak jauh hanya render di iOS; tindakan tombol A2UI native hanya diterima dari halaman bawaan milik aplikasi.
+- Halaman A2UI Gateway jarak jauh hanya render-saja di iOS; tindakan tombol A2UI native hanya diterima dari halaman bawaan milik aplikasi.
 - Kembali ke scaffold bawaan dengan `canvas.navigate` dan `{"url":""}`.
 
 ## Hubungan Computer Use
 
-Aplikasi iOS adalah permukaan node seluler, bukan backend Codex Computer Use. Codex
+Aplikasi iOS adalah permukaan node mobile, bukan backend Codex Computer Use. Codex
 Computer Use dan `cua-driver mcp` mengontrol desktop macOS lokal melalui alat MCP;
-aplikasi iOS mengekspos kemampuan iPhone melalui perintah node OpenClaw
+aplikasi iOS mengekspos kapabilitas iPhone melalui perintah node OpenClaw
 seperti `canvas.*`, `camera.*`, `screen.*`, `location.*`, dan `talk.*`.
 
-Agent tetap dapat mengoperasikan aplikasi iOS melalui OpenClaw dengan memanggil perintah
+Agen masih dapat mengoperasikan aplikasi iOS melalui OpenClaw dengan memanggil perintah
 node, tetapi panggilan tersebut melewati protokol node gateway dan mengikuti batas
 foreground/background iOS. Gunakan [Codex Computer Use](/id/plugins/codex-computer-use)
-untuk kontrol desktop lokal dan halaman ini untuk kemampuan node iOS.
+untuk kontrol desktop lokal dan halaman ini untuk kapabilitas node iOS.
 
 ### Eval / snapshot Canvas
 
@@ -272,24 +287,25 @@ openclaw nodes invoke --node "iOS Node" --command canvas.eval --params '{"javaSc
 openclaw nodes invoke --node "iOS Node" --command canvas.snapshot --params '{"maxWidth":900,"format":"jpeg"}'
 ```
 
-## Voice wake + mode talk
+## Bangun suara + mode bicara
 
-- Voice wake dan mode talk tersedia di Settings.
-- Node iOS yang mampu talk mengiklankan kemampuan `talk` dan dapat mendeklarasikan
+- Mode bangun suara dan bicara tersedia di Pengaturan.
+- Talk realtime OpenAI menggunakan WebRTC milik klien saat `talk.realtime.transport` adalah `webrtc`; konfigurasi `gateway-relay` eksplisit tetap dimiliki Gateway. Lihat [Mode Talk](/id/nodes/talk).
+- Node iOS yang mendukung Talk mengiklankan kapabilitas `talk` dan dapat mendeklarasikan
   `talk.ptt.start`, `talk.ptt.stop`, `talk.ptt.cancel`, dan `talk.ptt.once`;
   Gateway mengizinkan perintah push-to-talk tersebut secara default untuk node
-  tepercaya yang mampu Talk.
+  tepercaya yang mendukung Talk.
 - iOS dapat menangguhkan audio latar belakang; perlakukan fitur suara sebagai upaya terbaik saat aplikasi tidak aktif.
 
 ## Kesalahan umum
 
-- `NODE_BACKGROUND_UNAVAILABLE`: bawa aplikasi iOS ke foreground (perintah canvas/camera/screen memerlukannya).
-- `A2UI_HOST_UNAVAILABLE`: halaman A2UI bawaan tidak dapat dijangkau di WebView aplikasi; pertahankan aplikasi di foreground pada tab Screen dan coba lagi.
+- `NODE_BACKGROUND_UNAVAILABLE`: bawa aplikasi iOS ke latar depan (perintah kanvas/kamera/layar memerlukannya).
+- `A2UI_HOST_UNAVAILABLE`: halaman A2UI bawaan tidak dapat dijangkau di WebView aplikasi; biarkan aplikasi berada di latar depan pada tab Layar dan coba lagi.
 - Prompt pemasangan tidak pernah muncul: jalankan `openclaw devices list` dan setujui secara manual.
-- Penyambungan ulang gagal setelah instal ulang: token pemasangan Keychain telah dihapus; pasangkan ulang node.
+- Koneksi ulang gagal setelah instal ulang: token pemasangan Keychain telah dihapus; pasangkan ulang node.
 
-## Dokumentasi terkait
+## Dokumen terkait
 
-- [Pairing](/id/channels/pairing)
+- [Pemasangan](/id/channels/pairing)
 - [Discovery](/id/gateway/discovery)
 - [Bonjour](/id/gateway/bonjour)

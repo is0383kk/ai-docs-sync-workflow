@@ -1,67 +1,65 @@
 ---
 read_when:
-    - DM एक्सेस नियंत्रण सेट अप करना
-    - नए iOS/Android Node को पेयर करना
-    - OpenClaw की सुरक्षा स्थिति की समीक्षा करना
-summary: 'पेयरिंग अवलोकन: मंज़ूरी दें कि कौन आपको DM कर सकता है + कौन-से नोड जुड़ सकते हैं'
+    - DM पहुँच नियंत्रण सेट अप करना
+    - नए iOS/Android नोड को पेयर करना
+    - OpenClaw की सुरक्षा स्थिति की समीक्षा
+summary: 'पेयरिंग अवलोकन: स्वीकृत करें कि कौन आपको DM कर सकता है + कौन से नोड जुड़ सकते हैं'
 title: पेयरिंग
 x-i18n:
-    generated_at: "2026-06-28T22:38:44Z"
+    generated_at: "2026-07-04T17:58:40Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 92870489b62aeec710f49ec92908f4b83c7d9ee2ce34174b42e283839748e549
+    source_hash: e9c6508b8fd991f3a61ce026d1d453364de566a5b1373a6311ad24f43dcdb267
     source_path: channels/pairing.md
     workflow: 16
 ---
 
-"पेयरिंग" OpenClaw का स्पष्ट एक्सेस अनुमोदन चरण है।
-इसका उपयोग दो जगहों पर होता है:
+"Pairing" OpenClaw का स्पष्ट एक्सेस अनुमोदन चरण है।
+इसका उपयोग दो जगहों पर किया जाता है:
 
-1. **DM पेयरिंग** (किसे बॉट से बात करने की अनुमति है)
-2. **Node पेयरिंग** (किन डिवाइस/नोड को gateway नेटवर्क से जुड़ने की अनुमति है)
+1. **DM pairing** (किसे bot से बात करने की अनुमति है)
+2. **Node pairing** (कौन-से devices/nodes gateway network में शामिल हो सकते हैं)
 
 सुरक्षा संदर्भ: [सुरक्षा](/hi/gateway/security)
 
-## 1) DM पेयरिंग (इनबाउंड चैट एक्सेस)
+## 1) DM pairing (इनबाउंड चैट एक्सेस)
 
-जब कोई चैनल DM नीति `pairing` के साथ कॉन्फ़िगर होता है, तो अज्ञात प्रेषकों को एक छोटा कोड मिलता है और उनका संदेश तब तक **प्रोसेस नहीं किया जाता** जब तक आप अनुमोदन नहीं देते।
+जब कोई channel DM policy `pairing` के साथ कॉन्फ़िगर किया जाता है, तो अज्ञात senders को एक छोटा code मिलता है और उनका message तब तक **प्रोसेस नहीं किया जाता** जब तक आप अनुमोदन नहीं करते।
 
-डिफ़ॉल्ट DM नीतियां यहां दस्तावेज़ित हैं: [सुरक्षा](/hi/gateway/security)
+डिफ़ॉल्ट DM policies यहां दस्तावेज़ित हैं: [सुरक्षा](/hi/gateway/security)
 
-`dmPolicy: "open"` केवल तब सार्वजनिक होता है जब प्रभावी DM अनुमति-सूची में `"*"` शामिल हो।
-सार्वजनिक-ओपन कॉन्फ़िग के लिए सेटअप और सत्यापन में उस वाइल्डकार्ड की आवश्यकता होती है। यदि मौजूदा
-स्टेट में ठोस `allowFrom` प्रविष्टियों के साथ `open` है, तो रनटाइम अभी भी केवल
-उन प्रेषकों को स्वीकार करता है, और पेयरिंग-स्टोर अनुमोदन `open` एक्सेस को विस्तृत नहीं करते।
+`dmPolicy: "open"` केवल तब public होता है जब प्रभावी DM allowlist में `"*"` शामिल हो।
+Setup और validation को public-open configs के लिए उस wildcard की आवश्यकता होती है। यदि मौजूदा
+state में concrete `allowFrom` entries के साथ `open` है, तो runtime फिर भी
+केवल उन्हीं senders को प्रवेश देता है, और pairing-store approvals `open` access को विस्तृत नहीं करते।
 
-पेयरिंग कोड:
+Pairing codes:
 
-- 8 अक्षर, अपरकेस, कोई अस्पष्ट अक्षर नहीं (`0O1I`)।
-- **1 घंटे बाद समाप्त हो जाते हैं**। बॉट पेयरिंग संदेश केवल तब भेजता है जब नया अनुरोध बनाया जाता है (लगभग हर प्रेषक के लिए प्रति घंटे एक बार)।
-- लंबित DM पेयरिंग अनुरोध डिफ़ॉल्ट रूप से **प्रति चैनल 3** तक सीमित हैं; अतिरिक्त अनुरोध तब तक अनदेखे किए जाते हैं जब तक कोई समाप्त या अनुमोदित नहीं हो जाता।
+- 8 characters, uppercase, कोई ambiguous chars नहीं (`0O1I`)।
+- **1 घंटे बाद expire होते हैं**। bot pairing message केवल तब भेजता है जब नया request बनाया जाता है (लगभग प्रति sender प्रति घंटे एक बार)।
+- Pending DM pairing requests डिफ़ॉल्ट रूप से **प्रति channel 3** तक सीमित हैं; अतिरिक्त requests तब तक अनदेखी की जाती हैं जब तक कोई expire या approve न हो जाए।
 
-### प्रेषक को अनुमोदित करें
+### किसी sender को approve करें
 
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-यदि अभी तक कोई कमांड स्वामी कॉन्फ़िगर नहीं है, तो DM पेयरिंग कोड को अनुमोदित करना
-`commands.ownerAllowFrom` को अनुमोदित प्रेषक, जैसे `telegram:123456789`, से भी बूटस्ट्रैप करता है।
-यह पहली बार के सेटअप को विशेषाधिकार प्राप्त कमांड और exec
-अनुमोदन प्रॉम्प्ट के लिए एक स्पष्ट स्वामी देता है। स्वामी मौजूद होने के बाद, बाद के पेयरिंग अनुमोदन केवल DM
-एक्सेस देते हैं; वे और स्वामी नहीं जोड़ते।
+यदि अभी तक कोई command owner configured नहीं है, तो DM pairing code approve करने से
+`commands.ownerAllowFrom` approved sender पर bootstrap भी हो जाता है, जैसे `telegram:123456789`।
+यह first-time setups को privileged commands और exec approval prompts के लिए एक स्पष्ट owner देता है।
+owner मौजूद होने के बाद, बाद की pairing approvals केवल DM access देती हैं; वे और owners नहीं जोड़तीं।
 
-समर्थित चैनल: `discord`, `feishu`, `googlechat`, `imessage`, `irc`, `line`, `matrix`, `mattermost`, `msteams`, `nextcloud-talk`, `nostr`, `openclaw-weixin`, `signal`, `slack`, `synology-chat`, `telegram`, `twitch`, `whatsapp`, `zalo`, `zalouser`।
+Supported channels: `discord`, `feishu`, `googlechat`, `imessage`, `irc`, `line`, `matrix`, `mattermost`, `msteams`, `nextcloud-talk`, `nostr`, `openclaw-weixin`, `signal`, `slack`, `synology-chat`, `telegram`, `twitch`, `whatsapp`, `zalo`, `zalouser`.
 
-### पुन: उपयोग योग्य प्रेषक समूह
+### Reusable sender groups
 
-जब एक ही विश्वसनीय प्रेषक सेट कई संदेश चैनलों पर या DM और समूह अनुमति-सूचियों दोनों पर लागू होना चाहिए,
-तो शीर्ष-स्तरीय `accessGroups` का उपयोग करें।
+जब समान trusted sender set को कई message channels या DM और group allowlists दोनों पर लागू करना हो, तो top-level `accessGroups` का उपयोग करें।
 
-स्थिर समूह `type: "message.senders"` का उपयोग करते हैं और चैनल अनुमति-सूचियों से
-`accessGroup:<name>` के साथ संदर्भित होते हैं:
+Static groups `type: "message.senders"` का उपयोग करते हैं और channel allowlists से
+`accessGroup:<name>` के साथ reference किए जाते हैं:
 
 ```json5
 {
@@ -82,74 +80,92 @@ openclaw pairing approve telegram <CODE>
 }
 ```
 
-एक्सेस समूहों का विस्तृत दस्तावेज़ यहां है: [एक्सेस समूह](/hi/channels/access-groups)
+Access groups का विस्तृत दस्तावेज़ यहां है: [Access groups](/hi/channels/access-groups)
 
-### स्टेट कहां रहता है
+### State कहां रहता है
 
-`~/.openclaw/credentials/` के अंतर्गत संग्रहीत:
+`~/.openclaw/credentials/` के अंतर्गत stored:
 
-- लंबित अनुरोध: `<channel>-pairing.json`
-- अनुमोदित अनुमति-सूची स्टोर:
-  - डिफ़ॉल्ट खाता: `<channel>-allowFrom.json`
-  - गैर-डिफ़ॉल्ट खाता: `<channel>-<accountId>-allowFrom.json`
+- Pending requests: `<channel>-pairing.json`
+- Approved allowlist store:
+  - Default account: `<channel>-allowFrom.json`
+  - Non-default account: `<channel>-<accountId>-allowFrom.json`
 
-खाता स्कोपिंग व्यवहार:
+Account scoping behavior:
 
-- गैर-डिफ़ॉल्ट खाते केवल अपनी स्कोप की गई अनुमति-सूची फ़ाइल पढ़ते/लिखते हैं।
-- डिफ़ॉल्ट खाता चैनल-स्कोप वाली अनस्कोप्ड अनुमति-सूची फ़ाइल का उपयोग करता है।
+- Non-default accounts केवल अपनी scoped allowlist file read/write करते हैं।
+- Default account channel-scoped unscoped allowlist file का उपयोग करता है।
 
-इन्हें संवेदनशील मानें (ये आपके assistant तक एक्सेस को नियंत्रित करते हैं)।
+इन्हें sensitive मानें (ये आपके assistant तक access gate करते हैं)।
 
 <Note>
-पेयरिंग अनुमति-सूची स्टोर DM एक्सेस के लिए है। समूह प्राधिकरण अलग है।
-DM पेयरिंग कोड को अनुमोदित करने से वह प्रेषक अपने-आप समूह
-कमांड चलाने या समूहों में बॉट को नियंत्रित करने की अनुमति नहीं पाता। पहला-स्वामी बूटस्ट्रैप अलग कॉन्फ़िग
-स्टेट है `commands.ownerAllowFrom` में, और समूह चैट डिलीवरी अभी भी
-चैनल की समूह अनुमति-सूचियों का पालन करती है (उदाहरण के लिए `groupAllowFrom`, `groups`, या चैनल के अनुसार प्रति-समूह
-या प्रति-विषय ओवरराइड)।
+pairing allowlist store DM access के लिए है। Group authorization अलग है।
+DM pairing code approve करने से वह sender group commands चलाने या groups में bot control करने के लिए अपने-आप allow नहीं होता।
+First-owner bootstrap अलग config state है
+`commands.ownerAllowFrom` में, और group chat delivery अभी भी channel की group allowlists का अनुसरण करती है
+(उदाहरण के लिए `groupAllowFrom`, `groups`, या channel के आधार पर per-group
+या per-topic overrides)।
 </Note>
 
-## 2) Node डिवाइस पेयरिंग (iOS/Android/macOS/headless नोड)
+## 2) Node device pairing (iOS/Android/macOS/headless nodes)
 
-नोड Gateway से `role: node` वाले **डिवाइस** के रूप में जुड़ते हैं। Gateway
-एक डिवाइस पेयरिंग अनुरोध बनाता है जिसे अनुमोदित किया जाना चाहिए।
+Nodes Gateway से **devices** के रूप में `role: node` के साथ connect करते हैं। Gateway
+एक device pairing request बनाता है जिसे approve करना आवश्यक है।
 
-### Telegram के माध्यम से पेयर करें (iOS के लिए अनुशंसित)
+### Control UI से pair करें (recommended)
 
-यदि आप `device-pair` Plugin का उपयोग करते हैं, तो आप पहली बार की डिवाइस पेयरिंग पूरी तरह Telegram से कर सकते हैं:
+`operator.admin` access वाले पहले से connected Control UI session का उपयोग करें:
 
-1. Telegram में, अपने बॉट को संदेश भेजें: `/pair`
-2. बॉट दो संदेशों के साथ उत्तर देता है: एक निर्देश संदेश और एक अलग **सेटअप कोड** संदेश (Telegram में कॉपी/पेस्ट करना आसान)।
-3. अपने फ़ोन पर, OpenClaw iOS ऐप खोलें → Settings → Gateway।
-4. QR कोड स्कैन करें या सेटअप कोड पेस्ट करें और कनेक्ट करें।
-5. फिर Telegram में: `/pair pending` (अनुरोध ID, भूमिका और दायरों की समीक्षा करें), फिर अनुमोदित करें।
+1. Control UI खोलें और **Nodes** select करें।
+2. **Devices** में, **Pair mobile device** पर click करें।
+3. अपने phone पर, OpenClaw app खोलें → **Settings** → **Gateway**।
+4. QR code scan करें या setup code paste करें, फिर connect करें।
 
-सेटअप कोड एक base64-एन्कोडेड JSON पेलोड है जिसमें शामिल है:
+Official OpenClaw iOS और Android apps तब automatically approve हो जाते हैं जब उनका
+setup-code metadata match करता है। यदि **Devices** में pending request दिखता है (उदाहरण के लिए,
+non-official client या mismatched metadata के लिए), तो approve करने से पहले उसकी role और
+scopes review करें।
+
+जब current Control UI session में administrator access नहीं होता, तो button disabled रहता है।
+उस स्थिति में Gateway host से नीचे दिया गया CLI approval flow उपयोग करें।
+
+### Telegram के ज़रिए pair करें
+
+यदि आप `device-pair` Plugin उपयोग करते हैं, तो आप first-time device pairing पूरी तरह Telegram से कर सकते हैं:
+
+1. Telegram में, अपने bot को message करें: `/pair`
+2. bot दो messages के साथ reply करता है: एक instruction message और एक अलग **setup code** message (Telegram में copy/paste करना आसान)।
+3. अपने phone पर, OpenClaw iOS app खोलें → Settings → Gateway।
+4. QR code scan करें या setup code paste करें और connect करें।
+5. official mobile app automatically connect होता है। यदि `/pair pending` कोई
+   request दिखाता है, तो approve करने से पहले उसकी role और scopes review करें।
+
+setup code एक base64-encoded JSON payload है जिसमें शामिल है:
 
 - `url`: Gateway WebSocket URL (`ws://...` या `wss://...`)
-- `bootstrapToken`: प्रारंभिक पेयरिंग हैंडशेक के लिए उपयोग किया जाने वाला अल्पकालिक सिंगल-डिवाइस बूटस्ट्रैप टोकन
+- `bootstrapToken`: initial pairing handshake के लिए उपयोग किया गया short-lived single-device bootstrap token
 
-वह बूटस्ट्रैप टोकन अंतर्निहित पेयरिंग बूटस्ट्रैप प्रोफ़ाइल ले जाता है:
+वह bootstrap token built-in pairing bootstrap profile carry करता है:
 
-- अंतर्निहित सेटअप प्रोफ़ाइल केवल ताज़ा QR/सेटअप-कोड बेसलाइन की अनुमति देती है:
-  `node` और सीमित `operator` हैंडऑफ़
-- हैंड-ऑफ़ किया गया `node` टोकन `scopes: []` ही रहता है
-- हैंड-ऑफ़ किया गया `operator` टोकन `operator.approvals`,
-  `operator.read`, और `operator.write` तक सीमित है
-- `operator.admin` और `operator.pairing` QR/सेटअप-कोड
-  बूटस्ट्रैप द्वारा नहीं दिए जाते; इनके लिए अलग से अनुमोदित operator पेयरिंग या टोकन फ़्लो चाहिए
-- बाद का टोकन रोटेशन/निरस्तीकरण डिवाइस के अनुमोदित
-  भूमिका अनुबंध और कॉलर सत्र के operator दायरों, दोनों से सीमित रहता है
+- built-in setup profile केवल fresh QR/setup-code baseline allow करता है:
+  `node` plus bounded `operator` handoff
+- handed-off `node` token `scopes: []` ही रहता है
+- handed-off `operator` token `operator.approvals`,
+  `operator.read`, `operator.talk.secrets`, और `operator.write` तक सीमित है
+- `operator.admin` QR/setup-code bootstrap से grant नहीं होता; इसके लिए
+  अलग approved operator pairing या token flow की आवश्यकता होती है
+- बाद की token rotation/revocation device के approved
+  role contract और caller session के operator scopes दोनों से bounded रहती है
 
-सेटअप कोड को वैध रहने तक पासवर्ड जैसा मानें।
+setup code को valid रहते समय password की तरह treat करें।
 
-Tailscale, सार्वजनिक, या अन्य रिमोट मोबाइल पेयरिंग के लिए, Tailscale Serve/Funnel
-या किसी अन्य `wss://` Gateway URL का उपयोग करें। प्लेनटेक्स्ट `ws://` सेटअप कोड केवल
-loopback, निजी LAN पतों, `.local` Bonjour होस्ट, और Android
-emulator होस्ट के लिए स्वीकार किए जाते हैं। Tailnet CGNAT पते, `.ts.net` नाम, और सार्वजनिक होस्ट अभी भी
-QR/सेटअप-कोड जारी होने से पहले fail closed होते हैं।
+Tailscale, public, या अन्य remote mobile pairing के लिए, Tailscale Serve/Funnel
+या कोई अन्य `wss://` Gateway URL उपयोग करें। Plaintext `ws://` setup codes केवल
+loopback, private LAN addresses, `.local` Bonjour hosts, और Android
+emulator host के लिए accepted हैं। Tailnet CGNAT addresses, `.ts.net` names, और public hosts अभी भी
+QR/setup-code जारी करने से पहले fail closed होते हैं।
 
-### Node डिवाइस को अनुमोदित करें
+### Node device approve करें
 
 ```bash
 openclaw devices list
@@ -157,25 +173,25 @@ openclaw devices approve <requestId>
 openclaw devices reject <requestId>
 ```
 
-जब स्पष्ट अनुमोदन इसलिए अस्वीकार होता है क्योंकि अनुमोदन देने वाला paired-device सत्र
-pairing-only दायरे के साथ खोला गया था, तो CLI उसी अनुरोध को
-`operator.admin` के साथ फिर से आज़माता है। इससे मौजूदा admin-सक्षम paired device,
-`devices/paired.json` को हाथ से संपादित किए बिना, नई Control UI/ब्राउज़र पेयरिंग को पुनर्प्राप्त कर सकता है।
-Gateway फिर भी पुनः आज़माए गए कनेक्शन को सत्यापित करता है; जो टोकन
-`operator.admin` के साथ प्रमाणित नहीं हो सकते, वे अवरुद्ध रहते हैं।
+जब explicit approval इसलिए denied होता है क्योंकि approving paired-device session
+pairing-only scope के साथ खोला गया था, तो CLI उसी request को
+`operator.admin` के साथ retry करता है। इससे existing admin-capable paired device नया
+Control UI/browser pairing `devices/paired.json` हाथ से edit किए बिना recover कर सकता है।
+Gateway फिर भी retried connection validate करता है; ऐसे tokens जो
+`operator.admin` के साथ authenticate नहीं कर सकते, blocked रहते हैं।
 
-यदि वही डिवाइस अलग auth विवरणों के साथ फिर कोशिश करता है (उदाहरण के लिए अलग
-भूमिका/दायरे/public key), तो पिछला लंबित अनुरोध प्रतिस्थापित हो जाता है और नया
+यदि वही device अलग auth details (उदाहरण के लिए अलग
+role/scopes/public key) के साथ retry करता है, तो previous pending request supersede हो जाता है और नया
 `requestId` बनाया जाता है।
 
 <Note>
-पहले से paired डिवाइस को चुपचाप व्यापक एक्सेस नहीं मिलता। यदि वह अधिक दायरों या व्यापक भूमिका के लिए फिर से कनेक्ट करता है, तो OpenClaw मौजूदा अनुमोदन को जैसा है वैसा रखता है और एक नया लंबित अपग्रेड अनुरोध बनाता है। अनुमोदन देने से पहले वर्तमान में अनुमोदित एक्सेस की नए अनुरोधित एक्सेस से तुलना करने के लिए `openclaw devices list` का उपयोग करें।
+पहले से paired device को चुपचाप broader access नहीं मिलता। यदि वह अधिक scopes या broader role मांगते हुए reconnect करता है, तो OpenClaw existing approval को जैसा है वैसा रखता है और fresh pending upgrade request बनाता है। approve करने से पहले current approved access को newly requested access से compare करने के लिए `openclaw devices list` उपयोग करें।
 </Note>
 
-### वैकल्पिक trusted-CIDR Node auto-approve
+### Optional trusted-CIDR node auto-approve
 
-डिवाइस पेयरिंग डिफ़ॉल्ट रूप से मैनुअल रहती है। कड़ाई से नियंत्रित नोड नेटवर्क के लिए,
-आप स्पष्ट CIDR या सटीक IP के साथ पहली बार के नोड auto-approval में opt in कर सकते हैं:
+Device pairing default रूप से manual रहता है। tightly controlled node networks के लिए,
+आप explicit CIDRs या exact IPs के साथ first-time node auto-approval में opt in कर सकते हैं:
 
 ```json5
 {
@@ -189,31 +205,31 @@ Gateway फिर भी पुनः आज़माए गए कनेक्�
 }
 ```
 
-यह केवल ताज़ा `role: node` पेयरिंग अनुरोधों पर लागू होता है जिनमें कोई अनुरोधित
-दायरे नहीं होते। Operator, ब्राउज़र, Control UI, और WebChat क्लाइंट को अभी भी मैनुअल
-अनुमोदन चाहिए। भूमिका, दायरा, मेटाडेटा, और public-key बदलावों को अभी भी मैनुअल
-अनुमोदन चाहिए।
+यह केवल fresh `role: node` pairing requests पर लागू होता है जिनमें कोई requested
+scopes नहीं हैं। Operator, browser, Control UI, और WebChat clients को अभी भी manual
+approval की आवश्यकता होती है। Role, scope, metadata, और public-key changes को अभी भी manual
+approval की आवश्यकता होती है।
 
-### Node पेयरिंग स्टेट स्टोरेज
+### Node pairing state storage
 
-`~/.openclaw/devices/` के अंतर्गत संग्रहीत:
+`~/.openclaw/devices/` के अंतर्गत stored:
 
-- `pending.json` (अल्पकालिक; लंबित अनुरोध समाप्त हो जाते हैं)
-- `paired.json` (paired डिवाइस + टोकन)
+- `pending.json` (short-lived; pending requests expire)
+- `paired.json` (paired devices + tokens)
 
-### नोट्स
+### Notes
 
 - legacy `node.pair.*` API (CLI: `openclaw nodes pending|approve|reject|remove|rename`) एक
-  अलग gateway-स्वामित्व वाला पेयरिंग स्टोर है। WS नोड को अभी भी डिवाइस पेयरिंग चाहिए।
-- पेयरिंग रिकॉर्ड अनुमोदित भूमिकाओं के लिए टिकाऊ सत्य स्रोत है। Active
-  डिवाइस टोकन उसी अनुमोदित भूमिका सेट तक सीमित रहते हैं; अनुमोदित भूमिकाओं के बाहर
-  कोई इधर-उधर की टोकन प्रविष्टि नया एक्सेस नहीं बनाती।
+  अलग gateway-owned pairing store है। WS nodes को अभी भी device pairing की आवश्यकता होती है।
+- pairing record approved roles के लिए durable source of truth है। Active
+  device tokens उस approved role set तक bounded रहते हैं; approved roles के बाहर कोई stray token entry
+  नया access create नहीं करती।
 
-## संबंधित दस्तावेज़
+## Related docs
 
-- सुरक्षा मॉडल + prompt injection: [सुरक्षा](/hi/gateway/security)
-- सुरक्षित रूप से अपडेट करना (doctor चलाएं): [अपडेट करना](/hi/install/updating)
-- चैनल कॉन्फ़िग:
+- Security model + prompt injection: [सुरक्षा](/hi/gateway/security)
+- Safely update करना (doctor चलाएं): [Updating](/hi/install/updating)
+- Channel configs:
   - Telegram: [Telegram](/hi/channels/telegram)
   - WhatsApp: [WhatsApp](/hi/channels/whatsapp)
   - Signal: [Signal](/hi/channels/signal)
