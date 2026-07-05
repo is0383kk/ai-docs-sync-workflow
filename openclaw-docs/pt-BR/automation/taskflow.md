@@ -1,12 +1,12 @@
 ---
 read_when:
-    - Você quer entender como o fluxo de tarefas se relaciona com tarefas em segundo plano
+    - Você quer entender como o Fluxo de tarefas se relaciona com tarefas em segundo plano
     - Você encontra Task Flow ou openclaw tasks flow em notas de versão ou na documentação
     - Você quer inspecionar ou gerenciar o estado durável do fluxo
-summary: Camada de orquestração do Task Flow acima das tarefas em segundo plano
+summary: Camada de orquestração do TaskFlow acima de tarefas em segundo plano
 title: Fluxo de tarefas
 x-i18n:
-    generated_at: "2026-06-27T17:09:16Z"
+    generated_at: "2026-07-02T08:01:19Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
@@ -15,29 +15,29 @@ x-i18n:
     workflow: 16
 ---
 
-Task Flow é o substrato de orquestração de fluxos que fica acima das [tarefas em segundo plano](/pt-BR/automation/tasks). Ele gerencia fluxos duráveis de várias etapas com seu próprio estado, rastreamento de revisões e semântica de sincronização, enquanto as tarefas individuais continuam sendo a unidade de trabalho desacoplado.
+Task Flow é o substrato de orquestração de fluxos que fica acima de [tarefas em segundo plano](/pt-BR/automation/tasks). Ele gerencia fluxos duráveis de várias etapas com seu próprio estado, rastreamento de revisões e semântica de sincronização, enquanto tarefas individuais continuam sendo a unidade de trabalho desacoplado.
 
 ## Quando usar Task Flow
 
-Use Task Flow quando o trabalho abranger várias etapas sequenciais ou ramificadas e você precisar de rastreamento durável de progresso entre reinicializações do Gateway. Para operações únicas em segundo plano, uma [tarefa](/pt-BR/automation/tasks) simples é suficiente.
+Use Task Flow quando o trabalho abranger várias etapas sequenciais ou ramificadas e você precisar de rastreamento durável de progresso entre reinicializações do gateway. Para operações únicas em segundo plano, uma [tarefa](/pt-BR/automation/tasks) simples é suficiente.
 
-| Cenário                              | Use                  |
-| ------------------------------------- | -------------------- |
-| Trabalho único em segundo plano       | Tarefa simples       |
-| Pipeline de várias etapas (A, depois B, depois C) | Task Flow (gerenciado) |
-| Observar tarefas criadas externamente | Task Flow (espelhado) |
-| Lembrete de execução única            | Trabalho Cron        |
+| Cenário                               | Uso                       |
+| ------------------------------------- | ------------------------- |
+| Trabalho único em segundo plano       | Tarefa simples            |
+| Pipeline de várias etapas (A depois B depois C) | Task Flow (gerenciado) |
+| Observar tarefas criadas externamente | Task Flow (espelhado)     |
+| Lembrete único                        | Trabalho Cron             |
 
 ## Padrão confiável de workflow agendado
 
 Para workflows recorrentes, como briefings de inteligência de mercado, trate o agendamento, a orquestração e as verificações de confiabilidade como camadas separadas:
 
-1. Use [Tarefas Agendadas](/pt-BR/automation/cron-jobs) para a temporização.
+1. Use [Tarefas Agendadas](/pt-BR/automation/cron-jobs) para temporização.
 2. Use uma sessão Cron persistente quando o workflow precisar se basear em contexto anterior.
-3. Use [Lobster](/pt-BR/tools/lobster) para etapas determinísticas, portões de aprovação e tokens de retomada.
-4. Use Task Flow para rastrear a execução de várias etapas entre tarefas filhas, esperas, tentativas e reinicializações do Gateway.
+3. Use [Lobster](/pt-BR/tools/lobster) para etapas determinísticas, gates de aprovação e tokens de retomada.
+4. Use Task Flow para rastrear a execução de várias etapas entre tarefas filhas, esperas, novas tentativas e reinicializações do gateway.
 
-Exemplo de formato Cron:
+Formato de Cron de exemplo:
 
 ```bash
 openclaw cron add \
@@ -51,9 +51,9 @@ openclaw cron add \
   --to "channel:C1234567890"
 ```
 
-Use `session:<id>` em vez de `isolated` quando o workflow recorrente precisar de histórico deliberado, resumos de execuções anteriores ou contexto permanente. Use `isolated` quando cada execução deve começar do zero e todo o estado necessário é explícito no workflow.
+Use `session:<id>` em vez de `isolated` quando o workflow recorrente precisar de histórico deliberado, resumos de execuções anteriores ou contexto permanente. Use `isolated` quando cada execução deve começar do zero e todo o estado necessário está explícito no workflow.
 
-Dentro do workflow, coloque verificações de confiabilidade antes da etapa de resumo do LLM:
+Dentro do workflow, coloque as verificações de confiabilidade antes da etapa de resumo do LLM:
 
 ```yaml
 name: market-intel-brief
@@ -78,13 +78,13 @@ steps:
 
 Verificações de pré-voo recomendadas:
 
-- Disponibilidade do navegador e escolha de perfil, por exemplo `openclaw` para estado gerenciado ou `user` quando uma sessão do Chrome conectada for necessária. Consulte [Navegador](/pt-BR/tools/browser).
+- Disponibilidade do navegador e escolha de perfil, por exemplo `openclaw` para estado gerenciado ou `user` quando uma sessão do Chrome autenticada for necessária. Consulte [Navegador](/pt-BR/tools/browser).
 - Credenciais de API e cota para cada fonte.
 - Alcance de rede para endpoints necessários.
 - Ferramentas necessárias habilitadas para o agente, como `lobster`, `browser` e `llm-task`.
 - Destino de falha configurado para Cron para que falhas de pré-voo fiquem visíveis. Consulte [Tarefas Agendadas](/pt-BR/automation/cron-jobs#delivery-and-output).
 
-Campos de proveniência de dados recomendados para cada item coletado:
+Campos recomendados de proveniência de dados para cada item coletado:
 
 ```json
 {
@@ -96,9 +96,9 @@ Campos de proveniência de dados recomendados para cada item coletado:
 }
 ```
 
-Faça o workflow rejeitar ou marcar itens obsoletos antes da sumarização. A etapa de LLM deve receber apenas JSON estruturado e deve ser instruída a preservar `sourceUrl`, `retrievedAt` e `asOf` na saída. Use [Tarefa de LLM](/pt-BR/tools/llm-task) quando precisar de uma etapa de modelo validada por esquema dentro do workflow.
+Faça o workflow rejeitar ou marcar itens obsoletos antes da sumarização. A etapa do LLM deve receber apenas JSON estruturado e deve ser instruída a preservar `sourceUrl`, `retrievedAt` e `asOf` na saída. Use [Tarefa LLM](/pt-BR/tools/llm-task) quando precisar de uma etapa de modelo validada por esquema dentro do workflow.
 
-Para workflows reutilizáveis por equipes ou comunidades, empacote a CLI, os arquivos `.lobster` e quaisquer notas de configuração como uma skill ou Plugin e publique pelo [ClawHub](/pt-BR/clawhub). Mantenha as proteções específicas do workflow nesse pacote, a menos que a API do Plugin não tenha uma capacidade genérica necessária.
+Para workflows reutilizáveis de equipe ou comunidade, empacote a CLI, os arquivos `.lobster` e quaisquer notas de configuração como uma skill ou Plugin e publique por meio do [ClawHub](/clawhub). Mantenha guardrails específicos do workflow nesse pacote, a menos que a API de Plugin não tenha uma capacidade genérica necessária.
 
 ## Modos de sincronização
 
@@ -106,7 +106,7 @@ Para workflows reutilizáveis por equipes ou comunidades, empacote a CLI, os arq
 
 Task Flow controla o ciclo de vida de ponta a ponta. Ele cria tarefas como etapas do fluxo, conduz essas tarefas até a conclusão e avança o estado do fluxo automaticamente.
 
-Exemplo: um fluxo de relatório semanal que (1) coleta dados, (2) gera o relatório e (3) o entrega. Task Flow cria cada etapa como uma tarefa em segundo plano, aguarda a conclusão e então passa para a próxima etapa.
+Exemplo: um fluxo de relatório semanal que (1) coleta dados, (2) gera o relatório e (3) o entrega. Task Flow cria cada etapa como uma tarefa em segundo plano, aguarda a conclusão e passa para a próxima etapa.
 
 ```
 Flow: weekly-report
@@ -117,20 +117,20 @@ Flow: weekly-report
 
 ### Modo espelhado
 
-Task Flow observa tarefas criadas externamente e mantém o estado do fluxo sincronizado sem assumir a propriedade da criação de tarefas. Isso é útil quando as tarefas se originam de trabalhos Cron, comandos da CLI ou outras fontes, e você quer uma visão unificada do progresso delas como um fluxo.
+Task Flow observa tarefas criadas externamente e mantém o estado do fluxo sincronizado sem assumir a propriedade da criação das tarefas. Isso é útil quando as tarefas se originam de trabalhos Cron, comandos da CLI ou outras fontes e você quer uma visão unificada do progresso delas como um fluxo.
 
-Exemplo: três trabalhos Cron independentes que juntos formam uma rotina de "operações matinais". Um fluxo espelhado rastreia o progresso coletivo sem controlar quando ou como eles são executados.
+Exemplo: três trabalhos Cron independentes que, juntos, formam uma rotina de "operações matinais". Um fluxo espelhado rastreia o progresso coletivo sem controlar quando ou como eles são executados.
 
 ## Estado durável e rastreamento de revisões
 
-Cada fluxo persiste seu próprio estado e rastreia revisões para que o progresso sobreviva a reinicializações do Gateway. O rastreamento de revisões permite detectar conflitos quando várias fontes tentam avançar o mesmo fluxo simultaneamente.
-O registro de fluxos usa SQLite com manutenção limitada de log de gravação antecipada, incluindo
-checkpoints periódicos e no desligamento, para que Gateways de longa duração não retenham
+Cada fluxo persiste seu próprio estado e rastreia revisões para que o progresso sobreviva a reinicializações do gateway. O rastreamento de revisões permite detectar conflitos quando várias fontes tentam avançar o mesmo fluxo simultaneamente.
+O registro de fluxos usa SQLite com manutenção limitada do write-ahead log, incluindo
+checkpoints periódicos e no encerramento, para que gateways de longa execução não retenham
 arquivos auxiliares `registry.sqlite-wal` ilimitados.
 
 ## Comportamento de cancelamento
 
-`openclaw tasks flow cancel` define uma intenção de cancelamento persistente no fluxo. As tarefas ativas dentro do fluxo são canceladas, e nenhuma nova etapa é iniciada. A intenção de cancelamento persiste entre reinicializações, então um fluxo cancelado permanece cancelado mesmo que o Gateway reinicie antes que todas as tarefas filhas tenham terminado.
+`openclaw tasks flow cancel` define uma intenção de cancelamento persistente no fluxo. As tarefas ativas dentro do fluxo são canceladas, e nenhuma nova etapa é iniciada. A intenção de cancelamento persiste entre reinicializações, portanto um fluxo cancelado continua cancelado mesmo que o gateway reinicie antes de todas as tarefas filhas terminarem.
 
 ## Comandos da CLI
 
@@ -145,19 +145,19 @@ openclaw tasks flow show <lookup>
 openclaw tasks flow cancel <lookup>
 ```
 
-| Comando                           | Descrição                                      |
-| --------------------------------- | ---------------------------------------------- |
+| Comando                           | Descrição                                           |
+| --------------------------------- | --------------------------------------------------- |
 | `openclaw tasks flow list`        | Mostra fluxos rastreados com status e modo de sincronização |
-| `openclaw tasks flow show <id>`   | Inspeciona um fluxo por id de fluxo ou chave de lookup |
-| `openclaw tasks flow cancel <id>` | Cancela um fluxo em execução e suas tarefas ativas |
+| `openclaw tasks flow show <id>`   | Inspeciona um fluxo por id de fluxo ou chave de busca |
+| `openclaw tasks flow cancel <id>` | Cancela um fluxo em execução e suas tarefas ativas  |
 
-## Como fluxos se relacionam com tarefas
+## Como fluxos se relacionam a tarefas
 
-Fluxos coordenam tarefas, não as substituem. Um único fluxo pode conduzir várias tarefas em segundo plano ao longo de seu ciclo de vida. Use `openclaw tasks` para inspecionar registros de tarefas individuais e `openclaw tasks flow` para inspecionar o fluxo orquestrador.
+Fluxos coordenam tarefas, não as substituem. Um único fluxo pode conduzir várias tarefas em segundo plano ao longo de sua vida útil. Use `openclaw tasks` para inspecionar registros de tarefas individuais e `openclaw tasks flow` para inspecionar o fluxo orquestrador.
 
 ## Relacionado
 
-- [Tarefas em Segundo Plano](/pt-BR/automation/tasks) — o livro-razão de trabalho desacoplado que os fluxos coordenam
+- [Tarefas em Segundo Plano](/pt-BR/automation/tasks) — o ledger de trabalho desacoplado que os fluxos coordenam
 - [CLI: tarefas](/pt-BR/cli/tasks) — referência de comandos da CLI para `openclaw tasks flow`
-- [Visão Geral da Automação](/pt-BR/automation) — todos os mecanismos de automação em resumo
+- [Visão Geral de Automação](/pt-BR/automation) — todos os mecanismos de automação em uma visão geral
 - [Trabalhos Cron](/pt-BR/automation/cron-jobs) — trabalhos agendados que podem alimentar fluxos

@@ -174,7 +174,7 @@ claude doctor
 
 ## Authenticate
 
-Claude Code requires a Pro, Max, Team, Enterprise, or Console account. The free Claude.ai plan does not include Claude Code access. You can also use Claude Code with a third-party API provider like [Amazon Bedrock](/en/amazon-bedrock), [Google Vertex AI](/en/google-vertex-ai), or [Microsoft Foundry](/en/microsoft-foundry).
+Claude Code requires a Pro, Max, Team, Enterprise, or Console account. The free Claude.ai plan does not include Claude Code access. You can also use Claude Code with a third-party API provider like [Amazon Bedrock](/en/amazon-bedrock), [Google Cloud's Agent Platform](/en/google-vertex-ai), or [Microsoft Foundry](/en/microsoft-foundry).
 
 After installing, log in by running `claude` and following the browser prompts. See [Authentication](/en/authentication) for all account types and team setup options.
 
@@ -419,7 +419,7 @@ All repositories are signed with the [Claude Code release signing key](#binary-i
 
 ### Install with npm
 
-You can also install Claude Code as a global npm package. The package requires [Node.js 18 or later](https://nodejs.org/en/download).
+You can also install Claude Code as a global npm package. As of v2.1.198, the npm package requires [Node.js 22 or later](https://nodejs.org/en/download). On an older Node.js version, npm prints an `EBADENGINE` warning during install rather than failing; the install completes and `claude` still runs, since the package downloads a native binary that doesn't use your Node.js at runtime.
 
 ```bash theme={null}
 npm install -g @anthropic-ai/claude-code
@@ -488,7 +488,7 @@ Steps 1-3 require a POSIX shell with `gpg` and `curl`. On Windows, run them in G
   </Step>
 
   <Step title="Check the binary against the manifest">
-    Compare the SHA256 checksum of your downloaded binary with the value listed under `platforms.<platform>.checksum` in `manifest.json`.
+    Compare the SHA256 checksum of the binary with the value listed under `platforms.<platform>.checksum` in `manifest.json`. The commands below assume a `claude` binary in the current directory. To verify an installed native binary instead, run the command against `~/.local/share/claude/versions/VERSION`, replacing VERSION with the release you set in Step 2.
 
     <Tabs>
       <Tab title="Linux">

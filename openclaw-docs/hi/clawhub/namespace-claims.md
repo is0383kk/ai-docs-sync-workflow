@@ -1,13 +1,13 @@
 ---
 read_when:
-    - किसी संगठन, ब्रांड, पैकेज स्कोप, मालिक हैंडल, skill स्लग, या पैकेज नेमस्पेस पर दावा करना
-    - पहले से दावा किए गए या आरक्षित namespace को हल करना
-    - रिपोर्ट, अपील या नेमस्पेस दावा का उपयोग करना है या नहीं, यह तय करना
+    - किसी संगठन, ब्रांड, पैकेज स्कोप, मालिक हैंडल, स्किल स्लग, या पैकेज नेमस्पेस पर दावा करना
+    - पहले से दावा किए गए या आरक्षित namespace को resolve करना
+    - रिपोर्ट, अपील या namespace claim का उपयोग करना है या नहीं तय करना
 sidebarTitle: Org and Namespace Claims
-summary: संगठन, ब्रांड, स्वामी-हैंडल, पैकेज-स्कोप, स्किल-स्लग, या नेमस्पेस स्वामित्व विवादों के लिए ClawHub समीक्षा का अनुरोध कैसे करें।
-title: संगठन और नेमस्पेस दावे
+summary: संगठन, ब्रांड, स्वामी-हैंडल, पैकेज-स्कोप, Skill-स्लग, या नेमस्पेस स्वामित्व विवादों के लिए ClawHub समीक्षा का अनुरोध कैसे करें।
+title: संगठन और नामस्थान दावे
 x-i18n:
-    generated_at: "2026-06-30T22:16:26Z"
+    generated_at: "2026-07-04T20:31:32Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
@@ -16,92 +16,94 @@ x-i18n:
     workflow: 16
 ---
 
-# संगठन और नेमस्पेस दावे
+# Org और Namespace दावे
 
-ClawHub owner handles, संगठन handles, skill slugs, Plugin पैकेज नामों और
-पैकेज scopes को सार्वजनिक नेमस्पेस के रूप में उपयोग करता है। यदि कोई नेमस्पेस
-किसी वास्तविक दुनिया के प्रोजेक्ट, ब्रांड, पैकेज ecosystem, या संगठन से संबंधित
-दिखता है, लेकिन ClawHub पर पहले से दावा किया गया, आरक्षित, भ्रामक, या विवादित
-है, तो स्टाफ से
-[संगठन / नेमस्पेस दावा issue form](https://github.com/openclaw/clawhub/issues/new?template=org-namespace-claim.yml)
-के साथ उसकी समीक्षा करने को कहें।
+ClawHub स्वामी हैंडल, org हैंडल, skill slugs, Plugin पैकेज नामों और
+पैकेज scopes को सार्वजनिक namespaces के रूप में उपयोग करता है। यदि कोई namespace
+किसी वास्तविक दुनिया के प्रोजेक्ट, ब्रांड, पैकेज ecosystem या संगठन से संबंधित
+लगता है, लेकिन ClawHub पर पहले से दावा किया गया, आरक्षित, भ्रामक या विवादित है,
+तो staff से
+[Org / Namespace Claim issue form](https://github.com/openclaw/clawhub/issues/new?template=org-namespace-claim.yml)
+के साथ इसकी समीक्षा करने को कहें।
 
-इस पथ का उपयोग सार्वजनिक, गैर-संवेदनशील स्वामित्व समीक्षा के लिए करें। नेमस्पेस
-दावों के लिए इन-प्रोडक्ट रिपोर्ट या खाता अपील फ़ॉर्म का उपयोग न करें।
+सार्वजनिक, गैर-संवेदनशील स्वामित्व समीक्षा के लिए इस पथ का उपयोग करें। namespace
+दावों के लिए in-product रिपोर्ट या खाता appeal form का उपयोग न करें।
 
 ## दावा कब खोलें
 
-जब आपको लगता है कि ClawHub स्टाफ को यह समीक्षा करनी चाहिए कि वास्तविक दुनिया के
-स्वामित्व के कारण किसी नेमस्पेस को आरक्षित, स्थानांतरित, नाम बदला, छिपाया,
-quarantine, alias, या अन्यथा बदला जाना चाहिए, तब नेमस्पेस दावा खोलें।
+namespace दावा तब खोलें जब आपको लगे कि ClawHub staff को समीक्षा करनी चाहिए कि
+वास्तविक दुनिया के स्वामित्व के कारण किसी namespace को आरक्षित, स्थानांतरित,
+नामांतरित, छिपाया, quarantined, aliased, या अन्यथा बदला जाना चाहिए या नहीं।
 
 उदाहरणों में शामिल हैं:
 
-- ऐसा संगठन handle जो आपके GitHub संगठन, प्रोजेक्ट, कंपनी, या समुदाय से मेल खाता हो
-- `@example-org/*` जैसा पैकेज scope, जिसे केवल मेल खाते ClawHub owner के अंतर्गत
-  प्रकाशित होना चाहिए
-- ऐसा skill slug या Plugin पैकेज नाम जो किसी प्रोजेक्ट की नकल करता हुआ दिखता हो
-- ब्रांड, ट्रेडमार्क, प्रोजेक्ट नाम-परिवर्तन, या पैकेज इतिहास विवाद
-- हटाया गया, निष्क्रिय, या पहुंच से बाहर owner जो सही नेमस्पेस owner को रोकता हो
+- ऐसा org हैंडल जो आपके GitHub org, प्रोजेक्ट, कंपनी या समुदाय से मेल खाता हो
+- `@example-org/*` जैसा पैकेज scope, जिसे केवल मेल खाने वाले ClawHub स्वामी के
+  अंतर्गत प्रकाशित होना चाहिए
+- कोई skill slug या Plugin पैकेज नाम जो किसी प्रोजेक्ट का प्रतिरूपण करता लगता हो
+- ब्रांड, trademark, प्रोजेक्ट rename, या पैकेज इतिहास से जुड़ा विवाद
+- कोई हटाया गया, निष्क्रिय या पहुंच से बाहर स्वामी जो उचित namespace स्वामी को
+  रोकता हो
 
-यदि listing स्वामित्व विवाद से आगे unsafe, malicious, या भ्रामक है, तो संबंधित
-moderation या security guidance का भी पालन करें। नेमस्पेस दावा फ़ॉर्म स्वामित्व
-समीक्षा के लिए है, आपातकालीन vulnerability disclosure के लिए नहीं।
+यदि listing स्वामित्व विवाद से परे असुरक्षित, दुर्भावनापूर्ण या भ्रामक है, तो
+संबंधित moderation या सुरक्षा guidance का भी पालन करें। namespace claim form
+स्वामित्व समीक्षा के लिए है, आपातकालीन vulnerability disclosure के लिए नहीं।
 
-## फ़ाइल करने से पहले
+## फाइल करने से पहले
 
-पहले पुष्टि करें कि आप ऐसे owner के साथ प्रकाशित कर रहे हैं जो नेमस्पेस से मेल
-खाता है। Plugin पैकेजों के लिए, `@example-org/example-plugin` जैसे scoped नाम
-मेल खाते `example-org` owner के रूप में प्रकाशित होने चाहिए।
+पहले पुष्टि करें कि आप उस स्वामी के साथ प्रकाशित कर रहे हैं जो namespace से मेल
+खाता है। Plugin पैकेजों के लिए, `@example-org/example-plugin` जैसे scoped नामों
+को मेल खाने वाले `example-org` स्वामी के रूप में प्रकाशित किया जाना चाहिए।
 
-यदि आप मौजूदा owner को manage कर सकते हैं, तो प्रभावित resource को प्रकाशित,
-नाम बदलकर, transfer, hide, या delete करके नेमस्पेस सीधे ठीक करें। दावा तब उपयोग
-करें जब आप मौजूदा owner को manage नहीं कर सकते या जब विवाद सुलझाने के लिए स्टाफ
-की जरूरत हो।
+यदि आप वर्तमान स्वामी को manage कर सकते हैं, तो प्रभावित resource को प्रकाशित,
+नामांतरित, स्थानांतरित, छिपाकर या हटाकर namespace को सीधे ठीक करें। claim का
+उपयोग तब करें जब आप वर्तमान स्वामी को manage नहीं कर सकते या जब staff को किसी
+विवाद का समाधान करना हो।
 
-## शामिल करने के लिए साक्ष्य
+## शामिल करने योग्य प्रमाण
 
-सार्वजनिक, गैर-संवेदनशील साक्ष्य का उपयोग करें। उपयोगी proof में शामिल हैं:
+सार्वजनिक, गैर-संवेदनशील प्रमाण का उपयोग करें। सहायक प्रमाणों में शामिल हैं:
 
-- GitHub संगठन, repo, release, या maintainer इतिहास
-- आधिकारिक प्रोजेक्ट docs जो नेमस्पेस का नाम बताते हों
-- domain या आधिकारिक email-domain proof
+- GitHub org, repo, release, या maintainer history
+- आधिकारिक प्रोजेक्ट docs जो namespace का नाम बताते हों
+- domain या official email-domain proof
 - npm, PyPI, crates.io, या अन्य package-registry scope control
 - trademark, brand, या project ownership evidence जिसे सार्वजनिक रूप से चर्चा
   करना सुरक्षित हो
-- source repository इतिहास, package history, या सार्वजनिक rename notices
-- विवादित ClawHub owner, skill, Plugin, package, या issue के links
+- source repository history, package history, या public rename notices
+- विवादित ClawHub स्वामी, skill, Plugin, पैकेज या issue के लिंक
 
-समझाएँ कि प्रत्येक link क्या साबित करता है। स्टाफ को निजी credentials या secrets
-की जरूरत के बिना संबंध समझ में आना चाहिए।
+समझाएं कि प्रत्येक लिंक क्या सिद्ध करता है। staff को निजी credentials या secrets
+की आवश्यकता के बिना संबंध समझ में आना चाहिए।
 
 ## क्या शामिल न करें
 
-सार्वजनिक GitHub issue में secrets या private proof न डालें। शामिल न करें:
+सार्वजनिक GitHub issue में secrets या निजी proof न डालें। शामिल न करें:
 
 - API tokens, signing keys, या credentials
 - DNS challenge tokens
-- निजी legal files या contracts
-- personal identity documents
-- निजी emails, private security reports, या confidential customer data
+- निजी कानूनी files या contracts
+- व्यक्तिगत identity documents
+- निजी emails, निजी security reports, या confidential customer data
 
-दावा फ़ॉर्म पूछता है कि क्या sensitive evidence के लिए private staff channel की
-जरूरत है। संवेदनशील सामग्री सार्वजनिक रूप से पोस्ट करने के बजाय उस विकल्प का
+claim form पूछता है कि संवेदनशील प्रमाण के लिए private staff channel की आवश्यकता
+है या नहीं। संवेदनशील सामग्री को सार्वजनिक रूप से पोस्ट करने के बजाय उस विकल्प का
 उपयोग करें।
 
 ## संभावित परिणाम
 
-साक्ष्य और जोखिम के आधार पर, ClawHub स्टाफ किसी नेमस्पेस को reserve कर सकता है,
-ownership transfer कर सकता है, resource का नाम बदल सकता है, मौजूदा listing को
-hide या quarantine कर सकता है, alias या redirect जोड़ सकता है, अधिक proof मांग
-सकता है, या request अस्वीकार कर सकता है।
+प्रमाण और जोखिम के आधार पर, ClawHub staff किसी namespace को आरक्षित कर सकता है,
+स्वामित्व स्थानांतरित कर सकता है, किसी resource का नाम बदल सकता है, मौजूदा
+listing को छिपा या quarantine कर सकता है, alias या redirect जोड़ सकता है, अधिक
+proof मांग सकता है, या अनुरोध अस्वीकार कर सकता है।
 
-नेमस्पेस समीक्षा यह guarantee नहीं देती कि हर matching name transfer किया जाएगा।
-स्टाफ public evidence, existing usage, security risk, और user impact को तौलता है।
+namespace समीक्षा यह guarantee नहीं करती कि हर matching name स्थानांतरित किया
+जाएगा। staff सार्वजनिक प्रमाण, मौजूदा उपयोग, security risk और user impact को
+तौलता है।
 
 ## संबंधित Docs
 
-- [Publishing](/hi/clawhub/publishing)
-- [Troubleshooting](/clawhub/troubleshooting#publish-fails-because-a-namespace-is-claimed-or-reserved)
-- [Moderation and Account Safety](/clawhub/moderation)
+- [प्रकाशन](/hi/clawhub/publishing)
+- [समस्या निवारण](/clawhub/troubleshooting#publish-fails-because-a-namespace-is-claimed-or-reserved)
+- [Moderation और Account Safety](/clawhub/moderation)
 - [Security](/clawhub/security)

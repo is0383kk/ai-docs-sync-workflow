@@ -224,7 +224,7 @@ export AWS_PROFILE=my-profile
 
 For CI and automation, give the runner an IAM role with permission to invoke the Anthropic service and set `AWS_REGION`. The credential chain picks the role up automatically.
 
-If your SSO credentials expire mid-session, configure [`awsAuthRefresh`](/en/amazon-bedrock#advanced-credential-configuration) so Claude Code re-runs your login command and retries instead of failing. Add the command to your `settings.json`:
+If your SSO credentials expire mid-session, configure [`awsAuthRefresh`](/en/amazon-bedrock#advanced-credential-configuration) so Claude Code re-runs your login command and retries instead of failing. Automatic refresh on Claude Platform on AWS requires Claude Code v2.1.198 or later; earlier versions stop with a prompt to run `/login`, which can't refresh AWS credentials. Add the command to your `settings.json`:
 
 ```json theme={null}
 {
@@ -262,7 +262,7 @@ export AWS_REGION=us-east-1
 
 `ANTHROPIC_AWS_WORKSPACE_ID` is required and is sent on every request as the `anthropic-workspace-id` header. The base URL is computed from `AWS_REGION` as `https://aws-external-anthropic.{region}.api.aws`. To override the URL directly, set `ANTHROPIC_AWS_BASE_URL`.
 
-Claude Platform on AWS is opt-in even when AWS credentials are present in your environment. Bedrock and Foundry take precedence in provider routing, so unset `CLAUDE_CODE_USE_BEDROCK` and `CLAUDE_CODE_USE_FOUNDRY` if they're set.
+Claude Platform on AWS is opt-in even when AWS credentials are present in your environment. Amazon Bedrock and Microsoft Foundry take precedence in provider routing, so unset `CLAUDE_CODE_USE_BEDROCK` and `CLAUDE_CODE_USE_FOUNDRY` if they're set.
 
 ### 3. Pin model versions
 

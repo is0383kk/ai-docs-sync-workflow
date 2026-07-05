@@ -1,15 +1,15 @@
 ---
 read_when:
-    - Bir mobil Node uygulamasını bir Gateway ile hızlıca eşleştirmek istiyorsunuz
-    - Uzak/elle paylaşım için setup-code çıktısına ihtiyacınız var
-summary: '`openclaw qr` için CLI başvurusu (mobil eşleştirme QR''si + kurulum kodu oluşturma)'
+    - Bir mobil node uygulamasını bir gateway ile hızlıca eşleştirmek istiyorsunuz
+    - Uzaktan/manuel paylaşım için setup-code çıktısına ihtiyacınız var
+summary: '`openclaw qr` için CLI başvurusu (mobil eşleştirme QR kodu + kurulum kodu oluşturma)'
 title: QR
 x-i18n:
-    generated_at: "2026-06-28T00:24:30Z"
+    generated_at: "2026-07-04T18:18:16Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: d08bbeb69627dafea45c912af4e92c08cd5c79d4ae52bb3f0a6fba5e789acb51
+    source_hash: 81d15c9d551960c6f5677649b481e447ecda55a395957746959b4ecf81712bdb
     source_path: cli/qr.md
     workflow: 16
 ---
@@ -30,31 +30,31 @@ openclaw qr --url wss://gateway.example/ws
 
 ## Seçenekler
 
-- `--remote`: `gateway.remote.url` değerini tercih et; ayarlanmamışsa `gateway.tailscale.mode=serve|funnel` yine de uzak herkese açık URL'yi sağlayabilir
-- `--url <url>`: yükte kullanılan gateway URL'sini geçersiz kıl
-- `--public-url <url>`: yükte kullanılan herkese açık URL'yi geçersiz kıl
-- `--token <token>`: önyükleme akışının kimlik doğrulaması yaptığı gateway token'ını geçersiz kıl
-- `--password <password>`: önyükleme akışının kimlik doğrulaması yaptığı gateway parolasını geçersiz kıl
-- `--setup-code-only`: yalnızca kurulum kodunu yazdır
-- `--no-ascii`: ASCII QR işlemeyi atla
-- `--json`: JSON çıktısı üret (`setupCode`, `gatewayUrl`, `auth`, `urlSource`)
+- `--remote`: `gateway.remote.url` değerini tercih eder; ayarlanmamışsa `gateway.tailscale.mode=serve|funnel` yine de uzak genel URL'yi sağlayabilir
+- `--url <url>`: yükte kullanılan gateway URL'sini geçersiz kılar
+- `--public-url <url>`: yükte kullanılan genel URL'yi geçersiz kılar
+- `--token <token>`: bootstrap akışının kimlik doğrulaması yaptığı gateway token'ını geçersiz kılar
+- `--password <password>`: bootstrap akışının kimlik doğrulaması yaptığı gateway parolasını geçersiz kılar
+- `--setup-code-only`: yalnızca kurulum kodunu yazdırır
+- `--no-ascii`: ASCII QR işlemeyi atlar
+- `--json`: JSON çıktısı üretir (`setupCode`, `gatewayUrl`, `auth`, `urlSource`)
 
 ## Notlar
 
-- `--token` ve `--password` birlikte kullanılamaz.
+- `--token` ve `--password` birbirini dışlar.
 - Kurulum kodunun kendisi artık paylaşılan gateway token'ını/parolasını değil, opak ve kısa ömürlü bir `bootstrapToken` taşır.
-- Yerleşik kurulum kodu önyüklemesi, güvenilir mobil alıştırma için sınırlı bir `operator` devretme token'ı ile birlikte `scopes: []` içeren birincil bir `node` token'ı döndürür.
-- Devredilen operator token'ı `operator.approvals`, `operator.read`, `operator.talk.secrets` ve `operator.write` ile sınırlıdır; `operator.admin` ve `operator.pairing` ayrı bir onaylanmış operator eşleştirmesi veya token akışı gerektirir.
-- Mobil eşleştirme, Tailscale/herkese açık `ws://` gateway URL'leri için kapalı başarısız olur. Özel LAN adresleri ve `.local` Bonjour ana makineleri `ws://` üzerinden desteklenmeye devam eder, ancak Tailscale/herkese açık mobil rotalar Tailscale Serve/Funnel veya bir `wss://` gateway URL'si kullanmalıdır.
+- Yerleşik kurulum kodu bootstrap'i, güvenilir mobil ilk katılım için birincil `node` token'ını `scopes: []` ile ve sınırlı bir `operator` devir token'ı ile döndürür.
+- Devredilen operator token'ı `operator.approvals`, `operator.read`, `operator.talk.secrets` ve `operator.write` ile sınırlıdır; eşleştirme değişiklik kapsamları ve `operator.admin` yine de ayrı bir onaylanmış operator eşleştirmesi veya token akışı gerektirir.
+- Mobil eşleştirme, Tailscale/genel `ws://` gateway URL'leri için kapalı şekilde başarısız olur. Özel LAN adresleri ve `.local` Bonjour ana bilgisayarları `ws://` üzerinden desteklenmeye devam eder, ancak Tailscale/genel mobil rotalar Tailscale Serve/Funnel veya bir `wss://` gateway URL'si kullanmalıdır.
 - `--remote` ile OpenClaw, `gateway.remote.url` veya
-  `gateway.tailscale.mode=serve|funnel` gerektirir.
-- `--remote` ile, etkin uzak kimlik bilgileri SecretRefs olarak yapılandırılmışsa ve `--token` ya da `--password` iletmezseniz, komut bunları etkin gateway anlık görüntüsünden çözümler. Gateway kullanılamıyorsa komut hızlıca başarısız olur.
-- `--remote` olmadan, CLI kimlik doğrulama geçersiz kılması iletilmediğinde yerel gateway kimlik doğrulama SecretRefs çözümlenir:
-  - Token kimlik doğrulaması kazanabildiğinde `gateway.auth.token` çözümlenir (açık `gateway.auth.mode="token"` veya hiçbir parola kaynağının kazanmadığı çıkarımsal mod).
-  - Parola kimlik doğrulaması kazanabildiğinde `gateway.auth.password` çözümlenir (açık `gateway.auth.mode="password"` veya auth/env'den kazanan token olmayan çıkarımsal mod).
-- Hem `gateway.auth.token` hem de `gateway.auth.password` yapılandırılmışsa (SecretRefs dahil) ve `gateway.auth.mode` ayarlanmamışsa, mod açıkça ayarlanana kadar kurulum kodu çözümlemesi başarısız olur.
-- Gateway sürüm uyumsuzluğu notu: bu komut yolu `secrets.resolve` desteği olan bir gateway gerektirir; daha eski gateway'ler bilinmeyen yöntem hatası döndürür.
-- Taramadan sonra cihaz eşleştirmesini şununla onaylayın:
+  `gateway.tailscale.mode=serve|funnel` seçeneklerinden birini gerektirir.
+- `--remote` ile, etkin uzak kimlik bilgileri SecretRefs olarak yapılandırılmışsa ve `--token` ya da `--password` iletmezseniz, komut bunları etkin gateway anlık görüntüsünden çözer. Gateway kullanılamıyorsa komut hızlıca başarısız olur.
+- `--remote` olmadan, CLI kimlik doğrulama geçersiz kılması iletilmediğinde yerel gateway auth SecretRefs çözülür:
+  - `gateway.auth.token`, token auth kazanabildiğinde çözülür (açık `gateway.auth.mode="token"` veya hiçbir parola kaynağının kazanmadığı çıkarılmış mod).
+  - `gateway.auth.password`, parola auth kazanabildiğinde çözülür (açık `gateway.auth.mode="password"` veya auth/env'den kazanan token olmayan çıkarılmış mod).
+- Hem `gateway.auth.token` hem de `gateway.auth.password` yapılandırılmışsa (SecretRefs dahil) ve `gateway.auth.mode` ayarlanmamışsa, kurulum kodu çözümlemesi mod açıkça ayarlanana kadar başarısız olur.
+- Gateway sürüm uyumsuzluğu notu: bu komut yolu `secrets.resolve` destekleyen bir gateway gerektirir; eski gateway'ler bilinmeyen yöntem hatası döndürür.
+- Resmi OpenClaw iOS ve Android uygulamaları, kurulum kodu meta verileri eşleştiğinde otomatik olarak bağlanır. Bir istek beklemede kalırsa (örneğin resmi olmayan bir istemci veya eşleşmeyen meta veriler için), şu komutlarla inceleyip onaylayın:
   - `openclaw devices list`
   - `openclaw devices approve <requestId>`
 
