@@ -1,39 +1,35 @@
 ---
 read_when:
-    - OpenClaw の設定を、作成済みの `policy.jsonc` と照合したい
-    - doctor lint にポリシー検出結果が必要です
+    - OpenClaw の設定を作成済みの policy.jsonc と照合したい
+    - doctor lint にポリシー検出結果を含めたい
     - 監査証跡にはポリシー証明ハッシュが必要です
 summary: '`openclaw policy` 適合性チェックの CLI リファレンス'
 title: ポリシー
 x-i18n:
-    generated_at: "2026-06-27T11:00:03Z"
+    generated_at: "2026-07-06T21:47:54Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 5af65bb34aeed72bbb348a56195d65152dce1e8d0e7236da8d8681e56c9b32f4
+    source_hash: 5c58284793e9bdda4fa855b34b873d9427d9f64886882b2ad1dc4dc19dededaa
     source_path: cli/policy.md
     workflow: 16
 ---
 
 # `openclaw policy`
 
-`openclaw policy` は、同梱の Policy plugin によって提供されます。Policy は、既存の OpenClaw 設定の上にあるエンタープライズ向け適合レイヤーです。第二の設定システムを追加するものではありません。`policy.jsonc` は作成された要件を定義し、OpenClaw はアクティブなワークスペースを証拠として観測し、policy ヘルスチェックは `doctor --lint` を通じてドリフトを報告します。最終的な適合シグナルは、問題のない `doctor --lint` 実行です。policy は、別個のヘルスゲートを作成するのではなく、その共有 lint サーフェスに検出結果を提供します。
+`openclaw policy` は、バンドルされた Policy Plugin によって提供されます。これは既存の OpenClaw 設定の上にあるエンタープライズ向けの適合性レイヤーであり、第二の設定システムではありません。要件は `policy.jsonc` に記述します。OpenClaw はアクティブなワークスペースを証拠として観測し、ポリシーは `doctor --lint` を通じてドリフトを報告します。Policy はリクエスト時にツール呼び出しを強制したりランタイム動作を書き換えたりせず、`auth-profiles.json` のようなエージェントごとの認証情報ストアを証明することもありません。
 
-Policy は現在、設定済みチャンネル、MCP サーバー、モデルプロバイダー、ネットワーク SSRF 姿勢、ingress/チャンネルアクセス姿勢、Gateway 公開姿勢、エージェントワークスペース姿勢、データ処理姿勢、OpenClaw 設定のシークレットプロバイダー/auth プロファイル姿勢、および管理対象ツール宣言を管理します。たとえば、IT またはワークスペース運用者は、Telegram が承認済みチャンネルプロバイダーではないことを記録し、MCP サーバーとモデル参照を承認済みエントリに制限し、プライベートネットワークの fetch/browser アクセスを無効のままにすることを要求し、ダイレクトメッセージのセッション分離とチャンネル ingress 姿勢をレビュー済みの範囲内に維持することを要求し、Gateway の bind/auth/HTTP 公開をレビュー済みの範囲内に維持することを要求し、エージェントワークスペースアクセスとツール拒否をレビュー済み姿勢に維持することを要求し、OpenClaw 設定の SecretRef に管理対象プロバイダーを使用することを要求し、設定 auth プロファイルに provider/mode メタデータを持たせることを要求し、管理対象ツールにリスクと機密性のメタデータを持たせることを要求し、機密ログのリダクションを要求し、テレメトリのコンテンツ取得を拒否し、セッション保持メンテナンスを要求し、セッショントランスクリプトのメモリインデックス化を拒否し、そのうえで `doctor --lint` を共有適合ゲートとして使用できます。
-
-ワークスペースに「これらのチャンネルは有効化してはならない」や「管理対象ツールは承認メタデータを宣言しなければならない」といった永続的な宣言と、OpenClaw がその宣言に引き続き適合していることを証明する反復可能な方法が必要な場合に、policy を使用します。ローカルの挙動だけが必要で、policy の検出結果や証明出力が不要な場合は、通常の設定とワークスペースドキュメントだけを使用してください。
+Policy は、設定済みチャンネル、MCP サーバー、モデルプロバイダー、ネットワーク SSRF の姿勢、イングレス/チャンネルアクセス、Gateway の公開状態とノードコマンドの姿勢、エージェントのワークスペースアクセス、サンドボックスの姿勢、データ処理の姿勢、シークレットプロバイダー/auth プロファイルの姿勢、管理対象ツールメタデータ（`TOOLS.md`）をチェックします。ワークスペースに「Telegram を有効にしてはならない」や「管理対象ツールはリスクと所有者メタデータを宣言しなければならない」のような、永続的で検査可能なステートメントが必要な場合に使用します。証明やドリフト検出を伴わないローカル動作だけが必要な場合は、通常の設定で十分です。
 
 ## クイックスタート
-
-初回使用前に、同梱の Policy plugin を有効化します。
 
 ```bash
 openclaw plugins enable policy
 ```
 
-policy が有効な場合、doctor は任意の plugins をアクティブ化せずに policy ヘルスチェックを読み込めます。`policy.jsonc` が存在しない場合でも plugin は有効なままなので、doctor は欠落している成果物を報告できます。
+`policy.jsonc` が存在しない場合でも Plugin は有効なままなので、doctor はチェックを暗黙にスキップするのではなく、不足している成果物を報告できます。
 
-Policy は作成するものであり、ユーザーの現在の設定から生成されるものではありません。チャンネル、MCP サーバー、モデルプロバイダー、ネットワーク姿勢、ingress/チャンネルアクセス、Gateway 公開、エージェントワークスペース姿勢、設定済み sandbox ランタイム姿勢、OpenClaw データ処理姿勢、設定シークレットプロバイダー/auth プロファイル姿勢、exec 承認ファイル姿勢、およびツールメタデータの最小 policy は次のようになります。
+`policy.jsonc` は手作業で作成します。現在の設定から生成されるものではありません。各トップレベルセクションはルール名前空間です。具体的なルールがその配下に存在する場合にのみチェックが実行されます（サポートされていないセクションやキーは、暗黙に無視されるのではなく `policy/policy-jsonc-invalid` として失敗します）。サポートされるすべてのセクションを網羅する最小例:
 
 ```jsonc
 {
@@ -91,6 +87,9 @@ Policy は作成するものであり、ユーザーの現在の設定から生�
     "http": {
       "denyEndpoints": ["chatCompletions", "responses"],
       "requireUrlAllowlists": true,
+    },
+    "nodes": {
+      "denyCommands": ["system.run"],
     },
   },
   "agents": {
@@ -154,18 +153,29 @@ Policy は作成するものであり、ユーザーの現在の設定から生�
 }
 ```
 
-ルールが権威です。カテゴリブロックは名前空間にすぎません。具体的なルールが存在する場合にチェックが実行されます。OpenClaw は、現在の `channels.*` 設定、`mcp.servers.*`、`models.providers.*`、選択されたエージェントモデル参照、ネットワーク SSRF 設定、ダイレクトメッセージセッションスコープ、チャンネル DM policy、チャンネルグループ policy、チャンネル/グループの mention ゲート、Gateway の bind/auth/Control UI/Tailscale/remote/HTTP 姿勢、OpenClaw 設定のエージェント sandbox ワークスペースアクセスとツール拒否姿勢、データ処理設定姿勢、設定シークレットプロバイダーと SecretRef の来歴、設定 auth プロファイルメタデータ、設定済みのグローバル/エージェントごとのツール姿勢、および `TOOLS.md` 宣言を証拠として読み取り、適合しない観測状態を報告します。policy が non-loopback Gateway bind を拒否する場合、ランタイムデフォルトをレビューする意思があるときだけ `gateway.bind` を省略してください。厳密な設定適合には `gateway.bind=loopback` を設定します。読み取り専用エージェント姿勢では、該当するデフォルトまたはエージェントに sandbox mode を設定し、`workspaceAccess` を `none` または `ro` に設定してください。sandbox mode が省略されている場合や `off` の場合、読み取り専用/書き込み不可 policy は満たされません。`agents.workspace.denyTools` は `exec`、`process`、`write`、`edit`、`apply_patch` をサポートします。OpenClaw 設定の `group:fs` はファイル変更ツールを対象とし、`group:runtime` はシェル/プロセスツールを対象とします。ツール姿勢 policy は、`tools.profile`、`tools.allow`、`tools.alsoAllow`、`tools.deny`、`tools.fs.workspaceOnly`、`tools.exec.security`、`tools.exec.ask`、`tools.exec.host`、`tools.elevated.enabled`、および同じエージェントごとの `agents.list[].tools.*` オーバーライドを観測します。Exec 承認 policy は、`execApprovals` ルールが存在する場合にのみ、名前付きの `exec-approvals.json` プロダクト成果物を読み取ります。証拠には、socket トークンや最後に使用されたコマンドテキストを含めず、デフォルト、エージェントごとの姿勢、allowlist パターンを記録します。Policy はランタイムでツール呼び出しを強制しません。シークレット証拠は、provider/source 姿勢と SecretRef メタデータを記録し、生のシークレット値は記録しません。Policy は、`auth-profiles.json` のようなエージェントごとの認証情報ストアを読み取ったり証明したりしません。これらのストアは引き続き既存の auth と認証情報フローが所有します。データ処理証拠は、設定レベルの姿勢のみです。設定済みのリダクションモード、テレメトリのコンテンツ取得トグル、セッションメンテナンスモード、セッショントランスクリプトのメモリインデックス化設定をチェックします。生ログ、テレメトリエクスポート、トランスクリプト内容、メモリファイルを検査したり、個人データやシークレットが存在しないことを証明したりはしません。
+下のルール表からは自明でない横断的な注記:
 
-### Policy ルールリファレンス
+- 非 local loopback バインドを拒否しつつ `gateway.bind` を省略する場合、ランタイムのデフォルトを受け入れることを意味します。厳密な適合性には `gateway.bind: "loopback"` を設定してください。
+- 読み取り専用エージェントの場合は、該当するデフォルト/エージェントでサンドボックス `mode` を `all` または `non-main` に設定し、`workspaceAccess` を `none` または `ro` に設定します。サンドボックスモードが未設定または `off` の場合、読み取り専用ポリシーは満たされません。
+- `agents.workspace.denyTools` は `exec`、`process`、`write`、`edit`、`apply_patch` を受け入れます。設定のツール拒否グループ `group:fs`（ファイル変更）と `group:runtime`（シェル/プロセス）は、同等の姿勢を満たします。
+- Exec 承認チェックは、`execApprovals` ルールが存在する場合にのみ、実際の `exec-approvals.json` 成果物を読み取ります。成果物が存在しない、または無効な場合、それは観測不能な証拠であり、合成された合格ではありません。
+- シークレットと auth プロファイルの証拠は、プロバイダー/ソースの姿勢と SecretRef メタデータのみを記録し、生の値は記録しません。Policy は `auth-profiles.json` のようなエージェントごとの認証情報ストアを読み取ったり証明したりしません。
+- データ処理の証拠は、設定レベルの姿勢のみです（秘匿化モード、テレメトリ取得トグル、セッションメンテナンスモード、トランスクリプトインデックス設定）。ログ、テレメトリエクスポート、トランスクリプト、メモリファイルは検査しません。また、クリーンな結果は、それらに個人データやシークレットが存在しないことを証明するものではありません。
 
-以下の各 policy フィールドは任意です。対応するルールが `policy.jsonc` に存在する場合にのみ、チェックが実行されます。観測状態は既存の OpenClaw 設定またはワークスペースメタデータです。policy はドリフトを報告しますが、修復パスが明示的に利用可能で有効化されていない限り、ランタイム挙動を書き換えません。
-Policy ファイルは厳密です。サポートされていないセクションまたはルールキーは、無視されるのではなく `policy/policy-jsonc-invalid` として報告されます。
+### ポリシールールリファレンス
 
-Policy オーバーレイは、広範なトップレベルルールをグローバルに保持し、その後、名前付きスコープブロックで明示的なセレクターに対してより厳格な通常の policy セクションを追加できるようにします。スコープ名は説明用のバケットにすぎません。マッチングにはスコープ内のセレクター値が使用されます。オーバーレイは加算的です。グローバルな主張は引き続き実行され、スコープ付きの主張は同じ観測設定に対して独自の検出結果を出すことができます。
+以下のすべてのルールは任意です。ルールが存在する場合にのみチェックが実行されます。観測される状態は、既存の OpenClaw 設定またはワークスペースメタデータです。
 
 #### スコープ付きオーバーレイ
 
-一部のエージェントまたはチャンネルにトップレベルのベースラインより厳格な policy が必要な場合は、`scopes.<scopeName>` を使用します。エージェントスコープのセクションは `agentIds` を使用し、これは `tools.*`、`agents.workspace.*`、`sandbox.*`、`dataHandling.memory.*`、`execApprovals.*` をサポートします。チャンネルスコープの ingress は `channelIds` を使用し、これは `ingress.channels.*` をサポートします。サポートされていないセクションは、無視されるのではなく拒否されます。`agentIds` エントリが `agents.list[]` に存在しない場合、OpenClaw はそのランタイムエージェント ID について、継承されたグローバル/デフォルト姿勢に対してスコープ付きルールを評価します。
+特定のエージェントやチャンネルにトップレベルのベースラインより厳格なポリシーが必要な場合は、`scopes.<scopeName>` を使用します。スコープ名は単なるラベルです。マッチングにはスコープ内のセレクターが使われます。オーバーレイは加算的です。グローバルルールは引き続き実行され、スコープ付きルールは同じ証拠に対して独自の検出結果を追加できます。
+
+| セレクター | サポートされるセクション | 使用する場面 |
+| ------------ | ------------------------------------------------------------------------------ | ------------------------------------------------- |
+| `agentIds`   | `tools`, `agents.workspace`, `sandbox`, `dataHandling.memory`, `execApprovals` | 1 つ以上のランタイムエージェントに、より厳格なルールが必要な場合。 |
+| `channelIds` | `ingress.channels`                                                             | 1 つ以上のチャンネルに、より厳格なイングレスルールが必要な場合。 |
+
+`agentIds` エントリが `agents.list[]` に存在しない場合、OpenClaw はそのスコープ付きルールをスキップするのではなく、そのランタイムエージェント ID について継承されたグローバル/デフォルトの姿勢に対して評価します。
 
 ```jsonc
 {
@@ -229,135 +239,134 @@ Policy オーバーレイは、広範なトップレベルルールをグロー�
 }
 ```
 
-上記のように、各スコープが異なるフィールドを管理する場合、同じエージェントを複数のスコープに含めることができます。同じエージェントに対して繰り返されるスコープ付きフィールドは、policy メタデータに従って同等またはより制限的でなければなりません。より弱い重複した主張は拒否されます。厳格性メタデータでは、allow-list は部分集合、deny-list は上位集合、必須 boolean は固定要件として扱われます。
+上の例のように、各スコープが異なるフィールドを管理する場合、同じエージェントを複数のスコープに含めることができます。同じエージェントに対してスコープ付きフィールドが重複する場合は、同等またはより制限的でなければなりません。より弱い重複主張は拒否されます（allow リストはサブセット、deny リストはスーパーセット、必須のブール値は固定です）。
 
-コンテナ姿勢 policy は、OpenClaw が一致したエージェントについて観測できる証拠に対してのみ評価されます。有効な `sandbox.containers.*` ルールが、sandbox backend がそのフィールドを公開できないエージェントに適用される場合、policy はその主張を合格として扱うのではなく、`policy/sandbox-container-posture-unobservable` を報告します。異なる sandbox backend を使用するエージェントグループには個別の `agentIds` スコープを使用し、それらのフィールドを観測できないグループでは、サポートされていないコンテナルールを未設定または false のままにします。
+コンテナ姿勢ルール（`sandbox.containers.*`）は、マッチしたエージェントのサンドボックスバックエンドが公開できる証拠に対してのみチェックされます。有効化したルールをバックエンドが観測できない場合、ポリシーは合格にするのではなく `policy/sandbox-container-posture-unobservable` を報告します。コンテナルールは、それを公開できるバックエンドを使うエージェントグループにスコープしてください。
 
-トップレベルの `ingress.session.requireDmScope` は、`session.dmScope` がチャンネルに帰属可能な証拠ではないため、グローバルのままです。
+トップレベルの `ingress.session.requireDmScope` はグローバルのままです。`session.dmScope` はチャンネルに帰属できる証拠ではないため、`channelIds` でスコープできません。
 
-| セレクター     | サポートされるセクション                                                                 | 使用する場合                                          |
-| ------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------- |
-| `agentIds`   | `tools`, `agents.workspace`, `sandbox`, `dataHandling.memory`, and `execApprovals` | 1 つ以上のランタイムエージェントにより厳格なルールが必要な場合。   |
-| `channelIds` | `ingress.channels`                                                                 | 1 つ以上のチャンネルにより厳格な入口ルールが必要な場合。 |
-
-`policy.jsonc` に存在するすべてのスコープは、有効で適用可能でなければなりません。
+`policy.jsonc` に存在するすべてのスコープは、有効かつ強制可能でなければなりません。
 
 #### チャンネル
 
-| ポリシーフィールド                         | 観測される状態                          | 使用する場合                                                     |
+| ポリシーフィールド | 観測される状態 | 使用する場面 |
 | ------------------------------------ | --------------------------------------- | ------------------------------------------------------------ |
-| `channels.denyRules[].when.provider` | `channels.*` プロバイダーと有効化状態 | `telegram` などのプロバイダーから構成済みチャンネルを拒否します。 |
-| `channels.denyRules[].reason`        | 検出メッセージと修復ヒントのコンテキスト | プロバイダーが拒否される理由を説明します。                          |
+| `channels.denyRules[].when.provider` | `channels.*` のプロバイダーと有効状態 | `telegram` などのプロバイダーから設定済みチャンネルを拒否します。 |
+| `channels.denyRules[].reason`        | 検出メッセージと修復ヒントのコンテキスト | プロバイダーが拒否される理由を説明します。 |
 
 #### MCP サーバー
 
-| ポリシーフィールド        | 観測される状態      | 使用する場合                                                   |
+| ポリシーフィールド | 観測される状態 | 使用する場面 |
 | ------------------- | ------------------- | ---------------------------------------------------------- |
-| `mcp.servers.allow` | `mcp.servers.*` ID | 構成済みのすべての MCP サーバーが許可リストに含まれることを要求します。 |
-| `mcp.servers.deny`  | `mcp.servers.*` ID | 特定の構成済み MCP サーバー ID を拒否します。                   |
+| `mcp.servers.allow` | `mcp.servers.*` IDs | 設定済みのすべての MCP サーバーが allowlist に含まれることを要求します。 |
+| `mcp.servers.deny`  | `mcp.servers.*` IDs | 特定の設定済み MCP サーバー ID を拒否します。 |
 
 #### モデルプロバイダー
 
-| ポリシーフィールド             | 観測される状態                                   | 使用する場合                                                                        |
+| ポリシーフィールド | 観測される状態 | 使用する場面 |
 | ------------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------- |
-| `models.providers.allow` | `models.providers.*` ID と選択されたモデル参照 | 構成済みプロバイダーと選択されたモデル参照が承認済みプロバイダーを使用することを要求します。 |
-| `models.providers.deny`  | `models.providers.*` ID と選択されたモデル参照 | 構成済みプロバイダーと選択されたモデル参照をプロバイダー ID で拒否します。               |
+| `models.providers.allow` | `models.providers.*` IDs と選択されたモデル参照 | 設定済みプロバイダーと選択されたモデル参照が承認済みプロバイダーを使用することを要求します。 |
+| `models.providers.deny`  | `models.providers.*` IDs と選択されたモデル参照 | プロバイダー ID によって、設定済みプロバイダーと選択されたモデル参照を拒否します。 |
 
 #### ネットワーク
 
-| ポリシーフィールド                   | 観測される状態                      | 使用する場合                                                           |
+| ポリシーフィールド | 観測される状態 | 使用する場面 |
 | ------------------------------ | ----------------------------------- | ------------------------------------------------------------------ |
-| `network.privateNetwork.allow` | プライベートネットワーク SSRF 例外経路 | `false` に設定して、プライベートネットワークアクセスを無効のままにすることを要求します。 |
+| `network.privateNetwork.allow` | プライベートネットワーク SSRF の回避口 | `false` に設定し、プライベートネットワークアクセスが無効のままであることを要求します。 |
 
-#### 入口とチャンネルアクセス
+#### イングレスとチャンネルアクセス
 
-| ポリシーフィールド                              | 観測される状態                                                 | 使用する場合                                                           |
+| ポリシーフィールド                              | 観測された状態                                                 | 使用する場合                                                           |
 | ----------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `ingress.session.requireDmScope`          | `session.dmScope`                                              | レビュー済みのダイレクトメッセージ分離スコープを要求します。                 |
-| `ingress.channels.allowDmPolicies`        | `channels.*.dmPolicy` とレガシーチャンネル DM ポリシーフィールド      | レビュー済みのダイレクトメッセージチャンネルポリシーのみを許可します。               |
-| `ingress.channels.denyOpenGroups`         | チャンネル、アカウント、グループの入口ポリシー                     | 構成済みチャンネルとアカウントに対してオープングループ入口を拒否します。      |
-| `ingress.channels.requireMentionInGroups` | チャンネル、アカウント、グループ、ギルド、ネストされたメンションゲート構成 | グループ入口がオープンまたはメンションゲート付きの場合に、メンションゲートを要求します。 |
+| `ingress.session.requireDmScope`          | `session.dmScope`                                              | レビュー済みのダイレクトメッセージ分離スコープを必須にする。                 |
+| `ingress.channels.allowDmPolicies`        | `channels.*.dmPolicy` と従来のチャンネル DM ポリシーフィールド      | レビュー済みのダイレクトメッセージチャンネルポリシーのみを許可する。               |
+| `ingress.channels.denyOpenGroups`         | チャンネル、アカウント、グループのイングレスポリシー                     | 構成済みのチャンネルとアカウントでオープングループのイングレスを拒否する。      |
+| `ingress.channels.requireMentionInGroups` | チャンネル、アカウント、グループ、ギルド、ネストされたメンションゲート構成 | グループイングレスがオープンまたはメンションゲート付きの場合、メンションゲートを必須にする。 |
 
 #### Gateway
 
-| ポリシーフィールド                            | 観測される状態                                 | 使用する場合                                                     |
-| --------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------ |
-| `gateway.exposure.allowNonLoopbackBind` | `gateway.bind`                                 | `false` に設定して、Gateway のループバックバインドを要求します。          |
-| `gateway.exposure.allowTailscaleFunnel` | Tailscale サーブ/ファネル Gateway 姿勢         | `false` に設定して、Tailscale Funnel の公開を拒否します。            |
-| `gateway.auth.requireAuth`              | `gateway.auth.mode`                            | `true` に設定して、無効化された Gateway 認証を拒否します。               |
-| `gateway.auth.requireExplicitRateLimit` | `gateway.auth.rateLimit`                       | `true` に設定して、明示的な認証レート制限構成を要求します。    |
-| `gateway.controlUi.allowInsecure`       | Control UI の安全でない認証/デバイス/オリジントグル | `false` に設定して、安全でない Control UI 公開トグルを拒否します。 |
-| `gateway.remote.allow`                  | リモート Gateway モード/構成                     | `false` に設定して、リモート Gateway モードを拒否します。                  |
-| `gateway.http.denyEndpoints`            | Gateway HTTP API エンドポイント                     | `chatCompletions` や `responses` などのエンドポイント ID を拒否します。  |
-| `gateway.http.requireUrlAllowlists`     | Gateway HTTP URL 取得入力                  | `true` に設定して、URL 取得入力に URL 許可リストを要求します。 |
+| ポリシーフィールド                            | 観測された状態                                 | 使用する場合                                                                             |
+| --------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `gateway.exposure.allowNonLoopbackBind` | `gateway.bind`                                 | local loopback Gateway バインドを必須にするには `false` に設定する。                                  |
+| `gateway.exposure.allowTailscaleFunnel` | Tailscale serve/funnel Gateway の態勢         | Tailscale Funnel 露出を拒否するには `false` に設定する。                                    |
+| `gateway.auth.requireAuth`              | `gateway.auth.mode`                            | 無効化された Gateway 認証を拒否するには `true` に設定する。                                       |
+| `gateway.auth.requireExplicitRateLimit` | `gateway.auth.rateLimit`                       | 明示的な認証レート制限構成を必須にするには `true` に設定する。                            |
+| `gateway.controlUi.allowInsecure`       | Control UI の安全でない認証/デバイス/オリジン切り替え | 安全でない Control UI 露出切り替えを拒否するには `false` に設定する。                         |
+| `gateway.remote.allow`                  | リモート Gateway モード/構成                     | リモート Gateway モードを拒否するには `false` に設定する。                                          |
+| `gateway.http.denyEndpoints`            | Gateway HTTP API エンドポイント                     | `chatCompletions` や `responses` などのエンドポイント ID を拒否する。                          |
+| `gateway.http.requireUrlAllowlists`     | Gateway HTTP URL 取得入力                  | URL 取得入力で URL 許可リストを必須にするには `true` に設定する。                         |
+| `gateway.nodes.denyCommands`            | `gateway.nodes.denyCommands`                   | OpenClaw 構成で `system.run` などの正確なノードコマンド ID が拒否されることを必須にする。 |
+
+`gateway.nodes.denyCommands` は、大文字小文字を区別する完全一致の拒否スーパーセットルールです。
+特権ノードコマンドが OpenClaw 構成で明示的に拒否されていることをポリシーで証明する必要がある場合に使用します。
+特権ノードコマンドを意図的に許可するデプロイメントでは、
+`gateway.nodes.allowCommands` だけに依存するのではなく、レビュー後に `policy.jsonc` を更新する必要があります。
 
 #### エージェントワークスペース
 
-| ポリシーフィールド                     | 観測される状態                                                                        | 使用する場合                                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `agents.workspace.allowedAccess` | `agents.defaults.sandbox.workspaceAccess` と `agents.list[].sandbox.workspaceAccess` | `none` や `ro` などのサンドボックスワークスペースアクセス値のみを許可します。                                                  |
-| `agents.workspace.denyTools`     | グローバルおよびエージェントごとのツール拒否構成                                                 | `exec`、`process`、`write`、`edit`、`apply_patch` などのワークスペース/ランタイム変更ツールを拒否することを要求します。 |
+| ポリシーフィールド                     | 観測された状態                                                                        | 使用する場合                                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `agents.workspace.allowedAccess` | `agents.defaults.sandbox.workspaceAccess` と `agents.list[].sandbox.workspaceAccess` | `none` や `ro` などのサンドボックスワークスペースアクセス値のみを許可する。                       |
+| `agents.workspace.denyTools`     | グローバルおよびエージェントごとのツール拒否構成                                                 | 変更ツール（`exec`、`process`、`write`、`edit`、`apply_patch`）が拒否されることを必須にする。 |
 
-#### サンドボックス姿勢
+#### サンドボックス態勢
 
-| ポリシーフィールド                                          | 観測される状態                                          | 使用する場合                                                       |
+| ポリシーフィールド                                          | 観測された状態                                          | 使用する場合                                                       |
 | ----------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------- |
-| `sandbox.requireMode`                                 | `agents.defaults.sandbox.mode` とエージェントごとのモード       | `all` や `non-main` などのレビュー済みサンドボックスモードのみを許可します。 |
-| `sandbox.allowBackends`                               | `agents.defaults.sandbox.backend` とエージェントごとのバックエンド | `docker` などのレビュー済みサンドボックスバックエンドのみを許可します。         |
-| `sandbox.containers.denyHostNetwork`                  | コンテナベースのサンドボックス/ブラウザネットワークモード           | ホストネットワークモードを拒否します。                                        |
-| `sandbox.containers.denyContainerNamespaceJoin`       | コンテナベースのサンドボックス/ブラウザネットワークモード           | 別のコンテナネットワーク名前空間への参加を拒否します。              |
-| `sandbox.containers.requireReadOnlyMounts`            | コンテナベースのサンドボックス/ブラウザマウントモード             | マウントが読み取り専用であることを要求します。                                |
-| `sandbox.containers.denyContainerRuntimeSocketMounts` | コンテナベースのサンドボックス/ブラウザマウントターゲット          | コンテナランタイムソケットのマウントを拒否します。                          |
-| `sandbox.containers.denyUnconfinedProfiles`           | コンテナセキュリティプロファイル姿勢                      | 制限なしのコンテナセキュリティプロファイルを拒否します。                   |
-| `sandbox.browser.requireCdpSourceRange`               | サンドボックスブラウザ CDP ソース範囲                        | ブラウザ CDP 公開でソース範囲の宣言を要求します。        |
+| `sandbox.requireMode`                                 | `agents.defaults.sandbox.mode` とエージェントごとのモード       | `all` や `non-main` などのレビュー済みサンドボックスモードのみを許可する。 |
+| `sandbox.allowBackends`                               | `agents.defaults.sandbox.backend` とエージェントごとのバックエンド | `docker` などのレビュー済みサンドボックスバックエンドのみを許可する。         |
+| `sandbox.containers.denyHostNetwork`                  | コンテナベースのサンドボックス/ブラウザネットワークモード           | ホストネットワークモードを拒否する。                                        |
+| `sandbox.containers.denyContainerNamespaceJoin`       | コンテナベースのサンドボックス/ブラウザネットワークモード           | 別のコンテナネットワーク名前空間への参加を拒否する。              |
+| `sandbox.containers.requireReadOnlyMounts`            | コンテナベースのサンドボックス/ブラウザマウントモード             | マウントを読み取り専用にすることを必須にする。                                |
+| `sandbox.containers.denyContainerRuntimeSocketMounts` | コンテナベースのサンドボックス/ブラウザマウントターゲット          | コンテナランタイムソケットのマウントを拒否する。                          |
+| `sandbox.containers.denyUnconfinedProfiles`           | コンテナセキュリティプロファイルの態勢                      | 非制限コンテナセキュリティプロファイルを拒否する。                   |
+| `sandbox.browser.requireCdpSourceRange`               | サンドボックスブラウザ CDP ソース範囲                        | ブラウザ CDP 露出でソース範囲の宣言を必須にする。        |
 
-ポリシーは欠落した `sandbox.mode` を暗黙のデフォルト `off` として扱うため、
-`sandbox.requireMode` は、新規または未構成のサンドボックスを
-`["all"]` のような許可リスト外として報告します。
+ポリシーは、欠落している `sandbox.mode` を暗黙のデフォルト `off` として扱うため、
+`sandbox.requireMode` は、新規または未構成のサンドボックスを `["all"]` などの
+許可リスト外として報告します。
 
 #### データ処理
 
-| ポリシーフィールド                                        | 観測される状態                                                                       | 使用する場合                                                               |
+| ポリシーフィールド                                        | 観測された状態                                                                       | 使用する場合                                                               |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| `dataHandling.sensitiveLogging.requireRedaction`    | `logging.redactSensitive`                                                            | `true` に設定して、`logging.redactSensitive: "off"` を拒否します。              |
-| `dataHandling.telemetry.denyContentCapture`         | `diagnostics.otel.captureContent`                                                    | `true` に設定して、テレメトリーのコンテンツキャプチャを拒否します。                     |
-| `dataHandling.retention.requireSessionMaintenance`  | `session.maintenance.mode`                                                           | `true` に設定して、有効なセッションメンテナンスモード `enforce` を要求します。 |
-| `dataHandling.memory.denySessionTranscriptIndexing` | `memory.qmd.sessions.enabled` と `agents.*.memorySearch.experimental.sessionMemory` | `true` に設定して、セッション transcript のメモリへのインデックス化を拒否します。       |
+| `dataHandling.sensitiveLogging.requireRedaction`    | `logging.redactSensitive`                                                            | `logging.redactSensitive: "off"` を拒否するには `true` に設定する。              |
+| `dataHandling.telemetry.denyContentCapture`         | `diagnostics.otel.captureContent`                                                    | テレメトリーのコンテンツキャプチャを拒否するには `true` に設定する。                     |
+| `dataHandling.retention.requireSessionMaintenance`  | `session.maintenance.mode`                                                           | 有効なセッションメンテナンスモード `enforce` を必須にするには `true` に設定する。 |
+| `dataHandling.memory.denySessionTranscriptIndexing` | `memory.qmd.sessions.enabled` と `agents.*.memorySearch.experimental.sessionMemory` | セッショントランスクリプトのメモリへのインデックス化を拒否するには `true` に設定する。       |
 
 #### シークレット
 
-| ポリシーフィールド                      | 観測される状態                                           | 使用する場合                                                                |
+| ポリシーフィールド                      | 観測された状態                                           | 使用する場合                                                                |
 | --------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `secrets.requireManagedProviders` | Config SecretRefs と `secrets.providers.*` 宣言 | `true` に設定して、SecretRefs が宣言済みプロバイダーを指すことを要求します。     |
-| `secrets.denySources`             | シークレットプロバイダーソースと SecretRef ソース            | `exec`、`file`、または別の構成済みソース名などのソースを拒否します。 |
-| `secrets.allowInsecureProviders`  | 安全でないシークレットプロバイダー姿勢フラグ                   | `false` に設定して、安全でない姿勢を選択したプロバイダーを拒否します。      |
+| `secrets.requireManagedProviders` | 構成 SecretRefs と `secrets.providers.*` 宣言 | SecretRefs が宣言済みプロバイダーを指すことを必須にするには `true` に設定する。     |
+| `secrets.denySources`             | シークレットプロバイダーソースと SecretRef ソース            | `exec`、`file`、または別の構成済みソース名などのソースを拒否する。 |
+| `secrets.allowInsecureProviders`  | 安全でないシークレットプロバイダー態勢フラグ                   | 安全でない態勢を選択したプロバイダーを拒否するには `false` に設定する。      |
 
 #### Exec 承認
 
-Exec 承認ポリシーは、アクティブなランタイム `exec-approvals.json`
-アーティファクトを観測します。デフォルトではこれは `~/.openclaw/exec-approvals.json` です。
-`OPENCLAW_STATE_DIR` が設定されている場合、Policy は
-`$OPENCLAW_STATE_DIR/exec-approvals.json` を読み取ります。
-`execApprovals.defaults.*` や `execApprovals.agents.*` などの実際の姿勢ルールには、
+Exec 承認チェックは、ランタイムの `exec-approvals.json` アーティファクトを読み取ります。
+デフォルトでは `~/.openclaw/exec-approvals.json`、または
+`OPENCLAW_STATE_DIR` が設定されている場合は `$OPENCLAW_STATE_DIR/exec-approvals.json` です。
+`execApprovals.defaults.*` または `execApprovals.agents.*` 配下の態勢ルールには、
 読み取り可能なアーティファクト証拠が必要です。アーティファクトが欠落しているか無効な場合は、
-合成ランタイムデフォルトに対するベストエフォート合格になるのではなく、観測不能な証拠として報告されます。
-アーティファクトが読み取り可能になると、省略された承認フィールドはランタイムデフォルトを継承します。欠落した
-`defaults.security` は `full` で、欠落したエージェントセキュリティはその
-デフォルトを継承します。証拠には `defaults`、`agents.*`、
-`agents.*.allowlist[].pattern` に加えて、任意の `argPattern`、有効な
-`autoAllowSkills` 姿勢、およびエントリソースが含まれます。ソケット
-パス/トークン、`commandText`、`lastUsedCommand`、解決済みパス、タイムスタンプは含まれません。
+ベストエフォートの合格ではなく、観測不能な証拠として報告されます。読み取り可能になると、省略された
+フィールドはランタイムのデフォルトを継承します。欠落している `defaults.security` は `full` で、
+欠落しているエージェントセキュリティはそのデフォルトを継承します。証拠には `defaults`、
+`agents.*`、`agents.*.allowlist[].pattern`、任意の `argPattern`、有効な
+`autoAllowSkills` 態勢、エントリソースが含まれます。ソケットパス/トークン、
+`commandText`、`lastUsedCommand`、解決済みパス、タイムスタンプは含まれません。
 
-| ポリシーフィールド                        | 観測される状態                                                                         | 使用する場合                                                                                |
+| ポリシーフィールド                                | 観測された状態                                                                         | 使用する場合                                                                                |
 | ------------------------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `execApprovals.requireFile`                 | アクティブなランタイム `exec-approvals.json` パス                                              | 承認アーティファクトが存在し、解析できることを要求するには `true` に設定します。                     |
-| `execApprovals.defaults.allowSecurity`      | `defaults.security`、デフォルトは `full`                                              | 承認済みのデフォルト承認セキュリティモードのみを許可します。                                    |
-| `execApprovals.agents.allowSecurity`        | `agents.*.security`、デフォルトを継承                                               | エージェントごとに有効な承認セキュリティモードのうち、承認済みのものだけを許可します。                        |
-| `execApprovals.agents.allowAutoAllowSkills` | `defaults.autoAllowSkills` と `agents.*.autoAllowSkills`、ランタイムデフォルトを継承 | 暗黙的なスキル CLI 承認なしで、厳密な手動許可リストを要求するには `false` に設定します。 |
-| `execApprovals.agents.allowlist.expected`   | 集約された `agents.*.allowlist[]` パターンと任意の argPattern エントリ               | 承認許可リストがレビュー済みのパターンセットと一致することを要求します。                      |
+| `execApprovals.requireFile`                 | アクティブなランタイム `exec-approvals.json` パス                                              | 承認アーティファクトが存在し、解析できることを必須にするには `true` に設定する。                     |
+| `execApprovals.defaults.allowSecurity`      | `defaults.security`、デフォルトは `full`                                              | 承認済みのデフォルト承認セキュリティモードのみを許可する。                                    |
+| `execApprovals.agents.allowSecurity`        | `agents.*.security`、デフォルトを継承                                               | 承認済みのエージェントごとの有効な承認セキュリティモードのみを許可する。                        |
+| `execApprovals.agents.allowAutoAllowSkills` | `defaults.autoAllowSkills` と `agents.*.autoAllowSkills`、ランタイムデフォルトを継承 | 暗黙の skill CLI 承認なしで厳密な手動許可リストを必須にするには `false` に設定する。 |
+| `execApprovals.agents.allowlist.expected`   | 集約された `agents.*.allowlist[]` パターンと任意の argPattern エントリ               | 承認許可リストがレビュー済みパターンセットと一致することを必須にする。                      |
 
-たとえば、承認アーティファクトを要求し、寛容なデフォルトを拒否し、
-選択したエージェントに対してレビュー済みの exec 承認姿勢のみを許可します。
+例: 承認アーティファクトを必須にし、許容度の高いデフォルトを拒否し、選択したエージェントに対して
+レビュー済みの exec 承認態勢のみを許可します。
 
 ```jsonc
 {
@@ -397,31 +406,33 @@ Exec 承認ポリシーは、アクティブなランタイム `exec-approvals.j
 
 #### 認証プロファイル
 
-| ポリシーフィールド                    | 観測される状態                               | 使用する場合                                                                                   |
+| ポリシーフィールド                    | 観測された状態                               | 使用する場合                                                                                   |
 | ------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `auth.profiles.requireMetadata` | `auth.profiles.*` のプロバイダーとモードメタデータ | config 認証プロファイルで `provider` や `mode` などのメタデータキーを要求します。               |
-| `auth.profiles.allowModes`      | `auth.profiles.*.mode`                       | `api_key`、`aws-sdk`、`oauth`、`token` など、サポートされている認証プロファイルモードのみを許可します。 |
+| `auth.profiles.requireMetadata` | `auth.profiles.*` のプロバイダーとモードのメタデータ | 設定の認証プロファイルで `provider` や `mode` などのメタデータキーを必須にする。               |
+| `auth.profiles.allowModes`      | `auth.profiles.*.mode`                       | `api_key`、`aws-sdk`、`oauth`、`token` など、サポートされている認証プロファイルモードのみを許可する。 |
 
 #### ツールメタデータ
 
-| ポリシーフィールド            | 観測される状態                   | 使用する場合                                                                                   |
+| ポリシーフィールド            | 観測された状態                   | 使用する場合                                                                                   |
 | ----------------------- | -------------------------------- | ------------------------------------------------------------------------------------------ |
-| `tools.requireMetadata` | 管理対象の `TOOLS.md` 宣言 | 管理対象ツールが `risk`、`sensitivity`、`owner` などのメタデータキーを宣言することを要求します。 |
+| `tools.requireMetadata` | 管理対象の `TOOLS.md` 宣言 | 管理対象ツールで `risk`、`sensitivity`、`owner` などのメタデータキーの宣言を必須にする。 |
 
 #### ツール姿勢
 
-| ポリシーフィールド                    | 観測される状態                                              | 使用する場合                                                                                                 |
+| ポリシーフィールド                    | 観測された状態                                              | 使用する場合                                                                                                 |
 | ------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `tools.profiles.allow`          | `tools.profile` と `agents.list[].tools.profile`           | `minimal`、`messaging`、`coding` などのツールプロファイル ID のみを許可します。                                 |
-| `tools.fs.requireWorkspaceOnly` | `tools.fs.workspaceOnly` とエージェントごとの `tools.fs` オーバーライド | ワークスペース限定のファイルシステムツール姿勢を要求するには `true` に設定します。                                         |
-| `tools.exec.allowSecurity`      | `tools.exec.security` とエージェントごとの exec セキュリティ           | `deny` や `allowlist` などの exec セキュリティモードのみを許可します。                                            |
-| `tools.exec.requireAsk`         | `tools.exec.ask` とエージェントごとの exec ask モード                | `always` などの承認姿勢を要求します。                                                               |
-| `tools.exec.allowHosts`         | `tools.exec.host` とエージェントごとの exec ホストルーティング           | `sandbox` などの exec ホストルーティングモードのみを許可します。                                                    |
-| `tools.elevated.allow`          | `tools.elevated.enabled` とエージェントごとの昇格姿勢     | 昇格ツールモードを無効のままにすることを要求するには `false` に設定します。                                           |
-| `tools.alsoAllow.expected`      | `tools.alsoAllow` とエージェントごとの `tools.alsoAllow`           | 正確な `alsoAllow` エントリを要求し、不足または想定外の追加ツール権限付与を報告します。                 |
-| `tools.denyTools`               | `tools.deny` と `agents.list[].tools.deny`                 | 設定済みのツール拒否リストに、`group:runtime` や `group:fs` などのツール ID またはグループを含めることを要求します。 |
+| `tools.profiles.allow`          | `tools.profile` と `agents.list[].tools.profile`           | `minimal`、`messaging`、`coding` などのツールプロファイル ID のみを許可する。                                 |
+| `tools.fs.requireWorkspaceOnly` | `tools.fs.workspaceOnly` とエージェントごとの `tools.fs` オーバーライド | `true` に設定して、ワークスペース限定のファイルシステムツール姿勢を必須にする。                                         |
+| `tools.exec.allowSecurity`      | `tools.exec.security` とエージェントごとの exec セキュリティ           | `deny` や `allowlist` などの exec セキュリティモードのみを許可する。                                            |
+| `tools.exec.requireAsk`         | `tools.exec.ask` とエージェントごとの exec ask モード                | `always` などの承認姿勢を必須にする。                                                               |
+| `tools.exec.allowHosts`         | `tools.exec.host` とエージェントごとの exec ホストルーティング           | `sandbox` などの exec ホストルーティングモードのみを許可する。                                                    |
+| `tools.elevated.allow`          | `tools.elevated.enabled` とエージェントごとの昇格姿勢     | `false` に設定して、昇格ツールモードを無効のままにすることを必須にする。                                           |
+| `tools.alsoAllow.expected`      | `tools.alsoAllow` とエージェントごとの `tools.alsoAllow`           | 正確な `alsoAllow` エントリを必須にし、不足または想定外に追加されたツール許可を報告する。                 |
+| `tools.denyTools`               | `tools.deny` と `agents.list[].tools.deny`                 | 設定済みのツール拒否リストに、`group:runtime` や `group:fs` などのツール ID またはグループを含めることを必須にする。 |
 
-作成中にポリシーのみのチェックを実行します。
+## チェックを実行する
+
+作成中にポリシー専用チェックを実行します。
 
 ```bash
 openclaw policy check
@@ -429,32 +440,29 @@ openclaw policy check --json
 openclaw policy check --severity-min error
 ```
 
-`policy check` はポリシーチェックセットのみを実行し、証拠、検出結果、
-証明ハッシュを出力します。Policy plugin が有効な場合、同じ検出結果は
+`policy check` はポリシーチェックセットのみを実行し、エビデンス、検出事項、
+および証明ハッシュを出力します。Policy plugin が有効な場合、同じ検出事項は
 `openclaw doctor --lint` にも表示されます。
 
-オペレーターのポリシーファイルを、作成済みのベースラインポリシーファイルと比較します。
+オペレーターのポリシーファイルを作成済みベースラインと比較します。
 
 ```bash
 openclaw policy compare --baseline official.policy.jsonc
 openclaw policy compare --baseline official.policy.jsonc --policy policy.jsonc --json
 ```
 
-`policy compare` は、ポリシーファイル構文同士を比較します。OpenClaw の
-ランタイム状態、証拠、認証情報、シークレットは検査しません。このコマンドは、
-スコープ付きオーバーレイを管理するものと同じポリシールールメタデータを使用します。
-許可リストは同等またはより狭く、拒否リストは同等またはより広く、必須 boolean は
-必須値を維持し、順序付き文字列は設定された順序のより制限的な端に向かう場合のみ
-移動でき、完全一致リストは一致する必要があります。
+`policy compare` は、ポリシーファイル構文をポリシーファイル構文に対してチェックします。
+ランタイム状態、エビデンス、認証情報、シークレットは検査しません。スコープ付きオーバーレイを管理するものと同じ
+ルールメタデータを使用します。許可リストは同等またはより狭く、
+拒否リストは同等またはより広く、必須ブール値は
+その値を維持し、順序付き文字列は設定された順序の
+より厳格な端にのみ移動でき、完全一致リストは一致する必要があります。ベースラインは
+組織が作成したポリシーにできます。チェック対象ポリシーは、より厳格な値または
+追加ルールを加えられます。トップレベルのチェック対象ルールは、
+同等またはより制限的であれば、スコープ付きベースラインルールを満たせます。スコープ名は
+ファイル間で一致する必要はありません。比較はセレクター（`agentIds`/`channelIds`）とフィールドでキー付けされます。
 
-ベースラインファイルは組織が作成したポリシーにできます。チェック対象ポリシーは、
-より厳格な値を使用したり、追加のポリシールールを追加したりできます。最上位の
-チェック対象ルールは、同等またはより制限的であれば、スコープ付きベースラインルールも
-満たせます。これは最上位ポリシーが広く適用されるためです。スコープ名は一致する必要がありません。
-スコープ付き比較は、`agentIds` や `channelIds` などのセレクター値と、
-チェック対象のポリシーフィールドによってキー付けされます。
-
-クリーンな比較 JSON 出力の例は、ポリシーファイル比較状態のみを報告します。
+クリーンな比較（`--json`）:
 
 ```json
 {
@@ -466,8 +474,8 @@ openclaw policy compare --baseline official.policy.jsonc --policy policy.jsonc -
 }
 ```
 
-クリーンな `policy check --json` 出力の例には、オペレーターまたは監督者が記録できる
-安定したハッシュが含まれます。
+クリーンな `policy check --json` 出力には、オペレーターまたは
+監督者が記録できる安定したハッシュが含まれます。
 
 ```json
 {
@@ -492,7 +500,7 @@ openclaw policy compare --baseline official.policy.jsonc --policy policy.jsonc -
 
 ## ポリシーを設定する
 
-ポリシー設定は `plugins.entries.policy.config` 配下にあります。
+ポリシー設定は `plugins.entries.policy.config` の下にあります。
 
 ```jsonc
 {
@@ -515,21 +523,18 @@ openclaw policy compare --baseline official.policy.jsonc --policy policy.jsonc -
 
 | 設定                   | 目的                                                         |
 | ------------------------- | --------------------------------------------------------------- |
-| `enabled`                 | `policy.jsonc` が存在する前でもポリシーチェックを有効にします。         |
-| `workspaceRepairs`        | `doctor --fix` がポリシー管理対象のワークスペース設定を編集できるようにします。 |
-| `expectedHash`            | 承認済みポリシーアーティファクトに対する任意のハッシュロック。            |
-| `expectedAttestationHash` | 最後に受け入れられたクリーンなポリシーチェックに対する任意のハッシュロック。    |
-| `path`                    | ポリシーアーティファクトのワークスペース相対位置。             |
+| `enabled`                 | `policy.jsonc` が存在する前でもポリシーチェックを有効にする。         |
+| `workspaceRepairs`        | `doctor --fix` がポリシー管理対象のワークスペース設定を編集できるようにする。 |
+| `expectedHash`            | 承認済みポリシー成果物の任意のハッシュロック。            |
+| `expectedAttestationHash` | 最後に受け入れられたクリーンなポリシーチェックの任意のハッシュロック。    |
+| `path`                    | ポリシー成果物のワークスペース相対の場所。             |
 
-Plugin をインストールしたままワークスペースのポリシーチェックを無効にするには、
-`plugins.entries.policy.config.enabled` を `false` に設定します。
-
-ツールメタデータ要件は、`tools.requireMetadata` を使って `policy.jsonc` に作成します。
-たとえば `["risk", "sensitivity", "owner"]` です。
+`plugins.entries.policy.config.enabled` を `false` に設定すると、Plugin を
+インストールしたまま、ワークスペースのポリシーチェックを無効にできます。
 
 ## ポリシー状態を受け入れる
 
-JSON 出力の例:
+JSON 出力例:
 
 ```json
 {
@@ -659,106 +664,115 @@ JSON 出力の例:
 }
 ```
 
-ポリシーハッシュは、作成されたルール成果物を識別します。エビデンスブロックは、ポリシーチェックで使用された観測済みのOpenClaw状態を記録します。`workspace.hash`値は、チェック対象スコープのそのエビデンスペイロードを識別します。検出事項ハッシュは、チェックによって返された正確な検出事項セットを識別します。`checkedAt`は評価が実行された時刻を記録します。証明ハッシュは、ポリシーハッシュ、エビデンスハッシュ、検出事項ハッシュ、および結果がクリーンだったかどうかという安定した主張を識別します。同じポリシー状態で繰り返しチェックした場合に同じ証明が生成されるよう、意図的に`checkedAt`は含めていません。これらを合わせて、このポリシーチェックの監査タプルを形成します。
+`attestation.policy.hash` は、作成されたルール成果物を識別します。`evidence` は
+チェックで使用された観測済み OpenClaw 状態を記録し、
+`workspace.hash` はそのエビデンスペイロードを識別します。`findingsHash` は
+正確な検出事項セットを識別します。`checkedAt` はチェックの実行時刻を記録します。
+`attestationHash` は安定した主張（ポリシーハッシュ、エビデンスハッシュ、
+検出事項ハッシュ、クリーン/ダーティ状態）を識別し、意図的に `checkedAt` を除外します。
+そのため、同じポリシー状態は常に同じ証明ハッシュを生成します。これら
+4 つの値を合わせて、1 回のポリシーチェックの監査タプルを形成します。
 
-後続のGatewayまたはスーパーバイザーがポリシーを使ってランタイムアクションをブロック、承認、または注釈付けする場合、最後にクリーンだったポリシーチェックの証明ハッシュを記録する必要があります。`checkedAt`は監査ログ用にJSON出力内に残りますが、安定した証明ハッシュの一部ではありません。
+Gateway または監督者が、ランタイムアクションのブロック、承認、注釈付けに
+ポリシーを使用する場合、最後のクリーンなチェックの証明ハッシュを記録する必要があります。
+`checkedAt` は監査ログ用に JSON 出力に残りますが、
+安定ハッシュの一部ではありません。
 
-ポリシー状態を受け入れるときは、次のライフサイクルを使用します。
+ポリシー状態を受け入れるライフサイクル:
 
-1. `policy.jsonc`を作成またはレビューします。
-2. `openclaw policy check --json`を実行します。
-3. 結果がクリーンな場合、`attestation.policy.hash`を`expectedHash`として記録します。
-4. `attestation.attestationHash`を`expectedAttestationHash`として記録します。
-5. CIまたはリリースゲートで`openclaw doctor --lint`を再実行します。
+1. `policy.jsonc` を作成またはレビューする。
+2. `openclaw policy check --json` を実行する。
+3. クリーンであれば、`attestation.policy.hash` を `expectedHash` として記録する。
+4. `attestation.attestationHash` を `expectedAttestationHash` として記録する。
+5. CI またはリリースゲートで `openclaw doctor --lint` を再実行する。
 
-ポリシールールを意図的に変更した場合は、クリーンなチェック結果から、受け入れ済みの両方のハッシュを更新します。ワークスペース設定を意図的に変更してもポリシーが同じままの場合、通常は`expectedAttestationHash`のみが変わります。
+ポリシールールを意図的に変更した場合は、クリーンなチェックから受け入れ済みハッシュを両方更新します。ワークスペース設定だけが変わった場合（ポリシーは同じまま）、通常は `expectedAttestationHash` だけが変わります。
 
-`agents.workspace`ルールを有効化またはアップグレードすると、ワークスペースハッシュと証明ハッシュに`agentWorkspace`エビデンスが追加されます。オペレーターは新しいエビデンスを確認し、これらのルールを有効化した後に受け入れ済みの証明ハッシュを更新する必要があります。ツール態勢ルールを有効化またはアップグレードすると、同じ方法で`toolPosture`エビデンスが追加されます。
+`agents.workspace` ルールを有効化またはアップグレードすると、ワークスペースハッシュと証明ハッシュに `agentWorkspace` 証拠が追加されます。有効化後に新しい証拠を確認し、受け入れ済み証明ハッシュを更新してください。ツールポスチャルールを有効化またはアップグレードすると、同じ方法で `toolPosture` 証拠が追加されます。
 
-`openclaw policy watch`は同じチェックを繰り返し実行し、現在のエビデンスが`expectedAttestationHash`と一致しなくなった場合に報告します。
+`openclaw policy watch` はチェックを再実行し、現在の証拠が `expectedAttestationHash` と一致しなくなったときに報告します。
 
 ```bash
 openclaw policy watch --json
 ```
 
-1回のドリフト評価だけが必要なCIまたはスクリプトでは、`--once`を使用します。`--once`を指定しない場合、コマンドはデフォルトで2秒ごとにポーリングします。別の間隔を選ぶには`--interval-ms`を使用します。
+CI や 1 回だけドリフト評価が必要なスクリプトでは `--once` を使用します。`--once` がない場合、デフォルトでは 2 秒ごとにポーリングします。間隔を変更するには `--interval-ms` を使用します。
 
 ## 検出事項
 
-ポリシーは現在、次を検証します。
-
 | チェック ID                                             | 検出事項                                                                          |
 | -------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `policy/policy-jsonc-missing`                            | Policy が有効だが、`policy.jsonc` がありません。                                  |
-| `policy/policy-jsonc-invalid`                            | Policy を解析できないか、不正な形式のルールエントリが含まれています。            |
-| `policy/policy-hash-mismatch`                            | Policy が設定済みの `expectedHash` と一致しません。                               |
-| `policy/attestation-hash-mismatch`                       | 現在の Policy 証拠が、承認済みの証明と一致しなくなっています。                   |
-| `policy/policy-conformance-invalid`                      | ベースラインまたはチェック対象の Policy ファイルに無効な比較構文があります。     |
-| `policy/policy-conformance-missing`                      | チェック対象の Policy ファイルに、ベースライン Policy ファイルで必要なルールがありません。 |
-| `policy/policy-conformance-weaker`                       | チェック対象の Policy ファイルに、ベースライン Policy ファイルより弱い値があります。 |
-| `policy/channels-denied-provider`                        | 有効なチャンネルがチャンネル拒否ルールに一致しています。                         |
-| `policy/mcp-denied-server`                               | 設定済みの MCP サーバーが Policy によって拒否されています。                      |
-| `policy/mcp-unapproved-server`                           | 設定済みの MCP サーバーが許可リスト外です。                                      |
+| `policy/policy-jsonc-missing`                            | ポリシーは有効ですが、`policy.jsonc` がありません。                               |
+| `policy/policy-jsonc-invalid`                            | ポリシーを解析できないか、不正な形式のルールエントリが含まれています。            |
+| `policy/policy-hash-mismatch`                            | ポリシーが設定済みの `expectedHash` と一致しません。                              |
+| `policy/attestation-hash-mismatch`                       | 現在のポリシー証拠が、受け入れ済み証明と一致しなくなりました。                    |
+| `policy/policy-conformance-invalid`                      | ベースラインまたはチェック対象のポリシーファイルに無効な比較構文があります。      |
+| `policy/policy-conformance-missing`                      | チェック対象のポリシーファイルに、ベースラインポリシーファイルで必須のルールがありません。 |
+| `policy/policy-conformance-weaker`                       | チェック対象のポリシーファイルの値が、ベースラインポリシーファイルより弱くなっています。 |
+| `policy/channels-denied-provider`                        | 有効化されたチャネルがチャネル拒否ルールに一致します。                            |
+| `policy/mcp-denied-server`                               | 設定済みの MCP サーバーがポリシーによって拒否されています。                       |
+| `policy/mcp-unapproved-server`                           | 設定済みの MCP サーバーが許可リストの外にあります。                               |
 | `policy/models-denied-provider`                          | 設定済みのモデルプロバイダーまたはモデル参照が、拒否されたプロバイダーを使用しています。 |
-| `policy/models-unapproved-provider`                      | 設定済みのモデルプロバイダーまたはモデル参照が許可リスト外です。                |
-| `policy/network-private-access-enabled`                  | Policy が拒否しているときに、プライベートネットワーク SSRF エスケープハッチが有効です。 |
-| `policy/ingress-dm-policy-unapproved`                    | チャンネル DM Policy が Policy 許可リスト外です。                                |
-| `policy/ingress-dm-scope-unapproved`                     | `session.dmScope` が、Policy で要求される DM 分離スコープと一致しません。        |
-| `policy/ingress-open-groups-denied`                      | Policy がオープングループの受信を拒否しているのに、チャンネルグループ Policy が `open` です。 |
-| `policy/ingress-group-mention-required`                  | Policy がメンションゲートを要求しているのに、チャンネルまたはグループエントリがそれを無効にしています。 |
-| `policy/gateway-non-loopback-bind`                       | Policy が拒否しているときに、Gateway のバインドポスチャーが非ループバック公開を許可しています。 |
-| `policy/gateway-auth-disabled`                           | Policy が認証を要求しているときに、Gateway 認証が無効です。                      |
-| `policy/gateway-rate-limit-missing`                      | Policy が要求しているときに、Gateway 認証のレート制限ポスチャーが明示されていません。 |
-| `policy/gateway-control-ui-insecure`                     | Gateway Control UI の安全でない公開トグルが有効です。                            |
-| `policy/gateway-tailscale-funnel`                        | Policy が拒否しているときに、Gateway Tailscale Funnel 公開が有効です。           |
-| `policy/gateway-remote-enabled`                          | Policy が拒否しているときに、Gateway リモートモードがアクティブです。            |
-| `policy/gateway-http-endpoint-enabled`                   | Policy で拒否されているのに、Gateway HTTP API エンドポイントが有効です。         |
-| `policy/gateway-http-url-fetch-unrestricted`             | Gateway HTTP URL フェッチ入力に、必須の URL 許可リストがありません。             |
-| `policy/agents-workspace-access-denied`                  | エージェントのサンドボックスモードまたはワークスペースアクセスが Policy 許可リスト外です。 |
-| `policy/agents-tool-not-denied`                          | エージェントまたはデフォルト設定が、Policy で必要なツールを拒否していません。    |
-| `policy/tools-profile-unapproved`                        | 設定済みのグローバルまたはエージェント別ツールプロファイルが許可リスト外です。  |
-| `policy/tools-fs-workspace-only-required`                | ファイルシステムツールが、ワークスペースのみのパスポスチャーで設定されていません。 |
-| `policy/tools-exec-security-unapproved`                  | Exec セキュリティモードが Policy 許可リスト外です。                              |
-| `policy/tools-exec-ask-unapproved`                       | Exec 確認モードが Policy 許可リスト外です。                                      |
-| `policy/tools-exec-host-unapproved`                      | Exec ホストルーティングが Policy 許可リスト外です。                              |
-| `policy/tools-elevated-enabled`                          | Policy が拒否しているときに、昇格ツールモードが有効です。                        |
-| `policy/tools-also-allow-missing`                        | 設定済みの `alsoAllow` リストに、Policy で必要なエントリがありません。           |
-| `policy/tools-also-allow-unexpected`                     | 設定済みの `alsoAllow` リストに、Policy で想定されていないエントリが含まれています。 |
+| `policy/models-unapproved-provider`                      | 設定済みのモデルプロバイダーまたはモデル参照が許可リストの外にあります。          |
+| `policy/network-private-access-enabled`                  | ポリシーが拒否しているにもかかわらず、プライベートネットワーク SSRF エスケープハッチが有効です。 |
+| `policy/ingress-dm-policy-unapproved`                    | チャネル DM ポリシーがポリシー許可リストの外にあります。                          |
+| `policy/ingress-dm-scope-unapproved`                     | `session.dmScope` が、ポリシーで必須の DM 分離スコープと一致しません。             |
+| `policy/ingress-open-groups-denied`                      | ポリシーがオープングループの流入を拒否しているにもかかわらず、チャネルグループポリシーが `open` です。 |
+| `policy/ingress-group-mention-required`                  | ポリシーがメンションゲートを必須としているにもかかわらず、チャネルまたはグループエントリがそれを無効化しています。 |
+| `policy/gateway-non-loopback-bind`                       | ポリシーが拒否しているにもかかわらず、Gateway バインドポスチャが非ループバック公開を許可しています。 |
+| `policy/gateway-auth-disabled`                           | ポリシーが認証を必須としているにもかかわらず、Gateway 認証が無効です。             |
+| `policy/gateway-rate-limit-missing`                      | ポリシーが必須としているにもかかわらず、Gateway 認証レート制限ポスチャが明示されていません。 |
+| `policy/gateway-control-ui-insecure`                     | Gateway Control UI の安全でない公開トグルが有効です。                             |
+| `policy/gateway-tailscale-funnel`                        | ポリシーが拒否しているにもかかわらず、Gateway Tailscale Funnel 公開が有効です。   |
+| `policy/gateway-remote-enabled`                          | ポリシーが拒否しているにもかかわらず、Gateway リモートモードがアクティブです。     |
+| `policy/gateway-http-endpoint-enabled`                   | ポリシーで拒否されているにもかかわらず、Gateway HTTP API エンドポイントが有効です。 |
+| `policy/gateway-http-url-fetch-unrestricted`             | Gateway HTTP URL 取得入力に、必須の URL 許可リストがありません。                  |
+| `policy/gateway-node-command-denied`                     | ポリシーで拒否された Node コマンドが、OpenClaw 設定で拒否されていません。          |
+| `policy/agents-workspace-access-denied`                  | エージェントのサンドボックスモードまたはワークスペースアクセスがポリシー許可リストの外にあります。 |
+| `policy/agents-tool-not-denied`                          | エージェントまたはデフォルト設定が、ポリシーで必須のツールを拒否していません。     |
+| `policy/tools-profile-unapproved`                        | 設定済みのグローバルまたはエージェント別ツールプロファイルが許可リストの外にあります。 |
+| `policy/tools-fs-workspace-only-required`                | ファイルシステムツールが、ワークスペース限定パスポスチャで設定されていません。    |
+| `policy/tools-exec-security-unapproved`                  | Exec セキュリティモードがポリシー許可リストの外にあります。                       |
+| `policy/tools-exec-ask-unapproved`                       | Exec 確認モードがポリシー許可リストの外にあります。                               |
+| `policy/tools-exec-host-unapproved`                      | Exec ホストルーティングがポリシー許可リストの外にあります。                       |
+| `policy/tools-elevated-enabled`                          | ポリシーが拒否しているにもかかわらず、昇格ツールモードが有効です。                |
+| `policy/tools-also-allow-missing`                        | 設定済みの `alsoAllow` リストに、ポリシーで必須のエントリがありません。            |
+| `policy/tools-also-allow-unexpected`                     | 設定済みの `alsoAllow` リストに、ポリシーが想定していないエントリが含まれています。 |
 | `policy/tools-required-deny-missing`                     | グローバルまたはエージェント別ツール拒否リストに、必須の拒否ツールが含まれていません。 |
-| `policy/sandbox-mode-unapproved`                         | サンドボックスモードが Policy 許可リスト外です。                                 |
-| `policy/sandbox-backend-unapproved`                      | サンドボックスバックエンドが Policy 許可リスト外です。                           |
-| `policy/sandbox-container-posture-unobservable`          | 観測できないバックエンドに対して、コンテナポスチャールールが有効です。           |
+| `policy/sandbox-mode-unapproved`                         | サンドボックスモードがポリシー許可リストの外にあります。                          |
+| `policy/sandbox-backend-unapproved`                      | サンドボックスバックエンドがポリシー許可リストの外にあります。                    |
+| `policy/sandbox-container-posture-unobservable`          | 観測できないバックエンドに対して、コンテナポスチャルールが有効化されています。    |
 | `policy/sandbox-container-host-network-denied`           | コンテナベースのサンドボックスまたはブラウザーがホストネットワークモードを使用しています。 |
 | `policy/sandbox-container-namespace-join-denied`         | コンテナベースのサンドボックスまたはブラウザーが別のコンテナ名前空間に参加しています。 |
 | `policy/sandbox-container-mount-mode-required`           | コンテナベースのサンドボックスまたはブラウザーのマウントが読み取り専用ではありません。 |
 | `policy/sandbox-container-runtime-socket-mount`          | コンテナベースのサンドボックスまたはブラウザーのマウントが、コンテナランタイムソケットを公開しています。 |
-| `policy/sandbox-container-unconfined-profile`            | Policy が拒否しているときに、コンテナサンドボックスプロファイルが無制限です。    |
-| `policy/sandbox-browser-cdp-source-range-missing`        | Policy が要求しているときに、サンドボックスブラウザーの CDP ソース範囲がありません。 |
-| `policy/data-handling-redaction-disabled`                | Policy が要求しているときに、機密ログのリダクションが無効です。                  |
-| `policy/data-handling-telemetry-content-capture`         | Policy が拒否しているときに、テレメトリーのコンテンツキャプチャが有効です。      |
-| `policy/data-handling-session-retention-not-enforced`    | Policy が要求しているときに、セッション保持メンテナンスが強制されていません。    |
-| `policy/data-handling-session-transcript-memory-enabled` | Policy が拒否しているときに、セッショントランスクリプトのメモリーインデックス化が有効です。 |
-| `policy/secrets-unmanaged-provider`                      | 設定の SecretRef が、`secrets.providers` で宣言されていないプロバイダーを参照しています。 |
-| `policy/secrets-denied-provider-source`                  | 設定のシークレットプロバイダーまたは SecretRef が、Policy で拒否されたソースを使用しています。 |
-| `policy/secrets-insecure-provider`                       | Policy が拒否しているときに、シークレットプロバイダーが安全でないポスチャーにオプトインしています。 |
-| `policy/auth-profile-invalid-metadata`                   | 設定の認証プロファイルに、有効なプロバイダーまたはモードメタデータがありません。 |
-| `policy/auth-profile-unapproved-mode`                    | 設定の認証プロファイルモードが Policy 許可リスト外です。                         |
-| `policy/exec-approvals-missing`                          | Policy が `exec-approvals.json` を要求していますが、アーティファクトがありません。 |
-| `policy/exec-approvals-invalid`                          | 設定済みの Exec 承認アーティファクトを解析できません。                           |
-| `policy/exec-approvals-default-security-unapproved`      | Exec 承認のデフォルトが、Policy 許可リスト外のセキュリティモードを使用しています。 |
-| `policy/exec-approvals-agent-security-unapproved`        | エージェント別の有効な Exec 承認セキュリティモードが許可リスト外です。           |
-| `policy/exec-approvals-auto-allow-skills-enabled`        | Policy が拒否しているときに、Exec 承認エージェントが Skills CLI を暗黙的に自動許可しています。 |
-| `policy/exec-approvals-allowlist-missing`                | 承認許可リストに、Policy で必要なパターンがありません。                         |
-| `policy/exec-approvals-allowlist-unexpected`             | 承認許可リストに、Policy で想定されていないパターンが含まれています。            |
-| `policy/tools-missing-risk-level`                        | 管理対象ツール宣言にリスクメタデータがありません。                              |
-| `policy/tools-unknown-risk-level`                        | 管理対象ツール宣言が不明なリスク値を使用しています。                            |
-| `policy/tools-missing-sensitivity-token`                 | 管理対象ツール宣言に機密度メタデータがありません。                              |
-| `policy/tools-missing-owner`                             | 管理対象ツール宣言に所有者メタデータがありません。                              |
-| `policy/tools-unknown-sensitivity-token`                 | 管理対象ツール宣言が不明な機密度値を使用しています。                            |
+| `policy/sandbox-container-unconfined-profile`            | ポリシーが拒否しているにもかかわらず、コンテナサンドボックスプロファイルが無制限です。 |
+| `policy/sandbox-browser-cdp-source-range-missing`        | ポリシーが必須としているにもかかわらず、サンドボックスブラウザー CDP ソース範囲がありません。 |
+| `policy/data-handling-redaction-disabled`                | ポリシーが必須としているにもかかわらず、機密ログのリダクションが無効です。          |
+| `policy/data-handling-telemetry-content-capture`         | ポリシーが拒否しているにもかかわらず、テレメトリコンテンツキャプチャが有効です。  |
+| `policy/data-handling-session-retention-not-enforced`    | ポリシーが必須としているにもかかわらず、セッション保持メンテナンスが強制されていません。 |
+| `policy/data-handling-session-transcript-memory-enabled` | ポリシーが拒否しているにもかかわらず、セッショントランスクリプトメモリインデックスが有効です。 |
+| `policy/secrets-unmanaged-provider`                      | 設定の SecretRef が、`secrets.providers` の下で宣言されていないプロバイダーを参照しています。 |
+| `policy/secrets-denied-provider-source`                  | 設定のシークレットプロバイダーまたは SecretRef が、ポリシーで拒否されたソースを使用しています。 |
+| `policy/secrets-insecure-provider`                       | ポリシーが拒否しているにもかかわらず、シークレットプロバイダーが安全でないポスチャを選択しています。 |
+| `policy/auth-profile-invalid-metadata`                   | 設定の認証プロファイルに、有効なプロバイダーまたはモードのメタデータがありません。 |
+| `policy/auth-profile-unapproved-mode`                    | 設定の認証プロファイルモードがポリシー許可リストの外にあります。                  |
+| `policy/exec-approvals-missing`                          | ポリシーが `exec-approvals.json` を必須としていますが、そのアーティファクトがありません。 |
+| `policy/exec-approvals-invalid`                          | 設定済みの Exec 承認アーティファクトを解析できません。                            |
+| `policy/exec-approvals-default-security-unapproved`      | Exec 承認のデフォルトが、ポリシー許可リストの外にあるセキュリティモードを使用しています。 |
+| `policy/exec-approvals-agent-security-unapproved`        | エージェント別の有効な Exec 承認セキュリティモードが許可リストの外にあります。     |
+| `policy/exec-approvals-auto-allow-skills-enabled`        | ポリシーが拒否しているにもかかわらず、Exec 承認エージェントが skill CLI を暗黙的に自動許可しています。 |
+| `policy/exec-approvals-allowlist-missing`                | 承認許可リストに、ポリシーで必須のパターンがありません。                          |
+| `policy/exec-approvals-allowlist-unexpected`             | 承認許可リストに、ポリシーが想定していないパターンが含まれています。              |
+| `policy/tools-missing-risk-level`                        | ガバナンス対象ツール宣言にリスクメタデータがありません。                          |
+| `policy/tools-unknown-risk-level`                        | ガバナンス対象ツール宣言が不明なリスク値を使用しています。                        |
+| `policy/tools-missing-sensitivity-token`                 | ガバナンス対象ツール宣言に機密度メタデータがありません。                          |
+| `policy/tools-missing-owner`                             | ガバナンス対象ツール宣言に所有者メタデータがありません。                          |
+| `policy/tools-unknown-sensitivity-token`                 | ガバナンス対象ツール宣言が不明な機密度値を使用しています。                        |
 
-Policy の検出事項には、`target` と `requirement` の両方を含めることができます。`target` は、準拠していないことが観測されたワークスペース内の対象です。`requirement` は、その検出事項を発生させた、作成済みの Policy ルールです。現在、どちらの値もアドレスであり、通常は `oc://` パスですが、フィールド名はアドレス形式ではなく Policy 上の役割を表しています。
+検出事項には、`target`（適合していない観測されたワークスペース上の対象）と `requirement`（検出事項になった作成済みルール）の両方を含めることができます。現在はどちらも `oc://` アドレス文字列ですが、フィールド名はアドレス形式ではなくポリシー上の役割を表しています。
 
-JSON 検出事項の例:
+検出事項の例:
 
 ```json
 {
@@ -774,8 +788,6 @@ JSON 検出事項の例:
 }
 ```
 
-ツール検出事項の例:
-
 ```json
 {
   "checkId": "policy/tools-missing-risk-level",
@@ -790,8 +802,6 @@ JSON 検出事項の例:
 }
 ```
 
-MCP 検出事項の例:
-
 ```json
 {
   "checkId": "policy/mcp-unapproved-server",
@@ -804,8 +814,6 @@ MCP 検出事項の例:
   "requirement": "oc://policy.jsonc/mcp/servers/allow"
 }
 ```
-
-モデルプロバイダー検出事項の例:
 
 ```json
 {
@@ -820,8 +828,6 @@ MCP 検出事項の例:
 }
 ```
 
-ネットワーク検出事項の例:
-
 ```json
 {
   "checkId": "policy/network-private-access-enabled",
@@ -834,8 +840,6 @@ MCP 検出事項の例:
   "requirement": "oc://policy.jsonc/network/privateNetwork/allow"
 }
 ```
-
-Gateway公開の検出例:
 
 ```json
 {
@@ -850,7 +854,19 @@ Gateway公開の検出例:
 }
 ```
 
-エージェントワークスペースの検出例:
+```json
+{
+  "checkId": "policy/gateway-node-command-denied",
+  "severity": "error",
+  "message": "Gateway node command 'system.run' is denied by policy but not denied by OpenClaw config.",
+  "source": "policy",
+  "path": "openclaw config",
+  "ocPath": "oc://openclaw.config/gateway/nodes/denyCommands",
+  "target": "oc://openclaw.config/gateway/nodes/denyCommands",
+  "requirement": "oc://policy.jsonc/gateway/nodes/denyCommands",
+  "fixHint": "Add 'system.run' to gateway.nodes.denyCommands or update policy after review."
+}
+```
 
 ```json
 {
@@ -869,9 +885,22 @@ Gateway公開の検出例:
 
 `doctor --lint` と `policy check` は読み取り専用です。
 
-`workspaceRepairs` が明示的に有効化されている場合に限り、`doctor --fix` はポリシー管理下のワークスペース設定を編集します。このオプトインがない場合、ポリシーチェックは修復予定の内容を報告し、設定は変更しません。
+`doctor --fix` は、`workspaceRepairs` が明示的に有効化されている場合にのみ、ポリシー管理対象のワークスペース設定を編集します。それ以外の場合、チェックは修復予定の内容を報告し、設定は変更しません。
 
-このバージョンでは、OpenClaw 設定で有効化されているものの `channels.denyRules` で拒否されているチャネルを、修復によって無効化できます。有効な拒否ルールは設定済みチャネルをオフにできるため、ポリシーファイルをレビューした後にのみ `workspaceRepairs` を有効化してください。
+このバージョンでは、修復によって `channels.denyRules` で拒否されたチャンネルを無効化し、以下に示す自動的な絞り込み修復を適用できます。有効なルールによってワークスペース設定が変更される可能性があるため、`workspaceRepairs` はポリシーファイルのレビュー後にのみ有効化してください。
+
+- グローバルポリシーが昇格ツールを禁止している場合、`tools.elevated.enabled=false` を設定する
+- ポリシーでそれらのツールの拒否が要求されている場合、不足している必須拒否ツール ID を `tools.deny` または
+  `agents.list[].tools.deny` に追加する
+- 安全でない `gateway.controlUi.*` トグルを `false` に設定する
+- ポリシーがリモート Gateway モードを拒否している場合、`gateway.mode=local` を設定する
+- ポリシーが機密ログの墨消しを要求している場合、`logging.redactSensitive=tools` を設定する
+- ポリシーがテレメトリ内容のキャプチャを拒否している場合、`diagnostics.otel.captureContent=false`、またはオブジェクト形式のテレメトリキャプチャ設定では
+  `diagnostics.otel.captureContent.enabled=false` を設定する
+
+スコープ付き昇格ツール修復は検出のみです。スコープ付きデータ処理修復も、検出結果が共有ログ設定またはテレメトリ設定を報告している場合はスキップされます。共有設定を変更すると、スコープ付きポリシー対象を超えて影響するためです。
+
+スコープ付き必須拒否修復は、検出結果が継承されたルート `tools.deny` を報告している場合はスキップされます。必要なツールをルート設定に追加すると、スコープ付きポリシー対象を超えて影響するためです。エージェントローカルの必須拒否修復では、報告された `agents.list[].tools.deny` パスを更新できます。
 
 ```jsonc
 {
@@ -891,9 +920,9 @@ Gateway公開の検出例:
 
 | コマンド          | `0`                                                    | `1`                                                                 | `2`                          |
 | ---------------- | ------------------------------------------------------ | ------------------------------------------------------------------- | ---------------------------- |
-| `policy check`   | しきい値に達した検出事項はありません。                          | 1件以上の検出事項がしきい値に達しました。                             | 引数またはランタイムの失敗。 |
+| `policy check`   | しきい値以上の検出結果はありません。                          | 1件以上の検出結果がしきい値に達しました。                             | 引数またはランタイムの失敗。 |
 | `policy compare` | ポリシーファイルはベースラインと同等以上に厳格です。 | ポリシーファイルが無効、欠落、またはベースラインルールより弱いです。 | 引数またはランタイムの失敗。 |
-| `policy watch`   | 検出事項はなく、承認済みハッシュは最新です。              | 検出事項が存在するか、承認済みアテステーションが古くなっています。                    | 引数またはランタイムの失敗。 |
+| `policy watch`   | 検出結果はなく、承認済みハッシュは最新です。              | 検出結果が存在するか、承認済み証明が古くなっています。                    | 引数またはランタイムの失敗。 |
 
 ## 関連
 

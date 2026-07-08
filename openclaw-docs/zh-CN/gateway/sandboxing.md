@@ -2,120 +2,100 @@
 read_when: You want a dedicated explanation of sandboxing or need to tune agents.defaults.sandbox.
 sidebarTitle: Sandboxing
 status: active
-summary: OpenClaw 沙箱隔离的工作方式：模式、范围、工作区访问和镜像
+summary: OpenClaw 沙箱隔离的工作方式：模式、作用域、工作区访问和镜像
 title: 沙箱隔离
 x-i18n:
-    generated_at: "2026-06-27T02:07:03Z"
+    generated_at: "2026-07-06T10:48:47Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 7c9754fbfc71ee5fb48df72eece8ba3b155ce5e0d9c55aae75ce21801dceb07d
+    source_hash: 60d6695c5d8f4e8d3bfb80dd387a50c104dc4e140d5974a66d5a2176594782a4
     source_path: gateway/sandboxing.md
     workflow: 16
 ---
 
-OpenClaw 可以**在沙箱后端中运行工具**，以降低影响范围。这是**可选的**，并由配置控制（`agents.defaults.sandbox` 或 `agents.list[].sandbox`）。如果沙箱隔离关闭，工具会在主机上运行。Gateway 网关保留在主机上；启用后，工具执行会在隔离的沙箱中运行。
+OpenClaw 可以在沙箱后端中运行工具执行，以降低影响范围。沙箱隔离默认关闭，由 `agents.defaults.sandbox`（全局）或 `agents.list[].sandbox`（按 Agent）控制。Gateway 网关进程始终留在主机上；启用后，只有工具执行会移入沙箱。
 
 <Note>
-这不是完美的安全边界，但当模型做出错误操作时，它能显著限制文件系统和进程访问。
+这不是完美的安全边界，但当模型做出不当操作时，它可以显著限制文件系统和进程访问。
 </Note>
 
-## 哪些内容会被沙箱隔离
+## 会被沙箱隔离的内容
 
-- 工具执行（`exec`、`read`、`write`、`edit`、`apply_patch`、`process` 等）。
-- 可选的沙箱浏览器（`agents.defaults.sandbox.browser`）。
+- 工具执行：`exec`、`read`、`write`、`edit`、`apply_patch`、`process` 等。
+- 可选的沙箱隔离浏览器（`agents.defaults.sandbox.browser`）。
 
-<AccordionGroup>
-  <Accordion title="Sandboxed browser details">
-    - 默认情况下，当浏览器工具需要它时，沙箱浏览器会自动启动（确保 CDP 可访问）。通过 `agents.defaults.sandbox.browser.autoStart` 和 `agents.defaults.sandbox.browser.autoStartTimeoutMs` 配置。
-    - 默认情况下，沙箱浏览器容器使用专用 Docker 网络（`openclaw-sandbox-browser`），而不是全局 `bridge` 网络。通过 `agents.defaults.sandbox.browser.network` 配置。
-    - 可选的 `agents.defaults.sandbox.browser.cdpSourceRange` 使用 CIDR 允许列表限制容器边缘的 CDP 入口流量（例如 `172.21.0.1/32`）。
-    - noVNC 观察者访问默认受密码保护；OpenClaw 会发出一个短期有效的令牌 URL，用于提供本地引导页面，并通过 URL 片段（不是查询参数或请求头日志）中的密码打开 noVNC。
-    - `agents.defaults.sandbox.browser.allowHostControl` 允许沙箱隔离会话显式指向主机浏览器。
-    - 可选允许列表会限制 `target: "custom"`：`allowedControlUrls`、`allowedControlHosts`、`allowedControlPorts`。
-
-  </Accordion>
-</AccordionGroup>
-
-未沙箱隔离：
+不会被沙箱隔离的内容：
 
 - Gateway 网关进程本身。
-- 任何被显式允许在沙箱外运行的工具（例如 `tools.elevated`）。
-  - **提升权限的 exec 会绕过沙箱隔离，并使用配置的逃逸路径（默认是 `gateway`，或当 exec 目标是 `node` 时使用 `node`）。**
-  - 如果沙箱隔离关闭，`tools.elevated` 不会改变执行方式（已经在主机上）。参见 [Elevated Mode](/zh-CN/tools/elevated)。
+- 任何通过 `tools.elevated` 显式允许在沙箱外运行的工具。提升权限的 Exec 会绕过沙箱隔离，并在配置的逃逸路径上运行（默认为 `gateway`，或者当 Exec 目标为 `node` 时为 `node`）。如果沙箱隔离关闭，`tools.elevated` 不会改变任何行为，因为 Exec 已经在主机上运行。参见[提升权限模式](/zh-CN/tools/elevated)。
 
-## 模式
+## 模式、范围和后端
 
-`agents.defaults.sandbox.mode` 控制**何时**使用沙箱隔离：
+三个独立设置控制沙箱行为：
 
-<Tabs>
-  <Tab title="off">
-    无沙箱隔离。
-  </Tab>
-  <Tab title="non-main">
-    仅沙箱隔离**非主**会话（如果你希望普通聊天在主机上运行，这是默认选项）。
+| 设置 | 键                                | 值                           | 默认值   |
+| ------- | --------------------------------- | ---------------------------- | -------- |
+| 模式    | `agents.defaults.sandbox.mode`    | `off`, `non-main`, `all`     | `off`    |
+| 范围    | `agents.defaults.sandbox.scope`   | `agent`, `session`, `shared` | `agent`  |
+| 后端 | `agents.defaults.sandbox.backend` | `docker`, `ssh`, `openshell` | `docker` |
 
-    `"non-main"` 基于 `session.mainKey`（默认 `"main"`），而不是智能体 ID。群组/渠道会话使用自己的键，因此它们会被视为非主会话并被沙箱隔离。
+**模式**控制何时应用沙箱隔离：
 
-  </Tab>
-  <Tab title="all">
-    每个会话都在沙箱中运行。
-  </Tab>
-</Tabs>
+- `off`：不使用沙箱隔离。
+- `non-main`：除 Agent 主会话外的每个会话都使用沙箱。主会话键始终是 `agent:<agentId>:main`（当 `session.scope` 为 `"global"` 时为 `global`）；它不可配置。群组/渠道会话使用自己的键，因此它们始终计为非主会话并会被沙箱隔离。
+- `all`：每个会话都在沙箱中运行。
 
-## 范围
+**范围**控制创建多少容器/环境：
 
-`agents.defaults.sandbox.scope` 控制**创建多少个容器**：
+- `agent`：每个 Agent 一个容器。
+- `session`：每个会话一个容器。
+- `shared`：所有沙箱隔离会话共享一个容器（在此范围下会忽略按 Agent 的 `docker`/`ssh`/`browser` 覆盖项）。
 
-- `"agent"`（默认）：每个智能体一个容器。
-- `"session"`：每个会话一个容器。
-- `"shared"`：所有沙箱隔离会话共享一个容器。
-
-## 后端
-
-`agents.defaults.sandbox.backend` 控制**哪个运行时**提供沙箱：
-
-- `"docker"`（启用沙箱隔离时的默认值）：本地 Docker 支持的沙箱运行时。
-- `"ssh"`：通用 SSH 支持的远程沙箱运行时。
-- `"openshell"`：OpenShell 支持的沙箱运行时。
-
-SSH 专用配置位于 `agents.defaults.sandbox.ssh` 下。OpenShell 专用配置位于 `plugins.entries.openshell.config` 下。
-
-### 选择后端
+**后端**控制哪个运行时执行沙箱隔离工具。SSH 专属配置位于 `agents.defaults.sandbox.ssh` 下；OpenShell 专属配置位于 `plugins.entries.openshell.config` 下。
 
 |                     | Docker                           | SSH                            | OpenShell                                           |
 | ------------------- | -------------------------------- | ------------------------------ | --------------------------------------------------- |
-| **运行位置**   | 本地容器                  | 任何可通过 SSH 访问的主机        | OpenShell 托管的沙箱                           |
+| **运行位置**   | 本地容器                  | 任何可通过 SSH 访问的主机        | OpenShell 托管沙箱                           |
 | **设置**           | `scripts/sandbox-setup.sh`       | SSH 密钥 + 目标主机          | 已启用 OpenShell 插件                            |
-| **工作区模型** | 绑定挂载或复制               | 远程规范（初始化一次）   | `mirror` 或 `remote`                                |
+| **工作区模型** | 绑定挂载或复制               | 远程为准（种子一次）   | `mirror` 或 `remote`                                |
 | **网络控制** | `docker.network`（默认：无） | 取决于远程主机         | 取决于 OpenShell                                |
 | **浏览器沙箱** | 支持                        | 不支持                  | 尚不支持                                   |
 | **绑定挂载**     | `docker.binds`                   | N/A                            | N/A                                                 |
-| **最适合**        | 本地开发，完整隔离        | 卸载到远程机器 | 带可选双向同步的托管远程沙箱 |
+| **最适合**        | 本地开发，完全隔离        | 卸载到远程机器 | 带可选双向同步的托管远程沙箱 |
 
-### Docker 后端
+## Docker 后端
 
-沙箱隔离默认关闭。如果你启用沙箱隔离但未选择后端，OpenClaw 会使用 Docker 后端。它通过 Docker daemon socket（`/var/run/docker.sock`）在本地执行工具和沙箱浏览器。沙箱容器隔离由 Docker 命名空间决定。
+启用沙箱隔离后，Docker 是默认后端。它通过 Docker 守护进程套接字（`/var/run/docker.sock`）在本地运行工具和沙箱浏览器；隔离来自 Docker 命名空间。
 
-要将主机 GPU 暴露给 Docker 沙箱，请设置 `agents.defaults.sandbox.docker.gpus` 或按智能体覆盖的 `agents.list[].sandbox.docker.gpus`。该值会作为单独参数传递给 Docker 的 `--gpus` 标志，例如 `"all"` 或 `"device=GPU-uuid"`，并且需要兼容的主机运行时，例如 NVIDIA Container Toolkit。
+默认值：`network: "none"`（无出站网络）、`readOnlyRoot: true`、`capDrop: ["ALL"]`、镜像 `openclaw-sandbox:bookworm-slim`。
+
+要暴露主机 GPU，请将 `agents.defaults.sandbox.docker.gpus`（或按 Agent 的覆盖项）设置为类似 `"all"` 或 `"device=GPU-uuid"` 的值。该值会传给 Docker 的 `--gpus` 标志，并要求兼容的主机运行时，例如 NVIDIA Container Toolkit。
 
 <Warning>
-**Docker-out-of-Docker (DooD) 约束**
+**Docker-out-of-Docker（DooD）约束**
 
-如果你将 OpenClaw Gateway 网关本身部署为 Docker 容器，它会使用主机的 Docker socket 编排同级沙箱容器（DooD）。这会引入一个特定的路径映射约束：
+如果你将 OpenClaw Gateway 网关本身部署为 Docker 容器，它会使用主机的 Docker 套接字编排同级沙箱容器（DooD）。这会引入路径映射约束：
 
-- **配置需要主机路径**：`openclaw.json` 的 `workspace` 配置必须包含**主机的绝对路径**（例如 `/home/user/.openclaw/workspaces`），而不是 Gateway 网关容器内部路径。当 OpenClaw 要求 Docker daemon 生成沙箱时，daemon 会相对于主机 OS 命名空间评估路径，而不是 Gateway 网关命名空间。
-- **FS 桥接一致性（相同卷映射）**：OpenClaw Gateway 网关原生进程也会将 Heartbeat 和桥接文件写入 `workspace` 目录。由于 Gateway 网关在自己的容器化环境中评估完全相同的字符串（主机路径），Gateway 网关部署必须包含相同的卷映射，以原生方式链接主机命名空间（`-v /home/user/.openclaw:/home/user/.openclaw`）。
-- **Codex 代码模式**：当 OpenClaw 沙箱处于活动状态时，OpenClaw 会在该轮次禁用 Codex 应用服务器原生代码模式、用户 MCP 服务器以及应用支持的插件执行，因为这些原生表面运行在 Gateway 网关主机应用服务器进程中，而不是 OpenClaw 沙箱后端中。当普通 exec/process 工具可用时，Shell 访问会通过 OpenClaw 沙箱支持的工具（例如 `sandbox_exec` 和 `sandbox_process`）暴露。不要将主机 Docker socket 挂载到智能体沙箱容器或自定义 Codex 沙箱中。
+- **配置需要主机路径**：`openclaw.json` 的 `workspace` 必须包含**主机的绝对路径**（例如 `/home/user/.openclaw/workspaces`），而不是内部 Gateway 网关容器路径。Docker 守护进程会相对于主机操作系统命名空间解析路径，而不是相对于 Gateway 网关自身命名空间。
+- **需要匹配的卷映射**：Gateway 网关进程还会将心跳和桥接文件写入该 `workspace` 路径。请给 Gateway 网关容器提供相同的卷映射（`-v /home/user/.openclaw:/home/user/.openclaw`），这样同一个主机路径也能从 Gateway 网关容器内部正确解析。映射不匹配会在 Gateway 网关尝试写入心跳时表现为 `EACCES`。
+- **Codex 代码模式**：当 OpenClaw 沙箱处于活动状态时，OpenClaw 会在该轮次禁用 Codex app-server 原生代码模式、用户 MCP 服务器以及由应用托管的插件执行（这些都从 Gateway 网关主机上的 app-server 进程运行，而不是 OpenClaw 沙箱后端），除非沙箱工具策略暴露所需工具，并且你选择启用实验性沙箱 Exec 服务器路径。此时 Shell 访问会通过 OpenClaw 沙箱支持的工具路由，例如 `sandbox_exec` 和 `sandbox_process`。不要将主机 Docker 套接字挂载进 Agent 沙箱容器或自定义 Codex 沙箱。完整行为请参见 [Codex Harness](/zh-CN/plugins/codex-harness)。
 
-在 Ubuntu/AppArmor 主机上，当你有意在没有启用 OpenClaw 沙箱隔离的情况下运行原生 Codex `workspace-write`，且服务用户不允许创建非特权用户命名空间时，Codex `workspace-write` 可能会在 shell 启动前失败。当 Docker 沙箱出口流量被禁用（`network: "none"`，默认值）时，Codex 还需要非特权网络命名空间。常见症状包括 `bwrap: setting up uid map: Permission denied` 和 `bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted`。运行 `openclaw doctor`；如果它报告 Codex bwrap 命名空间探测失败，优先使用授予 OpenClaw 服务进程所需命名空间的 AppArmor 配置文件。`kernel.apparmor_restrict_unprivileged_userns=0` 是主机范围的回退方案，存在安全权衡；仅在该主机安全态势可接受时使用。
-
-如果你在内部映射路径但没有绝对主机路径一致性，OpenClaw 会原生抛出 `EACCES` 权限错误，因为它尝试在容器环境内写入 Heartbeat，而完全限定的路径字符串并不存在于原生环境中。
+在启用了 Docker 沙箱模式的 Ubuntu/AppArmor 主机上，Codex app-server 的 `workspace-write` Shell 执行需要沙箱容器内的非特权用户命名空间；当服务用户无法创建这些命名空间时，Shell 启动前可能会失败。当 Docker 沙箱出站网络被禁用（`network: "none"`，默认值）时，还需要一个非特权网络命名空间。常见症状包括：`bwrap: setting up uid map: Permission denied` 和 `bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted`。运行 `openclaw doctor`；如果它报告 Codex bwrap 命名空间探测失败，优先使用一个 AppArmor 配置文件，为 OpenClaw 服务进程授予所需命名空间。`kernel.apparmor_restrict_unprivileged_userns=0` 是主机范围的回退方案，但有安全取舍；仅当该主机安全态势可接受时才使用。
 </Warning>
 
-### SSH 后端
+### 沙箱隔离浏览器
 
-当你希望 OpenClaw 在任意可通过 SSH 访问的机器上沙箱隔离 `exec`、文件工具和媒体读取时，使用 `backend: "ssh"`。
+- 当浏览器工具需要时，沙箱浏览器会自动启动（确保 CDP 可达）。通过 `agents.defaults.sandbox.browser.autoStart`（默认 `true`）和 `autoStartTimeoutMs`（默认 12 秒）配置。
+- 沙箱浏览器容器使用专用 Docker 网络（`openclaw-sandbox-browser`），而不是全局 `bridge` 网络。通过 `agents.defaults.sandbox.browser.network` 配置。
+- `agents.defaults.sandbox.browser.cdpSourceRange` 使用 CIDR 允许列表限制容器边缘的 CDP 入站访问（例如 `172.21.0.1/32`）。
+- noVNC 观察者访问默认受密码保护；OpenClaw 会发出一个短期有效的令牌 URL，用于提供本地引导页面，并通过 URL 片段（不是查询字符串或标头日志）中的密码打开 noVNC。
+- `agents.defaults.sandbox.browser.allowHostControl`（默认 `false`）允许沙箱隔离会话显式目标到主机浏览器。
+- 可选允许列表会限制 `target: "custom"`：`allowedControlUrls`、`allowedControlHosts`、`allowedControlPorts`。
+
+## SSH 后端
+
+使用 `backend: "ssh"` 在任意可通过 SSH 访问的机器上沙箱隔离 `exec`、文件工具和媒体读取。
 
 ```json5
 {
@@ -145,36 +125,15 @@ SSH 专用配置位于 `agents.defaults.sandbox.ssh` 下。OpenShell 专用配�
 }
 ```
 
-<AccordionGroup>
-  <Accordion title="How it works">
-    - OpenClaw 会在 `sandbox.ssh.workspaceRoot` 下创建按范围划分的远程根目录。
-    - 在创建或重新创建后的首次使用时，OpenClaw 会从本地工作区初始化一次该远程工作区。
-    - 之后，`exec`、`read`、`write`、`edit`、`apply_patch`、提示词媒体读取以及入站媒体暂存都会通过 SSH 直接作用于远程工作区。
-    - OpenClaw 不会自动将远程更改同步回本地工作区。
+默认值：`command: "ssh"`、`workspaceRoot: "/tmp/openclaw-sandboxes"`、`strictHostKeyChecking: true`、`updateHostKeys: true`。
 
-  </Accordion>
-  <Accordion title="Authentication material">
-    - `identityFile`、`certificateFile`、`knownHostsFile`：使用现有本地文件，并通过 OpenSSH 配置传递它们。
-    - `identityData`、`certificateData`、`knownHostsData`：使用内联字符串或 SecretRefs。OpenClaw 会通过普通 secrets 运行时快照解析它们，将它们写入权限为 `0600` 的临时文件，并在 SSH 会话结束时删除它们。
-    - 如果同一项同时设置了 `*File` 和 `*Data`，该 SSH 会话会优先使用 `*Data`。
+- **生命周期**：OpenClaw 会在 `sandbox.ssh.workspaceRoot` 下创建一个按范围划分的远程根目录。在创建或重新创建后的首次使用时，它会从本地工作区向该远程工作区播种一次。之后，`exec`、`read`、`write`、`edit`、`apply_patch`、提示媒体读取和入站媒体暂存都会通过 SSH 直接作用于远程工作区。OpenClaw 不会自动将远程更改同步回本地工作区。
+- **身份验证材料**：`identityFile`/`certificateFile`/`knownHostsFile` 引用现有本地文件。`identityData`/`certificateData`/`knownHostsData` 接受内联字符串或 SecretRefs，通过正常的密钥运行时快照解析，写入权限模式为 `0600` 的临时文件，并在 SSH 会话结束时删除。如果同一项同时设置了 `*File` 和 `*Data` 变体，则该会话中 `*Data` 优先。
+- **远程为准的后果**：初始播种后，远程 SSH 工作区会成为真实的沙箱状态。播种步骤之后在 OpenClaw 外部进行的主机本地编辑，直到你重新创建沙箱前都不会在远程可见。`openclaw sandbox recreate` 会删除按范围划分的远程根目录，并在下次使用时再次从本地播种。此后端不支持浏览器沙箱隔离，且 `sandbox.docker.*` 设置不适用于它。
 
-  </Accordion>
-  <Accordion title="Remote-canonical consequences">
-    这是一个**远程规范**模型。初始初始化后，远程 SSH 工作区会成为真正的沙箱状态。
+## OpenShell 后端
 
-    - 初始化步骤之后，在 OpenClaw 外部进行的主机本地编辑不会在远程可见，直到你重新创建沙箱。
-    - `openclaw sandbox recreate` 会删除按范围划分的远程根目录，并在下次使用时再次从本地初始化。
-    - SSH 后端不支持浏览器沙箱隔离。
-    - `sandbox.docker.*` 设置不适用于 SSH 后端。
-
-  </Accordion>
-</AccordionGroup>
-
-### OpenShell 后端
-
-当你希望 OpenClaw 在 OpenShell 托管的远程环境中沙箱隔离工具时，使用 `backend: "openshell"`。完整设置指南、配置参考和工作区模式比较，请参见专门的 [OpenShell 页面](/zh-CN/gateway/openshell)。
-
-OpenShell 复用与通用 SSH 后端相同的核心 SSH 传输和远程文件系统桥接，并增加 OpenShell 专用生命周期（`sandbox create/get/delete`、`sandbox ssh-config`）以及可选的 `mirror` 工作区模式。
+使用 `backend: "openshell"` 在 OpenShell 托管的远程环境中沙箱隔离工具。OpenShell 复用与通用 SSH 后端相同的 SSH 传输和远程文件系统桥接，并添加 OpenShell 生命周期（`sandbox create/get/delete/ssh-config`）以及可选的 `mirror` 工作区同步模式。
 
 ```json5
 {
@@ -195,8 +154,6 @@ OpenShell 复用与通用 SSH 后端相同的核心 SSH 传输和远程文件系
         config: {
           from: "openclaw",
           mode: "remote", // mirror | remote
-          remoteWorkspaceDir: "/sandbox",
-          remoteAgentWorkspaceDir: "/agent",
         },
       },
     },
@@ -204,132 +161,37 @@ OpenShell 复用与通用 SSH 后端相同的核心 SSH 传输和远程文件系
 }
 ```
 
-OpenShell 模式：
+`mode: "mirror"`（默认）保持本地工作区为准：OpenClaw 会在 `exec` 前将本地同步到沙箱，并在之后同步回来。`mode: "remote"` 会从本地向远程工作区播种一次，然后直接针对远程工作区运行 `exec`/`read`/`write`/`edit`/`apply_patch`，且不会同步回来；播种之后的本地编辑不可见，直到你执行 `openclaw sandbox recreate`。在 `scope: "agent"` 或 `scope: "shared"` 下，该远程工作区会在相同范围内共享。当前限制：尚不支持沙箱浏览器，且 `sandbox.docker.binds` 不适用于此后端。
 
-- `mirror`（默认）：本地工作区保持规范状态。OpenClaw 会在 exec 前将本地文件同步到 OpenShell，并在 exec 后将远程工作区同步回来。
-- `remote`：沙箱创建后，OpenShell 工作区成为规范状态。OpenClaw 会从本地工作区初始化一次远程工作区，然后文件工具和 exec 会直接作用于远程沙箱，而不会同步更改回来。
+`openclaw sandbox list`/`recreate`/prune all 会像处理 Docker 运行时一样处理 OpenShell 运行时；清理逻辑可感知后端。
 
-<AccordionGroup>
-  <Accordion title="远程传输细节">
-    - OpenClaw 通过 `openshell sandbox ssh-config <name>` 向 OpenShell 请求特定沙箱的 SSH 配置。
-    - 核心会把该 SSH 配置写入临时文件，打开 SSH 会话，并复用 `backend: "ssh"` 使用的同一个远程文件系统桥接。
-    - 在 `mirror` 模式下，只有生命周期不同：执行前将本地同步到远程，执行后再同步回来。
-
-  </Accordion>
-  <Accordion title="当前 OpenShell 限制">
-    - 尚不支持沙箱浏览器
-    - OpenShell 后端不支持 `sandbox.docker.binds`
-    - `sandbox.docker.*` 下的 Docker 专用运行时旋钮仍然只适用于 Docker 后端
-
-  </Accordion>
-</AccordionGroup>
-
-#### 工作区模式
-
-OpenShell 有两种工作区模型。这是在实践中最重要的部分。
-
-<Tabs>
-  <Tab title="mirror（本地为准）">
-    当你希望**本地工作区保持为权威来源**时，使用 `plugins.entries.openshell.config.mode: "mirror"`。
-
-    行为：
-
-    - 在 `exec` 之前，OpenClaw 会将本地工作区同步到 OpenShell 沙箱。
-    - 在 `exec` 之后，OpenClaw 会将远程工作区同步回本地工作区。
-    - 文件工具仍然通过沙箱桥接运行，但在轮次之间，本地工作区仍是事实来源。
-
-    适用于：
-
-    - 你在 OpenClaw 之外本地编辑文件，并希望这些更改自动出现在沙箱中
-    - 你希望 OpenShell 沙箱尽可能像 Docker 后端一样工作
-    - 你希望每次 exec 轮次后，主机工作区都反映沙箱写入
-
-    权衡：exec 前后会产生额外同步成本。
-
-  </Tab>
-  <Tab title="remote（OpenShell 为准）">
-    当你希望 **OpenShell 工作区成为权威来源**时，使用 `plugins.entries.openshell.config.mode: "remote"`。
-
-    行为：
-
-    - 首次创建沙箱时，OpenClaw 会从本地工作区向远程工作区播种一次。
-    - 之后，`exec`、`read`、`write`、`edit` 和 `apply_patch` 会直接作用于远程 OpenShell 工作区。
-    - OpenClaw 在 exec 后**不会**把远程更改同步回本地工作区。
-    - 提示词阶段的媒体读取仍然可用，因为文件和媒体工具会通过沙箱桥接读取，而不是假定有本地主机路径。
-    - 传输方式是通过 `openshell sandbox ssh-config` 返回的配置 SSH 进入 OpenShell 沙箱。
-
-    重要后果：
-
-    - 如果你在播种步骤之后，在主机上于 OpenClaw 之外编辑文件，远程沙箱**不会**自动看到这些更改。
-    - 如果重新创建沙箱，远程工作区会再次从本地工作区播种。
-    - 使用 `scope: "agent"` 或 `scope: "shared"` 时，该远程工作区会在同一作用域共享。
-
-    适用于：
-
-    - 沙箱应主要存在于远程 OpenShell 侧
-    - 你希望降低每轮同步开销
-    - 你不希望主机本地编辑静默覆盖远程沙箱状态
-
-  </Tab>
-</Tabs>
-
-如果你把沙箱看作临时执行环境，请选择 `mirror`。如果你把沙箱看作真实工作区，请选择 `remote`。
-
-#### OpenShell 生命周期
-
-OpenShell 沙箱仍通过普通沙箱生命周期管理：
-
-- `openclaw sandbox list` 会显示 OpenShell 运行时以及 Docker 运行时
-- `openclaw sandbox recreate` 会删除当前运行时，并让 OpenClaw 在下次使用时重新创建它
-- 清理逻辑也会感知后端
-
-对于 `remote` 模式，重新创建尤其重要：
-
-- 重新创建会删除该作用域的权威远程工作区
-- 下次使用会从本地工作区播种一个新的远程工作区
-
-对于 `mirror` 模式，重新创建主要是重置远程执行环境，因为本地工作区无论如何仍是权威来源。
+完整前置要求、配置参考、工作区模式对比和生命周期细节，请参见 [OpenShell](/zh-CN/gateway/openshell)。
 
 ## 工作区访问
 
-`agents.defaults.sandbox.workspaceAccess` 控制**沙箱可以看到什么**：
+`agents.defaults.sandbox.workspaceAccess` 控制沙箱可以看到什么：
 
-<Tabs>
-  <Tab title="none（默认）">
-    工具会看到 `~/.openclaw/sandboxes` 下的沙箱工作区。
-  </Tab>
-  <Tab title="ro">
-    以只读方式把 Agent 工作区挂载到 `/agent`（禁用 `write`/`edit`/`apply_patch`）。
-  </Tab>
-  <Tab title="rw">
-    以读写方式把 Agent 工作区挂载到 `/workspace`。
-  </Tab>
-</Tabs>
+| 值               | 行为                                                                                      |
+| ---------------- | ----------------------------------------------------------------------------------------- |
+| `none`（默认）   | 工具会看到位于 `~/.openclaw/sandboxes` 下的隔离沙箱工作区。                               |
+| `ro`             | 以只读方式将 Agent 工作区挂载到 `/agent`（禁用 `write`/`edit`/`apply_patch`）。           |
+| `rw`             | 以读写方式将 Agent 工作区挂载到 `/workspace`。                                            |
 
-使用 OpenShell 后端时：
-
-- `mirror` 模式仍然在 exec 轮次之间使用本地工作区作为权威来源
-- `remote` 模式在初始播种后使用远程 OpenShell 工作区作为权威来源
-- `workspaceAccess: "ro"` 和 `"none"` 仍会以相同方式限制写入行为
+使用 OpenShell 后端时，`mirror` 模式仍会在 exec 轮次之间使用本地工作区作为规范来源，`remote` 模式会在初始种子之后使用远程 OpenShell 工作区作为规范来源，并且 `workspaceAccess: "ro"`/`"none"` 仍会以相同方式限制写入行为。
 
 入站媒体会被复制到活动沙箱工作区（`media/inbound/*`）。
 
 <Note>
-**Skills 注意事项：**`read` 工具以沙箱根目录为根。使用 `workspaceAccess: "none"` 时，OpenClaw 会把符合条件的 Skills 镜像到沙箱工作区（`.../skills`），以便它们可被读取。使用 `"rw"` 时，可从 `/workspace/skills` 读取工作区 Skills，并且符合条件的托管、内置或插件 Skills 会被物化到生成的只读路径 `/workspace/.openclaw/sandbox-skills/skills`。
+**Skills**：`read` 工具以沙箱根目录为根。使用 `workspaceAccess: "none"` 时，OpenClaw 会将符合条件的 Skills 镜像到沙箱工作区（`.../skills`），以便读取。使用 `"rw"` 时，可以从 `/workspace/skills` 读取工作区 Skills，符合条件的托管、内置或插件 Skills 会被物化到生成的只读路径 `/workspace/.openclaw/sandbox-skills/skills`。
 </Note>
 
 ## 自定义绑定挂载
 
-`agents.defaults.sandbox.docker.binds` 会把额外主机目录挂载到容器中。格式：`host:container:mode`（例如 `"/home/user/source:/source:rw"`）。
+`agents.defaults.sandbox.docker.binds` 会将额外的主机目录挂载到容器中。格式：`host:container:mode`（例如 `"/home/user/source:/source:rw"`）。
 
-全局绑定和按 Agent 绑定会**合并**（而不是替换）。在 `scope: "shared"` 下，按 Agent 绑定会被忽略。
+全局绑定和每个 Agent 的绑定会合并（不会替换）。在 `scope: "shared"` 下，每个 Agent 的绑定会被忽略。
 
-`agents.defaults.sandbox.browser.binds` 只会把额外主机目录挂载到**沙箱浏览器**容器中。
-
-- 设置时（包括 `[]`），它会替换浏览器容器的 `agents.defaults.sandbox.docker.binds`。
-- 省略时，浏览器容器会回退到 `agents.defaults.sandbox.docker.binds`（向后兼容）。
-
-示例（只读源目录 + 一个额外数据目录）：
+`agents.defaults.sandbox.browser.binds` 仅将额外的主机目录挂载到**沙箱浏览器**容器中。设置后（包括 `[]`），它会替换浏览器容器的 `docker.binds`；省略时，浏览器容器会回退到 `docker.binds`。
 
 ```json5
 {
@@ -356,16 +218,15 @@ OpenShell 沙箱仍通过普通沙箱生命周期管理：
 ```
 
 <Warning>
-**绑定安全**
+**绑定安全性**
 
-- 绑定会绕过沙箱文件系统：它们会以你设置的模式（`:ro` 或 `:rw`）暴露主机路径。
-- OpenClaw 会阻止危险的绑定来源（例如：`docker.sock`、`/etc`、`/proc`、`/sys`、`/dev`，以及会暴露它们的父级挂载）。
-- OpenClaw 还会阻止常见的主目录凭据根，例如 `~/.aws`、`~/.cargo`、`~/.config`、`~/.docker`、`~/.gnupg`、`~/.netrc`、`~/.npm` 和 `~/.ssh`。
-- 绑定校验不只是字符串匹配。OpenClaw 会规范化源路径，然后通过最深的已存在祖先再次解析它，再重新检查被阻止的路径和允许的根。
-- 这意味着即使最终叶子节点尚不存在，符号链接父级逃逸仍会失败关闭。示例：如果 `run-link` 指向那里，`/workspace/run-link/new-file` 仍会解析为 `/var/run/...`。
-- 允许的源根也会以同样方式规范化，因此，一个在符号链接解析前看起来位于允许列表内的路径，仍会因 `outside allowed roots` 被拒绝。
+- 绑定会绕过沙箱文件系统：它们会按你设置的模式（`:ro` 或 `:rw`）暴露主机路径。
+- OpenClaw 默认阻止危险的绑定来源：系统路径（`/etc`、`/proc`、`/sys`、`/dev`、`/root`、`/boot`）、Docker 套接字目录（`/run`、`/var/run` 及其 `docker.sock` 变体），以及常见的主目录凭据根目录（`~/.aws`、`~/.cargo`、`~/.config`、`~/.docker`、`~/.gnupg`、`~/.netrc`、`~/.npm`、`~/.ssh`）。
+- 验证会规范化来源路径，然后通过最深的现有祖先再次解析它，再重新检查被阻止的路径和允许的根目录，因此即使最终叶子节点尚不存在，符号链接父目录逃逸也会失败关闭（例如，如果 `run-link` 指向那里，`/workspace/run-link/new-file` 仍会解析为 `/var/run/...`）。
+- 绑定目标如果遮蔽保留的容器挂载点（`/workspace`、`/agent`），默认也会被阻止；可通过 `agents.defaults.sandbox.docker.dangerouslyAllowReservedContainerTargets: true` 覆盖。
+- 工作区/Agent 工作区允许列表根目录之外的绑定来源默认会被阻止；可通过 `agents.defaults.sandbox.docker.dangerouslyAllowExternalBindSources: true` 覆盖。允许的根目录会以相同方式规范化，因此在符号链接解析前看起来位于允许列表内的路径，如果解析后位于允许根目录之外，仍会被拒绝。
 - 敏感挂载（密钥、SSH 密钥、服务凭据）应使用 `:ro`，除非绝对需要。
-- 如果你只需要对工作区的读取访问，请结合 `workspaceAccess: "ro"` 使用；绑定模式保持独立。
+- 如果你只需要读取工作区，请与 `workspaceAccess: "ro"` 结合使用；绑定模式仍保持独立。
 - 请参阅[沙箱、工具策略和提升权限](/zh-CN/gateway/sandbox-vs-tool-policy-vs-elevated)，了解绑定如何与工具策略和提升权限的 exec 交互。
 
 </Warning>
@@ -375,22 +236,22 @@ OpenShell 沙箱仍通过普通沙箱生命周期管理：
 默认 Docker 镜像：`openclaw-sandbox:bookworm-slim`
 
 <Note>
-**源代码检出与 npm 安装**
+**源码检出与 npm 安装**
 
-`scripts/sandbox-setup.sh`、`scripts/sandbox-common-setup.sh` 和 `scripts/sandbox-browser-setup.sh` 辅助脚本仅在从[源代码检出](https://github.com/openclaw/openclaw)运行时可用。它们不包含在 npm 包中。
+`scripts/sandbox-setup.sh`、`scripts/sandbox-common-setup.sh` 和 `scripts/sandbox-browser-setup.sh` 辅助脚本仅在从[源码检出](https://github.com/openclaw/openclaw)运行时可用。它们不包含在 npm 包中。
 
 如果你通过 `npm install -g openclaw` 安装了 OpenClaw，请改用下面显示的内联 `docker build` 命令。
 </Note>
 
 <Steps>
   <Step title="构建默认镜像">
-    从源代码检出运行：
+    从源码检出：
 
     ```bash
     scripts/sandbox-setup.sh
     ```
 
-    从 npm 安装运行（无需源代码检出）：
+    从 npm 安装（无需源码检出）：
 
     ```bash
     docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -406,117 +267,114 @@ OpenShell 沙箱仍通过普通沙箱生命周期管理：
     DOCKERFILE
     ```
 
-    默认镜像**不**包含 Node。如果某个技能需要 Node（或其他运行时），可以构建自定义镜像，或通过 `sandbox.docker.setupCommand` 安装（需要网络出口 + 可写根目录 + root 用户）。
+    默认镜像**不**包含 Node。如果某个 Skill 需要 Node（或其他运行时），请烘焙自定义镜像，或通过 `sandbox.docker.setupCommand` 安装（需要网络出口 + 可写根目录 + root 用户）。
 
-    当缺少 `openclaw-sandbox:bookworm-slim` 时，OpenClaw 不会静默替换为普通的 `debian:bookworm-slim`。目标为默认镜像的沙箱运行会快速失败并显示构建说明，直到你构建它，因为内置镜像携带用于沙箱写入/编辑辅助工具的 `python3`。
+    当缺少 `openclaw-sandbox:bookworm-slim` 时，OpenClaw 不会静默替换为普通的 `debian:bookworm-slim`。以默认镜像为目标的沙箱运行会快速失败并给出构建说明，直到你构建该镜像，因为内置镜像携带了供沙箱写入/编辑辅助工具使用的 `python3`。
 
   </Step>
   <Step title="可选：构建通用镜像">
-    对于带有常用工具的更完整沙箱镜像（例如 `curl`、`jq`、Node 24、pnpm、`python3` 和 `git`）：
+    如需包含常用工具的更完整沙箱镜像（例如 `curl`、`jq`、Node 24、pnpm、`python3` 和 `git`）：
 
-    从源代码检出运行：
+    从源码检出：
 
     ```bash
     scripts/sandbox-common-setup.sh
     ```
 
-    从 npm 安装运行时，先构建默认镜像（见上文），然后使用仓库中的 [`scripts/docker/sandbox/Dockerfile.common`](https://github.com/openclaw/openclaw/blob/main/scripts/docker/sandbox/Dockerfile.common) 在其上构建通用镜像。
+    从 npm 安装时，先构建默认镜像（见上文），然后使用仓库中的 [`scripts/docker/sandbox/Dockerfile.common`](https://github.com/openclaw/openclaw/blob/main/scripts/docker/sandbox/Dockerfile.common) 在其基础上构建通用镜像。
 
     然后将 `agents.defaults.sandbox.docker.image` 设置为 `openclaw-sandbox-common:bookworm-slim`。
 
   </Step>
   <Step title="可选：构建沙箱浏览器镜像">
-    从源代码检出运行：
+    从源码检出：
 
     ```bash
     scripts/sandbox-browser-setup.sh
     ```
 
-    从 npm 安装运行时，使用仓库中的 [`scripts/docker/sandbox/Dockerfile.browser`](https://github.com/openclaw/openclaw/blob/main/scripts/docker/sandbox/Dockerfile.browser) 构建。
+    从 npm 安装时，使用仓库中的 [`scripts/docker/sandbox/Dockerfile.browser`](https://github.com/openclaw/openclaw/blob/main/scripts/docker/sandbox/Dockerfile.browser) 构建。
 
   </Step>
 </Steps>
 
-默认情况下，Docker 沙箱容器运行时**没有网络**。可使用 `agents.defaults.sandbox.docker.network` 覆盖。
+默认情况下，Docker 沙箱容器运行时**没有网络**。可通过 `agents.defaults.sandbox.docker.network` 覆盖。
 
 <AccordionGroup>
   <Accordion title="沙箱浏览器 Chromium 默认值">
-    内置沙箱浏览器镜像还会为容器化工作负载应用保守的 Chromium 启动默认值。当前容器默认值包括：
+    内置沙箱浏览器镜像会为容器化工作负载应用保守的 Chromium 启动标志：
 
     - `--remote-debugging-address=127.0.0.1`
     - `--remote-debugging-port=<derived from OPENCLAW_BROWSER_CDP_PORT>`
     - `--user-data-dir=${HOME}/.chrome`
     - `--no-first-run`
     - `--no-default-browser-check`
-    - `--disable-3d-apis`
-    - `--disable-gpu`
     - `--disable-dev-shm-usage`
     - `--disable-background-networking`
-    - `--disable-extensions`
-    - `--disable-features=TranslateUI`
     - `--disable-breakpad`
     - `--disable-crash-reporter`
-    - `--disable-software-rasterizer`
     - `--no-zygote`
     - `--metrics-recording-only`
-    - `--renderer-process-limit=2`
-    - 启用 `noSandbox` 时使用 `--no-sandbox`。
-    - 三个图形加固标志（`--disable-3d-apis`、`--disable-software-rasterizer`、`--disable-gpu`）是可选的，并且在容器缺少 GPU 支持时很有用。如果你的工作负载需要 WebGL 或其他 3D/浏览器功能，请设置 `OPENCLAW_BROWSER_DISABLE_GRAPHICS_FLAGS=0`。
-    - `--disable-extensions` 默认启用；对于依赖扩展的流程，可以使用 `OPENCLAW_BROWSER_DISABLE_EXTENSIONS=0` 禁用。
-    - `--renderer-process-limit=2` 由 `OPENCLAW_BROWSER_RENDERER_PROCESS_LIMIT=<N>` 控制，其中 `0` 会保留 Chromium 的默认值。
+    - `--password-store=basic`
+    - `--use-mock-keychain`
+    - 启用 `browser.headless` 时使用 `--headless=new`。
+    - 启用 `browser.noSandbox` 时使用 `--no-sandbox --disable-setuid-sandbox`。
+    - 默认使用 `--disable-3d-apis`、`--disable-gpu`、`--disable-software-rasterizer`；这些图形加固标志有助于没有 GPU 支持的容器。如果你的工作负载需要 WebGL 或其他 3D 功能，请设置 `OPENCLAW_BROWSER_DISABLE_GRAPHICS_FLAGS=0`。
+    - 默认使用 `--disable-extensions`；对于依赖扩展的流程，请设置 `OPENCLAW_BROWSER_DISABLE_EXTENSIONS=0`。
+    - 默认使用 `--renderer-process-limit=2`；由 `OPENCLAW_BROWSER_RENDERER_PROCESS_LIMIT=<N>` 控制，其中 `0` 保留 Chromium 的默认值。
 
-    如果你需要不同的运行时配置文件，请使用自定义浏览器镜像并提供自己的入口点。对于本地（非容器）Chromium 配置文件，请使用 `browser.extraArgs` 追加额外启动标志。
+    如果你需要不同的运行时配置，请使用自定义浏览器镜像并提供自己的入口点。对于本地（非容器）Chromium 配置，请使用 `browser.extraArgs` 追加额外启动标志。
 
   </Accordion>
-  <Accordion title="网络安全默认设置">
-    - `network: "host"` 被阻止。
-    - `network: "container:<id>"` 默认被阻止（存在绕过命名空间加入的风险）。
-    - 紧急破例覆盖：`agents.defaults.sandbox.docker.dangerouslyAllowContainerNamespaceJoin: true`。
+  <Accordion title="网络安全默认值">
+    - `network: "host"` 会被阻止。
+    - `network: "container:<id>"` 默认会被阻止（存在命名空间加入绕过风险）。
+    - 紧急覆盖：`agents.defaults.sandbox.docker.dangerouslyAllowContainerNamespaceJoin: true`。
 
   </Accordion>
 </AccordionGroup>
 
-Docker 安装和容器化 Gateway 网关在这里：[Docker](/zh-CN/install/docker)
+Docker 安装和容器化 Gateway 网关位于此处：[Docker](/zh-CN/install/docker)
 
-对于 Docker Gateway 网关部署，`scripts/docker/setup.sh` 可以引导沙箱配置。设置 `OPENCLAW_SANDBOX=1`（或 `true`/`yes`/`on`）以启用该路径。你可以用 `OPENCLAW_DOCKER_SOCKET` 覆盖套接字位置。完整设置和环境变量参考：[Docker](/zh-CN/install/docker#agent-sandbox)。
+对于 Docker Gateway 网关部署，`scripts/docker/setup.sh` 可以引导沙箱配置。设置 `OPENCLAW_SANDBOX=1`（或 `true`/`yes`/`on`）以启用该路径。使用 `OPENCLAW_DOCKER_SOCKET` 覆盖套接字位置。完整设置和环境变量参考：[Docker](/zh-CN/install/docker#agent-sandbox)。
 
 ## setupCommand（一次性容器设置）
 
-`setupCommand` 在沙箱容器创建后**只运行一次**（不是每次运行都执行）。它通过 `sh -lc` 在容器内执行。
+`setupCommand` 会在沙箱容器创建后**运行一次**（不是每次运行都执行）。它通过 `sh -lc` 在容器内执行。
 
 路径：
 
 - 全局：`agents.defaults.sandbox.docker.setupCommand`
-- 按 Agent：`agents.list[].sandbox.docker.setupCommand`
+- 每个 Agent：`agents.list[].sandbox.docker.setupCommand`
 
 <AccordionGroup>
   <Accordion title="常见陷阱">
-    - 默认 `docker.network` 是 `"none"`（无出站访问），因此包安装会失败。
-    - `docker.network: "container:<id>"` 需要 `dangerouslyAllowContainerNamespaceJoin: true`，且仅用于紧急破例。
-    - `readOnlyRoot: true` 会阻止写入；请设置 `readOnlyRoot: false` 或构建自定义镜像。
+    - 默认 `docker.network` 是 `"none"`（无出口），因此包安装会失败。
+    - `docker.network: "container:<id>"` 需要 `dangerouslyAllowContainerNamespaceJoin: true`，且仅用于紧急情况。
+    - `readOnlyRoot: true` 会阻止写入；请设置 `readOnlyRoot: false` 或烘焙自定义镜像。
     - `user` 必须是 root 才能安装包（省略 `user` 或设置 `user: "0:0"`）。
-    - 沙箱 exec **不会**继承主机 `process.env`。请使用 `agents.defaults.sandbox.docker.env`（或自定义镜像）提供技能 API 密钥。
-    - `agents.defaults.sandbox.docker.env` 中的值会作为显式 Docker 容器环境变量传递。任何拥有 Docker 守护进程访问权限的人都可以使用 `docker inspect` 等 Docker 元数据命令检查它们。如果这种元数据暴露不可接受，请使用自定义镜像、挂载的密钥文件，或其他密钥传递路径。
+    - 沙箱 exec **不会**继承主机 `process.env`。请使用 `agents.defaults.sandbox.docker.env`（或自定义镜像）提供 Skill API 密钥。
+    - `agents.defaults.sandbox.docker.env` 中的值会作为显式 Docker 容器环境变量传递。任何拥有 Docker 守护进程访问权限的人都可以用 `docker inspect` 等 Docker 元数据命令查看它们。如果这种元数据暴露不可接受，请使用自定义镜像、挂载的密钥文件或其他密钥传递路径。
 
   </Accordion>
 </AccordionGroup>
 
-## 工具策略和逃生通道
+## 工具策略和逃逸通道
 
-工具允许/拒绝策略仍会在沙箱规则之前应用。如果某个工具在全局或按 Agent 被拒绝，沙箱隔离不会把它恢复回来。
+工具允许/拒绝策略仍会先于沙箱规则应用。如果某个工具在全局或每个 Agent 层面被拒绝，沙箱隔离不会把它恢复回来。
 
-`tools.elevated` 是一个显式逃生通道，会在沙箱外运行 `exec`（默认是 `gateway`，或者当 exec 目标是 `node` 时为 `node`）。`/exec` 指令只适用于已授权的发送者，并按会话持久化；若要硬性禁用 `exec`，请使用工具策略拒绝（参见[沙箱、工具策略和提升权限](/zh-CN/gateway/sandbox-vs-tool-policy-vs-elevated)）。
+`tools.elevated` 是一个显式逃逸通道，会在沙箱外运行 `exec`（默认为 `gateway`，或当 exec 目标是 `node` 时为 `node`）。`/exec` 指令仅适用于已授权的发送者，并按会话持久化；要硬禁用 `exec`，请使用工具策略拒绝（参见[沙箱、工具策略和提升权限](/zh-CN/gateway/sandbox-vs-tool-policy-vs-elevated)）。
 
 调试：
 
-- 使用 `openclaw sandbox explain` 检查生效的沙箱模式、工具策略和修复配置键。
-- 参见[沙箱、工具策略和提升权限](/zh-CN/gateway/sandbox-vs-tool-policy-vs-elevated)，了解“为什么这被阻止了？”的心智模型。
-
-保持锁定状态。
+- `openclaw sandbox list` 显示沙箱容器、状态、镜像匹配、年龄、空闲时间，以及关联的会话/Agent。
+- `openclaw sandbox explain [--session <key>] [--agent <id>]` 会检查生效的沙箱模式、主机工作区、运行时工作目录、Docker 挂载、工具策略和修复配置键。它的 `workspaceRoot` 字段仍是已配置的沙箱根目录；`effectiveHostWorkspaceRoot` 显示活动工作区实际所在位置。
+- `openclaw sandbox recreate [--all | --session <key> | --agent <id>] [--browser] [--force]` 会移除容器/环境，使其在下次使用时按当前配置重新创建。
+- 请参阅[沙箱、工具策略和提升权限](/zh-CN/gateway/sandbox-vs-tool-policy-vs-elevated)，了解“为什么这被阻止？”的心智模型。
 
 ## 多 Agent 覆盖
 
-每个 Agent 都可以覆盖沙箱 + 工具：`agents.list[].sandbox` 和 `agents.list[].tools`（以及用于沙箱工具策略的 `agents.list[].tools.sandbox.tools`）。有关优先级，请参见[多 Agent 沙盒和工具](/zh-CN/tools/multi-agent-sandbox-tools)。
+每个 Agent 都可以覆盖沙箱 + 工具：`agents.list[].sandbox` 和 `agents.list[].tools`（以及用于沙箱工具策略的 `agents.list[].tools.sandbox.tools`）。有关优先级，请参阅[多 Agent 沙盒和工具](/zh-CN/tools/multi-agent-sandbox-tools)。
 
 ## 最小启用示例
 
@@ -536,8 +394,8 @@ Docker 安装和容器化 Gateway 网关在这里：[Docker](/zh-CN/install/dock
 
 ## 相关
 
-- [多 Agent 沙盒和工具](/zh-CN/tools/multi-agent-sandbox-tools) — 按 Agent 覆盖和优先级
-- [OpenShell](/zh-CN/gateway/openshell) — 托管沙箱后端设置、工作区模式和配置参考
+- [多 Agent 沙盒和工具](/zh-CN/tools/multi-agent-sandbox-tools) -- 按 Agent 覆盖和优先级
+- [OpenShell](/zh-CN/gateway/openshell) -- 托管式沙箱后端设置、工作区模式和配置参考
 - [沙箱配置](/zh-CN/gateway/config-agents#agentsdefaultssandbox)
-- [沙箱、工具策略和提升权限](/zh-CN/gateway/sandbox-vs-tool-policy-vs-elevated) — 调试“为什么这被阻止了？”
+- [沙箱、工具策略和提升权限](/zh-CN/gateway/sandbox-vs-tool-policy-vs-elevated) -- 调试“为什么会被阻止？”
 - [安全](/zh-CN/gateway/security)

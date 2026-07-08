@@ -1,24 +1,22 @@
 ---
 read_when:
-    - Quieres emparejar rápidamente una aplicación Node móvil con un Gateway
-    - Necesitas la salida del código de configuración para compartir de forma remota/manual
+    - Quieres emparejar una aplicación Node móvil con un Gateway rápidamente
+    - Necesitas la salida de setup-code para compartirla de forma remota/manual
 summary: Referencia de CLI para `openclaw qr` (generar QR de emparejamiento móvil + código de configuración)
 title: QR
 x-i18n:
-    generated_at: "2026-07-04T17:48:41Z"
+    generated_at: "2026-07-05T17:41:36Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 81d15c9d551960c6f5677649b481e447ecda55a395957746959b4ecf81712bdb
+    source_hash: cc8e1781b654f281f53beea8ec684c743fb585f65a0ecc9823a20a0180b4ca4c
     source_path: cli/qr.md
     workflow: 16
 ---
 
 # `openclaw qr`
 
-Genera un QR de emparejamiento móvil y un código de configuración a partir de tu configuración actual de Gateway.
-
-## Uso
+Genera un QR de emparejamiento móvil y un código de configuración desde tu configuración actual de Gateway.
 
 ```bash
 openclaw qr
@@ -28,39 +26,65 @@ openclaw qr --remote
 openclaw qr --url wss://gateway.example/ws
 ```
 
+Las aplicaciones oficiales de OpenClaw para iOS y Android se conectan automáticamente cuando sus
+metadatos de código de configuración coinciden. Si una solicitud queda pendiente (por ejemplo, para un
+cliente no oficial o metadatos no coincidentes), revísala y apruébala:
+
+```bash
+openclaw devices list
+openclaw devices approve <requestId>
+```
+
 ## Opciones
 
-- `--remote`: prefiere `gateway.remote.url`; si no está definido, `gateway.tailscale.mode=serve|funnel` aún puede proporcionar la URL pública remota
-- `--url <url>`: sobrescribe la URL de Gateway usada en la carga útil
-- `--public-url <url>`: sobrescribe la URL pública usada en la carga útil
-- `--token <token>`: sobrescribe contra qué token de Gateway se autentica el flujo de arranque
-- `--password <password>`: sobrescribe contra qué contraseña de Gateway se autentica el flujo de arranque
+- `--remote`: prefiere `gateway.remote.url`; recurre a `gateway.tailscale.mode=serve|funnel` si esa URL no está definida. Ignora `publicUrl` del Plugin `device-pair`.
+- `--url <url>`: sobrescribe la URL del Gateway utilizada en la carga útil
+- `--public-url <url>`: sobrescribe la URL pública utilizada en la carga útil
+- `--token <token>`: sobrescribe el token del Gateway contra el que se autentica el flujo de arranque
+- `--password <password>`: sobrescribe la contraseña del Gateway contra la que se autentica el flujo de arranque
 - `--setup-code-only`: imprime solo el código de configuración
-- `--no-ascii`: omite la representación QR ASCII
-- `--json`: emite JSON (`setupCode`, `gatewayUrl`, `auth`, `urlSource`)
+- `--no-ascii`: omite la representación ASCII del QR
+- `--json`: emite JSON (`setupCode`, `gatewayUrl`, `gatewayUrls` opcional, `auth`, `urlSource`)
 
-## Notas
+`--token` y `--password` son mutuamente excluyentes.
 
-- `--token` y `--password` son mutuamente excluyentes.
-- El propio código de configuración ahora lleva un `bootstrapToken` opaco y de corta duración, no el token/contraseña compartidos de Gateway.
-- El arranque integrado con código de configuración devuelve un token principal de `node` con `scopes: []`, más un token acotado de transferencia de `operator` para la incorporación móvil de confianza.
-- El token de operador transferido se limita a `operator.approvals`, `operator.read`, `operator.talk.secrets` y `operator.write`; los ámbitos de mutación de emparejamiento y `operator.admin` siguen requiriendo un emparejamiento de operador aprobado por separado o un flujo de token.
-- El emparejamiento móvil falla de forma cerrada para URL de Gateway `ws://` públicas/de Tailscale. Las direcciones LAN privadas y los hosts Bonjour `.local` siguen siendo compatibles mediante `ws://`, pero las rutas móviles públicas/de Tailscale deberían usar Tailscale Serve/Funnel o una URL de Gateway `wss://`.
-- Con `--remote`, OpenClaw requiere `gateway.remote.url` o
-  `gateway.tailscale.mode=serve|funnel`.
-- Con `--remote`, si las credenciales remotas efectivamente activas están configuradas como SecretRefs y no pasas `--token` ni `--password`, el comando las resuelve desde la instantánea activa de Gateway. Si Gateway no está disponible, el comando falla rápidamente.
-- Sin `--remote`, las SecretRefs de autenticación de Gateway local se resuelven cuando no se pasa una anulación de autenticación por CLI:
-  - `gateway.auth.token` se resuelve cuando la autenticación por token puede prevalecer (`gateway.auth.mode="token"` explícito o modo inferido donde no prevalece ninguna fuente de contraseña).
-  - `gateway.auth.password` se resuelve cuando la autenticación por contraseña puede prevalecer (`gateway.auth.mode="password"` explícito o modo inferido sin ningún token prevaleciente de auth/env).
-- Si tanto `gateway.auth.token` como `gateway.auth.password` están configurados (incluidas SecretRefs) y `gateway.auth.mode` no está definido, la resolución del código de configuración falla hasta que el modo se defina explícitamente.
-- Nota sobre desfase de versión de Gateway: esta ruta de comando requiere un Gateway que admita `secrets.resolve`; los Gateway más antiguos devuelven un error de método desconocido.
-- Las apps oficiales de OpenClaw para iOS y Android se conectan automáticamente cuando sus
-  metadatos de código de configuración coinciden. Si una solicitud permanece pendiente (por ejemplo, para un
-  cliente no oficial o metadatos no coincidentes), revísala y apruébala con:
-  - `openclaw devices list`
-  - `openclaw devices approve <requestId>`
+## Contenido del código de configuración
+
+El código de configuración transporta un `bootstrapToken` opaco y de corta duración, no el token/contraseña compartido del Gateway. El flujo de arranque integrado emite:
+
+- un token primario `node` con `scopes: []`
+- un token de transferencia `operator` acotado, limitado a `operator.approvals`, `operator.read`, `operator.talk.secrets` y `operator.write`
+
+Los ámbitos de mutación de emparejamiento y `operator.admin` siguen requiriendo un emparejamiento de operador aprobado por separado o un flujo de token.
+
+## Resolución de URL del Gateway
+
+El emparejamiento móvil falla de forma cerrada con URL de Gateway `ws://` públicas/Tailscale: usa Tailscale Serve/Funnel o una URL de Gateway `wss://` para esos casos. Las direcciones LAN privadas y los hosts Bonjour `.local` siguen siendo compatibles mediante `ws://` sin cifrar.
+
+Cuando la URL de Gateway seleccionada proviene de `gateway.bind=lan`, OpenClaw también comprueba rutas persistentes de `tailscale serve status --json`. Cualquier raíz HTTPS de Serve que redirija al puerto local loopback del Gateway activo se incluye como alternativa. Los enlaces de interfaz específica `custom` y `tailnet` no reciben esa alternativa porque un proxy Serve de loopback no puede alcanzar esos listeners. Los clientes iOS actuales prueban las rutas anunciadas en orden y guardan la primera que sea alcanzable; el campo heredado `url` permanece sin cambios para clientes antiguos.
+
+Con `--remote`, se requiere uno de `gateway.remote.url` o `gateway.tailscale.mode=serve|funnel`.
+
+## Resolución de autenticación (sin `--remote`)
+
+Cuando no se pasa ninguna sobrescritura de autenticación de CLI, las SecretRefs de autenticación del Gateway local se resuelven así:
+
+| Condición                                                                                                                    | Se resuelve como                          |
+| ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `gateway.auth.mode="token"`, o modo inferido sin una fuente de contraseña ganadora                                           | `gateway.auth.token`                      |
+| `gateway.auth.mode="password"`, o modo inferido sin un token ganador desde auth/env                                         | `gateway.auth.password`                   |
+| Tanto `gateway.auth.token` como `gateway.auth.password` están configurados (incluidas SecretRefs) y `gateway.auth.mode` no está definido | falla; define `gateway.auth.mode` explícitamente |
+
+## Resolución de autenticación (`--remote`)
+
+Si las credenciales remotas efectivamente activas están configuradas como SecretRefs y no se pasa ni `--token` ni `--password`, el comando las resuelve desde la instantánea del Gateway activo. Si el Gateway no está disponible, el comando falla rápidamente.
+
+<Note>
+Esta ruta de comando requiere un Gateway compatible con el método RPC `secrets.resolve`. Los Gateway antiguos devuelven un error de método desconocido.
+</Note>
 
 ## Relacionado
 
 - [Referencia de CLI](/es/cli)
+- [Dispositivos](/es/cli/devices)
 - [Emparejamiento](/es/cli/pairing)

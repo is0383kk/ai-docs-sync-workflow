@@ -1,44 +1,44 @@
 ---
 read_when:
-    - Uso o configuración de comandos de chat
+    - Usar o configurar comandos de chat
     - Depuración del enrutamiento de comandos o permisos
-    - Comprender cómo se registran los comandos de Skills
+    - Entender cómo se registran los comandos de Skills
 sidebarTitle: Slash commands
 summary: 'Todos los comandos de barra, directivas y atajos en línea disponibles: configuración, enrutamiento y comportamiento por superficie.'
 title: Comandos de barra
 x-i18n:
-    generated_at: "2026-07-01T20:12:51Z"
+    generated_at: "2026-07-06T10:55:11Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 8f9b74740baad038d667ccb8d80fc46af686111785b585ea1cb8cde13f41d98f
+    source_hash: 297d7503c7c8f140279733a8417b1a9d4fd239b5bf7d9944312907d0f2119ba1
     source_path: tools/slash-commands.md
     workflow: 16
 ---
 
-El Gateway gestiona comandos enviados como mensajes independientes que comienzan con `/`.
-Los comandos bash solo del host usan `! <cmd>` (con `/bash <cmd>` como alias).
+El Gateway gestiona comandos enviados como mensajes independientes que empiezan por `/`.
+Los comandos bash solo de host usan `! <cmd>` (con `/bash <cmd>` como alias).
 
 Cuando una conversación está vinculada a una sesión ACP, el texto normal se enruta al
-arnés ACP. Los comandos de administración del Gateway siguen siendo locales: `/acp ...` siempre llega
-al manejador de comandos de OpenClaw, y `/status` más `/unfocus` permanecen locales siempre que
+arnés de ACP. Los comandos de gestión del Gateway permanecen locales: `/acp ...` siempre llega
+al manejador de comandos de OpenClaw, y `/status` junto con `/unfocus` permanecen locales siempre que
 el manejo de comandos esté habilitado para la superficie.
 
 ## Tres tipos de comandos
 
 <CardGroup cols={3}>
   <Card title="Comandos" icon="terminal">
-    Mensajes independientes `/...` gestionados por el Gateway. Deben enviarse como el
+    Mensajes `/...` independientes gestionados por el Gateway. Deben enviarse como el
     único contenido del mensaje.
   </Card>
   <Card title="Directivas" icon="sliders">
     `/think`, `/fast`, `/verbose`, `/trace`, `/reasoning`, `/elevated`,
-    `/exec`, `/model`, `/queue`: se eliminan del mensaje antes de que el modelo
-    lo vea. Persisten la configuración de la sesión cuando se envían solas; actúan como indicaciones en línea
+    `/exec`, `/model`, `/queue` — se eliminan del mensaje antes de que el modelo
+    los vea. Conservan la configuración de la sesión cuando se envían solos; actúan como sugerencias en línea
     cuando se envían con otro texto.
   </Card>
   <Card title="Atajos en línea" icon="bolt">
-    `/help`, `/commands`, `/status`, `/whoami`: se ejecutan de inmediato y se
+    `/help`, `/commands`, `/status`, `/whoami` — se ejecutan de inmediato y se
     eliminan antes de que el modelo vea el texto restante. Solo remitentes autorizados.
   </Card>
 </CardGroup>
@@ -46,13 +46,13 @@ el manejo de comandos esté habilitado para la superficie.
 <AccordionGroup>
   <Accordion title="Detalles del comportamiento de las directivas">
     - Las directivas se eliminan del mensaje antes de que el modelo lo vea.
-    - En mensajes **solo de directivas** (el mensaje contiene solo directivas), persisten
-      en la sesión y responden con un acuse de recibo.
-    - En mensajes de **chat normal** con otro texto, actúan como indicaciones en línea y
-      **no** persisten la configuración de la sesión.
+    - En mensajes **solo de directivas** (el mensaje contiene únicamente directivas), se
+      conservan en la sesión y responden con una confirmación.
+    - En mensajes de **chat normal** con otro texto, actúan como sugerencias en línea y
+      **no** conservan la configuración de la sesión.
     - Las directivas solo se aplican a **remitentes autorizados**. Si `commands.allowFrom`
-      está definido, es la única lista de permitidos que se usa; de lo contrario, la autorización proviene de
-      listas de permitidos/emparejamiento del canal más `commands.useAccessGroups`. Los remitentes no autorizados
+      está definido, es la única lista de permitidos utilizada; de lo contrario, la autorización proviene de
+      las listas de permitidos/emparejamiento del canal más `commands.useAccessGroups`. Los remitentes no autorizados
       ven las directivas tratadas como texto sin formato.
   </Accordion>
 </AccordionGroup>
@@ -87,14 +87,14 @@ el manejo de comandos esté habilitado para la superficie.
 <ParamField path="commands.text" type="boolean" default="true">
   Habilita el análisis de `/...` en mensajes de chat. En superficies sin comandos nativos
   (WhatsApp, WebChat, Signal, iMessage, Google Chat, Microsoft Teams), los comandos de texto
-  funcionan incluso cuando se define en `false`.
+  funcionan incluso cuando se define como `false`.
 </ParamField>
 
 <ParamField path="commands.native" type='boolean | "auto"' default='"auto"'>
   Registra comandos nativos. Automático: activado para Discord/Telegram; desactivado para Slack;
   se ignora para proveedores sin soporte nativo. Sobrescríbelo por canal con
-  `channels.<provider>.commands.native`. En Discord, `false` omite el registro de comandos de barra diagonal;
-  los comandos registrados previamente pueden seguir visibles hasta que se eliminen.
+  `channels.<provider>.commands.native`. En Discord, `false` omite el registro de comandos de barra;
+  los comandos registrados anteriormente pueden seguir visibles hasta que se eliminen.
 </ParamField>
 
 <ParamField path="commands.nativeSkills" type='boolean | "auto"' default='"auto"'>
@@ -109,43 +109,43 @@ el manejo de comandos esté habilitado para la superficie.
 </ParamField>
 
 <ParamField path="commands.bashForegroundMs" type="number" default="2000">
-  Cuánto tiempo espera bash antes de cambiar al modo en segundo plano (`0` pasa a segundo plano
-  de inmediato).
+  Cuánto tiempo espera bash antes de cambiar al modo en segundo plano (`0` lo pone en segundo plano
+  inmediatamente).
 </ParamField>
 
 <ParamField path="commands.config" type="boolean" default="false">
-  Habilita `/config` (lee/escribe `openclaw.json`). Solo propietario.
+  Habilita `/config` (lee/escribe `openclaw.json`). Solo propietarios.
 </ParamField>
 
 <ParamField path="commands.mcp" type="boolean" default="false">
-  Habilita `/mcp` (lee/escribe la configuración MCP administrada por OpenClaw en `mcp.servers`). Solo propietario.
+  Habilita `/mcp` (lee/escribe la configuración MCP gestionada por OpenClaw en `mcp.servers`). Solo propietarios.
 </ParamField>
 
 <ParamField path="commands.plugins" type="boolean" default="false">
-  Habilita `/plugins` (descubrimiento/estado de plugins más instalación y activación/desactivación). Solo propietario para escrituras.
+  Habilita `/plugins` (descubrimiento/estado de plugins más instalación y activación/desactivación). Solo propietarios para escrituras.
 </ParamField>
 
 <ParamField path="commands.debug" type="boolean" default="false">
-  Habilita `/debug` (sobrescrituras de configuración solo en tiempo de ejecución). Solo propietario.
+  Habilita `/debug` (sobrescrituras de configuración solo en tiempo de ejecución). Solo propietarios.
 </ParamField>
 
 <ParamField path="commands.restart" type="boolean" default="true">
-  Habilita `/restart` y las acciones de herramienta para reiniciar el Gateway.
+  Habilita `/restart` y las acciones de herramientas de reinicio del gateway.
 </ParamField>
 
 <ParamField path="commands.ownerAllowFrom" type="string[]">
-  Lista explícita de permitidos del propietario para superficies de comandos solo del propietario. Separada de
-  `commands.allowFrom` y del acceso por emparejamiento de MD.
+  Lista explícita de permitidos de propietarios para superficies de comandos solo para propietarios. Separada de
+  `commands.allowFrom` y del acceso por emparejamiento de DM.
 </ParamField>
 
 <ParamField path="channels.<channel>.commands.enforceOwnerForCommands" type="boolean" default="false">
-  Por canal: requiere identidad de propietario para comandos solo del propietario. Cuando es `true`,
-  el remitente debe coincidir con `commands.ownerAllowFrom` o tener el ámbito interno `operator.admin`.
+  Por canal: requiere identidad de propietario para comandos solo para propietarios. Cuando es `true`,
+  el remitente debe coincidir con `commands.ownerAllowFrom` o tener el alcance interno `operator.admin`.
   Una entrada comodín de `allowFrom` **no** es suficiente.
 </ParamField>
 
 <ParamField path="commands.ownerDisplay" type='"raw" | "hash"'>
-  Controla cómo aparecen los id. de propietario en el prompt del sistema.
+  Controla cómo aparecen los identificadores de propietario en el prompt del sistema.
 </ParamField>
 
 <ParamField path="commands.ownerDisplaySecret" type="string">
@@ -153,9 +153,9 @@ el manejo de comandos esté habilitado para la superficie.
 </ParamField>
 
 <ParamField path="commands.allowFrom" type="object">
-  Lista de permitidos por proveedor para autorización de comandos. Cuando se configura, es la
-  **única** fuente de autorización para comandos y directivas. Usa `"*"` como valor predeterminado
-  global; las claves específicas del proveedor lo sobrescriben.
+  Lista de permitidos por proveedor para la autorización de comandos. Cuando se configura, es la
+  **única** fuente de autorización para comandos y directivas. Usa `"*"` para un
+  valor predeterminado global; las claves específicas de proveedor lo sobrescriben.
 </ParamField>
 
 <ParamField path="commands.useAccessGroups" type="boolean" default="true">
@@ -168,9 +168,9 @@ Los comandos provienen de tres fuentes:
 
 - **Integrados del núcleo:** `src/auto-reply/commands-registry.shared.ts`
 - **Comandos de dock generados:** `src/auto-reply/commands-registry.data.ts`
-- **Comandos de Plugin:** llamadas `registerCommand()` del plugin
+- **Comandos de Plugin:** llamadas `registerCommand()` de plugin
 
-La disponibilidad depende de las marcas de configuración, la superficie del canal y los
+La disponibilidad depende de las banderas de configuración, la superficie del canal y los
 plugins instalados/habilitados.
 
 ### Comandos del núcleo
@@ -180,55 +180,55 @@ plugins instalados/habilitados.
     | Comando | Descripción |
     | --- | --- |
     | `/new [model]` | Archiva la sesión actual e inicia una nueva |
-    | `/reset [soft [message]]` | Restablece la sesión actual en el mismo lugar. `soft` conserva la transcripción, descarta los id. de sesión de backend CLI reutilizados y vuelve a ejecutar el arranque |
-    | `/name <title>` | Nombra o renombra la sesión actual. Omite el título para ver el nombre actual y una sugerencia |
+    | `/reset [soft [message]]` | Restablece la sesión actual en el mismo lugar. `soft` conserva la transcripción, elimina los identificadores de sesión del backend de CLI reutilizados y vuelve a ejecutar el inicio |
+    | `/name <title>` | Asigna o cambia el nombre de la sesión actual. Omite el título para ver el nombre actual y una sugerencia |
     | `/compact [instructions]` | Compacta el contexto de la sesión. Consulta [Compaction](/es/concepts/compaction) |
-    | `/stop` | Anula la ejecución actual |
-    | `/session idle <duration\|off>` | Administra la expiración por inactividad de la vinculación de hilo |
-    | `/session max-age <duration\|off>` | Administra la expiración por edad máxima de la vinculación de hilo |
+    | `/stop` | Cancela la ejecución actual |
+    | `/session idle <duration\|off>` | Gestiona la expiración por inactividad de la vinculación de hilos |
+    | `/session max-age <duration\|off>` | Gestiona la expiración por edad máxima de la vinculación de hilos |
     | `/export-session [path]` | Exporta la sesión actual a HTML. Alias: `/export` |
     | `/export-trajectory [path]` | Exporta un paquete de trayectoria JSONL para la sesión actual. Alias: `/trajectory` |
 
     <Note>
-      Control UI intercepta `/new` escrito para crear y cambiar a una nueva
+      La interfaz de control intercepta `/new` escrito para crear y cambiar a una nueva
       sesión de panel, excepto cuando `session.dmScope: "main"` está configurado
       y el padre actual es la sesión principal del agente; en ese caso `/new`
       restablece la sesión principal en el mismo lugar. `/reset` escrito sigue ejecutando el
-      restablecimiento in situ del Gateway. Usa `/model default` cuando quieras borrar una selección
-      de modelo fijada para la sesión.
+      restablecimiento en el mismo lugar del Gateway. Usa `/model default` cuando quieras borrar una
+      selección de modelo de sesión fijada.
     </Note>
 
   </Accordion>
 
-  <Accordion title="Controles de modelo y ejecución">
+  <Accordion title="Modelo y controles de ejecución">
     | Comando | Descripción |
     | --- | --- |
-    | `/think <level\|default>` | Define el nivel de pensamiento o borra la sobrescritura de sesión. Alias: `/thinking`, `/t` |
-    | `/verbose on\|off\|full` | Alterna la salida detallada. Alias: `/v` |
-    | `/trace on\|off` | Alterna la salida de traza del plugin para la sesión actual |
+    | `/think <level\|default>` | Define el nivel de pensamiento o borra la sobrescritura de la sesión. Alias: `/thinking`, `/t` |
+    | `/verbose on\|off\|full` | Activa o desactiva la salida detallada. Alias: `/v` |
+    | `/trace on\|off` | Activa o desactiva la salida de trazas de plugins para la sesión actual |
     | `/fast [status\|auto\|on\|off\|default]` | Muestra, define o borra el modo rápido |
-    | `/reasoning [on\|off\|stream]` | Alterna la visibilidad del razonamiento. Alias: `/reason` |
-    | `/elevated [on\|off\|ask\|full]` | Alterna el modo elevado. Alias: `/elev` |
+    | `/reasoning [on\|off\|stream]` | Activa o desactiva la visibilidad del razonamiento. Alias: `/reason` |
+    | `/elevated [on\|off\|ask\|full]` | Activa o desactiva el modo elevado. Alias: `/elev` |
     | `/exec host=<auto\|sandbox\|gateway\|node> security=<deny\|allowlist\|full> ask=<off\|on-miss\|always> node=<id>` | Muestra o define los valores predeterminados de exec |
-    | `/login [codex\|openai\|openai-codex]` | Empareja el inicio de sesión de Codex/OpenAI desde un chat privado o una sesión de Web UI. Solo propietario/admin |
+    | `/login [codex\|openai\|openai-codex]` | Empareja el inicio de sesión de Codex/OpenAI desde un chat privado o una sesión de interfaz web. Solo propietario/administrador |
     | `/model [name\|#\|status]` | Muestra o define el modelo |
     | `/models [provider] [page] [limit=<n>\|all]` | Lista proveedores o modelos configurados/con autenticación disponible |
-    | `/queue <mode>` | Administra el comportamiento de la cola de ejecuciones activas. Consulta [Cola](/es/concepts/queue) y [Dirección de cola](/es/concepts/queue-steering) |
+    | `/queue <mode>` | Gestiona el comportamiento de la cola de ejecuciones activas. Consulta [Cola](/es/concepts/queue) y [Dirección de cola](/es/concepts/queue-steering) |
     | `/steer <message>` | Inyecta orientación en la ejecución activa. Alias: `/tell`. Consulta [Dirigir](/es/tools/steer) |
 
     <AccordionGroup>
-      <Accordion title="seguridad de verbose / trace / fast / reasoning">
-        - `/verbose` es para depuración: mantenlo **desactivado** en el uso normal.
-        - `/trace` revela solo líneas de traza/depuración propiedad del plugin; la charla detallada normal permanece desactivada.
-        - `/fast auto|on|off` persiste una sobrescritura de sesión; usa la opción `inherit` de la IU Sesiones para borrarla.
-        - `/fast` es específico del proveedor: OpenAI/Codex lo asignan a `service_tier=priority`; las solicitudes directas a Anthropic lo asignan a `service_tier=auto` o `standard_only`.
-        - `/reasoning`, `/verbose` y `/trace` son riesgosos en contextos de grupo: pueden revelar razonamiento interno o diagnósticos de plugins. Mantenlos desactivados en chats grupales.
+      <Accordion title="Seguridad de verbose / trace / fast / reasoning">
+        - `/verbose` es para depuración; mantenlo **desactivado** durante el uso normal.
+        - `/trace` revela solo líneas de traza/depuración propiedad del plugin; el ruido detallado normal permanece desactivado.
+        - `/fast auto|on|off` conserva una sobrescritura de sesión; usa la opción `inherit` de la interfaz de sesiones para borrarla.
+        - `/fast` es específico del proveedor: OpenAI/Codex lo asigna a `service_tier=priority`; las solicitudes directas a Anthropic lo asignan a `service_tier=auto` o `standard_only`.
+        - `/reasoning`, `/verbose` y `/trace` son riesgosos en entornos grupales; pueden revelar razonamiento interno o diagnósticos de plugins. Mantenlos desactivados en chats grupales.
 
       </Accordion>
       <Accordion title="Detalles del cambio de modelo">
-        - `/model` persiste el nuevo modelo inmediatamente en la sesión.
-        - Si el agente está inactivo, la próxima ejecución lo usa de inmediato.
-        - Si hay una ejecución activa, el cambio se marca como pendiente y se aplica en el siguiente punto de reintento limpio.
+        - `/model` conserva el nuevo modelo inmediatamente en la sesión.
+        - Si el agente está inactivo, la siguiente ejecución lo usa de inmediato.
+        - Si hay una ejecución activa, el cambio queda marcado como pendiente y se aplica en el siguiente punto de reintento limpio.
 
       </Accordion>
     </AccordionGroup>
@@ -241,23 +241,24 @@ plugins instalados/habilitados.
     | `/help` | Muestra el resumen breve de ayuda |
     | `/commands` | Muestra el catálogo de comandos generado |
     | `/tools [compact\|verbose]` | Muestra lo que el agente actual puede usar ahora mismo |
-    | `/status` | Muestra el estado de ejecución/tiempo de ejecución, el tiempo activo de Gateway y del sistema, el estado de plugins, además del uso/cuota del proveedor |
-    | `/status plugins` | Muestra el estado detallado de plugins: errores de carga, cuarentenas, fallos de canal, problemas de dependencias, avisos de compatibilidad |
-    | `/goal [status\|start\|pause\|resume\|complete\|block\|clear] ...` | Administra el [objetivo](/es/tools/goal) durable de la sesión actual |
-    | `/diagnostics [note]` | Flujo de informe de soporte solo del propietario. Pide aprobación de exec cada vez |
-    | `/crestodian <request>` | Ejecuta el ayudante de configuración y reparación de Crestodian desde un MD del propietario |
-    | `/tasks` | Lista las tareas en segundo plano activas/recientes de la sesión actual |
+    | `/status` | Muestra el estado de ejecución/runtime, el tiempo activo del Gateway y del sistema, la salud de plugins, además del uso/cuota del proveedor |
+    | `/status plugins` | Muestra salud detallada de plugins: errores de carga, cuarentenas, fallos de plugins de canal, problemas de dependencias, avisos de compatibilidad. Requiere `commands.plugins: true` |
+    | `/goal [status\|start\|edit\|pause\|resume\|complete\|block\|clear] ...` | Gestiona el [objetivo](/es/tools/goal) durable de la sesión actual |
+    | `/diagnostics [note]` | Flujo de informe de soporte solo para propietario. Pide aprobación de exec cada vez |
+    | `/crestodian <request>` | Ejecuta el asistente de configuración y reparación Crestodian desde un mensaje directo del propietario |
+    | `/tasks` | Lista tareas en segundo plano activas/recientes para la sesión actual |
     | `/context [list\|detail\|map\|json]` | Explica cómo se ensambla el contexto |
-    | `/whoami` | Muestra tu id. de remitente. Alias: `/id` |
-    | `/usage off\|tokens\|full\|reset\|cost` | Controla el pie de uso por respuesta (`reset`/`inherit`/`clear`/`default` borra la sobrescritura de sesión para volver a heredar el valor predeterminado configurado) o imprime un resumen local de costes |
+    | `/whoami` | Muestra tu identificador de remitente. Alias: `/id` |
+    | `/usage off\|tokens\|full\|reset\|cost` | Controla el pie de uso por respuesta (`reset`/`inherit`/`clear`/`default` borra la sobrescritura de sesión para volver a heredar el valor predeterminado configurado) o imprime un resumen local de coste |
   </Accordion>
 
   <Accordion title="Skills, listas de permitidos, aprobaciones">
     | Comando | Descripción |
     | --- | --- |
     | `/skill <name> [input]` | Ejecuta una skill por nombre |
-    | `/allowlist [list\|add\|remove] ...` | Administra entradas de lista de permitidos. Solo texto |
-    | `/approve <id> <decision>` | Resuelve prompts de aprobación de exec o plugin |
+    | `/learn [request]` | Redacta una skill revisable a partir de la conversación actual o fuentes nombradas mediante [Skill Workshop](/es/tools/skill-workshop) |
+    | `/allowlist [list\|add\|remove] ...` | Gestiona entradas de la lista de permitidos. Solo texto |
+    | `/approve <id> <decision>` | Resuelve prompts de aprobación de exec o plugins |
     | `/btw <question>` | Haz una pregunta secundaria sin cambiar el contexto de la sesión. Alias: `/side`. Consulta [BTW](/es/tools/btw) |
   </Accordion>
 
@@ -265,7 +266,7 @@ plugins instalados/habilitados.
     | Comando | Descripción |
     | --- | --- |
     | `/subagents list\|log\|info` | Inspecciona ejecuciones de subagentes para la sesión actual |
-    | `/acp spawn\|cancel\|steer\|close\|sessions\|status\|set-mode\|set\|cwd\|permissions\|timeout\|model\|reset-options\|doctor\|install\|help` | Gestiona sesiones ACP y opciones de runtime. Los controles de runtime requieren propietario externo o identidad interna de administrador del Gateway |
+    | `/acp spawn\|cancel\|steer\|close\|sessions\|status\|set-mode\|set\|cwd\|permissions\|timeout\|model\|reset-options\|doctor\|install\|help` | Gestiona sesiones ACP y opciones de runtime. Los controles de runtime requieren propietario externo o identidad de administrador interno de Gateway |
     | `/focus <target>` | Vincula el hilo actual de Discord o el tema de Telegram a un destino de sesión |
     | `/unfocus` | Elimina la vinculación del hilo actual |
     | `/agents` | Lista los agentes vinculados al hilo para la sesión actual |
@@ -274,31 +275,31 @@ plugins instalados/habilitados.
   <Accordion title="Escrituras solo para propietarios y administración">
     | Comando | Requiere | Descripción |
     | --- | --- | --- |
-    | `/config show\|get\|set\|unset` | `commands.config: true` | Lee o escribe `openclaw.json`. Solo para propietarios |
-    | `/mcp show\|get\|set\|unset` | `commands.mcp: true` | Lee o escribe la configuración del servidor MCP gestionado por OpenClaw. Solo para propietarios |
-    | `/plugins list\|inspect\|show\|get\|install\|enable\|disable` | `commands.plugins: true` | Inspecciona o modifica el estado de Plugins. Solo para propietarios en escrituras. Alias: `/plugin` |
-    | `/debug show\|set\|unset\|reset` | `commands.debug: true` | Sobrescrituras de configuración solo en runtime. Solo para propietarios |
+    | `/config show\|get\|set\|unset` | `commands.config: true` | Lee o escribe `openclaw.json`. Solo propietarios |
+    | `/mcp show\|get\|set\|unset` | `commands.mcp: true` | Lee o escribe la configuración de servidor MCP gestionada por OpenClaw. Solo propietarios |
+    | `/plugins list\|inspect\|show\|get\|install\|enable\|disable` | `commands.plugins: true` | Inspecciona o modifica el estado de plugins. Solo propietarios para escrituras. Alias: `/plugin` |
+    | `/debug show\|set\|unset\|reset` | `commands.debug: true` | Sobrescrituras de configuración solo en runtime. Solo propietarios |
     | `/restart` | `commands.restart: true` (predeterminado) | Reinicia OpenClaw |
-    | `/send on\|off\|inherit` | propietario | Establece la política de envío |
+    | `/send on\|off\|inherit` | propietario | Define la política de envío |
   </Accordion>
 
   <Accordion title="Voz, TTS, control de canal">
     | Comando | Descripción |
     | --- | --- |
     | `/tts on\|off\|status\|chat\|latest\|provider\|limit\|summary\|audio\|help` | Controla TTS. Consulta [TTS](/es/tools/tts) |
-    | `/activation mention\|always` | Establece el modo de activación de grupo |
+    | `/activation mention\|always` | Define el modo de activación de grupo |
     | `/bash <command>` | Ejecuta un comando de shell del host. Alias: `! <command>`. Requiere `commands.bash: true` |
-    | `!poll [sessionId]` | Comprueba un trabajo bash en segundo plano |
-    | `!stop [sessionId]` | Detiene un trabajo bash en segundo plano |
+    | `!poll [sessionId]` | Comprueba un trabajo de bash en segundo plano |
+    | `!stop [sessionId]` | Detiene un trabajo de bash en segundo plano |
   </Accordion>
 </AccordionGroup>
 
 ### Comandos de Dock
 
 Los comandos de Dock cambian la ruta de respuesta de la sesión activa a otro canal vinculado.
-Consulta [Acoplamiento de canales](/es/concepts/channel-docking) para la configuración y la solución de problemas.
+Consulta [Acoplamiento de canales](/es/concepts/channel-docking) para configuración y resolución de problemas.
 
-Generado a partir de Plugins de canal con soporte para comandos nativos:
+Generado a partir de plugins de canal con compatibilidad con comandos nativos:
 
 - `/dock-discord` (alias: `/dock_discord`)
 - `/dock-mattermost` (alias: `/dock_mattermost`)
@@ -308,80 +309,80 @@ Generado a partir de Plugins de canal con soporte para comandos nativos:
 Los comandos de Dock requieren `session.identityLinks`. El remitente de origen y el par de destino
 deben estar en el mismo grupo de identidad.
 
-### Comandos de Plugins incluidos
+### Comandos de plugins incluidos
 
-| Comando                                                                                      | Descripción                                                                         |
-| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `/dreaming [on\|off\|status\|help]`                                                          | Activa o desactiva Dreaming de memoria (propietario o administrador del Gateway). Consulta [Dreaming](/es/concepts/dreaming) |
-| `/pair [qr\|status\|pending\|approve\|cleanup\|notify]`                                      | Gestiona el emparejamiento de dispositivos. Consulta [Emparejamiento](/es/channels/pairing) |
-| `/phone status\|arm ...\|disarm`                                                             | Arma temporalmente comandos de nodo telefónico de alto riesgo                                       |
-| `/voice status\|list\|set <voiceId>`                                                         | Gestiona la configuración de voz de Talk. Nombre nativo de Discord: `/talkvoice`                         |
-| `/card ...`                                                                                  | Envía preajustes de tarjetas enriquecidas de LINE. Consulta [LINE](/es/channels/line)                             |
-| `/codex status\|models\|threads\|resume\|compact\|review\|diagnostics\|account\|mcp\|skills` | Controla el arnés de servidor de aplicaciones Codex. Consulta [Arnés de Codex](/es/plugins/codex-harness)   |
+| Comando                                                 | Descripción                                                                                                                                                                                    |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/dreaming [on\|off\|status\|help]`                     | Activa o desactiva memory dreaming (propietario o administrador de Gateway). Consulta [Dreaming](/es/concepts/dreaming)                                                                                                            |
+| `/pair [qr\|status\|pending\|approve\|cleanup\|notify]` | Gestiona el emparejamiento de dispositivos. Consulta [Emparejamiento](/es/channels/pairing)                                                                                                                                        |
+| `/phone status\|arm ...\|disarm`                        | Arma temporalmente comandos de nodo telefónico de alto riesgo                                                                                                                                                  |
+| `/voice status\|list\|set <voiceId>`                    | Gestiona la configuración de voz de Talk. Nombre nativo en Discord: `/talkvoice`                                                                                                                                    |
+| `/card ...`                                             | Envía preajustes de tarjetas enriquecidas de LINE. Consulta [LINE](/es/channels/line)                                                                                                                                        |
+| `/codex <action> ...`                                   | Vincula, dirige e inspecciona el arnés de servidor de aplicación de Codex (estado, hilos, reanudar, modelo, rápido, permisos, compactar, revisión, mcp, Skills y más). Consulta [Arnés de Codex](/es/plugins/codex-harness) |
 
 Solo QQBot: `/bot-ping`, `/bot-version`, `/bot-help`, `/bot-upgrade`, `/bot-logs`
 
-### Comandos de Skills
+### Comandos de Skill
 
-Las Skills invocables por el usuario se exponen como comandos de barra:
+Las Skills invocables por el usuario se exponen como comandos de barra diagonal:
 
 - `/skill <name> [input]` siempre funciona como punto de entrada genérico.
-- Las Skills pueden registrarse como comandos directos (por ejemplo, `/prose` para OpenProse).
-- El registro nativo de comandos de Skills se controla mediante `commands.nativeSkills` y
+- Skills pueden registrarse como comandos directos (por ejemplo, `/prose` para OpenProse).
+- El registro de comandos nativos de Skills se controla mediante `commands.nativeSkills` y
   `channels.<provider>.commands.nativeSkills`.
 - Los nombres se saneen a `a-z0-9_` (máximo 32 caracteres); las colisiones reciben sufijos numéricos.
 
 <AccordionGroup>
-  <Accordion title="Despacho de comandos de Skills">
-    De forma predeterminada, los comandos de Skills se enrutan al modelo como una solicitud normal.
+  <Accordion title="Despacho de comandos de Skill">
+    De forma predeterminada, los comandos de Skill se enrutan al modelo como una solicitud normal.
 
-    Las Skills pueden declarar `command-dispatch: tool` para enrutar directamente a una herramienta
+    Skills pueden declarar `command-dispatch: tool` para enrutar directamente a una herramienta
     (determinista, sin intervención del modelo). Ejemplo: `/prose` (Plugin OpenProse)
     — consulta [OpenProse](/es/prose).
 
   </Accordion>
   <Accordion title="Argumentos de comandos nativos">
     Discord usa autocompletado para opciones dinámicas y menús de botones cuando se omiten
-    argumentos requeridos. Telegram y Slack muestran un menú de botones para comandos con
-    opciones. Las opciones dinámicas se resuelven respecto al modelo de sesión de destino, por lo que las opciones
-    específicas del modelo, como niveles de `/think`, siguen la sobrescritura de `/model` de la sesión.
+    los argumentos requeridos. Telegram y Slack muestran un menú de botones para comandos con
+    opciones. Las opciones dinámicas se resuelven frente al modelo de la sesión de destino, por lo que las opciones
+    específicas del modelo, como los niveles de `/think`, siguen la sobrescritura `/model` de la sesión.
   </Accordion>
 </AccordionGroup>
 
-## `/tools` — qué puede usar el agente ahora
+## `/tools`: lo que el agente puede usar ahora
 
-`/tools` responde una pregunta de runtime: **qué puede usar este agente ahora mismo en esta
-conversación** — no un catálogo estático de configuración.
+`/tools` responde a una pregunta de runtime: **qué puede usar este agente ahora mismo en esta
+conversación** — no un catálogo de configuración estático.
 
 ```text
-/tools         # compact view
-/tools verbose # with short descriptions
+/tools         # vista compacta
+/tools verbose # con descripciones breves
 ```
 
-Los resultados tienen alcance de sesión. Cambiar de agente, canal, hilo, autorización del remitente
-o modelo puede cambiar la salida. Para editar perfiles y sobrescrituras,
-usa el panel Tools de la Control UI o las superficies de configuración.
+Los resultados están limitados a la sesión. Cambiar el agente, canal, hilo, autorización
+del remitente o modelo puede cambiar la salida. Para editar perfiles y sobrescrituras,
+usa el panel de Tools de la interfaz de Control o las superficies de configuración.
 
-## `/model` — selección de modelo
+## `/model`: selección de modelo
 
 ```text
-/model             # show model picker
-/model list        # same
-/model 3           # select by number from picker
+/model             # mostrar selector de modelos
+/model list        # igual
+/model 3           # seleccionar por número desde el selector
 /model openai/gpt-5.4
 /model opus@anthropic:default
-/model default     # clear the session model selection
-/model status      # detailed view with endpoint and API mode
+/model default     # borrar la selección de modelo de la sesión
+/model status      # vista detallada con endpoint y modo de API
 ```
 
-En Discord, `/model` y `/models` abren un selector interactivo con desplegables de proveedor y
-modelo. El selector respeta `agents.defaults.models`, incluidas las entradas
-`provider/*`.
+En Discord, `/model` y `/models` abren un selector interactivo con proveedor y
+menús desplegables de modelo. El selector respeta `agents.defaults.models`, incluidas
+las entradas `provider/*`.
 
-## `/config` — escrituras de configuración en disco
+## `/config`: escrituras de configuración en disco
 
 <Note>
-  Solo para propietarios. Deshabilitado de forma predeterminada — habilítalo con `commands.config: true`.
+  Solo propietarios. Deshabilitado de forma predeterminada — habilítalo con `commands.config: true`.
 </Note>
 
 ```text
@@ -392,13 +393,13 @@ modelo. El selector respeta `agents.defaults.models`, incluidas las entradas
 /config unset messages.responsePrefix
 ```
 
-La configuración se valida antes de escribir. Los cambios no válidos se rechazan. Las actualizaciones de `/config`
-persisten entre reinicios.
+La configuración se valida antes de escribir. Los cambios no válidos se rechazan. `/config`
+persiste las actualizaciones entre reinicios.
 
-## `/mcp` — configuración del servidor MCP
+## `/mcp`: configuración de servidor MCP
 
 <Note>
-  Solo para propietarios. Deshabilitado de forma predeterminada — habilítalo con `commands.mcp: true`.
+  Solo propietarios. Deshabilitado de forma predeterminada — habilítalo con `commands.mcp: true`.
 </Note>
 
 ```text
@@ -408,12 +409,12 @@ persisten entre reinicios.
 /mcp unset context7
 ```
 
-`/mcp` almacena la configuración en la configuración de OpenClaw, no en ajustes de proyecto de agente integrado.
+`/mcp` almacena la configuración en la configuración de OpenClaw, no en ajustes de proyecto de agente embebido.
 
-## `/debug` — sobrescrituras solo en runtime
+## `/debug`: sobrescrituras solo en runtime
 
 <Note>
-  Solo para propietarios. Deshabilitado de forma predeterminada — habilítalo con `commands.debug: true`.
+  Solo propietarios. Deshabilitado de forma predeterminada — habilítalo con `commands.debug: true`.
   Las sobrescrituras se aplican inmediatamente a nuevas lecturas de configuración, pero **no** escriben en disco.
 </Note>
 
@@ -425,10 +426,10 @@ persisten entre reinicios.
 /debug reset
 ```
 
-## `/plugins` — gestión de Plugins
+## `/plugins`: gestión de plugins
 
 <Note>
-  Solo para propietarios en escrituras. Deshabilitado de forma predeterminada — habilítalo con `commands.plugins: true`.
+  Solo propietarios para escrituras. Deshabilitado de forma predeterminada — habilítalo con `commands.plugins: true`.
 </Note>
 
 ```text
@@ -440,25 +441,25 @@ persisten entre reinicios.
 /plugins install ./path/to/plugin
 ```
 
-`/plugins enable|disable` actualiza la configuración de Plugins y recarga en caliente el runtime
-de Plugins del Gateway para nuevos turnos de agente. `/plugins install` reinicia automáticamente los
-Gateways gestionados porque cambiaron los módulos fuente de Plugins.
+`/plugins enable|disable` actualiza la configuración de plugins y recarga en caliente el runtime de plugins de Gateway
+para nuevos turnos de agente. `/plugins install` reinicia automáticamente los Gateways gestionados
+porque cambiaron los módulos de origen del plugin.
 
-## `/trace` — salida de traza de Plugins
+## `/trace`: salida de trazas de plugins
 
 ```text
-/trace          # show current trace state
+/trace          # mostrar el estado actual de las trazas
 /trace on
 /trace off
 ```
 
-`/trace` revela líneas de traza/depuración de Plugins con alcance de sesión sin el modo
-detallado completo. No reemplaza a `/debug` (sobrescrituras de runtime) ni a `/verbose` (salida normal
+`/trace` revela líneas de traza/depuración de plugins limitadas a la sesión sin el modo detallado
+completo. No reemplaza a `/debug` (sobrescrituras de runtime) ni a `/verbose` (salida normal
 de herramientas).
 
-## `/btw` — preguntas laterales
+## `/btw`: preguntas secundarias
 
-`/btw` es una pregunta lateral rápida sobre el contexto de la sesión actual. Alias: `/side`.
+`/btw` es una pregunta secundaria rápida sobre el contexto de la sesión actual. Alias: `/side`.
 
 ```text
 /btw what are we doing right now?
@@ -468,11 +469,11 @@ de herramientas).
 A diferencia de un mensaje normal:
 
 - Usa la sesión actual como contexto de fondo.
-- En sesiones del arnés de Codex, se ejecuta como un hilo lateral efímero de Codex.
+- En sesiones del arnés de Codex, se ejecuta como un hilo secundario efímero de Codex.
 - **No** cambia el contexto futuro de la sesión.
-- No se escribe en el historial de transcripción.
+- No se escribe en el historial de la transcripción.
 
-Consulta [Preguntas laterales BTW](/es/tools/btw) para ver el comportamiento completo.
+Consulta [Preguntas secundarias BTW](/es/tools/btw) para ver el comportamiento completo.
 
 ## Notas de superficie
 
@@ -481,26 +482,26 @@ Consulta [Preguntas laterales BTW](/es/tools/btw) para ver el comportamiento com
     - **Comandos de texto:** se ejecutan en la sesión de chat normal (los DM comparten `main`, los grupos tienen su propia sesión).
     - **Comandos nativos de Discord:** `agent:<agentId>:discord:slash:<userId>`
     - **Comandos nativos de Slack:** `agent:<agentId>:slack:slash:<userId>` (prefijo configurable mediante `channels.slack.slashCommand.sessionPrefix`)
-    - **Comandos nativos de Telegram:** `telegram:slash:<userId>` (dirige a la sesión de chat mediante `CommandTargetSessionKey`)
-    - **`/login codex`** envía códigos de emparejamiento de dispositivo solo mediante chat privado o rutas de respuesta de Web UI. Las invocaciones en grupos/temas de Telegram piden al propietario que envíe un DM al bot en su lugar.
+    - **Comandos nativos de Telegram:** `telegram:slash:<userId>` (dirigen a la sesión de chat mediante `CommandTargetSessionKey`)
+    - **`/login codex`** envía códigos de emparejamiento de dispositivos solo a través de chat privado o rutas de respuesta de la Web UI. Las invocaciones en grupos/temas de Telegram piden al propietario que envíe un DM al bot en su lugar.
     - **`/stop`** apunta a la sesión de chat activa para abortar la ejecución actual.
 
   </Accordion>
-  <Accordion title="Detalles de Slack">
+  <Accordion title="Detalles específicos de Slack">
     `channels.slack.slashCommand` admite un único comando de estilo `/openclaw`.
-    Con `commands.native: true`, crea un comando de barra de Slack por cada comando
-    integrado. Registra `/agentstatus` (no `/status`) porque Slack reserva
+    Con `commands.native: true`, crea un comando de barra diagonal de Slack por cada
+    comando integrado. Registra `/agentstatus` (no `/status`) porque Slack reserva
     `/status`. El texto `/status` sigue funcionando en mensajes de Slack.
   </Accordion>
-  <Accordion title="Ruta rápida y atajos en línea">
-    - Los mensajes solo con comandos de remitentes en allowlist se gestionan inmediatamente (omiten la cola y el modelo).
-    - Los atajos en línea (`/help`, `/commands`, `/status`, `/whoami`) también funcionan incrustados en mensajes normales y se eliminan antes de que el modelo vea el texto restante.
-    - Los mensajes no autorizados solo con comandos se ignoran silenciosamente; los tokens `/...` en línea se tratan como texto plano.
+  <Accordion title="Ruta rápida y accesos directos en línea">
+    - Los mensajes solo de comandos de remitentes permitidos se gestionan de inmediato (omiten cola + modelo).
+    - Los accesos directos en línea (`/help`, `/commands`, `/status`, `/whoami`) también funcionan incrustados en mensajes normales y se eliminan antes de que el modelo vea el texto restante.
+    - Los mensajes solo de comandos no autorizados se ignoran silenciosamente; los tokens `/...` en línea se tratan como texto plano.
 
   </Accordion>
   <Accordion title="Notas de argumentos">
     - Los comandos aceptan un `:` opcional entre el comando y los argumentos (`/think: high`, `/send: on`).
-    - `/new <model>` acepta un alias de modelo, `provider/model` o un nombre de proveedor (coincidencia difusa); si no hay coincidencia, el texto se trata como cuerpo del mensaje.
+    - `/new <model>` acepta un alias de modelo, `provider/model` o un nombre de proveedor (coincidencia difusa); si no hay coincidencia, el texto se trata como el cuerpo del mensaje.
     - `/allowlist add|remove` requiere `commands.config: true` y respeta `configWrites` del canal.
 
   </Accordion>
@@ -509,22 +510,22 @@ Consulta [Preguntas laterales BTW](/es/tools/btw) para ver el comportamiento com
 ## Uso y estado del proveedor
 
 - **Uso/cuota del proveedor** (por ejemplo, "Claude 80% left") se muestra en `/status` para el proveedor del modelo actual cuando el seguimiento de uso está habilitado.
-- **Líneas de tokens/caché** en `/status` pueden recurrir a la entrada de uso más reciente de la transcripción cuando la instantánea de la sesión en vivo es escasa.
-- **Ejecución frente a runtime:** `/status` informa `Execution` para la ruta de sandbox efectiva y `Runtime` para quién ejecuta la sesión: `OpenClaw Default`, `OpenAI Codex`, un backend CLI o un backend ACP.
+- **Líneas de tokens/caché** en `/status` pueden recurrir a la entrada de uso de transcripción más reciente cuando la instantánea de sesión en vivo es escasa.
+- **Ejecución vs runtime:** `/status` informa `Execution` para la ruta efectiva del sandbox y `Runtime` para quién ejecuta la sesión: `OpenClaw Default`, `OpenAI Codex`, un backend de CLI o un backend de ACP.
 - **Tokens/costo por respuesta:** controlado por `/usage off|tokens|full`.
-- `/model status` trata de modelos/autenticación/endpoints, no de uso.
+- `/model status` trata sobre modelos/autenticación/endpoints, no sobre uso.
 
 ## Relacionado
 
 <CardGroup cols={2}>
   <Card title="Skills" href="/es/tools/skills" icon="puzzle-piece">
-    Cómo se registran y controlan los comandos de barra de Skills.
+    Cómo se registran y controlan los comandos slash de Skills.
   </Card>
   <Card title="Crear Skills" href="/es/tools/creating-skills" icon="hammer">
-    Crea una Skill que registre su propio comando de barra.
+    Crea una skill que registre su propio comando slash.
   </Card>
   <Card title="BTW" href="/es/tools/btw" icon="comments">
-    Preguntas laterales sin cambiar el contexto de la sesión.
+    Preguntas secundarias sin cambiar el contexto de la sesión.
   </Card>
   <Card title="Steer" href="/es/tools/steer" icon="compass">
     Guía al agente durante la ejecución con `/steer`.
