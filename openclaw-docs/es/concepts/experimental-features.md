@@ -1,72 +1,67 @@
 ---
 read_when:
     - Ves una clave de configuración `.experimental` y quieres saber si es estable
-    - Quieres probar funciones preliminares del entorno de ejecución sin confundirlas con los valores predeterminados normales
-    - Quieres un único lugar para encontrar las marcas experimentales documentadas actualmente
+    - Quieres probar funciones de entorno de ejecución en vista previa sin confundirlas con los valores predeterminados normales
+    - Quieres un solo lugar para encontrar las marcas experimentales documentadas actualmente
 summary: Qué significan las marcas experimentales en OpenClaw y cuáles están documentadas actualmente
 title: Funciones experimentales
 x-i18n:
-    generated_at: "2026-06-27T11:11:53Z"
+    generated_at: "2026-07-06T10:48:46Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: a0f42e6b574c5db9508412c9c5d9919d1a54a16fe00edea43664f3a01e8e38f5
+    source_hash: ac12f9e754afd369a1be0853f8023e479fe51777aa42b73f6245223f07053152
     source_path: concepts/experimental-features.md
     workflow: 16
 ---
 
-Las funciones experimentales en OpenClaw son **superficies de vista previa opcionales**. Están
-detrás de marcas explícitas porque aún necesitan recorrido en el mundo real antes de
-merecer un valor predeterminado estable o un contrato público de larga duración.
+Las funciones experimentales son superficies de vista previa optativas detrás de flags explícitas. Necesitan más uso en el mundo real antes de obtener un valor predeterminado estable o un contrato de larga duración.
 
-Trátalas de forma distinta a la configuración normal:
+- Desactivadas de forma predeterminada salvo que una documentación te indique habilitar una.
+- La forma y el comportamiento pueden cambiar más rápido que la configuración estable.
+- Prefiere una ruta estable cuando ya exista una.
+- Despliégalas de forma amplia solo después de probarlas primero en un entorno más pequeño.
 
-- Mantenlas **desactivadas de forma predeterminada** salvo que la documentación relacionada te indique probar una.
-- Espera que **la forma y el comportamiento cambien** más rápido que la configuración estable.
-- Prefiere primero la ruta estable cuando ya exista una.
-- Si estás implementando OpenClaw de forma amplia, prueba las marcas experimentales en un entorno
-  más pequeño antes de incorporarlas a una referencia compartida.
+## Flags documentadas actualmente
 
-## Marcas documentadas actualmente
+| Superficie               | Clave                                                                                      | Úsala cuando                                                                                                                          | Más                                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Runtime de modelo local  | `agents.defaults.experimental.localModelLean`, `agents.list[].experimental.localModelLean` | Un backend local más pequeño o más estricto se atasca con toda la superficie de herramientas predeterminada de OpenClaw               | [Modelos locales](/es/gateway/local-models)                                                         |
+| Búsqueda de memoria      | `agents.defaults.memorySearch.experimental.sessionMemory`                                  | Quieres que `memory_search` indexe transcripciones de sesiones anteriores y aceptas el coste adicional de almacenamiento/indexación    | [Referencia de configuración de memoria](/es/reference/memory-config#session-memory-search-experimental) |
+| Arnés de Codex           | `plugins.entries.codex.config.appServer.experimental.sandboxExecServer`                    | Quieres que el servidor de aplicación nativo de Codex 0.132.0 o posterior apunte a un servidor de ejecución respaldado por sandbox de OpenClaw en lugar de desactivar el Modo Código | [Referencia del arnés de Codex](/es/plugins/codex-harness-reference#sandboxed-native-execution)        |
+| Herramienta de planificación estructurada | `tools.experimental.planTool`                                                              | Quieres exponer la herramienta estructurada `update_plan` para el seguimiento de trabajo de varios pasos en runtimes e interfaces de usuario compatibles | [Referencia de configuración del Gateway](/es/gateway/config-tools#toolsexperimental)                    |
 
-| Superficie               | Clave                                                                                      | Úsala cuando                                                                                                                      | Más                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Runtime de modelo local  | `agents.defaults.experimental.localModelLean`, `agents.list[].experimental.localModelLean` | Un backend local más pequeño o estricto se atasca con la superficie de herramientas predeterminada completa de OpenClaw           | [Modelos locales](/es/gateway/local-models)                                                       |
-| Búsqueda de memoria      | `agents.defaults.memorySearch.experimental.sessionMemory`                                  | Quieres que `memory_search` indexe transcripciones de sesiones anteriores y aceptas el coste adicional de almacenamiento/indexado | [Referencia de configuración de memoria](/es/reference/memory-config#session-memory-search-experimental) |
-| Arnés de Codex           | `plugins.entries.codex.config.appServer.experimental.sandboxExecServer`                    | Quieres que el servidor de aplicaciones nativo de Codex 0.132.0 o posterior apunte a un exec-server respaldado por el sandbox de OpenClaw en lugar de desactivar el Modo de código | [Referencia del arnés de Codex](/es/plugins/codex-harness-reference#sandboxed-native-execution)  |
-| Herramienta de planificación estructurada | `tools.experimental.planTool`                                                  | Quieres exponer la herramienta estructurada `update_plan` para el seguimiento de trabajo de varios pasos en runtimes e interfaces compatibles | [Referencia de configuración del Gateway](/es/gateway/config-tools#toolsexperimental)            |
+## Modo ligero para modelo local
 
-## Modo ligero de modelo local
+`agents.defaults.experimental.localModelLean: true` elimina las herramientas opcionales pesadas de la superficie directa del agente en cada turno: `browser`, `cron`, `message`, `image_generate`, `music_generate`, `video_generate`, `tts` y `pdf`. Las herramientas permitidas explícitamente o requeridas para la entrega siguen disponibles, aunque la Búsqueda de herramientas puede catalogarlas en lugar de exponerlas directamente. El modo ligero también establece de forma predeterminada los catálogos de plugins/MCP/clientes en Búsqueda de herramientas estructurada (`tool_search`, `tool_describe`, `tool_call`) cuando `tools.toolSearch` aún no está configurado. Usa `agents.list[].experimental.localModelLean` para limitar esto a un agente.
 
-`agents.defaults.experimental.localModelLean: true` es una válvula de alivio para configuraciones de modelos locales más débiles. Cuando está activada, OpenClaw elimina tres herramientas predeterminadas — `browser`, `cron` y `message` — de la superficie de herramientas del agente en cada turno. También hace que esa ejecución use de forma predeterminada controles estructurados de búsqueda de herramientas cuando `tools.toolSearch` no está configurado explícitamente, de modo que los catálogos de herramientas de plugins, MCP o clientes más grandes permanezcan detrás de `tool_search`, `tool_describe` y `tool_call` en lugar de volcarse en el prompt. Las ejecuciones que requieren entrega directa con `message` mantienen esa herramienta directa en lugar de activar el valor predeterminado de búsqueda de herramientas del modo ligero. Usa `agents.list[].experimental.localModelLean` para activar o desactivar el mismo comportamiento en un agente configurado.
+Si ya ajustas la Búsqueda de herramientas de forma global, OpenClaw deja esa configuración intacta. Establece `tools.toolSearch: false` para optar por no usar el valor predeterminado de Búsqueda de herramientas del modo ligero.
 
-### Por qué estas tres herramientas
+### Por qué estas herramientas
 
-Estas tres herramientas tienen las descripciones más grandes y la mayor cantidad de formas de parámetros en el runtime predeterminado de OpenClaw. En un backend compatible con OpenAI de contexto pequeño o más estricto, esa es la diferencia entre:
+Estas herramientas tienen las descripciones más grandes, las formas de parámetros más amplias o la mayor probabilidad de distraer a un modelo pequeño de la ruta normal de programación y conversación. En un backend compatible con OpenAI de contexto pequeño o más estricto, esa es la diferencia entre:
 
-- Esquemas de herramientas que encajan limpiamente en el prompt frente a desplazar el historial de conversación.
-- El modelo que elige la herramienta correcta frente a emitir llamadas de herramientas mal formadas porque hay demasiados esquemas de aspecto similar.
-- El adaptador de Chat Completions que se mantiene dentro de los límites de salida estructurada del servidor frente a provocar un 400 por el tamaño de la carga útil de llamadas de herramientas.
+- Que los esquemas de herramientas quepan en el prompt frente a que desplacen el historial de conversación.
+- Que el modelo elija la herramienta correcta frente a que emita llamadas a herramientas mal formadas por demasiados esquemas similares.
+- Que el adaptador de Chat Completions permanezca dentro de los límites de salida estructurada frente a recibir un 400 por el tamaño de la carga útil de llamadas a herramientas.
 
-Eliminarlas no reconfigura OpenClaw silenciosamente; solo acorta la lista de herramientas directas. El modelo todavía tiene disponibles `read`, `write`, `edit`, `exec`, `apply_patch`, búsqueda/obtención web (cuando está configurada), memoria y herramientas de sesión/agente. Los catálogos adicionales siguen siendo invocables mediante la búsqueda de herramientas salvo que establezcas explícitamente `tools.toolSearch: false`.
+Eliminarlas solo acorta la lista directa de herramientas. El modelo aún tiene `read`, `write`, `edit`, `exec`, `apply_patch`, comprensión de imágenes, búsqueda/obtención web (cuando está configurada), memoria y herramientas de sesión/agente. Los catálogos adicionales siguen disponibles mediante la Búsqueda de herramientas salvo que establezcas `tools.toolSearch: false`; las herramientas permitidas explícitamente pueden volver a incorporar a un agente ligero en un flujo de trabajo recortado.
 
 ### Cuándo activarlo
 
-Activa el modo ligero cuando ya hayas comprobado que el modelo puede hablar con el Gateway, pero los turnos completos del agente fallan. La cadena de señales típica es:
+Habilita el modo ligero una vez que hayas demostrado que el modelo puede hablar con el Gateway, pero los turnos completos del agente se comportan mal:
 
 1. `openclaw infer model run --gateway --model <ref> --prompt "Reply with exactly: pong"` se completa correctamente.
-2. Un turno normal del agente falla con llamadas de herramientas mal formadas, prompts demasiado grandes o el modelo ignora sus herramientas.
+2. Un turno normal del agente falla con llamadas a herramientas mal formadas, prompts demasiado grandes o el modelo ignora sus herramientas.
 3. Cambiar `localModelLean: true` elimina el fallo.
 
 ### Cuándo dejarlo desactivado
 
-Si tu backend maneja limpiamente el runtime predeterminado completo, deja esto desactivado. El modo ligero es una solución alternativa, no un valor predeterminado. Existe porque algunas pilas locales necesitan una superficie de herramientas más pequeña para comportarse correctamente; los modelos alojados y los equipos locales con buenos recursos no.
+Si tu backend maneja limpiamente todo el runtime predeterminado, deja esto desactivado. Es una solución alternativa para pilas locales que necesitan una superficie de herramientas más pequeña, no un valor predeterminado para modelos alojados o equipos locales con buenos recursos.
 
-El modo ligero tampoco sustituye a `tools.profile`, `tools.allow`/`tools.deny` ni a la vía de escape `compat.supportsTools: false` del modelo. Si necesitas una superficie de herramientas permanentemente más estrecha para un agente específico, prefiere esos controles estables antes que la marca experimental.
+El modo ligero no reemplaza `tools.profile`, `tools.allow`/`tools.deny` ni la vía de escape `compat.supportsTools: false` del modelo. Para una superficie de herramientas más estrecha de forma permanente en un agente específico, prefiere esos controles estables.
 
-Si ya ajustas la búsqueda de herramientas globalmente, OpenClaw deja intacta esa configuración del operador. Establece `tools.toolSearch: false` para excluirte del valor predeterminado de búsqueda de herramientas del modo ligero.
-
-### Activar
+### Habilitar
 
 ```json5
 {
@@ -98,20 +93,11 @@ Solo para un agente:
 }
 ```
 
-Reinicia el Gateway después de cambiar la marca y, luego, confirma la lista recortada de herramientas con:
-
-```bash
-openclaw status --deep
-```
-
-La salida de estado profundo enumera las herramientas activas del agente; `browser`, `cron` y `message` deberían estar ausentes cuando el modo ligero está activado, salvo que el modo de entrega actual fuerce respuestas directas con `message`.
+Reinicia el Gateway después de cambiar la flag. El filtrado ligero elimina `browser`, `cron`, `message`, `image_generate`, `music_generate`, `video_generate`, `tts` y `pdf` salvo que las conserves explícitamente con `tools.allow` o `tools.alsoAllow`; la Búsqueda de herramientas aún puede catalogar herramientas conservadas en lugar de exponerlas directamente.
 
 ## Experimental no significa oculto
 
-Si una función es experimental, OpenClaw debería decirlo claramente en la documentación y en la
-propia ruta de configuración. Lo que **no** debería hacer es introducir comportamiento de vista previa de forma encubierta en un
-control predeterminado que parece estable y fingir que eso es normal. Así es como las superficies de
-configuración se vuelven desordenadas.
+Una función experimental debe indicarlo claramente en la documentación y en la propia ruta de configuración, no ocultarse detrás de un control predeterminado que parece estable.
 
 ## Relacionado
 

@@ -1,35 +1,37 @@
 ---
 read_when:
-    - 新しいカスタムSkillを作成しています
-    - SKILL.md ベースの Skills 向けに、すぐに始められるワークフローが必要です
+    - 新しいカスタムスキルを作成しています
+    - SKILL.md ベースの Skills 向けに、手早く始めるためのワークフローが必要です
     - Skill Workshop を使用して、エージェントレビュー用のスキルを提案したい
 sidebarTitle: Creating skills
 summary: OpenClaw エージェント向けのカスタム SKILL.md ワークスペース Skills をビルド、テスト、公開します。
 title: Skills の作成
 x-i18n:
-    generated_at: "2026-06-27T13:10:52Z"
+    generated_at: "2026-07-05T11:49:31Z"
     model: gpt-5.5
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 7a744e9010c66b8465449d24430520473717edde86711bbb59774519189b9e72
+    source_hash: cba2aa863ebd083d4592e8a764dbdc2c30a0dd8aff49d273927e82df0069bc81
     source_path: tools/creating-skills.md
     workflow: 16
 ---
 
-Skills は、エージェントがツールをいつどのように使うかを教えます。各Skillは、YAMLフロントマターとMarkdownの手順を含む`SKILL.md`ファイルを持つディレクトリです。
-OpenClaw は、定義済みの[優先順位](/ja-JP/tools/skills#loading-order)に従って複数のルートからSkillsを読み込みます。
+Skills は、エージェントにツールをいつ、どのように使うかを教えます。各スキルは、
+YAML フロントマターと Markdown の手順を含む `SKILL.md` ファイルを持つディレクトリです。
+OpenClaw は、定義済みの[優先順位](/ja-JP/tools/skills#loading-order)に従って複数のルートから Skills を読み込みます。
 
-## 最初のSkillを作成する
+## 最初のスキルを作成する
 
 <Steps>
   <Step title="Create the skill directory">
-    Skills はワークスペースの`skills/`フォルダーに置きます。新しいSkill用のディレクトリを作成します。
+    Skills はワークスペースの `skills/` フォルダーに配置します。
 
     ```bash
     mkdir -p ~/.openclaw/workspace/skills/hello-world
     ```
 
-    整理のためにSkillsをサブフォルダーにまとめることもできます。Skillの名前はフォルダーパスではなく、`SKILL.md`のフロントマターで決まります。
+    整理のためにスキルをサブフォルダーでグループ化できます。スキル名はフォルダーパスではなく、
+    `SKILL.md` のフロントマターで決まります。
 
     ```bash
     mkdir -p ~/.openclaw/workspace/skills/personal/hello-world
@@ -39,7 +41,7 @@ OpenClaw は、定義済みの[優先順位](/ja-JP/tools/skills#loading-order)�
   </Step>
 
   <Step title="Write SKILL.md">
-    ディレクトリ内に`SKILL.md`を作成します。フロントマターはメタデータを定義し、本文はエージェントへの手順を示します。
+    フロントマターはメタデータを定義し、本文はエージェントへの手順を示します。
 
     ```markdown
     ---
@@ -57,9 +59,10 @@ OpenClaw は、定義済みの[優先順位](/ja-JP/tools/skills#loading-order)�
     ```
 
     命名規則:
-    - `name`には小文字、数字、ハイフンを使用します。
-    - ディレクトリ名とフロントマターの`name`を一致させます。
-    - `description`はエージェントとスラッシュコマンド検出に表示されます。1行に収め、160文字未満にしてください。
+    - `name` には小文字、数字、ハイフンを使用します。
+    - ディレクトリ名とフロントマターの `name` を一致させます。
+    - `description` はエージェントとスラッシュコマンドの探索に表示されます。
+      1 行にし、160 文字未満にしてください。
 
   </Step>
 
@@ -68,7 +71,9 @@ OpenClaw は、定義済みの[優先順位](/ja-JP/tools/skills#loading-order)�
     openclaw skills list
     ```
 
-    OpenClaw はデフォルトでSkillsルート配下の`SKILL.md`ファイルを監視します。監視が無効になっている場合、または既存のセッションを継続している場合は、エージェントが更新済みリストを受け取れるように新しいセッションを開始します。
+    OpenClaw はデフォルトで、Skills ルート配下の `SKILL.md` ファイルを監視します。
+    ウォッチャーが無効になっている場合、または既存のセッションを続けている場合は、
+    エージェントが更新済みリストを受け取れるように新しいセッションを開始します。
 
     ```bash
     # From chat — archive current session and start fresh
@@ -81,43 +86,43 @@ OpenClaw は、定義済みの[優先順位](/ja-JP/tools/skills#loading-order)�
   </Step>
 
   <Step title="Test it">
-    Skillをトリガーするはずのメッセージを送信します。
-
     ```bash
     openclaw agent --message "give me a greeting"
     ```
 
-    またはチャットを開き、エージェントに直接依頼します。名前で明示的に呼び出すには`/skill hello-world`を使用します。
+    またはチャットを開き、エージェントに直接依頼します。名前で明示的に呼び出すには
+    `/skill hello-world` を使用します。
 
   </Step>
 </Steps>
 
-## SKILL.mdリファレンス
+## `SKILL.md` リファレンス
 
 ### 必須フィールド
 
-| フィールド    | 説明                                                   |
-| ------------- | ------------------------------------------------------ |
-| `name`        | 小文字、数字、ハイフンを使った一意のスラッグ           |
-| `description` | エージェントと検出出力に表示される1行の説明            |
+| フィールド | 説明 |
+| ------------- | --------------------------------------------------------------- |
+| `name` | 小文字、数字、ハイフンを使用する一意のスラッグ |
+| `description` | エージェントと探索出力に表示される 1 行の説明 |
 
 ### 任意のフロントマターキー
 
-| フィールド                 | デフォルト | 説明                                                                      |
-| -------------------------- | ---------- | ------------------------------------------------------------------------- |
-| `user-invocable`           | `true`     | Skillをユーザー用スラッシュコマンドとして公開する                         |
-| `disable-model-invocation` | `false`    | Skillをエージェントのシステムプロンプトから除外する（`/skill`では引き続き実行される） |
-| `command-dispatch`         | —          | `tool`に設定すると、モデルをバイパスしてスラッシュコマンドを直接ツールへルーティングする |
-| `command-tool`             | —          | `command-dispatch: tool`が設定されているときに呼び出すツール名             |
-| `command-arg-mode`         | `raw`      | ツールディスパッチでは、生の引数文字列をツールへ転送する                  |
-| `homepage`                 | —          | macOS Skills UIで「Website」として表示されるURL                            |
+| フィールド | デフォルト | 説明 |
+| -------------------------- | ------- | -------------------------------------------------------------------------------- |
+| `user-invocable` | `true` | スキルをユーザー向けスラッシュコマンドとして公開します |
+| `disable-model-invocation` | `false` | スキルをエージェントのシステムプロンプトから除外します（`/skill` 経由では引き続き実行されます） |
+| `command-dispatch` | — | `tool` に設定すると、モデルを迂回してスラッシュコマンドをツールへ直接ルーティングします |
+| `command-tool` | — | `command-dispatch: tool` が設定されているときに呼び出すツール名 |
+| `command-arg-mode` | `raw` | ツールディスパッチ時に、生の引数文字列をツールへ転送します |
+| `homepage` | — | macOS の Skills UI で「Website」として表示される URL |
 
-ゲート用フィールド（`requires.bins`、`requires.env`など）については、
-[Skills — ゲーティング](/ja-JP/tools/skills#gating)を参照してください。
+ゲート用フィールド（`requires.bins`、`requires.env` など）については
+[Skills — ゲート](/ja-JP/tools/skills#gating)を参照してください。
 
-### `{baseDir}`の使用
+### `{baseDir}` の使用
 
-Skill本文内で`{baseDir}`を使うと、パスをハードコードせずにSkillディレクトリ内のファイルを参照できます。
+パスをハードコードせずに、スキルディレクトリ内のファイルを参照します。
+エージェントは、スキル自身のディレクトリを基準に `{baseDir}` を解決します。
 
 ```markdown
 Run the helper script at `{baseDir}/scripts/run.sh`.
@@ -125,7 +130,7 @@ Run the helper script at `{baseDir}/scripts/run.sh`.
 
 ## 条件付き有効化を追加する
 
-依存関係が利用可能な場合にのみ読み込まれるように、Skillにゲートを設定します。
+依存関係が利用可能な場合にのみ読み込まれるように、スキルにゲートを設定します。
 
 ```markdown
 ---
@@ -139,18 +144,18 @@ metadata: { "openclaw": { "requires": { "bins": ["gemini"] }, "primaryEnv": "GEM
   <Accordion title="Gating options">
     | キー | 説明 |
     | --- | --- |
-    | `requires.bins` | すべてのバイナリが`PATH`上に存在する必要がある |
-    | `requires.anyBins` | 少なくとも1つのバイナリが`PATH`上に存在する必要がある |
-    | `requires.env` | 各環境変数がプロセスまたは設定内に存在する必要がある |
-    | `requires.config` | 各`openclaw.json`パスが真値である必要がある |
+    | `requires.bins` | すべてのバイナリが `PATH` 上に存在する必要があります |
+    | `requires.anyBins` | 少なくとも 1 つのバイナリが `PATH` 上に存在する必要があります |
+    | `requires.env` | 各環境変数がプロセスまたは設定内に存在する必要があります |
+    | `requires.config` | 各 `openclaw.json` パスが truthy である必要があります |
     | `os` | プラットフォームフィルター: `["darwin"]`、`["linux"]`、`["win32"]` |
-    | `always` | `true`に設定するとすべてのゲートをスキップし、常にSkillを含める |
+    | `always` | `true` に設定すると、すべてのゲートをスキップし、常にスキルを含めます |
 
-    完全なリファレンス: [Skills — ゲーティング](/ja-JP/tools/skills#gating)。
+    完全なリファレンス: [Skills — ゲート](/ja-JP/tools/skills#gating)。
 
   </Accordion>
   <Accordion title="Environment and API keys">
-    APIキーを`openclaw.json`内のSkillエントリに接続します。
+    `openclaw.json` のスキルエントリに API キーを接続します。
 
     ```json5
     {
@@ -165,16 +170,17 @@ metadata: { "openclaw": { "requires": { "bins": ["gemini"] }, "primaryEnv": "GEM
     }
     ```
 
-    キーは、そのエージェントターンの間だけホストプロセスに注入されます。
-    サンドボックスには届きません。詳細は
+    キーは、そのエージェントターンに限ってホストプロセスへ注入されます。
+    サンドボックスには到達しません。詳しくは
     [サンドボックス化された環境変数](/ja-JP/tools/skills-config#sandboxed-skills-and-env-vars)を参照してください。
 
   </Accordion>
 </AccordionGroup>
 
-## Skill Workshop経由で提案する
+## Skill Workshop 経由で提案する
 
-エージェントが下書きしたSkillsや、Skillを有効化する前にオペレーターのレビューを受けたい場合は、`SKILL.md`を直接書く代わりに[Skill Workshop](/ja-JP/tools/skill-workshop)の提案を使用します。
+エージェントが下書きしたスキル、またはスキルを有効化する前にオペレーターのレビューを行いたい場合は、
+`SKILL.md` を直接書く代わりに [Skill Workshop](/ja-JP/tools/skill-workshop) の提案を使用します。
 
 ```bash
 # Propose a brand-new skill
@@ -189,7 +195,7 @@ openclaw skills workshop propose-update hello-world \
   --description "Updated greeting skill"
 ```
 
-提案にサポートファイルが含まれる場合は`--proposal-dir`を使用します。
+提案にサポートファイルが含まれる場合は `--proposal-dir` を使用します。
 
 ```bash
 openclaw skills workshop propose-create \
@@ -198,7 +204,8 @@ openclaw skills workshop propose-create \
   --proposal-dir ./hello-world-proposal/
 ```
 
-ディレクトリには`PROPOSAL.md`が含まれている必要があります。サポートファイルは`assets/`、`examples/`、`references/`、`scripts/`、または`templates/`に置けます。
+ディレクトリのルートには `PROPOSAL.md` が含まれている必要があります。サポートファイルは
+`assets/`、`examples/`、`references/`、`scripts/`、または `templates/` の下に置きます。
 
 レビュー後:
 
@@ -207,28 +214,31 @@ openclaw skills workshop inspect <proposal-id>
 openclaw skills workshop apply <proposal-id>
 ```
 
-提案ライフサイクル全体については[Skill Workshop](/ja-JP/tools/skill-workshop)を参照してください。
+提案ライフサイクル全体については [Skill Workshop](/ja-JP/tools/skill-workshop) を参照してください。
 
-## ClawHubへ公開する
+## ClawHub へ公開する
 
 <Steps>
   <Step title="Ensure your SKILL.md is complete">
-    `name`、`description`、および`metadata.openclaw`のゲート用フィールドが設定されていることを確認します。プロジェクトページがある場合は`homepage` URLを追加します。
+    `name`、`description`、および任意の `metadata.openclaw` ゲートフィールドが設定されていることを確認します。
+    プロジェクトページがある場合は `homepage` URL を追加します。
   </Step>
-  <Step title="Install the ClawHub skill">
-    ClawHub Skillには、現在の公開コマンド形式と必要なメタデータが記載されています。
-
+  <Step title="Install the standalone ClawHub CLI and log in">
     ```bash
-    openclaw skills install @openclaw/clawhub-publish
+    npm i -g clawhub
+    clawhub login
     ```
-
   </Step>
   <Step title="Publish">
     ```bash
-    clawhub publish
+    clawhub skill publish ./path/to/hello-world
     ```
 
-    フロー全体については[ClawHub — 公開](/ja-JP/clawhub/publishing)を参照してください。
+    推定されたバージョンを上書きするには `--version <version>` を追加し、
+    特定の所有者の下で公開するには `--owner <owner>` を追加します。完全なフロー、所有者スコープ、
+    その他のメンテナンスコマンド（`clawhub sync`、`clawhub skill rename` など）については、
+    [ClawHub — 公開](/ja-JP/clawhub/publishing) と
+    [ClawHub CLI](/ja-JP/clawhub/cli) を参照してください。
 
   </Step>
 </Steps>
@@ -236,10 +246,10 @@ openclaw skills workshop apply <proposal-id>
 ## ベストプラクティス
 
 <Tip>
-  - **簡潔にする** — AIとして振る舞う方法ではなく、*何を*するかをモデルに指示します。
-  - **安全を最優先にする** — Skillが`exec`を使用する場合、信頼できない入力から任意のコマンド注入を許さないようにプロンプトを設計してください。
-  - **ローカルでテストする** — 共有する前に`openclaw agent --message "..."`を使用します。
-  - **ClawHubを使用する** — ゼロから構築する前に、[clawhub.ai](https://clawhub.ai)でコミュニティのSkillsを探します。
+  - **簡潔にする** — AI としてどう振る舞うかではなく、モデルに*何を*するかを指示します。
+  - **安全を最優先にする** — スキルが `exec` を使用する場合、信頼できない入力から任意のコマンドインジェクションが発生しないようにプロンプトを設計します。
+  - **ローカルでテストする** — 共有する前に `openclaw agent --message "..."` を使用します。
+  - **ClawHub を使用する** — ゼロから構築する前に、[clawhub.ai](https://clawhub.ai) でコミュニティの Skills を確認します。
 
 </Tip>
 
@@ -247,18 +257,18 @@ openclaw skills workshop apply <proposal-id>
 
 <CardGroup cols={2}>
   <Card title="Skills reference" href="/ja-JP/tools/skills" icon="puzzle-piece">
-    読み込み順、ゲーティング、許可リスト、SKILL.md形式。
+    読み込み順序、ゲート、許可リスト、および SKILL.md 形式。
   </Card>
   <Card title="Skill Workshop" href="/ja-JP/tools/skill-workshop" icon="flask">
-    エージェントが下書きしたSkills用の提案キュー。
+    エージェントが下書きした Skills の提案キュー。
   </Card>
   <Card title="Skills config" href="/ja-JP/tools/skills-config" icon="gear">
-    完全な`skills.*`設定スキーマ。
+    完全な `skills.*` 設定スキーマ。
   </Card>
-  <Card title="ClawHub" href="/ja-JP/clawhub" icon="cloud">
-    公開レジストリでSkillsを探して公開する。
+  <Card title="ClawHub" href="/clawhub" icon="cloud">
+    公開レジストリで Skills を閲覧および公開します。
   </Card>
   <Card title="Building plugins" href="/ja-JP/plugins/building-plugins" icon="plug">
-    Pluginは、説明対象のツールと一緒にSkillsを同梱できます。
+    Plugins は、ドキュメント化するツールと一緒に Skills を同梱できます。
   </Card>
 </CardGroup>
