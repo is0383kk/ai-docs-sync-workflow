@@ -17,13 +17,13 @@ x-i18n:
 
 <p align="center">
     <img
-        src="/assets/openclaw-logo-text-dark.png"
+        src="/assets/openclaw-hero-light.png"
         alt="OpenClaw"
         width="500"
         class="dark:hidden"
     />
     <img
-        src="/assets/openclaw-logo-text.png"
+        src="/assets/openclaw-hero-dark.png"
         alt="OpenClaw"
         width="500"
         class="hidden dark:block"
@@ -41,7 +41,7 @@ x-i18n:
   <Card title="Rozpocznij" href="/pl/start/getting-started" icon="rocket">
     Zainstaluj OpenClaw i uruchom Gateway w kilka minut.
   </Card>
-  <Card title="Uruchom wdrażanie" href="/pl/start/wizard" icon="sparkles">
+  <Card title="Uruchom wdrażanie" href="/pl/start/wizard" icon="list-checks">
     Konfiguracja z przewodnikiem za pomocą `openclaw onboard` i przepływów parowania.
   </Card>
   <Card title="Otwórz Control UI" href="/pl/web/control-ui" icon="layout-dashboard">

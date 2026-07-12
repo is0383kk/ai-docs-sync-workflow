@@ -17,13 +17,13 @@ x-i18n:
 
 <p align="center">
     <img
-        src="/assets/openclaw-logo-text-dark.png"
+        src="/assets/openclaw-hero-light.png"
         alt="OpenClaw"
         width="500"
         class="dark:hidden"
     />
     <img
-        src="/assets/openclaw-logo-text.png"
+        src="/assets/openclaw-hero-dark.png"
         alt="OpenClaw"
         width="500"
         class="hidden dark:block"
@@ -41,7 +41,7 @@ x-i18n:
   <Card title="开始使用" href="/zh-CN/start/getting-started" icon="rocket">
     安装 OpenClaw，并在几分钟内启动 Gateway 网关。
   </Card>
-  <Card title="运行新手引导" href="/zh-CN/start/wizard" icon="sparkles">
+  <Card title="运行新手引导" href="/zh-CN/start/wizard" icon="list-checks">
     通过 `openclaw onboard` 和配对流程进行引导式设置。
   </Card>
   <Card title="打开 Control UI" href="/zh-CN/web/control-ui" icon="layout-dashboard">

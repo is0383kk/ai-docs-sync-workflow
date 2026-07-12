@@ -17,13 +17,13 @@ x-i18n:
 
 <p align="center">
     <img
-        src="/assets/openclaw-logo-text-dark.png"
+        src="/assets/openclaw-hero-light.png"
         alt="OpenClaw"
         width="500"
         class="dark:hidden"
     />
     <img
-        src="/assets/openclaw-logo-text.png"
+        src="/assets/openclaw-hero-dark.png"
         alt="OpenClaw"
         width="500"
         class="hidden dark:block"
@@ -41,7 +41,7 @@ x-i18n:
   <Card title="Mulai" href="/id/start/getting-started" icon="rocket">
     Instal OpenClaw dan jalankan Gateway dalam hitungan menit.
   </Card>
-  <Card title="Jalankan Onboarding" href="/id/start/wizard" icon="sparkles">
+  <Card title="Jalankan Onboarding" href="/id/start/wizard" icon="list-checks">
     Penyiapan terpandu dengan `openclaw onboard` dan alur pairing.
   </Card>
   <Card title="Buka UI Kontrol" href="/id/web/control-ui" icon="layout-dashboard">

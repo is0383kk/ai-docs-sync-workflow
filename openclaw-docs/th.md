@@ -17,13 +17,13 @@ x-i18n:
 
 <p align="center">
     <img
-        src="/assets/openclaw-logo-text-dark.png"
+        src="/assets/openclaw-hero-light.png"
         alt="OpenClaw"
         width="500"
         class="dark:hidden"
     />
     <img
-        src="/assets/openclaw-logo-text.png"
+        src="/assets/openclaw-hero-dark.png"
         alt="OpenClaw"
         width="500"
         class="hidden dark:block"
@@ -41,7 +41,7 @@ x-i18n:
   <Card title="เริ่มต้นใช้งาน" href="/th/start/getting-started" icon="rocket">
     ติดตั้ง OpenClaw แล้วเปิด Gateway ได้ในไม่กี่นาที
   </Card>
-  <Card title="รันการเริ่มใช้งาน" href="/th/start/wizard" icon="sparkles">
+  <Card title="รันการเริ่มใช้งาน" href="/th/start/wizard" icon="list-checks">
     การตั้งค่าพร้อมคำแนะนำด้วย `openclaw onboard` และโฟลว์การจับคู่
   </Card>
   <Card title="เปิด Control UI" href="/th/web/control-ui" icon="layout-dashboard">

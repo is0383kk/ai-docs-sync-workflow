@@ -17,13 +17,13 @@ x-i18n:
 
 <p align="center">
     <img
-        src="/assets/openclaw-logo-text-dark.png"
+        src="/assets/openclaw-hero-light.png"
         alt="OpenClaw"
         width="500"
         class="dark:hidden"
     />
     <img
-        src="/assets/openclaw-logo-text.png"
+        src="/assets/openclaw-hero-dark.png"
         alt="OpenClaw"
         width="500"
         class="hidden dark:block"
@@ -41,7 +41,7 @@ x-i18n:
   <Card title="開始使用" href="/zh-TW/start/getting-started" icon="rocket">
     安裝 OpenClaw，並在幾分鐘內啟動閘道。
   </Card>
-  <Card title="執行入門設定" href="/zh-TW/start/wizard" icon="sparkles">
+  <Card title="執行入門設定" href="/zh-TW/start/wizard" icon="list-checks">
     使用 `openclaw onboard` 和配對流程進行引導式設定。
   </Card>
   <Card title="開啟控制介面" href="/zh-TW/web/control-ui" icon="layout-dashboard">

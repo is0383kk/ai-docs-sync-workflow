@@ -17,13 +17,13 @@ x-i18n:
 
 <p align="center">
     <img
-        src="/assets/openclaw-logo-text-dark.png"
+        src="/assets/openclaw-hero-light.png"
         alt="OpenClaw"
         width="500"
         class="dark:hidden"
     />
     <img
-        src="/assets/openclaw-logo-text.png"
+        src="/assets/openclaw-hero-dark.png"
         alt="OpenClaw"
         width="500"
         class="hidden dark:block"
@@ -41,7 +41,7 @@ x-i18n:
   <Card title="शुरू करें" href="/hi/start/getting-started" icon="rocket">
     OpenClaw इंस्टॉल करें और कुछ ही मिनटों में Gateway शुरू करें।
   </Card>
-  <Card title="Onboarding चलाएं" href="/hi/start/wizard" icon="sparkles">
+  <Card title="Onboarding चलाएं" href="/hi/start/wizard" icon="list-checks">
     `openclaw onboard` और पेयरिंग फ़्लो के साथ निर्देशित सेटअप।
   </Card>
   <Card title="Control UI खोलें" href="/hi/web/control-ui" icon="layout-dashboard">
