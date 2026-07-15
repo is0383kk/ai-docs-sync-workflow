@@ -1,42 +1,30 @@
 ---
 read_when:
     - Sie möchten über Tailscale auf den Gateway zugreifen
-    - Sie möchten die browserbasierte Control UI und Konfigurationsbearbeitung
-summary: 'Gateway-Weboberflächen: Control UI, Bind-Modi und Sicherheit'
+    - Sie möchten die Browser-Control-UI und die Konfigurationsbearbeitung
+summary: 'Gateway-Weboberflächen: Control UI, Bindungsmodi und Sicherheit'
 title: Web
 x-i18n:
-    generated_at: "2026-06-27T18:24:01Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T02:18:49Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 1c6b0c9f4ff53af295eb4eef7290d5d6b70c52543f57a9e83c7f8a635a2b35cd
+    source_hash: 413fb029d95241f5c6043b28825727cdee52b2fa8cbe998fbbd6e3ff7b81467b
     source_path: web/index.md
     workflow: 16
 ---
 
-The Gateway stellt eine kleine **browserbasierte Control UI** (Vite + Lit) über denselben Port wie der Gateway WebSocket bereit:
+Der Gateway stellt eine kleine **Browser-Control-UI** (Vite + Lit) über denselben Port wie der Gateway-WebSocket bereit:
 
 - Standard: `http://<host>:18789/`
 - mit `gateway.tls.enabled: true`: `https://<host>:18789/`
 - optionales Präfix: Legen Sie `gateway.controlUi.basePath` fest (z. B. `/openclaw`)
 
-Die Funktionen sind unter [Control UI](/de/web/control-ui) beschrieben. Der Rest dieser Seite konzentriert sich auf Bind-Modi, Sicherheit und webseitige Oberflächen.
-
-## Webhooks
-
-Wenn `hooks.enabled=true` ist, stellt der Gateway außerdem einen kleinen Webhook-Endpunkt auf demselben HTTP-Server bereit.
-Siehe [Gateway-Konfiguration](/de/gateway/configuration) → `hooks` für Authentifizierung und Payloads.
-
-## Admin HTTP RPC
-
-Admin HTTP RPC stellt ausgewählte Gateway-Control-Plane-Methoden unter `POST /api/v1/admin/rpc` bereit.
-Es ist standardmäßig deaktiviert und wird nur registriert, wenn das Plugin `admin-http-rpc` aktiviert ist.
-Siehe [Admin HTTP RPC](/de/plugins/admin-http-rpc) für das Authentifizierungsmodell, erlaubte Methoden und den WebSocket-Vergleich.
+Die Funktionen werden unter [Control UI](/de/web/control-ui) beschrieben. Diese Seite behandelt Bindungsmodi, Sicherheit und weitere webseitige Schnittstellen.
 
 ## Konfiguration (standardmäßig aktiviert)
 
-Die Control UI ist **standardmäßig aktiviert**, wenn Assets vorhanden sind (`dist/control-ui`).
-Sie können sie über die Konfiguration steuern:
+Die Control UI ist **standardmäßig aktiviert**, wenn die Assets vorhanden sind (`dist/control-ui`):
 
 ```json5
 {
@@ -46,90 +34,89 @@ Sie können sie über die Konfiguration steuern:
 }
 ```
 
-## Tailscale-Zugriff
+## Webhooks
 
-### Integriertes Serve (empfohlen)
+Wenn `hooks.enabled=true` festgelegt ist, stellt der Gateway außerdem einen Webhook-Endpunkt auf demselben HTTP-Server bereit. Informationen zu Authentifizierung und Nutzdaten finden Sie unter `hooks` in der [Referenz zur Gateway-Konfiguration](/de/gateway/configuration-reference#hooks).
 
-Belassen Sie den Gateway auf loopback und lassen Sie Tailscale Serve ihn proxien:
+## Administrator-HTTP-RPC
 
-```json5
-{
-  gateway: {
-    bind: "loopback",
-    tailscale: { mode: "serve" },
-  },
-}
-```
+`POST /api/v1/admin/rpc` stellt ausgewählte Methoden der Gateway-Steuerungsebene über HTTP bereit. Die Funktion ist standardmäßig deaktiviert und wird nur registriert, wenn das Plugin `admin-http-rpc` aktiviert ist. Informationen zum Authentifizierungsmodell, zu den zulässigen Methoden und zum Vergleich mit der WebSocket-API finden Sie unter [Administrator-HTTP-RPC](/de/plugins/admin-http-rpc).
 
-Starten Sie anschließend den Gateway:
+## Zugriff über Tailscale
 
-```bash
-openclaw gateway
-```
+<Tabs>
+  <Tab title="Integriertes Serve (empfohlen)">
+    Belassen Sie den Gateway auf local loopback und lassen Sie ihn durch Tailscale Serve als Proxy weiterleiten:
 
-Öffnen Sie:
+    ```json5
+    {
+      gateway: {
+        bind: "loopback",
+        tailscale: { mode: "serve" },
+      },
+    }
+    ```
 
-- `https://<magicdns>/` (oder Ihr konfiguriertes `gateway.controlUi.basePath`)
+    Starten Sie den Gateway:
 
-### Tailnet-Bind + Token
+    ```bash
+    openclaw gateway
+    ```
 
-```json5
-{
-  gateway: {
-    bind: "tailnet",
-    controlUi: { enabled: true },
-    auth: { mode: "token", token: "your-token" },
-  },
-}
-```
+    Öffnen Sie `https://<magicdns>/` (oder Ihren konfigurierten `gateway.controlUi.basePath`).
 
-Starten Sie anschließend den Gateway (dieses Nicht-loopback-Beispiel verwendet Authentifizierung mit gemeinsamem Geheimnis und Token):
+  </Tab>
+  <Tab title="Tailnet-Bindung + Token">
+    ```json5
+    {
+      gateway: {
+        bind: "tailnet",
+        controlUi: { enabled: true },
+        auth: { mode: "token", token: "your-token" },
+      },
+    }
+    ```
 
-```bash
-openclaw gateway
-```
+    Starten Sie den Gateway (dieses Beispiel ohne local loopback verwendet die Authentifizierung mit einem Shared-Secret-Token):
 
-Öffnen Sie:
+    ```bash
+    openclaw gateway
+    ```
 
-- `http://<tailscale-ip>:18789/` (oder Ihr konfiguriertes `gateway.controlUi.basePath`)
+    Öffnen Sie `http://<tailscale-ip>:18789/` (oder Ihren konfigurierten `gateway.controlUi.basePath`).
 
-### Öffentliches Internet (Funnel)
+  </Tab>
+  <Tab title="Öffentliches Internet (Funnel)">
+    ```json5
+    {
+      gateway: {
+        bind: "loopback",
+        tailscale: { mode: "funnel" },
+        auth: { mode: "password" }, // or OPENCLAW_GATEWAY_PASSWORD
+      },
+    }
+    ```
 
-```json5
-{
-  gateway: {
-    bind: "loopback",
-    tailscale: { mode: "funnel" },
-    auth: { mode: "password" }, // oder OPENCLAW_GATEWAY_PASSWORD
-  },
-}
-```
+    `tailscale.mode: "funnel"` erfordert `gateway.auth.mode: "password"`; sowohl Serve als auch Funnel erfordern `gateway.bind: "loopback"`.
+
+  </Tab>
+</Tabs>
 
 ## Sicherheitshinweise
 
-- Gateway-Authentifizierung ist standardmäßig erforderlich (Token, Passwort, trusted-proxy oder Tailscale Serve-Identitätsheader, wenn aktiviert).
-- Nicht-loopback-Binds **erfordern** weiterhin Gateway-Authentifizierung. In der Praxis bedeutet das Token-/Passwortauthentifizierung oder einen identitätsbewussten Reverse Proxy mit `gateway.auth.mode: "trusted-proxy"`.
-- Der Assistent erstellt standardmäßig Authentifizierung mit gemeinsamem Geheimnis und generiert in der Regel einen Gateway-Token (auch auf loopback).
-- Im Modus mit gemeinsamem Geheimnis sendet die UI `connect.params.auth.token` oder `connect.params.auth.password`.
-- Wenn `gateway.tls.enabled: true` ist, rendern lokale Dashboard- und Status-Helfer `https://`-Dashboard-URLs und `wss://`-WebSocket-URLs.
-- In Modi mit Identitätsinformationen wie Tailscale Serve oder `trusted-proxy` wird die WebSocket-Authentifizierungsprüfung stattdessen über Request-Header erfüllt.
-- Für öffentliche Nicht-loopback-Control-UI-Deployments legen Sie `gateway.controlUi.allowedOrigins`
-  explizit fest (vollständige Origins). Private Same-Origin-LAN-/Tailnet-Ladevorgänge werden für loopback,
-  RFC1918/link-local, `.local`, `.ts.net` und Tailscale-CGNAT-Hosts akzeptiert.
-- `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true` aktiviert
-  den Host-Header-Origin-Fallback-Modus, ist aber eine gefährliche Herabstufung der Sicherheit.
-- Mit Serve können Tailscale-Identitätsheader die Control-UI-/WebSocket-Authentifizierung erfüllen,
-  wenn `gateway.auth.allowTailscale` `true` ist (kein Token/Passwort erforderlich).
-  HTTP-API-Endpunkte verwenden diese Tailscale-Identitätsheader nicht; sie folgen
-  stattdessen dem normalen HTTP-Authentifizierungsmodus des Gateways. Setzen Sie
-  `gateway.auth.allowTailscale: false`, um explizite Anmeldedaten zu verlangen. Siehe
-  [Tailscale](/de/gateway/tailscale) und [Sicherheit](/de/gateway/security). Dieser
-  tokenlose Ablauf setzt voraus, dass dem Gateway-Host vertraut wird.
-- `gateway.tailscale.mode: "funnel"` erfordert `gateway.auth.mode: "password"` (gemeinsames Passwort).
+- Die Gateway-Authentifizierung ist standardmäßig erforderlich: Token, Passwort, vertrauenswürdiger Proxy oder, sofern aktiviert, Identitätsheader von Tailscale Serve.
+- Bindungen außerhalb von local loopback **erfordern** weiterhin eine Gateway-Authentifizierung: Token-/Passwortauthentifizierung oder einen identitätsbewussten Reverse-Proxy mit `gateway.auth.mode: "trusted-proxy"`.
+- Der Onboarding-Assistent erstellt standardmäßig eine Shared-Secret-Authentifizierung und generiert üblicherweise ein Gateway-Token, selbst bei local loopback.
+- Im Shared-Secret-Modus sendet die UI während des WebSocket-Handshakes `connect.params.auth.token` oder `connect.params.auth.password`.
+- Mit `gateway.tls.enabled: true` stellen lokale Dashboard-/Status-Hilfsfunktionen URLs mit `https://` und WebSocket-URLs mit `wss://` dar.
+- In identitätsbasierten Modi (Tailscale Serve, `trusted-proxy`) wird die WebSocket-Authentifizierungsprüfung anhand der Anfrageheader statt anhand eines gemeinsamen Geheimnisses erfüllt.
+- Legen Sie für öffentliche Control-UI-Bereitstellungen außerhalb von local loopback `gateway.controlUi.allowedOrigins` explizit fest (vollständige Ursprünge). Private Ladevorgänge mit demselben Ursprung werden für local loopback, RFC1918-/Link-Local-, `.local`-, `.ts.net`- und Tailscale-CGNAT-Hosts auch ohne diese Einstellung akzeptiert.
+- `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback: true` aktiviert den Ursprungs-Fallback über den Host-Header; dies stellt eine gefährliche Herabstufung der Sicherheit dar.
+- Bei Serve erfüllen Tailscale-Identitätsheader die Authentifizierungsanforderungen der Control UI und des WebSockets, wenn `gateway.auth.allowTailscale: true` festgelegt ist (kein Token oder Passwort erforderlich). HTTP-API-Endpunkte verwenden keine Tailscale-Identitätsheader; sie folgen stets dem normalen HTTP-Authentifizierungsmodus des Gateways. Legen Sie `gateway.auth.allowTailscale: false` fest, um auch über Serve explizite Anmeldedaten zu verlangen. Dieser tokenlose Ablauf setzt voraus, dass der Gateway-Host selbst vertrauenswürdig ist. Siehe [Tailscale](/de/gateway/tailscale) und [Sicherheit](/de/gateway/security).
 
-## UI erstellen
+## Erstellen der UI
 
-Der Gateway stellt statische Dateien aus `dist/control-ui` bereit. Erstellen Sie sie mit:
+Der Gateway stellt statische Dateien aus `dist/control-ui` bereit:
 
 ```bash
 pnpm ui:build

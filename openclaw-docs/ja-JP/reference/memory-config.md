@@ -1,26 +1,27 @@
 ---
 read_when:
-    - メモリ検索プロバイダーまたは埋め込みモデルを構成したい
-    - QMD バックエンドを設定する
-    - ハイブリッド検索、MMR、または時間減衰を調整したい
-    - マルチモーダルメモリインデックス作成を有効にする場合
+    - メモリ検索プロバイダーまたは埋め込みモデルを設定する場合
+    - QMDバックエンドを設定する場合
+    - ハイブリッド検索、MMR、または時間減衰を調整する場合
+    - マルチモーダルメモリのインデックス作成を有効にする場合
 sidebarTitle: Memory config
-summary: メモリ検索、埋め込みプロバイダー、QMD、ハイブリッド検索、マルチモーダルインデックス作成のすべての設定項目
+summary: メモリ検索、埋め込みプロバイダー、QMD、ハイブリッド検索、マルチモーダルインデックス作成に関するすべての設定項目
 title: メモリ設定リファレンス
 x-i18n:
-    generated_at: "2026-07-05T11:48:22Z"
-    model: gpt-5.5
+    generated_at: "2026-07-14T14:01:34Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 25
     provider: openai
-    source_hash: a31a8f3a77b994ca394612f39c2134527a4c7b25baec9ab280c6e3ee7ac0b0f1
+    source_hash: 1947d6d654de85059ef777a3a6387f6db5b76c8d688fbb539a063162d323c1f6
     source_path: reference/memory-config.md
     workflow: 16
 ---
 
-このページでは、OpenClaw のメモリ検索に関するすべての設定項目を一覧にしています。概念的な概要については、次を参照してください。
+このページでは、OpenClaw のメモリ検索に関するすべての設定項目を一覧にしています。概念的な概要については、以下を参照してください。
 
 <CardGroup cols={2}>
-  <Card title="メモリ概要" href="/ja-JP/concepts/memory">
+  <Card title="メモリの概要" href="/ja-JP/concepts/memory">
     メモリの仕組み。
   </Card>
   <Card title="組み込みエンジン" href="/ja-JP/concepts/memory-builtin">
@@ -30,50 +31,50 @@ x-i18n:
     ローカル優先のサイドカー。
   </Card>
   <Card title="メモリ検索" href="/ja-JP/concepts/memory-search">
-    検索パイプラインとチューニング。
+    検索パイプラインと調整。
   </Card>
   <Card title="Active Memory" href="/ja-JP/concepts/active-memory">
     対話型セッション用のメモリサブエージェント。
   </Card>
 </CardGroup>
 
-特に記載がない限り、すべてのメモリ検索設定は `openclaw.json` の `agents.defaults.memorySearch`（またはエージェントごとの `agents.list[].memorySearch` オーバーライド）配下にあります。
+特に記載がない限り、メモリ検索のすべての設定は `openclaw.json`（またはエージェントごとの `agents.list[].memorySearch` オーバーライド）内の `agents.defaults.memorySearch` にあります。
 
 <Note>
-**Active Memory** 機能トグルとサブエージェント設定を探している場合、それは `memorySearch` ではなく `plugins.entries.active-memory` 配下にあります。
+**Active Memory** 機能の切り替えとサブエージェント設定を探している場合、それらは `memorySearch` ではなく `plugins.entries.active-memory` にあります。
 
-Active Memory は 2 つのゲートモデルを使用します。
+Active Memory は 2 段階のゲートモデルを使用します。
 
-1. Plugin が有効で、現在のエージェント ID を対象にしている必要がある
-2. リクエストが対象となる対話型の永続チャットセッションである必要がある
+1. Plugin が有効で、現在のエージェント ID を対象としている必要があります
+2. リクエストが対象となる対話型の永続チャットセッションである必要があります
 
-有効化モデル、Plugin 所有の設定、トランスクリプトの永続化、安全なロールアウトパターンについては、[Active Memory](/ja-JP/concepts/active-memory) を参照してください。
+有効化モデル、Plugin が所有する設定、トランスクリプトの永続化、安全な段階的導入パターンについては、[Active Memory](/ja-JP/concepts/active-memory)を参照してください。
 </Note>
 
 ---
 
-## プロバイダー選択
+## プロバイダーの選択
 
 | キー        | 型      | デフォルト          | 説明                                                                                                                                                                                                                                                                                 |
 | ---------- | --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `enabled`  | `boolean` | `true`           | メモリ検索を有効または無効にする                                                                                                                                                                                                                                                             |
-| `provider` | `string`  | `"openai"`       | `bedrock`、`deepinfra`、`gemini`、`github-copilot`、`local`、`mistral`、`ollama`、`openai`、`openai-compatible`、`voyage` などの埋め込みアダプター ID。`api` がメモリ埋め込みアダプターまたは OpenAI 互換モデル API を指す、設定済みの `models.providers.<id>` にすることもできます |
+| `provider` | `string`  | `"openai"`       | `bedrock`、`deepinfra`、`gemini`、`github-copilot`、`local`、`mistral`、`ollama`、`openai`、`openai-compatible`、`voyage` などの埋め込みアダプター ID。`api` がメモリ埋め込みアダプターまたは OpenAI 互換モデル API を指す、設定済みの `models.providers.<id>` を指定することもできます |
 | `model`    | `string`  | プロバイダーのデフォルト | 埋め込みモデル名                                                                                                                                                                                                                                                                        |
 | `fallback` | `string`  | `"none"`         | プライマリが失敗した場合のフォールバックアダプター ID                                                                                                                                                                                                                                                  |
 
-`provider` が設定されていない場合、OpenClaw は OpenAI 埋め込みを使用します。Bedrock、DeepInfra、Gemini、GitHub Copilot、Mistral、Ollama、Voyage、ローカル GGUF モデル、または OpenAI 互換の `/v1/embeddings` エンドポイントを使用するには、`provider` を明示的に設定してください。まだ `provider: "auto"` と記述されているレガシー設定は `openai` に解決されます。
+`provider` が設定されていない場合、OpenClaw は OpenAI の埋め込みを使用します。Bedrock、DeepInfra、Gemini、GitHub Copilot、Mistral、Ollama、Voyage、ローカル GGUF モデル、または OpenAI 互換の `/v1/embeddings` エンドポイントを使用するには、`provider` を明示的に設定してください。`provider: "auto"` が残っているレガシー設定は、`openai` として解決されます。
 
 <Warning>
-埋め込みプロバイダー、モデル、プロバイダー設定、ソース、スコープ、チャンク化、またはトークナイザーを変更すると、既存の SQLite ベクトルインデックスと互換性がなくなる可能性があります。OpenClaw はすべてを自動的に再埋め込みするのではなく、ベクトル検索を一時停止してインデックス ID 警告を報告します。準備ができたら、`openclaw memory status --index --agent <id>` または `openclaw memory index --force --agent <id>` で再構築してください。
+埋め込みプロバイダー、モデル、プロバイダー設定、ソース、スコープ、チャンク分割、またはトークナイザーを変更すると、既存の SQLite ベクトルインデックスと互換性がなくなる場合があります。OpenClaw はすべてを自動的に再埋め込みする代わりに、ベクトル検索を一時停止してインデックス ID の警告を報告します。準備ができたら、`openclaw memory status --index --agent <id>` または `openclaw memory index --force --agent <id>` で再構築してください。
 </Warning>
 
-`provider` が未設定の場合、レガシーの `provider: "auto"` が存在する場合、または `provider: "none"` が意図的に FTS のみのモードを選択している場合、埋め込みが利用できなくても、メモリ呼び出しは語彙的な FTS ランキングを使用できます。
+`provider` が未設定の場合、レガシーの `provider: "auto"` が存在する場合、または `provider: "none"` で意図的に FTS 専用モードを選択している場合、埋め込みが利用できなくても、メモリの想起では語彙ベースの FTS ランキングを引き続き使用できます。
 
-明示的な非ローカルプロバイダーはフェイルクローズします。`memorySearch.provider` を Bedrock、DeepInfra、Gemini、GitHub Copilot、LM Studio、Mistral、Ollama、OpenAI、Voyage、または OpenAI 互換のカスタムプロバイダーなど、具体的なリモートバックエンド付きプロバイダーに設定し、そのプロバイダーが実行時に利用できない場合、`memory_search` は FTS のみの呼び出しを暗黙に使用するのではなく、利用不可の結果を返します。プロバイダーや認証の設定を修正するか、到達可能なプロバイダーに切り替えるか、意図的に FTS のみの呼び出しを行いたい場合は `provider: "none"` を設定してください。
+明示的に指定された非ローカルプロバイダーはフェイルクローズします。`memorySearch.provider` に Bedrock、DeepInfra、Gemini、GitHub Copilot、LM Studio、Mistral、Ollama、OpenAI、Voyage、または OpenAI 互換のカスタムプロバイダーなど、リモートバックエンドを使用する具体的なプロバイダーを設定し、そのプロバイダーが実行時に利用できない場合、`memory_search` は暗黙的に FTS 専用の想起を使用せず、利用不可の結果を返します。プロバイダーまたは認証の設定を修正するか、到達可能なプロバイダーに切り替えるか、意図的に FTS 専用の想起を使用する場合は `provider: "none"` を設定してください。
 
 ### カスタムプロバイダー ID
 
-`memorySearch.provider` は、`ollama` などのメモリ固有プロバイダーアダプターや、`openai-responses` / `openai-completions` などの OpenAI 互換モデル API 用に、カスタム `models.providers.<id>` エントリを指すことができます。OpenClaw は埋め込みアダプター用にそのプロバイダーの `api` 所有者を解決しつつ、エンドポイント、認証、モデルプレフィックス処理のためにカスタムプロバイダー ID を保持します。これにより、マルチ GPU またはマルチホスト構成で、メモリ埋め込みを特定のローカルエンドポイント専用にできます。
+`memorySearch.provider` は、`ollama` などのメモリ固有プロバイダーアダプター、または `openai-responses` / `openai-completions` などの OpenAI 互換モデル API 用のカスタム `models.providers.<id>` エントリを指すことができます。OpenClaw は、エンドポイント、認証、モデルプレフィックスの処理用にカスタムプロバイダー ID を維持しながら、埋め込みアダプターについてそのプロバイダーの `api` 所有者を解決します。これにより、複数 GPU または複数ホストの構成で、メモリ埋め込み専用の特定のローカルエンドポイントを使用できます。
 
 ```json5
 {
@@ -98,30 +99,30 @@ Active Memory は 2 つのゲートモデルを使用します。
 }
 ```
 
-### API キー解決
+### API キーの解決
 
-リモート埋め込みには API キーが必要です。Bedrock は代わりに AWS SDK のデフォルト認証情報チェーン（インスタンスロール、SSO、アクセスキー、または Bedrock API キー）を使用します。
+リモート埋め込みには API キーが必要です。ただし、Bedrock は代わりに AWS SDK のデフォルト認証情報チェーン（インスタンスロール、SSO、アクセスキー、または Bedrock API キー）を使用します。
 
 | プロバイダー       | 環境変数                                             | 設定キー                          |
 | -------------- | --------------------------------------------------- | ----------------------------------- |
 | Bedrock        | AWS 認証情報チェーン、または `AWS_BEARER_TOKEN_BEDROCK` | API キーは不要                   |
 | DeepInfra      | `DEEPINFRA_API_KEY`                                 | `models.providers.deepinfra.apiKey` |
 | Gemini         | `GEMINI_API_KEY`                                    | `models.providers.google.apiKey`    |
-| GitHub Copilot | `COPILOT_GITHUB_TOKEN`、`GH_TOKEN`、`GITHUB_TOKEN`  | デバイスログイン経由の認証プロファイル       |
+| GitHub Copilot | `COPILOT_GITHUB_TOKEN`、`GH_TOKEN`、`GITHUB_TOKEN`  | デバイスログインによる認証プロファイル       |
 | Mistral        | `MISTRAL_API_KEY`                                   | `models.providers.mistral.apiKey`   |
 | Ollama         | `OLLAMA_API_KEY`（プレースホルダー）                      | --                                  |
 | OpenAI         | `OPENAI_API_KEY`                                    | `models.providers.openai.apiKey`    |
 | Voyage         | `VOYAGE_API_KEY`                                    | `models.providers.voyage.apiKey`    |
 
 <Note>
-Codex OAuth はチャット/補完のみを対象としており、埋め込みリクエストには使用できません。
+Codex OAuth はチャットと補完のみを対象とし、埋め込みリクエストには使用できません。
 </Note>
 
 ---
 
 ## リモートエンドポイント設定
 
-グローバルな OpenAI チャット認証情報を継承すべきではない、汎用の OpenAI 互換 `/v1/embeddings` サーバーには `provider: "openai-compatible"` を使用します。
+グローバルな OpenAI チャット認証情報を継承しない、汎用の OpenAI 互換 `/v1/embeddings` サーバーには `provider: "openai-compatible"` を使用します。
 
 <ParamField path="remote.baseUrl" type="string">
   カスタム API ベース URL。
@@ -159,21 +160,21 @@ Codex OAuth はチャット/補完のみを対象としており、埋め込み�
     | キー                    | 型     | デフォルト                | 説明                                |
     | ---------------------- | -------- | ---------------------- | ------------------------------------------- |
     | `model`                | `string` | `gemini-embedding-001` | `gemini-embedding-2-preview` もサポートします |
-    | `outputDimensionality` | `number` | `3072`                 | Embedding 2 の場合: 768、1536、または 3072        |
+    | `outputDimensionality` | `number` | `3072`                 | Embedding 2 の場合：768、1536、または 3072        |
 
     <Warning>
     モデルまたは `outputDimensionality` を変更すると、インデックス ID が変わります。OpenClaw は、メモリインデックスを明示的に再構築するまでベクトル検索を一時停止します。
     </Warning>
 
   </Accordion>
-  <Accordion title="OpenAI 互換入力タイプ">
-    OpenAI 互換の埋め込みエンドポイントは、プロバイダー固有の `input_type` リクエストフィールドをオプトインで使用できます。これは、クエリ埋め込みとドキュメント埋め込みに異なるラベルを必要とする非対称埋め込みモデルに便利です。
+  <Accordion title="OpenAI 互換の入力タイプ">
+    OpenAI 互換の埋め込みエンドポイントでは、プロバイダー固有の `input_type` リクエストフィールドを任意で使用できます。これは、クエリ埋め込みと文書埋め込みに異なるラベルを必要とする非対称埋め込みモデルに便利です。
 
     | キー                 | 型     | デフォルト | 説明                                             |
     | ------------------- | -------- | ------- | -------------------------------------------------------- |
-    | `inputType`         | `string` | 未設定   | クエリ埋め込みとドキュメント埋め込みで共有する `input_type`   |
-    | `queryInputType`    | `string` | 未設定   | クエリ時の `input_type`; `inputType` をオーバーライド          |
-    | `documentInputType` | `string` | 未設定   | インデックス/ドキュメントの `input_type`; `inputType` をオーバーライド      |
+    | `inputType`         | `string` | 未設定   | クエリ埋め込みと文書埋め込みで共有する `input_type`   |
+    | `queryInputType`    | `string` | 未設定   | クエリ時の `input_type`。`inputType` をオーバーライドします          |
+    | `documentInputType` | `string` | 未設定   | インデックス／文書用の `input_type`。`inputType` をオーバーライドします      |
 
     ```json5
     {
@@ -194,13 +195,13 @@ Codex OAuth はチャット/補完のみを対象としており、埋め込み�
     }
     ```
 
-    これらの値を変更すると、プロバイダーのバッチインデックス作成における埋め込みキャッシュ ID に影響します。上流モデルがラベルを異なるものとして扱う場合は、メモリの再インデックスを行ってください。
+    これらの値を変更すると、プロバイダーのバッチインデックス作成における埋め込みキャッシュ ID に影響します。上流モデルがラベルを異なるものとして扱う場合は、その後にメモリの再インデックスを実行してください。
 
   </Accordion>
   <Accordion title="Bedrock">
-    ### Bedrock 埋め込み設定
+    ### Bedrock の埋め込み設定
 
-    Bedrock は AWS SDK のデフォルト認証情報チェーンに加えて OpenClaw が確認するベアラートークンを使用するため、設定に API キーは保存されません。OpenClaw が Bedrock 対応のインスタンスロールを持つ EC2 で実行されている場合は、プロバイダーとモデルを設定するだけです。
+    Bedrock は AWS SDK のデフォルト認証情報チェーンに加えて OpenClaw が検証するベアラートークンを使用するため、API キーは設定に保存されません。OpenClaw が Bedrock 対応のインスタンスロールを持つ EC2 上で実行されている場合は、プロバイダーとモデルのみを設定します。
 
     ```json5
     {
@@ -218,11 +219,11 @@ Codex OAuth はチャット/補完のみを対象としており、埋め込み�
     | キー                    | 型     | デフォルト                        | 説明                     |
     | ---------------------- | -------- | ------------------------------- | -------------------------------- |
     | `model`                | `string` | `amazon.titan-embed-text-v2:0` | 任意の Bedrock 埋め込みモデル ID  |
-    | `outputDimensionality` | `number` | モデルのデフォルト                  | Titan V2 の場合: 256、512、または 1024 |
+    | `outputDimensionality` | `number` | モデルのデフォルト                  | Titan V2 の場合：256、512、または 1024 |
 
-    **サポートされているモデル**（ファミリー検出と次元数のデフォルトを含む）:
+    **サポート対象モデル**（ファミリー検出および次元のデフォルトを含む）：
 
-    | モデル ID                                   | プロバイダー   | デフォルト次元 | 設定可能な次元          |
+    | モデル ID                                   | プロバイダー   | デフォルト次元数 | 設定可能な次元数          |
     | ------------------------------------------- | ---------- | ------------- | -------------------------- |
     | `amazon.titan-embed-text-v2:0`             | Amazon     | 1024         | 256, 512, 1024             |
     | `amazon.titan-embed-text-v1`               | Amazon     | 1536         | --                          |
@@ -237,18 +238,18 @@ Codex OAuth はチャット/補完のみを対象としており、埋め込み�
 
     スループット接尾辞付きのバリアント（例: `amazon.titan-embed-text-v1:2:8k`）と、リージョン接頭辞付きの推論プロファイル ID（例: `us.amazon.titan-embed-text-v2:0`）は、ベースモデルの設定を継承します。
 
-    **リージョン:** 次の順序で解決されます: `memorySearch.remote.baseUrl` オーバーライド、`models.providers.amazon-bedrock.baseUrl` 設定、`AWS_REGION`、`AWS_DEFAULT_REGION`、その後デフォルトの `us-east-1`。
+    **リージョン:** 次の順序で解決されます: `memorySearch.remote.baseUrl` のオーバーライド、`models.providers.amazon-bedrock.baseUrl` の設定、`AWS_REGION`、`AWS_DEFAULT_REGION`、最後にデフォルトの `us-east-1`。
 
-    **認証:** OpenClaw はまず `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` または `AWS_BEARER_TOKEN_BEDROCK` を確認し、その後、標準の AWS SDK デフォルト認証情報プロバイダーチェーンにフォールスルーします。
+    **認証:** OpenClaw は最初に `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` または `AWS_BEARER_TOKEN_BEDROCK` を確認し、その後、標準の AWS SDK デフォルト認証情報プロバイダーチェーンへフォールスルーします。
 
-    1. 環境変数（`AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`）。ただし `AWS_PROFILE` も設定されている場合を除く
+    1. 環境変数（`AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`）。ただし、`AWS_PROFILE` も設定されている場合を除く
     2. SSO（SSO フィールドが設定されている場合のみ）
-    3. 共有認証情報ファイルと設定ファイル（`fromIni`、`AWS_PROFILE` を含む）
+    3. 共有認証情報および設定ファイル（`fromIni`、`AWS_PROFILE` を含む）
     4. 認証情報プロセス（AWS 設定ファイル内の `credential_process`）
-    5. Web ID トークン認証情報
+    5. ウェブアイデンティティトークン認証情報
     6. ECS または EC2 インスタンスメタデータ認証情報
 
-    **IAM 権限:** IAM ロールまたはユーザーには次が必要です。
+    **IAM 権限:** IAM ロールまたはユーザーには次の権限が必要です。
 
     ```json
     {
@@ -258,7 +259,7 @@ Codex OAuth はチャット/補完のみを対象としており、埋め込み�
     }
     ```
 
-    最小権限にするには、`InvokeModel` を特定のモデルにスコープします。
+    最小権限にするには、`InvokeModel` のスコープを特定のモデルに限定します。
 
     ```text
     arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v2:0
@@ -269,30 +270,32 @@ Codex OAuth はチャット/補完のみを対象としており、埋め込み�
     | キー                   | 型               | デフォルト                | 説明                                                                                                                                                                                                                                                                                                          |
     | --------------------- | ------------------ | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `local.modelPath`     | `string`           | 自動ダウンロード        | GGUF モデルファイルへのパス                                                                                                                                                                                                                                                                                              |
-    | `local.modelCacheDir` | `string`           | node-llama-cpp デフォルト | ダウンロードしたモデル用のキャッシュディレクトリ                                                                                                                                                                                                                                                                                      |
-    | `local.contextSize`   | `number \| "auto"` | `4096`                 | 埋め込みコンテキストのコンテキストウィンドウサイズ。4096 は典型的なチャンク（128-512 トークン）をカバーしつつ、重み以外の VRAM を制限します。制約のあるホストでは 1024-2048 に下げてください。`"auto"` はモデルの学習済み最大値を使用します。8B+ モデルには推奨されません（Qwen3-Embedding-8B: 最大 40 960 トークンで VRAM が約 32 GB まで増える可能性があります）。 |
+    | `local.modelCacheDir` | `string`           | node-llama-cpp のデフォルト | ダウンロードしたモデルのキャッシュディレクトリ                                                                                                                                                                                                                                                                                      |
+    | `local.contextSize`   | `number \| "auto"` | `4096`                 | 埋め込みコンテキストのコンテキストウィンドウサイズ。4096 は一般的なチャンク（128-512 トークン）を収容しつつ、重み以外の VRAM 使用量を制限します。リソースに制約のあるホストでは 1024-2048 に下げてください。`"auto"` はモデルの学習時の最大値を使用します。8B 以上のモデルでは推奨されません（Qwen3-Embedding-8B: 最大 40 960 トークンでは VRAM が約 32 GB に達する場合があります）。 |
 
-    まず公式 llama.cpp プロバイダーをインストールします: `openclaw plugins install @openclaw/llama-cpp-provider`。
-    デフォルトモデル: `embeddinggemma-300m-qat-Q8_0.gguf`（約 0.6 GB、自動ダウンロード）。ソースチェックアウトでは引き続きネイティブビルドの承認が必要です: `pnpm approve-builds` の後に `pnpm rebuild node-llama-cpp`。
+    まず公式の llama.cpp プロバイダーをインストールします: `openclaw plugins install @openclaw/llama-cpp-provider`。
+    デフォルトモデル: `embeddinggemma-300m-qat-Q8_0.gguf`（約 0.6 GB、自動ダウンロード）。ソースチェックアウトでは、引き続きネイティブビルドの承認が必要です: `pnpm approve-builds`、続いて `pnpm rebuild node-llama-cpp`。
 
-    Gateway が使用するものと同じプロバイダーパスを検証するには、スタンドアロン CLI を使用します。
+    スタンドアロン CLI を使用して、Gateway が使用するものと同じプロバイダーパスを検証します。
 
     ```bash
     openclaw memory status --deep --agent main
     openclaw memory index --force --agent main
     ```
 
-    ローカル GGUF 埋め込みには `provider: "local"` を明示的に設定します。`hf:` と HTTP(S) モデル参照は、明示的なローカル設定でサポートされます（node-llama-cpp のモデル解決経由）が、デフォルトプロバイダーは変更されません。
+    数値の `local.contextSize` 値は、モデルの重みと要求された埋め込みコンテキストを一緒に収められるように、node-llama-cpp の GPU レイヤー自動配置にも使用されます。`openclaw memory status --deep` は、ランタイムが読み込まれた後に、最後に確認された llama.cpp のバックエンド、デバイス、オフロード、要求されたコンテキスト、タイムスタンプ付きメモリ情報を報告します。受動的なステータス確認ではモデルを読み込みません。
+
+    ローカル GGUF 埋め込みには、`provider: "local"` を明示的に設定します。`hf:` および HTTP(S) モデル参照は、明示的なローカル設定でサポートされています（node-llama-cpp のモデル解決を使用）が、デフォルトプロバイダーは変更されません。
 
   </Accordion>
 </AccordionGroup>
 
-### インライン埋め込みタイムアウト
+### インライン埋め込みのタイムアウト
 
 <ParamField path="sync.embeddingBatchTimeoutSeconds" type="number">
-  メモリインデックス作成中のインライン埋め込みバッチのタイムアウトを上書きします。
+  メモリのインデックス作成中に実行されるインライン埋め込みバッチのタイムアウトを上書きします。
 
-未設定の場合はプロバイダーのデフォルトを使用します。`local`、`ollama`、`lmstudio` などのローカル/セルフホスト型プロバイダーでは 600 秒、ホスト型プロバイダーでは 120 秒です。ローカルの CPU バウンドな埋め込みバッチが正常だが遅い場合は、この値を増やしてください。
+未設定の場合はプロバイダーのデフォルトを使用します。`local`、`ollama`、`lmstudio` などのローカルまたはセルフホスト型プロバイダーでは 600 秒、ホスト型プロバイダーでは 120 秒です。ローカルの CPU 負荷型埋め込みバッチが正常ではあるものの遅い場合は、この値を増やしてください。
 </ParamField>
 
 ---
@@ -304,39 +307,39 @@ Codex OAuth はチャット/補完のみを対象としており、埋め込み�
 | キー                            | 型      | デフォルト | 説明                                                           |
 | ------------------------------ | --------- | ------- | --------------------------------------------------------------------- |
 | `onSessionStart`               | `boolean` | `true`  | セッション開始時にメモリインデックスを同期する                           |
-| `onSearch`                     | `boolean` | `true`  | コンテンツ変更を検出した後、検索時に遅延同期する                 |
-| `watch`                        | `boolean` | `true`  | メモリファイルを監視（chokidar）し、変更時に再インデックスをスケジュールする         |
-| `watchDebounceMs`              | `number`  | `1500`  | 急速なファイル監視イベントをまとめるためのデバウンスウィンドウ                |
-| `intervalMinutes`              | `number`  | `0`     | 分単位の定期再インデックス間隔（`0` で無効）                   |
-| `sessions.postCompactionForce` | `boolean` | `true`  | Compaction によってトリガーされたトランスクリプト更新後に、セッションの再インデックスを強制する |
+| `onSearch`                     | `boolean` | `true`  | コンテンツの変更を検出した後、検索時に遅延同期する                 |
+| `watch`                        | `boolean` | `true`  | メモリファイルを監視し（chokidar）、変更時に再インデックス作成を予約する         |
+| `watchDebounceMs`              | `number`  | `1500`  | 短時間に発生するファイル監視イベントをまとめるためのデバウンス期間                |
+| `intervalMinutes`              | `number`  | `0`     | 分単位の定期的な再インデックス作成間隔（`0` で無効化）                   |
+| `sessions.postCompactionForce` | `boolean` | `true`  | Compaction によってトリガーされたトランスクリプト更新後に、セッションの再インデックス作成を強制する |
 
 <ParamField path="chunking.tokens" type="number">
-  埋め込み前にメモリソースを分割するときに使用する、トークン単位のチャンクサイズ（デフォルト: 400）。
+  埋め込み前にメモリソースを分割する際に使用する、トークン単位のチャンクサイズ（デフォルト: 400）。
 </ParamField>
 <ParamField path="chunking.overlap" type="number">
-  分割境界付近のコンテキストを保持するための隣接チャンク間のトークン重複（デフォルト: 80）。
+  分割境界付近のコンテキストを維持するための、隣接チャンク間のトークン重複数（デフォルト: 80）。
 </ParamField>
 
 <Note>
-`chunking.tokens` または `chunking.overlap` を変更すると、チャンク境界が変わり、既存のインデックス ID が無効になります（プロバイダー選択の下にある警告を参照）。
+`chunking.tokens` または `chunking.overlap` を変更するとチャンク境界が変わり、既存のインデックス識別情報が無効になります（「プロバイダーの選択」の警告を参照）。
 </Note>
 
 ---
 
-## ハイブリッド検索設定
+## ハイブリッド検索の設定
 
 すべて `memorySearch.query` 配下です。
 
 | キー          | 型     | デフォルト | 説明                               |
 | ------------ | -------- | ------- | ----------------------------------------- |
-| `maxResults` | `number` | `6`     | 注入前に返されるメモリヒットの最大数 |
+| `maxResults` | `number` | `6`     | 注入前に返すメモリヒットの最大数 |
 | `minScore`   | `number` | `0.35`  | ヒットを含めるための最小関連度スコア  |
 
-そして `memorySearch.query.hybrid` 配下です。
+また、`memorySearch.query.hybrid` 配下には次の設定があります。
 
 | キー                   | 型      | デフォルト | 説明                        |
 | --------------------- | --------- | ------- | ---------------------------------- |
-| `enabled`             | `boolean` | `true`  | ハイブリッド BM25 + ベクトル検索を有効にする |
+| `enabled`             | `boolean` | `true`  | BM25 + ベクトルのハイブリッド検索を有効にする |
 | `vectorWeight`        | `number`  | `0.7`   | ベクトルスコアの重み（0-1）     |
 | `textWeight`          | `number`  | `0.3`   | BM25 スコアの重み（0-1）       |
 | `candidateMultiplier` | `number`  | `4`     | 候補プールサイズの乗数     |
@@ -346,15 +349,15 @@ Codex OAuth はチャット/補完のみを対象としており、埋め込み�
     | キー           | 型      | デフォルト | 説明                          |
     | ------------- | --------- | ------- | ------------------------------------- |
     | `mmr.enabled` | `boolean` | `false` | MMR 再ランキングを有効にする                |
-    | `mmr.lambda`  | `number`  | `0.7`   | 0 = 最大多様性、1 = 最大関連性 |
+    | `mmr.lambda`  | `number`  | `0.7`   | 0 = 最大の多様性、1 = 最大の関連性 |
   </Tab>
-  <Tab title="時間的減衰（新しさ）">
+  <Tab title="時間減衰（新しさ）">
     | キー                          | 型      | デフォルト | 説明               |
     | ---------------------------- | --------- | ------- | -------------------------- |
-    | `temporalDecay.enabled`      | `boolean` | `false` | 新しさブーストを有効にする      |
+    | `temporalDecay.enabled`      | `boolean` | `false` | 新しさによるブーストを有効にする      |
     | `temporalDecay.halfLifeDays` | `number`  | `30`    | N 日ごとにスコアが半減する |
 
-    エバーグリーンファイル（`MEMORY.md`、`memory/` 内の日付なしファイル）は減衰されません。
+    エバーグリーンファイル（`MEMORY.md`、`memory/` 内の日付なしファイル）は減衰しません。
 
   </Tab>
 </Tabs>
@@ -388,7 +391,7 @@ Codex OAuth はチャット/補完のみを対象としており、埋め込み�
 
 | キー          | 型       | 説明                              |
 | ------------ | ---------- | ---------------------------------------- |
-| `extraPaths` | `string[]` | インデックス対象にする追加のディレクトリまたはファイル |
+| `extraPaths` | `string[]` | インデックスを作成する追加のディレクトリまたはファイル |
 
 ```json5
 {
@@ -402,27 +405,27 @@ Codex OAuth はチャット/補完のみを対象としており、埋め込み�
 }
 ```
 
-パスは絶対パスまたはワークスペース相対にできます。ディレクトリは `.md` ファイルを対象に再帰的にスキャンされます。シンボリックリンクの扱いはアクティブなバックエンドに依存します。組み込みエンジンはシンボリックリンクをスキップし、QMD は基盤となる QMD スキャナーの動作に従います。
+パスは絶対パスまたはワークスペース相対パスにできます。ディレクトリは `.md` ファイルを対象に再帰的にスキャンされます。シンボリックリンクの処理はアクティブなバックエンドによって異なります。組み込みエンジンはシンボリックリンクをスキップしますが、QMD は基盤となる QMD スキャナーの動作に従います。
 
-エージェントスコープのクロスエージェントトランスクリプト検索には、`memory.qmd.paths` の代わりに `agents.list[].memorySearch.qmd.extraCollections` を使用します。これらの追加コレクションは同じ `{ path, name, pattern? }` 形状に従いますが、エージェントごとにマージされ、パスが現在のワークスペース外を指している場合は明示的な共有名を保持できます。同じ解決済みパスが `memory.qmd.paths` と `memorySearch.qmd.extraCollections` の両方に現れる場合、QMD は最初のエントリを保持し、重複をスキップします。
+エージェント単位のエージェント横断トランスクリプト検索には、`memory.qmd.paths` ではなく `agents.list[].memorySearch.qmd.extraCollections` を使用します。これらの追加コレクションは同じ `{ path, name, pattern? }` 形式に従いますが、エージェントごとにマージされ、パスが現在のワークスペース外を指す場合は明示的な共有名を保持できます。同じ解決済みパスが `memory.qmd.paths` と `memorySearch.qmd.extraCollections` の両方に存在する場合、QMD は最初のエントリを保持し、重複をスキップします。
 
 ---
 
 ## マルチモーダルメモリ（Gemini）
 
-Gemini Embedding 2 を使用して、Markdown と一緒に画像と音声をインデックス化します。
+Gemini Embedding 2 を使用して、Markdown とともに画像と音声をインデックス化します。
 
 | キー                       | 型       | デフォルト    | 説明                            |
 | ------------------------- | ---------- | ---------- | -------------------------------------- |
-| `multimodal.enabled`      | `boolean`  | `false`    | マルチモーダルインデックス作成を有効にする             |
+| `multimodal.enabled`      | `boolean`  | `false`    | マルチモーダルインデックスを有効化             |
 | `multimodal.modalities`   | `string[]` | --         | `["image"]`、`["audio"]`、または `["all"]` |
 | `multimodal.maxFileBytes` | `number`   | `10485760` | インデックス対象の最大ファイルサイズ（10 MiB）    |
 
 <Note>
-`extraPaths` 内のファイルにのみ適用されます。デフォルトのメモリルートは Markdown のみに留まります。`gemini-embedding-2-preview` が必要です。`fallback` は `"none"` でなければなりません。
+`extraPaths` 内のファイルにのみ適用されます。デフォルトのメモリルートは引き続き Markdown のみです。`gemini-embedding-2-preview` が必要です。`fallback` は `"none"` でなければなりません。
 </Note>
 
-対応形式: `.jpg`、`.jpeg`、`.png`、`.webp`、`.gif`、`.heic`、`.heif`（画像）; `.mp3`、`.wav`、`.ogg`、`.opus`、`.m4a`、`.aac`、`.flac`（音声）。
+対応形式：`.jpg`、`.jpeg`、`.png`、`.webp`、`.gif`、`.heic`、`.heif`（画像）、`.mp3`、`.wav`、`.ogg`、`.opus`、`.m4a`、`.aac`、`.flac`（音声）。
 
 ---
 
@@ -430,14 +433,14 @@ Gemini Embedding 2 を使用して、Markdown と一緒に画像と音声をイ�
 
 | キー                | 型      | デフォルト | 説明                                  |
 | ------------------ | --------- | ------- | -------------------------------------------- |
-| `cache.enabled`    | `boolean` | `true`  | チャンクの埋め込みを SQLite にキャッシュする             |
-| `cache.maxEntries` | `number`  | 未設定   | キャッシュ済み埋め込み数の努力目標としての上限 |
+| `cache.enabled`    | `boolean` | `true`  | チャンクの埋め込みを SQLite にキャッシュ             |
+| `cache.maxEntries` | `number`  | 未設定   | キャッシュ済み埋め込み数のおおよその上限 |
 
-再インデックスやトランスクリプト更新時に、変更されていないテキストを再埋め込みしないようにします。無制限キャッシュにする場合は `maxEntries` を未設定のままにします。ピーク時の再インデックス速度よりもディスク増加を重視する場合に設定します。設定すると、キャッシュが上限を超えた時点で、最終更新時刻が古いエントリから先に削除されます。
+再インデックスやトランスクリプト更新時に、変更されていないテキストが再度埋め込み処理されるのを防ぎます。キャッシュを無制限にする場合は `maxEntries` を未設定のままにし、再インデックスの最高速度よりディスク使用量の増加が重要な場合は設定します。設定すると、キャッシュが上限を超えた時点で、最終更新日時が古いエントリから順に削除されます。
 
 ---
 
-## バッチインデックス作成
+## バッチインデックス
 
 | キー                           | 型      | デフォルト | 説明                |
 | ----------------------------- | --------- | ------- | -------------------------- |
@@ -448,41 +451,39 @@ Gemini Embedding 2 を使用して、Markdown と一緒に画像と音声をイ�
 | `remote.batch.pollIntervalMs` | `number`  | `2000`  | ポーリング間隔              |
 | `remote.batch.timeoutMinutes` | `number`  | `60`    | バッチタイムアウト              |
 
-`gemini`、`openai`、`voyage` で利用できます。OpenAI のバッチは、大規模なバックフィルでは通常最速かつ最安です。
+`gemini`、`openai`、`voyage` で利用できます。大量のバックフィルでは、通常 OpenAI のバッチが最も高速かつ低コストです。
 
-`remote.nonBatchConcurrency` は、ローカル/セルフホストプロバイダー、およびプロバイダーのバッチ API が有効でない場合のホスト型プロバイダーで使われるインライン埋め込み呼び出しを制御します。Ollama は、小規模なローカルホストに負荷をかけすぎないよう、非バッチインデックス作成ではデフォルトで `1` になります。より大きなマシンでは高い値を設定してください。
+`remote.nonBatchConcurrency` は、ローカル／セルフホスト型プロバイダー、およびプロバイダーのバッチ API が有効でない場合のホスト型プロバイダーで使用されるインライン埋め込み呼び出しを制御します。小規模なローカルホストへの過負荷を避けるため、Ollama の非バッチインデックスではデフォルト値が `1` です。より大規模なマシンでは、より大きい値を設定してください。
 
-これは、インライン埋め込み呼び出しのタイムアウトを制御する `sync.embeddingBatchTimeoutSeconds` とは別です。
+これは、インライン埋め込み呼び出しのタイムアウトを制御する `sync.embeddingBatchTimeoutSeconds` とは別の設定です。
 
 ---
 
 ## セッションメモリ検索（実験的）
 
-セッションのトランスクリプトをインデックス化し、`memory_search` 経由で表示します。
+セッションのトランスクリプトをインデックス化し、`memory_search` を通じて提示します。
 
 | キー                           | 型       | デフォルト      | 説明                             |
 | ----------------------------- | ---------- | ------------ | --------------------------------------- |
-| `experimental.sessionMemory`  | `boolean`  | `false`      | セッションインデックス作成を有効化                 |
-| `sources`                     | `string[]` | `["memory"]` | トランスクリプトを含めるには `"sessions"` を追加 |
-| `sync.sessions.deltaBytes`    | `number`   | `100000`     | 再インデックスのバイトしきい値              |
-| `sync.sessions.deltaMessages` | `number`   | `50`         | 再インデックスのメッセージしきい値           |
+| `experimental.sessionMemory`  | `boolean`  | `false`      | セッションインデックスを有効化                 |
+| `sources`                     | `string[]` | `["memory"]` | トランスクリプトを含めるために `"sessions"` を追加 |
+| `sync.sessions.deltaBytes`    | `number`   | `100000`     | 再インデックスを行うバイト数のしきい値              |
+| `sync.sessions.deltaMessages` | `number`   | `50`         | 再インデックスを行うメッセージ数のしきい値           |
 
 <Warning>
-セッションインデックス作成はオプトインで、非同期に実行されます。結果は少し古い場合があります。セッションログはディスク上に保存されるため、ファイルシステムアクセスを信頼境界として扱ってください。
+セッションインデックスはオプトインで、非同期に実行されます。結果がわずかに古い場合があります。セッションログはディスク上に保存されるため、ファイルシステムへのアクセスを信頼境界として扱ってください。
 </Warning>
 
-セッショントランスクリプトのヒットも
-[`tools.sessions.visibility`](/ja-JP/gateway/config-tools#toolssessions) に従います。デフォルトの
-`tree` 可視性では、現在のセッションと、それが生成したセッションだけが公開されます。DM など、別の
-セッションから、同じエージェントの無関係な Gateway ディスパッチセッションを
-思い出すには、意図的に可視性を `agent` に広げてください（エージェント間の想起も
-必要で、エージェント間ポリシーが許可する場合に限り `all`）。
+セッショントランスクリプトのヒットにも
+[`tools.sessions.visibility`](/ja-JP/gateway/config-tools#toolssessions) が適用されます。デフォルトの
+`tree` 可視性では、現在のセッションと、そのセッションから生成されたセッションのみが公開されます。DM など、別のセッションから、同じエージェントに Gateway 経由でディスパッチされた無関係なセッションを
+呼び出すには、可視性を意図的に `agent` まで拡大してください（エージェント間の呼び出しも必要で、エージェント間ポリシーで許可されている場合のみ `all`）。
 
-以下の例では、これらの設定を `agents.defaults` の下に配置しています。1 つの
-エージェントだけがセッショントランスクリプトをインデックス化して検索すべき場合は、
-エージェントごとのオーバーライドで同等の `memorySearch` 設定を適用することもできます。
+以下の例では、これらの設定を `agents.defaults` の下に配置しています。セッショントランスクリプトのインデックス化と検索を 1 つの
+エージェントだけに行わせる場合は、エージェント単位のオーバーライドに同等の `memorySearch` 設定を
+適用することもできます。
 
-同じエージェントの Gateway から DM への想起の場合:
+同一エージェントで Gateway から DM を呼び出す場合：
 
 <Tabs>
   <Tab title="組み込みバックエンド">
@@ -528,7 +529,7 @@ Gemini Embedding 2 を使用して、Markdown と一緒に画像と音声をイ�
 </Tabs>
 
 QMD を使用する場合、`agents.defaults.memorySearch.experimental.sessionMemory` と
-`sources: ["sessions"]` だけでは、トランスクリプトは QMD にエクスポートされません。あわせて
+`sources: ["sessions"]` だけでは、トランスクリプトは QMD にエクスポートされません。
 `memory.qmd.sessions.enabled: true` も設定してください。
 
 ---
@@ -538,85 +539,85 @@ QMD を使用する場合、`agents.defaults.memorySearch.experimental.sessionMe
 | キー                          | 型      | デフォルト | 説明                       |
 | ---------------------------- | --------- | ------- | --------------------------------- |
 | `store.vector.enabled`       | `boolean` | `true`  | ベクトルクエリに sqlite-vec を使用 |
-| `store.vector.extensionPath` | `string`  | 同梱 | sqlite-vec パスを上書きする          |
+| `store.vector.extensionPath` | `string`  | 同梱 | sqlite-vec のパスを上書き          |
 
-  sqlite-vec が利用できない場合、OpenClaw は自動的にプロセス内のコサイン類似度にフォールバックします。
+sqlite-vec が利用できない場合、OpenClaw は自動的にプロセス内のコサイン類似度へフォールバックします。
 
-  ---
+---
 
-  ## インデックスストレージ
+## インデックスストレージ
 
-  組み込みメモリインデックスは、各エージェントの OpenClaw SQLite データベース
-  `agents/<agentId>/agent/openclaw-agent.sqlite` にあります。
+組み込みのメモリインデックスは、各エージェントの OpenClaw SQLite データベース内の
+`agents/<agentId>/agent/openclaw-agent.sqlite` に保存されます。
 
-  | キー                  | 型       | デフォルト | 説明                                      |
-  | --------------------- | -------- | ----------- | ----------------------------------------- |
-  | `store.fts.tokenizer` | `string` | `unicode61` | FTS5 トークナイザー（`unicode61` または `trigram`） |
+| キー                   | 型     | デフォルト     | 説明                               |
+| --------------------- | -------- | ----------- | ----------------------------------------- |
+| `store.fts.tokenizer` | `string` | `unicode61` | FTS5 トークナイザー（`unicode61` または `trigram`） |
 
-  ---
+---
 
-  ## QMD バックエンド設定
+## QMD バックエンド設定
 
-  有効にするには `memory.backend = "qmd"` を設定します。すべての QMD 設定は `memory.qmd` 配下にあります。
+有効にするには `memory.backend = "qmd"` を設定します。すべての QMD 設定は `memory.qmd` の下に配置されます。
 
-  | キー                     | 型        | デフォルト | 説明                                                                                           |
-  | ------------------------ | --------- | -------- | ---------------------------------------------------------------------------------------------- |
-  | `command`                | `string`  | `qmd`    | QMD 実行可能ファイルのパス。サービスの `PATH` がシェルと異なる場合は絶対パスを設定します |
-  | `searchMode`             | `string`  | `search` | 検索コマンド: `search`、`vsearch`、`query`                                                     |
-  | `rerank`                 | `boolean` | --       | QMD の再ランキングをスキップするには、`searchMode: "query"` および QMD 2.1+ で `false` に設定します |
-  | `includeDefaultMemory`   | `boolean` | `true`   | `MEMORY.md` + `memory/**/*.md` を自動インデックス化します                                      |
-  | `paths[]`                | `array`   | --       | 追加パス: `{ name, path, pattern? }`                                                           |
-  | `sessions.enabled`       | `boolean` | `false`  | セッショントランスクリプトを QMD にエクスポートします                                         |
-  | `sessions.retentionDays` | `number`  | --       | トランスクリプト保持期間                                                                       |
-  | `sessions.exportDir`     | `string`  | --       | エクスポートディレクトリ                                                                       |
+| キー                      | 型      | デフォルト  | 説明                                                                           |
+| ------------------------ | --------- | -------- | ------------------------------------------------------------------------------------- |
+| `command`                | `string`  | `qmd`    | QMD 実行ファイルのパス。サービスの `PATH` がシェルと異なる場合は絶対パスを設定 |
+| `searchMode`             | `string`  | `search` | 検索コマンド：`search`、`vsearch`、`query`                                          |
+| `rerank`                 | `boolean` | --       | QMD の再ランキングをスキップするには、`searchMode: "query"` および QMD 2.1+ とともに `false` に設定          |
+| `includeDefaultMemory`   | `boolean` | `true`   | `MEMORY.md` と `memory/**/*.md` を自動インデックス化                                             |
+| `paths[]`                | `array`   | --       | 追加パス：`{ name, path, pattern? }`                                               |
+| `sessions.enabled`       | `boolean` | `false`  | セッショントランスクリプトを QMD にエクスポート                                                   |
+| `sessions.retentionDays` | `number`  | --       | トランスクリプトの保持期間                                                                  |
+| `sessions.exportDir`     | `string`  | --       | エクスポート先ディレクトリ                                                                      |
 
-  `searchMode: "search"` は字句/BM25 のみです。OpenClaw は、そのモードでは `memory status --deep` の実行中も含め、セマンティックベクトルの準備状況プローブや QMD 埋め込みメンテナンスを実行しません。`vsearch` と `query` は引き続き QMD ベクトルの準備状況と埋め込みを必要とします。
+`searchMode: "search"` は字句／BM25 のみです。OpenClaw はこのモードに対して、`memory status --deep` の実行中も含め、セマンティックベクトルの準備状況プローブや QMD 埋め込みの保守を実行しません。`vsearch` と `query` では、引き続き QMD ベクトルの準備完了と埋め込みが必要です。
 
-  `rerank: false` は QMD の `query` モードのみを変更し、QMD 2.1 以降が必要です。直接 CLI モードでは OpenClaw は `--no-rerank` を渡します。mcporter ベースの MCP モードでは、QMD の統合クエリツールに `rerank: false` を渡します。QMD のデフォルトのクエリ再ランキング動作を使用するには未設定のままにします。
+`rerank: false` は QMD の `query` モードのみを変更し、QMD 2.1 以降が必要です。直接 CLI モードでは OpenClaw は `--no-rerank` を渡し、mcporter 経由の MCP モードでは QMD の統合クエリツールに `rerank: false` を渡します。QMD のデフォルトのクエリ再ランキング動作を使用する場合は、未設定のままにしてください。
 
-  OpenClaw は現在の QMD コレクションと MCP クエリ形式を優先しますが、必要に応じて互換性のあるコレクションパターンフラグや古い MCP ツール名を試すことで、古い QMD リリースも動作するようにしています。QMD が複数のコレクションフィルターのサポートを通知する場合、同一ソースのコレクションは 1 つの QMD プロセスで検索されます。古い QMD ビルドではコレクションごとの互換性パスが維持されます。同一ソースとは、永続メモリコレクション（デフォルトのメモリファイルとカスタムパス）がまとめてグループ化されることを意味します。一方、セッショントランスクリプトコレクションは別のグループのままなので、ソースの多様化では引き続き両方の入力を利用できます。
+OpenClaw は現在の QMD コレクションと MCP クエリ形式を優先しますが、必要に応じて互換性のあるコレクションパターンフラグや旧 MCP ツール名を試すことで、古い QMD リリースも引き続き動作させます。QMD が複数のコレクションフィルターへの対応を通知する場合、同一ソースのコレクションは 1 つの QMD プロセスで検索されます。古い QMD ビルドでは、コレクションごとの互換性パスが維持されます。同一ソースとは、永続メモリコレクション（デフォルトのメモリファイルとカスタムパス）がまとめてグループ化されることを意味します。一方、セッショントランスクリプトのコレクションは別のグループとして維持されるため、ソースの多様化では引き続き両方の入力が使用されます。
 
-  <Note>
-  QMD モデルのオーバーライドは OpenClaw 設定ではなく、QMD 側に残ります。QMD のモデルをグローバルにオーバーライドする必要がある場合は、Gateway ランタイム環境で `QMD_EMBED_MODEL`、`QMD_RERANK_MODEL`、`QMD_GENERATE_MODEL` などの環境変数を設定します。
-  </Note>
+<Note>
+QMD モデルのオーバーライドは OpenClaw 設定ではなく、QMD 側に配置します。QMD のモデルをグローバルにオーバーライドする必要がある場合は、Gateway ランタイム環境で `QMD_EMBED_MODEL`、`QMD_RERANK_MODEL`、`QMD_GENERATE_MODEL` などの環境変数を設定してください。
+</Note>
 
-  ### mcporter 連携
+### mcporter 連携
 
-  すべて `memory.qmd.mcporter` 配下です。クエリごとに `qmd` を起動する代わりに、長時間稼働する `mcporter` MCP デーモン経由で QMD 検索をルーティングし、大きなモデルでのコールドスタートのオーバーヘッドを削減します。
+すべて `memory.qmd.mcporter` の下に配置されます。クエリごとに `qmd` を起動する代わりに、長時間稼働する `mcporter` MCP デーモンを介して QMD 検索をルーティングし、大規模モデルのコールドスタートのオーバーヘッドを削減します。
 
-  | キー          | 型        | デフォルト | 説明                                                                           |
-  | ------------- | --------- | ------- | ------------------------------------------------------------------------------ |
-  | `enabled`     | `boolean` | `false` | リクエストごとに `qmd` を起動する代わりに、QMD 呼び出しを mcporter 経由でルーティングします |
-  | `serverName`  | `string`  | `qmd`   | `lifecycle: keep-alive` で `qmd mcp` を実行する mcporter サーバー名            |
-  | `startDaemon` | `boolean` | `true`  | `enabled` が true の場合、mcporter デーモンを自動的に起動します                |
+| キー           | 型      | デフォルト | 説明                                                            |
+| ------------- | --------- | ------- | ---------------------------------------------------------------------- |
+| `enabled`     | `boolean` | `false` | リクエストごとに `qmd` を起動する代わりに、mcporter 経由で QMD 呼び出しをルーティング |
+| `serverName`  | `string`  | `qmd`   | `lifecycle: keep-alive` を指定して `qmd mcp` を実行する mcporter サーバー名  |
+| `startDaemon` | `boolean` | `true`  | `enabled` が true の場合に mcporter デーモンを自動起動         |
 
-  `mcporter` がインストールされ PATH 上にあり、さらに `qmd mcp` を実行する mcporter サーバーが設定されている必要があります。クエリごとのプロセス起動コストが許容できる、より単純なローカルセットアップでは無効のままにします。
+`mcporter` がインストールされ PATH 上にあり、かつ `qmd mcp` を実行する mcporter サーバーが設定されている必要があります。クエリごとのプロセス起動コストを許容できる、より単純なローカル構成では無効のままにしてください。
 
-  <AccordionGroup>
+<AccordionGroup>
   <Accordion title="更新スケジュール">
-    | キー                      | 型        | デフォルト | 説明                                                                            |
-    | --------------------------- | --------- | -------- | ------------------------------------------------------------------------------- |
-    | `update.interval`         | `string`  | `5m`    | 更新間隔                                                                        |
-    | `update.debounceMs`       | `number`  | `15000` | ファイル変更をデバウンスします                                                  |
-    | `update.onBoot`           | `boolean` | `true`  | 長時間稼働する QMD マネージャーが開いたときに更新します。即時の起動時更新をスキップするには false に設定します |
-    | `update.startup`          | `string`  | `off`   | 任意の Gateway 起動時 QMD 初期化: `off`、`idle`、または `immediate`             |
-    | `update.startupDelayMs`   | `number`  | `120000` | `startup: "idle"` の更新が実行されるまでの遅延                                  |
-    | `update.waitForBootSync`  | `boolean` | `false` | 初回更新が完了するまでマネージャーの起動をブロックします                       |
-    | `update.embedInterval`    | `string`  | `60m`   | 個別の埋め込み頻度                                                              |
-    | `update.commandTimeoutMs` | `number`  | `30000` | QMD メンテナンスコマンド（コレクション一覧/追加）のタイムアウト                 |
-    | `update.updateTimeoutMs`  | `number`  | `120000` | 各 `qmd update` サイクルのタイムアウト                                          |
-    | `update.embedTimeoutMs`   | `number`  | `120000` | 各 `qmd embed` サイクルのタイムアウト                                           |
+    | キー                       | 型      | デフォルト | 説明                           |
+    | --------------------------- | --------- | -------- | ---------------------------------------- |
+    | `update.interval`         | `string`  | `5m`    | 更新間隔                      |
+    | `update.debounceMs`       | `number`  | `15000` | ファイル変更をデバウンス                 |
+    | `update.onBoot`           | `boolean` | `true`  | 長期間稼働する QMD マネージャーを開く際に更新する。起動直後の更新をスキップするには false に設定 |
+    | `update.startup`          | `string`  | `off`   | Gateway 起動時の任意の QMD 初期化：`off`、`idle`、または `immediate` |
+    | `update.startupDelayMs`   | `number`  | `120000` | `startup: "idle"` 更新が実行されるまでの遅延 |
+    | `update.waitForBootSync`  | `boolean` | `false` | 初回更新が完了するまでマネージャーを開く処理をブロック |
+    | `update.embedInterval`    | `string`  | `60m`   | 埋め込み処理に別の実行間隔を設定                |
+    | `update.commandTimeoutMs` | `number`  | `30000` | QMD メンテナンスコマンド（コレクションの一覧表示／追加）のタイムアウト |
+    | `update.updateTimeoutMs`  | `number`  | `120000` | 各 `qmd update` サイクルのタイムアウト   |
+    | `update.embedTimeoutMs`   | `number`  | `120000` | 各 `qmd embed` サイクルのタイムアウト    |
   </Accordion>
   <Accordion title="制限">
-    | キー                      | 型       | デフォルト | 説明                             |
-    | --------------------------- | -------- | ------- | -------------------------------- |
-    | `limits.maxResults`       | `number` | `4`     | 最大検索結果数                   |
-    | `limits.maxSnippetChars`  | `number` | `450`   | スニペット長を制限します         |
-    | `limits.maxInjectedChars` | `number` | `2200`  | 挿入される合計文字数を制限します |
-    | `limits.timeoutMs`        | `number` | `4000`  | 検索タイムアウト                 |
+    | キー                       | 型     | デフォルト | 説明                |
+    | --------------------------- | -------- | ------- | ------------------------------ |
+    | `limits.maxResults`       | `number` | `4`     | 検索結果の最大数         |
+    | `limits.maxSnippetChars`  | `number` | `450`   | スニペットの長さを制限       |
+    | `limits.maxInjectedChars` | `number` | `2200`  | 注入される合計文字数を制限 |
+    | `limits.timeoutMs`        | `number` | `4000`  | `memory_search` を含む、QMD を使用した検索中の QMD コマンドのタイムアウト。セットアップ、同期、組み込みフォールバック、および補助処理ではデフォルトのツール期限を維持 |
   </Accordion>
   <Accordion title="スコープ">
-    どのセッションが QMD 検索結果を受け取れるかを制御します。[`session.sendPolicy`](/ja-JP/gateway/config-agents#session) と同じスキーマです。
+    QMD の検索結果を受け取れるセッションを制御します。[`session.sendPolicy`](/ja-JP/gateway/config-agents#session) と同じスキーマです。
 
     ```json5
     {
@@ -631,24 +632,24 @@ QMD を使用する場合、`agents.defaults.memorySearch.experimental.sessionMe
     }
     ```
 
-    出荷時のデフォルトは DM/ダイレクトのみで、グループやその他のチャネルタイプは拒否されます。`match.keyPrefix` は正規化されたセッションキーに一致します。`match.rawKeyPrefix` は `agent:<id>:` を含む生キーに一致します。
+    提供時のデフォルトでは DM／ダイレクトのみが許可され、グループおよびその他のチャンネル種別は拒否されます。`match.keyPrefix` は正規化されたセッションキーに一致し、`match.rawKeyPrefix` は `agent:<id>:` を含む未加工のキーに一致します。
 
   </Accordion>
   <Accordion title="引用">
-    `memory.citations` はすべてのバックエンドに適用されます:
+    `memory.citations` はすべてのバックエンドに適用されます。
 
     | 値            | 動作                                            |
     | ------------------ | ------------------------------------------------------ |
-    | `auto` (デフォルト) | スニペットに `Source: <path#line>` フッターを含める    |
+    | `auto`（デフォルト） | スニペットに `Source: <path#line>` フッターを含める    |
     | `on`             | 常にフッターを含める                               |
-    | `off`            | フッターを省略する（パスは内部的にはエージェントに渡される） |
+    | `off`            | フッターを省略（パスは引き続き内部でエージェントに渡される） |
 
   </Accordion>
 </AccordionGroup>
 
-gateway-start QMD 初期化が有効な場合、OpenClaw は対象エージェントに対してのみ QMD を起動します。`update.onBoot` が true で、interval/embed メンテナンスが設定されていない場合、起動時はブート更新用のワンショットマネージャーを使用し、それを閉じます。update または embed interval が設定されている場合、起動時に長寿命の QMD マネージャーを開き、ウォッチャーと interval タイマーを所有できるようにします。`update.onBoot: false` は、即時のブート更新のみをスキップします。
+Gateway 起動時の QMD 初期化が有効な場合、OpenClaw は対象となるエージェントに対してのみ QMD を起動します。`update.onBoot` が true で、更新間隔または埋め込みメンテナンスが設定されていない場合、起動時にはブート更新用の単発マネージャーを使用し、完了後に閉じます。更新間隔または埋め込み間隔が設定されている場合、起動時に長期間稼働する QMD マネージャーを開き、ウォッチャーと間隔タイマーを管理できるようにします。`update.onBoot: false` がスキップするのは、起動直後の更新のみです。
 
-### 完全な QMD の例
+### QMD の完全な例
 
 ```json5
 {
@@ -673,20 +674,20 @@ gateway-start QMD 初期化が有効な場合、OpenClaw は対象エージェ�
 
 ## Dreaming
 
-Dreaming は `agents.defaults.memorySearch` ではなく、`plugins.entries.memory-core.config.dreaming` の下で設定します。
+Dreaming は `agents.defaults.memorySearch` ではなく、`plugins.entries.memory-core.config.dreaming` で設定します。
 
-Dreaming は 1 つのスケジュールされたスイープとして実行され、内部の light/deep/REM フェーズは実装詳細として使用します。
+Dreaming は単一のスケジュールされたスイープとして実行され、内部の light／deep／REM フェーズは実装の詳細として使用されます。
 
-概念上の動作とスラッシュコマンドについては、[Dreaming](/ja-JP/concepts/dreaming) を参照してください。
+概念的な動作とスラッシュコマンドについては、[Dreaming](/ja-JP/concepts/dreaming)を参照してください。
 
 ### ユーザー設定
 
 | キー                                    | 型      | デフォルト       | 説明                                                                                                                      |
 | -------------------------------------- | --------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `enabled`                              | `boolean` | `false`       | dreaming 全体を有効または無効にする                                                                                              |
-| `frequency`                            | `string`  | `0 3 * * *`   | 完全な dreaming スイープの任意の cron 間隔                                                                                |
-| `model`                                | `string`  | デフォルトモデル | 任意の Dream Diary サブエージェントモデルオーバーライド                                                                                     |
-| `phases.deep.maxPromotedSnippetTokens` | `number`  | `160`         | `MEMORY.md` に昇格された各短期リコールスニペットから保持する推定トークンの最大数。来歴メタデータは引き続き表示される |
+| `enabled`                              | `boolean` | `false`       | Dreaming 全体を有効または無効にする                                                                                              |
+| `frequency`                            | `string`  | `0 3 * * *`   | Dreaming の完全なスイープを実行する任意の Cron 間隔                                                                                |
+| `model`                                | `string`  | デフォルトモデル | 任意の Dream Diary サブエージェントモデルの上書き                                                                                     |
+| `phases.deep.maxPromotedSnippetTokens` | `number`  | `160`         | `MEMORY.md` に昇格される各短期想起スニペットから保持する推定トークンの最大数。来歴メタデータは引き続き表示される |
 
 ### 例
 
@@ -715,14 +716,14 @@ Dreaming は 1 つのスケジュールされたスイープとして実行さ�
 <Note>
 - Dreaming はマシン状態を `memory/.dreams/` に書き込みます。
 - Dreaming は人間が読めるナラティブ出力を `DREAMS.md`（または既存の `dreams.md`）に書き込みます。
-- `dreaming.model` は既存の Plugin サブエージェントの信頼ゲートを使用します。有効にする前に `plugins.entries.memory-core.subagent.allowModelOverride: true` を設定してください。
-- 設定されたモデルが利用できない場合、Dream Diary はセッションのデフォルトモデルで 1 回再試行します。信頼または許可リストの失敗はログに記録され、暗黙的に再試行されることはありません。
-- light/deep/REM フェーズのポリシーとしきい値は内部動作であり、ユーザー向け設定ではありません。
+- `dreaming.model` は既存の Plugin サブエージェント信頼ゲートを使用します。有効にする前に `plugins.entries.memory-core.subagent.allowModelOverride: true` を設定してください。
+- 設定したモデルが利用できない場合、Dream Diary はセッションのデフォルトモデルで 1 回再試行します。信頼または許可リストの失敗はログに記録され、暗黙的には再試行されません。
+- light／deep／REM フェーズのポリシーとしきい値は内部動作であり、ユーザー向け設定ではありません。
 
 </Note>
 
-## 関連
+## 関連項目
 
 - [設定リファレンス](/ja-JP/gateway/configuration-reference)
-- [Memory 概要](/ja-JP/concepts/memory)
-- [Memory 検索](/ja-JP/concepts/memory-search)
+- [メモリの概要](/ja-JP/concepts/memory)
+- [メモリ検索](/ja-JP/concepts/memory-search)

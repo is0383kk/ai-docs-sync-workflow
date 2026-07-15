@@ -1,47 +1,59 @@
 ---
 read_when:
-    - Você quer conclusões de shell para zsh/bash/fish/PowerShell
-    - Você precisa armazenar em cache scripts de conclusão no estado do OpenClaw
-summary: Referência de CLI para `openclaw completion` (gerar/instalar scripts de conclusão de shell)
+    - Você quer o preenchimento automático de comandos do shell para zsh/bash/fish/PowerShell
+    - Você precisa armazenar em cache os scripts de conclusão no estado do OpenClaw
+summary: Referência da CLI para `openclaw completion` (gerar/instalar scripts de conclusão automática do shell)
 title: Conclusão
 x-i18n:
-    generated_at: "2026-04-24T05:44:48Z"
-    model: gpt-5.4
-    provider: openai
-    source_hash: 9d064723b97f09105154197e4ef35b98ccb61e4b775f3fd990b18958f751f713
-    source_path: cli/completion.md
-    workflow: 15
+    generated_at: "2026-07-11T23:47:39Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    provider: openai
+    source_hash: 67cb52a47036745150887c752d18e2dfa84fab2722c27c696142d23080bb2efd
+    source_path: cli/completion.md
+    workflow: 16
 ---
 
 # `openclaw completion`
 
-Gere scripts de conclusão de shell e, opcionalmente, instale-os no perfil do seu shell.
+Gere scripts de preenchimento automático do shell, armazene-os em cache no estado do OpenClaw e, opcionalmente, instale-os no perfil do seu shell.
 
 ## Uso
 
 ```bash
-openclaw completion
-openclaw completion --shell zsh
-openclaw completion --install
-openclaw completion --shell fish --install
-openclaw completion --write-state
+openclaw completion                          # exibe o script zsh na saída padrão
+openclaw completion --shell fish             # exibe o script fish
+openclaw completion --write-state            # armazena em cache os scripts de todos os shells
+openclaw completion --write-state --install  # armazena em cache e instala em uma única etapa
 openclaw completion --shell bash --write-state
 ```
 
 ## Opções
 
 - `-s, --shell <shell>`: shell de destino (`zsh`, `bash`, `powershell`, `fish`; padrão: `zsh`)
-- `-i, --install`: instala a conclusão adicionando uma linha de source ao perfil do seu shell
-- `--write-state`: grava o(s) script(s) de conclusão em `$OPENCLAW_STATE_DIR/completions` sem imprimir no stdout
-- `-y, --yes`: ignora prompts de confirmação de instalação
+- `-i, --install`: instala o preenchimento automático adicionando ao perfil do shell uma linha que carrega o script armazenado em cache
+- `--write-state`: grava os scripts de preenchimento automático em `$OPENCLAW_STATE_DIR/completions` (padrão: `~/.openclaw/completions`) sem exibi-los na saída padrão; com `--shell`, grava apenas o script desse shell; caso contrário, grava os scripts dos quatro shells
+- `-y, --yes`: ignora as solicitações de confirmação da instalação (modo não interativo)
+
+## Fluxo de instalação
+
+`--install` configura seu perfil para usar o script armazenado em cache, portanto o cache precisa existir primeiro: se estiver ausente, o comando falhará e solicitará que você execute `openclaw completion --write-state`. Combine `--write-state --install` para realizar ambas as ações em uma única etapa. Sem `--shell`, `--install` detecta o shell por meio de `$SHELL` (usando zsh como alternativa).
+
+A instalação grava um pequeno bloco `# OpenClaw Completion` no perfil do seu shell e substitui quaisquer linhas antigas e lentas no formato `source <(openclaw completion ...)` pela linha que carrega o script armazenado em cache:
+
+| Shell      | Perfil                                                                                                                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| bash       | `~/.bashrc` (usa `~/.bash_profile` como alternativa quando `~/.bashrc` está ausente)                                                                                                      |
+| fish       | `~/.config/fish/config.fish`                                                                                                                                                               |
+| powershell | `~/.config/powershell/Microsoft.PowerShell_profile.ps1` (no Windows: `Documents/PowerShell/Microsoft.PowerShell_profile.ps1` ou `Documents/WindowsPowerShell/...` para Windows PowerShell) |
+| zsh        | `~/.zshrc`                                                                                                                                                                                 |
 
 ## Observações
 
-- `--install` grava um pequeno bloco "OpenClaw Completion" no perfil do seu shell e o aponta para o script em cache.
-- Sem `--install` ou `--write-state`, o comando imprime o script no stdout.
-- A geração de conclusão carrega antecipadamente as árvores de comandos para incluir subcomandos aninhados.
+- Sem `--install` ou `--write-state`, o comando exibe o script na saída padrão.
+- A geração do preenchimento automático carrega antecipadamente toda a árvore de comandos, incluindo os comandos da CLI dos plugins, portanto os subcomandos aninhados são incluídos.
+- `openclaw update` atualiza automaticamente o cache de preenchimento após uma atualização bem-sucedida; `openclaw doctor` pode corrigir configurações de preenchimento ausentes ou desatualizadas.
 
-## Relacionado
+## Conteúdo relacionado
 
-- [Referência de CLI](/pt-BR/cli)
+- [Referência da CLI](/pt-BR/cli)

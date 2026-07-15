@@ -1,28 +1,29 @@
 ---
 read_when:
-    - Вы устанавливаете, настраиваете или проверяете Plugin tlon
-summary: Plugin канала OpenClaw Tlon/Urbit для рабочих процессов чата.
-title: Plugin Tlon
+    - Вы устанавливаете, настраиваете или проверяете плагин tlon
+summary: Плагин канала Tlon/Urbit для OpenClaw, предназначенный для рабочих процессов чата.
+title: Плагин Tlon
 x-i18n:
-    generated_at: "2026-06-28T23:29:10Z"
-    model: gpt-5.5
+    generated_at: "2026-07-13T20:08:14Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 24
     provider: openai
     source_hash: 6fd1dcc934734599c0b671f0a9659dc5cc6e4ff907e3e14f9ff3ba5ec86aa0cc
     source_path: plugins/reference/tlon.md
     workflow: 16
 ---
 
-# Tlon Plugin
+# Плагин Tlon
 
-Plugin канала OpenClaw Tlon/Urbit для рабочих процессов чата.
+Плагин канала Tlon/Urbit для OpenClaw, предназначенный для рабочих процессов чата.
 
 ## Распространение
 
 - Пакет: `@openclaw/tlon`
 - Способ установки: npm; ClawHub
 
-## Интерфейс
+## Возможности
 
 каналы: tlon; Skills
 

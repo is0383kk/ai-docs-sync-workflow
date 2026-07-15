@@ -1,35 +1,35 @@
 ---
 read_when:
     - Quieres usar modelos de Mistral en OpenClaw
-    - Quieres transcripción en tiempo real de Voxtral para Voice Call
-    - Necesitas incorporación de clave de API de Mistral y referencias de modelo
-summary: Usa modelos Mistral y transcripción Voxtral con OpenClaw
+    - Quieres la transcripción en tiempo real de Voxtral para las llamadas de voz
+    - Necesitas configurar una clave de API de Mistral y referencias de modelos
+summary: Usa los modelos de Mistral y la transcripción de Voxtral con OpenClaw
 title: Mistral
 x-i18n:
-    generated_at: "2026-07-05T11:37:51Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T23:27:28Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 20c970c8bcff4a0da0dd6a27d5957c384d0a34363c40871d3e56b567e7d6213a
+    source_hash: 58f27b9917d2e7144a64cad559de4fe26a5a1101703bbe21c04252717df801cd
     source_path: providers/mistral.md
     workflow: 16
 ---
 
-El Plugin incluido `mistral` registra cuatro contratos: finalizaciones de chat, comprensión de medios (transcripción por lotes de Voxtral), STT en tiempo real para Voice Call (Voxtral Realtime) e incrustaciones de memoria (`mistral-embed`).
+El Plugin `mistral` incluido registra cuatro contratos: completado de chat, comprensión multimedia (transcripción por lotes con Voxtral), STT en tiempo real para llamadas de voz (Voxtral Realtime) e incrustaciones de memoria (`mistral-embed`).
 
-| Propiedad        | Valor                                       |
-| ---------------- | ------------------------------------------- |
-| ID del proveedor | `mistral`                                   |
-| Plugin           | incluido, habilitado de forma predeterminada |
-| Variable de entorno de autenticación | `MISTRAL_API_KEY`        |
-| Marca de incorporación | `--auth-choice mistral-api-key`        |
-| Marca directa de CLI | `--mistral-api-key <key>`                |
-| API              | compatible con OpenAI (`openai-completions`) |
-| URL base         | `https://api.mistral.ai/v1`                 |
-| Modelo predeterminado | `mistral/mistral-large-latest`          |
-| Modelo de incrustaciones | `mistral-embed`                       |
-| Lote de Voxtral  | `voxtral-mini-latest` (transcripción de audio) |
-| Voxtral en tiempo real | `voxtral-mini-transcribe-realtime-2602` |
+| Propiedad        | Valor                                            |
+| ---------------- | ------------------------------------------------ |
+| Id. del proveedor | `mistral`                                       |
+| Plugin           | incluido, habilitado de forma predeterminada     |
+| Variable de entorno de autenticación | `MISTRAL_API_KEY`                |
+| Opción de incorporación | `--auth-choice mistral-api-key`             |
+| Opción directa de la CLI | `--mistral-api-key <key>`                   |
+| API              | compatible con OpenAI (`openai-completions`)     |
+| URL base         | `https://api.mistral.ai/v1`                      |
+| Modelo predeterminado | `mistral/mistral-large-latest`               |
+| Modelo de incrustaciones | `mistral-embed`                              |
+| Voxtral por lotes | `voxtral-mini-latest` (transcripción de audio)  |
+| Voxtral en tiempo real | `voxtral-mini-transcribe-realtime-2602`       |
 
 ## Primeros pasos
 
@@ -42,14 +42,14 @@ El Plugin incluido `mistral` registra cuatro contratos: finalizaciones de chat, 
     openclaw onboard --auth-choice mistral-api-key
     ```
 
-    O pasa la clave directamente:
+    O proporciona la clave directamente:
 
     ```bash
     openclaw onboard --mistral-api-key "$MISTRAL_API_KEY"
     ```
 
   </Step>
-  <Step title="Define un modelo predeterminado">
+  <Step title="Establece un modelo predeterminado">
     ```json5
     {
       env: { MISTRAL_API_KEY: "sk-..." },
@@ -66,24 +66,25 @@ El Plugin incluido `mistral` registra cuatro contratos: finalizaciones de chat, 
 
 ## Catálogo de LLM integrado
 
-| Referencia de modelo             | Entrada     | Contexto | Salida máxima | Notas                                                            |
-| -------------------------------- | ----------- | -------- | ------------- | ---------------------------------------------------------------- |
-| `mistral/mistral-large-latest`   | texto, imagen | 262,144 | 16,384        | Modelo predeterminado                                            |
-| `mistral/mistral-medium-2508`    | texto, imagen | 262,144 | 8,192         | Mistral Medium 3.1                                               |
-| `mistral/mistral-medium-3-5`     | texto, imagen | 262,144 | 8,192         | Mistral Medium 3.5; razonamiento ajustable                       |
-| `mistral/mistral-small-latest`   | texto, imagen | 128,000 | 16,384        | Mistral Small 4; razonamiento ajustable mediante la API `reasoning_effort` |
-| `mistral/pixtral-large-latest`   | texto, imagen | 128,000 | 32,768        | Pixtral                                                          |
-| `mistral/codestral-latest`       | texto        | 256,000 | 4,096         | Programación                                                     |
-| `mistral/devstral-medium-latest` | texto        | 262,144 | 32,768        | Devstral 2                                                       |
-| `mistral/magistral-small`        | texto        | 128,000 | 40,000        | Con razonamiento habilitado                                      |
+| Referencia del modelo             | Entrada       | Contexto | Salida máxima | Notas                                                        |
+| --------------------------------- | ------------- | -------- | ------------- | ------------------------------------------------------------ |
+| `mistral/mistral-large-latest`    | texto, imagen | 262,144  | 16,384        | Modelo predeterminado                                        |
+| `mistral/mistral-medium-2508`     | texto, imagen | 262,144  | 8,192         | Mistral Medium 3.1                                           |
+| `mistral/mistral-medium-3-5`      | texto, imagen | 262,144  | 8,192         | Mistral Medium 3.5; razonamiento ajustable                    |
+| `mistral/mistral-small-latest`    | texto, imagen | 262,144  | 16,384        | Última versión de Mistral Small 4; `reasoning_effort` ajustable |
+| `mistral/mistral-small-2603`      | texto, imagen | 262,144  | 16,384        | Versión fijada de Mistral Small 4; `reasoning_effort` ajustable |
+| `mistral/pixtral-large-latest`    | texto, imagen | 128,000  | 32,768        | Pixtral                                                      |
+| `mistral/codestral-latest`        | texto         | 256,000  | 4,096         | Programación                                                 |
+| `mistral/devstral-medium-latest`  | texto         | 262,144  | 32,768        | Devstral 2                                                   |
+| `mistral/magistral-small`         | texto         | 128,000  | 40,000        | Con razonamiento habilitado                                  |
 
-Explora la fila del catálogo incluido antes de cambiar la configuración:
+Consulta la fila del catálogo incluido antes de cambiar la configuración:
 
 ```bash
 openclaw models list --all --provider mistral --plain
 ```
 
-Haz una prueba rápida de un modelo sin iniciar el Gateway:
+Realiza una prueba rápida de un modelo sin iniciar el Gateway:
 
 ```bash
 openclaw infer model run --local \
@@ -94,7 +95,7 @@ openclaw infer model run --local \
 
 ## Transcripción de audio (Voxtral)
 
-Usa Voxtral para la transcripción de audio por lotes mediante la canalización de comprensión de medios:
+Usa Voxtral para la transcripción de audio por lotes mediante el proceso de comprensión multimedia:
 
 ```json5
 {
@@ -110,20 +111,20 @@ Usa Voxtral para la transcripción de audio por lotes mediante la canalización 
 ```
 
 <Tip>
-La ruta de transcripción de medios usa `/v1/audio/transcriptions`. El modelo de audio predeterminado para Mistral es `voxtral-mini-latest`.
+La ruta de transcripción multimedia utiliza `/v1/audio/transcriptions`. El modelo de audio predeterminado para Mistral es `voxtral-mini-latest`.
 </Tip>
 
-## STT de streaming para Voice Call
+## STT de transmisión para llamadas de voz
 
-El Plugin incluido `mistral` registra Voxtral Realtime como proveedor de STT de streaming para Voice Call.
+El Plugin `mistral` incluido registra Voxtral Realtime como proveedor de STT de transmisión para llamadas de voz.
 
-| Configuración | Ruta de configuración                                                | Predeterminado                         |
-| ------------- | -------------------------------------------------------------------- | -------------------------------------- |
-| Clave de API  | `plugins.entries.voice-call.config.streaming.providers.mistral.apiKey` | Recurre a `MISTRAL_API_KEY`            |
-| Modelo        | `...mistral.model`                                                   | `voxtral-mini-transcribe-realtime-2602` |
-| Codificación  | `...mistral.encoding`                                                | `pcm_mulaw`                            |
-| Frecuencia de muestreo | `...mistral.sampleRate`                                      | `8000`                                 |
-| Retraso objetivo | `...mistral.targetStreamingDelayMs`                                | `800`                                  |
+| Ajuste             | Ruta de configuración                                                   | Valor predeterminado                     |
+| ------------------ | ----------------------------------------------------------------------- | ---------------------------------------- |
+| Clave de API       | `plugins.entries.voice-call.config.streaming.providers.mistral.apiKey`  | Recurre a `MISTRAL_API_KEY`              |
+| Modelo             | `...mistral.model`                                                      | `voxtral-mini-transcribe-realtime-2602`  |
+| Codificación       | `...mistral.encoding`                                                   | `pcm_mulaw`                              |
+| Frecuencia de muestreo | `...mistral.sampleRate`                                             | `8000`                                   |
+| Retardo objetivo   | `...mistral.targetStreamingDelayMs`                                     | `800`                                    |
 
 ```json5
 {
@@ -149,27 +150,27 @@ El Plugin incluido `mistral` registra Voxtral Realtime como proveedor de STT de 
 ```
 
 <Note>
-OpenClaw establece de forma predeterminada STT en tiempo real de Mistral en `pcm_mulaw` a 8 kHz para que Voice Call pueda reenviar directamente tramas multimedia de Twilio. Usa `encoding: "pcm_s16le"` y un `sampleRate` coincidente solo si tu flujo ascendente ya es PCM sin procesar.
+OpenClaw utiliza de forma predeterminada `pcm_mulaw` a 8 kHz para el STT en tiempo real de Mistral, de modo que las llamadas de voz puedan reenviar directamente las tramas multimedia de Twilio. Usa `encoding: "pcm_s16le"` y un `sampleRate` correspondiente solo si el flujo de origen ya es PCM sin procesar.
 </Note>
 
 ## Configuración avanzada
 
 <AccordionGroup>
   <Accordion title="Razonamiento ajustable">
-    `mistral/mistral-small-latest` y `mistral/mistral-medium-3-5` admiten [razonamiento ajustable](https://docs.mistral.ai/studio-api/conversations/reasoning/adjustable) en la API Chat Completions mediante `reasoning_effort` (`none` minimiza el pensamiento adicional en la salida; `high` muestra trazas completas de pensamiento antes de la respuesta final).
+    `mistral/mistral-small-latest`, `mistral/mistral-small-2603` y `mistral/mistral-medium-3-5` admiten [razonamiento ajustable](https://docs.mistral.ai/studio-api/conversations/reasoning/adjustable) en la API de completado de chat mediante `reasoning_effort` (`none` minimiza el razonamiento adicional en la salida; `high` muestra las trazas completas de razonamiento antes de la respuesta final).
 
-    OpenClaw asigna el nivel de **pensamiento** de la sesión a la API de Mistral:
+    OpenClaw asigna el nivel de **razonamiento** de la sesión a la API de Mistral:
 
-    | Nivel de pensamiento de OpenClaw                                     | `reasoning_effort` de Mistral |
+    | Nivel de razonamiento de OpenClaw                                   | `reasoning_effort` de Mistral |
     | -------------------------------------------------------------------- | ----------------------------- |
     | **desactivado** / **mínimo**                                         | `none`                        |
-    | **bajo** / **medio** / **alto** / **xhigh** / **adaptive** / **max** | `high`                        |
+    | **bajo** / **medio** / **alto** / **muy alto** / **adaptativo** / **máximo** | `high`               |
 
     <Warning>
-    Evita combinar el modo de razonamiento Medium 3.5 con `temperature: 0`; se ha informado que la API HTTP de Mistral rechaza `reasoning_effort="high"` más `temperature: 0` con una respuesta 400. Deja la temperatura sin definir, o desactiva/reduce al mínimo el pensamiento para que OpenClaw envíe `reasoning_effort: "none"` antes de establecer una temperatura baja.
+    Evita combinar el modo de razonamiento de Medium 3.5 con `temperature: 0`; se ha informado que la API HTTP de Mistral rechaza `reasoning_effort="high"` junto con `temperature: 0` mediante una respuesta 400. Deja la temperatura sin configurar o desactiva el razonamiento o establécelo en mínimo para que OpenClaw envíe `reasoning_effort: "none"` antes de establecer una temperatura baja.
     </Warning>
 
-    Ejemplo de configuración con alcance de modelo para el razonamiento de Medium 3.5:
+    Ejemplo de configuración limitada al modelo para el razonamiento de Medium 3.5:
 
     ```json5
     {
@@ -187,13 +188,13 @@ OpenClaw establece de forma predeterminada STT en tiempo real de Mistral en `pcm
     ```
 
     <Note>
-    Otros modelos incluidos en el catálogo de Mistral no usan este parámetro. Sigue usando los modelos `magistral-*` cuando quieras el comportamiento nativo de Mistral centrado primero en el razonamiento.
+    Los demás modelos del catálogo de Mistral incluido no utilizan este parámetro. Sigue usando modelos `magistral-*` cuando quieras el comportamiento nativo de Mistral centrado en el razonamiento.
     </Note>
 
   </Accordion>
 
   <Accordion title="Incrustaciones de memoria">
-    Mistral puede servir incrustaciones de memoria mediante `/v1/embeddings` (modelo predeterminado: `mistral-embed`):
+    Mistral puede proporcionar incrustaciones de memoria mediante `/v1/embeddings` (modelo predeterminado: `mistral-embed`):
 
     ```json5
     {
@@ -208,21 +209,21 @@ OpenClaw establece de forma predeterminada STT en tiempo real de Mistral en `pcm
   </Accordion>
 
   <Accordion title="Autenticación y URL base">
-    - La autenticación de Mistral usa `MISTRAL_API_KEY` (encabezado Bearer).
-    - La URL base del proveedor usa de forma predeterminada `https://api.mistral.ai/v1` y acepta la forma estándar de solicitud de finalizaciones de chat compatible con OpenAI.
-    - El modelo predeterminado de incorporación es `mistral/mistral-large-latest`.
-    - Sobrescribe la URL base en `models.providers.mistral.baseUrl` solo cuando Mistral publique explícitamente un endpoint regional que necesites.
+    - La autenticación de Mistral utiliza `MISTRAL_API_KEY` (encabezado Bearer).
+    - La URL base del proveedor es `https://api.mistral.ai/v1` de forma predeterminada y acepta el formato estándar de solicitudes de completado de chat compatible con OpenAI.
+    - El modelo predeterminado durante la incorporación es `mistral/mistral-large-latest`.
+    - Sobrescribe la URL base en `models.providers.mistral.baseUrl` únicamente cuando Mistral publique explícitamente un punto de conexión regional que necesites.
 
   </Accordion>
 </AccordionGroup>
 
-## Relacionado
+## Contenido relacionado
 
 <CardGroup cols={2}>
   <Card title="Selección de modelos" href="/es/concepts/model-providers" icon="layers">
-    Elegir proveedores, referencias de modelo y comportamiento de conmutación por error.
+    Selección de proveedores, referencias de modelos y comportamiento de conmutación por error.
   </Card>
-  <Card title="Comprensión de medios" href="/es/nodes/media-understanding" icon="microphone">
-    Configuración de transcripción de audio y selección de proveedor.
+  <Card title="Comprensión multimedia" href="/es/nodes/media-understanding" icon="microphone">
+    Configuración de la transcripción de audio y selección de proveedores.
   </Card>
 </CardGroup>

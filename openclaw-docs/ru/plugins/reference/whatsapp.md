@@ -1,21 +1,22 @@
 ---
 read_when:
-    - Вы устанавливаете, настраиваете или проводите аудит Plugin WhatsApp
-summary: Plugin канала OpenClaw WhatsApp для чатов WhatsApp Web.
-title: Plugin WhatsApp
+    - Вы устанавливаете, настраиваете или проверяете плагин WhatsApp.
+summary: Плагин канала OpenClaw WhatsApp для чатов WhatsApp Web.
+title: Плагин WhatsApp
 x-i18n:
-    generated_at: "2026-07-04T15:29:00Z"
-    model: gpt-5.5
+    generated_at: "2026-07-13T20:08:47Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 24
     provider: openai
     source_hash: 2fed1a21b859b7d3bd2798d013faaf7460cd6984c4b06b70e59e3ac85c5327fb
     source_path: plugins/reference/whatsapp.md
     workflow: 16
 ---
 
-# Plugin WhatsApp
+# Плагин WhatsApp
 
-Plugin канала OpenClaw WhatsApp для чатов WhatsApp Web.
+Плагин канала WhatsApp для OpenClaw, предназначенный для чатов WhatsApp Web.
 
 ## Распространение
 
@@ -28,4 +29,4 @@ Plugin канала OpenClaw WhatsApp для чатов WhatsApp Web.
 
 ## Связанная документация
 
-- [whatsapp](/ru/channels/whatsapp)
+- [WhatsApp](/ru/channels/whatsapp)

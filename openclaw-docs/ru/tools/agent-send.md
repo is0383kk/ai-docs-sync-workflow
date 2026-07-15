@@ -1,68 +1,70 @@
 ---
 read_when:
-    - Вы хотите инициировать запуски агента из скриптов или командной строки
+    - Вы хотите запускать агентов из скриптов или командной строки
     - Вам нужно программно доставлять ответы агента в канал чата
-summary: Запускайте ходы агента из CLI и при необходимости доставляйте ответы в каналы
-title: Отправка агентом
+summary: Запускайте циклы агента из CLI и при необходимости отправляйте ответы в каналы
+title: Отправка агента
 x-i18n:
-    generated_at: "2026-06-28T23:49:25Z"
-    model: gpt-5.5
+    generated_at: "2026-07-13T18:41:05Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 24
     provider: openai
-    source_hash: 25026258a5a47c87fbf99689de5ea16d827b11af07bc5ce4f6c3e2bda6466b46
+    source_hash: 23ad57735bd43a2bba5add571e9572da0fbe7b516a70515c674e1ababaab081a
     source_path: tools/agent-send.md
     workflow: 16
 ---
 
-`openclaw agent` запускает один ход агента из командной строки без необходимости
-во входящем сообщении чата. Используйте его для скриптовых рабочих процессов, тестирования и
-программной доставки.
+`openclaw agent` запускает один ход агента из командной строки без
+входящего сообщения чата. Используйте эту команду для сценарных рабочих процессов, тестирования и
+программной доставки. Полное описание флагов и поведения:
+[Справочник по CLI агента](/ru/cli/agent).
 
 ## Быстрый старт
 
 <Steps>
-  <Step title="Run a simple agent turn">
+  <Step title="Запустите простой ход агента">
     ```bash
-    openclaw agent --agent main --message "What is the weather today?"
+    openclaw agent --agent main --message "Какая сегодня погода?"
     ```
 
-    Это отправляет сообщение через Gateway и выводит ответ.
+    Отправляет сообщение через Gateway и выводит ответ.
 
   </Step>
 
-  <Step title="Send a multiline prompt from a file">
+  <Step title="Отправьте многострочную инструкцию из файла">
     ```bash
     openclaw agent --agent ops --message-file ./task.md
     ```
 
-    Это считывает допустимый файл UTF-8 как тело сообщения агента.
+    Считывает корректный файл UTF-8 как тело сообщения агента.
 
   </Step>
 
-  <Step title="Target a specific agent or session">
+  <Step title="Укажите конкретного агента или сеанс">
     ```bash
-    # Target a specific agent
-    openclaw agent --agent ops --message "Summarize logs"
+    # Указать конкретного агента
+    openclaw agent --agent ops --message "Суммируй журналы"
 
-    # Target a phone number (derives session key)
-    openclaw agent --to +15555550123 --message "Status update"
+    # Указать номер телефона (ключ сеанса формируется автоматически)
+    openclaw agent --to +15555550123 --message "Обновление статуса"
 
-    # Reuse an existing session
-    openclaw agent --session-id abc123 --message "Continue the task"
+    # Повторно использовать существующий сеанс
+    openclaw agent --session-id abc123 --message "Продолжи задачу"
 
-    # Target an exact session key
-    openclaw agent --session-key agent:ops:incident-42 --message "Summarize status"
+    # Указать точный ключ сеанса
+    openclaw agent --session-key agent:ops:incident-42 --message "Суммируй статус"
     ```
 
   </Step>
 
-  <Step title="Deliver the reply to a channel">
+  <Step title="Доставьте ответ в канал">
     ```bash
-    # Deliver to WhatsApp (default channel)
-    openclaw agent --to +15555550123 --message "Report ready" --deliver
+    # Доставить в WhatsApp (канал по умолчанию)
+    openclaw agent --to +15555550123 --message "Отчёт готов" --deliver
 
-    # Deliver to Slack
-    openclaw agent --agent ops --message "Generate report" \
+    # Доставить в Slack
+    openclaw agent --agent ops --message "Сформируй отчёт" \
       --deliver --reply-channel slack --reply-to "#reports"
     ```
 
@@ -71,83 +73,93 @@ x-i18n:
 
 ## Флаги
 
-| Флаг                          | Описание                                                    |
-| ----------------------------- | ----------------------------------------------------------- |
-| `--message \<text\>`          | Встроенное сообщение для отправки                           |
-| `--message-file \<path\>`     | Считать сообщение из допустимого файла UTF-8                |
-| `--to \<dest\>`               | Вывести ключ сеанса из целевого адресата (телефон, id чата) |
-| `--session-key \<key\>`       | Использовать явный ключ сеанса                              |
-| `--agent \<id\>`              | Направить в настроенного агента (использует его сеанс `main`) |
-| `--session-id \<id\>`         | Повторно использовать существующий сеанс по id              |
-| `--local`                     | Принудительно использовать локальную встроенную среду выполнения (без Gateway) |
-| `--deliver`                   | Отправить ответ в канал чата                                |
-| `--channel \<name\>`          | Канал доставки (whatsapp, telegram, discord, slack и т. д.) |
-| `--reply-to \<target\>`       | Переопределение цели доставки                               |
-| `--reply-channel \<name\>`    | Переопределение канала доставки                             |
-| `--reply-account \<id\>`      | Переопределение id учетной записи доставки                  |
-| `--thinking \<level\>`        | Задать уровень thinking для выбранного профиля модели       |
-| `--verbose \<on\|full\|off\>` | Задать уровень подробности                                  |
-| `--timeout \<seconds\>`       | Переопределить тайм-аут агента                              |
-| `--json`                      | Вывести структурированный JSON                              |
+| Флаг                        | Описание                                                          |
+| --------------------------- | -------------------------------------------------------------------- |
+| `--message <text>`          | Встроенное сообщение для отправки                                               |
+| `--message-file <path>`     | Считать сообщение из корректного файла UTF-8                             |
+| `--to <dest>`               | Сформировать ключ сеанса из адресата (телефона, идентификатора чата)                    |
+| `--session-key <key>`       | Использовать явный ключ сеанса                                          |
+| `--agent <id>`              | Указать настроенного агента (используется его сеанс `main`)                  |
+| `--session-id <id>`         | Повторно использовать существующий сеанс по идентификатору                                      |
+| `--model <id>`              | Переопределение модели для этого запуска (`provider/model` или идентификатор модели)           |
+| `--local`                   | Принудительно использовать локальную встроенную среду выполнения (пропустить Gateway)                          |
+| `--deliver`                 | Отправить ответ в канал чата                                     |
+| `--channel <name>`          | Канал доставки; вместе с `--agent` + `--to` также применяется к области личных сообщений     |
+| `--reply-to <target>`       | Переопределение адресата доставки                                             |
+| `--reply-channel <name>`    | Переопределение канала доставки                                            |
+| `--reply-account <id>`      | Переопределение идентификатора учётной записи доставки                                         |
+| `--thinking <level>`        | Задать уровень рассуждений для выбранного профиля модели                    |
+| `--verbose <on\|full\|off>` | Сохранить уровень подробности для сеанса (`full` также записывает вывод инструментов в журнал) |
+| `--timeout <seconds>`       | Переопределить время ожидания агента (по умолчанию 600 или значение конфигурации)                |
+| `--json`                    | Вывести структурированный JSON                                               |
 
 ## Поведение
 
 - По умолчанию CLI работает **через Gateway**. Добавьте `--local`, чтобы принудительно использовать
-  встроенную среду выполнения на текущей машине.
-- Передайте ровно один из параметров: `--message` или `--message-file`. Сообщения из файла сохраняют
-  многострочное содержимое после удаления необязательной UTF-8 BOM.
-- Если Gateway недоступен, CLI **возвращается** к локальному встроенному запуску.
-- Выбор сеанса: `--to` выводит ключ сеанса (целевые группы/каналы
-  сохраняют изоляцию; прямые чаты сворачиваются в `main`).
+  встроенную среду выполнения на текущем компьютере.
+- Передайте ровно один из параметров: `--message` или `--message-file`. Сообщения из файлов сохраняют
+  многострочное содержимое после удаления необязательной метки BOM UTF-8.
+- Если запрос к Gateway завершается ошибкой, CLI **переходит** к локальному встроенному
+  запуску; при превышении времени ожидания Gateway переход выполняется с новым сеансом, а не параллельно с
+  исходным журналом диалога.
+- Выбор сеанса: `--to` формирует ключ сеанса (адресаты групп и каналов
+  сохраняют изоляцию; личные чаты сводятся к `main`). При совместном использовании `--agent`,
+  `--channel` и `--to` маршрутизация следует каноническому адресату канала
+  и `session.dmScope`. Для стабильных идентификаторов, используемых только для исходящих сообщений, применяется
+  принадлежащий провайдеру сеанс, изолированный от основного сеанса агента.
 - `--session-key` выбирает явный ключ. Ключи с префиксом агента должны использовать
-  `agent:<agent-id>:<session-key>`, а `--agent` должен совпадать с этим id агента, когда
-  указаны оба параметра. Простые ключи без sentinel ограничиваются областью `--agent`, когда
-  он указан; например, `--agent ops --session-key incident-42` направляет в
-  `agent:ops:incident-42`. Без `--agent` простые ключи без sentinel ограничиваются областью
-  настроенного агента по умолчанию. Литералы `global` и `unknown` остаются
-  без области только когда `--agent` не указан; в этом случае встроенный fallback
-  и владение хранилищем используют настроенного агента по умолчанию.
-- Флаги thinking и verbose сохраняются в хранилище сеанса.
-- Вывод: по умолчанию простой текст или `--json` для структурированной полезной нагрузки и метаданных.
-- С `--json --deliver` JSON включает статус доставки для отправленных,
-  подавленных, частичных и неудачных отправок. См.
-  [статус доставки JSON](/ru/cli/agent#json-delivery-status).
+  `agent:<agent-id>:<session-key>`, а `--agent` должен соответствовать этому идентификатору агента, если
+  указаны оба параметра. Простые ключи, не являющиеся служебными, относятся к области `--agent`, если
+  он указан; например, `--agent ops --session-key incident-42` направляется в
+  `agent:ops:incident-42`. Без `--agent` простые ключи, не являющиеся служебными, относятся
+  к области настроенного агента по умолчанию. Литеральные `global` и `unknown` остаются
+  без области только тогда, когда не указан `--agent`; путь перехода к встроенной среде выполнения
+  связывает эти служебные сеансы с настроенным агентом по умолчанию.
+- `--reply-channel` и `--reply-account` влияют только на доставку.
+- Флаги рассуждений и подробности сохраняются в хранилище сеансов.
+- Вывод: по умолчанию обычный текст или `--json` для структурированных данных и метаданных.
+- При использовании `--json --deliver` JSON содержит статус доставки для отправленных,
+  подавленных, частично отправленных и неудачных отправок. См.
+  [Статус доставки JSON](/ru/cli/agent#json-delivery-status).
 
 ## Примеры
 
 ```bash
-# Simple turn with JSON output
-openclaw agent --to +15555550123 --message "Trace logs" --verbose on --json
+# Простой ход с выводом JSON
+openclaw agent --to +15555550123 --message "Проанализируй журналы" --verbose on --json
 
-# Turn with thinking level
-openclaw agent --session-id 1234 --message "Summarize inbox" --thinking medium
+# Ход с переопределением модели
+openclaw agent --agent ops --model openai/gpt-5.4 --message "Суммируй журналы"
 
-# Multiline prompt from a file
+# Ход с уровнем рассуждений
+openclaw agent --session-id 1234 --message "Суммируй входящие сообщения" --thinking medium
+
+# Многострочная инструкция из файла
 openclaw agent --agent ops --message-file ./task.md
 
-# Exact session key
-openclaw agent --session-key agent:ops:incident-42 --message "Summarize status"
+# Точный ключ сеанса
+openclaw agent --session-key agent:ops:incident-42 --message "Суммируй статус"
 
-# Legacy key scoped to an agent
-openclaw agent --agent ops --session-key incident-42 --message "Summarize status"
+# Устаревший ключ в области агента
+openclaw agent --agent ops --session-key incident-42 --message "Суммируй статус"
 
-# Deliver to a different channel than the session
-openclaw agent --agent ops --message "Alert" --deliver --reply-channel telegram --reply-to "@admin"
+# Доставить в канал, отличный от канала сеанса
+openclaw agent --agent ops --message "Предупреждение" --deliver --reply-channel telegram --reply-to "@admin"
 ```
 
 ## Связанные материалы
 
 <CardGroup cols={2}>
-  <Card title="Agent CLI reference" href="/ru/cli/agent" icon="terminal">
-    Полный справочник флагов и параметров `openclaw agent`.
+  <Card title="Справочник по CLI агента" href="/ru/cli/agent" icon="terminal">
+    Полное описание флагов и параметров `openclaw agent`.
   </Card>
-  <Card title="Sub-agents" href="/ru/tools/subagents" icon="users">
+  <Card title="Субагенты" href="/ru/tools/subagents" icon="users">
     Фоновый запуск субагентов.
   </Card>
-  <Card title="Sessions" href="/ru/concepts/session" icon="comments">
+  <Card title="Сеансы" href="/ru/concepts/session" icon="comments">
     Как работают ключи сеансов и как `--to`, `--agent` и `--session-id` разрешают их.
   </Card>
-  <Card title="Slash commands" href="/ru/tools/slash-commands" icon="slash">
-    Собственный каталог команд, используемый внутри сеансов агента.
+  <Card title="Команды с косой чертой" href="/ru/tools/slash-commands" icon="slash">
+    Каталог встроенных команд, используемых в сеансах агентов.
   </Card>
 </CardGroup>

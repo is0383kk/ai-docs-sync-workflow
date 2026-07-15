@@ -1,25 +1,25 @@
 ---
 read_when:
-    - Quieres que los agentes de OpenClaw usen un catálogo amplio de herramientas sin añadir todos los esquemas de herramientas al prompt
-    - Quieres que las herramientas de OpenClaw, las herramientas MCP y las herramientas de cliente se expongan a través de una única superficie de runtime compacta
-    - Estás implementando o depurando el descubrimiento de herramientas para ejecuciones de OpenClaw
-summary: 'Búsqueda de herramientas: compacta catálogos grandes de herramientas de OpenClaw detrás de search, describe y call'
+    - Quieres que los agentes de OpenClaw usen un amplio catálogo de herramientas sin añadir el esquema de cada herramienta al prompt
+    - Quieres que las herramientas de OpenClaw, las herramientas MCP y las herramientas de cliente estén disponibles a través de una única interfaz de ejecución compacta.
+    - Estás implementando o depurando la detección de herramientas para las ejecuciones de OpenClaw
+summary: 'Búsqueda de herramientas: compacta los grandes catálogos de herramientas de OpenClaw tras las funciones de búsqueda, descripción y llamada'
 title: Búsqueda de herramientas
 x-i18n:
-    generated_at: "2026-07-05T11:46:17Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T23:36:33Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: fa8a7f8580fe3743bfc6082ad3ab0fef848a326539131b4804e577daa05f4137
+    source_hash: 6608a2de3b8ec03d3bb182d5909bb73429f623af8cebb34bc38856cb9d8b8c32
     source_path: tools/tool-search.md
     workflow: 16
 ---
 
-La Búsqueda de herramientas es una función experimental del runtime de agentes de OpenClaw. Ofrece a los agentes una forma compacta de descubrir y llamar catálogos grandes de herramientas. Es útil cuando la ejecución tiene muchas herramientas disponibles, pero es probable que el modelo solo necesite algunas.
+La Búsqueda de herramientas es una función experimental del entorno de ejecución de agentes de OpenClaw. Ofrece a los agentes una forma compacta de descubrir e invocar catálogos extensos de herramientas. Resulta útil cuando la ejecución dispone de muchas herramientas, pero es probable que el modelo solo necesite unas pocas.
 
-Esta página documenta la Búsqueda de herramientas de OpenClaw. No es la superficie de búsqueda de herramientas ni de herramientas dinámicas nativa de Codex. El modo de código nativo de Codex, la búsqueda de herramientas, las herramientas dinámicas diferidas y las llamadas de herramientas anidadas son superficies estables del arnés de Codex y no dependen de `tools.toolSearch`.
+Esta página documenta la Búsqueda de herramientas de OpenClaw. No se trata de la búsqueda de herramientas ni de la superficie de herramientas dinámicas nativas de Codex. El modo de código, la búsqueda de herramientas, las herramientas dinámicas diferidas y las llamadas a herramientas anidadas nativos de Codex son superficies estables del entorno de Codex y no dependen de `tools.toolSearch`.
 
-Cuando se habilita para ejecuciones de OpenClaw, el modelo recibe una herramienta `tool_search_code` de forma predeterminada. Esa herramienta ejecuta un cuerpo breve de JavaScript en un subproceso aislado de Node con un puente `openclaw.tools`:
+Cuando se habilita para ejecuciones de OpenClaw, el modelo recibe de forma predeterminada una herramienta `tool_search_code`, además de cualquier herramienta exclusivamente directa cuyos resultados estructurados no puedan atravesar el puente compacto. La herramienta de código ejecuta un breve cuerpo de JavaScript en un subproceso aislado de Node con un puente `openclaw.tools`:
 
 ```js
 const hits = await openclaw.tools.search("create a GitHub issue");
@@ -30,56 +30,56 @@ return await openclaw.tools.call(tool.id, {
 });
 ```
 
-El catálogo puede incluir herramientas de OpenClaw, herramientas de plugins, herramientas MCP y herramientas proporcionadas por el cliente. El modelo no ve todos los esquemas completos por adelantado. En su lugar, busca descriptores compactos, describe una herramienta seleccionada cuando necesita el esquema exacto y llama a esa herramienta a través de OpenClaw.
+El catálogo puede incluir herramientas de OpenClaw aptas para el catálogo, herramientas de plugins, herramientas de MCP y herramientas proporcionadas por el cliente. El modelo no ve de antemano todos los esquemas catalogados. En su lugar, busca descriptores compactos, obtiene la descripción de una herramienta seleccionada cuando necesita el esquema exacto y la invoca mediante OpenClaw. Las herramientas exclusivamente directas permanecen visibles para el modelo y no se añaden al catálogo.
 
-Las ejecuciones del arnés de Codex no reciben estos controles experimentales de la Búsqueda de herramientas de OpenClaw. OpenClaw pasa capacidades del producto a Codex como herramientas dinámicas, y Codex es propietario del modo de código nativo estable, la búsqueda de herramientas nativa, las herramientas dinámicas diferidas y las llamadas de herramientas anidadas.
+Las ejecuciones del entorno de Codex no reciben estos controles experimentales de la Búsqueda de herramientas de OpenClaw. OpenClaw transmite las capacidades del producto a Codex como herramientas dinámicas, y Codex controla el modo de código nativo estable, la búsqueda de herramientas nativa, las herramientas dinámicas diferidas y las llamadas a herramientas anidadas.
 
 ## Cómo se ejecuta un turno
 
-Durante la planificación, el ejecutor integrado de OpenClaw crea el catálogo efectivo para la ejecución:
+Durante la planificación, el ejecutor integrado de OpenClaw construye el catálogo efectivo para la ejecución:
 
-1. Resolver la política de herramientas activa para el agente, el perfil, el sandbox y la sesión.
-2. Enumerar las herramientas de OpenClaw y de plugins elegibles.
-3. Enumerar las herramientas MCP elegibles a través del runtime MCP de la sesión.
-4. Agregar las herramientas de cliente elegibles suministradas para la ejecución actual.
-5. Indexar descriptores compactos para la búsqueda.
-6. Exponer al modelo el puente de código de OpenClaw, las herramientas estructuradas de respaldo o la superficie compacta de directorio.
+1. Resuelve la política de herramientas activa para el agente, el perfil, el entorno aislado y la sesión.
+2. Enumera las herramientas aptas de OpenClaw y de los plugins.
+3. Enumera las herramientas de MCP aptas mediante el entorno de ejecución de MCP de la sesión.
+4. Añade las herramientas de cliente aptas proporcionadas para la ejecución actual.
+5. Mantiene las herramientas exclusivamente directas visibles para el modelo e indexa descriptores compactos para las herramientas restantes aptas para el catálogo.
+6. Expone el puente de código de OpenClaw, las herramientas estructuradas de respaldo o la superficie compacta de directorio junto con esas herramientas exclusivamente directas.
 
-Durante la ejecución, cada llamada real de herramienta vuelve a OpenClaw. El runtime aislado de Node no contiene implementaciones de plugins, objetos de cliente MCP ni secretos. `openclaw.tools.call(...)` cruza el puente de vuelta al Gateway, donde siguen aplicándose la política, la aprobación, los hooks, el registro y el manejo de resultados normales.
+Durante la ejecución, cada llamada real a una herramienta vuelve a OpenClaw. El entorno aislado de Node no contiene implementaciones de plugins, objetos de cliente de MCP ni secretos. `openclaw.tools.call(...)` atraviesa el puente de vuelta al Gateway, donde siguen aplicándose la política, la aprobación, los hooks, el registro y el procesamiento de resultados habituales.
 
 ## Modos
 
 `tools.toolSearch` tiene tres modos visibles para el modelo:
 
-- `code`: expone `tool_search_code`, el puente compacto predeterminado de JavaScript.
-- `tools`: expone `tool_search`, `tool_describe` y `tool_call` como herramientas estructuradas simples para proveedores que no deberían recibir código.
-- `directory`: expone `tool_search`, `tool_describe` y `tool_call`, además de un directorio acotado en el prompt con nombres y descripciones de herramientas disponibles para proveedores que deberían ver nombres de herramientas sin todos los esquemas completos. OpenClaw también puede exponer directamente un conjunto pequeño y acotado de esquemas de herramientas probables o requeridos para el turno actual.
+- `code`: expone `tool_search_code`, el puente compacto predeterminado de JavaScript, junto con las herramientas exclusivamente directas.
+- `tools`: expone `tool_search`, `tool_describe` y `tool_call` como herramientas estructuradas simples para proveedores que no deban recibir código, junto con las herramientas exclusivamente directas.
+- `directory`: expone `tool_search`, `tool_describe` y `tool_call`, además de un directorio acotado en el prompt con los nombres y las descripciones de las herramientas disponibles para proveedores que deban ver los nombres de las herramientas sin recibir todos los esquemas completos. OpenClaw también puede exponer directamente un pequeño conjunto acotado de esquemas de herramientas probables o necesarias para el turno actual. Las herramientas exclusivamente directas también permanecen visibles en este modo.
 
-Todos los modos usan el mismo catálogo filtrado por política y la ruta normal de ejecución de OpenClaw. Si el runtime actual no puede iniciar el proceso hijo aislado de Node para el modo de código, el modo `code` predeterminado vuelve a `tools` antes de la compactación del catálogo. En el modo `directory`, las herramientas proporcionadas por el cliente permanecen directamente visibles para la ejecución actual, mientras que las herramientas de OpenClaw, de plugins y MCP pueden compactarse detrás del catálogo de directorio. Una llamada directa a un nombre exacto oculto del directorio se hidrata desde ese mismo catálogo autorizado antes de la ejecución.
+Todos los modos utilizan el mismo catálogo filtrado por políticas y la ruta de ejecución habitual de OpenClaw. Las herramientas marcadas con `catalogMode: "direct-only"` permanecen fuera de ese catálogo y siguen siendo visibles para el modelo. Si el entorno de ejecución actual no puede iniciar el proceso secundario aislado de Node para el modo de código, el modo predeterminado `code` recurre a `tools` antes de la Compaction del catálogo. En el modo `directory`, las herramientas proporcionadas por el cliente permanecen visibles directamente durante la ejecución actual, mientras que las herramientas de OpenClaw, de plugins y de MCP pueden compactarse detrás del catálogo del directorio. Una llamada directa al nombre exacto de una herramienta oculta del directorio se completa desde ese mismo catálogo autorizado antes de ejecutarse.
 
-Todos los modos son experimentales. Prefiere la exposición directa de herramientas para catálogos pequeños de herramientas de OpenClaw y prefiere las superficies estables nativas de Codex para ejecuciones del arnés de Codex.
+Todos los modos son experimentales. Prefiera la exposición directa de herramientas para catálogos pequeños de herramientas de OpenClaw y las superficies estables nativas de Codex para las ejecuciones del entorno de Codex.
 
-No hay una configuración separada de selección de fuentes. Cuando la Búsqueda de herramientas está habilitada, el catálogo incluye herramientas elegibles de OpenClaw, MCP y de cliente después del filtrado normal de políticas.
+No existe una configuración independiente para seleccionar las fuentes. Cuando la Búsqueda de herramientas está habilitada, el catálogo incluye las herramientas de OpenClaw, MCP y cliente aptas para el catálogo después del filtrado habitual por políticas; las herramientas exclusivamente directas se conservan por separado.
 
-## Por qué existe
+## Motivo de esta función
 
-Los catálogos grandes son útiles, pero costosos. Enviar todos los esquemas de herramientas al modelo agranda la solicitud, ralentiza la planificación y aumenta la selección accidental de herramientas.
+Los catálogos extensos son útiles, pero costosos. Enviar todos los esquemas de herramientas al modelo aumenta el tamaño de la solicitud, ralentiza la planificación e incrementa la selección accidental de herramientas.
 
-La Búsqueda de herramientas cambia la forma:
+La Búsqueda de herramientas cambia la estructura:
 
 - herramientas directas: el modelo ve todos los esquemas seleccionados antes del primer token
-- modo de código de Búsqueda de herramientas: el modelo ve una herramienta de código compacta y un contrato de API breve
-- modo de herramientas de Búsqueda de herramientas: el modelo ve tres herramientas estructuradas compactas de respaldo
-- modo de directorio de Búsqueda de herramientas: el modelo ve un directorio acotado más controles de búsqueda/descripción/llamada y un conjunto pequeño y acotado de esquemas probables o requeridos
-- durante el turno: el modelo puede cargar los esquemas restantes según sea necesario
+- modo de código de la Búsqueda de herramientas: el modelo ve una herramienta de código compacta, un contrato breve de API y cualquier herramienta exclusivamente directa
+- modo de herramientas de la Búsqueda de herramientas: el modelo ve tres herramientas estructuradas compactas de respaldo, además de cualquier herramienta exclusivamente directa
+- modo de directorio de la Búsqueda de herramientas: el modelo ve un directorio acotado, controles de búsqueda/descripción/llamada y un pequeño conjunto acotado de esquemas probables o necesarios, además de cualquier herramienta exclusivamente directa
+- durante el turno: el modelo puede cargar los esquemas restantes según los necesite
 
-La exposición directa de herramientas sigue siendo el valor predeterminado correcto para catálogos pequeños. La Búsqueda de herramientas funciona mejor cuando una ejecución puede ver muchas herramientas, especialmente de servidores MCP o herramientas de aplicaciones proporcionadas por el cliente.
+La exposición directa de herramientas sigue siendo la opción predeterminada adecuada para catálogos pequeños. La Búsqueda de herramientas resulta especialmente útil cuando una ejecución puede acceder a muchas herramientas, sobre todo desde servidores MCP o herramientas de aplicaciones proporcionadas por el cliente.
 
 ## API
 
 `openclaw.tools.search(query, options?)`
 
-Busca en el catálogo efectivo de la ejecución actual. Los resultados son compactos y seguros para volver a colocarlos en el contexto del prompt.
+Busca en el catálogo efectivo de la ejecución actual. Los resultados son compactos y seguros para volver a incluirlos en el contexto del prompt.
 
 ```js
 const hits = await openclaw.tools.search("calendar event", { limit: 5 });
@@ -87,7 +87,7 @@ const hits = await openclaw.tools.search("calendar event", { limit: 5 });
 
 `openclaw.tools.describe(id)`
 
-Carga metadatos completos para un resultado de búsqueda, incluido el esquema de entrada exacto.
+Carga los metadatos completos de un resultado de búsqueda, incluido el esquema exacto de entrada.
 
 ```js
 const calendarCreate = await openclaw.tools.describe("mcp:calendar:create_event");
@@ -95,7 +95,7 @@ const calendarCreate = await openclaw.tools.describe("mcp:calendar:create_event"
 
 `openclaw.tools.call(id, args)`
 
-Llama a una herramienta seleccionada a través de OpenClaw.
+Invoca una herramienta seleccionada mediante OpenClaw.
 
 ```js
 await openclaw.tools.call(calendarCreate.id, {
@@ -116,32 +116,32 @@ El modo de directorio expone:
 - `tool_describe`
 - `tool_call`
 
-También mantiene directamente visibles las herramientas proporcionadas por el cliente y puede exponer directamente un conjunto pequeño y acotado de esquemas de herramientas de catálogo probables o requeridos para el turno actual. Si el directorio acotado omite entradas, usa `tool_search` para encontrarlas. Si el modelo solicita directamente un nombre exacto de herramienta oculta del directorio, OpenClaw la hidrata desde el catálogo autorizado antes de la ejecución normal.
-Los nombres de herramientas de cliente en modo de directorio no deben colisionar con nombres de herramientas de OpenClaw, plugins o MCP, porque el despacho diferido exacto usa esos nombres.
+También mantiene visibles directamente las herramientas proporcionadas por el cliente y todas las herramientas exclusivamente directas, y puede exponer directamente un pequeño conjunto acotado de esquemas de herramientas del catálogo probables o necesarios para el turno actual. Si el directorio acotado omite entradas, utilice `tool_search` para encontrarlas. Si el modelo solicita directamente el nombre exacto de una herramienta oculta del directorio, OpenClaw la completa desde el catálogo autorizado antes de la ejecución habitual.
+Los nombres de herramientas de cliente del modo de directorio no deben coincidir con nombres de herramientas de OpenClaw, de plugins o de MCP, porque el despacho diferido exacto utiliza esos nombres.
 
-## Límite del runtime
+## Límite del entorno de ejecución
 
-El puente de código se ejecuta en un subproceso de Node de vida corta. El subproceso comienza con el modo de permisos de Node habilitado, un entorno vacío, sin permisos de sistema de archivos ni red, y sin permisos de procesos hijos ni workers. OpenClaw aplica un tiempo de espera de reloj de pared en el proceso padre y mata el subproceso al agotarse el tiempo, incluso después de continuaciones asíncronas.
+El puente de código se ejecuta en un subproceso de corta duración de Node. El subproceso se inicia con el modo de permisos de Node habilitado, un entorno vacío, sin permisos para el sistema de archivos ni la red y sin permisos para procesos secundarios ni workers. OpenClaw aplica un tiempo de espera de reloj de pared en el proceso principal y termina el subproceso cuando se agota, incluso después de continuaciones asíncronas.
 
-El runtime solo expone:
+El entorno de ejecución solo expone:
 
 - `console.log`, `console.warn` y `console.error`
 - `openclaw.tools.search`
 - `openclaw.tools.describe`
 - `openclaw.tools.call`
 
-El comportamiento normal de OpenClaw sigue aplicándose a las llamadas finales:
+El comportamiento habitual de OpenClaw sigue aplicándose a las llamadas finales:
 
-- políticas de permitir y denegar herramientas
-- restricciones de herramientas por agente y por sandbox
-- política de herramientas de canal/runtime
+- políticas de autorización y denegación de herramientas
+- restricciones de herramientas por agente y por entorno aislado
+- política de herramientas del canal o del entorno de ejecución
 - hooks de aprobación
-- hooks `before_tool_call` de plugins
+- hooks `before_tool_call` de los plugins
 - identidad de sesión, registros y telemetría
 
 ## Configuración
 
-Habilita la Búsqueda de herramientas para ejecuciones de OpenClaw con el puente de código predeterminado:
+Habilite la Búsqueda de herramientas para las ejecuciones de OpenClaw con el puente de código predeterminado:
 
 ```bash
 openclaw config set tools.toolSearch true
@@ -157,7 +157,7 @@ JSON equivalente:
 }
 ```
 
-Usa en su lugar las herramientas estructuradas de respaldo para ejecuciones de OpenClaw:
+Utilice en su lugar las herramientas estructuradas de respaldo para las ejecuciones de OpenClaw:
 
 ```json5
 {
@@ -169,7 +169,7 @@ Usa en su lugar las herramientas estructuradas de respaldo para ejecuciones de O
 }
 ```
 
-Usa en su lugar la superficie compacta de directorio para ejecuciones de OpenClaw:
+Utilice en su lugar la superficie compacta de directorio para las ejecuciones de OpenClaw:
 
 ```json5
 {
@@ -181,7 +181,7 @@ Usa en su lugar la superficie compacta de directorio para ejecuciones de OpenCla
 }
 ```
 
-Ajusta el tiempo de espera del modo de código y los límites de resultados de búsqueda (los valores mostrados son los predeterminados):
+Ajuste el tiempo de espera del modo de código y los límites de resultados de búsqueda (los valores mostrados son los predeterminados):
 
 ```json5
 {
@@ -196,9 +196,9 @@ Ajusta el tiempo de espera del modo de código y los límites de resultados de b
 }
 ```
 
-El runtime limita `codeTimeoutMs` a 1000-60000, `maxSearchLimit` a 1-50 y `searchDefaultLimit` a 1..`maxSearchLimit`.
+El entorno de ejecución limita `codeTimeoutMs` al intervalo 1000-60000, `maxSearchLimit` al intervalo 1-50 y `searchDefaultLimit` al intervalo 1..`maxSearchLimit`.
 
-Deshabilítala:
+Deshabilítela:
 
 ```json5
 {
@@ -210,53 +210,53 @@ Deshabilítala:
 
 ## Prompt y telemetría
 
-La Búsqueda de herramientas registra suficiente telemetría para compararla con la exposición directa de herramientas:
+La Búsqueda de herramientas registra telemetría suficiente para compararla con la exposición directa de herramientas:
 
-- bytes serializados totales de herramientas y prompt enviados al arnés
-- tamaño del catálogo y desglose por fuente
-- conteos de búsqueda, descripción y llamada
-- llamadas finales de herramientas ejecutadas a través de OpenClaw
-- ids y fuentes de herramientas seleccionadas
+- total de bytes serializados de herramientas y del prompt enviados al entorno
+- tamaño del catálogo y desglose por fuentes
+- número de búsquedas, descripciones y llamadas
+- llamadas finales a herramientas ejecutadas mediante OpenClaw
+- identificadores y fuentes de las herramientas seleccionadas
 
-Los registros de sesión deberían permitir responder:
+Los registros de sesión deben permitir responder:
 
-- cuántos esquemas de herramientas vio el modelo por adelantado
+- cuántos esquemas de herramientas vio el modelo de antemano
 - cuántas operaciones de búsqueda y descripción realizó
-- qué herramienta final se llamó
-- si el resultado provino de OpenClaw, MCP o una herramienta de cliente
+- qué herramienta final se invocó
+- si el resultado procedía de OpenClaw, MCP o una herramienta de cliente
 
 ## Validación E2E
 
-El escenario de Gateway de QA Lab prueba ambas rutas con el runtime de OpenClaw:
+El escenario de Gateway de QA Lab demuestra ambas rutas con el entorno de ejecución de OpenClaw:
 
 ```bash
 pnpm openclaw qa suite --provider-mode mock-openai --scenario tool-search-gateway-e2e
 ```
 
-Crea un plugin falso temporal con un catálogo grande de herramientas, inicia el proveedor simulado de OpenAI, inicia un Gateway una vez en modo directo y otra vez con la Búsqueda de herramientas habilitada, y luego compara las cargas útiles de solicitud del proveedor y los registros de sesión.
+Crea un plugin falso temporal con un catálogo extenso de herramientas, inicia el proveedor simulado de OpenAI, inicia un Gateway una vez en modo directo y otra con la Búsqueda de herramientas habilitada, y después compara las cargas útiles de las solicitudes al proveedor y los registros de sesión.
 
-La regresión demuestra:
+La prueba de regresión demuestra:
 
-1. El modo directo puede llamar a la herramienta del plugin falso.
-2. La Búsqueda de herramientas puede llamar a la misma herramienta del plugin falso.
-3. El modo directo expone directamente al proveedor los esquemas de herramientas del plugin falso.
-4. La Búsqueda de herramientas expone solo el puente compacto.
-5. La carga útil de solicitud de la Búsqueda de herramientas es más pequeña para el catálogo falso grande.
-6. Los registros de sesión muestran los conteos esperados de llamadas de herramientas y la telemetría de llamadas puenteadas.
+1. El modo directo puede invocar la herramienta del plugin falso.
+2. La Búsqueda de herramientas puede invocar la misma herramienta del plugin falso.
+3. El modo directo expone los esquemas de herramientas del plugin falso directamente al proveedor.
+4. La Búsqueda de herramientas solo expone el puente compacto y cualquier herramienta exclusivamente directa.
+5. La carga útil de la solicitud de la Búsqueda de herramientas es más pequeña para el catálogo falso extenso.
+6. Los registros de sesión muestran el número esperado de llamadas a herramientas y la telemetría de llamadas a través del puente.
 
 ## Comportamiento ante fallos
 
 La Búsqueda de herramientas debe fallar de forma cerrada:
 
-- si una herramienta no está en la política efectiva, la búsqueda no debería devolverla
-- si una herramienta seleccionada deja de estar disponible, `tool_call` debería fallar
-- si la política o la aprobación bloquea la ejecución, el resultado de la llamada debería informar ese bloqueo en lugar de omitirlo
-- si el puente de código no puede crear un runtime aislado, usa `mode: "tools"` o deshabilita la Búsqueda de herramientas para ese despliegue
+- si una herramienta no está permitida por la política efectiva, la búsqueda no debe devolverla
+- si una herramienta seleccionada deja de estar disponible, `tool_call` debe fallar
+- si la política o la aprobación bloquean la ejecución, el resultado de la llamada debe informar de ese bloqueo en lugar de eludirlo
+- si el puente de código no puede crear un entorno aislado, utilice `mode: "tools"` o deshabilite la Búsqueda de herramientas para ese despliegue
 
-## Relacionado
+## Contenido relacionado
 
 - [Herramientas y plugins](/es/tools)
-- [Sandbox multiagente y herramientas](/es/tools/multi-agent-sandbox-tools)
-- [Herramienta Exec](/es/tools/exec)
+- [Entorno aislado multiagente y herramientas](/es/tools/multi-agent-sandbox-tools)
+- [Herramienta de ejecución](/es/tools/exec)
 - [Configuración de agentes ACP](/es/tools/acp-agents-setup)
-- [Crear plugins](/es/plugins/building-plugins)
+- [Creación de plugins](/es/plugins/building-plugins)

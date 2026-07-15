@@ -1,43 +1,39 @@
 ---
 read_when:
-    - OpenClaw가 해당 모델이 선택되었을 때만 로컬 모델 서버를 시작하도록 하려는 경우
-    - ds4, inferrs, vLLM, llama.cpp, MLX 또는 다른 OpenAI 호환 로컬 서버를 실행합니다
-    - 로컬 제공자의 콜드 스타트, 준비 상태, 유휴 종료를 제어해야 합니다.
-summary: OpenClaw 모델 요청 전에 필요할 때 로컬 모델 서버 시작
+    - 모델 또는 임베딩 제공자가 선택된 경우에만 OpenClaw가 로컬 모델 서버를 시작하도록 하려는 경우
+    - ds4, inferrs, vLLM, llama.cpp, MLX 또는 기타 OpenAI 호환 로컬 서버를 실행하는 경우
+    - 로컬 제공자의 콜드 스타트, 준비 상태, 유휴 종료를 제어해야 합니다
+summary: OpenClaw 모델 및 임베딩 요청 전에 필요할 때 로컬 모델 서버 시작
 title: 로컬 모델 서비스
 x-i18n:
-    generated_at: "2026-06-27T17:29:24Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T00:46:39Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 399648e32dd51faba7687a26de75ef349f1197269b5cca03d34552f0cd9cce28
+    source_hash: a761113dd591fed0394379b2bad173165efc5e284565c652493e73d1e724529d
     source_path: gateway/local-model-services.md
     workflow: 16
 ---
 
-`models.providers.<id>.localService`를 사용하면 OpenClaw가 필요할 때 provider 소유의 로컬
-모델 서버를 시작할 수 있습니다. 이는 provider 수준 설정입니다. 선택한 모델이
-해당 provider에 속하면 OpenClaw는 서비스를 프로브하고, endpoint가 내려가 있으면 프로세스를
-시작한 뒤, 준비 상태를 기다린 다음 모델 요청을 보냅니다.
-
-하루 종일 실행해 두기에는 비용이 큰 로컬 서버나, 모델 선택만으로 backend를
-올리기에 충분해야 하는 수동 설정에 사용하세요.
+`models.providers.<id>.localService`는 필요할 때 공급자 소유의 로컬 모델 서버를 시작합니다. 모델 또는 임베딩 요청에서 해당 공급자를 선택하면 OpenClaw는 상태 엔드포인트를 확인하고, 서버가 중지되어 있으면 프로세스를 시작한 뒤 준비될 때까지 기다렸다가 요청을 전송합니다. 비용이 많이 드는 로컬 서버를 하루 종일 실행하지 않으려는 경우 사용하세요.
 
 ## 작동 방식
 
-1. 모델 요청이 설정된 provider로 확인됩니다.
-2. 해당 provider에 `localService`가 있으면 OpenClaw가 `healthUrl`을 프로브합니다.
-3. 프로브가 성공하면 OpenClaw는 기존 서버를 사용합니다.
-4. 프로브가 실패하면 OpenClaw는 `args`와 함께 `command`를 시작합니다.
-5. OpenClaw는 `readyTimeoutMs`가 만료될 때까지 준비 상태를 폴링합니다.
-6. 모델 요청은 일반 provider transport를 통해 전송됩니다.
-7. OpenClaw가 프로세스를 시작했고 `idleStopMs`가 양수이면, 마지막 진행 중 요청이
-   해당 시간만큼 유휴 상태였던 뒤 프로세스가 중지됩니다.
+1. 모델 또는 임베딩 요청이 구성된 공급자로 해석됩니다.
+2. 해당 공급자에 `localService`가 있으면 OpenClaw가 `healthUrl`을 확인합니다.
+3. 확인에 성공하면 OpenClaw는 이미 실행 중인 서버를 사용합니다.
+4. 확인에 실패하면 OpenClaw는 `args`를 사용하여 `command`를 실행합니다.
+5. OpenClaw는 `readyTimeoutMs`가 만료될 때까지 상태 엔드포인트를 폴링합니다.
+6. 요청은 일반적인 모델 또는 임베딩 전송 경로를 거칩니다.
+7. OpenClaw가 프로세스를 시작했고 `idleStopMs`가 설정되어 있으면, 처리 중이던 마지막 요청이 해당 시간만큼 유휴 상태가 된 후 프로세스를 중지합니다.
 
-OpenClaw는 이를 위해 launchd, systemd, Docker, daemon을 설치하지 않습니다.
-서버는 처음 필요로 한 OpenClaw 프로세스의 child process입니다.
+OpenClaw는 이를 위해 launchd, systemd, Docker 또는 어떠한 데몬도 설치하지 않습니다. 서버는 이를 처음 필요로 한 OpenClaw 프로세스의 일반 자식 프로세스입니다.
 
-## 설정 형태
+시작 작업은 구성된 공급자와 명령/인수/환경 변수 집합별로 직렬화되므로 동일한 서비스를 대상으로 한 채팅 및 임베딩 요청이 동시에 발생해도 서버가 중복으로 생성되지 않습니다. 각 요청은 응답 처리가 완료될 때까지 자체 임대를 유지하므로, 유휴 종료는 처리 중인 모든 모델 및 임베딩 요청이 완료될 때까지 기다립니다. 구성된 공급자 별칭은 서로 구분된 상태로 유지됩니다. 두 별칭이 서로 다른 GPU 호스트를 가리키더라도 동일한 Ollama, LM Studio 또는 OpenAI 호환 어댑터 ID로 통합되지 않습니다.
+
+다른 OpenClaw 프로세스가 동일한 `healthUrl`에서 이미 정상 상태의 서버를 실행 중이면 이 프로세스는 해당 서버의 관리를 인수하지 않고 재사용합니다(각 프로세스는 자신이 직접 시작한 자식 프로세스만 관리합니다). 시작 및 종료 로그에는 길이가 제한되고 민감 정보가 제거된 자식 프로세스 출력의 마지막 부분과 소요 시간 및 종료 세부 정보가 포함되며, 구성된 환경 변수 값은 절대 출력되지 않습니다.
+
+## 구성 형태
 
 ```json5
 {
@@ -74,24 +70,23 @@ OpenClaw는 이를 위해 launchd, systemd, Docker, daemon을 설치하지 않�
 }
 ```
 
+느린 콜드 스타트와 긴 생성 작업이 기본 모델 요청 제한 시간에 걸리지 않도록 공급자 항목에 `timeoutSeconds`를 설정하세요(`localService`가 아님). 서버가 기본 URL의 `/models`가 아닌 다른 위치에서 준비 상태를 제공하는 경우에는 명시적인 `healthUrl`을 설정하세요.
+
 ## 필드
 
-- `command`: 절대 실행 파일 경로입니다. 셸 조회는 사용되지 않습니다.
-- `args`: 프로세스 인수입니다. 셸 확장, pipe, globbing, quoting
-  규칙은 적용되지 않습니다.
-- `cwd`: 프로세스의 선택적 작업 디렉터리입니다.
-- `env`: OpenClaw 프로세스 환경 위에 병합되는 선택적 환경 변수입니다.
-- `healthUrl`: 준비 상태 URL입니다. 생략하면 OpenClaw가 `baseUrl`에 `/models`를
-  추가하므로 `http://127.0.0.1:8000/v1`은
-  `http://127.0.0.1:8000/v1/models`가 됩니다.
-- `readyTimeoutMs`: 시작 준비 상태 기한입니다. 기본값: `120000`.
-- `idleStopMs`: OpenClaw가 시작한 프로세스의 유휴 종료 지연입니다. `0`이거나
-  생략하면 OpenClaw가 종료될 때까지 프로세스를 계속 실행합니다.
+| 필드             | 필수 여부 | 설명                                                                                                                                 |
+| ---------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `command`        | 예        | 실행 파일의 절대 경로입니다. 셸 PATH 조회를 수행하지 않습니다.                                                                       |
+| `args`           | 아니요    | 프로세스 인수입니다. 셸 확장, 파이프, 글로빙 또는 따옴표 처리를 수행하지 않습니다.                                                    |
+| `cwd`            | 아니요    | 프로세스의 작업 디렉터리입니다.                                                                                                      |
+| `env`            | 아니요    | OpenClaw 프로세스 환경에 병합되는 환경 변수입니다.                                                                                   |
+| `healthUrl`      | 아니요    | 준비 상태 URL입니다. 기본값은 `baseUrl`에 `/models`를 추가한 값입니다(`http://127.0.0.1:8000/v1`은 `http://127.0.0.1:8000/v1/models`가 됩니다). |
+| `readyTimeoutMs` | 아니요    | 시작 준비 제한 시간입니다. 기본값: `120000`.                                                                                         |
+| `idleStopMs`     | 아니요    | OpenClaw가 시작한 프로세스의 유휴 종료 지연 시간입니다. `0`이거나 생략하면 OpenClaw가 종료될 때까지 계속 실행합니다.                  |
 
 ## Inferrs 예시
 
-Inferrs는 사용자 지정 OpenAI 호환 `/v1` backend이므로, 동일한 로컬 서비스
-API가 `inferrs` provider 항목과 함께 작동합니다.
+Inferrs는 사용자 지정 OpenAI 호환 `/v1` 백엔드이므로 동일한 `localService` API를 `inferrs` 공급자 항목에 사용할 수 있습니다.
 
 ```json5
 {
@@ -133,9 +128,7 @@ API가 `inferrs` provider 항목과 함께 작동합니다.
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
             contextWindow: 131072,
             maxTokens: 4096,
-            compat: {
-              requiresStringContent: true,
-            },
+            compat: { requiresStringContent: true },
           },
         ],
       },
@@ -144,12 +137,9 @@ API가 `inferrs` provider 항목과 함께 작동합니다.
 }
 ```
 
-`command`를 OpenClaw를 실행하는 머신에서 `which inferrs`의 결과로 바꾸세요.
+`command`를 OpenClaw가 실행되는 머신에서 `which inferrs`를 실행한 결과로 바꾸세요. 전체 inferrs 설정: [Inferrs](/ko/providers/inferrs).
 
 ## ds4 예시
-
-전체 설정, context 크기 조정 지침, 검증 명령은
-[ds4](/ko/providers/ds4)를 참고하세요.
 
 ```json5
 {
@@ -186,24 +176,13 @@ API가 `inferrs` provider 항목과 함께 작동합니다.
 }
 ```
 
-## 운영 참고 사항
-
-- 하나의 OpenClaw 프로세스가 자신이 시작한 child를 관리합니다. 동일한 상태 URL이
-  이미 실행 중인 것을 보는 다른 OpenClaw 프로세스는 이를 adopt하지 않고 재사용합니다.
-- 시작은 provider command 및 인수 집합별로 직렬화되므로, 동시 요청이 동일 설정에 대해
-  중복 서버를 생성하지 않습니다.
-- 활성 streaming 응답은 lease를 유지합니다. 유휴 종료는 응답
-  본문 처리가 완료될 때까지 기다립니다.
-- 느린 로컬 provider에서는 `timeoutSeconds`를 사용해 cold start와 긴 generation이
-  기본 모델 요청 timeout에 걸리지 않도록 하세요.
-- 서버가 `/v1/models`가 아닌 다른 위치에서 준비 상태를 노출한다면 명시적인 `healthUrl`을
-  사용하세요.
+전체 설정, 컨텍스트 크기 조정 및 검증 명령: [ds4](/ko/providers/ds4).
 
 ## 관련 항목
 
 <CardGroup cols={2}>
   <Card title="로컬 모델" href="/ko/gateway/local-models" icon="server">
-    로컬 모델 설정, provider 선택지, 안전 지침입니다.
+    로컬 모델 설정, 공급자 선택 및 안전 지침입니다.
   </Card>
   <Card title="Inferrs" href="/ko/providers/inferrs" icon="cpu">
     inferrs OpenAI 호환 로컬 서버를 통해 OpenClaw를 실행합니다.

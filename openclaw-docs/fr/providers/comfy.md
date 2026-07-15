@@ -1,56 +1,57 @@
 ---
 read_when:
-    - Vous voulez utiliser des workflows ComfyUI locaux avec OpenClaw
-    - Vous voulez utiliser Comfy Cloud avec des workflows d’image, de vidéo ou de musique
-    - Vous avez besoin des clés de configuration du plugin comfy inclus
-summary: Configuration de la génération d’images, de vidéos et de musique par workflow ComfyUI dans OpenClaw
+    - Vous souhaitez utiliser des workflows ComfyUI locaux avec OpenClaw
+    - Vous souhaitez utiliser Comfy Cloud avec des workflows d’image, de vidéo ou de musique
+    - Vous avez besoin des clés de configuration du plugin Comfy intégré.
+summary: Configuration de la génération d’images, de vidéos et de musique avec les workflows ComfyUI dans OpenClaw
 title: ComfyUI
 x-i18n:
-    generated_at: "2026-04-25T13:55:26Z"
-    model: gpt-5.4
-    provider: openai
-    source_hash: 41dda4be24d5b2c283fa499a345cf9f38747ec19b4010163ceffd998307ca086
-    source_path: providers/comfy.md
-    workflow: 15
+    generated_at: "2026-07-12T03:14:18Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    provider: openai
+    source_hash: 74150d202a422de8e0f4b2b82d5d12bd42eb46991e8ef688832208e1a2ff7793
+    source_path: providers/comfy.md
+    workflow: 16
 ---
 
-OpenClaw inclut un plugin `comfy` pour les exécutions ComfyUI pilotées par workflow. Le plugin est entièrement piloté par workflow, donc OpenClaw n’essaie pas de mapper des contrôles génériques `size`, `aspectRatio`, `resolution`, `durationSeconds` ou de type TTS sur votre graphe.
+OpenClaw inclut un Plugin `comfy` intégré pour exécuter des workflows ComfyUI. Le
+Plugin repose entièrement sur les workflows : OpenClaw ne transpose pas de contrôles génériques tels que `size`,
+`aspectRatio`, `resolution`, `durationSeconds` ou des contrôles de type TTS dans
+votre graphe.
 
-| Propriété       | Détail                                                                            |
-| ---------------- | --------------------------------------------------------------------------------- |
-| Fournisseur      | `comfy`                                                                           |
-| Modèles          | `comfy/workflow`                                                                  |
-| Surfaces partagées | `image_generate`, `video_generate`, `music_generate`                            |
-| Authentification | Aucune pour ComfyUI local ; `COMFY_API_KEY` ou `COMFY_CLOUD_API_KEY` pour Comfy Cloud |
-| API              | ComfyUI `/prompt` / `/history` / `/view` et Comfy Cloud `/api/*`                 |
+| Propriété          | Détail                                                                                     |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| Fournisseur        | `comfy`                                                                                    |
+| Modèle             | `comfy/workflow`                                                                           |
+| Outils partagés    | `image_generate`, `video_generate`, `music_generate`                                       |
+| Authentification   | Aucune pour ComfyUI local ; `COMFY_API_KEY` ou `COMFY_CLOUD_API_KEY` pour Comfy Cloud       |
+| API                | ComfyUI `/prompt` / `/history` / `/view` ; Comfy Cloud `/api/*`                             |
 
-## Ce qui est pris en charge
+## Fonctionnalités prises en charge
 
-- Génération d’image à partir d’un JSON de workflow
-- Édition d’image avec 1 image de référence uploadée
-- Génération vidéo à partir d’un JSON de workflow
-- Génération vidéo avec 1 image de référence uploadée
-- Génération de musique ou d’audio via l’outil partagé `music_generate`
-- Téléchargement de sortie depuis un nœud configuré ou tous les nœuds de sortie correspondants
+- Génération et modification d’images à partir d’un workflow JSON (la modification accepte 1 image de référence téléversée)
+- Génération de vidéos à partir d’un workflow JSON, de texte en vidéo ou d’image en vidéo (1 image de référence)
+- Génération de musique ou d’audio au moyen de l’outil partagé `music_generate`, avec 1 image de référence facultative
+- Téléchargement de la sortie depuis un Node configuré, ou depuis tous les Nodes de sortie correspondants lorsqu’aucun n’est configuré
 
 ## Prise en main
 
-Choisissez entre exécuter ComfyUI sur votre propre machine ou utiliser Comfy Cloud.
+Choisissez entre l’exécution de ComfyUI sur votre propre machine et l’utilisation de Comfy Cloud.
 
 <Tabs>
   <Tab title="Local">
-    **Idéal pour :** exécuter votre propre instance ComfyUI sur votre machine ou votre LAN.
+    **Idéal pour :** exécuter votre propre instance ComfyUI sur votre machine ou votre réseau local.
 
     <Steps>
-      <Step title="Démarrer ComfyUI localement">
-        Assurez-vous que votre instance ComfyUI locale est en cours d’exécution (par défaut `http://127.0.0.1:8188`).
+      <Step title="Start ComfyUI locally">
+        Vérifiez que votre instance ComfyUI locale est en cours d’exécution (adresse par défaut : `http://127.0.0.1:8188`).
       </Step>
-      <Step title="Préparer votre JSON de workflow">
-        Exportez ou créez un fichier JSON de workflow ComfyUI. Notez les identifiants de nœuds du nœud d’entrée de prompt et du nœud de sortie que vous voulez qu’OpenClaw lise.
+      <Step title="Prepare your workflow JSON">
+        Exportez ou créez un fichier JSON de workflow ComfyUI. Notez les identifiants des Nodes correspondant au Node d’entrée de l’invite et au Node de sortie depuis lequel OpenClaw doit lire.
       </Step>
-      <Step title="Configurer le fournisseur">
-        Définissez `mode: "local"` et pointez vers votre fichier de workflow. Voici un exemple minimal pour l’image :
+      <Step title="Configure the provider">
+        Définissez `mode: "local"` et indiquez le chemin de votre fichier de workflow. Exemple minimal pour les images :
 
         ```json5
         {
@@ -72,8 +73,8 @@ Choisissez entre exécuter ComfyUI sur votre propre machine ou utiliser Comfy Cl
         }
         ```
       </Step>
-      <Step title="Définir le modèle par défaut">
-        Pointez OpenClaw vers le modèle `comfy/workflow` pour la fonctionnalité que vous avez configurée :
+      <Step title="Set the default model">
+        Configurez OpenClaw pour utiliser le modèle `comfy/workflow` pour la fonctionnalité que vous avez configurée :
 
         ```json5
         {
@@ -87,7 +88,7 @@ Choisissez entre exécuter ComfyUI sur votre propre machine ou utiliser Comfy Cl
         }
         ```
       </Step>
-      <Step title="Vérifier">
+      <Step title="Verify">
         ```bash
         openclaw models list --provider comfy
         ```
@@ -97,31 +98,34 @@ Choisissez entre exécuter ComfyUI sur votre propre machine ou utiliser Comfy Cl
   </Tab>
 
   <Tab title="Comfy Cloud">
-    **Idéal pour :** exécuter des workflows sur Comfy Cloud sans gérer des ressources GPU locales.
+    **Idéal pour :** exécuter des workflows sur Comfy Cloud sans gérer de ressources GPU locales.
 
     <Steps>
-      <Step title="Obtenir une clé API">
+      <Step title="Get an API key">
         Inscrivez-vous sur [comfy.org](https://comfy.org) et générez une clé API depuis le tableau de bord de votre compte.
       </Step>
-      <Step title="Définir la clé API">
-        Fournissez votre clé par l’une des méthodes suivantes :
+      <Step title="Set the API key">
+        Fournissez votre clé à l’aide de l’une des méthodes suivantes :
 
         ```bash
-        # Variable d’environnement (préférée)
+        # Onboarding flag
+        openclaw onboard --comfy-api-key "your-key"
+
+        # Environment variable (preferred for daemons)
         export COMFY_API_KEY="your-key"
 
-        # Variable d’environnement alternative
+        # Alternative environment variable
         export COMFY_CLOUD_API_KEY="your-key"
 
-        # Ou directement dans la configuration
+        # Or inline in config
         openclaw config set plugins.entries.comfy.config.apiKey "your-key"
         ```
       </Step>
-      <Step title="Préparer votre JSON de workflow">
-        Exportez ou créez un fichier JSON de workflow ComfyUI. Notez les identifiants de nœuds du nœud d’entrée de prompt et du nœud de sortie.
+      <Step title="Prepare your workflow JSON">
+        Exportez ou créez un fichier JSON de workflow ComfyUI. Notez les identifiants des Nodes correspondant au Node d’entrée de l’invite et au Node de sortie.
       </Step>
-      <Step title="Configurer le fournisseur">
-        Définissez `mode: "cloud"` et pointez vers votre fichier de workflow :
+      <Step title="Configure the provider">
+        Définissez `mode: "cloud"` et indiquez le chemin de votre fichier de workflow :
 
         ```json5
         {
@@ -143,10 +147,10 @@ Choisissez entre exécuter ComfyUI sur votre propre machine ou utiliser Comfy Cl
         ```
 
         <Tip>
-        En mode cloud, `baseUrl` vaut par défaut `https://cloud.comfy.org`. Vous n’avez besoin de définir `baseUrl` que si vous utilisez un point de terminaison cloud personnalisé.
+        En mode cloud, `baseUrl` utilise par défaut `https://cloud.comfy.org`. Définissez `baseUrl` uniquement pour un point de terminaison cloud personnalisé.
         </Tip>
       </Step>
-      <Step title="Définir le modèle par défaut">
+      <Step title="Set the default model">
         ```json5
         {
           agents: {
@@ -159,7 +163,7 @@ Choisissez entre exécuter ComfyUI sur votre propre machine ou utiliser Comfy Cl
         }
         ```
       </Step>
-      <Step title="Vérifier">
+      <Step title="Verify">
         ```bash
         openclaw models list --provider comfy
         ```
@@ -171,7 +175,7 @@ Choisissez entre exécuter ComfyUI sur votre propre machine ou utiliser Comfy Cl
 
 ## Configuration
 
-Comfy prend en charge des paramètres de connexion partagés de niveau supérieur plus des sections de workflow par fonctionnalité (`image`, `video`, `music`) :
+Comfy prend en charge des paramètres de connexion partagés au niveau supérieur ainsi que des sections de workflow propres à chaque fonctionnalité (`image`, `video`, `music`) :
 
 ```json5
 {
@@ -205,38 +209,44 @@ Comfy prend en charge des paramètres de connexion partagés de niveau supérieu
 
 ### Clés partagées
 
-| Clé                   | Type                   | Description                                                                           |
-| --------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
-| `mode`                | `"local"` ou `"cloud"` | Mode de connexion.                                                                    |
-| `baseUrl`             | string                 | Vaut par défaut `http://127.0.0.1:8188` en local ou `https://cloud.comfy.org` en cloud. |
-| `apiKey`              | string                 | Clé inline facultative, alternative aux variables d’environnement `COMFY_API_KEY` / `COMFY_CLOUD_API_KEY`. |
-| `allowPrivateNetwork` | boolean                | Autoriser une `baseUrl` privée/LAN en mode cloud.                                     |
+| Clé                   | Type                    | Description                                                                                          |
+| --------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------- |
+| `mode`                | `"local"` ou `"cloud"`  | Mode de connexion. Valeur par défaut : `"local"`.                                                    |
+| `baseUrl`             | chaîne                  | Valeur par défaut : `http://127.0.0.1:8188` en local ou `https://cloud.comfy.org` dans le cloud.      |
+| `apiKey`              | chaîne                  | Clé intégrée facultative, en remplacement des variables d’environnement `COMFY_API_KEY` / `COMFY_CLOUD_API_KEY`. |
+| `allowPrivateNetwork` | booléen                 | Autorise une `baseUrl` privée ou sur le réseau local en mode cloud, ou un nom de domaine complet DNS privé local. |
 
-### Clés par fonctionnalité
+<Note>
+En mode `local`, les adresses IP littérales de bouclage ou privées et les noms de service à une seule étiquette tels que `http://comfyui:8188` fonctionnent sans `allowPrivateNetwork`. Les noms de domaine complets DNS privés qui semblent publics, tels que `https://comfy.local.example.com`, nécessitent `allowPrivateNetwork: true`. La confiance accordée à l’origine privée reste limitée au schéma, au nom d’hôte et au port configurés ; les redirections locales ne peuvent pas quitter le nom d’hôte configuré, tandis que les redirections cloud vers des CDN publics sont vérifiées selon la politique SSRF par défaut.
+</Note>
 
-Ces clés s’appliquent à l’intérieur des sections `image`, `video` ou `music` :
+### Clés propres à chaque fonctionnalité
 
-| Clé                          | Requise | Par défaut | Description                                                                  |
-| ---------------------------- | ------- | ---------- | ---------------------------------------------------------------------------- |
-| `workflow` ou `workflowPath` | Oui     | --         | Chemin vers le fichier JSON de workflow ComfyUI.                             |
-| `promptNodeId`               | Oui     | --         | Identifiant du nœud qui reçoit le prompt texte.                              |
-| `promptInputName`            | Non     | `"text"`   | Nom d’entrée sur le nœud de prompt.                                          |
-| `outputNodeId`               | Non     | --         | Identifiant du nœud à partir duquel lire la sortie. S’il est omis, tous les nœuds de sortie correspondants sont utilisés. |
-| `pollIntervalMs`             | Non     | --         | Intervalle de polling en millisecondes pour la fin de tâche.                 |
-| `timeoutMs`                  | Non     | --         | Délai d’expiration en millisecondes pour l’exécution du workflow.            |
+Ces clés s’appliquent dans les sections `image`, `video` ou `music` :
 
-Les sections `image` et `video` prennent aussi en charge :
+| Clé                          | Obligatoire | Valeur par défaut | Description                                                                                      |
+| ---------------------------- | ----------- | ----------------- | ------------------------------------------------------------------------------------------------ |
+| `workflow` ou `workflowPath` | Oui         | --                | Workflow JSON intégré ou chemin du fichier JSON de workflow ComfyUI.                              |
+| `promptNodeId`               | Oui         | --                | Identifiant du Node qui reçoit l’invite textuelle.                                                |
+| `promptInputName`            | Non         | `"text"`          | Nom de l’entrée sur le Node d’invite.                                                             |
+| `outputNodeId`               | Non         | --                | Identifiant du Node depuis lequel lire la sortie. S’il est omis, tous les Nodes de sortie correspondants sont utilisés. |
+| `pollIntervalMs`             | Non         | `1500`            | Intervalle d’interrogation en millisecondes pour vérifier l’achèvement de la tâche.                |
+| `timeoutMs`                  | Non         | `300000`          | Délai d’expiration en millisecondes pour l’exécution du workflow.                                  |
 
-| Clé                   | Requise                               | Par défaut | Description                                        |
-| --------------------- | ------------------------------------- | ---------- | -------------------------------------------------- |
-| `inputImageNodeId`    | Oui (lors du passage d’une image de référence) | --   | Identifiant du nœud qui reçoit l’image de référence uploadée. |
-| `inputImageInputName` | Non                                   | `"image"`  | Nom d’entrée sur le nœud image.                    |
+Les sections `image` et `video` prennent également en charge un Node d’entrée pour l’image de référence :
+
+| Clé                   | Obligatoire                                      | Valeur par défaut | Description                                                     |
+| --------------------- | ------------------------------------------------ | ----------------- | --------------------------------------------------------------- |
+| `inputImageNodeId`    | Oui (lorsqu’une image de référence est transmise) | --                | Identifiant du Node qui reçoit l’image de référence téléversée. |
+| `inputImageInputName` | Non                                              | `"image"`         | Nom de l’entrée sur le Node d’image.                             |
+
+`apiKey` accepte soit une chaîne littérale, soit un objet de [référence de secret](/fr/gateway/configuration-reference#secrets).
 
 ## Détails des workflows
 
 <AccordionGroup>
-  <Accordion title="Workflows d’image">
-    Définissez le modèle d’image par défaut sur `comfy/workflow` :
+  <Accordion title="Image workflows">
+    Définissez le modèle d’image par défaut sur `comfy/workflow` :
 
     ```json5
     {
@@ -250,9 +260,9 @@ Les sections `image` et `video` prennent aussi en charge :
     }
     ```
 
-    **Exemple d’édition avec image de référence :**
+    **Exemple de modification avec une image de référence :**
 
-    Pour activer l’édition d’image avec une image de référence uploadée, ajoutez `inputImageNodeId` à votre configuration image :
+    Pour permettre la modification d’une image à l’aide d’une image de référence téléversée, ajoutez `inputImageNodeId` à votre configuration d’image :
 
     ```json5
     {
@@ -276,8 +286,8 @@ Les sections `image` et `video` prennent aussi en charge :
 
   </Accordion>
 
-  <Accordion title="Workflows vidéo">
-    Définissez le modèle vidéo par défaut sur `comfy/workflow` :
+  <Accordion title="Video workflows">
+    Définissez le modèle vidéo par défaut sur `comfy/workflow` :
 
     ```json5
     {
@@ -291,27 +301,27 @@ Les sections `image` et `video` prennent aussi en charge :
     }
     ```
 
-    Les workflows vidéo Comfy prennent en charge le texte-vers-vidéo et l’image-vers-vidéo via le graphe configuré.
+    Les workflows vidéo Comfy prennent en charge la génération de texte en vidéo et d’image en vidéo au moyen du graphe configuré.
 
     <Note>
-    OpenClaw ne transmet pas de vidéos d’entrée dans les workflows Comfy. Seuls les prompts texte et les images de référence uniques sont pris en charge en entrée.
+    OpenClaw ne transmet pas de vidéos d’entrée aux workflows Comfy. Seules les invites textuelles et les images de référence uniques sont prises en charge comme entrées.
     </Note>
 
   </Accordion>
 
-  <Accordion title="Workflows musicaux">
-    Le plugin inclus enregistre un fournisseur de génération musicale pour les sorties audio ou musicales définies par workflow, exposé via l’outil partagé `music_generate` :
+  <Accordion title="Music workflows">
+    Le Plugin intégré enregistre un fournisseur de génération musicale pour les sorties audio ou musicales définies par un workflow, accessible au moyen de l’outil partagé `music_generate`. Il accepte une image de référence facultative (1 au maximum) :
 
     ```text
     /tool music_generate prompt="Warm ambient synth loop with soft tape texture"
     ```
 
-    Utilisez la section de configuration `music` pour pointer vers votre JSON de workflow audio et votre nœud de sortie.
+    Utilisez la section de configuration `music` pour indiquer le fichier JSON de votre workflow audio et le Node de sortie.
 
   </Accordion>
 
-  <Accordion title="Rétrocompatibilité">
-    La configuration d’image de niveau supérieur existante (sans section imbriquée `image`) fonctionne toujours :
+  <Accordion title="Backward compatibility">
+    La configuration d’image existante au niveau supérieur (sans section `image` imbriquée) continue de fonctionner :
 
     ```json5
     {
@@ -329,42 +339,38 @@ Les sections `image` et `video` prennent aussi en charge :
     }
     ```
 
-    OpenClaw traite cette forme héritée comme la configuration du workflow image. Vous n’avez pas besoin de migrer immédiatement, mais les sections imbriquées `image` / `video` / `music` sont recommandées pour les nouvelles installations.
-
-    <Tip>
-    Si vous n’utilisez que la génération d’images, la configuration plate héritée et la nouvelle section imbriquée `image` sont fonctionnellement équivalentes.
-    </Tip>
+    OpenClaw traite cette ancienne structure comme la configuration du workflow d’image. Vous n’avez pas besoin d’effectuer une migration immédiatement, mais les sections imbriquées `image` / `video` / `music` sont recommandées pour les nouvelles installations. Si vous utilisez uniquement la génération d’images, l’ancienne configuration à plat et la nouvelle section `image` imbriquée sont fonctionnellement équivalentes.
 
   </Accordion>
 
-  <Accordion title="Tests live">
-    Une couverture live opt-in existe pour le plugin inclus :
+  <Accordion title="Live tests">
+    Une couverture de tests en conditions réelles, activable explicitement, est disponible pour le Plugin intégré :
 
     ```bash
     OPENCLAW_LIVE_TEST=1 COMFY_LIVE_TEST=1 pnpm test:live -- extensions/comfy/comfy.live.test.ts
     ```
 
-    Le test live ignore les cas image, vidéo ou musique individuels sauf si la section de workflow Comfy correspondante est configurée.
+    Le test en conditions réelles ignore les cas individuels d’image, de vidéo ou de musique, sauf si la section correspondante du flux de travail Comfy est configurée.
 
   </Accordion>
 </AccordionGroup>
 
-## Related
+## Pages connexes
 
 <CardGroup cols={2}>
   <Card title="Génération d’images" href="/fr/tools/image-generation" icon="image">
     Configuration et utilisation de l’outil de génération d’images.
   </Card>
-  <Card title="Génération vidéo" href="/fr/tools/video-generation" icon="video">
-    Configuration et utilisation de l’outil de génération vidéo.
+  <Card title="Génération de vidéos" href="/fr/tools/video-generation" icon="video">
+    Configuration et utilisation de l’outil de génération de vidéos.
   </Card>
-  <Card title="Génération musicale" href="/fr/tools/music-generation" icon="music">
-    Configuration de l’outil de génération de musique et d’audio.
+  <Card title="Génération de musique" href="/fr/tools/music-generation" icon="music">
+    Configuration de l’outil de génération de musique et de contenu audio.
   </Card>
   <Card title="Répertoire des fournisseurs" href="/fr/providers/index" icon="layers">
-    Vue d’ensemble de tous les fournisseurs et des références de modèles.
+    Présentation de tous les fournisseurs et de toutes les références de modèles.
   </Card>
   <Card title="Référence de configuration" href="/fr/gateway/config-agents#agent-defaults" icon="gear">
-    Référence complète de configuration, y compris les valeurs par défaut des agents.
+    Référence complète de la configuration, y compris les valeurs par défaut des agents.
   </Card>
 </CardGroup>

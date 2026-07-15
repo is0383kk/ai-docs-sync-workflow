@@ -1,43 +1,42 @@
 ---
 read_when:
-    - Вы хотите использовать Perplexity Search для веб-поиска
+    - Вы хотите использовать Perplexity Search для поиска в интернете
     - Необходимо настроить PERPLEXITY_API_KEY или OPENROUTER_API_KEY
-summary: Perplexity Search API и совместимость Sonar/OpenRouter для web_search
+summary: Совместимость Perplexity Search API и Sonar/OpenRouter с web_search
 title: Поиск Perplexity
 x-i18n:
-    generated_at: "2026-06-28T23:54:20Z"
-    model: gpt-5.5
+    generated_at: "2026-07-13T18:43:40Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 24
     provider: openai
-    source_hash: 6ef003238bc38dd3d92b98654598cba05fb1c324d8ca766a683cf1defe5bd435
+    source_hash: a7ca97355110e70a05f1d57acab475dda8dec89393804df40c6e9be5e30780e8
     source_path: tools/perplexity-search.md
     workflow: 16
 ---
 
-OpenClaw поддерживает Perplexity Search API как провайдера `web_search`.
-Он возвращает структурированные результаты с полями `title`, `url` и `snippet`.
+OpenClaw поддерживает Perplexity Search API в качестве провайдера `web_search`. Он возвращает структурированные результаты с полями `title`, `url` и `snippet`.
 
-Для совместимости OpenClaw также поддерживает устаревшие настройки Perplexity Sonar/OpenRouter.
-Если вы используете `OPENROUTER_API_KEY`, ключ `sk-or-...` в `plugins.entries.perplexity.config.webSearch.apiKey` или задаете `plugins.entries.perplexity.config.webSearch.baseUrl` / `model`, провайдер переключается на путь chat-completions и возвращает сгенерированные ИИ ответы с цитированием вместо структурированных результатов Search API.
+Для совместимости OpenClaw также поддерживает устаревшие конфигурации Perplexity Sonar/OpenRouter. Если вы используете `OPENROUTER_API_KEY`, ключ `sk-or-...` в `plugins.entries.perplexity.config.webSearch.apiKey` или задаёте `plugins.entries.perplexity.config.webSearch.baseUrl` / `model`, провайдер переключается на путь дополнений чата и вместо структурированных результатов Search API возвращает синтезированные ИИ ответы с цитатами.
 
-## Установите Plugin
+## Установка плагина
 
-Установите официальный Plugin, затем перезапустите Gateway:
+Установите официальный плагин, затем перезапустите Gateway:
 
 ```bash
 openclaw plugins install @openclaw/perplexity-plugin
 openclaw gateway restart
 ```
 
-## Получение API-ключа Perplexity
+## Получение ключа Perplexity API
 
-1. Создайте учетную запись Perplexity на [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api)
-2. Создайте API-ключ в панели управления
+1. Создайте учётную запись Perplexity на странице [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api).
+2. Создайте ключ API на панели управления.
 3. Сохраните ключ в конфигурации или задайте `PERPLEXITY_API_KEY` в окружении Gateway.
 
 ## Совместимость с OpenRouter
 
-Если вы уже использовали OpenRouter для Perplexity Sonar, оставьте `provider: "perplexity"` и задайте `OPENROUTER_API_KEY` в окружении Gateway либо сохраните ключ `sk-or-...` в `plugins.entries.perplexity.config.webSearch.apiKey`.
+Если вы уже использовали OpenRouter для Perplexity Sonar, сохраните `provider: "perplexity"` и задайте `OPENROUTER_API_KEY` в окружении Gateway либо сохраните ключ `sk-or-...` в `plugins.entries.perplexity.config.webSearch.apiKey`.
 
 Необязательные параметры совместимости:
 
@@ -100,15 +99,11 @@ openclaw gateway restart
 
 ## Где задать ключ
 
-**Через конфигурацию:** выполните `openclaw configure --section web`. Команда сохраняет ключ в
-`~/.openclaw/openclaw.json` в поле `plugins.entries.perplexity.config.webSearch.apiKey`.
-Это поле также принимает объекты SecretRef.
+**Через конфигурацию:** выполните `openclaw configure --section web`. Команда сохраняет ключ в `~/.openclaw/openclaw.json` в разделе `plugins.entries.perplexity.config.webSearch.apiKey`. Это поле также принимает объекты SecretRef.
 
-**Через окружение:** задайте `PERPLEXITY_API_KEY` или `OPENROUTER_API_KEY`
-в окружении процесса Gateway. Для установки Gateway поместите его в
-`~/.openclaw/.env` (или в окружение вашего сервиса). См. [Переменные окружения](/ru/help/faq#env-vars-and-env-loading).
+**Через окружение:** задайте `PERPLEXITY_API_KEY` или `OPENROUTER_API_KEY` в окружении процесса Gateway. При установке Gateway добавьте переменную в `~/.openclaw/.env` (или окружение вашей службы). См. раздел [Переменные окружения](/ru/help/faq#env-vars-and-env-loading).
 
-Если настроен `provider: "perplexity"` и SecretRef ключа Perplexity не разрешается без резервного значения из окружения, запуск или перезагрузка быстро завершается ошибкой.
+Если настроен `provider: "perplexity"`, а SecretRef ключа Perplexity не разрешается и резервная переменная окружения отсутствует, запуск или перезагрузка немедленно завершается ошибкой.
 
 ## Параметры инструмента
 
@@ -131,7 +126,7 @@ openclaw gateway restart
 </ParamField>
 
 <ParamField path="freshness" type="'day' | 'week' | 'month' | 'year'">
-Фильтр по времени: `day` означает 24 часа.
+Временной фильтр — `day` означает 24 часа.
 </ParamField>
 
 <ParamField path="date_after" type="string">
@@ -143,95 +138,92 @@ openclaw gateway restart
 </ParamField>
 
 <ParamField path="domain_filter" type="string[]">
-Массив списка разрешенных или запрещенных доменов (максимум 20).
+Массив разрешённых или запрещённых доменов (не более 20).
 </ParamField>
 
 <ParamField path="max_tokens" type="number" default="25000">
-Общий бюджет содержимого (максимум 1000000).
+Общий бюджет содержимого (не более 1000000).
 </ParamField>
 
 <ParamField path="max_tokens_per_page" type="number" default="2048">
-Лимит токенов на страницу.
+Ограничение количества токенов на страницу.
 </ParamField>
 
 Для устаревшего пути совместимости Sonar/OpenRouter:
 
-- принимаются `query`, `count` и `freshness`
-- `count` там предназначен только для совместимости; ответ все равно представляет собой один синтезированный
-  ответ с цитированием, а не список из N результатов
-- фильтры только для Search API, такие как `country`, `language`, `date_after`,
-  `date_before`, `domain_filter`, `max_tokens` и `max_tokens_per_page`,
-  возвращают явные ошибки
+- Поддерживаются `query`, `count` и `freshness`.
+- `count` используется там только для совместимости; ответ по-прежнему представляет собой один синтезированный ответ с цитатами, а не список из N результатов.
+- Фильтры, доступные только в Search API (`country`, `language`, `date_after`, `date_before`, `domain_filter`, `max_tokens`, `max_tokens_per_page`), приводят к явным ошибкам.
 
 **Примеры:**
 
 ```javascript
-// Country and language-specific search
+// Поиск с учётом страны и языка
 await web_search({
-  query: "renewable energy",
+  query: "возобновляемая энергия",
   country: "DE",
   language: "de",
 });
 
-// Recent results (past week)
+// Недавние результаты (за последнюю неделю)
 await web_search({
-  query: "AI news",
+  query: "новости ИИ",
   freshness: "week",
 });
 
-// Date range search
+// Поиск по диапазону дат
 await web_search({
-  query: "AI developments",
+  query: "развитие ИИ",
   date_after: "2024-01-01",
   date_before: "2024-06-30",
 });
 
-// Domain filtering (allowlist)
+// Фильтрация доменов (список разрешённых)
 await web_search({
-  query: "climate research",
+  query: "исследования климата",
   domain_filter: ["nature.com", "science.org", ".edu"],
 });
 
-// Domain filtering (denylist - prefix with -)
+// Фильтрация доменов (список запрещённых — с префиксом -)
 await web_search({
-  query: "product reviews",
+  query: "обзоры продуктов",
   domain_filter: ["-reddit.com", "-pinterest.com"],
 });
 
-// More content extraction
+// Извлечение большего объёма содержимого
 await web_search({
-  query: "detailed AI research",
+  query: "подробные исследования ИИ",
   max_tokens: 50000,
   max_tokens_per_page: 4096,
 });
 ```
 
-### Правила фильтра доменов
+### Правила фильтрации доменов
 
-- Максимум 20 доменов на фильтр
-- Нельзя смешивать список разрешенных и список запрещенных доменов в одном запросе
-- Используйте префикс `-` для записей списка запрещенных доменов (например, `["-reddit.com"]`)
+- Не более 20 доменов в одном фильтре.
+- В одном запросе нельзя смешивать записи из списков разрешённых и запрещённых доменов.
+- Для записей списка запрещённых доменов используйте префикс `-` (например, `["-reddit.com"]`).
 
 ## Примечания
 
-- Perplexity Search API возвращает структурированные результаты веб-поиска (`title`, `url`, `snippet`)
-- OpenRouter или явные `plugins.entries.perplexity.config.webSearch.baseUrl` / `model` переключают Perplexity обратно на chat completions Sonar для совместимости
-- Совместимость Sonar/OpenRouter возвращает один синтезированный ответ с цитированием, а не строки структурированных результатов
-- Результаты по умолчанию кэшируются на 15 минут (настраивается через `cacheTtlMinutes`)
+- Perplexity Search API возвращает структурированные результаты веб-поиска (`title`, `url`, `snippet`).
+- OpenRouter или явно заданные `plugins.entries.perplexity.config.webSearch.baseUrl` / `model` переключают Perplexity обратно на дополнения чата Sonar для совместимости.
+- В режиме совместимости Sonar/OpenRouter возвращается один синтезированный ответ с цитатами, а не строки структурированных результатов.
+- По умолчанию результаты кэшируются на 15 минут (настраивается с помощью `cacheTtlMinutes`).
 
-## См. также
+## Связанные материалы
 
 <CardGroup cols={2}>
-  <Card title="Web search overview" href="/ru/tools/web" icon="globe">
-    Все провайдеры и правила автоопределения.
+  <Card title="Обзор веб-поиска" href="/ru/tools/web" icon="globe">
+    Все провайдеры и правила автоматического обнаружения.
   </Card>
-  <Card title="Brave search" href="/ru/tools/brave-search" icon="shield">
+  <Card title="Поиск Brave" href="/ru/tools/brave-search" icon="shield">
     Структурированные результаты с фильтрами по стране и языку.
   </Card>
-  <Card title="Exa search" href="/ru/tools/exa-search" icon="magnifying-glass">
+  <Card title="Поиск Exa" href="/ru/tools/exa-search" icon="magnifying-glass">
     Нейронный поиск с извлечением содержимого.
   </Card>
-  <Card title="Perplexity Search API docs" href="https://docs.perplexity.ai/docs/search/quickstart" icon="arrow-up-right-from-square">
-    Официальное краткое руководство и справочник Perplexity Search API.
+  <Card title="Документация Perplexity Search API" href="https://docs.perplexity.ai/docs/search/quickstart" icon="arrow-up-right-from-square">
+    Официальное краткое руководство и справочник по Perplexity Search API.
   </Card>
 </CardGroup>

@@ -1,57 +1,58 @@
 ---
 read_when:
-    - Unterstützung für Standort-Nodes oder eine Berechtigungs-UI hinzufügen
+    - Unterstützung für Standort-Nodes oder eine Berechtigungsoberfläche hinzufügen
     - Android-Standortberechtigungen oder Vordergrundverhalten gestalten
-summary: Standortbefehl für Nodes (location.get), Berechtigungsmodi und Vordergrundverhalten unter Android
+summary: Standortbefehl für Nodes (`location.get`), Berechtigungsmodi und Android-Verhalten im Vordergrund
 title: Standortbefehl
 x-i18n:
-    generated_at: "2026-05-06T06:55:02Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T01:50:14Z"
+    model: gpt-5.6
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 63ed754bfdda1cf379dcb7ac40817c0b93cc1efe4526512d70258072da4bc8a7
+    source_hash: fae9f7707620f3f743d40c07618a431a6baa7a357dda6d74021bc986cd4974b1
     source_path: nodes/location-command.md
     workflow: 16
-    postprocess_version: locale-links-v1
 ---
 
 ## Kurzfassung
 
-- `location.get` ist ein Node-Befehl (über `node.invoke`).
+- `location.get` ist ein Node-Befehl, der über `node.invoke` oder `openclaw nodes location get` aufgerufen wird.
 - Standardmäßig deaktiviert.
-- Android-App-Einstellungen verwenden eine Auswahl: Aus / Während der Nutzung.
-- Separater Schalter: Genauer Standort.
+- Android-Builds von Drittanbietern verwenden eine Auswahl: Aus / Während der Nutzung / Immer. Play-Builds bieten weiterhin nur Aus / Während der Nutzung.
+- Der genaue Standort wird über einen separaten Schalter aktiviert.
 
-## Warum eine Auswahl (nicht nur ein Schalter)
+## Warum eine Auswahl (und nicht nur ein Schalter)
 
-OS-Berechtigungen haben mehrere Ebenen. Wir können in der App eine Auswahl bereitstellen, aber das OS entscheidet weiterhin über die tatsächlich gewährte Berechtigung.
-
-- iOS/macOS können **Während der Nutzung** oder **Immer** in Systemabfragen/Einstellungen anzeigen.
-- Die Android-App unterstützt derzeit nur Standortzugriff im Vordergrund.
-- Genauer Standort ist eine separate Berechtigung (iOS 14+ „Genau“, Android „fine“ vs. „coarse“).
-
-Die Auswahl in der UI steuert unseren angeforderten Modus; die tatsächliche Berechtigung liegt in den OS-Einstellungen.
+Die Standortberechtigungen des Betriebssystems haben mehrere Stufen. Der genaue Standort ist ebenfalls eine separate Betriebssystemberechtigung (ab iOS 14 „Genauer Standort“, unter Android „genau“ gegenüber „ungefähr“). Die Auswahl in der App legt den angeforderten Modus fest, aber das Betriebssystem entscheidet weiterhin über die tatsächlich erteilte Berechtigung.
 
 ## Einstellungsmodell
 
 Pro Node-Gerät:
 
-- `location.enabledMode`: `off | whileUsing`
+- `location.enabledMode`: `off | whileUsing | always`
 - `location.preciseEnabled`: bool
 
-UI-Verhalten:
+Verhalten der Benutzeroberfläche:
 
-- Die Auswahl von `whileUsing` fordert Vordergrundberechtigung an.
-- Wenn das OS die angeforderte Ebene verweigert, auf die höchste gewährte Ebene zurücksetzen und den Status anzeigen.
+- Bei Auswahl von `whileUsing` wird die Berechtigung für die Nutzung im Vordergrund angefordert.
+- Bei Auswahl von `always` fordert der Android-Build eines Drittanbieters zuerst die Berechtigung für die Nutzung im Vordergrund an, erläutert den Hintergrundzugriff und öffnet anschließend die Android-App-Einstellungen für die separate Berechtigung **Allow all the time**.
+- Android-Play-Builds deklarieren keine Berechtigung für den Standortzugriff im Hintergrund und zeigen `always` nicht an.
+- Wenn das Betriebssystem die angeforderte Stufe verweigert, wechselt die App zur höchsten erteilten Stufe zurück und zeigt den Status an.
 
-## Berechtigungszuordnung (node.permissions)
+## Zuordnung der Berechtigungen (node.permissions)
 
-Optional. macOS-Node meldet `location` über die Berechtigungszuordnung; iOS/Android können dies auslassen.
+Optional. Der macOS-Node meldet `location` über die `permissions`-Zuordnung in `node.list`/`node.describe`; iOS/Android können diese Angabe auslassen.
 
 ## Befehl: `location.get`
 
-Aufgerufen über `node.invoke`.
+Aufruf über `node.invoke` oder die CLI-Hilfsfunktion:
 
-Parameter (vorgeschlagen):
+```bash
+openclaw nodes location get --node <idOrNameOrIp>
+openclaw nodes location get --node <idOrNameOrIp> --accuracy precise --max-age 15000 --location-timeout 10000
+```
+
+Parameter:
 
 ```json
 {
@@ -61,7 +62,9 @@ Parameter (vorgeschlagen):
 }
 ```
 
-Antwort-Payload:
+Die CLI-Flags werden direkt zugeordnet: `--location-timeout` -> `timeoutMs`, `--max-age` -> `maxAgeMs`, `--accuracy` -> `desiredAccuracy`.
+
+Antwort-Nutzdaten:
 
 ```json
 {
@@ -79,32 +82,34 @@ Antwort-Payload:
 
 Fehler (stabile Codes):
 
-- `LOCATION_DISABLED`: Auswahl ist aus.
-- `LOCATION_PERMISSION_REQUIRED`: Berechtigung für den angeforderten Modus fehlt.
-- `LOCATION_BACKGROUND_UNAVAILABLE`: App läuft im Hintergrund, aber nur Während der Nutzung ist erlaubt.
-- `LOCATION_TIMEOUT`: Keine Positionsbestimmung innerhalb der Zeit.
-- `LOCATION_UNAVAILABLE`: Systemfehler / keine Provider.
+- `LOCATION_DISABLED`: Die Auswahl ist auf „Aus“ eingestellt.
+- `LOCATION_PERMISSION_REQUIRED`: Die Berechtigung für den angeforderten Modus fehlt.
+- `LOCATION_BACKGROUND_UNAVAILABLE`: Die App befindet sich im Hintergrund, aber es wurde nur „Während der Nutzung“ gewährt.
+- `LOCATION_TIMEOUT`: Innerhalb des Zeitlimits konnte kein Standort ermittelt werden.
+- `LOCATION_UNAVAILABLE`: Systemfehler oder keine Provider verfügbar.
 
 ## Verhalten im Hintergrund
 
-- Android-App verweigert `location.get`, während sie im Hintergrund läuft.
-- Halten Sie OpenClaw geöffnet, wenn Sie unter Android Standort anfordern.
-- Andere Node-Plattformen können abweichen.
+- Android-Builds von Drittanbietern akzeptieren `location.get` im Hintergrund nur, wenn der Benutzer `Always` ausgewählt und Android den Standortzugriff im Hintergrund gewährt hat. Der vorhandene persistente Node-Dienst fügt den Diensttyp `location` hinzu und zeigt während der Aktivität `Location: Always` an.
+- Android-Play-Builds und der Modus `While Using` verweigern `location.get`, während sich die App im Hintergrund befindet.
+- Andere Node-Plattformen können sich anders verhalten.
 
-## Modell-/Tooling-Integration
+## Modell- und Tooling-Integration
 
-- Tool-Oberfläche: Das `nodes`-Tool fügt die Aktion `location_get` hinzu (Node erforderlich).
+- Agenten-Tool: die Aktion `location_get` des Tools `nodes` (Node erforderlich).
 - CLI: `openclaw nodes location get --node <id>`.
-- Agent-Richtlinien: Nur aufrufen, wenn der Benutzer Standort aktiviert hat und den Umfang versteht.
+- Agentenrichtlinien: Nur aufrufen, wenn der Benutzer den Standort aktiviert hat und den Umfang versteht.
 
-## UX-Text (vorgeschlagen)
+## UX-Text (Vorschlag)
 
-- Aus: „Standortfreigabe ist deaktiviert.“
+- Aus: „Die Standortfreigabe ist deaktiviert.“
 - Während der Nutzung: „Nur wenn OpenClaw geöffnet ist.“
-- Genauer Standort: „Genauen GPS-Standort verwenden. Deaktivieren, um ungefähren Standort zu teilen.“
+- Immer: „Angeforderte Standortabfragen zulassen, während OpenClaw im Hintergrund ausgeführt wird.“
+- Genau: „Genauen GPS-Standort verwenden. Deaktivieren Sie diese Option, um den ungefähren Standort zu teilen.“
 
-## Verwandt
+## Verwandte Themen
 
-- [Channel-Standortparsing](/de/channels/location)
+- [Node-Übersicht](/de/nodes)
+- [Verarbeitung von Kanalstandorten](/de/channels/location)
 - [Kameraaufnahme](/de/nodes/camera)
 - [Sprechmodus](/de/nodes/talk)

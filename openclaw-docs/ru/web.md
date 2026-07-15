@@ -1,140 +1,123 @@
 ---
 read_when:
     - Вы хотите получить доступ к Gateway через Tailscale
-    - Вам нужен браузерный Control UI и редактирование конфигурации
-summary: 'Веб-поверхности Gateway: Control UI, режимы привязки и безопасность'
+    - Вам нужны браузерный интерфейс управления и редактирование конфигурации
+summary: 'Веб-интерфейсы Gateway: интерфейс управления, режимы привязки и безопасность'
 title: Веб
 x-i18n:
-    generated_at: "2026-06-28T23:57:25Z"
-    model: gpt-5.5
+    generated_at: "2026-07-13T18:52:35Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 24
     provider: openai
-    source_hash: 1c6b0c9f4ff53af295eb4eef7290d5d6b70c52543f57a9e83c7f8a635a2b35cd
+    source_hash: 413fb029d95241f5c6043b28825727cdee52b2fa8cbe998fbbd6e3ff7b81467b
     source_path: web/index.md
     workflow: 16
 ---
 
-Gateway обслуживает небольшой **браузерный интерфейс управления** (Vite + Lit) на том же порту, что и WebSocket Gateway:
+Gateway предоставляет небольшой **браузерный интерфейс управления** (Vite + Lit) на том же порту, что и WebSocket Gateway:
 
 - по умолчанию: `http://<host>:18789/`
 - с `gateway.tls.enabled: true`: `https://<host>:18789/`
 - необязательный префикс: задайте `gateway.controlUi.basePath` (например, `/openclaw`)
 
-Возможности описаны в [интерфейсе управления](/ru/web/control-ui). Остальная часть этой страницы посвящена режимам привязки, безопасности и поверхностям, доступным из веба.
-
-## Webhook
-
-Когда `hooks.enabled=true`, Gateway также предоставляет небольшой endpoint Webhook на том же HTTP-сервере.
-См. [конфигурацию Gateway](/ru/gateway/configuration) → `hooks` для аутентификации и payload.
-
-## Административный HTTP RPC
-
-Административный HTTP RPC предоставляет выбранные методы плоскости управления Gateway по адресу `POST /api/v1/admin/rpc`.
-По умолчанию он отключен и регистрируется только при включенном plugin `admin-http-rpc`.
-См. [Административный HTTP RPC](/ru/plugins/admin-http-rpc) для модели аутентификации, разрешенных методов и сравнения с WebSocket.
+Возможности описаны в разделе [Интерфейс управления](/ru/web/control-ui). На этой странице рассматриваются режимы привязки, безопасность и другие веб-интерфейсы.
 
 ## Конфигурация (включено по умолчанию)
 
-Интерфейс управления **включен по умолчанию**, когда присутствуют ресурсы (`dist/control-ui`).
-Им можно управлять через конфигурацию:
+Интерфейс управления **включён по умолчанию**, когда ресурсы доступны (`dist/control-ui`):
 
 ```json5
 {
   gateway: {
-    controlUi: { enabled: true, basePath: "/openclaw" }, // basePath optional
+    controlUi: { enabled: true, basePath: "/openclaw" }, // basePath необязателен
   },
 }
 ```
+
+## Webhook
+
+Если `hooks.enabled=true`, Gateway также предоставляет конечную точку Webhook на том же HTTP-сервере. Сведения об аутентификации и полезной нагрузке см. в разделе `hooks` [справочника по конфигурации Gateway](/ru/gateway/configuration-reference#hooks).
+
+## Административный HTTP RPC
+
+`POST /api/v1/admin/rpc` предоставляет выбранные методы плоскости управления Gateway через HTTP. По умолчанию отключён; регистрируется только при включённом плагине `admin-http-rpc`. Модель аутентификации, разрешённые методы и сравнение с API WebSocket см. в разделе [Административный HTTP RPC](/ru/plugins/admin-http-rpc).
 
 ## Доступ через Tailscale
 
-### Интегрированный Serve (рекомендуется)
+<Tabs>
+  <Tab title="Встроенный Serve (рекомендуется)">
+    Оставьте Gateway привязанным к loopback-интерфейсу и используйте Tailscale Serve в качестве прокси:
 
-Оставьте Gateway на loopback и позвольте Tailscale Serve проксировать его:
+    ```json5
+    {
+      gateway: {
+        bind: "loopback",
+        tailscale: { mode: "serve" },
+      },
+    }
+    ```
 
-```json5
-{
-  gateway: {
-    bind: "loopback",
-    tailscale: { mode: "serve" },
-  },
-}
-```
+    Запустите Gateway:
 
-Затем запустите gateway:
+    ```bash
+    openclaw gateway
+    ```
 
-```bash
-openclaw gateway
-```
+    Откройте `https://<magicdns>/` (или настроенный вами `gateway.controlUi.basePath`).
 
-Откройте:
+  </Tab>
+  <Tab title="Привязка к tailnet + токен">
+    ```json5
+    {
+      gateway: {
+        bind: "tailnet",
+        controlUi: { enabled: true },
+        auth: { mode: "token", token: "your-token" },
+      },
+    }
+    ```
 
-- `https://<magicdns>/` (или настроенный вами `gateway.controlUi.basePath`)
+    Запустите Gateway (в этом примере с привязкой не к loopback-интерфейсу используется аутентификация по токену с общим секретом):
 
-### Привязка к Tailnet + токен
+    ```bash
+    openclaw gateway
+    ```
 
-```json5
-{
-  gateway: {
-    bind: "tailnet",
-    controlUi: { enabled: true },
-    auth: { mode: "token", token: "your-token" },
-  },
-}
-```
+    Откройте `http://<tailscale-ip>:18789/` (или настроенный вами `gateway.controlUi.basePath`).
 
-Затем запустите gateway (этот пример не на loopback использует аутентификацию
-по токену общего секрета):
+  </Tab>
+  <Tab title="Публичный интернет (Funnel)">
+    ```json5
+    {
+      gateway: {
+        bind: "loopback",
+        tailscale: { mode: "funnel" },
+        auth: { mode: "password" }, // или OPENCLAW_GATEWAY_PASSWORD
+      },
+    }
+    ```
 
-```bash
-openclaw gateway
-```
+    Для `tailscale.mode: "funnel"` требуется `gateway.auth.mode: "password"`; для Serve и Funnel требуется `gateway.bind: "loopback"`.
 
-Откройте:
-
-- `http://<tailscale-ip>:18789/` (или настроенный вами `gateway.controlUi.basePath`)
-
-### Публичный интернет (Funnel)
-
-```json5
-{
-  gateway: {
-    bind: "loopback",
-    tailscale: { mode: "funnel" },
-    auth: { mode: "password" }, // or OPENCLAW_GATEWAY_PASSWORD
-  },
-}
-```
+  </Tab>
+</Tabs>
 
 ## Примечания по безопасности
 
-- Аутентификация Gateway требуется по умолчанию (токен, пароль, доверенный прокси или заголовки идентификации Tailscale Serve, если включены).
-- Привязки не к loopback все равно **требуют** аутентификацию gateway. На практике это означает аутентификацию по токену/паролю или обратный прокси с учетом идентификации и `gateway.auth.mode: "trusted-proxy"`.
-- Мастер по умолчанию создает аутентификацию с общим секретом и обычно генерирует
-  токен gateway (даже на loopback).
-- В режиме общего секрета UI отправляет `connect.params.auth.token` или
-  `connect.params.auth.password`.
-- Когда `gateway.tls.enabled: true`, локальная панель управления и вспомогательные средства статуса отображают
-  URL панели управления с `https://` и URL WebSocket с `wss://`.
-- В режимах с идентификацией, таких как Tailscale Serve или `trusted-proxy`, проверка
-  аутентификации WebSocket вместо этого удовлетворяется заголовками запроса.
-- Для публичных развертываний интерфейса управления не на loopback явно задайте `gateway.controlUi.allowedOrigins`
-  (полные origins). Приватные загрузки из LAN/Tailnet с тем же origin принимаются для loopback,
-  RFC1918/link-local, `.local`, `.ts.net` и хостов Tailscale CGNAT.
-- `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true` включает
-  резервный режим origin по заголовку Host, но это опасное снижение безопасности.
-- При Serve заголовки идентификации Tailscale могут удовлетворять аутентификацию Control UI/WebSocket,
-  когда `gateway.auth.allowTailscale` равно `true` (токен/пароль не требуется).
-  Endpoint HTTP API не используют эти заголовки идентификации Tailscale; вместо этого они следуют
-  обычному режиму HTTP-аутентификации gateway. Задайте
-  `gateway.auth.allowTailscale: false`, чтобы требовать явные учетные данные. См.
-  [Tailscale](/ru/gateway/tailscale) и [Безопасность](/ru/gateway/security). Этот
-  поток без токена предполагает, что хост gateway является доверенным.
-- `gateway.tailscale.mode: "funnel"` требует `gateway.auth.mode: "password"` (общий пароль).
+- По умолчанию требуется аутентификация Gateway: токен, пароль, доверенный прокси-сервер или, если они включены, заголовки идентификации Tailscale Serve.
+- При привязке не к loopback-интерфейсу аутентификация Gateway также **обязательна**: аутентификация по токену/паролю или обратный прокси-сервер с проверкой идентификации и `gateway.auth.mode: "trusted-proxy"`.
+- Мастер первоначальной настройки по умолчанию создаёт аутентификацию с общим секретом и обычно генерирует токен Gateway даже при привязке к loopback-интерфейсу.
+- В режиме общего секрета интерфейс отправляет `connect.params.auth.token` или `connect.params.auth.password` во время установления соединения WebSocket.
+- При использовании `gateway.tls.enabled: true` локальные вспомогательные средства панели управления и состояния формируют URL-адреса `https://` и URL-адреса WebSocket `wss://`.
+- В режимах с передачей идентификационных данных (Tailscale Serve, `trusted-proxy`) проверка аутентификации WebSocket выполняется на основе заголовков запроса, а не общего секрета.
+- При публичном развёртывании интерфейса управления с привязкой не к loopback-интерфейсу явно задайте `gateway.controlUi.allowedOrigins` (полные источники). Для loopback, RFC1918/link-local, `.local`, `.ts.net` и узлов Tailscale CGNAT частные загрузки из того же источника принимаются без этого параметра.
+- `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback: true` включает резервное определение источника по заголовку Host; это опасное ослабление безопасности.
+- При использовании Serve заголовки идентификации Tailscale обеспечивают аутентификацию интерфейса управления/WebSocket, если `gateway.auth.allowTailscale: true` (токен или пароль не требуется). Конечные точки HTTP API не используют заголовки идентификации Tailscale; они всегда следуют обычному режиму HTTP-аутентификации Gateway. Задайте `gateway.auth.allowTailscale: false`, чтобы требовать явные учётные данные даже при использовании Serve. Этот режим без токена предполагает, что сам узел Gateway является доверенным. См. разделы [Tailscale](/ru/gateway/tailscale) и [Безопасность](/ru/gateway/security).
 
-## Сборка UI
+## Сборка интерфейса
 
-Gateway обслуживает статические файлы из `dist/control-ui`. Соберите их с помощью:
+Gateway предоставляет статические файлы из `dist/control-ui`:
 
 ```bash
 pnpm ui:build

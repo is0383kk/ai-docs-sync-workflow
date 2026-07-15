@@ -1,46 +1,41 @@
 ---
 read_when:
     - Zalo Personal für OpenClaw einrichten
-    - Debugging des Zalo Personal-Logins oder Nachrichtenflusses
+    - Fehlerbehebung bei der Anmeldung oder beim Nachrichtenfluss von Zalo Personal
 summary: Unterstützung für persönliche Zalo-Konten über natives zca-js (QR-Anmeldung), Funktionen und Konfiguration
-title: Zalo persönlich
+title: Zalo privat
 x-i18n:
-    generated_at: "2026-06-27T17:13:50Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T01:28:49Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: fdd331d118bfc0d9aba90ac5e42c2ba52e010eafba1342bd3523c64642057dc6
+    source_hash: 962697c4a56dfb733fe4973e23129ccb365506e35c09e673365842f45a837949
     source_path: channels/zalouser.md
     workflow: 16
 ---
 
-Status: experimentell. Diese Integration automatisiert ein **persönliches Zalo-Konto** über natives `zca-js` innerhalb von OpenClaw.
+Status: experimentell. Diese Integration automatisiert ein **persönliches Zalo-Konto** prozessintern über das native `zca-js`, ohne externe CLI-Binärdatei.
 
 <Warning>
-Dies ist eine inoffizielle Integration und kann zur Sperrung oder zum Bann des Kontos führen. Die Nutzung erfolgt auf eigenes Risiko.
+Dies ist eine inoffizielle Integration und kann zur Sperrung oder Kündigung des Kontos führen. Die Nutzung erfolgt auf eigenes Risiko.
 </Warning>
 
-## Gebündeltes Plugin
+## Installation
 
-Zalo Personal wird in aktuellen OpenClaw-Releases als gebündeltes Plugin ausgeliefert, sodass normale
-paketierte Builds keine separate Installation benötigen.
+Zalo Personal ist ein offizielles externes Plugin und nicht im Kern enthalten. Installieren Sie es vor der Verwendung:
 
-Wenn Sie einen älteren Build oder eine benutzerdefinierte Installation verwenden, die Zalo Personal ausschließt,
-installieren Sie das npm-Paket direkt:
+```bash
+openclaw plugins install @openclaw/zalouser
+```
 
-- Installation über CLI: `openclaw plugins install @openclaw/zalouser`
-- Angeheftete Version: `openclaw plugins install @openclaw/zalouser@2026.5.2`
-- Oder aus einem Source-Checkout: `openclaw plugins install ./path/to/local/zalouser-plugin`
+- Version festlegen: `openclaw plugins install @openclaw/zalouser@<version>`
+- Aus einem Quellcode-Checkout: `openclaw plugins install ./path/to/local/zalouser-plugin`
 - Details: [Plugins](/de/tools/plugin)
 
-Es ist kein externes `zca`/`openzca`-CLI-Binary erforderlich.
+## Schnelleinrichtung
 
-## Schnelle Einrichtung (Einsteiger)
-
-1. Stellen Sie sicher, dass das Zalo Personal-Plugin verfügbar ist.
-   - Aktuelle paketierte OpenClaw-Releases enthalten es bereits.
-   - Ältere/benutzerdefinierte Installationen können es mit den obigen Befehlen manuell hinzufügen.
-2. Anmelden (QR, auf dem Gateway-Rechner):
+1. Installieren Sie das Plugin (siehe oben).
+2. Melden Sie sich an (per QR-Code auf dem Gateway-Rechner):
    - `openclaw channels login --channel zalouser`
    - Scannen Sie den QR-Code mit der mobilen Zalo-App.
 3. Aktivieren Sie den Kanal:
@@ -56,23 +51,21 @@ Es ist kein externes `zca`/`openzca`-CLI-Binary erforderlich.
 }
 ```
 
-4. Starten Sie den Gateway neu (oder schließen Sie die Einrichtung ab).
-5. Der Zugriff auf Direktnachrichten verwendet standardmäßig Pairing; genehmigen Sie beim ersten Kontakt den Pairing-Code.
+4. Starten Sie das Gateway neu (oder schließen Sie die Einrichtung ab).
+5. Der Zugriff auf Direktnachrichten verwendet standardmäßig die Kopplung; genehmigen Sie beim ersten Kontakt den Kopplungscode.
 
-## Was es ist
+## Funktionsweise
 
-- Läuft vollständig im Prozess über `zca-js`.
-- Verwendet native Event-Listener, um eingehende Nachrichten zu empfangen.
-- Sendet Antworten direkt über die JS-API (Text/Medien/Link).
-- Entwickelt für Anwendungsfälle mit „persönlichem Konto“, in denen die Zalo Bot API nicht verfügbar ist.
+- Wird vollständig prozessintern über die Bibliothek `zca-js` ausgeführt (ohne externe Binärdatei `zca`/`openzca`).
+- Verwendet native Ereignis-Listener (`message`, `error`), um eingehende Nachrichten zu empfangen.
+- Sendet Antworten direkt über die JS-API (Text/Medien/Links).
+- Ist für Anwendungsfälle mit „persönlichen Konten“ vorgesehen, in denen die Zalo Bot API nicht verfügbar ist.
 
 ## Benennung
 
-Die Kanal-ID ist `zalouser`, um ausdrücklich zu machen, dass dies ein **persönliches Zalo-Benutzerkonto** automatisiert (inoffiziell). Wir reservieren `zalo` für eine mögliche zukünftige offizielle Zalo-API-Integration.
+Die Kanal-ID lautet `zalouser`, um ausdrücklich kenntlich zu machen, dass hier ein **persönliches Zalo-Benutzerkonto** automatisiert wird (inoffiziell). `zalo` ist für eine mögliche zukünftige offizielle Integration der Zalo-API reserviert.
 
-## IDs finden (Verzeichnis)
-
-Verwenden Sie die Verzeichnis-CLI, um Peers/Gruppen und deren IDs zu ermitteln:
+## IDs ermitteln (Verzeichnis)
 
 ```bash
 openclaw directory self --channel zalouser
@@ -80,38 +73,36 @@ openclaw directory peers list --channel zalouser --query "name"
 openclaw directory groups list --channel zalouser --query "work"
 ```
 
-## Grenzen
+## Einschränkungen
 
-- Ausgehender Text wird in Blöcke von ca. 2000 Zeichen aufgeteilt (Grenzen des Zalo-Clients).
-- Streaming ist standardmäßig blockiert.
+- Ausgehender Text wird in Abschnitte von jeweils 2.000 Zeichen aufgeteilt (Beschränkung des Zalo-Clients).
+- Streaming wird nicht unterstützt.
 
-## Zugriffskontrolle (Direktnachrichten)
+## Zugriffssteuerung (Direktnachrichten)
 
-`channels.zalouser.dmPolicy` unterstützt: `pairing | allowlist | open | disabled` (Standard: `pairing`).
+`channels.zalouser.dmPolicy`: `pairing | allowlist | open | disabled` (Standardwert: `pairing`).
 
-`channels.zalouser.allowFrom` sollte stabile Zalo-Benutzer-IDs verwenden. Es kann auch auf statische Sender-Zugriffsgruppen verweisen (`accessGroup:<name>`). Während der interaktiven Einrichtung können eingegebene Namen über die prozessinterne Kontaktsuche des Plugins in IDs aufgelöst werden.
+`channels.zalouser.allowFrom` sollte stabile Zalo-Benutzer-IDs verwenden. Es können auch statische Absenderzugriffsgruppen (`accessGroup:<name>`) angegeben werden. Während der interaktiven Einrichtung können eingegebene Namen mithilfe der prozessinternen Kontaktsuche des Plugins in IDs aufgelöst werden.
 
-Wenn ein Rohname in der Konfiguration verbleibt, löst der Start ihn nur auf, wenn `channels.zalouser.dangerouslyAllowNameMatching: true` aktiviert ist. Ohne diese explizite Zustimmung erfolgen Senderprüfungen zur Laufzeit ausschließlich ID-basiert, und Rohnamen werden für die Autorisierung ignoriert.
+Wenn ein unaufgelöster Name in der Konfiguration verbleibt, wird er beim Start nur aufgelöst, wenn `channels.zalouser.dangerouslyAllowNameMatching: true` aktiviert ist. Ohne diese ausdrückliche Aktivierung erfolgen Absenderprüfungen zur Laufzeit ausschließlich anhand von IDs; unaufgelöste Namen werden bei der Autorisierung ignoriert.
 
-Genehmigen über:
+Genehmigung über:
 
 - `openclaw pairing list zalouser`
 - `openclaw pairing approve zalouser <code>`
 
 ## Gruppenzugriff (optional)
 
-- Standard: `channels.zalouser.groupPolicy = "open"` (Gruppen erlaubt). Verwenden Sie `channels.defaults.groupPolicy`, um den Standard zu überschreiben, wenn er nicht gesetzt ist.
-- Auf eine Zulassungsliste beschränken mit:
-  - `channels.zalouser.groupPolicy = "allowlist"`
-  - `channels.zalouser.groups` (Schlüssel sollten stabile Gruppen-IDs sein; Namen werden beim Start nur dann in IDs aufgelöst, wenn `channels.zalouser.dangerouslyAllowNameMatching: true` aktiviert ist)
-  - `channels.zalouser.groupAllowFrom` (steuert, welche Sender in zugelassenen Gruppen den Bot auslösen können; statische Sender-Zugriffsgruppen können mit `accessGroup:<name>` referenziert werden)
-- Alle Gruppen blockieren: `channels.zalouser.groupPolicy = "disabled"`.
-- Der Konfigurationsassistent kann nach Gruppen-Zulassungslisten fragen.
-- Beim Start löst OpenClaw Gruppen-/Benutzernamen in Zulassungslisten in IDs auf und protokolliert die Zuordnung nur, wenn `channels.zalouser.dangerouslyAllowNameMatching: true` aktiviert ist.
-- Der Abgleich der Gruppen-Zulassungsliste ist standardmäßig ausschließlich ID-basiert. Nicht aufgelöste Namen werden für die Authentifizierung ignoriert, sofern `channels.zalouser.dangerouslyAllowNameMatching: true` nicht aktiviert ist.
-- `channels.zalouser.dangerouslyAllowNameMatching: true` ist ein Notfall-Kompatibilitätsmodus, der veränderliche Namensauflösung beim Start und Gruppen-Namensabgleich zur Laufzeit wieder aktiviert.
-- Wenn `groupAllowFrom` nicht gesetzt ist, fällt die Laufzeit für Gruppen-Senderprüfungen auf `allowFrom` zurück.
-- Senderprüfungen gelten sowohl für normale Gruppennachrichten als auch für Steuerbefehle (zum Beispiel `/new`, `/reset`).
+- Standardwert: `channels.zalouser.groupPolicy = "allowlist"` (Gruppen benötigen einen ausdrücklichen Eintrag in der Zulassungsliste).
+- Alle Gruppen öffnen: `channels.zalouser.groupPolicy = "open"`.
+- Alle Gruppen sperren: `channels.zalouser.groupPolicy = "disabled"`.
+- Bei `groupPolicy = "allowlist"`:
+  - Die Schlüssel von `channels.zalouser.groups` sollten stabile Gruppen-IDs sein; Namen werden beim Start nur dann in IDs aufgelöst, wenn `channels.zalouser.dangerouslyAllowNameMatching: true` aktiviert ist.
+  - `channels.zalouser.groupAllowFrom` steuert, welche Absender in zugelassenen Gruppen den Bot auslösen können; statische Absenderzugriffsgruppen können mit `accessGroup:<name>` angegeben werden.
+- Der Konfigurationsassistent kann Zulassungslisten für Gruppen abfragen.
+- Der Abgleich der Gruppenzulassungsliste erfolgt standardmäßig ausschließlich anhand von IDs. Nicht aufgelöste Namen werden bei der Autorisierung ignoriert, sofern `channels.zalouser.dangerouslyAllowNameMatching: true` nicht aktiviert ist.
+- `channels.zalouser.dangerouslyAllowNameMatching: true` ist ein Kompatibilitätsmodus für Notfälle, der die veränderliche Namensauflösung beim Start und den Abgleich von Gruppennamen zur Laufzeit wieder aktiviert.
+- `groupAllowFrom` greift bei gewöhnlichen Gruppennachrichten **nicht** auf `allowFrom` zurück: Bleibt der Wert für eine zugelassene Gruppe leer, steht diese Gruppe allen Absendern offen. Autorisierte Steuerbefehle (beispielsweise `/new`) bilden die Ausnahme; bei ihnen greift die Prüfung des Befehlsabsenders auf `allowFrom` zurück, wenn `groupAllowFrom` leer ist.
 
 Beispiel:
 
@@ -122,23 +113,27 @@ Beispiel:
       groupPolicy: "allowlist",
       groupAllowFrom: ["1471383327500481391"],
       groups: {
-        "123456789": { allow: true },
-        "Work Chat": { allow: true },
+        "123456789": { enabled: true },
+        "Work Chat": { enabled: true },
       },
     },
   },
 }
 ```
 
-### Gruppen-Erwähnungsgating
+<Note>
+`channels.zalouser.groups.<id>.allow` ist ein veralteter Feldname; die aktuelle Konfiguration verwendet `enabled`. `openclaw doctor --fix` migriert `allow` automatisch zu `enabled`.
+</Note>
 
-- `channels.zalouser.groups.<group>.requireMention` steuert, ob Gruppenantworten eine Erwähnung erfordern.
-- Auflösungsreihenfolge: exakte Gruppen-ID/exakter Gruppenname -> normalisierter Gruppen-Slug -> `*` -> Standard (`true`).
-- Dies gilt sowohl für zugelassene Gruppen als auch für den offenen Gruppenmodus.
-- Das Zitieren einer Bot-Nachricht zählt als implizite Erwähnung für die Gruppenaktivierung.
-- Autorisierte Steuerbefehle (zum Beispiel `/new`) können das Erwähnungsgating umgehen.
-- Wenn eine Gruppennachricht übersprungen wird, weil eine Erwähnung erforderlich ist, speichert OpenClaw sie als ausstehende Gruppenhistorie und bezieht sie in die nächste verarbeitete Gruppennachricht ein.
-- Das Limit der Gruppenhistorie verwendet standardmäßig `messages.groupChat.historyLimit` (Fallback `50`). Sie können es pro Konto mit `channels.zalouser.historyLimit` überschreiben.
+### Erwähnungspflicht in Gruppen
+
+- `channels.zalouser.groups.<group>.requireMention` legt fest, ob Gruppenantworten eine Erwähnung erfordern.
+- Auflösungsreihenfolge: Gruppen-ID -> Alias `group:<id>` -> Gruppenname/Slug (namensbasierte Kandidaten gelten nur, wenn `dangerouslyAllowNameMatching: true` aktiviert ist) -> `*` -> Standardwert (`true`).
+- Gilt sowohl für zugelassene Gruppen als auch für den offenen Gruppenmodus.
+- Das Zitieren einer Bot-Nachricht gilt für die Gruppenaktivierung als implizite Erwähnung.
+- Autorisierte Steuerbefehle (beispielsweise `/new`) können die Erwähnungspflicht umgehen.
+- Wenn eine Gruppennachricht übersprungen wird, weil eine Erwähnung erforderlich ist, speichert OpenClaw sie als ausstehenden Gruppenverlauf und fügt sie der nächsten verarbeiteten Gruppennachricht bei.
+- Begrenzung des Gruppenverlaufs: `channels.zalouser.historyLimit`, danach `messages.groupChat.historyLimit`, anschließend ein Rückfallwert von `50`.
 
 Beispiel:
 
@@ -148,8 +143,8 @@ Beispiel:
     zalouser: {
       groupPolicy: "allowlist",
       groups: {
-        "*": { allow: true, requireMention: true },
-        "Work Chat": { allow: true, requireMention: false },
+        "*": { enabled: true, requireMention: true },
+        "Work Chat": { enabled: true, requireMention: false },
       },
     },
   },
@@ -158,7 +153,7 @@ Beispiel:
 
 ## Mehrere Konten
 
-Konten werden in OpenClaw-State `zalouser`-Profilen zugeordnet. Beispiel:
+Konten werden im OpenClaw-Status `zalouser`-Profilen zugeordnet. Beispiel:
 
 ```json5
 {
@@ -176,50 +171,49 @@ Konten werden in OpenClaw-State `zalouser`-Profilen zugeordnet. Beispiel:
 
 ## Umgebungsvariablen
 
-Das Zalo Personal-Plugin kann die Profilauswahl auch aus Umgebungsvariablen lesen:
+Die Profilauswahl kann auch über Umgebungsvariablen erfolgen:
 
-- `ZALOUSER_PROFILE`: zu verwendender Profilname, wenn weder in der Kanal- noch in der Kontokonfiguration ein `profile` gesetzt ist.
-- `ZCA_PROFILE`: alter Fallback-Profilname, der nur verwendet wird, wenn `ZALOUSER_PROFILE` nicht gesetzt ist.
+| Variable           | Zweck                                                                                                    |
+| ------------------ | -------------------------------------------------------------------------------------------------------- |
+| `ZALOUSER_PROFILE` | Zu verwendender Profilname, wenn in der Kanal- oder Kontokonfiguration kein `profile` festgelegt ist.    |
+| `ZCA_PROFILE`      | Veralteter Rückfallwert, der nur verwendet wird, wenn `ZALOUSER_PROFILE` nicht festgelegt ist.            |
 
-Profilnamen wählen die gespeicherten Zalo-Anmeldedaten im OpenClaw-State aus. Die Auflösungsreihenfolge ist:
+Profilnamen wählen die gespeicherten Zalo-Anmeldedaten im OpenClaw-Status aus. Auflösungsreihenfolge:
 
 1. Explizites `profile` in der Konfiguration.
 2. `ZALOUSER_PROFILE`.
 3. `ZCA_PROFILE`.
-4. Die Konto-ID für Nicht-Standardkonten oder `default` für das Standardkonto.
+4. Die Konto-ID für nicht standardmäßige Konten oder `default` für das Standardkonto.
 
-Bei Setups mit mehreren Konten sollten Sie vorzugsweise für jedes Konto `profile` in der Konfiguration setzen, damit
-eine einzelne Umgebungsvariable nicht dazu führt, dass mehrere Konten dieselbe Anmeldesitzung
-teilen.
+Bei Konfigurationen mit mehreren Konten sollten Sie für jedes Konto `profile` in der Konfiguration festlegen, damit nicht eine einzige Umgebungsvariable dazu führt, dass mehrere Konten dieselbe Anmeldesitzung gemeinsam verwenden.
 
-## Tippen, Reaktionen und Zustellbestätigungen
+## Eingabeanzeige, Reaktionen und Zustellbestätigungen
 
-- OpenClaw sendet vor dem Versand einer Antwort ein Tippereignis (nach bestem Bemühen).
-- Die Nachrichtenreaktionsaktion `react` wird für `zalouser` in Kanalaktionen unterstützt.
+- OpenClaw sendet vor dem Versenden einer Antwort nach Möglichkeit ein Eingabeereignis.
+- Die Nachrichtenreaktionsaktion `react` wird in Kanalaktionen für `zalouser` unterstützt.
   - Verwenden Sie `remove: true`, um ein bestimmtes Reaktions-Emoji von einer Nachricht zu entfernen.
-  - Reaktionssemantik: [Reaktionen](/de/tools/reactions)
-- Für eingehende Nachrichten, die Event-Metadaten enthalten, sendet OpenClaw Zustell- und Gelesen-Bestätigungen (nach bestem Bemühen).
+  - Semantik von Reaktionen: [Reaktionen](/de/tools/reactions)
+- Bei eingehenden Nachrichten mit Ereignismetadaten sendet OpenClaw nach Möglichkeit Zustell- und Lesebestätigungen.
 
 ## Fehlerbehebung
 
-**Anmeldung bleibt nicht bestehen:**
+**Anmeldung bleibt nicht gespeichert:**
 
 - `openclaw channels status --probe`
 - Erneut anmelden: `openclaw channels logout --channel zalouser && openclaw channels login --channel zalouser`
 
-**Zulassungsliste-/Gruppenname wurde nicht aufgelöst:**
+**Name der Zulassungsliste/Gruppe wurde nicht aufgelöst:**
 
-- Verwenden Sie numerische IDs in `allowFrom`/`groupAllowFrom` und stabile Gruppen-IDs in `groups`. Wenn Sie absichtlich exakte Freundes-/Gruppennamen benötigen, aktivieren Sie `channels.zalouser.dangerouslyAllowNameMatching: true`.
+- Verwenden Sie numerische IDs in `allowFrom`/`groupAllowFrom` und stabile Gruppen-IDs in `groups`. Wenn Sie absichtlich exakte Namen von Kontakten oder Gruppen verwenden müssen, aktivieren Sie `channels.zalouser.dangerouslyAllowNameMatching: true`.
 
-**Upgrade von alter CLI-basierter Einrichtung:**
+**Upgrade von einer alten externen, auf `zca`/CLI basierenden Einrichtung:**
 
-- Entfernen Sie alle alten Annahmen zu externen `zca`-Prozessen.
-- Der Kanal läuft jetzt vollständig in OpenClaw ohne externe CLI-Binaries.
+- Entfernen Sie alle Annahmen über einen externen `zca`-Prozess; der Kanal wird jetzt vollständig prozessintern über `zca-js` ausgeführt, ohne externe CLI-Binärdatei.
 
 ## Verwandte Themen
 
-- [Kanalübersicht](/de/channels) — alle unterstützten Kanäle
-- [Pairing](/de/channels/pairing) — DM-Authentifizierung und Pairing-Ablauf
-- [Gruppen](/de/channels/groups) — Verhalten von Gruppenchats und Erwähnungsgating
-- [Kanal-Routing](/de/channels/channel-routing) — Sitzungsrouting für Nachrichten
-- [Sicherheit](/de/gateway/security) — Zugriffsmodell und Härtung
+- [Kanalübersicht](/de/channels) – alle unterstützten Kanäle
+- [Kopplung](/de/channels/pairing) – Authentifizierung von Direktnachrichten und Kopplungsablauf
+- [Gruppen](/de/channels/groups) – Verhalten von Gruppenchats und Erwähnungspflicht
+- [Kanalweiterleitung](/de/channels/channel-routing) – Sitzungsweiterleitung für Nachrichten
+- [Sicherheit](/de/gateway/security) – Zugriffsmodell und Absicherung

@@ -1,26 +1,25 @@
 ---
 read_when:
-    - 추론된 후속 약속을 검토하려고 합니다
+    - 추론된 후속 조치 약속을 검토하려는 경우
     - 보류 중인 체크인을 해제하려는 경우
-    - Heartbeat가 전달할 수 있는 내용을 감사하고 있습니다
+    - Heartbeat가 무엇을 전달할 수 있는지 감사하고 있습니다
 summary: '`openclaw commitments`에 대한 CLI 참조(추론된 후속 작업 검사 및 해제)'
 title: '`openclaw commitments`'
 x-i18n:
-    generated_at: "2026-04-30T06:21:53Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T00:40:07Z"
+    model: gpt-5.6
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 37d5e5dca25cf649a5069360aa4e41fcc33d042dea99f643b98c07189c58f21c
+    source_hash: 4323273a5d73975532f4728dc5e40c5d59e0c6d2e31a538f96bf3451e3fdf4d9
     source_path: cli/commitments.md
     workflow: 16
-    postprocess_version: locale-links-v1
 ---
 
-후속 추론 약속을 나열하고 관리합니다.
+추론된 후속 조치 약속을 나열하고 관리합니다.
 
-약속은 대화 맥락에서 생성되는, 사용자가 동의한 단기 후속 메모리입니다.
-개념 안내서는 [추론된 약속](/ko/concepts/commitments)을 참조하세요.
+약속은 명시적으로 활성화해야 하며(`commitments.enabled`), 대화 맥락에서 생성되어 Heartbeat를 통해 전달되는 단기 후속 조치 메모리입니다. 개념 안내와 설정은 [추론된 약속](/ko/concepts/commitments)을 참조하세요.
 
-하위 명령 없이 `openclaw commitments`를 실행하면 대기 중인 약속이 나열됩니다.
+하위 명령 없이 실행하면 `openclaw commitments`는 대기 중인 약속을 나열합니다.
 
 ## 사용법
 
@@ -32,11 +31,12 @@ openclaw commitments dismiss <id...> [--json]
 
 ## 옵션
 
-- `--all`: 대기 중인 약속만이 아니라 모든 상태를 표시합니다.
+- `--all`: 대기 중인 약속만 표시하지 않고 모든 상태를 표시합니다.
 - `--agent <id>`: 하나의 에이전트 ID로 필터링합니다.
-- `--status <status>`: 상태별로 필터링합니다. 값: `pending`, `sent`,
-  `dismissed`, `snoozed` 또는 `expired`.
-- `--json`: 기계가 읽을 수 있는 JSON을 출력합니다.
+- `--status <status>`: 상태로 필터링합니다. 값은 `pending`, `sent`, `dismissed`, `snoozed` 또는 `expired`입니다. 알 수 없는 값을 지정하면 오류와 함께 종료됩니다.
+- `--json`: 기계 판독 가능한 JSON을 출력합니다.
+
+`dismiss`는 지정된 약속 ID를 `dismissed`로 표시하여 Heartbeat가 해당 약속을 전달하지 않도록 합니다.
 
 ## 예시
 
@@ -58,7 +58,7 @@ openclaw commitments --all
 openclaw commitments --agent main
 ```
 
-일시 중지된 약속 찾기:
+다시 알림으로 설정된 약속 찾기:
 
 ```bash
 openclaw commitments --status snoozed
@@ -78,18 +78,18 @@ openclaw commitments --all --json
 
 ## 출력
 
-텍스트 출력에는 다음이 포함됩니다.
+텍스트 출력에는 약속 수, 저장소 경로, 활성 필터 및 약속별 행 하나가 표시됩니다.
 
 - 약속 ID
 - 상태
-- 종류
-- 가장 이른 기한
-- 범위
+- 종류(`event_check_in`, `deadline_check`, `care_check_in` 또는 `open_loop`)
+- 가장 빠른 예정 시간
+- 범위(에이전트/채널/대상)
 - 제안된 확인 메시지
 
-JSON 출력에는 약속 저장소 경로와 저장된 전체 레코드도 포함됩니다.
+JSON 출력에는 개수, 활성 상태 및 에이전트 필터, 약속 저장소 경로와 저장된 전체 레코드가 포함됩니다.
 
-## 관련 항목
+## 관련 문서
 
 - [추론된 약속](/ko/concepts/commitments)
 - [메모리 개요](/ko/concepts/memory)

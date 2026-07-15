@@ -1,40 +1,40 @@
 ---
 read_when:
-    - Construir herramientas de host que no pueden usar el cliente RPC WebSocket de Gateway
-    - Exponer la automatización administrativa de Gateway detrás de una entrada privada de confianza
-    - Auditando el modelo de seguridad para el acceso HTTP a los métodos de Gateway
-summary: Expón métodos seleccionados del plano de control del Gateway mediante el plugin admin-http-rpc incluido y opcional
-title: Plugin RPC HTTP de administración
+    - Creación de herramientas para el host que no pueden usar el cliente RPC WebSocket del Gateway
+    - Exposición de la automatización administrativa del Gateway mediante un punto de entrada privado y de confianza
+    - Auditoría del modelo de seguridad para el acceso HTTP a los métodos del Gateway
+summary: Exponga métodos seleccionados del plano de control del Gateway mediante el Plugin admin-http-rpc incluido y de activación voluntaria
+title: Plugin de RPC HTTP de administración
 x-i18n:
-    generated_at: "2026-07-05T11:29:58Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T23:17:34Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 075135d2248acc859e60a72639350e16ed43785e9a353396fd47c3b02a4b0f5a
+    source_hash: 0709081efd0ce65cef7edac54df9a71978cbad17e2b25df83ac9075de938376c
     source_path: plugins/admin-http-rpc.md
     workflow: 16
 ---
 
-El plugin incluido `admin-http-rpc` expone por HTTP un conjunto de métodos del plano de control de Gateway en una lista permitida, para automatización de hosts de confianza que no puede mantener abierta una conexión WebSocket con Gateway.
+El plugin `admin-http-rpc` incluido expone mediante HTTP un conjunto de métodos de plano de control del Gateway incluidos en una lista de permitidos, para la automatización de hosts de confianza que no puede mantener abierta una conexión WebSocket con el Gateway.
 
-Se distribuye con OpenClaw, pero está deshabilitado de forma predeterminada; cuando está deshabilitado, la ruta no se registra. Cuando está habilitado, agrega `POST /api/v1/admin/rpc` en el mismo listener que Gateway (`http://<gateway-host>:<port>/api/v1/admin/rpc`).
+Se distribuye con OpenClaw, pero está deshabilitado de forma predeterminada; cuando está deshabilitado, la ruta no se registra. Cuando se habilita, añade `POST /api/v1/admin/rpc` en el mismo puerto de escucha que el Gateway (`http://<gateway-host>:<port>/api/v1/admin/rpc`).
 
-Habilítalo solo para herramientas privadas del host, automatización de tailnet o una entrada interna de confianza. Nunca expongas esta ruta directamente a internet público.
+Habilítelo únicamente para herramientas privadas del host, automatización de una tailnet o un punto de entrada interno de confianza. Nunca exponga esta ruta directamente a Internet.
 
 ## Antes de habilitarlo
 
-RPC HTTP de administración es una superficie completa del plano de control para operadores: cualquier llamador que supere la autenticación HTTP de Gateway puede invocar los métodos permitidos que se indican abajo. Habilítalo solo cuando todo esto sea cierto:
+RPC de administración por HTTP es una superficie completa del plano de control para operadores: cualquier cliente que supere la autenticación HTTP del Gateway puede invocar los métodos incluidos en la lista de permitidos que aparecen a continuación. Habilítelo únicamente cuando se cumplan todas estas condiciones:
 
-- El llamador es de confianza para operar Gateway.
-- El llamador no puede usar el cliente RPC WebSocket.
-- La ruta solo es accesible en loopback, una tailnet o una entrada privada autenticada.
-- Has revisado los métodos permitidos y coinciden con la automatización que planeas ejecutar.
+- El cliente es de confianza para operar el Gateway.
+- El cliente no puede utilizar el cliente RPC de WebSocket.
+- Solo se puede acceder a la ruta mediante local loopback, una tailnet o un punto de entrada privado autenticado.
+- Ha revisado los métodos permitidos y coinciden con la automatización que tiene previsto ejecutar.
 
-Para clientes de OpenClaw y herramientas interactivas que pueden mantener abierta una conexión WebSocket con Gateway, usa RPC WebSocket en su lugar.
+Para clientes de OpenClaw y herramientas interactivas que puedan mantener abierta una conexión WebSocket con el Gateway, utilice RPC de WebSocket en su lugar.
 
-## Habilitar
+## Habilitación
 
-Habilita el plugin incluido:
+Habilite el plugin incluido:
 
 <Tabs>
   <Tab title="CLI">
@@ -56,18 +56,18 @@ Habilita el plugin incluido:
   </Tab>
 </Tabs>
 
-La ruta se registra durante el inicio del plugin, así que reinicia Gateway después de cambiar la configuración del plugin.
+La ruta se registra durante el inicio del plugin, por lo que debe reiniciar el Gateway después de cambiar la configuración del plugin.
 
-Deshabilítalo cuando ya no necesites la superficie HTTP:
+Deshabilítelo cuando ya no necesite la superficie HTTP:
 
 ```bash
 openclaw plugins disable admin-http-rpc
 openclaw gateway restart
 ```
 
-## Verificar la ruta
+## Verificación de la ruta
 
-Usa `health` como la solicitud segura más pequeña:
+Utilice `health` como la solicitud segura más pequeña:
 
 ```bash
 curl -sS http://<gateway-host>:<port>/api/v1/admin/rpc \
@@ -76,7 +76,7 @@ curl -sS http://<gateway-host>:<port>/api/v1/admin/rpc \
   -d '{"method":"health","params":{}}'
 ```
 
-Una respuesta correcta tiene `ok: true`:
+Una respuesta correcta contiene `ok: true`:
 
 ```json
 {
@@ -92,25 +92,26 @@ Cuando el plugin está deshabilitado, la ruta devuelve `404` porque no está reg
 
 ## Autenticación
 
-La ruta del plugin usa autenticación HTTP de Gateway.
+La ruta del plugin utiliza la autenticación HTTP del Gateway.
 
-Rutas de autenticación comunes:
+Vías de autenticación habituales:
 
-- autenticación de secreto compartido (`gateway.auth.mode="token"` o `"password"`): `Authorization: Bearer <token-or-password>`
-- autenticación HTTP con identidad de confianza (`gateway.auth.mode="trusted-proxy"`): enruta a través del proxy configurado con reconocimiento de identidad y deja que inyecte los encabezados de identidad requeridos
-- autenticación abierta de entrada privada (`gateway.auth.mode="none"`): no se requiere encabezado de autenticación
+- autenticación mediante secreto compartido (`gateway.auth.mode="token"` o `"password"`): `Authorization: Bearer <token-or-password>`
+- autenticación HTTP de confianza con identidad (`gateway.auth.mode="trusted-proxy"`): dirija la ruta a través del proxy configurado con reconocimiento de identidad y permita que este inyecte las cabeceras de identidad requeridas
+- autenticación abierta mediante un punto de entrada privado (`gateway.auth.mode="none"`): no se requiere ninguna cabecera de autenticación
 
 ## Modelo de seguridad
 
-Trata este plugin como una superficie completa de operador de Gateway.
+Trate este plugin como una superficie completa del Gateway para operadores.
 
-- Habilitar el plugin ofrece intencionalmente acceso a los métodos RPC de administración permitidos en `/api/v1/admin/rpc`.
-- El plugin declara el contrato de manifiesto reservado `contracts.gatewayMethodDispatch: ["authenticated-request"]`, que es lo que permite que su ruta HTTP autenticada por Gateway despache métodos del plano de control en el proceso. Esto no es un sandbox: el contrato evita el uso accidental de helpers reservados del SDK, pero los plugins de confianza siguen ejecutándose en el proceso de Gateway.
-- La autenticación bearer de secreto compartido (modos `token`/`password`) prueba la posesión del secreto del operador de Gateway; los encabezados `x-openclaw-scopes` más restringidos se ignoran en esa ruta y se restauran los valores predeterminados normales de operador completo.
-- La autenticación HTTP con identidad de confianza (modo `trusted-proxy`) respeta `x-openclaw-scopes` cuando están presentes.
-- `gateway.auth.mode="none"` significa que esta ruta no está autenticada si el plugin está habilitado. Usa eso solo detrás de una entrada privada en la que confíes plenamente.
-- Las solicitudes se despachan a través de los mismos handlers de métodos de Gateway y comprobaciones de alcance que RPC WebSocket, después de que la autenticación de la ruta del plugin se supere.
-- Mantén esta ruta en loopback, tailnet o una entrada privada de confianza. No la expongas directamente a internet público. Usa gateways separados cuando los llamadores crucen límites de confianza.
+- Al habilitar el plugin, se ofrece intencionadamente acceso a los métodos RPC de administración incluidos en la lista de permitidos en `/api/v1/admin/rpc`.
+- El plugin declara el contrato reservado de manifiesto `contracts.gatewayMethodDispatch: ["authenticated-request"]`, que permite que su ruta HTTP autenticada por el Gateway despache métodos del plano de control dentro del proceso. Esto no es un entorno aislado: el contrato evita el uso accidental de asistentes reservados del SDK, pero los plugins de confianza siguen ejecutándose en el proceso del Gateway.
+- La autenticación de portador mediante secreto compartido (modos `token`/`password`) demuestra la posesión del secreto del operador del Gateway; las cabeceras `x-openclaw-scopes` más restrictivas se ignoran en esa vía y se restauran los valores predeterminados normales de operador completo.
+- La autenticación HTTP de confianza con identidad (modo `trusted-proxy`) respeta `x-openclaw-scopes` cuando está presente.
+- `gateway.auth.mode="none"` significa que esta ruta no está autenticada si el plugin está habilitado. Utilice esta opción únicamente detrás de un punto de entrada privado en el que confíe plenamente.
+- Una vez superada la autenticación de la ruta del plugin, las solicitudes se despachan mediante los mismos controladores de métodos y comprobaciones de ámbito del Gateway que el RPC de WebSocket.
+- La ruta permanece accesible durante una concesión de suspensión preparada. La validación limitada de solicitudes y la respuesta local de detección `commands.list` siguen disponibles. De los métodos despachados al Gateway, solo `gateway.suspend.prepare`, `gateway.suspend.status` y `gateway.suspend.resume` pueden ejecutarse mientras la admisión está cerrada; los demás métodos incluidos en la lista de permitidos devuelven la respuesta reintentable normal `UNAVAILABLE` del Gateway.
+- Mantenga esta ruta en local loopback, una tailnet o un punto de entrada privado de confianza. No la exponga directamente a Internet. Utilice gateways separados cuando los clientes traspasen límites de confianza.
 
 ## Solicitud
 
@@ -130,15 +131,15 @@ Content-Type: application/json
 
 Campos:
 
-- `id` (cadena, opcional): se copia en la respuesta. Se genera un UUID cuando se omite.
-- `method` (cadena, obligatorio): nombre de método de Gateway permitido.
-- `params` (cualquier valor, opcional): parámetros específicos del método.
+- `id` (cadena, opcional): se copia en la respuesta. Si se omite, se genera un UUID.
+- `method` (cadena, obligatorio): nombre del método permitido del Gateway.
+- `params` (cualquier tipo, opcional): parámetros específicos del método.
 
 El tamaño máximo predeterminado del cuerpo de la solicitud es de 1 MB.
 
 ## Respuesta
 
-Las respuestas correctas usan la forma RPC de Gateway:
+Las respuestas correctas utilizan la estructura RPC del Gateway:
 
 ```json
 {
@@ -148,7 +149,7 @@ Las respuestas correctas usan la forma RPC de Gateway:
 }
 ```
 
-Los errores de método de Gateway usan:
+Los errores de los métodos del Gateway utilizan:
 
 ```json
 {
@@ -161,7 +162,7 @@ Los errores de método de Gateway usan:
 }
 ```
 
-El estado HTTP sigue el código de error:
+El estado HTTP depende del código de error:
 
 | Código de error            | Estado HTTP |
 | -------------------------- | ----------- |
@@ -174,9 +175,9 @@ El estado HTTP sigue el código de error:
 
 ## Métodos permitidos
 
-- descubrimiento: `commands.list`
-  Devuelve los nombres de métodos RPC HTTP permitidos por este plugin.
-- gateway: `health`, `status`, `logs.tail`, `usage.status`, `usage.cost`, `gateway.restart.request`
+- detección: `commands.list`
+  Devuelve los nombres de los métodos RPC HTTP permitidos por este plugin.
+- gateway: `health`, `status`, `logs.tail`, `usage.status`, `usage.cost`, `gateway.restart.request`, `gateway.suspend.prepare`, `gateway.suspend.status`, `gateway.suspend.resume`
 - configuración: `config.get`, `config.schema`, `config.schema.lookup`, `config.set`, `config.patch`, `config.apply`
 - canales: `channels.status`, `channels.start`, `channels.stop`, `channels.logout`
 - web: `web.login.start`, `web.login.wait`
@@ -189,27 +190,27 @@ El estado HTTP sigue el código de error:
 - tareas: `tasks.list`, `tasks.get`, `tasks.cancel`
 - diagnósticos: `doctor.memory.status`, `update.status`
 
-Otros métodos de Gateway se bloquean hasta que se agreguen intencionalmente.
+Los demás métodos del Gateway se bloquean hasta que se añadan intencionadamente.
 
 ## Comparación con WebSocket
 
-La ruta RPC WebSocket normal de Gateway sigue siendo la API de plano de control preferida para clientes de OpenClaw. Usa RPC HTTP de administración solo para herramientas de host que necesitan una superficie HTTP de solicitud/respuesta.
+La ruta RPC normal de WebSocket del Gateway sigue siendo la API preferida del plano de control para los clientes de OpenClaw. Utilice RPC de administración por HTTP únicamente para herramientas del host que necesiten una superficie HTTP de solicitud y respuesta.
 
-Los clientes WebSocket con token compartido sin una identidad de dispositivo de confianza no pueden autodeclarar alcances de administración durante la conexión. RPC HTTP de administración sigue deliberadamente el modelo existente de operador HTTP de confianza: cuando el plugin está habilitado, la autenticación bearer de secreto compartido se trata como acceso de operador completo para esta superficie de administración.
+Los clientes de WebSocket con un token compartido y sin una identidad de dispositivo de confianza no pueden declarar por sí mismos ámbitos de administración durante la conexión. RPC de administración por HTTP sigue deliberadamente el modelo existente de operador HTTP de confianza: cuando el plugin está habilitado, la autenticación de portador mediante secreto compartido se considera acceso de operador completo para esta superficie de administración.
 
 ## Solución de problemas
 
 `404 Not Found`
 
-: El plugin está deshabilitado, Gateway no se ha reiniciado desde que se habilitó, o la solicitud va a un proceso de Gateway diferente.
+: El plugin está deshabilitado, el Gateway no se ha reiniciado desde que se habilitó o la solicitud se dirige a otro proceso del Gateway.
 
 `401 Unauthorized`
 
-: La solicitud no satisfizo la autenticación HTTP de Gateway. Comprueba el token bearer o los encabezados de identidad de trusted-proxy.
+: La solicitud no cumplió los requisitos de autenticación HTTP del Gateway. Compruebe el token de portador o las cabeceras de identidad de `trusted-proxy`.
 
 `405 Method Not Allowed`
 
-: La solicitud usó algo distinto de `POST`.
+: La solicitud utilizó un método distinto de `POST`.
 
 `413 Payload Too Large`
 
@@ -217,16 +218,16 @@ Los clientes WebSocket con token compartido sin una identidad de dispositivo de 
 
 `400 INVALID_REQUEST`
 
-: El cuerpo de la solicitud no es JSON válido, falta el campo `method` o el método no está en la lista permitida del plugin.
+: El cuerpo de la solicitud no es JSON válido, falta el campo `method`, el método no está incluido en la lista de permitidos del plugin o un identificador de reanudación de suspensión no coincide con la concesión activa.
 
 `503 UNAVAILABLE`
 
-: El handler del método de Gateway no está disponible. Revisa los logs de Gateway y vuelve a intentarlo después de que Gateway termine de iniciar.
+: El método del Gateway se está iniciando, tiene una limitación de frecuencia, está suspendido o está esperando una operación de suspensión o reanudación en conflicto. Examine `error.details` cuando esté presente y respete `error.retryAfterMs` antes de volver a intentarlo.
 
-## Relacionado
+## Temas relacionados
 
-- [Alcances de operador](/es/gateway/operator-scopes)
-- [Seguridad de Gateway](/es/gateway/security)
+- [Ámbitos del operador](/es/gateway/operator-scopes)
+- [Seguridad del Gateway](/es/gateway/security)
 - [Acceso remoto](/es/gateway/remote)
-- [Manifiesto de Plugin](/es/plugins/manifest#contracts-reference)
-- [Subrutas de SDK](/es/plugins/sdk-subpaths)
+- [Manifiesto del plugin](/es/plugins/manifest#contracts-reference)
+- [Subrutas del SDK](/es/plugins/sdk-subpaths)

@@ -1,39 +1,39 @@
 ---
 read_when:
-    - ローカルの ComfyUI ワークフローを OpenClaw で使いたい
-    - Comfy Cloud を画像、動画、または音楽のワークフローで使いたい
-    - バンドルされた comfy plugin の設定キーが必要です
-summary: OpenClaw での ComfyUI ワークフロー画像、動画、音楽生成セットアップ
+    - OpenClaw でローカルの ComfyUI ワークフローを使用したい場合
+    - 画像、動画、音楽のワークフローで Comfy Cloud を使用したい場合
+    - バンドル版 comfy Plugin の設定キーが必要です
+summary: OpenClawでのComfyUIワークフローによる画像、動画、音楽生成のセットアップ
 title: ComfyUI
 x-i18n:
-    generated_at: "2026-07-05T11:43:35Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T22:36:17Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 0602dcad22ed36e8cbf5b04f5098f613d48fcd6af55b0e13804cfeb4533d0247
+    source_hash: 74150d202a422de8e0f4b2b82d5d12bd42eb46991e8ef688832208e1a2ff7793
     source_path: providers/comfy.md
     workflow: 16
 ---
 
-OpenClaw は、ワークフロー駆動の ComfyUI 実行向けにバンドルされた `comfy` Plugin を同梱しています。この
-Plugin は完全にワークフロー駆動です。OpenClaw は汎用の `size`、
-`aspectRatio`、`resolution`、`durationSeconds`、または TTS スタイルのコントロールを
+OpenClaw には、ワークフロー駆動の ComfyUI 実行用 `comfy` Plugin が同梱されています。この
+Plugin は完全にワークフロー駆動です。OpenClaw は、汎用的な `size`、
+`aspectRatio`、`resolution`、`durationSeconds`、または TTS 形式の制御を
 グラフに対応付けません。
 
-| プロパティ | 詳細                                                                                  |
-| ---------- | ------------------------------------------------------------------------------------- |
-| Provider   | `comfy`                                                                               |
-| Model      | `comfy/workflow`                                                                      |
-| 共有ツール | `image_generate`, `video_generate`, `music_generate`                                  |
-| 認証       | ローカル ComfyUI では不要。Comfy Cloud では `COMFY_API_KEY` または `COMFY_CLOUD_API_KEY` |
-| API        | ComfyUI `/prompt` / `/history` / `/view`; Comfy Cloud `/api/*`                        |
+| プロパティ     | 詳細                                                                           |
+| ------------ | -------------------------------------------------------------------------------- |
+| プロバイダー     | `comfy`                                                                          |
+| モデル        | `comfy/workflow`                                                                 |
+| 共有ツール | `image_generate`、`video_generate`、`music_generate`                             |
+| 認証         | ローカルの ComfyUI では不要。Comfy Cloud では `COMFY_API_KEY` または `COMFY_CLOUD_API_KEY` |
+| API          | ComfyUI `/prompt` / `/history` / `/view`、Comfy Cloud `/api/*`                   |
 
-## 対応していること
+## 対応機能
 
-- ワークフロー JSON からの画像生成と編集（編集ではアップロード済みの参照画像を 1 つ使用）
-- ワークフロー JSON からの動画生成、text-to-video または image-to-video（参照画像 1 つ）
-- 共有 `music_generate` ツールを通じた音楽/音声生成。任意で参照画像を 1 つ使用可能
-- 設定済みノードからの出力ダウンロード、または未設定の場合は一致するすべての出力ノードからのダウンロード
+- ワークフロー JSON による画像の生成と編集（編集ではアップロードした参照画像を1枚使用）
+- ワークフロー JSON による動画生成。テキストから動画、または画像から動画（参照画像1枚）
+- 共有 `music_generate` ツールによる音楽・音声生成。任意で参照画像を1枚使用可能
+- 設定したノードから出力をダウンロード。ノードを設定していない場合は、一致するすべての出力ノードからダウンロード
 
 ## はじめに
 
@@ -48,10 +48,10 @@ Plugin は完全にワークフロー駆動です。OpenClaw は汎用の `size`
         ローカルの ComfyUI インスタンスが実行中であることを確認します（デフォルトは `http://127.0.0.1:8188`）。
       </Step>
       <Step title="ワークフロー JSON を準備する">
-        ComfyUI ワークフロー JSON ファイルをエクスポートまたは作成します。プロンプト入力ノードと、OpenClaw に読み取らせたい出力ノードのノード ID を控えておきます。
+        ComfyUI ワークフロー JSON ファイルをエクスポートまたは作成します。プロンプト入力ノードと、OpenClaw が読み取る出力ノードのノード ID を確認します。
       </Step>
-      <Step title="Provider を設定する">
-        `mode: "local"` を設定し、ワークフローファイルを指定します。最小限の画像例:
+      <Step title="プロバイダーを設定する">
+        `mode: "local"` を設定し、ワークフローファイルを指定します。最小限の画像設定例:
 
         ```json5
         {
@@ -74,7 +74,7 @@ Plugin は完全にワークフロー駆動です。OpenClaw は汎用の `size`
         ```
       </Step>
       <Step title="デフォルトモデルを設定する">
-        設定した機能について、OpenClaw が `comfy/workflow` モデルを参照するようにします:
+        設定した機能について、OpenClaw が `comfy/workflow` モデルを使用するよう指定します:
 
         ```json5
         {
@@ -88,7 +88,7 @@ Plugin は完全にワークフロー駆動です。OpenClaw は汎用の `size`
         }
         ```
       </Step>
-      <Step title="検証する">
+      <Step title="確認する">
         ```bash
         openclaw models list --provider comfy
         ```
@@ -98,11 +98,11 @@ Plugin は完全にワークフロー駆動です。OpenClaw は汎用の `size`
   </Tab>
 
   <Tab title="Comfy Cloud">
-    **最適な用途:** ローカル GPU リソースを管理せずに Comfy Cloud でワークフローを実行する場合。
+    **最適な用途:** ローカルの GPU リソースを管理せずに Comfy Cloud でワークフローを実行する場合。
 
     <Steps>
       <Step title="API キーを取得する">
-        [comfy.org](https://comfy.org) でサインアップし、アカウントダッシュボードから API キーを生成します。
+        [comfy.org](https://comfy.org) で登録し、アカウントのダッシュボードから API キーを生成します。
       </Step>
       <Step title="API キーを設定する">
         次のいずれかの方法でキーを指定します:
@@ -122,9 +122,9 @@ Plugin は完全にワークフロー駆動です。OpenClaw は汎用の `size`
         ```
       </Step>
       <Step title="ワークフロー JSON を準備する">
-        ComfyUI ワークフロー JSON ファイルをエクスポートまたは作成します。プロンプト入力ノードと出力ノードのノード ID を控えておきます。
+        ComfyUI ワークフロー JSON ファイルをエクスポートまたは作成します。プロンプト入力ノードと出力ノードのノード ID を確認します。
       </Step>
-      <Step title="Provider を設定する">
+      <Step title="プロバイダーを設定する">
         `mode: "cloud"` を設定し、ワークフローファイルを指定します:
 
         ```json5
@@ -147,7 +147,7 @@ Plugin は完全にワークフロー駆動です。OpenClaw は汎用の `size`
         ```
 
         <Tip>
-        クラウドモードでは `baseUrl` のデフォルトは `https://cloud.comfy.org` です。カスタムクラウドエンドポイントを使う場合のみ `baseUrl` を設定します。
+        クラウドモードでは、`baseUrl` のデフォルトは `https://cloud.comfy.org` です。カスタムのクラウドエンドポイントを使用する場合にのみ `baseUrl` を設定してください。
         </Tip>
       </Step>
       <Step title="デフォルトモデルを設定する">
@@ -163,7 +163,7 @@ Plugin は完全にワークフロー駆動です。OpenClaw は汎用の `size`
         }
         ```
       </Step>
-      <Step title="検証する">
+      <Step title="確認する">
         ```bash
         openclaw models list --provider comfy
         ```
@@ -175,7 +175,7 @@ Plugin は完全にワークフロー駆動です。OpenClaw は汎用の `size`
 
 ## 設定
 
-Comfy は、共有のトップレベル接続設定に加えて、機能ごとのワークフローセクション（`image`、`video`、`music`）に対応しています:
+Comfy は、共有の最上位接続設定と、機能ごとのワークフローセクション（`image`、`video`、`music`）に対応しています:
 
 ```json5
 {
@@ -209,40 +209,44 @@ Comfy は、共有のトップレベル接続設定に加えて、機能ごと�
 
 ### 共有キー
 
-| キー                  | 型                     | 説明                                                                                  |
+| キー                   | 型                   | 説明                                                                           |
 | --------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
-| `mode`                | `"local"` または `"cloud"` | 接続モード。デフォルトは `"local"`。                                                  |
-| `baseUrl`             | string                 | ローカルでは `http://127.0.0.1:8188`、クラウドでは `https://cloud.comfy.org` がデフォルト。 |
-| `apiKey`              | string                 | 任意のインラインキー。`COMFY_API_KEY` / `COMFY_CLOUD_API_KEY` 環境変数の代替。        |
-| `allowPrivateNetwork` | boolean                | クラウドモードでプライベート/LAN の `baseUrl` を許可する。                            |
+| `mode`                | `"local"` または `"cloud"` | 接続モード。デフォルトは `"local"`。                                               |
+| `baseUrl`             | 文字列                 | ローカルではデフォルトが `http://127.0.0.1:8188`、クラウドでは `https://cloud.comfy.org`。 |
+| `apiKey`              | 文字列                 | 任意のインラインキー。環境変数 `COMFY_API_KEY` / `COMFY_CLOUD_API_KEY` の代替。 |
+| `allowPrivateNetwork` | 真偽値                | クラウドモードでプライベート/LAN の `baseUrl`、またはローカルのプライベート DNS FQDN を許可。              |
+
+<Note>
+`local` モードでは、ループバック/プライベート IP リテラルと、`http://comfyui:8188` のような単一ラベルのサービス名は、`allowPrivateNetwork` なしで機能します。`https://comfy.local.example.com` のように公開アドレスに見えるプライベート DNS FQDN には、`allowPrivateNetwork: true` が必要です。プライベートオリジンへの信頼は、設定されたスキーム、ホスト名、ポートのみに限定されます。ローカルのリダイレクトは設定されたホスト名から外れることができません。一方、公開 CDN へのクラウドリダイレクトは、デフォルトの SSRF ポリシーで検査されます。
+</Note>
 
 ### 機能ごとのキー
 
-これらのキーは `image`、`video`、または `music` セクション内に適用されます:
+これらのキーは、`image`、`video`、または `music` セクション内で使用します:
 
-| キー                         | 必須 | デフォルト | 説明                                                                 |
-| ---------------------------- | ---- | ---------- | -------------------------------------------------------------------- |
-| `workflow` or `workflowPath` | はい | --         | インラインのワークフロー JSON、または ComfyUI ワークフロー JSON ファイルへのパス。 |
-| `promptNodeId`               | はい | --         | テキストプロンプトを受け取るノード ID。                              |
-| `promptInputName`            | いいえ | `"text"` | プロンプトノード上の入力名。                                         |
-| `outputNodeId`               | いいえ | --       | 出力を読み取るノード ID。省略した場合、一致するすべての出力ノードが使用されます。 |
-| `pollIntervalMs`             | いいえ | `1500`   | ジョブ完了を確認するポーリング間隔（ミリ秒）。                       |
-| `timeoutMs`                  | いいえ | `300000` | ワークフロー実行のタイムアウト（ミリ秒）。                           |
+| キー                          | 必須 | デフォルト  | 説明                                                                  |
+| ---------------------------- | -------- | -------- | ---------------------------------------------------------------------------- |
+| `workflow` または `workflowPath` | はい      | --       | インラインのワークフロー JSON、または ComfyUI ワークフロー JSON ファイルへのパス。             |
+| `promptNodeId`               | はい      | --       | テキストプロンプトを受け取るノード ID。                                       |
+| `promptInputName`            | いいえ       | `"text"` | プロンプトノード上の入力名。                                               |
+| `outputNodeId`               | いいえ       | --       | 出力を読み取るノード ID。省略した場合は、一致するすべての出力ノードを使用。 |
+| `pollIntervalMs`             | いいえ       | `1500`   | ジョブの完了を確認するポーリング間隔（ミリ秒）。                         |
+| `timeoutMs`                  | いいえ       | `300000` | ワークフロー実行のタイムアウト（ミリ秒）。                                |
 
 `image` セクションと `video` セクションは、参照画像の入力ノードにも対応しています:
 
-| キー                  | 必須                                 | デフォルト | 説明                                           |
-| --------------------- | ------------------------------------ | ---------- | ---------------------------------------------- |
-| `inputImageNodeId`    | はい（参照画像を渡す場合）           | --         | アップロード済み参照画像を受け取るノード ID。 |
-| `inputImageInputName` | いいえ                               | `"image"`  | 画像ノード上の入力名。                         |
+| キー                   | 必須                             | デフォルト   | 説明                                         |
+| --------------------- | ------------------------------------ | --------- | --------------------------------------------------- |
+| `inputImageNodeId`    | はい（参照画像を渡す場合） | --        | アップロードした参照画像を受け取るノード ID。 |
+| `inputImageInputName` | いいえ                                   | `"image"` | 画像ノード上の入力名。                       |
 
-`apiKey` は、リテラル文字列または [シークレット参照](/ja-JP/gateway/configuration-reference#secrets) オブジェクトのいずれかを受け付けます。
+`apiKey` には、リテラル文字列または[シークレット参照](/ja-JP/gateway/configuration-reference#secrets)オブジェクトを指定できます。
 
 ## ワークフローの詳細
 
 <AccordionGroup>
   <Accordion title="画像ワークフロー">
-    デフォルト画像モデルを `comfy/workflow` に設定します:
+    デフォルトの画像モデルを `comfy/workflow` に設定します:
 
     ```json5
     {
@@ -256,9 +260,9 @@ Comfy は、共有のトップレベル接続設定に加えて、機能ごと�
     }
     ```
 
-    **参照画像編集の例:**
+    **参照画像を使用した編集例:**
 
-    アップロード済み参照画像を使った画像編集を有効にするには、画像設定に `inputImageNodeId` を追加します:
+    アップロードした参照画像による画像編集を有効にするには、画像設定に `inputImageNodeId` を追加します:
 
     ```json5
     {
@@ -283,7 +287,7 @@ Comfy は、共有のトップレベル接続設定に加えて、機能ごと�
   </Accordion>
 
   <Accordion title="動画ワークフロー">
-    デフォルト動画モデルを `comfy/workflow` に設定します:
+    デフォルトの動画モデルを `comfy/workflow` に設定します:
 
     ```json5
     {
@@ -297,27 +301,27 @@ Comfy は、共有のトップレベル接続設定に加えて、機能ごと�
     }
     ```
 
-    Comfy の動画ワークフローは、設定されたグラフを通じて text-to-video と image-to-video に対応しています。
+    Comfy の動画ワークフローは、設定されたグラフを通じてテキストから動画、および画像から動画への生成に対応します。
 
     <Note>
-    OpenClaw は入力動画を Comfy ワークフローに渡しません。入力として対応しているのは、テキストプロンプトと単一の参照画像のみです。
+    OpenClaw は入力動画を Comfy ワークフローに渡しません。入力として対応しているのは、テキストプロンプトと1枚の参照画像のみです。
     </Note>
 
   </Accordion>
 
   <Accordion title="音楽ワークフロー">
-    バンドルされた Plugin は、ワークフローで定義された音声または音楽出力向けの音楽生成 Provider を登録し、共有 `music_generate` ツールを通じて公開します。任意の参照画像（最大 1 つ）を受け付けます:
+    同梱 Plugin は、ワークフローで定義された音声または音楽出力用の音楽生成プロバイダーを登録し、共有 `music_generate` ツールを通じて提供します。任意の参照画像を受け付けます（最大1枚）:
 
     ```text
     /tool music_generate prompt="Warm ambient synth loop with soft tape texture"
     ```
 
-    `music` 設定セクションを使用して、音声ワークフロー JSON と出力ノードを指定します。
+    `music` 設定セクションで、音声ワークフロー JSON と出力ノードを指定します。
 
   </Accordion>
 
   <Accordion title="後方互換性">
-    ネストされた `image` セクションを使わない既存のトップレベル画像設定も引き続き機能します:
+    既存の最上位画像設定（ネストされた `image` セクションを使用しない形式）も引き続き機能します:
 
     ```json5
     {
@@ -335,23 +339,23 @@ Comfy は、共有のトップレベル接続設定に加えて、機能ごと�
     }
     ```
 
-    OpenClaw はそのレガシー形状を画像ワークフロー設定として扱います。すぐに移行する必要はありませんが、新しいセットアップにはネストされた `image` / `video` / `music` セクションを推奨します。画像生成のみを使用する場合、レガシーのフラット設定と新しいネストされた `image` セクションは機能的に同等です。
+    OpenClaw は、このレガシー形式を画像ワークフロー設定として扱います。すぐに移行する必要はありませんが、新規設定ではネストされた `image` / `video` / `music` セクションを推奨します。画像生成のみを使用する場合、レガシーのフラット設定と新しいネストされた `image` セクションは機能的に同等です。
 
   </Accordion>
 
   <Accordion title="ライブテスト">
-    バンドルされた Plugin には、オプトインのライブカバレッジがあります:
+    同梱 Plugin には、オプトインのライブテスト範囲があります:
 
     ```bash
     OPENCLAW_LIVE_TEST=1 COMFY_LIVE_TEST=1 pnpm test:live -- extensions/comfy/comfy.live.test.ts
     ```
 
-    ライブテストは、一致する Comfy ワークフローセクションが設定されていない限り、個別の画像、動画、または音楽ケースをスキップします。
+    ライブテストでは、対応する Comfy ワークフローのセクションが設定されていない場合、個別の画像、動画、音楽のケースをスキップします。
 
   </Accordion>
 </AccordionGroup>
 
-## 関連
+## 関連項目
 
 <CardGroup cols={2}>
   <Card title="画像生成" href="/ja-JP/tools/image-generation" icon="image">
@@ -361,7 +365,7 @@ Comfy は、共有のトップレベル接続設定に加えて、機能ごと�
     動画生成ツールの設定と使用方法。
   </Card>
   <Card title="音楽生成" href="/ja-JP/tools/music-generation" icon="music">
-    音楽と音声生成ツールのセットアップ。
+    音楽および音声生成ツールのセットアップ。
   </Card>
   <Card title="プロバイダーディレクトリ" href="/ja-JP/providers/index" icon="layers">
     すべてのプロバイダーとモデル参照の概要。

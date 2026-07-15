@@ -1,21 +1,22 @@
 ---
 read_when:
-    - Вы устанавливаете, настраиваете или проверяете плагин raft
-summary: OpenClaw Raft channel plugin для безопасных мостов пробуждения CLI.
-title: Plugin Raft
+    - Вы устанавливаете, настраиваете или проверяете плагин Raft
+summary: Плагин канала OpenClaw Raft для безопасных мостов активации CLI.
+title: Плагин Raft
 x-i18n:
-    generated_at: "2026-06-28T23:28:12Z"
-    model: gpt-5.5
+    generated_at: "2026-07-13T20:07:48Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 24
     provider: openai
     source_hash: fea04ec6a2f3e08d69fd95c8a8e368fdbc8e179b243b8f6b41b5f8ef70039efc
     source_path: plugins/reference/raft.md
     workflow: 16
 ---
 
-# Plugin Raft
+# Плагин Raft
 
-Plugin канала OpenClaw Raft для безопасных мостов пробуждения CLI.
+Плагин канала Raft для OpenClaw, предоставляющий безопасные мосты активации CLI.
 
 ## Распространение
 
@@ -24,8 +25,8 @@ Plugin канала OpenClaw Raft для безопасных мостов пр�
 
 ## Интерфейс
 
-channels: raft
+каналы: raft
 
-## Связанные документы
+## Связанная документация
 
-- [raft](/ru/channels/raft)
+- [Raft](/ru/channels/raft)

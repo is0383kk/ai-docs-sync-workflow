@@ -1,95 +1,83 @@
 ---
 read_when:
     - 작업별 프롬프트 없이 실행되는 자율 에이전트 워크플로 설정
-    - 에이전트가 독립적으로 수행할 수 있는 작업과 사람의 승인이 필요한 작업 정의
-    - 명확한 경계와 에스컬레이션 규칙으로 다중 프로그램 에이전트 구조화하기
-summary: 자율 에이전트 프로그램의 영구 운영 권한 정의
+    - 에이전트가 독립적으로 수행할 수 있는 작업과 사람의 승인이 필요한 작업 정의하기
+    - 명확한 경계와 에스컬레이션 규칙을 갖춘 다중 프로그램 에이전트 구조화
+summary: 자율 에이전트 프로그램의 영구적인 운영 권한 정의
 title: 상시 지시 사항
 x-i18n:
-    generated_at: "2026-05-12T00:56:17Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T00:32:50Z"
+    model: gpt-5.6
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 3a51baa7aca31cb34b682983374d4d551ed6ab57ae54a5c63e7d044bffeef756
+    source_hash: 9e7ad622efe734facc9dc3716f5ee7f57ed3923499db78730bda234a5c62ad80
     source_path: automation/standing-orders.md
     workflow: 16
-    postprocess_version: locale-links-v1
 ---
 
-상시 명령은 정의된 프로그램에 대해 에이전트에 **영구 운영 권한**을 부여합니다. 매번 개별 작업 지침을 주는 대신, 명확한 범위, 트리거, 에스컬레이션 규칙이 있는 프로그램을 정의하면 에이전트가 그 경계 안에서 자율적으로 실행합니다.
+상시 지시는 정의된 프로그램에 대해 에이전트에 **영구적인 운영 권한**을 부여합니다. 각 작업마다 에이전트에 요청하는 대신 명확한 범위, 트리거, 에스컬레이션 규칙을 갖춘 프로그램을 정의하면 에이전트가 해당 경계 내에서 자율적으로 실행합니다. "주간 보고서는 네가 담당한다. 매주 금요일에 작성하여 전송하고, 문제가 있어 보일 때만 에스컬레이션하라."
 
-이는 매주 금요일마다 어시스턴트에게 "주간 보고서를 보내"라고 말하는 것과, "주간 보고서는 네가 담당한다. 매주 금요일에 작성해서 보내고, 뭔가 잘못된 것처럼 보일 때만 에스컬레이션해."라고 상시 권한을 부여하는 것의 차이입니다.
+## 상시 지시가 필요한 이유
 
-## 상시 명령이 필요한 이유
+**상시 지시가 없는 경우:** 모든 작업을 에이전트에 일일이 요청해야 하고, 일상 업무가 누락되거나 지연되며, 사용자가 병목 지점이 됩니다.
 
-**상시 명령이 없으면:**
-
-- 모든 작업마다 에이전트에 프롬프트를 입력해야 합니다
-- 에이전트는 요청 사이에 유휴 상태로 머뭅니다
-- 반복 작업이 잊히거나 지연됩니다
-- 사용자가 병목이 됩니다
-
-**상시 명령이 있으면:**
-
-- 에이전트가 정의된 경계 안에서 자율적으로 실행합니다
-- 반복 작업이 프롬프트 없이 일정에 따라 수행됩니다
-- 예외와 승인에 대해서만 사용자가 개입합니다
-- 에이전트가 유휴 시간을 생산적으로 활용합니다
+**상시 지시가 있는 경우:** 에이전트가 정의된 경계 내에서 자율적으로 실행하고, 일상 업무가 일정에 따라 처리되며, 사용자는 예외 상황과 승인에만 관여합니다.
 
 ## 작동 방식
 
-상시 명령은 [에이전트 워크스페이스](/ko/concepts/agent-workspace) 파일에 정의됩니다. 권장 방식은 에이전트가 항상 컨텍스트에 포함하도록 `AGENTS.md`(매 세션 자동 주입됨)에 직접 넣는 것입니다. 더 큰 구성의 경우 `standing-orders.md` 같은 전용 파일에 넣고 `AGENTS.md`에서 참조할 수도 있습니다.
+상시 지시는 [에이전트 작업 공간](/ko/concepts/agent-workspace) 파일에 정의됩니다. 권장 방식은 에이전트가 항상 해당 지시를 컨텍스트에 포함하도록 매 세션에 자동으로 주입되는 `AGENTS.md`에 직접 작성하는 것입니다. 구성이 큰 경우 `standing-orders.md` 같은 전용 파일에 작성하고 `AGENTS.md`에서 참조할 수도 있습니다.
 
 각 프로그램은 다음을 지정합니다.
 
-1. **범위** - 에이전트가 수행할 권한이 있는 작업
+1. **범위** - 에이전트가 수행하도록 허가된 작업
 2. **트리거** - 실행 시점(일정, 이벤트 또는 조건)
-3. **승인 게이트** - 실행 전에 사람의 승인이 필요한 항목
-4. **에스컬레이션 규칙** - 멈추고 도움을 요청해야 하는 시점
+3. **승인 관문** - 실행 전에 사람의 승인이 필요한 작업
+4. **에스컬레이션 규칙** - 중단하고 도움을 요청해야 하는 시점
 
-에이전트는 워크스페이스 부트스트랩 파일을 통해 매 세션 이러한 지침을 로드하고([Agent Workspace](/ko/concepts/agent-workspace)에서 자동 주입 파일 전체 목록 참고), 시간 기반 강제를 위해 [Cron 작업](/ko/automation/cron-jobs)과 결합하여 실행합니다.
+에이전트는 작업 공간 부트스트랩 파일을 통해 매 세션마다 이러한 지시를 불러오며(자동 주입되는 파일의 전체 목록은 [에이전트 작업 공간](/ko/concepts/agent-workspace) 참조), 시간 기반 실행을 위한 [Cron 작업](/ko/automation/cron-jobs)과 결합하여 지시에 따라 작업을 수행합니다.
 
 <Tip>
-상시 명령을 `AGENTS.md`에 넣어 매 세션 로드되도록 보장하세요. 워크스페이스 부트스트랩은 `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `BOOTSTRAP.md`, `MEMORY.md`를 자동으로 주입하지만, 하위 디렉터리의 임의 파일은 주입하지 않습니다.
+상시 지시를 매 세션에 반드시 불러오려면 `AGENTS.md`에 작성하세요. 작업 공간 부트스트랩은 `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `BOOTSTRAP.md`, `MEMORY.md`를 자동으로 주입하지만, 하위 디렉터리의 임의 파일은 주입하지 않습니다.
 </Tip>
 
-## 상시 명령의 구조
+## 상시 지시의 구성
 
 ```markdown
-## Program: Weekly Status Report
+## 프로그램: 주간 상태 보고서
 
-**Authority:** Compile data, generate report, deliver to stakeholders
-**Trigger:** Every Friday at 4 PM (enforced via cron job)
-**Approval gate:** None for standard reports. Flag anomalies for human review.
-**Escalation:** If data source is unavailable or metrics look unusual (>2σ from norm)
+**권한:** 데이터 취합, 보고서 생성, 이해관계자에게 전달
+**트리거:** 매주 금요일 오후 4시(Cron 작업으로 실행)
+**승인 관문:** 표준 보고서에는 없음. 이상 징후는 사람의 검토 대상으로 표시.
+**에스컬레이션:** 데이터 소스를 사용할 수 없거나 지표가 비정상적으로 보이는 경우(정상 범위에서 >2σ)
 
-### Execution steps
+### 실행 단계
 
-1. Pull metrics from configured sources
-2. Compare to prior week and targets
-3. Generate report in Reports/weekly/YYYY-MM-DD.md
-4. Deliver summary via configured channel
-5. Log completion to Agent/Logs/
+1. 구성된 소스에서 지표 가져오기
+2. 이전 주 및 목표와 비교
+3. Reports/weekly/YYYY-MM-DD.md에 보고서 생성
+4. 구성된 채널을 통해 요약 전달
+5. Agent/Logs/에 완료 기록
 
-### What NOT to do
+### 하지 말아야 할 작업
 
-- Do not send reports to external parties
-- Do not modify source data
-- Do not skip delivery if metrics look bad - report accurately
+- 외부 관계자에게 보고서를 보내지 않기
+- 원본 데이터를 수정하지 않기
+- 지표가 좋지 않아 보여도 전달을 생략하지 말고 정확하게 보고하기
 ```
 
-## 상시 명령과 Cron 작업
+## 상시 지시와 Cron 작업
 
-상시 명령은 에이전트가 수행할 권한이 있는 **내용**을 정의합니다. [Cron 작업](/ko/automation/cron-jobs)은 그것이 발생하는 **시점**을 정의합니다. 둘은 함께 작동합니다.
+상시 지시는 에이전트가 **무엇을** 수행하도록 허가되었는지 정의합니다. [Cron 작업](/ko/automation/cron-jobs)은 해당 작업이 **언제** 실행되는지 정의합니다. 두 기능은 다음과 같이 함께 작동합니다.
 
-```
-Standing Order: "You own the daily inbox triage"
+```text
+상시 지시: "일일 받은편지함 분류를 네가 담당한다"
     ↓
-Cron Job (8 AM daily): "Execute inbox triage per standing orders"
+Cron 작업(매일 오전 8시): "상시 지시에 따라 받은편지함 분류 실행"
     ↓
-Agent: Reads standing orders → executes steps → reports results
+에이전트: 상시 지시 읽기 → 단계 실행 → 결과 보고
 ```
 
-Cron 작업 프롬프트는 내용을 중복하지 말고 상시 명령을 참조해야 합니다.
+Cron 작업 프롬프트는 상시 지시를 중복해서 작성하지 말고 참조해야 합니다.
 
 ```bash
 openclaw cron add \
@@ -100,159 +88,159 @@ openclaw cron add \
   --announce \
   --channel imessage \
   --to "+1XXXXXXXXXX" \
-  --message "Execute daily inbox triage per standing orders. Check mail for new alerts. Parse, categorize, and persist each item. Report summary to owner. Escalate unknowns."
+  --message "상시 지시에 따라 일일 받은편지함 분류를 실행하세요. 새 알림이 있는지 메일을 확인하세요. 각 항목을 파싱하고 분류하여 저장하세요. 소유자에게 요약을 보고하세요. 알 수 없는 항목은 에스컬레이션하세요."
 ```
 
 ## 예시
 
-### 예시 1: 콘텐츠와 소셜 미디어(주간 주기)
+### 예시 1: 콘텐츠 및 소셜 미디어(주간 주기)
 
 ```markdown
-## Program: Content & Social Media
+## 프로그램: 콘텐츠 및 소셜 미디어
 
-**Authority:** Draft content, schedule posts, compile engagement reports
-**Approval gate:** All posts require owner review for first 30 days, then standing approval
-**Trigger:** Weekly cycle (Monday review → mid-week drafts → Friday brief)
+**권한:** 콘텐츠 초안 작성, 게시물 예약, 참여도 보고서 작성
+**승인 관문:** 처음 30일 동안은 모든 게시물에 소유자 검토가 필요하며, 이후에는 상시 승인 적용
+**트리거:** 주간 주기(월요일 검토 → 주중 초안 작성 → 금요일 브리핑)
 
-### Weekly cycle
+### 주간 주기
 
-- **Monday:** Review platform metrics and audience engagement
-- **Tuesday-Thursday:** Draft social posts, create blog content
-- **Friday:** Compile weekly marketing brief → deliver to owner
+- **월요일:** 플랫폼 지표 및 잠재고객 참여도 검토
+- **화요일~목요일:** 소셜 게시물 초안 및 블로그 콘텐츠 작성
+- **금요일:** 주간 마케팅 브리핑 작성 → 소유자에게 전달
 
-### Content rules
+### 콘텐츠 규칙
 
-- Voice must match the brand (see SOUL.md or brand voice guide)
-- Never identify as AI in public-facing content
-- Include metrics when available
-- Focus on value to audience, not self-promotion
+- 문체는 브랜드와 일치해야 함(SOUL.md 또는 브랜드 문체 가이드 참조)
+- 공개 콘텐츠에서 자신을 AI라고 밝히지 않기
+- 가능한 경우 지표 포함
+- 자기 홍보가 아니라 잠재고객에게 제공하는 가치에 집중
 ```
 
-### 예시 2: 재무 운영(이벤트 트리거)
+### 예시 2: 재무 운영(이벤트 기반)
 
 ```markdown
-## Program: Financial Processing
+## 프로그램: 재무 처리
 
-**Authority:** Process transaction data, generate reports, send summaries
-**Approval gate:** None for analysis. Recommendations require owner approval.
-**Trigger:** New data file detected OR scheduled monthly cycle
+**권한:** 거래 데이터 처리, 보고서 생성, 요약 전송
+**승인 관문:** 분석에는 없음. 권고 사항에는 소유자 승인이 필요함.
+**트리거:** 새 데이터 파일 감지 또는 예약된 월간 주기
 
-### When new data arrives
+### 새 데이터가 도착한 경우
 
-1. Detect new file in designated input directory
-2. Parse and categorize all transactions
-3. Compare against budget targets
-4. Flag: unusual items, threshold breaches, new recurring charges
-5. Generate report in designated output directory
-6. Deliver summary to owner via configured channel
+1. 지정된 입력 디렉터리에서 새 파일 감지
+2. 모든 거래를 파싱하고 분류
+3. 예산 목표와 비교
+4. 비정상 항목, 임계값 초과, 새로운 반복 청구를 표시
+5. 지정된 출력 디렉터리에 보고서 생성
+6. 구성된 채널을 통해 소유자에게 요약 전달
 
-### Escalation rules
+### 에스컬레이션 규칙
 
-- Single item > $500: immediate alert
-- Category > budget by 20%: flag in report
-- Unrecognizable transaction: ask owner for categorization
-- Failed processing after 2 retries: report failure, do not guess
+- 단일 항목 > $500: 즉시 알림
+- 범주가 예산보다 20% 초과: 보고서에 표시
+- 식별할 수 없는 거래: 소유자에게 분류 요청
+- 두 번 재시도한 후에도 처리 실패: 실패를 보고하고 추측하지 않기
 ```
 
-### 예시 3: 모니터링과 알림(연속)
+### 예시 3: 모니터링 및 알림(지속 실행)
 
 ```markdown
-## Program: System Monitoring
+## 프로그램: 시스템 모니터링
 
-**Authority:** Check system health, restart services, send alerts
-**Approval gate:** Restart services automatically. Escalate if restart fails twice.
-**Trigger:** Every heartbeat cycle
+**권한:** 시스템 상태 확인, 서비스 재시작, 알림 전송
+**승인 관문:** 서비스를 자동으로 재시작. 재시작이 두 번 실패하면 에스컬레이션.
+**트리거:** 매 Heartbeat 주기
 
-### Checks
+### 확인 항목
 
-- Service health endpoints responding
-- Disk space above threshold
-- Pending tasks not stale (>24 hours)
-- Delivery channels operational
+- 서비스 상태 엔드포인트 응답 여부
+- 디스크 여유 공간이 임계값 이상인지 여부
+- 대기 중인 작업이 오래 방치되지 않았는지 여부(>24시간)
+- 전달 채널의 정상 작동 여부
 
-### Response matrix
+### 대응 매트릭스
 
-| Condition        | Action                   | Escalate?                |
-| ---------------- | ------------------------ | ------------------------ |
-| Service down     | Restart automatically    | Only if restart fails 2x |
-| Disk space < 10% | Alert owner              | Yes                      |
-| Stale task > 24h | Remind owner             | No                       |
-| Channel offline  | Log and retry next cycle | If offline > 2 hours     |
+| 조건                 | 조치                          | 에스컬레이션 여부              |
+| -------------------- | ----------------------------- | ------------------------------ |
+| 서비스 중단          | 자동으로 재시작               | 재시작이 2회 실패한 경우에만   |
+| 디스크 여유 공간 < 10% | 소유자에게 알림              | 예                             |
+| 방치된 작업 > 24시간 | 소유자에게 알림               | 아니요                         |
+| 채널 오프라인        | 기록하고 다음 주기에 재시도   | 2시간 넘게 오프라인인 경우     |
 ```
 
 ## 실행-검증-보고 패턴
 
-상시 명령은 엄격한 실행 원칙과 결합할 때 가장 잘 작동합니다. 상시 명령의 모든 작업은 다음 루프를 따라야 합니다.
+상시 지시는 엄격한 실행 규율과 결합할 때 가장 효과적입니다. 상시 지시의 모든 작업은 다음 반복 절차를 따라야 합니다.
 
-1. **실행** - 실제 작업을 수행합니다(지침을 확인만 하지 않음)
-2. **검증** - 결과가 올바른지 확인합니다(파일 존재, 메시지 전달, 데이터 파싱)
-3. **보고** - 수행한 일과 검증한 내용을 소유자에게 알립니다
+1. **실행** - 실제 작업 수행(지시를 확인했다는 응답만 하지 않기)
+2. **검증** - 결과가 올바른지 확인(파일 존재, 메시지 전달, 데이터 파싱)
+3. **보고** - 수행한 작업과 검증한 내용을 소유자에게 알리기
 
 ```markdown
-### Execution rules
+### 실행 규칙
 
-- Every task follows Execute-Verify-Report. No exceptions.
-- "I'll do that" is not execution. Do it, then report.
-- "Done" without verification is not acceptable. Prove it.
-- If execution fails: retry once with adjusted approach.
-- If still fails: report failure with diagnosis. Never silently fail.
-- Never retry indefinitely - 3 attempts max, then escalate.
+- 모든 작업은 실행-검증-보고를 따릅니다. 예외는 없습니다.
+- "그렇게 하겠습니다"는 실행이 아닙니다. 실행한 다음 보고하세요.
+- 검증 없이 "완료"라고 하는 것은 허용되지 않습니다. 증명하세요.
+- 실행에 실패하면 접근 방식을 조정하여 한 번 재시도합니다.
+- 여전히 실패하면 진단 내용과 함께 실패를 보고합니다. 절대로 아무런 보고 없이 실패하지 마세요.
+- 무기한 재시도하지 마세요. 최대 3번 시도한 후 에스컬레이션하세요.
 ```
 
-이 패턴은 에이전트의 가장 흔한 실패 모드, 즉 작업을 완료하지 않고 확인만 하는 문제를 방지합니다.
+이 패턴은 작업을 완료하지 않고 확인 응답만 하는 가장 흔한 에이전트 실패 유형을 방지합니다.
 
 ## 다중 프로그램 아키텍처
 
-여러 관심사를 관리하는 에이전트의 경우, 상시 명령을 명확한 경계를 가진 별도 프로그램으로 구성하세요.
+여러 영역을 관리하는 에이전트의 경우 상시 지시를 경계가 명확한 별도의 프로그램으로 구성하세요.
 
 ```markdown
-## Program 1: [Domain A] (Weekly)
+## 프로그램 1: [영역 A] (주간)
 
 ...
 
-## Program 2: [Domain B] (Monthly + On-Demand)
+## 프로그램 2: [영역 B] (월간 + 요청 시)
 
 ...
 
-## Program 3: [Domain C] (As-Needed)
+## 프로그램 3: [영역 C] (필요 시)
 
 ...
 
-## Escalation Rules (All Programs)
+## 에스컬레이션 규칙 (모든 프로그램)
 
-- [Common escalation criteria]
-- [Approval gates that apply across programs]
+- [공통 에스컬레이션 기준]
+- [프로그램 전반에 적용되는 승인 관문]
 ```
 
-각 프로그램에는 다음이 있어야 합니다.
+각 프로그램에는 다음 항목이 있어야 합니다.
 
-- 자체 **트리거 주기**(주간, 월간, 이벤트 기반, 연속)
-- 자체 **승인 게이트**(일부 프로그램은 다른 프로그램보다 더 많은 감독이 필요함)
-- 명확한 **경계**(에이전트가 한 프로그램이 어디서 끝나고 다른 프로그램이 어디서 시작되는지 알아야 함)
+- 자체적인 **트리거 주기**(주간, 월간, 이벤트 기반, 지속 실행)
+- 자체적인 **승인 관문**(일부 프로그램에는 다른 프로그램보다 더 많은 감독이 필요함)
+- 명확한 **경계**(에이전트가 한 프로그램이 끝나고 다른 프로그램이 시작되는 지점을 알아야 함)
 
 ## 모범 사례
 
-### 권장
+### 권장 사항
 
-- 좁은 권한으로 시작하고 신뢰가 쌓이면 확장합니다
-- 고위험 작업에는 명시적인 승인 게이트를 정의합니다
-- "하지 말아야 할 일" 섹션을 포함합니다. 경계는 권한만큼 중요합니다
-- 신뢰할 수 있는 시간 기반 실행을 위해 Cron 작업과 결합합니다
-- 에이전트 로그를 매주 검토하여 상시 명령이 준수되고 있는지 확인합니다
-- 요구 사항이 발전함에 따라 상시 명령을 업데이트합니다. 상시 명령은 살아 있는 문서입니다
+- 좁은 권한으로 시작하고 신뢰가 쌓임에 따라 확대
+- 위험도가 높은 작업에 명시적인 승인 관문 정의
+- "하지 말아야 할 작업" 섹션 포함 - 권한만큼 경계도 중요함
+- 신뢰할 수 있는 시간 기반 실행을 위해 Cron 작업과 결합
+- 에이전트 로그를 매주 검토하여 상시 지시 준수 여부 확인
+- 요구 사항의 변화에 따라 상시 지시 업데이트 - 상시 지시는 지속적으로 관리하는 문서임
 
-### 피하기
+### 피해야 할 사항
 
-- 첫날부터 광범위한 권한을 부여하지 마세요("네가 최선이라고 생각하는 대로 해")
-- 에스컬레이션 규칙을 건너뛰지 마세요. 모든 프로그램에는 "언제 멈추고 물어볼지" 조항이 필요합니다
-- 에이전트가 구두 지침을 기억할 것이라고 가정하지 마세요. 모든 것을 파일에 넣으세요
-- 여러 관심사를 단일 프로그램에 섞지 마세요. 서로 다른 도메인에는 별도 프로그램을 사용하세요
-- Cron 작업으로 강제하는 것을 잊지 마세요. 트리거 없는 상시 명령은 제안에 그칩니다
+- 첫날부터 광범위한 권한 부여("최선이라고 생각하는 것은 무엇이든 수행")
+- 에스컬레이션 규칙 생략 - 모든 프로그램에는 "중단하고 질문해야 하는 시점" 조항이 필요함
+- 에이전트가 구두 지시를 기억할 것이라고 가정 - 모든 내용을 파일에 작성
+- 단일 프로그램에 여러 영역을 혼합 - 영역별로 프로그램 분리
+- Cron 작업을 통한 실행 강제를 잊는 것 - 트리거가 없는 상시 지시는 제안에 불과함
 
-## 관련
+## 관련 문서
 
-- [자동화](/ko/automation): 모든 자동화 메커니즘을 한눈에 봅니다.
-- [Cron 작업](/ko/automation/cron-jobs): 상시 명령을 위한 일정 강제.
-- [Hooks](/ko/automation/hooks): 에이전트 수명 주기 이벤트를 위한 이벤트 기반 스크립트.
-- [Webhooks](/ko/automation/cron-jobs#webhooks): 인바운드 HTTP 이벤트 트리거.
-- [에이전트 워크스페이스](/ko/concepts/agent-workspace): 자동 주입 부트스트랩 파일 전체 목록(`AGENTS.md`, `SOUL.md` 등)을 포함해 상시 명령이 위치하는 곳.
+- [자동화](/ko/automation): 모든 자동화 메커니즘을 한눈에 확인합니다.
+- [Cron 작업](/ko/automation/cron-jobs): 상시 지시의 일정 실행을 강제합니다.
+- [훅](/ko/automation/hooks): 에이전트 수명 주기 이벤트를 위한 이벤트 기반 스크립트입니다.
+- [Webhook](/ko/automation/cron-jobs#webhooks): 인바운드 HTTP 이벤트 트리거입니다.
+- [에이전트 작업 공간](/ko/concepts/agent-workspace): 자동 주입되는 부트스트랩 파일(`AGENTS.md`, `SOUL.md` 등)의 전체 목록을 포함하여 상시 지시가 저장되는 위치를 설명합니다.

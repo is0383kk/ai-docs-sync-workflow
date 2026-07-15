@@ -1,31 +1,29 @@
 ---
 read_when:
-    - Sie möchten eine URL abrufen und lesbaren Inhalt extrahieren
-    - Sie müssen web_fetch oder den Firecrawl-Fallback dafür konfigurieren
-    - Sie möchten die Grenzen und das Caching von web_fetch verstehen
+    - Sie möchten eine URL abrufen und lesbare Inhalte extrahieren
+    - Sie müssen `web_fetch` oder dessen Firecrawl-Fallback konfigurieren.
+    - Sie möchten die Beschränkungen und das Caching von web_fetch verstehen
 sidebarTitle: Web Fetch
 summary: web_fetch-Tool -- HTTP-Abruf mit Extraktion lesbarer Inhalte
-title: Webabruf
+title: Web-Abruf
 x-i18n:
-    generated_at: "2026-06-27T18:23:10Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T02:18:33Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: b5a4127b97ded80eec1a5944bc8606069e630c61f89c4d5ce9cb729390b4eb4d
+    source_hash: 8c956b01fce44dc4b8f3ac289b312691c3fe4293ed2e6777fb53f3345dd99e93
     source_path: tools/web-fetch.md
     workflow: 16
 ---
 
-Das Tool `web_fetch` führt ein einfaches HTTP GET aus und extrahiert lesbaren Inhalt
-(HTML zu Markdown oder Text). Es führt **kein** JavaScript aus.
-
-Verwenden Sie für JS-lastige Websites oder login-geschützte Seiten stattdessen den
+`web_fetch` führt einen einfachen HTTP-GET aus und extrahiert lesbare Inhalte (HTML in
+Markdown oder Text). JavaScript wird dabei **nicht** ausgeführt. Verwenden Sie für stark
+JS-basierte Websites oder durch Anmeldung geschützte Seiten stattdessen den
 [Webbrowser](/de/tools/browser).
 
 ## Schnellstart
 
-`web_fetch` ist **standardmäßig aktiviert** -- keine Konfiguration erforderlich. Der Agent kann
-es sofort aufrufen:
+Standardmäßig aktiviert, keine Konfiguration erforderlich:
 
 ```javascript
 await web_fetch({ url: "https://example.com/article" });
@@ -42,22 +40,22 @@ Ausgabeformat nach der Extraktion des Hauptinhalts.
 </ParamField>
 
 <ParamField path="maxChars" type="number">
-Ausgabe auf diese Anzahl von Zeichen kürzen.
+Kürzt die Ausgabe auf diese Zeichenanzahl. Wird auf `tools.web.fetch.maxCharsCap` begrenzt.
 </ParamField>
 
 ## Funktionsweise
 
 <Steps>
-  <Step title="Fetch">
-    Sendet ein HTTP GET mit einem Chrome-ähnlichen User-Agent und
-    `Accept-Language`-Header. Blockiert private/interne Hostnamen und prüft Weiterleitungen erneut.
+  <Step title="Abrufen">
+    Sendet einen HTTP-GET mit einem Chrome-ähnlichen User-Agent und dem Header
+    `Accept-Language`. Blockiert private/interne Hostnamen und überprüft Weiterleitungen erneut.
   </Step>
-  <Step title="Extract">
-    Führt Readability (Extraktion des Hauptinhalts) auf der HTML-Antwort aus.
+  <Step title="Extrahieren">
+    Führt Readability (Extraktion des Hauptinhalts) für die HTML-Antwort aus.
   </Step>
   <Step title="Fallback (optional)">
-    Wenn Readability fehlschlägt und Firecrawl ausgewählt ist, wird der Versuch über die
-    Firecrawl-API mit Bot-Umgehungsmodus wiederholt.
+    Wenn Readability fehlschlägt und ein Abruf-Provider verfügbar ist, erfolgt ein
+    erneuter Versuch über diesen Provider (beispielsweise mit dem Modus von Firecrawl zur Bot-Umgehung).
   </Step>
   <Step title="Cache">
     Ergebnisse werden 15 Minuten lang zwischengespeichert (konfigurierbar), um wiederholte
@@ -71,13 +69,13 @@ Ausgabe auf diese Anzahl von Zeichen kürzen.
 fünf Sekunden noch aussteht:
 
 ```text
-Fetching page content...
+Seiteninhalt wird abgerufen...
 ```
 
-Schnelle Cache-Treffer und schnelle Netzwerkantworten sind abgeschlossen, bevor der Timer auslöst,
-sodass sie keine Fortschrittszeile anzeigen. Wenn der Aufruf abgebrochen wird, wird der Timer gelöscht.
-Wenn der Abruf schließlich abgeschlossen ist, erhält der Agent das normale Tool-Ergebnis;
-die Fortschrittszeile ist nur Channel-UI-Status und enthält niemals abgerufene Seiteninhalte.
+Schnelle Cache-Treffer und zügige Netzwerkantworten werden abgeschlossen, bevor der Timer
+ausgelöst wird, sodass sie nie eine Fortschrittszeile anzeigen. Beim Abbrechen des Aufrufs wird
+der Timer gelöscht. Die Fortschrittszeile ist ausschließlich ein Zustand der Kanaloberfläche und
+enthält niemals Inhalte der abgerufenen Seite.
 
 ## Konfiguration
 
@@ -86,20 +84,20 @@ die Fortschrittszeile ist nur Channel-UI-Status und enthält niemals abgerufene 
   tools: {
     web: {
       fetch: {
-        enabled: true, // default: true
-        provider: "firecrawl", // optional; omit for auto-detect
-        maxChars: 50000, // max output chars
-        maxCharsCap: 50000, // hard cap for maxChars param
-        maxResponseBytes: 2000000, // max download size before truncation
+        enabled: true, // Standard: true
+        provider: "firecrawl", // optional; zur automatischen Erkennung weglassen
+        maxChars: 20000, // standardmäßige Anzahl der Ausgabezeichen; durch maxCharsCap begrenzt
+        maxCharsCap: 20000, // feste Obergrenze für den Parameter maxChars
+        maxResponseBytes: 750000, // maximale Downloadgröße vor der Kürzung (32000-10000000)
         timeoutSeconds: 30,
         cacheTtlMinutes: 15,
         maxRedirects: 3,
-        useTrustedEnvProxy: false, // let a trusted HTTP(S) env proxy resolve DNS
-        readability: true, // use Readability extraction
-        userAgent: "Mozilla/5.0 ...", // override User-Agent
+        useTrustedEnvProxy: false, // einem vertrauenswürdigen HTTP(S)-Umgebungsproxy die DNS-Auflösung überlassen
+        readability: true, // Readability-Extraktion verwenden
+        userAgent: "Mozilla/5.0 ...", // User-Agent überschreiben
         ssrfPolicy: {
-          allowRfc2544BenchmarkRange: true, // opt-in for trusted fake-IP proxies using 198.18.0.0/15
-          allowIpv6UniqueLocalRange: true, // opt-in for trusted fake-IP proxies using fc00::/7
+          allowRfc2544BenchmarkRange: true, // explizite Freigabe für vertrauenswürdige Fake-IP-Proxys mit 198.18.0.0/15
+          allowIpv6UniqueLocalRange: true, // explizite Freigabe für vertrauenswürdige Fake-IP-Proxys mit fc00::/7
         },
       },
     },
@@ -109,15 +107,15 @@ die Fortschrittszeile ist nur Channel-UI-Status und enthält niemals abgerufene 
 
 ## Firecrawl-Fallback
 
-Wenn die Readability-Extraktion fehlschlägt, kann `web_fetch` für Bot-Umgehung und bessere Extraktion auf
-[Firecrawl](/de/tools/firecrawl) zurückfallen:
+Wenn die Readability-Extraktion fehlschlägt, kann `web_fetch` für die Bot-Umgehung und eine
+bessere Extraktion auf [Firecrawl](/de/tools/firecrawl) zurückgreifen:
 
 ```json5
 {
   tools: {
     web: {
       fetch: {
-        provider: "firecrawl", // optional; omit for auto-detect from available credentials
+        provider: "firecrawl", // optional; zur automatischen Erkennung anhand verfügbarer Anmeldedaten weglassen
       },
     },
   },
@@ -127,10 +125,10 @@ Wenn die Readability-Extraktion fehlschlägt, kann `web_fetch` für Bot-Umgehung
         enabled: true,
         config: {
           webFetch: {
-            // apiKey: "fc-...", // optional; omit for keyless starter access
+            // apiKey: "fc-...", // optional; für schlüssellosen Starterzugriff weglassen
             baseUrl: "https://api.firecrawl.dev",
             onlyMainContent: true,
-            maxAgeMs: 86400000, // cache duration (1 day)
+            maxAgeMs: 172800000, // Cache-Dauer (2 Tage)
             timeoutSeconds: 60,
           },
         },
@@ -141,80 +139,82 @@ Wenn die Readability-Extraktion fehlschlägt, kann `web_fetch` für Bot-Umgehung
 ```
 
 `plugins.entries.firecrawl.config.webFetch.apiKey` ist optional und unterstützt SecretRef-Objekte.
-Die Legacy-Konfiguration `tools.web.fetch.firecrawl.*` wird von `openclaw doctor --fix` automatisch migriert.
+Die ältere Konfiguration `tools.web.fetch.firecrawl.*` wird über `openclaw doctor --fix`
+automatisch zu `plugins.entries.firecrawl.config.webFetch` migriert.
 
 <Note>
-  Wenn Sie einen Firecrawl-API-key-SecretRef konfigurieren und dieser ohne
-  `FIRECRAWL_API_KEY`-Env-Fallback nicht aufgelöst wird, schlägt der Gateway-Start früh fehl.
+  Wenn Sie eine SecretRef für den Firecrawl-API-Schlüssel konfigurieren, die nicht aufgelöst
+  werden kann und für die kein Fallback über die Umgebungsvariable `FIRECRAWL_API_KEY`
+  vorhanden ist, schlägt der Start des Gateways sofort fehl.
 </Note>
 
 <Note>
-  Firecrawl-`baseUrl`-Überschreibungen sind eingeschränkt: Gehosteter Traffic verwendet
+  Überschreibungen von Firecrawl-`baseUrl` sind eingeschränkt: Gehosteter Datenverkehr verwendet
   `https://api.firecrawl.dev`; selbst gehostete Überschreibungen müssen auf private oder
-  interne Endpunkte zielen, und `http://` wird nur für diese privaten Ziele akzeptiert.
+  interne Endpunkte verweisen, und `http://` wird nur für solche privaten Ziele akzeptiert.
 </Note>
 
 Aktuelles Laufzeitverhalten:
 
 - `tools.web.fetch.provider` wählt den Fallback-Provider für den Abruf explizit aus.
-- Wenn `provider` ausgelassen wird, erkennt OpenClaw automatisch den ersten bereiten Web-Fetch-Provider
-  aus den konfigurierten Zugangsdaten. Nicht-sandboxed `web_fetch` kann
-  installierte Plugins verwenden, die `contracts.webFetchProviders` deklarieren und zur Laufzeit einen
-  passenden Provider registrieren. Das offizielle Firecrawl-Plugin stellt diesen
-  Fallback bereit.
-- Sandboxed-`web_fetch`-Aufrufe erlauben gebündelte Provider sowie installierte Provider,
-  deren offizielle npm- oder ClawHub-Herkunft verifiziert ist. Derzeit erlaubt dies das
-  offizielle Firecrawl-Plugin; externe Abruf-Plugins von Drittanbietern bleiben ausgeschlossen.
-- Wenn Readability deaktiviert ist, springt `web_fetch` direkt zum ausgewählten
-  Provider-Fallback. Wenn kein Provider verfügbar ist, schlägt es geschlossen fehl.
+- Wenn `provider` weggelassen wird, erkennt OpenClaw automatisch den ersten einsatzbereiten
+  Web-Abruf-Provider anhand der konfigurierten Anmeldedaten. `web_fetch` ohne Sandbox kann
+  installierte Plugins verwenden, die `contracts.webFetchProviders` deklarieren und zur
+  Laufzeit einen passenden Provider registrieren. Das offizielle Firecrawl-Plugin stellt
+  derzeit diesen Fallback bereit.
+- `web_fetch`-Aufrufe in der Sandbox erlauben gebündelte Provider sowie installierte Provider,
+  deren offizielle Herkunft von npm oder ClawHub verifiziert ist. Derzeit ist dadurch das
+  offizielle Firecrawl-Plugin zulässig; externe Abruf-Plugins von Drittanbietern bleiben ausgeschlossen.
+- Wenn Readability deaktiviert ist, wechselt `web_fetch` direkt zum ausgewählten
+  Provider-Fallback. Wenn kein Provider verfügbar ist, schlägt der Aufruf sicher geschlossen fehl.
 
-## Vertrauenswürdiger Env-Proxy
+## Vertrauenswürdiger Umgebungsproxy
 
-Wenn Ihre Bereitstellung erfordert, dass `web_fetch` über einen vertrauenswürdigen ausgehenden
-HTTP(S)-Proxy läuft, setzen Sie `tools.web.fetch.useTrustedEnvProxy: true`.
+Wenn Ihre Bereitstellung erfordert, dass `web_fetch` einen vertrauenswürdigen ausgehenden
+HTTP(S)-Proxy verwendet, setzen Sie `tools.web.fetch.useTrustedEnvProxy: true`.
 
-In diesem Modus wendet OpenClaw weiterhin hostnamenbasierte SSRF-Prüfungen an, bevor
-die Anfrage gesendet wird, lässt aber den Proxy DNS auflösen, statt lokales DNS-Pinning
+In diesem Modus wendet OpenClaw vor dem Senden der Anfrage weiterhin hostnamebasierte
+SSRF-Prüfungen an, überlässt jedoch dem Proxy die DNS-Auflösung, anstatt lokales DNS-Pinning
 durchzuführen. Aktivieren Sie dies nur, wenn der Proxy vom Betreiber kontrolliert wird und
-nach der DNS-Auflösung ausgehende Richtlinien erzwingt.
+nach der DNS-Auflösung Richtlinien für ausgehenden Datenverkehr durchsetzt.
 
 <Note>
-  Wenn keine HTTP(S)-Proxy-Env-Variable konfiguriert ist oder der Zielhost durch
-  `NO_PROXY` ausgeschlossen ist, fällt `web_fetch` auf den normalen strikten Pfad mit lokalem DNS-Pinning
-  zurück.
+  Wenn keine Umgebungsvariable für einen HTTP(S)-Proxy konfiguriert ist oder der Zielhost durch
+  `NO_PROXY` ausgeschlossen wird, greift `web_fetch` auf den normalen strikten Pfad mit lokalem
+  DNS-Pinning zurück.
 </Note>
 
-## Limits und Sicherheit
+## Beschränkungen und Sicherheit
 
-- `maxChars` wird auf `tools.web.fetch.maxCharsCap` begrenzt
-- Der Antwortkörper wird vor dem Parsen auf `maxResponseBytes` begrenzt; übergroße
-  Antworten werden mit einer Warnung gekürzt
+- `maxChars` wird auf `tools.web.fetch.maxCharsCap` begrenzt (Standard: `20000`)
+- Der Antworttext wird vor der Analyse auf `maxResponseBytes` begrenzt (Standard: `750000`,
+  begrenzt auf 32000-10000000); übergroße Antworten werden mit einer Warnung gekürzt
 - Private/interne Hostnamen werden blockiert
 - `tools.web.fetch.ssrfPolicy.allowRfc2544BenchmarkRange` und
-  `tools.web.fetch.ssrfPolicy.allowIpv6UniqueLocalRange` sind enge Opt-ins
-  für vertrauenswürdige Fake-IP-Proxy-Stacks; lassen Sie sie ungesetzt, sofern Ihr Proxy
-  diese synthetischen Bereiche nicht besitzt und seine eigene Zielrichtlinie erzwingt
-- Weiterleitungen werden geprüft und durch `maxRedirects` begrenzt
-- `useTrustedEnvProxy` ist ein explizites Opt-in und sollte nur für
-  betreiberkontrollierte Proxys aktiviert werden, die auch nach der DNS-Auflösung ausgehende Richtlinien
-  erzwingen
-- `web_fetch` arbeitet nach Best-Effort -- einige Websites benötigen den [Webbrowser](/de/tools/browser)
+  `tools.web.fetch.ssrfPolicy.allowIpv6UniqueLocalRange` sind eng begrenzte explizite Freigaben
+  für vertrauenswürdige Fake-IP-Proxy-Stacks; lassen Sie sie ungesetzt, sofern Ihr Proxy nicht
+  Eigentümer dieser synthetischen Bereiche ist und eigene Zielrichtlinien durchsetzt
+- Weiterleitungen werden überprüft und durch `maxRedirects` begrenzt (Standard: `3`)
+- `useTrustedEnvProxy` muss explizit aktiviert werden und sollte nur für vom Betreiber
+  kontrollierte Proxys verwendet werden, die auch nach der DNS-Auflösung Richtlinien für
+  ausgehenden Datenverkehr durchsetzen
+- `web_fetch` arbeitet nach bestem Bemühen – einige Websites benötigen den [Webbrowser](/de/tools/browser)
 
 ## Tool-Profile
 
-Wenn Sie Tool-Profile oder Allowlists verwenden, fügen Sie `web_fetch` oder `group:web` hinzu:
+Wenn Sie Tool-Profile oder Zulassungslisten verwenden, fügen Sie `web_fetch` oder `group:web` hinzu:
 
 ```json5
 {
   tools: {
     allow: ["web_fetch"],
-    // or: allow: ["group:web"]  (includes web_fetch, web_search, and x_search)
+    // oder: allow: ["group:web"]  (umfasst web_fetch, web_search und x_search)
   },
 }
 ```
 
-## Verwandt
+## Verwandte Themen
 
-- [Websuche](/de/tools/web) -- das Web mit mehreren Providern durchsuchen
-- [Webbrowser](/de/tools/browser) -- vollständige Browser-Automatisierung für JS-lastige Websites
-- [Firecrawl](/de/tools/firecrawl) -- Firecrawl-Such- und Scrape-Tools
+- [Websuche](/de/tools/web) – das Web mit mehreren Providern durchsuchen
+- [Webbrowser](/de/tools/browser) – vollständige Browserautomatisierung für stark JS-basierte Websites
+- [Firecrawl](/de/tools/firecrawl) – Firecrawl-Tools für Suche und Scraping

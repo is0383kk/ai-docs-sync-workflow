@@ -1,14 +1,14 @@
 ---
 read_when:
-    - anthropic-vertex pluginをインストール、設定、または監査している
-summary: Google Vertex AI 上の Claude モデル用 OpenClaw Anthropic Vertex プロバイダー Plugin。
+    - anthropic-vertex Pluginをインストール、設定、または監査しています
+summary: Google Vertex AI 上の Claude モデル向け OpenClaw Anthropic Vertex プロバイダー Plugin。
 title: Anthropic Vertex Plugin
 x-i18n:
-    generated_at: "2026-06-27T12:21:39Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T22:31:40Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: f772c9a5bf1edd6a270b7ba5e6d695290fe96648c9ac38d0bc90bb1504f50cd7
+    source_hash: fe5500ca56df49c0ef6ccbf39ced71e3fd0b18776ad23716de8575bc6ba64cb8
     source_path: plugins/reference/anthropic-vertex.md
     workflow: 16
 ---
@@ -20,18 +20,30 @@ Google Vertex AI 上の Claude モデル向け OpenClaw Anthropic Vertex プロ�
 ## 配布
 
 - パッケージ: `@openclaw/anthropic-vertex-provider`
-- インストール経路: npm; ClawHub
+- インストール経路: npm、ClawHub
 
-## サーフェス
+## 提供機能
 
-providers: anthropic-vertex
+プロバイダー: anthropic-vertex
 
 <!-- openclaw-plugin-reference:manual-start -->
 
 ## Claude Fable 5
 
-Google Cloud リージョンでモデルが利用可能な場合は、`anthropic-vertex/claude-fable-5` を使用します。
-Fable 5 は常に適応的思考を使用し、デフォルトで `high` effort になります。`/think off` と
-`/think minimal` は、このモデルが思考の無効化をサポートしていないため、`low` effort を使用します。
+お使いの Google Cloud リージョンでモデルが利用可能な場合は、`anthropic-vertex/claude-fable-5` を使用します。
+Fable 5 は常に適応型思考を使用し、デフォルトのエフォートは `high` です。モデルは思考の無効化をサポートしていないため、`/think off` と
+`/think minimal` では `low` エフォートが使用されます。
+
+## Claude Sonnet 5
+
+Vertex の `global`、`us`、または `eu`
+エンドポイントで `anthropic-vertex/claude-sonnet-5` を使用します。Sonnet 5 はデフォルトで `high` エフォートの適応型思考を使用し、
+`/think off` またはネイティブの `/think xhigh|max` レベルをサポートします。OpenClaw は、
+1,000,000 トークンのコンテキストウィンドウと 128,000 トークンの出力上限を自動的に公開します。
+
+カタログの料金は、2026 年 8 月 31 日までは入力・出力 100 万トークンあたり
+`$2/$10` という Vertex の導入時グローバル料金に従い、9 月 1 日以降は
+`$3/$15` になります。`us` および `eu` のマルチリージョンエンドポイントでは、Vertex が文書化している
+10% の追加料金が適用されます。
 
 <!-- openclaw-plugin-reference:manual-end -->

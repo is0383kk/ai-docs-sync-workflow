@@ -1,34 +1,36 @@
 ---
 read_when:
     - Sie möchten Chutes mit OpenClaw verwenden
-    - Sie benötigen den OAuth- oder API-Schlüssel-Einrichtungspfad
-    - Sie möchten das Standardmodell, Aliasse oder das Erkennungsverhalten
+    - Sie benötigen den Einrichtungsweg für OAuth oder einen API-Schlüssel.
+    - Sie möchten das Standardmodell, Aliasse oder das Erkennungsverhalten festlegen
 summary: Chutes-Einrichtung (OAuth oder API-Schlüssel, Modellerkennung, Aliasse)
 title: Chutes
 x-i18n:
-    generated_at: "2026-06-27T18:02:51Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T02:02:56Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 8f1898c568fd664303a8bb5c2e46228c75f9c217bec5a65e752d9c7e10b980bb
+    source_hash: dafa96c4a56b9d38d033b87cc077d359cb71adaf1ca41a0ab6b6cc77b66484a7
     source_path: providers/chutes.md
     workflow: 16
 ---
 
-[Chutes](https://chutes.ai) stellt Open-Source-Modellkataloge über eine
-OpenAI-kompatible API bereit. OpenClaw unterstützt sowohl Browser-OAuth als auch direkte API-Schlüssel-
-Authentifizierung für den Provider `chutes`.
+[Chutes](https://chutes.ai) stellt Kataloge mit Open-Source-Modellen über eine
+OpenAI-kompatible API bereit. OpenClaw unterstützt sowohl Browser-OAuth als auch die Authentifizierung per API-Schlüssel.
 
-| Eigenschaft | Wert                         |
-| ----------- | ---------------------------- |
-| Provider    | `chutes`                     |
-| API         | OpenAI-kompatibel            |
-| Basis-URL   | `https://llm.chutes.ai/v1`   |
-| Auth        | OAuth oder API-Schlüssel (siehe unten) |
+| Eigenschaft      | Wert                                                    |
+| ---------------- | ------------------------------------------------------- |
+| Provider         | `chutes`                                                |
+| Plugin           | offizielles externes Paket (`@openclaw/chutes-provider`) |
+| API              | OpenAI-kompatibel                                       |
+| Basis-URL        | `https://llm.chutes.ai/v1`                              |
+| Authentifizierung | OAuth oder API-Schlüssel (siehe unten)                 |
+| Laufzeit-Umgebungsvariablen | `CHUTES_API_KEY`, `CHUTES_OAUTH_TOKEN`         |
+
+`CHUTES_OAUTH_TOKEN` stellt ein bereits abgerufenes OAuth-Zugriffstoken direkt
+bereit (beispielsweise in CI) und umgeht damit den nachfolgend beschriebenen interaktiven Browserablauf.
 
 ## Plugin installieren
-
-Installieren Sie das offizielle Plugin und starten Sie anschließend den Gateway neu:
 
 ```bash
 openclaw plugins install @openclaw/chutes-provider
@@ -37,21 +39,19 @@ openclaw gateway restart
 
 ## Erste Schritte
 
+Beide Wege legen `chutes/zai-org/GLM-4.7-TEE` als Standardmodell fest und registrieren
+den Chutes-Katalog.
+
 <Tabs>
   <Tab title="OAuth">
     <Steps>
-      <Step title="OAuth-Onboarding-Flow ausführen">
+      <Step title="OAuth-Onboarding ausführen">
         ```bash
         openclaw onboard --auth-choice chutes
         ```
-        OpenClaw startet den Browser-Flow lokal oder zeigt auf entfernten/headless Hosts
-        eine URL und einen Flow zum Einfügen der Weiterleitung an. OAuth-Token werden über OpenClaw-Auth-
-        Profile automatisch aktualisiert.
-      </Step>
-      <Step title="Standardmodell prüfen">
-        Nach dem Onboarding wird das Standardmodell auf
-        `chutes/zai-org/GLM-4.7-TEE` gesetzt und der statische Chutes-Katalog
-        registriert.
+        OpenClaw startet den Browserablauf lokal oder zeigt auf entfernten/headless
+        Hosts eine URL und einen Ablauf zum Einfügen der Weiterleitungs-URL an. OAuth-Token
+        werden über die OpenClaw-Authentifizierungsprofile automatisch aktualisiert.
       </Step>
     </Steps>
   </Tab>
@@ -61,35 +61,29 @@ openclaw gateway restart
         Erstellen Sie einen Schlüssel unter
         [chutes.ai/settings/api-keys](https://chutes.ai/settings/api-keys).
       </Step>
-      <Step title="API-Schlüssel-Onboarding-Flow ausführen">
+      <Step title="Onboarding für API-Schlüssel ausführen">
         ```bash
         openclaw onboard --auth-choice chutes-api-key
         ```
-      </Step>
-      <Step title="Standardmodell prüfen">
-        Nach dem Onboarding wird das Standardmodell auf
-        `chutes/zai-org/GLM-4.7-TEE` gesetzt und der statische Chutes-Katalog
-        registriert.
       </Step>
     </Steps>
   </Tab>
 </Tabs>
 
-<Note>
-Beide Authentifizierungspfade registrieren den statischen Chutes-Katalog und setzen das Standardmodell auf
-`chutes/zai-org/GLM-4.7-TEE`. Runtime-Umgebungsvariablen: `CHUTES_API_KEY`,
-`CHUTES_OAUTH_TOKEN`.
-</Note>
+## Ermittlungsverhalten
 
-## Discovery-Verhalten
-
-Wenn Chutes-Authentifizierung verfügbar ist, fragt OpenClaw den Chutes-Katalog mit diesen
-Anmeldedaten ab und verwendet die erkannten Modelle. Wenn Discovery fehlschlägt, fällt OpenClaw
-auf einen statischen Katalog zurück, sodass Onboarding und Start weiterhin funktionieren.
+Wenn eine Chutes-Authentifizierung verfügbar ist, fragt OpenClaw `GET /v1/models`
+mit diesen Anmeldedaten ab und verwendet die ermittelten Modelle, die pro
+Anmeldedatensatz fünf Minuten lang zwischengespeichert werden. Bei einem abgelaufenen oder nicht autorisierten
+Schlüssel (HTTP 401) versucht OpenClaw die Abfrage einmal ohne Anmeldedaten
+erneut. Wenn die Ermittlung weiterhin keine Einträge liefert, fehlschlägt oder einen
+anderen Nicht-2xx-Status zurückgibt, greift OpenClaw auf den mitgelieferten statischen Katalog zurück (die
+Ermittlung per API-Schlüssel und OAuth verwendet denselben Ablauf). Wenn die Ermittlung beim Start fehlschlägt, wird
+der statische Katalog automatisch verwendet.
 
 ## Standard-Aliasse
 
-OpenClaw registriert drei praktische Aliasse für den statischen Chutes-Katalog:
+OpenClaw registriert drei praktische Aliasse für den Chutes-Katalog:
 
 | Alias           | Zielmodell                                            |
 | --------------- | ----------------------------------------------------- |
@@ -97,11 +91,11 @@ OpenClaw registriert drei praktische Aliasse für den statischen Chutes-Katalog:
 | `chutes-pro`    | `chutes/deepseek-ai/DeepSeek-V3.2-TEE`                |
 | `chutes-vision` | `chutes/chutesai/Mistral-Small-3.2-24B-Instruct-2506` |
 
-## Integrierter Starter-Katalog
+## Integrierter Einstiegskatalog
 
-Der statische Fallback-Katalog enthält aktuelle Chutes-Refs:
+Der mitgelieferte Ausweichkatalog enthält 47 Modelle. Eine repräsentative Auswahl aktueller Referenzen:
 
-| Modell-Ref                                           |
+| Modellreferenz                                        |
 | ----------------------------------------------------- |
 | `chutes/zai-org/GLM-4.7-TEE`                          |
 | `chutes/zai-org/GLM-5-TEE`                            |
@@ -111,6 +105,8 @@ Der statische Fallback-Katalog enthält aktuelle Chutes-Refs:
 | `chutes/chutesai/Mistral-Small-3.2-24B-Instruct-2506` |
 | `chutes/Qwen/Qwen3-Coder-Next-TEE`                    |
 | `chutes/openai/gpt-oss-120b-TEE`                      |
+
+Führen Sie `openclaw models list --all --provider chutes` aus, um die vollständige Liste anzuzeigen.
 
 ## Konfigurationsbeispiel
 
@@ -129,41 +125,41 @@ Der statische Fallback-Katalog enthält aktuelle Chutes-Refs:
 ```
 
 <AccordionGroup>
-  <Accordion title="OAuth-Überschreibungen">
-    Sie können den OAuth-Flow mit optionalen Umgebungsvariablen anpassen:
+  <Accordion title="OAuth-Anpassungen">
+    Passen Sie den OAuth-Ablauf mit optionalen Umgebungsvariablen an:
 
     | Variable | Zweck |
     | -------- | ----- |
-    | `CHUTES_CLIENT_ID` | Benutzerdefinierte OAuth-Client-ID |
-    | `CHUTES_CLIENT_SECRET` | Benutzerdefinierter OAuth-Client-Secret |
-    | `CHUTES_OAUTH_REDIRECT_URI` | Benutzerdefinierte Weiterleitungs-URI |
-    | `CHUTES_OAUTH_SCOPES` | Benutzerdefinierte OAuth-Scopes |
+    | `CHUTES_CLIENT_ID` | OAuth-Client-ID (wird abgefragt, wenn nicht festgelegt) |
+    | `CHUTES_CLIENT_SECRET` | OAuth-Client-Secret |
+    | `CHUTES_OAUTH_REDIRECT_URI` | Weiterleitungs-URI (Standard: `http://127.0.0.1:1456/oauth-callback`) |
+    | `CHUTES_OAUTH_SCOPES` | Durch Leerzeichen getrennte Berechtigungsbereiche (Standard: `openid profile chutes:invoke`) |
 
-    Weitere Informationen zu Anforderungen an Weiterleitungs-Apps und Hilfe finden Sie in der [Chutes-OAuth-Dokumentation](https://chutes.ai/docs/sign-in-with-chutes/overview).
+    Weitere Informationen zu den Anforderungen für Weiterleitungs-Apps und Hilfestellung finden Sie in der
+    [Chutes-OAuth-Dokumentation](https://chutes.ai/docs/sign-in-with-chutes/overview).
 
   </Accordion>
 
   <Accordion title="Hinweise">
-    - API-Schlüssel- und OAuth-Discovery verwenden beide dieselbe `chutes`-Provider-ID.
     - Chutes-Modelle werden als `chutes/<model-id>` registriert.
-    - Wenn Discovery beim Start fehlschlägt, wird automatisch der statische Katalog verwendet.
+    - Chutes meldet die Token-Nutzung während des Streamings nicht (`supportsUsageInStreaming: false`); die Gesamtnutzung wird dennoch angezeigt, sobald der Stream abgeschlossen ist.
 
   </Accordion>
 </AccordionGroup>
 
-## Verwandt
+## Verwandte Themen
 
 <CardGroup cols={2}>
   <Card title="Modellauswahl" href="/de/concepts/model-providers" icon="layers">
-    Provider-Regeln, Modell-Refs und Failover-Verhalten.
+    Provider-Regeln, Modellreferenzen und Failover-Verhalten.
   </Card>
   <Card title="Konfigurationsreferenz" href="/de/gateway/configuration-reference" icon="gear">
-    Vollständiges Konfigurationsschema einschließlich Provider-Einstellungen.
+    Vollständiges Konfigurationsschema einschließlich der Provider-Einstellungen.
   </Card>
   <Card title="Chutes" href="https://chutes.ai" icon="arrow-up-right-from-square">
     Chutes-Dashboard und API-Dokumentation.
   </Card>
-  <Card title="Chutes API keys" href="https://chutes.ai/settings/api-keys" icon="key">
+  <Card title="Chutes-API-Schlüssel" href="https://chutes.ai/settings/api-keys" icon="key">
     Chutes-API-Schlüssel erstellen und verwalten.
   </Card>
 </CardGroup>

@@ -1,123 +1,33 @@
 ---
 read_when:
-    - OpenAI Chat Completions를 기대하는 도구 통합하기
-summary: Gateway에서 OpenAI 호환 /v1/chat/completions HTTP 엔드포인트 노출
+    - OpenAI Chat Completions를 사용하는 도구 통합하기
+summary: Gateway에서 OpenAI 호환 /v1/chat/completions HTTP 엔드포인트 제공
 title: OpenAI 채팅 완성
 x-i18n:
-    generated_at: "2026-06-27T17:30:00Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T00:46:59Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: e8746f4f5964a5d0b948877b64b5d20440dea3aa45b36813c404cd06660792cf
+    source_hash: 9b1fffd2ce3da881ecd91adbb7c5d10b1d7adbd99af9b2ea4544b62ecbaf1f32
     source_path: gateway/openai-http-api.md
     workflow: 16
 ---
 
-OpenClaw의 Gateway는 작은 OpenAI 호환 Chat Completions 엔드포인트를 제공할 수 있습니다.
+Gateway는 소규모 OpenAI 호환 Chat Completions 인터페이스를 제공할 수 있습니다. 이 기능은 **기본적으로 비활성화되어 있습니다**.
 
-이 엔드포인트는 **기본적으로 비활성화되어 있습니다**. 먼저 설정에서 활성화하세요.
+활성화하면 Gateway와 동일한 포트에서 다음 항목을 모두 제공합니다(WS + HTTP 멀티플렉싱):
 
-- `POST /v1/chat/completions`
-- Gateway와 같은 포트(WS + HTTP 멀티플렉스): `http://<gateway-host>:<port>/v1/chat/completions`
+| 메서드 | 경로                   |
+| ------ | ---------------------- |
+| POST   | `/v1/chat/completions` |
+| GET    | `/v1/models`           |
+| GET    | `/v1/models/{id}`      |
+| POST   | `/v1/embeddings`       |
+| POST   | `/v1/responses`        |
 
-Gateway의 OpenAI 호환 HTTP 표면이 활성화되면 다음도 제공합니다.
-
-- `GET /v1/models`
-- `GET /v1/models/{id}`
-- `POST /v1/embeddings`
-- `POST /v1/responses`
-
-내부적으로 요청은 일반 Gateway 에이전트 실행(`openclaw agent`와 동일한 코드 경로)으로 실행되므로 라우팅/권한/설정은 Gateway와 일치합니다.
-
-## 인증
-
-Gateway 인증 설정을 사용합니다.
-
-일반적인 HTTP 인증 경로:
-
-- 공유 비밀 인증(`gateway.auth.mode="token"` 또는 `"password"`):
-  `Authorization: Bearer <token-or-password>`
-- 신뢰할 수 있는 ID 포함 HTTP 인증(`gateway.auth.mode="trusted-proxy"`):
-  설정된 ID 인식 프록시를 통해 라우팅하고 필요한 ID 헤더를
-  주입하게 합니다.
-- 비공개 인그레스 공개 인증(`gateway.auth.mode="none"`):
-  인증 헤더가 필요하지 않습니다.
-
-참고:
-
-- `gateway.auth.mode="token"`이면 `gateway.auth.token`(또는 `OPENCLAW_GATEWAY_TOKEN`)을 사용하세요.
-- `gateway.auth.mode="password"`이면 `gateway.auth.password`(또는 `OPENCLAW_GATEWAY_PASSWORD`)를 사용하세요.
-- `gateway.auth.mode="trusted-proxy"`이면 HTTP 요청은 설정된 신뢰할 수 있는
-  프록시 소스에서 와야 합니다. 같은 호스트 루프백 프록시는 명시적으로
-  `gateway.auth.trustedProxy.allowLoopback = true`가 필요합니다.
-- 프록시를 우회하는 내부 같은 호스트 호출자는 로컬 직접
-  폴백으로 `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD`를 사용할 수
-  있습니다. `Forwarded`, `X-Forwarded-*` 또는 `X-Real-IP` 헤더 증거가 있으면
-  대신 요청은 trusted-proxy 경로에 유지됩니다.
-- `gateway.auth.rateLimit`이 설정되어 있고 인증 실패가 너무 많이 발생하면 엔드포인트는 `Retry-After`와 함께 `429`를 반환합니다.
-
-## 보안 경계(중요)
-
-이 엔드포인트를 Gateway 인스턴스에 대한 **전체 운영자 접근** 표면으로 취급하세요.
-
-- 여기의 HTTP bearer 인증은 좁은 사용자별 범위 모델이 아닙니다.
-- 이 엔드포인트에 유효한 Gateway 토큰/비밀번호는 소유자/운영자 자격 증명처럼 취급해야 합니다.
-- 요청은 신뢰할 수 있는 운영자 작업과 같은 제어 평면 에이전트 경로를 통해 실행됩니다.
-- 이 엔드포인트에는 별도의 비소유자/사용자별 도구 경계가 없습니다. 호출자가 여기에서 Gateway 인증을 통과하면 OpenClaw는 해당 호출자를 이 Gateway의 신뢰할 수 있는 운영자로 취급합니다.
-- 공유 비밀 인증 모드(`token` 및 `password`)에서는 호출자가 더 좁은 `x-openclaw-scopes` 헤더를 보내더라도 엔드포인트가 일반적인 전체 운영자 기본값을 복원합니다.
-- 신뢰할 수 있는 ID 포함 HTTP 모드(예: 신뢰할 수 있는 프록시 인증 또는 `gateway.auth.mode="none"`)는 `x-openclaw-scopes`가 있을 때 이를 존중하고, 없으면 일반 운영자 기본 범위 세트로 폴백합니다.
-- 대상 에이전트 정책이 민감한 도구를 허용하면 이 엔드포인트가 이를 사용할 수 있습니다.
-- 이 엔드포인트는 루프백/tailnet/비공개 인그레스에만 두세요. 공용 인터넷에 직접 노출하지 마세요.
-
-인증 매트릭스:
-
-- `gateway.auth.mode="token"` 또는 `"password"` + `Authorization: Bearer ...`
-  - 공유 Gateway 운영자 비밀을 소유하고 있음을 증명합니다.
-  - 더 좁은 `x-openclaw-scopes`를 무시합니다.
-  - 전체 기본 운영자 범위 세트를 복원합니다.
-    `operator.admin`, `operator.approvals`, `operator.pairing`,
-    `operator.read`, `operator.talk.secrets`, `operator.write`
-  - 이 엔드포인트의 채팅 턴을 소유자 발신자 턴으로 취급합니다.
-- 신뢰할 수 있는 ID 포함 HTTP 모드(예: 신뢰할 수 있는 프록시 인증 또는 비공개 인그레스의 `gateway.auth.mode="none"`)
-  - 일부 외부 신뢰 ID 또는 배포 경계를 인증합니다.
-  - 헤더가 있을 때 `x-openclaw-scopes`를 존중합니다.
-  - 헤더가 없으면 일반 운영자 기본 범위 세트로 폴백합니다.
-  - 호출자가 명시적으로 범위를 좁히고 `operator.admin`을 생략할 때만 소유자 의미 체계를 잃습니다.
-  - `x-openclaw-model` 같은 소유자 수준 요청 제어에는 `operator.admin`이 필요합니다.
-
-[보안](/ko/gateway/security) 및 [원격 접근](/ko/gateway/remote)을 참조하세요.
-
-## 이 엔드포인트를 사용할 때
-
-기존 Gateway와 도구 또는 신뢰할 수 있는 앱 측 백엔드를 통합하고 Gateway 운영자 자격 증명을 안전하게 보관할 수 있을 때 `/v1/chat/completions`를 사용하세요.
-
-- 통합이 같은 Gateway에 대한 또 다른 운영자/클라이언트 표면에 불과하다면 새 내장 채널을 추가하는 것보다 이를 선호하세요.
-- 원격 Gateway에 직접 연결하는 네이티브 모바일 클라이언트의 경우 [WebChat](/ko/web/webchat) 또는 [Gateway Protocol](/ko/gateway/protocol)을 선호하고, 기기가 공유 HTTP 토큰/비밀번호를 필요로 하지 않도록 페어링된 기기 부트스트랩/기기 토큰 플로를 구현하세요.
-- 자체 사용자, 방, Webhook 전달 또는 아웃바운드 전송이 있는 외부 메시징 네트워크를 통합하는 경우 대신 채널 Plugin을 빌드하세요. [Plugin 빌드](/ko/plugins/building-plugins)를 참조하세요.
-
-## 에이전트 우선 모델 계약
-
-OpenClaw는 OpenAI `model` 필드를 원시 공급자 모델 ID가 아니라 **에이전트 대상**으로 취급합니다.
-
-- `model: "openclaw"`는 설정된 기본 에이전트로 라우팅합니다.
-- `model: "openclaw/default"`도 설정된 기본 에이전트로 라우팅합니다.
-- `model: "openclaw/<agentId>"`는 특정 에이전트로 라우팅합니다.
-
-선택적 요청 헤더:
-
-- `x-openclaw-model: <provider/model-or-bare-id>`는 선택된 에이전트의 백엔드 모델을 재정의합니다. 공유 비밀 bearer 호출자는 이 헤더를 사용할 수 있습니다. trusted-proxy 또는 `x-openclaw-scopes`가 있는 비공개 무인증 인그레스 요청 같은 ID 포함 호출자에게는 `operator.admin`이 필요합니다. 쓰기 전용 호출자는 `403 missing scope: operator.admin`을 받습니다.
-- `x-openclaw-agent-id: <agentId>`는 호환성 재정의로 계속 지원됩니다.
-- `x-openclaw-session-key: <sessionKey>`는 세션 라우팅을 명시적으로 제어합니다. 값은 `subagent:`, `cron:`, `acp:` 같은 예약된 내부 세션 네임스페이스를 사용하면 안 됩니다. 그런 요청은 `400 invalid_request_error`로 거부됩니다.
-- `x-openclaw-message-channel: <channel>`은 채널 인식 프롬프트 및 정책을 위한 합성 인그레스 채널 컨텍스트를 설정합니다.
-
-계속 허용되는 호환성 별칭:
-
-- `model: "openclaw:<agentId>"`
-- `model: "agent:<agentId>"`
+요청은 일반적인 Gateway 에이전트 실행으로 처리되므로(`openclaw agent`와 동일한 코드 경로), 라우팅, 권한, 구성이 사용 중인 Gateway와 일치합니다.
 
 ## 엔드포인트 활성화
-
-`gateway.http.endpoints.chatCompletions.enabled`를 `true`로 설정하세요.
 
 ```json5
 {
@@ -131,88 +41,128 @@ OpenClaw는 OpenAI `model` 필드를 원시 공급자 모델 ID가 아니라 **�
 }
 ```
 
-## 엔드포인트 비활성화
+비활성화하려면 `enabled: false`로 설정하거나 생략합니다.
 
-`gateway.http.endpoints.chatCompletions.enabled`를 `false`로 설정하세요.
+## 보안 경계(중요)
+
+이 엔드포인트는 Gateway 인스턴스에 대한 **전체 운영자 액세스 권한**으로 취급해야 합니다.
+
+- 이 엔드포인트의 유효한 Gateway 토큰/비밀번호는 제한된 사용자별 범위가 아니라 소유자/운영자 자격 증명과 동일합니다.
+- 요청은 신뢰할 수 있는 운영자 작업과 동일한 제어 영역 에이전트 경로를 통과하므로, 대상 에이전트의 정책에서 민감한 도구를 허용하면 이 엔드포인트에서도 해당 도구를 사용할 수 있습니다.
+- local loopback, tailnet 또는 비공개 인그레스에서만 사용하십시오. 공개 인터넷에 노출하지 마십시오.
+
+인증 구성표:
+
+| 인증 경로                                                                                            | 동작                                                                                                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gateway.auth.mode="token"` 또는 `"password"` + `Authorization: Bearer ...`                            | 공유 Gateway 비밀 정보의 소유를 증명합니다. 모든 `x-openclaw-scopes` 헤더를 무시하고 전체 기본 운영자 범위 집합(`operator.admin`, `operator.approvals`, `operator.pairing`, `operator.read`, `operator.talk.secrets`, `operator.write`)을 복원합니다. 채팅 턴을 소유자가 보낸 턴으로 취급합니다. |
+| 신뢰할 수 있는 ID 포함 HTTP(신뢰 프록시 인증 또는 비공개 인그레스의 `gateway.auth.mode="none"`) | `x-openclaw-scopes`가 있으면 적용하고, 없으면 기본 운영자 범위 집합을 사용합니다. 호출자가 범위를 명시적으로 축소하고 `operator.admin`을 제외한 경우에만 소유자 의미 체계가 사라집니다. `x-openclaw-model`과 같은 소유자 수준 제어에는 `operator.admin`이 필요합니다.                        |
+
+[운영자 범위](/ko/gateway/operator-scopes), [보안](/ko/gateway/security), [원격 액세스](/ko/gateway/remote)를 참조하십시오.
+
+## 인증
+
+Gateway 인증 구성을 사용합니다(해당 모드에 관한 자세한 내용은 [신뢰 프록시 인증](/ko/gateway/trusted-proxy-auth) 참조).
+
+| 모드                                | 인증 방법                                                                                                                                                                     |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gateway.auth.mode="token"`         | `Authorization: Bearer <token>`. `gateway.auth.token` 또는 `OPENCLAW_GATEWAY_TOKEN`을 통해 설정합니다.                                                                                              |
+| `gateway.auth.mode="password"`      | `Authorization: Bearer <password>`. `gateway.auth.password` 또는 `OPENCLAW_GATEWAY_PASSWORD`를 통해 설정합니다.                                                                                     |
+| `gateway.auth.mode="trusted-proxy"` | 구성된 ID 인식 프록시를 통해 라우팅합니다. 프록시가 필요한 ID 헤더를 삽입합니다. 동일 호스트의 local loopback 프록시에는 명시적으로 `gateway.auth.trustedProxy.allowLoopback = true`를 설정해야 합니다. |
+| `gateway.auth.mode="none"`          | 인증 헤더가 필요하지 않습니다(비공개 인그레스 전용).                                                                                                                                         |
+
+참고:
+
+- `trusted-proxy` Gateway에서 프록시를 우회하는 동일 호스트 호출자는 `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD`를 직접 사용하는 방식으로 대체할 수 있습니다. 단, `Forwarded`, `X-Forwarded-*` 또는 `X-Real-IP` 헤더의 흔적이 있으면 요청은 계속 신뢰 프록시 경로를 사용합니다.
+- `gateway.auth.rateLimit`이 구성되어 있고 인증 시도가 너무 많이 실패하면 엔드포인트는 `Retry-After` 헤더와 함께 `429`를 반환합니다.
+
+## 이 엔드포인트를 사용해야 하는 경우
+
+- 통합이 동일한 Gateway를 위한 또 하나의 운영자/클라이언트 인터페이스에 불과하다면 새 내장 채널을 추가하는 대신 이 엔드포인트를 사용하는 것이 좋습니다.
+- 원격 Gateway에 직접 연결되는 네이티브 모바일 클라이언트에는 [WebChat](/ko/web/webchat) 또는 페어링된 기기 부트스트랩/기기 토큰 흐름을 사용하는 [Gateway 프로토콜](/ko/gateway/protocol)을 권장합니다. 그러면 기기에 공유 HTTP 토큰/비밀번호가 필요하지 않습니다.
+- 자체 사용자, 대화방, Webhook 전달 또는 발신 전송 기능을 갖춘 외부 메시징 네트워크를 통합하는 경우에는 채널 Plugin을 구축하십시오. [Plugin 구축](/ko/plugins/building-plugins)을 참조하십시오.
+
+## 에이전트 우선 모델 계약
+
+OpenClaw는 OpenAI의 `model` 필드를 원시 제공자 모델 ID가 아닌 **에이전트 대상**으로 취급합니다.
+
+| `model` 값                                | 라우팅 대상                                                                                                                |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `openclaw`                                   | 구성된 기본 에이전트                                                                                                 |
+| `openclaw/default`                           | 구성된 기본 에이전트(안정적인 별칭이며, 환경에 따라 실제 기본 에이전트 ID가 변경되더라도 안전하게 하드코딩 가능) |
+| `openclaw/<agentId>` 또는 `openclaw:<agentId>` | 특정 에이전트                                                                                                           |
+| `agent:<agentId>`                            | 특정 에이전트(호환성 별칭)                                                                                     |
+
+선택적 요청 헤더:
+
+| 헤더                                          | 효과                                                                                                                                                                                                                                                                      |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `x-openclaw-model: <provider/model-or-bare-id>` | 선택한 에이전트의 백엔드 모델을 재정의합니다. 공유 비밀 Bearer 호출자는 이를 직접 사용할 수 있습니다. ID 포함 호출자(신뢰 프록시 또는 `x-openclaw-scopes`를 사용하는 인증 없는 비공개 인그레스)는 `operator.admin`이 필요하며, 그렇지 않으면 `403 missing scope: operator.admin`이 반환됩니다. |
+| `x-openclaw-agent-id: <agentId>`                | 에이전트 선택을 위한 호환성 재정의입니다.                                                                                                                                                                                                                                 |
+| `x-openclaw-session-key: <sessionKey>`          | 명시적으로 세션을 라우팅합니다. 예약된 내부 네임스페이스(`subagent:`, `cron:`, `acp:`)를 사용하면 `400 invalid_request_error`와 함께 거부됩니다.                                                                                                                                |
+| `x-openclaw-message-channel: <channel>`         | 채널을 인식하는 프롬프트/정책을 위한 합성 인그레스 채널 컨텍스트를 설정합니다.                                                                                                                                                                                              |
+
+`/v1/models`는 백엔드 제공자 모델이나 하위 에이전트가 아니라 최상위 에이전트 대상(`openclaw`, `openclaw/default`, `openclaw/<agentId>`)을 나열합니다. 하위 에이전트는 내부 실행 토폴로지로 유지됩니다. `x-openclaw-model`을 생략하면 선택한 에이전트는 평소 구성된 모델로 실행됩니다.
+
+`/v1/embeddings`는 동일한 에이전트 대상 `model` ID를 사용합니다. 특정 임베딩 모델을 선택하려면 공유 비밀 호출자 또는 `operator.admin` 권한이 있는 ID 포함 호출자에서 `x-openclaw-model`을 전송하십시오. 그렇지 않으면 요청은 선택한 에이전트의 일반 임베딩 설정을 사용합니다.
+
+## 세션 동작
+
+기본적으로 엔드포인트는 **요청별로 상태를 유지하지 않습니다**(호출할 때마다 새 세션 키 생성).
+
+요청에 OpenAI `user` 문자열이 포함되면 Gateway는 반복 호출이 에이전트 세션을 공유할 수 있도록 이 문자열에서 안정적인 세션 키를 파생합니다. 사용자 지정 앱에서는 대화 스레드마다 동일한 `user` 값을 재사용하십시오. 여러 대화/기기에서 하나의 OpenClaw 세션을 공유하려는 경우가 아니라면 계정 수준 식별자는 사용하지 마십시오. 여러 클라이언트/스레드에 걸쳐 명시적인 라우팅 제어가 필요한 경우에만 `x-openclaw-session-key`를 사용하고, 위의 예약된 네임스페이스를 피하는 애플리케이션 소유 키를 사용하십시오.
+
+## 요청 제한(구성)
+
+기본값은 `gateway.http.endpoints.chatCompletions`에서 조정할 수 있습니다.
 
 ```json5
 {
   gateway: {
     http: {
       endpoints: {
-        chatCompletions: { enabled: false },
+        chatCompletions: {
+          enabled: true,
+          maxBodyBytes: 20000000,
+          maxImageParts: 8,
+          maxTotalImageBytes: 20000000,
+          images: {
+            allowUrl: false,
+            urlAllowlist: ["cdn.example.com", "*.assets.example.com"],
+            allowedMimes: [
+              "image/jpeg",
+              "image/png",
+              "image/gif",
+              "image/webp",
+              "image/heic",
+              "image/heif",
+            ],
+            maxBytes: 10485760,
+            maxRedirects: 3,
+            timeoutMs: 10000,
+          },
+        },
       },
     },
   },
 }
 ```
 
-## 세션 동작
+생략 시 기본값:
 
-기본적으로 엔드포인트는 **요청별 무상태**입니다(호출마다 새 세션 키가 생성됩니다).
+| 키                   | 기본값                                                                     |
+| --------------------- | --------------------------------------------------------------------------- |
+| `maxBodyBytes`        | 20MB                                                                        |
+| `maxImageParts`       | 8(가장 최근 사용자 메시지에서 읽는 `image_url` 부분의 최대 개수)                 |
+| `maxTotalImageBytes`  | 20MB(단일 요청의 모든 `image_url` 부분에서 디코딩된 바이트의 누적 크기) |
+| `images.allowUrl`     | `false`(활성화하지 않으면 URL에서 가져오는 `image_url` 부분이 거부됨)         |
+| `images.maxBytes`     | 이미지당 10MB                                                              |
+| `images.maxRedirects` | 3                                                                           |
+| `images.timeoutMs`    | 10초                                                                         |
 
-요청에 OpenAI `user` 문자열이 포함되어 있으면 Gateway는 여기에서 안정적인 세션 키를 파생하므로 반복 호출이 에이전트 세션을 공유할 수 있습니다.
+HEIC/HEIF `image_url` 소스는 허용되며, 공유 OpenClaw 이미지 프로세서(Rastermill)를 통해 제공자에게 전달되기 전에 JPEG로 정규화됩니다. 외부 코덱 지원이 필요한 형식에는 시스템 변환기(`sips`, ImageMagick, GraphicsMagick 또는 ffmpeg)를 대체 수단으로 사용합니다.
 
-커스텀 앱의 경우 가장 안전한 기본값은 대화 스레드별로 같은 `user` 값을 재사용하는 것입니다. 여러 대화나 기기가 하나의 OpenClaw 세션을 공유하길 명시적으로 원하는 경우가 아니라면 계정 수준 식별자는 피하세요. 여러 클라이언트나 스레드 간 명시적 라우팅 제어가 필요할 때만 `x-openclaw-session-key`를 사용하고, `subagent:`, `cron:`, `acp:` 같은 예약된 내부 네임스페이스로 시작하지 않는 애플리케이션 소유 키를 선택하세요.
-
-## 이 표면이 중요한 이유
-
-이는 자체 호스팅 프런트엔드와 도구를 위한 가장 영향력 있는 호환성 세트입니다.
-
-- 대부분의 Open WebUI, LobeChat, LibreChat 설정은 `/v1/models`를 기대합니다.
-- 많은 RAG 시스템은 `/v1/embeddings`를 기대합니다.
-- 기존 OpenAI 채팅 클라이언트는 보통 `/v1/chat/completions`로 시작할 수 있습니다.
-- 더 에이전트 네이티브한 클라이언트는 점점 `/v1/responses`를 선호합니다.
-
-## 모델 목록 및 에이전트 라우팅
-
-<AccordionGroup>
-  <Accordion title="`/v1/models`는 무엇을 반환하나요?">
-    OpenClaw 에이전트 대상 목록입니다.
-
-    반환되는 ID는 `openclaw`, `openclaw/default`, `openclaw/<agentId>` 항목입니다.
-    이를 OpenAI `model` 값으로 직접 사용하세요.
-
-  </Accordion>
-  <Accordion title="`/v1/models`는 에이전트 또는 하위 에이전트를 나열하나요?">
-    백엔드 공급자 모델이나 하위 에이전트가 아니라 최상위 에이전트 대상을 나열합니다.
-
-    하위 에이전트는 내부 실행 토폴로지로 남습니다. 의사 모델로 나타나지 않습니다.
-
-  </Accordion>
-  <Accordion title="왜 `openclaw/default`가 포함되나요?">
-    `openclaw/default`는 설정된 기본 에이전트의 안정적인 별칭입니다.
-
-    즉 실제 기본 에이전트 ID가 환경마다 달라져도 클라이언트는 예측 가능한 하나의 ID를 계속 사용할 수 있습니다.
-
-  </Accordion>
-  <Accordion title="백엔드 모델을 어떻게 재정의하나요?">
-    `x-openclaw-model`을 사용하세요. 이는 소유자 수준 재정의입니다. Gateway 공유 비밀 bearer 토큰/비밀번호 경로에서 작동하며, 신뢰할 수 있는 프록시 인증 같은 ID 포함 HTTP 경로에서는 `operator.admin`이 필요합니다.
-
-    예:
-    `x-openclaw-model: openai/gpt-5.4`
-    `x-openclaw-model: gpt-5.5`
-
-    생략하면 선택된 에이전트가 일반 설정 모델 선택으로 실행됩니다.
-
-  </Accordion>
-  <Accordion title="임베딩은 이 계약에 어떻게 맞나요?">
-    `/v1/embeddings`는 같은 에이전트 대상 `model` ID를 사용합니다.
-
-    `model: "openclaw/default"` 또는 `model: "openclaw/<agentId>"`를 사용하세요.
-    특정 임베딩 모델이 필요하면 공유 비밀 호출자 또는 `operator.admin`이 있는 ID 포함 호출자에서 `x-openclaw-model`로 보내세요.
-    해당 헤더가 없으면 요청은 선택된 에이전트의 일반 임베딩 설정으로 전달됩니다.
-
-  </Accordion>
-</AccordionGroup>
-
-## 스트리밍(SSE)
-
-Server-Sent Events(SSE)를 받으려면 `stream: true`를 설정하세요.
-
-- `Content-Type: text/event-stream`
-- 각 이벤트 줄은 `data: <json>`입니다.
-- 스트림은 `data: [DONE]`으로 끝납니다.
+보안 참고: 호스트 이름을 허용 목록에 추가해도 비공개/내부 IP 차단을 우회하지 않습니다. 인터넷에 노출된 Gateway에는 애플리케이션 수준의 보호 조치와 함께 네트워크 송신 제어를 적용하세요. [보안](/ko/gateway/security)을 참조하세요.
 
 ## 채팅 도구 계약
 
@@ -220,90 +170,80 @@ Server-Sent Events(SSE)를 받으려면 `stream: true`를 설정하세요.
 
 ### 지원되는 요청 필드
 
-- `tools`: `{ "type": "function", "function": { ... } }`의 배열
-- `tool_choice`: `"auto"`, `"none"`, `"required"` 또는 `{ "type": "function", "function": { "name": "..." } }`
-- `messages[*].role: "tool"` 후속 턴
-- 이전 도구 호출에 도구 결과를 다시 바인딩하기 위한 `messages[*].tool_call_id`
-- `max_completion_tokens`: 숫자; 총 완료 토큰에 대한 호출별 한도(추론 토큰 포함). 현재 OpenAI Chat Completions 필드 이름입니다. `max_completion_tokens`와 `max_tokens`가 모두 전송되면 선호됩니다.
-- `max_tokens`: 숫자; 이전 버전과의 호환성을 위해 허용되는 레거시 별칭입니다. `max_completion_tokens`도 있으면 무시됩니다.
-- `temperature`: 숫자; 에이전트 스트림 매개변수 채널을 통해 업스트림 공급자에 전달되는 최선 노력 샘플링 온도입니다.
-- `top_p`: 숫자; 에이전트 스트림 매개변수 채널을 통해 업스트림 공급자에 전달되는 최선 노력 nucleus 샘플링입니다.
-- `frequency_penalty`: 숫자; 에이전트 스트림 매개변수 채널을 통해 업스트림 공급자에 전달되는 최선 노력 빈도 페널티입니다. 검증 범위: -2.0~2.0. 범위를 벗어난 값에는 `400 invalid_request_error`를 반환합니다.
-- `presence_penalty`: 숫자; 에이전트 스트림 매개변수 채널을 통해 업스트림 공급자에 전달되는 최선 노력 존재 페널티입니다. 검증 범위: -2.0~2.0. 범위를 벗어난 값에는 `400 invalid_request_error`를 반환합니다.
-- `seed`: 숫자(정수); 에이전트 스트림 매개변수 채널을 통해 업스트림 공급자에 전달되는 최선 노력 시드입니다. 정수가 아닌 값에는 `400 invalid_request_error`를 반환합니다.
-- `stop`: 문자열 또는 최대 4개 문자열의 배열; 에이전트 스트림 매개변수 채널을 통해 업스트림 공급자에 전달되는 최선 노력 중지 시퀀스입니다. 4개를 초과하는 시퀀스 또는 문자열이 아니거나 비어 있는 항목에는 `400 invalid_request_error`를 반환합니다.
+| 필드                       | 참고                                                                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tools`                    | `{ "type": "function", "function": { ... } }`의 배열                                                                                                         |
+| `tool_choice`              | `"auto"`, `"none"`, `"required"` 또는 `{ "type": "function", "function": { "name": "..." } }`                                                                |
+| `messages[*].role: "tool"` | 후속 턴                                                                                                                                                      |
+| `messages[*].tool_call_id` | 도구 결과를 이전 도구 호출에 연결합니다.                                                                                                                     |
+| `max_completion_tokens`    | 숫자. 총 완성 토큰 수의 호출별 상한입니다(추론 토큰 포함). 현재 필드 이름이며, `max_tokens`와 함께 전송하면 이 필드가 사용됩니다.                              |
+| `max_tokens`               | 숫자. 레거시 별칭이며, `max_completion_tokens`도 있으면 무시됩니다.                                                                                           |
+| `temperature`              | 0~2의 숫자. 최선형으로 업스트림 제공자에 전달됩니다. 범위를 벗어나면 `400 invalid_request_error`가 반환됩니다.                                                |
+| `top_p`                    | 0~1의 숫자. 최선형으로 적용됩니다. 범위를 벗어나면 `400 invalid_request_error`가 반환됩니다.                                                                  |
+| `frequency_penalty`        | -2.0~2.0의 숫자. 최선형으로 적용됩니다. 범위를 벗어나면 `400 invalid_request_error`가 반환됩니다.                                                             |
+| `presence_penalty`         | -2.0~2.0의 숫자. 최선형으로 적용됩니다. 범위를 벗어나면 `400 invalid_request_error`가 반환됩니다.                                                             |
+| `seed`                     | 정수. 최선형으로 적용됩니다. 정수가 아닌 값에는 `400 invalid_request_error`가 반환됩니다.                                                                     |
+| `stop`                     | 문자열 또는 최대 4개의 문자열 배열. 최선형으로 적용됩니다. 시퀀스가 4개를 초과하거나 문자열이 아닌 항목 또는 빈 항목이 있으면 `400 invalid_request_error`가 반환됩니다. |
 
-토큰 상한 필드 중 하나라도 설정되면, 해당 값은 에이전트 stream-param 채널을 통해 업스트림 제공자에 전달됩니다. 업스트림 제공자에 전송되는 실제 와이어 필드 이름은 제공자 전송 계층이 선택합니다. OpenAI 계열 엔드포인트에는 `max_completion_tokens`가 사용되고, Mistral 및 Chutes처럼 레거시 이름만 허용하는 제공자에는 `max_tokens`가 사용됩니다. 샘플링 필드(`temperature`, `top_p`, `frequency_penalty`, `presence_penalty`, `seed`)도 동일한 stream-param 채널을 따릅니다. ChatGPT 기반 Codex Responses 백엔드는 고정 샘플링을 사용하므로 서버 측에서 이 필드들을 제거합니다. `stop`도 stream-param 채널을 통해 전달되며 전송 계층의 stop 필드(Chat Completions 백엔드의 경우 `stop`, Anthropic의 경우 `stop_sequences`)로 매핑됩니다. OpenAI Responses API에는 stop 매개변수가 없으므로 Responses 기반 모델에는 `stop`이 적용되지 않습니다.
+모든 샘플링 및 토큰 상한 필드는 동일한 에이전트 스트림 매개변수 채널을 통해 전달되며 최선형으로 전달됩니다.
+
+- 토큰 상한: 전송 필드 이름은 제공자 전송 계층에서 선택합니다. OpenAI 계열 엔드포인트에는 `max_completion_tokens`, 레거시 이름만 허용하는 제공자(Mistral, Chutes)에는 `max_tokens`를 사용합니다.
+- `stop`은 전송 계층의 중지 필드에 매핑됩니다. Chat Completions 백엔드에는 `stop`, Anthropic에는 `stop_sequences`를 사용합니다. OpenAI Responses API에는 중지 매개변수가 없으므로 Responses 기반 모델에는 `stop`이 적용되지 않습니다.
+- ChatGPT 기반 Codex Responses 백엔드는 서버 측 고정 샘플링을 사용하며 요청이 해당 백엔드에 도달하기 전에 `temperature`/`top_p`를 제거합니다(`max_output_tokens`, `metadata`, `prompt_cache_retention`, `service_tier`도 함께 제거).
 
 ### 지원되지 않는 변형
 
-엔드포인트는 다음을 포함한 지원되지 않는 도구 변형에 대해 `400 invalid_request_error`를 반환합니다.
+다음 경우 `400 invalid_request_error`를 반환합니다.
 
-- 배열이 아닌 `tools`
-- function이 아닌 도구 항목
-- 누락된 `tool.function.name`
+- 배열이 아닌 `tools`, 함수가 아닌 도구 항목 또는 누락된 `tool.function.name`
 - `allowed_tools` 및 `custom` 같은 `tool_choice` 변형
-- 제공된 `tools`와 일치하지 않는 `tool_choice.function.name` 값
+- 제공된 도구와 일치하지 않는 `tool_choice.function.name` 값
 
-`tool_choice: "required"` 및 function으로 고정된 `tool_choice`의 경우, 엔드포인트는 노출된 클라이언트 function-tool 집합을 좁히고, 런타임에 응답 전에 클라이언트 도구를 호출하도록 지시하며, 에이전트 응답에 일치하는 구조화된 클라이언트 도구 호출이 포함되지 않으면 오류를 반환합니다. 이 계약은 호출자가 제공한 HTTP `tools` 목록에 적용되며, 모든 내부 OpenClaw 에이전트 도구에 적용되는 것은 아닙니다.
+`tool_choice: "required"` 및 함수가 고정된 `tool_choice`의 경우, 엔드포인트는 노출되는 클라이언트 함수 도구 집합을 좁히고 런타임에 응답 전에 클라이언트 도구를 호출하도록 지시하며, 에이전트 응답에 일치하는 구조화된 클라이언트 도구 호출이 없으면 오류를 반환합니다. 이는 모든 내부 OpenClaw 에이전트 도구가 아니라 호출자가 제공한 HTTP `tools` 목록에 적용됩니다.
 
-### 비스트리밍 도구 응답 형태
+### 비스트리밍 도구 응답 형식
 
-에이전트가 도구를 호출하기로 결정하면 응답은 다음을 사용합니다.
+에이전트가 도구를 호출하면 응답은 다음을 사용합니다.
 
 - `choices[0].finish_reason = "tool_calls"`
-- 다음을 포함하는 `choices[0].message.tool_calls[]` 항목:
-  - `id`
-  - `type: "function"`
-  - `function.name`
-  - `function.arguments` (JSON 문자열)
+- `id`, `type: "function"`, `function.name`, `function.arguments`(JSON 문자열)를 포함하는 `choices[0].message.tool_calls[]` 항목
+- 도구 호출 전 어시스턴트 설명은 `choices[0].message.content`에 포함됩니다(비어 있을 수 있음).
 
-도구 호출 전의 어시스턴트 설명은 `choices[0].message.content`에 반환됩니다(비어 있을 수 있음).
+### 스트리밍 도구 응답 형식
 
-### 스트리밍 도구 응답 형태
+`stream: true`이면 도구 호출은 증분 SSE 청크로 도착합니다. 초기 어시스턴트 역할 델타, 선택적 어시스턴트 설명 델타, 도구 식별 정보 및 인수 조각을 전달하는 하나 이상의 `delta.tool_calls` 청크, 그다음 `finish_reason: "tool_calls"`가 포함된 최종 청크와 `data: [DONE]` 순서입니다.
 
-`stream: true`일 때 도구 호출은 증분 SSE 청크로 방출됩니다.
-
-- 초기 어시스턴트 역할 델타
-- 선택적 어시스턴트 설명 델타
-- 도구 ID와 인수 조각을 전달하는 하나 이상의 `delta.tool_calls` 청크
-- `finish_reason: "tool_calls"`가 포함된 최종 청크
-- `data: [DONE]`
-
-`stream_options.include_usage=true`이면 `[DONE]` 전에 후행 사용량 청크가 방출됩니다.
+`stream_options.include_usage=true`이면 `[DONE]` 전에 마지막 사용량 청크가 전송됩니다.
 
 ### 도구 후속 루프
 
-`tool_calls`를 받은 후 클라이언트는 요청된 function을 실행하고 다음을 포함하는 후속 요청을 보내야 합니다.
+`tool_calls`를 수신한 후 요청된 함수를 실행하고, 이전 어시스턴트 도구 호출 메시지와 일치하는 `tool_call_id`를 가진 하나 이상의 `role: "tool"` 메시지를 포함하는 후속 요청을 전송합니다. 그러면 동일한 에이전트 추론 루프가 계속되어 최종 답변을 생성합니다.
 
-- 이전 어시스턴트 도구 호출 메시지
-- 일치하는 `tool_call_id`가 있는 하나 이상의 `role: "tool"` 메시지
+## 스트리밍(SSE)
 
-이를 통해 Gateway 에이전트 실행은 동일한 추론 루프를 계속하고 최종 어시스턴트 답변을 생성할 수 있습니다.
+Server-Sent Events를 수신하려면 `stream: true`로 설정합니다.
+
+- `Content-Type: text/event-stream`
+- 각 이벤트 줄은 `data: <json>` 형식입니다.
+- 스트림은 `data: [DONE]`으로 종료됩니다.
 
 ## Open WebUI 빠른 설정
 
-기본 Open WebUI 연결의 경우:
-
 - 기본 URL: `http://127.0.0.1:18789/v1`
-- macOS의 Docker 기본 URL: `http://host.docker.internal:18789/v1`
-- API 키: Gateway bearer 토큰
+- macOS에서 Docker를 사용할 때의 기본 URL: `http://host.docker.internal:18789/v1`
+- API 키: Gateway 베어러 토큰
 - 모델: `openclaw/default`
 
-예상 동작:
+예상 동작: `GET /v1/models`는 `openclaw/default`를 나열하며, Open WebUI는 이를 채팅 모델 ID로 사용합니다. 특정 백엔드 제공자/모델을 사용하려면 에이전트의 일반 기본 모델을 설정하거나 `x-openclaw-model`을 전송하세요(공유 비밀 호출자 또는 `operator.admin` 권한이 있는 신원 포함 호출자).
 
-- `GET /v1/models`는 `openclaw/default`를 나열해야 합니다.
-- Open WebUI는 `openclaw/default`를 채팅 모델 ID로 사용해야 합니다.
-- 해당 에이전트에 특정 백엔드 제공자/모델을 사용하려면 에이전트의 일반 기본 모델을 설정하거나, 공유 비밀 호출자 또는 `operator.admin`을 가진 ID 포함 호출자에서 `x-openclaw-model`을 보내세요.
-
-빠른 스모크:
+빠른 스모크 테스트:
 
 ```bash
 curl -sS http://127.0.0.1:18789/v1/models \
   -H 'Authorization: Bearer YOUR_TOKEN'
 ```
 
-이것이 `openclaw/default`를 반환하면, 대부분의 Open WebUI 설정은 동일한 기본 URL과 토큰으로 연결할 수 있습니다.
+이 명령이 `openclaw/default`를 반환하면 대부분의 Open WebUI 설정에서 동일한 기본 URL과 토큰으로 연결할 수 있습니다.
 
 ## 예시
 
@@ -320,7 +260,7 @@ curl -sS http://127.0.0.1:18789/v1/chat/completions \
   }'
 ```
 
-해당 대화에서 나중에 호출할 때 동일한 `user` 값을 재사용하면 같은 에이전트 세션을 계속할 수 있습니다.
+해당 대화에서 이후 호출 시 동일한 `user` 값을 재사용하면 동일한 에이전트 세션을 계속할 수 있습니다.
 
 비스트리밍:
 
@@ -348,7 +288,7 @@ curl -N http://127.0.0.1:18789/v1/chat/completions \
   }'
 ```
 
-모델 나열:
+모델 목록 조회:
 
 ```bash
 curl -sS http://127.0.0.1:18789/v1/models \
@@ -375,14 +315,10 @@ curl -sS http://127.0.0.1:18789/v1/embeddings \
   }'
 ```
 
-참고:
+`/v1/embeddings`는 `input`으로 문자열 또는 문자열 배열을 지원합니다.
 
-- `/v1/models`는 원시 제공자 카탈로그가 아니라 OpenClaw 에이전트 대상을 반환합니다.
-- `openclaw/default`는 항상 존재하므로 하나의 안정적인 ID가 여러 환경에서 작동합니다.
-- 백엔드 제공자/모델 재정의는 OpenAI `model` 필드가 아니라 `x-openclaw-model`에 둡니다. ID를 포함하는 HTTP 인증 경로에서는 이 헤더에 `operator.admin`이 필요합니다.
-- `/v1/embeddings`는 `input`을 문자열 또는 문자열 배열로 지원합니다.
-
-## 관련 항목
+## 관련 문서
 
 - [구성 참조](/ko/gateway/configuration-reference)
+- [운영자 범위](/ko/gateway/operator-scopes)
 - [OpenAI](/ko/providers/openai)

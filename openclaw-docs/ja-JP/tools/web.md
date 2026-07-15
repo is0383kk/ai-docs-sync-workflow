@@ -1,53 +1,57 @@
 ---
 read_when:
-    - web_search を有効化または設定したい場合
-    - x_search を有効化または設定する必要があります
+    - web_search を有効化または設定する場合
+    - x_search を有効化または設定したい場合
     - 検索プロバイダーを選択する必要があります
-    - OpenClaw で自動検出とプロバイダー選択を理解する
+    - 自動検出とプロバイダーの選択について理解したい場合
 sidebarTitle: Web Search
-summary: web_search、x_search、web_fetch -- Webを検索、Xの投稿を検索、またはページ内容を取得する
+summary: web_search、x_search、web_fetch -- ウェブを検索する、X の投稿を検索する、またはページのコンテンツを取得する
 title: Web 検索
 x-i18n:
-    generated_at: "2026-07-05T11:58:03Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T22:48:48Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 9963a532560581e4aa533d2706eaab8f22224fec022ec8b8a3b8a093430f6971
+    source_hash: 58db549f5133a98a2ee9514f570ba8bd99b793e912ed3e0da296f454c88692a7
     source_path: tools/web.md
     workflow: 16
 ---
 
-`web_search` は、設定済みのプロバイダーで Web を検索し、正規化された結果を返します。結果はクエリごとに 15 分間キャッシュされます（設定可能）。OpenClaw
-には、X（旧 Twitter）の投稿向けの `x_search` と、軽量な URL 取得向けの `web_fetch` もバンドルされています。`web_fetch` は常にローカルで実行されます。`web_search` は、Grok がプロバイダーの場合は xAI Responses 経由でルーティングされ、`x_search` は常に xAI Responses を使用します。
+`web_search` は、設定済みのプロバイダーを使用してウェブを検索し、
+正規化された結果を返します。結果はクエリごとに15分間キャッシュされます（設定可能）。
+OpenClaw には、X（旧Twitter）の投稿を検索する `x_search` と、軽量なURL取得を行う
+`web_fetch` も同梱されています。`web_fetch` は常にローカルで実行されます。
+Grok がプロバイダーの場合、`web_search` は xAI Responses 経由で処理され、
+`x_search` は常に xAI Responses を使用します。
 
 <Info>
-  `web_search` は軽量な HTTP ツールであり、ブラウザー自動化ではありません。
-  JS が多いサイトやログインには、[Web Browser](/ja-JP/tools/browser) を使用してください。
-  特定の URL を取得するには、[Web Fetch](/ja-JP/tools/web-fetch) を使用してください。
+  `web_search` は軽量なHTTPツールであり、ブラウザー自動化ツールではありません。
+  JavaScriptへの依存度が高いサイトやログインが必要な場合は、[ウェブブラウザー](/ja-JP/tools/browser)を使用してください。
+  特定のURLを取得する場合は、[ウェブ取得](/ja-JP/tools/web-fetch)を使用してください。
 </Info>
 
 ## クイックスタート
 
 <Steps>
-  <Step title="プロバイダーを選択">
-    プロバイダーを選び、必要なセットアップを完了します。一部のプロバイダーは
-    キー不要で、その他は API キーが必要です。詳細は以下のプロバイダーページを
-    参照してください。
+  <Step title="プロバイダーを選択する">
+    プロバイダーを選択し、必要なセットアップを完了します。一部のプロバイダーは
+    キーなしで利用できますが、APIキーが必要なものもあります。詳細については、
+    以下の各プロバイダーのページを参照してください。
   </Step>
-  <Step title="設定">
+  <Step title="設定する">
     ```bash
     openclaw configure --section web
     ```
-    これにより、プロバイダーと必要な認証情報が保存されます。API ベースの
-    プロバイダーでは、代わりにプロバイダーの環境変数（例:
+    これにより、プロバイダーと必要な認証情報が保存されます。APIを利用する
+    プロバイダーの場合は、代わりにプロバイダーの環境変数（例:
     `BRAVE_API_KEY`）を設定し、この手順を省略できます。
   </Step>
-  <Step title="使用">
+  <Step title="使用する">
     ```javascript
     await web_search({ query: "OpenClaw plugin SDK" });
     ```
 
-    X の投稿の場合:
+    Xの投稿の場合:
 
     ```javascript
     await x_search({ query: "dinner recipes" });
@@ -60,142 +64,142 @@ x-i18n:
 
 <CardGroup cols={2}>
   <Card title="Brave Search" icon="shield" href="/ja-JP/tools/brave-search">
-    スニペット付きの構造化結果。`llm-context` モード、国/言語フィルターをサポートします。無料枠があります。
+    スニペット付きの構造化された結果。`llm-context` モードと国・言語フィルターに対応しています。無料枠を利用できます。
   </Card>
   <Card title="Codex Hosted Search" icon="search" href="/ja-JP/plugins/codex-harness">
-    Codex アプリサーバーアカウントを通じた、根拠付きの AI 合成回答。
+    Codex app-server アカウントを通じて、根拠に基づきAIが統合した回答を提供します。
   </Card>
   <Card title="DuckDuckGo" icon="bird" href="/ja-JP/tools/duckduckgo-search">
-    キー不要のプロバイダー。API キーは不要です。非公式の HTML ベース統合です。
+    キー不要のプロバイダーです。APIキーは必要ありません。HTMLを利用した非公式の統合です。
   </Card>
   <Card title="Exa" icon="brain" href="/ja-JP/tools/exa-search">
-    コンテンツ抽出（ハイライト、テキスト、要約）を備えたニューラル検索 + キーワード検索。
+    コンテンツ抽出（ハイライト、テキスト、要約）を備えたニューラル検索とキーワード検索。
   </Card>
   <Card title="Firecrawl" icon="flame" href="/ja-JP/tools/firecrawl">
-    構造化結果。深い抽出には `firecrawl_search` と `firecrawl_scrape` の併用が最適です。
+    構造化された結果。詳細な抽出には `firecrawl_search` および `firecrawl_scrape` と組み合わせるのが最適です。
   </Card>
   <Card title="Gemini" icon="sparkles" href="/ja-JP/tools/gemini-search">
-    Google Search グラウンディングによる、引用付きの AI 合成回答。
+    Google Search のグラウンディングにより、引用付きでAIが統合した回答を提供します。
   </Card>
   <Card title="Grok" icon="zap" href="/ja-JP/tools/grok-search">
-    xAI Web グラウンディングによる、引用付きの AI 合成回答。
+    xAI のウェブグラウンディングにより、引用付きでAIが統合した回答を提供します。
   </Card>
   <Card title="Kimi" icon="moon" href="/ja-JP/tools/kimi-search">
-    Moonshot Web 検索による、引用付きの AI 合成回答。根拠なしのチャットフォールバックは明示的に失敗します。
+    Moonshot のウェブ検索により、引用付きでAIが統合した回答を提供します。グラウンディングされていないチャットへのフォールバックは明示的に失敗します。
   </Card>
   <Card title="MiniMax Search" icon="globe" href="/ja-JP/tools/minimax-search">
-    MiniMax Token Plan 検索 API による構造化結果。
+    MiniMax Token Plan 検索APIによる構造化された結果。
   </Card>
   <Card title="Ollama Web Search" icon="globe" href="/ja-JP/tools/ollama-search">
-    サインイン済みのローカル Ollama ホスト、またはホスト型 Ollama API 経由の検索。
+    サインイン済みのローカルOllamaホストまたはホスト型Ollama APIを介して検索します。
   </Card>
   <Card title="Parallel" icon="layer-group" href="/ja-JP/tools/parallel-search">
-    有料の Parallel Search API（`PARALLEL_API_KEY`）。より高いレート制限と目的調整。
+    有料のParallel Search API（`PARALLEL_API_KEY`）。より高いレート制限と目的に応じた調整を提供します。
   </Card>
-  <Card title="Parallel Search (無料)" icon="layer-group" href="/ja-JP/tools/parallel-search">
-    キー不要のオプトイン。Parallel の無料 Search MCP。LLM 向けに最適化された高密度な抜粋を提供し、API キーは不要です。
+  <Card title="Parallel Search（無料）" icon="layer-group" href="/ja-JP/tools/parallel-search">
+    オプトインでキー不要。LLM向けに最適化された高密度の抜粋を提供するParallelの無料Search MCPで、APIキーは不要です。
   </Card>
   <Card title="Perplexity" icon="search" href="/ja-JP/tools/perplexity-search">
-    コンテンツ抽出制御とドメインフィルタリングを備えた構造化結果。
+    コンテンツ抽出制御とドメインフィルタリングを備えた構造化された結果。
   </Card>
   <Card title="SearXNG" icon="server" href="/ja-JP/tools/searxng-search">
-    セルフホスト型メタ検索。API キーは不要です。Google、Bing、DuckDuckGo などを集約します。
+    セルフホスト型のメタ検索。APIキーは不要です。Google、Bing、DuckDuckGoなどを集約します。
   </Card>
   <Card title="Tavily" icon="globe" href="/ja-JP/tools/tavily">
-    検索深度、トピックフィルタリング、URL 抽出用の `tavily_extract` を備えた構造化結果。
+    検索深度、トピックフィルタリング、URL抽出用の `tavily_extract` を備えた構造化された結果。
   </Card>
 </CardGroup>
 
-### プロバイダー比較
+### プロバイダーの比較
 
-| プロバイダー                                     | 結果スタイル                                                 | フィルター                                       | API キー                                                                                |
+| プロバイダー                                     | 結果の形式                                                     | フィルター                                       | APIキー                                                                                 |
 | ------------------------------------------------ | -------------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| [Brave](/ja-JP/tools/brave-search)                     | 構造化スニペット                                             | 国、言語、時間、`llm-context` モード             | `BRAVE_API_KEY`                                                                         |
-| [Codex Hosted Search](/ja-JP/plugins/codex-harness)    | AI 合成 + ソース URL                                          | ドメイン、コンテキストサイズ、ユーザー所在地     | なし。Codex/OpenAI サインインを使用                                                     |
-| [DuckDuckGo](/ja-JP/tools/duckduckgo-search)           | 構造化スニペット                                             | --                                               | なし（キー不要）                                                                        |
-| [Exa](/ja-JP/tools/exa-search)                         | 構造化 + 抽出済み                                            | ニューラル/キーワードモード、日付、コンテンツ抽出 | `EXA_API_KEY`                                                                           |
-| [Firecrawl](/ja-JP/tools/firecrawl)                    | 構造化スニペット                                             | `firecrawl_search` ツール経由                    | `FIRECRAWL_API_KEY`                                                                     |
-| [Gemini](/ja-JP/tools/gemini-search)                   | AI 合成 + 引用                                               | --                                               | `GEMINI_API_KEY`                                                                        |
-| [Grok](/ja-JP/tools/grok-search)                       | AI 合成 + 引用                                               | --                                               | xAI OAuth、`XAI_API_KEY`、または `plugins.entries.xai.config.webSearch.apiKey`          |
-| [Kimi](/ja-JP/tools/kimi-search)                       | AI 合成 + 引用。根拠なしのチャットフォールバックで失敗       | --                                               | `KIMI_API_KEY` / `MOONSHOT_API_KEY`                                                     |
-| [MiniMax Search](/ja-JP/tools/minimax-search)          | 構造化スニペット                                             | リージョン（`global` / `cn`）                    | `MINIMAX_CODE_PLAN_KEY` / `MINIMAX_CODING_API_KEY` / `MINIMAX_OAUTH_TOKEN`              |
-| [Ollama Web Search](/ja-JP/tools/ollama-search)        | 構造化スニペット                                             | --                                               | サインイン済みのローカルホストでは不要。直接 `https://ollama.com` 検索する場合は `OLLAMA_API_KEY` |
-| [Parallel](/ja-JP/tools/parallel-search)               | LLM コンテキスト向けにランク付けされた高密度な抜粋           | --                                               | `PARALLEL_API_KEY`（有料）                                                              |
-| [Parallel Search (無料)](/ja-JP/tools/parallel-search) | LLM コンテキスト向けにランク付けされた高密度な抜粋           | --                                               | なし（無料 Search MCP）                                                                 |
-| [Perplexity](/ja-JP/tools/perplexity-search)           | 構造化スニペット                                             | 国、言語、時間、ドメイン、コンテンツ制限         | `PERPLEXITY_API_KEY` / `OPENROUTER_API_KEY`                                             |
-| [SearXNG](/ja-JP/tools/searxng-search)                 | 構造化スニペット                                             | カテゴリ、言語                                   | なし（セルフホスト）                                                                    |
-| [Tavily](/ja-JP/tools/tavily)                          | 構造化スニペット                                             | `tavily_search` ツール経由                       | `TAVILY_API_KEY`                                                                        |
+| [Brave](/ja-JP/tools/brave-search)                     | 構造化されたスニペット                                         | 国、言語、期間、`llm-context` モード              | `BRAVE_API_KEY`                                                                         |
+| [Codex Hosted Search](/ja-JP/plugins/codex-harness)    | AIによる統合 + ソースURL                                       | ドメイン、コンテキストサイズ、ユーザーの所在地    | なし。Codex/OpenAIへのサインインを使用                                                  |
+| [DuckDuckGo](/ja-JP/tools/duckduckgo-search)           | 構造化されたスニペット                                         | --                                               | なし（キー不要）                                                                        |
+| [Exa](/ja-JP/tools/exa-search)                         | 構造化 + 抽出済み                                               | ニューラル/キーワードモード、日付、コンテンツ抽出 | `EXA_API_KEY`                                                                           |
+| [Firecrawl](/ja-JP/tools/firecrawl)                    | 構造化されたスニペット                                         | `firecrawl_search` ツール経由                     | `FIRECRAWL_API_KEY`                                                                     |
+| [Gemini](/ja-JP/tools/gemini-search)                   | AIによる統合 + 引用                                             | --                                               | `GEMINI_API_KEY`                                                                        |
+| [Grok](/ja-JP/tools/grok-search)                       | AIによる統合 + 引用                                             | --                                               | xAI OAuth、`XAI_API_KEY`、または `plugins.entries.xai.config.webSearch.apiKey`          |
+| [Kimi](/ja-JP/tools/kimi-search)                       | AIによる統合 + 引用。グラウンディングされていないチャットへのフォールバック時は失敗 | --                                               | `KIMI_API_KEY` / `MOONSHOT_API_KEY`                                                     |
+| [MiniMax Search](/ja-JP/tools/minimax-search)          | 構造化されたスニペット                                         | リージョン（`global` / `cn`）                     | `MINIMAX_CODE_PLAN_KEY` / `MINIMAX_CODING_API_KEY` / `MINIMAX_OAUTH_TOKEN`              |
+| [Ollama Web Search](/ja-JP/tools/ollama-search)        | 構造化されたスニペット                                         | --                                               | サインイン済みのローカルホストでは不要。`https://ollama.com` の直接検索では `OLLAMA_API_KEY` |
+| [Parallel](/ja-JP/tools/parallel-search)               | LLMコンテキスト向けに順位付けされた高密度の抜粋                | --                                               | `PARALLEL_API_KEY`（有料）                                                              |
+| [Parallel Search（無料）](/ja-JP/tools/parallel-search) | LLMコンテキスト向けに順位付けされた高密度の抜粋                | --                                               | なし（無料のSearch MCP）                                                                |
+| [Perplexity](/ja-JP/tools/perplexity-search)           | 構造化されたスニペット                                         | 国、言語、期間、ドメイン、コンテンツ制限          | `PERPLEXITY_API_KEY` / `OPENROUTER_API_KEY`                                             |
+| [SearXNG](/ja-JP/tools/searxng-search)                 | 構造化されたスニペット                                         | カテゴリー、言語                                  | なし（セルフホスト）                                                                    |
+| [Tavily](/ja-JP/tools/tavily)                          | 構造化されたスニペット                                         | `tavily_search` ツール経由                        | `TAVILY_API_KEY`                                                                        |
 
 ## 自動検出
 
-ドキュメントとセットアップフロー内のプロバイダー一覧はアルファベット順です。自動検出では、
-別個の固定された優先順位を使用し、認証情報が必要なプロバイダー
-（`requiresCredential !== false`）について、設定済みのものが見つかった場合にのみ選択します。
-`provider` が設定されていない場合、OpenClaw は以下の順序でプロバイダーを確認し、
-最初に準備できているものを使用します。
+ドキュメントおよびセットアップフロー内のプロバイダー一覧はアルファベット順です。
+自動検出では、それとは別の固定された優先順位を使用し、認証情報が必要な
+（`requiresCredential !== false`）プロバイダーのうち、設定済みのものだけを選択します。
+`provider` が設定されていない場合、OpenClaw は次の順序でプロバイダーを確認し、
+準備が整っている最初のものを使用します。
 
-API ベースのプロバイダーが先です:
+最初にAPIを利用するプロバイダー:
 
-1. **Brave** -- `BRAVE_API_KEY` または `plugins.entries.brave.config.webSearch.apiKey`（順序 10）
-2. **MiniMax Search** -- `MINIMAX_CODE_PLAN_KEY` / `MINIMAX_CODING_API_KEY` / `MINIMAX_OAUTH_TOKEN` / `MINIMAX_API_KEY` または `plugins.entries.minimax.config.webSearch.apiKey`（順序 15）
-3. **Gemini** -- `plugins.entries.google.config.webSearch.apiKey`、`GEMINI_API_KEY`、または `models.providers.google.apiKey`（順序 20）
-4. **Grok** -- xAI OAuth、`XAI_API_KEY`、または `plugins.entries.xai.config.webSearch.apiKey`（順序 30）
-5. **Kimi** -- `KIMI_API_KEY` / `MOONSHOT_API_KEY` または `plugins.entries.moonshot.config.webSearch.apiKey`（順序 40）
-6. **Perplexity** -- `PERPLEXITY_API_KEY` / `OPENROUTER_API_KEY` または `plugins.entries.perplexity.config.webSearch.apiKey`（順序 50）
-7. **Firecrawl** -- `FIRECRAWL_API_KEY` または `plugins.entries.firecrawl.config.webSearch.apiKey`（順序 60）
-8. **Exa** -- `EXA_API_KEY` または `plugins.entries.exa.config.webSearch.apiKey`。任意の `plugins.entries.exa.config.webSearch.baseUrl` は Exa エンドポイントを上書きします（順序 65）
-9. **Tavily** -- `TAVILY_API_KEY` または `plugins.entries.tavily.config.webSearch.apiKey`（順序 70）
-10. **Parallel** -- `PARALLEL_API_KEY` または `plugins.entries.parallel.config.webSearch.apiKey` 経由の有料 Parallel Search API。任意の `plugins.entries.parallel.config.webSearch.baseUrl` はエンドポイントを上書きします（順序 75）
+1. **Brave** -- `BRAVE_API_KEY` または `plugins.entries.brave.config.webSearch.apiKey`（順序10）
+2. **MiniMax Search** -- `MINIMAX_CODE_PLAN_KEY` / `MINIMAX_CODING_API_KEY` / `MINIMAX_OAUTH_TOKEN` / `MINIMAX_API_KEY` または `plugins.entries.minimax.config.webSearch.apiKey`（順序15）
+3. **Gemini** -- `plugins.entries.google.config.webSearch.apiKey`、`GEMINI_API_KEY`、または `models.providers.google.apiKey`（順序20）
+4. **Grok** -- xAI OAuth、`XAI_API_KEY`、または `plugins.entries.xai.config.webSearch.apiKey`（順序30）
+5. **Kimi** -- `KIMI_API_KEY` / `MOONSHOT_API_KEY` または `plugins.entries.moonshot.config.webSearch.apiKey`（順序40）
+6. **Perplexity** -- `PERPLEXITY_API_KEY` / `OPENROUTER_API_KEY` または `plugins.entries.perplexity.config.webSearch.apiKey`（順序50）
+7. **Firecrawl** -- `FIRECRAWL_API_KEY` または `plugins.entries.firecrawl.config.webSearch.apiKey`（順序60）
+8. **Exa** -- `EXA_API_KEY` または `plugins.entries.exa.config.webSearch.apiKey`。任意の `plugins.entries.exa.config.webSearch.baseUrl` でExaのエンドポイントを上書きできます（順序65）
+9. **Tavily** -- `TAVILY_API_KEY` または `plugins.entries.tavily.config.webSearch.apiKey`（順序70）
+10. **Parallel** -- `PARALLEL_API_KEY` または `plugins.entries.parallel.config.webSearch.apiKey` を介した有料のParallel Search API。任意の `plugins.entries.parallel.config.webSearch.baseUrl` でエンドポイントを上書きできます（順序75）
 
-その後に、エンドポイント設定済みのプロバイダーが続きます:
+その後に、エンドポイントが設定されたプロバイダー:
 
-11. **SearXNG** -- `SEARXNG_BASE_URL` または `plugins.entries.searxng.config.webSearch.baseUrl`（順序 200）
+11. **SearXNG** -- `SEARXNG_BASE_URL` または `plugins.entries.searxng.config.webSearch.baseUrl`（順序200）
 
-**Parallel Search (無料)**、**DuckDuckGo**、
-**Ollama Web Search**、**Codex Hosted Search** などのキー不要プロバイダーは、
-内部の順序値を持っていても自動検出では選ばれません。これらは
-`tools.web.search.provider` で明示的に選択した場合、または
-`openclaw configure --section web` を通じて選択した場合にのみ使用されます。OpenClaw は、
-API ベースのプロバイダーが設定されていないという理由だけで、管理対象の
-`web_search` クエリをキー不要プロバイダーへ送信することはありません。
+**Parallel Search（無料）**、**DuckDuckGo**、**Ollama Web Search**、
+**Codex Hosted Search** などのキー不要プロバイダーは、内部的な順序値を持っていても、
+自動検出では決して選択されません。これらは `tools.web.search.provider` で明示的に
+選択した場合、または `openclaw configure --section web` を介して選択した場合にのみ
+使用されます。APIを利用するプロバイダーが設定されていないという理由だけで、
+OpenClaw が管理対象の `web_search` クエリをキー不要のプロバイダーへ送信することはありません。
 
-OpenAI Responses モデルは例外です。`tools.web.search.provider`
-が未設定の間は、上記の管理対象プロバイダーではなく OpenAI のネイティブ Web 検索を使用します（下記参照）。
-代わりに管理対象パス経由でルーティングするには、`tools.web.search.provider` を
-`parallel-free`（または別のプロバイダー）に設定します。
+OpenAI Responses モデルは例外です。`tools.web.search.provider` が未設定の場合、
+上記の管理対象プロバイダーではなく、OpenAIのネイティブウェブ検索を使用します
+（後述）。管理対象の経路を使用するには、`tools.web.search.provider` を
+`parallel-free`（または別のプロバイダー）に設定してください。
 
 <Note>
-  すべてのプロバイダーキー項目は SecretRef オブジェクトをサポートします。
-  `plugins.entries.<plugin>.config.webSearch.apiKey` 配下の Plugin スコープの SecretRef は、
-  インストール済みの API ベース Web 検索プロバイダーに対して解決されます。対象には Brave、Exa、Firecrawl、
-  Gemini、Grok、Kimi、MiniMax、Parallel、Perplexity、Tavily が含まれます。
-  これは、プロバイダーが `tools.web.search.provider` 経由で明示的に選択された場合でも、
-  自動検出で選択された場合でも同じです。自動検出モードでは、OpenClaw は
-  選択されたプロバイダーキーだけを解決します。選択されていない SecretRef は非アクティブのままなので、
-  複数のプロバイダーを設定しておいても、使用していないものの解決コストは発生しません。
+  すべてのプロバイダーのキーフィールドはSecretRefオブジェクトに対応しています。
+  `plugins.entries.<plugin>.config.webSearch.apiKey` 配下のPluginスコープのSecretRefは、
+  インストール済みでAPIを利用するウェブ検索プロバイダー（Brave、Exa、Firecrawl、
+  Gemini、Grok、Kimi、MiniMax、Parallel、Perplexity、Tavilyを含む）に対して解決されます。
+  これは、`tools.web.search.provider` でプロバイダーを明示的に選択した場合と、
+  自動検出で選択された場合のどちらにも適用されます。自動検出モードでは、
+  OpenClaw は選択されたプロバイダーのキーだけを解決します。選択されていない
+  SecretRef は非アクティブなままになるため、使用していないプロバイダーの解決コストを
+  負担することなく、複数のプロバイダーを設定しておけます。
 </Note>
 
-## ネイティブ OpenAI Web 検索
+## OpenAIネイティブウェブ検索
 
-直接 OpenAI Responses モデル（`api: "openai-responses"`、provider `openai`、base URL なし、または公式 OpenAI API base URL）は、OpenClaw web search が有効で、managed provider が固定されていない場合、OpenAI のホスト型 `web_search` ツールを自動的に使用します。これはバンドルされた OpenAI Plugin 内の provider 所有の動作であり、OpenAI 互換プロキシ base URL や Azure ルートには適用されません。OpenAI モデルで managed `web_search` ツールを使い続けるには、`tools.web.search.provider` を `brave` など別の provider に設定します。または、managed search とネイティブ OpenAI search の両方を無効にするには、`tools.web.search.enabled: false` を設定します。
+直接 OpenAI Responses モデル（`api: "openai-responses"`、プロバイダーは `openai`、ベース URL なし、または公式 OpenAI API ベース URL）は、OpenClaw のウェブ検索が有効で、管理対象プロバイダーが固定されていない場合、OpenAI がホストする `web_search` ツールを自動的に使用します。これはバンドルされた OpenAI Plugin 内でプロバイダーが所有する動作であり、OpenAI 互換プロキシのベース URL や Azure ルートには適用されません。OpenAI モデルで管理対象の `web_search` ツールを使用し続けるには、`tools.web.search.provider` を `brave` などの別のプロバイダーに設定します。または、管理対象検索と OpenAI ネイティブ検索の両方を無効にするには、`tools.web.search.enabled: false` を設定します。
 
-## ネイティブ Codex web search
+## ネイティブ Codex ウェブ検索
 
-Codex app-server ランタイムは、web search が有効で managed provider が選択されていない場合、Codex のホスト型 `web_search` ツールを自動的に使用します。ネイティブのホスト型 search と OpenClaw の managed `web_search` 動的ツールは相互排他的であるため、managed search でネイティブのドメイン制限をバイパスすることはできません。OpenClaw は、ホスト型 search が利用できない、明示的に無効化されている、または選択済みの managed provider に置き換えられている場合に managed ツールを使用します。OpenClaw は、Codex のスタンドアロン `web.run` 拡張を無効のままにします（`features.standalone_web_search: false`）。これは本番 app-server トラフィックが、そのユーザー定義 `web` 名前空間を拒否するためです。
+Codex app-server ランタイムは、ウェブ検索が有効で、管理対象プロバイダーが選択されていない場合、Codex がホストする `web_search` ツールを自動的に使用します。ネイティブのホスト型検索と OpenClaw の管理対象 `web_search` 動的ツールは相互排他的であるため、管理対象検索でネイティブのドメイン制限を回避することはできません。ホスト型検索が利用できない、明示的に無効化されている、または選択された管理対象プロバイダーに置き換えられている場合、OpenClaw は管理対象ツールを使用します。本番環境の app-server トラフィックはユーザー定義の `web` 名前空間を拒否するため、OpenClaw は Codex のスタンドアロン `web.run` 拡張機能を無効（`features.standalone_web_search: false`）のままにします。
 
-- ネイティブ search は `tools.web.search.openaiCodex` で設定します
-- 任意の親モデル向けに、Codex Hosted Search を managed `web_search` provider としてプロビジョニングするには、`tools.web.search.provider: "codex"` を設定します。各呼び出しは有界の一時的な Codex app-server turn を実行し、Codex がホスト型 `webSearch` item を出力しない場合は失敗します。
-- `mode: "cached"` はデフォルトの設定ですが、Codex は無制限の app-server turn ではこれを live external access として解決します。live access を明示的に要求するには `"live"` を設定します
-- OpenClaw の managed `web_search` を使用するには、`tools.web.search.provider` を `brave` などの managed provider に設定します
-- Codex ホスト型 search をオプトアウトするには、`tools.web.search.openaiCodex.enabled: false` を設定します。他の managed provider は引き続き利用できます
-- Codex ネイティブツールサーフェスを制限しても、managed `web_search` は利用可能なままです
-- `allowedDomains` が設定されている場合、ホスト型 search が利用できないと自動 managed フォールバックはフェイルクローズし、ネイティブ allowlist をバイパスできないようにします
-- ツール無効の LLM のみの実行では、ネイティブ search と managed search の両方が無効になります
-- `tools.web.search.enabled: false` は managed search とネイティブ search の両方を無効にします
+- ネイティブ検索は `tools.web.search.openaiCodex` で設定します
+- `tools.web.search.provider: "codex"` を設定すると、任意の親モデル向けの管理対象 `web_search` プロバイダーとして Codex Hosted Search が準備されます。各呼び出しでは制限付きの一時的な Codex app-server ターンが実行され、Codex がホスト型の `webSearch` 項目を出力しない場合は失敗します。
+- `mode: "cached"` がデフォルトの設定ですが、Codex は制限のない app-server ターンではこれをライブの外部アクセスとして解決します。ライブアクセスを明示的に要求するには `"live"` を設定します
+- OpenClaw の管理対象 `web_search` を使用するには、`tools.web.search.provider` を `brave` などの管理対象プロバイダーに設定します
+- Codex ホスト型検索を使用しない場合は、`tools.web.search.openaiCodex.enabled: false` を設定します。他の管理対象プロバイダーは引き続き利用できます
+- Codex のネイティブツール対象範囲を制限した場合も、管理対象 `web_search` は利用可能なままです
+- `allowedDomains` が設定されている場合、ホスト型検索を利用できないときは自動的な管理対象フォールバックがフェイルクローズとなり、ネイティブの許可リストを回避できません
+- ツールが無効な LLM のみの実行では、ネイティブ検索と管理対象検索の両方が無効になります
+- `tools.web.search.enabled: false` は、管理対象検索とネイティブ検索の両方を無効にします
 
-永続的な有効 Codex search-policy の変更は、新しいバインド済みスレッドを開始します。これにより、すでにロードされた app-server スレッドが古い hosted-search access を保持できなくなります。一時的な per-turn 制限では、一時的な制限付きスレッドを使用し、後で resume するために既存の binding を保持します。
+永続的に有効となる Codex 検索ポリシーの変更時には、すでに読み込まれた app-server スレッドが古いホスト型検索アクセスを保持しないように、新しいバインド済みスレッドが開始されます。ターンごとの一時的な制限では、一時的な制限付きスレッドを使用し、後で再開できるように既存のバインディングを維持します。
 
-直接の OpenAI ChatGPT Responses トラフィックでも、OpenAI のホスト型 `web_search` ツールを使用できます。この別経路は引き続き `tools.web.search.openaiCodex.enabled: true` によるオプトインであり、`api: "openai-chatgpt-responses"` を使用する対象の `openai/*` モデルにのみ適用されます。
+直接の OpenAI ChatGPT Responses トラフィックでも、OpenAI がホストする `web_search` ツールを使用できます。この別経路は引き続き `tools.web.search.openaiCodex.enabled: true` による明示的な有効化が必要で、`api: "openai-chatgpt-responses"` を使用する対象の `openai/*` モデルにのみ適用されます。
 
 ```json5
 {
@@ -203,7 +207,7 @@ Codex app-server ランタイムは、web search が有効で managed provider �
     web: {
       search: {
         enabled: true,
-        // Optional: use Codex Hosted Search from non-Codex parent models too.
+        // 任意: Codex 以外の親モデルからも Codex Hosted Search を使用します。
         provider: "codex",
         openaiCodex: {
           enabled: true,
@@ -222,15 +226,15 @@ Codex app-server ランタイムは、web search が有効で managed provider �
 }
 ```
 
-ネイティブ Codex search をサポートしないランタイムや provider では、Codex は OpenClaw の動的ツール名前空間を通じて managed `web_search` フォールバックを使用できます。Codex ホスト型 search ではなく、OpenClaw の provider 固有のネットワーク制御が必要な場合は、明示的な managed provider を使用してください。
+ネイティブ Codex 検索に対応していないランタイムやプロバイダーでは、Codex は OpenClaw の動的ツール名前空間を介して管理対象 `web_search` フォールバックを使用できます。Codex ホスト型検索ではなく、OpenClaw のプロバイダー固有のネットワーク制御が必要な場合は、管理対象プロバイダーを明示的に指定してください。
 
-`provider: "codex"` を選択すると、バンドルされた `codex` Plugin が有効になり、上記と同じ `tools.web.search.openaiCodex` 制限が使用されます。先に `openclaw models auth login --provider openai` で Codex app-server を認証してください。親エージェントは任意のモデルまたはランタイムを使用できます。有界 search worker だけが Codex 経由で実行されます。
+`provider: "codex"` を選択すると、バンドルされた `codex` Plugin が有効になり、前述の `tools.web.search.openaiCodex` と同じ制限が使用されます。まず `openclaw models auth login --provider openai` で Codex app-server を認証してください。親エージェントは任意のモデルまたはランタイムを使用できます。Codex を介して実行されるのは、制限付き検索ワーカーのみです。
 
-## ネットワーク安全性
+## ネットワークの安全性
 
-Managed HTTP `web_search` provider 呼び出しは、現在の provider 自身のホスト名にスコープされた OpenClaw の保護付き fetch 経路を使用します。そのホスト名に限り、OpenClaw は `198.18.0.0/15` と `fc00::/7` にある Surge、Clash、sing-box の fake-IP DNS 応答を許可します。その他の private、loopback、link-local、metadata 宛先は引き続きブロックされます。Codex Hosted Search は例外です。その有界 worker は、ネットワークアクセスを Codex app-server のホスト型 `web_search` ツールに委譲します。
+管理対象 HTTP `web_search` プロバイダーの呼び出しでは、現在のプロバイダー自身のホスト名にスコープを限定した OpenClaw の保護付きフェッチ経路を使用します。そのホスト名に限り、OpenClaw は `198.18.0.0/15` および `fc00::/7` 内の Surge、Clash、sing-box の偽 IP DNS 応答を許可します。その他のプライベート、ループバック、リンクローカル、メタデータ宛先は引き続きブロックされます。Codex Hosted Search は例外です。制限付きワーカーがネットワークアクセスを Codex app-server のホスト型 `web_search` ツールに委任します。
 
-この自動許可は、任意の `web_fetch` URL には適用されません。`web_fetch` では、信頼済みプロキシがそれらの合成範囲を所有している場合にのみ、`tools.web.fetch.ssrfPolicy.allowRfc2544BenchmarkRange` と `tools.web.fetch.ssrfPolicy.allowIpv6UniqueLocalRange` を明示的に有効にしてください。
+この自動許可は、任意の `web_fetch` URL には適用されません。`web_fetch` では、信頼するプロキシがそれらの合成範囲を所有している場合に限り、`tools.web.fetch.ssrfPolicy.allowRfc2544BenchmarkRange` と `tools.web.fetch.ssrfPolicy.allowIpv6UniqueLocalRange` を明示的に有効にしてください。
 
 ## 設定
 
@@ -239,8 +243,8 @@ Managed HTTP `web_search` provider 呼び出しは、現在の provider 自身�
   tools: {
     web: {
       search: {
-        enabled: true, // default: true
-        provider: "brave", // or omit for auto-detection
+        enabled: true, // デフォルト: true
+        provider: "brave", // または自動検出する場合は省略
         maxResults: 5,
         timeoutSeconds: 30,
         cacheTtlMinutes: 15,
@@ -250,32 +254,32 @@ Managed HTTP `web_search` provider 呼び出しは、現在の provider 自身�
 }
 ```
 
-Provider 固有の設定（API keys、base URLs、modes）は `plugins.entries.<plugin>.config.webSearch.*` 配下にあります。Gemini は、専用の web-search 設定と `GEMINI_API_KEY` の後の低優先度フォールバックとして、`models.providers.google.apiKey` と `models.providers.google.baseUrl` も再利用できます。例については provider ページを参照してください。
-Grok は、`openclaw models auth login --provider xai --method oauth` の xAI OAuth auth profile も再利用できます。API-key 設定は引き続きフォールバックです。
+プロバイダー固有の設定（API キー、ベース URL、モード）は `plugins.entries.<plugin>.config.webSearch.*` に配置します。Gemini は、専用のウェブ検索設定と `GEMINI_API_KEY` の後に、優先度の低いフォールバックとして `models.providers.google.apiKey` と `models.providers.google.baseUrl` を再利用することもできます。例については、各プロバイダーのページを参照してください。
+Grok は、`openclaw models auth login --provider xai --method oauth` で作成した xAI OAuth 認証プロファイルを再利用することもできます。API キー設定は引き続きフォールバックとして使用されます。
 
-`tools.web.search.provider` は、バンドル済みおよびインストール済みの Plugin manifest で宣言された web-search provider id に対して検証されます。`"brvae"` のようなタイプミスは、自動検出へ静かにフォールバックするのではなく、設定検証で失敗します。設定済み provider に古い Plugin evidence しかない場合、たとえばサードパーティ Plugin のアンインストール後に残った `plugins.entries.<plugin>` ブロックがある場合、OpenClaw は起動の回復性を維持しつつ警告を報告します。そのため、Plugin を再インストールするか、`openclaw doctor --fix` を実行して古い設定をクリーンアップできます。
+`tools.web.search.provider` は、バンドル済みおよびインストール済み Plugin のマニフェストで宣言されたウェブ検索プロバイダー ID に対して検証されます。`"brvae"` のような入力ミスは、自動検出へ暗黙的にフォールバックするのではなく、設定検証で失敗します。設定されたプロバイダーについて、サードパーティー Plugin のアンインストール後に残った `plugins.entries.<plugin>` ブロックなど、古い Plugin 情報しかない場合、OpenClaw は起動の耐障害性を維持しつつ警告を報告します。Plugin を再インストールするか、`openclaw doctor --fix` を実行して古い設定をクリーンアップできます。
 
-`web_fetch` フォールバック provider の選択は別です。
+`web_fetch` のフォールバックプロバイダー選択は別に行われます。
 
 - `tools.web.fetch.provider` で選択します
-- またはそのフィールドを省略し、OpenClaw に設定済み認証情報から最初に準備完了となった web-fetch provider を自動検出させます
-- 非 sandbox の `web_fetch` は、`contracts.webFetchProviders` を宣言するインストール済み Plugin provider を使用できます。sandbox fetch は、バンドル済み provider と検証済みの公式 Plugin インストールを許可しますが、サードパーティの外部 Plugin は除外します
-- 公式 Firecrawl Plugin は、現時点でバンドルされた唯一の `webFetchProviders` contributor であり、`plugins.entries.firecrawl.config.webFetch.*` 配下で設定されます
+- または、そのフィールドを省略し、設定済みの認証情報から最初に利用可能なウェブフェッチプロバイダーを OpenClaw に自動検出させます
+- サンドボックス化されていない `web_fetch` は、`contracts.webFetchProviders` を宣言するインストール済み Plugin プロバイダーを使用できます。サンドボックス化されたフェッチでは、バンドル済みプロバイダーと検証済みの公式 Plugin インストールを許可しますが、外部のサードパーティー Plugin は除外されます
+- 現在、公式 Firecrawl Plugin は唯一のバンドル済み `webFetchProviders` 提供元であり、`plugins.entries.firecrawl.config.webFetch.*` で設定します
 
-`openclaw onboard` または `openclaw configure --section web` で **Kimi** を選択すると、OpenClaw は次も尋ねる場合があります。
+`openclaw onboard` または `openclaw configure --section web` で **Kimi** を選択すると、OpenClaw は次の項目も確認できます。
 
-- Moonshot API region（`https://api.moonshot.ai/v1` または `https://api.moonshot.cn/v1`）
-- デフォルトの Kimi web-search model（デフォルトは `kimi-k2.6`）
+- Moonshot API リージョン（`https://api.moonshot.ai/v1` または `https://api.moonshot.cn/v1`）
+- デフォルトの Kimi ウェブ検索モデル（デフォルトは `kimi-k2.6`）
 
-`x_search` は `plugins.entries.xai.config.xSearch.*` で設定します。これは chat と同じ xAI auth profile、または Grok web search で使用される `XAI_API_KEY` / Plugin web-search credential を使用します。
+`x_search` は `plugins.entries.xai.config.xSearch.*` で設定します。チャットと同じ xAI 認証プロファイル、または Grok ウェブ検索で使用する `XAI_API_KEY` / Plugin ウェブ検索認証情報を使用します。
 従来の `tools.web.x_search.*` 設定は、`openclaw doctor --fix` によって自動移行されます。
-`openclaw onboard` または `openclaw configure --section web` で Grok を選択すると、OpenClaw は Grok セットアップ完了直後に、同じ credential を使った任意の `x_search` セットアップも提示します。これは Grok 経路内の別のフォローアップ手順であり、別のトップレベル web-search provider 選択ではありません。別の provider を選んだ場合、OpenClaw は `x_search` プロンプトを表示しません。
+`openclaw onboard` または `openclaw configure --section web` で Grok を選択すると、Grok の設定完了直後に、同じ認証情報を使用する任意の `x_search` 設定も OpenClaw によって提示されます。これは Grok 経路内の独立した後続手順であり、最上位のウェブ検索プロバイダーを別途選択するものではありません。別のプロバイダーを選択した場合、OpenClaw は `x_search` プロンプトを表示しません。
 
-### API keys の保存
+### API キーの保存
 
 <Tabs>
   <Tab title="設定ファイル">
-    `openclaw configure --section web` を実行するか、key を直接設定します。
+    `openclaw configure --section web` を実行するか、キーを直接設定します。
 
     ```json5
     {
@@ -295,53 +299,58 @@ Grok は、`openclaw models auth login --provider xai --method oauth` の xAI OA
 
   </Tab>
   <Tab title="環境変数">
-    Gateway プロセス環境で provider env var を設定します。
+    Gateway プロセス環境でプロバイダーの環境変数を設定します。
 
     ```bash
     export BRAVE_API_KEY="YOUR_KEY"
     ```
 
-    gateway インストールでは、`~/.openclaw/.env` に入れます。
-    [Env vars](/ja-JP/help/faq#env-vars-and-env-loading) を参照してください。
+    Gateway のインストールでは、`~/.openclaw/.env` に配置します。
+    [環境変数](/ja-JP/help/faq#env-vars-and-env-loading)を参照してください。
 
   </Tab>
 </Tabs>
 
 ## ツールパラメーター
 
-| Parameter             | Description                                                        |
+| パラメーター          | 説明                                                               |
 | --------------------- | ------------------------------------------------------------------ |
-| `query`               | 検索クエリ（必須）                                            |
-| `count`               | 返す結果数（1-10、デフォルト: 5）                               |
-| `country`             | 2文字の ISO 国コード（例: "US", "DE"）                        |
-| `language`            | ISO 639-1 言語コード（例: "en", "de"）                          |
-| `search_lang`         | 検索言語コード（Brave のみ）                                  |
-| `freshness`           | 時間フィルター: `day`、`week`、`month`、または `year`                     |
-| `date_after`          | この日付より後の結果（YYYY-MM-DD）                               |
-| `date_before`         | この日付より前の結果（YYYY-MM-DD）                              |
-| `ui_lang`             | UI 言語コード（Brave のみ）                                      |
-| `domain_filter`       | ドメイン allowlist/denylist 配列（Perplexity のみ）                  |
-| `max_tokens`          | 合計コンテンツ token budget、ネイティブ Perplexity Search API のみ      |
-| `max_tokens_per_page` | ページごとの抽出 token 制限、ネイティブ Perplexity Search API のみ |
+| `query`               | 検索クエリ（必須）                                                 |
+| `count`               | 返す結果数（1～10、デフォルト: 5）                                |
+| `country`             | 2 文字の ISO 国コード（例: "US"、"DE"）                           |
+| `language`            | ISO 639-1 言語コード（例: "en"、"de"）                            |
+| `search_lang`         | 検索言語コード（Brave のみ）                                      |
+| `freshness`           | 期間フィルター: `day`、`week`、`month`、または `year`             |
+| `date_after`          | この日付より後の結果（YYYY-MM-DD）                                |
+| `date_before`         | この日付より前の結果（YYYY-MM-DD）                                |
+| `ui_lang`             | UI 言語コード（Brave のみ）                                       |
+| `domain_filter`       | ドメイン許可リスト/拒否リストの配列（Perplexity のみ）            |
+| `max_tokens`          | コンテンツ全体のトークン上限（ネイティブ Perplexity Search API のみ） |
+| `max_tokens_per_page` | ページごとの抽出トークン上限（ネイティブ Perplexity Search API のみ） |
 
 <Warning>
-  すべてのパラメーターがすべての provider で機能するわけではありません。Brave `llm-context` mode は `ui_lang` を拒否します。`date_before` も `date_after` を必要とします。これは Brave のカスタム freshness 範囲に開始日と終了日の両方が必要なためです。
-  Gemini、Grok、Kimi は citations 付きの合成回答を1つ返します。これらは shared-tool 互換性のために `count` を受け付けますが、根拠付き回答の形は変わりません。Gemini は `day` freshness を recency hint として扱います。より広い freshness 値と明示的な日付は、Google Search grounding time range を設定します。
-  Sonar/OpenRouter 互換経路（`plugins.entries.perplexity.config.webSearch.baseUrl` /
-  `model` または `OPENROUTER_API_KEY`）を使用する場合、Perplexity も同じように動作します。その経路では `max_tokens` と `max_tokens_per_page` のサポートも削除されます。
-  SearXNG は、信頼済みの private-network または loopback ホストに対してのみ `http://` を受け付けます。public SearXNG endpoints は `https://` を使用する必要があります。
-  Firecrawl と Tavily は、`web_search` を通じて `query` と `count` のみをサポートします。高度なオプションには専用ツールを使用してください。
+  すべてのパラメーターがすべてのプロバイダーで動作するわけではありません。Brave の `llm-context` モードは `ui_lang` を拒否します。また、Brave のカスタム期間範囲では開始日と終了日の両方が必要なため、`date_before` を使用する場合は `date_after` も必要です。
+  Gemini、Grok、Kimi は、引用付きの統合された回答を 1 件返します。共有ツールとの互換性のため `count` を受け入れますが、根拠付き回答の形式は変わりません。Gemini は `day` の期間指定を最近の情報を優先するヒントとして扱います。より広い期間値や明示的な日付を指定すると、Google Search グラウンディングの期間範囲が設定されます。
+  Sonar/OpenRouter 互換経路（`plugins.entries.perplexity.config.webSearch.baseUrl` / `model` または `OPENROUTER_API_KEY`）を使用する場合、Perplexity も同様に動作します。この経路では `max_tokens` と `max_tokens_per_page` のサポートも無効になります。
+  SearXNG は、信頼されたプライベートネットワークまたはループバックホストに限り `http://` を受け入れます。公開 SearXNG エンドポイントでは `https://` を使用する必要があります。
+  Firecrawl と Tavily は、`web_search` を介して `query` と `count` のみをサポートします。高度なオプションには、それぞれの専用ツールを使用してください。
 </Warning>
 
 ## x_search
 
-`x_search` は xAI を使用して X（旧 Twitter）の投稿をクエリし、citations 付きの AI 合成回答を返します。自然言語クエリと任意の構造化フィルターを受け付けます。OpenClaw は、組み込みの xAI `x_search` ツールを永続的に登録しておくのではなく、リクエストごとに構築します。そのため、実際にそれを呼び出す turn でのみ有効です。
+`x_search` は xAI を使用して X（旧 Twitter）の投稿を検索し、引用付きの AI 統合回答を返します。自然言語クエリと任意の構造化フィルターを受け入れます。OpenClaw は組み込みの xAI `x_search` ツールを永続的に登録するのではなく、リクエストごとに構築するため、実際に呼び出したターンでのみ有効になります。
+
+<Warning>
+  `x_search` は xAI のサーバー上で実行されます。xAI の料金はツール呼び出し 1,000 回あたり 5 ドルで、これにモデルの入力トークンと出力トークンの料金が加算されます。
+</Warning>
 
 <Note>
-  xAI は `x_search` がキーワード検索、セマンティック検索、ユーザー検索、スレッド取得をサポートすると文書化しています。reposts、replies、bookmarks、views などの投稿ごとの engagement stats については、正確な投稿 URL または status ID に対する targeted lookup を優先してください。広いキーワード検索でも該当する投稿を見つけられる場合がありますが、投稿ごとの metadata が完全ではないことがあります。良いパターンは、先に投稿を見つけてから、その正確な投稿に絞った2回目の `x_search` クエリを実行することです。
+  xAI のドキュメントでは、`x_search` はキーワード検索、セマンティック検索、ユーザー検索、スレッド取得をサポートすると説明されています。再投稿、返信、ブックマーク、閲覧数など、投稿ごとのエンゲージメント統計が必要な場合は、正確な投稿 URL またはステータス ID を対象とする検索を推奨します。広範なキーワード検索でも目的の投稿を見つけられる場合がありますが、投稿ごとのメタデータが不完全になる可能性があります。まず投稿を特定し、次にその投稿だけに焦点を当てた 2 回目の `x_search` クエリを実行する方法が効果的です。
 </Note>
 
-### x_search 設定
+### x_search の設定
+
+`enabled`を省略した場合、`x_search`が公開されるのは、アクティブなモデルのプロバイダーが`xai`で、かつxAIの認証情報を解決できる場合のみです。既知の非xAIプロバイダーを使用するアクティブなモデルでプロバイダーをまたいだ利用を有効にするには、`plugins.entries.xai.config.xSearch.enabled`を`true`に設定します。アクティブなモデルのプロバイダーが指定されていないか解決できない場合、このツールは非表示のままです。すべてのプロバイダーで無効にするには、`enabled`を`false`に設定します。xAIの認証情報は常に必要です。
 
 ```json5
 {
@@ -350,17 +359,17 @@ Grok は、`openclaw models auth login --provider xai --method oauth` の xAI OA
       xai: {
         config: {
           xSearch: {
-            enabled: true,
-            model: "grok-4-1-fast-non-reasoning",
-            baseUrl: "https://api.x.ai/v1", // optional, overrides webSearch.baseUrl
+            enabled: true, // 既知の非xAIモデルプロバイダーでは必須
+            model: "grok-4.3",
+            baseUrl: "https://api.x.ai/v1", // 任意、webSearch.baseUrlを上書き
             inlineCitations: false,
             maxTurns: 2,
             timeoutSeconds: 30,
             cacheTtlMinutes: 15,
           },
           webSearch: {
-            apiKey: "xai-...", // optional if an xAI auth profile or XAI_API_KEY is set
-            baseUrl: "https://api.x.ai/v1", // optional shared xAI Responses base URL
+            apiKey: "xai-...", // xAI認証プロファイルまたはXAI_API_KEYが設定されている場合は任意
+            baseUrl: "https://api.x.ai/v1", // 任意の共有xAI ResponsesベースURL
           },
         },
       },
@@ -369,25 +378,23 @@ Grok は、`openclaw models auth login --provider xai --method oauth` の xAI OA
 }
 ```
 
-`plugins.entries.xai.config.xSearch.baseUrl` が設定されている場合、
-`x_search` は `<baseUrl>/responses` に投稿します。そのフィールドが省略されている場合は、
-`plugins.entries.xai.config.webSearch.baseUrl`、次にレガシーの
-`tools.web.search.grok.baseUrl`、最後に公開 xAI エンドポイント
-(`https://api.x.ai/v1`) にフォールバックします。
+`plugins.entries.xai.config.xSearch.baseUrl`が設定されている場合、`x_search`は`<baseUrl>/responses`にPOSTします。このフィールドを省略した場合、`plugins.entries.xai.config.webSearch.baseUrl`、従来の`tools.web.search.grok.baseUrl`、最後に公開xAIエンドポイント（`https://api.x.ai/v1`）の順にフォールバックします。
 
-### x_search パラメーター
+### x_searchのパラメーター
 
 | パラメーター                 | 説明                                                   |
 | ---------------------------- | ------------------------------------------------------ |
-| `query`                      | 検索クエリ (必須)                                     |
-| `allowed_x_handles`          | 結果を特定の X ハンドルに制限                         |
-| `excluded_x_handles`         | 特定の X ハンドルを除外                               |
-| `from_date`                  | この日付以降の投稿のみを含める (YYYY-MM-DD)           |
-| `to_date`                    | この日付以前の投稿のみを含める (YYYY-MM-DD)           |
-| `enable_image_understanding` | 一致する投稿に添付された画像を xAI に検査させる       |
-| `enable_video_understanding` | 一致する投稿に添付された動画を xAI に検査させる       |
+| `query`                      | 検索クエリ（必須）                                     |
+| `allowed_x_handles`          | 結果を最大20件のXハンドルに限定                        |
+| `excluded_x_handles`         | 最大20件のXハンドルを除外                              |
+| `from_date`                  | この日付以降の投稿のみを含める（YYYY-MM-DD）           |
+| `to_date`                    | この日付以前の投稿のみを含める（YYYY-MM-DD）           |
+| `enable_image_understanding` | 一致した投稿に添付された画像をxAIが解析できるようにする |
+| `enable_video_understanding` | 一致した投稿に添付された動画をxAIが解析できるようにする |
 
-### x_search の例
+`allowed_x_handles`と`excluded_x_handles`は同時に指定できません。
+
+### x_searchの例
 
 ```javascript
 await x_search({
@@ -398,7 +405,7 @@ await x_search({
 ```
 
 ```javascript
-// Per-post stats: use the exact status URL or status ID when possible
+// 投稿ごとの統計：可能な場合は正確なステータスURLまたはステータスIDを使用
 await x_search({
   query: "https://x.com/huntharo/status/1905678901234567890",
 });
@@ -407,23 +414,23 @@ await x_search({
 ## 例
 
 ```javascript
-// Basic search
+// 基本的な検索
 await web_search({ query: "OpenClaw plugin SDK" });
 
-// German-specific search
+// ドイツ向けの検索
 await web_search({ query: "TV online schauen", country: "DE", language: "de" });
 
-// Recent results (past week)
+// 最近の結果（過去1週間）
 await web_search({ query: "AI developments", freshness: "week" });
 
-// Date range
+// 日付範囲
 await web_search({
   query: "climate research",
   date_after: "2024-01-01",
   date_before: "2024-06-30",
 });
 
-// Domain filtering (Perplexity only)
+// ドメインのフィルタリング（Perplexityのみ）
 await web_search({
   query: "product reviews",
   domain_filter: ["-reddit.com", "-pinterest.com"],
@@ -432,20 +439,20 @@ await web_search({
 
 ## ツールプロファイル
 
-ツールプロファイルまたは許可リストを使用する場合は、`web_search`、`x_search`、または `group:web` を追加します。
+ツールプロファイルまたは許可リストを使用する場合は、`web_search`、`x_search`、または`group:web`を追加します。
 
 ```json5
 {
   tools: {
     allow: ["web_search", "x_search"],
-    // or: allow: ["group:web"]  (includes web_search, x_search, and web_fetch)
+    // または：allow: ["group:web"]  （web_search、x_search、web_fetchを含む）
   },
 }
 ```
 
-## 関連
+## 関連項目
 
-- [Web Fetch](/ja-JP/tools/web-fetch) -- URL を取得し、読み取り可能なコンテンツを抽出する
-- [Web Browser](/ja-JP/tools/browser) -- JS の多いサイト向けの完全なブラウザー自動化
-- [Grok Search](/ja-JP/tools/grok-search) -- `web_search` プロバイダーとしての Grok
-- [Ollama Web Search](/ja-JP/tools/ollama-search) -- Ollama ホスト経由のキー不要の Web 検索
+- [Web Fetch](/ja-JP/tools/web-fetch) -- URLを取得し、読みやすいコンテンツを抽出
+- [Web Browser](/ja-JP/tools/browser) -- JavaScriptを多用するサイト向けの完全なブラウザー自動化
+- [Grok Search](/ja-JP/tools/grok-search) -- `web_search`プロバイダーとしてのGrok
+- [Ollama Web Search](/ja-JP/tools/ollama-search) -- Ollamaホストを介したキー不要のウェブ検索

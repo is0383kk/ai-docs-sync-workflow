@@ -1,52 +1,53 @@
 ---
 read_when:
     - Настройка OpenClaw в Oracle Cloud
-    - Ищем бесплатный VPS-хостинг для OpenClaw
-    - Хотите круглосуточно использовать OpenClaw на небольшом сервере
-summary: Разместите OpenClaw на уровне Always Free ARM в Oracle Cloud
+    - Ищете бесплатный VPS-хостинг для OpenClaw
+    - Хотите, чтобы OpenClaw работал круглосуточно на небольшом сервере
+summary: Разместите OpenClaw на ARM-тарифе Always Free в Oracle Cloud
 title: Oracle Cloud
 x-i18n:
-    generated_at: "2026-06-28T23:08:02Z"
-    model: gpt-5.5
+    generated_at: "2026-07-13T18:20:12Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 24
     provider: openai
-    source_hash: 9115c83c7a78b78d8b6701b028a2f6e9f08a71f7fff14b7b45f1610b8052c14e
+    source_hash: 5e1eb95b6bc8ad73e1492a03d8ebe32d89c80e58347614e6ae12d2d3d926d577
     source_path: install/oracle.md
     workflow: 16
 ---
 
-Запустите постоянный OpenClaw Gateway на ARM-уровне **Always Free** в Oracle Cloud (до 4 OCPU, 24 ГБ ОЗУ, 200 ГБ хранилища) без затрат.
+Запустите постоянный Gateway OpenClaw на ARM-тарифе Oracle Cloud **Always Free** (до 4 OCPU, 24 ГБ ОЗУ и 200 ГБ хранилища) бесплатно.
 
 ## Предварительные требования
 
-- Учетная запись Oracle Cloud ([регистрация](https://www.oracle.com/cloud/free/)) -- если возникнут проблемы, см. [руководство сообщества по регистрации](https://gist.github.com/rssnyder/51e3cfedd730e7dd5f4a816143b25dbd)
+- Учетная запись Oracle Cloud ([регистрация](https://www.oracle.com/cloud/free/)) — если возникнут проблемы, ознакомьтесь с [руководством сообщества по регистрации](https://gist.github.com/rssnyder/51e3cfedd730e7dd5f4a816143b25dbd)
 - Учетная запись Tailscale (бесплатно на [tailscale.com](https://tailscale.com))
-- Пара SSH-ключей
+- Пара ключей SSH
 - Около 30 минут
 
 ## Настройка
 
 <Steps>
-  <Step title="Create an OCI instance">
+  <Step title="Создание экземпляра OCI">
     1. Войдите в [Oracle Cloud Console](https://cloud.oracle.com/).
     2. Перейдите в **Compute > Instances > Create Instance**.
     3. Настройте:
-       - **Имя:** `openclaw`
-       - **Образ:** Ubuntu 24.04 (aarch64)
-       - **Форма:** `VM.Standard.A1.Flex` (Ampere ARM)
-       - **OCPU:** 2 (или до 4)
-       - **Память:** 12 ГБ (или до 24 ГБ)
-       - **Загрузочный том:** 50 ГБ (до 200 ГБ бесплатно)
-       - **SSH-ключ:** добавьте свой открытый ключ
-    4. Нажмите **Create** и запишите публичный IP-адрес.
+       - **Name:** `openclaw`
+       - **Image:** Ubuntu 24.04 (aarch64)
+       - **Shape:** `VM.Standard.A1.Flex` (Ampere ARM)
+       - **OCPUs:** 2 (или до 4)
+       - **Memory:** 12 ГБ (или до 24 ГБ)
+       - **Boot volume:** 50 ГБ (бесплатно до 200 ГБ)
+       - **SSH key:** добавьте свой открытый ключ
+    4. Нажмите **Create** и запишите общедоступный IP-адрес.
 
     <Tip>
-    Если создание экземпляра завершается ошибкой "Out of capacity", попробуйте другой домен доступности или повторите попытку позже. Емкость бесплатного уровня ограничена.
+    Если создать экземпляр не удается из-за ошибки "Out of capacity", попробуйте другой домен доступности или повторите попытку позже. Ресурсы бесплатного тарифа ограничены.
     </Tip>
 
   </Step>
 
-  <Step title="Connect and update the system">
+  <Step title="Подключение и обновление системы">
     ```bash
     ssh ubuntu@YOUR_PUBLIC_IP
 
@@ -54,43 +55,43 @@ x-i18n:
     sudo apt install -y build-essential
     ```
 
-    `build-essential` требуется для компиляции некоторых зависимостей на ARM.
+    `build-essential` требуется для компиляции некоторых зависимостей под ARM.
 
   </Step>
 
-  <Step title="Configure user and hostname">
+  <Step title="Настройка пользователя и имени хоста">
     ```bash
     sudo hostnamectl set-hostname openclaw
     sudo passwd ubuntu
     sudo loginctl enable-linger ubuntu
     ```
 
-    Включение linger сохраняет пользовательские сервисы запущенными после выхода из системы.
+    Включение linger позволяет пользовательским службам продолжать работу после выхода из системы.
 
   </Step>
 
-  <Step title="Install Tailscale">
+  <Step title="Установка Tailscale">
     ```bash
     curl -fsSL https://tailscale.com/install.sh | sh
     sudo tailscale up --ssh --hostname=openclaw
     ```
 
-    С этого момента подключайтесь через Tailscale: `ssh ubuntu@openclaw`.
+    Теперь подключайтесь через Tailscale: `ssh ubuntu@openclaw`.
 
   </Step>
 
-  <Step title="Install OpenClaw">
+  <Step title="Установка OpenClaw">
     ```bash
     curl -fsSL https://openclaw.ai/install.sh | bash
     source ~/.bashrc
     ```
 
-    При запросе "How do you want to hatch your bot?" выберите **Do this later**.
+    При появлении запроса "How do you want to hatch your bot?" выберите **Do this later**.
 
   </Step>
 
-  <Step title="Configure the gateway">
-    Используйте аутентификацию по токену с Tailscale Serve для безопасного удаленного доступа.
+  <Step title="Настройка Gateway">
+    Используйте аутентификацию по токену вместе с Tailscale Serve для безопасного удаленного доступа.
 
     ```bash
     openclaw config set gateway.bind loopback
@@ -102,23 +103,23 @@ x-i18n:
     systemctl --user restart openclaw-gateway.service
     ```
 
-    `gateway.trustedProxies=["127.0.0.1"]` здесь используется только для обработки forwarded-IP/local-client локальным прокси Tailscale Serve. Это **не** `gateway.auth.mode: "trusted-proxy"`. В этой настройке маршруты просмотрщика diff сохраняют отказ по умолчанию: необработанные запросы просмотрщика с `127.0.0.1` без заголовков пересылающего прокси могут возвращать `Diff not found`. Используйте `mode=file` / `mode=both` для вложений или намеренно включите удаленные просмотрщики и задайте `plugins.entries.diffs.config.viewerBaseUrl` (либо передайте прокси `baseUrl`), если вам нужны ссылки просмотрщика, которыми можно делиться.
+    Здесь `gateway.trustedProxies=["127.0.0.1"]` используется только для обработки перенаправленного IP-адреса и локального клиента локальным прокси Tailscale Serve. Это **не** `gateway.auth.mode: "trusted-proxy"`. В этой конфигурации маршруты средства просмотра различий сохраняют закрытое по умолчанию поведение: необработанные запросы средства просмотра `127.0.0.1` без перенаправленных заголовков прокси возвращают `Diff not found`. Используйте `mode=file` / `mode=both` для вложений либо намеренно включите удаленные средства просмотра и задайте `plugins.entries.diffs.config.viewerBaseUrl` (или передайте прокси `baseUrl`), если нужны общедоступные ссылки на средство просмотра.
 
   </Step>
 
-  <Step title="Lock down VCN security">
-    Заблокируйте весь трафик на сетевой границе, кроме Tailscale:
+  <Step title="Ограничение доступа в VCN">
+    Заблокируйте на границе сети весь трафик, кроме Tailscale:
 
-    1. Перейдите в **Networking > Virtual Cloud Networks** в консоли OCI.
-    2. Нажмите свой VCN, затем **Security Lists > Default Security List**.
-    3. **Удалите** все входящие правила, кроме `0.0.0.0/0 UDP 41641` (Tailscale).
-    4. Оставьте стандартные исходящие правила (разрешить все исходящие соединения).
+    1. Перейдите в **Networking > Virtual Cloud Networks** в OCI Console.
+    2. Нажмите на свою VCN, затем выберите **Security Lists > Default Security List**.
+    3. **Удалите** все правила входящего трафика, кроме `0.0.0.0/0 UDP 41641` (Tailscale).
+    4. Сохраните стандартные правила исходящего трафика (разрешить весь исходящий трафик).
 
-    Это блокирует SSH на порту 22, HTTP, HTTPS и все остальное на сетевой границе. С этого момента подключаться можно только через Tailscale.
+    Это блокирует SSH на порту 22, HTTP, HTTPS и весь остальной трафик на границе сети. С этого момента подключаться можно только через Tailscale.
 
   </Step>
 
-  <Step title="Verify">
+  <Step title="Проверка">
     ```bash
     openclaw --version
     systemctl --user status openclaw-gateway.service
@@ -126,76 +127,76 @@ x-i18n:
     curl http://localhost:18789
     ```
 
-    Откройте Control UI с любого устройства в вашем tailnet:
+    Откройте интерфейс управления с любого устройства в своей сети tailnet:
 
     ```
     https://openclaw.<tailnet-name>.ts.net/
     ```
 
-    Замените `<tailnet-name>` на имя вашего tailnet (видно в `tailscale status`).
+    Замените `<tailnet-name>` именем своей сети tailnet (оно отображается в `tailscale status`).
 
   </Step>
 </Steps>
 
-## Проверьте состояние безопасности
+## Проверка уровня безопасности
 
-Когда VCN заблокирован (открыт только UDP 41641), а Gateway привязан к loopback, публичный трафик блокируется на сетевой границе, а административный доступ доступен только через tailnet. Это устраняет необходимость в нескольких традиционных шагах по усилению защиты VPS:
+Когда доступ к VCN ограничен (открыт только UDP-порт 41641), а Gateway привязан к loopback-интерфейсу, общедоступный трафик блокируется на границе сети, а административный доступ возможен только из сети tailnet. Благодаря этому несколько традиционных мер по усилению защиты VPS не требуются:
 
-| Традиционный шаг             | Требуется?  | Почему                                                                       |
-| ---------------------------- | ----------- | --------------------------------------------------------------------------- |
-| Файрвол UFW                  | Нет         | VCN блокирует трафик до того, как он достигает экземпляра.                  |
-| fail2ban                     | Нет         | Порт 22 заблокирован на уровне VCN; поверхности для брутфорса нет.          |
-| Усиление sshd                | Нет         | Tailscale SSH не использует sshd.                                           |
-| Отключение входа root        | Нет         | Tailscale аутентифицирует по идентичности tailnet, а не системным пользователям. |
-| Аутентификация только по SSH-ключу | Нет   | То же самое — идентичность tailnet заменяет системные SSH-ключи.            |
-| Усиление IPv6                | Обычно нет  | Зависит от настроек VCN/подсети; проверьте, что действительно назначено/открыто. |
+| Традиционная мера                | Требуется?         | Причина                                                                    |
+| -------------------------------- | ------------------ | -------------------------------------------------------------------------- |
+| Межсетевой экран UFW             | Нет                | VCN блокирует трафик до того, как он достигнет экземпляра.                 |
+| fail2ban                         | Нет                | Порт 22 заблокирован на уровне VCN; поверхность для перебора отсутствует.  |
+| Усиление защиты sshd             | Нет                | Tailscale SSH не использует sshd.                                          |
+| Отключение входа для root        | Нет                | Tailscale выполняет аутентификацию по идентификатору tailnet, а не системным пользователям. |
+| Аутентификация только по SSH-ключу | Нет              | Аналогично — идентификатор tailnet заменяет системные SSH-ключи.            |
+| Усиление защиты IPv6             | Обычно нет         | Зависит от настроек VCN и подсети; проверьте, что фактически назначено и доступно извне. |
 
 По-прежнему рекомендуется:
 
-- `chmod 700 ~/.openclaw`, чтобы ограничить права доступа к файлам учетных данных.
-- `openclaw security audit` для проверки состояния безопасности, специфичной для OpenClaw.
+- `chmod 700 ~/.openclaw` для ограничения разрешений файлов учетных данных.
+- `openclaw security audit` для проверки уровня безопасности OpenClaw.
 - Регулярно выполнять `sudo apt update && sudo apt upgrade` для установки исправлений ОС.
-- Периодически проверять устройства в [административной консоли Tailscale](https://login.tailscale.com/admin).
+- Периодически проверять устройства в [консоли администрирования Tailscale](https://login.tailscale.com/admin).
 
 Команды для быстрой проверки:
 
 ```bash
-# Confirm no public ports are listening
+# Убедитесь, что общедоступные порты не прослушиваются
 sudo ss -tlnp | grep -v '127.0.0.1\|::1'
 
-# Verify Tailscale SSH is active
-tailscale status | grep -q 'offers: ssh' && echo "Tailscale SSH active"
+# Убедитесь, что Tailscale SSH активен
+tailscale status | grep -q 'offers: ssh' && echo "Tailscale SSH активен"
 
-# Optional: disable sshd entirely once Tailscale SSH is confirmed working
+# Необязательно: полностью отключите sshd, убедившись, что Tailscale SSH работает
 sudo systemctl disable --now ssh
 ```
 
-## Примечания по ARM
+## Примечания об ARM
 
-Уровень Always Free использует ARM (`aarch64`). Большинство возможностей OpenClaw работают нормально; небольшому числу нативных бинарных файлов нужны ARM-сборки:
+Тариф Always Free использует ARM (`aarch64`). Большинство функций OpenClaw работают без проблем; небольшому числу нативных исполняемых файлов требуются сборки для ARM:
 
 - Node.js, Telegram, WhatsApp (Baileys): чистый JavaScript, проблем нет.
-- Большинство npm-пакетов с нативным кодом: доступны предварительно собранные артефакты `linux-arm64`.
-- Необязательные CLI-помощники (например, бинарные файлы Go/Rust, поставляемые Skills): перед установкой проверьте наличие релиза `aarch64` / `linux-arm64`.
+- Большинство пакетов npm с нативным кодом: доступны предварительно собранные артефакты `linux-arm64`.
+- Необязательные вспомогательные инструменты CLI (например, исполняемые файлы Go/Rust, поставляемые навыками): перед установкой проверьте наличие выпуска `aarch64` / `linux-arm64`.
 
-Проверьте архитектуру с помощью `uname -m` (должно вывести `aarch64`). Для бинарных файлов без ARM-сборки установите их из исходного кода или пропустите.
+Проверьте архитектуру с помощью `uname -m` (команда должна вывести `aarch64`). Исполняемые файлы без сборки для ARM установите из исходного кода или не устанавливайте.
 
-## Постоянное хранение и резервные копии
+## Хранение данных и резервное копирование
 
-Состояние OpenClaw находится в:
+Состояние OpenClaw хранится в следующих каталогах:
 
-- `~/.openclaw/` — `openclaw.json`, `auth-profiles.json` для каждого агента, состояние каналов/провайдеров и данные сессий.
+- `~/.openclaw/` — `openclaw.json`, данные `auth-profiles.json` отдельных агентов, состояние каналов и провайдеров, а также данные сеансов.
 - `~/.openclaw/workspace/` — рабочая область агента (SOUL.md, память, артефакты).
 
-Они сохраняются после перезагрузок. Чтобы создать переносимый снимок:
+Эти данные сохраняются после перезагрузки. Чтобы создать переносимый снимок:
 
 ```bash
 openclaw backup create
 ```
 
-## Резервный вариант: SSH-туннель
+## Резервный вариант: туннель SSH
 
-Если Tailscale Serve не работает, используйте SSH-туннель с локальной машины:
+Если Tailscale Serve не работает, создайте туннель SSH с локального компьютера:
 
 ```bash
 ssh -L 18789:127.0.0.1:18789 ubuntu@openclaw
@@ -205,22 +206,22 @@ ssh -L 18789:127.0.0.1:18789 ubuntu@openclaw
 
 ## Устранение неполадок
 
-**Создание экземпляра завершается ошибкой ("Out of capacity")** -- ARM-экземпляры бесплатного уровня популярны. Попробуйте другой домен доступности или повторите попытку в часы меньшей нагрузки.
+**Не удается создать экземпляр ("Out of capacity")** — ARM-экземпляры бесплатного тарифа популярны. Попробуйте другой домен доступности или повторите попытку в часы наименьшей нагрузки.
 
-**Tailscale не подключается** -- Выполните `sudo tailscale up --ssh --hostname=openclaw --reset`, чтобы пройти повторную аутентификацию.
+**Tailscale не подключается** — выполните `sudo tailscale up --ssh --hostname=openclaw --reset` для повторной аутентификации.
 
-**Gateway не запускается** -- Выполните `openclaw doctor --non-interactive` и проверьте журналы с помощью `journalctl --user -u openclaw-gateway.service -n 50`.
+**Gateway не запускается** — выполните `openclaw doctor --non-interactive` и проверьте журналы с помощью `journalctl --user -u openclaw-gateway.service -n 50`.
 
-**Проблемы с ARM-бинарными файлами** -- Большинство npm-пакетов работает на ARM64. Для нативных бинарных файлов ищите релизы `linux-arm64` или `aarch64`. Проверьте архитектуру с помощью `uname -m`.
+**Проблемы с исполняемыми файлами ARM** — большинство пакетов npm работают на ARM64. Для нативных исполняемых файлов ищите выпуски `linux-arm64` или `aarch64`. Проверьте архитектуру с помощью `uname -m`.
 
-## Следующие шаги
+## Дальнейшие действия
 
-- [Каналы](/ru/channels) -- подключите Telegram, WhatsApp, Discord и другие
-- [Конфигурация Gateway](/ru/gateway/configuration) -- все параметры конфигурации
-- [Обновление](/ru/install/updating) -- поддерживайте OpenClaw в актуальном состоянии
+- [Каналы](/ru/channels) — подключите Telegram, WhatsApp, Discord и другие сервисы
+- [Настройка Gateway](/ru/gateway/configuration) — все параметры конфигурации
+- [Обновление](/ru/install/updating) — поддерживайте OpenClaw в актуальном состоянии
 
 ## Связанные материалы
 
 - [Обзор установки](/ru/install)
 - [GCP](/ru/install/gcp)
-- [Хостинг VPS](/ru/vps)
+- [Размещение на VPS](/ru/vps)

@@ -1,64 +1,51 @@
 ---
 read_when:
-    - Débogage des invites d’autorisation macOS manquantes ou bloquées
-    - Décider d’accorder ou non l’accessibilité à Node ou à un runtime CLI
-    - Empaqueter ou signer l’application macOS
+    - Dépannage des invites d’autorisation macOS absentes ou bloquées
+    - Décider s’il faut accorder l’accès à l’accessibilité à Node ou à un environnement d’exécution CLI
+    - Empaquetage ou signature de l’app macOS
     - Modification des identifiants de bundle ou des chemins d’installation de l’application
 summary: Persistance des autorisations macOS (TCC) et exigences de signature
 title: Autorisations macOS
 x-i18n:
-    generated_at: "2026-06-27T17:43:52Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T02:48:17Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 7b7e21c53bff16c3023e2b6509894717c3d0ef96524951b0d0c5975d2fc91019
+    source_hash: c8431a1d5a27aed00c50c5d6c8c36554cf766051dfdccea677d0523bbc4189d4
     source_path: platforms/mac/permissions.md
     workflow: 16
 ---
 
-Les autorisations macOS sont fragiles. TCC associe une autorisation à la
-signature de code de l’application, à l’identifiant de bundle et au chemin sur le disque. Si l’un de ces éléments change,
-macOS considère l’application comme nouvelle et peut supprimer ou masquer les invites.
+Les autorisations macOS sont fragiles. TCC associe une autorisation à la signature de code de l’application, à son identifiant de bundle et à son chemin sur le disque. Si l’un de ces éléments change, macOS considère l’application comme nouvelle et peut supprimer ou masquer les invites.
 
 ## Exigences pour des autorisations stables
 
 - Même chemin : exécutez l’application depuis un emplacement fixe (pour OpenClaw, `dist/OpenClaw.app`).
-- Même identifiant de bundle : modifier l’ID de bundle crée une nouvelle identité d’autorisation.
-- Application signée : les builds non signés ou signés ad hoc ne conservent pas les autorisations.
-- Signature cohérente : utilisez un vrai certificat Apple Development ou Developer ID
-  afin que la signature reste stable entre les rebuilds.
+- Même identifiant de bundle : l’identifiant de bundle d’OpenClaw est `ai.openclaw.mac` ; le modifier crée une nouvelle identité d’autorisation.
+- Application signée : les versions non signées ou signées de manière ad hoc ne conservent pas les autorisations.
+- Signature cohérente : utilisez un véritable certificat Apple Development ou Developer ID afin que la signature reste stable entre les recompilations.
 
-Les signatures ad hoc génèrent une nouvelle identité à chaque build. macOS oubliera les
-autorisations précédentes, et les invites peuvent disparaître entièrement jusqu’à ce que les entrées obsolètes soient supprimées.
+Les signatures ad hoc génèrent une nouvelle identité à chaque compilation. macOS oublie les autorisations précédentes et les invites peuvent disparaître complètement jusqu’à ce que les entrées obsolètes soient effacées.
 
-## Autorisations d’accessibilité pour les runtimes Node et CLI
+## Autorisations d’accessibilité pour les environnements d’exécution Node et CLI
 
-Préférez accorder l’Accessibilité à OpenClaw.app, Peekaboo.app ou à un autre
-assistant signé avec son propre identifiant de bundle plutôt qu’à un binaire `node` générique.
+Préférez accorder l’autorisation d’accessibilité à OpenClaw.app, Peekaboo.app ou à un autre utilitaire signé possédant son propre identifiant de bundle plutôt qu’à un binaire `node` générique.
 
-macOS TCC accorde l’Accessibilité à l’identité de code du processus qu’il voit. Si un
-workflow Homebrew, nvm, pnpm ou npm conduit un exécutable `node` partagé à
-recevoir l’Accessibilité, tout package JavaScript lancé via ce même
-exécutable peut hériter de privilèges d’automatisation de l’interface graphique.
+Le système TCC de macOS accorde l’autorisation d’accessibilité à l’identité de code du processus qu’il détecte. Si un processus utilisant Homebrew, nvm, pnpm ou npm conduit à accorder l’autorisation d’accessibilité à un exécutable `node` partagé, tout paquet JavaScript lancé par ce même exécutable peut hériter des privilèges d’automatisation de l’interface graphique.
 
-Considérez une entrée `node` dans Réglages Système comme une autorisation étendue pour ce runtime Node,
-et non comme une autorisation pour un seul package npm. Évitez d’accorder l’Accessibilité à
-`node` sauf si vous faites confiance à chaque script et package lancé via cette installation
-Node exacte.
+Considérez une entrée `node` dans System Settings comme une autorisation étendue accordée à cet environnement d’exécution Node, et non comme une autorisation accordée à un seul paquet npm. Évitez d’accorder l’autorisation d’accessibilité à `node`, sauf si vous faites confiance à tous les scripts et paquets lancés par cette installation précise de Node.
 
-Si vous avez accidentellement accordé l’Accessibilité à `node`, supprimez cette entrée dans
-Réglages Système -> Confidentialité et sécurité -> Accessibilité. Accordez ensuite l’autorisation à l’application
-ou à l’assistant signé qui doit gérer l’automatisation de l’interface utilisateur.
+Si vous avez accidentellement accordé l’autorisation d’accessibilité à `node`, supprimez cette entrée dans System Settings -> Privacy & Security -> Accessibility. Accordez ensuite l’autorisation à l’application ou à l’utilitaire signé qui doit prendre en charge l’automatisation de l’interface utilisateur.
 
-## Liste de récupération lorsque les invites disparaissent
+## Liste de vérification pour la récupération lorsque les invites disparaissent
 
 1. Quittez l’application.
-2. Supprimez l’entrée de l’application dans Réglages Système -> Confidentialité et sécurité.
+2. Supprimez l’entrée de l’application dans System Settings -> Privacy & Security.
 3. Relancez l’application depuis le même chemin et accordez à nouveau les autorisations.
-4. Si l’invite n’apparaît toujours pas, réinitialisez les entrées TCC avec `tccutil` et réessayez.
+4. Si l’invite n’apparaît toujours pas, réinitialisez les entrées TCC avec `tccutil`, puis réessayez.
 5. Certaines autorisations ne réapparaissent qu’après un redémarrage complet de macOS.
 
-Exemples de réinitialisations (remplacez l’ID de bundle si nécessaire) :
+Exemples de réinitialisation (avec l’identifiant de bundle d’OpenClaw, `ai.openclaw.mac`) :
 
 ```bash
 sudo tccutil reset Accessibility ai.openclaw.mac
@@ -66,16 +53,15 @@ sudo tccutil reset ScreenCapture ai.openclaw.mac
 sudo tccutil reset AppleEvents
 ```
 
-## Autorisations des fichiers et dossiers (Bureau/Documents/Téléchargements)
+## Autorisations relatives aux fichiers et dossiers (Desktop/Documents/Downloads)
 
-macOS peut aussi restreindre l’accès au Bureau, aux Documents et aux Téléchargements pour les processus de terminal ou d’arrière-plan. Si les lectures de fichiers ou les listages de répertoires se bloquent, accordez l’accès au même contexte de processus que celui qui effectue les opérations sur les fichiers (par exemple Terminal/iTerm, une application lancée par LaunchAgent ou un processus SSH).
+macOS peut également restreindre l’accès aux dossiers Desktop, Documents et Downloads pour les processus exécutés dans un terminal ou en arrière-plan. Si la lecture de fichiers ou l’affichage du contenu de répertoires se bloque, accordez l’accès au même contexte de processus que celui qui effectue les opérations sur les fichiers (par exemple Terminal/iTerm, une application lancée par LaunchAgent ou un processus SSH).
 
-Solution de contournement : déplacez les fichiers dans l’espace de travail OpenClaw (`~/.openclaw/workspace`) si vous voulez éviter les autorisations dossier par dossier.
+Solution de contournement : déplacez les fichiers dans l’espace de travail OpenClaw (`~/.openclaw/workspace`) si vous souhaitez éviter d’accorder des autorisations dossier par dossier.
 
-Si vous testez les autorisations, signez toujours avec un vrai certificat. Les builds ad hoc
-ne sont acceptables que pour des exécutions locales rapides où les autorisations n’ont pas d’importance.
+Si vous testez les autorisations, signez toujours avec un véritable certificat. Les versions signées de manière ad hoc ne sont acceptables que pour de rapides exécutions locales où les autorisations n’ont pas d’importance.
 
-## Connexe
+## Pages connexes
 
 - [Application macOS](/fr/platforms/macos)
-- [Signature macOS](/fr/platforms/mac/signing)
+- [Signature sous macOS](/fr/platforms/mac/signing)

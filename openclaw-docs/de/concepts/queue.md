@@ -1,59 +1,57 @@
 ---
 read_when:
-    - Automatische Antwortausführung oder Parallelität ändern
-    - Erläuterung von /queue-Modi oder Verhalten zur Nachrichtensteuerung
-summary: Modi, Standardwerte und sitzungsspezifische Überschreibungen für die Warteschlange automatischer Antworten
+    - Ändern der Ausführung oder Parallelität automatischer Antworten
+    - Erläuterung der /queue-Modi oder des Verhaltens bei der Nachrichtensteuerung
+summary: Modi der Warteschlange für automatische Antworten, Standardwerte und sitzungsspezifische Überschreibungen
 title: Befehlswarteschlange
 x-i18n:
-    generated_at: "2026-06-27T17:26:04Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T01:34:16Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 6e518b018a85ddbc7afa3925180cc2329eb1d249316d81907ba51cfb3c692375
+    source_hash: 309d149545aaba91d2248dd6354d82e3cb7ddd489817a5f84acbb0269a0815ec
     source_path: concepts/queue.md
     workflow: 16
 ---
 
-Wir serialisieren eingehende Auto-Reply-Ausführungen (alle Kanäle) über eine kleine In-Process-Warteschlange, um zu verhindern, dass mehrere Agent-Ausführungen kollidieren, während sichere Parallelität über Sitzungen hinweg weiterhin möglich bleibt.
+OpenClaw serialisiert eingehende automatische Antwortläufe (über alle Kanäle hinweg) mithilfe einer kleinen prozessinternen Warteschlange, um Kollisionen zwischen mehreren Agent-Läufen zu verhindern und gleichzeitig sichere Parallelität über Sitzungen hinweg zu ermöglichen.
 
 ## Warum
 
-- Auto-Reply-Ausführungen können teuer sein (LLM-Aufrufe) und kollidieren, wenn mehrere eingehende Nachrichten kurz nacheinander eintreffen.
-- Serialisierung vermeidet Konkurrenz um gemeinsame Ressourcen (Sitzungsdateien, Logs, CLI-stdin) und verringert die Wahrscheinlichkeit von Upstream-Rate-Limits.
+- Automatische Antwortläufe können aufwendig sein (LLM-Aufrufe) und kollidieren, wenn mehrere eingehende Nachrichten kurz nacheinander eintreffen.
+- Die Serialisierung verhindert Konkurrenz um gemeinsam genutzte Ressourcen (Sitzungsdateien, Protokolle, CLI-Standardeingabe) und verringert das Risiko, vorgelagerte Ratenbegrenzungen zu erreichen.
 
 ## Funktionsweise
 
-- Eine Lane-bewusste FIFO-Warteschlange leert jede Lane mit einer konfigurierbaren Nebenläufigkeitsobergrenze (Standard 1 für nicht konfigurierte Lanes; `main` standardmäßig 4, `subagent` 8).
-- `runEmbeddedAgent` reiht nach **Sitzungsschlüssel** ein (Lane `session:<key>`), um zu garantieren, dass pro Sitzung nur eine aktive Ausführung läuft.
-- Jede Sitzungsausführung wird anschließend in eine **globale Lane** (`main` standardmäßig) eingereiht, sodass die Gesamtparallelität durch `agents.defaults.maxConcurrent` begrenzt wird.
-- Wenn ausführliches Logging aktiviert ist, geben eingereihte Ausführungen einen kurzen Hinweis aus, wenn sie vor dem Start mehr als ca. 2 s gewartet haben.
-- Tippindikatoren werden beim Einreihen weiterhin sofort ausgelöst (wenn vom Kanal unterstützt), sodass die Benutzererfahrung unverändert bleibt, während wir warten, bis wir an der Reihe sind.
+- Eine Lane-bezogene FIFO-Warteschlange arbeitet jede Lane mit einer konfigurierbaren Parallelitätsgrenze ab (standardmäßig 1 für nicht konfigurierte Lanes; `main` verwendet standardmäßig 4, `subagent` 8).
+- `runEmbeddedAgent` reiht Läufe anhand des **Sitzungsschlüssels** (Lane `session:<key>`) ein, sodass pro Sitzung garantiert nur ein Lauf aktiv ist.
+- Jeder Sitzungslauf wird anschließend in eine **globale Lane** (standardmäßig `main`) eingereiht, sodass die Gesamtparallelität durch `agents.defaults.maxConcurrent` begrenzt wird.
+- Wenn die ausführliche Protokollierung aktiviert ist, geben eingereihte Läufe einen kurzen Hinweis aus, falls sie vor dem Start länger als etwa 2 Sekunden gewartet haben.
+- Tippindikatoren werden beim Einreihen weiterhin sofort ausgelöst (sofern vom Kanal unterstützt), sodass die Benutzererfahrung unverändert bleibt, während der Lauf wartet, bis er an der Reihe ist.
 
 ## Standardwerte
 
-Wenn nicht gesetzt, verwenden alle eingehenden Kanaloberflächen:
+Wenn nichts festgelegt ist, verwenden alle Oberflächen für eingehende Kanäle:
 
 - `mode: "steer"`
 - `debounceMs: 500`
 - `cap: 20`
 - `drop: "summarize"`
 
-Same-Turn-Steuerung ist der Standard. Ein Prompt, der während einer laufenden Ausführung eintrifft, wird in die aktive Runtime injiziert, wenn die Ausführung Steuerung annehmen kann, sodass keine zweite Sitzungsausführung gestartet wird. Wenn die aktive Ausführung keine Steuerung annehmen kann, wartet OpenClaw, bis die aktive Ausführung abgeschlossen ist, bevor der Prompt gestartet wird.
+Die Steuerung innerhalb desselben Turns ist die Standardeinstellung. Ein Prompt, der während eines Laufs eintrifft, wird in die aktive Laufzeitumgebung eingefügt, sofern der Lauf eine Steuerung akzeptieren kann; daher wird kein zweiter Sitzungslauf gestartet. Kann der aktive Lauf keine Steuerung akzeptieren, wartet OpenClaw, bis dieser beendet ist, bevor der Prompt gestartet wird.
 
 ## Warteschlangenmodi
 
-`/queue` steuert, was normale eingehende Nachrichten tun, während eine Sitzung bereits eine aktive Ausführung hat:
+`/queue` steuert, was mit normalen eingehenden Nachrichten geschieht, während in einer Sitzung bereits ein Lauf aktiv ist:
 
-- `steer`: Nachrichten in die aktive Runtime injizieren. OpenClaw liefert alle ausstehenden Steuerungsnachrichten **nachdem der aktuelle Assistant-Turn seine Tool-Aufrufe fertig ausgeführt hat**, vor dem nächsten LLM-Aufruf; der Codex app-server erhält ein gebündeltes `turn/steer`. Wenn die Ausführung nicht aktiv streamt oder Steuerung nicht verfügbar ist, wartet OpenClaw, bis die aktive Ausführung endet, bevor der Prompt gestartet wird.
-- `followup`: nicht steuern. Jede Nachricht für einen späteren Agent-Turn nach Ende der aktuellen Ausführung einreihen.
-- `collect`: nicht steuern. Eingereihte Nachrichten nach dem Ruhefenster zu einem **einzelnen** Follow-up-Turn zusammenführen. Wenn Nachrichten unterschiedliche Kanäle/Threads adressieren, werden sie einzeln abgearbeitet, um das Routing zu bewahren.
-- `interrupt`: die aktive Ausführung für diese Sitzung abbrechen und dann die neueste Nachricht ausführen.
+- `steer`: Fügt Nachrichten in die aktive Laufzeitumgebung ein. OpenClaw übermittelt alle ausstehenden Steuerungsnachrichten **nachdem der aktuelle Assistenten-Turn die Ausführung seiner Tool-Aufrufe abgeschlossen hat** und vor dem nächsten LLM-Aufruf; der Codex-App-Server erhält einen gebündelten `turn/steer`-Aufruf. Wenn der Lauf nicht aktiv streamt oder keine Steuerung verfügbar ist, wartet OpenClaw bis zum Ende des aktiven Laufs, bevor der Prompt gestartet wird.
+- `followup`: Keine Steuerung. Reiht jede Nachricht für einen späteren Agent-Turn nach dem Ende des aktuellen Laufs ein.
+- `collect`: Keine Steuerung. Fasst eingereihte Nachrichten nach dem Ruhefenster zu einem **einzigen** nachfolgenden Turn zusammen. Wenn Nachrichten unterschiedliche Kanäle oder Threads adressieren, werden sie einzeln abgearbeitet, damit das Routing erhalten bleibt.
+- `interrupt`: Bricht den aktiven Lauf dieser Sitzung ab und führt anschließend die neueste Nachricht aus.
 
-Runtime-spezifisches Timing und Abhängigkeitsverhalten finden Sie unter
-[Steuerungswarteschlange](/de/concepts/queue-steering). Für den expliziten Befehl `/steer <message>`
-siehe [Steuern](/de/tools/steer).
+Laufzeitspezifische Informationen zu Zeitabläufen und Abhängigkeitsverhalten finden Sie unter [Steuerungswarteschlange](/de/concepts/queue-steering). Informationen zum expliziten Befehl `/steer <message>` finden Sie unter [Steuern](/de/tools/steer).
 
-Global oder pro Kanal über `messages.queue` konfigurieren:
+Die Konfiguration erfolgt global oder pro Kanal über `messages.queue`:
 
 ```json5
 {
@@ -71,57 +69,72 @@ Global oder pro Kanal über `messages.queue` konfigurieren:
 
 ## Warteschlangenoptionen
 
-Optionen gelten für die eingereihte Zustellung. `debounceMs` legt im Modus `steer` auch das Ruhefenster für Codex-Steuerung fest:
+Die Optionen gelten für die eingereihte Zustellung. `debounceMs` legt im Modus `steer` außerdem das Ruhefenster für die Codex-Steuerung fest:
 
-- `debounceMs`: Ruhefenster, bevor eingereihte Follow-ups oder Collect-Batches abgearbeitet werden; im Codex-Modus `steer` das Ruhefenster, bevor gebündeltes `turn/steer` gesendet wird. Reine Zahlen sind Millisekunden; die Einheiten `ms`, `s`, `m`, `h` und `d` werden von `/queue`-Optionen akzeptiert.
-- `cap`: maximale Anzahl eingereihter Nachrichten pro Sitzung. Werte unter `1` werden ignoriert.
-- `drop: "summarize"`: Standard. Die ältesten eingereihten Einträge nach Bedarf verwerfen, kompakte Zusammenfassungen behalten und diese als synthetischen Follow-up-Prompt injizieren.
-- `drop: "old"`: die ältesten eingereihten Einträge nach Bedarf verwerfen, ohne Zusammenfassungen zu bewahren.
-- `drop: "new"`: die neueste Nachricht ablehnen, wenn die Warteschlange bereits voll ist.
+- `debounceMs`: Ruhefenster vor dem Abarbeiten eingereihter Folgemeldungen oder gesammelter Pakete; im Codex-Modus `steer` das Ruhefenster vor dem Senden des gebündelten `turn/steer`. Zahlen ohne Einheit werden als Millisekunden interpretiert; die Einheiten `ms`, `s`, `m`, `h` und `d` werden von den Optionen für `/queue` akzeptiert.
+- `cap`: Maximale Anzahl eingereihter Nachrichten pro Sitzung. Werte unter `1` werden ignoriert.
+- `drop: "summarize"` (Standard): Verwirft bei Bedarf die ältesten Einträge der Warteschlange, behält kompakte Zusammenfassungen bei und fügt sie als synthetischen nachfolgenden Prompt ein.
+- `drop: "old"`: Verwirft bei Bedarf die ältesten Einträge der Warteschlange, ohne Zusammenfassungen beizubehalten.
+- `drop: "new"`: Lehnt die neueste Nachricht ab, wenn die Warteschlange bereits voll ist.
 
 Standardwerte: `debounceMs: 500`, `cap: 20`, `drop: summarize`.
 
 ## Steuerung und Streaming
 
-Wenn Kanal-Streaming `partial` oder `block` ist, kann Steuerung wie mehrere kurze sichtbare Antworten aussehen, während die aktive Ausführung Runtime-Grenzen erreicht:
+Wenn das Kanal-Streaming auf `partial` oder `block` eingestellt ist, kann die Steuerung wie mehrere kurze sichtbare Antworten erscheinen, während der aktive Lauf Laufzeitgrenzen erreicht:
 
-- `partial`: Die Vorschau kann früh finalisiert werden, danach startet eine neue Vorschau, sobald Steuerung akzeptiert wurde.
-- `block`: Entwurfsgroße Blöcke können dasselbe sequenzielle Erscheinungsbild erzeugen.
-- Ohne Streaming fällt Steuerung auf ein Follow-up nach der aktiven Ausführung zurück, wenn die Runtime keine Same-Turn-Steuerung annehmen kann.
+- `partial`: Die Vorschau wird möglicherweise frühzeitig abgeschlossen; nach Annahme der Steuerung beginnt dann eine neue Vorschau.
+- `block`: Blöcke in Entwurfsgröße können denselben sequenziellen Eindruck erzeugen.
+- Ohne Streaming greift die Steuerung auf eine Folgeaktion nach dem aktiven Lauf zurück, wenn die Laufzeitumgebung keine Steuerung innerhalb desselben Turns akzeptieren kann.
 
-`steer` bricht laufende Tools nicht ab. Verwenden Sie `/queue interrupt`, wenn die neueste Nachricht die aktuelle Ausführung abbrechen soll.
+`steer` bricht laufende Tools nicht ab. Verwenden Sie `/queue interrupt`, wenn die neueste Nachricht den aktuellen Lauf abbrechen soll.
 
-## Priorität
+## Rangfolge
 
-Für die Modusauswahl löst OpenClaw auf:
+Für die Auswahl des Modus verwendet OpenClaw folgende Rangfolge:
 
-1. Inline- oder gespeicherte sitzungsbezogene `/queue`-Überschreibung.
+1. Inline oder gespeichert festgelegte sitzungsspezifische `/queue`-Überschreibung.
 2. `messages.queue.byChannel.<channel>`.
 3. `messages.queue.mode`.
-4. Standard `steer`.
+4. Standardwert `steer`.
 
-Für Optionen haben Inline- oder gespeicherte `/queue`-Optionen Vorrang vor der Konfiguration. Danach werden kanalspezifisches Debounce (`messages.queue.debounceMsByChannel`), Plugin-Debounce-Standardwerte, globale `messages.queue`-Optionen und eingebaute Standardwerte angewendet. `cap` und `drop` sind globale/Sitzungsoptionen, keine kanalspezifischen Konfigurationsschlüssel.
+Bei Optionen haben inline oder gespeichert festgelegte `/queue`-Optionen Vorrang vor der Konfiguration. Anschließend werden in dieser Reihenfolge der kanalspezifische Entprellwert (`messages.queue.debounceMsByChannel`), die Entprellstandardwerte des Plugins, die globalen `messages.queue`-Optionen und die integrierten Standardwerte angewendet. `cap` und `drop` sind globale bzw. sitzungsspezifische Optionen und keine kanalspezifischen Konfigurationsschlüssel.
 
-## Sitzungsbezogene Überschreibungen
+## Sitzungsspezifische Überschreibungen
 
 - Senden Sie `/queue <steer|followup|collect|interrupt>` als eigenständigen Befehl, um den Warteschlangenmodus für die aktuelle Sitzung zu speichern.
 - Optionen können kombiniert werden: `/queue collect debounce:0.5s cap:25 drop:summarize`
 - `/queue default` oder `/queue reset` löscht die Sitzungsüberschreibung.
 
-## Umfang und Garantien
+## Abbruch eingereihter Turns
 
-- Gilt für Auto-Reply-Agent-Ausführungen über alle eingehenden Kanäle hinweg, die die Gateway-Antwortpipeline verwenden (WhatsApp Web, Telegram, Slack, Discord, Signal, iMessage, Webchat usw.).
-- Die Standard-Lane (`main`) ist prozessweit für eingehende Antworten + Haupt-Heartbeats; setzen Sie `agents.defaults.maxConcurrent`, um mehrere Sitzungen parallel zuzulassen.
-- Zusätzliche Lanes können existieren (z. B. `cron`, `cron-nested`, `nested`, `subagent`), sodass Hintergrundjobs parallel laufen können, ohne eingehende Antworten zu blockieren. Isolierte Cron-Agent-Turns halten einen `cron`-Slot, während ihre innere Agent-Ausführung `cron-nested` verwendet; beide verwenden `cron.maxConcurrentRuns`. Gemeinsame Nicht-Cron-Flows mit `nested` behalten ihr eigenes Lane-Verhalten. Diese losgelösten Ausführungen werden als [Hintergrundaufgaben](/de/automation/tasks) verfolgt.
-- Sitzungsbezogene Lanes garantieren, dass jeweils nur eine Agent-Ausführung eine bestimmte Sitzung berührt.
-- Keine externen Abhängigkeiten oder Hintergrund-Worker-Threads; reines TypeScript + Promises.
+Während ein Prompt in der `followup`-/`collect`-Warteschlange liegt (beispielsweise wenn ein TUI- oder Webchat-Aufruf von `chat.send` eintrifft, während ein anderer Turn aktiv ist), verwaltet das Gateway eine **Gateway-eigene Abbruchidentität** für die Client-`runId`, bis der eingereihte Inhalt ausgeführt oder verworfen wird. Die Identität folgt Inhalten, die in eine Überlaufzusammenfassung aufgenommen werden.
+
+- `chat.abort` mit einer bestimmten `runId` bricht diesen Turn ab, solange er noch eingereiht ist, sofern der Anfordernde autorisiert ist (dieselben Eigentumsregeln wie bei aktiven Läufen).
+- `chat.abort` für eine Sitzung ohne `runId` bricht zuerst **autorisierte eingereihte Turns** und anschließend autorisierte aktive Läufe ab. Diese Reihenfolge verhindert, dass beim Abarbeiten der Warteschlange Arbeit in eine nur teilweise gestoppte Sitzung übernommen wird.
+- Das Leeren der gesamten Sitzungswarteschlange ohne Prüfung des jeweiligen Anfordernden ist bei Sitzungen mit mehreren Eigentümern nicht der vorgesehene Stoppmechanismus.
+- Wartezeiten in der Warteschlange werden für `sessions.list` nicht als aktive Agent-Läufe dargestellt und unterliegen nicht der Zeitüberschreitungssemantik aktiver Läufe; diese gilt ausschließlich für die aktive Phase.
+
+Clients (einschließlich der TUI) leiten während eines Laufs eintreffende Prompts weiter und überlassen dem Gateway die Anwendung des Warteschlangenmodus. Esc/`/stop` verwendet einen sitzungsbezogenen Abbruch, sodass verloren gegangene lokale Handles nicht dazu führen können, dass ein noch eingereihter Prompt ausgeführt wird.
+
+## Geltungsbereich und Garantien
+
+- Gilt für Agent-Läufe mit automatischen Antworten in allen eingehenden Kanälen, die die Gateway-Antwortpipeline verwenden (WhatsApp Web, Telegram, Slack, Discord, Signal, iMessage, Webchat usw.).
+- Die Standard-Lane (`main`) gilt prozessweit für eingehende Nachrichten und Haupt-Heartbeats; legen Sie `agents.defaults.maxConcurrent` fest, um mehrere Sitzungen parallel zuzulassen.
+- Es können zusätzliche Lanes vorhanden sein (z. B. `cron`, `cron-nested`, `nested`, `subagent`), damit Hintergrundaufträge parallel ausgeführt werden können, ohne eingehende Antworten zu blockieren. Isolierte Cron-Agent-Turns belegen einen `cron`-Slot, während ihre interne Agent-Ausführung `cron-nested` verwendet; beide verwenden `cron.maxConcurrentRuns`. Gemeinsam genutzte `nested`-Abläufe außerhalb von Cron behalten ihr eigenes Lane-Verhalten bei. Diese entkoppelten Läufe werden als [Hintergrundaufgaben](/de/automation/tasks) verfolgt.
+- Sitzungsspezifische Lanes garantieren, dass zu einem Zeitpunkt nur ein Agent-Lauf auf eine bestimmte Sitzung zugreift.
+- Keine externen Abhängigkeiten oder Hintergrund-Worker-Threads; ausschließlich TypeScript und Promises.
 
 ## Fehlerbehebung
 
-- Wenn Befehle festzustecken scheinen, aktivieren Sie ausführliche Logs und suchen Sie nach Zeilen mit "queued for ...ms", um zu bestätigen, dass die Warteschlange abgearbeitet wird.
-- Wenn Sie die Warteschlangentiefe benötigen, aktivieren Sie ausführliche Logs und achten Sie auf Warteschlangen-Timing-Zeilen.
-- Codex app-server-Ausführungen, die einen Turn akzeptieren und dann keinen Fortschritt mehr ausgeben, werden durch den Codex-Adapter unterbrochen, damit die aktive Sitzungs-Lane freigegeben werden kann, statt auf das Timeout der äußeren Ausführung zu warten.
-- Wenn Diagnosen aktiviert sind, werden Sitzungen, die über `diagnostics.stuckSessionWarnMs` hinaus in `processing` bleiben, ohne beobachtete Antwort, Tool-, Status-, Block- oder ACP-Fortschritte, nach aktueller Aktivität klassifiziert. Aktive Arbeit wird als `session.long_running` geloggt; besessene stille Modellaufrufe bleiben ebenfalls bis `diagnostics.stuckSessionAbortMs` `session.long_running`, damit langsame oder nicht streamende Provider nicht zu früh als blockiert gemeldet werden. Aktive Arbeit ohne jüngsten Fortschritt wird als `session.stalled` geloggt; besessene Modellaufrufe wechseln bei oder nach der Abbruchschwelle zu `session.stalled`, und besitzerlose veraltete Modell-/Tool-Aktivität wird nicht als langlaufend verborgen. `session.stuck` ist für wiederherstellbare veraltete Sitzungsbuchhaltung reserviert, einschließlich untätiger eingereihter Sitzungen mit veralteter besitzerloser Modell-/Tool-Aktivität, und nur dieser Pfad kann die betroffene Sitzungs-Lane freigeben, damit eingereihte Arbeit abläuft. Wiederholte `session.stuck`-Diagnosen fahren zurück, solange die Sitzung unverändert bleibt.
+- Wenn Befehle festzustecken scheinen, aktivieren Sie die ausführliche Protokollierung und suchen Sie nach Zeilen mit `"queued for ...ms"`, um zu bestätigen, dass die Warteschlange abgearbeitet wird.
+- Läufe des Codex-App-Servers, die einen Turn annehmen und anschließend keine Fortschrittsmeldungen mehr ausgeben, werden vom Codex-Adapter unterbrochen, damit die aktive Sitzungs-Lane freigegeben werden kann, anstatt auf die Zeitüberschreitung des äußeren Laufs zu warten.
+- Wenn die Diagnose aktiviert ist, werden Sitzungen, die nach `diagnostics.stuckSessionWarnMs` weiterhin den Status `processing` aufweisen, ohne dass eine Antwort sowie Tool-, Status-, Block- oder ACP-Fortschritte beobachtet wurden, anhand der aktuellen Aktivität klassifiziert:
+  - Aktive Arbeit mit kürzlichen Fortschrittsmeldungen wird als `session.long_running` protokolliert. Zugeordnete stille Modellaufrufe bleiben ebenfalls bis `diagnostics.stuckSessionAbortMs` im Status `session.long_running`, damit langsame oder nicht streamende Provider nicht zu früh als blockiert gemeldet werden.
+  - Aktive Arbeit ohne kürzliche Fortschrittsmeldungen wird als `session.stalled` protokolliert; zugeordnete Modellaufrufe, blockierte Tool-Aufrufe und blockierte eingebettete Läufe wechseln beim Erreichen oder Überschreiten des Abbruchschwellenwerts zu `session.stalled`. Veraltete Modell- oder Tool-Aktivität ohne Eigentümer wird nicht als lang laufend verborgen.
+  - `session.stuck` ist für wiederherstellbare veraltete Sitzungsbuchführung reserviert, einschließlich inaktiver eingereihter Sitzungen mit veralteter Modell- oder Tool-Aktivität ohne Eigentümer.
+  - `session.stuck` löst stets eine Wiederherstellung aus, die die betroffene Sitzungs-Lane freigeben kann. Eine Klassifizierung als `session.stalled` nach Überschreiten von `diagnostics.stuckSessionAbortMs` (blockierter Tool-Aufruf, blockierter Modellaufruf oder blockierter eingebetteter Lauf) kann ebenfalls eine Wiederherstellung durch aktiven Abbruch auslösen. Daher können beide Klassifizierungen eine Warteschlange wieder freigeben, nicht nur `session.stuck`.
+  - Wiederholte Warnprotokollzeilen für `session.stuck` und `session.long_running` werden exponentiell seltener ausgegeben, solange die Sitzung unverändert bleibt; Wiederherstellungsversuche werden unabhängig davon weiterhin bei jedem Heartbeat-Takt ausgeführt.
 
 ## Verwandte Themen
 

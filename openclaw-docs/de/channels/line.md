@@ -1,29 +1,25 @@
 ---
 read_when:
     - Sie möchten OpenClaw mit LINE verbinden
-    - Sie müssen LINE-Webhook und Zugangsdaten einrichten
+    - Sie müssen den LINE-Webhook und die Zugangsdaten einrichten
     - Sie möchten LINE-spezifische Nachrichtenoptionen
-summary: Einrichtung, Konfiguration und Nutzung des LINE Messaging API-Plugins
+summary: Einrichtung, Konfiguration und Verwendung des LINE-Messaging-API-Plugins
 title: LINE
 x-i18n:
-    generated_at: "2026-06-27T17:11:06Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T01:24:46Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: c27572d1db71d1f46b4e6ee68aa03bdbec8f90ed7fb0884f0185ea4aa877468a
+    source_hash: ee5931c2bfca4a67a8b390f300907cd31a074988b10c6c0540444cff0bfde334
     source_path: channels/line.md
     workflow: 16
 ---
 
-LINE verbindet sich über die LINE Messaging API mit OpenClaw. Das Plugin läuft als Webhook-
-Empfänger auf dem Gateway und verwendet Ihr Channel access token + Channel secret für die
-Authentifizierung.
+LINE stellt über die LINE Messaging API eine Verbindung zu OpenClaw her. Das Plugin wird als Webhook-Empfänger auf dem Gateway ausgeführt und verwendet Ihr Channel-Zugriffstoken und Channel-Secret zur Authentifizierung.
 
-Status: herunterladbares Plugin. Direktnachrichten, Gruppenchats, Medien, Standorte, Flex-
-Nachrichten, Template-Nachrichten und Schnellantworten werden unterstützt. Reaktionen und Threads
-werden nicht unterstützt.
+Status: offizielles, separat installiertes Plugin. Direktnachrichten, Gruppenchats, Medien, Standorte, Flex-Nachrichten, Vorlagennachrichten und Schnellantworten werden unterstützt. Reaktionen und Threads werden nicht unterstützt.
 
-## Installieren
+## Installation
 
 Installieren Sie LINE, bevor Sie den Kanal konfigurieren:
 
@@ -31,7 +27,7 @@ Installieren Sie LINE, bevor Sie den Kanal konfigurieren:
 openclaw plugins install @openclaw/line
 ```
 
-Lokaler Checkout (wenn aus einem Git-Repo ausgeführt):
+Lokaler Checkout (bei Ausführung aus einem Git-Repository):
 
 ```bash
 openclaw plugins install ./path/to/local/line-plugin
@@ -41,27 +37,24 @@ openclaw plugins install ./path/to/local/line-plugin
 
 1. Erstellen Sie ein LINE Developers-Konto und öffnen Sie die Console:
    [https://developers.line.biz/console/](https://developers.line.biz/console/)
-2. Erstellen (oder wählen) Sie einen Provider und fügen Sie einen **Messaging API**-Kanal hinzu.
-3. Kopieren Sie das **Channel access token** und das **Channel secret** aus den Kanaleinstellungen.
+2. Erstellen oder wählen Sie einen Provider und fügen Sie einen **Messaging API**-Kanal hinzu.
+3. Kopieren Sie **Channel access token** und **Channel secret** aus den Kanaleinstellungen.
 4. Aktivieren Sie **Use webhook** in den Messaging API-Einstellungen.
-5. Setzen Sie die Webhook-URL auf Ihren Gateway-Endpunkt (HTTPS erforderlich):
+5. Legen Sie als Webhook-URL Ihren Gateway-Endpunkt fest (HTTPS erforderlich):
 
-```
+```text
 https://gateway-host/line/webhook
 ```
 
-Das Gateway antwortet auf die Webhook-Verifizierung (GET) von LINE und bestätigt signierte
-eingehende Ereignisse (POST) unmittelbar nach Signatur- und Payload-Validierung; die Agent-
-Verarbeitung wird asynchron fortgesetzt.
-Wenn Sie einen benutzerdefinierten Pfad benötigen, setzen Sie `channels.line.webhookPath` oder
-`channels.line.accounts.<id>.webhookPath` und aktualisieren Sie die URL entsprechend.
+Das Gateway beantwortet die Webhook-Verifizierung von LINE (GET) und bestätigt signierte eingehende Ereignisse (POST) unmittelbar nach der Signatur- und Nutzdatenvalidierung; die Verarbeitung durch den Agenten wird asynchron fortgesetzt.
+Wenn Sie einen benutzerdefinierten Pfad benötigen, legen Sie `channels.line.webhookPath` oder `channels.line.accounts.<id>.webhookPath` fest und aktualisieren Sie die URL entsprechend.
 
-Sicherheitshinweis:
+Sicherheitshinweise:
 
-- Die LINE-Signaturverifizierung hängt vom Body ab (HMAC über den Raw Body), daher wendet OpenClaw vor der Verifizierung strenge Pre-Auth-Body-Limits und Timeouts an.
-- OpenClaw verarbeitet Webhook-Ereignisse aus den verifizierten Raw-Request-Bytes. Durch Upstream-Middleware transformierte `req.body`-Werte werden zur Wahrung der Signaturintegrität ignoriert.
+- Die LINE-Signaturverifizierung hängt vom Nachrichtentext ab (HMAC über den unveränderten Nachrichtentext). Daher erzwingt OpenClaw vor der Authentifizierung eine strikte Größenbegrenzung von 64 KB und ein Zeitlimit für das Einlesen.
+- OpenClaw verarbeitet Webhook-Ereignisse anhand der verifizierten unveränderten Anfragebytes. Durch vorgelagerte Middleware veränderte `req.body`-Werte werden zum Schutz der Signaturintegrität ignoriert.
 
-## Konfigurieren
+## Konfiguration
 
 Minimale Konfiguration:
 
@@ -78,7 +71,7 @@ Minimale Konfiguration:
 }
 ```
 
-Öffentliche DM-Konfiguration:
+Konfiguration für öffentliche Direktnachrichten:
 
 ```json5
 {
@@ -94,7 +87,7 @@ Minimale Konfiguration:
 }
 ```
 
-Umgebungsvariablen (nur Standardkonto):
+Umgebungsvariablen (nur für das Standardkonto):
 
 - `LINE_CHANNEL_ACCESS_TOKEN`
 - `LINE_CHANNEL_SECRET`
@@ -112,7 +105,8 @@ Token-/Secret-Dateien:
 }
 ```
 
-`tokenFile` und `secretFile` müssen auf reguläre Dateien verweisen. Symlinks werden abgelehnt.
+`tokenFile` und `secretFile` müssen auf reguläre Dateien verweisen. Symbolische Links werden abgelehnt.
+Direkt in der Konfiguration angegebene Werte haben Vorrang vor Dateien; Umgebungsvariablen dienen beim Standardkonto als letzte Ausweichmöglichkeit.
 
 Mehrere Konten:
 
@@ -134,46 +128,40 @@ Mehrere Konten:
 
 ## Zugriffskontrolle
 
-Direktnachrichten verwenden standardmäßig Pairing. Unbekannte Absender erhalten einen Pairing-Code, und ihre
-Nachrichten werden ignoriert, bis sie genehmigt wurden.
+Direktnachrichten verwenden standardmäßig die Kopplung. Unbekannte Absender erhalten einen Kopplungscode, und ihre Nachrichten werden ignoriert, bis der Zugriff genehmigt wurde:
 
 ```bash
 openclaw pairing list line
 openclaw pairing approve line <CODE>
 ```
 
-Allowlist und Richtlinien:
+Positivlisten und Richtlinien:
 
-- `channels.line.dmPolicy`: `pairing | allowlist | open | disabled`
-- `channels.line.allowFrom`: allowgelistete LINE-Benutzer-IDs für DMs; `dmPolicy: "open"` erfordert `["*"]`
-- `channels.line.groupPolicy`: `allowlist | open | disabled`
-- `channels.line.groupAllowFrom`: allowgelistete LINE-Benutzer-IDs für Gruppen
-- Überschreibungen pro Gruppe: `channels.line.groups.<groupId>.allowFrom`
-- Statische Absender-Zugriffsgruppen können aus `allowFrom`, `groupAllowFrom` und gruppenspezifischem `allowFrom` mit `accessGroup:<name>` referenziert werden.
-- Runtime-Hinweis: Wenn `channels.line` vollständig fehlt, fällt die Runtime für Gruppenprüfungen auf `groupPolicy="allowlist"` zurück (auch wenn `channels.defaults.groupPolicy` gesetzt ist).
+- `channels.line.dmPolicy`: `pairing | allowlist | open | disabled` (Standard: `pairing`)
+- `channels.line.allowFrom`: für Direktnachrichten zugelassene LINE-Benutzer-IDs; `dmPolicy: "open"` erfordert `["*"]`
+- `channels.line.groupPolicy`: `allowlist | open | disabled` (Standard: `allowlist`)
+- `channels.line.groupAllowFrom`: für Gruppen zugelassene LINE-Benutzer-IDs
+- Gruppenspezifische Überschreibungen: `channels.line.groups.<groupId>.allowFrom` (zusätzlich `enabled`, `requireMention`, `systemPrompt`, `skills`)
+- Statische Absender-Zugriffsgruppen können aus `allowFrom`, `groupAllowFrom` und dem gruppenspezifischen `allowFrom` über `accessGroup:<name>` referenziert werden; siehe [Zugriffsgruppen](/de/channels/access-groups).
+- Laufzeithinweis: Wenn `channels.line` vollständig fehlt, verwendet die Laufzeit für Gruppenprüfungen ersatzweise `groupPolicy="allowlist"` (selbst wenn `channels.defaults.groupPolicy` festgelegt ist).
 
-Bei LINE-IDs wird zwischen Groß- und Kleinschreibung unterschieden. Gültige IDs sehen so aus:
+Bei LINE-IDs wird zwischen Groß- und Kleinschreibung unterschieden. Gültige IDs sehen wie folgt aus:
 
-- Benutzer: `U` + 32 Hex-Zeichen
-- Gruppe: `C` + 32 Hex-Zeichen
-- Raum: `R` + 32 Hex-Zeichen
+- Benutzer: `U` + 32 Hexadezimalzeichen
+- Gruppe: `C` + 32 Hexadezimalzeichen
+- Raum: `R` + 32 Hexadezimalzeichen
 
 ## Nachrichtenverhalten
 
-- Text wird bei 5000 Zeichen in Blöcke aufgeteilt.
-- Markdown-Formatierung wird entfernt; Codeblöcke und Tabellen werden, wenn möglich, in Flex-
-  Karten umgewandelt.
-- Streaming-Antworten werden gepuffert; LINE erhält vollständige Blöcke mit einer Ladeanimation,
-  während der Agent arbeitet.
-- Mediendownloads sind durch `channels.line.mediaMaxMb` begrenzt (Standard 10).
-- Eingehende Medien werden unter `~/.openclaw/media/inbound/` gespeichert, bevor sie an den
-  Agent übergeben werden. Dies entspricht dem gemeinsamen Medienspeicher, der von anderen gebündelten Kanal-
-  Plugins verwendet wird.
+- Text wird in Abschnitte von jeweils 5.000 Zeichen aufgeteilt.
+- Markdown-Formatierungen werden entfernt; Codeblöcke und Tabellen werden nach Möglichkeit in Flex-Karten umgewandelt.
+- Streaming-Antworten werden gepuffert; LINE erhält vollständige Abschnitte und zeigt eine Ladeanimation an, während der Agent arbeitet.
+- Medien-Downloads werden durch `channels.line.mediaMaxMb` begrenzt (Standard: 10).
+- Eingehende Medien werden unter `~/.openclaw/media/inbound/` gespeichert, bevor sie an den Agenten übergeben werden. Dies entspricht dem gemeinsamen Medienspeicher, den auch andere Kanal-Plugins verwenden.
 
 ## Kanaldaten (Rich Messages)
 
-Verwenden Sie `channelData.line`, um Schnellantworten, Standorte, Flex-Karten oder Template-
-Nachrichten zu senden.
+Verwenden Sie `channelData.line`, um Schnellantworten, Standorte, Flex-Karten oder Vorlagennachrichten zu senden.
 
 ```json5
 {
@@ -189,9 +177,7 @@ Nachrichten zu senden.
       },
       flexMessage: {
         altText: "Status card",
-        contents: {
-          /* Flex payload */
-        },
+        contents: {/* Flex payload */},
       },
       templateMessage: {
         type: "confirm",
@@ -206,46 +192,45 @@ Nachrichten zu senden.
 }
 ```
 
-Das LINE-Plugin liefert außerdem einen `/card`-Befehl für Flex-Nachrichten-Presets mit:
+Das LINE-Plugin enthält außerdem einen `/card`-Befehl für Flex-Nachrichtenvorlagen:
 
-```
+```text
 /card info "Welcome" "Thanks for joining!"
 ```
 
 ## ACP-Unterstützung
 
-LINE unterstützt ACP (Agent Communication Protocol)-Konversationsbindungen:
+LINE unterstützt ACP-Konversationsbindungen (Agent Communication Protocol):
 
 - `/acp spawn <agent> --bind here` bindet den aktuellen LINE-Chat an eine ACP-Sitzung, ohne einen untergeordneten Thread zu erstellen.
-- Konfigurierte ACP-Bindungen und aktive konversationsgebundene ACP-Sitzungen funktionieren auf LINE wie bei anderen Konversationskanälen.
+- Konfigurierte ACP-Bindungen und aktive, an Konversationen gebundene ACP-Sitzungen funktionieren unter LINE wie bei anderen Konversationskanälen.
 
-Details finden Sie unter [ACP-Agenten](/de/tools/acp-agents).
+Weitere Informationen finden Sie unter [ACP-Agenten](/de/tools/acp-agents).
 
 ## Ausgehende Medien
 
-Das LINE-Plugin unterstützt das Senden von Bildern, Videos und Audiodateien über das Agent-Nachrichtenwerkzeug. Medien werden über den LINE-spezifischen Zustellpfad mit geeigneter Vorschau- und Tracking-Behandlung gesendet:
+Das LINE-Plugin sendet Bilder, Videos und Audiodateien über das Nachrichtenwerkzeug des Agenten:
 
-- **Bilder**: werden als LINE-Bildnachrichten mit automatischer Vorschaugenerierung gesendet.
-- **Videos**: werden mit expliziter Vorschau- und Content-Type-Behandlung gesendet.
-- **Audio**: wird als LINE-Audionachrichten gesendet.
+- **Bilder**: werden als LINE-Bildnachrichten gesendet; das Vorschaubild verwendet standardmäßig die Medien-URL.
+- **Videos**: erfordern ein Vorschaubild; legen Sie `channelData.line.previewImageUrl` auf eine Bild-URL fest.
+- **Audio**: wird als LINE-Audionachricht gesendet; die Dauer beträgt standardmäßig 60 Sekunden, sofern `channelData.line.durationMs` nicht festgelegt ist.
 
-URLs für ausgehende Medien müssen öffentliche HTTPS-URLs sein. OpenClaw validiert den Ziel-Hostnamen, bevor die URL an LINE übergeben wird, und lehnt loopback-, link-local- und private Netzwerkziele ab.
+Der Medientyp wird aus `channelData.line.mediaKind` übernommen, sofern dieser Wert festgelegt ist. Andernfalls wird er aus den anderen LINE-Optionen oder der Dateiendung der URL abgeleitet, wobei ein Bild als Ausweichwert dient.
 
-Generische Mediendaten-Sends fallen auf die vorhandene reine Bildroute zurück, wenn kein LINE-spezifischer Pfad verfügbar ist.
+URLs für ausgehende Medien müssen öffentliche HTTPS-URLs mit höchstens 2.000 Zeichen sein. OpenClaw validiert den Ziel-Hostnamen, bevor die URL an LINE übergeben wird, und lehnt local loopback-, Link-Local- sowie private Netzwerkziele ab.
+
+Allgemeine Medienübertragungen ohne LINE-spezifische Optionen verwenden die Bildroute.
 
 ## Fehlerbehebung
 
-- **Webhook-Verifizierung schlägt fehl:** Stellen Sie sicher, dass die Webhook-URL HTTPS verwendet und das
-  `channelSecret` mit der LINE Console übereinstimmt.
-- **Keine eingehenden Ereignisse:** Bestätigen Sie, dass der Webhook-Pfad mit `channels.line.webhookPath`
-  übereinstimmt und das Gateway von LINE aus erreichbar ist.
-- **Fehler beim Mediendownload:** Erhöhen Sie `channels.line.mediaMaxMb`, wenn Medien das
-  Standardlimit überschreiten.
+- **Webhook-Verifizierung schlägt fehl:** Stellen Sie sicher, dass die Webhook-URL HTTPS verwendet und `channelSecret` mit der LINE Console übereinstimmt.
+- **Keine eingehenden Ereignisse:** Prüfen Sie, ob der Webhook-Pfad mit `channels.line.webhookPath` übereinstimmt und das Gateway von LINE aus erreichbar ist.
+- **Fehler beim Medien-Download:** Erhöhen Sie `channels.line.mediaMaxMb`, wenn Medien die Standardbegrenzung überschreiten.
 
 ## Verwandte Themen
 
 - [Kanalübersicht](/de/channels) — alle unterstützten Kanäle
-- [Pairing](/de/channels/pairing) — DM-Authentifizierung und Pairing-Ablauf
-- [Gruppen](/de/channels/groups) — Gruppenchat-Verhalten und Mention-Gating
-- [Kanalrouting](/de/channels/channel-routing) — Sitzungsrouting für Nachrichten
-- [Sicherheit](/de/gateway/security) — Zugriffsmodell und Härtung
+- [Kopplung](/de/channels/pairing) — Authentifizierung von Direktnachrichten und Kopplungsablauf
+- [Gruppen](/de/channels/groups) — Verhalten von Gruppenchats und Erwähnungsanforderungen
+- [Kanal-Routing](/de/channels/channel-routing) — Sitzungs-Routing für Nachrichten
+- [Sicherheit](/de/gateway/security) — Zugriffsmodell und Absicherung

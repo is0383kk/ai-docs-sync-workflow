@@ -1,37 +1,42 @@
 ---
 read_when:
-    - Desea cambiar entre stable/extended-stable/beta/dev
+    - Quieres cambiar entre estable/estable extendida/beta/desarrollo
     - Quieres fijar una versión, etiqueta o SHA específicos
     - Estás etiquetando o publicando versiones preliminares
 sidebarTitle: Release Channels
-summary: 'Canales estable, estable extendido, beta y dev: semántica, cambio, fijación y etiquetado'
+summary: 'Canales estable, estable con soporte extendido, beta y de desarrollo: semántica, cambio, fijación y etiquetado'
 title: Canales de lanzamiento
 x-i18n:
-    generated_at: "2026-07-06T10:50:58Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T23:12:25Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 00b35a9dd74a2a5ffad67b28538d0e210634fa474b70b65aeba49a09c0a73368
+    source_hash: a99e31f5121c0ab8696e638cb10a7ce16e8f32c81e4b2bef1f703eef71191494
     source_path: install/development-channels.md
     workflow: 16
 ---
 
-OpenClaw distribuye cuatro canales de actualización:
+OpenClaw se distribuye en cuatro canales de actualización:
 
-- **stable**: dist-tag de npm `latest`. Recomendado para la mayoría de los usuarios.
-- **extended-stable**: dist-tag de npm `extended-stable`. Un canal de paquetes totalmente nuevo,
-  retrasado por mes con soporte. En esta versión es solo para paquetes y solo en primer plano.
-- **beta**: dist-tag de npm `beta`. Recurre a `latest` cuando `beta` falta
+- **estable**: dist-tag de npm `latest`. Recomendado para la mayoría de los usuarios.
+- **estable extendido**: dist-tag de npm `extended-stable`. Un canal de paquetes
+  totalmente nuevo para un mes anterior aún compatible. Solo está disponible
+  como paquete y la instalación se realiza únicamente en primer plano. Una
+  selección almacenada recibe avisos de actualización de solo lectura cuando
+  `update.checkOnStart` está habilitado, pero nunca se aplica automáticamente.
+- **beta**: dist-tag de npm `beta`. Recurre a `latest` cuando `beta` no existe
   o es anterior a la versión estable actual.
-- **dev**: punta móvil de `main` (git). dist-tag de npm `dev` cuando se publica. `main`
-  es para experimentación y desarrollo activo; puede contener funciones incompletas
-  o cambios incompatibles. No lo use para Gateways de producción.
+- **desarrollo**: estado más reciente y cambiante de `main` (git). Dist-tag de
+  npm `dev` cuando se publica. `main` está destinado a la experimentación y al
+  desarrollo activo; puede contener funciones incompletas o cambios
+  incompatibles. No lo ejecute en gateways de producción.
 
-Las compilaciones estables suelen publicarse primero en **beta**, validarse allí y luego
-promocionarse a **latest** sin incrementar la versión. Los mantenedores también pueden publicar
-directamente en `latest`. Los dist-tags son la fuente de referencia para las instalaciones de npm.
+Las compilaciones estables suelen publicarse primero en **beta**, se validan
+allí y después se promueven a **latest** sin incrementar la versión. Los
+mantenedores también pueden publicar directamente en `latest`. Los dist-tags
+son la fuente de referencia para las instalaciones mediante npm.
 
-## Cambiar de canal
+## Cambio de canal
 
 ```bash
 openclaw update --channel stable
@@ -40,68 +45,73 @@ openclaw update --channel beta
 openclaw update --channel dev
 ```
 
-`--channel` conserva la elección en `update.channel` dentro de la configuración e impulsa ambas
-rutas de instalación:
+`--channel` guarda la elección en `update.channel` dentro de la configuración y
+controla ambas rutas de instalación:
 
-| Canal             | instalaciones de npm/paquete                                                                                                                                                          | instalaciones de git                                                                                                                                               |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `stable`          | dist-tag `latest`                                                                                                                                                                      | última etiqueta git estable (excluye `-alpha.N`, `-beta.N`, `-rc.N`, `-dev.N`, `-next.N`, `-preview.N`, `-canary.N`, `-nightly.N` y otros sufijos de prelanzamiento con nombre) |
-| `extended-stable` | resuelve el selector público de npm `extended-stable`, verifica el paquete exacto seleccionado e instala esa versión exacta. Falla de forma cerrada sin recurrir a `latest`, `beta` ni `dev`. | no compatible: OpenClaw deja el checkout sin cambios y le pide usar una instalación de paquete                                                                     |
-| `beta`            | dist-tag `beta`, con respaldo a `latest` cuando `beta` falta o es anterior                                                                                                              | última etiqueta git beta, con respaldo a la última etiqueta git estable cuando beta falta o es anterior                                                           |
-| `dev`             | dist-tag `dev` (poco frecuente; la mayoría de usuarios de dev usan instalaciones de git)                                                                                                | obtiene cambios, aplica rebase del checkout sobre la rama upstream `main`, compila y reinstala la CLI global                                                      |
+| Canal             | Instalaciones mediante npm/paquetes                                                                                                                                                                                          | Instalaciones mediante git                                                                                                                                                                  |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stable`          | dist-tag `latest`                                                                                                                                                                                                             | etiqueta estable de git más reciente (excluye `-alpha.N`, `-beta.N`, `-rc.N`, `-dev.N`, `-next.N`, `-preview.N`, `-canary.N`, `-nightly.N` y otros sufijos de versión preliminar con nombre) |
+| `extended-stable` | resuelve el selector público `extended-stable` de npm, verifica el paquete exacto seleccionado e instala esa versión exacta. Falla de forma segura sin recurrir a `latest`, `beta` ni `dev`.                                    | no compatible: OpenClaw deja el checkout sin cambios y le pide que use una instalación mediante paquete                                                                                    |
+| `beta`            | dist-tag `beta`, con recurso a `latest` cuando `beta` no existe o es anterior                                                                                                                                                  | etiqueta beta de git más reciente, con recurso a la etiqueta estable de git más reciente cuando la beta no existe o es anterior                                                            |
+| `dev`             | dist-tag `dev` (poco frecuente; la mayoría de los usuarios de desarrollo utilizan instalaciones mediante git)                                                                                                                 | obtiene los cambios, reorganiza mediante rebase el checkout sobre la rama `main` del repositorio remoto, compila y reinstala la CLI global                                                  |
 
-Para instalaciones git de `dev`, el checkout predeterminado es `~/openclaw` (o
-`$OPENCLAW_HOME/openclaw` cuando `OPENCLAW_HOME` está definido); reemplácelo con
-`OPENCLAW_GIT_DIR`.
+Para las instalaciones de desarrollo mediante git, el checkout predeterminado
+es `~/openclaw` (o `$OPENCLAW_HOME/openclaw` cuando se define `OPENCLAW_HOME`);
+puede sustituirlo mediante `OPENCLAW_GIT_DIR`.
 
 <Tip>
-Para mantener stable y dev en paralelo, use dos checkouts separados y apunte cada Gateway al suyo.
+Para mantener las versiones estable y de desarrollo en paralelo, utilice dos checkouts separados y dirija cada gateway al suyo.
 </Tip>
 
-## Apuntar a una versión o etiqueta puntual
+## Selección puntual de una versión o etiqueta
 
-Use `--tag` para apuntar a un dist-tag, una versión o una especificación de paquete específicos para una
-sola actualización **sin** cambiar el canal conservado:
+Use `--tag` para seleccionar un dist-tag, una versión o una especificación de
+paquete concretos en una sola actualización **sin** cambiar el canal guardado:
 
 ```bash
-# Install a specific version
+# Instalar una versión específica
 openclaw update --tag 2026.4.1-beta.1
 
-# Install from the beta dist-tag (one-off, does not persist)
+# Instalar desde el dist-tag beta (una sola vez, no se guarda)
 openclaw update --tag beta
 
-# Switch to the moving GitHub main checkout (persistent)
+# Cambiar al checkout cambiante de main en GitHub (persistente)
 openclaw update --channel dev
 
-# Install a specific npm package spec
+# Instalar una especificación de paquete npm específica
 openclaw update --tag openclaw@2026.4.1-beta.1
 
-# Install from GitHub main once without persisting the channel
+# Instalar una vez desde main en GitHub sin guardar el canal
 openclaw update --tag main
 ```
 
 Notas:
 
-- `--tag` se aplica **solo a instalaciones de paquete (npm)**; las instalaciones de git lo ignoran.
-- La etiqueta no se conserva; el siguiente `openclaw update` usa el canal configurado.
-- `--tag main` se asigna a la especificación compatible con npm `github:openclaw/openclaw#main`
-  para esa ejecución. Para una instalación persistente de `main` móvil, use
-  `openclaw update --channel dev` (las instalaciones de paquete cambian a un checkout de git)
-  o reinstale con el método git del instalador:
+- `--tag` se aplica **solo a las instalaciones mediante paquetes (npm)**; las
+  instalaciones mediante git lo ignoran.
+- La etiqueta no se guarda; la siguiente ejecución de `openclaw update` utiliza
+  el canal configurado.
+- `--tag main` se asigna a la especificación compatible con npm
+  `github:openclaw/openclaw#main` para esa única ejecución. Para una instalación
+  persistente y cambiante de `main`, use `openclaw update --channel dev` (las
+  instalaciones mediante paquetes cambian a un checkout de git) o reinstale
+  mediante el método git del instalador:
   `curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git --version main`.
-  La ruta de instalación de npm rechaza directamente los destinos de origen GitHub/git y lo dirige
-  al método git en su lugar.
-- Protección contra versiones anteriores: si la versión de destino es anterior a la versión actual,
-  OpenClaw solicita confirmación (omítala con `--yes`).
-- Extended-stable siempre usa su destino de paquete exacto verificado. No es un alias puntual
-  de `--tag extended-stable`, y `--tag` no puede combinarse con un canal extended-stable efectivo.
-- `--channel beta` difiere de `--tag beta`: el flujo del canal puede recurrir a stable/latest
-  cuando beta falta o es anterior, mientras que `--tag beta` siempre apunta al dist-tag `beta`
-  sin procesar para esa ejecución.
+  La ruta de instalación mediante npm rechaza directamente los destinos de
+  origen de GitHub/git y le indica que utilice en su lugar el método git.
+- Protección frente a versiones anteriores: si la versión de destino es
+  anterior a la actual, OpenClaw solicita confirmación (omítala con `--yes`).
+- El canal estable extendido siempre utiliza su destino de paquete exacto
+  verificado. No es un alias puntual de `--tag extended-stable`, y `--tag` no
+  puede combinarse con un canal estable extendido efectivo.
+- `--channel beta` difiere de `--tag beta`: el flujo del canal puede recurrir a
+  estable/`latest` cuando la beta no existe o es anterior, mientras que
+  `--tag beta` siempre selecciona el dist-tag `beta` sin procesar para esa única
+  ejecución.
 
-## Ensayo
+## Simulación
 
-Previsualice qué haría `openclaw update` sin realizar cambios:
+Obtenga una vista previa de lo que haría `openclaw update` sin realizar cambios:
 
 ```bash
 openclaw update --dry-run
@@ -110,55 +120,67 @@ openclaw update --tag 2026.4.1-beta.1 --dry-run
 openclaw update --dry-run --json
 ```
 
-El ensayo informa el canal efectivo, la versión de destino, las acciones planificadas
-y si sería necesaria una confirmación de instalación de una versión anterior.
+La simulación informa del canal efectivo, la versión de destino, las acciones
+planificadas y si sería necesaria una confirmación para instalar una versión
+anterior.
 
 ## Plugins y canales
 
-Cambiar de canal con `openclaw update` también sincroniza las fuentes de plugins:
+El cambio de canal mediante `openclaw update` también sincroniza los orígenes
+de los plugins:
 
-- `dev` cambia los plugins instalados que tienen una contraparte incluida de vuelta a
-  su fuente incluida (checkout de git).
-- `stable` y `beta` restauran paquetes de plugins instalados desde npm o ClawHub.
-- `extended-stable` resuelve plugins oficiales de npm elegibles con intención desnuda/predeterminada
-  o `latest` a la versión exacta del núcleo instalada. No consulta etiquetas
-  `@extended-stable` de plugins en tiempo de ejecución.
-- Los plugins instalados desde npm se actualizan después de que finaliza la actualización del núcleo.
+- `dev` devuelve los plugins instalados que tengan un equivalente incluido a
+  su origen incluido (checkout de git).
+- `stable` y `beta` restauran los paquetes de plugins instalados mediante npm o
+  ClawHub.
+- `extended-stable` resuelve los plugins oficiales de npm aptos con una
+  intención básica/predeterminada o `latest` a la versión exacta del núcleo
+  instalada. No consulta las etiquetas `@extended-stable` de los plugins
+  durante la ejecución.
+- Los plugins instalados mediante npm se actualizan después de que finalice la
+  actualización del núcleo.
 
-## Comprobar el estado actual
+## Consulta del estado actual
 
 ```bash
 openclaw update status
 ```
 
-Muestra el canal activo (con la fuente que lo decidió: configuración, etiqueta git,
-rama git, versión instalada o valor predeterminado), el tipo de instalación (git o paquete),
-la versión actual y la disponibilidad de actualizaciones.
+Muestra el canal activo (con el origen que lo determinó: configuración,
+etiqueta de git, rama de git, versión instalada o valor predeterminado), el tipo
+de instalación (git o paquete), la versión actual y la disponibilidad de
+actualizaciones.
 
-## Prácticas recomendadas de etiquetado
+## Prácticas recomendadas para las etiquetas
 
-- Etiquete las versiones en las que quiere que aterricen los checkouts de git: `vYYYY.M.PATCH` para stable,
-  `vYYYY.M.PATCH-beta.N` para beta. Los sufijos de prelanzamiento con nombre, como
-  `-alpha.N`, `-rc.N` y `-next.N`, no son destinos stable ni beta.
-- Las etiquetas estables numéricas heredadas, como `vYYYY.M.PATCH-1` y `v1.0.1-1`, siguen
-  reconociéndose como etiquetas git estables por compatibilidad.
-- `vYYYY.M.PATCH.beta.N` (separado por puntos) también se reconoce por compatibilidad;
-  prefiera `-beta.N`.
-- Mantenga las etiquetas inmutables: nunca mueva ni reutilice una etiqueta.
-- Los dist-tags de npm siguen siendo la fuente de referencia para las instalaciones de npm:
-  - `latest` -> stable
-  - `extended-stable` -> versión de paquete retrasada por mes con soporte
-  - `beta` -> compilación candidata o compilación estable publicada primero en beta
+- Etiquete las versiones en las que quiera que se sitúen los checkouts de git:
+  `vYYYY.M.PATCH` para estable y `vYYYY.M.PATCH-beta.N` para beta. Los sufijos
+  de versiones preliminares con nombre, como `-alpha.N`, `-rc.N` y `-next.N`,
+  no son destinos estables ni beta.
+- Las etiquetas estables numéricas heredadas, como `vYYYY.M.PATCH-1` y
+  `v1.0.1-1`, siguen reconociéndose como etiquetas estables de git por
+  compatibilidad.
+- `vYYYY.M.PATCH.beta.N` (separado por puntos) también se reconoce por
+  compatibilidad; se recomienda `-beta.N`.
+- Mantenga inmutables las etiquetas: nunca mueva ni reutilice una etiqueta.
+- Los dist-tags de npm siguen siendo la fuente de referencia para las
+  instalaciones mediante npm:
+  - `latest` -> estable
+  - `extended-stable` -> versión de paquete del mes anterior aún compatible
+  - `beta` -> compilación candidata o compilación estable publicada primero como beta
   - `dev` -> instantánea de main (opcional)
 
-## Disponibilidad de la app para macOS
+## Disponibilidad de la aplicación para macOS
 
-Las compilaciones beta y dev pueden **no** incluir una versión de la app para macOS. Eso está bien:
+Las compilaciones beta y de desarrollo pueden **no** incluir una versión de la
+aplicación para macOS. No hay ningún problema:
 
-- La etiqueta git y el dist-tag de npm aún pueden publicarse por sí solos.
-- Indique "sin compilación para macOS para esta beta" en las notas de la versión o el changelog.
+- La etiqueta de git y el dist-tag de npm pueden publicarse igualmente por
+  separado.
+- Indique «no hay compilación para macOS en esta beta» en las notas de la
+  versión o en el registro de cambios.
 
-## Relacionado
+## Contenido relacionado
 
 - [Actualización](/es/install/updating)
 - [Funcionamiento interno del instalador](/es/install/installer)

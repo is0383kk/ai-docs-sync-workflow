@@ -1,114 +1,152 @@
 ---
 read_when:
-    - Vous déboguez des rejets de requêtes de fournisseur liés à la forme de la transcription
-    - Vous modifiez la sanitisation des transcriptions ou la logique de réparation des appels d’outils
-    - Vous examinez les incohérences d’identifiants d’appels d’outils entre fournisseurs
-summary: 'Référence : règles de nettoyage et de réparation des transcriptions propres aux fournisseurs'
+    - Vous déboguez des rejets de requêtes par le fournisseur liés à la structure de la transcription
+    - Vous modifiez la logique d’assainissement des transcriptions ou de réparation des appels d’outils
+    - Vous examinez les incohérences d’identifiants d’appels d’outils entre les fournisseurs
+summary: 'Référence : règles d’assainissement et de réparation des transcriptions propres aux fournisseurs'
 title: Hygiène des transcriptions
 x-i18n:
-    generated_at: "2026-06-27T18:12:59Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T03:19:45Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: ca1c747b33dc0d6730281d6c91d28a0f8a85bcc5e5cb00dbdebdb55157871a7d
+    source_hash: 4c78d718106498e92c34e3ad6af452a340f230fa88fbf3da36a568e9814ec759
     source_path: reference/transcript-hygiene.md
     workflow: 16
 ---
 
-OpenClaw applique des **correctifs propres aux fournisseurs** aux transcriptions avant une exécution (lors de la construction du contexte du modèle). La plupart sont des ajustements **en mémoire** utilisés pour satisfaire des exigences strictes des fournisseurs. Une passe distincte de réparation des fichiers de session peut aussi réécrire le JSONL stocké avant le chargement de la session, mais seulement pour les lignes mal formées ou les tours persistés qui ne sont pas des enregistrements durables valides. Les réponses assistant livrées sont conservées sur disque ; la suppression du préremplissage assistant propre au fournisseur n’a lieu que lors de la construction des charges utiles sortantes. Lorsqu’une réparation a lieu, le fichier original est écrit dans un fichier frère transitoire `*.bak-<pid>-<ts>` avant le remplacement atomique, puis supprimé une fois le remplacement réussi ; la sauvegarde n’est conservée que si le nettoyage échoue lui-même (auquel cas le chemin est renvoyé).
+OpenClaw applique des **correctifs propres à chaque fournisseur** aux transcriptions avant une exécution
+(lors de la construction du contexte du modèle). La plupart sont des ajustements **en mémoire** utilisés pour
+satisfaire les exigences strictes des fournisseurs. Une passe distincte de réparation du fichier de session peut
+également réécrire le JSONL stocké avant le chargement de la session, mais uniquement pour les
+lignes malformées ou les tours persistés qui ne constituent pas des enregistrements durables valides.
+Les réponses de l’assistant transmises sont conservées sur disque ; la suppression du préremplissage
+de l’assistant propre au fournisseur n’a lieu que lors de la construction des charges utiles
+sortantes.
 
-Le périmètre comprend :
+Lorsqu’une réparation est effectuée, le fichier d’origine est écrit dans un fichier frère temporaire
+`*.bak-<pid>-<ts>` avant le remplacement atomique, puis supprimé une fois le
+remplacement réussi. La sauvegarde n’est conservée que si son nettoyage échoue,
+auquel cas son chemin est signalé.
 
-- Le contexte d’invite uniquement runtime qui reste hors des tours de transcription visibles par l’utilisateur
-- L’assainissement des identifiants d’appel d’outil
-- La validation des entrées d’appel d’outil
-- La réparation de l’appariement des résultats d’outil
-- La validation / l’ordonnancement des tours
-- Le nettoyage des signatures de pensée
+La portée comprend :
+
+- L’exclusion du contexte d’invite réservé à l’exécution des tours de transcription visibles par l’utilisateur
+- L’assainissement des identifiants d’appels d’outils
+- La validation des entrées d’appels d’outils
+- La réparation de l’association des résultats d’outils
+- La validation et l’ordre des tours
 - Le nettoyage des signatures de réflexion
-- L’assainissement des charges utiles d’image
-- Le nettoyage des blocs de texte vides avant la relecture fournisseur
-- Le nettoyage des tours de longueur incomplets uniquement composés de raisonnement avant la relecture fournisseur
-- Le balisage de provenance des entrées utilisateur (pour les invites routées entre sessions)
-- La réparation des tours d’erreur assistant vides pour la relecture Bedrock Converse
+- Le nettoyage des signatures de raisonnement
+- L’assainissement des charges utiles d’images
+- Le nettoyage des blocs de texte vides avant leur relecture par le fournisseur
+- Le nettoyage des tours incomplets limités en longueur et contenant uniquement du raisonnement avant leur relecture par le fournisseur
+- Le marquage de la provenance des entrées utilisateur (pour les invites acheminées entre sessions)
+- La réparation des tours d’erreur vides de l’assistant pour la relecture par Bedrock Converse
 
-Si vous avez besoin de détails sur le stockage des transcriptions, consultez :
-
-- [Analyse approfondie de la gestion des sessions](/fr/reference/session-management-compaction)
-
----
-
-## Règle globale : le contexte runtime n’est pas la transcription utilisateur
-
-Le contexte runtime/système peut être ajouté à l’invite du modèle pour un tour, mais ce n’est pas du contenu rédigé par l’utilisateur final. OpenClaw conserve un corps d’invite distinct orienté transcription pour les réponses Gateway, les suivis en file d’attente, ACP, CLI et les exécutions OpenClaw intégrées. Les tours utilisateur visibles stockés utilisent ce corps de transcription au lieu de l’invite enrichie par le runtime.
-
-Pour les sessions héritées qui ont déjà persisté des enveloppes runtime, les surfaces d’historique Gateway appliquent une projection d’affichage avant de renvoyer les messages aux clients WebChat, TUI, REST ou SSE.
+Pour plus de détails sur le stockage des transcriptions, consultez
+[Présentation approfondie de la gestion des sessions](/fr/reference/session-management-compaction).
 
 ---
 
-## Où cela s’exécute
+## Règle globale : le contexte d’exécution n’est pas une transcription utilisateur
 
-Toute l’hygiène des transcriptions est centralisée dans le runner intégré :
+Le contexte d’exécution ou système peut être ajouté à l’invite du modèle pour un tour, mais il ne
+s’agit pas de contenu rédigé par l’utilisateur final. OpenClaw conserve un corps
+d’invite distinct destiné à la transcription pour les réponses du Gateway, les suivis mis en file d’attente, ACP, la CLI et les exécutions
+OpenClaw intégrées. Les tours utilisateur visibles stockés utilisent ce corps de transcription au lieu de
+l’invite enrichie par le contexte d’exécution.
+
+Pour les anciennes sessions qui ont déjà persisté des enveloppes d’exécution, les surfaces d’historique du Gateway
+appliquent une projection d’affichage avant de renvoyer les messages aux clients WebChat,
+TUI, REST ou SSE.
+
+---
+
+## Emplacement de l’exécution
+
+Toute l’hygiène des transcriptions est centralisée dans l’exécuteur intégré :
 
 - Sélection de la politique : `src/agents/transcript-policy.ts`
-- Application de l’assainissement/réparation : `sanitizeSessionHistory` dans `src/agents/embedded-agent-runner/replay-history.ts`
+  (`resolveTranscriptPolicy`, indexée par `provider`, `modelApi` et `modelId`)
+- Application de l’assainissement et des réparations : `sanitizeSessionHistory` dans
+  `src/agents/embedded-agent-runner/replay-history.ts`
 
-La politique utilise `provider`, `modelApi` et `modelId` pour décider quoi appliquer.
-
-Séparément de l’hygiène des transcriptions, les fichiers de session sont réparés (si nécessaire) avant le chargement :
+Indépendamment de l’hygiène des transcriptions, les fichiers de session sont réparés (si nécessaire)
+avant leur chargement :
 
 - `repairSessionFileIfNeeded` dans `src/agents/session-file-repair.ts`
-- Appelé depuis `run/attempt.ts` et `compact.ts` (runner intégré)
+- Appelée depuis `src/agents/embedded-agent-runner/run/attempt.ts` et
+  `src/agents/embedded-agent-runner/compact.ts`
 
 ---
 
 ## Règle globale : assainissement des images
 
-Les charges utiles d’image sont toujours assainies pour éviter un rejet côté fournisseur dû aux limites de taille (réduction d’échelle/recompression des images base64 trop volumineuses).
-
-Cela aide également à contrôler la pression en tokens induite par les images pour les modèles capables de vision. Des dimensions maximales plus faibles réduisent généralement l’usage de tokens ; des dimensions plus élevées préservent les détails.
+Les charges utiles d’images sont toujours assainies afin d’éviter leur rejet côté fournisseur en raison des
+limites de taille (réduction des dimensions et recompression des images base64 trop volumineuses). Cela aide également à
+maîtriser la pression sur les tokens causée par les images pour les modèles capables de vision : des dimensions
+maximales plus faibles réduisent l’utilisation des tokens, tandis que des dimensions plus élevées préservent les détails.
 
 Implémentation :
 
-- `sanitizeSessionMessagesImages` dans `src/agents/embedded-agent-helpers/images.ts`
+- `sanitizeSessionMessagesImages` dans
+  `src/agents/embedded-agent-helpers/images.ts`
 - `sanitizeContentBlocksImages` dans `src/agents/tool-images.ts`
-- Le côté maximal de l’image est configurable via `agents.defaults.imageMaxDimensionPx` (par défaut : `1200`).
-- Les blocs de texte vides sont supprimés pendant que cette passe parcourt le contenu de relecture. Les tours assistant qui deviennent vides sont retirés de la copie de relecture ; les tours utilisateur et résultat d’outil qui deviennent vides reçoivent un placeholder non vide de contenu omis.
+- La dimension maximale d’un côté de l’image est configurable via `agents.defaults.imageMaxDimensionPx`
+  (valeur par défaut : `1200`)
+- Les blocs de texte vides sont supprimés pendant que cette passe parcourt le contenu à relire.
+  Les tours de l’assistant qui deviennent vides sont retirés de la copie destinée à la relecture ; les tours
+  utilisateur et de résultats d’outils qui deviennent vides reçoivent un texte de remplacement non vide
+  indiquant que le contenu a été omis.
 
 ---
 
-## Règle globale : appels d’outil mal formés
+## Règle globale : appels d’outils malformés
 
-Les blocs d’appel d’outil assistant auxquels il manque à la fois `input` et `arguments` sont supprimés avant la construction du contexte du modèle. Cela évite les rejets fournisseur dus à des appels d’outil partiellement persistés (par exemple après un échec de limite de débit).
+Les blocs d’appels d’outils de l’assistant auxquels manquent à la fois `input` et `arguments` sont supprimés
+avant la construction du contexte du modèle. Cela évite les rejets du fournisseur dus à des
+appels d’outils partiellement persistés (par exemple, après un échec lié à une limitation de débit).
 
 Implémentation :
 
 - `sanitizeToolCallInputs` dans `src/agents/session-transcript-repair.ts`
-- Appliqué dans `sanitizeSessionHistory` dans `src/agents/embedded-agent-runner/replay-history.ts`
+- Appliquée dans `sanitizeSessionHistory`
+  (`src/agents/embedded-agent-runner/replay-history.ts`)
 
 ---
 
-## Règle globale : tours incomplets uniquement composés de raisonnement
+## Règle globale : tours incomplets contenant uniquement du raisonnement
 
-Les tours assistant qui atteignent la limite de sortie du fournisseur avec uniquement du contenu de réflexion ou de réflexion masquée sont omis de la copie de relecture en mémoire. Ces tours contiennent un état fournisseur incomplet et peuvent porter une signature de réflexion partielle.
+Les tours de l’assistant qui atteignent la limite de sortie du fournisseur avec uniquement du contenu de raisonnement ou
+de raisonnement expurgé sont omis de la copie de relecture en mémoire. Ces
+tours contiennent un état incomplet du fournisseur et peuvent comporter une signature de raisonnement
+partielle.
 
-Les tours de longueur vides restent inchangés, tout comme les tours de longueur avec du texte visible, des appels d’outil ou des blocs de contenu inconnus. Les transcriptions stockées ne sont pas réécrites.
+Les tours vides limités en longueur restent inchangés, tout comme ceux contenant du texte visible,
+des appels d’outils ou des blocs de contenu inconnus. Les transcriptions stockées ne sont pas réécrites.
 
-Implémentation :
-
-- `normalizeAssistantReplayContent` dans `src/agents/embedded-agent-runner/replay-history.ts`
+Implémentation : `normalizeAssistantReplayContent` dans
+`src/agents/embedded-agent-runner/replay-history.ts`
 
 ---
 
-## Règle globale : provenance des entrées entre sessions
+## Règle globale : provenance des entrées intersessions
 
-Lorsqu’un agent envoie une invite dans une autre session via `sessions_send` (y compris les étapes de réponse/annonce agent à agent), OpenClaw persiste le tour utilisateur créé avec :
+Lorsqu’un agent envoie une invite à une autre session via `sessions_send`
+(y compris lors des étapes de réponse ou d’annonce entre agents), OpenClaw persiste le
+tour utilisateur créé avec `message.provenance.kind = "inter_session"`.
 
-- `message.provenance.kind = "inter_session"`
+OpenClaw ajoute également au même tour un marqueur `[Message intersession] ... isUser=false`
+avant le texte de l’invite acheminée, afin que l’appel actif au modèle puisse
+distinguer la sortie d’une session étrangère des instructions externes de l’utilisateur final. Ce
+marqueur inclut la session source, le canal et l’outil lorsqu’ils sont disponibles. La
+transcription continue d’utiliser `role: "user"` pour assurer la compatibilité avec le fournisseur, mais le
+texte visible et les métadonnées de provenance identifient tous deux le tour comme des données
+intersessions.
 
-OpenClaw préfixe également le texte de l’invite routée par un marqueur du même tour `[Inter-session message ... isUser=false]` afin que l’appel actif au modèle puisse distinguer une sortie de session étrangère d’instructions externes de l’utilisateur final. Ce marqueur inclut la session source, le canal et l’outil lorsqu’ils sont disponibles. La transcription utilise toujours `role: "user"` pour la compatibilité fournisseur, mais le texte visible et les métadonnées de provenance marquent tous deux le tour comme données inter-session.
-
-Lors de la reconstruction du contexte, OpenClaw applique le même marqueur aux anciens tours utilisateur inter-session persistés qui n’ont que des métadonnées de provenance.
+Lors de la reconstruction du contexte, OpenClaw applique le même marqueur aux anciens tours
+utilisateur intersessions persistés qui ne disposent que des métadonnées de provenance.
 
 ---
 
@@ -117,83 +155,130 @@ Lors de la reconstruction du contexte, OpenClaw applique le même marqueur aux a
 **OpenAI / OpenAI Codex**
 
 - Assainissement des images uniquement.
-- Supprime les signatures de raisonnement orphelines (éléments de raisonnement autonomes sans bloc de contenu suivant) pour les transcriptions OpenAI Responses/Codex, et supprime le raisonnement OpenAI rejouable après un changement de route de modèle.
-- Préserve les charges utiles d’éléments de raisonnement rejouables OpenAI Responses, y compris les éléments chiffrés à résumé vide, afin que la relecture manuelle/WebSocket conserve l’état `rs_*` requis apparié aux éléments de sortie assistant.
-- Native ChatGPT Codex Responses suit la parité filaire Codex en rejouant les charges utiles antérieures Responses de raisonnement/message/fonction sans identifiants d’éléments antérieurs tout en préservant le `prompt_cache_key` de session.
-- La relecture de la famille OpenAI Responses préserve les paires de raisonnement canoniques `call_*|fc_*` du même modèle, mais normalise de façon déterministe les `call_id` / identifiants d’éléments d’appel de fonction mal formés ou trop longs avant la conversion de charge utile pi-ai.
-- La réparation de l’appariement des résultats d’outil peut déplacer de vraies sorties appariées et synthétiser des sorties Codex de style `aborted` pour les appels d’outil manquants.
-- Aucune validation ni réorganisation des tours.
-- Les sorties d’outil manquantes de la famille OpenAI Responses sont synthétisées en `aborted` pour correspondre à la normalisation de relecture Codex.
-- Aucune suppression de signature de pensée.
+- Suppression des signatures de raisonnement orphelines (éléments de raisonnement autonomes sans
+  bloc de contenu suivant) pour les transcriptions OpenAI Responses/Codex, ainsi que du
+  raisonnement OpenAI relisible après un changement de route du modèle.
+- Conservation des charges utiles des éléments de raisonnement OpenAI Responses relisibles, y compris
+  les éléments chiffrés avec un résumé vide, afin que la relecture manuelle ou par WebSocket conserve l’état
+  `rs_*` requis associé aux éléments de sortie de l’assistant.
+- Les Responses natives de ChatGPT Codex respectent la parité du protocole Codex en relisant
+  les charges utiles précédentes de raisonnement, de message et de fonction de Responses sans les identifiants
+  d’éléments antérieurs, tout en préservant le `prompt_cache_key` de la session.
+- La relecture de la famille OpenAI Responses préserve les paires canoniques de raisonnement
+  `call_*|fc_*` du même modèle, mais normalise de façon déterministe les `call_id` ou identifiants
+  d’éléments d’appels de fonction malformés ou trop longs avant la conversion de la charge utile pi-ai.
+- La réparation de l’association des résultats d’outils peut déplacer les sorties réelles correspondantes et synthétiser
+  des sorties `aborted` au format Codex pour les appels d’outils manquants.
+- Aucune validation ni réorganisation des tours ; aucune suppression des signatures de réflexion.
 
-**OpenAI-compatible Chat Completions**
+**Chat Completions compatibles avec OpenAI**
 
-- Les blocs historiques de réflexion/raisonnement assistant sont supprimés avant la relecture afin que les serveurs locaux et de type proxy compatibles OpenAI ne reçoivent pas de champs de raisonnement des tours précédents comme `reasoning` ou `reasoning_content`.
-- Les continuations d’appel d’outil du même tour actuel conservent le bloc de raisonnement assistant attaché à l’appel d’outil jusqu’à ce que le résultat d’outil ait été rejoué.
-- Les entrées de modèles personnalisés/auto-hébergés avec `reasoning: true` préservent les métadonnées de raisonnement rejouées.
-- Les exceptions détenues par le fournisseur peuvent se désinscrire lorsque leur protocole filaire exige les métadonnées de raisonnement rejouées.
+- Les blocs historiques de raisonnement de l’assistant sont supprimés avant la relecture,
+  afin que les serveurs locaux et mandataires compatibles avec OpenAI ne reçoivent pas
+  les champs de raisonnement des tours précédents tels que `reasoning` ou `reasoning_content`.
+- Les continuations d’appels d’outils du même tour en cours conservent le bloc de raisonnement de l’assistant
+  associé à l’appel d’outil jusqu’à ce que le résultat de l’outil ait été relu.
+- Les entrées de modèles personnalisés ou auto-hébergés avec `reasoning: true` conservent les
+  métadonnées de raisonnement relues.
+- Les exceptions propres aux fournisseurs peuvent désactiver ce comportement lorsque leur protocole exige
+  la relecture des métadonnées de raisonnement.
 
 **Google (Generative AI / Gemini CLI / Antigravity)**
 
-- Assainissement des identifiants d’appel d’outil : alphanumérique strict.
-- Réparation de l’appariement des résultats d’outil et résultats d’outil synthétiques.
-- Validation des tours (alternance de tours de style Gemini).
-- Correction d’ordonnancement des tours Google (préfixe un minuscule amorçage utilisateur si l’historique commence par assistant).
-- Antigravity Claude : normalise les signatures de réflexion ; supprime les blocs de réflexion non signés.
+- Assainissement des identifiants d’appels d’outils : caractères alphanumériques stricts.
+- Réparation de l’association des résultats d’outils et résultats d’outils synthétiques.
+- Validation des tours (alternance des tours au format Gemini).
+- Correction de l’ordre des tours Google (ajout au début d’un court message d’initialisation utilisateur si l’historique
+  commence par l’assistant).
+- Antigravity Claude : normalisation des signatures de raisonnement ; suppression des blocs de raisonnement
+  non signés.
 
-**Anthropic / Minimax (compatible Anthropic)**
+**Anthropic / Minimax (compatibles avec Anthropic)**
 
-- Réparation de l’appariement des résultats d’outil et résultats d’outil synthétiques.
-- Validation des tours (fusionne les tours utilisateur consécutifs pour satisfaire l’alternance stricte).
-- Les tours de préremplissage assistant finaux sont supprimés des charges utiles Anthropic Messages sortantes lorsque la réflexion est activée, y compris les routes Cloudflare AI Gateway.
-- Les signatures de réflexion assistant antérieures à la Compaction sont supprimées avant la relecture fournisseur lorsqu’une session a été compactée. Les signatures de réflexion sont liées cryptographiquement au préfixe de conversation au moment de la génération ; après la Compaction, le préfixe change (le contenu résumé est remplacé par un résumé de compaction), donc rejouer les signatures originales conduit Anthropic à rejeter la requête avec "Invalid signature in thinking block". Le texte de réflexion est conservé comme bloc non signé, puis traité par la règle ci-dessous.
-- Les blocs de réflexion avec des signatures de relecture manquantes, vides ou blanches sont supprimés avant la conversion fournisseur. Si cela vide un tour assistant, OpenClaw conserve la forme du tour avec un texte non vide de raisonnement omis.
-- Les anciens tours assistant uniquement composés de réflexion qui doivent être supprimés sont remplacés par un texte non vide de raisonnement omis afin que les adaptateurs fournisseur ne suppriment pas le tour de relecture.
+- Réparation de l’association des résultats d’outils et résultats d’outils synthétiques.
+- Validation des tours (fusion des tours utilisateur consécutifs pour respecter une
+  alternance stricte).
+- Les tours finaux de préremplissage de l’assistant sont supprimés des charges utiles Anthropic
+  Messages sortantes lorsque le raisonnement est activé, y compris pour les routes du
+  Gateway IA de Cloudflare.
+- Les signatures de raisonnement de l’assistant antérieures à la Compaction sont supprimées avant la
+  relecture par le fournisseur lorsqu’une session a été compactée. Les signatures de raisonnement sont
+  liées cryptographiquement au préfixe de la conversation au moment de leur génération ;
+  après la Compaction, le préfixe change (le contenu résumé remplace le
+  contenu d’origine), de sorte que la relecture des signatures d’origine conduit Anthropic à
+  rejeter la requête avec « Signature non valide dans le bloc de raisonnement ». Le
+  texte du raisonnement est conservé sous la forme d’un bloc non signé, puis traité par la
+  règle ci-dessous.
+- Les blocs de raisonnement dont les signatures de relecture sont absentes, vides ou ne contiennent que des espaces sont
+  supprimés avant la conversion par le fournisseur. Si cela vide un tour de l’assistant,
+  OpenClaw conserve la structure du tour avec un texte non vide indiquant que le raisonnement a été omis.
+- Les anciens tours de l’assistant contenant uniquement du raisonnement et devant être supprimés sont remplacés
+  par un texte non vide indiquant que le raisonnement a été omis, afin que les adaptateurs du fournisseur ne suppriment pas
+  le tour relu.
 
-**Amazon Bedrock (Converse API)**
+**Amazon Bedrock (API Converse)**
 
-- Les tours d’erreur de flux assistant vides sont réparés en un bloc de texte de secours non vide avant la relecture. Bedrock Converse rejette les messages assistant avec `content: []`, donc les tours assistant persistés avec `stopReason: "error"` et un contenu vide sont également réparés sur disque avant le chargement.
-- Les tours d’erreur de flux assistant qui ne contiennent que des blocs de texte blancs sont supprimés de la copie de relecture en mémoire au lieu de rejouer un bloc blanc invalide.
-- Les signatures de réflexion assistant antérieures à la Compaction sont supprimées avant la relecture Converse lorsqu’une session a été compactée, pour la même raison qu’Anthropic ci-dessus.
-- Les blocs de réflexion Claude avec des signatures de relecture manquantes, vides ou blanches sont supprimés avant la relecture Converse. Si cela vide un tour assistant, OpenClaw conserve la forme du tour avec un texte non vide de raisonnement omis.
-- Les anciens tours assistant uniquement composés de réflexion qui doivent être supprimés sont remplacés par un texte non vide de raisonnement omis afin que la relecture Converse conserve une forme de tour stricte.
-- La relecture filtre les tours assistant miroir de livraison OpenClaw et injectés par Gateway.
-- L’assainissement des images s’applique via la règle globale.
+- Les tours d’erreur de diffusion vides de l’assistant sont réparés avec un bloc de texte de remplacement
+  non vide avant la relecture. Bedrock Converse rejette les messages de l’assistant
+  avec `content: []` ; les tours persistés de l’assistant avec `stopReason:
+"error"` et un contenu vide sont donc également réparés sur disque avant leur chargement.
+- Les tours d’erreur de diffusion de l’assistant contenant uniquement des blocs de texte vides sont retirés de
+  la copie de relecture en mémoire au lieu de relire un bloc vide non valide.
+- Les signatures de raisonnement de l’assistant antérieures à la Compaction sont supprimées avant la relecture
+  par Converse lorsqu’une session a été compactée, pour la même raison que pour
+  Anthropic ci-dessus.
+- Les blocs de raisonnement Claude dont les signatures de relecture sont absentes, vides ou ne contiennent que des espaces
+  sont supprimés avant la relecture par Converse. Si cela vide un tour de l’assistant,
+  OpenClaw conserve la structure du tour avec un texte non vide indiquant que le raisonnement a été omis.
+- Les anciens tours de l’assistant contenant uniquement du raisonnement et devant être supprimés sont remplacés
+  par un texte non vide indiquant que le raisonnement a été omis, afin que la relecture par Converse conserve
+  une structure stricte des tours.
+- La relecture filtre les tours de l’assistant issus du miroir de distribution d’OpenClaw et injectés par le Gateway.
+- L’assainissement des images s’applique conformément à la règle globale.
 
-**Mistral (y compris la détection basée sur l’identifiant de modèle)**
+**Mistral (y compris la détection fondée sur l’identifiant du modèle)**
 
-- Assainissement des identifiants d’appel d’outil : strict9 (longueur alphanumérique 9).
+- Assainissement des identifiants d’appels d’outils : strict9 (caractères alphanumériques, longueur 9).
 
 **OpenRouter Gemini**
 
-- Nettoyage des signatures de pensée : supprime les valeurs `thought_signature` non base64 (conserve le base64).
+- Nettoyage des signatures de réflexion : suppression des valeurs `thought_signature` qui ne sont pas
+  en base64 (conservation de celles en base64).
 
 **OpenRouter Anthropic**
 
-- Les tours de préremplissage assistant finaux sont supprimés des charges utiles de modèles Anthropic compatibles OpenAI OpenRouter vérifiés lorsque le raisonnement est activé, ce qui correspond au comportement de relecture Anthropic direct et Cloudflare Anthropic.
+- Les tours finaux de préremplissage de l’assistant sont supprimés des charges utiles vérifiées des modèles Anthropic
+  compatibles avec OpenAI sur OpenRouter lorsque le raisonnement est activé,
+  conformément au comportement de relecture d’Anthropic direct et d’Anthropic via Cloudflare.
 
-**Tout le reste**
+**Tous les autres**
 
 - Assainissement des images uniquement.
 
 ---
 
-## Comportement historique (avant 2026.1.22)
+## Comportement historique (avant la version 2026.1.22)
 
-Avant la version 2026.1.22, OpenClaw appliquait plusieurs couches d’hygiène des transcriptions :
+Avant la version 2026.1.22, OpenClaw appliquait plusieurs couches d’hygiène des
+transcriptions :
 
-- Une **extension transcript-sanitize** s’exécutait à chaque construction de contexte et pouvait :
-  - Réparer l’appariement utilisation/résultat d’outil.
-  - Assainir les identifiants d’appel d’outil (y compris un mode non strict qui préservait `_`/`-`).
-- Le runner effectuait également un assainissement propre aux fournisseurs, ce qui dupliquait le travail.
-- Des mutations supplémentaires avaient lieu hors de la politique fournisseur, notamment :
-  - La suppression des balises `<final>` du texte assistant avant la persistance.
-  - La suppression des tours d’erreur assistant vides.
-  - La troncature du contenu assistant après les appels d’outil.
+- Une **extension d’assainissement des transcriptions** s’exécutait lors de chaque construction du contexte et pouvait :
+  - Réparer l’association entre l’utilisation des outils et leurs résultats.
+  - Assainir les identifiants d’appels d’outils (y compris dans un mode non strict qui conservait
+    `_`/`-`).
+- L’exécuteur effectuait également un assainissement propre au fournisseur, ce qui
+  dupliquait le travail.
+- D’autres mutations avaient lieu en dehors de la politique du fournisseur, notamment
+  la suppression des balises `<final>` du texte de l’assistant avant la persistance, la suppression
+  des tours d’erreur vides de l’assistant et la troncature du contenu de l’assistant après les appels
+  d’outils.
 
-Cette complexité a provoqué des régressions entre fournisseurs (notamment l’appariement `call_id|fc_id` d’`openai-responses`). Le nettoyage de 2026.1.22 a supprimé l’extension, centralisé la logique dans le runner et rendu OpenAI **sans modification** au-delà de l’assainissement des images.
+Cette complexité provoquait des régressions entre fournisseurs (notamment pour
+l’association `call_id|fc_id` d’`openai-responses`). Le nettoyage de la version 2026.1.22 a supprimé
+l’extension, centralisé la logique dans l’exécuteur et fait en sorte qu’OpenAI ne soit **pas modifié**
+au-delà de l’assainissement des images.
 
-## Connexe
+## Ressources associées
 
 - [Gestion des sessions](/fr/concepts/session)
 - [Élagage des sessions](/fr/concepts/session-pruning)

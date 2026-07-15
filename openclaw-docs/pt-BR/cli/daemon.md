@@ -2,23 +2,21 @@
 read_when:
     - Você ainda usa `openclaw daemon ...` em scripts
     - Você precisa de comandos de ciclo de vida do serviço (instalar/iniciar/parar/reiniciar/status)
-summary: Referência da CLI para `openclaw daemon` (alias legado para gerenciamento do serviço Gateway)
+summary: Referência da CLI para `openclaw daemon` (alias legado para gerenciamento do serviço do Gateway)
 title: Daemon
 x-i18n:
-    generated_at: "2026-06-30T13:53:06Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T23:50:12Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 1a3ec72b22907994ecefac84b2b9e5b22bf1d922e5b2822a1c0db80f0362dade
+    source_hash: 4933885078d067ff2e077f25f14483aa5a10e3cd36951d0dc25c625d8b4d78e6
     source_path: cli/daemon.md
     workflow: 16
 ---
 
 # `openclaw daemon`
 
-Alias legado para comandos de gerenciamento do serviço Gateway.
-
-`openclaw daemon ...` mapeia para a mesma superfície de controle de serviço que os comandos de serviço `openclaw gateway ...`.
+Alias legado para o gerenciamento do serviço Gateway. `openclaw daemon ...` corresponde aos mesmos comandos de controle de serviço que `openclaw gateway ...`. Prefira [`openclaw gateway`](/pt-BR/cli/gateway) na documentação e nos exemplos atuais.
 
 ## Uso
 
@@ -31,45 +29,34 @@ openclaw daemon restart
 openclaw daemon uninstall
 ```
 
-## Subcomandos
+## Subcomandos e opções
 
-- `status`: mostra o estado de instalação do serviço e verifica a integridade do Gateway
-- `install`: instala o serviço (`launchd`/`systemd`/`schtasks`)
-- `uninstall`: remove o serviço
-- `start`: inicia o serviço
-- `stop`: para o serviço
-- `restart`: reinicia o serviço
+| Subcomando  | Opções                                                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `status`    | `--url`, `--token`, `--password`, `--timeout`, `--no-probe`, `--require-rpc`, `--deep`, `--json`                           |
+| `install`   | `--port`, `--runtime <node\|bun>`, `--token`, `--wrapper <path>`, `--force`, `--json`                                      |
+| `uninstall` | `--json`                                                                                                                   |
+| `start`     | `--json`                                                                                                                   |
+| `stop`      | `--json`, `--disable` (somente launchd: desativa KeepAlive/RunAtLoad de forma persistente até a próxima inicialização)     |
+| `restart`   | `--force`, `--safe`, `--skip-deferral`, `--wait <duration>`, `--json`                                                      |
 
-## Opções comuns
+- `status`: mostra o estado de instalação do serviço (launchd/systemd/schtasks) e verifica a integridade do Gateway.
+- `install`: instala o serviço; `--force` reinstala/sobrescreve uma instalação existente.
+- `restart --safe`: solicita ao Gateway em execução que faça uma verificação preliminar do trabalho ativo e agende uma única reinicialização consolidada após a conclusão do trabalho, limitada por `gateway.reload.deferralTimeoutMs` (padrão de 300000 ms/5 minutos; defina como `0` para aguardar indefinidamente). Quando esse limite expira, a reinicialização é forçada mesmo assim. `restart` sem opções usa diretamente o gerenciador de serviços; `--force` é a substituição imediata.
+- `restart --safe --skip-deferral`: ignora o mecanismo de adiamento por trabalho ativo para que o Gateway seja reiniciado imediatamente, mesmo quando impedimentos são relatados. Requer `--safe`.
 
-- `status`: `--url`, `--token`, `--password`, `--timeout`, `--no-probe`, `--require-rpc`, `--deep`, `--json`
-- `install`: `--port`, `--runtime <node|bun>`, `--token`, `--force`, `--json`
-- `restart`: `--safe`, `--skip-deferral`, `--force`, `--wait <duration>`, `--json`
-- ciclo de vida (`uninstall|start|stop`): `--json`
+## Observações
 
-Observações:
-
-- `status` resolve SecretRefs de autenticação configurados para autenticação da verificação quando possível.
-- Se um SecretRef de autenticação obrigatório não for resolvido neste caminho de comando, `daemon status --json` relata `rpc.authWarning` quando a conectividade/autenticação da verificação falha; passe `--token`/`--password` explicitamente ou resolva a origem do segredo primeiro.
-- Se a verificação for bem-sucedida, avisos de auth-ref não resolvidas são suprimidos para evitar falsos positivos.
-- `status --deep` adiciona uma varredura de serviço em nível de sistema de melhor esforço. Quando encontra outros serviços semelhantes a gateway, a saída humana imprime dicas de limpeza e avisa que um gateway por máquina ainda é a recomendação normal.
-- `status --deep` também executa validação de configuração em modo ciente de Plugin e expõe avisos de manifesto de Plugin configurados (por exemplo, metadados ausentes de configuração de canal), para que verificações rápidas de instalação e atualização os capturem. O `status` padrão mantém o caminho rápido somente leitura que ignora a validação de Plugin.
-- Em instalações systemd no Linux, as verificações de desvio de token de `status` incluem fontes de unidade `Environment=` e `EnvironmentFile=`.
-- As verificações de desvio resolvem SecretRefs de `gateway.auth.token` usando o env de runtime mesclado (primeiro o env do comando de serviço, depois o fallback para o env do processo).
-- Se a autenticação por token não estiver efetivamente ativa (`gateway.auth.mode` explícito como `password`/`none`/`trusted-proxy`, ou modo não definido quando a senha pode prevalecer e nenhum candidato a token pode prevalecer), as verificações de desvio de token ignoram a resolução do token de configuração.
-- Quando a autenticação por token exige um token e `gateway.auth.token` é gerenciado por SecretRef, `install` valida que o SecretRef pode ser resolvido, mas não persiste o token resolvido nos metadados de ambiente do serviço.
-- Se a autenticação por token exige um token e o SecretRef de token configurado não foi resolvido, a instalação falha de forma fechada.
-- Se `gateway.auth.token` e `gateway.auth.password` estiverem configurados e `gateway.auth.mode` não estiver definido, a instalação é bloqueada até que o modo seja definido explicitamente.
-- No macOS, `install` mantém os plists do LaunchAgent acessíveis somente ao proprietário e carrega valores de ambiente de serviço gerenciados por meio de um arquivo e wrapper acessíveis somente ao proprietário, em vez de serializar chaves de API ou refs de env de perfil de autenticação em `EnvironmentVariables`.
-- Se você executar intencionalmente vários gateways em um host, isole portas, configuração/estado e workspaces; consulte [/gateway#multiple-gateways-same-host](/pt-BR/gateway#multiple-gateways-same-host).
-- `restart --safe` pede ao Gateway em execução para fazer uma pré-verificação do trabalho ativo e agendar uma reinicialização coalescida depois que o trabalho ativo for escoado. A reinicialização segura padrão aguarda o trabalho ativo até o `gateway.reload.deferralTimeoutMs` configurado (padrão de 5 minutos); quando esse orçamento expira, a reinicialização é forçada. Defina `gateway.reload.deferralTimeoutMs` como `0` para uma espera segura indefinida que nunca força. `restart` simples mantém o comportamento existente do gerenciador de serviço; `--force` continua sendo o caminho de substituição imediata.
-- `restart --safe --skip-deferral` executa a reinicialização segura ciente de OpenClaw, mas ignora o gate de adiamento por trabalho ativo, então o Gateway emite a reinicialização imediatamente mesmo quando bloqueadores são relatados. É uma saída de emergência para o operador quando uma execução de tarefa travada prende a reinicialização segura; exige `--safe`.
-
-## Prefira
-
-Use [`openclaw gateway`](/pt-BR/cli/gateway) para a documentação e os exemplos atuais.
+- `status` resolve as SecretRefs de autenticação configuradas para a autenticação da verificação quando possível. Se uma SecretRef obrigatória não for resolvida, `status --json` relata `rpc.authWarning`; forneça `--token`/`--password` explicitamente ou resolva primeiro a fonte do segredo. Os avisos de autenticação não resolvida são suprimidos quando a verificação é bem-sucedida por outros meios.
+- `status --deep` adiciona uma varredura em nível de sistema, de melhor esforço, em busca de outros serviços semelhantes ao Gateway (exibe sugestões de limpeza; a recomendação continua sendo um Gateway por máquina) e executa a validação da configuração em modo ciente de Plugins, expondo avisos do manifesto de Plugins que o caminho rápido padrão ignora.
+- Em instalações systemd no Linux, as verificações de divergência de token inspecionam as fontes `Environment=` e `EnvironmentFile=` da unidade.
+- As verificações de divergência de token resolvem as SecretRefs de `gateway.auth.token` usando o ambiente de execução mesclado (primeiro o ambiente do comando do serviço e depois o ambiente do processo). Se a autenticação por token não estiver efetivamente ativa (`gateway.auth.mode` definido como `password`/`none`/`trusted-proxy`, ou não definido quando a senha puder prevalecer), a resolução do token da configuração será ignorada.
+- `install` valida se um `gateway.auth.token` gerenciado por SecretRef pode ser resolvido, mas nunca persiste o valor resolvido nos metadados do ambiente do serviço; se não puder resolvê-lo, a instalação falhará de forma segura.
+- Se `gateway.auth.token` e `gateway.auth.password` estiverem configurados e `gateway.auth.mode` não estiver definido, `install` será bloqueado até que você defina explicitamente o modo.
+- No macOS, `install` mantém os plists do LaunchAgent e o arquivo de ambiente/wrapper gerado acessíveis somente pelo proprietário (modo `0600`/`0700`), em vez de incorporar segredos em `EnvironmentVariables`.
+- Para executar vários Gateways em um único host, isole portas, configuração/estado e espaços de trabalho. Consulte [Vários gateways](/pt-BR/gateway#multiple-gateways-same-host).
 
 ## Relacionado
 
 - [Referência da CLI](/pt-BR/cli)
-- [Runbook do Gateway](/pt-BR/gateway)
+- [Guia operacional do Gateway](/pt-BR/gateway)

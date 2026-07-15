@@ -1,47 +1,44 @@
 ---
 read_when:
-    - 자동화된 서버 배포와 보안 강화가 필요합니다
-    - VPN 접근이 가능한 방화벽 격리 설정이 필요합니다
+    - 보안 강화를 적용한 자동화된 서버 배포가 필요한 경우
+    - VPN 액세스가 가능한 방화벽 격리 설정이 필요합니다.
     - 원격 Debian/Ubuntu 서버에 배포하고 있습니다
-summary: Ansible, Tailscale VPN 및 방화벽 격리를 통한 자동화된 강화 OpenClaw 설치
+summary: Ansible, Tailscale VPN 및 방화벽 격리를 활용한 자동화되고 강화된 OpenClaw 설치
 title: Ansible
 x-i18n:
-    generated_at: "2026-06-27T17:35:43Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T00:49:56Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 03eb6f40139d7e154eee92a7a1a67471da90b128cc90daf86fbc87e383a5297c
+    source_hash: 8d3626ab364169609f92f636cb6b86cb980dca2b235500e748296128765444ae
     source_path: install/ansible.md
     workflow: 16
 ---
 
-OpenClaw를 보안 우선 아키텍처의 자동 설치 프로그램인 **[openclaw-ansible](https://github.com/openclaw/openclaw-ansible)**로 프로덕션 서버에 배포하세요.
+보안 우선 아키텍처를 갖춘 자동 설치 프로그램인 **[openclaw-ansible](https://github.com/openclaw/openclaw-ansible)**을 사용하여 OpenClaw를 프로덕션 서버에 배포하세요.
 
 <Info>
-[openclaw-ansible](https://github.com/openclaw/openclaw-ansible) 저장소는 Ansible 배포의 기준 소스입니다. 이 페이지는 빠른 개요입니다.
+[openclaw-ansible](https://github.com/openclaw/openclaw-ansible) 저장소는 Ansible 배포의 기준 소스입니다. 이 페이지에서는 간략한 개요를 제공합니다.
 </Info>
 
 ## 사전 요구 사항
 
-| 요구 사항 | 세부 정보                                                |
-| ----------- | --------------------------------------------------------- |
-| **OS**      | Debian 11+ 또는 Ubuntu 20.04+                             |
-| **액세스**  | 루트 또는 sudo 권한                                      |
-| **네트워크** | 패키지 설치를 위한 인터넷 연결                           |
-| **Ansible** | 2.14+ (빠른 시작 스크립트로 자동 설치됨)                 |
+| 요구 사항 | 세부 정보                                                        |
+| --------- | ---------------------------------------------------------------- |
+| 운영 체제 | Debian 11 이상 또는 Ubuntu 20.04 이상                            |
+| 접근 권한 | root 또는 sudo 권한                                              |
+| 네트워크  | 패키지 설치를 위한 인터넷 연결                                   |
+| Ansible   | 2.14 이상(빠른 시작 스크립트에서 자동으로 설치됨)                |
 
-## 제공되는 항목
+## 제공되는 기능
 
-- **방화벽 우선 보안** -- UFW + Docker 격리(SSH + Tailscale만 접근 가능)
-- **Tailscale VPN** -- 서비스를 공개적으로 노출하지 않는 안전한 원격 액세스
-- **Docker** -- 격리된 샌드박스 컨테이너, localhost 전용 바인딩
-- **심층 방어** -- 4계층 보안 아키텍처
-- **Systemd 통합** -- 강화 설정과 함께 부팅 시 자동 시작
-- **단일 명령 설정** -- 몇 분 안에 전체 배포 완료
+- 방화벽 우선 보안: UFW + Docker 격리(SSH + Tailscale을 통해서만 접근 가능)
+- 서비스를 공개적으로 노출하지 않고 원격으로 접근할 수 있는 Tailscale VPN
+- localhost 전용 바인딩을 사용하는 격리된 샌드박스 컨테이너용 Docker
+- 보안 강화 및 부팅 시 자동 시작을 지원하는 systemd 통합
+- 단일 명령 설정
 
 ## 빠른 시작
-
-단일 명령 설치:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-ansible/main/install.sh | bash
@@ -49,19 +46,17 @@ curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-ansible/main/inst
 
 ## 설치되는 항목
 
-Ansible playbook은 다음을 설치하고 구성합니다.
-
-1. **Tailscale** -- 안전한 원격 액세스를 위한 메시 VPN
-2. **UFW 방화벽** -- SSH + Tailscale 포트만 허용
-3. **Docker CE + Compose V2** -- 기본 에이전트 샌드박스 백엔드용
-4. **Node.js 24 + pnpm** -- 런타임 종속성(Node 22 LTS, 현재 `22.19+`, 계속 지원됨)
-5. **OpenClaw** -- 컨테이너화되지 않은 호스트 기반
-6. **Systemd 서비스** -- 보안 강화와 함께 자동 시작
+1. Tailscale(안전한 원격 접근을 위한 메시 VPN)
+2. UFW 방화벽(SSH + Tailscale 포트만 허용)
+3. Docker CE + Compose V2(기본 에이전트 샌드박스 백엔드)
+4. Node.js 및 pnpm(OpenClaw에는 Node 22.19 이상 또는 23.11 이상이 필요하며, Node 24를 권장함)
+5. 컨테이너가 아닌 호스트 기반으로 설치되는 OpenClaw
+6. 보안이 강화된 systemd 서비스
 
 <Note>
-Gateway는 Docker가 아니라 호스트에서 직접 실행됩니다. 에이전트 샌드박싱은
-선택 사항입니다. 이 playbook은 Docker가 기본 샌드박스
-백엔드이기 때문에 Docker를 설치합니다. 자세한 내용과 다른 백엔드는 [샌드박싱](/ko/gateway/sandboxing)을 참조하세요.
+Gateway는 Docker 내부가 아닌 호스트에서 직접 실행됩니다. 에이전트 샌드박싱은
+선택 사항입니다. 이 플레이북은 Docker가 기본 샌드박스
+백엔드이므로 Docker를 설치합니다. 다른 백엔드는 [샌드박싱](/ko/gateway/sandboxing)을 참조하세요.
 </Note>
 
 ## 설치 후 설정
@@ -73,12 +68,12 @@ Gateway는 Docker가 아니라 호스트에서 직접 실행됩니다. 에이전
     ```
   </Step>
   <Step title="온보딩 마법사 실행">
-    설치 후 스크립트가 OpenClaw 설정 구성을 안내합니다.
+    설치 후 스크립트가 OpenClaw 구성 과정을 안내합니다.
   </Step>
-  <Step title="메시징 제공자 연결">
-    WhatsApp, Telegram, Discord 또는 Signal에 로그인하세요.
+  <Step title="메시징 채널 연결">
+    WhatsApp, Telegram, Discord 또는 Signal에 로그인합니다.
     ```bash
-    openclaw channels login
+    openclaw channels login --channel <name>
     ```
   </Step>
   <Step title="설치 확인">
@@ -88,52 +83,50 @@ Gateway는 Docker가 아니라 호스트에서 직접 실행됩니다. 에이전
     ```
   </Step>
   <Step title="Tailscale에 연결">
-    안전한 원격 액세스를 위해 VPN 메시에 참여하세요.
+    안전한 원격 접근을 위해 VPN 메시에 참여합니다.
   </Step>
 </Steps>
 
 ### 빠른 명령
 
 ```bash
-# Check service status
+# 서비스 상태 확인
 sudo systemctl status openclaw
 
-# View live logs
+# 실시간 로그 보기
 sudo journalctl -u openclaw -f
 
-# Restart gateway
+# Gateway 다시 시작
 sudo systemctl restart openclaw
 
-# Provider login (run as openclaw user)
+# 채널 로그인(openclaw 사용자로 실행)
 sudo -i -u openclaw
-openclaw channels login
+openclaw channels login --channel <name>
 ```
 
 ## 보안 아키텍처
 
-이 배포는 4계층 방어 모델을 사용합니다.
+4계층 방어 모델:
 
-1. **방화벽(UFW)** -- SSH(22) + Tailscale(41641/udp)만 공개적으로 노출
-2. **VPN(Tailscale)** -- VPN 메시를 통해서만 Gateway 접근 가능
-3. **Docker 격리** -- DOCKER-USER iptables 체인이 외부 포트 노출을 방지
-4. **Systemd 강화** -- NoNewPrivileges, PrivateTmp, 비권한 사용자
+1. 방화벽(UFW): SSH(22)와 Tailscale(41641/udp)만 공개적으로 노출
+2. VPN(Tailscale): VPN 메시를 통해서만 Gateway에 접근 가능
+3. Docker 격리: `DOCKER-USER` iptables 체인이 외부 포트 노출 방지
+4. systemd 보안 강화: `NoNewPrivileges`, `PrivateTmp`, 비특권 사용자
 
-외부 공격 표면을 확인하려면 다음을 실행하세요.
+외부 공격 표면을 확인합니다.
 
 ```bash
 nmap -p- YOUR_SERVER_IP
 ```
 
-포트 22(SSH)만 열려 있어야 합니다. 다른 모든 서비스(Gateway, Docker)는 잠겨 있습니다.
+포트 22(SSH)만 열려 있어야 합니다. Gateway와 Docker는 외부 접근이 차단된 상태로 유지됩니다.
 
-Docker는 Gateway 자체를 실행하기 위한 것이 아니라 에이전트 샌드박스(격리된 도구 실행)를 위해 설치됩니다. 샌드박스 구성은 [Multi-Agent Sandbox and Tools](/ko/tools/multi-agent-sandbox-tools)를 참조하세요.
+Docker는 Gateway 실행용이 아니라 에이전트 샌드박스(격리된 도구 실행)용으로 설치됩니다. 샌드박스 구성은 [다중 에이전트 샌드박스 및 도구](/ko/tools/multi-agent-sandbox-tools)를 참조하세요.
 
 ## 수동 설치
 
-자동화보다 수동 제어를 선호한다면:
-
 <Steps>
-  <Step title="필수 구성 요소 설치">
+  <Step title="사전 요구 사항 설치">
     ```bash
     sudo apt update && sudo apt install -y ansible git
     ```
@@ -149,15 +142,15 @@ Docker는 Gateway 자체를 실행하기 위한 것이 아니라 에이전트 �
     ansible-galaxy collection install -r requirements.yml
     ```
   </Step>
-  <Step title="playbook 실행">
+  <Step title="플레이북 실행">
     ```bash
     ./run-playbook.sh
     ```
 
-    또는 직접 실행한 뒤 나중에 설정 스크립트를 수동으로 실행하세요.
+    또는 플레이북을 직접 실행한 후 설정 스크립트를 수동으로 실행합니다.
     ```bash
     ansible-playbook playbook.yml --ask-become-pass
-    # Then run: /tmp/openclaw-setup.sh
+    # 그런 다음 실행: /tmp/openclaw-setup.sh
     ```
 
   </Step>
@@ -165,35 +158,34 @@ Docker는 Gateway 자체를 실행하기 위한 것이 아니라 에이전트 �
 
 ## 업데이트
 
-Ansible 설치 관리자는 수동 업데이트용으로 OpenClaw를 설정합니다. 표준 업데이트 흐름은 [업데이트](/ko/install/updating)를 참조하세요.
+Ansible 설치 프로그램은 OpenClaw를 수동으로 업데이트하도록 설정합니다. 표준 절차는 [업데이트](/ko/install/updating)를 참조하세요.
 
-Ansible playbook을 다시 실행하려면(예: 구성 변경):
+예를 들어 구성을 변경한 후 플레이북을 다시 실행하려면 다음 명령을 사용합니다.
 
 ```bash
 cd openclaw-ansible
 ./run-playbook.sh
 ```
 
-이는 멱등적이며 여러 번 실행해도 안전합니다.
+이 작업은 멱등성을 보장하므로 여러 번 실행해도 안전합니다.
 
 ## 문제 해결
 
 <AccordionGroup>
-  <Accordion title="방화벽이 내 연결을 차단합니다">
-    - 먼저 Tailscale VPN을 통해 접근할 수 있는지 확인하세요
-    - SSH 접근(포트 22)은 항상 허용됩니다
-    - Gateway는 설계상 Tailscale을 통해서만 접근할 수 있습니다
+  <Accordion title="방화벽이 연결을 차단함">
+    - 먼저 Tailscale VPN을 통해 연결하세요. Gateway는 설계상 이 방식으로만 접근할 수 있습니다.
+    - SSH(포트 22)는 항상 허용됩니다.
 
   </Accordion>
-  <Accordion title="서비스가 시작되지 않습니다">
+  <Accordion title="서비스가 시작되지 않음">
     ```bash
-    # Check logs
+    # 로그 확인
     sudo journalctl -u openclaw -n 100
 
-    # Verify permissions
+    # 권한 확인
     sudo ls -la /opt/openclaw
 
-    # Test manual start
+    # 수동 시작 테스트
     sudo -i -u openclaw
     cd ~/openclaw
     openclaw gateway run
@@ -202,40 +194,40 @@ cd openclaw-ansible
   </Accordion>
   <Accordion title="Docker 샌드박스 문제">
     ```bash
-    # Verify Docker is running
+    # Docker가 실행 중인지 확인
     sudo systemctl status docker
 
-    # Check sandbox image
+    # 샌드박스 이미지 확인
     sudo docker images | grep openclaw-sandbox
 
-    # Build sandbox image if missing (requires source checkout)
+    # 이미지가 없으면 샌드박스 이미지 빌드(소스 체크아웃 필요)
     cd /opt/openclaw/openclaw
     sudo -u openclaw ./scripts/sandbox-setup.sh
-    # For npm installs without a source checkout, see
+    # 소스 체크아웃 없이 npm으로 설치한 경우 다음 참조
     # https://docs.openclaw.ai/gateway/sandboxing#images-and-setup
     ```
 
   </Accordion>
-  <Accordion title="Provider 로그인이 실패합니다">
-    `openclaw` 사용자로 실행 중인지 확인하세요.
+  <Accordion title="채널 로그인 실패">
+    `openclaw` 사용자로 실행하고 있는지 확인하세요.
     ```bash
     sudo -i -u openclaw
-    openclaw channels login
+    openclaw channels login --channel <name>
     ```
   </Accordion>
 </AccordionGroup>
 
 ## 고급 구성
 
-자세한 보안 아키텍처와 문제 해결은 openclaw-ansible 저장소를 참조하세요.
+자세한 보안 아키텍처와 문제 해결 방법은 openclaw-ansible 저장소를 참조하세요.
 
 - [보안 아키텍처](https://github.com/openclaw/openclaw-ansible/blob/main/docs/security.md)
 - [기술 세부 정보](https://github.com/openclaw/openclaw-ansible/blob/main/docs/architecture.md)
 - [문제 해결 가이드](https://github.com/openclaw/openclaw-ansible/blob/main/docs/troubleshooting.md)
 
-## 관련 항목
+## 관련 문서
 
-- [openclaw-ansible](https://github.com/openclaw/openclaw-ansible) -- 전체 배포 가이드
-- [Docker](/ko/install/docker) -- 컨테이너화된 Gateway 설정
-- [샌드박스](/ko/gateway/sandboxing) -- 에이전트 샌드박스 구성
-- [Multi-Agent Sandbox and Tools](/ko/tools/multi-agent-sandbox-tools) -- 에이전트별 격리
+- [openclaw-ansible](https://github.com/openclaw/openclaw-ansible): 전체 배포 가이드
+- [Docker](/ko/install/docker): 컨테이너화된 Gateway 설정
+- [샌드박싱](/ko/gateway/sandboxing): 에이전트 샌드박스 구성
+- [다중 에이전트 샌드박스 및 도구](/ko/tools/multi-agent-sandbox-tools): 에이전트별 격리

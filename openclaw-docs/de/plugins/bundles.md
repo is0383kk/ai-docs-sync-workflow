@@ -1,62 +1,66 @@
 ---
 read_when:
-    - Sie möchten ein mit Codex, Claude oder Cursor kompatibles Bundle installieren
+    - Sie möchten ein mit Codex, Claude oder Cursor kompatibles Paket installieren
     - Sie müssen verstehen, wie OpenClaw Bundle-Inhalte nativen Funktionen zuordnet
-    - Fehlersuche bei der Bundle-Erkennung oder fehlenden Fähigkeiten
+    - Sie beheben Probleme bei der Bundle-Erkennung oder bei fehlenden Funktionen
 summary: Codex-, Claude- und Cursor-Bundles als OpenClaw-Plugins installieren und verwenden
-title: Plugin-Bundles
+title: Plugin-Pakete
 x-i18n:
-    generated_at: "2026-06-27T17:44:58Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T01:52:36Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: b26915603db9d4d4422f4d1542f033be02eb83c5ffefcf93cac7968f624f4969
+    source_hash: d44006866238f53ee2e3e8126cc4f7ed6f7413534257775f7904c9b877778c59
     source_path: plugins/bundles.md
     workflow: 16
 ---
 
 OpenClaw kann Plugins aus drei externen Ökosystemen installieren: **Codex**, **Claude**
-und **Cursor**. Diese heißen **Bundles** – Inhalts- und Metadatenpakete, die
-OpenClaw nativen Funktionen wie Skills, Hooks und MCP-Tools zuordnet.
+und **Cursor**. Diese werden als **Bundles** bezeichnet – Inhalts- und Metadatenpakete,
+die OpenClaw nativen Funktionen wie Skills, Hooks und MCP-Tools zuordnet.
 
 <Info>
-  Bundles sind **nicht** dasselbe wie native OpenClaw-Plugins. Native Plugins laufen
-  im Prozess und können jede Capability registrieren. Bundles sind Inhaltspakete mit
-  selektivem Feature-Mapping und einer engeren Vertrauensgrenze.
+  Bundles sind **nicht** dasselbe wie native OpenClaw-Plugins. Native Plugins werden
+  prozessintern ausgeführt und können beliebige Funktionen registrieren. Bundles sind
+  Inhaltspakete mit selektiver Funktionszuordnung und einer engeren Vertrauensgrenze.
 </Info>
 
 ## Warum es Bundles gibt
 
-Viele nützliche Plugins werden im Codex-, Claude- oder Cursor-Format veröffentlicht. Anstatt
-Autorinnen und Autoren zu verlangen, sie als native OpenClaw-Plugins neu zu schreiben, erkennt OpenClaw
-diese Formate und ordnet ihre unterstützten Inhalte dem nativen Funktionsumfang zu. Das bedeutet, Sie können ein Claude-Befehlspaket oder ein Codex-Skill-Bundle installieren
-und es sofort verwenden.
+Viele nützliche Plugins werden im Format von Codex, Claude oder Cursor veröffentlicht.
+Anstatt von Autoren zu verlangen, sie als native OpenClaw-Plugins neu zu schreiben,
+erkennt OpenClaw diese Formate und ordnet ihre unterstützten Inhalte dem nativen
+Funktionsumfang zu. Sie können ein Claude-Befehlspaket oder ein Codex-Skill-Bundle
+installieren und sofort verwenden.
 
 ## Ein Bundle installieren
 
 <Steps>
   <Step title="Aus einem Verzeichnis, Archiv oder Marketplace installieren">
     ```bash
-    # Local directory
+    # Lokales Verzeichnis
     openclaw plugins install ./my-bundle
 
-    # Archive
+    # Archiv
     openclaw plugins install ./my-bundle.tgz
 
-    # Claude marketplace
-    openclaw plugins marketplace list <marketplace-name>
-    openclaw plugins install <plugin-name>@<marketplace-name>
+    # Claude-Marketplace
+    openclaw plugins marketplace list <source>
+    openclaw plugins install <plugin> --marketplace <source>
     ```
+
+    `<source>` ist ein lokaler Marketplace-Pfad bzw. ein lokales Marketplace-Repository oder eine Git-/GitHub-Quelle.
 
   </Step>
 
-  <Step title="Erkennung prüfen">
+  <Step title="Erkennung überprüfen">
     ```bash
     openclaw plugins list
     openclaw plugins inspect <id>
     ```
 
-    Bundles werden als `Format: bundle` mit einem Subtyp von `codex`, `claude` oder `cursor` angezeigt.
+    Bundles zeigen `Format: bundle` sowie einen Wert `Bundle format:` mit `codex`,
+    `claude` oder `cursor` an.
 
   </Step>
 
@@ -65,62 +69,65 @@ und es sofort verwenden.
     openclaw gateway restart
     ```
 
-    Zugeordnete Funktionen (Skills, Hooks, MCP-Tools, LSP-Standards) sind in der nächsten Sitzung verfügbar.
+    Zugeordnete Funktionen (Skills, Hooks, MCP-Tools und LSP-Standardwerte) sind in der nächsten Sitzung verfügbar.
 
   </Step>
 </Steps>
 
 ## Was OpenClaw aus Bundles zuordnet
 
-Nicht jede Bundle-Funktion läuft heute in OpenClaw. Hier sehen Sie, was funktioniert und was
-erkannt, aber noch nicht verdrahtet ist.
+Derzeit werden nicht alle Bundle-Funktionen in OpenClaw ausgeführt. Nachfolgend
+sehen Sie, was funktioniert und was zwar erkannt, aber noch nicht eingebunden wird.
 
-### Jetzt unterstützt
+### Derzeit unterstützt
 
-| Feature       | Wie es zugeordnet wird                                                                            | Gilt für       |
-| ------------- | ------------------------------------------------------------------------------------------------- | -------------- |
-| Skill-Inhalt  | Bundle-Skill-Roots werden als normale OpenClaw-Skills geladen                                     | Alle Formate   |
-| Befehle       | `commands/` und `.cursor/commands/` werden als Skill-Roots behandelt                              | Claude, Cursor |
-| Hook-Pakete   | OpenClaw-artige Layouts mit `HOOK.md` + `handler.ts`                                              | Codex          |
-| MCP-Tools     | Bundle-MCP-Konfiguration wird in eingebettete OpenClaw-Einstellungen zusammengeführt; unterstützte stdio- und HTTP-Server werden geladen | Alle Formate   |
-| LSP-Server    | Claude `.lsp.json` und im Manifest deklarierte `lspServers` werden in eingebettete OpenClaw-LSP-Standards zusammengeführt | Claude         |
-| Einstellungen | Claude `settings.json` wird als eingebettete OpenClaw-Standardeinstellungen importiert            | Claude         |
+| Funktion       | Zuordnung                                                                                              | Gilt für       |
+| -------------- | ------------------------------------------------------------------------------------------------------ | -------------- |
+| Skill-Inhalte  | Bundle-Skill-Stammverzeichnisse werden als normale OpenClaw-Skills geladen                             | Alle Formate   |
+| Befehle        | `commands/` und `.cursor/commands/` werden als Skill-Stammverzeichnisse behandelt                      | Claude, Cursor |
+| Hook-Pakete    | OpenClaw-Layouts im Stil von `HOOK.md` + `handler.ts`                                                  | Codex          |
+| MCP-Tools      | Die MCP-Konfiguration des Bundles wird mit den eingebetteten OpenClaw-Einstellungen zusammengeführt; unterstützte stdio- und HTTP-Server werden geladen | Alle Formate   |
+| LSP-Server     | Claude-`.lsp.json` und im Manifest deklarierte `lspServers` werden mit den eingebetteten OpenClaw-LSP-Standardwerten zusammengeführt | Claude         |
+| Einstellungen  | Claude-`settings.json` wird als eingebettete OpenClaw-Standardwerte importiert                         | Claude         |
 
-#### Skill-Inhalt
+#### Skill-Inhalte
 
-- Bundle-Skill-Roots werden als normale OpenClaw-Skill-Roots geladen
-- Claude-`commands`-Roots werden als zusätzliche Skill-Roots behandelt
-- Cursor-`.cursor/commands`-Roots werden als zusätzliche Skill-Roots behandelt
+- Bundle-Skill-Stammverzeichnisse werden als normale OpenClaw-Skill-Stammverzeichnisse geladen.
+- Claude-`commands/`-Stammverzeichnisse werden als zusätzliche Skill-Stammverzeichnisse behandelt.
+- Cursor-`.cursor/commands/`-Stammverzeichnisse werden als zusätzliche Skill-Stammverzeichnisse behandelt.
 
-Das bedeutet, dass Claude-Markdown-Befehlsdateien über den normalen OpenClaw-Skill-
-Loader funktionieren. Cursor-Befehls-Markdown funktioniert über denselben Pfad.
+Claude-Markdown-Befehlsdateien und Cursor-Befehls-Markdown funktionieren beide über
+den normalen OpenClaw-Skill-Loader.
 
 #### Hook-Pakete
 
-- Bundle-Hook-Roots funktionieren **nur**, wenn sie das normale OpenClaw-Hook-Paket-
-  Layout verwenden. Heute ist dies hauptsächlich der Codex-kompatible Fall:
-  - `HOOK.md`
-  - `handler.ts` oder `handler.js`
+Bundle-Hook-Stammverzeichnisse funktionieren **nur**, wenn sie das normale
+OpenClaw-Hook-Paketlayout verwenden: `HOOK.md` sowie `handler.ts` oder `handler.js`.
+Derzeit trifft dies hauptsächlich auf den Codex-kompatiblen Fall zu.
 
 #### MCP für eingebettetes OpenClaw
 
-- aktivierte Bundles können MCP-Serverkonfiguration beitragen
-- OpenClaw führt Bundle-MCP-Konfiguration in den wirksamen eingebetteten OpenClaw-Einstellungen als
-  `mcpServers` zusammen
-- OpenClaw stellt unterstützte Bundle-MCP-Tools während eingebetteter OpenClaw-Agent-Turns bereit, indem
-  stdio-Server gestartet oder Verbindungen zu HTTP-Servern hergestellt werden
-- die Tool-Profile `coding` und `messaging` enthalten Bundle-MCP-Tools standardmäßig;
-  verwenden Sie `tools.deny: ["bundle-mcp"]`, um sich für einen Agent oder Gateway abzumelden
-- projektlokale eingebettete Agent-Einstellungen gelten weiterhin nach den Bundle-Standards, sodass Workspace-
-  Einstellungen Bundle-MCP-Einträge bei Bedarf überschreiben können
-- Bundle-MCP-Toolkataloge werden vor der Registrierung deterministisch sortiert, sodass
-  Änderungen der Upstream-Reihenfolge von `listTools()` die Prompt-Cache-Tool-Blöcke nicht durcheinanderbringen
+- Aktivierte Bundles können MCP-Serverkonfigurationen bereitstellen.
+- OpenClaw führt die MCP-Konfiguration des Bundles als `mcpServers` mit den
+  effektiven eingebetteten OpenClaw-Einstellungen zusammen.
+- OpenClaw stellt unterstützte Bundle-MCP-Tools während der Ausführungen des
+  eingebetteten OpenClaw-Agenten bereit, indem es stdio-Server startet oder
+  Verbindungen zu HTTP-Servern herstellt.
+- Die Tool-Profile `coding` und `messaging` enthalten Bundle-MCP-Tools
+  standardmäßig; verwenden Sie `tools.deny: ["bundle-mcp"]`, um sie für einen
+  Agenten oder Gateway zu deaktivieren.
+- Projektlokale Einstellungen für eingebettete Agenten werden weiterhin nach
+  den Bundle-Standardwerten angewendet, sodass Workspace-Einstellungen
+  Bundle-MCP-Einträge bei Bedarf überschreiben können.
+- Bundle-MCP-Toolkataloge werden vor der Registrierung deterministisch sortiert,
+  damit Änderungen der vorgelagerten `listTools()`-Reihenfolge nicht ständig
+  die Tool-Blöcke des Prompt-Caches ändern.
 
 ##### Transporte
 
-MCP-Server können stdio- oder HTTP-Transport verwenden:
+MCP-Server können stdio- oder HTTP-Transport verwenden.
 
-**Stdio** startet einen Child-Prozess:
+**Stdio** startet einen untergeordneten Prozess:
 
 ```json
 {
@@ -136,7 +143,8 @@ MCP-Server können stdio- oder HTTP-Transport verwenden:
 }
 ```
 
-**HTTP** verbindet sich standardmäßig über `sse` mit einem laufenden MCP-Server oder auf Anforderung über `streamable-http`:
+**HTTP** stellt eine Verbindung zu einem laufenden MCP-Server her und verwendet
+standardmäßig `sse`, sofern nicht `streamable-http` angefordert wird:
 
 ```json
 {
@@ -155,72 +163,79 @@ MCP-Server können stdio- oder HTTP-Transport verwenden:
 }
 ```
 
-- `transport` kann auf `"streamable-http"` oder `"sse"` gesetzt werden; wenn es ausgelassen wird, verwendet OpenClaw `sse`
-- `type: "http"` ist eine CLI-native Downstream-Form; verwenden Sie `transport: "streamable-http"` in der OpenClaw-Konfiguration. `openclaw mcp set` und `openclaw doctor --fix` normalisieren den gängigen Alias.
-- nur URL-Schemata `http:` und `https:` sind erlaubt
-- `headers`-Werte unterstützen `${ENV_VAR}`-Interpolation
-- ein Servereintrag mit sowohl `command` als auch `url` wird abgelehnt
-- URL-Anmeldedaten (userinfo und Query-Parameter) werden aus Tool-
-  Beschreibungen und Logs entfernt
-- `connectionTimeoutMs` überschreibt das standardmäßige Verbindungs-Timeout von 30 Sekunden für
-  sowohl stdio- als auch HTTP-Transporte
+- `transport` akzeptiert `"streamable-http"` oder `"sse"`; bei Auslassung wird standardmäßig `sse` verwendet.
+- `type: "http"` ist eine CLI-native nachgelagerte Struktur; verwenden Sie `transport: "streamable-http"` in der OpenClaw-Konfiguration. `openclaw mcp set` und `openclaw doctor --fix` normalisieren den gängigen Alias.
+- Nur die URL-Schemata `http:` und `https:` sind zulässig.
+- Werte in `headers` unterstützen die Interpolation mit `${ENV_VAR}`.
+- Ein Servereintrag, der sowohl `command` als auch `url` enthält, wird abgelehnt.
+- URL-Anmeldedaten (Benutzerinformationen und Abfrageparameter) werden in
+  Tool-Beschreibungen und Protokollen unkenntlich gemacht.
+- `connectionTimeoutMs` überschreibt das standardmäßige Verbindungszeitlimit von
+  30 Sekunden sowohl für stdio- als auch für HTTP-Transporte. Das
+  Anforderungszeitlimit beträgt standardmäßig 60 Sekunden und kann mit
+  `requestTimeoutMs` überschrieben werden.
 
 ##### Tool-Benennung
 
-OpenClaw registriert Bundle-MCP-Tools mit Provider-sicheren Namen in der Form
-`serverName__toolName`. Zum Beispiel wird ein Server mit dem Schlüssel `"vigil-harbor"`, der ein
-`memory_search`-Tool bereitstellt, als `vigil-harbor__memory_search` registriert.
+OpenClaw registriert Bundle-MCP-Tools mit Provider-kompatiblen Namen im Format
+`serverName__toolName`. Beispielsweise wird ein Server mit dem Schlüssel
+`"vigil-harbor"`, der ein Tool namens `memory_search` bereitstellt, als
+`vigil-harbor__memory_search` registriert.
 
-- Zeichen außerhalb von `A-Za-z0-9_-` werden durch `-` ersetzt
-- Fragmente, die mit einem Nicht-Buchstaben beginnen würden, erhalten ein Buchstabenpräfix, sodass numerische
-  Server-Schlüssel wie `12306` zu Provider-sicheren Tool-Präfixen werden
-- Server-Präfixe sind auf 30 Zeichen begrenzt
-- vollständige Tool-Namen sind auf 64 Zeichen begrenzt
-- leere Servernamen fallen auf `mcp` zurück
-- kollidierende bereinigte Namen werden mit numerischen Suffixen eindeutig gemacht
-- die endgültige offengelegte Tool-Reihenfolge ist nach sicherem Namen deterministisch, um wiederholte eingebettete Agent-
-  Turns cache-stabil zu halten
-- Profilfilterung behandelt alle Tools eines Bundle-MCP-Servers als Plugin-eigen
-  durch `bundle-mcp`, sodass Profil-Allowlists und Deny-Listen entweder
-  einzelne offengelegte Tool-Namen oder den Plugin-Schlüssel `bundle-mcp` enthalten können
+- Zeichen außerhalb von `A-Za-z0-9_-` werden durch `-` ersetzt.
+- Fragmente, die mit einem Nichtbuchstaben beginnen würden, erhalten ein
+  Buchstabenpräfix, sodass numerische Serverschlüssel wie `12306`
+  Provider-kompatible Tool-Präfixe erhalten.
+- Serverpräfixe sind auf 30 Zeichen begrenzt.
+- Vollständige Tool-Namen sind auf 64 Zeichen begrenzt.
+- Leere Servernamen verwenden ersatzweise `mcp`.
+- Kollidierende bereinigte Namen werden durch numerische Suffixe unterschieden.
+- Die endgültige Reihenfolge der bereitgestellten Tools ist anhand des sicheren
+  Namens deterministisch, sodass wiederholte Ausführungen des eingebetteten
+  Agenten cache-stabil bleiben.
+- Bei der Profilfilterung werden alle Tools eines Bundle-MCP-Servers als Eigentum
+  des Plugins `bundle-mcp` behandelt, sodass Zulassungs- und Sperrlisten von
+  Profilen entweder auf einzelne bereitgestellte Tool-Namen oder auf den
+  Plugin-Schlüssel `bundle-mcp` verweisen können.
 
 #### Eingebettete OpenClaw-Einstellungen
 
-- Claude `settings.json` wird als eingebettete OpenClaw-Standardeinstellungen importiert, wenn das
-  Bundle aktiviert ist
-- OpenClaw bereinigt Shell-Override-Schlüssel, bevor es sie anwendet
-
-Bereinigte Schlüssel:
+Claude-`settings.json` wird bei aktiviertem Bundle als Standardeinstellung für
+eingebettetes OpenClaw importiert. OpenClaw bereinigt Shell-Überschreibungsschlüssel,
+bevor sie angewendet werden:
 
 - `shellPath`
 - `shellCommandPrefix`
 
 #### Eingebettetes OpenClaw-LSP
 
-- aktivierte Claude-Bundles können LSP-Serverkonfiguration beitragen
-- OpenClaw lädt `.lsp.json` plus alle im Manifest deklarierten `lspServers`-Pfade
-- Bundle-LSP-Konfiguration wird in die wirksamen eingebetteten OpenClaw-LSP-Standards zusammengeführt
-- nur unterstützte stdio-gestützte LSP-Server sind heute ausführbar; nicht unterstützte
-  Transporte erscheinen weiterhin in `openclaw plugins inspect <id>`
+- Aktivierte Claude-Bundles können LSP-Serverkonfigurationen bereitstellen.
+- OpenClaw lädt `.lsp.json` sowie alle im Manifest deklarierten `lspServers`-Pfade.
+- Die LSP-Konfiguration des Bundles wird mit den effektiven eingebetteten
+  OpenClaw-LSP-Standardwerten zusammengeführt.
+- Derzeit können nur unterstützte stdio-basierte LSP-Server ausgeführt werden;
+  nicht unterstützte Transporte werden weiterhin in `openclaw plugins inspect <id>`
+  angezeigt.
 
 ### Erkannt, aber nicht ausgeführt
 
-Diese werden erkannt und in Diagnosen angezeigt, aber OpenClaw führt sie nicht aus:
+Diese Elemente werden erkannt und in der Diagnose angezeigt, aber nicht von OpenClaw ausgeführt:
 
-- Claude `agents`, `hooks.json`-Automatisierung, `outputStyles`
-- Cursor `.cursor/agents`, `.cursor/hooks.json`, `.cursor/rules`
-- Codex-Inline-/App-Metadaten über Capability-Berichte hinaus
+- Claude-`agents`, Automatisierung über `hooks/hooks.json`, `outputStyles`
+- Cursor-`.cursor/agents`, `.cursor/hooks.json`, `.cursor/rules`
+- Codex-`.app.json`-Metadaten über die Funktionsmeldung hinaus
 
 ## Bundle-Formate
 
 <AccordionGroup>
   <Accordion title="Codex-Bundles">
-    Marker: `.codex-plugin/plugin.json`
+    Kennzeichnungen: `.codex-plugin/plugin.json`
 
     Optionale Inhalte: `skills/`, `hooks/`, `.mcp.json`, `.app.json`
 
-    Codex-Bundles passen am besten zu OpenClaw, wenn sie Skill-Roots und OpenClaw-artige
-    Hook-Paket-Verzeichnisse (`HOOK.md` + `handler.ts`) verwenden.
+    Codex-Bundles eignen sich am besten für OpenClaw, wenn sie
+    Skill-Stammverzeichnisse und Hook-Paketverzeichnisse im OpenClaw-Stil
+    (`HOOK.md` + `handler.ts`) verwenden.
 
   </Accordion>
 
@@ -228,90 +243,91 @@ Diese werden erkannt und in Diagnosen angezeigt, aber OpenClaw führt sie nicht 
     Zwei Erkennungsmodi:
 
     - **Manifestbasiert:** `.claude-plugin/plugin.json`
-    - **Ohne Manifest:** Standard-Claude-Layout (`skills/`, `commands/`, `agents/`, `hooks/`, `.mcp.json`, `.lsp.json`, `settings.json`)
+    - **Ohne Manifest:** Claude-Standardlayout (`skills/`, `commands/`, `agents/`, `hooks/`, `.mcp.json`, `.lsp.json`, `settings.json`)
 
     Claude-spezifisches Verhalten:
 
     - `commands/` wird als Skill-Inhalt behandelt
-    - `settings.json` wird in eingebettete OpenClaw-Einstellungen importiert (Shell-Override-Schlüssel werden bereinigt)
-    - `.mcp.json` stellt unterstützte stdio-Tools für eingebettetes OpenClaw bereit
-    - `.lsp.json` plus im Manifest deklarierte `lspServers`-Pfade werden in eingebettete OpenClaw-LSP-Standards geladen
+    - `settings.json` wird in die eingebetteten OpenClaw-Einstellungen importiert (Shell-Überschreibungsschlüssel werden bereinigt)
+    - `.mcp.json` stellt dem eingebetteten OpenClaw unterstützte stdio-Tools bereit
+    - `.lsp.json` sowie im Manifest deklarierte `lspServers`-Pfade werden in die eingebetteten OpenClaw-LSP-Standardwerte geladen
     - `hooks/hooks.json` wird erkannt, aber nicht ausgeführt
-    - Benutzerdefinierte Komponentenpfade im Manifest sind additiv (sie erweitern Standards, ersetzen sie nicht)
+    - Benutzerdefinierte Komponentenpfade im Manifest sind additiv; sie erweitern die Standardwerte, anstatt sie zu ersetzen
 
   </Accordion>
 
   <Accordion title="Cursor-Bundles">
-    Marker: `.cursor-plugin/plugin.json`
+    Kennzeichnungen: `.cursor-plugin/plugin.json`
 
     Optionale Inhalte: `skills/`, `.cursor/commands/`, `.cursor/agents/`, `.cursor/rules/`, `.cursor/hooks.json`, `.mcp.json`
 
     - `.cursor/commands/` wird als Skill-Inhalt behandelt
-    - `.cursor/rules/`, `.cursor/agents/` und `.cursor/hooks.json` sind nur Erkennung
+    - `.cursor/rules/`, `.cursor/agents/` und `.cursor/hooks.json` werden nur erkannt
 
   </Accordion>
 </AccordionGroup>
 
-## Erkennungspriorität
+## Erkennungsreihenfolge
 
 OpenClaw prüft zuerst auf das native Plugin-Format:
 
-1. `openclaw.plugin.json` oder gültiges `package.json` mit `openclaw.extensions` – wird als **natives Plugin** behandelt
-2. Bundle-Marker (`.codex-plugin/`, `.claude-plugin/` oder Standard-Claude-/Cursor-Layout) – wird als **Bundle** behandelt
+1. `openclaw.plugin.json` oder eine gültige `package.json` mit `openclaw.extensions` – wird als **natives Plugin** behandelt
+2. Bundle-Kennzeichnungen (`.codex-plugin/`, `.claude-plugin/` oder das standardmäßige Claude-/Cursor-Layout) – werden als **Bundle** behandelt
 
-Wenn ein Verzeichnis beides enthält, verwendet OpenClaw den nativen Pfad. Dies verhindert,
-dass Dual-Format-Pakete teilweise als Bundles installiert werden.
+Wenn ein Verzeichnis beides enthält, verwendet OpenClaw den nativen Pfad. Dadurch
+wird verhindert, dass Pakete mit zwei Formaten teilweise als Bundles installiert werden.
 
 ## Laufzeitabhängigkeiten und Bereinigung
 
-- Kompatible Bundles von Drittanbietern erhalten keine `npm install`-Reparatur beim Start. Sie
-  sollten über `openclaw plugins install` installiert werden und alles, was
-  sie benötigen, im installierten Plugin-Verzeichnis mitliefern.
-- OpenClaw-eigene gebündelte Plugins werden entweder schlank im Core ausgeliefert oder
-  über den Plugin-Installer heruntergeladen. Der Gateway-Start führt für sie nie einen
-  Package Manager aus.
-- `openclaw doctor --fix` entfernt alte bereitgestellte Abhängigkeitsverzeichnisse und kann
-  herunterladbare Plugins wiederherstellen, die im lokalen Plugin-Index fehlen, wenn
-  die Konfiguration auf sie verweist.
+- Kompatible Drittanbieter-Bundles erhalten beim Start keine Reparatur durch
+  `npm install`. Sie sollten über `openclaw plugins install` installiert werden
+  und alles Benötigte im installierten Plugin-Verzeichnis enthalten.
+- OpenClaw-eigene gebündelte Plugins werden entweder schlank im Kern ausgeliefert
+  oder können über das Plugin-Installationsprogramm heruntergeladen werden. Beim
+  Start des Gateways wird für sie niemals ein Paketmanager ausgeführt.
+- `openclaw doctor --fix` entfernt veraltete lokale Installationsdatensätze
+  gebündelter Plugins und kann herunterladbare Plugins wiederherstellen, die im
+  lokalen Plugin-Index fehlen, wenn die Konfiguration weiterhin auf sie verweist.
 
 ## Sicherheit
 
 Bundles haben eine engere Vertrauensgrenze als native Plugins:
 
-- OpenClaw lädt **keine** beliebigen Bundle-Laufzeitmodule im Prozess
-- Skills und Hook-Paket-Pfade müssen innerhalb des Plugin-Roots bleiben (Boundary-geprüft)
-- Einstellungsdateien werden mit denselben Boundary-Prüfungen gelesen
-- Unterstützte stdio-MCP-Server können als Subprozesse gestartet werden
+- OpenClaw lädt **keine** beliebigen Bundle-Laufzeitmodule prozessintern.
+- Pfade für Skills und Hook-Pakete müssen innerhalb des Plugin-Stammverzeichnisses bleiben (Grenzprüfung).
+- Einstellungsdateien werden mit denselben Grenzprüfungen gelesen.
+- Unterstützte stdio-MCP-Server können als Unterprozesse gestartet werden.
 
-Das macht Bundles standardmäßig sicherer, aber Sie sollten Drittanbieter-
-Bundles dennoch als vertrauenswürdigen Inhalt für die Funktionen behandeln, die sie bereitstellen.
+Dadurch sind Bundles standardmäßig sicherer. Dennoch sollten Sie Drittanbieter-Bundles
+für die Funktionen, die sie bereitstellen, als vertrauenswürdige Inhalte behandeln.
 
 ## Fehlerbehebung
 
 <AccordionGroup>
-  <Accordion title="Bundle wird erkannt, aber Capabilities laufen nicht">
-    Führen Sie `openclaw plugins inspect <id>` aus. Wenn eine Capability aufgeführt, aber als
-    nicht verdrahtet markiert ist, ist das eine Produktgrenze – keine fehlerhafte Installation.
+  <Accordion title="Das Bundle wird erkannt, aber Funktionen werden nicht ausgeführt">
+    Führen Sie `openclaw plugins inspect <id>` aus. Wenn eine Funktion aufgeführt,
+    aber als nicht eingebunden gekennzeichnet ist, handelt es sich um eine
+    Produktbeschränkung und nicht um eine fehlerhafte Installation.
   </Accordion>
 
-  <Accordion title="Claude-Befehlsdateien erscheinen nicht">
-    Stellen Sie sicher, dass das Bundle aktiviert ist und die Markdown-Dateien sich innerhalb eines erkannten
-    `commands/`- oder `skills/`-Roots befinden.
+  <Accordion title="Claude-Befehlsdateien werden nicht angezeigt">
+    Stellen Sie sicher, dass das Bundle aktiviert ist und sich die Markdown-Dateien
+    in einem erkannten `commands/`- oder `skills/`-Stammverzeichnis befinden.
   </Accordion>
 
   <Accordion title="Claude-Einstellungen werden nicht angewendet">
-    Nur eingebettete OpenClaw-Einstellungen aus `settings.json` werden unterstützt. OpenClaw behandelt
-    Bundle-Einstellungen nicht als rohe Konfigurations-Patches.
+    Es werden nur eingebettete OpenClaw-Einstellungen aus `settings.json` unterstützt.
+    OpenClaw behandelt Bundle-Einstellungen nicht als direkte Konfigurations-Patches.
   </Accordion>
 
   <Accordion title="Claude-Hooks werden nicht ausgeführt">
-    `hooks/hooks.json` ist nur Erkennung. Wenn Sie ausführbare Hooks benötigen, verwenden Sie das
-    OpenClaw-Hook-Paket-Layout oder liefern Sie ein natives Plugin aus.
+    `hooks/hooks.json` wird nur erkannt. Wenn Sie ausführbare Hooks benötigen,
+    verwenden Sie das OpenClaw-Hook-Paketlayout oder liefern Sie ein natives Plugin aus.
   </Accordion>
 </AccordionGroup>
 
-## Verwandt
+## Verwandte Themen
 
 - [Plugins installieren und konfigurieren](/de/tools/plugin)
 - [Plugins erstellen](/de/plugins/building-plugins) – ein natives Plugin erstellen
-- [Plugin-Manifest](/de/plugins/manifest) – natives Manifest-Schema
+- [Plugin-Manifest](/de/plugins/manifest) – natives Manifestschema
