@@ -1,37 +1,39 @@
 ---
 read_when:
-    - 你希望 OpenClaw 仅在选中其模型时启动本地模型服务器
-    - 你运行 ds4、inferrs、vLLM、llama.cpp、MLX 或其他 OpenAI 兼容的本地服务器
+    - 你希望 OpenClaw 仅在选择其模型或嵌入提供商时启动本地模型服务器
+    - 你运行 ds4、inferrs、vLLM、llama.cpp、MLX 或其他与 OpenAI 兼容的本地服务器
     - 你需要控制本地提供商的冷启动、就绪状态和空闲关闭
-summary: 在 OpenClaw 模型请求前按需启动本地模型服务器
+summary: 在 OpenClaw 发起模型和嵌入请求前按需启动本地模型服务器
 title: 本地模型服务
 x-i18n:
-    generated_at: "2026-07-05T11:18:57Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T20:31:36Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 9098fe9245a98987e7c58edb8395ae67e7d2ee5ec2215cc7d3ae880a62073372
+    source_hash: a761113dd591fed0394379b2bad173165efc5e284565c652493e73d1e724529d
     source_path: gateway/local-model-services.md
     workflow: 16
 ---
 
-`models.providers.<id>.localService` 会按需启动由提供商拥有的本地模型服务器。当请求选择该提供商的模型时，OpenClaw 会探测健康端点；如果进程已停止，就启动该进程，等待其就绪，然后发送请求。用它可以避免让昂贵的本地服务器整天运行。
+`models.providers.<id>.localService` 会按需启动由提供商管理的本地模型服务器。当模型或嵌入请求选择该提供商时，OpenClaw 会探测健康检查端点；如果服务未运行，则启动进程并等待其就绪，然后发送请求。使用此功能可以避免昂贵的本地服务器全天持续运行。
 
 ## 工作原理
 
-1. 模型请求解析到已配置的提供商。
-2. 如果该提供商有 `localService`，OpenClaw 会探测 `healthUrl`。
-3. 探测成功时，OpenClaw 使用已经运行的服务器。
-4. 探测失败时，OpenClaw 使用 `args` 启动 `command`。
-5. OpenClaw 轮询健康端点，直到 `readyTimeoutMs` 到期。
-6. 模型请求通过常规提供商传输路径发送。
-7. 如果该进程由 OpenClaw 启动且设置了 `idleStopMs`，OpenClaw 会在最后一个进行中的请求空闲达到该时长后停止该进程。
+1. 模型或嵌入请求解析到已配置的提供商。
+2. 如果该提供商配置了 `localService`，OpenClaw 会探测 `healthUrl`。
+3. 如果探测成功，OpenClaw 会使用已经运行的服务器。
+4. 如果探测失败，OpenClaw 会使用 `args` 启动 `command`。
+5. OpenClaw 会轮询健康检查端点，直到 `readyTimeoutMs` 到期。
+6. 请求通过常规模型或嵌入传输通道发送。
+7. 如果进程由 OpenClaw 启动且设置了 `idleStopMs`，则在最后一个进行中的请求空闲达到该时长后，OpenClaw 会停止该进程。
 
-OpenClaw 不会为此安装 launchd、systemd、Docker 或任何守护进程。该服务器只是最先需要它的 OpenClaw 进程的普通子进程。
+OpenClaw 不会为此安装 launchd、systemd、Docker 或任何守护进程。服务器只是首个需要它的 OpenClaw 进程所创建的普通子进程。
 
-启动会按提供商的命令/参数/环境变量集合串行化，因此针对同一服务的并发请求不会启动重复服务器。如果另一个 OpenClaw 进程已经在同一 `healthUrl` 上有健康的服务器，本进程会复用它，但不会接管它（每个进程只管理自己亲自启动的子进程）。活跃的流式响应会持有租约，因此空闲关闭会等到响应处理完成后再进行。
+对于每组已配置的提供商及命令、参数和环境变量，启动过程会串行执行，因此同一服务的并发聊天和嵌入请求不会启动重复的服务器。每个请求都会持有自己的租约，直到响应处理完成，因此空闲关闭会等待所有进行中的模型和嵌入请求结束。已配置的提供商别名仍然彼此独立：两个别名可以指向不同的 GPU 主机，而不会被合并到同一个 Ollama、LM Studio 或 OpenAI 兼容适配器 ID 上。
 
-## 配置形状
+如果另一个 OpenClaw 进程已在同一 `healthUrl` 上运行健康的服务器，当前进程会复用该服务器，但不会接管它（每个进程只管理自己启动的子进程）。启动和退出日志包含长度受限且经过脱敏的子进程输出末尾内容，以及计时和退出详情；配置的环境变量值绝不会被输出。
+
+## 配置结构
 
 ```json5
 {
@@ -68,23 +70,23 @@ OpenClaw 不会为此安装 launchd、systemd、Docker 或任何守护进程。�
 }
 ```
 
-在提供商条目上设置 `timeoutSeconds`（而不是 `localService`），这样缓慢的冷启动和较长的生成过程就不会触发默认模型请求超时。只要你的服务器在基础 URL 的 `/models` 之外的位置暴露就绪状态，就应显式设置 `healthUrl`。
+请在提供商条目上设置 `timeoutSeconds`（而不是在 `localService` 中设置），这样缓慢的冷启动和耗时较长的生成操作就不会触发默认的模型请求超时。如果服务器的就绪端点不是基础 URL 下的 `/models`，请务必显式设置 `healthUrl`。
 
 ## 字段
 
-| 字段             | 必填 | 说明                                                                                                                                |
-| ---------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `command`        | 是   | 绝对可执行文件路径。不进行 shell PATH 查找。                                                                                        |
-| `args`           | 否   | 进程参数。不进行 shell 展开、管道、通配符匹配或引号处理。                                                                           |
-| `cwd`            | 否   | 进程的工作目录。                                                                                                                    |
-| `env`            | 否   | 覆盖合并到 OpenClaw 进程环境中的环境变量。                                                                                          |
-| `healthUrl`      | 否   | 就绪 URL。默认是在 `baseUrl` 后追加 `/models`（`http://127.0.0.1:8000/v1` 会变成 `http://127.0.0.1:8000/v1/models`）。              |
-| `readyTimeoutMs` | 否   | 启动就绪截止时间。默认值：`120000`。                                                                                                |
-| `idleStopMs`     | 否   | OpenClaw 启动的进程的空闲关闭延迟。`0` 或省略表示保持运行，直到 OpenClaw 退出。                                                     |
+| 字段             | 必需 | 说明                                                                                                                                 |
+| ---------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `command`        | 是   | 可执行文件的绝对路径。不会通过 shell PATH 查找。                                                                                     |
+| `args`           | 否   | 进程参数。不支持 shell 展开、管道、通配符匹配或引号处理。                                                                            |
+| `cwd`            | 否   | 进程的工作目录。                                                                                                                     |
+| `env`            | 否   | 与 OpenClaw 进程环境合并的环境变量。                                                                                                 |
+| `healthUrl`      | 否   | 就绪检查 URL。默认为在 `baseUrl` 后附加 `/models`（`http://127.0.0.1:8000/v1` 会变为 `http://127.0.0.1:8000/v1/models`）。           |
+| `readyTimeoutMs` | 否   | 启动就绪的截止时间。默认值：`120000`。                                                                                               |
+| `idleStopMs`     | 否   | OpenClaw 所启动进程的空闲关闭延迟。设为 `0` 或省略时，进程会一直运行到 OpenClaw 退出。                                                |
 
 ## Inferrs 示例
 
-Inferrs 是自定义的 OpenAI 兼容 `/v1` 后端，因此同一个 `localService` API 可用于 `inferrs` 提供商条目：
+Inferrs 是一个自定义的 OpenAI 兼容 `/v1` 后端，因此同一个 `localService` API 也适用于 `inferrs` 提供商条目：
 
 ```json5
 {
@@ -135,7 +137,7 @@ Inferrs 是自定义的 OpenAI 兼容 `/v1` 后端，因此同一个 `localServi
 }
 ```
 
-将 `command` 替换为运行 OpenClaw 的机器上 `which inferrs` 的结果。完整的 inferrs 设置：[Inferrs](/zh-CN/providers/inferrs)。
+将 `command` 替换为在运行 OpenClaw 的机器上执行 `which inferrs` 所得到的结果。完整的 Inferrs 设置说明：[Inferrs](/zh-CN/providers/inferrs)。
 
 ## ds4 示例
 
@@ -176,13 +178,13 @@ Inferrs 是自定义的 OpenAI 兼容 `/v1` 后端，因此同一个 `localServi
 
 完整设置、上下文大小配置和验证命令：[ds4](/zh-CN/providers/ds4)。
 
-## 相关
+## 相关内容
 
 <CardGroup cols={2}>
   <Card title="Local models" href="/zh-CN/gateway/local-models" icon="server">
-    本地模型设置、提供商选择和安全指导。
+    本地模型设置、提供商选择和安全指南。
   </Card>
   <Card title="Inferrs" href="/zh-CN/providers/inferrs" icon="cpu">
-    通过 inferrs OpenAI 兼容本地服务器运行 OpenClaw。
+    通过 Inferrs 的 OpenAI 兼容本地服务器运行 OpenClaw。
   </Card>
 </CardGroup>

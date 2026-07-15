@@ -1,95 +1,83 @@
 ---
 read_when:
-    - Autonome Agenten-Arbeitsabläufe einrichten, die ohne Eingabeaufforderung für jede einzelne Aufgabe ausgeführt werden
-    - Festlegen, was der Agent eigenständig tun kann und was menschliche Genehmigung erfordert
-    - Strukturierung von Multi-Programm-Agenten mit klaren Grenzen und Eskalationsregeln
-summary: Dauerhafte Betriebsbefugnisse für autonome Agentenprogramme definieren
-title: Daueranweisungen
+    - Einrichten autonomer Agenten-Workflows, die ohne Aufforderung für jede einzelne Aufgabe ausgeführt werden
+    - Festlegen, was der Agent selbstständig tun kann und wofür eine menschliche Genehmigung erforderlich ist
+    - Strukturierung von Agenten mit mehreren Programmen durch klare Grenzen und Eskalationsregeln
+summary: Definieren Sie dauerhafte Betriebsbefugnisse für autonome Agentenprogramme
+title: Daueraufträge
 x-i18n:
-    generated_at: "2026-05-12T00:56:17Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T01:22:54Z"
+    model: gpt-5.6
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 3a51baa7aca31cb34b682983374d4d551ed6ab57ae54a5c63e7d044bffeef756
+    source_hash: 9e7ad622efe734facc9dc3716f5ee7f57ed3923499db78730bda234a5c62ad80
     source_path: automation/standing-orders.md
     workflow: 16
-    postprocess_version: locale-links-v1
 ---
 
-Daueranweisungen gewähren Ihrem Agenten **dauerhafte operative Befugnis** für definierte Programme. Statt jedes Mal einzelne Aufgabenanweisungen zu geben, definieren Sie Programme mit klarem Umfang, Triggern und Eskalationsregeln - und der Agent führt sie autonom innerhalb dieser Grenzen aus.
+Daueraufträge erteilen Ihrem Agenten **dauerhafte Handlungsbefugnis** für festgelegte Programme. Statt den Agenten für jede Aufgabe einzeln anzuweisen, definieren Sie Programme mit eindeutigem Umfang, Auslösern und Eskalationsregeln. Der Agent führt sie innerhalb dieser Grenzen autonom aus: „Sie sind für den wöchentlichen Bericht verantwortlich. Erstellen und versenden Sie ihn jeden Freitag und eskalieren Sie nur, wenn etwas ungewöhnlich erscheint.“
 
-Das ist der Unterschied zwischen der Anweisung an Ihren Assistenten „Senden Sie jeden Freitag den Wochenbericht“ und der Erteilung dauerhafter Befugnis: „Sie sind für den Wochenbericht verantwortlich. Stellen Sie ihn jeden Freitag zusammen, senden Sie ihn und eskalieren Sie nur, wenn etwas falsch aussieht.“
+## Warum Daueraufträge sinnvoll sind
 
-## Warum Daueranweisungen
+**Ohne Daueraufträge:** Sie weisen den Agenten bei jeder Aufgabe einzeln an, Routinearbeiten werden vergessen oder verzögern sich und Sie werden zum Engpass.
 
-**Ohne Daueranweisungen:**
-
-- Sie müssen den Agenten für jede Aufgabe prompten
-- Der Agent bleibt zwischen Anfragen inaktiv
-- Routinearbeit wird vergessen oder verzögert
-- Sie werden zum Engpass
-
-**Mit Daueranweisungen:**
-
-- Der Agent führt Aufgaben autonom innerhalb definierter Grenzen aus
-- Routinearbeit erfolgt planmäßig ohne Prompting
-- Sie werden nur bei Ausnahmen und Freigaben einbezogen
-- Der Agent nutzt Leerlaufzeit produktiv
+**Mit Daueraufträgen:** Der Agent arbeitet innerhalb definierter Grenzen autonom, Routinearbeiten erfolgen planmäßig und Sie werden nur bei Ausnahmen und erforderlichen Genehmigungen einbezogen.
 
 ## Funktionsweise
 
-Daueranweisungen werden in den Dateien Ihres [Agent-Arbeitsbereichs](/de/concepts/agent-workspace) definiert. Der empfohlene Ansatz ist, sie direkt in `AGENTS.md` aufzunehmen (das in jeder Sitzung automatisch injiziert wird), damit der Agent sie immer im Kontext hat. Für größere Konfigurationen können Sie sie auch in einer dedizierten Datei wie `standing-orders.md` ablegen und aus `AGENTS.md` darauf verweisen.
+Daueraufträge werden in den Dateien Ihres [Agenten-Arbeitsbereichs](/de/concepts/agent-workspace) definiert. Es wird empfohlen, sie direkt in `AGENTS.md` aufzunehmen. Diese Datei wird automatisch in jede Sitzung eingefügt, sodass dem Agenten die Daueraufträge stets als Kontext vorliegen. Bei umfangreicheren Konfigurationen können Sie sie auch in einer eigenen Datei wie `standing-orders.md` ablegen und aus `AGENTS.md` darauf verweisen.
 
-Jedes Programm legt fest:
+Jedes Programm legt Folgendes fest:
 
-1. **Umfang** - wozu der Agent berechtigt ist
-2. **Trigger** - wann die Ausführung erfolgen soll (Zeitplan, Ereignis oder Bedingung)
-3. **Freigabegates** - was vor der Ausführung menschliche Zustimmung erfordert
-4. **Eskalationsregeln** - wann gestoppt und um Hilfe gebeten werden soll
+1. **Umfang** – wozu der Agent berechtigt ist
+2. **Auslöser** – wann die Ausführung erfolgt (Zeitplan, Ereignis oder Bedingung)
+3. **Genehmigungsschranken** – was vor der Ausführung eine menschliche Freigabe erfordert
+4. **Eskalationsregeln** – wann die Ausführung angehalten und um Hilfe gebeten werden muss
 
-Der Agent lädt diese Anweisungen in jeder Sitzung über die Bootstrap-Dateien des Arbeitsbereichs (die vollständige Liste automatisch injizierter Dateien finden Sie unter [Agent-Arbeitsbereich](/de/concepts/agent-workspace)) und führt sie zusammen mit [Cron-Jobs](/de/automation/cron-jobs) zur zeitbasierten Durchsetzung aus.
+Der Agent lädt diese Anweisungen in jeder Sitzung über die Bootstrap-Dateien des Arbeitsbereichs. Eine vollständige Liste der automatisch eingefügten Dateien finden Sie unter [Agenten-Arbeitsbereich](/de/concepts/agent-workspace). Er führt sie in Verbindung mit [Cron-Aufträgen](/de/automation/cron-jobs) zur zeitgesteuerten Durchsetzung aus.
 
 <Tip>
-Legen Sie Daueranweisungen in `AGENTS.md` ab, um sicherzustellen, dass sie in jeder Sitzung geladen werden. Der Arbeitsbereich-Bootstrap injiziert automatisch `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `BOOTSTRAP.md` und `MEMORY.md` - aber keine beliebigen Dateien in Unterverzeichnissen.
+Speichern Sie Daueraufträge in `AGENTS.md`, damit sie garantiert in jeder Sitzung geladen werden. Der Arbeitsbereich-Bootstrap fügt `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `BOOTSTRAP.md` und `MEMORY.md` automatisch ein – nicht jedoch beliebige Dateien in Unterverzeichnissen.
 </Tip>
 
-## Anatomie einer Daueranweisung
+## Aufbau eines Dauerauftrags
 
 ```markdown
-## Program: Weekly Status Report
+## Programm: Wöchentlicher Statusbericht
 
-**Authority:** Compile data, generate report, deliver to stakeholders
-**Trigger:** Every Friday at 4 PM (enforced via cron job)
-**Approval gate:** None for standard reports. Flag anomalies for human review.
-**Escalation:** If data source is unavailable or metrics look unusual (>2σ from norm)
+**Befugnis:** Daten zusammenstellen, Bericht erstellen, an Beteiligte übermitteln
+**Auslöser:** Jeden Freitag um 16 Uhr (durch einen Cron-Auftrag durchgesetzt)
+**Genehmigungsschranke:** Keine für Standardberichte. Auffälligkeiten zur menschlichen Prüfung kennzeichnen.
+**Eskalation:** Wenn die Datenquelle nicht verfügbar ist oder Kennzahlen ungewöhnlich erscheinen (>2σ von der Norm)
 
-### Execution steps
+### Ausführungsschritte
 
-1. Pull metrics from configured sources
-2. Compare to prior week and targets
-3. Generate report in Reports/weekly/YYYY-MM-DD.md
-4. Deliver summary via configured channel
-5. Log completion to Agent/Logs/
+1. Kennzahlen aus konfigurierten Quellen abrufen
+2. Mit der Vorwoche und den Zielwerten vergleichen
+3. Bericht unter Reports/weekly/YYYY-MM-DD.md erstellen
+4. Zusammenfassung über den konfigurierten Kanal übermitteln
+5. Abschluss unter Agent/Logs/ protokollieren
 
-### What NOT to do
+### Was NICHT zu tun ist
 
-- Do not send reports to external parties
-- Do not modify source data
-- Do not skip delivery if metrics look bad - report accurately
+- Berichte nicht an externe Parteien senden
+- Quelldaten nicht verändern
+- Übermittlung nicht auslassen, wenn Kennzahlen schlecht ausfallen – korrekt berichten
 ```
 
-## Daueranweisungen plus Cron-Jobs
+## Daueraufträge in Verbindung mit Cron-Aufträgen
 
-Daueranweisungen definieren, **wozu** der Agent berechtigt ist. [Cron-Jobs](/de/automation/cron-jobs) definieren, **wann** es geschieht. Sie arbeiten zusammen:
+Daueraufträge definieren, **wozu** der Agent berechtigt ist. [Cron-Aufträge](/de/automation/cron-jobs) definieren, **wann** dies geschieht. Beide greifen ineinander:
 
-```
-Standing Order: "You own the daily inbox triage"
+```text
+Dauerauftrag: „Sie sind für die tägliche Posteingangssichtung verantwortlich“
     ↓
-Cron Job (8 AM daily): "Execute inbox triage per standing orders"
+Cron-Auftrag (täglich um 8 Uhr): „Posteingangssichtung gemäß Daueraufträgen ausführen“
     ↓
-Agent: Reads standing orders → executes steps → reports results
+Agent: Liest Daueraufträge → führt Schritte aus → meldet Ergebnisse
 ```
 
-Der Prompt des Cron-Jobs sollte auf die Daueranweisung verweisen, statt sie zu duplizieren:
+Die Anweisung des Cron-Auftrags sollte auf den Dauerauftrag verweisen, statt ihn zu duplizieren:
 
 ```bash
 openclaw cron add \
@@ -100,7 +88,7 @@ openclaw cron add \
   --announce \
   --channel imessage \
   --to "+1XXXXXXXXXX" \
-  --message "Execute daily inbox triage per standing orders. Check mail for new alerts. Parse, categorize, and persist each item. Report summary to owner. Escalate unknowns."
+  --message "Tägliche Posteingangssichtung gemäß Daueraufträgen ausführen. E-Mails auf neue Warnmeldungen prüfen. Jeden Eintrag analysieren, kategorisieren und dauerhaft speichern. Dem Verantwortlichen eine Zusammenfassung melden. Unbekannte Fälle eskalieren."
 ```
 
 ## Beispiele
@@ -108,151 +96,151 @@ openclaw cron add \
 ### Beispiel 1: Inhalte und soziale Medien (wöchentlicher Zyklus)
 
 ```markdown
-## Program: Content & Social Media
+## Programm: Inhalte und soziale Medien
 
-**Authority:** Draft content, schedule posts, compile engagement reports
-**Approval gate:** All posts require owner review for first 30 days, then standing approval
-**Trigger:** Weekly cycle (Monday review → mid-week drafts → Friday brief)
+**Befugnis:** Inhalte entwerfen, Beiträge einplanen, Interaktionsberichte zusammenstellen
+**Genehmigungsschranke:** In den ersten 30 Tagen müssen alle Beiträge vom Verantwortlichen geprüft werden, danach gilt eine dauerhafte Freigabe
+**Auslöser:** Wöchentlicher Zyklus (Prüfung am Montag → Entwürfe zur Wochenmitte → Kurzbericht am Freitag)
 
-### Weekly cycle
+### Wöchentlicher Zyklus
 
-- **Monday:** Review platform metrics and audience engagement
-- **Tuesday-Thursday:** Draft social posts, create blog content
-- **Friday:** Compile weekly marketing brief → deliver to owner
+- **Montag:** Plattformkennzahlen und Interaktionen der Zielgruppe prüfen
+- **Dienstag–Donnerstag:** Beiträge für soziale Medien entwerfen, Bloginhalte erstellen
+- **Freitag:** Wöchentlichen Marketing-Kurzbericht zusammenstellen → an den Verantwortlichen übermitteln
 
-### Content rules
+### Inhaltsregeln
 
-- Voice must match the brand (see SOUL.md or brand voice guide)
-- Never identify as AI in public-facing content
-- Include metrics when available
-- Focus on value to audience, not self-promotion
+- Der Schreibstil muss zur Marke passen (siehe SOUL.md oder Leitfaden zur Markensprache)
+- In öffentlich sichtbaren Inhalten niemals als KI zu erkennen geben
+- Kennzahlen einbeziehen, sofern verfügbar
+- Den Mehrwert für die Zielgruppe statt Eigenwerbung in den Mittelpunkt stellen
 ```
 
-### Beispiel 2: Finanzprozesse (ereignisgesteuert)
+### Beispiel 2: Finanzvorgänge (ereignisgesteuert)
 
 ```markdown
-## Program: Financial Processing
+## Programm: Finanzielle Verarbeitung
 
-**Authority:** Process transaction data, generate reports, send summaries
-**Approval gate:** None for analysis. Recommendations require owner approval.
-**Trigger:** New data file detected OR scheduled monthly cycle
+**Befugnis:** Transaktionsdaten verarbeiten, Berichte erstellen, Zusammenfassungen senden
+**Genehmigungsschranke:** Keine für Analysen. Empfehlungen erfordern die Genehmigung des Verantwortlichen.
+**Auslöser:** Neue Datendatei erkannt ODER planmäßiger monatlicher Zyklus
 
-### When new data arrives
+### Wenn neue Daten eintreffen
 
-1. Detect new file in designated input directory
-2. Parse and categorize all transactions
-3. Compare against budget targets
-4. Flag: unusual items, threshold breaches, new recurring charges
-5. Generate report in designated output directory
-6. Deliver summary to owner via configured channel
+1. Neue Datei im festgelegten Eingabeverzeichnis erkennen
+2. Alle Transaktionen analysieren und kategorisieren
+3. Mit Budgetvorgaben vergleichen
+4. Kennzeichnen: ungewöhnliche Posten, Schwellenwertüberschreitungen, neue wiederkehrende Belastungen
+5. Bericht im festgelegten Ausgabeverzeichnis erstellen
+6. Zusammenfassung über den konfigurierten Kanal an den Verantwortlichen übermitteln
 
-### Escalation rules
+### Eskalationsregeln
 
-- Single item > $500: immediate alert
-- Category > budget by 20%: flag in report
-- Unrecognizable transaction: ask owner for categorization
-- Failed processing after 2 retries: report failure, do not guess
+- Einzelposten > $500: sofortige Warnmeldung
+- Kategorie überschreitet das Budget um 20 %: im Bericht kennzeichnen
+- Nicht zuordenbare Transaktion: Verantwortlichen um Kategorisierung bitten
+- Verarbeitung nach 2 Wiederholungsversuchen fehlgeschlagen: Fehler melden, keine Vermutungen anstellen
 ```
 
-### Beispiel 3: Monitoring und Warnmeldungen (kontinuierlich)
+### Beispiel 3: Überwachung und Warnmeldungen (kontinuierlich)
 
 ```markdown
-## Program: System Monitoring
+## Programm: Systemüberwachung
 
-**Authority:** Check system health, restart services, send alerts
-**Approval gate:** Restart services automatically. Escalate if restart fails twice.
-**Trigger:** Every heartbeat cycle
+**Befugnis:** Systemzustand prüfen, Dienste neu starten, Warnmeldungen senden
+**Genehmigungsschranke:** Dienste automatisch neu starten. Eskalieren, wenn der Neustart zweimal fehlschlägt.
+**Auslöser:** Bei jedem Heartbeat-Zyklus
 
-### Checks
+### Prüfungen
 
-- Service health endpoints responding
-- Disk space above threshold
-- Pending tasks not stale (>24 hours)
-- Delivery channels operational
+- Zustandsendpunkte der Dienste antworten
+- Freier Speicherplatz liegt über dem Schwellenwert
+- Ausstehende Aufgaben sind nicht veraltet (>24 Stunden)
+- Übermittlungskanäle sind betriebsbereit
 
-### Response matrix
+### Reaktionsmatrix
 
-| Condition        | Action                   | Escalate?                |
-| ---------------- | ------------------------ | ------------------------ |
-| Service down     | Restart automatically    | Only if restart fails 2x |
-| Disk space < 10% | Alert owner              | Yes                      |
-| Stale task > 24h | Remind owner             | No                       |
-| Channel offline  | Log and retry next cycle | If offline > 2 hours     |
+| Bedingung                 | Aktion                                      | Eskalieren?                         |
+| ------------------------- | ------------------------------------------- | ----------------------------------- |
+| Dienst ausgefallen        | Automatisch neu starten                     | Nur wenn der Neustart 2-mal fehlschlägt |
+| Freier Speicherplatz < 10 % | Verantwortlichen warnen                   | Ja                                  |
+| Veraltete Aufgabe > 24 Std. | Verantwortlichen erinnern                 | Nein                                |
+| Kanal offline             | Protokollieren und im nächsten Zyklus erneut versuchen | Wenn länger als 2 Stunden offline |
 ```
 
-## Muster Ausführen-Prüfen-Berichten
+## Muster „Ausführen–Prüfen–Melden“
 
-Daueranweisungen funktionieren am besten in Kombination mit strenger Ausführungsdisziplin. Jede Aufgabe in einer Daueranweisung sollte dieser Schleife folgen:
+Daueraufträge funktionieren am besten in Verbindung mit strikter Ausführungsdisziplin. Jede Aufgabe in einem Dauerauftrag sollte diesem Ablauf folgen:
 
-1. **Ausführen** - Erledigen Sie die eigentliche Arbeit (bestätigen Sie die Anweisung nicht nur)
-2. **Prüfen** - Bestätigen Sie, dass das Ergebnis korrekt ist (Datei existiert, Nachricht zugestellt, Daten geparst)
-3. **Berichten** - Teilen Sie der verantwortlichen Person mit, was erledigt und was geprüft wurde
+1. **Ausführen** – Die eigentliche Arbeit erledigen (die Anweisung nicht nur bestätigen)
+2. **Prüfen** – Bestätigen, dass das Ergebnis korrekt ist (Datei vorhanden, Nachricht übermittelt, Daten analysiert)
+3. **Melden** – Dem Verantwortlichen mitteilen, was erledigt und was geprüft wurde
 
 ```markdown
-### Execution rules
+### Ausführungsregeln
 
-- Every task follows Execute-Verify-Report. No exceptions.
-- "I'll do that" is not execution. Do it, then report.
-- "Done" without verification is not acceptable. Prove it.
-- If execution fails: retry once with adjusted approach.
-- If still fails: report failure with diagnosis. Never silently fail.
-- Never retry indefinitely - 3 attempts max, then escalate.
+- Jede Aufgabe folgt dem Muster „Ausführen–Prüfen–Melden“. Keine Ausnahmen.
+- „Ich werde das erledigen“ ist keine Ausführung. Erledigen Sie es und melden Sie anschließend das Ergebnis.
+- „Erledigt“ ohne Prüfung ist nicht akzeptabel. Erbringen Sie einen Nachweis.
+- Wenn die Ausführung fehlschlägt: einmal mit angepasstem Vorgehen erneut versuchen.
+- Wenn sie weiterhin fehlschlägt: Fehler einschließlich Diagnose melden. Fehler niemals stillschweigend übergehen.
+- Wiederholungsversuche niemals unbegrenzt fortsetzen – höchstens 3 Versuche, danach eskalieren.
 ```
 
-Dieses Muster verhindert den häufigsten Fehlermodus von Agenten: eine Aufgabe zu bestätigen, ohne sie abzuschließen.
+Dieses Muster verhindert die häufigste Fehlerart bei Agenten: eine Aufgabe zu bestätigen, ohne sie abzuschließen.
 
-## Multi-Programm-Architektur
+## Architektur mit mehreren Programmen
 
-Für Agenten, die mehrere Zuständigkeitsbereiche verwalten, organisieren Sie Daueranweisungen als separate Programme mit klaren Grenzen:
+Organisieren Sie Daueraufträge für Agenten, die mehrere Aufgabenbereiche verwalten, als getrennte Programme mit klaren Grenzen:
 
 ```markdown
-## Program 1: [Domain A] (Weekly)
+## Programm 1: [Bereich A] (Wöchentlich)
 
 ...
 
-## Program 2: [Domain B] (Monthly + On-Demand)
+## Programm 2: [Bereich B] (Monatlich + bei Bedarf)
 
 ...
 
-## Program 3: [Domain C] (As-Needed)
+## Programm 3: [Bereich C] (Nach Bedarf)
 
 ...
 
-## Escalation Rules (All Programs)
+## Eskalationsregeln (Alle Programme)
 
-- [Common escalation criteria]
-- [Approval gates that apply across programs]
+- [Gemeinsame Eskalationskriterien]
+- [Programmübergreifend geltende Genehmigungsschranken]
 ```
 
-Jedes Programm sollte Folgendes haben:
+Jedes Programm sollte Folgendes besitzen:
 
-- Einen eigenen **Trigger-Takt** (wöchentlich, monatlich, ereignisgesteuert, kontinuierlich)
-- Eigene **Freigabegates** (einige Programme benötigen mehr Aufsicht als andere)
-- Klare **Grenzen** (der Agent sollte wissen, wo ein Programm endet und ein anderes beginnt)
+- Einen eigenen **Ausführungsrhythmus** (wöchentlich, monatlich, ereignisgesteuert, kontinuierlich)
+- Eigene **Genehmigungsschranken** (einige Programme benötigen mehr Aufsicht als andere)
+- Klare **Abgrenzungen** (der Agent sollte wissen, wo ein Programm endet und ein anderes beginnt)
 
-## Best Practices
+## Bewährte Vorgehensweisen
 
 ### Empfohlen
 
-- Beginnen Sie mit enger Befugnis und erweitern Sie sie, wenn Vertrauen entsteht
-- Definieren Sie explizite Freigabegates für risikoreiche Aktionen
-- Fügen Sie Abschnitte „Was NICHT zu tun ist“ hinzu - Grenzen sind genauso wichtig wie Berechtigungen
-- Kombinieren Sie dies mit Cron-Jobs für zuverlässige zeitbasierte Ausführung
-- Prüfen Sie Agent-Protokolle wöchentlich, um zu verifizieren, dass Daueranweisungen befolgt werden
-- Aktualisieren Sie Daueranweisungen, wenn sich Ihre Anforderungen weiterentwickeln - sie sind lebende Dokumente
+- Mit eng begrenzten Befugnissen beginnen und diese mit zunehmendem Vertrauen erweitern
+- Ausdrückliche Genehmigungsschranken für risikoreiche Aktionen definieren
+- Abschnitte mit „Was NICHT zu tun ist“ einfügen – Grenzen sind ebenso wichtig wie Berechtigungen
+- Für eine zuverlässige zeitgesteuerte Ausführung mit Cron-Aufträgen kombinieren
+- Agentenprotokolle wöchentlich prüfen, um die Einhaltung der Daueraufträge zu bestätigen
+- Daueraufträge an Ihre sich ändernden Anforderungen anpassen – sie sind lebende Dokumente
 
-### Vermeiden
+### Zu vermeiden
 
-- Am ersten Tag breite Befugnis gewähren („tun Sie, was Sie für richtig halten“)
-- Eskalationsregeln auslassen - jedes Programm braucht eine Klausel dazu, wann gestoppt und gefragt werden soll
-- Davon ausgehen, dass der Agent mündliche Anweisungen behält - schreiben Sie alles in die Datei
-- Zuständigkeitsbereiche in einem einzigen Programm vermischen - separate Programme für separate Domänen
-- Die Durchsetzung mit Cron-Jobs vergessen - Daueranweisungen ohne Trigger werden zu Vorschlägen
+- Am ersten Tag weitreichende Befugnisse erteilen („Tun Sie, was immer Sie für das Beste halten“)
+- Eskalationsregeln auslassen – jedes Programm benötigt eine Klausel dazu, wann die Ausführung anzuhalten und nachzufragen ist
+- Davon ausgehen, dass der Agent sich an mündliche Anweisungen erinnert – alles in der Datei festhalten
+- Aufgabenbereiche in einem einzigen Programm vermischen – getrennte Programme für getrennte Bereiche verwenden
+- Die Durchsetzung mit Cron-Aufträgen vergessen – Daueraufträge ohne Auslöser werden zu bloßen Empfehlungen
 
 ## Verwandte Themen
 
 - [Automatisierung](/de/automation): alle Automatisierungsmechanismen auf einen Blick.
-- [Cron-Jobs](/de/automation/cron-jobs): Zeitplandurchsetzung für Daueranweisungen.
-- [Hooks](/de/automation/hooks): ereignisgesteuerte Skripte für Lebenszyklusereignisse von Agenten.
-- [Webhooks](/de/automation/cron-jobs#webhooks): eingehende HTTP-Ereignistrigger.
-- [Agent-Arbeitsbereich](/de/concepts/agent-workspace): wo Daueranweisungen liegen, einschließlich der vollständigen Liste automatisch injizierter Bootstrap-Dateien (`AGENTS.md`, `SOUL.md` usw.).
+- [Cron-Aufträge](/de/automation/cron-jobs): zeitliche Durchsetzung von Daueraufträgen.
+- [Hooks](/de/automation/hooks): ereignisgesteuerte Skripte für Lebenszyklusereignisse des Agenten.
+- [Webhooks](/de/automation/cron-jobs#webhooks): Auslöser für eingehende HTTP-Ereignisse.
+- [Agenten-Arbeitsbereich](/de/concepts/agent-workspace): Speicherort der Daueraufträge einschließlich der vollständigen Liste automatisch eingefügter Bootstrap-Dateien (`AGENTS.md`, `SOUL.md` usw.).

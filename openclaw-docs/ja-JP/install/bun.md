@@ -1,24 +1,25 @@
 ---
 read_when:
-    - 最速のローカル開発ループ（bun + watch）を使いたい
-    - Bun のインストール、パッチ、ライフサイクルスクリプトの問題に遭遇した
-summary: 'Bun ワークフロー（実験的）: pnpm と比較したインストールと注意点'
-title: Bun（実験的）
+    - Bun で依存関係をインストールするか、パッケージスクリプトを実行したい場合
+    - Bun のインストール／パッチ／ライフサイクルスクリプトの問題が発生する
+summary: インストールとパッケージスクリプトには Bun ワークフローを使用し、実行時には Node が必要です
+title: Bun
 x-i18n:
-    generated_at: "2026-07-05T11:31:16Z"
-    model: gpt-5.5
+    generated_at: "2026-07-14T13:49:54Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 25
     provider: openai
-    source_hash: b836be354166ceb073d170e472e8b69c3f517e754fe71417df1d85d27a18ae94
+    source_hash: b822f700123b91c785eb881ebf28a63e77915b46dfd44beb9dbf63fb71aaa0d2
     source_path: install/bun.md
     workflow: 16
 ---
 
 <Warning>
-Bun は Gateway ランタイムには推奨されません（WhatsApp と Telegram で既知の問題があります）。本番環境では Node を使用してください。
+Bun は必要な `node:sqlite` API を提供していないため、OpenClaw CLI または Gateway を実行できません。OpenClaw のすべてのランタイムコマンドには、サポートされている Node バージョンをインストールしてください。
 </Warning>
 
-Bun は TypeScript を直接実行するための任意のローカルランタイムです（`bun run ...`、`bun --watch ...`）。デフォルトのパッケージマネージャーは引き続き `pnpm` で、完全にサポートされ、ドキュメントツールで使用されています。Bun は `pnpm-lock.yaml` を使用できず、無視します。
+Bun は、オプションの依存関係インストーラーおよびパッケージスクリプトランナーとして引き続き使用できます。デフォルトのパッケージマネージャーは引き続き `pnpm` であり、完全にサポートされ、ドキュメントツールで使用されています。Bun は `pnpm-lock.yaml` を使用できず、これを無視します。
 
 ## インストール
 
@@ -28,7 +29,7 @@ Bun は TypeScript を直接実行するための任意のローカルランタ�
     bun install
     ```
 
-    `bun.lock` / `bun.lockb` は gitignore されているため、リポジトリの差分は発生しません。lockfile の書き込みを完全にスキップするには:
+    `bun.lock` / `bun.lockb` は gitignore の対象であるため、リポジトリに変更は生じません。ロックファイルへの書き込みを完全にスキップするには、次のコマンドを実行します。
 
     ```sh
     bun install --no-save
@@ -40,28 +41,31 @@ Bun は TypeScript を直接実行するための任意のローカルランタ�
     bun run build
     bun run vitest run
     ```
+
+    OpenClaw 自体を起動するコマンドは、引き続き Node 経由で実行する必要があります。
+
   </Step>
 </Steps>
 
 ## ライフサイクルスクリプト
 
-Bun は明示的に信頼しない限り、依存関係のライフサイクルスクリプトをブロックします。このリポジトリでは、一般的にブロックされる次のスクリプトは不要です:
+Bun は、明示的に信頼されていない依存関係のライフサイクルスクリプトをブロックします。このリポジトリでは、一般的にブロックされる次のスクリプトは必要ありません。
 
-- `baileys` `preinstall`: Node のメジャーバージョンが 20 以上かを確認します（OpenClaw には Node 22.19+ または 23.11+ が必要で、Node 24 が推奨されます）
-- `protobufjs` `postinstall`: 互換性のないバージョンスキームに関する警告を出力します（ビルド成果物はありません）
+- `baileys` `preinstall`: Node のメジャーバージョンが 20 以上であることを確認します（OpenClaw には Node 22.22.3+、24.15+、または 25.9+ が必要で、Node 24 を推奨します）
+- `protobufjs` `postinstall`: 互換性のないバージョン体系に関する警告を出力します（ビルド成果物は生成されません）
 
-これらのスクリプトが必要なランタイム問題に遭遇した場合は、明示的に信頼してください:
+これらのスクリプトが必要となるランタイムの問題が発生した場合は、明示的に信頼してください。
 
 ```sh
 bun pm trust baileys protobufjs
 ```
 
-## 注意点
+## 注意事項
 
-一部のパッケージスクリプトは内部で `pnpm` をハードコードしています（例: `check:docs`、`ui:*`、`protocol:check`）。`bun run` 経由で実行しても `pnpm` をシェル経由で呼び出すため、それらは `pnpm` で直接実行してください。
+一部のパッケージスクリプトでは、内部で `pnpm` がハードコードされています（例: `check:docs`、`ui:*`、`protocol:check`）。`bun run` 経由で実行しても `pnpm` がシェルから起動されるため、それらは `pnpm` から直接実行してください。
 
-## 関連
+## 関連項目
 
-- [インストール概要](/ja-JP/install)
+- [インストールの概要](/ja-JP/install)
 - [Node.js](/ja-JP/install/node)
 - [更新](/ja-JP/install/updating)

@@ -1,25 +1,23 @@
 ---
 read_when:
-    - Você está usando mensagens diretas do modo de pareamento e precisa aprovar remetentes
+    - Você está usando mensagens diretas no modo de pareamento e precisa aprovar os remetentes
 summary: Referência da CLI para `openclaw pairing` (aprovar/listar solicitações de pareamento)
 title: Pareamento
 x-i18n:
-    generated_at: "2026-05-06T17:54:10Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T23:49:36Z"
+    model: gpt-5.6
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 022018239ab1134b18986be42b8e019f412a1a730a9671f422979909c4a31dc5
+    source_hash: ca83ad9d9e55cfffd49301cb529b28df370c2dcff03484880f7cfc85ec2d6440
     source_path: cli/pairing.md
     workflow: 16
-    postprocess_version: locale-links-v1
 ---
 
 # `openclaw pairing`
 
-Aprove ou inspecione solicitações de pareamento por DM (para canais compatíveis com pareamento).
+Aprove ou inspecione solicitações de pareamento por mensagem direta em canais que oferecem suporte a pareamento (apenas mensagens diretas de chat — o pareamento de Node/dispositivo usa `openclaw devices`).
 
-Relacionado:
-
-- Fluxo de pareamento: [Pareamento](/pt-BR/channels/pairing)
+Relacionado: [Fluxo de pareamento](/pt-BR/channels/pairing)
 
 ## Comandos
 
@@ -35,23 +33,20 @@ openclaw pairing approve --channel telegram --account work <code> --notify
 
 ## `pairing list`
 
-Liste solicitações de pareamento pendentes para um canal.
+Lista as solicitações de pareamento pendentes de um canal.
 
-Opções:
+| Opção                   | Descrição                                      |
+| ----------------------- | ---------------------------------------------- |
+| `[channel]`             | ID posicional do canal                         |
+| `--channel <channel>`   | ID explícito do canal                          |
+| `--account <accountId>` | ID da conta para canais com várias contas      |
+| `--json`                | saída legível por máquina                      |
 
-- `[channel]`: ID de canal posicional
-- `--channel <channel>`: ID de canal explícito
-- `--account <accountId>`: ID da conta para canais com várias contas
-- `--json`: saída legível por máquina
-
-Observações:
-
-- Se vários canais compatíveis com pareamento estiverem configurados, você deve fornecer um canal posicionalmente ou com `--channel`.
-- Canais de Plugin são permitidos desde que o ID do canal seja válido.
+Se vários canais compatíveis com pareamento estiverem configurados, informe um canal como argumento posicional ou com `--channel`. Os canais de extensão funcionam desde que o ID do canal seja válido.
 
 ## `pairing approve`
 
-Aprove um código de pareamento pendente e permita esse remetente.
+Aprova um código de pareamento pendente e permite esse remetente.
 
 Uso:
 
@@ -59,25 +54,15 @@ Uso:
 - `openclaw pairing approve --channel <channel> <code>`
 - `openclaw pairing approve <code>` quando exatamente um canal compatível com pareamento estiver configurado
 
-Opções:
+Opções: `--channel <channel>`, `--account <accountId>`, `--notify` (envia uma confirmação ao solicitante pelo mesmo canal).
 
-- `--channel <channel>`: ID de canal explícito
-- `--account <accountId>`: ID da conta para canais com várias contas
-- `--notify`: envia uma confirmação de volta ao solicitante no mesmo canal
+### Inicialização do proprietário
 
-Inicialização do proprietário:
+Se `commands.ownerAllowFrom` estiver vazio quando você aprovar um código de pareamento, o OpenClaw também registrará o remetente aprovado como proprietário dos comandos, usando uma entrada com escopo de canal, como `telegram:123456789`. Isso inicializa apenas o primeiro proprietário — aprovações de pareamento posteriores nunca substituem nem ampliam `commands.ownerAllowFrom`.
 
-- Se `commands.ownerAllowFrom` estiver vazio quando você aprovar um código de pareamento, o OpenClaw também registra o remetente aprovado como proprietário dos comandos, usando uma entrada com escopo de canal, como `telegram:123456789`.
-- Isso inicializa apenas o primeiro proprietário. Aprovações de pareamento posteriores não substituem nem expandem `commands.ownerAllowFrom`.
-- O proprietário dos comandos é a conta do operador humano autorizada a executar comandos exclusivos do proprietário e aprovar ações perigosas, como `/diagnostics`, `/export-trajectory`, `/config` e aprovações de exec.
+O proprietário dos comandos é a conta do operador humano autorizada a executar comandos exclusivos do proprietário e aprovar ações perigosas, como `/diagnostics`, `/export-trajectory`, `/config` e aprovações de execução. O pareamento apenas permite que um remetente converse com o agente; por si só, ele não concede privilégios de proprietário além dessa inicialização única.
 
-## Observações
-
-- Entrada de canal: passe-a posicionalmente (`pairing list telegram`) ou com `--channel <channel>`.
-- `pairing list` aceita `--account <accountId>` para canais com várias contas.
-- `pairing approve` aceita `--account <accountId>` e `--notify`.
-- Se apenas um canal compatível com pareamento estiver configurado, `pairing approve <code>` é permitido.
-- Se você aprovou um remetente antes de essa inicialização existir, execute `openclaw doctor`; ele avisa quando nenhum proprietário de comandos está configurado e mostra o comando `openclaw config set commands.ownerAllowFrom ...` para corrigir isso.
+Se você aprovou um remetente antes da existência dessa inicialização, execute `openclaw doctor`; ele avisa quando nenhum proprietário dos comandos está configurado e mostra o comando exato `openclaw config set commands.ownerAllowFrom ...` para corrigir isso.
 
 ## Relacionado
 

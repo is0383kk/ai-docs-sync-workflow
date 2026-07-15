@@ -1,58 +1,46 @@
 ---
 read_when:
-    - Вы хотите создать простой Plugin OpenClaw, который только добавляет инструменты агента
-    - Вы хотите использовать defineToolPlugin вместо ручного написания метаданных манифеста Plugin
-    - Вам нужно создать каркас, сгенерировать, проверить, протестировать или опубликовать Plugin, содержащий только инструменты
+    - Вы хотите создать простой плагин OpenClaw, который лишь добавляет инструменты агента
+    - Вы хотите использовать defineToolPlugin вместо написания метаданных манифеста плагина вручную
+    - Вам нужно создать каркас, сгенерировать, проверить, протестировать или опубликовать плагин, содержащий только инструменты
 sidebarTitle: Tool Plugins
 summary: Создавайте простые типизированные инструменты агента с помощью defineToolPlugin и openclaw plugins init/build/validate
-title: Plugins для инструментов
+title: Плагины инструментов
 x-i18n:
-    generated_at: "2026-06-28T23:33:37Z"
-    model: gpt-5.5
+    generated_at: "2026-07-13T20:10:40Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 24
     provider: openai
-    source_hash: 5e0ead3e9162b0e9e930a7a69dcd4a72a78063dae09a173efb70d0db32f73c9a
+    source_hash: fb9187e1d8aed88eee5c99dcdce89f70cd0d4f930b97aaac2ff868037d63adc1
     source_path: plugins/tool-plugins.md
     workflow: 16
 ---
 
-Плагины инструментов добавляют в OpenClaw инструменты, вызываемые агентом, без добавления канала,
-поставщика модели, hook, сервиса или backend настройки. Используйте `defineToolPlugin`, когда
-плагин владеет фиксированным списком инструментов и вы хотите, чтобы OpenClaw сгенерировал
-метаданные манифеста, которые сохраняют эти инструменты доступными для обнаружения без загрузки runtime-кода.
+`defineToolPlugin` создаёт плагин, который добавляет только инструменты, вызываемые агентом: без
+канала, поставщика моделей, обработчика, службы или серверной части настройки. Он создаёт
+метаданные манифеста, необходимые OpenClaw для обнаружения инструментов без загрузки
+кода среды выполнения плагина.
 
-Рекомендуемый процесс:
-
-1. Создайте каркас пакета с помощью `openclaw plugins init`.
-2. Напишите инструменты с `defineToolPlugin`.
-3. Соберите JavaScript.
-4. Сгенерируйте метаданные `openclaw.plugin.json` и `package.json` с помощью
-   `openclaw plugins build`.
-5. Проверьте сгенерированные метаданные перед публикацией или установкой.
-
-Для плагинов поставщиков, каналов, hook, сервисов или плагинов со смешанными возможностями начните с
+Для плагинов поставщиков, каналов, обработчиков, служб или плагинов со смешанными возможностями начните с
 [Создание плагинов](/ru/plugins/building-plugins), [Плагины каналов](/ru/plugins/sdk-channel-plugins)
 или [Плагины поставщиков](/ru/plugins/sdk-provider-plugins).
 
 ## Требования
 
-- Node >= 22.
-- Вывод пакета TypeScript ESM.
-- `typebox` для схем конфигурации и параметров инструментов.
-- `openclaw >=2026.5.17`, первая версия OpenClaw, которая экспортирует
+- Node 22.22.3+, Node 24.15+ или Node 25.9+.
+- Выходной пакет TypeScript ESM.
+- `typebox` в `dependencies` (не только в `devDependencies` — созданный
+  плагин импортирует его во время выполнения).
+- `openclaw >=2026.5.17` — первая версия, экспортирующая
   `openclaw/plugin-sdk/tool-plugin`.
-- Корень пакета, который может поставлять `dist/`, `openclaw.plugin.json` и
+- Корень пакета, содержащий `dist/`, `openclaw.plugin.json` и
   `package.json`.
-
-Сгенерированный плагин импортирует `typebox` во время выполнения, поэтому держите `typebox` в
-`dependencies`, а не только в `devDependencies`.
 
 ## Быстрый старт
 
-Создайте новый пакет плагина:
-
 ```bash
-openclaw plugins init stock-quotes --name "Stock Quotes"
+openclaw plugins init stock-quotes --name "Котировки акций"
 cd stock-quotes
 npm install
 npm run plugin:build
@@ -60,25 +48,40 @@ npm run plugin:validate
 npm test
 ```
 
-Каркас создает:
+`plugins init` создаёт:
 
-- `src/index.ts`: entry `defineToolPlugin` с инструментом `echo`.
-- `src/index.test.ts`: небольшой тест метаданных.
-- `tsconfig.json`: вывод TypeScript NodeNext в `dist/`.
-- `package.json`: скрипты, runtime-зависимости и
-  `openclaw.extensions: ["./dist/index.js"]`.
-- `openclaw.plugin.json`: сгенерированные метаданные манифеста для начального инструмента.
+| Файл                   | Назначение                                                           |
+| ---------------------- | ----------------------------------------------------------------- |
+| `src/index.ts`         | Точка входа `defineToolPlugin` с одним инструментом `echo`                     |
+| `src/index.test.ts`    | Тест метаданных, проверяющий список инструментов                             |
+| `tsconfig.json`        | Выходные данные NodeNext TypeScript в `dist/`                             |
+| `vitest.config.ts`     | Конфигурация Vitest для `src/**/*.test.ts`                              |
+| `package.json`         | Скрипты, зависимости среды выполнения, `openclaw.extensions: ["./dist/index.js"]` |
+| `openclaw.plugin.json` | Созданные метаданные манифеста для исходного инструмента                  |
 
-Ожидаемый вывод проверки:
+`npm run plugin:build` запускает `npm run build` (tsc), а затем
+`openclaw plugins build --entry ./dist/index.js`. `npm run plugin:validate`
+повторно выполняет сборку и запускает `openclaw plugins validate --entry ./dist/index.js`.
+При успешной проверке выводится:
 
 ```text
-Plugin stock-quotes is valid.
+Плагин stock-quotes действителен.
 ```
+
+Параметры `openclaw plugins init <id>`:
+
+| Флаг                 | Значение по умолчанию            | Действие                                 |
+| -------------------- | ------------------ | -------------------------------------- |
+| `--directory <path>` | `<id>`             | Каталог вывода                       |
+| `--name <name>`      | `<id>` в заглавном регистре | Отображаемое имя                           |
+| `--type <type>`      | `tool`             | Тип шаблона: `tool` или `provider`    |
+| `--force`            | выключено                | Перезаписать существующий каталог вывода |
 
 ## Написание инструмента
 
-`defineToolPlugin` принимает идентификацию плагина, необязательную схему конфигурации и
-статический список инструментов. Типы параметров и конфигурации выводятся из схем TypeBox.
+`defineToolPlugin` принимает идентификационные данные плагина, необязательную схему конфигурации и
+статический список инструментов. Типы параметров и конфигурации выводятся из
+схем TypeBox.
 
 ```typescript
 import { Type } from "typebox";
@@ -86,19 +89,19 @@ import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
 
 export default defineToolPlugin({
   id: "stock-quotes",
-  name: "Stock Quotes",
-  description: "Fetch stock quote snapshots.",
+  name: "Котировки акций",
+  description: "Получение снимков котировок акций.",
   configSchema: Type.Object({
-    apiKey: Type.Optional(Type.String({ description: "Quote API key." })),
-    baseUrl: Type.Optional(Type.String({ description: "Quote API base URL." })),
+    apiKey: Type.Optional(Type.String({ description: "Ключ API котировок." })),
+    baseUrl: Type.Optional(Type.String({ description: "Базовый URL API котировок." })),
   }),
   tools: (tool) => [
     tool({
       name: "stock_quote",
-      label: "Stock Quote",
-      description: "Fetch a stock quote snapshot.",
+      label: "Котировка акции",
+      description: "Получение снимка котировки акции.",
       parameters: Type.Object({
-        symbol: Type.String({ description: "Ticker symbol, for example OPEN." }),
+        symbol: Type.String({ description: "Биржевой символ, например OPEN." }),
       }),
       async execute({ symbol }, config, context) {
         context.signal?.throwIfAborted();
@@ -113,35 +116,35 @@ export default defineToolPlugin({
 });
 ```
 
-Имена инструментов являются стабильным API. Выбирайте имена, которые уникальны, написаны в нижнем регистре и
-достаточно конкретны, чтобы избежать конфликтов с инструментами core или другими плагинами.
+Имена инструментов являются стабильным API. Выбирайте уникальные имена в нижнем регистре,
+достаточно конкретные, чтобы избежать конфликтов с основными инструментами или другими плагинами.
 
-## Необязательные и фабричные инструменты
+## Необязательные инструменты и фабрики инструментов
 
-Установите `optional: true`, когда пользователи должны явно добавить инструмент в allowlist, прежде чем он
-будет отправлен модели:
+Задайте `optional: true`, если пользователи должны явно добавить инструмент в список разрешённых, прежде чем он
+будет отправлен модели. `openclaw plugins build` записывает соответствующую
+запись манифеста `toolMetadata.<tool>.optional`, поэтому OpenClaw может определить, что
+инструмент является необязательным, без загрузки кода среды выполнения плагина.
 
 ```typescript
 tool({
   name: "workflow_run",
-  description: "Run an external workflow.",
+  description: "Запуск внешнего рабочего процесса.",
   parameters: Type.Object({ goal: Type.String() }),
   optional: true,
   execute: ({ goal }) => ({ queued: true, goal }),
 });
 ```
 
-`openclaw plugins build` записывает соответствующую запись манифеста `toolMetadata.<tool>.optional`,
-чтобы OpenClaw мог обнаружить инструмент без загрузки runtime-кода плагина.
-
-Используйте `factory`, когда инструменту нужен runtime-контекст инструмента, прежде чем его можно будет
-создать. Фабрика сохраняет метаданные статическими, позволяя инструменту отказаться от конкретного запуска,
-проверить состояние sandbox или привязать runtime-помощники.
+Используйте `factory`, когда для создания инструмента требуется контекст инструмента среды выполнения —
+чтобы отказаться от него для конкретного запуска, проверить состояние песочницы или привязать
+вспомогательные функции среды выполнения. Метаданные остаются статическими, хотя конкретный инструмент создаётся
+во время выполнения.
 
 ```typescript
 tool({
   name: "local_workflow",
-  description: "Run a local workflow outside sandboxed sessions.",
+  description: "Запуск локального рабочего процесса вне изолированных сеансов.",
   parameters: Type.Object({ goal: Type.String() }),
   optional: true,
   factory({ api, toolContext }) {
@@ -153,22 +156,23 @@ tool({
 });
 ```
 
-Фабрики по-прежнему предназначены для фиксированных имен инструментов. Используйте `definePluginEntry` напрямую, когда
-плагин вычисляет имена инструментов динамически или объединяет инструменты с hook,
-сервисами, поставщиками, командами или другими runtime-поверхностями.
+Фабрики по-прежнему заранее объявляют фиксированное имя инструмента. Используйте `definePluginEntry`
+напрямую, когда плагин динамически вычисляет имена инструментов или объединяет инструменты
+с обработчиками, службами, поставщиками или командами.
 
 ## Возвращаемые значения
 
-`defineToolPlugin` оборачивает простые возвращаемые значения в формат результата инструмента OpenClaw:
+`defineToolPlugin` оборачивает обычные возвращаемые значения в формат результата инструмента
+OpenClaw:
 
-- Верните строку, когда модель должна увидеть именно этот текст.
-- Верните JSON-совместимое значение, когда вы хотите, чтобы модель увидела форматированный JSON,
-  а OpenClaw сохранил исходное значение в `details`.
+- Возвращайте строку, если модель должна увидеть именно этот текст.
+- Возвращайте JSON-совместимое значение, если модель должна увидеть форматированный JSON,
+  а OpenClaw — сохранить исходное значение в `details`.
 
 ```typescript
 tool({
   name: "echo_text",
-  description: "Echo input text.",
+  description: "Повторение входного текста.",
   parameters: Type.Object({
     input: Type.String(),
   }),
@@ -179,7 +183,7 @@ tool({
 ```typescript
 tool({
   name: "echo_json",
-  description: "Echo input as structured JSON.",
+  description: "Повторение входных данных в виде структурированного JSON.",
   parameters: Type.Object({
     input: Type.String(),
   }),
@@ -187,27 +191,24 @@ tool({
 });
 ```
 
-Используйте фабричный инструмент, когда нужно вернуть собственный `AgentToolResult` или повторно использовать
-существующую реализацию `api.registerTool`. Используйте `definePluginEntry` вместо
-`defineToolPlugin`, когда вам нужны полностью динамические инструменты или смешанные возможности
-плагина.
+Используйте фабрику инструментов, когда требуется пользовательский `AgentToolResult` или необходимо повторно использовать
+существующую реализацию `api.registerTool`.
 
 ## Конфигурация
 
-`configSchema` необязательна. Если вы ее опустите, OpenClaw использует строгую схему пустого объекта,
-и сгенерированный манифест все равно будет включать `configSchema`.
+`configSchema` является необязательной. Если её опустить, OpenClaw применит строгую схему пустого объекта;
+созданный манифест всё равно будет содержать `configSchema`.
 
 ```typescript
 export default defineToolPlugin({
   id: "no-config-tools",
-  name: "No Config Tools",
-  description: "Adds tools that do not need configuration.",
+  name: "Инструменты без конфигурации",
+  description: "Добавляет инструменты, которым не требуется конфигурация.",
   tools: () => [],
 });
 ```
 
-Когда вы включаете `configSchema`, второй аргумент `execute` типизируется на основе
-схемы:
+При наличии `configSchema` тип второго аргумента `execute` выводится из неё:
 
 ```typescript
 const configSchema = Type.Object({
@@ -216,13 +217,13 @@ const configSchema = Type.Object({
 
 export default defineToolPlugin({
   id: "configured-tools",
-  name: "Configured Tools",
-  description: "Adds configured tools.",
+  name: "Настроенные инструменты",
+  description: "Добавляет настроенные инструменты.",
   configSchema,
   tools: (tool) => [
     tool({
       name: "configured_ping",
-      description: "Check whether configuration is available.",
+      description: "Проверка доступности конфигурации.",
       parameters: Type.Object({}),
       execute: (_params, config) => ({ hasKey: config.apiKey.length > 0 }),
     }),
@@ -230,32 +231,30 @@ export default defineToolPlugin({
 });
 ```
 
-OpenClaw читает конфигурацию плагина из записи плагина в конфигурации Gateway. Не
-зашивайте секреты в исходный код или примеры в документации. Используйте конфигурацию, переменные окружения
-или SecretRefs согласно модели безопасности плагина.
+OpenClaw считывает конфигурацию плагина из записи плагина в конфигурации Gateway. Не
+указывайте секреты непосредственно в исходном коде или примерах документации; используйте конфигурацию, переменные
+окружения или SecretRefs в соответствии с моделью безопасности плагина.
 
-## Сгенерированные метаданные
+## Созданные метаданные
 
-OpenClaw обнаруживает установленные плагины по холодным метаданным. Он должен уметь читать
-манифест плагина до импорта runtime-кода плагина. Поэтому `defineToolPlugin`
-предоставляет статические метаданные, а `openclaw plugins build` записывает эти
-метаданные в пакет.
-
-Запускайте генератор после изменения id, имени, описания, схемы конфигурации,
-активации или имен инструментов плагина:
+OpenClaw должен прочитать манифест плагина до импорта кода среды выполнения плагина.
+`defineToolPlugin` предоставляет для этого статические метаданные, а
+`openclaw plugins build` записывает их в пакет. Повторно запускайте генератор после
+изменения идентификатора, имени, описания, схемы конфигурации, активации или имён
+инструментов плагина:
 
 ```bash
 npm run build
 openclaw plugins build --entry ./dist/index.js
 ```
 
-Для плагина с одним инструментом сгенерированный манифест выглядит так:
+Созданный манифест для плагина с одним инструментом:
 
 ```json
 {
   "id": "stock-quotes",
-  "name": "Stock Quotes",
-  "description": "Fetch stock quote snapshots.",
+  "name": "Котировки акций",
+  "description": "Получение снимков котировок акций.",
   "version": "0.1.0",
   "configSchema": {
     "type": "object",
@@ -271,15 +270,15 @@ openclaw plugins build --entry ./dist/index.js
 }
 ```
 
-`contracts.tools` — важный контракт обнаружения. Он сообщает OpenClaw, какой
-плагин владеет каждым инструментом, без загрузки runtime-кода каждого установленного плагина. Если
-манифест устарел, инструмент может отсутствовать при обнаружении или неправильный плагин
-может быть указан как причина ошибки регистрации.
+`contracts.tools` — важный контракт обнаружения: он сообщает OpenClaw, какому
+плагину принадлежит каждый инструмент, без загрузки среды выполнения каждого установленного плагина. Из-за
+устаревшего манифеста инструмент может отсутствовать при обнаружении либо ошибка регистрации
+может быть ошибочно приписана другому плагину.
 
 ## Метаданные пакета
 
-Для простого процесса tool-plugin `openclaw plugins build` выравнивает
-`package.json` с выбранной единственной runtime-точкой входа:
+`openclaw plugins build` также согласует `package.json` с выбранной точкой входа
+среды выполнения:
 
 ```json
 {
@@ -297,14 +296,13 @@ openclaw plugins build --entry ./dist/index.js
 }
 ```
 
-Используйте собранный JavaScript, например `./dist/index.js`, для установленных пакетов. Исходные
-entry полезны при разработке в workspace, но опубликованные пакеты не должны
-зависеть от runtime-загрузки TypeScript.
+Публикуйте собранный JavaScript (`./dist/index.js`), а не точку входа исходного кода TypeScript.
+Точки входа исходного кода работают только при локальной разработке в рабочей области.
 
 ## Проверка в CI
 
-Используйте `plugins build --check`, чтобы CI падал, когда сгенерированные метаданные устарели, без
-перезаписи файлов:
+`plugins build --check` завершается с ошибкой без перезаписи файлов, если созданные метаданные
+устарели:
 
 ```bash
 npm run build
@@ -313,24 +311,24 @@ openclaw plugins validate --entry ./dist/index.js
 npm test
 ```
 
-`plugins validate` проверяет, что:
+`plugins validate` проверяет следующее:
 
-- `openclaw.plugin.json` существует и проходит обычный загрузчик манифеста.
-- Текущая entry экспортирует метаданные `defineToolPlugin`.
-- Сгенерированные поля манифеста соответствуют метаданным entry.
+- `openclaw.plugin.json` существует и проходит обычную загрузку манифеста.
+- Текущая точка входа экспортирует метаданные `defineToolPlugin`.
+- Поля созданного манифеста соответствуют метаданным точки входа.
 - `contracts.tools` соответствует объявленным именам инструментов.
-- `package.json` указывает `openclaw.extensions` на выбранную runtime-entry.
+- `package.json` направляет `openclaw.extensions` на выбранную точку входа среды выполнения.
 
 ## Локальная установка и проверка
 
-Из отдельного checkout OpenClaw или установленного CLI установите путь пакета:
+Из отдельной копии OpenClaw или установленного CLI установите пакет по его пути:
 
 ```bash
 openclaw plugins install ./stock-quotes
 openclaw plugins inspect stock-quotes --runtime
 ```
 
-Для пакетного smoke сначала упакуйте и установите tarball:
+Для проверки упакованной версии сначала создайте пакет и установите tar-архив:
 
 ```bash
 npm pack
@@ -338,79 +336,83 @@ openclaw plugins install npm-pack:./openclaw-plugin-stock-quotes-0.1.0.tgz
 openclaw plugins inspect stock-quotes --runtime --json
 ```
 
-После установки запустите или перезапустите Gateway и попросите агента использовать
-инструмент. Если вы отлаживаете видимость инструмента, проверьте runtime плагина и
-эффективный каталог инструментов перед изменением кода.
+После установки перезапустите или перезагрузите Gateway и попросите агента использовать
+инструмент. Если инструмент не отображается, проверьте среду выполнения плагина и действующий
+каталог инструментов, прежде чем изменять код (см. [Устранение неполадок](#troubleshooting)).
 
 ## Публикация
 
-Публикуйте через ClawHub, когда пакет готов:
+Когда пакет будет готов, опубликуйте его через ClawHub. `clawhub package publish`
+принимает источник: локальную папку, репозиторий GitHub (`owner/repo[@ref]`) или
+URL tar-архива.
 
 ```bash
-clawhub package publish your-org/stock-quotes --dry-run
-clawhub package publish your-org/stock-quotes
+clawhub package publish ./stock-quotes --dry-run
+clawhub package publish ./stock-quotes
 ```
 
-Установите с явным локатором ClawHub:
+Установите с явным указателем ClawHub:
 
 ```bash
 openclaw plugins install clawhub:your-org/stock-quotes
 ```
 
-Простые npm package specs остаются поддерживаемыми во время перехода при запуске, но ClawHub
-является предпочтительной поверхностью обнаружения и распространения для плагинов OpenClaw.
+Спецификации пакетов npm без префикса по-прежнему устанавливаются из npm во время перехода при запуске, но
+ClawHub является предпочтительной системой обнаружения и распространения плагинов
+OpenClaw. Сведения об области владельца и проверке
+выпуска см. в разделе [Публикация в ClawHub](/ru/clawhub/publishing).
 
 ## Устранение неполадок
 
 ### `plugin entry not found: ./dist/index.js`
 
-Выбранный entry-файл не существует. Запустите `npm run build`, затем повторно выполните
+Выбранный файл точки входа не существует. Запустите `npm run build`, затем повторно запустите
 `openclaw plugins build --entry ./dist/index.js` или
 `openclaw plugins validate --entry ./dist/index.js`.
 
 ### `plugin entry does not expose defineToolPlugin metadata`
 
-Entry не экспортировал значение, созданное `defineToolPlugin`. Проверьте, что
-default export модуля является результатом `defineToolPlugin(...)`, или передайте правильную
-entry с `--entry`.
+Точка входа не экспортировала значение, созданное `defineToolPlugin`. Убедитесь, что
+экспорт модуля по умолчанию является результатом `defineToolPlugin(...)`, либо передайте
+правильную точку входа с помощью `--entry`.
 
 ### `openclaw.plugin.json generated metadata is stale`
 
-Манифест больше не соответствует метаданным entry. Запустите:
+Манифест больше не соответствует метаданным точки входа. Выполните:
 
 ```bash
 npm run build
 openclaw plugins build --entry ./dist/index.js
 ```
 
-Закоммитьте изменения как `openclaw.plugin.json`, так и `package.json`.
+Зафиксируйте изменения как `openclaw.plugin.json`, так и `package.json`.
 
 ### `package.json openclaw.extensions must include ./dist/index.js`
 
-Метаданные пакета указывают на другую runtime-entry. Запустите
-`openclaw plugins build --entry ./dist/index.js`, чтобы генератор выровнял
-метаданные пакета с entry, которую вы собираетесь поставлять.
+Метаданные пакета указывают на другую точку входа среды выполнения. Запустите
+`openclaw plugins build --entry ./dist/index.js`, чтобы генератор согласовал
+метаданные пакета с точкой входа, которую вы намерены опубликовать.
 
 ### `Cannot find package 'typebox'`
 
-Собранный плагин импортирует `typebox` во время выполнения. Держите `typebox` в
-`dependencies`, переустановите зависимости пакета, пересоберите и повторно выполните проверку.
+Собранный плагин импортирует `typebox` во время выполнения. Оставьте его в `dependencies`,
+повторно установите зависимости, выполните сборку и снова запустите проверку.
 
-### Инструмент не появляется после установки
+### Инструмент не отображается после установки
 
 Проверьте следующее по порядку:
 
 1. `openclaw plugins inspect <plugin-id> --runtime`
 2. `openclaw plugins validate --root <plugin-root> --entry ./dist/index.js`
-3. В `openclaw.plugin.json` есть `contracts.tools` с ожидаемыми именами инструментов.
-4. В `package.json` есть `openclaw.extensions: ["./dist/index.js"]`.
+3. `openclaw.plugin.json` содержит `contracts.tools` с ожидаемыми именами инструментов.
+4. `package.json` содержит `openclaw.extensions: ["./dist/index.js"]`.
 5. Gateway был перезапущен или перезагружен после установки плагина.
 
 ## См. также
 
 - [Создание плагинов](/ru/plugins/building-plugins)
 - [Точки входа плагинов](/ru/plugins/sdk-entrypoints)
-- [Подпути Plugin SDK](/ru/plugins/sdk-subpaths)
+- [Подпути SDK плагинов](/ru/plugins/sdk-subpaths)
 - [Манифест плагина](/ru/plugins/manifest)
 - [CLI плагинов](/ru/cli/plugins)
-- [Публикация ClawHub](/ru/clawhub/publishing)
+- [Публикация в ClawHub](/ru/clawhub/publishing)

@@ -1,31 +1,31 @@
 ---
 read_when:
-    - Escolher auto, ask, allowlist, full ou deny para permissões de comando
+    - Escolhendo auto, ask, allowlist, full ou deny para permissões de comandos
     - Configurando aprovações revisadas pelo Codex Guardian por meio de tools.exec.mode
-    - Comparando aprovações de execução do OpenClaw com permissões do harness ACPX
-summary: Modos de permissão para exec no host, aprovações do Codex Guardian e sessões de harness ACPX
+    - Comparação entre as aprovações de execução do OpenClaw e as permissões do ambiente ACPX
+summary: Modos de permissão para execução no host, aprovações do Codex Guardian e sessões do ambiente ACPX
 title: Modos de permissão
 x-i18n:
-    generated_at: "2026-06-27T18:17:33Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T00:27:34Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 6ce89cadb45b3b96ce9ab62b35c06610d02f0ff02f15ef7d2128c59fbebb325a
+    source_hash: f580e66508c1f69e868ed26a62d88a675f86a4d1ca738650dc5af82e967f3ac3
     source_path: tools/permission-modes.md
     workflow: 16
 ---
 
-Os modos de permissão decidem quanta autoridade um agente tem antes de poder executar comandos no host, gravar arquivos ou pedir acesso extra a um harness de backend. Comece com `tools.exec.mode: "auto"` quando quiser que o OpenClaw use listas de permissões primeiro, depois revisão automática nativa do Codex ou uma rota de aprovação humana para falhas.
+Os modos de permissão determinam quanta autoridade um agente possui antes de executar comandos no host, gravar arquivos ou solicitar acesso adicional a um ambiente de execução de backend.
 
 <Note>
   O modo de permissão é separado de `tools.exec.host=auto`. `tools.exec.host`
-  escolhe onde um comando é executado. `tools.exec.mode` escolhe como o exec
-  do host é aprovado.
+  determina onde um comando é executado. `tools.exec.mode` determina como a
+  execução no host é aprovada.
 </Note>
 
 ## Padrão recomendado
 
-Use `auto` para agentes de codificação que precisam de acesso útil ao host sem transformar cada falha em uma solicitação humana:
+Use `auto` para agentes de programação que precisam de acesso útil ao host sem transformar cada comando não correspondente em uma solicitação a uma pessoa:
 
 ```bash
 openclaw config set tools.exec.mode auto
@@ -33,31 +33,31 @@ openclaw approvals get
 openclaw gateway restart
 ```
 
-Depois verifique a política efetiva:
+Em seguida, verifique a política efetiva:
 
 ```bash
 openclaw exec-policy show
 ```
 
-No modo `auto`, o OpenClaw executa correspondências determinísticas da lista de permissões diretamente. Falhas de aprovação passam primeiro pelo revisor automático nativo do OpenClaw e depois recorrem à rota de aprovação humana configurada quando necessário.
+## Modos de execução no host do OpenClaw
 
-## Modos de exec do host do OpenClaw
+`tools.exec.mode` é a interface de política normalizada para `exec` no host. Cada modo corresponde a um par subjacente de `security` (rigor da lista de permissões) e `ask` (solicitação quando não há correspondência):
 
-`tools.exec.mode` é a superfície de política normalizada para `exec` no host.
+| Modo        | security / ask          | Comportamento                                                                                                                   | Use quando                                                      |
+| ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `deny`      | `deny` / `off`          | Bloqueia completamente a execução no host.                                                                                       | Nenhum comando no host é permitido.                              |
+| `allowlist` | `allowlist` / `off`     | Executa somente comandos na lista de permissões; nega silenciosamente os que não correspondem.                                   | Você tem um conjunto conhecido e seguro de comandos.             |
+| `ask`       | `allowlist` / `on-miss` | Executa correspondências da lista de permissões; solicita a uma pessoa quando não há correspondência.                            | Uma pessoa deve revisar cada comando novo.                       |
+| `auto`      | `allowlist` / `on-miss` | Executa correspondências da lista de permissões; envia as demais para revisão automática antes de recorrer à aprovação humana.   | Sessões de programação precisam de acesso prático e protegido.   |
+| `full`      | `full` / `off`          | Executa no host sem solicitações.                                                                                                | Este host ou esta sessão confiável deve ignorar as etapas de aprovação. |
 
-| Modo        | Comportamento                                     | Use quando                                              |
-| ----------- | ------------------------------------------------- | ------------------------------------------------------- |
-| `deny`      | Bloquear exec no host.                            | Nenhum comando de host é permitido.                     |
-| `allowlist` | Executar apenas comandos na lista de permissões.  | Você tem um conjunto de comandos sabidamente seguro.    |
-| `ask`       | Executar correspondências da lista e perguntar nas falhas. | Um humano deve revisar novos comandos.           |
-| `auto`      | Executar correspondências da lista e depois usar revisão automática. | Sessões de codificação precisam de acesso protegido prático. |
-| `full`      | Executar exec no host sem solicitações.           | Este host/sessão confiável deve ignorar barreiras de aprovação. |
+`ask` e `auto` compartilham as mesmas configurações de lista de permissões e solicitação; `auto` também habilita o revisor automático nativo, que decide por conta própria sobre comandos sem correspondência e só os encaminha para a rota de aprovação humana configurada quando não consegue aprová-los com segurança.
 
-Para a política completa de exec no host, arquivo local de aprovações, esquema da lista de permissões, binários seguros e comportamento de encaminhamento, consulte [Aprovações de exec](/pt-BR/tools/exec-approvals).
+Para consultar a política completa de execução no host, o arquivo local de aprovações, o esquema da lista de permissões, os binários seguros e o comportamento de encaminhamento, consulte [Aprovações de execução](/pt-BR/tools/exec-approvals).
 
 ## Mapeamento do Codex Guardian
 
-Para sessões nativas do servidor de aplicativo do Codex, `tools.exec.mode: "auto"` mapeia para aprovações revisadas pelo Codex Guardian quando os requisitos locais do Codex permitem. O OpenClaw normalmente envia:
+Para sessões nativas do servidor de aplicativo do Codex, `tools.exec.mode: "auto"` direciona o Codex para aprovações revisadas pelo Guardian quando os requisitos locais do Codex permitem. Valores resultantes típicos:
 
 | Campo do Codex      | Valor típico      |
 | ------------------- | ----------------- |
@@ -65,23 +65,23 @@ Para sessões nativas do servidor de aplicativo do Codex, `tools.exec.mode: "aut
 | `approvalsReviewer` | `auto_review`     |
 | `sandbox`           | `workspace-write` |
 
-No modo `auto`, o OpenClaw não preserva substituições inseguras legadas do Codex, como `approvalPolicy: "never"` ou `sandbox: "danger-full-access"`. Use `tools.exec.mode: "full"` apenas quando quiser intencionalmente a postura sem aprovação.
+O modo `auto` impõe essa política sobre quaisquer substituições configuradas de sandbox ou aprovação do Codex, portanto não preserva combinações legadas inseguras, como `approvalPolicy: "never"` com `sandbox: "danger-full-access"`. `tools.exec.mode: "deny"` e `"allowlist"` bloqueiam completamente a execução local pelo servidor de aplicativo do Codex. Use `tools.exec.mode: "full"` somente quando quiser intencionalmente uma configuração sem aprovação.
 
-Para configuração do servidor de aplicativo, ordem de autenticação e detalhes do runtime nativo do Codex, consulte [harness do Codex](/pt-BR/plugins/codex-harness).
+Para informações sobre a configuração do servidor de aplicativo, a ordem de autenticação e os detalhes do ambiente de execução nativo do Codex, consulte [Ambiente de execução do Codex](/pt-BR/plugins/codex-harness).
 
-## Permissões do harness ACPX
+## Permissões do ambiente de execução ACPX
 
-Sessões ACPX são não interativas, então não podem clicar em uma solicitação de permissão de TTY. O ACPX usa configurações separadas no nível do harness em `plugins.entries.acpx.config`:
+As sessões ACPX não são interativas, portanto não podem responder a uma solicitação de permissão em um TTY. O ACPX usa configurações separadas no nível do ambiente de execução em `plugins.entries.acpx.config`:
 
-| Configuração                | Valor comum     | Significado                                  |
-| --------------------------- | --------------- | -------------------------------------------- |
-| `permissionMode`            | `approve-reads` | Aprovar automaticamente apenas leituras.     |
-| `permissionMode`            | `approve-all`   | Aprovar automaticamente gravações e comandos de shell. |
-| `permissionMode`            | `deny-all`      | Negar todas as solicitações de permissão.    |
-| `nonInteractivePermissions` | `fail`          | Abortar quando uma solicitação seria necessária. |
-| `nonInteractivePermissions` | `deny`          | Negar a solicitação e continuar quando possível. |
+| Configuração                | Valores         | Significado                                                     |
+| --------------------------- | --------------- | --------------------------------------------------------------- |
+| `permissionMode`            | `approve-reads` | Aprova automaticamente somente leituras.                        |
+| `permissionMode`            | `approve-all`   | Aprova automaticamente gravações e comandos do shell.           |
+| `permissionMode`            | `deny-all`      | Nega todas as solicitações de permissão.                         |
+| `nonInteractivePermissions` | `fail`          | Interrompe quando uma solicitação seria necessária.              |
+| `nonInteractivePermissions` | `deny`          | Nega a solicitação e continua quando possível.                   |
 
-Configure permissões ACPX separadamente das aprovações de exec do OpenClaw:
+Configure as permissões do ACPX separadamente das aprovações de execução do OpenClaw:
 
 ```bash
 openclaw config set plugins.entries.acpx.config.permissionMode approve-all
@@ -89,31 +89,31 @@ openclaw config set plugins.entries.acpx.config.nonInteractivePermissions fail
 openclaw gateway restart
 ```
 
-Use `approve-all` como o equivalente de emergência do ACPX para uma sessão de harness sem solicitações. Para detalhes de configuração e modos de falha, consulte [configuração de agentes ACP](/pt-BR/tools/acp-agents-setup#permission-configuration).
+Use `approve-all` como o equivalente emergencial do ACPX para uma sessão do ambiente de execução sem solicitações. Para detalhes de configuração e modos de falha, consulte [Configuração de agentes ACP](/pt-BR/tools/acp-agents-setup#permission-configuration).
 
-## Escolhendo um modo
+## Escolha de um modo
 
-| Objetivo                                      | Configurar                                                   |
-| --------------------------------------------- | ------------------------------------------------------------ |
-| Bloquear comandos do host completamente       | `tools.exec.mode: "deny"`                                    |
-| Permitir apenas comandos sabidamente seguros  | `tools.exec.mode: "allowlist"`                               |
-| Perguntar a um humano para cada novo formato de comando | `tools.exec.mode: "ask"`                           |
-| Usar revisão automática do Codex/OpenClaw antes de humanos | `tools.exec.mode: "auto"`                         |
-| Ignorar aprovações de exec no host totalmente | `tools.exec.mode: "full"` mais o arquivo de aprovações do host correspondente |
-| Fazer sessões ACPX não interativas gravarem/executarem | `plugins.entries.acpx.config.permissionMode: "approve-all"` |
+| Objetivo                                              | Configuração                                                        |
+| ----------------------------------------------------- | ------------------------------------------------------------------- |
+| Bloquear completamente os comandos no host            | `tools.exec.mode: "deny"`                                           |
+| Permitir somente comandos conhecidos e seguros        | `tools.exec.mode: "allowlist"`                                      |
+| Solicitar a uma pessoa cada novo formato de comando   | `tools.exec.mode: "ask"`                                            |
+| Usar a revisão automática do Codex/OpenClaw antes de pessoas | `tools.exec.mode: "auto"`                                     |
+| Ignorar completamente as aprovações de execução no host | `tools.exec.mode: "full"` mais o arquivo correspondente de aprovações do host |
+| Permitir gravação/execução em sessões ACPX não interativas | `plugins.entries.acpx.config.permissionMode: "approve-all"`     |
 
-Se um comando ainda solicitar aprovação ou falhar depois de alterar o modo, inspecione as duas camadas:
+Se um comando ainda solicitar aprovação ou falhar após a alteração do modo, verifique ambas as camadas:
 
 ```bash
 openclaw approvals get
 openclaw exec-policy show
 ```
 
-O exec do host usa o resultado mais restritivo entre a configuração do OpenClaw e o arquivo de aprovações local do host. As permissões do harness ACPX não afrouxam aprovações de exec no host, e aprovações de exec no host não afrouxam solicitações do harness ACPX.
+A execução no host usa o resultado mais restritivo entre a configuração do OpenClaw e o arquivo local de aprovações do host. As permissões do ambiente de execução ACPX não flexibilizam as aprovações de execução no host, e as aprovações de execução no host não flexibilizam as solicitações do ambiente de execução ACPX.
 
 ## Relacionados
 
-- [Aprovações de exec](/pt-BR/tools/exec-approvals)
-- [Aprovações de exec - avançado](/pt-BR/tools/exec-approvals-advanced)
-- [harness do Codex](/pt-BR/plugins/codex-harness)
-- [configuração de agentes ACP](/pt-BR/tools/acp-agents-setup#permission-configuration)
+- [Aprovações de execução](/pt-BR/tools/exec-approvals)
+- [Aprovações de execução — avançado](/pt-BR/tools/exec-approvals-advanced)
+- [Ambiente de execução do Codex](/pt-BR/plugins/codex-harness)
+- [Configuração de agentes ACP](/pt-BR/tools/acp-agents-setup#permission-configuration)

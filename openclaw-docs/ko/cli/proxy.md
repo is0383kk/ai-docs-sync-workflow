@@ -1,37 +1,28 @@
 ---
 read_when:
-    - 배포 전에 운영자 관리 프록시 라우팅을 검증해야 합니다
+    - 배포 전에 운영자가 관리하는 프록시 라우팅을 검증해야 합니다.
     - 디버깅을 위해 OpenClaw 전송 트래픽을 로컬에서 캡처해야 합니다
-    - 디버그 프록시 세션, blob 또는 내장 쿼리 프리셋을 검사하려는 경우
-summary: '`openclaw proxy`에 대한 CLI 참조로, 운영자 관리 프록시 검증과 로컬 디버그 프록시 캡처 검사기를 포함합니다'
+    - 디버그 프록시 세션, Blob 또는 기본 제공 쿼리 프리셋을 검사하려는 경우
+summary: 운영자 관리 프록시 검증 및 로컬 디버그 프록시 캡처 검사기를 포함한 `openclaw proxy`의 CLI 참조 문서
 title: 프록시
 x-i18n:
-    generated_at: "2026-06-27T17:19:34Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T00:40:28Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: c3883373f2aa6d365ed93bcb9f7da2bb9281b8bd061d1842bc5bef0f43b7ccb9
+    source_hash: 91583f785032bfffe455a1963804108550f6fbb735ac4de1dd91d0ca5ae0df35
     source_path: cli/proxy.md
     workflow: 16
 ---
 
 # `openclaw proxy`
 
-운영자가 관리하는 프록시 라우팅을 검증하거나, 로컬 명시적 디버그 프록시를 실행하고
-캡처된 트래픽을 검사합니다.
-
-OpenClaw 프록시 라우팅을 활성화하기 전에 운영자가 관리하는 포워드 프록시를
-사전 점검하려면 `validate`를 사용하세요. 다른 명령은 전송 수준 조사를 위한
-디버깅 도구입니다. 로컬 프록시를 시작하고, 캡처를 활성화한 상태로 하위 명령을
-실행하며, 캡처 세션을 나열하고, 일반적인 트래픽 패턴을 쿼리하고, 캡처된 blob을
-읽고, 로컬 캡처 데이터를 삭제할 수 있습니다.
-
-## 명령
+운영자가 관리하는 프록시 라우팅을 검증하거나, 로컬 명시적 디버그 프록시를 실행하고 캡처된 트래픽을 검사합니다.
 
 ```bash
+openclaw proxy validate [--json] [--proxy-url <url>] [--proxy-ca-file <path>] [--allowed-url <url>] [--denied-url <url>] [--apns-reachable] [--apns-authority <url>] [--timeout-ms <ms>]
 openclaw proxy start [--host <host>] [--port <port>]
 openclaw proxy run [--host <host>] [--port <port>] -- <cmd...>
-openclaw proxy validate [--json] [--proxy-url <url>] [--proxy-ca-file <path>] [--allowed-url <url>] [--denied-url <url>] [--apns-reachable] [--apns-authority <url>] [--timeout-ms <ms>]
 openclaw proxy coverage
 openclaw proxy sessions [--limit <count>]
 openclaw proxy query --preset <name> [--session <id>]
@@ -39,40 +30,53 @@ openclaw proxy blob --id <blobId>
 openclaw proxy purge
 ```
 
+`validate`는 운영자가 관리하는 정방향 프록시를 사전 점검합니다. 나머지는 전송 계층 조사를 위한 디버깅 도구입니다. 로컬 캡처 프록시를 시작하고, 이를 통해 하위 명령을 실행하고, 캡처 세션을 나열하고, 트래픽 패턴을 조회하고, 캡처된 블롭을 읽고, 로컬 캡처 데이터를 삭제할 수 있습니다.
+
 ## 검증
 
-`openclaw proxy validate`는 `--proxy-url`, 설정 또는 `OPENCLAW_PROXY_URL`에서
-유효한 운영자 관리 프록시 URL을 확인합니다. 관리형 프록시 URL은 일반
-포워드 프록시 리스너에는 `http://`를 사용할 수 있고, OpenClaw가 프록시 요청을
-보내기 전에 프록시 엔드포인트로 TLS를 열어야 하는 경우에는 `https://`를 사용할
-수 있습니다. 프록시가 활성화되고 구성되어 있지 않으면 설정 문제를 보고합니다.
-설정을 변경하기 전에 일회성 사전 점검을 하려면 `--proxy-url`을 사용하세요.
-HTTPS 프록시 엔드포인트로의 TLS 연결에서 비공개 CA를 신뢰하려면
-`--proxy-ca-file`을 추가하세요. 기본적으로 공개 대상이 프록시를 통해 성공하고,
-프록시가 임시 루프백 카나리에 도달할 수 없는지 확인합니다. 사용자 지정 거부
-대상은 fail-closed 방식입니다. 배포별 거부 신호를 별도로 확인할 수 없는 한
-HTTP 응답과 모호한 전송 실패는 모두 실패로 처리됩니다. 프록시를 통해 APNs
-HTTP/2 CONNECT 터널도 열고 샌드박스 APNs가 응답하는지 확인하려면
-`--apns-reachable`을 추가하세요. 이 프로브는 의도적으로 유효하지 않은 제공자
-토큰을 사용하므로, APNs `403 InvalidProviderToken` 응답은 도달 가능성을 나타내는
-성공 신호입니다.
+`--proxy-url`, 설정(`proxy.proxyUrl`), `OPENCLAW_PROXY_URL` 순의 우선순위로 유효한 운영자 관리 프록시 URL을 확인합니다. 활성화되고 구성된 프록시가 없으면 설정 문제를 보고합니다. 설정을 변경하지 않고 일회성 사전 점검을 수행하려면 `--proxy-url`을 전달하세요.
 
-옵션:
+관리형 프록시 URL은 일반 정방향 프록시 리스너에 `http://`를 사용하며, OpenClaw가 프록시 요청을 보내기 전에 프록시 엔드포인트 자체에 TLS 연결을 열어야 하는 경우 `https://`를 사용합니다. 해당 TLS 연결에서 사설 CA를 신뢰하려면 `--proxy-ca-file`을 사용하세요.
 
-- `--json`: 기계가 읽을 수 있는 JSON을 출력합니다.
-- `--proxy-url <url>`: 설정이나 환경 변수 대신 이 `http://` 또는 `https://` 프록시 URL을 검증합니다.
-- `--proxy-ca-file <path>`: HTTPS 프록시 엔드포인트의 TLS 검증을 위해 이 PEM CA 파일을 신뢰합니다.
-- `--allowed-url <url>`: 프록시를 통해 성공할 것으로 예상되는 대상을 추가합니다. 여러 대상을 확인하려면 반복하세요.
-- `--denied-url <url>`: 프록시에 의해 차단될 것으로 예상되는 대상을 추가합니다. 여러 대상을 확인하려면 반복하세요.
-- `--apns-reachable`: 샌드박스 APNs HTTP/2가 프록시를 통해 도달 가능한지도 확인합니다.
-- `--apns-authority <url>`: `--apns-reachable`로 프로브할 APNs authority입니다(기본값은 `https://api.sandbox.push.apple.com`, 프로덕션은 `https://api.push.apple.com`).
-- `--timeout-ms <ms>`: 요청별 제한 시간(밀리초)입니다.
+기본적으로 다음을 실행합니다.
+
+- `https://example.com/`에 대한 **허용됨** 검사 1회(`--allowed-url`로 재정의하거나 추가 가능, 반복 지정 가능)
+- 임시 루프백 카나리아에 대한 **거부됨** 검사 1회(`--denied-url`로 재정의 가능, 반복 지정 가능)
+
+사용자 지정 `--denied-url` 대상은 실패 시 차단 방식으로 동작합니다. 배포별 거부 신호를 독립적으로 확인할 수 없는 한, HTTP 응답과 모호한 전송 실패 모두 검사 실패로 간주합니다. 전송 오류를 차단 증거로 처리하는 대상은 기본 제공 루프백 카나리아뿐입니다.
+
+프록시를 통해 APNs HTTP/2 CONNECT 터널도 열고 샌드박스 APNs의 응답을 확인하려면 `--apns-reachable`을 추가하세요. 이 검사는 의도적으로 유효하지 않은 제공자 토큰을 전송하므로, APNs의 `403 InvalidProviderToken` 응답은 실패가 아니라 도달 가능함을 나타내는 성공 신호로 간주됩니다.
+
+### 옵션
+
+| 플래그                   | 효과                                                                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `--json`                 | 기계 판독 가능한 JSON 출력                                                                                                  |
+| `--proxy-url <url>`      | 설정이나 환경 변수 대신 이 `http://`/`https://` 프록시 URL 검증                                                            |
+| `--proxy-ca-file <path>` | HTTPS 프록시 엔드포인트의 TLS 검증에서 이 PEM CA 파일 신뢰                                                                  |
+| `--allowed-url <url>`    | 프록시를 통해 성공할 것으로 예상되는 대상(반복 지정 가능)                                                                   |
+| `--denied-url <url>`     | 프록시에 의해 차단될 것으로 예상되는 대상(반복 지정 가능)                                                                   |
+| `--apns-reachable`       | 프록시를 통해 샌드박스 APNs HTTP/2에 도달할 수 있는지도 확인                                                                |
+| `--apns-authority <url>` | 검사할 APNs 권한 서버(기본값 `https://api.sandbox.push.apple.com`, 프로덕션은 `https://api.push.apple.com`)                  |
+| `--timeout-ms <ms>`      | 요청별 제한 시간                                                                                                            |
+
+프록시 설정 또는 대상 검사가 실패하면 종료 코드 1로 종료합니다.
 
 배포 지침과 거부 의미 체계는 [네트워크 프록시](/ko/security/network-proxy)를 참조하세요.
 
-## 쿼리 프리셋
+## 디버그 프록시
 
-`openclaw proxy query --preset <name>`은 다음을 허용합니다.
+`start`는 로컬 캡처 프록시를 시작하고 해당 URL, CA 인증서 경로, 캡처 DB 경로를 출력합니다. Ctrl+C로 중지하세요. `--host`를 설정하지 않으면 기본적으로 `127.0.0.1`에 바인딩합니다.
+
+`run`은 로컬 디버그 프록시를 시작한 다음 프록시 환경을 적용하여 자체 캡처 세션에서 `<cmd...>`(`--` 뒤의 인수)을 실행합니다.
+
+디버그 프록시의 직접 업스트림 전달은 진단을 위해 업스트림 소켓을 엽니다. OpenClaw 관리형 프록시 모드가 활성화된 경우 프록시 요청과 CONNECT 터널의 직접 전달은 기본적으로 비활성화됩니다. 승인된 로컬 진단에만 `OPENCLAW_DEBUG_PROXY_ALLOW_DIRECT_CONNECT_WITH_MANAGED_PROXY=1`을 설정하세요.
+
+`coverage`는 각 전송 방식이 캡처되는지, 프록시 전용인지, 또는 미지원인지에 관한 JSON 보고서(`summary`와 전송 방식별 `entries`)를 출력합니다.
+
+`sessions`는 최근 캡처 세션을 나열합니다(`--limit`, 기본값 20).
+
+`query --preset <name>`은 캡처된 트래픽에 대해 기본 제공 쿼리를 실행하며, 선택적으로 `--session <id>`로 범위를 한정할 수 있습니다. 프리셋:
 
 - `double-sends`
 - `retry-storms`
@@ -81,13 +85,9 @@ HTTP/2 CONNECT 터널도 열고 샌드박스 APNs가 응답하는지 확인하�
 - `missing-ack`
 - `error-bursts`
 
-## 참고
+`blob --id <blobId>`는 캡처된 페이로드 블롭의 원시 콘텐츠를 출력합니다.
 
-- `start`는 `--host`가 설정되지 않은 경우 기본값으로 `127.0.0.1`을 사용합니다.
-- `run`은 로컬 디버그 프록시를 시작한 다음 `--` 뒤의 명령을 실행합니다.
-- 디버그 프록시의 직접 업스트림 전달은 진단을 위해 업스트림 소켓을 엽니다. OpenClaw 관리형 프록시 모드가 활성화되어 있으면 프록시 요청과 CONNECT 터널에 대한 직접 전달은 기본적으로 비활성화됩니다. 승인된 로컬 진단에만 `OPENCLAW_DEBUG_PROXY_ALLOW_DIRECT_CONNECT_WITH_MANAGED_PROXY=1`을 설정하세요.
-- 프록시 설정 또는 대상 확인이 실패하면 `validate`는 코드 1로 종료됩니다.
-- 캡처는 로컬 디버깅 데이터입니다. 완료 후 `openclaw proxy purge`를 사용하세요.
+`purge`는 캡처된 모든 트래픽 메타데이터와 블롭을 삭제합니다. 캡처는 로컬 디버깅 데이터이므로 작업을 마치면 삭제하세요.
 
 ## 관련 항목
 

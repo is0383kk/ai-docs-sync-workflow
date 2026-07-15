@@ -1,113 +1,146 @@
 ---
 read_when:
-    - Instances タブのデバッグ
+    - Control UI のデバイスページでライブステータスをデバッグする
     - 重複または古いインスタンス行の調査
-    - Gateway WS 接続またはシステムイベントビーコンの変更
-summary: OpenClaw のプレゼンスエントリが生成、マージ、表示される仕組み
+    - Gateway WebSocket 接続またはシステムイベントビーコンの変更
+summary: OpenClaw のプレゼンスエントリが生成、統合、表示される仕組み
 title: プレゼンス
 x-i18n:
-    generated_at: "2026-07-05T11:20:21Z"
-    model: gpt-5.5
+    generated_at: "2026-07-14T13:39:34Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 25
     provider: openai
-    source_hash: 2b8a2bf688fd94bd7145ca511fec259b9c868ea9bcbe75b12587f747dfaadf4d
+    source_hash: b50291e26ddc06fac888847c9e94eba5f9351b1b8d06c55fd6bec16a38d0b6a5
     source_path: concepts/presence.md
     workflow: 16
 ---
 
-OpenClaw の「プレゼンス」は、次を軽量かつベストエフォートで示すビューです。
+OpenClawの「プレゼンス」は、以下を軽量かつベストエフォートで把握するためのビューです。
 
-- **Gateway** 自体、および
-- **Gateway に接続しているクライアント**（mac アプリ、WebChat、CLI など）
+- **Gateway**自体、および
+- **Gatewayに接続されているユーザー向けクライアント**（Macアプリ、WebChat、Nodeなど）
 
-プレゼンスは主に、macOS アプリの **Instances** タブを表示し、
-オペレーターがすばやく状況を把握できるようにするために使われます。
+プレゼンスでは、Control UIの**Devices**ページ
+（**Settings → Devices**内）と、macOSアプリの**Instances**タブにライブ接続メタデータが表示されます。
+
+このページでは、Gatewayのクライアント一覧について説明します。最後に使用したMacを検出し、
+NodeのアラートをそのMacにルーティングする方法については、
+[アクティブなコンピューターのプレゼンス](/ja-JP/nodes/presence)を参照してください。
 
 ## プレゼンスフィールド（表示される内容）
 
 プレゼンスエントリは、次のようなフィールドを持つ構造化オブジェクトです。
 
-- `instanceId`（任意だが強く推奨）: 安定したクライアント識別子（通常は `connect.client.instanceId`）
-- `host`: 人間が読みやすいホスト名
-- `ip`: ベストエフォートの IP アドレス
-- `version`: クライアントバージョン文字列
-- `deviceFamily` / `modelIdentifier`: ハードウェアのヒント
-- `mode`: `ui`, `webchat`, `cli`, `backend`, `node`, `probe`, `test`
-- `lastInputSeconds`: 既知の場合、最後のユーザー入力からの秒数
-- `reason`: クライアントが提供する自由形式の文字列。Gateway 自体は `self`, `connect`, `disconnect` のみを発行します
-- `deviceId`, `roles`, `scopes`: 接続ハンドシェイクから得られるデバイス識別子とロール/スコープのヒント
-- `ts`: 最終更新タイムスタンプ（エポックからのミリ秒）
+- `instanceId`（任意ですが強く推奨）：安定したクライアントID（通常は`connect.client.instanceId`）
+- `host`：人が識別しやすいホスト名
+- `ip`：ベストエフォートで取得したIPアドレス
+- `version`：クライアントのバージョン文字列
+- `deviceFamily` / `modelIdentifier`：ハードウェア情報のヒント
+- `mode`：`ui`、`webchat`、`cli`、`backend`、`node`、`probe`、`test`
+- `lastInputSeconds`：判明している場合、最後のユーザー入力からの経過秒数
+- `reason`：クライアントが指定する自由形式の文字列。Gateway自体が出力するのは`self`、`connect`、`disconnect`のみ
+- `deviceId`、`roles`、`scopes`：接続ハンドシェイクから得られるデバイスIDとロール／スコープのヒント
+- `ts`：最終更新時刻（エポックからのミリ秒）
 
 ## 生成元（プレゼンスの取得元）
 
 プレゼンスエントリは複数のソースによって生成され、**マージ**されます。
 
-### 1) Gateway 自身のエントリ
+### 1) Gatewayの自己エントリ
 
-Gateway は起動時に常に「self」エントリを初期投入するため、クライアントが接続する前でも UI にゲートウェイホストが表示されます。
+Gatewayは、クライアントが接続する前でもUIにGatewayホストが表示されるよう、
+起動時に必ず「自己」エントリを登録します。
 
-### 2) WebSocket 接続
+### 2) WebSocket接続
 
-すべての WS クライアントは `connect` リクエストから開始します。ハンドシェイクに成功すると、Gateway はその接続のプレゼンスエントリを upsert します。
+すべてのWSクライアントは、`connect`リクエストから開始します。ハンドシェイクが成功すると、
+Gatewayはその接続のプレゼンスエントリをupsertします。
 
-#### 1 回限りの CLI コマンドが表示されない理由
+#### 一時的なコントロールプレーン接続が表示されない理由
 
-CLI は短時間の 1 回限りのコマンドのために接続することがよくあります。Instances リストを大量の項目で埋めないようにするため、`client.mode === "cli"` はプレゼンスエントリに**変換されません**。
+CLIコマンド、バックエンドRPCクライアント、プローブは、多くの場合短時間だけ接続します。
+その頻繁な変動をプレゼンスTTLの期間全体にわたって保持しないよう、
+`cli`、`backend`、`probe`モードのクライアントは
+プレゼンスエントリに**変換されません**。テストモードのクライアントは、
+テストスイートで実際のクライアントの代わりとして使用されるため、追跡されます。
 
-### 3) `system-event` ビーコン
+### 3) `system-event`ビーコン
 
-クライアントは `system-event` メソッドを使って、より詳細な定期ビーコンを送信できます。mac アプリはこれを使ってホスト名、IP、`lastInputSeconds` を報告します。
+クライアントは、`system-event`メソッドを介して、より詳細な定期ビーコンを送信できます。Mac
+アプリはこれを使用して、ホスト名、IP、`lastInputSeconds`を報告します。
 
-### 4) Node 接続（role: node）
+### 4) Node接続（ロール：Node）
 
-ノードが `role: node` で Gateway WebSocket 経由で接続すると、Gateway はそのノードのプレゼンスエントリを upsert します（他の WS クライアントと同じフロー）。
+Nodeが`role: node`を使用してGateway WebSocket経由で接続すると、Gatewayは
+そのNodeのプレゼンスエントリをupsertします（他のWSクライアントと同じフロー）。
 
-## マージと重複排除のルール（`instanceId` が重要な理由）
+## マージと重複排除のルール（`instanceId`が重要な理由）
 
-プレゼンスエントリは単一のインメモリマップに保存され、大文字小文字を区別せずに、次のうち最初に利用可能なものをキーにします。ペアリング済みデバイス ID、`connect.client.instanceId`、最後の手段として接続ごとの ID。
+プレゼンスエントリは、単一のメモリ内マップに格納されます。キーには、大文字と小文字を区別せず、
+次の順序で最初に利用可能なものが使用されます。ペアリング済みデバイスID、`connect.client.instanceId`、
+最後の手段として接続ごとのID。
 
-CLI クライアントは追跡対象から完全に除外されるため（上記参照）、その接続 ID がキーになることはありません。それ以外のすべてのクライアントでは、接続 ID へのフォールバックにより、安定した `instanceId` なしで再接続するクライアントは**重複**行として表示されます。
+一時的なコントロールプレーンクライアントは追跡対象から完全に除外されるため（前述）、
+その接続IDがキーになることはありません。それ以外のすべてのクライアントでは、
+接続IDへのフォールバックにより、安定した`instanceId`を持たずに再接続したクライアントは
+**重複した**行として表示されます。
 
-## TTL と上限サイズ
+## TTLと上限サイズ
 
 プレゼンスは意図的に一時的なものです。
 
-- **TTL:** 5 分より古いエントリは剪定されます
-- **最大エントリ数:** 200（古いものから先に削除）
+- **TTL：**5分より古いエントリは削除
+- **最大エントリ数：**200（古いものから削除）
 
-これにより、リストを最新に保ち、メモリ使用量が無制限に増えることを避けられます。
+これにより、一覧を最新の状態に保ち、メモリ使用量の無制限な増加を防ぎます。
 
-## リモート/トンネルの注意点（ループバック IP）
+## リモート／トンネルに関する注意事項（ループバックIP）
 
-クライアントが SSH トンネル / ローカルポートフォワード経由で接続すると、Gateway はリモートアドレスを `127.0.0.1` として認識する場合があります。そのトンネルアドレスをクライアントの IP として記録しないように、接続処理では、検出されたローカル（ループバック）クライアントについて、ループバックアドレスをエントリに書き込むのではなく、`ip` を完全に省略します。
+クライアントがSSHトンネル／ローカルポートフォワーディング経由で接続すると、Gatewayには
+リモートアドレスが`127.0.0.1`として見える場合があります。そのトンネルアドレスを
+クライアントのIPとして記録しないよう、接続処理では、ローカル（ループバック）として検出された
+クライアントについて、ループバックアドレスをエントリに書き込む代わりに
+`ip`自体を省略します。
 
 ## 利用側
 
-### macOS Instances タブ
+### Control UIのDevicesページ
 
-macOS アプリは `system-presence` の出力を表示し、最終更新からの経過時間に基づいて小さなステータスインジケーター（Active/Idle/Stale）を適用します。
+**Devices**ページは、`system-presence`を永続的なペアリングレコードおよびNodeレコードと
+結合します。Gatewayの自己ビーコンを先頭に固定し、一致するデバイスIDまたは
+インスタンスIDを使用して、ライブのプラットフォーム、バージョン、モデル、入力からの経過時間の
+メタデータを表示します。
+
+### macOSのInstancesタブ
+
+macOSアプリは`system-presence`の出力を表示し、最終更新からの経過時間に基づいて
+小さなステータスインジケーター（Active/Idle/Stale）を適用します。
 
 ## デバッグのヒント
 
-- 生のリストを見るには、Gateway に対して `system-presence` を呼び出します。
-- 重複が表示される場合:
-  - クライアントがハンドシェイクで安定した `client.instanceId` を送信していることを確認します
-  - 定期ビーコンが同じ `instanceId` を使っていることを確認します
-  - 接続由来のエントリに `instanceId` がないか確認します（重複は想定どおりです）
+- 未加工の一覧を確認するには、Gatewayに対して`system-presence`を呼び出します。
+- 重複が表示される場合：
+  - クライアントがハンドシェイクで安定した`client.instanceId`を送信していることを確認します
+  - 定期ビーコンが同じ`instanceId`を使用していることを確認します
+  - 接続から生成されたエントリに`instanceId`がないか確認します（その場合、重複は想定どおりです）
 
-## 関連
+## 関連項目
 
 <CardGroup cols={2}>
-  <Card title="Typing indicators" href="/ja-JP/concepts/typing-indicators" icon="ellipsis">
+  <Card title="アクティブなコンピューターのプレゼンス" href="/ja-JP/nodes/presence" icon="computer-mouse">
+    Macの物理入力によってアクティブなNodeを選択し、接続アラートをルーティングする仕組み。
+  </Card>
+  <Card title="入力中インジケーター" href="/ja-JP/concepts/typing-indicators" icon="ellipsis">
     入力中インジケーターが送信されるタイミングと、その調整方法。
   </Card>
-  <Card title="Streaming and chunking" href="/ja-JP/concepts/streaming" icon="bars-staggered">
-    送信ストリーミング、チャンク化、チャネルごとのフォーマット。
+  <Card title="ストリーミングとチャンク分割" href="/ja-JP/concepts/streaming" icon="bars-staggered">
+    送信ストリーミング、チャンク分割、チャンネルごとの書式設定。
   </Card>
-  <Card title="Gateway architecture" href="/ja-JP/concepts/architecture" icon="diagram-project">
-    プレゼンス更新を駆動する Gateway コンポーネントと WebSocket プロトコル。
+  <Card title="Gatewayアーキテクチャ" href="/ja-JP/concepts/architecture" icon="diagram-project">
+    Gatewayのコンポーネントと、プレゼンス更新を駆動するWebSocketプロトコル。
   </Card>
-  <Card title="Gateway protocol" href="/ja-JP/gateway/protocol" icon="plug">
-    `connect`、`system-event`、`system-presence` のワイヤープロトコル。
+  <Card title="Gatewayプロトコル" href="/ja-JP/gateway/protocol" icon="plug">
+    `connect`、`system-event`、`system-presence`のワイヤープロトコル。
   </Card>
 </CardGroup>

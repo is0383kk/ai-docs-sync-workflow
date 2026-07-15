@@ -1,31 +1,34 @@
 ---
 read_when:
     - Você quer enfileirar um evento do sistema sem criar um trabalho Cron
-    - Você precisa habilitar ou desabilitar Heartbeats
-    - Você quer inspecionar entradas de presença do sistema
+    - Você precisa ativar ou desativar os heartbeats
+    - Você quer inspecionar as entradas de presença do sistema
 summary: Referência da CLI para `openclaw system` (eventos do sistema, Heartbeat, presença)
 title: Sistema
 x-i18n:
-    generated_at: "2026-05-11T20:26:48Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T23:50:33Z"
+    model: gpt-5.6
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 2810fb064ea4afeac24ca0d71419913a664bbec0721cabdb09196075914f4864
+    source_hash: aaca206d8b463fd33f9e3cb21382bbf36469e9daa2706d8a9e2c7fab14b76e7a
     source_path: cli/system.md
     workflow: 16
-    postprocess_version: locale-links-v1
 ---
 
 # `openclaw system`
 
-Auxiliares em nível de sistema para o Gateway: enfileire eventos do sistema, controle Heartbeats
-e veja a presença.
+Auxiliares no nível do sistema para o Gateway: enfileirar eventos do sistema, controlar
+heartbeats e visualizar a presença.
 
-Todos os subcomandos `system` usam RPC do Gateway e aceitam as flags compartilhadas do cliente:
+Todos os subcomandos de `system` usam RPC do Gateway e aceitam as opções compartilhadas do cliente:
 
-- `--url <url>`
-- `--token <token>`
-- `--timeout <ms>`
-- `--expect-final`
+| Opção             | Padrão                               | Descrição                                                                                                                                                                                                 |
+| ----------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--url <url>`     | `gateway.remote.url` quando configurado | URL WebSocket do Gateway.                                                                                                                                                                              |
+| `--token <token>` | nenhum                               | Token do Gateway (se necessário).                                                                                                                                                                         |
+| `--timeout <ms>`  | `30000`                              | Tempo limite da RPC em milissegundos.                                                                                                                                                                     |
+| `--expect-final`  | desativado                           | Aguarda a resposta final (agente).                                                                                                                                                                        |
+| `--json`          | desativado                           | Gera a saída em JSON. `heartbeat last/enable/disable` e `system presence` sempre imprimem a carga JSON bruta da RPC, independentemente desta opção; `system event` a usa para alternar entre JSON e uma linha simples `ok`. |
 
 ## Comandos comuns
 
@@ -39,58 +42,48 @@ openclaw system presence
 
 ## `system event`
 
-Enfileira um evento do sistema na sessão **principal** por padrão. O próximo Heartbeat
-o injetará como uma linha `System:` no prompt. Use `--mode now` para acionar
-o Heartbeat imediatamente; `next-heartbeat` aguarda o próximo tick agendado.
+Por padrão, enfileira um evento do sistema na sessão **principal**. O próximo
+heartbeat o injeta como uma linha `System:` no prompt. Use `--mode now` para
+acionar o heartbeat imediatamente; `next-heartbeat` (padrão) aguarda o
+próximo ciclo agendado.
 
-Passe `--session-key` para direcionar uma sessão específica (por exemplo, para retransmitir a
-conclusão de uma tarefa assíncrona de volta ao canal que a iniciou).
+Passe `--session-key` para direcionar a uma sessão específica, por exemplo, para retransmitir a
+conclusão de uma tarefa assíncrona ao canal que a iniciou.
 
-> **Exceção de temporização com `--session-key`:** quando `--session-key` é fornecido,
-> `--mode next-heartbeat` se reduz a um despertar direcionado imediato em vez de
-> aguardar o próximo tick agendado. Despertares direcionados usam a intenção de Heartbeat
-> `immediate`, portanto ignoram a barreira de não vencido do executor que, de outra forma,
-> adiaria (e efetivamente descartaria) um despertar com intenção `event`. Se você quiser entrega
-> atrasada, omita `--session-key` para que o evento caia na sessão principal e
-> acompanhe o próximo Heartbeat regular.
+<Note>
+**Exceção de temporização com `--session-key`:** quando `--session-key` é fornecido,
+`--mode next-heartbeat` passa a realizar uma ativação direcionada imediata em vez de
+aguardar o próximo ciclo agendado. Ativações direcionadas usam a intenção de heartbeat
+`immediate`, portanto ignoram o bloqueio de execução antes do prazo, que, de outra forma,
+adiaria (e efetivamente descartaria) uma ativação com intenção `event`. Se quiser uma
+entrega posterior, omita `--session-key` para que o evento seja destinado à sessão principal e
+seja transportado pelo próximo heartbeat regular.
+</Note>
 
-Flags:
+Opções:
 
 - `--text <text>`: texto obrigatório do evento do sistema.
 - `--mode <mode>`: `now` ou `next-heartbeat` (padrão).
-- `--session-key <sessionKey>`: opcional; direciona uma sessão específica do agente
+- `--session-key <sessionKey>`: opcional; direciona a uma sessão específica do agente
   em vez da sessão principal do agente. Chaves que não pertencem ao
-  agente resolvido fazem fallback para a sessão principal do agente.
-- `--json`: saída legível por máquina.
-- `--url`, `--token`, `--timeout`, `--expect-final`: flags compartilhadas de RPC do Gateway.
+  agente resolvido usam como alternativa a sessão principal do agente.
 
 ## `system heartbeat last|enable|disable`
 
-Controles de Heartbeat:
-
-- `last`: mostra o último evento de Heartbeat.
-- `enable`: reativa os Heartbeats (use isto se eles tiverem sido desativados).
-- `disable`: pausa os Heartbeats.
-
-Flags:
-
-- `--json`: saída legível por máquina.
-- `--url`, `--token`, `--timeout`, `--expect-final`: flags compartilhadas de RPC do Gateway.
+- `last`: mostra o último evento de heartbeat.
+- `enable`: reativa os heartbeats (use se eles tiverem sido desativados).
+- `disable`: pausa os heartbeats.
 
 ## `system presence`
 
-Lista as entradas atuais de presença do sistema que o Gateway conhece (nós,
+Lista as entradas atuais de presença do sistema conhecidas pelo Gateway (nodes,
 instâncias e linhas de status semelhantes).
-
-Flags:
-
-- `--json`: saída legível por máquina.
-- `--url`, `--token`, `--timeout`, `--expect-final`: flags compartilhadas de RPC do Gateway.
 
 ## Observações
 
-- Requer um Gateway em execução acessível pela sua configuração atual (local ou remota).
-- Eventos do sistema são efêmeros e não são persistidos entre reinicializações.
+- Requer um Gateway em execução que possa ser acessado pela configuração atual (local ou
+  remota).
+- Os eventos do sistema são efêmeros e não persistem entre reinicializações.
 
 ## Relacionado
 

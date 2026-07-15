@@ -1,21 +1,21 @@
 ---
 read_when:
-    - Lernen, wie Sie OpenClaw konfigurieren
-    - Suche nach Konfigurationsbeispielen
+    - Erfahren Sie, wie Sie OpenClaw konfigurieren
+    - Auf der Suche nach Konfigurationsbeispielen
     - OpenClaw zum ersten Mal einrichten
-summary: Schemagenaue Konfigurationsbeispiele für gängige OpenClaw-Setups
+summary: Schemakonforme Konfigurationsbeispiele für gängige OpenClaw-Setups
 title: Konfigurationsbeispiele
 x-i18n:
-    generated_at: "2026-06-27T17:28:26Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T01:36:48Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 945f4cd8571814597ec0188853e91c6483a0d8b09bd0ca7dcfb79eb877607ce2
+    source_hash: c3ad82ccce62e0c8dbb72f81b0de62d60d8a6282f0a327ed1cbda7ffa3e47969
     source_path: gateway/configuration-examples.md
     workflow: 16
 ---
 
-Die folgenden Beispiele sind am aktuellen Konfigurationsschema ausgerichtet. Die vollständige Referenz und feldspezifische Hinweise finden Sie unter [Konfiguration](/de/gateway/configuration).
+Die folgenden Beispiele entsprechen dem aktuellen Konfigurationsschema. Die vollständige Referenz und Hinweise zu den einzelnen Feldern finden Sie unter [Konfiguration](/de/gateway/configuration).
 
 ## Schnellstart
 
@@ -28,9 +28,9 @@ Die folgenden Beispiele sind am aktuellen Konfigurationsschema ausgerichtet. Die
 }
 ```
 
-Speichern Sie dies unter `~/.openclaw/openclaw.json`, dann können Sie dem Bot von dieser Nummer aus eine DM senden.
+Speichern Sie die Datei unter `~/.openclaw/openclaw.json`. Anschließend können Sie dem Bot von dieser Nummer aus eine Direktnachricht senden.
 
-### Empfohlener Einstieg
+### Empfohlene Ausgangskonfiguration
 
 ```json5
 {
@@ -59,16 +59,16 @@ Speichern Sie dies unter `~/.openclaw/openclaw.json`, dann können Sie dem Bot v
   messages: {
     visibleReplies: "automatic",
     groupChat: {
-      visibleReplies: "message_tool", // opt-in; visible output requires message(action=send)
+      visibleReplies: "message_tool", // optionale Aktivierung; sichtbare Ausgabe erfordert message(action=send)
       unmentionedInbound: "room_event",
     },
   },
 }
 ```
 
-## Erweitertes Beispiel (wichtige Optionen)
+## Erweitertes Beispiel (wichtigste Optionen)
 
-> Mit JSON5 können Sie Kommentare und nachgestellte Kommas verwenden. Reguläres JSON funktioniert ebenfalls.
+> JSON5 ermöglicht Kommentare und nachgestellte Kommas. Reguläres JSON funktioniert ebenfalls.
 
 ```json5
 {
@@ -145,7 +145,7 @@ Speichern Sie dies unter `~/.openclaw/openclaw.json`, dann können Sie dem Bot v
         enabled: true,
         maxBytes: 20971520,
         models: [
-          { provider: "openai", model: "gpt-4o-mini-transcribe" },
+          { provider: "openai", model: "gpt-4o-transcribe" },
           // Optional CLI fallback (Whisper binary):
           // { type: "cli", command: "whisper", args: ["--model", "base", "{{MediaPath}}"] }
         ],
@@ -172,7 +172,7 @@ Speichern Sie dies unter `~/.openclaw/openclaw.json`, dann können Sie dem Bot v
       discord: { mode: "idle", idleMinutes: 10080 },
     },
     resetTriggers: ["/new", "/reset"],
-    store: "~/.openclaw/agents/default/sessions/sessions.json",
+    store: "~/.openclaw/agents/main/sessions/sessions.json",
     maintenance: {
       mode: "warn",
       pruneAfter: "30d",
@@ -216,8 +216,8 @@ Speichern Sie dies unter `~/.openclaw/openclaw.json`, dann können Sie dem Bot v
           slug: "friends-of-openclaw",
           requireMention: false,
           channels: {
-            general: { allow: true },
-            help: { allow: true, requireMention: true },
+            general: { enabled: true },
+            help: { enabled: true, requireMention: true },
           },
         },
       },
@@ -228,7 +228,7 @@ Speichern Sie dies unter `~/.openclaw/openclaw.json`, dann können Sie dem Bot v
       botToken: "xoxb-REPLACE_ME",
       appToken: "xapp-REPLACE_ME",
       channels: {
-        "#general": { allow: true, requireMention: true },
+        "#general": { enabled: true, requireMention: true },
       },
       dm: { enabled: true, allowFrom: ["U123"] },
       slashCommand: {
@@ -391,7 +391,7 @@ Speichern Sie dies unter `~/.openclaw/openclaw.json`, dann können Sie dem Bot v
   // Cron jobs
   cron: {
     enabled: true,
-    store: "~/.openclaw/cron/cron.json",
+    store: "~/.openclaw/cron/jobs.json",
     maxConcurrentRuns: 8, // default; cron dispatch + isolated cron agent-turn execution
     sessionRetention: "24h",
     runLog: {
@@ -455,7 +455,7 @@ Speichern Sie dies unter `~/.openclaw/openclaw.json`, dann können Sie dem Bot v
       allowTailscale: true,
     },
     tailscale: { mode: "serve", resetOnExit: false },
-    remote: { url: "ws://gateway.tailnet:18789", token: "remote-token" },
+    remote: { url: "ws://gateway-host.ts.net:18789", token: "remote-token" },
     reload: { mode: "hybrid", debounceMs: 300 },
   },
 
@@ -482,9 +482,9 @@ Speichern Sie dies unter `~/.openclaw/openclaw.json`, dann können Sie dem Bot v
 }
 ```
 
-### Per Symlink angebundenes benachbartes Skill-Repository
+### Über symbolische Verknüpfung eingebundenes benachbartes Skill-Repository
 
-Verwenden Sie dies, wenn ein integrierter Skill-Root einen Symlink in ein benachbartes Repository enthält, zum
+Verwenden Sie dies, wenn das Stammverzeichnis eines integrierten Skills eine symbolische Verknüpfung zu einem benachbarten Repository enthält, zum
 Beispiel `~/.agents/skills/manager -> ~/Projects/manager/skills`.
 
 ```json5
@@ -498,13 +498,13 @@ Beispiel `~/.agents/skills/manager -> ~/Projects/manager/skills`.
 }
 ```
 
-- `extraDirs` durchsucht das benachbarte Repository als expliziten Skill-Root.
-- `allowSymlinkTargets` lässt per Symlink angebundene Skill-Ordner in diesen vertrauenswürdigen
-  echten Ziel-Root auflösen, ohne beliebige Symlink-Ausbrüche zu erlauben.
-- Damit Skill Workshop Schreibvorgänge über dasselbe vertrauenswürdige Symlink-Ziel ausführen kann,
+- `extraDirs` durchsucht das benachbarte Repository als explizites Skill-Stammverzeichnis.
+- `allowSymlinkTargets` ermöglicht es über symbolische Verknüpfungen eingebundenen Skill-Ordnern, in dieses vertrauenswürdige
+  reale Zielstammverzeichnis aufgelöst zu werden, ohne beliebige Ausbrüche über symbolische Verknüpfungen zuzulassen.
+- Damit Skill Workshop über dasselbe vertrauenswürdige Ziel der symbolischen Verknüpfung Schreibvorgänge ausführen kann,
   setzen Sie `skills.workshop.allowSymlinkTargetWrites: true`.
 
-## Häufige Muster
+## Gängige Muster
 
 ### Gemeinsame Skill-Basis mit einer Überschreibung
 
@@ -523,11 +523,11 @@ Beispiel `~/.agents/skills/manager -> ~/Projects/manager/skills`.
 }
 ```
 
-- `agents.defaults.skills` ist die gemeinsame Basis.
-- `agents.list[].skills` ersetzt diese Basis für einen Agenten.
+- `agents.defaults.skills` ist die gemeinsame Ausgangsbasis.
+- `agents.list[].skills` ersetzt diese Ausgangsbasis für einen Agenten.
 - Verwenden Sie `skills: []`, wenn ein Agent keine Skills sehen soll.
 
-### Multi-Plattform-Einrichtung
+### Plattformübergreifende Einrichtung
 
 ```json5
 {
@@ -548,11 +548,11 @@ Beispiel `~/.agents/skills/manager -> ~/Projects/manager/skills`.
 }
 ```
 
-### Automatische Genehmigung für vertrauenswürdiges Node-Netzwerk
+### Automatische Genehmigung in einem vertrauenswürdigen Node-Netzwerk
 
-Lassen Sie die Gerätekopplung manuell, sofern Sie den Netzwerkpfad nicht kontrollieren. Für ein dediziertes
-Labor oder ein Tailnet-Subnetz können Sie sich mit exakten CIDRs oder IPs für die automatische Genehmigung
-von Node-Geräten bei der ersten Kopplung entscheiden:
+Belassen Sie die Gerätekopplung im manuellen Modus, sofern Sie den Netzwerkpfad nicht kontrollieren. Für ein dediziertes
+Labor- oder Tailnet-Subnetz können Sie die automatische Genehmigung bei der erstmaligen Kopplung eines Node-Geräts
+mit exakten CIDRs oder IP-Adressen aktivieren:
 
 ```json5
 {
@@ -566,27 +566,27 @@ von Node-Geräten bei der ersten Kopplung entscheiden:
 }
 ```
 
-Dies bleibt deaktiviert, wenn es nicht gesetzt ist. Es gilt nur für neue `role: node`-Kopplungen ohne
-angeforderte Scopes. Operator-/Browser-Clients sowie Upgrades von Rolle, Scope, Metadaten oder
-öffentlichem Schlüssel erfordern weiterhin eine manuelle Genehmigung.
+Wenn die Option nicht gesetzt ist, bleibt sie deaktiviert. Sie gilt nur für neue Kopplungen mit `role: node`
+ohne angeforderte Geltungsbereiche. Operator-/Browser-Clients sowie Aktualisierungen von Rolle, Geltungsbereich, Metadaten oder
+öffentlichen Schlüsseln erfordern weiterhin eine manuelle Genehmigung.
 
-### Sicherer DM-Modus (gemeinsamer Posteingang / Mehrbenutzer-DMs)
+### Sicherer DM-Modus (gemeinsamer Posteingang / DMs mit mehreren Benutzern)
 
-Wenn mehr als eine Person Ihrem Bot DMs senden kann (mehrere Einträge in `allowFrom`, Kopplungsgenehmigungen für mehrere Personen oder `dmPolicy: "open"`), aktivieren Sie den **sicheren DM-Modus**, damit DMs von verschiedenen Absendern standardmäßig keinen gemeinsamen Kontext teilen:
+Wenn mehr als eine Person Ihrem Bot eine DM senden kann (mehrere Einträge in `allowFrom`, Kopplungsgenehmigungen für mehrere Personen oder `dmPolicy: "open"`), aktivieren Sie den **sicheren DM-Modus**, damit DMs verschiedener Absender standardmäßig keinen gemeinsamen Kontext verwenden:
 
 ```json5
 {
-  // Secure DM mode (recommended for multi-user or sensitive DM agents)
+  // Sicherer DM-Modus (empfohlen für DM-Agenten mit mehreren Benutzern oder sensiblen Daten)
   session: { dmScope: "per-channel-peer" },
 
   channels: {
-    // Example: WhatsApp multi-user inbox
+    // Beispiel: WhatsApp-Posteingang für mehrere Benutzer
     whatsapp: {
       dmPolicy: "allowlist",
       allowFrom: ["+15555550123", "+15555550124"],
     },
 
-    // Example: Discord multi-user inbox
+    // Beispiel: Discord-Posteingang für mehrere Benutzer
     discord: {
       enabled: true,
       token: "YOUR_DISCORD_BOT_TOKEN",
@@ -596,10 +596,10 @@ Wenn mehr als eine Person Ihrem Bot DMs senden kann (mehrere Einträge in `allow
 }
 ```
 
-Für Discord/Slack/Google Chat/Microsoft Teams/Mattermost/IRC ist die Absenderautorisierung standardmäßig ID-basiert.
-Aktivieren Sie direkte veränderbare Namens-/E-Mail-/Nick-Zuordnung mit dem jeweiligen `dangerouslyAllowNameMatching: true` des Kanals nur, wenn Sie dieses Risiko ausdrücklich akzeptieren.
+Bei Discord/Google Chat/IRC/Mattermost/Microsoft Teams/Slack erfolgt die Absenderautorisierung standardmäßig primär anhand der ID.
+Aktivieren Sie den direkten Abgleich veränderlicher Namen, E-Mail-Adressen oder Nicknamen mit `dangerouslyAllowNameMatching: true` des jeweiligen Kanals nur, wenn Sie dieses Risiko ausdrücklich akzeptieren.
 
-### Anthropic-API-Schlüssel + MiniMax-Fallback
+### Anthropic-API-Schlüssel und MiniMax-Fallback
 
 ```json5
 {
@@ -659,8 +659,8 @@ Aktivieren Sie direkte veränderbare Namens-/E-Mail-/Nick-Zuordnung mit dem jewe
       enabled: true,
       botToken: "xoxb-...",
       channels: {
-        "#engineering": { allow: true, requireMention: true },
-        "#general": { allow: true, requireMention: true },
+        "#engineering": { enabled: true, requireMention: true },
+        "#general": { enabled: true, requireMention: true },
       },
     },
   },
@@ -703,12 +703,12 @@ Aktivieren Sie direkte veränderbare Namens-/E-Mail-/Nick-Zuordnung mit dem jewe
 
 ## Tipps
 
-- Wenn Sie `dmPolicy: "open"` setzen, muss die passende `allowFrom`-Liste `"*"` enthalten.
-- Provider-IDs unterscheiden sich (Telefonnummern, Benutzer-IDs, Kanal-IDs). Verwenden Sie die Provider-Dokumentation, um das Format zu bestätigen.
+- Wenn Sie `dmPolicy: "open"` festlegen, muss die entsprechende `allowFrom`-Liste `"*"` enthalten.
+- Provider-IDs unterscheiden sich (Telefonnummern, Benutzer-IDs, Kanal-IDs). Prüfen Sie das Format in der Dokumentation des Providers.
 - Optionale Abschnitte, die Sie später hinzufügen können: `web`, `browser`, `ui`, `discovery`, `plugins`, `talk`, `signal`, `imessage`.
-- Siehe [Provider](/de/providers) und [Problembehandlung](/de/gateway/troubleshooting) für ausführlichere Einrichtungshinweise.
+- Weitere Hinweise zur Einrichtung finden Sie unter [Provider](/de/providers) und [Fehlerbehebung](/de/gateway/troubleshooting).
 
-## Verwandt
+## Verwandte Themen
 
 - [Konfigurationsreferenz](/de/gateway/configuration-reference)
 - [Konfiguration](/de/gateway/configuration)

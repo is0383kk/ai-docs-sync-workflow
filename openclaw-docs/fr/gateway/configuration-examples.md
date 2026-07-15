@@ -1,21 +1,21 @@
 ---
 read_when:
     - Apprendre à configurer OpenClaw
-    - Recherche d’exemples de configuration
-    - Configuration d’OpenClaw pour la première fois
-summary: Exemples de configuration conformes au schéma pour les configurations OpenClaw courantes
+    - À la recherche d’exemples de configuration
+    - Configuration initiale d’OpenClaw
+summary: Exemples de configuration conformes au schéma pour les installations OpenClaw courantes
 title: Exemples de configuration
 x-i18n:
-    generated_at: "2026-06-27T17:29:06Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T02:34:17Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 945f4cd8571814597ec0188853e91c6483a0d8b09bd0ca7dcfb79eb877607ce2
+    source_hash: c3ad82ccce62e0c8dbb72f81b0de62d60d8a6282f0a327ed1cbda7ffa3e47969
     source_path: gateway/configuration-examples.md
     workflow: 16
 ---
 
-Les exemples ci-dessous sont alignés sur le schéma de configuration actuel. Pour la référence exhaustive et les notes champ par champ, consultez [Configuration](/fr/gateway/configuration).
+Les exemples ci-dessous sont conformes au schéma de configuration actuel. Pour consulter la référence exhaustive et les remarques propres à chaque champ, voir [Configuration](/fr/gateway/configuration).
 
 ## Démarrage rapide
 
@@ -28,9 +28,9 @@ Les exemples ci-dessous sont alignés sur le schéma de configuration actuel. Po
 }
 ```
 
-Enregistrez dans `~/.openclaw/openclaw.json` et vous pourrez envoyer un DM au bot depuis ce numéro.
+Enregistrez ce contenu dans `~/.openclaw/openclaw.json` afin de pouvoir envoyer un message privé au bot depuis ce numéro.
 
-### Configuration de départ recommandée
+### Configuration initiale recommandée
 
 ```json5
 {
@@ -44,7 +44,7 @@ Enregistrez dans `~/.openclaw/openclaw.json` et vous pourrez envoyer un DM au bo
         id: "main",
         identity: {
           name: "Clawd",
-          theme: "helpful assistant",
+          theme: "assistant serviable",
           emoji: "🦞",
         },
       },
@@ -59,16 +59,16 @@ Enregistrez dans `~/.openclaw/openclaw.json` et vous pourrez envoyer un DM au bo
   messages: {
     visibleReplies: "automatic",
     groupChat: {
-      visibleReplies: "message_tool", // opt-in; visible output requires message(action=send)
+      visibleReplies: "message_tool", // activation explicite ; une sortie visible nécessite message(action=send)
       unmentionedInbound: "room_event",
     },
   },
 }
 ```
 
-## Exemple étendu (options principales)
+## Exemple détaillé (principales options)
 
-> JSON5 vous permet d’utiliser des commentaires et des virgules finales. Le JSON classique fonctionne aussi.
+> JSON5 permet d’utiliser des commentaires et des virgules finales. Le format JSON standard fonctionne également.
 
 ```json5
 {
@@ -145,7 +145,7 @@ Enregistrez dans `~/.openclaw/openclaw.json` et vous pourrez envoyer un DM au bo
         enabled: true,
         maxBytes: 20971520,
         models: [
-          { provider: "openai", model: "gpt-4o-mini-transcribe" },
+          { provider: "openai", model: "gpt-4o-transcribe" },
           // Optional CLI fallback (Whisper binary):
           // { type: "cli", command: "whisper", args: ["--model", "base", "{{MediaPath}}"] }
         ],
@@ -172,7 +172,7 @@ Enregistrez dans `~/.openclaw/openclaw.json` et vous pourrez envoyer un DM au bo
       discord: { mode: "idle", idleMinutes: 10080 },
     },
     resetTriggers: ["/new", "/reset"],
-    store: "~/.openclaw/agents/default/sessions/sessions.json",
+    store: "~/.openclaw/agents/main/sessions/sessions.json",
     maintenance: {
       mode: "warn",
       pruneAfter: "30d",
@@ -216,8 +216,8 @@ Enregistrez dans `~/.openclaw/openclaw.json` et vous pourrez envoyer un DM au bo
           slug: "friends-of-openclaw",
           requireMention: false,
           channels: {
-            general: { allow: true },
-            help: { allow: true, requireMention: true },
+            general: { enabled: true },
+            help: { enabled: true, requireMention: true },
           },
         },
       },
@@ -228,7 +228,7 @@ Enregistrez dans `~/.openclaw/openclaw.json` et vous pourrez envoyer un DM au bo
       botToken: "xoxb-REPLACE_ME",
       appToken: "xapp-REPLACE_ME",
       channels: {
-        "#general": { allow: true, requireMention: true },
+        "#general": { enabled: true, requireMention: true },
       },
       dm: { enabled: true, allowFrom: ["U123"] },
       slashCommand: {
@@ -391,7 +391,7 @@ Enregistrez dans `~/.openclaw/openclaw.json` et vous pourrez envoyer un DM au bo
   // Cron jobs
   cron: {
     enabled: true,
-    store: "~/.openclaw/cron/cron.json",
+    store: "~/.openclaw/cron/jobs.json",
     maxConcurrentRuns: 8, // default; cron dispatch + isolated cron agent-turn execution
     sessionRetention: "24h",
     runLog: {
@@ -455,7 +455,7 @@ Enregistrez dans `~/.openclaw/openclaw.json` et vous pourrez envoyer un DM au bo
       allowTailscale: true,
     },
     tailscale: { mode: "serve", resetOnExit: false },
-    remote: { url: "ws://gateway.tailnet:18789", token: "remote-token" },
+    remote: { url: "ws://gateway-host.ts.net:18789", token: "remote-token" },
     reload: { mode: "hybrid", debounceMs: 300 },
   },
 
@@ -482,10 +482,9 @@ Enregistrez dans `~/.openclaw/openclaw.json` et vous pourrez envoyer un DM au bo
 }
 ```
 
-### Dépôt de Skills frère lié par lien symbolique
+### Dépôt de Skills frère lié symboliquement
 
-Utilisez ceci lorsqu’une racine de Skill intégrée contient un lien symbolique vers un dépôt frère, par
-exemple `~/.agents/skills/manager -> ~/Projects/manager/skills`.
+Utilisez ceci lorsqu’une racine de Skill intégrée contient un lien symbolique vers un dépôt frère, par exemple `~/.agents/skills/manager -> ~/Projects/manager/skills`.
 
 ```json5
 {
@@ -498,11 +497,9 @@ exemple `~/.agents/skills/manager -> ~/Projects/manager/skills`.
 }
 ```
 
-- `extraDirs` analyse le dépôt frère comme racine de Skill explicite.
-- `allowSymlinkTargets` permet aux dossiers de Skills liés par lien symbolique d’être résolus vers cette
-  racine cible réelle approuvée, sans autoriser les échappements arbitraires par lien symbolique.
-- Pour permettre à Skill Workshop d’appliquer des écritures via la même cible de lien symbolique approuvée,
-  définissez `skills.workshop.allowSymlinkTargetWrites: true`.
+- `extraDirs` analyse le dépôt frère comme une racine de Skill explicite.
+- `allowSymlinkTargets` permet aux dossiers de Skills liés symboliquement de pointer vers cette racine cible réelle approuvée sans autoriser les échappements arbitraires par lien symbolique.
+- Pour permettre à Skill Workshop d’effectuer des écritures via la même cible de lien symbolique approuvée, définissez `skills.workshop.allowSymlinkTargetWrites: true`.
 
 ## Modèles courants
 
@@ -523,9 +520,9 @@ exemple `~/.agents/skills/manager -> ~/Projects/manager/skills`.
 }
 ```
 
-- `agents.defaults.skills` est la base partagée.
-- `agents.list[].skills` remplace cette base pour un agent.
-- Utilisez `skills: []` lorsqu’un agent ne doit voir aucune Skills.
+- `agents.defaults.skills` constitue la base de référence partagée.
+- `agents.list[].skills` remplace cette base de référence pour un agent.
+- Utilisez `skills: []` lorsqu’un agent ne doit voir aucun Skill.
 
 ### Configuration multiplateforme
 
@@ -548,11 +545,11 @@ exemple `~/.agents/skills/manager -> ~/Projects/manager/skills`.
 }
 ```
 
-### Approbation automatique du réseau de nœuds de confiance
+### Approbation automatique sur un réseau de Nodes de confiance
 
-Gardez l’association des appareils manuelle, sauf si vous contrôlez le chemin réseau. Pour un laboratoire dédié
-ou un sous-réseau tailnet, vous pouvez activer l’approbation automatique des appareils nœuds lors de la première utilisation
-avec des CIDR ou des IP exacts :
+Conservez l’appairage manuel des appareils, sauf si vous contrôlez le chemin réseau. Pour un
+laboratoire dédié ou un sous-réseau du tailnet, vous pouvez activer l’approbation automatique
+des appareils Nodes lors de leur premier appairage à l’aide de CIDR ou d’adresses IP exacts :
 
 ```json5
 {
@@ -566,27 +563,27 @@ avec des CIDR ou des IP exacts :
 }
 ```
 
-Cette option reste désactivée lorsqu’elle n’est pas définie. Elle ne s’applique qu’aux nouvelles associations `role: node` sans
-portées demandées. Les clients opérateur/navigateur ainsi que les mises à niveau de rôle, de portée, de métadonnées ou
+Cette fonctionnalité reste désactivée si elle n’est pas configurée. Elle s’applique uniquement à un nouvel appairage avec `role: node`
+sans aucune portée demandée. Les clients opérateur/navigateur ainsi que les mises à niveau de rôle, de portée, de métadonnées ou
 de clé publique nécessitent toujours une approbation manuelle.
 
-### Mode DM sécurisé (boîte de réception partagée / DM multi-utilisateurs)
+### Mode sécurisé pour les messages privés (boîte de réception partagée / messages privés multi-utilisateurs)
 
-Si plusieurs personnes peuvent envoyer un DM à votre bot (plusieurs entrées dans `allowFrom`, approbations d’association pour plusieurs personnes, ou `dmPolicy: "open"`), activez le **mode DM sécurisé** afin que les DM de différents expéditeurs ne partagent pas un même contexte par défaut :
+Si plusieurs personnes peuvent envoyer des messages privés à votre bot (plusieurs entrées dans `allowFrom`, approbations d’appairage pour plusieurs personnes ou `dmPolicy: "open"`), activez le **mode sécurisé pour les messages privés** afin que les messages privés de différents expéditeurs ne partagent pas le même contexte par défaut :
 
 ```json5
 {
-  // Secure DM mode (recommended for multi-user or sensitive DM agents)
+  // Mode sécurisé pour les messages privés (recommandé pour les agents multi-utilisateurs ou traitant des messages privés sensibles)
   session: { dmScope: "per-channel-peer" },
 
   channels: {
-    // Example: WhatsApp multi-user inbox
+    // Exemple : boîte de réception WhatsApp multi-utilisateurs
     whatsapp: {
       dmPolicy: "allowlist",
       allowFrom: ["+15555550123", "+15555550124"],
     },
 
-    // Example: Discord multi-user inbox
+    // Exemple : boîte de réception Discord multi-utilisateurs
     discord: {
       enabled: true,
       token: "YOUR_DISCORD_BOT_TOKEN",
@@ -596,10 +593,10 @@ Si plusieurs personnes peuvent envoyer un DM à votre bot (plusieurs entrées da
 }
 ```
 
-Pour Discord/Slack/Google Chat/Microsoft Teams/Mattermost/IRC, l’autorisation de l’expéditeur repose par défaut d’abord sur l’ID.
-N’activez la correspondance directe par nom/e-mail/pseudonyme mutable avec `dangerouslyAllowNameMatching: true` de chaque canal que si vous acceptez explicitement ce risque.
+Pour Discord/Google Chat/IRC/Mattermost/Microsoft Teams/Slack, l’autorisation de l’expéditeur repose par défaut en priorité sur l’identifiant.
+N’activez la correspondance directe avec des noms, adresses e-mail ou pseudonymes modifiables via le paramètre `dangerouslyAllowNameMatching: true` de chaque canal que si vous acceptez explicitement ce risque.
 
-### Clé d’API Anthropic + solution de secours MiniMax
+### Clé d’API Anthropic avec MiniMax comme solution de repli
 
 ```json5
 {
@@ -635,7 +632,7 @@ N’activez la correspondance directe par nom/e-mail/pseudonyme mutable avec `da
 }
 ```
 
-### Bot de travail (accès restreint)
+### Bot professionnel (accès restreint)
 
 ```json5
 {
@@ -659,8 +656,8 @@ N’activez la correspondance directe par nom/e-mail/pseudonyme mutable avec `da
       enabled: true,
       botToken: "xoxb-...",
       channels: {
-        "#engineering": { allow: true, requireMention: true },
-        "#general": { allow: true, requireMention: true },
+        "#engineering": { enabled: true, requireMention: true },
+        "#general": { enabled: true, requireMention: true },
       },
     },
   },
@@ -703,12 +700,12 @@ N’activez la correspondance directe par nom/e-mail/pseudonyme mutable avec `da
 
 ## Conseils
 
-- Si vous définissez `dmPolicy: "open"`, la liste `allowFrom` correspondante doit inclure `"*"`.
-- Les ID des fournisseurs varient (numéros de téléphone, ID utilisateur, ID de canal). Utilisez la documentation du fournisseur pour confirmer le format.
-- Sections facultatives à ajouter plus tard : `web`, `browser`, `ui`, `discovery`, `plugins`, `talk`, `signal`, `imessage`.
-- Consultez [Fournisseurs](/fr/providers) et [Dépannage](/fr/gateway/troubleshooting) pour des notes de configuration plus détaillées.
+- Si vous définissez `dmPolicy: "open"`, la liste `allowFrom` correspondante doit contenir `"*"`.
+- Les identifiants des fournisseurs diffèrent (numéros de téléphone, identifiants utilisateur, identifiants de canal). Consultez la documentation du fournisseur pour confirmer le format.
+- Sections facultatives à ajouter ultérieurement : `web`, `browser`, `ui`, `discovery`, `plugins`, `talk`, `signal`, `imessage`.
+- Consultez [Fournisseurs](/fr/providers) et [Dépannage](/fr/gateway/troubleshooting) pour obtenir des informations de configuration plus détaillées.
 
-## Associé
+## Contenu associé
 
 - [Référence de configuration](/fr/gateway/configuration-reference)
 - [Configuration](/fr/gateway/configuration)

@@ -1,42 +1,40 @@
 ---
 read_when:
-    - macOS-Logs erfassen oder die Protokollierung privater Daten untersuchen
-    - Debugging von Problemen im Lebenszyklus von Sprachaktivierung und Sitzungen
-summary: 'OpenClaw-Protokollierung: rollierende Diagnose-Dateiprotokolle + Datenschutz-Flags für das Unified Log'
+    - macOS-Protokolle erfassen oder die Protokollierung privater Daten untersuchen
+    - Fehlerbehebung bei Problemen mit dem Lebenszyklus von Sprachaktivierung und Sitzungen
+summary: 'OpenClaw-Protokollierung: rotierende Diagnoseprotokolldatei + einheitliche Datenschutzoptionen für Protokolle'
 title: macOS-Protokollierung
 x-i18n:
-    generated_at: "2026-05-06T06:56:26Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T01:51:24Z"
+    model: gpt-5.6
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 76c001008311d4e3f245add4cce32bdcc3eed9d897b30f6884c0649d2f0523df
+    source_hash: ef0fd91bd7fc0a8b5f598cfe8f5de551795a4badd0f6634c5bcbd4f3916bfc64
     source_path: platforms/mac/logging.md
     workflow: 16
-    postprocess_version: locale-links-v1
 ---
 
-# Logging (macOS)
+# Protokollierung (macOS)
 
-## Rotierendes Diagnosedatei-Log (Debug-Bereich)
+## Rotierende Diagnoseprotokolldatei (Debug-Bereich)
 
-OpenClaw leitet macOS-App-Logs über swift-log weiter (standardmäßig Unified Logging) und kann bei Bedarf ein lokales, rotierendes Datei-Log auf die Festplatte schreiben, wenn Sie eine dauerhafte Aufzeichnung benötigen.
+Die macOS-App protokolliert über swift-log (standardmäßig einheitliche Protokollierung) und kann für eine dauerhafte Erfassung zusätzlich ein rotierendes lokales Dateiprotokoll schreiben (`DiagnosticsFileLog`).
 
-- Detailgrad: **Debug-Bereich → Logs → App logging → Detailgrad**
-- Aktivieren: **Debug-Bereich → Logs → App logging → „Rotierendes Diagnose-Log schreiben (JSONL)”**
-- Speicherort: `~/Library/Logs/OpenClaw/diagnostics.jsonl` (rotiert automatisch; alte Dateien erhalten die Endungen `.1`, `.2`, …)
-- Leeren: **Debug-Bereich → Logs → App logging → „Leeren”**
+- Aktivieren: **Debug-Bereich -> Protokolle -> App-Protokollierung -> „Rotierendes Diagnoseprotokoll schreiben (JSONL)“** (standardmäßig deaktiviert).
+- Ausführlichkeit: Auswahlfeld **Debug-Bereich -> Protokolle -> App-Protokollierung -> Ausführlichkeit**.
+- Speicherort: `~/Library/Logs/OpenClaw/diagnostics.jsonl`.
+- Rotation: Die Datei wird bei 5 MB rotiert; bis zu 5 Sicherungen mit den Endungen `.1`...`.5` werden aufbewahrt (die älteste wird gelöscht).
+- Löschen: **Debug-Bereich -> Protokolle -> App-Protokollierung -> „Löschen“** löscht die aktive Datei und alle Sicherungen.
 
-Hinweise:
+Behandeln Sie die Datei als vertraulich und geben Sie sie nicht ohne vorherige Prüfung weiter.
 
-- Dies ist **standardmäßig deaktiviert**. Aktivieren Sie es nur während der aktiven Fehlersuche.
-- Behandeln Sie die Datei als vertraulich; geben Sie sie nicht ohne Prüfung weiter.
+## Private Daten in der einheitlichen Protokollierung unter macOS
 
-## Private Daten im Unified Logging unter macOS
-
-Unified Logging schwärzt die meisten Nutzdaten, sofern ein Subsystem nicht `privacy -off` aktiviert. Laut Peters Beitrag zu macOS-[Datenschutzbesonderheiten beim Logging](https://steipete.me/posts/2025/logging-privacy-shenanigans) (2025) wird dies über eine plist in `/Library/Preferences/Logging/Subsystems/` gesteuert, die nach dem Subsystemnamen benannt ist. Nur neue Logeinträge übernehmen das Flag, aktivieren Sie es daher, bevor Sie ein Problem reproduzieren.
+Die einheitliche Protokollierung schwärzt die meisten Nutzdaten, sofern ein Subsystem nicht `privacy -off` aktiviert. Dies wird durch eine plist-Datei in `/Library/Preferences/Logging/Subsystems/` gesteuert, deren Schlüssel der Name des Subsystems ist. Das Flag gilt nur für neue Protokolleinträge; aktivieren Sie es daher, bevor Sie ein Problem reproduzieren. Hintergrundinformationen: [Besonderheiten des Datenschutzes bei der macOS-Protokollierung](https://steipete.me/posts/2025/logging-privacy-shenanigans).
 
 ## Für OpenClaw aktivieren (`ai.openclaw`)
 
-- Schreiben Sie die plist zuerst in eine temporäre Datei und installieren Sie sie dann atomar als root:
+Schreiben Sie die plist-Datei zunächst in eine temporäre Datei und installieren Sie sie anschließend atomar als root:
 
 ```bash
 cat <<'EOF' >/tmp/ai.openclaw.plist
@@ -55,16 +53,15 @@ EOF
 sudo install -m 644 -o root -g wheel /tmp/ai.openclaw.plist /Library/Preferences/Logging/Subsystems/ai.openclaw.plist
 ```
 
-- Ein Neustart ist nicht erforderlich; logd erkennt die Datei schnell, aber nur neue Logzeilen enthalten private Nutzdaten.
-- Zeigen Sie die detailliertere Ausgabe mit dem vorhandenen Hilfsprogramm an, z. B. `./scripts/clawlog.sh --category WebChat --last 5m`.
+Ein Neustart ist nicht erforderlich; logd übernimmt die Datei schnell, aber nur neue Protokollzeilen enthalten private Nutzdaten. Zeigen Sie die ausführlichere Ausgabe mit `./scripts/clawlog.sh --category WebChat --last 5m` an (`--last`/`-l` legt den Zeitraum fest, standardmäßig `5m`; `--category`/`-c` filtert nach Kategorie).
 
-## Nach der Fehlersuche deaktivieren
+## Nach der Fehlerdiagnose deaktivieren
 
 - Entfernen Sie die Überschreibung: `sudo rm /Library/Preferences/Logging/Subsystems/ai.openclaw.plist`.
 - Führen Sie optional `sudo log config --reload` aus, damit logd die Überschreibung sofort verwirft.
-- Denken Sie daran, dass diese Oberfläche Telefonnummern und Nachrichtentexte enthalten kann; lassen Sie die plist nur so lange bestehen, wie Sie die zusätzlichen Details aktiv benötigen.
+- Diese Ausgabe kann Telefonnummern und Nachrichteninhalte enthalten; behalten Sie die plist-Datei nur so lange bei, wie sie aktiv benötigt wird.
 
-## Verwandt
+## Verwandte Themen
 
 - [macOS-App](/de/platforms/macos)
-- [Gateway-Logging](/de/gateway/logging)
+- [Gateway-Protokollierung](/de/gateway/logging)

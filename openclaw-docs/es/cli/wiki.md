@@ -2,25 +2,25 @@
 read_when:
     - Quieres usar la CLI de memory-wiki
     - Estás documentando o cambiando `openclaw wiki`
-summary: Referencia de CLI para `openclaw wiki` (estado del almacén memory-wiki, búsqueda, compilación, lint, aplicación, puente, importación de ChatGPT y ayudantes de Obsidian)
+summary: Referencia de la CLI para `openclaw wiki` (estado del almacén de memory-wiki, búsqueda, compilación, análisis, aplicación, puente, importación de ChatGPT y herramientas auxiliares de Obsidian)
 title: Wiki
 x-i18n:
-    generated_at: "2026-07-05T11:10:45Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T23:01:58Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 5f50389227366eadfb027b019998604be4651b44430f8d7c04d719990843dd84
+    source_hash: 0e817fdd101c3fbe8c3c2aa51ab6a5e8e3bc35ce61376e746b7fceb0b87d0154
     source_path: cli/wiki.md
     workflow: 16
 ---
 
 # `openclaw wiki`
 
-Inspecciona y mantiene la bóveda `memory-wiki`. Proporcionado por el Plugin `memory-wiki` incluido.
+Inspecciona y mantiene el almacén `memory-wiki`. Lo proporciona el Plugin `memory-wiki` incluido.
 
-Relacionado: [Plugin Memory Wiki](/es/plugins/memory-wiki), [Descripción general de la memoria](/es/concepts/memory), [CLI: memory](/es/cli/memory)
+Relacionado: [Plugin Memory Wiki](/es/plugins/memory-wiki), [Descripción general de la memoria](/es/concepts/memory), [CLI: memoria](/es/cli/memory)
 
-## Comandos comunes
+## Comandos habituales
 
 ```bash
 openclaw wiki status
@@ -55,45 +55,67 @@ openclaw wiki obsidian command workspace:quick-switcher
 openclaw wiki obsidian daily
 ```
 
+## Selección del agente
+
+Cuando `plugins.entries.memory-wiki.config.vault.scope` es `agent`, selecciona el
+almacén con la opción de nivel superior `--agent <id>`:
+
+```bash
+openclaw wiki --agent support status
+openclaw wiki --agent support search "refund policy"
+openclaw wiki --agent marketing ingest ./campaign-notes.md
+```
+
+En una configuración con varios agentes configurados, `--agent` es obligatorio para las
+operaciones de la CLI, de modo que un comando no pueda leer ni escribir en un almacén predeterminado arbitrario. Si
+solo hay un agente configurado, ese agente sigue siendo el predeterminado. Los identificadores de agente desconocidos
+producen un error antes de que comience la operación del almacén. La opción no cambia la ruta
+seleccionada cuando `vault.scope` es `global`.
+
+Los clientes del Gateway siguen la misma regla: pasa `agentId` en las solicitudes `wiki.*`
+respaldadas por el almacén en una configuración multiagente con ámbito de agente. La ausencia de un identificador o un identificador desconocido es
+un error. Los turnos del agente, las herramientas de wiki, los complementos del corpus de memoria y los resúmenes
+compilados para prompts ya incluyen el contexto del agente activo en tiempo de ejecución.
+
 ## Comandos
 
 ### `wiki status`
 
-Muestra el modo de la bóveda, el estado y la disponibilidad de la CLI de Obsidian. Úsalo primero para comprobar si la bóveda está inicializada, si el modo puente está en buen estado o si la integración con Obsidian está disponible.
+Muestra el modo y el ámbito del almacén, el agente resuelto, el estado y la disponibilidad de la CLI de Obsidian. Úsalo primero para comprobar si el almacén previsto está inicializado, si el modo puente funciona correctamente o si la integración con Obsidian está disponible.
 
-Cuando el modo puente está activo y configurado para leer artefactos de memoria, este comando consulta el Gateway en ejecución, de modo que ve el mismo contexto activo del Plugin de memoria que la memoria de agente/tiempo de ejecución.
+Cuando el modo puente está activo y configurado para leer artefactos de memoria, este comando consulta el Gateway en ejecución para usar el mismo contexto activo del Plugin de memoria que la memoria del agente o del entorno de ejecución.
 
 ### `wiki doctor`
 
-Ejecuta comprobaciones de estado de la wiki e informa correcciones accionables. Sale con un código distinto de cero cuando no está en buen estado.
+Ejecuta comprobaciones del estado de la wiki e informa de correcciones prácticas. Termina con un código distinto de cero cuando el estado no es correcto.
 
-Cuando el modo puente está activo y configurado para leer artefactos de memoria, este comando consulta el Gateway en ejecución antes de crear el informe. Las importaciones de puente deshabilitadas y las configuraciones de puente que no leen artefactos de memoria permanecen locales/sin conexión.
+Cuando el modo puente está activo y configurado para leer artefactos de memoria, este comando consulta el Gateway en ejecución antes de generar el informe. Las importaciones del puente deshabilitadas y las configuraciones del puente que no leen artefactos de memoria permanecen en modo local/sin conexión.
 
-Problemas típicos:
+Problemas habituales:
 
-- modo puente habilitado sin artefactos de memoria públicos
-- diseño de bóveda no válido o ausente
-- CLI externa de Obsidian ausente cuando se espera el modo Obsidian
+- modo puente habilitado sin artefactos públicos de memoria
+- estructura del almacén no válida o ausente
+- falta la CLI externa de Obsidian cuando se espera el modo Obsidian
 
 ### `wiki init`
 
-Crea el diseño de la bóveda wiki y las páginas iniciales, incluidos índices de nivel superior y directorios de caché.
+Crea la estructura del almacén de la wiki y las páginas iniciales, incluidos los índices de nivel superior y los directorios de caché.
 
 ### `wiki ingest <path>`
 
-Importa un archivo local de markdown o texto a la carpeta `sources/` de la wiki como página fuente. `<path>` debe ser una ruta de archivo local; hoy no hay ingesta de URL. Rechaza archivos binarios.
+Importa un archivo Markdown o de texto local en la carpeta `sources/` de la wiki como página de origen. `<path>` debe ser una ruta de archivo local; actualmente no se admite la ingesta desde URL. Rechaza los archivos binarios.
 
-Las páginas fuente importadas llevan frontmatter de procedencia (`sourceType: local-file`, `sourcePath`, `ingestedAt`). La ingesta siempre recompila la bóveda después.
+Las páginas de origen importadas incluyen frontmatter de procedencia (`sourceType: local-file`, `sourcePath`, `ingestedAt`). La ingesta siempre vuelve a compilar el almacén después.
 
-Banderas: `--title <title>` reemplaza el título de la fuente (predeterminado: derivado del nombre de archivo).
+Opciones: `--title <title>` sustituye el título del origen (valor predeterminado: derivado del nombre del archivo).
 
 ### `wiki okf import <path>`
 
-Importa un paquete de Open Knowledge Format descomprimido a páginas de conceptos de la wiki.
+Importa un paquete descomprimido de Open Knowledge Format en páginas de conceptos de la wiki.
 
-El importador lee todos los documentos de concepto `.md` no reservados en el árbol de directorios OKF, exige un campo `type` no vacío y trata los valores de `type` de OKF desconocidos como conceptos genéricos. Los archivos OKF reservados `index.md` y `log.md` no se importan como conceptos.
+El importador lee cada documento de concepto `.md` no reservado del árbol de directorios de OKF, requiere un campo `type` no vacío y trata los valores desconocidos de `type` de OKF como conceptos genéricos. Los archivos reservados `index.md` y `log.md` de OKF no se importan como conceptos.
 
-Las páginas importadas se aplanan bajo `concepts/` para que los flujos existentes de compilación, búsqueda, obtención, resumen y panel de la wiki las vean de inmediato. El ID de concepto OKF original, `type`, `resource`, `tags`, la marca de tiempo, la ruta fuente y el frontmatter completo se conservan en el frontmatter de la página. Los enlaces markdown internos de OKF se reescriben a las páginas de wiki generadas; los enlaces rotos o externos se dejan sin cambios. La importación siempre recompila la bóveda después.
+Las páginas importadas se organizan en una estructura plana bajo `concepts/`, para que los flujos existentes de compilación, búsqueda, obtención, resumen y panel de la wiki las detecten de inmediato. El identificador original del concepto de OKF, `type`, `resource`, `tags`, la marca de tiempo, la ruta de origen y el frontmatter completo se conservan en el frontmatter de la página. Los enlaces Markdown internos de OKF se reescriben para apuntar a las páginas generadas de la wiki; los enlaces rotos o externos no se modifican. La importación siempre vuelve a compilar el almacén después.
 
 Ejemplos:
 
@@ -106,42 +128,42 @@ openclaw wiki get <path-from-json-result>
 
 ### `wiki compile`
 
-Reconstruye índices, bloques relacionados, paneles y resúmenes compilados. Escribe artefactos estables orientados a máquinas en:
+Vuelve a generar los índices, los bloques relacionados, los paneles y los resúmenes compilados. Escribe artefactos estables destinados a máquinas en:
 
 - `.openclaw-wiki/cache/agent-digest.json`
 - `.openclaw-wiki/cache/claims.jsonl`
 
-Si `render.createDashboards` está habilitado, la compilación también actualiza las páginas de informe.
+Si `render.createDashboards` está habilitado, la compilación también actualiza las páginas de informes.
 
 ### `wiki lint`
 
-Analiza la bóveda y escribe un informe que cubre:
+Analiza el almacén y escribe un informe que abarca:
 
-- problemas estructurales (enlaces rotos, ids ausentes/duplicados, tipo o título de página ausente, frontmatter no válido)
-- brechas de procedencia (ids de fuente ausentes, procedencia de importación ausente)
+- problemas estructurales (enlaces rotos, identificadores ausentes o duplicados, falta el tipo o el título de la página, frontmatter no válido)
+- carencias de procedencia (identificadores de origen ausentes, procedencia de importación ausente)
 - contradicciones (contradicciones marcadas, afirmaciones en conflicto)
 - preguntas abiertas
-- páginas y afirmaciones de baja confianza
+- páginas y afirmaciones con poca confianza
 - páginas y afirmaciones obsoletas
 
-Ejecuta esto después de actualizaciones significativas de la wiki.
+Ejecuta este comando después de realizar actualizaciones importantes en la wiki.
 
 ### `wiki search <query>`
 
-Busca contenido de la wiki. El comportamiento depende de la configuración:
+Busca en el contenido de la wiki. El comportamiento depende de la configuración:
 
 - `search.backend`: `shared` o `local`
 - `search.corpus`: `wiki`, `memory` o `all`
 - `--mode`: `auto`, `find-person`, `route-question`, `source-evidence` o `raw-claim`
 
-Usa `wiki search` para clasificación y procedencia específicas de la wiki. Para una pasada amplia de recuperación compartida, prefiere `openclaw memory search` cuando el Plugin de memoria activo expone búsqueda compartida.
+Usa `wiki search` para obtener una clasificación y una procedencia específicas de la wiki. Para realizar una única consulta amplia en la memoria compartida, es preferible usar `openclaw memory search` cuando el Plugin de memoria activo ofrece búsqueda compartida.
 
 Modos de búsqueda:
 
-- `find-person`: alias, identificadores, redes sociales, IDs canónicos y páginas de personas
-- `route-question`: pistas de a quién preguntar/para qué se usa mejor y contexto de relaciones
-- `source-evidence`: páginas fuente y campos de evidencia estructurada
-- `raw-claim`: texto de afirmación estructurada con metadatos de afirmación/evidencia
+- `find-person`: alias, nombres de usuario, redes sociales, identificadores canónicos y páginas de personas
+- `route-question`: indicaciones sobre a quién preguntar o para qué resulta más útil, y contexto de relaciones
+- `source-evidence`: páginas de origen y campos de pruebas estructuradas
+- `raw-claim`: texto de afirmaciones estructuradas con metadatos de afirmaciones y pruebas
 
 Ejemplos:
 
@@ -152,11 +174,11 @@ openclaw wiki search "maintainer-whois" --mode source-evidence
 openclaw wiki search "strong route Teams" --mode raw-claim --json
 ```
 
-La salida de texto incluye líneas `Claim:` y `Evidence:` cuando un resultado coincide con una afirmación estructurada. La salida JSON expone además `matchedClaimId`, `matchedClaimStatus`, `matchedClaimConfidence`, `evidenceKinds` y `evidenceSourceIds` para investigación detallada del lado del agente.
+La salida de texto incluye las líneas `Claim:` y `Evidence:` cuando un resultado coincide con una afirmación estructurada. La salida JSON también expone `matchedClaimId`, `matchedClaimStatus`, `matchedClaimConfidence`, `evidenceKinds` y `evidenceSourceIds` para permitir al agente profundizar en los resultados.
 
 ### `wiki get <lookup>`
 
-Lee una página de la wiki por id o ruta relativa.
+Lee una página de la wiki por identificador o ruta relativa.
 
 ```bash
 openclaw wiki get entity.alpha
@@ -165,61 +187,68 @@ openclaw wiki get syntheses/alpha-summary.md --from 1 --lines 80
 
 ### `wiki apply`
 
-Aplica mutaciones acotadas sin cirugía libre de páginas:
+Aplica cambios específicos sin modificar libremente las páginas:
 
-- `apply synthesis <title>`: crea o actualiza una página de síntesis con un cuerpo de resumen gestionado
-- `apply metadata <lookup>`: actualiza metadatos en una página existente
+- `apply synthesis <title>`: crea o actualiza una página de síntesis con un cuerpo de resumen administrado
+- `apply metadata <lookup>`: actualiza los metadatos de una página existente
 
-Ambos aceptan `--source-id`, `--contradiction`, `--question` (cada uno repetible), `--confidence <n>` (0-1) y `--status <status>`. `apply metadata` también acepta `--clear-confidence` para eliminar un valor de confianza almacenado. Esta es la forma admitida de evolucionar páginas wiki para que los bloques generados gestionados permanezcan intactos.
+Ambos aceptan `--source-id`, `--contradiction`, `--question` (cada uno se puede repetir), `--confidence <n>` (0-1) y `--status <status>`. `apply metadata` también acepta `--clear-confidence` para eliminar un valor de confianza almacenado. Esta es la forma admitida de modificar las páginas de la wiki para mantener intactos los bloques generados administrados.
 
 ### `wiki bridge import`
 
-Importa artefactos de memoria públicos desde el Plugin de memoria activo a páginas fuente respaldadas por puente. Usa esto en modo `bridge` para traer los artefactos de memoria exportados más recientes a la bóveda wiki.
+Importa artefactos públicos de memoria desde el Plugin de memoria activo en páginas de origen respaldadas por el puente. Úsalo en el modo `bridge` para incorporar al almacén de la wiki los artefactos de memoria exportados más recientes.
 
-Para lecturas activas de artefactos de puente, la CLI enruta la importación mediante RPC del Gateway para que use el contexto del Plugin de memoria en tiempo de ejecución. Si las importaciones de puente están deshabilitadas o las lecturas de artefactos están apagadas, el comando conserva el comportamiento local/sin conexión de importación cero. La actualización del índice después de la importación está controlada por `ingest.autoCompile`.
+Para las lecturas activas de artefactos del puente, la CLI dirige la importación mediante RPC del Gateway, de modo que use el contexto del Plugin de memoria del entorno de ejecución. Si las importaciones del puente están deshabilitadas o las lecturas de artefactos están desactivadas, el comando conserva el comportamiento local/sin conexión de cero importaciones. La actualización del índice tras la importación está condicionada por `ingest.autoCompile`.
 
 ### `wiki unsafe-local import`
 
-Importa desde rutas locales configuradas explícitamente (`unsafeLocal.paths`) en modo `unsafe-local`. Intencionalmente experimental y solo para la misma máquina. La actualización del índice después de la importación está controlada por `ingest.autoCompile`.
+Importa desde rutas locales configuradas explícitamente (`unsafeLocal.paths`) en el modo `unsafe-local`. Es intencionadamente experimental y solo funciona en el mismo equipo. La actualización del índice tras la importación está condicionada por `ingest.autoCompile`.
 
 ### `wiki chatgpt import`
 
-Importa una exportación de ChatGPT a páginas fuente borrador de la wiki.
+Importa una exportación de ChatGPT en borradores de páginas de origen de la wiki.
 
 ```bash
 openclaw wiki chatgpt import --export ./chatgpt-export
 openclaw wiki chatgpt import --export ./conversations.json --dry-run
 ```
 
-| Bandera           | Predeterminado | Descripción                                                  |
-| ----------------- | -------------- | ------------------------------------------------------------ |
-| `--export <path>` | (obligatorio)  | Directorio de exportación de ChatGPT o ruta `conversations.json`. |
-| `--dry-run`       | `false`        | Previsualiza conteos de creadas/actualizadas/omitidas sin escribir páginas. |
+| Opción            | Valor predeterminado | Descripción                                                                    |
+| ----------------- | -------------------- | ------------------------------------------------------------------------------ |
+| `--export <path>` | (obligatorio)        | Directorio de exportación de ChatGPT o ruta a `conversations.json`.            |
+| `--dry-run`       | `false`              | Previsualiza los recuentos de elementos creados, actualizados y omitidos sin escribir páginas. |
 
-Una importación que no es simulación y que cambia cualquier página registra un id de ejecución de importación, impreso en el resumen, necesario para revertir.
+Una importación que no sea de prueba y que cambie alguna página registra un identificador de ejecución de importación, que se muestra en el resumen y es necesario para revertirla.
 
 ### `wiki chatgpt rollback <run-id>`
 
-Revierte una ejecución de importación de ChatGPT aplicada anteriormente, eliminando las páginas que creó y restaurando las páginas que sobrescribió. No hace nada (e informa `alreadyRolledBack`) si la ejecución ya fue revertida.
+Revierte una ejecución de importación de ChatGPT aplicada anteriormente, elimina las páginas que creó y restaura las páginas que sobrescribió. No realiza ninguna operación (e informa de `alreadyRolledBack`) si la ejecución ya se había revertido.
 
 ### `wiki obsidian ...`
 
-Comandos auxiliares de Obsidian para bóvedas que se ejecutan en modo compatible con Obsidian: `status`, `search`, `open`, `command`, `daily`. Estos requieren la CLI oficial `obsidian` en `PATH` cuando `obsidian.useOfficialCli` está habilitado.
+Comandos auxiliares de Obsidian para almacenes que se ejecutan en un modo compatible con Obsidian: `status`, `search`, `open`, `command`, `daily`. Requieren que la CLI oficial `obsidian` esté disponible en `PATH` cuando `obsidian.useOfficialCli` está habilitado.
+
+La validación de la configuración rechaza `obsidian.useOfficialCli: true` cuando
+`vault.scope` es `agent`, porque `obsidian.vaultName` es una única configuración global,
+no una asignación por agente. La representación de Markdown compatible con Obsidian sigue
+disponible.
 
 ## Guía de uso práctico
 
-- Usa `wiki search` + `wiki get` cuando importan la procedencia y la identidad de la página.
-- Usa `wiki apply` en lugar de editar a mano secciones generadas gestionadas.
-- Usa `wiki lint` antes de confiar en contenido contradictorio o de baja confianza.
-- Usa `wiki compile` después de importaciones masivas o cambios de fuentes cuando quieras paneles y resúmenes compilados actualizados de inmediato.
-- Usa `wiki okf import` cuando un catálogo de datos, una exportación de documentación o un pipeline de enriquecimiento de agentes ya emite paquetes markdown OKF.
-- Usa `wiki bridge import` cuando el modo puente depende de artefactos de memoria recién exportados.
+- Usa `wiki search` + `wiki get` cuando la procedencia y la identidad de la página sean importantes.
+- Usa `wiki apply` en lugar de editar manualmente las secciones generadas administradas.
+- Usa `wiki lint` antes de confiar en contenido contradictorio o con poca confianza.
+- Usa `wiki compile` después de importaciones masivas o cambios en los orígenes cuando quieras disponer inmediatamente de paneles y resúmenes compilados actualizados.
+- Usa `wiki okf import` cuando un catálogo de datos, una exportación de documentación o una canalización de enriquecimiento de agentes ya genere paquetes Markdown de OKF.
+- Usa `wiki bridge import` cuando el modo puente dependa de artefactos de memoria recién exportados.
 
-## Integraciones de configuración
+## Relación con la configuración
 
-El comportamiento de `openclaw wiki` está determinado por:
+El comportamiento de `openclaw wiki` depende de:
 
 - `plugins.entries.memory-wiki.config.vaultMode`
+- `plugins.entries.memory-wiki.config.vault.scope`
+- `plugins.entries.memory-wiki.config.vault.path`
 - `plugins.entries.memory-wiki.config.search.backend`
 - `plugins.entries.memory-wiki.config.search.corpus`
 - `plugins.entries.memory-wiki.config.bridge.*`
@@ -232,5 +261,5 @@ Consulta [Plugin Memory Wiki](/es/plugins/memory-wiki) para ver el modelo de con
 
 ## Relacionado
 
-- [Referencia de CLI](/es/cli)
-- [Memory wiki](/es/plugins/memory-wiki)
+- [Referencia de la CLI](/es/cli)
+- [Wiki de memoria](/es/plugins/memory-wiki)

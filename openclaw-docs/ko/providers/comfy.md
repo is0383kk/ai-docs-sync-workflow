@@ -1,56 +1,57 @@
 ---
 read_when:
-    - OpenClaw와 함께 로컬 ComfyUI 워크플로를 사용하려고 합니다
-    - 이미지, 비디오 또는 음악 워크플로와 함께 Comfy Cloud를 사용하려고 합니다
-    - 번들 comfy Plugin config 키가 필요합니다
-summary: OpenClaw에서 ComfyUI 워크플로 이미지, 비디오, 음악 생성 설정하기
+    - OpenClaw에서 로컬 ComfyUI 워크플로를 사용하려는 경우
+    - 이미지, 동영상 또는 음악 워크플로에 Comfy Cloud를 사용하려는 경우
+    - 번들로 제공되는 comfy Plugin의 구성 키가 필요합니다.
+summary: OpenClaw에서 ComfyUI 워크플로를 사용한 이미지, 동영상 및 음악 생성 설정
 title: ComfyUI
 x-i18n:
-    generated_at: "2026-04-25T06:08:47Z"
-    model: gpt-5.4
-    provider: openai
-    source_hash: 41dda4be24d5b2c283fa499a345cf9f38747ec19b4010163ceffd998307ca086
-    source_path: providers/comfy.md
-    workflow: 15
+    generated_at: "2026-07-12T01:06:24Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    provider: openai
+    source_hash: 74150d202a422de8e0f4b2b82d5d12bd42eb46991e8ef688832208e1a2ff7793
+    source_path: providers/comfy.md
+    workflow: 16
 ---
 
-OpenClaw는 워크플로 기반 ComfyUI 실행을 위한 번들 `comfy` Plugin을 제공합니다. 이 Plugin은 전적으로 워크플로 기반이므로, OpenClaw는 일반적인 `size`, `aspectRatio`, `resolution`, `durationSeconds`, 또는 TTS 스타일 제어를 그래프에 매핑하려고 하지 않습니다.
+OpenClaw에는 워크플로 기반 ComfyUI 실행을 위한 `comfy` Plugin이 번들로 포함되어 있습니다. 이
+Plugin은 전적으로 워크플로에 따라 작동합니다. OpenClaw는 일반적인 `size`,
+`aspectRatio`, `resolution`, `durationSeconds` 또는 TTS 방식의 제어 항목을
+그래프에 매핑하지 않습니다.
 
-| 속성        | 세부 정보                                                                           |
-| --------------- | -------------------------------------------------------------------------------- |
-| Provider        | `comfy`                                                                          |
-| 모델          | `comfy/workflow`                                                                 |
-| 공유 표면 | `image_generate`, `video_generate`, `music_generate`                             |
-| 인증            | 로컬 ComfyUI에는 없음, Comfy Cloud에는 `COMFY_API_KEY` 또는 `COMFY_CLOUD_API_KEY` |
-| API             | ComfyUI `/prompt` / `/history` / `/view` 및 Comfy Cloud `/api/*`                |
+| 속성        | 세부 정보                                                                        |
+| ----------- | -------------------------------------------------------------------------------- |
+| 제공자      | `comfy`                                                                          |
+| 모델        | `comfy/workflow`                                                                 |
+| 공유 도구   | `image_generate`, `video_generate`, `music_generate`                             |
+| 인증        | 로컬 ComfyUI에는 필요 없음. Comfy Cloud에는 `COMFY_API_KEY` 또는 `COMFY_CLOUD_API_KEY` 필요 |
+| API         | ComfyUI `/prompt` / `/history` / `/view`, Comfy Cloud `/api/*`                   |
 
-## 지원 항목
+## 지원 기능
 
-- 워크플로 JSON을 통한 이미지 생성
-- 업로드된 참조 이미지 1개를 사용한 이미지 편집
-- 워크플로 JSON을 통한 비디오 생성
-- 업로드된 참조 이미지 1개를 사용한 비디오 생성
-- 공유 `music_generate` 도구를 통한 음악 또는 오디오 생성
-- 구성된 노드 또는 일치하는 모든 출력 노드에서 결과 다운로드
+- 워크플로 JSON을 사용한 이미지 생성 및 편집(편집 시 업로드된 참조 이미지 1개 사용)
+- 워크플로 JSON을 사용한 텍스트-비디오 또는 이미지-비디오 생성(참조 이미지 1개)
+- 공유 `music_generate` 도구를 통한 음악/오디오 생성(선택적으로 참조 이미지 1개 사용)
+- 구성된 Node에서 출력 다운로드 또는 Node가 구성되지 않은 경우 일치하는 모든 출력 Node에서 다운로드
 
 ## 시작하기
 
-자신의 머신에서 ComfyUI를 실행할지, Comfy Cloud를 사용할지 선택하세요.
+자체 컴퓨터에서 ComfyUI를 실행할지 Comfy Cloud를 사용할지 선택하세요.
 
 <Tabs>
   <Tab title="로컬">
-    **가장 적합한 경우:** 자신의 머신 또는 LAN에서 ComfyUI 인스턴스를 직접 실행할 때.
+    **적합한 용도:** 컴퓨터 또는 LAN에서 자체 ComfyUI 인스턴스를 실행하는 경우.
 
     <Steps>
       <Step title="로컬에서 ComfyUI 시작">
-        로컬 ComfyUI 인스턴스가 실행 중인지 확인하세요(기본값 `http://127.0.0.1:8188`).
+        로컬 ComfyUI 인스턴스가 실행 중인지 확인하세요(기본값: `http://127.0.0.1:8188`).
       </Step>
       <Step title="워크플로 JSON 준비">
-        ComfyUI 워크플로 JSON 파일을 내보내거나 만드세요. 프롬프트 입력 노드와 OpenClaw가 읽어야 할 출력 노드의 노드 ID를 기록해 두세요.
+        ComfyUI 워크플로 JSON 파일을 내보내거나 생성하세요. 프롬프트 입력 Node와 OpenClaw가 출력을 읽을 Node의 ID를 확인하세요.
       </Step>
-      <Step title="Provider 구성">
-        `mode: "local"`을 설정하고 워크플로 파일을 가리키세요. 아래는 최소 이미지 예시입니다:
+      <Step title="제공자 구성">
+        `mode: "local"`을 설정하고 워크플로 파일을 지정하세요. 최소 이미지 예시는 다음과 같습니다.
 
         ```json5
         {
@@ -73,7 +74,7 @@ OpenClaw는 워크플로 기반 ComfyUI 실행을 위한 번들 `comfy` Plugin�
         ```
       </Step>
       <Step title="기본 모델 설정">
-        구성한 capability에 대해 OpenClaw가 `comfy/workflow` 모델을 가리키도록 설정하세요:
+        구성한 기능에서 OpenClaw가 `comfy/workflow` 모델을 사용하도록 지정하세요.
 
         ```json5
         {
@@ -87,7 +88,7 @@ OpenClaw는 워크플로 기반 ComfyUI 실행을 위한 번들 `comfy` Plugin�
         }
         ```
       </Step>
-      <Step title="검증">
+      <Step title="확인">
         ```bash
         openclaw models list --provider comfy
         ```
@@ -97,31 +98,34 @@ OpenClaw는 워크플로 기반 ComfyUI 실행을 위한 번들 `comfy` Plugin�
   </Tab>
 
   <Tab title="Comfy Cloud">
-    **가장 적합한 경우:** 로컬 GPU 리소스를 관리하지 않고 Comfy Cloud에서 워크플로를 실행할 때.
+    **적합한 용도:** 로컬 GPU 리소스를 관리하지 않고 Comfy Cloud에서 워크플로를 실행하는 경우.
 
     <Steps>
-      <Step title="API 키 받기">
+      <Step title="API 키 발급">
         [comfy.org](https://comfy.org)에서 가입하고 계정 대시보드에서 API 키를 생성하세요.
       </Step>
       <Step title="API 키 설정">
-        다음 방법 중 하나로 키를 제공하세요:
+        다음 방법 중 하나로 키를 제공하세요.
 
         ```bash
-        # 환경 변수(권장)
+        # Onboarding flag
+        openclaw onboard --comfy-api-key "your-key"
+
+        # Environment variable (preferred for daemons)
         export COMFY_API_KEY="your-key"
 
-        # 대체 환경 변수
+        # Alternative environment variable
         export COMFY_CLOUD_API_KEY="your-key"
 
-        # 또는 config에 직접 입력
+        # Or inline in config
         openclaw config set plugins.entries.comfy.config.apiKey "your-key"
         ```
       </Step>
       <Step title="워크플로 JSON 준비">
-        ComfyUI 워크플로 JSON 파일을 내보내거나 만드세요. 프롬프트 입력 노드와 출력 노드의 노드 ID를 기록해 두세요.
+        ComfyUI 워크플로 JSON 파일을 내보내거나 생성하세요. 프롬프트 입력 Node와 출력 Node의 ID를 확인하세요.
       </Step>
-      <Step title="Provider 구성">
-        `mode: "cloud"`를 설정하고 워크플로 파일을 가리키세요:
+      <Step title="제공자 구성">
+        `mode: "cloud"`를 설정하고 워크플로 파일을 지정하세요.
 
         ```json5
         {
@@ -143,7 +147,7 @@ OpenClaw는 워크플로 기반 ComfyUI 실행을 위한 번들 `comfy` Plugin�
         ```
 
         <Tip>
-        Cloud 모드에서 `baseUrl` 기본값은 `https://cloud.comfy.org`입니다. 사용자 지정 cloud 엔드포인트를 사용하는 경우에만 `baseUrl`을 설정하면 됩니다.
+        클라우드 모드에서 `baseUrl`의 기본값은 `https://cloud.comfy.org`입니다. 사용자 지정 클라우드 엔드포인트를 사용할 때만 `baseUrl`을 설정하세요.
         </Tip>
       </Step>
       <Step title="기본 모델 설정">
@@ -159,7 +163,7 @@ OpenClaw는 워크플로 기반 ComfyUI 실행을 위한 번들 `comfy` Plugin�
         }
         ```
       </Step>
-      <Step title="검증">
+      <Step title="확인">
         ```bash
         openclaw models list --provider comfy
         ```
@@ -171,7 +175,7 @@ OpenClaw는 워크플로 기반 ComfyUI 실행을 위한 번들 `comfy` Plugin�
 
 ## 구성
 
-Comfy는 공유 최상위 연결 설정과 capability별 워크플로 섹션(`image`, `video`, `music`)을 지원합니다:
+Comfy는 공유 최상위 연결 설정과 기능별 워크플로 섹션(`image`, `video`, `music`)을 지원합니다.
 
 ```json5
 {
@@ -205,38 +209,44 @@ Comfy는 공유 최상위 연결 설정과 capability별 워크플로 섹션(`im
 
 ### 공유 키
 
-| 키                   | 타입                   | 설명                                                                           |
-| --------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
-| `mode`                | `"local"` 또는 `"cloud"` | 연결 모드입니다.                                                                      |
-| `baseUrl`             | string                 | 로컬은 기본값 `http://127.0.0.1:8188`, cloud는 `https://cloud.comfy.org`입니다. |
-| `apiKey`              | string                 | 선택적 인라인 키이며, `COMFY_API_KEY` / `COMFY_CLOUD_API_KEY` env vars의 대안입니다. |
-| `allowPrivateNetwork` | boolean                | cloud 모드에서 사설망/LAN `baseUrl`을 허용합니다.                                          |
+| 키                    | 유형                    | 설명                                                                                  |
+| --------------------- | ----------------------- | ------------------------------------------------------------------------------------- |
+| `mode`                | `"local"` 또는 `"cloud"` | 연결 모드입니다. 기본값은 `"local"`입니다.                                            |
+| `baseUrl`             | 문자열                  | 로컬에서는 `http://127.0.0.1:8188`, 클라우드에서는 `https://cloud.comfy.org`가 기본값입니다. |
+| `apiKey`              | 문자열                  | 선택적 인라인 키입니다. `COMFY_API_KEY` / `COMFY_CLOUD_API_KEY` 환경 변수 대신 사용할 수 있습니다. |
+| `allowPrivateNetwork` | 불리언                  | 클라우드 모드에서 비공개/LAN `baseUrl` 또는 로컬 비공개 DNS FQDN을 허용합니다.         |
 
-### capability별 키
+<Note>
+`local` 모드에서는 local loopback/비공개 IP 리터럴과 `http://comfyui:8188` 같은 단일 레이블 서비스 이름이 `allowPrivateNetwork` 없이 작동합니다. `https://comfy.local.example.com`처럼 공개 주소로 보이는 비공개 DNS FQDN에는 `allowPrivateNetwork: true`가 필요합니다. 비공개 출처에 대한 신뢰 범위는 구성된 스킴, 호스트 이름, 포트로 제한됩니다. 로컬 리디렉션은 구성된 호스트 이름을 벗어날 수 없으며, 공개 CDN으로 향하는 클라우드 리디렉션에는 기본 SSRF 정책이 적용됩니다.
+</Note>
 
-이 키들은 `image`, `video`, 또는 `music` 섹션 내부에 적용됩니다:
+### 기능별 키
 
-| 키                          | 필수 여부 | 기본값  | 설명                                                                  |
-| ---------------------------- | -------- | -------- | ---------------------------------------------------------------------------- |
-| `workflow` 또는 `workflowPath` | 예      | --       | ComfyUI 워크플로 JSON 파일 경로입니다.                                      |
-| `promptNodeId`               | 예      | --       | 텍스트 프롬프트를 받는 노드 ID입니다.                                       |
-| `promptInputName`            | 아니요       | `"text"` | 프롬프트 노드의 입력 이름입니다.                                               |
-| `outputNodeId`               | 아니요       | --       | 출력 결과를 읽을 노드 ID입니다. 생략하면 일치하는 모든 출력 노드를 사용합니다. |
-| `pollIntervalMs`             | 아니요       | --       | 작업 완료를 위한 폴링 간격(밀리초)입니다.                         |
-| `timeoutMs`                  | 아니요       | --       | 워크플로 실행 제한 시간(밀리초)입니다.                                |
+다음 키는 `image`, `video` 또는 `music` 섹션 내부에 적용됩니다.
 
-`image`와 `video` 섹션은 다음도 지원합니다:
+| 키                           | 필수     | 기본값   | 설명                                                                        |
+| ---------------------------- | -------- | -------- | --------------------------------------------------------------------------- |
+| `workflow` 또는 `workflowPath` | 예       | --       | 인라인 워크플로 JSON 또는 ComfyUI 워크플로 JSON 파일의 경로입니다.          |
+| `promptNodeId`               | 예       | --       | 텍스트 프롬프트를 받는 Node ID입니다.                                       |
+| `promptInputName`            | 아니요   | `"text"` | 프롬프트 Node의 입력 이름입니다.                                            |
+| `outputNodeId`               | 아니요   | --       | 출력을 읽을 Node ID입니다. 생략하면 일치하는 모든 출력 Node가 사용됩니다.   |
+| `pollIntervalMs`             | 아니요   | `1500`   | 작업 완료 여부를 확인하는 폴링 간격(밀리초)입니다.                          |
+| `timeoutMs`                  | 아니요   | `300000` | 워크플로 실행의 제한 시간(밀리초)입니다.                                    |
 
-| 키                   | 필수 여부                             | 기본값   | 설명                                         |
-| --------------------- | ------------------------------------ | --------- | --------------------------------------------------- |
-| `inputImageNodeId`    | 예 (참조 이미지를 전달할 때) | --        | 업로드된 참조 이미지를 받는 노드 ID입니다. |
-| `inputImageInputName` | 아니요                                   | `"image"` | 이미지 노드의 입력 이름입니다.                       |
+`image` 및 `video` 섹션은 참조 이미지 입력 Node도 지원합니다.
+
+| 키                    | 필수                                | 기본값    | 설명                                        |
+| --------------------- | ----------------------------------- | --------- | ------------------------------------------- |
+| `inputImageNodeId`    | 예(참조 이미지를 전달하는 경우)     | --        | 업로드된 참조 이미지를 받는 Node ID입니다. |
+| `inputImageInputName` | 아니요                              | `"image"` | 이미지 Node의 입력 이름입니다.             |
+
+`apiKey`에는 리터럴 문자열 또는 [시크릿 참조](/ko/gateway/configuration-reference#secrets) 객체를 사용할 수 있습니다.
 
 ## 워크플로 세부 정보
 
 <AccordionGroup>
   <Accordion title="이미지 워크플로">
-    기본 이미지 모델을 `comfy/workflow`로 설정하세요:
+    기본 이미지 모델을 `comfy/workflow`로 설정하세요.
 
     ```json5
     {
@@ -252,7 +262,7 @@ Comfy는 공유 최상위 연결 설정과 capability별 워크플로 섹션(`im
 
     **참조 이미지 편집 예시:**
 
-    업로드된 참조 이미지를 사용한 이미지 편집을 활성화하려면 이미지 config에 `inputImageNodeId`를 추가하세요:
+    업로드된 참조 이미지를 사용한 이미지 편집을 활성화하려면 이미지 구성에 `inputImageNodeId`를 추가하세요.
 
     ```json5
     {
@@ -277,7 +287,7 @@ Comfy는 공유 최상위 연결 설정과 capability별 워크플로 섹션(`im
   </Accordion>
 
   <Accordion title="비디오 워크플로">
-    기본 비디오 모델을 `comfy/workflow`로 설정하세요:
+    기본 비디오 모델을 `comfy/workflow`로 설정하세요.
 
     ```json5
     {
@@ -291,27 +301,27 @@ Comfy는 공유 최상위 연결 설정과 capability별 워크플로 섹션(`im
     }
     ```
 
-    Comfy 비디오 워크플로는 구성된 그래프를 통해 text-to-video와 image-to-video를 지원합니다.
+    Comfy 비디오 워크플로는 구성된 그래프를 통해 텍스트-비디오 및 이미지-비디오 생성을 지원합니다.
 
     <Note>
-    OpenClaw는 Comfy 워크플로에 입력 비디오를 전달하지 않습니다. 입력으로는 텍스트 프롬프트와 단일 참조 이미지만 지원됩니다.
+    OpenClaw는 입력 비디오를 Comfy 워크플로에 전달하지 않습니다. 입력으로는 텍스트 프롬프트와 단일 참조 이미지만 지원됩니다.
     </Note>
 
   </Accordion>
 
   <Accordion title="음악 워크플로">
-    번들 Plugin은 워크플로로 정의된 오디오 또는 음악 출력을 위한 음악 생성 provider를 등록하며, 이는 공유 `music_generate` 도구를 통해 노출됩니다:
+    번들 Plugin은 워크플로에 정의된 오디오 또는 음악 출력을 위한 음악 생성 제공자를 등록하고, 이를 공유 `music_generate` 도구를 통해 제공합니다. 선택적으로 참조 이미지 1개까지 받을 수 있습니다.
 
     ```text
     /tool music_generate prompt="Warm ambient synth loop with soft tape texture"
     ```
 
-    오디오 워크플로 JSON과 출력 노드를 가리키도록 `music` config 섹션을 사용하세요.
+    `music` 구성 섹션에서 오디오 워크플로 JSON과 출력 Node를 지정하세요.
 
   </Accordion>
 
-  <Accordion title="하위 호환성">
-    중첩된 `image` 섹션 없이 기존 최상위 이미지 config도 계속 작동합니다:
+  <Accordion title="이전 버전과의 호환성">
+    중첩된 `image` 섹션이 없는 기존 최상위 이미지 구성도 계속 작동합니다.
 
     ```json5
     {
@@ -329,22 +339,18 @@ Comfy는 공유 최상위 연결 설정과 capability별 워크플로 섹션(`im
     }
     ```
 
-    OpenClaw는 이 레거시 형태를 이미지 워크플로 config로 취급합니다. 즉시 마이그레이션할 필요는 없지만, 새 설정에는 중첩된 `image` / `video` / `music` 섹션을 권장합니다.
-
-    <Tip>
-    이미지 생성만 사용하는 경우, 레거시 평면 config와 새 중첩 `image` 섹션은 기능적으로 동일합니다.
-    </Tip>
+    OpenClaw는 이 레거시 구조를 이미지 워크플로 구성으로 처리합니다. 즉시 마이그레이션할 필요는 없지만, 새 설정에는 중첩된 `image` / `video` / `music` 섹션을 사용하는 것이 좋습니다. 이미지 생성만 사용하는 경우 레거시 평면 구성과 새로운 중첩 `image` 섹션은 기능적으로 동일합니다.
 
   </Accordion>
 
-  <Accordion title="Live 테스트">
-    번들 Plugin에 대한 opt-in live coverage가 있습니다:
+  <Accordion title="라이브 테스트">
+    번들 Plugin에 대해 명시적으로 활성화할 수 있는 라이브 테스트 범위가 제공됩니다.
 
     ```bash
     OPENCLAW_LIVE_TEST=1 COMFY_LIVE_TEST=1 pnpm test:live -- extensions/comfy/comfy.live.test.ts
     ```
 
-    matching Comfy 워크플로 섹션이 구성되지 않은 경우, live 테스트는 개별 이미지, 비디오, 또는 음악 케이스를 건너뜁니다.
+    일치하는 Comfy 워크플로 섹션이 구성되어 있지 않으면 라이브 테스트에서 개별 이미지, 동영상 또는 음악 사례를 건너뜁니다.
 
   </Accordion>
 </AccordionGroup>
@@ -353,16 +359,16 @@ Comfy는 공유 최상위 연결 설정과 capability별 워크플로 섹션(`im
 
 <CardGroup cols={2}>
   <Card title="이미지 생성" href="/ko/tools/image-generation" icon="image">
-    이미지 생성 도구 구성 및 사용법입니다.
+    이미지 생성 도구의 구성 및 사용법입니다.
   </Card>
-  <Card title="비디오 생성" href="/ko/tools/video-generation" icon="video">
-    비디오 생성 도구 구성 및 사용법입니다.
+  <Card title="동영상 생성" href="/ko/tools/video-generation" icon="video">
+    동영상 생성 도구의 구성 및 사용법입니다.
   </Card>
   <Card title="음악 생성" href="/ko/tools/music-generation" icon="music">
-    음악 및 오디오 생성 도구 설정입니다.
+    음악 및 오디오 생성 도구의 설정 방법입니다.
   </Card>
-  <Card title="Provider 디렉터리" href="/ko/providers/index" icon="layers">
-    모든 provider 및 모델 참조 개요입니다.
+  <Card title="제공자 디렉터리" href="/ko/providers/index" icon="layers">
+    모든 제공자와 모델 참조에 대한 개요입니다.
   </Card>
   <Card title="구성 참조" href="/ko/gateway/config-agents#agent-defaults" icon="gear">
     에이전트 기본값을 포함한 전체 구성 참조입니다.

@@ -1,130 +1,109 @@
 ---
 read_when:
     - Trabalhando na resolução de perfis de autenticação ou no roteamento de credenciais
-    - Depuração de falhas de autenticação de modelo ou da ordem dos perfis
-summary: Semântica canônica de elegibilidade e resolução de credenciais para perfis de autenticação
-title: Semântica de credenciais de autenticação
+    - Depuração de falhas de autenticação do modelo ou da ordem dos perfis
+summary: Semântica canônica de qualificação e resolução de credenciais para perfis de autenticação
+title: Semântica das credenciais de autenticação
 x-i18n:
-    generated_at: "2026-06-27T17:08:49Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T23:42:58Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 591c0384e1d43512252aaa7b362141b6bc93183b30b5847168758f86127f0663
+    source_hash: 6b0516b1bb23f400d5ac5fd39a628736034440216ac22823eef061b38564dff0
     source_path: auth-credential-semantics.md
     workflow: 16
 ---
 
-Este documento define a elegibilidade canônica de credenciais e a semântica de resolução usadas em:
+Essa semântica mantém alinhado o comportamento de autenticação no momento da seleção e durante a execução. Ela é compartilhada por:
 
-- `resolveAuthProfileOrder`
-- `resolveApiKeyForProfile`
-- `models status --probe`
-- `doctor-auth`
+- `resolveAuthProfileOrder` (ordenação de perfis)
+- `resolveApiKeyForProfile` (resolução de credenciais durante a execução)
+- `openclaw models status --probe`
+- verificações de autenticação do `openclaw doctor` (`doctor-auth`)
 
-O objetivo é manter alinhados o comportamento no momento da seleção e o comportamento em runtime.
+## Códigos de motivo estáveis da sondagem
 
-## Códigos de motivo estáveis de probe
+Os resultados da sondagem incluem uma categoria de `status` (`ok`, `auth`, `rate_limit`, `billing`, `timeout`, `format`, `unknown`, `no_model`), além de um `reasonCode` estável quando a sondagem não chegou a realizar uma chamada ao modelo:
 
-- `ok`
-- `excluded_by_auth_order`
-- `missing_credential`
-- `invalid_expires`
-- `expired`
-- `unresolved_ref`
-- `no_model`
+| `reasonCode`             | Significado                                                                                           |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `excluded_by_auth_order` | Perfil omitido da ordem explícita de autenticação do respectivo provedor.                             |
+| `missing_credential`     | Nenhuma credencial embutida ou SecretRef está configurada.                                            |
+| `expired`                | O valor `expires` do token está no passado.                                                           |
+| `invalid_expires`        | `expires` não é um carimbo de data/hora Unix válido, positivo e em milissegundos.                      |
+| `unresolved_ref`         | Não foi possível resolver a SecretRef configurada.                                                    |
+| `ineligible_profile`     | O perfil é incompatível com a configuração do provedor (inclui entrada de chave malformada).          |
+| `no_model`               | Há credenciais, mas nenhum modelo candidato que possa ser sondado foi resolvido.                      |
+
+As verificações de elegibilidade relatam `ok` como código de motivo para credenciais utilizáveis.
 
 ## Credenciais de token
 
-Credenciais de token (`type: "token"`) oferecem suporte a `token` inline e/ou `tokenRef`.
+As credenciais de token (`type: "token"`) são compatíveis com `token` e/ou `tokenRef` embutidos.
 
 ### Regras de elegibilidade
 
-1. Um perfil de token é inelegível quando tanto `token` quanto `tokenRef` estão ausentes.
-2. `expires` é opcional.
-3. Se `expires` estiver presente, ele deve ser um número finito maior que `0`.
-4. Se `expires` for inválido (`NaN`, `0`, negativo, não finito ou tipo incorreto), o perfil será inelegível com `invalid_expires`.
-5. Se `expires` estiver no passado, o perfil será inelegível com `expired`.
-6. `tokenRef` não ignora a validação de `expires`.
+1. Um perfil de token é inelegível quando `token` e `tokenRef` estão ausentes (`missing_credential`).
+2. `expires` é opcional. Quando presente, deve ser um número finito de milissegundos desde a época Unix, maior que `0` e não superior ao carimbo de data/hora máximo de `Date` do JavaScript (8640000000000000).
+3. Se `expires` for inválido (tipo incorreto, `NaN`, `0`, negativo, não finito ou além desse máximo), o perfil será inelegível com `invalid_expires`.
+4. Se `expires` estiver no passado, o perfil será inelegível com `expired`.
+5. `tokenRef` não ignora a validação de `expires`.
 
 ### Regras de resolução
 
-1. A semântica do resolvedor corresponde à semântica de elegibilidade para `expires`.
-2. Para perfis elegíveis, o material do token pode ser resolvido a partir de um valor inline ou de `tokenRef`.
-3. Referências não resolvíveis produzem `unresolved_ref` na saída de `models status --probe`.
+1. A semântica do resolvedor para `expires` corresponde à semântica de elegibilidade.
+2. Para perfis elegíveis, o conteúdo do token pode ser resolvido a partir do valor embutido ou de `tokenRef`.
+3. Referências que não podem ser resolvidas produzem `unresolved_ref` na saída de `models status --probe`.
 
-## Portabilidade de cópia do agente
+## Portabilidade de cópias de agentes
 
-A herança de autenticação do agente é read-through. Quando um agente não tem perfil local, ele
-pode resolver perfis a partir do armazenamento padrão/principal do agente em runtime sem
-copiar material secreto para seu próprio `auth-profiles.json`.
+A herança de autenticação do agente usa leitura transparente. Quando um agente não tem um perfil local, ele resolve os perfis no armazenamento do agente padrão/principal durante a execução, sem copiar conteúdo secreto para seu próprio armazenamento de credenciais (`agents/<agentId>/agent/openclaw-agent.sqlite`).
 
-Fluxos de cópia explícitos, como `openclaw agents add`, usam esta política de portabilidade:
+Fluxos de cópia explícita, como `openclaw agents add`, usam esta política de portabilidade:
 
-- Perfis `api_key` são portáveis, exceto quando `copyToAgents: false`.
-- Perfis `token` são portáveis, exceto quando `copyToAgents: false`.
-- Perfis `oauth` não são portáveis por padrão porque tokens de atualização podem ser
-  de uso único ou sensíveis à rotação.
-- Fluxos OAuth de propriedade do provedor podem optar por participar com `copyToAgents: true` somente quando
-  copiar material de atualização entre agentes for sabidamente seguro.
+- Perfis `api_key` e `token` são portáveis, exceto quando `copyToAgents: false`.
+- Perfis `oauth` não são portáveis por padrão, pois tokens de atualização podem ser de uso único ou sensíveis à rotação.
+- Fluxos OAuth pertencentes ao provedor podem aceitar a cópia com `copyToAgents: true` somente quando for comprovadamente seguro copiar o conteúdo de atualização entre agentes; essa aceitação se aplica apenas quando o perfil contém conteúdo embutido de acesso/atualização.
 
-Perfis não portáveis permanecem disponíveis por meio de herança read-through, exceto se
-o agente de destino fizer login separadamente e criar seu próprio perfil local.
+Perfis não portáveis continuam disponíveis por meio da herança com leitura transparente, a menos que o agente de destino inicie uma sessão separadamente e crie seu próprio perfil local.
 
 ## Rotas de autenticação somente por configuração
 
-Entradas `auth.profiles` com `mode: "aws-sdk"` são metadados de roteamento, não credenciais
-armazenadas. Elas são válidas quando o provedor de destino usa
-`models.providers.<id>.auth: "aws-sdk"` ou a rota AWS SDK de configuração do Amazon Bedrock de propriedade do Plugin.
-Esses IDs de perfil podem aparecer em `auth.order` e substituições de sessão
-mesmo quando não existe entrada correspondente em `auth-profiles.json`.
+As entradas de `auth.profiles` com `mode: "aws-sdk"` são metadados de roteamento, não credenciais armazenadas. Elas são válidas quando o provedor de destino usa `models.providers.<id>.auth: "aws-sdk"`, a rota gravada pela configuração do Amazon Bedrock pertencente ao Plugin. Esses IDs de perfil podem aparecer em `auth.order` e em substituições de sessão, mesmo quando não existe uma entrada correspondente no armazenamento de credenciais.
 
-Não grave `type: "aws-sdk"` em `auth-profiles.json`. Se uma instalação legada
-tiver esse marcador, `openclaw doctor --fix` o move para `auth.profiles` e
-remove o marcador do armazenamento de credenciais.
+Não grave `type: "aws-sdk"` no armazenamento de credenciais; as credenciais armazenadas são apenas `api_key`, `token` ou `oauth`. Se um `auth-profiles.json` legado contiver esse marcador, `openclaw doctor --fix` o moverá para `auth.profiles` e removerá o marcador do armazenamento.
 
 ## Filtragem explícita da ordem de autenticação
 
-- Quando `auth.order.<provider>` ou a substituição de ordem do armazenamento de autenticação estiver definida para um
-  provedor, `models status --probe` só executa probe em IDs de perfil que permanecem na
-  ordem de autenticação resolvida para esse provedor.
-- Um perfil armazenado para esse provedor que for omitido da ordem explícita
-  não é tentado silenciosamente depois. A saída de probe o relata com
-  `reasonCode: excluded_by_auth_order` e o detalhe
-  `Excluded by auth.order for this provider.`
+- Quando `auth.order.<provider>` ou a substituição da ordem no armazenamento de autenticação está definida para um provedor, `models status --probe` sonda apenas os IDs de perfil que permanecem na ordem de autenticação resolvida para esse provedor. A substituição armazenada prevalece sobre a configuração `auth.order`.
+- Um perfil armazenado para esse provedor que tenha sido omitido da ordem explícita não será tentado silenciosamente depois. A saída da sondagem o relata com `reasonCode: excluded_by_auth_order` e o detalhe `Excluded by auth.order for this provider.`
 
-## Resolução do destino de probe
+## Resolução do destino da sondagem
 
-- Destinos de probe podem vir de perfis de autenticação, credenciais de ambiente ou
-  `models.json`.
-- Se um provedor tiver credenciais, mas o OpenClaw não conseguir resolver um candidato
-  de modelo apto para probe para ele, `models status --probe` relata `status: no_model` com
-  `reasonCode: no_model`.
+- Os destinos da sondagem podem vir de perfis de autenticação, credenciais de ambiente ou `models.json` (`source` do resultado: `profile`, `env`, `models.json`).
+- Se um provedor tiver credenciais, mas o OpenClaw não conseguir resolver um modelo candidato que possa ser sondado para ele, `models status --probe` relatará `status: no_model` com `reasonCode: no_model`.
 
-## Descoberta de credenciais por CLI externa
+## Descoberta de credenciais de CLI externa
 
-- Credenciais somente de runtime pertencentes a CLIs externas são descobertas somente quando o
-  provedor, o runtime ou o perfil de autenticação está no escopo da operação atual, ou
-  quando um perfil local armazenado para essa fonte externa já existe.
-- Chamadores do armazenamento de autenticação devem escolher um modo explícito de descoberta de CLI externa:
-  `none` para autenticação persistida/de Plugin somente, `existing` para atualizar perfis de CLI externa
-  já armazenados, ou `scoped` para um conjunto concreto de provedor/perfil.
-- Caminhos somente leitura/de status passam `allowKeychainPrompt: false`; eles usam somente credenciais
-  de CLI externa apoiadas em arquivo e não leem nem reutilizam resultados do macOS Keychain.
+- Credenciais exclusivas de execução pertencentes a CLIs externas (Claude CLI para `claude-cli`, Codex CLI para `openai`, MiniMax CLI para `minimax-portal`) são descobertas somente quando o provedor, o ambiente de execução ou o perfil de autenticação está no escopo da operação atual, ou quando já existe um perfil local armazenado para essa fonte externa.
+- Os chamadores do armazenamento de autenticação escolhem um modo explícito de descoberta de CLI externa: `none` apenas para autenticação persistida/de Plugin, `existing` para atualizar perfis de CLI externa já armazenados ou `scoped` para um conjunto concreto de provedores/perfis.
+- Os caminhos somente leitura/de status passam `allowKeychainPrompt: false`; eles usam apenas credenciais de CLI externa armazenadas em arquivos e não leem nem reutilizam resultados do macOS Keychain.
 
-## Guarda de política de SecretRef OAuth
+## Proteção da política de SecretRef do OAuth
 
-- Entrada SecretRef é apenas para credenciais estáticas.
-- Se uma credencial de perfil for `type: "oauth"`, objetos SecretRef não são suportados para o material dessa credencial de perfil.
-- Se `auth.profiles.<id>.mode` for `"oauth"`, a entrada `keyRef`/`tokenRef` apoiada por SecretRef para esse perfil será rejeitada.
-- Violações são falhas rígidas nos caminhos de resolução de autenticação de inicialização/recarregamento.
+A entrada SecretRef destina-se apenas a credenciais estáticas. As credenciais OAuth são mutáveis durante a execução (os fluxos de atualização persistem tokens rotacionados), portanto, conteúdo OAuth apoiado por SecretRef dividiria o estado mutável entre armazenamentos.
 
-## Mensagens compatíveis com legado
+- Se uma credencial de perfil for `type: "oauth"`, objetos SecretRef serão rejeitados em qualquer campo de conteúdo de credencial desse perfil.
+- Se `auth.profiles.<id>.mode` for `"oauth"`, entradas `keyRef`/`tokenRef` apoiadas por SecretRef serão rejeitadas para esse perfil.
+- As violações são falhas definitivas (erros lançados) nos caminhos de preparação de segredos durante a inicialização/recarga e de resolução de perfis.
 
-Para compatibilidade de script, erros de probe mantêm esta primeira linha inalterada:
+## Mensagens compatíveis com versões legadas
+
+Para manter a compatibilidade com scripts, os erros da sondagem mantêm esta primeira linha inalterada:
 
 `Auth profile credentials are missing or expired.`
 
-Detalhes mais amigáveis para humanos e códigos de motivo estáveis podem ser adicionados nas linhas subsequentes.
+Detalhes de fácil compreensão e o código de motivo estável aparecem nas linhas seguintes no formato `↳ Auth reason [code]: ...`.
 
 ## Relacionado
 

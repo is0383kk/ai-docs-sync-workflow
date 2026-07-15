@@ -1,147 +1,124 @@
 ---
 read_when:
-    - Vous modifiez la mise en forme Markdown ou le découpage en fragments pour les canaux sortants
-    - Vous ajoutez un nouveau formateur de canal ou mappage de style
+    - Vous modifiez la mise en forme Markdown ou le découpage des messages pour les canaux sortants
+    - Vous ajoutez un nouveau formateur de canal ou un nouveau mappage de style
     - Vous déboguez des régressions de mise en forme sur plusieurs canaux
 summary: Pipeline de mise en forme Markdown pour les canaux sortants
 title: Mise en forme Markdown
 x-i18n:
-    generated_at: "2026-05-12T12:50:34Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T02:34:43Z"
+    model: gpt-5.6
+    postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 8db92aaf1063ebcbd8630dfcb8ca0a4e9eeb1c64f5b8868bf11c836777180515
+    source_hash: f9a35fd9a6386068e1e3bec73ec6e692f49239b468f42dd737f919b1c6a88e41
     source_path: concepts/markdown-formatting.md
     workflow: 16
-    postprocess_version: locale-links-v1
 ---
 
-OpenClaw met en forme le Markdown sortant en le convertissant en une représentation
-intermédiaire (IR) partagée avant de générer une sortie propre à chaque canal. L’IR conserve le
-texte source intact tout en portant les plages de style et de liens afin que le découpage et le rendu
-restent cohérents entre les canaux.
-
-## Objectifs
-
-- **Cohérence :** une seule étape d’analyse, plusieurs moteurs de rendu.
-- **Découpage sûr :** scinder le texte avant le rendu afin que la mise en forme en ligne ne se
-  rompe jamais entre les blocs.
-- **Adaptation au canal :** convertir la même IR en mrkdwn Slack, HTML Telegram et plages de
-  style Signal sans réanalyser le Markdown.
+OpenClaw convertit le Markdown sortant en une représentation intermédiaire
+(IR) partagée avant de générer une sortie propre à chaque canal. L’IR conserve le texte brut ainsi que
+les plages de style et de liens, de sorte qu’une seule étape d’analyse alimente chaque canal et que le découpage
+ne scinde jamais la mise en forme au milieu d’une plage.
 
 ## Pipeline
 
-1. **Analyser le Markdown -> IR**
-   - L’IR est du texte brut accompagné de plages de style (gras/italique/barré/code/spoiler) et de plages de liens.
-   - Les décalages utilisent des unités de code UTF-16 afin que les plages de style Signal s’alignent avec son API.
-   - Les tableaux ne sont analysés que lorsqu’un canal active la conversion des tableaux.
-2. **Découper l’IR (format d’abord)**
-   - Le découpage s’effectue sur le texte de l’IR avant le rendu.
-   - La mise en forme en ligne n’est pas scindée entre les blocs ; les plages sont découpées par bloc.
-3. **Rendre par canal**
-   - **Slack :** jetons mrkdwn (gras/italique/barré/code), liens sous forme `<url|label>`.
-   - **Telegram :** balises HTML (`<b>`, `<i>`, `<s>`, `<code>`, `<pre><code>`, `<a href>`).
-   - **Signal :** texte brut + plages `text-style` ; les liens deviennent `label (url)` lorsque le libellé diffère.
+1. **Analyser le Markdown en IR** (`markdownToIR`) - texte brut avec plages de style
+   (gras, italique, barré, code, bloc de code, divulgâcheur, citation,
+   titres de niveau 1 à 6) et plages de liens. Les décalages sont exprimés en unités de code UTF-16 afin que les plages de style
+   de Signal correspondent directement à son API. Les tableaux ne sont analysés que lorsque le canal
+   active un mode de tableau.
+2. **Découper l’IR** (`chunkMarkdownIR` / `renderMarkdownIRChunksWithinLimit`)
+   - le découpage s’effectue sur le texte de l’IR avant le rendu, de sorte que les styles intégrés et
+     les liens sont répartis par fragment au lieu d’être rompus à une limite.
+3. **Effectuer le rendu par canal** (`renderMarkdownWithMarkers`) - une table de correspondance des marqueurs de style
+   transforme les plages en balisage natif du canal.
+
+| Canal                                                            | Moteur de rendu                                                                       | Remarques                                                                                                      |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Slack                                                            | jetons mrkdwn (`*bold*`, `_italic_`, `` `code` ``, blocs de code délimités)           | Les liens deviennent `<url\|label>` ; les liens automatiques sont désactivés pendant l’analyse pour éviter les doublons |
+| Telegram                                                         | balises HTML (`<b>`, `<i>`, `<s>`, `<code>`, `<pre><code>`, `<a href>`, `<tg-spoiler>`) | Prend également en charge les tableaux et les titres des messages enrichis (`<h1>`-`<h6>`) lorsque `richMessages` est activé |
+| Signal                                                           | texte brut + plages `text-style`                                                      | Les liens sont rendus sous la forme `label (url)` lorsque le libellé diffère de l’URL                         |
+| Discord, WhatsApp, iMessage, Microsoft Teams et autres canaux    | texte brut                                                                           | Aucun style basé sur l’IR ; la conversion des tableaux Markdown s’effectue toujours via `convertMarkdownTables` |
 
 ## Exemple d’IR
 
 Markdown d’entrée :
-
-```markdown
-Hello **world** - see [docs](https://docs.openclaw.ai).
-```
-
+__OC_I18N_900000__
 IR (schématique) :
-
-```json
-{
-  "text": "Hello world - see docs.",
-  "styles": [{ "start": 6, "end": 11, "style": "bold" }],
-  "links": [{ "start": 19, "end": 23, "href": "https://docs.openclaw.ai" }]
-}
-```
-
-## Où elle est utilisée
-
-- Les adaptateurs sortants Slack, Telegram et Signal effectuent le rendu depuis l’IR.
-- Les autres canaux (WhatsApp, iMessage, Microsoft Teams, Discord) utilisent encore du texte brut ou
-  leurs propres règles de mise en forme, avec la conversion des tableaux Markdown appliquée avant
-  le découpage lorsqu’elle est activée.
-
+__OC_I18N_900001__
 ## Gestion des tableaux
 
-Les tableaux Markdown ne sont pas pris en charge de manière cohérente par tous les clients de chat. Utilisez
-`markdown.tables` pour contrôler la conversion par canal (et par compte).
+`markdown.tables` détermine la manière dont un canal convertit les tableaux Markdown, pour chaque
+canal et, facultativement, pour chaque compte :
 
-- `code` : rend les tableaux sous forme de blocs de code (valeur par défaut pour la plupart des canaux).
-- `bullets` : convertit chaque ligne en puces (valeur par défaut pour Matrix, Signal et WhatsApp).
-- `off` : désactive l’analyse et la conversion des tableaux ; le texte brut du tableau est transmis tel quel.
+| Mode      | Comportement                                                                                     |
+| --------- | ------------------------------------------------------------------------------------------------ |
+| `code`    | Effectuer le rendu sous forme de tableau ASCII aligné dans un bloc de code (valeur de repli par défaut) |
+| `bullets` | Convertir chaque ligne en éléments de liste `label: value`                                       |
+| `block`   | Conserver les tableaux natifs lorsque le transport les prend en charge ; sinon, revenir à `code` |
+| `off`     | Désactiver l’analyse des tableaux ; le texte brut du tableau est transmis sans modification      |
 
-Clés de configuration :
-
-```yaml
-channels:
-  discord:
-    markdown:
-      tables: code
-    accounts:
-      work:
-        markdown:
-          tables: off
-```
-
+Valeurs par défaut des Plugins par canal : Signal, WhatsApp et Matrix utilisent
+`bullets` par défaut ; Mattermost utilise `off` par défaut ; Telegram utilise `block` par défaut (qui
+se résout en `code`, sauf si `richMessages` est activé pour le compte). Tout
+canal sans valeur par défaut explicite définie par un Plugin revient à `code`.
+__OC_I18N_900002__
 ## Règles de découpage
 
-- Les limites de découpage proviennent des adaptateurs/configurations de canal et sont appliquées au texte de l’IR.
-- Les blocs de code clôturés sont conservés comme un bloc unique avec un saut de ligne final afin que les canaux
-  les affichent correctement.
-- Les préfixes de liste et les préfixes de citation font partie du texte de l’IR, donc le découpage
-  ne scinde pas un préfixe en son milieu.
-- Les styles en ligne (gras/italique/barré/code-en-ligne/spoiler) ne sont jamais scindés entre
-  les blocs ; le moteur de rendu rouvre les styles dans chaque bloc.
+- Les limites de fragment proviennent des adaptateurs ou de la configuration du canal et s’appliquent au texte de l’IR, et non
+  à la sortie générée.
+- Les blocs de code délimités sont conservés en un seul bloc avec un saut de ligne final afin que
+  les canaux génèrent correctement le délimiteur de fermeture.
+- Les préfixes de liste et de citation font partie du texte de l’IR, de sorte que le découpage ne
+  scinde jamais un préfixe.
+- Les styles intégrés ne sont jamais scindés entre plusieurs fragments ; le moteur de rendu rouvre un
+  style actif au début du fragment suivant.
 
-Si vous avez besoin de plus de détails sur le comportement du découpage entre les canaux, consultez
-[Streaming + découpage](/fr/concepts/streaming).
+Consultez [Diffusion en continu et découpage](/concepts/streaming) pour en savoir plus sur les limites de fragment et
+le comportement de distribution entre les canaux.
 
-## Politique de liens
+## Politique relative aux liens
 
-- **Slack :** `[label](url)` -> `<url|label>` ; les URL nues restent nues. L’autolien
-  est désactivé pendant l’analyse pour éviter les doubles liens.
+- **Slack :** `[label](url)` -> `<url|label>` ; les URL brutes restent telles quelles.
 - **Telegram :** `[label](url)` -> `<a href="url">label</a>` (mode d’analyse HTML).
-- **Signal :** `[label](url)` -> `label (url)` sauf si le libellé correspond à l’URL.
+- **Signal :** `[label](url)` -> `label (url)`, sauf si le libellé correspond déjà
+  à l’URL.
 
-## Spoilers
+## Divulgâcheurs
 
-Les marqueurs de spoiler (`||spoiler||`) ne sont analysés que pour Signal, où ils correspondent à
-des plages de style SPOILER. Les autres canaux les traitent comme du texte brut.
+Les marqueurs de divulgâcheur (`||spoiler||`) sont analysés pour Signal (associés à des plages de style
+`SPOILER`) et Telegram (associés à `<tg-spoiler>`). Les autres canaux traitent
+`||...||` comme du texte brut.
 
-## Comment ajouter ou mettre à jour un formateur de canal
+## Ajouter ou mettre à jour le formateur d’un canal
 
-1. **Analyser une seule fois :** utilisez l’assistant partagé `markdownToIR(...)` avec les options appropriées au canal
-   (autolien, style de titre, préfixe de citation).
-2. **Rendre :** implémentez un moteur de rendu avec `renderMarkdownWithMarkers(...)` et une
-   carte de marqueurs de style (ou des plages de style Signal).
-3. **Découper :** appelez `chunkMarkdownIR(...)` avant le rendu ; rendez chaque bloc.
-4. **Brancher l’adaptateur :** mettez à jour l’adaptateur sortant du canal pour utiliser le nouveau découpeur
-   et le nouveau moteur de rendu.
-5. **Tester :** ajoutez ou mettez à jour les tests de format et un test de livraison sortante si le
-   canal utilise le découpage.
+1. **Analyser une seule fois** avec `markdownToIR(...)`, en transmettant les options adaptées au canal
+   (`autolink`, `headingStyle`, `blockquotePrefix`, `tableMode`).
+2. **Effectuer le rendu** avec `renderMarkdownWithMarkers(...)` et une table de correspondance des marqueurs de style (ou
+   une logique personnalisée de plages de style pour les transports comme Signal).
+3. **Découper** avec `chunkMarkdownIR(...)` ou
+   `renderMarkdownIRChunksWithinLimit(...)` avant d’effectuer le rendu de chaque fragment.
+4. **Connecter l’adaptateur** afin d’appeler le nouveau découpeur et le nouveau moteur de rendu depuis le
+   chemin d’envoi sortant.
+5. **Tester** avec des tests de format ainsi qu’un test de distribution sortante si le canal
+   effectue un découpage.
 
 ## Pièges courants
 
-- Les jetons Slack entre chevrons (`<@U123>`, `<#C123>`, `<https://...>`) doivent être
-  préservés ; échappez le HTML brut de manière sûre.
-- Le HTML Telegram exige d’échapper le texte hors balises pour éviter un balisage cassé.
-- Les plages de style Signal dépendent des décalages UTF-16 ; n’utilisez pas de décalages en points de code.
-- Préservez les sauts de ligne finaux des blocs de code clôturés afin que les marqueurs de fermeture arrivent sur
-  leur propre ligne.
+- Les jetons Slack entre chevrons (`<@U123>`, `<#C123>`, `<https://...>`) doivent
+  survivre à l’échappement ; le HTML brut doit toujours être échappé de manière sûre.
+- Le HTML Telegram exige l’échappement du texte situé hors des balises afin d’éviter un balisage incorrect.
+- Les plages de style Signal utilisent des décalages UTF-16, et non des décalages en points de code.
+- Conservez les sauts de ligne finaux des blocs de code délimités afin que le marqueur de fermeture
+  se trouve sur sa propre ligne.
 
-## Liés
+## Contenu associé
 
 <CardGroup cols={2}>
-  <Card title="Streaming et découpage" href="/fr/concepts/streaming" icon="bars-staggered">
-    Comportement du streaming sortant, limites des blocs et livraison propre à chaque canal.
+  <Card title="Diffusion en continu et découpage" href="/fr/concepts/streaming" icon="bars-staggered">
+    Comportement de diffusion en continu sortante, limites des fragments et distribution propre à chaque canal.
   </Card>
   <Card title="Invite système" href="/fr/concepts/system-prompt" icon="message-lines">
-    Ce que le modèle voit avant la conversation, y compris les fichiers d’espace de travail injectés.
+    Ce que le modèle voit avant la conversation, y compris les fichiers injectés de l’espace de travail.
   </Card>
 </CardGroup>

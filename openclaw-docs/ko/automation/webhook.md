@@ -1,20 +1,20 @@
 ---
-summary: /automation/cron-jobs로 리디렉션
-title: 웹훅
+summary: /automation/cron-jobs로 리디렉션합니다
+title: Webhook
 x-i18n:
-    generated_at: "2026-04-24T06:02:49Z"
-    model: gpt-5.4
-    provider: openai
-    source_hash: b0241fc7232c73d1f595f18fdf1a2d65475c6a82e3068b0aefb4f95f41712086
-    source_path: automation/webhook.md
-    workflow: 15
+    generated_at: "2026-07-12T00:33:20Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    provider: openai
+    source_hash: fde1180946aef371d4e44b24f3880f28e935a033c9a722ea3b188f893faf9e17
+    source_path: automation/webhook.md
+    workflow: 16
 ---
 
-이 페이지는 [예약된 작업](/ko/automation/cron-jobs#webhooks)(으)로 이동되었습니다. Webhook 문서는 [예약된 작업](/ko/automation/cron-jobs#webhooks)에서 확인하세요.
+이 페이지는 이동되었습니다. Webhook 문서는 이제 [예약된 작업](/ko/automation/cron-jobs#webhooks)에서 확인할 수 있습니다.
 
-## 관련
+## 관련 항목
 
-- [Poll](/ko/cli/message)
+- [설문조사](/ko/cli/message)
 - [Gmail PubSub](/ko/automation/cron-jobs)
 - [Hooks](/ko/automation/hooks)

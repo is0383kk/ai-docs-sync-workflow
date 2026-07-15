@@ -1,28 +1,29 @@
 ---
 read_when:
-    - Вы устанавливаете, настраиваете или проверяете Plugin senseaudio
-summary: Добавляет поддержку провайдера распознавания медиа.
-title: Plugin Senseaudio
+    - Вы устанавливаете, настраиваете или проверяете плагин senseaudio
+summary: Добавляет поддержку провайдера для распознавания медиаконтента.
+title: Плагин Senseaudio
 x-i18n:
-    generated_at: "2026-06-28T23:28:42Z"
-    model: gpt-5.5
+    generated_at: "2026-07-13T18:25:07Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 24
     provider: openai
     source_hash: b1566a7e33b2f3d367c0fafc364b701aff60587204bb585af1cf15786e5ed330
     source_path: plugins/reference/senseaudio.md
     workflow: 16
 ---
 
-# Plugin Senseaudio
+# Плагин Senseaudio
 
-Добавляет поддержку провайдера понимания медиа.
+Добавляет поддержку провайдера анализа медиаконтента.
 
 ## Распространение
 
 - Пакет: `@openclaw/senseaudio-provider`
-- Способ установки: включен в OpenClaw
+- Способ установки: входит в состав OpenClaw
 
-## Поверхность
+## Интерфейс
 
 контракты: mediaUnderstandingProviders
 

@@ -1,21 +1,22 @@
 ---
 read_when:
     - Вы устанавливаете, настраиваете или проверяете плагин firecrawl
-summary: Добавляет инструменты, доступные для вызова агентом. Добавляет поддержку провайдера получения веб-данных. Добавляет поддержку провайдера веб-поиска.
-title: Plugin Firecrawl
+summary: Добавляет инструменты, доступные для вызова агентом. Добавляет поддержку провайдера получения веб-страниц. Добавляет поддержку провайдера веб-поиска.
+title: Плагин Firecrawl
 x-i18n:
-    generated_at: "2026-06-28T23:24:01Z"
-    model: gpt-5.5
+    generated_at: "2026-07-13T20:05:48Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 24
     provider: openai
     source_hash: ca5577e6e850d947a3714e3dc62c7756faae8471e150d3cdb320a85efe3fe4f5
     source_path: plugins/reference/firecrawl.md
     workflow: 16
 ---
 
-# Firecrawl Plugin
+# Плагин Firecrawl
 
-Добавляет инструменты, вызываемые агентом. Добавляет поддержку провайдера веб-загрузки. Добавляет поддержку провайдера веб-поиска.
+Добавляет инструменты, доступные для вызова агентом. Добавляет поддержку провайдера получения веб-страниц. Добавляет поддержку провайдера веб-поиска.
 
 ## Распространение
 
@@ -24,7 +25,7 @@ x-i18n:
 
 ## Интерфейс
 
-contracts: tools, webFetchProviders, webSearchProviders
+контракты: tools, webFetchProviders, webSearchProviders
 
 ## Связанная документация
 

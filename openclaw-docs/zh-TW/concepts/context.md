@@ -1,44 +1,44 @@
 ---
 read_when:
-    - 你想了解「脈絡」在 OpenClaw 中的意思
-    - 你正在偵錯為什麼模型「知道」某件事（或忘記了它）
-    - 你想降低上下文負擔（/context、/status、/compact）
-summary: 情境：模型看到的內容、其建構方式，以及如何檢查它
+    - 您想了解 OpenClaw 中的「上下文」是什麼意思
+    - 你正在偵錯模型為何「知道」某件事（或為何忘記了它）
+    - 你想要降低上下文負擔（/context、/status、/compact）
+summary: 上下文：模型會看到什麼、如何建構，以及如何檢視
 title: 上下文
 x-i18n:
-    generated_at: "2026-07-05T11:13:00Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T21:16:42Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 2b94bf7dd87318107840faced4e899e0a4acae5fe8ae55cfcb91ae72259c79aa
+    source_hash: 1eb3d342a601a447487640587f746cc80a133ede338a880741f53c3e01f20ed1
     source_path: concepts/context.md
     workflow: 16
 ---
 
-「脈絡」是 **OpenClaw 在一次執行中傳送給模型的所有內容**。它受模型的 **脈絡視窗**（token 限制）約束。
+「上下文」是 **OpenClaw 在一次執行中傳送給模型的所有內容**。它受限於模型的**上下文視窗**（權杖上限）。
 
 初學者心智模型：
 
-- **系統提示**（由 OpenClaw 建立）：規則、工具、Skills 清單、時間/執行環境，以及注入的工作區檔案。
-- **對話歷史**：你在此工作階段的訊息 + 助理的訊息。
-- **工具呼叫/結果 + 附件**：命令輸出、檔案讀取、圖片/音訊等。
+- **系統提示**（由 OpenClaw 建立）：規則、工具、Skills 清單、時間／執行階段，以及注入的工作區檔案。
+- **對話記錄**：此工作階段中你的訊息 + 助理的訊息。
+- **工具呼叫／結果 + 附件**：命令輸出、檔案讀取內容、影像／音訊等。
 
-脈絡與「記憶」_不是同一回事_：記憶可以儲存在磁碟上並稍後重新載入；脈絡則是模型目前視窗內的內容。
+上下文與「記憶」_並不相同_：記憶可以儲存在磁碟上，之後重新載入；上下文則是模型目前視窗中的內容。
 
-## 快速開始（檢查脈絡）
+## 快速開始（檢視上下文）
 
-- `/status` → 快速查看「我的視窗有多滿？」+ 工作階段設定。
-- `/context list` → 已注入的內容 + 粗略大小（每個檔案 + 總計）。
-- `/context detail` → 更深入的拆解：每個檔案、每個工具結構描述大小、每個 Skills 項目大小、系統提示大小，以及可壓縮的逐字稿訊息數。
-- `/context map` → 目前工作階段已追蹤脈絡貢獻項目的 WinDirStat 風格樹狀圖影像。
-- `/usage tokens` → 在一般回覆後附加每則回覆的用量頁尾。
-- `/compact` → 將較舊的歷史摘要成一個精簡項目，以釋放視窗空間。
+- `/status` → 快速查看「我的視窗用了多少？」以及工作階段設定。
+- `/context list` → 查看注入了哪些內容及其概略大小（各檔案 + 總計）。
+- `/context detail` → 更深入的細目：各檔案、各工具結構描述、各 Skills 項目的大小、系統提示大小，以及可壓縮的對話記錄訊息數。
+- `/context map` → 目前工作階段中已追蹤上下文來源的 WinDirStat 風格矩形樹狀圖。
+- `/usage tokens` → 在一般回覆後附加每次回覆的用量頁尾。
+- `/compact` → 將較早的記錄摘要成精簡項目，以釋放視窗空間。
 
-另請參閱：[斜線命令](/zh-TW/tools/slash-commands)、[Token 使用量與成本](/zh-TW/reference/token-use)、[壓縮](/zh-TW/concepts/compaction)。
+另請參閱：[斜線命令](/zh-TW/tools/slash-commands)、[權杖用量與成本](/zh-TW/reference/token-use)、[壓縮](/zh-TW/concepts/compaction)。
 
-## 範例輸出
+## 輸出範例
 
-數值會因模型、提供者、工具政策，以及工作區中的內容而異。
+數值會因模型、供應商、工具政策及工作區內容而異。
 
 ### `/context list`
 
@@ -85,42 +85,45 @@ Top tools (schema size):
 
 ### `/context map`
 
-會傳送一張由最新快取執行報告產生的影像。在工作階段中尚未有一般訊息產生執行報告之前，`/context map` 會回傳不可用訊息，而不是繪製估算。矩形面積與已追蹤的提示字元數成正比：
+傳送一張根據最新快取的執行報告與工作階段對話記錄所產生的影像。在工作階段中，一般訊息尚未產生執行報告之前，`/context map` 會傳回無法使用的訊息，而不會繪製估算圖。矩形面積與所追蹤的提示字元數成正比：
 
+- 對話記錄（使用者訊息、助理回覆、工具結果、壓縮摘要），以及僅傳遞給模型的每回合執行階段上下文和鉤子提示新增內容
 - 注入的工作區檔案
 - 基礎系統提示文字
 - Skills 提示項目
 - 工具 JSON 結構描述
 
-當沒有快取的執行報告時，`/context list`、`/context detail` 和 `/context json` 仍可檢查隨需估算。
+對話群組會隨工作階段進行而增長，因此圖表每回合都會變化；壓縮後，它會折疊成摘要圖塊。
 
-## 哪些內容會計入脈絡視窗
+沒有快取執行報告時，`/context list`、`/context detail` 和 `/context json` 仍可檢視隨需計算的估算值。
 
-模型收到的一切都會計入，包括：
+## 哪些內容會計入上下文視窗
+
+模型接收的所有內容都會計入，包括：
 
 - 系統提示（所有區段）。
-- 對話歷史。
+- 對話記錄。
 - 工具呼叫 + 工具結果。
-- 附件/逐字稿（圖片/音訊/檔案）。
-- 壓縮摘要與修剪成品。
-- 提供者「包裝」或隱藏標頭（不可見，但仍會計入）。
+- 附件／轉錄內容（影像／音訊／檔案）。
+- 壓縮摘要與修剪產物。
+- 供應商的「包裝內容」或隱藏標頭（不可見，但仍會計入）。
 
 ## OpenClaw 如何建立系統提示
 
-系統提示由 **OpenClaw 擁有**，並在每次執行時重新建立。它包含：
+系統提示**由 OpenClaw 管理**，並會在每次執行時重新建立。它包括：
 
-- 工具清單 + 簡短描述。
-- Skills 清單（僅中繼資料；見下方）。
+- 工具清單 + 簡短說明。
+- Skills 清單（僅中繼資料；請見下文）。
 - 工作區位置。
 - 時間（UTC + 已設定時轉換後的使用者時間）。
-- 執行環境中繼資料（主機/OS/模型/思考）。
-- **專案脈絡** 下的注入工作區啟動檔案。
+- 執行階段中繼資料（主機／作業系統／模型／思考模式）。
+- **專案上下文**下所注入的工作區啟動檔案。
 
-完整拆解：[系統提示](/zh-TW/concepts/system-prompt)。
+完整細目：[系統提示](/zh-TW/concepts/system-prompt)。
 
-## 注入的工作區檔案（專案脈絡）
+## 注入的工作區檔案（專案上下文）
 
-依預設，OpenClaw 會注入一組固定的工作區檔案（若存在）：
+OpenClaw 預設會注入一組固定的工作區檔案（若存在）：
 
 - `AGENTS.md`
 - `SOUL.md`
@@ -130,71 +133,71 @@ Top tools (schema size):
 - `HEARTBEAT.md`
 - `BOOTSTRAP.md`（僅首次執行）
 
-大型檔案會依每個檔案使用 `agents.defaults.bootstrapMaxChars`（預設 `20000` 字元）截斷。OpenClaw 也會使用 `agents.defaults.bootstrapTotalMaxChars`（預設 `60000` 字元）對跨檔案的啟動注入施加總上限。`/context` 會顯示 **原始與注入後** 大小，以及是否發生截斷。
+大型檔案會依各檔案的 `agents.defaults.bootstrapMaxChars`（預設為 `20000` 個字元）截斷。OpenClaw 也會透過 `agents.defaults.bootstrapTotalMaxChars`（預設為 `60000` 個字元）限制跨檔案的啟動內容注入總量。`/context` 會顯示**原始大小與注入大小**，以及是否發生截斷。
 
-發生截斷時，執行環境可以在專案脈絡下方注入提示內警告區塊。請使用 `agents.defaults.bootstrapPromptTruncationWarning`（`off`、`once`、`always`；預設 `always`）設定此行為。
+發生截斷時，執行階段可在專案上下文中注入提示內警告區塊。使用 `agents.defaults.bootstrapPromptTruncationWarning` 設定此行為（`off`、`once`、`always`；預設為 `always`）。
 
 ## Skills：注入與隨需載入
 
-系統提示包含精簡的 **Skills 清單**（名稱 + 描述 + 位置）。此清單會帶來實際開銷。
+系統提示包含精簡的 **Skills 清單**（名稱 + 說明 + 位置）。這份清單確實會產生額外負擔。
 
-Skills 指示預設_不會_包含在內。模型應該只在 **需要時** `read` 該 Skills 的 `SKILL.md`。
+Skills 指示預設_不會_包含在內。模型應僅在**需要時**才 `read` 該 Skills 的 `SKILL.md`。
 
 ## 工具：有兩種成本
 
-工具會以兩種方式影響脈絡：
+工具會透過兩種方式影響上下文：
 
-1. 系統提示中的 **工具清單文字**（你看到的「Tooling」）。
-2. **工具結構描述**（JSON）。這些會傳送給模型，讓它能呼叫工具。即使你不會以純文字看到它們，它們仍會計入脈絡。
+1. 系統提示中的**工具清單文字**（你看到的「工具」）。
+2. **工具結構描述**（JSON）。這些內容會傳送給模型，使模型能呼叫工具。即使你看不到其純文字形式，它們仍會計入上下文。
 
-`/context detail` 會拆解最大的工具結構描述，讓你看出主要占用來源。
+`/context detail` 會列出最大的工具結構描述，讓你看出哪些項目占用最多空間。
 
 ## 命令、指令與「行內捷徑」
 
-斜線命令由閘道處理。有幾種不同的行為：
+斜線命令由閘道處理。其行為分為以下幾種：
 
-- **獨立命令**：只有 `/...` 的訊息會作為命令執行。
-- **指令**：`/think`、`/fast`、`/verbose`、`/trace`、`/reasoning`、`/elevated`、`/exec`、`/model`、`/queue` 會在模型看到訊息前被移除。
-  - 只有指令的訊息會保留工作階段設定。
-  - 一般訊息中的行內指令會作為每則訊息的提示。
-- **行內捷徑**（僅限允許清單中的傳送者）：一般訊息內的某些 `/...` token 可以立即執行（例如：「hey /status」），並在模型看到剩餘文字前被移除。
+- **獨立命令**：只包含 `/...` 的訊息會作為命令執行。
+- **指令**：`/think`、`/fast`、`/verbose`、`/trace`、`/reasoning`、`/elevated`、`/exec`、`/model`、`/queue` 會在模型看到訊息之前移除。
+  - 僅含指令的訊息會保留工作階段設定。
+  - 一般訊息中的行內指令會作為該訊息的提示。
+- **行內捷徑**（僅限允許清單中的傳送者）：一般訊息內的特定 `/...` 權杖可以立即執行（例如：「嗨 /status」），並會在模型看到剩餘文字前移除。
 
 詳細資訊：[斜線命令](/zh-TW/tools/slash-commands)。
 
-## 工作階段、壓縮與修剪（哪些會持久化）
+## 工作階段、壓縮與修剪（哪些內容會保留）
 
-跨訊息持久化的內容取決於機制：
+跨訊息保留的內容取決於所使用的機制：
 
-- **一般歷史** 會保留在工作階段逐字稿中，直到依政策壓縮/修剪。
-- **壓縮** 會將摘要保留到逐字稿中，並保持最近訊息完整。
-- **修剪** 會從_記憶體內_提示中丟棄舊工具結果，以釋放脈絡視窗空間，但不會重寫工作階段逐字稿 - 完整歷史仍可在磁碟上檢查。
+- **一般記錄**會保留在工作階段對話記錄中，直到依政策壓縮或修剪。
+- **壓縮**會將摘要保留至對話記錄中，並完整保留最近的訊息。
+- **修剪**會從_記憶體中的_提示移除舊工具結果，以釋放上下文視窗空間，但不會重寫工作階段對話記錄——完整記錄仍可在磁碟上檢視。
 
 文件：[工作階段](/zh-TW/concepts/session)、[壓縮](/zh-TW/concepts/compaction)、[工作階段修剪](/zh-TW/concepts/session-pruning)。
 
-依預設，OpenClaw 會使用內建的 `legacy` 脈絡引擎進行組裝與壓縮。如果你安裝了提供 `kind: "context-engine"` 的外掛，並使用 `plugins.slots.contextEngine` 選取它，OpenClaw 會改為將脈絡組裝、`/compact`，以及相關子代理脈絡生命週期 hook 委派給該引擎。`ownsCompaction: false` 不會自動退回到舊版引擎；作用中的引擎仍必須正確實作 `compact()`。如需完整的可外掛介面、生命週期 hook 與設定，請參閱 [脈絡引擎](/zh-TW/concepts/context-engine)。
+OpenClaw 預設使用內建的 `legacy` 上下文引擎進行組裝與壓縮。如果你安裝了提供 `kind: "context-engine"` 的外掛，並透過 `plugins.slots.contextEngine` 選取它，OpenClaw 便會改由該引擎負責上下文組裝、`/compact`，以及相關子代理程式的上下文生命週期鉤子。`ownsCompaction: false` 不會自動退回 `legacy` 引擎；作用中的引擎仍必須正確實作 `compact()`。如需完整的可插拔介面、生命週期鉤子及設定方式，請參閱[上下文引擎](/zh-TW/concepts/context-engine)。
 
-## `/context` 實際回報什麼
+## `/context` 實際報告的內容
 
-`/context` 會優先使用最新可用的 **執行建立** 系統提示報告：
+若有可用資料，`/context` 會優先採用最新的**執行時建立**系統提示報告：
 
-- `System prompt (run)` = 從上一個嵌入式（可使用工具）執行擷取，並保留在工作階段儲存中。
-- `System prompt (estimate)` = 當沒有執行報告時（或透過不產生報告的命令列介面後端執行時）即時計算。
+- `System prompt (run)` = 從上一次內嵌式（可使用工具）執行擷取，並保留在工作階段儲存區中。
+- `System prompt (estimate)` = 沒有執行報告時（或透過不會產生該報告的命令列介面後端執行時）即時計算。
 
-無論哪種方式，它都會回報大小與主要貢獻項目；它**不會**傾印完整系統提示或工具結構描述。在詳細模式中，它也會使用與壓縮相同的真實對話訊息述詞來比較工作階段逐字稿，因此更容易區分高提示/快取用量與可壓縮的對話歷史。
+無論採用哪種方式，它都會報告大小及主要占用來源；**不會**傾印完整的系統提示或工具結構描述。在詳細模式下，它也會使用與壓縮相同的真實對話訊息判斷條件來比較工作階段對話記錄，讓高提示／快取用量更容易與可壓縮的對話記錄區分。
 
-## 相關
+## 相關內容
 
 <CardGroup cols={2}>
-  <Card title="Context engine" href="/zh-TW/concepts/context-engine" icon="puzzle-piece">
-    透過外掛自訂脈絡注入。
+  <Card title="上下文引擎" href="/zh-TW/concepts/context-engine" icon="puzzle-piece">
+    透過外掛自訂上下文注入。
   </Card>
-  <Card title="Compaction" href="/zh-TW/concepts/compaction" icon="compress">
-    摘要長對話，讓它們保持在模型視窗內。
+  <Card title="壓縮" href="/zh-TW/concepts/compaction" icon="compress">
+    摘要長篇對話，使其維持在模型視窗範圍內。
   </Card>
-  <Card title="System prompt" href="/zh-TW/concepts/system-prompt" icon="message-lines">
-    系統提示如何建立，以及每一輪會注入哪些內容。
+  <Card title="系統提示" href="/zh-TW/concepts/system-prompt" icon="message-lines">
+    系統提示如何建立，以及每回合會注入哪些內容。
   </Card>
-  <Card title="Agent loop" href="/zh-TW/concepts/agent-loop" icon="arrows-rotate">
-    從傳入訊息到最終回覆的完整代理執行週期。
+  <Card title="代理程式迴圈" href="/zh-TW/concepts/agent-loop" icon="arrows-rotate">
+    從收到訊息到最終回覆的完整代理程式執行週期。
   </Card>
 </CardGroup>

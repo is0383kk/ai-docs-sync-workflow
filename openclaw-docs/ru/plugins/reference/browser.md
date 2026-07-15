@@ -1,30 +1,31 @@
 ---
 read_when:
     - Вы устанавливаете, настраиваете или проверяете плагин браузера
-summary: Добавляет инструменты, вызываемые агентом.
-title: Plugin браузера
+summary: Добавляет инструменты, доступные для вызова агентом.
+title: Браузерный плагин
 x-i18n:
-    generated_at: "2026-06-28T23:21:48Z"
-    model: gpt-5.5
+    generated_at: "2026-07-13T20:04:51Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 24
     provider: openai
     source_hash: 2dcf562660fa3d05d22856335a7d2e6e467a432ee6dda5650efd94edde661ba4
     source_path: plugins/reference/browser.md
     workflow: 16
 ---
 
-# Plugin для браузера
+# Браузерный плагин
 
-Добавляет инструменты, доступные для вызова агентом.
+Добавляет инструменты, которые может вызывать агент.
 
 ## Распространение
 
 - Пакет: `@openclaw/browser-plugin`
-- Способ установки: включен в OpenClaw
+- Способ установки: включён в OpenClaw
 
 ## Интерфейс
 
-контракты: инструменты; Skills
+контракты: инструменты; навыки
 
 ## Связанная документация
 

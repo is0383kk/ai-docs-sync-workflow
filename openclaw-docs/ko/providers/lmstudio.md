@@ -5,79 +5,75 @@ read_when:
 summary: LM Studio로 OpenClaw 실행하기
 title: LM Studio
 x-i18n:
-    generated_at: "2026-06-27T18:02:45Z"
-    model: gpt-5.5
+    generated_at: "2026-07-12T01:11:44Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 20dff6e3156edf0e840c5450999bc511ba168b23692494c9030bfb946936ae40
+    source_hash: b4223f90e786e285651fc889985dd61124c60758b4e9c3599d76201d9ac20b46
     source_path: providers/lmstudio.md
     workflow: 16
 ---
 
-LM Studio는 자체 하드웨어에서 오픈 가중치 모델을 실행하기 위한 친숙하면서도 강력한 앱입니다. llama.cpp(GGUF) 또는 MLX 모델(Apple Silicon)을 실행할 수 있습니다. GUI 패키지 또는 헤드리스 데몬(`llmster`)으로 제공됩니다. 제품 및 설정 문서는 [lmstudio.ai](https://lmstudio.ai/)를 참조하세요.
+LM Studio는 llama.cpp(GGUF) 또는 MLX 모델을 GUI 앱이나 헤드리스 `llmster` 데몬으로 로컬에서 실행합니다. 설치 및 제품 문서는 [lmstudio.ai](https://lmstudio.ai/)를 참조하세요.
 
 ## 빠른 시작
 
-1. LM Studio(데스크톱) 또는 `llmster`(헤드리스)를 설치한 다음 로컬 서버를 시작합니다.
+<Steps>
+  <Step title="서버 설치 및 시작">
+    LM Studio(데스크톱) 또는 `llmster`(헤드리스)를 설치한 후 서버를 시작합니다.
 
-```bash
-curl -fsSL https://lmstudio.ai/install.sh | bash
-```
+    ```bash
+    lms server start --port 1234
+    ```
 
-2. 서버 시작
+    또는 헤드리스 데몬을 실행합니다.
 
-데스크톱 앱을 시작하거나 다음 명령으로 데몬을 실행했는지 확인하세요.
+    ```bash
+    lms daemon up
+    ```
 
-```bash
-lms daemon up
-```
+    데스크톱 앱을 사용하는 경우 원활한 모델 로딩을 위해 JIT를 활성화하세요. 자세한 내용은
+    [LM Studio JIT 및 TTL 가이드](https://lmstudio.ai/docs/developer/core/ttl-and-auto-evict)를 참조하세요.
 
-```bash
-lms server start --port 1234
-```
+  </Step>
+  <Step title="인증이 활성화된 경우 API 키 설정">
+    ```bash
+    export LM_API_TOKEN="your-lm-studio-api-token"
+    ```
 
-앱을 사용하는 경우 원활한 사용을 위해 JIT가 활성화되어 있는지 확인하세요. 자세한 내용은 [LM Studio JIT 및 TTL 가이드](https://lmstudio.ai/docs/developer/core/ttl-and-auto-evict)를 참조하세요.
+    LM Studio 인증이 비활성화되어 있으면 설정 중 API 키를 비워 두세요.
+    [LM Studio 인증](https://lmstudio.ai/docs/developer/core/authentication)을 참조하세요.
 
-3. LM Studio 인증이 활성화되어 있으면 `LM_API_TOKEN`을 설정합니다.
+  </Step>
+  <Step title="온보딩 실행">
+    ```bash
+    openclaw onboard
+    ```
 
-```bash
-export LM_API_TOKEN="your-lm-studio-api-token"
-```
+    `LM Studio`를 선택한 다음 `Default model` 프롬프트에서 모델을 선택하세요.
 
-LM Studio 인증이 비활성화되어 있으면 대화형 OpenClaw 설정 중 API 키를 비워 둘 수 있습니다.
+  </Step>
+</Steps>
 
-LM Studio 인증 설정 세부 정보는 [LM Studio 인증](https://lmstudio.ai/docs/developer/core/authentication)을 참조하세요.
-
-4. 온보딩을 실행하고 `LM Studio`를 선택합니다.
-
-```bash
-openclaw onboard
-```
-
-5. 온보딩에서 `Default model` 프롬프트를 사용해 LM Studio 모델을 선택합니다.
-
-나중에 설정하거나 변경할 수도 있습니다.
+나중에 기본 모델을 변경하려면 다음을 실행합니다.
 
 ```bash
 openclaw models set lmstudio/qwen/qwen3.5-9b
 ```
 
-LM Studio 모델 키는 `author/model-name` 형식(예: `qwen/qwen3.5-9b`)을 따릅니다. OpenClaw
-모델 참조는 공급자 이름을 앞에 붙입니다: `lmstudio/qwen/qwen3.5-9b`. 모델의 정확한 키는
-`curl http://localhost:1234/api/v1/models`를 실행하고 `key` 필드를 확인해 찾을 수 있습니다.
+LM Studio 모델 키는 `author/model-name` 형식(예: `qwen/qwen3.5-9b`)을 사용하며, OpenClaw 모델 참조에는 제공자가 앞에 붙습니다(`lmstudio/qwen/qwen3.5-9b`). 모델의 정확한 키를 찾으려면 아래 명령을 실행하고 `key` 필드를 확인하세요.
+
+```bash
+curl http://localhost:1234/api/v1/models
+```
 
 ## 비대화형 온보딩
 
-설정을 스크립트화하려는 경우(CI, 프로비저닝, 원격 부트스트랩) 비대화형 온보딩을 사용하세요.
-
 ```bash
-openclaw onboard \
-  --non-interactive \
-  --accept-risk \
-  --auth-choice lmstudio
+openclaw onboard --non-interactive --accept-risk --auth-choice lmstudio
 ```
 
-또는 기본 URL, 모델, 선택적 API 키를 지정합니다.
+또는 기본 URL, 모델, API 키를 명시적으로 지정합니다.
 
 ```bash
 openclaw onboard \
@@ -89,48 +85,21 @@ openclaw onboard \
   --custom-model-id qwen/qwen3.5-9b
 ```
 
-`--custom-model-id`는 `lmstudio/` 공급자 접두사 없이 LM Studio가 반환하는 모델 키(예:
-`qwen/qwen3.5-9b`)를 받습니다.
+`--custom-model-id`에는 `lmstudio/` 제공자 접두사 없이 LM Studio가 반환한 모델 키(예: `qwen/qwen3.5-9b`)를 지정합니다. 인증된 서버에는 `--lmstudio-api-key`를 전달하거나 `LM_API_TOKEN`을 설정하세요. 인증되지 않은 서버에는 이를 생략하면 OpenClaw가 대신 로컬 비밀 정보가 아닌 마커를 저장합니다. 호환성을 위해 `--custom-api-key`도 계속 사용할 수 있지만 `--lmstudio-api-key` 사용을 권장합니다.
 
-인증된 LM Studio 서버의 경우 `--lmstudio-api-key`를 전달하거나 `LM_API_TOKEN`을 설정하세요.
-인증되지 않은 LM Studio 서버의 경우 키를 생략하세요. OpenClaw는 로컬 비밀이 아닌 마커를 저장합니다.
+이 명령은 `models.providers.lmstudio`를 작성하고 기본 모델을 `lmstudio/<custom-model-id>`로 설정합니다. API 키를 제공하면 `lmstudio:default` 인증 프로필도 작성합니다.
 
-`--custom-api-key`는 호환성을 위해 계속 지원되지만, LM Studio에는 `--lmstudio-api-key`가 권장됩니다.
-
-이렇게 하면 `models.providers.lmstudio`가 기록되고 기본 모델이
-`lmstudio/<custom-model-id>`로 설정됩니다. API 키를 제공하면 설정이
-`lmstudio:default` 인증 프로필도 기록합니다.
-
-대화형 설정은 선택적 선호 로드 컨텍스트 길이를 묻고, 구성에 저장하는 발견된 LM Studio 모델 전체에 이를 적용할 수 있습니다.
-LM Studio Plugin 구성은 모델 요청에 대해 구성된 LM Studio 엔드포인트를 신뢰하며, 여기에는 루프백, LAN, tailnet 호스트가 포함됩니다. 메타데이터/link-local 원본은 여전히 명시적 옵트인이 필요합니다. `models.providers.lmstudio.request.allowPrivateNetwork: false`를 설정해 옵트아웃할 수 있습니다.
+대화형 설정에서는 기본 로드 컨텍스트 길이를 추가로 묻고, 검색하여 구성에 저장하는 모든 모델에 이를 적용할 수 있습니다.
 
 ## 구성
 
 ### 스트리밍 사용량 호환성
 
-LM Studio는 스트리밍 사용량과 호환됩니다. OpenAI 형태의
-`usage` 객체를 내보내지 않는 경우 OpenClaw는 대신 llama.cpp 스타일의
-`timings.prompt_n` / `timings.predicted_n` 메타데이터에서 토큰 수를 복구합니다.
+LM Studio는 스트리밍 응답에 OpenAI 형식의 `usage` 객체를 항상 포함하지는 않습니다. OpenClaw는 대신 llama.cpp 형식의 `timings.prompt_n` / `timings.predicted_n` 메타데이터에서 토큰 수를 복구합니다. 로컬 엔드포인트(local loopback 호스트)로 확인되는 모든 OpenAI 호환 엔드포인트에는 동일한 대체 처리가 적용되며, vLLM, SGLang, llama.cpp, LocalAI, Jan, TabbyAPI, text-generation-webui 같은 다른 로컬 백엔드도 포함됩니다.
 
-동일한 스트리밍 사용량 동작이 다음 OpenAI 호환 로컬 백엔드에도 적용됩니다.
+### 사고 호환성
 
-- vLLM
-- SGLang
-- llama.cpp
-- LocalAI
-- Jan
-- TabbyAPI
-- text-generation-webui
-
-### Thinking 호환성
-
-LM Studio의 `/api/v1/models` 검색이 모델별 추론 옵션을 보고하면
-OpenClaw는 일치하는 OpenAI 호환 `reasoning_effort` 값을 모델 호환성
-메타데이터에 노출합니다. 현재 LM Studio 빌드는 `allowed_options: ["off", "on"]` 같은
-이진 UI 옵션을 광고하면서 `/v1/chat/completions`에서는 해당 값을 거부할 수 있습니다.
-OpenClaw는 요청을 보내기 전에 이 이진 검색 형태를 `none`, `minimal`, `low`, `medium`, `high`, `xhigh`로
-정규화합니다. `off`/`on` 추론 맵을 포함하는 이전에 저장된 LM Studio 구성도
-카탈로그가 로드될 때 같은 방식으로 정규화됩니다.
+LM Studio의 `/api/v1/models` 검색에서 모델별 추론 옵션을 보고하면 OpenClaw는 모델 호환성 메타데이터에 일치하는 `reasoning_effort` 값(`none`, `minimal`, `low`, `medium`, `high`, `xhigh`)을 노출합니다. 일부 LM Studio 빌드는 이진 UI 옵션(`allowed_options: ["off", "on"]`)을 표시하지만 `/v1/chat/completions`에서는 해당 리터럴 값을 거부합니다. OpenClaw는 요청을 보내기 전에 이 이진 형식을 6단계 척도로 정규화하며, `off`/`on` 추론 매핑이 여전히 포함된 이전 저장 구성에도 이를 적용합니다.
 
 ### 명시적 구성
 
@@ -159,34 +128,9 @@ OpenClaw는 요청을 보내기 전에 이 이진 검색 형태를 `none`, `mini
 }
 ```
 
-## 문제 해결
+### 사전 로드 비활성화
 
-### LM Studio가 감지되지 않음
-
-LM Studio가 실행 중인지 확인하세요. 인증이 활성화되어 있으면 `LM_API_TOKEN`도 설정하세요.
-
-```bash
-# Start via desktop app, or headless:
-lms server start --port 1234
-```
-
-API에 접근할 수 있는지 확인합니다.
-
-```bash
-curl http://localhost:1234/api/v1/models
-```
-
-### 인증 오류(HTTP 401)
-
-설정에서 HTTP 401을 보고하면 API 키를 확인하세요.
-
-- `LM_API_TOKEN`이 LM Studio에 구성된 키와 일치하는지 확인하세요.
-- LM Studio 인증 설정 세부 정보는 [LM Studio 인증](https://lmstudio.ai/docs/developer/core/authentication)을 참조하세요.
-- 서버에 인증이 필요하지 않으면 설정 중 키를 비워 두세요.
-
-### Just-in-time 모델 로딩
-
-LM Studio는 모델이 첫 요청 시 로드되는 Just-in-time(JIT) 모델 로딩을 지원합니다. OpenClaw는 기본적으로 LM Studio의 네이티브 로드 엔드포인트를 통해 모델을 미리 로드하며, 이는 JIT가 비활성화된 경우에 도움이 됩니다. LM Studio의 JIT, 유휴 TTL, 자동 제거 동작이 모델 수명 주기를 맡도록 하려면 OpenClaw의 미리 로드 단계를 비활성화하세요.
+LM Studio는 첫 요청 시 모델을 로드하는 JIT(Just-In-Time) 모델 로딩을 지원합니다. OpenClaw는 기본적으로 LM Studio의 네이티브 로드 엔드포인트를 통해 모델을 사전 로드하며, 이는 JIT가 비활성화된 경우 유용합니다. 대신 LM Studio의 JIT, 유휴 TTL 및 자동 제거 동작이 모델 수명 주기를 관리하도록 하려면 OpenClaw의 사전 로드 단계를 비활성화하세요.
 
 ```json5
 {
@@ -203,9 +147,9 @@ LM Studio는 모델이 첫 요청 시 로드되는 Just-in-time(JIT) 모델 로�
 }
 ```
 
-### LAN 또는 tailnet LM Studio 호스트
+### LAN 또는 테일넷 호스트
 
-LM Studio 호스트의 접근 가능한 주소를 사용하고, `/v1`을 유지하며, 해당 머신에서 LM Studio가 루프백을 넘어 바인딩되어 있는지 확인하세요.
+LM Studio 호스트에서 연결 가능한 주소를 사용하고 `/v1`을 유지하며, 해당 컴퓨터에서 LM Studio가 local loopback 외부에도 바인딩되어 있는지 확인하세요.
 
 ```json5
 {
@@ -222,7 +166,29 @@ LM Studio 호스트의 접근 가능한 주소를 사용하고, `/v1`을 유지�
 }
 ```
 
-`lmstudio`는 보호된 모델 요청에 대해 구성된 로컬/사설 엔드포인트를 자동으로 신뢰합니다. 사용자 지정/로컬 OpenAI 호환 공급자 항목도 메타데이터/link-local 원본을 제외하고 정확히 구성된 `baseUrl` 원본을 신뢰합니다. 다른 사설 포트나 대상으로 보내는 요청에는 여전히 `models.providers.<id>.request.allowPrivateNetwork: true`가 필요합니다. 정확한 원본 신뢰에서 옵트아웃하려면 `models.providers.<id>.request.allowPrivateNetwork: false`를 설정하세요.
+`lmstudio`는 메타데이터/링크 로컬 출처를 제외하고 local loopback, LAN 및 테일넷 호스트를 포함하여 구성된 엔드포인트를 모델 요청 대상으로 자동 신뢰합니다. 모든 사용자 지정/로컬 OpenAI 호환 제공자 항목에도 동일한 정확한 출처 신뢰가 적용됩니다. 다른 비공개 호스트나 포트로 보내는 요청에는 여전히 `models.providers.<id>.request.allowPrivateNetwork: true`가 필요하며, 기본 신뢰를 사용하지 않으려면 이를 `false`로 설정하세요.
+
+## 문제 해결
+
+### LM Studio가 감지되지 않음
+
+LM Studio가 실행 중인지 확인하세요.
+
+```bash
+lms server start --port 1234
+```
+
+인증이 활성화되어 있으면 `LM_API_TOKEN`도 설정하세요. API에 연결할 수 있는지 확인합니다.
+
+```bash
+curl http://localhost:1234/api/v1/models
+```
+
+### 인증 오류(HTTP 401)
+
+- `LM_API_TOKEN`이 LM Studio에 구성된 키와 일치하는지 확인하세요.
+- [LM Studio 인증](https://lmstudio.ai/docs/developer/core/authentication)을 참조하세요.
+- 서버에서 인증을 요구하지 않는 경우 설정 중 키를 비워 두세요.
 
 ## 관련 항목
 

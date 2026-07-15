@@ -1,36 +1,36 @@
 ---
 read_when:
-    - Gateway WebSocket RPC クライアントを使用できないホストツールを構築する
-    - 信頼済みのプライベート ingress の背後で Gateway 管理自動化を公開する
-    - GatewayメソッドへのHTTPアクセスのセキュリティモデルの監査
-summary: バンドル済みのオプトイン admin-http-rpc Plugin を通じて、選択した Gateway コントロールプレーンメソッドを公開する
+    - Gateway WebSocket RPC クライアントを使用できないホストツールの構築
+    - プライベートな信頼済みイングレス経由で Gateway 管理自動化を公開する
+    - GatewayメソッドへのHTTPアクセスに関するセキュリティモデルの監査
+summary: バンドルされているオプトインの admin-http-rpc Plugin を通じて、選択した Gateway コントロールプレーンメソッドを公開する
 title: 管理用 HTTP RPC Plugin
 x-i18n:
-    generated_at: "2026-07-05T11:35:39Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T22:25:58Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: 075135d2248acc859e60a72639350e16ed43785e9a353396fd47c3b02a4b0f5a
+    source_hash: 0709081efd0ce65cef7edac54df9a71978cbad17e2b25df83ac9075de938376c
     source_path: plugins/admin-http-rpc.md
     workflow: 16
 ---
 
-バンドルされている `admin-http-rpc` Plugin は、Gateway WebSocket 接続を開いたままにできない信頼済みホスト自動化向けに、許可リスト化された Gateway コントロールプレーンメソッドのセットを HTTP 経由で公開します。
+バンドルされている `admin-http-rpc` Plugin は、Gateway WebSocket 接続を開いたまま維持できない、信頼されたホスト自動化のために、許可リストに登録された一連の Gateway コントロールプレーンメソッドを HTTP 経由で公開します。
 
-これは OpenClaw に同梱されていますが、デフォルトでは無効です。無効な場合、ルートは登録されません。有効にすると、Gateway と同じリスナーに `POST /api/v1/admin/rpc` が追加されます (`http://<gateway-host>:<port>/api/v1/admin/rpc`)。
+この Plugin は OpenClaw に同梱されていますが、デフォルトでは無効です。無効な場合、ルートは登録されません。有効にすると、Gateway と同じリスナーに `POST /api/v1/admin/rpc`（`http://<gateway-host>:<port>/api/v1/admin/rpc`）が追加されます。
 
-プライベートホストツール、tailnet 自動化、または信頼済み内部 ingress に限って有効にしてください。このルートを公開インターネットへ直接公開しないでください。
+プライベートなホストツール、tailnet 自動化、または信頼された内部イングレスに対してのみ有効にしてください。このルートを公開インターネットに直接公開してはなりません。
 
 ## 有効にする前に
 
-Admin HTTP RPC は完全なオペレーター向けコントロールプレーン surface です。Gateway HTTP 認証を通過した呼び出し元は、以下の許可リスト化されたメソッドを呼び出せます。次のすべてが真の場合にのみ有効にしてください。
+管理 HTTP RPC は、完全なオペレーター向けコントロールプレーンインターフェースです。Gateway HTTP 認証を通過した呼び出し元は、以下の許可リストに登録されたメソッドをすべて呼び出せます。次の条件をすべて満たす場合にのみ有効にしてください。
 
-- 呼び出し元が Gateway の運用を信頼されている。
+- 呼び出し元が Gateway の操作を任せられる信頼された主体である。
 - 呼び出し元が WebSocket RPC クライアントを使用できない。
-- ルートが loopback、tailnet、またはプライベートな認証済み ingress からのみ到達可能である。
-- 許可されたメソッドを確認済みであり、実行予定の自動化に一致している。
+- ルートには、ループバック、tailnet、または認証済みのプライベートイングレスからのみアクセスできる。
+- 許可されたメソッドを確認済みであり、実行予定の自動化と一致している。
 
-Gateway WebSocket 接続を開いたままにできる OpenClaw クライアントや対話型ツールでは、代わりに WebSocket RPC を使用してください。
+Gateway WebSocket 接続を開いたまま維持できる OpenClaw クライアントや対話型ツールでは、代わりに WebSocket RPC を使用してください。
 
 ## 有効化
 
@@ -43,7 +43,7 @@ Gateway WebSocket 接続を開いたままにできる OpenClaw クライアン�
     openclaw gateway restart
     ```
   </Tab>
-  <Tab title="Config">
+  <Tab title="設定">
     ```json5
     {
       plugins: {
@@ -56,16 +56,16 @@ Gateway WebSocket 接続を開いたままにできる OpenClaw クライアン�
   </Tab>
 </Tabs>
 
-ルートは Plugin の起動中に登録されるため、Plugin 設定を変更した後は Gateway を再起動してください。
+ルートは Plugin の起動時に登録されるため、Plugin の設定を変更した後は Gateway を再起動してください。
 
-HTTP surface が不要になったら無効にします。
+HTTP インターフェースが不要になったら無効にします。
 
 ```bash
 openclaw plugins disable admin-http-rpc
 openclaw gateway restart
 ```
 
-## ルートを検証する
+## ルートの確認
 
 最小限で安全なリクエストとして `health` を使用します。
 
@@ -76,7 +76,7 @@ curl -sS http://<gateway-host>:<port>/api/v1/admin/rpc \
   -d '{"method":"health","params":{}}'
 ```
 
-成功レスポンスには `ok: true` があります。
+成功レスポンスには `ok: true` が含まれます。
 
 ```json
 {
@@ -88,29 +88,30 @@ curl -sS http://<gateway-host>:<port>/api/v1/admin/rpc \
 }
 ```
 
-Plugin が無効な場合、ルートは登録されていないため `404` を返します。
+Plugin が無効な場合、ルートが登録されていないため `404` が返されます。
 
 ## 認証
 
-Plugin ルートは Gateway HTTP 認証を使用します。
+Plugin のルートは Gateway HTTP 認証を使用します。
 
-一般的な認証パス:
+一般的な認証方式は次のとおりです。
 
-- 共有シークレット認証 (`gateway.auth.mode="token"` または `"password"`): `Authorization: Bearer <token-or-password>`
-- 信頼済み ID 付き HTTP 認証 (`gateway.auth.mode="trusted-proxy"`): 設定済みの ID 対応プロキシ経由でルーティングし、必要な ID ヘッダーを注入させる
-- プライベート ingress のオープン認証 (`gateway.auth.mode="none"`): 認証ヘッダーは不要
+- 共有シークレット認証（`gateway.auth.mode="token"` または `"password"`）：`Authorization: Bearer <token-or-password>`
+- 信頼された ID 情報を含む HTTP 認証（`gateway.auth.mode="trusted-proxy"`）：設定済みの ID 対応プロキシを経由させ、必要な ID ヘッダーを注入させる
+- プライベートイングレスの認証なしモード（`gateway.auth.mode="none"`）：認証ヘッダーは不要
 
 ## セキュリティモデル
 
-この Plugin は完全な Gateway オペレーター surface として扱ってください。
+この Plugin は、完全な Gateway オペレーターインターフェースとして扱ってください。
 
-- Plugin を有効にすると、`/api/v1/admin/rpc` で許可リスト化された admin RPC メソッドへのアクセスを意図的に提供します。
-- Plugin は予約済みの `contracts.gatewayMethodDispatch: ["authenticated-request"]` manifest contract を宣言します。これにより、Gateway 認証済みの HTTP ルートがプロセス内でコントロールプレーンメソッドをディスパッチできます。これはサンドボックスではありません。この contract は予約済み SDK ヘルパーの偶発的な使用を防ぎますが、信頼済み Plugin は引き続き Gateway プロセス内で実行されます。
-- 共有シークレット bearer 認証 (`token`/`password` モード) は Gateway オペレーターシークレットの所持を証明します。このパスでは、より狭い `x-openclaw-scopes` ヘッダーは無視され、通常の完全なオペレーターデフォルトが復元されます。
-- 信頼済み ID 付き HTTP 認証 (`trusted-proxy` モード) は、存在する場合 `x-openclaw-scopes` を尊重します。
-- `gateway.auth.mode="none"` は、Plugin が有効な場合このルートが未認証になることを意味します。完全に信頼するプライベート ingress の背後でのみ使用してください。
-- リクエストは、Plugin ルートの認証を通過した後、WebSocket RPC と同じ Gateway メソッドハンドラーおよび scope チェックを経由してディスパッチされます。
-- このルートは loopback、tailnet、またはプライベートな信頼済み ingress 上に保持してください。公開インターネットへ直接公開しないでください。呼び出し元が信頼境界をまたぐ場合は、別々の Gateway を使用してください。
+- Plugin を有効にすると、許可リストに登録された管理 RPC メソッドへのアクセスが `/api/v1/admin/rpc` で意図的に提供されます。
+- この Plugin は、予約済みの `contracts.gatewayMethodDispatch: ["authenticated-request"]` マニフェストコントラクトを宣言します。これにより、Gateway 認証済みの HTTP ルートから、プロセス内でコントロールプレーンメソッドをディスパッチできます。これはサンドボックスではありません。このコントラクトは予約済み SDK ヘルパーの誤使用を防ぎますが、信頼された Plugin は引き続き Gateway プロセス内で実行されます。
+- 共有シークレットによるベアラー認証（`token`／`password` モード）は、Gateway オペレーターシークレットの所持を証明します。この経路では、より限定的な `x-openclaw-scopes` ヘッダーは無視され、通常の完全なオペレーター権限のデフォルトが復元されます。
+- 信頼された ID 情報を含む HTTP 認証（`trusted-proxy` モード）は、`x-openclaw-scopes` が存在する場合にそれを適用します。
+- Plugin が有効な状態で `gateway.auth.mode="none"` を使用すると、このルートは未認証になります。この設定は、完全に信頼できるプライベートイングレスの背後でのみ使用してください。
+- リクエストは、Plugin ルートの認証を通過した後、WebSocket RPC と同じ Gateway メソッドハンドラーおよびスコープチェックを通じてディスパッチされます。
+- このルートには、準備済みの一時停止リース中もアクセスできます。上限付きのリクエスト検証とローカルの `commands.list` 検出レスポンスは引き続き利用できます。Gateway にディスパッチされるメソッドのうち、受付が閉じている間に実行できるのは `gateway.suspend.prepare`、`gateway.suspend.status`、`gateway.suspend.resume` のみです。許可リスト内のその他のメソッドは、通常の再試行可能な Gateway `UNAVAILABLE` レスポンスを返します。
+- このルートは、ループバック、tailnet、または信頼されたプライベートイングレス上に限定してください。公開インターネットに直接公開してはなりません。呼び出し元が信頼境界をまたぐ場合は、別々の Gateway を使用してください。
 
 ## リクエスト
 
@@ -128,17 +129,17 @@ Content-Type: application/json
 }
 ```
 
-フィールド:
+フィールド：
 
-- `id` (string, optional): レスポンスにコピーされます。省略時は UUID が生成されます。
-- `method` (string, required): 許可された Gateway メソッド名。
-- `params` (any, optional): メソッド固有の params。
+- `id`（文字列、省略可能）：レスポンスにコピーされます。省略した場合は UUID が生成されます。
+- `method`（文字列、必須）：許可された Gateway メソッド名。
+- `params`（任意の型、省略可能）：メソッド固有のパラメーター。
 
-デフォルトの最大リクエスト本文サイズは 1 MB です。
+デフォルトのリクエスト本文の最大サイズは 1 MB です。
 
 ## レスポンス
 
-成功レスポンスは Gateway RPC 形式を使用します。
+成功レスポンスは Gateway RPC の形式を使用します。
 
 ```json
 {
@@ -148,7 +149,7 @@ Content-Type: application/json
 }
 ```
 
-Gateway メソッドエラーは次を使用します。
+Gateway メソッドのエラーは次の形式を使用します。
 
 ```json
 {
@@ -161,72 +162,72 @@ Gateway メソッドエラーは次を使用します。
 }
 ```
 
-HTTP ステータスはエラーコードに従います。
+HTTP ステータスはエラーコードに応じて決まります。
 
 | エラーコード               | HTTP ステータス |
-| -------------------------- | ----------- |
-| `INVALID_REQUEST`          | 400         |
-| `APPROVAL_NOT_FOUND`       | 404         |
-| `NOT_LINKED`, `NOT_PAIRED` | 409         |
-| `UNAVAILABLE`              | 503         |
-| `AGENT_TIMEOUT`            | 504         |
-| その他のコード             | 500         |
+| -------------------------- | --------------- |
+| `INVALID_REQUEST`          | 400             |
+| `APPROVAL_NOT_FOUND`       | 404             |
+| `NOT_LINKED`, `NOT_PAIRED` | 409             |
+| `UNAVAILABLE`              | 503             |
+| `AGENT_TIMEOUT`            | 504             |
+| その他のコード             | 500             |
 
 ## 許可されたメソッド
 
-- 検出: `commands.list`
+- 検出：`commands.list`
   この Plugin で許可されている HTTP RPC メソッド名を返します。
-- Gateway: `health`, `status`, `logs.tail`, `usage.status`, `usage.cost`, `gateway.restart.request`
-- 設定: `config.get`, `config.schema`, `config.schema.lookup`, `config.set`, `config.patch`, `config.apply`
-- チャンネル: `channels.status`, `channels.start`, `channels.stop`, `channels.logout`
-- ウェブ: `web.login.start`, `web.login.wait`
-- モデル: `models.list`, `models.authStatus`
-- エージェント: `agents.list`, `agents.create`, `agents.update`, `agents.delete`
-- 承認: `exec.approvals.get`, `exec.approvals.set`, `exec.approvals.node.get`, `exec.approvals.node.set`
-- Cron: `cron.status`, `cron.list`, `cron.get`, `cron.runs`, `cron.add`, `cron.update`, `cron.remove`, `cron.run`
-- デバイス: `device.pair.list`, `device.pair.approve`, `device.pair.reject`, `device.pair.remove`
-- ノード: `node.list`, `node.describe`, `node.pair.list`, `node.pair.approve`, `node.pair.reject`, `node.pair.remove`, `node.rename`
-- タスク: `tasks.list`, `tasks.get`, `tasks.cancel`
-- 診断: `doctor.memory.status`, `update.status`
+- Gateway：`health`、`status`、`logs.tail`、`usage.status`、`usage.cost`、`gateway.restart.request`、`gateway.suspend.prepare`、`gateway.suspend.status`、`gateway.suspend.resume`
+- 設定：`config.get`、`config.schema`、`config.schema.lookup`、`config.set`、`config.patch`、`config.apply`
+- チャンネル：`channels.status`、`channels.start`、`channels.stop`、`channels.logout`
+- Web：`web.login.start`、`web.login.wait`
+- モデル：`models.list`、`models.authStatus`
+- エージェント：`agents.list`、`agents.create`、`agents.update`、`agents.delete`
+- 承認：`exec.approvals.get`、`exec.approvals.set`、`exec.approvals.node.get`、`exec.approvals.node.set`
+- Cron：`cron.status`、`cron.list`、`cron.get`、`cron.runs`、`cron.add`、`cron.update`、`cron.remove`、`cron.run`
+- デバイス：`device.pair.list`、`device.pair.approve`、`device.pair.reject`、`device.pair.remove`
+- Node：`node.list`、`node.describe`、`node.pair.list`、`node.pair.approve`、`node.pair.reject`、`node.pair.remove`、`node.rename`
+- タスク：`tasks.list`、`tasks.get`、`tasks.cancel`
+- 診断：`doctor.memory.status`、`update.status`
 
 その他の Gateway メソッドは、意図的に追加されるまでブロックされます。
 
 ## WebSocket との比較
 
-通常の Gateway WebSocket RPC パスは、OpenClaw クライアント向けの推奨コントロールプレーン API のままです。Admin HTTP RPC は、リクエスト/レスポンス型の HTTP surface が必要なホストツールにのみ使用してください。
+通常の Gateway WebSocket RPC 経路は、OpenClaw クライアント向けのコントロールプレーン API として引き続き推奨されます。管理 HTTP RPC は、リクエスト／レスポンス型の HTTP インターフェースを必要とするホストツールにのみ使用してください。
 
-信頼済みデバイス ID を持たない共有トークン WebSocket クライアントは、接続時に admin scope を自己宣言できません。Admin HTTP RPC は、既存の信頼済み HTTP オペレーターモデルに意図的に従います。Plugin が有効な場合、共有シークレット bearer 認証は、この admin surface に対する完全なオペレーターアクセスとして扱われます。
+信頼されたデバイス ID を持たない共有トークンの WebSocket クライアントは、接続時に管理スコープを自己宣言できません。管理 HTTP RPC は、既存の信頼された HTTP オペレーターモデルに意図的に従います。Plugin が有効な場合、この管理インターフェースでは共有シークレットのベアラー認証が完全なオペレーターアクセスとして扱われます。
 
 ## トラブルシューティング
 
 `404 Not Found`
 
-: Plugin が無効である、Plugin を有効にしてから Gateway を再起動していない、またはリクエストが別の Gateway プロセスに送信されています。
+: Plugin が無効になっている、有効化後に Gateway が再起動されていない、またはリクエストが別の Gateway プロセスに送信されています。
 
 `401 Unauthorized`
 
-: リクエストが Gateway HTTP 認証を満たしていません。bearer トークンまたは trusted-proxy ID ヘッダーを確認してください。
+: リクエストが Gateway HTTP 認証を満たしていません。ベアラートークンまたは trusted-proxy の ID ヘッダーを確認してください。
 
 `405 Method Not Allowed`
 
-: リクエストが `POST` 以外を使用しました。
+: リクエストで `POST` 以外のメソッドが使用されています。
 
 `413 Payload Too Large`
 
-: リクエスト本文が 1 MB 制限を超えました。
+: リクエスト本文が 1 MB の上限を超えています。
 
 `400 INVALID_REQUEST`
 
-: リクエスト本文が有効な JSON ではない、`method` フィールドが欠落している、またはメソッドが Plugin の許可リストに含まれていません。
+: リクエスト本文が有効な JSON ではない、`method` フィールドがない、メソッドが Plugin の許可リストに含まれていない、または一時停止の再開 ID がアクティブなリースと一致していません。
 
 `503 UNAVAILABLE`
 
-: Gateway メソッドハンドラーが利用できません。Gateway ログを確認し、Gateway の起動完了後に再試行してください。
+: Gateway メソッドが起動中、レート制限中、一時停止中、または競合する一時停止／再開操作の完了待ちです。`error.details` が存在する場合は確認し、再試行する前に `error.retryAfterMs` に従ってください。
 
-## 関連
+## 関連項目
 
-- [オペレーター scope](/ja-JP/gateway/operator-scopes)
-- [Gateway セキュリティ](/ja-JP/gateway/security)
+- [オペレータースコープ](/ja-JP/gateway/operator-scopes)
+- [Gateway のセキュリティ](/ja-JP/gateway/security)
 - [リモートアクセス](/ja-JP/gateway/remote)
-- [Plugin manifest](/ja-JP/plugins/manifest#contracts-reference)
+- [Plugin マニフェスト](/ja-JP/plugins/manifest#contracts-reference)
 - [SDK サブパス](/ja-JP/plugins/sdk-subpaths)

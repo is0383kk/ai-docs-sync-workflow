@@ -1,15 +1,15 @@
 ---
 read_when:
     - Quieres usar DeepSeek con OpenClaw
-    - Necesitas la variable de entorno de clave de API o la opción de autenticación de la CLI
-summary: Configuración de DeepSeek (autenticación + selección de modelo)
+    - Necesitas la variable de entorno de la clave de API o la opción de autenticación de la CLI
+summary: Configuración de DeepSeek (autenticación + selección del modelo)
 title: DeepSeek
 x-i18n:
-    generated_at: "2026-07-05T11:36:38Z"
-    model: gpt-5.5
+    generated_at: "2026-07-11T23:26:17Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
     provider: openai
-    source_hash: a0a66574c1977e835823d3d5f9fea073889267d6336a15533dd25645621e70dc
+    source_hash: 77e074756d593205d7d05f499da93b9bd3c63acdce7092b42fb5562023577925
     source_path: providers/deepseek.md
     workflow: 16
 ---
@@ -20,12 +20,12 @@ x-i18n:
 | --------- | -------------------------- |
 | Proveedor | `deepseek`                 |
 | Autenticación | `DEEPSEEK_API_KEY`     |
-| API       | compatible con OpenAI      |
+| API       | Compatible con OpenAI      |
 | URL base  | `https://api.deepseek.com` |
 
-## Instalar Plugin
+## Instalar el plugin
 
-Instala el Plugin oficial y luego reinicia Gateway:
+Instala el plugin oficial y, a continuación, reinicia el Gateway:
 
 ```bash
 openclaw plugins install @openclaw/deepseek-provider
@@ -51,7 +51,7 @@ openclaw gateway restart
     openclaw models list --provider deepseek
     ```
 
-    Para inspeccionar el catálogo estático del Plugin sin un Gateway en ejecución:
+    Para inspeccionar el catálogo estático del plugin sin un Gateway en ejecución:
 
     ```bash
     openclaw models list --all --provider deepseek
@@ -62,7 +62,7 @@ openclaw gateway restart
 
 <AccordionGroup>
   <Accordion title="Configuración no interactiva">
-    Para instalaciones con scripts o sin interfaz, pasa todas las marcas directamente:
+    Para instalaciones automatizadas o sin interfaz gráfica, pasa todas las opciones directamente:
 
     ```bash
     openclaw onboard --non-interactive \
@@ -77,49 +77,61 @@ openclaw gateway restart
 </AccordionGroup>
 
 <Warning>
-Si Gateway se ejecuta como daemon (launchd/systemd), asegúrate de que `DEEPSEEK_API_KEY` esté
+Si el Gateway se ejecuta como un daemon (launchd/systemd), asegúrate de que `DEEPSEEK_API_KEY` esté
 disponible para ese proceso (por ejemplo, en `~/.openclaw/.env` o mediante
 `env.shellEnv`).
 </Warning>
 
 ## Catálogo integrado
 
-| Ref. del modelo              | Nombre            | Entrada | Contexto  | Salida máxima | Notas                                      |
-| ---------------------------- | ----------------- | ------- | --------- | -------------- | ------------------------------------------ |
-| `deepseek/deepseek-v4-flash` | DeepSeek V4 Flash | texto   | 1,000,000 | 384,000        | Modelo predeterminado; superficie V4 con capacidad de razonamiento |
-| `deepseek/deepseek-v4-pro`   | DeepSeek V4 Pro   | texto   | 1,000,000 | 384,000        | Superficie V4 con capacidad de razonamiento |
-| `deepseek/deepseek-chat`     | DeepSeek Chat     | texto   | 131,072   | 8,192          | Superficie DeepSeek V3.2 sin razonamiento  |
-| `deepseek/deepseek-reasoner` | DeepSeek Reasoner | texto   | 131,072   | 65,536         | Superficie V3.2 con razonamiento habilitado |
+| Referencia del modelo        | Nombre            | Entrada | Contexto  | Salida máxima | Notas                                                     |
+| ---------------------------- | ----------------- | ------- | --------- | ------------- | --------------------------------------------------------- |
+| `deepseek/deepseek-v4-flash` | DeepSeek V4 Flash | texto   | 1,000,000 | 384,000       | Modelo predeterminado; interfaz V4 con capacidad de razonamiento |
+| `deepseek/deepseek-v4-pro`   | DeepSeek V4 Pro   | texto   | 1,000,000 | 384,000       | Interfaz V4 con capacidad de razonamiento                  |
+| `deepseek/deepseek-chat`     | DeepSeek Chat     | texto   | 1,000,000 | 384,000       | Nombre de compatibilidad obsoleto de V4 Flash sin razonamiento |
+| `deepseek/deepseek-reasoner` | DeepSeek Reasoner | texto   | 1,000,000 | 384,000       | Nombre de compatibilidad obsoleto de V4 Flash con razonamiento |
+
+<Warning>
+DeepSeek retirará `deepseek-chat` y `deepseek-reasoner` el 24 de julio de 2026
+a las 15:59 UTC. Actualmente se enrutan a DeepSeek V4 Flash en modo sin razonamiento y
+con razonamiento, respectivamente. Cambia las referencias de modelo configuradas a
+`deepseek/deepseek-v4-flash` o `deepseek/deepseek-v4-pro` antes de la fecha límite.
+</Warning>
+
+Las estimaciones de costes locales de OpenClaw siguen las tarifas publicadas por DeepSeek para aciertos
+de caché, fallos de caché y salida. DeepSeek puede modificar esas tarifas; su página
+[Modelos y precios](https://api-docs.deepseek.com/quick_start/pricing/) es la
+fuente autorizada para la facturación.
 
 <Tip>
 Los modelos V4 admiten el control `thinking` de DeepSeek. OpenClaw también reproduce
-`reasoning_content` de DeepSeek en turnos posteriores para que las sesiones de razonamiento con
-llamadas a herramientas puedan continuar.
-Usa `/think xhigh` o `/think max` con modelos DeepSeek V4 para solicitar el
+el `reasoning_content` de DeepSeek en turnos posteriores para que las sesiones de razonamiento con llamadas
+a herramientas puedan continuar.
+Usa `/think xhigh` o `/think max` con los modelos DeepSeek V4 para solicitar el
 `reasoning_effort` máximo de DeepSeek; ambos se asignan a `"max"`.
 </Tip>
 
 ## Razonamiento y herramientas
 
-Las sesiones de razonamiento de DeepSeek V4 requieren que los mensajes de asistente reproducidos desde un
+Las sesiones de razonamiento de DeepSeek V4 requieren que los mensajes reproducidos del asistente procedentes de un
 turno con razonamiento habilitado incluyan `reasoning_content` en las solicitudes posteriores.
-El Plugin DeepSeek de OpenClaw rellena ese campo automáticamente, por lo que el uso normal
-de herramientas en varios turnos funciona en `deepseek/deepseek-v4-flash` y
-`deepseek/deepseek-v4-pro`, incluso cuando el historial proviene de otro
+El plugin de DeepSeek para OpenClaw completa ese campo automáticamente, por lo que el uso normal
+de herramientas en varios turnos funciona con `deepseek/deepseek-v4-flash` y
+`deepseek/deepseek-v4-pro`, incluso cuando el historial procede de otro
 proveedor compatible con OpenAI (sin `reasoning_content` nativo) o de un mensaje
-de asistente simple. No se requiere `/new` después de cambiar de proveedor a mitad de sesión.
+normal del asistente. No es necesario usar `/new` después de cambiar de proveedor durante una sesión.
 
-Cuando el razonamiento está deshabilitado (incluida la selección **Ninguna** de la UI), OpenClaw
+Cuando el razonamiento está deshabilitado (incluida la selección **None** de la interfaz), OpenClaw
 envía `thinking: { type: "disabled" }` y elimina el `reasoning_content` reproducido
-del historial saliente, manteniendo la sesión en la ruta de DeepSeek sin razonamiento.
+del historial saliente, lo que mantiene la sesión en la ruta de DeepSeek sin razonamiento.
 
 Usa `deepseek/deepseek-v4-flash` como ruta rápida predeterminada. Usa
-`deepseek/deepseek-v4-pro` para el modelo más potente cuando puedas aceptar mayor
-costo o latencia.
+`deepseek/deepseek-v4-pro` como modelo más potente cuando puedas aceptar un mayor
+coste o latencia.
 
 ## Pruebas en vivo
 
-Para ejecutar solo las comprobaciones directas de modelos DeepSeek V4 desde el conjunto moderno de pruebas en vivo de modelos:
+Para ejecutar únicamente las comprobaciones directas de los modelos DeepSeek V4 de la suite moderna de pruebas en vivo de modelos:
 
 ```bash
 OPENCLAW_LIVE_PROVIDERS=deepseek \
@@ -127,8 +139,8 @@ OPENCLAW_LIVE_MODELS="deepseek/deepseek-v4-flash,deepseek/deepseek-v4-pro" \
 pnpm test:live src/agents/models.profiles.live.test.ts
 ```
 
-Verifica que ambos modelos V4 se completen y que los turnos posteriores de razonamiento/herramientas
-conserven la carga de reproducción que DeepSeek requiere.
+Verifica que ambos modelos V4 completen la ejecución y que los turnos posteriores de razonamiento y uso de herramientas
+conserven la carga de reproducción que requiere DeepSeek.
 
 ## Ejemplo de configuración
 
@@ -143,11 +155,11 @@ conserven la carga de reproducción que DeepSeek requiere.
 }
 ```
 
-## Relacionado
+## Contenido relacionado
 
 <CardGroup cols={2}>
   <Card title="Selección de modelos" href="/es/concepts/model-providers" icon="layers">
-    Elegir proveedores, refs. de modelos y comportamiento de conmutación por error.
+    Elección de proveedores, referencias de modelos y comportamiento de conmutación por error.
   </Card>
   <Card title="Referencia de configuración" href="/es/gateway/configuration-reference" icon="gear">
     Referencia completa de configuración para agentes, modelos y proveedores.
