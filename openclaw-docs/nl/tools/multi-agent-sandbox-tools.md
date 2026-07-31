@@ -2,26 +2,27 @@
 read_when: You want per-agent sandboxing or per-agent tool allow/deny policies in a multi-agent gateway.
 sidebarTitle: Multi-agent sandbox and tools
 status: active
-summary: Sandbox- en toolbeperkingen per agent, prioriteit en voorbeelden
+summary: Sandbox per agent + toolbeperkingen, prioriteit en voorbeelden
 title: Sandbox en tools voor meerdere agents
 x-i18n:
-    generated_at: "2026-07-12T09:29:59Z"
+    generated_at: "2026-07-27T05:27:34Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: fada3672a0a7ce6eac2a8bffee8329afcd893d97e33d8e9842cb12079397efa6
+    source_hash: 0e07d07c30b844be1e1d93db62fcdaab72c47a5248367559642a959bf09ad193
     source_path: tools/multi-agent-sandbox-tools.md
     workflow: 16
 ---
 
-Elke agent in een opstelling met meerdere agents kan het globale sandbox- en toolbeleid overschrijven. Deze pagina behandelt configuratie per agent, voorrangsregels en voorbeelden.
+Elke agent in een multi-agentconfiguratie kan het algemene sandbox- en toolbeleid overschrijven. Deze pagina behandelt configuratie per agent, voorrangsregels en voorbeelden.
 
 <CardGroup cols={3}>
   <Card title="Sandboxing" href="/nl/gateway/sandboxing">
     Backends en modi — volledige sandboxreferentie.
   </Card>
   <Card title="Sandbox versus toolbeleid versus verhoogd" href="/nl/gateway/sandbox-vs-tool-policy-vs-elevated">
-    Onderzoek waarom iets wordt geblokkeerd.
+    Problemen oplossen met "waarom wordt dit geblokkeerd?"
   </Card>
   <Card title="Verhoogde modus" href="/nl/tools/elevated">
     Verhoogde uitvoering voor vertrouwde afzenders.
@@ -29,7 +30,7 @@ Elke agent in een opstelling met meerdere agents kan het globale sandbox- en too
 </CardGroup>
 
 <Warning>
-Authenticatie is per agent afgebakend: elke agent heeft een eigen `agentDir`-authenticatieopslag in `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`. Gebruik `agentDir` nooit opnieuw voor meerdere agents. Agents kunnen terugvallen op de authenticatieprofielen van de standaard-/hoofdagent wanneer ze geen lokaal profiel hebben, maar OAuth-vernieuwingstokens worden niet naar de opslag van secundaire agents gekloond. Als u referenties handmatig kopieert, kopieer dan alleen overdraagbare statische `api_key`- of `token`-profielen.
+Authenticatie is per agent afgebakend: elke agent heeft een eigen `agentDir`-authenticatieopslag in `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`. Gebruik `agentDir` nooit opnieuw voor meerdere agents. Agents kunnen terugvallen op de authenticatieprofielen van de standaard-/hoofdagent wanneer ze geen lokaal profiel hebben, maar OAuth-vernieuwingstokens worden niet naar de opslag van secundaire agents gekloond. Als je aanmeldgegevens handmatig kopieert, kopieer dan alleen overdraagbare statische `api_key`- of `token`-profielen.
 </Warning>
 
 ---
@@ -88,8 +89,8 @@ Authenticatie is per agent afgebakend: elke agent heeft een eigen `agentDir`-aut
 
     **Resultaat:**
 
-    - Agent `main`: draait op de host en heeft volledige toegang tot tools.
-    - Agent `family`: draait in Docker (één container per agent) en kan alleen `read` gebruiken en berichten binnen het huidige gesprek verzenden.
+    - `main`-agent: draait op de host, volledige toegang tot tools.
+    - `family`-agent: draait in Docker (één container per agent), alleen `read` en berichten verzenden binnen het huidige gesprek.
 
   </Accordion>
   <Accordion title="Voorbeeld 2: Werkagent met gedeelde sandbox">
@@ -120,7 +121,7 @@ Authenticatie is per agent afgebakend: elke agent heeft een eigen `agentDir`-aut
     }
     ```
   </Accordion>
-  <Accordion title="Voorbeeld 2b: Globaal codeerprofiel + agent die alleen berichten verwerkt">
+  <Accordion title="Voorbeeld 2b: Algemeen programmeerprofiel + agent die alleen berichten verwerkt">
     ```json
     {
       "tools": { "profile": "coding" },
@@ -137,8 +138,8 @@ Authenticatie is per agent afgebakend: elke agent heeft een eigen `agentDir`-aut
 
     **Resultaat:**
 
-    - Standaardagents krijgen codeertools.
-    - Agent `support` kan alleen berichten verwerken (+ Slack-tool).
+    - standaardagents krijgen programmeertools.
+    - `support`-agent kan alleen berichten verwerken (+ Slack-tool).
 
   </Accordion>
   <Accordion title="Voorbeeld 3: Verschillende sandboxmodi per agent">
@@ -182,24 +183,24 @@ Authenticatie is per agent afgebakend: elke agent heeft een eigen `agentDir`-aut
 
 ## Configuratievoorrang
 
-Wanneer zowel globale (`agents.defaults.*`) als agentspecifieke (`agents.list[].*`) configuraties bestaan:
+Wanneer zowel algemene (`agents.defaults.*`) als agentspecifieke (`agents.entries.*.*`) configuraties bestaan:
 
 ### Sandboxconfiguratie
 
-Agentspecifieke instellingen overschrijven globale instellingen:
+Agentspecifieke instellingen overschrijven de algemene instellingen:
 
 ```text
-agents.list[].sandbox.mode > agents.defaults.sandbox.mode
-agents.list[].sandbox.scope > agents.defaults.sandbox.scope
-agents.list[].sandbox.workspaceRoot > agents.defaults.sandbox.workspaceRoot
-agents.list[].sandbox.workspaceAccess > agents.defaults.sandbox.workspaceAccess
-agents.list[].sandbox.docker.* > agents.defaults.sandbox.docker.*
-agents.list[].sandbox.browser.* > agents.defaults.sandbox.browser.*
-agents.list[].sandbox.prune.* > agents.defaults.sandbox.prune.*
+agents.entries.*.sandbox.mode > agents.defaults.sandbox.mode
+agents.entries.*.sandbox.scope > agents.defaults.sandbox.scope
+agents.entries.*.sandbox.workspaceRoot > agents.defaults.sandbox.workspaceRoot
+agents.entries.*.sandbox.workspaceAccess > agents.defaults.sandbox.workspaceAccess
+agents.entries.*.sandbox.docker.* > agents.defaults.sandbox.docker.*
+agents.entries.*.sandbox.browser.* > agents.defaults.sandbox.browser.*
+agents.entries.*.sandbox.prune.* > agents.defaults.sandbox.prune.*
 ```
 
 <Note>
-`agents.list[].sandbox.{docker,browser,prune}.*` overschrijft `agents.defaults.sandbox.{docker,browser,prune}.*` voor die agent (wordt genegeerd wanneer het sandboxbereik wordt bepaald als `"shared"`).
+`agents.entries.*.sandbox.{docker,browser,prune}.*` overschrijft `agents.defaults.sandbox.{docker,browser,prune}.*` voor die agent (wordt genegeerd wanneer het sandboxbereik wordt herleid tot `"shared"`).
 </Note>
 
 ### Toolbeperkingen
@@ -208,25 +209,25 @@ De filtervolgorde is:
 
 <Steps>
   <Step title="Toolprofiel">
-    `tools.profile` of `agents.list[].tools.profile`.
+    `tools.profile` of `agents.entries.*.tools.profile`.
   </Step>
   <Step title="Toolprofiel van provider">
-    `tools.byProvider[provider].profile` of `agents.list[].tools.byProvider[provider].profile`.
+    `tools.byProvider[provider].profile` of `agents.entries.*.tools.byProvider[provider].profile`.
   </Step>
-  <Step title="Globaal toolbeleid">
+  <Step title="Algemeen toolbeleid">
     `tools.allow` / `tools.deny`.
   </Step>
   <Step title="Toolbeleid van provider">
     `tools.byProvider[provider].allow/deny`.
   </Step>
   <Step title="Agentspecifiek toolbeleid">
-    `agents.list[].tools.allow/deny`.
+    `agents.entries.*.tools.allow/deny`.
   </Step>
   <Step title="Providerbeleid van agent">
-    `agents.list[].tools.byProvider[provider].allow/deny`.
+    `agents.entries.*.tools.byProvider[provider].allow/deny`.
   </Step>
   <Step title="Toolbeleid van sandbox">
-    `tools.sandbox.tools` of `agents.list[].tools.sandbox.tools`.
+    `tools.sandbox.tools` of `agents.entries.*.tools.sandbox.tools`.
   </Step>
   <Step title="Toolbeleid van subagent">
     `tools.subagents.tools`, indien van toepassing.
@@ -235,24 +236,24 @@ De filtervolgorde is:
 
 <AccordionGroup>
   <Accordion title="Voorrangsregels">
-    - Elk niveau kan tools verder beperken, maar kan tools die op eerdere niveaus zijn geweigerd niet opnieuw toestaan.
-    - Als `agents.list[].tools.sandbox.tools` is ingesteld, vervangt dit `tools.sandbox.tools` voor die agent.
-    - Als `agents.list[].tools.profile` is ingesteld, overschrijft dit `tools.profile` voor die agent.
-    - Toolcodes voor providers accepteren zowel `provider` (bijvoorbeeld `google-antigravity`) als `provider/model` (bijvoorbeeld `openai/gpt-5.4`).
+    - Elk niveau kan tools verder beperken, maar kan op eerdere niveaus geweigerde tools niet opnieuw toestaan.
+    - Als `agents.entries.*.tools.sandbox.tools` is ingesteld, vervangt dit `tools.sandbox.tools` voor die agent.
+    - Als `agents.entries.*.tools.profile` is ingesteld, overschrijft dit `tools.profile` voor die agent.
+    - Providertoolsleutels accepteren zowel `provider` (bijvoorbeeld `google-antigravity`) als `provider/model` (bijvoorbeeld `openai/gpt-5.4`).
 
   </Accordion>
   <Accordion title="Gedrag bij een lege toelatingslijst">
-    Als een expliciete toelatingslijst in deze keten ervoor zorgt dat er geen aanroepbare tools overblijven, stopt OpenClaw voordat de prompt naar het model wordt verzonden. Dit is opzettelijk: een agent die is geconfigureerd met een ontbrekende tool, zoals `agents.list[].tools.allow: ["query_db"]`, moet duidelijk mislukken totdat de Plugin die `query_db` registreert is ingeschakeld, en mag niet doorgaan als een agent die alleen tekst verwerkt.
+    Als een expliciete toelatingslijst in die keten ervoor zorgt dat er geen aanroepbare tools overblijven, stopt OpenClaw voordat de prompt naar het model wordt verzonden. Dit is opzettelijk: een agent die is geconfigureerd met een ontbrekende tool zoals `agents.entries.*.tools.allow: ["query_db"]`, moet duidelijk mislukken totdat de Plugin die `query_db` registreert is ingeschakeld, en niet doorgaan als een agent die alleen tekst verwerkt.
   </Accordion>
 </AccordionGroup>
 
-Toolbeleid ondersteunt `group:*`-verkortingen die worden uitgebreid naar meerdere tools. Zie [Toolgroepen](/nl/gateway/sandbox-vs-tool-policy-vs-elevated#tool-groups-shorthands) voor de volledige lijst.
+Toolbeleid ondersteunt `group:*`-verkortingen die naar meerdere tools worden uitgebreid. Zie [Toolgroepen](/nl/gateway/sandbox-vs-tool-policy-vs-elevated#tool-groups-shorthands) voor de volledige lijst.
 
-Verhoogde overschrijvingen per agent (`agents.list[].tools.elevated`) kunnen verhoogde uitvoering voor specifieke agents verder beperken. Zie [Verhoogde modus](/nl/tools/elevated) voor meer informatie.
+Verhoogde overschrijvingen per agent (`agents.entries.*.tools.elevated`) kunnen verhoogde uitvoering voor specifieke agents verder beperken. Zie [Verhoogde modus](/nl/tools/elevated) voor details.
 
 ---
 
-## Migratie vanaf één agent
+## Migratie vanuit één agent
 
 <Tabs>
   <Tab title="Voorheen (één agent)">
@@ -277,7 +278,7 @@ Verhoogde overschrijvingen per agent (`agents.list[].tools.elevated`) kunnen ver
     }
     ```
   </Tab>
-  <Tab title="Daarna (meerdere agents)">
+  <Tab title="Nadien (meerdere agents)">
     ```json
     {
       "agents": {
@@ -296,7 +297,7 @@ Verhoogde overschrijvingen per agent (`agents.list[].tools.elevated`) kunnen ver
 </Tabs>
 
 <Note>
-Verouderde configuratiecodes onder `agents.defaults.*`/`agents.list[].*` (zoals `sandbox.perSession`, `agentRuntime` en `embeddedPi`) worden door `openclaw doctor` gemigreerd; gebruik voortaan bij voorkeur `agents.defaults` + `agents.list`.
+Verouderde configuratiesleutels `agents.defaults.*`/`agents.entries.*.*` (zoals `sandbox.perSession`, `agentRuntime`, `embeddedPi`) worden door `openclaw doctor` gemigreerd; geef voortaan de voorkeur aan `agents.defaults` + `agents.entries`.
 </Note>
 
 ---
@@ -314,7 +315,7 @@ Verouderde configuratiecodes onder `agents.defaults.*`/`agents.list[].*` (zoals 
     }
     ```
   </Tab>
-  <Tab title="Shell-uitvoering met uitgeschakelde bestandssysteemtools">
+  <Tab title="Shelluitvoering met uitgeschakelde bestandssysteemtools">
     ```json
     {
       "tools": {
@@ -325,7 +326,7 @@ Verouderde configuratiecodes onder `agents.defaults.*`/`agents.list[].*` (zoals 
     ```
 
     <Warning>
-    Dit beleid schakelt de bestandssysteemtools van OpenClaw uit, maar `exec` blijft een shell en kan bestanden schrijven op elke locatie waar het bestandssysteem van de geselecteerde host of sandbox dit toestaat. Weiger voor een alleen-lezenagent `exec` en `process`, of combineer shelltoegang met bestandssysteembeperkingen voor de sandbox, zoals `agents.defaults.sandbox.workspaceAccess: "ro"` of `"none"`.
+    Dit beleid schakelt de bestandssysteemtools van OpenClaw uit, maar `exec` blijft een shell en kan bestanden schrijven waar het geselecteerde host- of sandboxbestandssysteem dit toestaat. Weiger voor een alleen-lezenagent `exec` en `process`, of combineer shelltoegang met bestandssysteembesturing voor de sandbox, zoals `agents.defaults.sandbox.workspaceAccess: "ro"` of `"none"`.
     </Warning>
 
   </Tab>
@@ -340,7 +341,7 @@ Verouderde configuratiecodes onder `agents.defaults.*`/`agents.list[].*` (zoals 
     }
     ```
 
-    `sessions_history` retourneert in dit profiel nog steeds een begrensde, opgeschoonde terugblik in plaats van een onbewerkte transcriptdump. De terugblik van de assistent verwijdert denktags, `<relevant-memories>`-structuren, XML-payloads in platte tekst voor toolaanroepen (waaronder `<tool_call>...</tool_call>`, `<function_call>...</function_call>`, `<tool_calls>...</tool_calls>`, `<function_calls>...</function_calls>` en afgekorte toolaanroepblokken), gedegradeerde toolaanroepstructuren, gelekte ASCII-/volledige-breedtebesturingstokens van het model en ongeldige XML voor MiniMax-toolaanroepen voordat redactie en afkapping plaatsvinden.
+    `sessions_history` in dit profiel retourneert nog steeds een begrensde, opgeschoonde herinneringsweergave in plaats van een onbewerkte transcriptdump. Bij het ophalen van assistentgegevens worden denktags, `<relevant-memories>`-scaffolding, XML-payloads voor toolaanroepen in platte tekst (waaronder `<tool_call>...</tool_call>`, `<function_call>...</function_call>`, `<tool_calls>...</tool_calls>`, `<function_calls>...</function_calls>` en afgekorte toolaanroepblokken), afgewaardeerde scaffolding voor toolaanroepen, gelekte ASCII-/volledige-breedte-modelbesturingstokens en ongeldige MiniMax-XML voor toolaanroepen verwijderd vóór redactie/afkapping.
 
   </Tab>
 </Tabs>
@@ -350,7 +351,7 @@ Verouderde configuratiecodes onder `agents.defaults.*`/`agents.list[].*` (zoals 
 ## Veelvoorkomende valkuil: "non-main"
 
 <Warning>
-`agents.defaults.sandbox.mode: "non-main"` vergelijkt de sessiesleutel met de sleutel van de hoofdsessie (altijd `"main"`; `session.mainKey` kan niet door de gebruiker worden geconfigureerd en OpenClaw waarschuwt bij elke andere waarde en negeert deze), niet met de agent-id. Groeps-/kanaalsessies krijgen altijd hun eigen sleutels, waardoor ze als niet-hoofdsessies worden behandeld en in een sandbox worden uitgevoerd. Als u wilt dat een agent nooit in een sandbox wordt uitgevoerd, stelt u `agents.list[].sandbox.mode: "off"` in.
+`agents.defaults.sandbox.mode: "non-main"` vergelijkt de sessiesleutel met de hoofdsessiesleutel (altijd `"main"`; `session.mainKey` kan niet door de gebruiker worden geconfigureerd en OpenClaw waarschuwt voor elke andere waarde en negeert deze), niet met de agent-id. Groeps-/kanaalsessies krijgen altijd hun eigen sleutels, waardoor ze als niet-hoofd worden behandeld en in een sandbox worden uitgevoerd. Als je wilt dat een agent nooit in een sandbox wordt uitgevoerd, stel dan `agents.entries.*.sandbox.mode: "off"` in.
 </Warning>
 
 ---
@@ -360,7 +361,7 @@ Verouderde configuratiecodes onder `agents.defaults.*`/`agents.list[].*` (zoals 
 Na het configureren van de sandbox en tools voor meerdere agents:
 
 <Steps>
-  <Step title="Agentbepaling controleren">
+  <Step title="Agentselectie controleren">
     ```bash
     openclaw agents list --bindings
     ```
@@ -371,7 +372,7 @@ Na het configureren van de sandbox en tools voor meerdere agents:
     ```
   </Step>
   <Step title="Toolbeperkingen testen">
-    - Verzend een bericht waarvoor beperkte tools nodig zijn.
+    - Stuur een bericht waarvoor beperkte tools nodig zijn.
     - Controleer of de agent geweigerde tools niet kan gebruiken.
 
   </Step>
@@ -388,19 +389,19 @@ Na het configureren van de sandbox en tools voor meerdere agents:
 
 <AccordionGroup>
   <Accordion title="Agent wordt ondanks `mode: 'all'` niet in een sandbox uitgevoerd">
-    - Controleer of er een globale `agents.defaults.sandbox.mode` bestaat die deze instelling overschrijft.
-    - Agentspecifieke configuratie heeft voorrang; stel daarom `agents.list[].sandbox.mode: "all"` in.
+    - Controleer of er een algemene `agents.defaults.sandbox.mode` bestaat die dit overschrijft.
+    - Agentspecifieke configuratie heeft voorrang, dus stel `agents.entries.*.sandbox.mode: "all"` in.
 
   </Accordion>
-  <Accordion title="Tools nog steeds beschikbaar ondanks de weigeringslijst">
-    - Controleer de [volledige filtervolgorde](#tool-restrictions): profiel → providerprofiel → globaal beleid → providerbeleid → agentbeleid → agentproviderbeleid → sandbox → subagent.
+  <Accordion title="Tools die ondanks de weigerlijst nog steeds beschikbaar zijn">
+    - Bekijk de [volledige filtervolgorde](#tool-restrictions): profiel → providerprofiel → globaal beleid → providerbeleid → agentbeleid → providerbeleid van de agent → sandbox → subagent.
     - Elk niveau kan alleen verdere beperkingen opleggen, niet opnieuw toegang verlenen.
     - Zie [Sandbox versus toolbeleid versus verhoogde modus](/nl/gateway/sandbox-vs-tool-policy-vs-elevated) voor stapsgewijze foutopsporing.
 
   </Accordion>
   <Accordion title="Container niet per agent geïsoleerd">
-    - De standaardwaarde voor `scope` is `"agent"` (één container per agent-ID).
-    - Stel `scope: "session"` in voor één container per sessie, of `scope: "shared"` om één container voor meerdere agents te hergebruiken.
+    - De standaardwaarde van `scope` is `"agent"` (één container per agent-id).
+    - Stel `scope: "session"` in voor één container per sessie, of `scope: "shared"` om één container opnieuw te gebruiken voor meerdere agents.
 
   </Accordion>
 </AccordionGroup>

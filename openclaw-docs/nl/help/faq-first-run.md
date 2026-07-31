@@ -1,102 +1,87 @@
 ---
 read_when:
-    - Nieuwe installatie, onboarding vastgelopen of fouten bij eerste uitvoering
-    - Auth en providerabonnementen kiezen
-    - Geen toegang tot docs.openclaw.ai, kan dashboard niet openen, installatie loopt vast
+    - Nieuwe installatie, vastgelopen onboarding of fouten bij de eerste uitvoering
+    - Authenticatie- en providerabonnementen kiezen
+    - Geen toegang tot docs.openclaw.ai, kan het dashboard niet openen, installatie loopt vast
 sidebarTitle: First-run FAQ
-summary: 'FAQ: snelstart en eerste installatie — installeren, onboarden, authenticatie, abonnementen, eerste fouten'
-title: 'FAQ: configuratie bij eerste keer uitvoeren'
+summary: 'FAQ: snelstart en configuratie bij de eerste uitvoering — installatie, onboarding, authenticatie, abonnementen, initiële fouten'
+title: 'FAQ: configuratie bij de eerste uitvoering'
 x-i18n:
-    generated_at: "2026-06-28T20:43:06Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T05:49:01Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 6ef4122bc0c3068806591ccdc1bf7f3eb5a81cc7efd2066d07f948fe953284be
+    source_hash: e1c93b89da625ae5f092db854c9b74adc005be75dd913af4bf89ed1a4f35396a
     source_path: help/faq-first-run.md
     workflow: 16
 ---
 
-  Q&A voor snel starten en eerste uitvoering. Zie de hoofd-[FAQ](/nl/help/faq) voor dagelijks gebruik, modellen, authenticatie, sessies
-  en probleemoplossing.
+Vragen en antwoorden over de snelle start en de eerste uitvoering. Zie voor dagelijks gebruik, modellen, authenticatie, sessies
+en probleemoplossing de hoofd-[FAQ](/nl/help/faq).
 
-  ## Snel starten en eerste configuratie
+## Snelle start en configuratie voor de eerste uitvoering
 
-  <AccordionGroup>
-  <Accordion title="Ik zit vast, snelste manier om verder te komen">
-    Gebruik een lokale AI-agent die **je machine kan zien**. Dat is veel effectiever dan vragen
-    in Discord, omdat de meeste gevallen van "ik zit vast" **lokale configuratie- of omgevingsproblemen** zijn die
-    externe helpers niet kunnen inspecteren.
+<AccordionGroup>
+  <Accordion title="Ik zit vast; wat is de snelste oplossing?">
+    Gebruik een lokale AI-agent die **je machine kan zien**. De meeste gevallen waarin iemand
+    vastzit, worden veroorzaakt door **lokale configuratie- of omgevingsproblemen** die een externe helper niet kan inspecteren. Dit werkt daarom beter dan
+    om hulp vragen in Discord.
 
     - **Claude Code**: [https://www.anthropic.com/claude-code/](https://www.anthropic.com/claude-code/)
     - **OpenAI Codex**: [https://openai.com/codex/](https://openai.com/codex/)
 
-    Deze tools kunnen de repo lezen, commando's uitvoeren, logs inspecteren en helpen je configuratie op machineniveau
-    te repareren (PATH, services, rechten, authenticatiebestanden). Geef ze de **volledige source-checkout** via
-    de hackbare (git)-installatie:
+    Geef de agent via de aanpasbare (git-)installatie toegang tot de volledige broncodecheckout, zodat deze
+    de code en documentatie kan lezen en kan redeneren over de exacte versie die je gebruikt:
 
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
     ```
 
-    Dit installeert OpenClaw **vanuit een git-checkout**, zodat de agent de code + docs kan lezen en
-    kan redeneren over de exacte versie die je draait. Je kunt later altijd terugschakelen naar stable
-    door de installer opnieuw uit te voeren zonder `--install-method git`.
+    Vraag de agent de oplossing stap voor stap te plannen en begeleiden en daarna alleen de
+    noodzakelijke opdrachten uit te voeren. Kleinere wijzigingen zijn gemakkelijker te controleren.
 
-    Tip: vraag de agent om de oplossing **te plannen en te begeleiden** (stap voor stap), en voer daarna alleen de
-    noodzakelijke commando's uit. Zo blijven wijzigingen klein en makkelijker te auditen.
+    Deel deze uitvoer wanneer je om hulp vraagt (in Discord of een GitHub-issue):
 
-    Als je een echte bug of fix ontdekt, maak dan een GitHub-issue aan of stuur een PR:
-    [https://github.com/openclaw/openclaw/issues](https://github.com/openclaw/openclaw/issues)
-    [https://github.com/openclaw/openclaw/pulls](https://github.com/openclaw/openclaw/pulls)
+    | Opdracht | Toont |
+    | --- | --- |
+    | `openclaw status` | Status van Gateway/agent en een momentopname van de basisconfiguratie |
+    | `openclaw status --all` | Volledige alleen-lezen diagnose die je kunt plakken |
+    | `openclaw models status` | Providerauthenticatie en beschikbaarheid van modellen |
+    | `openclaw doctor` | Valideert en herstelt veelvoorkomende configuratie- en statusproblemen |
+    | `openclaw logs --follow` | Live loguitvoer |
+    | `openclaw gateway status --deep` | Uitgebreide statuscontrole van Gateway/configuratie/Plugin |
+    | `openclaw health --verbose` | Gedetailleerd statusrapport |
 
-    Begin met deze commando's (deel de uitvoer wanneer je om hulp vraagt):
+    Een echte bug of oplossing gevonden? Dien een issue in of stuur een PR:
+    [Issues](https://github.com/openclaw/openclaw/issues) /
+    [Pull requests](https://github.com/openclaw/openclaw/pulls).
 
-    ```bash
-    openclaw status
-    openclaw models status
-    openclaw doctor
-    ```
-
-    Wat ze doen:
-
-    - `openclaw status`: snelle momentopname van gateway-/agent-gezondheid + basisconfiguratie.
-    - `openclaw models status`: controleert provider-authenticatie + beschikbaarheid van modellen.
-    - `openclaw doctor`: valideert en repareert veelvoorkomende configuratie-/statusproblemen.
-
-    Andere nuttige CLI-controles: `openclaw status --all`, `openclaw logs --follow`,
-    `openclaw gateway status`, `openclaw health --verbose`.
-
-    Snelle debuglus: [Eerste 60 seconden als er iets stuk is](/nl/help/faq#first-60-seconds-if-something-is-broken).
-    Installatiedocs: [Installeren](/nl/install), [Installer-flags](/nl/install/installer), [Bijwerken](/nl/install/updating).
+    Snelle foutopsporingscyclus: [De eerste 60 seconden als er iets defect is](/nl/help/faq#first-60-seconds-if-something-is-broken).
+    Installatiedocumentatie: [Installatie](/nl/install), [Installatieprogramma-opties](/nl/install/installer), [Bijwerken](/nl/install/updating).
 
   </Accordion>
 
-  <Accordion title="Heartbeat blijft overslaan. Wat betekenen de overslaanredenen?">
-    Veelvoorkomende Heartbeat-overslaanredenen:
+  <Accordion title="Heartbeat blijft overslaan. Wat betekenen de redenen daarvoor?">
+    | Reden voor overslaan | Betekenis |
+    | --- | --- |
+    | `quiet-hours` | Buiten het geconfigureerde venster met actieve uren |
+    | `empty-heartbeat-file` | Het kladbestand van de Heartbeat-monitor bestaat, maar bevat alleen lege regels, opmerkingen, een kop, een codeblokafbakening of een lege controlelijststructuur |
+    | `alerts-disabled` | Alle Heartbeat-zichtbaarheid is uitgeschakeld (`showOk`, `showAlerts` en `useIndicator` zijn allemaal uitgeschakeld) |
 
-    - `quiet-hours`: buiten het geconfigureerde venster voor actieve uren
-    - `empty-heartbeat-file`: `HEARTBEAT.md` bestaat, maar bevat alleen lege regels, opmerkingen, koppen, fences of lege checklist-scaffolding
-    - `no-tasks-due`: taakmodus voor `HEARTBEAT.md` is actief, maar geen van de taakintervallen is al verschuldigd
-    - `alerts-disabled`: alle Heartbeat-zichtbaarheid is uitgeschakeld (`showOk`, `showAlerts` en `useIndicator` staan allemaal uit)
+    Oudere Heartbeat-blokken `tasks:` worden met `openclaw doctor --fix` gemigreerd naar onafhankelijk geplande Cron-taken.
 
-    In taakmodus worden verschuldigde tijdstempels pas vooruitgezet nadat een echte Heartbeat-run
-    is voltooid. Overgeslagen runs markeren taken niet als voltooid.
-
-    Docs: [Heartbeat](/nl/gateway/heartbeat), [Automatisering](/nl/automation).
+    Documentatie: [Heartbeat](/nl/gateway/heartbeat), [Automatisering](/nl/automation).
 
   </Accordion>
 
-  <Accordion title="Aanbevolen manier om OpenClaw te installeren en te configureren">
-    De repo raadt aan om vanuit source te draaien en onboarding te gebruiken:
-
+  <Accordion title="Aanbevolen manier om OpenClaw te installeren en configureren">
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
     openclaw onboard --install-daemon
     ```
 
-    De wizard kan ook automatisch UI-assets bouwen. Na onboarding draai je de Gateway doorgaans op poort **18789**.
-
-    Vanuit source (contributors/dev):
+    Vanuit de broncode (bijdragers/ontwikkelaars):
 
     ```bash
     git clone https://github.com/openclaw/openclaw.git
@@ -107,98 +92,114 @@ x-i18n:
     openclaw onboard
     ```
 
-    Als je nog geen globale installatie hebt, voer je dit uit via `pnpm openclaw onboard`.
+    Nog geen globale installatie? Voer in plaats daarvan `pnpm openclaw onboard` uit. Als onderdelen van de Control UI
+    ontbreken, probeert de onboarding ze zelf te bouwen, met `pnpm ui:build` als terugvaloptie.
 
   </Accordion>
 
-  <Accordion title="Hoe open ik het dashboard na onboarding?">
-    De wizard opent direct na onboarding je browser met een schone (niet-getokeniseerde) dashboard-URL en print de link ook in de samenvatting. Houd dat tabblad open; als het niet is gestart, kopieer/plak dan de geprinte URL op dezelfde machine.
+  <Accordion title="Hoe open ik na de onboarding het dashboard?">
+    Direct na de configuratie opent de onboarding je browser met een schone dashboard-URL
+    (zonder token) en wordt de link in het overzicht weergegeven. Houd dat tabblad open. Als het niet is geopend,
+    kopieer en plak je de weergegeven URL op dezelfde machine.
   </Accordion>
 
-  <Accordion title="Hoe authenticeer ik het dashboard op localhost versus remote?">
+  <Accordion title="Hoe authenticeer ik het dashboard op localhost of op afstand?">
     **Localhost (dezelfde machine):**
 
     - Open `http://127.0.0.1:18789/`.
-    - Als om shared-secret-authenticatie wordt gevraagd, plak je het geconfigureerde token of wachtwoord in de Control UI-instellingen.
-    - Tokenbron: `gateway.auth.token` (of `OPENCLAW_GATEWAY_TOKEN`).
-    - Wachtwoordbron: `gateway.auth.password` (of `OPENCLAW_GATEWAY_PASSWORD`).
-    - Als er nog geen gedeeld geheim is geconfigureerd, genereer dan een token met `openclaw doctor --generate-gateway-token`.
+    - Als om authenticatie met een gedeeld geheim wordt gevraagd, plak je het geconfigureerde token of wachtwoord in de instellingen van de Control UI.
+    - Bron van het token: `gateway.auth.token` (of `OPENCLAW_GATEWAY_TOKEN`).
+    - Bron van het wachtwoord: `gateway.auth.password` (of `OPENCLAW_GATEWAY_PASSWORD`).
+    - Nog geen gedeeld geheim geconfigureerd? Voer `openclaw doctor --generate-gateway-token` (of `openclaw doctor --fix --generate-gateway-token`) uit.
 
     **Niet op localhost:**
 
-    - **Tailscale Serve** (aanbevolen): houd bind op local loopback, voer `openclaw gateway --tailscale serve` uit, open `https://<magicdns>/`. Als `gateway.auth.allowTailscale` `true` is, voldoen identity-headers aan Control UI-/WebSocket-authenticatie (geen geplakt gedeeld geheim, gaat uit van vertrouwde gatewayhost); HTTP-API's vereisen nog steeds shared-secret-authenticatie, tenzij je bewust private-ingress `none` of trusted-proxy HTTP-authenticatie gebruikt.
-      Slechte gelijktijdige Serve-authenticatiepogingen vanaf dezelfde client worden geserialiseerd voordat de failed-auth limiter ze registreert, dus de tweede slechte retry kan al `retry later` tonen.
-    - **Tailnet-bind**: voer `openclaw gateway --bind tailnet --token "<token>"` uit (of configureer wachtwoordauthenticatie), open `http://<tailscale-ip>:18789/` en plak daarna het bijbehorende gedeelde geheim in de dashboardinstellingen.
-    - **Identity-aware reverse proxy**: houd de Gateway achter een vertrouwde proxy, configureer `gateway.auth.mode: "trusted-proxy"` en open daarna de proxy-URL. Same-host loopback-proxy's vereisen expliciet `gateway.auth.trustedProxy.allowLoopback = true`.
-    - **SSH-tunnel**: `ssh -N -L 18789:127.0.0.1:18789 user@host` en open daarna `http://127.0.0.1:18789/`. Shared-secret-authenticatie geldt nog steeds via de tunnel; plak het geconfigureerde token of wachtwoord als daarom wordt gevraagd.
+    - **Tailscale Serve** (aanbevolen): houd de binding op loopback, voer `openclaw gateway --tailscale serve` uit en open `https://<magicdns>/`. Met `gateway.auth.allowTailscale: true` voldoen identiteitsheaders aan de authenticatievereisten van de Control UI/WebSocket (er hoeft geen gedeeld geheim te worden geplakt; hierbij wordt uitgegaan van een vertrouwde Gateway-host). HTTP-API's vereisen nog steeds authenticatie met een gedeeld geheim, tenzij je bewust private ingress via `none` of HTTP-authenticatie via een vertrouwde proxy gebruikt.
+      Gelijktijdige Serve-pogingen met onjuiste authenticatie vanaf dezelfde client worden serieel verwerkt voordat de mislukte-authenticatiebegrenzer ze registreert. Daardoor kan een tweede onjuiste poging al `retry later` tonen.
+    - **Tailnet-binding**: voer `openclaw gateway --bind tailnet --token "<token>"` uit (of configureer wachtwoordauthenticatie), open `http://<tailscale-ip>:18789/` en plak het bijbehorende gedeelde geheim in de dashboardinstellingen.
+    - **Identiteitsbewuste reverse proxy**: houd de Gateway achter een vertrouwde proxy, stel `gateway.auth.mode: "trusted-proxy"` in en open de proxy-URL. Loopbackproxy's op dezelfde host vereisen expliciet `gateway.auth.trustedProxy.allowLoopback: true`.
+    - **SSH-tunnel**: `ssh -N -L 18789:127.0.0.1:18789 user@gateway-host`, open vervolgens `http://127.0.0.1:18789/`. Authenticatie met een gedeeld geheim blijft ook via de tunnel van toepassing. Plak het geconfigureerde token of wachtwoord als daarom wordt gevraagd.
 
-    Zie [Dashboard](/nl/web/dashboard) en [Weboppervlakken](/nl/web) voor bind-modi en authenticatiedetails.
+    Zie [Dashboard](/nl/web/dashboard) en [Weboppervlakken](/nl/web) voor bindingsmodi en authenticatiedetails.
 
   </Accordion>
 
-  <Accordion title="Waarom zijn er twee exec-goedkeuringsconfiguraties voor chatgoedkeuringen?">
-    Ze beheren verschillende lagen:
+  <Accordion title="Waarom zijn er twee configuraties voor uitvoeringsgoedkeuringen via chat?">
+    Ze regelen verschillende lagen:
 
-    - `approvals.exec`: stuurt goedkeuringsprompts door naar chatbestemmingen
-    - `channels.<channel>.execApprovals`: laat dat kanaal optreden als native goedkeuringsclient voor exec-goedkeuringen
+    - `approvals.exec` - stuurt goedkeuringsverzoeken door naar chatbestemmingen.
+    - `channels.<channel>.execApprovals` - maakt van dat kanaal een systeemeigen goedkeuringsclient voor uitvoeringsgoedkeuringen.
 
-    Het host-execbeleid blijft nog steeds de echte goedkeuringspoort. Chatconfiguratie bepaalt alleen waar goedkeuringsprompts
-    verschijnen en hoe mensen ze kunnen beantwoorden.
+    Het uitvoeringsbeleid van de host blijft de daadwerkelijke goedkeuringspoort. De chatconfiguratie bepaalt alleen waar
+    verzoeken verschijnen en hoe mensen erop reageren.
 
-    In de meeste configuraties heb je **niet** allebei nodig:
+    Je hebt ze zelden allebei nodig:
 
-    - Als de chat al commando's en antwoorden ondersteunt, werkt `/approve` in dezelfde chat via het gedeelde pad.
-    - Als een ondersteund native kanaal approvers veilig kan afleiden, schakelt OpenClaw nu automatisch DM-first native goedkeuringen in wanneer `channels.<channel>.execApprovals.enabled` niet is ingesteld of `"auto"` is.
-    - Wanneer native goedkeuringskaarten/-knoppen beschikbaar zijn, is die native UI het primaire pad; de agent mag alleen een handmatig `/approve`-commando opnemen als het toolresultaat zegt dat chatgoedkeuringen niet beschikbaar zijn of dat handmatige goedkeuring het enige pad is.
-    - Gebruik `approvals.exec` alleen wanneer prompts ook moeten worden doorgestuurd naar andere chats of expliciete ops-rooms.
-    - Gebruik `channels.<channel>.execApprovals.target: "channel"` of `"both"` alleen wanneer je expliciet wilt dat goedkeuringsprompts terug in de oorspronkelijke room/topic worden geplaatst.
-    - Plugin-goedkeuringen zijn opnieuw afzonderlijk: ze gebruiken standaard `/approve` in dezelfde chat, optionele `approvals.plugin`-doorsturing, en alleen sommige native kanalen behouden native afhandeling voor Plugin-goedkeuringen daarbovenop.
+    - Als de chat al opdrachten en antwoorden ondersteunt, werkt `/approve` in dezelfde chat via het gedeelde pad.
+    - Wanneer een ondersteund systeemeigen kanaal goedkeurders veilig kan afleiden, schakelt OpenClaw automatisch systeemeigen goedkeuringen met privéberichten als eerste optie in als `channels.<channel>.execApprovals.enabled` niet is ingesteld of `"auto"` is.
+    - Wanneer systeemeigen goedkeuringskaarten/-knoppen beschikbaar zijn, is die interface leidend. Vermeld een handmatige opdracht `/approve` alleen als het gereedschapsresultaat aangeeft dat chatgoedkeuringen niet beschikbaar zijn.
+    - Gebruik `approvals.exec` alleen als verzoeken ook andere chats of expliciete operationele ruimtes moeten bereiken.
+    - Gebruik `channels.<channel>.execApprovals.target: "channel"` of `"both"` alleen als je goedkeuringsverzoeken terug wilt plaatsen in de oorspronkelijke ruimte of het oorspronkelijke onderwerp.
+    - Plugin-goedkeuringen staan hiervan los: standaard `/approve` in dezelfde chat, optioneel doorsturen via `approvals.plugin`, en slechts enkele systeemeigen kanalen behouden ook daarvoor de systeemeigen verwerking.
 
-    Korte versie: doorsturen is voor routing, native clientconfiguratie is voor rijkere kanaalspecifieke UX.
-    Zie [Exec-goedkeuringen](/nl/tools/exec-approvals).
+    Kort gezegd: doorsturen dient voor routering; de configuratie van de systeemeigen client biedt een rijkere, kanaalspecifieke gebruikerservaring.
+    Zie [Uitvoeringsgoedkeuringen](/nl/tools/exec-approvals).
 
   </Accordion>
 
   <Accordion title="Welke runtime heb ik nodig?">
-    Node **>= 22** is vereist. `pnpm` wordt aanbevolen. Bun wordt **niet aanbevolen** voor de Gateway.
+    Node **22.22.3+**, **24.15+** of **25.9+** is vereist (Node 24 wordt aanbevolen). `pnpm` is de pakketbeheerder van de repository.
+    Bun kan afhankelijkheden installeren en pakketscripts uitvoeren, maar kan de OpenClaw CLI of Gateway niet uitvoeren omdat `node:sqlite` ontbreekt.
   </Accordion>
 
-  <Accordion title="Draait het op Raspberry Pi?">
-    Ja. De Gateway is lichtgewicht - de docs noemen **512MB-1GB RAM**, **1 core** en ongeveer **500MB**
-    schijf als genoeg voor persoonlijk gebruik, en vermelden dat een **Raspberry Pi 4 dit kan draaien**.
+  <Accordion title="Werkt het op Raspberry Pi?">
+    Ja, maar controleer eerst het RAM-geheugen: Pi 5 en Pi 4 (2 GB+) zijn ideaal; Pi 3B+ (1 GB) werkt maar is traag; Pi Zero 2 W (512 MB) wordt niet aanbevolen.
 
-    Als je extra speelruimte wilt (logs, media, andere services), wordt **2GB aanbevolen**, maar het is
-    geen harde minimumvereiste.
+    | Model | RAM | Geschiktheid |
+    | --- | --- | --- |
+    | Pi 5 | 4/8 GB | Beste |
+    | Pi 4 | 4 GB | Goed |
+    | Pi 4 | 2 GB | Voldoende, voeg swap toe |
+    | Pi 4 | 1 GB | Krap |
+    | Pi 3B+ | 1 GB | Traag |
+    | Pi Zero 2 W | 512 MB | Niet aanbevolen |
 
-    Tip: een kleine Raspberry Pi/VPS kan de Gateway hosten, en je kunt **knooppunten** op je laptop/telefoon koppelen voor
-    lokaal scherm/camera/canvas of commando-uitvoering. Zie [Knooppunten](/nl/nodes).
+    Absoluut minimum: 1 GB RAM, 1 kern, 500 MB vrije schijfruimte en een 64-bits besturingssysteem. Omdat de Pi alleen
+    de Gateway uitvoert (modellen roepen cloud-API's aan), kan zelfs een bescheiden Pi de belasting aan.
 
-  </Accordion>
+    Een kleine Pi/VPS kan ook alleen de Gateway hosten, terwijl je **nodes** op je
+    laptop/telefoon koppelt voor lokaal scherm-, camera- of canvasgebruik of voor het uitvoeren van opdrachten. Zie [Nodes](/nl/nodes).
 
-  <Accordion title="Tips voor Raspberry Pi-installaties?">
-    Korte versie: het werkt, maar verwacht ruwe randjes.
-
-    - Gebruik een **64-bit** OS en houd Node >= 22.
-    - Geef de voorkeur aan de **hackbare (git)-installatie**, zodat je logs kunt zien en snel kunt bijwerken.
-    - Begin zonder kanalen/Skills en voeg ze daarna een voor een toe.
-    - Als je vreemde binaire problemen tegenkomt, is het meestal een **ARM-compatibiliteitsprobleem**.
-
-    Docs: [Linux](/nl/platforms/linux), [Installeren](/nl/install).
+    Volledige configuratiehandleiding: [Raspberry Pi](/nl/install/raspberry-pi).
 
   </Accordion>
 
-  <Accordion title="Het blijft hangen op wake up my friend / onboarding komt niet uit. Wat nu?">
-    Dat scherm is afhankelijk van een bereikbare en geauthenticeerde Gateway. De TUI verstuurt ook
-    automatisch "Wake up, my friend!" bij de eerste hatch. Als je die regel ziet met **geen antwoord**
-    en tokens op 0 blijven, is de agent nooit uitgevoerd.
+  <Accordion title="Tips voor installaties op Raspberry Pi?">
+    - Gebruik een **64-bits** besturingssysteem; gebruik geen 32-bits Raspberry Pi OS.
+    - Voeg swap toe op systemen met 2 GB of minder.
+    - Geef voor prestaties en levensduur de voorkeur aan een **USB-SSD** boven een SD-kaart.
+    - Geef de voorkeur aan de aanpasbare (git-)installatie, zodat je logboeken kunt bekijken en snel kunt bijwerken.
+    - Begin zonder kanalen/Skills en voeg ze één voor één toe.
+    - Vreemde fouten met binaire bestanden ("exec format error") worden meestal veroorzaakt doordat een ARM64-build voor een optioneel Skill-gereedschap ontbreekt.
 
-    1. Herstart de Gateway:
+    Volledige handleiding: [Raspberry Pi](/nl/install/raspberry-pi). Zie ook [Linux](/nl/platforms/linux).
+
+  </Accordion>
+
+  <Accordion title="Het blijft hangen bij wake up my friend / de onboarding komt niet uit. Wat nu?">
+    Dat scherm vereist dat de Gateway bereikbaar en geauthenticeerd is. De TUI verzendt bij de eerste keer uitkomen ook automatisch
+    "Wake up, my friend!" wanneer een modelprovider is geconfigureerd. Als
+    je de configuratie van het model/de authenticatie hebt overgeslagen, toont de onboarding de melding "Model auth missing" en wordt de
+    TUI geopend zonder iets te verzenden. Voeg een provider toe met `openclaw configure --section model`.
+    Als je de wekregel ziet maar **geen antwoord** krijgt en het aantal tokens op 0 blijft, is de agent nooit uitgevoerd.
+
+    1. Start de Gateway opnieuw:
 
     ```bash
     openclaw gateway restart
     ```
 
-    2. Controleer status + authenticatie:
+    2. Controleer de status en authenticatie:
 
     ```bash
     openclaw status
@@ -206,83 +207,81 @@ x-i18n:
     openclaw logs --follow
     ```
 
-    3. Als het nog steeds hangt, voer uit:
+    3. Blijft het hangen? Voer dit uit:
 
     ```bash
     openclaw doctor
     ```
 
-    Als de Gateway remote is, zorg dan dat de tunnel-/Tailscale-verbinding actief is en dat de UI
-    naar de juiste Gateway wijst. Zie [Remote toegang](/nl/gateway/remote).
+    Als de Gateway extern is, controleer je of de tunnel-/Tailscale-verbinding actief is en de UI
+    naar de juiste Gateway verwijst. Zie [Externe toegang](/nl/gateway/remote).
 
   </Accordion>
 
-  <Accordion title="Kan ik mijn configuratie naar een nieuwe machine (Mac mini) migreren zonder onboarding opnieuw te doen?">
-    Ja. Kopieer de **statusdirectory** en **workspace**, en voer daarna Doctor één keer uit. Dit
-    houdt je bot "exactly the same" (geheugen, sessiegeschiedenis, authenticatie en kanaalstatus)
-    zolang je **beide** locaties kopieert:
+  <Accordion title="Kan ik mijn configuratie naar een nieuwe machine migreren zonder de onboarding opnieuw uit te voeren?">
+    Ja. Kopieer de **statusmap** en **werkruimte** en voer Doctor vervolgens eenmaal uit:
 
     1. Installeer OpenClaw op de nieuwe machine.
-    2. Kopieer `$OPENCLAW_STATE_DIR` (standaard: `~/.openclaw`) vanaf de oude machine.
-    3. Kopieer je workspace (standaard: `~/.openclaw/workspace`).
-    4. Voer `openclaw doctor` uit en herstart de Gateway-service.
+    2. Kopieer `$OPENCLAW_STATE_DIR` (standaard: `~/.openclaw`) van de oude machine.
+    3. Kopieer je werkruimte (standaard: `~/.openclaw/workspace`).
+    4. Voer `openclaw doctor` uit en start de Gateway-service opnieuw.
 
-    Dat behoudt configuratie, authenticatieprofielen, WhatsApp-credentials, sessies en geheugen. Als je in
-    remote modus werkt, onthoud dan dat de gatewayhost eigenaar is van de sessiestore en workspace.
+    Hiermee blijven de configuratie, authenticatieprofielen, WhatsApp-referenties, sessies en het geheugen behouden. Je bot blijft
+    exact hetzelfde, zolang je **beide** locaties kopieert. In de externe modus beheert de
+    Gateway-host de sessieopslag en werkruimte.
 
-    **Belangrijk:** als je alleen je workspace commit/pusht naar GitHub, maak je een back-up
-    van **geheugen + bootstrapbestanden**, maar **niet** van sessiegeschiedenis of authenticatie. Die staan
-    onder `~/.openclaw/` (bijvoorbeeld `~/.openclaw/agents/<agentId>/sessions/`).
+    **Belangrijk:** als je alleen je werkruimte naar GitHub commit en pusht, maak je een back-up van
+    **geheugen en bootstrapbestanden**, maar niet van de sessiegeschiedenis of authenticatie. Die bevinden zich onder
+    `~/.openclaw/` (bijvoorbeeld `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`).
 
-    Gerelateerd: [Migreren](/nl/install/migrating), [Waar dingen op schijf staan](/nl/help/faq#where-things-live-on-disk),
-    [Agent-workspace](/nl/concepts/agent-workspace), [Doctor](/nl/gateway/doctor),
-    [Remote modus](/nl/gateway/remote).
+    Gerelateerd: [Migreren](/nl/install/migrating), [Waar gegevens op schijf worden opgeslagen](/nl/help/faq#where-things-live-on-disk),
+    [Agentwerkruimte](/nl/concepts/agent-workspace), [Doctor](/nl/gateway/doctor),
+    [Externe modus](/nl/gateway/remote).
 
   </Accordion>
 
-  <Accordion title="Waar zie ik wat nieuw is in de nieuwste versie?">
-    Bekijk de GitHub-changelog:
+  <Accordion title="Waar kan ik zien wat er nieuw is in de nieuwste versie?">
+    Bekijk het wijzigingslogboek op GitHub:
     [https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md](https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md)
 
-    De nieuwste vermeldingen staan bovenaan. Als de bovenste sectie is gemarkeerd als **Unreleased**, is de volgende gedateerde
-    sectie de nieuwste uitgebrachte versie. Vermeldingen zijn gegroepeerd op **Highlights**, **Wijzigingen** en
-    **Fixes** (plus docs/andere secties wanneer nodig).
+    De nieuwste vermeldingen staan bovenaan. Als de bovenste sectie **Niet uitgebracht** is, is de volgende
+    sectie met een datum de nieuwste uitgebrachte versie. Vermeldingen zijn gegroepeerd onder **Hoogtepunten**, **Wijzigingen**
+    en **Oplossingen** (plus documentatie-/andere secties wanneer nodig).
 
   </Accordion>
 
   <Accordion title="Geen toegang tot docs.openclaw.ai (SSL-fout)">
-    Sommige Comcast-/Xfinity-verbindingen blokkeren `docs.openclaw.ai` onterecht via Xfinity
-    Advanced Security. Schakel dit uit of zet `docs.openclaw.ai` op de allowlist en probeer het opnieuw.
-    Help ons dit te deblokkeren door het hier te melden: [https://spa.xfinity.com/check_url_status](https://spa.xfinity.com/check_url_status).
+    Sommige verbindingen van Comcast/Xfinity blokkeren `docs.openclaw.ai` ten onrechte via Xfinity
+    Advanced Security. Schakel dit uit of voeg `docs.openclaw.ai` toe aan de toelatingslijst en probeer het opnieuw. Help ons
+    de blokkering op te heffen: [https://spa.xfinity.com/check_url_status](https://spa.xfinity.com/check_url_status).
 
-    Als je de site nog steeds niet kunt bereiken, worden de docs gespiegeld op GitHub:
+    Nog steeds geblokkeerd? De documentatie wordt gespiegeld op GitHub:
     [https://github.com/openclaw/openclaw/tree/main/docs](https://github.com/openclaw/openclaw/tree/main/docs)
 
   </Accordion>
 
   <Accordion title="Verschil tussen stable en beta">
-    **Stable** en **beta** zijn **npm dist-tags**, geen afzonderlijke codelijnen:
+    **Stable** en **beta** zijn **npm dist-tags**, geen afzonderlijke codetakken:
 
     - `latest` = stable
-    - `beta` = vroege build voor testen
+    - `beta` = vroege build om te testen (valt terug op `latest` wanneer beta ontbreekt of ouder is dan de huidige stabiele release)
 
-    Meestal komt een stable release eerst op **beta** terecht, waarna een expliciete
-    promotiestap diezelfde versie naar `latest` verplaatst. Maintainers kunnen indien nodig ook
-    rechtstreeks naar `latest` publiceren. Daarom kunnen beta en stable na promotie naar
+    Een stabiele release komt meestal eerst op **beta** terecht, waarna een expliciete promotiestap
+    diezelfde versie naar `latest` verplaatst zonder het versienummer te wijzigen. Onderhouders
+    kunnen ook rechtstreeks naar `latest` publiceren. Daarom kunnen beta en stable na promotie naar
     **dezelfde versie** verwijzen.
 
-    Bekijk wat er is gewijzigd:
-    [https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md](https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md)
+    Bekijk wat er is gewijzigd: [CHANGELOG.md](https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md).
 
-    Zie de accordion hieronder voor installatieregels en het verschil tussen beta en dev.
+    Zie het volgende uitklapgedeelte voor installatieregels van één regel en het verschil tussen beta en dev.
 
   </Accordion>
 
-  <Accordion title="Hoe installeer ik de beta-versie en wat is het verschil tussen beta en dev?">
-    **Beta** is de npm dist-tag `beta` (kan na promotie overeenkomen met `latest`).
-    **Dev** is de bewegende kop van `main` (git); wanneer gepubliceerd, gebruikt deze de npm dist-tag `dev`.
+  <Accordion title="Hoe installeer ik de bètaversie en wat is het verschil tussen beta en dev?">
+    **Beta** is de npm-dist-tag `beta` (kan na promotie overeenkomen met `latest`).
+    **Dev** is de bewegende kop van `main` (git); bij publicatie naar npm gebruikt deze dist-tag `dev`.
 
-    One-liners (macOS/Linux):
+    Opdrachten van één regel (macOS/Linux):
 
     ```bash
     curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --beta
@@ -292,33 +291,31 @@ x-i18n:
     curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
     ```
 
-    Windows-installatieprogramma (PowerShell):
-    [https://openclaw.ai/install.ps1](https://openclaw.ai/install.ps1)
+    Windows-installatieprogramma (PowerShell): `iwr -useb https://openclaw.ai/install.ps1 | iex`
 
-    Meer details: [Ontwikkelkanalen](/nl/install/development-channels) en [Installatieprogramma-vlaggen](/nl/install/installer).
+    Meer informatie: [Ontwikkelingskanalen](/nl/install/development-channels) en [Opties voor het installatieprogramma](/nl/install/installer).
 
   </Accordion>
 
-  <Accordion title="Hoe probeer ik de nieuwste bits?">
+  <Accordion title="Hoe probeer ik de nieuwste wijzigingen?">
     Twee opties:
 
-    1. **Dev-kanaal (git-checkout):**
+    1. **Dev-kanaal (bestaande installatie):**
 
     ```bash
     openclaw update --channel dev
     ```
 
-    Dit schakelt over naar de `main`-branch en werkt bij vanuit de broncode.
+    Hiermee schakel je over naar een git-checkout van `main`, voer je een rebase uit op upstream, bouw je de code en installeer je
+    de CLI vanuit die checkout.
 
-    2. **Hackbare installatie (vanaf de installatiesite):**
+    2. **Aanpasbare (git-)installatie (nieuwe machine):**
 
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
     ```
 
-    Daarmee krijg je een lokale repo die je kunt bewerken en daarna via git kunt bijwerken.
-
-    Als je liever handmatig een schone clone gebruikt, gebruik dan:
+    Gebruik bij voorkeur een handmatige kloon:
 
     ```bash
     git clone https://github.com/openclaw/openclaw.git
@@ -327,94 +324,65 @@ x-i18n:
     pnpm build
     ```
 
-    Docs: [Bijwerken](/nl/cli/update), [Ontwikkelkanalen](/nl/install/development-channels),
-    [Installeren](/nl/install).
+    Documentatie: [Bijwerken](/nl/cli/update), [Ontwikkelingskanalen](/nl/install/development-channels), [Installeren](/nl/install).
 
   </Accordion>
 
-  <Accordion title="Hoe lang duren installatie en onboarding meestal?">
-    Ruwe richtlijn:
+  <Accordion title="Hoe lang duren de installatie en onboarding doorgaans?">
+    Globale indicatie:
 
-    - **Installatie:** 2-5 minuten
-    - **QuickStart-onboarding:** meestal een paar minuten
-    - **Volledige onboarding:** langer wanneer provider-aanmelding, kanaalkoppeling, daemon-installatie,
-      netwerkdownloads, Skills of optionele plugins extra configuratie nodig hebben
+    - **Installatie:** 2-5 minuten.
+    - **QuickStart-onboarding:** enkele minuten (loopback-Gateway, automatisch token, standaardwerkruimte).
+    - **Geavanceerde/volledige onboarding:** langer wanneer aanmelden bij de provider, kanaalkoppeling, installatie van de daemon, netwerkdownloads of Skills extra configuratie vereisen.
 
-    De CLI-wizard toont deze tijdlijn vooraf. Je kunt optionele stappen overslaan en later
-    terugkomen met `openclaw configure`.
+    De wizard toont deze tijdlijn vooraf. Sla optionele stappen over en keer later terug met
+    `openclaw configure`.
 
-    Als het blijft hangen, gebruik dan [Installatieprogramma vastgelopen](#quick-start-and-first-run-setup)
-    en de snelle debuglus in [Ik zit vast](#quick-start-and-first-run-setup).
+    Blijft het proces hangen? Zie hierboven [Ik zit vast](#quick-start-and-first-run-setup).
 
   </Accordion>
 
   <Accordion title="Installatieprogramma vastgelopen? Hoe krijg ik meer feedback?">
-    Voer het installatieprogramma opnieuw uit met **uitgebreide uitvoer**:
+    Voer het opnieuw uit met `--verbose`:
 
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --verbose
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --verbose
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --beta --verbose
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git --verbose
     ```
 
-    Beta-installatie met uitgebreide uitvoer:
-
-    ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --beta --verbose
-    ```
-
-    Voor een hackbare (git-)installatie:
-
-    ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git --verbose
-    ```
-
-    Windows-equivalent (PowerShell):
-
-    ```powershell
-    # install.ps1 has no dedicated -Verbose flag yet.
-    Set-PSDebug -Trace 1
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
-    Set-PSDebug -Trace 0
-    ```
-
-    Meer opties: [Installatieprogramma-vlaggen](/nl/install/installer).
+    `install.ps1` heeft geen afzonderlijke uitgebreide-uitvoeroptie; verpak het in plaats daarvan in `Set-PSDebug -Trace 1` /
+    `-Trace 0`. Volledig overzicht van opties: [Opties voor het installatieprogramma](/nl/install/installer).
 
   </Accordion>
 
-  <Accordion title="Windows-installatie meldt dat git niet is gevonden of dat openclaw niet wordt herkend">
+  <Accordion title="Windows-installatie meldt dat git niet is gevonden of openclaw niet wordt herkend">
     Twee veelvoorkomende Windows-problemen:
 
     **1) npm-fout spawn git / git niet gevonden**
 
-    - Installeer **Git for Windows** en zorg ervoor dat `git` op je PATH staat.
-    - Sluit PowerShell en open het opnieuw, en voer daarna het installatieprogramma opnieuw uit.
+    - Installeer **Git for Windows** en zorg dat `git` in PATH staat.
+    - Sluit PowerShell, open het opnieuw en voer het installatieprogramma nogmaals uit.
 
     **2) openclaw wordt na installatie niet herkend**
 
-    - Je globale npm-binmap staat niet op PATH.
-    - Controleer het pad:
+    - De globale npm-binmap staat niet in PATH.
+    - Controleer dit: `npm config get prefix`.
+    - Voeg die map toe aan je gebruikers-PATH (het achtervoegsel `\bin` is niet nodig; op de meeste systemen is dit `%AppData%\npm`).
+    - Sluit PowerShell en open het opnieuw.
 
-      ```powershell
-      npm config get prefix
-      ```
-
-    - Voeg die directory toe aan je gebruikers-PATH (geen `\bin`-suffix nodig op Windows; op de meeste systemen is dit `%AppData%\npm`).
-    - Sluit PowerShell en open het opnieuw nadat je PATH hebt bijgewerkt.
-
-    Gebruik voor desktopconfiguratie de native **Windows Hub**-app. Voor configuratie
-    alleen via de terminal worden zowel het PowerShell-installatieprogramma als WSL2 Gateway-paden ondersteund.
-    Docs: [Windows](/nl/platforms/windows).
+    Liever een desktopapp? Gebruik **Windows Hub**. Voor een installatie uitsluitend via de terminal worden zowel het PowerShell-
+    installatieprogramma als WSL2 Gateway-paden ondersteund. Documentatie: [Windows](/nl/platforms/windows).
 
   </Accordion>
 
-  <Accordion title="Windows exec-uitvoer toont vervormde Chinese tekst - wat moet ik doen?">
-    Dit is meestal een mismatch van de console-codepagina in native Windows-shells.
+  <Accordion title="De uitvoer van Windows exec toont verminkte Chinese tekst: wat moet ik doen?">
+    Dit komt doorgaans door een niet-overeenkomende consolecodepagina in systeemeigen Windows-shells.
 
-    Symptomen:
+    Symptomen: uitvoer van `system.run`/`exec` geeft Chinees als onleesbare tekens weer; dezelfde opdracht
+    ziet er in een ander terminalprofiel wel goed uit.
 
-    - `system.run`/`exec`-uitvoer rendert Chinees als mojibake
-    - Dezelfde opdracht ziet er goed uit in een ander terminalprofiel
-
-    Snelle workaround in PowerShell:
+    Tijdelijke oplossing in PowerShell:
 
     ```powershell
     chcp 65001
@@ -423,160 +391,146 @@ x-i18n:
     $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
     ```
 
-    Herstart daarna de Gateway en probeer je opdracht opnieuw:
+    Start daarna de Gateway opnieuw en probeer het nogmaals:
 
     ```powershell
     openclaw gateway restart
     ```
 
-    Als je dit nog steeds kunt reproduceren op de nieuwste OpenClaw, volg/rapporteer het dan in:
-
-    - [Issue #30640](https://github.com/openclaw/openclaw/issues/30640)
+    Treedt dit nog steeds op met de nieuwste OpenClaw? Volg of meld het hier: [Issue #30640](https://github.com/openclaw/openclaw/issues/30640).
 
   </Accordion>
 
-  <Accordion title="De docs hebben mijn vraag niet beantwoord - hoe krijg ik een beter antwoord?">
-    Gebruik de **hackbare (git-)installatie** zodat je de volledige broncode en docs lokaal hebt, en vraag daarna
-    je bot (of Claude/Codex) _vanuit die map_ zodat die de repo kan lezen en nauwkeurig kan antwoorden.
+  <Accordion title="De documentatie beantwoordde mijn vraag niet: hoe krijg ik een beter antwoord?">
+    Gebruik de aanpasbare (git-)installatie zodat je de volledige broncode en documentatie lokaal hebt. Stel vervolgens
+    je vraag aan je bot (of Claude/Codex) **vanuit die map**, zodat deze de repository kan lezen en nauwkeurig kan antwoorden.
 
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
     ```
 
-    Meer details: [Installeren](/nl/install) en [Installatieprogramma-vlaggen](/nl/install/installer).
+    Meer informatie: [Installeren](/nl/install) en [Opties voor het installatieprogramma](/nl/install/installer).
 
   </Accordion>
 
   <Accordion title="Hoe installeer ik OpenClaw op Linux?">
-    Kort antwoord: volg de Linux-gids en voer daarna onboarding uit.
-
-    - Linux-snelpad + service-installatie: [Linux](/nl/platforms/linux).
-    - Volledige walkthrough: [Aan de slag](/nl/start/getting-started).
+    - Snelle Linux-installatie + service-installatie: [Linux](/nl/platforms/linux).
+    - Volledige handleiding: [Aan de slag](/nl/start/getting-started).
     - Installatieprogramma + updates: [Installatie en updates](/nl/install/updating).
 
   </Accordion>
 
   <Accordion title="Hoe installeer ik OpenClaw op een VPS?">
-    Elke Linux-VPS werkt. Installeer op de server en gebruik daarna SSH/Tailscale om de Gateway te bereiken.
+    Elke Linux-VPS is geschikt. Installeer OpenClaw op de server en maak vervolgens via SSH/Tailscale verbinding met de Gateway.
 
-    Gidsen: [exe.dev](/nl/install/exe-dev), [Hetzner](/nl/install/hetzner), [Fly.io](/nl/install/fly).
-    Externe toegang: [Gateway op afstand](/nl/gateway/remote).
+    Handleidingen: [exe.dev](/nl/install/exe-dev), [Hetzner](/nl/install/hetzner), [Fly.io](/nl/install/fly).
+    Externe toegang: [Externe Gateway](/nl/gateway/remote).
 
   </Accordion>
 
-  <Accordion title="Waar zijn de cloud-/VPS-installatiegidsen?">
-    We houden een **hostinghub** bij met de gangbare providers. Kies er een en volg de gids:
+  <Accordion title="Waar vind ik de installatiehandleidingen voor de cloud/VPS?">
+    Hostingoverzicht met veelgebruikte providers:
 
-    - [VPS-hosting](/nl/vps) (alle providers op één plek)
+    - [VPS-hosting](/nl/vps) (alle providers op één plaats)
     - [Fly.io](/nl/install/fly)
     - [Hetzner](/nl/install/hetzner)
     - [exe.dev](/nl/install/exe-dev)
 
-    Zo werkt het in de cloud: de **Gateway draait op de server**, en je opent deze
-    vanaf je laptop/telefoon via de Control UI (of Tailscale/SSH). Je status + werkruimte
-    staan op de server, dus behandel de host als de bron van waarheid en maak er back-ups van.
+    In de cloud **draait de Gateway op de server** en open je deze vanaf je laptop/telefoon
+    via de Control UI (of Tailscale/SSH). Je status en werkruimte bevinden zich op de server, dus
+    beschouw de host als de primaire bron en maak er een back-up van.
 
-    Je kunt **nodes** (Mac/iOS/Android/headless) koppelen aan die cloud-Gateway om toegang te krijgen
-    tot lokaal scherm/camera/canvas of opdrachten uit te voeren op je laptop terwijl de
-    Gateway in de cloud blijft.
+    Koppel **nodes** (Mac/iOS/Android/headless) aan die Gateway in de cloud voor lokale
+    scherm-/camera-/canvasfuncties of opdrachtuitvoering op je laptop, terwijl de Gateway
+    in de cloud blijft.
 
-    Hub: [Platformen](/nl/platforms). Externe toegang: [Gateway op afstand](/nl/gateway/remote).
-    Nodes: [Nodes](/nl/nodes), [Nodes CLI](/nl/cli/nodes).
+    Overzicht: [Platforms](/nl/platforms). Externe toegang: [Externe Gateway](/nl/gateway/remote).
+    Nodes: [Nodes](/nl/nodes), [Nodes-CLI](/nl/cli/nodes).
 
   </Accordion>
 
   <Accordion title="Kan ik OpenClaw vragen zichzelf bij te werken?">
-    Kort antwoord: **mogelijk, niet aanbevolen**. De updateflow kan de
-    Gateway herstarten (waardoor de actieve sessie wegvalt), kan een schone git-checkout nodig hebben en
-    kan om bevestiging vragen. Veiliger: voer updates uit vanuit een shell als operator.
-
-    Gebruik de CLI:
+    Het is mogelijk, maar niet aanbevolen. Het updateproces kan de Gateway opnieuw starten (waardoor de
+    actieve sessie wordt verbroken), kan een schone git-checkout vereisen en kan om bevestiging vragen.
+    Het is veiliger om updates als beheerder vanuit een shell uit te voeren.
 
     ```bash
     openclaw update
     openclaw update status
-    openclaw update --channel stable|beta|dev
+    openclaw update --channel stable|extended-stable|beta|dev
     openclaw update --tag <dist-tag|version>
     openclaw update --no-restart
     ```
 
-    Als je vanuit een agent moet automatiseren:
+    Automatiseren vanuit een agent:
 
     ```bash
     openclaw update --yes --no-restart
     openclaw gateway restart
     ```
 
-    Docs: [Bijwerken](/nl/cli/update), [Bijwerken](/nl/install/updating).
+    Documentatie: [Bijwerken](/nl/cli/update), [Updates installeren](/nl/install/updating).
 
   </Accordion>
 
-  <Accordion title="Wat doet onboarding eigenlijk?">
-    `openclaw onboard` is het aanbevolen configuratiepad. In **lokale modus** leidt het je door:
+  <Accordion title="Wat doet onboarding precies?">
+    `openclaw onboard` is het aanbevolen configuratiepad. In de **lokale modus** doorloop je:
 
-    - **Model-/auth-configuratie** (provider-OAuth, API-sleutels, Anthropic setup-token, plus lokale modelopties zoals LM Studio)
-    - **Workspace**-locatie + bootstrapbestanden
-    - **Gateway-instellingen** (bind/poort/auth/tailscale)
-    - **Kanalen** (WhatsApp, Telegram, Discord, Mattermost, Signal, iMessage, plus gebundelde kanaalplugins zoals QQ Bot)
-    - **Daemon-installatie** (LaunchAgent op macOS; systemd-gebruikerseenheid op Linux/WSL2)
-    - **Healthchecks** en **skills**-selectie
+    1. **Model/authenticatie** - OAuth van de provider, API-sleutels of handmatige authenticatie (inclusief lokale opties zoals LM Studio); kies een standaardmodel.
+    2. **Werkruimte** - locatie + bootstrapbestanden.
+    3. **Gateway** - poort, bindadres, authenticatiemodus, beschikbaarstelling via Tailscale.
+    4. **Kanalen** - ingebouwde chatkanalen en chatkanalen van officiële Plugins: iMessage, Discord, Feishu, Google Chat, Mattermost, Microsoft Teams, QQ Bot, Signal, Slack, Telegram, WhatsApp en meer.
+    5. **Daemon** - LaunchAgent (macOS), systemd-gebruikerseenheid (Linux/WSL2) of een systeemeigen geplande Windows-taak.
+    6. **Statuscontrole** - start de Gateway en controleert of deze actief is.
+    7. **Skills** - installeert aanbevolen Skills en optionele afhankelijkheden.
 
-    Het stelt ook duurverwachtingen voordat de hoofdprompts beginnen en waarschuwt als je
-    geconfigureerde model onbekend is of auth mist.
+    De verwachte duur wordt vooraf aangegeven en je krijgt een waarschuwing als je geconfigureerde model onbekend is
+    of authenticatie ontbreekt. Volledig overzicht: [Onboarding (CLI)](/nl/start/wizard).
 
   </Accordion>
 
-  <Accordion title="Heb ik een Claude- of OpenAI-abonnement nodig om dit te draaien?">
-    Nee. Je kunt OpenClaw uitvoeren met **API-sleutels** (Anthropic/OpenAI/anderen) of met
-    **alleen-lokale modellen** zodat je gegevens op je apparaat blijven. Abonnementen (Claude
-    Pro/Max of OpenAI Codex) zijn optionele manieren om die providers te authenticeren.
+  <Accordion title="Heb ik een Claude- of OpenAI-abonnement nodig om dit uit te voeren?">
+    Nee. Voer OpenClaw uit met **API-sleutels** (Anthropic/OpenAI/andere) of **uitsluitend lokale modellen**,
+    zodat je gegevens op je apparaat blijven. Abonnementen (Claude Pro/Max, ChatGPT/Codex) zijn
+    optionele manieren om je bij die providers te authenticeren.
 
-    Voor Anthropic in OpenClaw is de praktische verdeling:
+    Voor Anthropic: een **API-sleutel** biedt standaardfacturering op basis van gebruik; **Claude CLI**
+    hergebruikt een bestaande Claude Code-aanmelding op dezelfde host. Anthropic behandelt momenteel
+    het niet-interactieve `claude -p`-pad van Claude CLI als Agent SDK-/programmatisch gebruik dat
+    nog steeds meetelt voor de limieten van je abonnement. Raadpleeg de actuele facturatiedocumentatie van Anthropic
+    voordat je op abonnementsgedrag vertrouwt. Voor langdurig actieve Gateway-hosts en gedeelde
+    automatisering is een Anthropic-API-sleutel de voorspelbaardere keuze.
 
-    - **Anthropic API-sleutel**: normale Anthropic API-facturering
-    - **Claude CLI / Claude-abonnementsauth in OpenClaw**: Anthropic-medewerkers
-      vertelden ons dat dit gebruik weer is toegestaan, en OpenClaw behandelt `claude -p`-
-      gebruik als goedgekeurd voor deze integratie tenzij Anthropic een nieuw
-      beleid publiceert
+    OpenAI Codex OAuth (ChatGPT/Codex-abonnement) wordt volledig ondersteund voor agentmodellen.
+    OpenClaw ondersteunt ook gehoste abonnementsopties, waaronder **Qwen Cloud
+    Coding Plan**, **MiniMax Coding Plan** en **Z.AI / GLM Coding Plan**.
 
-    Voor langlevende gatewayhosts zijn Anthropic API-sleutels nog steeds de
-    voorspelbaardere configuratie. OpenAI Codex OAuth wordt expliciet ondersteund voor externe
-    tools zoals OpenClaw.
-
-    OpenClaw ondersteunt ook andere gehoste abonnementsachtige opties, waaronder
-    **Qwen Cloud Coding Plan**, **MiniMax Coding Plan** en
-    **Z.AI / GLM Coding Plan**.
-
-    Docs: [Anthropic](/nl/providers/anthropic), [OpenAI](/nl/providers/openai),
-    [Qwen Cloud](/nl/providers/qwen),
-    [MiniMax](/nl/providers/minimax), [Z.AI (GLM)](/nl/providers/zai),
+    Documentatie: [Anthropic](/nl/providers/anthropic), [OpenAI](/nl/providers/openai),
+    [Qwen Cloud](/nl/providers/qwen), [MiniMax](/nl/providers/minimax), [Z.AI (GLM)](/nl/providers/zai),
     [Lokale modellen](/nl/gateway/local-models), [Modellen](/nl/concepts/models).
 
   </Accordion>
 
-  <Accordion title="Kan ik een Claude Max-abonnement gebruiken zonder API-sleutel?">
-    Ja.
-
-    Anthropic-medewerkers vertelden ons dat OpenClaw-achtig Claude CLI-gebruik weer is toegestaan, dus
-    OpenClaw behandelt Claude-abonnementsauth en `claude -p`-gebruik als goedgekeurd
-    voor deze integratie tenzij Anthropic een nieuw beleid publiceert. Als je
-    de meest voorspelbare server-side configuratie wilt, gebruik dan in plaats daarvan een Anthropic API-sleutel.
-
+  <Accordion title="Kan ik een Claude Max-abonnement zonder API-sleutel gebruiken?">
+    Ja. OpenClaw ondersteunt hergebruik van Claude CLI voor Pro-/Max-/Team-/Enterprise-abonnementen. Anthropic
+    behandelt het `claude -p`-pad dat OpenClaw gebruikt momenteel als gebruik binnen het abonnement,
+    onderhevig aan de limieten van je abonnement, en niet als een afzonderlijke gratis toelage. Zie
+    [Anthropic](/nl/providers/anthropic) voor de actuele factureringsinformatie en links naar
+    de eigen ondersteuningsartikelen van Anthropic. Gebruik voor de meest voorspelbare serverconfiguratie
+    in plaats daarvan een Anthropic-API-sleutel.
   </Accordion>
 
-  <Accordion title="Ondersteunen jullie Claude-abonnementsauth (Claude Pro of Max)?">
-    Ja.
+  <Accordion title="Ondersteunen jullie authenticatie via een Claude-abonnement (Claude Pro of Max)?">
+    Ja, via hergebruik van Claude CLI. De factureringswijze van Anthropic voor `claude -p`/Agent SDK-gebruik
+    is in de loop van de tijd gewijzigd; zie [Anthropic](/nl/providers/anthropic) voor de actuele status en
+    gedateerde links naar de ondersteuningsartikelen van Anthropic voordat je op specifiek factureringsgedrag
+    vertrouwt.
 
-    Anthropic-medewerkers vertelden ons dat dit gebruik weer is toegestaan, dus OpenClaw behandelt
-    hergebruik van Claude CLI en `claude -p`-gebruik als goedgekeurd voor deze integratie
-    tenzij Anthropic een nieuw beleid publiceert.
-
-    Anthropic setup-token is nog steeds beschikbaar als ondersteund OpenClaw-tokenpad, maar OpenClaw geeft nu de voorkeur aan hergebruik van Claude CLI en `claude -p` wanneer beschikbaar.
-    Voor productie- of multi-user-workloads is Anthropic API-sleutelauth nog steeds de
-    veiligere, voorspelbaardere keuze. Als je andere gehoste abonnementsachtige
-    opties in OpenClaw wilt, zie [OpenAI](/nl/providers/openai), [Qwen / Model
-    Cloud](/nl/providers/qwen), [MiniMax](/nl/providers/minimax) en [GLM
-    Models](/nl/providers/zai).
+    Authenticatie met een Anthropic-installatietoken is ook nog steeds een ondersteund tokenpad, maar OpenClaw geeft waar mogelijk de voorkeur aan
+    hergebruik van de Claude CLI en `claude -p`. Voor productie- of multi-userworkloads
+    blijft een Anthropic API-sleutel de veiligere, voorspelbaardere keuze. Andere
+    gehoste opties in abonnementsvorm: [OpenAI](/nl/providers/openai), [Qwen Cloud](/nl/providers/qwen),
+    [MiniMax](/nl/providers/minimax), [Z.AI (GLM)](/nl/providers/zai).
 
   </Accordion>
 
@@ -584,184 +538,185 @@ x-i18n:
 
 <a id="why-am-i-seeing-http-429-ratelimiterror-from-anthropic"></a>
 
-  <AccordionGroup>
-  <Accordion title="Waarom zie ik HTTP 429 rate_limit_error van Anthropic?">
-    Dat betekent dat je **Anthropic-quota/rate limit** voor het huidige venster is uitgeput. Als je
-    **Claude CLI** gebruikt, wacht dan tot het venster wordt gereset of upgrade je abonnement. Als je
-    een **Anthropic API key** gebruikt, controleer dan de Anthropic Console
-    op gebruik/facturering en verhoog de limieten waar nodig.
+<AccordionGroup>
+  <Accordion title="Waarom krijg ik HTTP 429 rate_limit_error van Anthropic?">
+    Je **Anthropic-quotum/snelheidslimiet** is voor het huidige tijdvenster opgebruikt. Wacht bij **Claude
+    CLI** tot het tijdvenster opnieuw wordt ingesteld of upgrade je abonnement. Controleer bij een **Anthropic API-sleutel**
+    het gebruik en de facturering in de Anthropic Console en verhoog zo nodig de limieten.
 
-    Als het bericht specifiek dit is:
-    `Extra usage is required for long context requests`, probeert de aanvraag
-    Anthropic's 1M-contextvenster te gebruiken (een GA-geschikt 1M Claude 4.x-model of legacy
-    `context1m: true`-config). Dat werkt alleen wanneer je referentie in aanmerking komt
-    voor long-context-facturering (API key-facturering of het OpenClaw Claude-loginpad
-    met Extra Usage ingeschakeld).
+    Als het bericht specifiek `Extra usage is required for long context requests` is,
+    probeert de aanvraag het contextvenster van 1M van Anthropic te gebruiken (een voor GA geschikt Claude 4.x-model
+    met 1M, of verouderde configuratie `params.context1m: true`) en komen je huidige referenties niet
+    in aanmerking voor facturering van lange context.
 
-    Tip: stel een **fallbackmodel** in zodat OpenClaw kan blijven antwoorden terwijl een provider rate-limited is.
+    Stel een **fallbackmodel** in, zodat OpenClaw blijft antwoorden terwijl de snelheidslimiet van een provider is bereikt.
     Zie [Modellen](/nl/cli/models), [OAuth](/nl/concepts/oauth) en
-    [/gateway/troubleshooting#anthropic-429-extra-usage-required-for-long-context](/nl/gateway/troubleshooting#anthropic-429-extra-usage-required-for-long-context).
+    [Anthropic 429: extra gebruik vereist voor lange context](/nl/gateway/troubleshooting#anthropic-429-extra-usage-required-for-long-context).
 
   </Accordion>
 
   <Accordion title="Wordt AWS Bedrock ondersteund?">
-    Ja. OpenClaw heeft een gebundelde **Amazon Bedrock (Converse)**-provider. Wanneer AWS-env-markeringen aanwezig zijn, kan OpenClaw automatisch de streaming/text Bedrock-catalogus ontdekken en samenvoegen als impliciete `amazon-bedrock`-provider; anders kun je expliciet `plugins.entries.amazon-bedrock.config.discovery.enabled` inschakelen of een handmatige providervermelding toevoegen. Zie [Amazon Bedrock](/nl/providers/bedrock) en [Modelproviders](/nl/providers/models). Als je liever een beheerde sleutelstroom gebruikt, is een OpenAI-compatibele proxy vóór Bedrock nog steeds een geldige optie.
+    Ja. OpenClaw heeft een gebundelde **Amazon Bedrock (Converse)**-provider. Als AWS-omgevingsmarkeringen
+    aanwezig zijn (`AWS_ACCESS_KEY_ID`, `AWS_PROFILE`, `AWS_BEARER_TOKEN_BEDROCK`),
+    schakelt OpenClaw automatisch de impliciete Bedrock-provider in voor modeldetectie; stel anders
+    `plugins.entries.amazon-bedrock.config.discovery.enabled: true` in of voeg handmatig een
+    providervermelding toe. Zie [Amazon Bedrock](/nl/providers/bedrock) en [Modelproviders](/nl/providers/models).
+    Een OpenAI-compatibele proxy vóór Bedrock blijft een geldige optie als je de voorkeur geeft aan een beheerde sleutelstroom.
   </Accordion>
 
   <Accordion title="Hoe werkt Codex-authenticatie?">
-    OpenClaw ondersteunt **OpenAI Code (Codex)** via OAuth (ChatGPT-aanmelding). Gebruik
-    `openai/gpt-5.5` voor de gangbare setup: ChatGPT/Codex-abonnementsauthenticatie plus
-    native Codex-app-serveruitvoering. Legacy Codex GPT-referenties zijn
-    legacy config die wordt gerepareerd door `openclaw doctor --fix`. Directe OpenAI API-key-
-    toegang blijft beschikbaar voor niet-agent OpenAI API-oppervlakken en voor agent-
-    modellen via een geordend `openai` API-key-profiel.
-    Zie [Modelproviders](/nl/concepts/model-providers) en [Onboarding (CLI)](/nl/start/wizard).
+    OpenClaw ondersteunt **OpenAI Codex** via OAuth (aanmelden bij ChatGPT). Een nieuwe
+    installatie zonder primair model gebruikt exact `openai/gpt-5.6-sol` voor
+    ChatGPT/Codex-abonnementsauthenticatie plus systeemeigen uitvoering via de Codex-appserver.
+    Bij herauthenticatie blijft een bestaand expliciet model behouden, waaronder
+    `openai/gpt-5.5`. Als de Codex-werkruimte GPT-5.6 niet beschikbaar stelt, selecteer dan
+    expliciet `openai/gpt-5.5`; OpenClaw voert geen stille downgrade uit. Verouderde
+    modelverwijzingen met een Codex-voorvoegsel zijn verouderde configuratie die door `openclaw doctor
+    --fix` wordt hersteld. Rechtstreekse toegang met een OpenAI API-sleutel blijft beschikbaar voor niet-agentgebonden OpenAI
+    API-oppervlakken en, via een geordend `openai`-API-sleutelprofiel, ook voor agentmodellen.
+    Zie [Modelproviders](/nl/concepts/model-providers) en
+    [Onboarding (CLI)](/nl/start/wizard).
   </Accordion>
 
-  <Accordion title="Waarom noemt OpenClaw nog steeds de legacy OpenAI Codex-prefix?">
-    `openai` is de provider- en auth-profiel-id voor zowel OpenAI API keys als
-    ChatGPT/Codex OAuth. Je kunt de legacy OpenAI Codex-prefix nog zien in legacy config en
-    migratiewaarschuwingen.
-    Oudere configs gebruikten die ook als modelprefix:
+  <Accordion title="Waarom vermeldt OpenClaw nog steeds het verouderde OpenAI Codex-voorvoegsel?">
+    `openai` is de huidige provider- en authenticatieprofiel-id voor zowel OpenAI API-sleutels als
+    ChatGPT/Codex OAuth; OpenAI Codex is erin opgenomen. Mogelijk zie je nog een verouderd
+    voorvoegsel `openai-codex` in oudere configuratie- en migratiewaarschuwingen:
 
-    - `openai/gpt-5.5` = ChatGPT/Codex-abonnementsauthenticatie met native Codex-runtime voor agentbeurten
-    - legacy Codex GPT-5.5-ref = legacy modelroute gerepareerd door `openclaw doctor --fix`
-    - `openai/gpt-5.5` plus een geordend `openai` API-key-profiel = API-key-authenticatie voor een OpenAI-agentmodel
-    - legacy Codex-authprofiel-id's = legacy authprofiel-id gemigreerd door `openclaw doctor --fix`
+    - `openai/gpt-5.6-sol` = nieuwe ChatGPT/Codex-abonnementsinstallatie met de systeemeigen Codex-runtime voor agentbeurten.
+    - `openai/gpt-5.5` = expliciete ondersteunde selectie voor bestaande configuraties of accounts zonder toegang tot GPT-5.6.
+    - Verouderde modelverwijzingen `openai-codex/*` = verouderde route die door `openclaw doctor --fix` wordt hersteld.
+    - `openai/gpt-5.5` plus een geordend `openai`-API-sleutelprofiel = API-sleutelauthenticatie voor een OpenAI-agentmodel.
+    - Verouderde authenticatieprofiel-id's `openai-codex` = verouderde id's die door `openclaw doctor --fix` worden gemigreerd.
 
-    Als je het directe OpenAI Platform-facturerings-/limietpad wilt, stel dan
-    `OPENAI_API_KEY` in. Als je ChatGPT/Codex-abonnementsauthenticatie wilt, meld je dan aan met
-    `openclaw models auth login --provider openai`. Houd de modelreferentie op
-    `openai/gpt-5.5`; legacy Codex-modelreferenties zijn legacy config die
-    `openclaw doctor --fix` herschrijft.
+    Wil je rechtstreekse facturering via OpenAI Platform? Stel `OPENAI_API_KEY` in. Wil je ChatGPT/Codex-
+    abonnementsauthenticatie? Voer `openclaw models auth login --provider openai` uit. Houd
+    modelverwijzingen onder de canonieke provider `openai/*`. Een nieuwe abonnementsinstallatie
+    gebruikt exact `openai/gpt-5.6-sol`; doctor herstelt verouderde verwijzingen met een Codex-voorvoegsel
+    zonder een expliciete selectie van `openai/gpt-5.5` te upgraden.
 
   </Accordion>
 
-  <Accordion title="Waarom kunnen Codex OAuth-limieten verschillen van ChatGPT web?">
-    Codex OAuth gebruikt door OpenAI beheerde, abonnementsafhankelijke quotavensters. In de praktijk
-    kunnen die limieten verschillen van de ervaring op de ChatGPT-website/app, zelfs wanneer
-    beide aan hetzelfde account zijn gekoppeld.
+  <Accordion title="Waarom kunnen de limieten van Codex OAuth verschillen van die van ChatGPT-web?">
+    Codex OAuth gebruikt door OpenAI beheerde, abonnementsafhankelijke quotumvensters die kunnen verschillen van de
+    ervaring op de ChatGPT-website of in de app, zelfs met hetzelfde account.
 
-    OpenClaw kan de momenteel zichtbare gebruiks-/quotavensters van providers tonen in
-    `openclaw models status`, maar het bedenkt of normaliseert geen ChatGPT-web-
-    rechten naar directe API-toegang. Als je het directe OpenAI Platform-
-    facturerings-/limietpad wilt, gebruik dan `openai/*` met een API key.
+    `openclaw models status` toont de momenteel zichtbare gebruiks- en quotumvensters van de provider, maar
+    verzint of normaliseert ChatGPT-webrechten niet naar rechtstreekse API-toegang. Gebruik voor het
+    rechtstreekse facturerings- en limietpad van OpenAI Platform `openai/*` met een API-sleutel.
 
   </Accordion>
 
   <Accordion title="Ondersteunen jullie OpenAI-abonnementsauthenticatie (Codex OAuth)?">
-    Ja. OpenClaw ondersteunt **OpenAI Code (Codex) abonnements-OAuth** volledig.
-    OpenAI staat expliciet abonnements-OAuth-gebruik toe in externe tools/workflows
-    zoals OpenClaw. Onboarding kan de OAuth-flow voor je uitvoeren.
+    Ja, volledig. OpenAI staat expliciet het gebruik van abonnements-OAuth toe in externe
+    tools en workflows zoals OpenClaw. Onboarding kan de OAuth-stroom voor je uitvoeren.
 
     Zie [OAuth](/nl/concepts/oauth), [Modelproviders](/nl/concepts/model-providers) en [Onboarding (CLI)](/nl/start/wizard).
 
   </Accordion>
 
   <Accordion title="Hoe stel ik Gemini CLI OAuth in?">
-    Gemini CLI gebruikt een **Plugin-authflow**, geen client-id of secret in `openclaw.json`.
+    Gemini CLI gebruikt een **Plugin-authenticatiestroom**, geen client-id of geheim in `openclaw.json`.
 
-    Stappen:
-
-    1. Installeer Gemini CLI lokaal zodat `gemini` op `PATH` staat
+    1. Installeer Gemini CLI lokaal, zodat `gemini` zich op `PATH` bevindt:
        - Homebrew: `brew install gemini-cli`
        - npm: `npm install -g @google/gemini-cli`
     2. Schakel de Plugin in: `openclaw plugins enable google`
-    3. Log in: `openclaw models auth login --provider google-gemini-cli --set-default`
-    4. Standaardmodel na login: `google-gemini-cli/gemini-3-flash-preview`
-    5. Als aanvragen mislukken, stel dan `GOOGLE_CLOUD_PROJECT` of `GOOGLE_CLOUD_PROJECT_ID` in op de gatewayhost
+    3. Meld je aan: `openclaw models auth login --provider google-gemini-cli --set-default`
+    4. Standaardmodel na aanmelding: `google/gemini-3.1-pro-preview` (runtime `google-gemini-cli`)
+    5. Mislukken aanvragen na aanmelding? Stel `GOOGLE_CLOUD_PROJECT` of `GOOGLE_CLOUD_PROJECT_ID` in op de Gateway-host en probeer het opnieuw.
 
-    Dit slaat OAuth-tokens op in authprofielen op de gatewayhost. Details: [Modelproviders](/nl/concepts/model-providers).
+    OAuth-tokens worden opgeslagen in authenticatieprofielen op de Gateway-host. Details: [Google](/nl/providers/google), [Modelproviders](/nl/concepts/model-providers).
 
   </Accordion>
 
   <Accordion title="Is een lokaal model geschikt voor informele chats?">
-    Meestal niet. OpenClaw heeft een grote context en sterke veiligheid nodig; kleine kaarten kappen af en lekken. Als het echt moet, draai dan de **grootste** modelbuild die je lokaal kunt draaien (LM Studio) en zie [/gateway/local-models](/nl/gateway/local-models). Kleinere/gekwantiseerde modellen verhogen het risico op promptinjectie - zie [Beveiliging](/nl/gateway/security).
+    Meestal niet. OpenClaw heeft een grote context en sterke beveiliging nodig; kleine kaarten kappen de context af
+    en slaan beveiligingsfilters aan de providerzijde over. Als het echt moet, voer dan lokaal de **grootste** modelbuild uit die
+    je kunt gebruiken (LM Studio) — zie [Lokale modellen](/nl/gateway/local-models). Kleinere/gekwantiseerde
+    modellen verhogen het risico op promptinjectie — zie [Beveiliging](/nl/gateway/security).
   </Accordion>
 
-  <Accordion title="Hoe houd ik gehost modelverkeer in een specifieke regio?">
-    Kies regio-vastgezette endpoints. OpenRouter biedt in de VS gehoste opties voor MiniMax, Kimi en GLM; kies de in de VS gehoste variant om data in de regio te houden. Je kunt Anthropic/OpenAI nog steeds naast deze vermelden door `models.mode: "merge"` te gebruiken, zodat fallbacks beschikbaar blijven terwijl de geregionaliseerde provider die je selecteert wordt gerespecteerd.
+  <Accordion title="Hoe houd ik verkeer naar gehoste modellen binnen een specifieke regio?">
+    Kies regiogebonden eindpunten. OpenRouter biedt in de VS gehoste opties voor MiniMax, Kimi
+    en GLM; kies de in de VS gehoste variant om gegevens binnen de regio te houden. Je kunt daarnaast nog steeds
+    Anthropic/OpenAI vermelden met `models.mode: "merge"`, zodat fallbacks
+    beschikbaar blijven terwijl de door jou geselecteerde regionale provider wordt gerespecteerd.
   </Accordion>
 
-  <Accordion title="Moet ik een Mac Mini kopen om dit te installeren?">
-    Nee. OpenClaw draait op macOS of Linux (Windows via WSL2). Een Mac mini is optioneel - sommige mensen
-    kopen er een als always-on host, maar een kleine VPS, thuisserver of Raspberry Pi-klasse apparaat werkt ook.
+  <Accordion title="Moet ik een Mac mini kopen om dit te installeren?">
+    Nee. OpenClaw draait op macOS of Linux (Windows via WSL2). Een Mac mini is een populaire
+    keuze als altijd actieve host, maar een kleine VPS, thuisserver of Raspberry Pi-achtige machine werkt ook.
 
-    Je hebt alleen een Mac nodig **voor tools die alleen op macOS werken**. Gebruik voor iMessage [iMessage](/nl/channels/imessage) met `imsg` op een Mac die is aangemeld bij Berichten. Als de Gateway op Linux of elders draait, stel dan `channels.imessage.cliPath` in op een SSH-wrapper die `imsg` op die Mac uitvoert. Als je andere macOS-only tools wilt, draai de Gateway dan op een Mac of koppel een macOS-node.
+    Je hebt alleen een Mac nodig **voor tools die uitsluitend op macOS werken**. Gebruik voor iMessage [iMessage](/nl/channels/imessage)
+    met `imsg` op elke Mac die bij Berichten is aangemeld. Als de Gateway op Linux of elders draait,
+    stel dan `channels.imessage.cliPath` in op een SSH-wrapper die `imsg` op die Mac uitvoert. Voer voor andere
+    tools die uitsluitend op macOS werken de Gateway uit op een Mac of koppel een macOS-node.
 
-    Docs: [iMessage](/nl/channels/imessage), [Nodes](/nl/nodes), [Mac remote mode](/nl/platforms/mac/remote).
-
-  </Accordion>
-
-  <Accordion title="Heb ik een Mac mini nodig voor iMessage-ondersteuning?">
-    Je hebt **een macOS-apparaat** nodig dat is aangemeld bij Berichten. Dat hoeft **geen** Mac mini te zijn -
-    elke Mac werkt. **Gebruik [iMessage](/nl/channels/imessage)** met `imsg`; de Gateway kan op die Mac draaien, of ergens anders met een SSH-wrapper `cliPath`.
-
-    Veelvoorkomende setups:
-
-    - Draai de Gateway op Linux/VPS en stel `channels.imessage.cliPath` in op een SSH-wrapper die `imsg` uitvoert op een Mac die is aangemeld bij Berichten.
-    - Draai alles op de Mac als je de eenvoudigste setup op één machine wilt.
-
-    Docs: [iMessage](/nl/channels/imessage), [Nodes](/nl/nodes),
-    [Mac remote mode](/nl/platforms/mac/remote).
+    Documentatie: [iMessage](/nl/channels/imessage), [Nodes](/nl/nodes), [Externe Mac-modus](/nl/platforms/mac/remote).
 
   </Accordion>
 
-  <Accordion title="Als ik een Mac mini koop om OpenClaw te draaien, kan ik die dan verbinden met mijn MacBook Pro?">
-    Ja. De **Mac mini kan de Gateway draaien**, en je MacBook Pro kan verbinden als
-    **node** (begeleidend apparaat). Nodes draaien de Gateway niet - ze bieden extra
-    mogelijkheden zoals scherm/camera/canvas en `system.run` op dat apparaat.
+  <Accordion title="Heb ik een Mac mini nodig voor ondersteuning van iMessage?">
+    Je hebt **een macOS-apparaat** nodig dat bij Berichten is aangemeld — niet noodzakelijk een Mac mini; elke
+    Mac werkt. Gebruik [iMessage](/nl/channels/imessage) met `imsg`; de Gateway kan op die
+    Mac draaien, of elders met een SSH-wrapper `cliPath`.
 
-    Veelvoorkomend patroon:
+    Veelgebruikte configuraties:
 
-    - Gateway op de Mac mini (always-on).
-    - MacBook Pro draait de macOS-app of een nodehost en koppelt met de Gateway.
-    - Gebruik `openclaw nodes status` / `openclaw nodes list` om deze te zien.
+    - Gateway op Linux/VPS, waarbij `channels.imessage.cliPath` is ingesteld op een SSH-wrapper die `imsg` uitvoert op een Mac die bij Berichten is aangemeld.
+    - Alles op één Mac voor de eenvoudigste configuratie met één machine.
 
-    Docs: [Nodes](/nl/nodes), [Nodes CLI](/nl/cli/nodes).
+    Documentatie: [iMessage](/nl/channels/imessage), [Nodes](/nl/nodes), [Externe Mac-modus](/nl/platforms/mac/remote).
+
+  </Accordion>
+
+  <Accordion title="Als ik een Mac mini koop om OpenClaw uit te voeren, kan ik die dan met mijn MacBook Pro verbinden?">
+    Ja. De **Mac mini kan de Gateway uitvoeren** en je MacBook Pro maakt verbinding als **node**
+    (begeleidend apparaat). Nodes voeren de Gateway niet uit; ze voegen mogelijkheden toe zoals
+    scherm/camera/canvas en `system.run` op dat apparaat.
+
+    Veelgebruikt patroon: de Gateway op de altijd actieve Mac mini; de MacBook Pro voert de macOS-app of een
+    nodehost uit en wordt aan de Gateway gekoppeld. Controleer dit met `openclaw nodes status` / `openclaw nodes list`.
+
+    Documentatie: [Nodes](/nl/nodes), [Nodes-CLI](/nl/cli/nodes).
 
   </Accordion>
 
   <Accordion title="Kan ik Bun gebruiken?">
-    Bun wordt **niet aanbevolen**. We zien runtimebugs, vooral met WhatsApp en Telegram.
-    Gebruik **Node** voor stabiele gateways.
-
-    Als je toch met Bun wilt experimenteren, doe dat dan op een niet-productie-gateway
-    zonder WhatsApp/Telegram.
-
+    Je kunt Bun gebruiken om afhankelijkheden te installeren of pakketscripts uit te voeren. De OpenClaw CLI en
+    Gateway vereisen **Node**, omdat de canonieke statusopslag `node:sqlite` gebruikt; Bun biedt
+    die API niet.
   </Accordion>
 
   <Accordion title="Telegram: wat hoort er in allowFrom?">
-    `channels.telegram.allowFrom` is **de Telegram-gebruikers-ID van de menselijke afzender** (numeriek). Het is niet de botgebruikersnaam.
+    `channels.telegram.allowFrom` is de **Telegram-gebruikers-id van de menselijke afzender** (numeriek),
+    niet de gebruikersnaam van de bot. De installatie vraagt uitsluitend om numerieke gebruikers-id's; `openclaw doctor --fix`
+    kan proberen verouderde vermeldingen van `@username` om te zetten.
 
-    Setup vraagt alleen om numerieke gebruikers-ID's. Als je al legacy `@username`-vermeldingen in config hebt, kan `openclaw doctor --fix` proberen deze op te lossen.
+    Veiliger (geen bot van derden): stuur je bot een privébericht, voer `openclaw logs --follow` uit en lees `from.id`.
 
-    Veiliger (geen bot van derden):
+    Officiële Bot API: stuur je bot een privébericht, roep `https://api.telegram.org/bot<bot_token>/getUpdates` aan en lees `message.from.id`.
 
-    - Stuur je bot een DM, voer daarna `openclaw logs --follow` uit en lees `from.id`.
+    Derde partij (minder privé): stuur `@userinfobot` of `@getidsbot` een privébericht.
 
-    Officiële Bot API:
-
-    - Stuur je bot een DM, roep daarna `https://api.telegram.org/bot<bot_token>/getUpdates` aan en lees `message.from.id`.
-
-    Derden (minder privé):
-
-    - Stuur een DM naar `@userinfobot` of `@getidsbot`.
-
-    Zie [/channels/telegram](/nl/channels/telegram#access-control-and-activation).
+    Zie [Telegram-toegangsbeheer](/nl/channels/telegram#access-control-and-activation).
 
   </Accordion>
 
-  <Accordion title="Kunnen meerdere mensen één WhatsApp-nummer gebruiken met verschillende OpenClaw-instanties?">
-    Ja, via **multi-agent-routering**. Bind de WhatsApp-**DM** van elke afzender (peer `kind: "direct"`, afzender E.164 zoals `+15551234567`) aan een andere `agentId`, zodat iedereen zijn eigen workspace en sessieopslag krijgt. Antwoorden komen nog steeds van hetzelfde **WhatsApp-account**, en DM-toegangscontrole (`channels.whatsapp.dmPolicy` / `channels.whatsapp.allowFrom`) is globaal per WhatsApp-account. Zie [Multi-Agent-routering](/nl/concepts/multi-agent) en [WhatsApp](/nl/channels/whatsapp).
+  <Accordion title="Kunnen meerdere personen één WhatsApp-nummer gebruiken met verschillende OpenClaw-instanties?">
+    Ja, via **multi-agentroutering**. Koppel het WhatsApp-privébericht van elke afzender (`peer: { kind: "direct", id: "+15551234567" }`) aan een andere `agentId`, zodat elke persoon een eigen werkruimte en sessieopslag heeft. Antwoorden komen nog steeds van **hetzelfde WhatsApp-account**; toegangsbeheer voor privéberichten (`channels.whatsapp.dmPolicy` / `channels.whatsapp.allowFrom`) is globaal per account. Zie [Multi-agentroutering](/nl/concepts/multi-agent) en [WhatsApp](/nl/channels/whatsapp).
   </Accordion>
 
-  <Accordion title='Kan ik een "fast chat"-agent en een "Opus for coding"-agent draaien?'>
-    Ja. Gebruik multi-agent-routering: geef elke agent zijn eigen standaardmodel en bind vervolgens inkomende routes (provideraccount of specifieke peers) aan elke agent. Voorbeeldconfig staat in [Multi-Agent-routering](/nl/concepts/multi-agent). Zie ook [Modellen](/nl/concepts/models) en [Configuratie](/nl/gateway/configuration).
+  <Accordion title='Kan ik een agent voor "snelle chats" en een agent met "Opus voor programmeren" uitvoeren?'>
+    Ja. Gebruik multi-agentroutering: geef elke agent een eigen standaardmodel en koppel vervolgens inkomende
+    routes (provideraccount of specifieke peers) aan elke agent. Voorbeeldconfiguratie:
+    [Multi-agentroutering](/nl/concepts/multi-agent). Zie ook [Modellen](/nl/concepts/models) en
+    [Configuratie](/nl/gateway/configuration).
   </Accordion>
 
   <Accordion title="Werkt Homebrew op Linux?">
-    Ja. Homebrew ondersteunt Linux (Linuxbrew). Snelle setup:
+    Ja, via Linuxbrew:
 
     ```bash
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -770,25 +725,27 @@ x-i18n:
     brew install <formula>
     ```
 
-    Als je OpenClaw via systemd draait, zorg dan dat de service-PATH `/home/linuxbrew/.linuxbrew/bin` (of je brew-prefix) bevat, zodat met `brew` geïnstalleerde tools worden gevonden in non-login shells.
-    Recente builds voegen ook algemene gebruikers-binmappen vooraan toe op Linux-systemd-services (bijvoorbeeld `~/.local/bin`, `~/.npm-global/bin`, `~/.local/share/pnpm`, `~/.bun/bin`) en respecteren `PNPM_HOME`, `NPM_CONFIG_PREFIX`, `BUN_INSTALL`, `VOLTA_HOME`, `ASDF_DATA_DIR`, `NVM_DIR` en `FNM_DIR` wanneer ingesteld.
+    OpenClaw uitvoeren via systemd: zorg ervoor dat het PATH van de service
+    `/home/linuxbrew/.linuxbrew/bin` (of je brew-voorvoegsel) bevat, zodat met `brew` geïnstalleerde tools
+    in niet-aanmeldingss shells worden gevonden. Recente builds voegen ook veelgebruikte gebruikersmappen met binaire bestanden vooraan toe aan Linux-
+    systemd-services (bijvoorbeeld `~/.local/bin`, `~/.npm-global/bin`,
+    `~/.local/share/pnpm`, `~/.bun/bin`) en respecteren `PNPM_HOME`, `NPM_CONFIG_PREFIX`,
+    `BUN_INSTALL`, `VOLTA_HOME`, `ASDF_DATA_DIR`, `NVM_DIR` en `FNM_DIR` wanneer deze zijn ingesteld.
 
   </Accordion>
 
-  <Accordion title="Verschil tussen de hackbare git-installatie en npm-installatie">
-    - **Hackbare (git) installatie:** volledige source-checkout, bewerkbaar, het beste voor contributors.
-      Je draait builds lokaal en kunt code/docs patchen.
-    - **npm-installatie:** globale CLI-installatie, geen repo, het beste voor "gewoon draaien."
-      Updates komen van npm dist-tags.
+  <Accordion title="Verschil tussen de aanpasbare git-installatie en npm-installatie">
+    - **Aanpasbare installatie (git):** volledige broncodecheckout, bewerkbaar, het meest geschikt voor bijdragers. Je bouwt lokaal en kunt code/documentatie aanpassen.
+    - **npm-installatie:** globale CLI-installatie, zonder repository, het meest geschikt om het "gewoon uit te voeren". Updates komen via npm-dist-tags.
 
-    Docs: [Aan de slag](/nl/start/getting-started), [Bijwerken](/nl/install/updating).
+    Documentatie: [Aan de slag](/nl/start/getting-started), [Bijwerken](/nl/install/updating).
 
   </Accordion>
 
   <Accordion title="Kan ik later wisselen tussen npm- en git-installaties?">
-    Ja. Gebruik `openclaw update --channel ...` wanneer OpenClaw al is geïnstalleerd.
-    Dit **verwijdert je data niet** - het verandert alleen de OpenClaw-code-installatie.
-    Je state (`~/.openclaw`) en workspace (`~/.openclaw/workspace`) blijven onaangeroerd.
+    Ja, met `openclaw update --channel ...` op een bestaande installatie. Hierdoor worden **je gegevens niet
+    verwijderd** — alleen de installatie van de OpenClaw-code verandert. De status (`~/.openclaw`) en
+    werkruimte (`~/.openclaw/workspace`) blijven onaangeroerd.
 
     Van npm naar git:
 
@@ -802,85 +759,83 @@ x-i18n:
     openclaw update --channel stable
     ```
 
-    Voeg `--dry-run` toe om eerst de geplande moduswisseling te bekijken. De updater voert
-    Doctor-vervolgacties uit, vernieuwt Plugin-bronnen voor het doelkanaal en
-    herstart de Gateway tenzij je `--no-restart` meegeeft.
+    Voeg `--dry-run` toe om eerst een voorbeeld van de geplande moduswisseling te bekijken. De updater voert
+    vervolgacties van Doctor uit, vernieuwt Plugin-bronnen voor het doelkanaal en start de Gateway opnieuw,
+    tenzij je `--no-restart` meegeeft.
 
     Het installatieprogramma kan beide modi ook afdwingen:
 
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method npm
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method npm
     ```
 
-    Back-uptips: zie [Back-upstrategie](/nl/help/faq#where-things-live-on-disk).
+    Back-uptips: [Waar onderdelen op schijf staan](/nl/help/faq#where-things-live-on-disk).
 
   </Accordion>
 
-  <Accordion title="Moet ik de Gateway op mijn laptop of op een VPS draaien?">
-    Kort antwoord: **als je 24/7 betrouwbaarheid wilt, gebruik dan een VPS**. Als je de
-    laagste drempel wilt en slaapstand/herstarts acceptabel vindt, draai hem lokaal.
+  <Accordion title="Moet ik de Gateway op mijn laptop of een VPS uitvoeren?">
+    Wil je 24/7 betrouwbaarheid? Gebruik een **VPS**. Wil je zo min mogelijk gedoe en vind je
+    de slaapstand en herstarts geen probleem? Voer de Gateway lokaal uit.
 
     **Laptop (lokale Gateway)**
 
-    - **Voordelen:** geen serverkosten, directe toegang tot lokale bestanden, live browservenster.
-    - **Nadelen:** slaapstand/netwerkuitval = verbroken verbindingen, OS-updates/herstarts onderbreken, moet wakker blijven.
+    - **Voordelen:** geen serverkosten, directe toegang tot lokale bestanden, een zichtbaar browservenster.
+    - **Nadelen:** de slaapstand of netwerkuitval verbreekt de verbinding, OS-updates en herstarts onderbreken de Gateway, de laptop moet actief blijven.
 
     **VPS / cloud**
 
-    - **Voordelen:** altijd aan, stabiel netwerk, geen problemen met laptopslaapstand, makkelijker draaiend te houden.
-    - **Nadelen:** vaak headless draaien (gebruik screenshots), alleen externe bestandstoegang, je moet SSH gebruiken voor updates.
+    - **Voordelen:** altijd actief, stabiel netwerk, geen problemen door de slaapstand van de laptop, eenvoudiger continu actief te houden.
+    - **Nadelen:** vaak headless (gebruik schermafbeeldingen), alleen externe bestandstoegang, SSH vereist voor updates.
 
-    **OpenClaw-specifieke opmerking:** WhatsApp/Telegram/Slack/Mattermost/Discord werken allemaal prima vanaf een VPS. De enige echte afweging is **headless browser** versus een zichtbaar venster. Zie [Browser](/nl/tools/browser).
+    WhatsApp/Telegram/Slack/Mattermost/Discord werken allemaal prima vanaf een VPS — de werkelijke
+    afweging is een headless browser tegenover een zichtbaar venster. Zie [Browser](/nl/tools/browser).
 
-    **Aanbevolen standaard:** VPS als je eerder Gateway-verbindingsverbrekingen had. Lokaal is uitstekend wanneer je de Mac actief gebruikt en lokale bestandstoegang of UI-automatisering met een zichtbare browser wilt.
-
-  </Accordion>
-
-  <Accordion title="Hoe belangrijk is het om OpenClaw op een dedicated machine te draaien?">
-    Niet vereist, maar **aanbevolen voor betrouwbaarheid en isolatie**.
-
-    - **Dedicated host (VPS/Mac mini/Raspberry Pi):** altijd aan, minder onderbrekingen door slaapstand/herstart, schonere rechten, makkelijker draaiend te houden.
-    - **Gedeelde laptop/desktop:** helemaal prima voor testen en actief gebruik, maar verwacht pauzes wanneer de machine in slaapstand gaat of updates uitvoert.
-
-    Als je het beste van beide werelden wilt, houd de Gateway dan op een dedicated host en koppel je laptop als een **Node** voor lokale scherm-/camera-/exec-tools. Zie [Nodes](/nl/nodes).
-    Lees [Beveiliging](/nl/gateway/security) voor beveiligingsrichtlijnen.
+    Standaardaanbeveling: gebruik een VPS als de verbinding met de Gateway eerder is verbroken; lokaal werkt uitstekend
+    wanneer je de Mac actief gebruikt en toegang tot lokale bestanden of UI-automatisering
+    met een zichtbare browser wilt.
 
   </Accordion>
 
-  <Accordion title="Wat zijn de minimale VPS-vereisten en het aanbevolen OS?">
-    OpenClaw is lichtgewicht. Voor een basis-Gateway + één chatkanaal:
+  <Accordion title="Hoe belangrijk is het om OpenClaw op een aparte machine uit te voeren?">
+    Dit is niet vereist, maar wordt aanbevolen voor betrouwbaarheid en isolatie.
 
-    - **Absoluut minimum:** 1 vCPU, 1GB RAM, ~500MB schijf.
-    - **Aanbevolen:** 1-2 vCPU, 2GB RAM of meer voor extra marge (logs, media, meerdere kanalen). Node-tools en browserautomatisering kunnen veel resources vragen.
+    - **Aparte host (VPS/Mac mini/Raspberry Pi):** altijd actief, minder onderbrekingen door de slaapstand of herstarts, overzichtelijkere machtigingen, eenvoudiger continu actief te houden.
+    - **Gedeelde laptop/desktop:** prima voor tests en actief gebruik, maar verwacht pauzes wanneer de machine in de slaapstand gaat of wordt bijgewerkt.
 
-    OS: gebruik **Ubuntu LTS** (of een moderne Debian/Ubuntu). Het Linux-installatiepad is daar het best getest.
+    Het beste van beide werelden: laat de Gateway op een aparte host draaien en koppel je laptop als een
+    **Node** voor lokale scherm-, camera- en uitvoeringstools. Zie [Nodes](/nl/nodes) en [Beveiliging](/nl/gateway/security).
+
+  </Accordion>
+
+  <Accordion title="Wat zijn de minimale VPS-vereisten en welk OS wordt aanbevolen?">
+    - **Absoluut minimum:** 1 vCPU, 1 GB RAM, ~500 MB schijfruimte.
+    - **Aanbevolen:** 1-2 vCPU, 2 GB+ RAM voor extra capaciteit (logboeken, media, meerdere kanalen). Node-tools en browserautomatisering kunnen veel systeembronnen gebruiken.
+
+    OS: **Ubuntu LTS** (of een moderne versie van Debian/Ubuntu) — het uitvoerigst geteste installatiepad voor Linux.
 
     Documentatie: [Linux](/nl/platforms/linux), [VPS-hosting](/nl/vps).
 
   </Accordion>
 
-  <Accordion title="Kan ik OpenClaw in een VM draaien en wat zijn de vereisten?">
-    Ja. Behandel een VM hetzelfde als een VPS: hij moet altijd aan staan, bereikbaar zijn en genoeg
-    RAM hebben voor de Gateway en alle kanalen die je inschakelt.
+  <Accordion title="Kan ik OpenClaw in een VM uitvoeren en wat zijn de vereisten?">
+    Ja. Behandel een VM als een VPS: deze moet altijd actief en bereikbaar zijn en voldoende RAM
+    hebben voor de Gateway en alle kanalen die je inschakelt.
 
-    Basisrichtlijnen:
+    - **Absoluut minimum:** 1 vCPU, 1 GB RAM.
+    - **Aanbevolen:** 2 GB+ RAM voor meerdere kanalen, browserautomatisering of mediatools.
+    - **OS:** Ubuntu LTS of een andere moderne versie van Debian/Ubuntu.
 
-    - **Absoluut minimum:** 1 vCPU, 1GB RAM.
-    - **Aanbevolen:** 2GB RAM of meer als je meerdere kanalen, browserautomatisering of mediatools draait.
-    - **OS:** Ubuntu LTS of een andere moderne Debian/Ubuntu.
-
-    Als je Windows gebruikt, gebruik dan **Windows Hub** voor desktopinstallatie, of WSL2 wanneer
-    je specifiek een Linux-achtige Gateway-VM wilt met brede compatibiliteit
-    met tooling. Zie [Windows](/nl/platforms/windows), [VPS-hosting](/nl/vps).
-    Als je macOS in een VM draait, zie [macOS-VM](/nl/install/macos-vm).
+    Gebruik op Windows **Windows Hub** voor de desktopconfiguratie, of WSL2 voor een Linux-achtige Gateway-VM
+    met brede compatibiliteit met tools. Zie [Windows](/nl/platforms/windows), [VPS-hosting](/nl/vps).
+    macOS uitvoeren in een VM: zie [macOS-VM](/nl/install/macos-vm).
 
   </Accordion>
 </AccordionGroup>
 
 ## Gerelateerd
 
-- [FAQ](/nl/help/faq) — de hoofd-FAQ (modellen, sessies, Gateway, beveiliging, meer)
+- [Veelgestelde vragen](/nl/help/faq) — de belangrijkste veelgestelde vragen (modellen, sessies, Gateway, beveiliging en meer)
 - [Installatieoverzicht](/nl/install)
 - [Aan de slag](/nl/start/getting-started)
-- [Probleemoplossing](/nl/help/troubleshooting)
+- [Problemen oplossen](/nl/help/troubleshooting)

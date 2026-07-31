@@ -1,28 +1,29 @@
 ---
 read_when:
-    - 你希望使用单个 API key 访问多个 LLM
+    - 你希望使用一个 API key 访问多个大语言模型
     - 你需要百度千帆设置指南
 summary: 使用千帆统一 API 在 OpenClaw 中访问多种模型
 title: 千帆
 x-i18n:
-    generated_at: "2026-07-11T20:54:12Z"
+    generated_at: "2026-07-26T06:26:16Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 31387a53ee4472e2d20ae939ea75cea0d6f6367501becd56a8654fd97fdf0804
     source_path: providers/qianfan.md
     workflow: 16
 ---
 
-Qianfan 是百度的 MaaS 平台：提供统一且兼容 OpenAI 的 API，通过单个端点和 API key 将请求路由到多种模型。OpenClaw 以官方外部插件 `@openclaw/qianfan-provider` 的形式提供该平台支持。
+Qianfan 是百度的 MaaS 平台：提供统一且兼容 OpenAI 的 API，通过单一端点和 API key 将请求路由到多个模型。OpenClaw 将其作为官方外部插件 `@openclaw/qianfan-provider` 提供。
 
-| 属性     | 值                                       |
-| -------- | ---------------------------------------- |
-| 提供商   | `qianfan`                                |
-| 身份验证 | `QIANFAN_API_KEY`                        |
-| API      | 兼容 OpenAI（`openai-completions`）      |
-| 基础 URL | `https://qianfan.baidubce.com/v2`        |
-| 默认模型 | `qianfan/deepseek-v3.2`                  |
+| 属性          | 值                                       |
+| ------------- | ---------------------------------------- |
+| 提供商        | `qianfan`                       |
+| 身份验证      | `QIANFAN_API_KEY`                       |
+| API           | 兼容 OpenAI（`openai-completions`）        |
+| 基础 URL      | `https://qianfan.baidubce.com/v2`                       |
+| 默认模型      | `qianfan/deepseek-v3.2`                       |
 
 ## 安装插件
 
@@ -36,7 +37,7 @@ openclaw gateway restart
 ## 入门指南
 
 <Steps>
-  <Step title="创建百度智能云账户">
+  <Step title="创建百度智能云账号">
     在 [Qianfan 控制台](https://console.bce.baidu.com/qianfan/ais/console/apiKey)注册或登录，并确保已启用 Qianfan API 访问权限。
   </Step>
   <Step title="生成 API key">
@@ -50,7 +51,7 @@ openclaw gateway restart
     非交互式运行会从 `--qianfan-api-key <key>` 或
     `QIANFAN_API_KEY` 读取密钥。新手引导会写入提供商配置，为默认模型添加
     `QIANFAN` 别名，并在尚未配置默认模型时将 `qianfan/deepseek-v3.2`
-    设为默认模型。
+    设置为默认模型。
 
   </Step>
   <Step title="验证模型是否可用">
@@ -62,15 +63,15 @@ openclaw gateway restart
 
 ## 内置目录
 
-| 模型引用                             | 输入         | 上下文  | 最大输出 | 推理 | 备注     |
-| ------------------------------------ | ------------ | ------- | -------- | ---- | -------- |
-| `qianfan/deepseek-v3.2`              | 文本         | 98,304  | 32,768   | 是   | 默认模型 |
-| `qianfan/ernie-5.0-thinking-preview` | 文本、图像   | 119,000 | 64,000   | 是   | 多模态   |
+| 模型引用                             | 输入        | 上下文  | 最大输出 | 推理 | 备注     |
+| ------------------------------------ | ----------- | ------- | -------- | ---- | -------- |
+| `qianfan/deepseek-v3.2`                   | 文本        | 98,304  | 32,768   | 是   | 默认模型 |
+| `qianfan/ernie-5.0-thinking-preview`                   | 文本、图像  | 119,000 | 64,000   | 是   | 多模态   |
 
-该目录是静态的，不支持实时模型发现。
+目录是静态的；不支持实时模型发现。
 
 <Tip>
-只有在需要自定义基础 URL 或模型元数据时，才需要覆盖 `models.providers.qianfan`。
+仅当需要自定义基础 URL 或模型元数据时，才需要覆盖 `models.providers.qianfan`。
 </Tip>
 
 ## 配置示例
@@ -127,9 +128,9 @@ openclaw gateway restart
   </Accordion>
 
   <Accordion title="故障排查">
-    - 确保你的 API key 以 `bce-v3/ALTAK-` 开头，并且已在百度智能云控制台中启用 Qianfan API 访问权限。
-    - 如果模型未列出，请确认你的账户已开通 Qianfan 服务。
-    - 只有在使用自定义端点或代理时才应更改基础 URL。
+    - 确保 API key 以 `bce-v3/ALTAK-` 开头，并已在百度智能云控制台中启用 Qianfan API 访问权限。
+    - 如果未列出模型，请确认账号已开通 Qianfan 服务。
+    - 仅在使用自定义端点或代理时更改基础 URL。
 
   </Accordion>
 </AccordionGroup>

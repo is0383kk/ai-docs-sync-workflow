@@ -1,35 +1,36 @@
 ---
 read_when:
-    - Een werkruimte handmatig initialiseren
+    - Een werkruimte handmatig opzetten
 summary: Werkruimtesjabloon voor HEARTBEAT.md
 title: HEARTBEAT.md-sjabloon
 x-i18n:
-    generated_at: "2026-07-12T09:24:55Z"
+    generated_at: "2026-07-27T06:09:14Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 1605f546995e0bdcb11f9bf905173b14aca25cfad664fe2c7644d18c2b4142e2
+    source_hash: d5b02cd62708a87515c4ae59bd2ffab3e4c8ebf81f4126fdd43ced756241b151
     source_path: reference/templates/HEARTBEAT.md
     workflow: 16
 ---
 
 # HEARTBEAT.md-sjabloon
 
-`HEARTBEAT.md` bevindt zich in de agentwerkruimte en bevat de periodieke Heartbeat-controlelijst. Houd het bestand leeg, of gebruik alleen witruimte, Markdown-opmerkingen, ATX-koppen, lege lijstitems (`- `, `* [ ]`) of fence-markeringen, zodat OpenClaw de aanroep van het Heartbeat-model volledig overslaat (`reason=empty-heartbeat-file`).
+`HEARTBEAT.md` bevindt zich in de agentwerkruimte en bevat de periodieke Heartbeat-checklist. Houd het leeg, of laat het alleen witruimte, Markdown-opmerkingen, ATX-koppen, lege lijststubs (`- `, `* [ ]`) of fence-markeringen bevatten, zodat OpenClaw de aanroep van het Heartbeat-model volledig overslaat (`reason=empty-heartbeat-file`).
 
 Standaard meegeleverde inhoud:
 
 ```markdown
-<!-- Heartbeat-sjabloon; inhoud met alleen opmerkingen voorkomt geplande Heartbeat-API-aanroepen. -->
+<!-- Heartbeat template; comments-only content prevents scheduled heartbeat API calls. -->
 
-# Houd dit bestand leeg (of gebruik alleen opmerkingen) om Heartbeat-API-aanroepen over te slaan.
+# Houd dit bestand leeg (of laat het alleen opmerkingen bevatten) om Heartbeat-API-aanroepen over te slaan.
 
-# Voeg hieronder taken toe wanneer je wilt dat de agent periodiek iets controleert.
+# Voeg hieronder een korte checklist toe wanneer de Heartbeat gedeelde context moet controleren.
 ```
 
-Voeg alleen korte taken onder de commentaarregels toe wanneer je periodieke controles wilt. Houd het beknopt: bij elke tik (standaard elke 30 minuten) leest Heartbeat dit bestand, waardoor uitgebreide instructies bij elke activering tokens verbruiken.
+Voeg alleen een korte checklist onder de commentaarregels toe wanneer één Heartbeat-beurt de items gezamenlijk moet controleren. Houd deze klein: Heartbeat-uitvoeringen lezen dit bestand bij elke tick (standaard elke 30 minuten), dus opgeblazen instructies verbruiken bij elke activering tokens.
 
-Gebruik voor controles die alleen worden uitgevoerd wanneer ze aan de beurt zijn, in plaats van een gewone controlelijst, een gestructureerd `tasks:`-blok met per taak de velden `interval` en `prompt`; zie [HEARTBEAT.md](/nl/gateway/heartbeat#heartbeatmd-optional) voor de indeling en het gedrag.
+Maak voor onafhankelijk geplande controles of controles die alleen bij het verstrijken van de termijn worden uitgevoerd [Cron-taken](/nl/automation/cron-jobs). Heartbeat-kladruimte ondersteunt geen planningssyntaxis meer. Voer `openclaw doctor --fix` uit om oudere `tasks:`-blokken te converteren.
 
 ## Gerelateerd
 

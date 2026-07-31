@@ -1,151 +1,253 @@
 ---
 read_when:
-    - बैकग्राउंड जॉब या वेकअप शेड्यूल करना
-    - OpenClaw में बाहरी ट्रिगर्स (Webhook, Gmail) जोड़ना
-    - निर्धारित कार्यों के लिए Heartbeat और Cron के बीच निर्णय लेना
+    - पृष्ठभूमि जॉब या वेकअप शेड्यूल करना
+    - बाहरी ट्रिगर्स (वेबहुक, Gmail) को OpenClaw से जोड़ना
+    - निर्धारित कार्यों के लिए Heartbeat और Cron के बीच चयन करना
 sidebarTitle: Scheduled tasks
-summary: Gateway शेड्यूलर के लिए शेड्यूल किए गए जॉब, Webhook, और Gmail PubSub ट्रिगर
+summary: Gateway शेड्यूलर के लिए शेड्यूल किए गए जॉब, Webhook और Gmail PubSub ट्रिगर
 title: निर्धारित कार्य
 x-i18n:
-    generated_at: "2026-07-02T08:15:57Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:25:55Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2f75b8d1e5ac558a02b895e1cd1b92b05af549a2bd63d4ce3ddafcaf9e94b88e
+    source_hash: dd889cf8e45196eda3ec7c2af930abcb2cc2bae8bad2dbdcaf3cd521a9e884b2
     source_path: automation/cron-jobs.md
     workflow: 16
 ---
 
-Cron Gateway का बिल्ट-इन scheduler है। यह jobs को persist करता है, सही समय पर agent को जगाता है, और output को chat channel या Webhook endpoint पर वापस deliver कर सकता है।
+Cron, Gateway का अंतर्निहित शेड्यूलर है। यह जॉब को स्थायी रखता है, सही समय पर एजेंट को सक्रिय करता है, और आउटपुट को किसी चैट चैनल, Webhook या कहीं भी नहीं भेज सकता है।
 
 ## त्वरित शुरुआत
 
 <Steps>
-  <Step title="Add a one-shot reminder">
+  <Step title="एक बार का रिमाइंडर जोड़ें">
     ```bash
-    openclaw cron create "2026-02-01T16:00:00Z" \
-      --name "Reminder" \
+    openclaw cron create "2027-02-01T16:00:00Z" \
+      --name "रिमाइंडर" \
       --session main \
-      --system-event "Reminder: check the cron docs draft" \
+      --system-event "रिमाइंडर: Cron दस्तावेज़ों का मसौदा जाँचें" \
       --wake now \
       --delete-after-run
     ```
   </Step>
-  <Step title="Check your jobs">
+  <Step title="अपने जॉब जाँचें">
     ```bash
     openclaw cron list
     openclaw cron get <job-id>
     openclaw cron show <job-id>
     ```
   </Step>
-  <Step title="See run history">
+  <Step title="रन इतिहास देखें">
     ```bash
     openclaw cron runs --id <job-id>
     ```
   </Step>
 </Steps>
 
-## cron कैसे काम करता है
+## Cron कैसे काम करता है
 
-- Cron **Gateway के अंदर** process में चलता है (model के अंदर नहीं)।
-- Job definitions, runtime state, और run history OpenClaw के shared SQLite state database में persist होते हैं, इसलिए restarts schedules नहीं खोते।
-- Upgrade पर, legacy `~/.openclaw/cron/jobs.json`, `jobs-state.json`, और `runs/*.jsonl` files को SQLite में import करने और उन्हें `.migrated` suffix के साथ rename करने के लिए `openclaw doctor --fix` चलाएँ। Malformed job rows को runtime से skip किया जाता है और बाद में repair या review के लिए `jobs-quarantine.json` में copy किया जाता है।
-- `cron.store` अभी भी logical cron store key और doctor import path को name करता है। Import के बाद, उस JSON file को edit करने से active cron jobs अब नहीं बदलते; इसके बजाय `openclaw cron add|edit|remove` या Gateway cron RPC methods का उपयोग करें।
-- सभी cron executions [background task](/hi/automation/tasks) records बनाते हैं।
-- Gateway startup पर, overdue isolated agent-turn jobs को तुरंत replay करने के बजाय channel-connect window से बाहर reschedule किया जाता है, ताकि restarts के बाद Discord/Telegram startup और native-command setup responsive रहें।
-- One-shot jobs (`--at`) default रूप से success के बाद auto-delete हो जाते हैं।
-- Isolated cron runs, run पूरा होने पर अपने `cron:<jobId>` session के लिए tracked browser tabs/processes को best-effort close करते हैं, ताकि detached browser automation orphaned processes पीछे न छोड़े।
-- Narrow cron self-cleanup grant पाने वाले isolated cron runs अब भी scheduler status, अपनी current job की self-filtered list, और उस job की run history पढ़ सकते हैं, ताकि status/Heartbeat checks broader cron mutation access पाए बिना अपना schedule inspect कर सकें।
-- Isolated cron runs stale acknowledgement replies से भी guard करते हैं। अगर पहला result सिर्फ interim status update (`on it`, `pulling everything together`, और समान hints) है और कोई descendant subagent run final answer के लिए अभी responsible नहीं है, तो OpenClaw delivery से पहले actual result के लिए एक बार फिर prompt करता है।
-- Isolated cron runs embedded run से structured execution-denial metadata का उपयोग करते हैं, जिसमें node-host `UNAVAILABLE` wrappers शामिल हैं जिनका nested error message `SYSTEM_RUN_DENIED` या `INVALID_REQUEST` से शुरू होता है, ताकि blocked command को green run की तरह report न किया जाए जबकि ordinary assistant prose को denial न माना जाए।
-- Isolated cron runs run-level agent failures को भी job errors मानते हैं, भले ही कोई reply payload produce न हो, ताकि model/provider failures error counters increment करें और job को successful clear करने के बजाय failure notifications trigger करें।
-- जब isolated agent-turn job `timeoutSeconds` तक पहुँचता है, cron underlying agent run को abort करता है और उसे एक छोटी cleanup window देता है। अगर run drain नहीं होता, तो Gateway-owned cleanup cron द्वारा timeout record करने से पहले उस run की session ownership को force-clear करता है, ताकि queued chat work stale processing session के पीछे न छूटे।
-- अगर isolated agent-turn runner start होने से पहले या first model call से पहले stall करता है, तो cron phase-specific timeout record करता है, जैसे `setup timed out before runner start` या `stalled before first model call (last phase: context-engine)`। ये watchdogs embedded providers और CLI-backed providers को उनके external CLI process के वास्तव में start होने से पहले cover करते हैं, और लंबे `timeoutSeconds` values से independent cap होते हैं ताकि cold-start/auth/context failures full job budget का इंतज़ार करने के बजाय जल्दी surface हों।
-- अगर आप `openclaw agent` चलाने के लिए system cron या कोई दूसरा external scheduler उपयोग करते हैं, तो उसे hard-kill escalation के साथ wrap करें, भले ही CLI `SIGTERM`/`SIGINT` handle करता हो। Gateway-backed runs accepted runs को abort करने के लिए Gateway से कहते हैं; local और embedded fallback runs को वही abort signal मिलता है। GNU `timeout` के लिए, plain `timeout 600 ...` के बजाय `timeout -k 60 600 openclaw agent ...` prefer करें; अगर process drain नहीं हो पाता, तो `-k` value supervisor backstop होती है। systemd units के लिए, final kill से पहले `SIGTERM` stop signal और `TimeoutStopSec` जैसी grace window का उपयोग करके वही shape रखें। अगर retry किसी `--run-id` को reuse करता है जबकि original Gateway run अभी भी active है, तो duplicate को second run start करने के बजाय in-flight report किया जाता है।
-
-<a id="maintenance"></a>
-
-<Note>
-Cron के लिए task reconciliation पहले runtime-owned, फिर durable-history-backed है: active cron task तब तक live रहता है जब तक cron runtime उस job को running के रूप में track करता है, भले ही कोई पुराना child session row अभी भी मौजूद हो। Runtime के job owning बंद करने और 5-minute grace window expire होने के बाद, maintenance matching `cron:<jobId>:<startedAt>` run के लिए persisted run logs और job state check करता है। अगर वह durable history terminal result दिखाती है, तो task ledger उससे finalized होता है; अन्यथा Gateway-owned maintenance task को `lost` mark कर सकता है। Offline CLI audit durable history से recover कर सकता है, लेकिन वह अपने empty in-process active-job set को इस बात का proof नहीं मानता कि Gateway-owned cron run gone है।
-</Note>
-
-## Schedule types
-
-| Kind    | CLI flag  | Description                                             |
-| ------- | --------- | ------------------------------------------------------- |
-| `at`    | `--at`    | One-shot timestamp (ISO 8601 या relative जैसे `20m`)    |
-| `every` | `--every` | Fixed interval                                          |
-| `cron`  | `--cron`  | Optional `--tz` के साथ 5-field या 6-field cron expression |
-
-Timezone के बिना timestamps को UTC माना जाता है। Local wall-clock scheduling के लिए `--tz America/New_York` जोड़ें।
-
-Recurring top-of-hour expressions load spikes घटाने के लिए automatically 5 minutes तक stagger किए जाते हैं। Precise timing force करने के लिए `--exact` या explicit window के लिए `--stagger 30s` उपयोग करें।
-
-### Day-of-month और day-of-week OR logic उपयोग करते हैं
-
-Cron expressions [croner](https://github.com/Hexagon/croner) द्वारा parse किए जाते हैं। जब day-of-month और day-of-week दोनों fields non-wildcard हों, तो croner तब match करता है जब **कोई भी** field match करे — दोनों नहीं। यह standard Vixie cron behavior है।
-
-```
-# Intended: "9 AM on the 15th, only if it's a Monday"
-# Actual:   "9 AM on every 15th, AND 9 AM on every Monday"
-0 9 15 * 1
-```
-
-यह प्रति month 0–1 बार के बजाय ~5–6 बार fire करता है। OpenClaw यहाँ Croner का default OR behavior उपयोग करता है। दोनों conditions require करने के लिए, Croner का `+` day-of-week modifier (`0 9 15 * +1`) उपयोग करें या एक field पर schedule करें और दूसरी को अपने job के prompt या command में guard करें।
-
-## Execution styles
-
-| Style           | `--session` value   | Runs in                  | Best for                        |
-| --------------- | ------------------- | ------------------------ | ------------------------------- |
-| Main session    | `main`              | Dedicated cron wake lane | Reminders, system events        |
-| Isolated        | `isolated`          | Dedicated `cron:<jobId>` | Reports, background chores      |
-| Current session | `current`           | Bound at creation time   | Context-aware recurring work    |
-| Custom session  | `session:custom-id` | Persistent named session | Workflows जो history पर build करते हैं |
+- Cron मॉडल के भीतर नहीं, बल्कि **Gateway प्रक्रिया के भीतर** चलता है। शेड्यूल सक्रिय होने के लिए Gateway का चालू होना आवश्यक है।
+- जॉब परिभाषाएँ, रनटाइम स्थिति और रन इतिहास OpenClaw के साझा SQLite स्थिति डेटाबेस में स्थायी रहते हैं, इसलिए पुनः प्रारंभ करने पर शेड्यूल नष्ट नहीं होते।
+- Cron का प्रत्येक निष्पादन एक [बैकग्राउंड टास्क](/hi/automation/tasks) रिकॉर्ड बनाता है।
+- एक बार चलने वाले जॉब (`--at`) सफल होने के बाद डिफ़ॉल्ट रूप से अपने-आप हट जाते हैं; उन्हें बनाए रखने के लिए `--keep-after-run` पास करें।
+- प्रति-रन वास्तविक समय बजट: सेट होने पर `--timeout-seconds`। अन्यथा, अलग-थलग/डिटैच किए गए एजेंट-टर्न जॉब पर अंतर्निहित एजेंट-टर्न टाइमआउट (`agents.defaults.timeoutSeconds`, डिफ़ॉल्ट 48 घंटे) लागू होने से पहले Cron का अपना 60-मिनट का वॉचडॉग सीमा लगाता है; कमांड जॉब का डिफ़ॉल्ट 10 मिनट और स्क्रिप्ट पेलोड का डिफ़ॉल्ट 5 मिनट है।
+- Gateway के प्रारंभ होने पर, समय से चूक चुके अलग-थलग एजेंट-टर्न जॉब तुरंत दोहराए जाने के बजाय पुनः शेड्यूल किए जाते हैं, जिससे मॉडल/टूल बूटस्ट्रैप कार्य चैनल-कनेक्ट अवधि से बाहर रहता है।
+- यदि आप सिस्टम Cron या किसी अन्य बाहरी शेड्यूलर से `openclaw agent` चलाते हैं, तो इसे हार्ड-किल एस्केलेशन से रैप करें, भले ही CLI पहले से `SIGTERM`/`SIGINT` को संभालता हो। Gateway-समर्थित रन स्वीकार किए गए रन को निरस्त करने के लिए Gateway से अनुरोध करते हैं; `--local` रन को भी वही निरस्तीकरण संकेत मिलता है। GNU `timeout` के लिए, साधारण `timeout 600 ...` के बजाय `timeout -k 60 600 openclaw agent ...` को प्राथमिकता दें — यदि प्रक्रिया समय पर समाप्त नहीं हो पाती, तो `-k` मान अंतिम सुरक्षा उपाय है। systemd यूनिट के लिए, अंतिम किल से पहले अनुग्रह अवधि (`TimeoutStopSec`) के साथ `SIGTERM` स्टॉप संकेत का उपयोग करें। मूल Gateway रन के सक्रिय रहते हुए `--run-id` का पुनः उपयोग करने पर दूसरा रन प्रारंभ करने के बजाय डुप्लिकेट को प्रगतिरत बताया जाता है।
 
 <AccordionGroup>
-  <Accordion title="Main session vs isolated vs custom">
-    **Main session** jobs cron-owned run lane में system event enqueue करते हैं और optional रूप से Heartbeat (`--wake now` या `--wake next-heartbeat`) को wake करते हैं। वे replies के लिए target main session के last delivery context का उपयोग कर सकते हैं, लेकिन वे routine cron turns को human chat lane में append नहीं करते और target session के लिए daily/idle reset freshness extend नहीं करते। **Isolated** jobs fresh session के साथ dedicated agent turn चलाते हैं। **Custom sessions** (`session:xxx`) runs के बीच context persist करते हैं, जिससे daily standups जैसे workflows enable होते हैं जो previous summaries पर build करते हैं।
-
-    Main-session cron events self-contained system-event reminders हैं। वे
-    default Heartbeat prompt के "Read
-    HEARTBEAT.md" instruction को automatically include नहीं करते। अगर recurring reminder को
-    `HEARTBEAT.md` consult करना चाहिए, तो cron event text में या
-    agent के अपने instructions में इसे explicitly कहें।
-
-  </Accordion>
-  <Accordion title="What 'fresh session' means for isolated jobs">
-    Isolated jobs के लिए, "fresh session" का अर्थ है हर run के लिए नया transcript/session id। OpenClaw thinking/fast/verbose settings, labels, और explicit user-selected model/auth overrides जैसी safe preferences carry कर सकता है, लेकिन वह पुराने cron row से ambient conversation context inherit नहीं करता: channel/group routing, send या queue policy, elevation, origin, या ACP runtime binding। जब recurring job को जानबूझकर उसी conversation context पर build करना चाहिए, तो `current` या `session:<id>` उपयोग करें।
-  </Accordion>
-  <Accordion title="Runtime cleanup">
-    Isolated jobs के लिए, runtime teardown में अब उस cron session के लिए best-effort browser cleanup शामिल है। Cleanup failures ignore किए जाते हैं ताकि actual cron result ही प्राथमिक रहे।
-
-    Isolated cron runs job के लिए बनाए गए किसी भी bundled MCP runtime instances को shared runtime-cleanup path के माध्यम से dispose भी करते हैं। यह main-session और custom-session MCP clients के tear down होने के तरीके से match करता है, इसलिए isolated cron jobs runs के बीच stdio child processes या long-lived MCP connections leak नहीं करते।
+  <Accordion title="अलग-थलग रन का सुदृढ़ीकरण">
+    - अलग-थलग रन पूर्ण होने पर अपने `cron:<jobId>` सत्र के लिए ट्रैक किए गए ब्राउज़र टैब/प्रक्रियाओं को सर्वोत्तम प्रयास के आधार पर बंद करते हैं और जॉब के लिए बनाए गए सभी बंडल किए गए MCP रनटाइम इंस्टेंस को उसी साझा टियरडाउन पथ से नष्ट करते हैं जिसका उपयोग मुख्य-सत्र और कस्टम-सत्र रन करते हैं। क्लीनअप विफलताओं को अनदेखा किया जाता है, ताकि Cron परिणाम को ही प्राथमिकता मिले।
+    - सीमित Cron स्व-क्लीनअप अनुमति वाले अलग-थलग रन शेड्यूलर की स्थिति, केवल अपना जॉब रखने वाली स्व-फ़िल्टर की गई सूची और उस जॉब का रन इतिहास पढ़ सकते हैं तथा केवल अपना जॉब हटा सकते हैं।
+    - अलग-थलग रन पुराने अभिस्वीकृति उत्तरों से बचाव करते हैं: यदि पहला परिणाम केवल अंतरिम स्थिति अपडेट (`on it`, `pulling everything together` और इसी प्रकार के संकेत) है और कोई वंशज सबएजेंट अब भी अंतिम उत्तर के लिए उत्तरदायी नहीं है, तो OpenClaw डिलीवरी से पहले वास्तविक परिणाम के लिए एक बार फिर प्रॉम्प्ट करता है।
+    - संरचित निष्पादन-अस्वीकृति मेटाडेटा (इसमें वे node-host `UNAVAILABLE` रैपर भी शामिल हैं जिनकी नेस्टेड त्रुटि `SYSTEM_RUN_DENIED` या `INVALID_REQUEST` से प्रारंभ होती है) पहचाना जाता है, ताकि अवरुद्ध कमांड को सफल रन न बताया जाए और सामान्य सहायक गद्य को गलती से अस्वीकृति न माना जाए।
+    - उत्तर पेलोड न होने पर भी रन-स्तरीय एजेंट विफलताएँ जॉब त्रुटियों में गिनी जाती हैं, इसलिए मॉडल/प्रदाता की विफलताएँ त्रुटि काउंटर बढ़ाती हैं और जॉब को सफल मानकर साफ़ करने के बजाय विफलता सूचनाएँ सक्रिय करती हैं।
+    - जब कोई जॉब `timeoutSeconds` तक पहुँचता है, तो Cron रन को निरस्त करके उसे क्लीनअप के लिए थोड़ी अवधि देता है। यदि वह समाप्त नहीं होता, तो Gateway-स्वामित्व वाला क्लीनअप Cron द्वारा टाइमआउट रिकॉर्ड करने से पहले उस रन के सत्र का स्वामित्व बलपूर्वक साफ़ कर देता है, ताकि कतारबद्ध चैट कार्य किसी पुराने प्रसंस्करण सत्र के पीछे अटका न रहे।
+    - सेटअप/स्टार्टअप में रुकावटों को चरण-विशिष्ट टाइमआउट मिलता है (उदाहरण के लिए `cron: isolated agent setup timed out before runner start` या `cron: isolated agent run stalled before execution start (last phase: context-engine)`)। ये वॉचडॉग एम्बेडेड और CLI-समर्थित प्रदाताओं को उनकी बाहरी CLI प्रक्रिया प्रारंभ होने से पहले भी कवर करते हैं और लंबे `timeoutSeconds` मानों से स्वतंत्र रूप से सीमित होते हैं, ताकि कोल्ड-स्टार्ट/प्रमाणीकरण/कॉन्टेक्स्ट विफलताएँ शीघ्र सामने आएँ।
 
   </Accordion>
-  <Accordion title="Subagent and Discord delivery">
-    जब isolated cron runs subagents orchestrate करते हैं, तो delivery stale parent interim text के बजाय final descendant output को भी prefer करती है। अगर descendants अभी भी running हैं, तो OpenClaw उस partial parent update को announce करने के बजाय suppress करता है।
-
-    Text-only Discord announce targets के लिए, OpenClaw streamed/intermediate text payloads और final answer दोनों को replay करने के बजाय canonical final assistant text एक बार भेजता है। Media और structured Discord payloads अब भी separate payloads के रूप में delivered होते हैं ताकि attachments और components drop न हों।
-
+  <Accordion title="टास्क समन्वयन">
+    Cron टास्क समन्वयन में पहला आधार रनटाइम स्वामित्व और दूसरा आधार स्थायी इतिहास होता है: जब तक Cron रनटाइम उस जॉब को चल रहा मानकर ट्रैक करता है, सक्रिय Cron टास्क चालू रहता है, भले ही कोई पुरानी चाइल्ड सत्र पंक्ति अब भी मौजूद हो। रनटाइम द्वारा जॉब का स्वामित्व छोड़ने और 5-मिनट की अनुग्रह अवधि समाप्त होने के बाद, रखरखाव जाँच मिलते-जुलते `cron:<jobId>:<startedAt>` रन के लिए स्थायी रन लॉग और जॉब स्थिति की जाँच करती है। वहाँ मौजूद टर्मिनल परिणाम टास्क लेजर को अंतिम रूप देता है; अन्यथा Gateway-स्वामित्व वाला रखरखाव टास्क को `lost` चिह्नित कर सकता है। ऑफ़लाइन CLI ऑडिट स्थायी इतिहास से पुनर्प्राप्त कर सकता है, लेकिन उसका अपना खाली इन-प्रोसेस सक्रिय-जॉब सेट इस बात का प्रमाण नहीं है कि Gateway-स्वामित्व वाला रन समाप्त हो चुका है।
   </Accordion>
 </AccordionGroup>
 
-### Command payloads
+## शेड्यूल के प्रकार
 
-Command payloads का उपयोग deterministic scripts के लिए करें जिन्हें model-backed isolated agent turn start किए बिना Gateway scheduler के अंदर चलना चाहिए। Command jobs Gateway host पर execute होते हैं, stdout/stderr capture करते हैं, cron history में run record करते हैं, और isolated jobs जैसे ही `announce`, `webhook`, और `none` delivery modes reuse करते हैं।
+| प्रकार      | CLI फ़्लैग           | विवरण                                                                                              |
+| --------- | ------------------ | -------------------------------------------------------------------------------------------------------- |
+| `at`      | `--at`             | एक बार का टाइमस्टैम्प (ISO 8601 या `20m` जैसा सापेक्ष मान)                                                     |
+| `every`   | `--every`          | निश्चित अंतराल (`10m`, `1h`, `1d`)                                                                       |
+| `cron`    | `--cron`           | वैकल्पिक `--tz` के साथ 5-फ़ील्ड या 6-फ़ील्ड Cron एक्सप्रेशन                                                  |
+| `on-exit` | `--on-exit`        | निगरानी किया गया कमांड समाप्त होने पर एक बार सक्रिय करें (इवेंट ट्रिगर; टर्न टियरडाउन के बाद भी बना रहता है; वैकल्पिक `--on-exit-cwd`) |
+| `stream`  | `--stream-command` | पर्यवेक्षित, लंबे समय तक चलने वाले कमांड द्वारा उत्पन्न बैच की गई पंक्तियों से सक्रिय करें                                      |
+
+टाइमज़ोन के बिना टाइमस्टैम्प को UTC माना जाता है। ऑफ़सेट-रहित `--at` डेटटाइम को समझने या उस IANA टाइमज़ोन में Cron एक्सप्रेशन का मूल्यांकन करने के लिए `--tz America/New_York` जोड़ें। `--tz` के बिना Cron एक्सप्रेशन Gateway होस्ट के टाइमज़ोन का उपयोग करते हैं। `--tz`, `--every` या `--on-exit` के साथ मान्य नहीं है।
+
+हर घंटे के आरंभ पर आवर्ती एक्सप्रेशन (वाइल्डकार्ड घंटा फ़ील्ड के साथ मिनट `0`) लोड में अचानक वृद्धि कम करने के लिए अपने-आप अधिकतम 5 मिनट तक अलग-अलग समय पर चलाए जाते हैं। सटीक समय बाध्य करने के लिए `--exact` या स्पष्ट समय-सीमा के लिए `--stagger 30s` का उपयोग करें (केवल Cron शेड्यूल)।
+
+### Heartbeat टास्क माइग्रेशन
+
+पुराने Heartbeat स्क्रैच में संरचित `tasks:` ब्लॉक समर्थित था। अपग्रेड करने के बाद प्रत्येक प्रविष्टि को सामान्य, संपादन योग्य मुख्य-सत्र Cron जॉब में बदलने के लिए `openclaw doctor --fix` चलाएँ। Doctor अंतराल और पिछली बार चलने का समय सुरक्षित रखता है, ब्लॉक हटाने से पहले जॉब बनाता है और पुनः चलाए जाने पर उन्हीं डिक्लेरेशन कुंजियों को सुरक्षित रूप से एकरूप करता है।
+
+इन माइग्रेट किए गए जॉब में सार्वजनिक `systemEvent` पेलोड होते हैं, इसलिए `openclaw cron list`, `get`, `edit` और `remove` के साथ Cron टूल उन्हें अन्य जॉब की तरह प्रबंधित करते हैं। उनका निष्पादन सुरक्षित Heartbeat टास्क वेक का उपयोग करता है: सक्रिय घंटे, न्यूनतम अंतराल, फ़्लड नियंत्रण और व्यस्त होने पर पुनः प्रयास अब भी लागू होते हैं, जबकि Cron प्रत्येक टास्क की स्वतंत्र आवृत्ति का स्वामित्व रखता है। समान संयोजन अवधि में देय जॉब एक Heartbeat टर्न साझा कर सकते हैं। Heartbeat के सक्रिय घंटों के बाहर आने वाली निर्धारित घटना छोड़ दी जाती है और जॉब की अगली घटना पर पुनः प्रयास की जाती है।
+
+Heartbeat स्क्रैच अब केवल निगरानी गद्य है। रनटाइम Heartbeat, `tasks:` टेक्स्ट को शेड्यूल के रूप में पार्स नहीं करते; नया आवर्ती कार्य Cron से बनाएँ।
+
+### स्ट्रीम स्रोत
+
+स्ट्रीम शेड्यूल, ऑपरेटर द्वारा लिखे गए argv कमांड को Gateway के अंतर्गत चलाता रहता है और उसकी stdout तथा stderr पंक्तियों से जॉब सक्रिय करता है। स्ट्रीम शेड्यूल इवेंट-चालित होते हैं, कभी समय के आधार पर देय नहीं होते और इनके लिए `cron.triggers.enabled: true` आवश्यक है, क्योंकि लंबे समय तक चलने वाले कमांड का अप्रत्यक्ष विश्वास वर्ग ट्रिगर स्क्रिप्ट के समान होता है। जॉब को अक्षम करने या हटाने से प्रक्रिया रुक जाती है; Gateway शटडाउन प्रक्रिया-वृक्ष के टियरडाउन की प्रतीक्षा करता है। शीघ्र विफलताएँ Cron के अंतर्निहित त्रुटि बैकऑफ़ के साथ पुनः प्रारंभ होती हैं। 60 सेकंड से छोटे लगातार पाँच रन जॉब को त्रुटि स्थिति में छोड़ देते हैं और सामान्य विफलता-अलर्ट पथ का उपयोग करते हैं; पुनः प्रारंभ सीमा साफ़ करने के लिए जॉब को मैन्युअल रूप से फिर सक्षम करें।
+
+```bash
+openclaw cron add \
+  --name "बिल्ड इवेंट स्ट्रीम" \
+  --stream-command '["node","scripts/build-events.mjs"]' \
+  --stream-mode match \
+  --stream-match '^(failed|recovered):' \
+  --stream-batch-ms 250 \
+  --session isolated \
+  --message "इन बिल्ड इवेंट की जाँच करें।"
+```
+
+`mode: "line"` (डिफ़ॉल्ट) प्रत्येक पंक्ति स्वीकार करता है। `mode: "match"` केवल संकलित `match` रेगेक्स से मेल खाने वाली पंक्तियाँ स्वीकार करता है। बैच `batchMs` तक निष्क्रिय रहने के बाद (डिफ़ॉल्ट 250 ms, 50–5000 तक सीमित) या `maxBatchBytes` पर (डिफ़ॉल्ट 16384, 1024–65536 तक सीमित) बंद होता है। बाइट सीमा पर बैच `[truncated]` के साथ समाप्त होता है। मिलान मोड हमेशा पूर्ण पंक्तियों का उनके पूरे टेक्स्ट से मिलान करता है, यहाँ तक कि `maxBatchBytes` के बाद भी (केवल भेजा गया बैच काटा जाता है); सीमित रॉ-इनटेक सीमा पर कटी हुई पंक्ति केवल एक उपसर्ग होती है, इसलिए उसे बेमेल माना जाता है, ताकि अंत में एंकर किया गया पैटर्न कटे हुए टेक्स्ट पर सक्रिय न हो। बैच को सिस्टम-इवेंट टेक्स्ट या एजेंट-टर्न संदेश में जोड़ा जाता है। स्ट्रीम शेड्यूल के लिए कमांड पेलोड अस्वीकार किए जाते हैं, क्योंकि स्रोत कमांड और पेलोड कमांड की प्रक्रिया का स्वामित्व अस्पष्ट होगा।
+
+प्रति जॉब केवल एक पेलोड सक्रियण और एक सीमित लंबित बैच रखा जाता है। पेलोड चलते समय या अंतर्निहित 30-सेकंड का ट्रिगर अंतराल बीतने से पहले आने वाली पंक्तियाँ असीमित कतार बनाने के बजाय उस लंबित बैच में संयोजित हो जाती हैं। एक क्रमबद्ध स्वामी गेट द्वारा छोड़े गए बैच, पेलोड त्रुटियाँ और न चलने वाली डिस्पैच को `streamDroppedBatches` में रिकॉर्ड करता है; सीमित मर्ज `streamCoalescedBatches` को बढ़ाते हैं। विफल पेलोड पर पुनः प्रयास नहीं किया जाता, क्योंकि वे आइडेम्पोटेंट न भी हों। पर्यवेक्षित चाइल्ड के पुनः प्रारंभ होने पर तार्किक स्रोत पहचान स्थिर रहती है, लेकिन स्रोत के अक्षम, हटाए या बदले जाने पर बदल जाती है, ताकि सेवानिवृत्त स्रोत के कतारबद्ध बैच A-से-B-से-A संपादन के बाद भी सक्रिय न हो सकें। स्टॉप पूर्ण होने के बाद पुराने चाइल्ड के देर से आए कॉलबैक निष्क्रिय रहते हैं। V1 में नेटिव WebSocket स्रोत शामिल नहीं है; इसे `websocat wss://example.invalid/events` जैसे argv कमांड से ब्रिज करें।
+
+जब किसी स्ट्रीम जॉब में `trigger.script` भी होता है, तो गेट प्रत्येक बंद बैच के लिए एक बार चलता है। वर्तमान बैच `trigger.state` के साथ गहराई तक फ़्रीज़ की गई `trigger.streamBatch` स्ट्रिंग के रूप में उपलब्ध होता है। `fire: false` गेट स्थिति को स्थायी करने के बाद उस बैच को छोड़ देता है। `fire: true` मौजूदा ट्रिगर संदेश अर्थ को बनाए रखता है और फिर बैच को परिणामी पेलोड में जोड़ता है। इसके बजाय स्ट्रीम जॉब बिना कंडीशन गेट के स्क्रिप्ट पेलोड का उपयोग कर सकता है; उस स्क्रिप्ट को बैच उसी `trigger.streamBatch` मान से मिलता है। स्क्रिप्ट पेलोड को कंडीशन गेट के साथ संयोजित करना अस्वीकार किया जाता है, क्योंकि दोनों स्थायी `trigger.state` स्लॉट का स्वामित्व लेते।
+
+### गतिशील आवृत्ति (गति नियंत्रण)
+
+आवर्ती जॉब `pacing.min` और/या `pacing.max` को `15m` या `4h` जैसी अवधि स्ट्रिंग पर सेट कर सकते हैं; कम-से-कम एक सीमा आवश्यक है। `cron add|edit` के साथ `--pacing-min` और `--pacing-max` का उपयोग करें (`--clear-pacing` दोनों सीमाएँ हटा देता है)।
+
+एक पृथक रन के दौरान, गति-नियंत्रित जॉब `action: "next_check"` और `in: "30m"` के साथ `cron` टूल को कॉल कर सकता है। प्रस्ताव केवल उस समय चल रहे जॉब पर लागू होता है और सफल रन पूरा होने के समय से मापा जाता है। OpenClaw इसे कॉन्फ़िगर की गई सीमाओं तक चुपचाप सीमित कर देता है।
+
+प्रस्ताव के बिना गति-नियंत्रण सामान्य शेड्यूल को अपरिवर्तित रखता है। विफल, टाइम-आउट और छोड़े गए रन प्रस्ताव को त्याग देते हैं, इसलिए मौजूदा पुनः प्रयास और त्रुटि-बैकऑफ़ व्यवहार को प्राथमिकता मिलती है। किसी आवर्ती जॉब को मैन्युअल रूप से बाध्य करना बैंड से बाहर होता है और उसके लंबित स्वाभाविक या गति-नियंत्रित स्लॉट को सुरक्षित रखता है। शर्त से ट्रिगर होने वाले जॉब के लिए, अंतर्निहित न्यूनतम अंतराल तब भी निचली सीमा बना रहता है, जब कोई प्रस्ताव पहले जाँचने का अनुरोध करता है।
+
+### महीने के दिन और सप्ताह के दिन में OR तर्क का उपयोग होता है
+
+Cron एक्सप्रेशन [croner](https://github.com/Hexagon/croner) द्वारा पार्स किए जाते हैं। जब महीने के दिन और सप्ताह के दिन, दोनों फ़ील्ड गैर-वाइल्डकार्ड हों, तो croner दोनों के बजाय **किसी एक** फ़ील्ड के मेल खाने पर मिलान करता है। यह मानक Vixie cron व्यवहार है।
+
+```bash
+# अपेक्षित: "15 तारीख को सुबह 9 बजे, केवल यदि सोमवार हो"
+# वास्तविक: "हर महीने की 15 तारीख को सुबह 9 बजे, और हर सोमवार को सुबह 9 बजे"
+0 9 15 * 1
+```
+
+यह महीने में 0-1 बार के बजाय लगभग 5-6 बार सक्रिय होता है। दोनों शर्तों को आवश्यक बनाने के लिए, croner के `+` सप्ताह-दिन संशोधक (`0 9 15 * +1`) का उपयोग करें, या एक फ़ील्ड पर शेड्यूल करें और दूसरे को अपने जॉब के प्रॉम्प्ट या कमांड में जाँचें।
+
+## इवेंट ट्रिगर (शर्त निगरानीकर्ता)
+
+इवेंट ट्रिगर किसी `every`, `cron`, या `stream` शेड्यूल में हेडलेस शर्त स्क्रिप्ट जोड़ता है। समय शेड्यूल नियत समय पर इसका मूल्यांकन करते हैं; स्ट्रीम शेड्यूल प्रत्येक बंद बैच के लिए इसका मूल्यांकन करते हैं। Cron सामान्य पेलोड केवल तभी चलाता है, जब स्क्रिप्ट `fire: true` लौटाती है:
+
+```json5
+{
+  schedule: { kind: "every", everyMs: 30000 },
+  trigger: {
+    // केवल तभी सक्रिय होता है, जब देखी गई स्थिति पिछले मूल्यांकन से अलग हो।
+    script: "const res = await tools.call('exec', { command: 'gh pr checks 123 --json state -q \\'.[].state\\' | sort -u' }); const status = String(res?.result?.details?.aggregated ?? '').trim(); json({ fire: status !== trigger.state?.status, message: `PR 123 CI: ${trigger.state?.status ?? 'unknown'} -> ${status}`, state: { status } });",
+    once: false,
+  },
+  payload: { kind: "agentTurn", message: "CI स्थिति में हुए बदलाव की जाँच करें।" },
+}
+```
+
+स्क्रिप्ट को `{ fire, message?, state? }` लौटाना आवश्यक है। पिछली JSON स्थिति अत्यधिक फ़्रीज़ किए गए `trigger.state` के रूप में उपलब्ध होती है; स्ट्रीम गेट को वर्तमान बैच भी `trigger.streamBatch` के रूप में मिलता है। इसे बनाए रखने के लिए नया `state` मान लौटाएँ। स्थिति 16 KB तक सीमित है। जब सक्रिय होने वाले परिणाम में `message` शामिल हो, तो cron निष्पादन से पहले इसे सिस्टम-इवेंट टेक्स्ट या एजेंट-टर्न संदेश में जोड़ देता है। `once: true` अपने पहले सफल सक्रिय पेलोड के बाद जॉब को अक्षम कर देता है।
+
+`fire: false` मूल्यांकन स्थिति और काउंटर बनाए रखता है, फिर रन इतिहास बनाए बिना पुनः शेड्यूल करता है। यदि सक्रिय पेलोड रन विफल हो जाता है, तो लौटाया गया `state` बनाए **नहीं** रखा जाता — अगला मूल्यांकन पिछली स्थिति देखता है और फिर सक्रिय हो सकता है, इसलिए स्क्रिप्ट को केवल-पढ़ने वाली जाँच के रूप में लिखें और कार्रवाइयाँ पेलोड में रखें। ट्रिगर शेड्यूल में 30 सेकंड का अंतर्निहित न्यूनतम अंतराल होता है। प्रत्येक मूल्यांकन का वॉल-क्लॉक बजट 30 सेकंड और अधिकतम 5 टूल कॉल है।
+
+निगरानीकर्ता केवल सफलता के बजाय **कार्रवाई योग्य स्थिति** के आधार पर बनाएँ: जो निगरानीकर्ता अपनी जाँच विफल होने या टाइम-आउट होने पर शांत हो जाता है, वह खराब होने के बावजूद स्वस्थ दिखता है। अवलोकन की तुलना `trigger.state` से करें और डुप्लिकेट हटाने के लिए नई स्थिति लौटाएँ; मॉडल या प्रक्रिया मेमोरी पर निर्भर न रहें। सक्रिय करते समय `message` को स्व-निहित बनाएँ, क्योंकि यह सक्रिय रन का संपूर्ण इवेंट संदर्भ बन जाता है।
+
+<Warning>
+`cron.triggers.enabled` को सक्षम करने से शर्त-ट्रिगर स्क्रिप्ट और `script` पेलोड, दोनों स्वामी एजेंट की **पूर्ण टूल नीति, जिसमें `exec` भी शामिल है**, के साथ हेडलेस चल सकते हैं। इसे उस एजेंट की अनुमतियों के साथ बिना निगरानी वाला कोड निष्पादन मानें; इसे तब तक अक्षम रखें, जब तक cron जॉब बनाने की अनुमति प्राप्त प्रत्येक एजेंट पर इसके अनुरूप भरोसा न हो।
+</Warning>
+
+स्थानीय स्क्रिप्ट फ़ाइल से निगरानीकर्ता बनाएँ (`-` stdin से स्क्रिप्ट पढ़ता है):
+
+```bash
+openclaw cron add \
+  --name "PR CI निगरानीकर्ता" \
+  --every 30s \
+  --trigger-script ./watch-pr-ci.js \
+  --message "CI स्थिति में हुए बदलाव पर प्रतिक्रिया दें" \
+  --session isolated
+```
+
+## पेलोड
+
+प्रत्येक जॉब में फ़्लैग द्वारा चुना गया ठीक एक पेलोड प्रकार होता है:
+
+| पेलोड        | फ़्लैग                                           | क्या चलता है                                               |
+| ------------- | ---------------------------------------------- | ---------------------------------------------------------- |
+| सिस्टम इवेंट  | `--system-event <text>`                        | मुख्य सत्र में पंक्तिबद्ध किया जाता है, स्वयं कोई मॉडल कॉल नहीं |
+| एजेंट संदेश | `--message <text>`                             | मॉडल-समर्थित एजेंट टर्न                                   |
+| कमांड       | `--command <shell>` or `--command-argv <json>` | Gateway होस्ट पर शेल/प्रक्रिया, कोई मॉडल कॉल नहीं          |
+| स्क्रिप्ट        | `--script <file\|->`                           | स्वामी एजेंट के टूल का उपयोग करने वाली हेडलेस कोड-मोड स्क्रिप्ट |
+
+एक अतिरिक्त पेलोड प्रकार, `heartbeat`, सिस्टम के स्वामित्व में है: gateway प्रत्येक Heartbeat-सक्षम एजेंट के लिए एक Heartbeat मॉनिटर जॉब को अभिसरित करता है ([Heartbeat](/hi/gateway/heartbeat) देखें)। यह `cron list --all` में दिखाई देता है, लेकिन CLI या API के माध्यम से बनाया या संपादित नहीं किया जा सकता। Heartbeat कॉन्फ़िगरेशन स्टार्टअप पर, कॉन्फ़िगरेशन रीलोड पर, या `openclaw doctor --fix` द्वारा स्थायी मॉनिटर शेड्यूल में लिखा जाता है। जब cron अक्षम होता है, तो मॉनिटर टिक नहीं करता और कोई फ़ॉलबैक Heartbeat टाइमर नहीं चलता।
+
+### एजेंट-टर्न विकल्प
+
+<ParamField path="--message" type="string" required>
+  प्रॉम्प्ट टेक्स्ट (पृथक/वर्तमान/कस्टम-सत्र जॉब के लिए आवश्यक)।
+</ParamField>
+<ParamField path="--model" type="string">
+  मॉडल ओवरराइड; इसका किसी अनुमत मॉडल में समाधान होना आवश्यक है, अन्यथा रन सत्यापन त्रुटि के साथ विफल हो जाता है।
+</ParamField>
+<ParamField path="--fallbacks" type="string">
+  प्रति-जॉब फ़ॉलबैक मॉडल सूची, उदाहरण के लिए `--fallbacks openai/gpt-5.6-sol,openrouter/meta-llama/llama-3.3-70b-instruct:free`। बिना फ़ॉलबैक वाले सख्त रन के लिए `--fallbacks ""` पास करें।
+</ParamField>
+<ParamField path="--clear-fallbacks" type="boolean">
+  `cron edit` पर, प्रति-जॉब फ़ॉलबैक ओवरराइड हटाता है, ताकि जॉब कॉन्फ़िगर की गई फ़ॉलबैक प्राथमिकता का पालन करे। `--fallbacks` के साथ संयोजित नहीं किया जा सकता।
+</ParamField>
+<ParamField path="--clear-model" type="boolean">
+  `cron edit` पर, प्रति-जॉब मॉडल ओवरराइड हटाता है, ताकि जॉब सामान्य cron मॉडल प्राथमिकता (संग्रहीत cron-सत्र ओवरराइड, अन्यथा एजेंट/डिफ़ॉल्ट मॉडल) का पालन करे। `--model` के साथ संयोजित नहीं किया जा सकता।
+</ParamField>
+<ParamField path="--thinking" type="string">
+  चिंतन स्तर ओवरराइड (`off|minimal|low|medium|high|xhigh|adaptive|max|ultra`)। उपलब्ध स्तर अभी भी चुने गए मॉडल और एजेंट रनटाइम पर निर्भर होते हैं।
+</ParamField>
+<ParamField path="--clear-thinking" type="boolean">
+  `cron edit` पर, प्रति-जॉब चिंतन ओवरराइड हटाता है। `--thinking` के साथ संयोजित नहीं किया जा सकता।
+</ParamField>
+<ParamField path="--light-context" type="boolean">
+  कार्यस्थान बूटस्ट्रैप फ़ाइल इंजेक्शन छोड़ें।
+</ParamField>
+<ParamField path="--tools" type="string">
+  जॉब किन टूल का उपयोग कर सकता है, इसे सीमित करें, उदाहरण के लिए `--tools exec,read`।
+</ParamField>
+
+टूल चला सकने वाले नए जॉब हमेशा स्पष्ट टूल नीति संग्रहीत करते हैं। एजेंट द्वारा बनाए गए जॉब
+उन्हीं टूल तक सीमित होते हैं जो बनाने वाले टर्न के लिए उपलब्ध हैं, और एजेंट
+संग्रहीत सूची को विस्तृत नहीं कर सकता। `--tools` के बिना किसी प्रमाणित ऑपरेटर द्वारा बनाए गए जॉब एक
+अप्रतिबंधित `*` नीति संग्रहीत करते हैं; `cron edit --clear-tools` उस स्पष्ट अप्रतिबंधित
+नीति को पुनर्स्थापित करता है। स्पष्ट टूल नीति से पहले के मौजूदा जॉब अपना वर्तमान व्यवहार
+तब तक बनाए रखते हैं, जब तक उनकी टूल नीति स्पष्ट रूप से संपादित नहीं की जाती या जॉब दोबारा नहीं बनाया जाता।
+
+`--model` जॉब का प्राथमिक मॉडल सेट करता है; यह सत्र के `/model` ओवरराइड को प्रतिस्थापित नहीं करता, इसलिए कॉन्फ़िगर की गई फ़ॉलबैक शृंखलाएँ इसके ऊपर लागू रहती हैं। किसी अनसुलझे या अस्वीकृत मॉडल के कारण रन डिफ़ॉल्ट पर चुपचाप फ़ॉलबैक होने के बजाय स्पष्ट सत्यापन त्रुटि के साथ विफल होता है। यदि किसी जॉब में `--model` है, लेकिन कोई स्पष्ट या कॉन्फ़िगर की गई फ़ॉलबैक सूची नहीं है, तो OpenClaw एजेंट के प्राथमिक मॉडल को छिपे हुए पुनः प्रयास लक्ष्य के रूप में चुपचाप जोड़ने के बजाय खाली फ़ॉलबैक ओवरराइड पास करता है।
+
+पृथक जॉब के लिए मॉडल-चयन प्राथमिकता, उच्चतम पहले:
+
+1. प्रति-जॉब पेलोड `model` (स्पष्ट कॉन्फ़िगरेशन; अस्वीकृत मॉडल रन को विफल करता है)
+2. Gmail हुक मॉडल ओवरराइड (केवल जब रन Gmail से आया हो और वह ओवरराइड अनुमत हो)
+3. उपयोगकर्ता द्वारा चयनित संग्रहीत cron-सत्र मॉडल ओवरराइड
+4. एजेंट/डिफ़ॉल्ट मॉडल चयन
+
+तेज़ मोड समाधान किए गए लाइव चयन का पालन करता है। यदि चयनित मॉडल कॉन्फ़िगरेशन में `params.fastMode` है, तो पृथक cron डिफ़ॉल्ट रूप से इसका उपयोग करता है; संग्रहीत सत्र `fastMode` ओवरराइड (फिर एजेंट `fastModeDefault`) अभी भी दोनों दिशाओं में मॉडल कॉन्फ़िगरेशन पर प्राथमिकता रखता है। ऑटो मोड मॉडल के `params.fastAutoOnSeconds` कटऑफ़ का उपयोग करता है, जिसका डिफ़ॉल्ट 60 सेकंड है।
+
+यदि किसी रन में लाइव मॉडल-स्विच हैंडऑफ़ होता है, तो cron स्विच किए गए प्रदाता/मॉडल के साथ पुनः प्रयास करता है और सक्रिय रन के लिए उस चयन (और किसी नए प्रमाणीकरण प्रोफ़ाइल) को बनाए रखता है। पुनः प्रयास सीमित हैं: आरंभिक प्रयास और 2 स्विच पुनः प्रयासों के बाद, cron लूप जारी रखने के बजाय निरस्त कर देता है।
+
+पृथक रन शुरू होने से पहले, OpenClaw कॉन्फ़िगर किए गए `api: "ollama"` और `api: "openai-completions"` प्रदाताओं के पहुँच योग्य स्थानीय एंडपॉइंट की जाँच करता है, जिनका `baseUrl` लूपबैक, निजी नेटवर्क, या `.local` है। यह पूर्व-जाँच जॉब की कॉन्फ़िगर की गई फ़ॉलबैक शृंखला को क्रमशः जाँचती है और केवल तभी रन को `skipped` चिह्नित करती है, जब प्रत्येक उम्मीदवार पहुँच से बाहर हो; `--fallbacks ""` इस जाँच को केवल प्राथमिक मॉडल तक सख्ती से सीमित रखता है। बंद एंडपॉइंट मॉडल कॉल शुरू करने के बजाय स्पष्ट त्रुटि के साथ रन को `skipped` के रूप में रिकॉर्ड करता है। परिणाम प्रति एंडपॉइंट 5 मिनट के लिए कैश किया जाता है (प्रति जॉब या मॉडल नहीं), इसलिए एक ही बंद स्थानीय Ollama/vLLM/SGLang/LM Studio सर्वर साझा करने वाले कई नियत जॉब अनुरोधों की बाढ़ के बजाय केवल एक जाँच की लागत उठाते हैं। छोड़े गए पूर्व-जाँच रन निष्पादन-त्रुटि बैकऑफ़ नहीं बढ़ाते; बार-बार छोड़े जाने की चेतावनियाँ पाने के लिए `failureAlert.includeSkipped` सेट करें।
+
+### कमांड पेलोड
+
+कमांड पेलोड मॉडल-समर्थित टर्न शुरू किए बिना Gateway शेड्यूलर के अंदर नियतात्मक स्क्रिप्ट चलाते हैं। वे Gateway होस्ट पर निष्पादित होते हैं, stdout/stderr कैप्चर करते हैं, रन को cron इतिहास में रिकॉर्ड करते हैं और एजेंट-टर्न जॉब के समान `announce`, `webhook`, और `none` वितरण मोड का पुनः उपयोग करते हैं।
 
 <Note>
-Command cron operator-admin Gateway automation surface है, agent
-`tools.exec` call नहीं। Cron jobs create, update, remove, या manually run करने के लिए
-`operator.admin` आवश्यक है; scheduled command runs बाद में
-Gateway process के अंदर उस admin-authored automation के रूप में execute होते हैं। Agent exec policy जैसे
-`tools.exec.mode`, approval prompts, और per-agent tool allowlists
-model-visible exec tools को govern करते हैं, command cron payloads को नहीं।
+कमांड cron ऑपरेटर-एडमिन Gateway स्वचालन सतह है, एजेंट `tools.exec` कॉल नहीं। cron जॉब बनाने, अपडेट करने, हटाने या मैन्युअल रूप से चलाने के लिए `operator.admin` आवश्यक है; शेड्यूल किए गए कमांड रन बाद में Gateway प्रक्रिया के अंदर उस एडमिन द्वारा लिखे गए स्वचालन के रूप में निष्पादित होते हैं। एजेंट exec नीति (`tools.exec.mode`, अनुमोदन प्रॉम्प्ट, प्रति-एजेंट टूल अनुमति-सूचियाँ) मॉडल को दिखाई देने वाले exec टूल को नियंत्रित करती है, कमांड cron पेलोड को नहीं।
 </Note>
 
 ```bash
 openclaw cron create "*/15 * * * *" \
-  --name "Queue depth probe" \
+  --name "क्यू गहराई जाँच" \
   --command "scripts/check-queue.sh" \
   --command-cwd "/srv/app" \
   --announce \
@@ -153,114 +255,126 @@ openclaw cron create "*/15 * * * *" \
   --to "-1001234567890"
 ```
 
-`--command <shell>` `argv: ["sh", "-lc", <shell>]` store करता है। जब आप shell parsing के बिना exact argv execution चाहते हैं, तो `--command-argv '["node","scripts/report.mjs"]'` उपयोग करें। Optional `--command-env KEY=VALUE`, `--command-input`, `--timeout-seconds`, `--no-output-timeout-seconds`, और `--output-max-bytes` fields process environment, stdin, और output bounds control करते हैं।
+`--command <shell>` `argv: ["sh", "-lc", <shell>]` को संग्रहीत करता है। शेल पार्सिंग के बिना सटीक argv निष्पादन के लिए `--command-argv '["node","scripts/report.mjs"]'` का उपयोग करें। वैकल्पिक `--command-env KEY=VALUE` (दोहराने योग्य), `--command-input`, `--timeout-seconds` (डिफ़ॉल्ट 10 मिनट), `--no-output-timeout-seconds`, और `--output-max-bytes` प्रक्रिया परिवेश, stdin और आउटपुट सीमाओं को नियंत्रित करते हैं।
 
-यदि stdout खाली नहीं है, तो वही पाठ डिलीवर किया गया परिणाम होता है। यदि stdout खाली है और stderr खाली नहीं है, तो stderr डिलीवर किया जाता है। यदि दोनों स्ट्रीम मौजूद हैं, तो cron एक छोटा `stdout:` / `stderr:` ब्लॉक डिलीवर करता है। शून्य एग्ज़िट कोड रन को `ok` के रूप में रिकॉर्ड करता है; गैर-शून्य एग्ज़िट, सिग्नल, टाइमआउट, या नो-आउटपुट टाइमआउट `error` रिकॉर्ड करता है और विफलता अलर्ट ट्रिगर कर सकता है। कोई कमांड जो केवल `NO_REPLY` प्रिंट करता है, सामान्य cron साइलेंट-टोकन सप्रेशन का उपयोग करता है और चैट में कुछ भी वापस पोस्ट नहीं करता।
+वितरित टेक्स्ट प्रक्रिया आउटपुट से प्राप्त होता है: गैर-रिक्त stdout को प्राथमिकता मिलती है; यदि stdout रिक्त और stderr गैर-रिक्त हो, तो stderr वितरित किया जाता है; यदि दोनों मौजूद हों, तो cron एक छोटा `stdout:` / `stderr:` ब्लॉक भेजता है। निकास कोड `0` रन को `ok` रिकॉर्ड करता है; गैर-शून्य निकास, सिग्नल, टाइम-आउट या आउटपुट-रहित टाइम-आउट `error` रिकॉर्ड करता है और विफलता चेतावनियाँ ट्रिगर कर सकता है। केवल `NO_REPLY` प्रिंट करने वाला कमांड सामान्य cron मूक-टोकन दमन का उपयोग करता है और चैट में कुछ भी वापस पोस्ट नहीं करता।
 
-### आइसोलेटेड जॉब्स के लिए पेलोड विकल्प
+### स्क्रिप्ट पेलोड
 
-<ParamField path="--message" type="string" required>
-  प्रॉम्प्ट पाठ (आइसोलेटेड के लिए आवश्यक)।
-</ParamField>
-<ParamField path="--model" type="string">
-  Model ओवरराइड; जॉब के लिए चयनित अनुमत model का उपयोग करता है।
-</ParamField>
-<ParamField path="--fallbacks" type="string">
-  प्रति-जॉब फ़ॉलबैक model सूची, उदाहरण के लिए `--fallbacks openrouter/gpt-4.1-mini,openai/gpt-5`। बिना फ़ॉलबैक वाले सख्त रन के लिए `--fallbacks ""` पास करें।
-</ParamField>
-<ParamField path="--clear-fallbacks" type="boolean">
-  `cron edit` पर, प्रति-जॉब फ़ॉलबैक ओवरराइड हटाता है ताकि जॉब कॉन्फ़िगर की गई फ़ॉलबैक प्राथमिकता का पालन करे। `--fallbacks` के साथ संयोजित नहीं किया जा सकता।
-</ParamField>
-<ParamField path="--clear-model" type="boolean">
-  `cron edit` पर, प्रति-जॉब model ओवरराइड हटाता है ताकि जॉब सामान्य cron model-चयन प्राथमिकता का पालन करे (यदि सेट हो तो संग्रहीत cron-session ओवरराइड, अन्यथा agent/default model)। `--model` के साथ संयोजित नहीं किया जा सकता।
-</ParamField>
-<ParamField path="--thinking" type="string">
-  Thinking स्तर ओवरराइड।
-</ParamField>
-<ParamField path="--clear-thinking" type="boolean">
-  `cron edit` पर, प्रति-जॉब thinking ओवरराइड हटाता है ताकि जॉब सामान्य cron thinking प्राथमिकता का पालन करे। `--thinking` के साथ संयोजित नहीं किया जा सकता।
-</ParamField>
-<ParamField path="--light-context" type="boolean">
-  वर्कस्पेस बूटस्ट्रैप फ़ाइल इंजेक्शन छोड़ें।
-</ParamField>
-<ParamField path="--tools" type="string">
-  जॉब किन टूल्स का उपयोग कर सकता है, इसे सीमित करें, उदाहरण के लिए `--tools exec,read`।
-</ParamField>
+स्क्रिप्ट पेलोड ट्रिगर स्क्रिप्ट के समान कोड-मोड एक्ज़ीक्यूटर में बिना संवादात्मक एजेंट टर्न शुरू किए हेडलेस रूप से चलते हैं। उन्हें बनाने या चलाने से पहले `cron.triggers.enabled` सक्षम करें; यह खतरनाक-ऑटोमेशन गेट ट्रिगर स्क्रिप्ट और स्क्रिप्ट पेलोड, दोनों पर लागू होता है। स्क्रिप्ट जॉब केवल `main` और `isolated` सेशन लक्ष्य समर्थित करते हैं।
 
-`--model` चयनित अनुमत model को उस जॉब के प्राथमिक model के रूप में उपयोग करता है। यह चैट-सेशन `/model` ओवरराइड जैसा नहीं है: जॉब प्राथमिक विफल होने पर भी कॉन्फ़िगर की गई फ़ॉलबैक चेन लागू रहती हैं। यदि अनुरोधित model अनुमत नहीं है या रिज़ॉल्व नहीं किया जा सकता, तो cron चुपचाप जॉब के agent/default model चयन पर वापस जाने के बजाय स्पष्ट वैलिडेशन त्रुटि के साथ रन विफल करता है।
+```bash
+openclaw cron create "0 * * * *" \
+  --name "प्रति घंटे क्यू की जाँच" \
+  --script ./automation/check-queue.js \
+  --script-timeout-seconds 300 \
+  --script-tool-budget 50 \
+  --session isolated \
+  --announce
+```
 
-Cron जॉब्स पेलोड-स्तर `fallbacks` भी रख सकती हैं। मौजूद होने पर, वह सूची जॉब के लिए कॉन्फ़िगर की गई फ़ॉलबैक चेन को बदल देती है। जब आप ऐसा सख्त cron रन चाहते हैं जो केवल चयनित model आज़माए, तो जॉब पेलोड/API में `fallbacks: []` का उपयोग करें। यदि किसी जॉब में `--model` है लेकिन न पेलोड फ़ॉलबैक हैं और न कॉन्फ़िगर किए गए फ़ॉलबैक, तो OpenClaw एक स्पष्ट खाली फ़ॉलबैक ओवरराइड पास करता है ताकि agent प्राथमिक को छिपे हुए अतिरिक्त रीट्राई लक्ष्य के रूप में न जोड़ा जाए।
+किसी फ़ाइल या stdin से JavaScript पढ़ने के लिए `--script <file|->` का उपयोग करें। टाइमआउट का डिफ़ॉल्ट मान 300 सेकंड है और इसकी अधिकतम सीमा 900 है; टूल बजट का डिफ़ॉल्ट मान 50 कॉल है और इसकी अधिकतम सीमा 200 है। ये पेलोड बजट छोटे ट्रिगर-गेट मूल्यांकन बजट से अलग हैं।
 
-किसी cron रन को `skipped` चिह्नित करने से पहले local-provider प्रीफ़्लाइट जांचें कॉन्फ़िगर किए गए फ़ॉलबैक पर चलती हैं; `fallbacks: []` उस प्रीफ़्लाइट पथ को सख्त रखता है।
+स्क्रिप्ट इन वैकल्पिक फ़ील्ड वाला ऑब्जेक्ट लौटा सकती है:
 
-आइसोलेटेड जॉब्स के लिए model-चयन प्राथमिकता है:
+- `notify`: जॉब के `announce`, `webhook`, या `none` डिलीवरी मोड के माध्यम से भेजा गया टेक्स्ट। इसे छोड़ने पर कुछ भी डिलीवर नहीं होता। `main` जॉब के लिए टेक्स्ट एक सिस्टम इवेंट बन जाता है।
+- `wake`: `"now"`, `notify` (या संक्षिप्त पूर्णता इवेंट) को क्यू में डालने के बाद तत्काल Heartbeat का अनुरोध करता है; `"next-heartbeat"` इवेंट को अगले Heartbeat के लिए क्यू में डालता है।
+- `state`: JSON स्थिति, जिसकी अधिकतम सीमा 16 KB है और जो केवल सफल रन के बाद स्थायी की जाती है। अगला रन ट्रिगर स्क्रिप्ट की तरह इसकी फ़्रीज़ की गई प्रति `trigger.state` के रूप में प्राप्त करता है। चूँकि उस नेमस्पेस का केवल एक स्थायी स्वामी होता है, इसलिए एक ही जॉब में स्क्रिप्ट पेलोड को कंडीशन ट्रिगर के साथ संयोजित नहीं किया जा सकता।
+- `nextCheck`: `"15m"` जैसी अवधि। यह केवल उन जॉब के लिए मान्य है जिनमें पेसिंग सक्षम है और एजेंट-टर्न प्रस्तावों के समान पेसिंग क्लैंप का उपयोग करती है।
 
-1. Gmail hook model ओवरराइड (जब रन Gmail से आया हो और वह ओवरराइड अनुमत हो)
-2. प्रति-जॉब पेलोड `model`
-3. उपयोगकर्ता-चयनित संग्रहीत cron सेशन model ओवरराइड
-4. Agent/default model चयन
+थ्रो, टाइमआउट, समाप्त हो चुके टूल बजट, अमान्य परिणाम, और पेसिंग के बिना `nextCheck` सामान्य Cron रन त्रुटियाँ हैं: वे लौटाई गई स्थिति को स्थायी किए बिना रन इतिहास, बैकऑफ़ और विफलता-अलर्ट प्रबंधन में शामिल होती हैं।
 
-Fast मोड भी रिज़ॉल्व किए गए लाइव चयन का पालन करता है। यदि चयनित model कॉन्फ़िग में `params.fastMode` है, तो आइसोलेटेड cron डिफ़ॉल्ट रूप से उसका उपयोग करता है। संग्रहीत सेशन `fastMode` ओवरराइड किसी भी दिशा में कॉन्फ़िग पर अभी भी प्राथमिकता रखता है। Auto मोड मौजूद होने पर चयनित model के `params.fastAutoOnSeconds` कटऑफ़ का उपयोग करता है, जिसका डिफ़ॉल्ट 60 सेकंड है।
+## निष्पादन शैलियाँ
 
-यदि कोई आइसोलेटेड रन लाइव model-switch हैंडऑफ़ तक पहुँचता है, तो cron बदले गए provider/model के साथ दोबारा प्रयास करता है और रीट्राई से पहले सक्रिय रन के लिए उस लाइव चयन को कायम रखता है। जब स्विच नया auth profile भी साथ लाता है, तो cron सक्रिय रन के लिए वह auth profile ओवरराइड भी कायम रखता है। रीट्राई सीमित हैं: प्रारंभिक प्रयास के बाद 2 switch रीट्राई तक, उसके बाद cron अंतहीन लूप के बजाय अबॉर्ट करता है।
+| शैली           | `--session` मान   | इसमें चलता है                  | इसके लिए सर्वोत्तम                        |
+| --------------- | ------------------- | ------------------------ | ------------------------------- |
+| मुख्य सेशन    | `main`              | समर्पित Cron वेक लेन | रिमाइंडर, सिस्टम इवेंट        |
+| पृथक        | `isolated`          | समर्पित `cron:<jobId>` | रिपोर्ट, बैकग्राउंड कार्य      |
+| वर्तमान सेशन | `current`           | निर्माण के समय बाइंड किया गया   | संदर्भ-जागरूक आवर्ती कार्य    |
+| कस्टम सेशन  | `session:custom-id` | स्थायी नामित सेशन | इतिहास पर आधारित वर्कफ़्लो |
 
-किसी आइसोलेटेड cron रन के agent runner में प्रवेश करने से पहले, OpenClaw कॉन्फ़िगर किए गए `api: "ollama"` और `api: "openai-completions"` providers के लिए पहुँच योग्य local provider endpoints जांचता है, जिनका `baseUrl` loopback, निजी-नेटवर्क, या `.local` है। यदि वह endpoint डाउन है, तो रन model कॉल शुरू करने के बजाय स्पष्ट provider/model त्रुटि के साथ `skipped` के रूप में रिकॉर्ड किया जाता है। endpoint परिणाम 5 मिनट के लिए कैश किया जाता है, ताकि समान मृत local Ollama, vLLM, SGLang, या LM Studio सर्वर का उपयोग करने वाली कई देय जॉब्स अनुरोधों की बाढ़ बनाने के बजाय एक छोटी probe साझा करें। छोड़े गए provider-preflight रन execution-error backoff नहीं बढ़ाते; जब आप बार-बार skip सूचनाएं चाहते हों, तो `failureAlert.includeSkipped` सक्षम करें।
+<AccordionGroup>
+  <Accordion title="मुख्य सेशन बनाम पृथक बनाम कस्टम">
+    **मुख्य सेशन** जॉब किसी सिस्टम इवेंट को Cron के स्वामित्व वाली रन लेन में क्यू करते हैं और वैकल्पिक रूप से Heartbeat (`--wake now` या `--wake next-heartbeat`) को सक्रिय करते हैं। वे उत्तरों के लिए लक्षित मुख्य सेशन के अंतिम डिलीवरी संदर्भ का उपयोग कर सकते हैं, लेकिन नियमित Cron टर्न को मानव चैट लेन में नहीं जोड़ते और लक्षित सेशन के दैनिक/निष्क्रिय रीसेट की ताज़गी नहीं बढ़ाते। **पृथक** जॉब नए सेशन के साथ एक समर्पित एजेंट टर्न चलाते हैं। **कस्टम सेशन** (`session:xxx`) रन के बीच संदर्भ स्थायी रखते हैं, जिससे पिछले सारांशों पर आधारित दैनिक स्टैंडअप जैसे वर्कफ़्लो संभव होते हैं।
+
+    मुख्य-सेशन Cron इवेंट स्व-निहित सिस्टम-इवेंट रिमाइंडर होते हैं। इनमें डिफ़ॉल्ट Heartbeat प्रॉम्प्ट या Heartbeat मॉनिटर स्क्रैच अपने-आप शामिल नहीं होते; यदि किसी रिमाइंडर को उस संदर्भ का उपयोग करना चाहिए, तो Cron इवेंट टेक्स्ट में इसे स्पष्ट रूप से लिखें।
+
+  </Accordion>
+  <Accordion title="पृथक जॉब के लिए 'नए सेशन' का अर्थ">
+    प्रत्येक रन के लिए नया ट्रांसक्रिप्ट/सेशन आईडी। OpenClaw सुरक्षित प्राथमिकताएँ (थिंकिंग/फ़ास्ट/वर्बोज़ सेटिंग, लेबल, उपयोगकर्ता द्वारा स्पष्ट रूप से चुने गए मॉडल/ऑथ ओवरराइड) बनाए रखता है, लेकिन किसी पुराने Cron रो से परिवेशी वार्तालाप संदर्भ प्राप्त नहीं करता: चैनल/समूह रूटिंग, भेजने या क्यू की नीति, एलिवेशन, मूल, या ACP रनटाइम बाइंडिंग। जब किसी आवर्ती जॉब को जानबूझकर उसी वार्तालाप संदर्भ पर आगे बढ़ना हो, तो `current` या `session:<id>` का उपयोग करें।
+  </Accordion>
+  <Accordion title="अनअटेंडेड रन अनुबंध">
+    पृथक Cron और हुक एजेंट टर्न स्पष्ट रूप से अनअटेंडेड होते हैं: स्पष्टीकरण देने या अनुमोदन करने के लिए कोई उपस्थित नहीं होता। अंतिम उत्तर योजना, अभिस्वीकृति या इनपुट के अनुरोध के बजाय वास्तविक डिलिवरेबल होना चाहिए। जब कुछ करने की आवश्यकता न हो, तो एजेंट `HEARTBEAT_OK` लौटाता है और विफलताओं को स्पष्ट रूप से बताता है; पुनः प्रयास और विफलता-अलर्ट नीति का स्वामित्व Cron के पास है।
+
+    विश्वसनीय शेड्यूल किए गए जॉब के लिए, जब जॉब के अपने निर्देश जानबूझकर कोई प्रश्न या योजना माँगते हैं, तो वे प्रभावी होते हैं और एजेंट उस जॉब को हटा सकता है जिसकी अब आवश्यकता नहीं है। बाहरी हुक टर्न को केवल सामान्य अनअटेंडेड अनुबंध प्राप्त होता है; बाहरी-सामग्री सीमा के पार उन्हें वह ओवरराइड या स्वयं हटाने का मार्गदर्शन प्राप्त नहीं होता।
+
+  </Accordion>
+  <Accordion title="सबएजेंट और Discord डिलीवरी">
+    जब पृथक Cron रन सबएजेंट का संयोजन करते हैं, तो डिलीवरी पुराने पैरेंट अंतरिम टेक्स्ट के बजाय अंतिम डिसेंडेंट आउटपुट को प्राथमिकता देती है। यदि डिसेंडेंट अब भी चल रहे हों, तो OpenClaw उस आंशिक पैरेंट अपडेट की घोषणा करने के बजाय उसे रोक देता है।
+
+    केवल-टेक्स्ट Discord घोषणा लक्ष्यों के लिए, OpenClaw स्ट्रीम किए गए/अंतरिम टेक्स्ट और अंतिम उत्तर, दोनों को दोहराने के बजाय प्रामाणिक अंतिम असिस्टेंट टेक्स्ट एक बार भेजता है। मीडिया और संरचित Discord पेलोड अब भी अलग से डिलीवर किए जाते हैं, ताकि अटैचमेंट और कॉम्पोनेंट छूट न जाएँ।
+
+  </Accordion>
+</AccordionGroup>
 
 ## डिलीवरी और आउटपुट
 
 | मोड       | क्या होता है                                                        |
 | ---------- | ------------------------------------------------------------------- |
-| `announce` | यदि agent ने नहीं भेजा, तो अंतिम पाठ लक्ष्य तक फ़ॉलबैक-डिलीवर करता है |
-| `webhook`  | समाप्त event पेलोड को URL पर POST करता है                                |
-| `none`     | कोई runner फ़ॉलबैक डिलीवरी नहीं                                         |
+| `announce` | यदि एजेंट ने अंतिम टेक्स्ट नहीं भेजा, तो उसे फ़ॉलबैक के रूप में लक्ष्य तक डिलीवर करें |
+| `webhook`  | पूर्ण इवेंट पेलोड को किसी URL पर POST करें                                |
+| `none`     | कोई रनर फ़ॉलबैक डिलीवरी नहीं                                         |
 
-चैनल डिलीवरी के लिए `--announce --channel telegram --to "-1001234567890"` का उपयोग करें। Telegram forum topics के लिए, `-1001234567890:topic:123` का उपयोग करें; OpenClaw Telegram-स्वामित्व वाला `-1001234567890:123` शॉर्टहैंड भी स्वीकार करता है। Direct RPC/config callers `delivery.threadId` को string या number के रूप में पास कर सकते हैं। Slack/Discord/Mattermost लक्ष्यों को स्पष्ट prefixes (`channel:<id>`, `user:<id>`) का उपयोग करना चाहिए। Matrix room IDs case-sensitive हैं; Matrix से सटीक room ID या `room:!room:server` रूप का उपयोग करें।
+चैनल डिलीवरी के लिए `--announce --channel telegram --to "-1001234567890"` का उपयोग करें। Telegram फ़ोरम विषयों के लिए `-1001234567890:topic:123` का उपयोग करें; OpenClaw, Telegram के स्वामित्व वाले संक्षिप्त रूप `-1001234567890:123` को भी स्वीकार करता है। प्रत्यक्ष RPC/कॉन्फ़िग कॉलर `delivery.threadId` को स्ट्रिंग या संख्या के रूप में पास कर सकते हैं। Slack/Discord/Mattermost लक्ष्य स्पष्ट प्रीफ़िक्स (`channel:<id>`, `user:<id>`) का उपयोग करते हैं। Matrix रूम आईडी केस-सेंसिटिव होते हैं; Matrix से सटीक रूम आईडी या `room:!room:server` रूप का उपयोग करें।
 
-जब announce डिलीवरी `channel: "last"` का उपयोग करती है या `channel` छोड़ती है, तो `telegram:123` जैसा provider-prefixed लक्ष्य cron के session history या एकल कॉन्फ़िगर किए गए channel पर वापस जाने से पहले channel चुन सकता है। केवल loaded plugin द्वारा विज्ञापित prefixes provider selectors हैं। यदि `delivery.channel` स्पष्ट है, तो target prefix को वही provider नामित करना होगा; उदाहरण के लिए, `channel: "whatsapp"` के साथ `to: "telegram:123"` अस्वीकार किया जाता है, बजाय इसके कि WhatsApp Telegram ID को phone number के रूप में व्याख्यायित करे। `channel:<id>`, `user:<id>`, `imessage:<handle>`, और `sms:<number>` जैसे target-kind और service prefixes channel-स्वामित्व वाले target syntax बने रहते हैं, provider selectors नहीं।
+जब घोषणा डिलीवरी `channel: "last"` का उपयोग करती है या `channel` को छोड़ती है, तो `telegram:123` जैसा प्रदाता-प्रीफ़िक्स वाला लक्ष्य चैनल चुन सकता है, इससे पहले कि Cron सेशन इतिहास या कॉन्फ़िगर किए गए किसी एक चैनल पर फ़ॉलबैक करे। केवल लोड किए गए Plugin द्वारा विज्ञापित प्रीफ़िक्स ही प्रदाता चयनकर्ता होते हैं। यदि `delivery.channel` स्पष्ट रूप से दिया गया है, तो लक्ष्य प्रीफ़िक्स में उसी प्रदाता का नाम होना चाहिए; WhatsApp को Telegram आईडी की व्याख्या फ़ोन नंबर के रूप में करने देने के बजाय `channel: "whatsapp"` के साथ `to: "telegram:123"` को अस्वीकार कर दिया जाता है। लक्ष्य-प्रकार और सेवा प्रीफ़िक्स (`channel:<id>`, `user:<id>`, `imessage:<handle>`, `sms:<number>`) चैनल के स्वामित्व वाला लक्ष्य सिंटैक्स बने रहते हैं, प्रदाता चयनकर्ता नहीं।
 
-आइसोलेटेड जॉब्स के लिए, चैट डिलीवरी साझा होती है। यदि चैट route उपलब्ध है, तो agent `message` tool का उपयोग कर सकता है, भले ही जॉब `--no-deliver` का उपयोग करे। यदि agent कॉन्फ़िगर किए गए/वर्तमान target को भेजता है, तो OpenClaw फ़ॉलबैक announce छोड़ देता है। अन्यथा `announce`, `webhook`, और `none` केवल यह नियंत्रित करते हैं कि agent turn के बाद runner अंतिम reply के साथ क्या करता है।
+पृथक जॉब के लिए चैट डिलीवरी साझा होती है: यदि कोई चैट रूट उपलब्ध है, तो एजेंट `--no-deliver` के साथ भी `message` टूल का उपयोग कर सकता है। यदि एजेंट कॉन्फ़िगर किए गए/वर्तमान लक्ष्य को भेजता है, तो OpenClaw फ़ॉलबैक घोषणा छोड़ देता है। अन्यथा `announce`, `webhook`, और `none` केवल यह नियंत्रित करते हैं कि एजेंट टर्न के बाद रनर अंतिम उत्तर के साथ क्या करता है।
 
-जब कोई agent सक्रिय चैट से आइसोलेटेड reminder बनाता है, तो OpenClaw फ़ॉलबैक announce route के लिए संरक्षित live delivery target संग्रहीत करता है। Internal session keys lowercase हो सकती हैं; वर्तमान चैट context उपलब्ध होने पर provider delivery targets उन keys से फिर से निर्मित नहीं किए जाते।
+जब कोई एजेंट सक्रिय चैट से पृथक रिमाइंडर बनाता है, तो OpenClaw फ़ॉलबैक घोषणा रूट के लिए सुरक्षित रखा गया लाइव डिलीवरी लक्ष्य संग्रहीत करता है। आंतरिक सेशन कुंजियाँ लोअरकेस में हो सकती हैं; वर्तमान चैट संदर्भ उपलब्ध होने पर उन कुंजियों से प्रदाता डिलीवरी लक्ष्यों का पुनर्निर्माण नहीं किया जाता।
 
-Implicit announce delivery पुराने targets को validate और reroute करने के लिए कॉन्फ़िगर की गई channel allowlists का उपयोग करती है। DM pairing-store approvals फ़ॉलबैक automation recipients नहीं हैं; जब कोई scheduled job DM को सक्रिय रूप से भेजनी चाहिए, तो `delivery.to` सेट करें या channel `allowFrom` entry कॉन्फ़िगर करें।
+अप्रत्यक्ष घोषणा डिलीवरी पुराने लक्ष्यों को सत्यापित और पुनः रूट करने के लिए कॉन्फ़िगर की गई चैनल अनुमति-सूचियों का उपयोग करती है। DM पेयरिंग-स्टोर अनुमोदन फ़ॉलबैक ऑटोमेशन प्राप्तकर्ता नहीं होते; जब किसी शेड्यूल किए गए जॉब को सक्रिय रूप से किसी DM पर भेजना हो, तो `delivery.to` सेट करें या चैनल की `allowFrom` प्रविष्टि कॉन्फ़िगर करें।
 
-## आउटपुट भाषा
+### विफलता सूचनाएँ
 
-Cron जॉब्स channel, locale, या पिछले messages से reply भाषा का अनुमान नहीं लगातीं। भाषा नियम scheduled message या template में रखें:
+विफलता सूचनाएँ एक अलग गंतव्य पथ का अनुसरण करती हैं:
+
+- `cron.failureDestination` विफलता सूचनाओं के लिए वैश्विक डिफ़ॉल्ट सेट करता है।
+- `job.delivery.failureDestination` प्रत्येक जॉब के लिए उसे ओवरराइड करता है।
+- यदि इनमें से कोई भी सेट नहीं है और जॉब पहले से `announce` के माध्यम से डिलीवर करता है, तो विफलता सूचनाएँ उस प्राथमिक घोषणा लक्ष्य पर फ़ॉलबैक करती हैं।
+- `delivery.failureDestination` केवल `sessionTarget="isolated"` जॉब पर समर्थित है, जब तक कि प्राथमिक डिलीवरी मोड `webhook` न हो।
+- `failureAlert.includeSkipped: true` किसी जॉब या वैश्विक Cron अलर्ट नीति में बार-बार छोड़े गए रन के अलर्ट सक्षम करता है। छोड़े गए रन का अलग लगातार-छोड़ने का काउंटर बना रहता है, इसलिए वे निष्पादन-त्रुटि बैकऑफ़ को प्रभावित नहीं करते।
+- `openclaw cron edit` प्रति-जॉब अलर्ट ट्यूनिंग उपलब्ध कराता है: `--failure-alert`/`--no-failure-alert`, `--failure-alert-after <n>`, `--failure-alert-channel`, `--failure-alert-to`, `--failure-alert-cooldown`, `--failure-alert-include-skipped`/`--failure-alert-exclude-skipped`, `--failure-alert-mode`, और `--failure-alert-account-id`।
+
+### आउटपुट भाषा
+
+Cron जॉब चैनल, लोकेल या पिछले संदेशों से उत्तर की भाषा का अनुमान नहीं लगाते। भाषा का नियम शेड्यूल किए गए संदेश या टेम्पलेट में रखें:
 
 ```bash
 openclaw cron edit <jobId> \
-  --message "Summarize the updates. Respond in Chinese; keep URLs, code, and product names unchanged."
+  --message "अपडेट का सारांश दें। चीनी में उत्तर दें; URL, कोड और उत्पाद नाम अपरिवर्तित रखें।"
 ```
 
-Template files के लिए, भाषा निर्देश rendered prompt में रखें और जॉब चलने से पहले सत्यापित करें कि `{{language}}` जैसे placeholders भरे गए हैं। यदि output भाषाएं मिलाता है, तो नियम स्पष्ट करें, उदाहरण के लिए: "Use Chinese for narrative text and keep technical terms in English."
-
-Failure notifications एक अलग destination path का पालन करती हैं:
-
-- `cron.failureDestination` failure notifications के लिए global default सेट करता है।
-- `job.delivery.failureDestination` उसे प्रति जॉब ओवरराइड करता है।
-- यदि कोई भी सेट नहीं है और जॉब पहले से `announce` के माध्यम से डिलीवर करती है, तो failure notifications अब उस primary announce target पर वापस जाती हैं।
-- `delivery.failureDestination` केवल `sessionTarget="isolated"` जॉब्स पर समर्थित है, जब तक कि primary delivery mode `webhook` न हो।
-- `failureAlert.includeSkipped: true` किसी जॉब या global cron alert policy को बार-बार skipped-run alerts में शामिल करता है। छोड़े गए रन अलग consecutive skip counter रखते हैं, इसलिए वे execution-error backoff को प्रभावित नहीं करते।
+टेम्पलेट फ़ाइलों के लिए भाषा निर्देश को रेंडर किए गए प्रॉम्प्ट में रखें और जॉब चलने से पहले सत्यापित करें कि `{{language}}` जैसे प्लेसहोल्डर भरे गए हैं। यदि आउटपुट में भाषाएँ मिश्रित हों, तो नियम स्पष्ट करें, उदाहरण के लिए: "वर्णनात्मक टेक्स्ट के लिए चीनी का उपयोग करें और तकनीकी शब्दों को अंग्रेज़ी में रखें।"
 
 ## CLI उदाहरण
 
 <Tabs>
-  <Tab title="One-shot reminder">
+  <Tab title="एक-बार का रिमाइंडर">
     ```bash
     openclaw cron add \
-      --name "Calendar check" \
+      --name "कैलेंडर की जाँच" \
       --at "20m" \
       --session main \
-      --system-event "Next heartbeat: check calendar." \
+      --system-event "अगला Heartbeat: कैलेंडर जाँचें।" \
       --wake now
     ```
   </Tab>
-  <Tab title="Recurring isolated job">
+  <Tab title="आवर्ती पृथक जॉब">
     ```bash
     openclaw cron create "0 7 * * *" \
-      "Summarize overnight updates." \
-      --name "Morning brief" \
+      "रातभर के अपडेट का सारांश दें।" \
+      --name "सुबह का संक्षिप्त विवरण" \
       --tz "America/Los_Angeles" \
       --session isolated \
       --announce \
@@ -268,31 +382,31 @@ Failure notifications एक अलग destination path का पालन क�
       --to "channel:C1234567890"
     ```
   </Tab>
-  <Tab title="Model and thinking override">
+  <Tab title="मॉडल और थिंकिंग ओवरराइड">
     ```bash
     openclaw cron add \
-      --name "Deep analysis" \
+      --name "गहन विश्लेषण" \
       --cron "0 6 * * 1" \
       --tz "America/Los_Angeles" \
       --session isolated \
-      --message "Weekly deep analysis of project progress." \
+      --message "परियोजना की प्रगति का साप्ताहिक गहन विश्लेषण।" \
       --model "opus" \
       --thinking high \
       --announce
     ```
   </Tab>
-  <Tab title="Webhook output">
+  <Tab title="Webhook आउटपुट">
     ```bash
     openclaw cron create "0 18 * * 1-5" \
-      "Summarize today's deploys as JSON." \
-      --name "Deploy digest" \
+      "आज के डिप्लॉय का JSON के रूप में सारांश दें।" \
+      --name "डिप्लॉय सारांश" \
       --webhook "https://example.invalid/openclaw/cron"
     ```
   </Tab>
-  <Tab title="Command output">
+  <Tab title="कमांड आउटपुट">
     ```bash
     openclaw cron create "*/15 * * * *" \
-      --name "Queue depth probe" \
+      --name "क्यू गहराई जाँच" \
       --command "scripts/check-queue.sh" \
       --command-cwd "/srv/app" \
       --announce \
@@ -302,9 +416,76 @@ Failure notifications एक अलग destination path का पालन क�
   </Tab>
 </Tabs>
 
-## Webhooks
+## जॉब प्रबंधित करना
 
-Gateway बाहरी triggers के लिए HTTP webhook endpoints उजागर कर सकता है। config में सक्षम करें:
+```bash
+# सक्षम जॉब सूचीबद्ध करें
+openclaw cron list
+
+# अक्षम जॉब भी शामिल करें
+openclaw cron list --all
+
+# किसी संग्रहीत जॉब को JSON के रूप में प्राप्त करें
+openclaw cron get <jobId>
+
+# समाधान किए गए डिलीवरी रूट सहित एक जॉब दिखाएँ
+openclaw cron show <jobId>
+
+# हटाए बिना सक्षम/अक्षम करें
+openclaw cron enable <jobId>
+openclaw cron disable <jobId>
+
+# किसी जॉब को संपादित करें
+openclaw cron edit <jobId> --message "अपडेट किया गया प्रॉम्प्ट" --model "opus"
+
+# किसी जॉब को अभी बलपूर्वक चलाएँ
+openclaw cron run <jobId>
+
+# किसी जॉब को अभी बलपूर्वक चलाएँ और उसकी अंतिम स्थिति की प्रतीक्षा करें
+openclaw cron run <jobId> --wait --wait-timeout 10m --poll-interval 2s
+
+# केवल तभी चलाएँ जब समय हो गया हो
+openclaw cron run <jobId> --due
+
+# रन इतिहास देखें
+openclaw cron runs --id <jobId> --limit 50
+
+# कोई एक सटीक रन देखें
+openclaw cron runs --id <jobId> --run-id <runId>
+
+# किसी जॉब को हटाएँ
+openclaw cron remove <jobId>
+
+# एजेंट चयन (बहु-एजेंट सेटअप)
+openclaw cron create "0 6 * * *" "ऑपरेशन कतार जाँचें" --name "ऑपरेशन स्वीप" --session isolated --agent ops
+openclaw cron edit <jobId> --clear-agent
+```
+
+किसी सत्र को संग्रहित करने पर (Control UI से, या ऑपरेटर-एडमिन कॉलर से `sessions.patch { archived: true }`) उस सत्र से बँधा प्रत्येक सक्षम cron जॉब अक्षम हो जाता है: उसका पृथक `cron:<jobId>` सत्र, कोई `session:<key>` लक्ष्य, या कोई डिलीवरी/वेक `sessionKey` लेन। सत्र को पुनर्स्थापित करने से वे जॉब फिर सक्षम नहीं होते; `openclaw cron enable <jobId>` का उपयोग करें। जिन सत्रों से कोई सक्षम जॉब बँधा है, वे Control UI साइडबार में घड़ी का बैज दिखाते हैं।
+
+`openclaw cron run <jobId>` मैन्युअल रन को कतार में डालने के बाद वापस लौटता है। शटडाउन हुक, रखरखाव स्क्रिप्ट या ऐसे अन्य स्वचालन के लिए `--wait` का उपयोग करें जिन्हें कतारबद्ध रन पूरा होने तक अवरुद्ध रहना आवश्यक है; यह लौटाए गए `runId` को पोल करता है (डिफ़ॉल्ट टाइमआउट `10m`, पोल अंतराल `2s`) और स्थिति `ok` के लिए `0` से, तथा `error`, `skipped` या प्रतीक्षा टाइमआउट के लिए गैर-शून्य मान से बाहर निकलता है।
+
+एजेंट का `cron` टूल `cron(action: "list")` से संक्षिप्त जॉब सारांश (`id`, `name`, `enabled`, `nextRunAtMs`, `scheduleKind`, `lastRunStatus`) लौटाता है; किसी एक जॉब की पूरी परिभाषा के लिए `cron(action: "get", jobId: "...")` का उपयोग करें। प्रत्यक्ष Gateway कॉलर `cron.list` को `compact: true` दे सकते हैं; इसे छोड़ने पर डिलीवरी पूर्वावलोकन सहित पूरा उत्तर सुरक्षित रहता है।
+
+`openclaw cron create`, `openclaw cron add` का उपनाम है। नए जॉब किसी स्थानात्मक शेड्यूल (`"0 9 * * 1"`, `"every 1h"`, `"20m"`, या कोई ISO टाइमस्टैम्प) के बाद स्थानात्मक एजेंट प्रॉम्प्ट का उपयोग कर सकते हैं। पूर्ण हुए रन के पेलोड को किसी HTTP एंडपॉइंट पर POST करने के लिए `cron add|create` या `cron edit` पर `--webhook <url>` का उपयोग करें; Webhook डिलीवरी को चैट डिलीवरी फ़्लैग (`--announce`, `--channel`, `--to`, `--thread-id`, `--account`) के साथ संयोजित नहीं किया जा सकता। `cron edit`, `--clear-channel`, `--clear-to`, `--clear-thread-id`, और `--clear-account` पर उन रूटिंग फ़ील्ड को अलग-अलग अनसेट करें (प्रत्येक अपने संबंधित सेट फ़्लैग के साथ दिए जाने पर अस्वीकार होता है) — यह `--no-deliver` से अलग है, जो केवल रनर फ़ॉलबैक डिलीवरी को अक्षम करता है।
+
+<Note>
+मॉडल ओवरराइड टिप्पणी:
+
+- `openclaw cron add|edit --model ...` जॉब के चयनित मॉडल को बदलता है।
+- यदि मॉडल की अनुमति है, तो वही सटीक प्रदाता/मॉडल पृथक एजेंट रन तक पहुँचता है।
+- यदि इसकी अनुमति नहीं है या इसका समाधान नहीं किया जा सकता, तो cron स्पष्ट सत्यापन त्रुटि के साथ रन को विफल करता है।
+- API `cron.update` पेलोड पैच किसी संग्रहीत जॉब मॉडल ओवरराइड को साफ़ करने के लिए `model: null` सेट कर सकते हैं।
+- `openclaw cron edit <job-id> --clear-model` CLI से उस ओवरराइड को साफ़ करता है (`model: null` पैच जैसा ही प्रभाव) और इसे `--model` के साथ संयोजित नहीं किया जा सकता।
+- कॉन्फ़िगर की गई फ़ॉलबैक शृंखलाएँ फिर भी लागू होती हैं, क्योंकि cron `--model` किसी जॉब का प्राथमिक मॉडल है, सत्र का `/model` ओवरराइड नहीं।
+- `openclaw cron add|edit --fallbacks ...` पेलोड `fallbacks` सेट करता है और उस जॉब के कॉन्फ़िगर किए गए फ़ॉलबैक को प्रतिस्थापित करता है; `--fallbacks ""` फ़ॉलबैक को अक्षम करके रन को सख्त बनाता है। `openclaw cron edit <job-id> --clear-fallbacks` प्रति-जॉब ओवरराइड को साफ़ करता है।
+- बिना किसी स्पष्ट या कॉन्फ़िगर की गई फ़ॉलबैक सूची वाला सामान्य `--model`, मौन अतिरिक्त पुनः-प्रयास लक्ष्य के रूप में एजेंट के प्राथमिक मॉडल तक आगे नहीं बढ़ता।
+
+</Note>
+
+## Webhook
+
+Gateway बाहरी ट्रिगर के लिए HTTP Webhook एंडपॉइंट उपलब्ध करा सकता है। कॉन्फ़िगरेशन में सक्षम करें:
 
 ```json5
 {
@@ -316,28 +497,28 @@ Gateway बाहरी triggers के लिए HTTP webhook endpoints उज�
 }
 ```
 
-### Authentication
+### प्रमाणीकरण
 
-हर request में header के माध्यम से hook token शामिल होना चाहिए:
+प्रत्येक अनुरोध में हेडर के माध्यम से हुक टोकन शामिल होना आवश्यक है:
 
 - `Authorization: Bearer <token>` (अनुशंसित)
 - `x-openclaw-token: <token>`
 
-Query-string tokens अस्वीकार किए जाते हैं।
+क्वेरी-स्ट्रिंग टोकन अस्वीकार किए जाते हैं।
 
 <AccordionGroup>
   <Accordion title="POST /hooks/wake">
-    main session के लिए system event enqueue करें:
+    मुख्य सत्र के लिए कोई सिस्टम इवेंट कतार में डालें:
 
     ```bash
     curl -X POST http://127.0.0.1:18789/hooks/wake \
       -H 'Authorization: Bearer SECRET' \
       -H 'Content-Type: application/json' \
-      -d '{"text":"New email received","mode":"now"}'
+      -d '{"text":"नया ईमेल प्राप्त हुआ","mode":"now"}'
     ```
 
     <ParamField path="text" type="string" required>
-      Event विवरण।
+      इवेंट का विवरण।
     </ParamField>
     <ParamField path="mode" type="string" default="now">
       `now` या `next-heartbeat`।
@@ -345,60 +526,66 @@ Query-string tokens अस्वीकार किए जाते हैं।
 
   </Accordion>
   <Accordion title="POST /hooks/agent">
-    आइसोलेटेड agent turn चलाएं:
+    एजेंट का पृथक टर्न चलाएँ:
 
     ```bash
     curl -X POST http://127.0.0.1:18789/hooks/agent \
       -H 'Authorization: Bearer SECRET' \
       -H 'Content-Type: application/json' \
-      -d '{"message":"Summarize inbox","name":"Email","model":"openai/gpt-5.4"}'
+      -d '{"message":"इनबॉक्स का सारांश दें","name":"ईमेल","model":"openai/gpt-5.6-sol"}'
     ```
 
-    फ़ील्ड्स: `message` (आवश्यक), `name`, `agentId`, `wakeMode`, `deliver`, `channel`, `to`, `model`, `fallbacks`, `thinking`, `timeoutSeconds`।
+    फ़ील्ड: `message` (आवश्यक), `name`, `agentId`, `sessionKey` (`hooks.allowRequestSessionKey=true` आवश्यक), `idempotencyKey`, `wakeMode`, `deliver`, `channel`, `to`, `model`, `thinking`, `timeoutSeconds`।
 
   </Accordion>
-  <Accordion title="Mapped hooks (POST /hooks/<name>)">
-    Custom hook names config में `hooks.mappings` के माध्यम से resolve किए जाते हैं। Mappings arbitrary payloads को templates या code transforms के साथ `wake` या `agent` actions में बदल सकती हैं।
+  <Accordion title="मैप किए गए हुक (POST /hooks/<name>)">
+    कस्टम हुक नाम कॉन्फ़िगरेशन में `hooks.mappings` के माध्यम से समाधान किए जाते हैं। मैपिंग टेम्पलेट या कोड रूपांतरण द्वारा मनमाने पेलोड को `wake` या `agent` क्रियाओं में बदल सकती हैं।
   </Accordion>
 </AccordionGroup>
 
 <Warning>
-Hook endpoints को loopback, tailnet, या trusted reverse proxy के पीछे रखें।
+हुक एंडपॉइंट को लूपबैक, टेलनेट या किसी विश्वसनीय रिवर्स प्रॉक्सी के पीछे रखें।
 
-- समर्पित हुक टोकन का उपयोग करें; Gateway auth टोकन दोबारा उपयोग न करें।
-- `hooks.path` को समर्पित सबपाथ पर रखें; `/` अस्वीकार किया जाता है।
-- `hooks.allowedAgentIds` सेट करें ताकि सीमित किया जा सके कि हुक किस प्रभावी एजेंट को लक्ष्य कर सकता है, जिसमें `agentId` छोड़े जाने पर डिफ़ॉल्ट एजेंट भी शामिल है।
-- जब तक आपको कॉलर-चुने हुए सेशन की आवश्यकता न हो, `hooks.allowRequestSessionKey=false` रखें।
-- यदि आप `hooks.allowRequestSessionKey` सक्षम करते हैं, तो अनुमत सेशन-की आकारों को सीमित करने के लिए `hooks.allowedSessionKeyPrefixes` भी सेट करें।
-- हुक पेलोड डिफ़ॉल्ट रूप से सुरक्षा सीमाओं के साथ रैप किए जाते हैं।
+- समर्पित हुक टोकन का उपयोग करें; Gateway प्रमाणीकरण टोकन का पुनः उपयोग न करें।
+- `hooks.path` को किसी समर्पित उपपथ पर रखें; `/` अस्वीकार किया जाता है।
+- हुक किन प्रभावी एजेंटों को लक्षित कर सकता है, इसे सीमित करने के लिए `hooks.allowedAgentIds` सेट करें; इसमें `agentId` छोड़े जाने पर डिफ़ॉल्ट एजेंट भी शामिल है।
+- जब तक कॉलर द्वारा चयनित सत्र आवश्यक न हों, `hooks.allowRequestSessionKey=false` बनाए रखें।
+- यदि आप `hooks.allowRequestSessionKey` सक्षम करते हैं, तो अनुमत सत्र कुंजी स्वरूपों को सीमित करने के लिए `hooks.allowedSessionKeyPrefixes` भी सेट करें।
+- हुक पेलोड डिफ़ॉल्ट रूप से सुरक्षा सीमाओं में लपेटे जाते हैं।
 
 </Warning>
 
-## Gmail PubSub इंटीग्रेशन
+## Gmail PubSub एकीकरण
 
-Google PubSub के ज़रिए Gmail इनबॉक्स ट्रिगर को OpenClaw से जोड़ें।
+Google PubSub के माध्यम से Gmail इनबॉक्स ट्रिगर को OpenClaw से जोड़ें।
 
 <Note>
-**पूर्वापेक्षाएँ:** `gcloud` CLI, `gog` (gogcli), OpenClaw हुक सक्षम, सार्वजनिक HTTPS एंडपॉइंट के लिए Tailscale।
+**पूर्वापेक्षाएँ:** `gcloud` CLI, `gog` (gogcli), सक्षम OpenClaw हुक, सार्वजनिक HTTPS एंडपॉइंट के लिए Tailscale।
 </Note>
 
-### विज़र्ड सेटअप (अनुशंसित)
+### विज़ार्ड सेटअप (अनुशंसित)
 
 ```bash
 openclaw webhooks gmail setup --account openclaw@gmail.com
 ```
 
-यह `hooks.gmail` कॉन्फ़िग लिखता है, Gmail प्रीसेट सक्षम करता है, और पुश एंडपॉइंट के लिए Tailscale Funnel का उपयोग करता है।
+यह `hooks.gmail` कॉन्फ़िगरेशन लिखता है, Gmail प्रीसेट सक्षम करता है और पुश एंडपॉइंट (`--tailscale funnel|serve|off`) के लिए डिफ़ॉल्ट रूप से Tailscale Funnel का उपयोग करता है।
 
-### Gateway ऑटो-स्टार्ट
+<Warning>
+Gmail प्रीसेट का प्रति-संदेश सत्र वार्तालाप संदर्भ को अलग करता है; यह लक्षित एजेंट के टूल या कार्यक्षेत्र को प्रतिबंधित नहीं करता। `agentId` सेट करने वाली कस्टम मैपिंग के बिना, Gmail हुक डिफ़ॉल्ट एजेंट के रूप में चलते हैं।
 
-जब `hooks.enabled=true` हो और `hooks.gmail.account` सेट हो, तो Gateway बूट पर `gog gmail watch serve` शुरू करता है और वॉच को अपने-आप रिन्यू करता है। बाहर रहने के लिए `OPENCLAW_SKIP_GMAIL_WATCHER=1` सेट करें।
+अविश्वसनीय इनबॉक्स के लिए हुक को किसी समर्पित रीडर एजेंट तक रूट करें, उस एजेंट को केवल-पढ़ने योग्य या कोई कार्यक्षेत्र पहुँच न दें, और फ़ाइलसिस्टम लेखन, शेल, ब्राउज़र तथा अन्य अनावश्यक टूल अस्वीकार करें। यदि उसे मुख्य एजेंट को सूचित करना हो, तो केवल आवश्यक एजेंट-से-एजेंट हस्तांतरण की अनुमति दें। [प्रॉम्प्ट इंजेक्शन](/hi/gateway/security#prompt-injection), [बहु-एजेंट सैंडबॉक्स और टूल](/hi/tools/multi-agent-sandbox-tools), और [`tools.agentToAgent`](/hi/gateway/config-tools#toolsagenttoagent) देखें।
+</Warning>
 
-### मैनुअल वन-टाइम सेटअप
+### Gateway स्वचालित प्रारंभ
+
+जब `hooks.enabled=true` और `hooks.gmail.account` सेट हों, तब Gateway बूट पर `gog gmail watch serve` प्रारंभ करता है और वॉच को स्वचालित रूप से नवीनीकृत करता है। इससे बाहर रहने के लिए `OPENCLAW_SKIP_GMAIL_WATCHER=1` सेट करें।
+
+### मैन्युअल एकबारगी सेटअप
 
 <Steps>
-  <Step title="Select the GCP project">
-    वह GCP प्रोजेक्ट चुनें जिसके पास `gog` द्वारा उपयोग किया गया OAuth क्लाइंट है:
+  <Step title="GCP प्रोजेक्ट चुनें">
+    वह GCP प्रोजेक्ट चुनें जिसके पास `gog` द्वारा उपयोग किया जाने वाला OAuth क्लाइंट है:
 
     ```bash
     gcloud auth login
@@ -407,7 +594,7 @@ openclaw webhooks gmail setup --account openclaw@gmail.com
     ```
 
   </Step>
-  <Step title="Create topic and grant Gmail push access">
+  <Step title="टॉपिक बनाएँ और Gmail पुश पहुँच प्रदान करें">
     ```bash
     gcloud pubsub topics create gog-gmail-watch
     gcloud pubsub topics add-iam-policy-binding gog-gmail-watch \
@@ -415,7 +602,7 @@ openclaw webhooks gmail setup --account openclaw@gmail.com
       --role=roles/pubsub.publisher
     ```
   </Step>
-  <Step title="Start the watch">
+  <Step title="वॉच प्रारंभ करें">
     ```bash
     gog gmail watch start \
       --account openclaw@gmail.com \
@@ -431,70 +618,14 @@ openclaw webhooks gmail setup --account openclaw@gmail.com
 {
   hooks: {
     gmail: {
-      model: "openrouter/meta-llama/llama-3.3-70b-instruct:free",
-      thinking: "off",
+      model: "openai/gpt-5.6-sol",
+      thinking: "high",
     },
   },
 }
 ```
 
-## जॉब प्रबंधन
-
-```bash
-# List all jobs
-openclaw cron list
-
-# Get one stored job as JSON
-openclaw cron get <jobId>
-
-# Show one job, including resolved delivery route
-openclaw cron show <jobId>
-
-# Edit a job
-openclaw cron edit <jobId> --message "Updated prompt" --model "opus"
-
-# Force run a job now
-openclaw cron run <jobId>
-
-# Force run a job now and wait for its terminal status
-openclaw cron run <jobId> --wait --wait-timeout 10m --poll-interval 2s
-
-# Run only if due
-openclaw cron run <jobId> --due
-
-# View run history
-openclaw cron runs --id <jobId> --limit 50
-
-# View one exact run
-openclaw cron runs --id <jobId> --run-id <runId>
-
-# Delete a job
-openclaw cron remove <jobId>
-
-# Agent selection (multi-agent setups)
-openclaw cron create "0 6 * * *" "Check ops queue" --name "Ops sweep" --session isolated --agent ops
-openclaw cron edit <jobId> --clear-agent
-```
-
-`openclaw cron run <jobId>` मैनुअल रन को एनक्यू करने के बाद लौटता है। शटडाउन हुक, मेंटेनेंस स्क्रिप्ट, या ऐसी अन्य ऑटोमेशन के लिए `--wait` का उपयोग करें जिसे क्यू किए गए रन के समाप्त होने तक ब्लॉक करना ज़रूरी है। वेट मोड लौटाए गए सटीक `runId` को पोल करता है; यह `ok` स्थिति के लिए `0` और `error`, `skipped`, या वेट टाइमआउट के लिए नॉन-ज़ीरो के साथ बाहर निकलता है।
-
-एजेंट `cron` टूल `cron(action: "list")` से संक्षिप्त जॉब सारांश (`id`, `name`, `enabled`, `nextRunAtMs`, `scheduleKind`, `lastRunStatus`) लौटाता है; एक पूर्ण जॉब परिभाषा के लिए `cron(action: "get", jobId: "...")` का उपयोग करें। सीधे Gateway कॉलर `cron.list` को `compact: true` पास कर सकते हैं; इसे छोड़ने पर डिलीवरी प्रीव्यू के साथ मौजूदा पूर्ण रिस्पॉन्स सुरक्षित रहता है।
-
-`openclaw cron create`, `openclaw cron add` का alias है, और नए जॉब positional शेड्यूल (`"0 9 * * 1"`, `"every 1h"`, `"20m"`, या ISO timestamp) के बाद positional एजेंट प्रॉम्प्ट का उपयोग कर सकते हैं। समाप्त रन पेलोड को HTTP एंडपॉइंट पर POST करने के लिए `cron add|create` या `cron edit` पर `--webhook <url>` का उपयोग करें। Webhook डिलीवरी को `--announce`, `--channel`, `--to`, `--thread-id`, या `--account` जैसे चैट डिलीवरी फ़्लैग के साथ जोड़ा नहीं जा सकता। `cron edit` पर, `--clear-channel`, `--clear-to`, `--clear-thread-id`, और `--clear-account` उन रूटिंग फ़ील्ड को अलग-अलग अनसेट करते हैं (हर एक अपने मिलते-जुलते सेट फ़्लैग के साथ अस्वीकार किया जाता है), जो `--no-deliver` द्वारा रनर फॉलबैक डिलीवरी अक्षम करने से अलग है।
-
-<Note>
-मॉडल ओवरराइड नोट:
-
-- `openclaw cron add|edit --model ...` जॉब का चुना हुआ मॉडल बदलता है।
-- यदि मॉडल अनुमत है, तो वही सटीक provider/model isolated एजेंट रन तक पहुंचता है।
-- यदि यह अनुमत नहीं है या रिज़ॉल्व नहीं किया जा सकता, तो Cron स्पष्ट वैलिडेशन त्रुटि के साथ रन को विफल करता है।
-- API `cron.update` पेलोड पैच संग्रहित जॉब मॉडल ओवरराइड साफ़ करने के लिए `model: null` सेट कर सकते हैं।
-- `openclaw cron edit <job-id> --clear-model` CLI से वह ओवरराइड साफ़ करता है (`model: null` पैच जैसा ही प्रभाव) और इसे `--model` के साथ जोड़ा नहीं जा सकता।
-- कॉन्फ़िगर की गई फॉलबैक चेन अब भी लागू होती हैं क्योंकि Cron `--model` जॉब प्राइमरी है, सेशन `/model` ओवरराइड नहीं।
-- `openclaw cron add|edit --fallbacks ...` पेलोड `fallbacks` सेट करता है, जिससे उस जॉब के लिए कॉन्फ़िगर किए गए फॉलबैक बदल जाते हैं; `--fallbacks ""` फॉलबैक अक्षम करता है और रन को strict बनाता है। `openclaw cron edit <job-id> --clear-fallbacks` प्रति-जॉब ओवरराइड साफ़ करता है।
-- बिना स्पष्ट या कॉन्फ़िगर की गई फॉलबैक सूची वाला साधारण `--model`, silent अतिरिक्त retry target के रूप में एजेंट प्राइमरी पर fall through नहीं करता।
-
-</Note>
+अविश्वसनीय इनबॉक्स के लिए अपने प्रदाता से उपलब्ध नवीनतम पीढ़ी के सर्वोत्तम स्तर वाले मॉडल का उपयोग करें। ऊपर दिया गया मान एक उदाहरण है; मॉडल का आपके कॉन्फ़िगर किए गए कैटलॉग और अनुमति-सूची में मौजूद होना आवश्यक है।
 
 ## कॉन्फ़िगरेशन
 
@@ -503,40 +634,39 @@ openclaw cron edit <jobId> --clear-agent
   cron: {
     enabled: true,
     store: "~/.openclaw/cron/jobs.json",
-    maxConcurrentRuns: 8,
-    retry: {
-      maxAttempts: 3,
-      backoffMs: [60000, 120000, 300000],
-      retryOn: ["rate_limit", "overloaded", "network", "server_error"],
+    triggers: {
+      enabled: false,
     },
     webhookToken: "replace-with-dedicated-webhook-token",
     sessionRetention: "24h",
-    runLog: { maxBytes: "2mb", keepLines: 2000 },
   },
 }
 ```
 
-`maxConcurrentRuns` शेड्यूल किए गए Cron dispatch और isolated एजेंट-turn execution दोनों को सीमित करता है, और डिफ़ॉल्ट 8 है। Isolated Cron एजेंट turns आंतरिक रूप से queue की समर्पित `cron-nested` execution lane का उपयोग करते हैं, इसलिए इस मान को बढ़ाने से स्वतंत्र Cron LLM runs केवल अपने outer Cron wrappers शुरू करने के बजाय समानांतर रूप से आगे बढ़ सकते हैं। साझा non-Cron `nested` lane इस सेटिंग से widened नहीं होती।
+`webhookToken`, cron Webhook POST पर `Authorization: Bearer <token>` के रूप में भेजा जाता है।
 
-`cron.store` एक logical store key और legacy doctor import path है। मौजूदा JSON stores को SQLite में import और archive करने के लिए `openclaw doctor --fix` चलाएं; भविष्य के Cron बदलाव CLI या Gateway API से होने चाहिए।
+`cron.store` एक तार्किक स्टोर कुंजी और डॉक्टर माइग्रेशन पथ है, हाथ से संपादित की जाने वाली सक्रिय JSON फ़ाइल नहीं। जॉब डेटा SQLite में रहता है; बदलावों के लिए CLI या Gateway API का उपयोग करें।
 
-Cron अक्षम करें: `cron.enabled: false` या `OPENCLAW_SKIP_CRON=1`।
+cron अक्षम करें: `cron.enabled: false` या `OPENCLAW_SKIP_CRON=1`।
 
 <AccordionGroup>
-  <Accordion title="Retry behavior">
-    **वन-शॉट retry**: transient त्रुटियां (rate limit, overload, network, server error) exponential backoff के साथ 3 बार तक retry करती हैं। permanent त्रुटियां तुरंत अक्षम कर देती हैं।
+  <Accordion title="पुनः-प्रयास व्यवहार">
+    **एकबारगी पुनः-प्रयास**: अस्थायी त्रुटियाँ (दर सीमा, अतिभार, नेटवर्क, टाइमआउट, सर्वर त्रुटि) अंतर्निहित पुनः-प्रयास शेड्यूल का उपयोग करती हैं। स्थायी त्रुटियाँ जॉब को तुरंत अक्षम कर देती हैं।
 
-    **Recurring retry**: retries के बीच exponential backoff (30s से 60m)। अगला सफल रन होने के बाद backoff reset हो जाता है।
+    **आवर्ती पुनः-प्रयास**: लगातार निष्पादन त्रुटियों पर विस्तारित शेड्यूल (30s, 60s, 5m, 15m, 60m) के अनुसार प्रतीक्षा बढ़ती है। अगले सफल रन के बाद बैकऑफ़ रीसेट हो जाता है।
 
   </Accordion>
-  <Accordion title="Maintenance">
-    `cron.sessionRetention` (डिफ़ॉल्ट `24h`) isolated run-session entries को prune करता है। `cron.runLog.keepLines` प्रति जॉब retained SQLite run-history rows को सीमित करता है; पुराने file-backed run logs के साथ config compatibility के लिए `maxBytes` रखा गया है।
+  <Accordion title="रखरखाव">
+    `cron.sessionRetention` (डिफ़ॉल्ट `24h`, `false` अक्षम करता है) पृथक रन-सत्र प्रविष्टियों को हटाता है। रन इतिहास प्रत्येक जॉब के लिए नवीनतम 2000 अंतिम पंक्तियाँ रखता है; खोई हुई पंक्तियों के लिए उनका 24-घंटे का सफ़ाई समय बना रहता है।
+  </Accordion>
+  <Accordion title="पुराने स्टोर का माइग्रेशन">
+    अपग्रेड पर, पुराने `~/.openclaw/cron/jobs.json`, `jobs-state.json`, और `runs/*.jsonl` फ़ाइलों को SQLite में आयात करने और उनका नाम `.migrated` प्रत्यय के साथ बदलने के लिए `openclaw doctor --fix` चलाएँ। विकृत जॉब पंक्तियाँ रनटाइम से छोड़ दी जाती हैं और बाद में मरम्मत या समीक्षा के लिए `jobs-quarantine.json` में कॉपी की जाती हैं।
   </Accordion>
 </AccordionGroup>
 
 ## समस्या निवारण
 
-### कमांड लैडर
+### कमांड क्रम
 
 ```bash
 openclaw status
@@ -550,39 +680,39 @@ openclaw doctor
 ```
 
 <AccordionGroup>
-  <Accordion title="Cron not firing">
-    - `cron.enabled` और `OPENCLAW_SKIP_CRON` env var जांचें।
+  <Accordion title="Cron सक्रिय नहीं हो रहा">
+    - `cron.enabled` और `OPENCLAW_SKIP_CRON` पर्यावरण चर जाँचें।
     - पुष्टि करें कि Gateway लगातार चल रहा है।
-    - `cron` शेड्यूल के लिए, timezone (`--tz`) बनाम host timezone सत्यापित करें।
-    - run output में `reason: not-due` का अर्थ है कि manual run को `openclaw cron run <jobId> --due` के साथ जांचा गया था और जॉब अभी due नहीं था।
+    - `cron` शेड्यूल के लिए, समय क्षेत्र (`--tz`) की होस्ट समय क्षेत्र से तुलना करके पुष्टि करें।
+    - रन आउटपुट में `reason: not-due` का अर्थ है कि मैन्युअल रन को `openclaw cron run <jobId> --due` के साथ जाँचा गया था और जॉब का समय अभी नहीं हुआ था।
 
   </Accordion>
-  <Accordion title="Cron fired but no delivery">
-    - डिलीवरी मोड `none` का अर्थ है कि कोई runner fallback send अपेक्षित नहीं है। चैट route उपलब्ध होने पर एजेंट अब भी `message` tool से सीधे भेज सकता है।
-    - डिलीवरी target missing/invalid (`channel`/`to`) का अर्थ है कि outbound skip किया गया।
-    - Matrix के लिए, lowercased `delivery.to` room IDs वाले copied या legacy jobs विफल हो सकते हैं क्योंकि Matrix room IDs case-sensitive होते हैं। जॉब को Matrix से मिले सटीक `!room:server` या `room:!room:server` value पर edit करें।
-    - Channel auth errors (`unauthorized`, `Forbidden`) का अर्थ है कि delivery credentials द्वारा blocked थी।
-    - यदि isolated run केवल silent token (`NO_REPLY` / `no_reply`) लौटाता है, तो OpenClaw direct outbound delivery को suppress करता है और fallback queued summary path को भी suppress करता है, इसलिए chat पर कुछ भी post नहीं होता।
-    - यदि एजेंट को user को स्वयं message करना चाहिए, तो जांचें कि जॉब के पास usable route है (`channel: "last"` with previous chat, या explicit channel/target)।
+  <Accordion title="Cron चला, लेकिन डिलीवरी नहीं हुई">
+    - डिलीवरी मोड `none` का अर्थ है कि कोई रनर फ़ॉलबैक प्रेषण अपेक्षित नहीं है। चैट रूट उपलब्ध होने पर एजेंट अब भी `message` टूल से सीधे भेज सकता है।
+    - डिलीवरी लक्ष्य अनुपस्थित/अमान्य (`channel`/`to`) होने का अर्थ है कि आउटबाउंड प्रेषण छोड़ दिया गया।
+    - Matrix के लिए, छोटे अक्षरों वाले `delivery.to` रूम ID वाले कॉपी किए गए या पुराने जॉब विफल हो सकते हैं, क्योंकि Matrix रूम ID केस-संवेदी होते हैं। जॉब को Matrix से प्राप्त सटीक `!room:server` या `room:!room:server` मान के अनुसार संपादित करें।
+    - चैनल प्रमाणीकरण त्रुटियों (`unauthorized`, `Forbidden`) का अर्थ है कि क्रेडेंशियल के कारण डिलीवरी अवरुद्ध हुई।
+    - यदि आइसोलेटेड रन केवल साइलेंट टोकन (`NO_REPLY` / `no_reply`) लौटाता है, तो OpenClaw सीधे आउटबाउंड डिलीवरी और फ़ॉलबैक कतारबद्ध-सारांश पथ को रोक देता है, इसलिए चैट में वापस कुछ भी पोस्ट नहीं होता।
+    - यदि एजेंट को उपयोगकर्ता को स्वयं संदेश भेजना चाहिए, तो जाँचें कि जॉब के पास उपयोग योग्य रूट है (`channel: "last"` के साथ पिछली चैट, या स्पष्ट चैनल/लक्ष्य)।
 
   </Accordion>
-  <Accordion title="Cron or heartbeat appears to prevent /new-style rollover">
-    - Daily और idle reset freshness `updatedAt` पर आधारित नहीं है; [Session management](/hi/concepts/session#session-lifecycle) देखें।
-    - Cron wakeups, Heartbeat runs, exec notifications, और Gateway bookkeeping routing/status के लिए session row update कर सकते हैं, लेकिन वे `sessionStartedAt` या `lastInteractionAt` को extend नहीं करते।
-    - उन legacy rows के लिए जो इन fields के मौजूद होने से पहले बनाई गई थीं, जब file अब भी उपलब्ध हो तो OpenClaw transcript JSONL session header से `sessionStartedAt` recover कर सकता है। `lastInteractionAt` के बिना legacy idle rows उस recovered start time को अपने idle baseline के रूप में उपयोग करती हैं।
+  <Accordion title="Cron या Heartbeat /new-शैली रोलओवर को रोकता हुआ दिखाई देता है">
+    - दैनिक और निष्क्रिय रीसेट की नवीनता `updatedAt` पर आधारित नहीं है; [सेशन प्रबंधन](/hi/concepts/session#session-lifecycle) देखें।
+    - Cron वेकअप, Heartbeat रन, exec सूचनाएँ और Gateway बहीखाता रूटिंग/स्थिति के लिए सेशन पंक्ति को अपडेट कर सकते हैं, लेकिन वे `sessionStartedAt` या `lastInteractionAt` को आगे नहीं बढ़ाते।
+    - इन फ़ील्ड के अस्तित्व में आने से पहले बनाई गई पुरानी पंक्तियों के लिए, फ़ाइल अब भी उपलब्ध होने पर OpenClaw ट्रांसक्रिप्ट JSONL सेशन हेडर से `sessionStartedAt` पुनर्प्राप्त कर सकता है। `lastInteractionAt` के बिना पुरानी निष्क्रिय पंक्तियाँ उस पुनर्प्राप्त प्रारंभ समय को अपनी निष्क्रियता आधाररेखा के रूप में उपयोग करती हैं।
 
   </Accordion>
-  <Accordion title="Timezone gotchas">
-    - `--tz` के बिना Cron gateway host timezone का उपयोग करता है।
-    - timezone के बिना `at` schedules को UTC माना जाता है।
-    - Heartbeat `activeHours` configured timezone resolution का उपयोग करता है।
+  <Accordion title="समय-क्षेत्र संबंधी सावधानियाँ">
+    - `--tz` के बिना Cron, Gateway होस्ट के समय-क्षेत्र का उपयोग करता है।
+    - समय-क्षेत्र के बिना `at` शेड्यूल को UTC माना जाता है।
+    - Heartbeat `activeHours` कॉन्फ़िगर किए गए समय-क्षेत्र निर्धारण का उपयोग करता है।
 
   </Accordion>
 </AccordionGroup>
 
 ## संबंधित
 
-- [Automation](/hi/automation) — सभी ऑटोमेशन mechanisms एक नज़र में
-- [Background Tasks](/hi/automation/tasks) — Cron executions के लिए task ledger
-- [Heartbeat](/hi/gateway/heartbeat) — periodic main-session turns
-- [Timezone](/hi/concepts/timezone) — timezone configuration
+- [ऑटोमेशन](/hi/automation) — सभी ऑटोमेशन तंत्रों का एक नज़र में अवलोकन
+- [पृष्ठभूमि कार्य](/hi/automation/tasks) — Cron निष्पादनों के लिए कार्य खाता-बही
+- [Heartbeat](/hi/gateway/heartbeat) — मुख्य सेशन के आवधिक टर्न
+- [समय-क्षेत्र](/hi/concepts/timezone) — समय-क्षेत्र कॉन्फ़िगरेशन

@@ -1,25 +1,26 @@
 ---
 read_when:
     - आप Hermes या किसी अन्य एजेंट सिस्टम से OpenClaw में माइग्रेट करना चाहते हैं
-    - आप Plugin-स्वामित्व वाला माइग्रेशन प्रदाता जोड़ रहे हैं
+    - आप Plugin के स्वामित्व वाला माइग्रेशन प्रदाता जोड़ रहे हैं
 summary: '`openclaw migrate` के लिए CLI संदर्भ (किसी अन्य एजेंट सिस्टम से स्थिति आयात करें)'
 title: माइग्रेट करें
 x-i18n:
-    generated_at: "2026-06-28T22:50:35Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:30:54Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 90798fd24af0984e485753e251c87a5dd8fd0246e7c135a50e3532de93ba075e
+    source_hash: f492535019f8a69706ff918462ba74cf5d26e733d2e4e9493b3c76bd77f2584d
     source_path: cli/migrate.md
     workflow: 16
 ---
 
 # `openclaw migrate`
 
-Plugin-स्वामित्व वाले माइग्रेशन प्रदाता के माध्यम से किसी दूसरे एजेंट सिस्टम से स्थिति आयात करें। बंडल किए गए प्रदाता Codex CLI स्थिति, [Claude](/hi/install/migrating-claude), और [Hermes](/hi/install/migrating-hermes) को कवर करते हैं; तृतीय-पक्ष plugins अतिरिक्त प्रदाता पंजीकृत कर सकते हैं।
+Plugin-स्वामित्व वाले माइग्रेशन प्रदाता के माध्यम से किसी अन्य एजेंट सिस्टम से स्थिति आयात करें। बंडल किए गए प्रदाता Claude, Codex CLI और [Hermes](/hi/install/migrating-hermes) को कवर करते हैं; Plugin अतिरिक्त प्रदाताओं को पंजीकृत कर सकते हैं।
 
 <Tip>
-उपयोगकर्ता-उन्मुख मार्गदर्शिकाओं के लिए, [Claude से माइग्रेट करना](/hi/install/migrating-claude) और [Hermes से माइग्रेट करना](/hi/install/migrating-hermes) देखें। [माइग्रेशन हब](/hi/install/migrating) सभी पथों की सूची देता है।
+उपयोगकर्ता-केंद्रित चरण-दर-चरण मार्गदर्शिकाओं के लिए, [Claude से माइग्रेट करना](/hi/install/migrating-claude) और [Hermes से माइग्रेट करना](/hi/install/migrating-hermes) देखें। [माइग्रेशन हब](/hi/install/migrating) सभी मार्गों को सूचीबद्ध करता है।
 </Tip>
 
 ## कमांड
@@ -44,273 +45,184 @@ openclaw onboard --import-from claude --import-source ~/.claude
 openclaw onboard --import-from hermes --import-source ~/.hermes
 ```
 
+बिना किसी अन्य फ़्लैग के `openclaw migrate <provider>` चलाने पर योजना बनती है, पूर्वावलोकन दिखता है और (TTY में) लागू करने से पहले संकेत दिया जाता है। `openclaw migrate plan <provider>` और `openclaw migrate apply <provider>` समान फ़्लैग के साथ पूर्वावलोकन और लागू करने की प्रक्रिया को अलग-अलग उपकमांड में विभाजित करते हैं।
+
 <ParamField path="<provider>" type="string">
-  किसी पंजीकृत माइग्रेशन प्रदाता का नाम, उदाहरण के लिए `hermes`। इंस्टॉल किए गए प्रदाता देखने के लिए `openclaw migrate list` चलाएँ।
+  पंजीकृत माइग्रेशन प्रदाता का नाम, उदाहरण के लिए `hermes`। इंस्टॉल किए गए प्रदाता देखने के लिए `openclaw migrate list` चलाएँ।
 </ParamField>
 <ParamField path="--dry-run" type="boolean">
   योजना बनाएँ और स्थिति बदले बिना बाहर निकलें।
 </ParamField>
 <ParamField path="--from <path>" type="string">
-  स्रोत स्थिति निर्देशिका को ओवरराइड करें। Hermes डिफ़ॉल्ट रूप से `~/.hermes` का उपयोग करता है।
+  स्रोत स्थिति डायरेक्टरी को ओवरराइड करें। Hermes `$HERMES_HOME` और सक्रिय प्रोफ़ाइल का अनुसरण करता है, फिर प्लेटफ़ॉर्म का डिफ़ॉल्ट (`~/.hermes` या `%LOCALAPPDATA%\hermes`) उपयोग करता है। Codex का डिफ़ॉल्ट `~/.codex` (या `$CODEX_HOME`) है, Claude का डिफ़ॉल्ट `~/.claude` है।
 </ParamField>
 <ParamField path="--include-secrets" type="boolean">
-  समर्थित क्रेडेंशियल बिना संकेत दिए आयात करें। इंटरैक्टिव apply, पहचाने गए auth क्रेडेंशियल आयात करने से पहले पूछता है, जहाँ डिफ़ॉल्ट रूप से हाँ चयनित होता है; गैर-इंटरैक्टिव `--yes` में इन्हें आयात करने के लिए `--include-secrets` आवश्यक है।
+  संकेत दिए बिना समर्थित क्रेडेंशियल आयात करें। इंटरैक्टिव रूप से लागू करते समय पहचाने गए प्रमाणीकरण क्रेडेंशियल आयात करने से पहले पूछा जाता है, जिसमें डिफ़ॉल्ट रूप से हाँ चयनित होता है; गैर-इंटरैक्टिव `--yes` में उन्हें आयात करने के लिए `--include-secrets` आवश्यक है।
 </ParamField>
 <ParamField path="--no-auth-credentials" type="boolean">
-  इंटरैक्टिव संकेत सहित auth क्रेडेंशियल आयात छोड़ें।
+  इंटरैक्टिव संकेत सहित प्रमाणीकरण क्रेडेंशियल का आयात छोड़ें।
 </ParamField>
 <ParamField path="--overwrite" type="boolean">
-  जब योजना conflicts रिपोर्ट करे, तब apply को मौजूदा targets बदलने की अनुमति दें।
+  योजना द्वारा टकराव रिपोर्ट किए जाने पर लागू करने की प्रक्रिया को मौजूदा लक्ष्यों को बदलने की अनुमति दें।
 </ParamField>
 <ParamField path="--yes" type="boolean">
-  पुष्टिकरण संकेत छोड़ें। गैर-इंटरैक्टिव मोड में आवश्यक।
+  पुष्टिकरण संकेत छोड़ें। गैर-इंटरैक्टिव मोड में आवश्यक है।
 </ParamField>
 <ParamField path="--skill <name>" type="string">
-  skill नाम या item id द्वारा एक skill copy item चुनें। कई skills माइग्रेट करने के लिए flag दोहराएँ। छोड़े जाने पर, इंटरैक्टिव Codex माइग्रेशन checkbox selector दिखाते हैं और गैर-इंटरैक्टिव माइग्रेशन सभी planned skills रखते हैं।
+  स्किल नाम या आइटम आईडी के आधार पर कॉपी करने के लिए एक स्किल आइटम चुनें। एकाधिक स्किल माइग्रेट करने के लिए फ़्लैग दोहराएँ। इसे छोड़ने पर इंटरैक्टिव Codex माइग्रेशन एक चेकबॉक्स चयनकर्ता दिखाते हैं और गैर-इंटरैक्टिव माइग्रेशन सभी नियोजित स्किल बनाए रखते हैं।
 </ParamField>
 <ParamField path="--plugin <name>" type="string">
-  Plugin नाम या item id द्वारा एक Codex Plugin install item चुनें। कई Codex plugins माइग्रेट करने के लिए flag दोहराएँ। छोड़े जाने पर, इंटरैक्टिव Codex माइग्रेशन native Codex Plugin checkbox selector दिखाते हैं और गैर-इंटरैक्टिव माइग्रेशन सभी planned plugins रखते हैं। यह केवल Codex app-server inventory द्वारा खोजे गए source-installed `openai-curated` Codex plugins पर लागू होता है।
+  Plugin नाम या आइटम आईडी के आधार पर इंस्टॉल करने के लिए एक Codex Plugin आइटम चुनें। एकाधिक Codex Plugin माइग्रेट करने के लिए फ़्लैग दोहराएँ। इसे छोड़ने पर इंटरैक्टिव Codex माइग्रेशन एक मूल Codex Plugin चेकबॉक्स चयनकर्ता दिखाते हैं और गैर-इंटरैक्टिव माइग्रेशन सभी नियोजित Plugin बनाए रखते हैं। यह केवल Codex ऐप-सर्वर इन्वेंटरी द्वारा खोजे गए स्रोत से इंस्टॉल किए गए `openai-curated` Codex Plugin पर लागू होता है।
 </ParamField>
 <ParamField path="--verify-plugin-apps" type="boolean">
-  केवल Codex। native Plugin activation की योजना बनाने से पहले ताज़ा source Codex app-server `app/list` traversal बाध्य करें। माइग्रेशन planning तेज़ रखने के लिए डिफ़ॉल्ट रूप से बंद।
+  केवल Codex। मूल Plugin सक्रियण की योजना बनाने से पहले स्रोत Codex ऐप-सर्वर के `app/list` का नया ट्रैवर्सल अनिवार्य करता है। माइग्रेशन योजना को तेज़ रखने के लिए डिफ़ॉल्ट रूप से बंद रहता है।
+</ParamField>
+<ParamField path="--backup-output <path>" type="string">
+  माइग्रेशन-पूर्व बैकअप आर्काइव पथ या डायरेक्टरी। इसे `openclaw backup create` को यथावत दिया जाता है।
 </ParamField>
 <ParamField path="--no-backup" type="boolean">
-  pre-apply backup छोड़ें। local OpenClaw state मौजूद होने पर `--force` आवश्यक है।
+  लागू करने से पहले का बैकअप छोड़ें। स्थानीय OpenClaw स्थिति मौजूद होने पर `--force` आवश्यक है।
 </ParamField>
 <ParamField path="--force" type="boolean">
-  जब apply अन्यथा backup छोड़ने से मना कर देता, तब `--no-backup` के साथ आवश्यक।
+  जब लागू करने की प्रक्रिया अन्यथा बैकअप छोड़ने से मना करती, तब `--no-backup` के साथ आवश्यक है।
 </ParamField>
 <ParamField path="--json" type="boolean">
-  योजना या apply परिणाम को JSON के रूप में प्रिंट करें। `--json` और बिना `--yes` के, apply योजना प्रिंट करता है और state को mutate नहीं करता।
+  योजना या लागू करने का परिणाम JSON के रूप में प्रिंट करें। `--json` के साथ और `--yes` के बिना, लागू करने की प्रक्रिया योजना प्रिंट करती है और स्थिति में बदलाव नहीं करती।
 </ParamField>
 
 ## सुरक्षा मॉडल
 
-`openclaw migrate` पहले preview करता है।
+`openclaw migrate` में पूर्वावलोकन को प्राथमिकता दी जाती है।
 
 <AccordionGroup>
-  <Accordion title="Apply से पहले preview">
-    प्रदाता कुछ भी बदलने से पहले itemized योजना लौटाता है, जिसमें conflicts, छोड़े गए items, और sensitive items शामिल होते हैं। JSON plans, apply output, और migration reports nested secret-looking keys जैसे API keys, tokens, authorization headers, cookies, और passwords को redact करते हैं।
+  <Accordion title="लागू करने से पहले पूर्वावलोकन">
+    कुछ भी बदलने से पहले प्रदाता टकरावों, छोड़े गए आइटमों और संवेदनशील आइटमों सहित मदवार योजना लौटाता है। JSON योजनाएँ, लागू करने का आउटपुट और माइग्रेशन रिपोर्ट API कुंजियों, टोकन, प्राधिकरण हेडर, कुकी और पासवर्ड जैसी गुप्त जानकारी से मिलती-जुलती नेस्टेड कुंजियों को छिपाते हैं।
 
-    `openclaw migrate apply <provider>` योजना का preview करता है और state बदलने से पहले संकेत देता है, जब तक `--yes` सेट न हो। गैर-इंटरैक्टिव मोड में, apply के लिए `--yes` आवश्यक है।
+    `openclaw migrate apply <provider>` योजना का पूर्वावलोकन करता है और स्थिति बदलने से पहले संकेत देता है, जब तक `--yes` सेट न हो। गैर-इंटरैक्टिव मोड में लागू करने के लिए `--yes` आवश्यक है।
 
   </Accordion>
-  <Accordion title="Backups">
-    Apply माइग्रेशन लागू करने से पहले OpenClaw backup बनाता और verify करता है। अगर अभी तक कोई local OpenClaw state मौजूद नहीं है, तो backup step छोड़ा जाता है और माइग्रेशन जारी रह सकता है। state मौजूद होने पर backup छोड़ने के लिए, `--no-backup` और `--force` दोनों पास करें।
+  <Accordion title="बैकअप">
+    लागू करने की प्रक्रिया माइग्रेशन लागू करने से पहले OpenClaw बैकअप बनाती और सत्यापित करती है। यदि अभी तक कोई स्थानीय OpenClaw स्थिति मौजूद नहीं है, तो बैकअप चरण छोड़ दिया जाता है और माइग्रेशन जारी रहता है। स्थिति मौजूद होने पर बैकअप छोड़ने के लिए `--no-backup` और `--force` दोनों दें।
   </Accordion>
-  <Accordion title="Conflicts">
-    जब योजना में conflicts हों तो apply जारी रखने से मना कर देता है। योजना की समीक्षा करें, फिर अगर मौजूदा targets बदलना जानबूझकर है तो `--overwrite` के साथ फिर चलाएँ। Providers अभी भी migration report directory में overwritten files के लिए item-level backups लिख सकते हैं।
+  <Accordion title="टकराव">
+    योजना में टकराव होने पर लागू करने की प्रक्रिया जारी रखने से मना करती है। योजना की समीक्षा करें, फिर यदि मौजूदा लक्ष्यों को बदलना जानबूझकर किया जा रहा है तो `--overwrite` के साथ फिर से चलाएँ। प्रदाता अब भी माइग्रेशन रिपोर्ट डायरेक्टरी में अधिलेखित फ़ाइलों के लिए आइटम-स्तरीय बैकअप लिख सकते हैं।
   </Accordion>
-  <Accordion title="Secrets">
-    इंटरैक्टिव apply पूछता है कि पहचाने गए auth credentials आयात करने हैं या नहीं, जहाँ डिफ़ॉल्ट रूप से हाँ चयनित होता है। उन्हें छोड़ने के लिए `--no-auth-credentials` का उपयोग करें, या `--yes` के साथ unattended credential import के लिए `--include-secrets` का उपयोग करें।
+  <Accordion title="गुप्त जानकारियाँ">
+    इंटरैक्टिव रूप से लागू करते समय पूछा जाता है कि पहचाने गए प्रमाणीकरण क्रेडेंशियल आयात करने हैं या नहीं, जिसमें डिफ़ॉल्ट रूप से हाँ चयनित होता है। उन्हें छोड़ने के लिए `--no-auth-credentials` का उपयोग करें, या `--yes` के साथ अप्रबंधित क्रेडेंशियल आयात के लिए `--include-secrets` का उपयोग करें।
   </Accordion>
 </AccordionGroup>
 
 ## Claude प्रदाता
 
-बंडल किया गया Claude प्रदाता डिफ़ॉल्ट रूप से `~/.claude` पर Claude Code state पहचानता है। किसी विशिष्ट Claude Code home या project root को आयात करने के लिए `--from <path>` का उपयोग करें।
+बंडल किया गया Claude प्रदाता डिफ़ॉल्ट रूप से `~/.claude` पर Claude Code स्थिति का पता लगाता है। किसी विशिष्ट Claude Code होम या प्रोजेक्ट रूट को आयात करने के लिए `--from <path>` का उपयोग करें।
 
 <Tip>
-उपयोगकर्ता-उन्मुख मार्गदर्शिका के लिए, [Claude से माइग्रेट करना](/hi/install/migrating-claude) देखें।
+उपयोगकर्ता-केंद्रित चरण-दर-चरण मार्गदर्शिका के लिए, [Claude से माइग्रेट करना](/hi/install/migrating-claude) देखें।
 </Tip>
 
 ### Claude क्या आयात करता है
 
-- Project `CLAUDE.md` और `.claude/CLAUDE.md` को OpenClaw एजेंट workspace में।
-- User `~/.claude/CLAUDE.md` को workspace `USER.md` में append किया गया।
-- project `.mcp.json`, Claude Code `~/.claude.json`, और Claude Desktop `claude_desktop_config.json` से MCP server definitions।
-- Claude skill directories जिनमें `SKILL.md` शामिल है।
-- Claude command Markdown files को केवल manual invocation वाले OpenClaw skills में परिवर्तित किया गया।
+- `~/.claude/projects/*/memory` से Claude Code ऑटो-मेमोरी Markdown और उपयोगकर्ता द्वारा कॉन्फ़िगर किया गया
+  `autoMemoryDirectory`, जिन्हें इंडेक्स की गई पुनःस्मृति के लिए
+  `memory/imports/claude-code/` के अंतर्गत कॉपी किया जाता है।
+- प्रोजेक्ट `CLAUDE.md` और `.claude/CLAUDE.md` को OpenClaw एजेंट वर्कस्पेस (`AGENTS.md`) में।
+- उपयोगकर्ता `~/.claude/CLAUDE.md` को वर्कस्पेस `USER.md` में जोड़ा जाता है।
+- प्रोजेक्ट `.mcp.json`, Claude Code `~/.claude.json` (उसकी प्रति-प्रोजेक्ट प्रविष्टियों सहित), और Claude Desktop `claude_desktop_config.json` से MCP सर्वर परिभाषाएँ।
+- Claude स्किल डायरेक्टरी जिनमें `SKILL.md` शामिल है (उपयोगकर्ता `~/.claude/skills` और प्रोजेक्ट `.claude/skills`)।
+- Claude कमांड Markdown फ़ाइलें (उपयोगकर्ता `~/.claude/commands` और प्रोजेक्ट `.claude/commands`), जिन्हें केवल मैन्युअल आह्वान वाले OpenClaw स्किल में बदला जाता है।
 
-### Archive और manual-review state
+### आर्काइव और मैन्युअल-समीक्षा स्थिति
 
-Claude hooks, permissions, environment defaults, local memory, path-scoped rules, subagents, caches, plans, और project history को migration report में सुरक्षित रखा जाता है या manual-review items के रूप में रिपोर्ट किया जाता है। OpenClaw hooks execute नहीं करता, broad allowlists copy नहीं करता, या OAuth/Desktop credential state को अपने-आप import नहीं करता।
+Claude हुक, अनुमतियाँ, परिवेश डिफ़ॉल्ट, प्रोजेक्ट `CLAUDE.local.md`, `.claude/rules`, उपयोगकर्ता और प्रोजेक्ट `agents/` डायरेक्टरी, और प्रोजेक्ट इतिहास (`~/.claude` के अंतर्गत `projects`, `cache`, `plans`) माइग्रेशन रिपोर्ट में संरक्षित किए जाते हैं या मैन्युअल-समीक्षा आइटम के रूप में रिपोर्ट किए जाते हैं। OpenClaw हुक निष्पादित नहीं करता, व्यापक अनुमति-सूचियाँ कॉपी नहीं करता, या OAuth/Desktop क्रेडेंशियल स्थिति को स्वचालित रूप से आयात नहीं करता।
 
 ## Codex प्रदाता
 
-बंडल किया गया Codex प्रदाता डिफ़ॉल्ट रूप से `~/.codex` पर Codex CLI state पहचानता है, या
-जब वह environment variable set हो तो `CODEX_HOME` पर। किसी विशिष्ट Codex home का
-inventory लेने के लिए `--from <path>` का उपयोग करें।
+बंडल किया गया Codex प्रदाता डिफ़ॉल्ट रूप से `~/.codex` पर, या उस पर्यावरण चर के सेट होने पर `CODEX_HOME` पर Codex CLI स्थिति का पता लगाता है। किसी विशिष्ट Codex होम की इन्वेंटरी बनाने के लिए `--from <path>` का उपयोग करें।
 
-इस प्रदाता का उपयोग तब करें जब आप OpenClaw Codex harness पर जा रहे हों और
-उपयोगी personal Codex CLI assets को सोच-समझकर promote करना चाहते हों। Local Codex app-server
-launches per-agent `CODEX_HOME` का उपयोग करते हैं, इसलिए वे डिफ़ॉल्ट रूप से आपके personal
-`~/.codex` को नहीं पढ़ते। सामान्य process `HOME` अब भी inherited होता है, इसलिए Codex
-shared `$HOME/.agents/*` skills/plugin marketplace entries देख सकता है और
-subprocesses user-home config और tokens खोज सकते हैं।
+OpenClaw Codex हार्नेस पर जाते समय और उपयोगी व्यक्तिगत Codex CLI एसेट को सोच-समझकर आगे बढ़ाने के लिए इस प्रदाता का उपयोग करें। स्थानीय Codex ऐप-सर्वर लॉन्च प्रति-एजेंट `CODEX_HOME` का उपयोग करते हैं, इसलिए वे डिफ़ॉल्ट रूप से आपके व्यक्तिगत `~/.codex` को नहीं पढ़ते। सामान्य प्रक्रिया `HOME` अब भी इनहेरिट की जाती है, इसलिए Codex साझा `$HOME/.agents/*` स्किल/Plugin मार्केटप्लेस प्रविष्टियाँ देख सकता है और उपप्रक्रियाएँ उपयोगकर्ता-होम कॉन्फ़िगरेशन तथा टोकन ढूँढ सकती हैं।
 
-Interactive terminal में `openclaw migrate codex` चलाने पर full
-plan का preview होता है, फिर final apply confirmation से पहले checkbox selectors खुलते हैं। Skill
-copy items पहले prompt किए जाते हैं। Bulk selection के लिए `Toggle all on` या `Toggle all off` का उपयोग करें।
-Rows toggle करने के लिए Space दबाएँ, या highlighted
-row activate करके जारी रखने के लिए Enter दबाएँ। Planned skills checked शुरू होते हैं, conflict skills unchecked शुरू होते हैं, और
-`Skip for now` इस run के लिए skill copies छोड़ देता है, जबकि plugin
-selection जारी रहता है। जब source-installed curated Codex plugins migratable हों और
-`--plugin` supplied न हो, तो migration फिर Plugin name द्वारा native Codex Plugin
-activation के लिए prompt करता है। Plugin items
-checked शुरू होते हैं जब तक target OpenClaw Codex Plugin config में वह
-Plugin पहले से न हो। मौजूदा target plugins unchecked शुरू होते हैं और
-`conflict: plugin exists` जैसा conflict hint दिखाते हैं; उस run में कोई native Codex
-plugins migrate न करने के लिए `Toggle all off` चुनें, या applying से पहले रुकने के लिए `Skip for now` चुनें। Scripted या
-exact runs के लिए, प्रति skill एक बार `--skill <name>` पास करें, उदाहरण के लिए:
+इंटरैक्टिव टर्मिनल में `openclaw migrate codex` चलाने पर पूरी योजना का पूर्वावलोकन दिखता है, फिर अंतिम लागू-पुष्टि से पहले चेकबॉक्स चयनकर्ता खुलते हैं। पहले स्किल कॉपी आइटमों के लिए संकेत दिया जाता है। सामूहिक चयन के लिए `Toggle all on` या `Toggle all off` का उपयोग करें। पंक्तियाँ टॉगल करने के लिए Space दबाएँ, या हाइलाइट की गई पंक्ति सक्रिय करके आगे बढ़ने के लिए Enter दबाएँ। नियोजित स्किल चयनित रूप में शुरू होते हैं, टकराव वाले स्किल अचयनित रूप में शुरू होते हैं, और `Skip for now` इस रन के लिए स्किल कॉपी छोड़कर भी Plugin चयन जारी रखता है। जब स्रोत से इंस्टॉल किए गए क्यूरेटेड Codex Plugin माइग्रेट किए जा सकते हों और `--plugin` न दिया गया हो, तो माइग्रेशन Plugin नाम के आधार पर मूल Codex Plugin सक्रियण के लिए संकेत देता है। Plugin आइटम चयनित रूप में शुरू होते हैं, जब तक लक्ष्य OpenClaw Codex Plugin कॉन्फ़िगरेशन में वह Plugin पहले से मौजूद न हो। मौजूदा लक्ष्य Plugin अचयनित रूप में शुरू होते हैं और `conflict: plugin exists` जैसा टकराव संकेत दिखाते हैं; उस रन में कोई मूल Codex Plugin माइग्रेट न करने के लिए `Toggle all off` चुनें, या लागू करने से पहले रुकने के लिए `Skip for now` चुनें।
+
+स्क्रिप्टेड या सटीक रन के लिए, एक या अधिक स्किल या Plugin स्पष्ट रूप से चुनें:
 
 ```bash
 openclaw migrate codex --dry-run --skill gog-vault77-google-workspace
 openclaw migrate apply codex --yes --skill gog-vault77-google-workspace
-```
-
-Native Codex Plugin migration को non-interactively एक या अधिक source-installed curated plugins तक सीमित करने के लिए
-`--plugin <name>` का उपयोग करें:
-
-```bash
 openclaw migrate codex --dry-run --plugin google-calendar
 openclaw migrate apply codex --yes --plugin google-calendar
 ```
 
 ### Codex क्या आयात करता है
 
-- `$CODEX_HOME/skills` के अंतर्गत Codex CLI skill directories, Codex के
-  `.system` cache को छोड़कर।
-- `$HOME/.agents/skills` के अंतर्गत personal AgentSkills, जब आप per-agent ownership चाहते हैं तो current
-  OpenClaw agent workspace में copy किए जाते हैं।
-- Codex app-server `plugin/list` के माध्यम से खोजे गए source-installed `openai-curated` Codex plugins।
-  Planning हर enabled installed Plugin के लिए `plugin/read` पढ़ता है।
-  App-backed plugins के लिए source Codex app-server
-  account response का ChatGPT subscription account होना आवश्यक है; non-ChatGPT या missing
-  account responses को `codex_subscription_required` के साथ skip किया जाता है। डिफ़ॉल्ट रूप से,
-  migration source `app/list` call नहीं करता, इसलिए account gate पास करने वाले app-backed plugins
-  source app accessibility verification के बिना planned होते हैं, और
-  account lookup transport failures `codex_account_unavailable` के साथ skip होते हैं। जब आप migration से ताज़ा source
-  `app/list` snapshot force कराना चाहते हों और native activation plan करने से पहले हर owned app का present, enabled, और
-  accessible होना require करना चाहते हों, तब
-  `--verify-plugin-apps` पास करें। उस mode में, account lookup
-  transport failures source app inventory verification में fall through करते हैं। Current process के लिए
-  source app inventory snapshot memory में रखा जाता है; इसे
-  migration output या target config में नहीं लिखा जाता। Disabled plugins,
-  unreadable Plugin details, subscription-gated source accounts, और, जब
-  verification requested हो, missing apps, disabled apps, inaccessible apps, या
-  source app inventory failures target config entries के बजाय typed reasons वाले manual skipped items
-  बनते हैं।
-  Apply हर selected eligible Plugin के लिए app-server `plugin/install` call करता है,
-  भले ही target app-server पहले से उस Plugin को installed और
-  enabled रिपोर्ट करे। Migrated Codex plugins केवल उन sessions में usable होते हैं जो
-  native Codex harness चुनते हैं; उन्हें OpenClaw provider runs,
-  ACP conversation bindings, या अन्य harnesses के लिए expose नहीं किया जाता।
+- `$CODEX_HOME/memories` से समेकित Codex `MEMORY.md` और `memory_summary.md`,
+  जिन्हें इंडेक्स की गई पुनःस्मृति के लिए `memory/imports/codex/` के अंतर्गत कॉपी किया जाता है।
+  अपरिष्कृत रोलआउट मेमोरी आयात नहीं की जाती।
+- `$CODEX_HOME/skills` के अंतर्गत Codex CLI स्किल डायरेक्टरी, Codex के `.system` कैश को छोड़कर।
+- `$HOME/.agents/skills` के अंतर्गत व्यक्तिगत AgentSkills, जिन्हें प्रति-एजेंट स्वामित्व के लिए वर्तमान OpenClaw एजेंट वर्कस्पेस में कॉपी किया जाता है।
+- Codex ऐप-सर्वर `plugin/list` के माध्यम से खोजे गए स्रोत से इंस्टॉल किए गए `openai-curated` Codex Plugin। योजना प्रत्येक सक्षम इंस्टॉल किए गए Plugin के लिए `plugin/read` पढ़ती है।
 
-### Manual-review Codex state
+ऐप-समर्थित Plugin माइग्रेशन में अतिरिक्त जाँच-द्वार होते हैं:
 
-Codex `config.toml`, native `hooks/hooks.json`, non-curated marketplaces, cached
-Plugin bundles जो source-installed curated plugins नहीं हैं, और source-installed
-plugins जो source subscription gate fail करते हैं, automatically activated नहीं होते।
-जब `--verify-plugin-apps` set हो, तो source app-inventory
-gate fail करने वाले plugins भी skip किए जाते हैं। उन्हें manual review के लिए
-migration report में copy या report किया जाता है।
+- ऐप-समर्थित Plugin के लिए स्रोत Codex ऐप-सर्वर खाता ChatGPT सदस्यता खाता होना आवश्यक है। गैर-ChatGPT या अनुपस्थित खाता प्रतिक्रियाएँ `codex_subscription_required` के साथ छोड़ दी जाती हैं।
+- डिफ़ॉल्ट रूप से, माइग्रेशन स्रोत `app/list` को कॉल नहीं करता, इसलिए खाता जाँच पार करने वाले ऐप-समर्थित Plugin की योजना स्रोत ऐप-पहुँच सत्यापन के बिना बनाई जाती है, और खाता-लुकअप परिवहन विफलताएँ `codex_account_unavailable` के साथ छोड़ दी जाती हैं।
+- स्रोत `app/list` का नया स्नैपशॉट अनिवार्य करने और मूल सक्रियण की योजना बनाने से पहले प्रत्येक स्वामित्व वाले ऐप का मौजूद, सक्षम और पहुँच योग्य होना आवश्यक करने के लिए `--verify-plugin-apps` दें। उस मोड में, खाता-लुकअप परिवहन विफलताएँ स्रोत ऐप-इन्वेंटरी सत्यापन तक आगे बढ़ती हैं। स्नैपशॉट केवल वर्तमान प्रक्रिया के लिए मेमोरी में रखा जाता है; इसे कभी भी माइग्रेशन आउटपुट या लक्ष्य कॉन्फ़िगरेशन में नहीं लिखा जाता।
 
-Migrated source-installed curated plugins के लिए, apply लिखता है:
+अक्षम Plugin, अपठनीय Plugin विवरण, सदस्यता-प्रतिबंधित स्रोत खाते, और (`--verify-plugin-apps` सेट होने पर) अनुपस्थित, अक्षम या पहुँच से बाहर ऐप लक्ष्य कॉन्फ़िगरेशन प्रविष्टियों के बजाय टाइप किए गए कारणों वाले मैन्युअल रूप से छोड़े गए आइटम बन जाते हैं। लागू करने की प्रक्रिया प्रत्येक चयनित पात्र Plugin के लिए ऐप-सर्वर `plugin/install` को कॉल करती है, भले ही लक्ष्य ऐप-सर्वर पहले से उस Plugin को इंस्टॉल और सक्षम रिपोर्ट करता हो। माइग्रेट किए गए Codex Plugin केवल उन सत्रों में उपयोग योग्य होते हैं जो मूल Codex हार्नेस चुनते हैं; वे OpenClaw प्रदाता रन, ACP वार्तालाप बाइंडिंग या अन्य हार्नेस के लिए उपलब्ध नहीं कराए जाते।
+
+### मैन्युअल-समीक्षा Codex स्थिति
+
+Codex `config.toml`, नेटिव `hooks/hooks.json`, गैर-क्यूरेटेड मार्केटप्लेस, कैश किए गए Plugin बंडल जो स्रोत से इंस्टॉल किए गए क्यूरेटेड Plugin नहीं हैं, और स्रोत से इंस्टॉल किए गए वे Plugin जो स्रोत सदस्यता गेट में विफल होते हैं, स्वचालित रूप से सक्रिय नहीं किए जाते। जब `--verify-plugin-apps` सेट होता है, तो स्रोत ऐप-इन्वेंटरी गेट में विफल होने वाले Plugin भी छोड़ दिए जाते हैं। मैन्युअल समीक्षा के लिए इन सभी को माइग्रेशन रिपोर्ट में कॉपी किया जाता है या इनकी सूचना दी जाती है।
+
+माइग्रेट किए गए, स्रोत से इंस्टॉल किए गए क्यूरेटेड Plugin के लिए ये लेखन लागू करें:
 
 - `plugins.entries.codex.enabled: true`
 - `plugins.entries.codex.config.codexPlugins.enabled: true`
 - `plugins.entries.codex.config.codexPlugins.allow_destructive_actions: true`
-- हर selected Plugin के लिए `marketplaceName: "openai-curated"` और
-  `pluginName` वाली एक explicit Plugin entry
+- प्रत्येक चयनित Plugin के लिए `marketplaceName: "openai-curated"` और `pluginName` वाली एक स्पष्ट Plugin प्रविष्टि
 
-माइग्रेशन कभी भी `plugins["*"]` नहीं लिखता और स्थानीय marketplace cache
-paths कभी संग्रहित नहीं करता। स्रोत-पक्ष subscription विफलताएं manual items पर typed
-reasons जैसे `codex_subscription_required`, `codex_account_unavailable`,
-`plugin_disabled`, या `plugin_read_unavailable` के साथ रिपोर्ट की जाती हैं। `--verify-plugin-apps` के साथ,
-source app-inventory विफलताएं `app_inaccessible`,
-`app_disabled`, `app_missing`, या `app_inventory_unavailable` के रूप में भी दिखाई दे सकती हैं। छोड़े गए plugins
-target config में नहीं लिखे जाते।
-Target-पक्ष auth-required installs प्रभावित plugin item पर
-`status: "skipped"`, `reason: "auth_required"`, और sanitized app identifiers के साथ रिपोर्ट किए जाते हैं।
-उनकी explicit config entries तब तक disabled लिखी जाती हैं जब तक आप उन्हें फिर से authorize और
-enable नहीं करते। अन्य install विफलताएं item-scoped `error` results होती हैं।
+माइग्रेशन कभी भी `plugins["*"]` नहीं लिखता और स्थानीय मार्केटप्लेस कैश पथ कभी संग्रहीत नहीं करता।
 
-यदि planning के दौरान Codex app-server plugin inventory अनुपलब्ध है, तो migration
-पूरे migration को विफल करने के बजाय cached bundle advisory items पर fallback करता है।
+छोड़े गए Plugin लक्ष्य कॉन्फ़िगरेशन में नहीं लिखे जाते। स्रोत-पक्ष की सदस्यता विफलताएँ मैन्युअल आइटम में इन टाइप किए गए कारणों के साथ रिपोर्ट की जाती हैं: `codex_subscription_required`, `codex_account_unavailable`, `plugin_disabled`, या `plugin_read_unavailable`। `--verify-plugin-apps` के साथ, स्रोत ऐप-इन्वेंटरी विफलताएँ `app_inaccessible`, `app_disabled`, `app_missing`, या `app_inventory_unavailable` के रूप में भी दिखाई दे सकती हैं। लक्ष्य-पक्ष पर प्रमाणीकरण आवश्यक होने वाले इंस्टॉल प्रभावित Plugin आइटम पर `status: "skipped"`, `reason: "auth_required"`, और सैनिटाइज़ किए गए ऐप आइडेंटिफ़ायर के साथ रिपोर्ट किए जाते हैं; उनकी स्पष्ट कॉन्फ़िगरेशन प्रविष्टियाँ तब तक अक्षम स्थिति में लिखी जाती हैं, जब तक आप उन्हें पुनः अधिकृत और सक्षम नहीं करते। अन्य इंस्टॉल विफलताएँ आइटम-स्कोप वाले `error` परिणाम होती हैं।
 
-## Hermes प्रदाता
+यदि योजना बनाने के दौरान Codex ऐप-सर्वर Plugin इन्वेंटरी उपलब्ध नहीं है, तो पूरा माइग्रेशन विफल करने के बजाय माइग्रेशन कैश किए गए बंडल के परामर्शात्मक आइटम पर वापस चला जाता है।
 
-Bundled Hermes प्रदाता default रूप से `~/.hermes` पर state detect करता है। जब Hermes कहीं और हो, तो `--from <path>` का उपयोग करें।
+## Hermes प्रोवाइडर
 
-### Hermes क्या import करता है
+बंडल किया गया Hermes प्रोवाइडर `$HERMES_HOME` और सक्रिय प्रोफ़ाइल का अनुसरण करता है, फिर प्लेटफ़ॉर्म डिफ़ॉल्ट (`~/.hermes` या `%LOCALAPPDATA%\hermes`) का उपयोग करता है। डिस्कवरी को ओवरराइड करने के लिए `--from <path>` का उपयोग करें।
 
-- `config.yaml` से default model configuration।
-- `providers` और `custom_providers` से configured model providers और custom OpenAI-compatible endpoints।
-- `mcp_servers` या `mcp.servers` से MCP server definitions।
-- OpenClaw agent workspace में `SOUL.md` और `AGENTS.md`।
-- Workspace memory files में append किए गए `memories/MEMORY.md` और `memories/USER.md`।
-- OpenClaw file memory के लिए memory config defaults, साथ ही Honcho जैसे external memory providers के लिए archive या manual-review items।
-- वे Skills जिनमें `skills/<name>/` के अंतर्गत `SKILL.md` file शामिल है।
-- `skills.config` से per-skill config values।
-- OpenCode `auth.json` से OpenCode OpenAI OAuth credentials, जब interactive credential migration स्वीकार किया जाता है, या जब `--include-secrets` set होता है। Hermes `auth.json` OAuth entries legacy state हैं जिन्हें manual OpenAI reauth या doctor repair के लिए report किया जाता है।
-- Hermes `.env` और OpenCode `auth.json` से supported API keys और tokens, जब interactive credential migration स्वीकार किया जाता है, या जब `--include-secrets` set होता है।
+### Hermes क्या इंपोर्ट करता है
 
-### Supported `.env` keys
+- `config.yaml` से डिफ़ॉल्ट मॉडल कॉन्फ़िगरेशन।
+- `model`, `providers`, और `custom_providers` से कॉन्फ़िगर किए गए मॉडल प्रोवाइडर और कस्टम OpenAI-संगत एंडपॉइंट।
+- `mcp_servers` या `mcp.servers` से MCP सर्वर परिभाषाएँ। सटीक OpenClaw मैपिंग में डिफ़ॉल्ट Streamable HTTP रूटिंग, OAuth स्कोप, बूलियन TLS सत्यापन, अलग क्लाइंट प्रमाणपत्र/कुंजी पथ, और Hermes नेटिव/रिसोर्स/प्रॉम्प्ट टूल नीति शामिल हैं। असमर्थित, केवल-Hermes रनटाइम या क्रेडेंशियल फ़ील्ड मैन्युअल समीक्षा के लिए रिपोर्ट किए जाते हैं।
+- `SOUL.md` और `AGENTS.md` को OpenClaw एजेंट वर्कस्पेस में।
+- `memories/MEMORY.md` और `memories/USER.md` को वर्कस्पेस मेमोरी फ़ाइलों में जोड़ा जाता है।
+  इसके बजाय केवल-मेमोरी सतहें (ऑनबोर्डिंग मेमोरी पेज और Control UI Memory
+  इंपोर्ट पेज) मौजूदा वर्कस्पेस मेमोरी को छुए बिना इंडेक्स की गई पुनःप्राप्ति के
+  लिए इन फ़ाइलों को `memory/imports/hermes/` के अंतर्गत कॉपी करती हैं।
+- OpenClaw फ़ाइल मेमोरी के लिए मेमोरी कॉन्फ़िगरेशन डिफ़ॉल्ट, साथ ही Honcho जैसे बाहरी मेमोरी प्रोवाइडर के लिए आर्काइव या मैन्युअल-समीक्षा आइटम।
+- ऐसे Skills जिनमें `skills/` के अंतर्गत कहीं भी `SKILL.md` फ़ाइल शामिल हो; नेस्टेड Skills को वर्कस्पेस स्किल डायरेक्टरी में समतल किया जाता है।
+- `skills.config` से प्रत्येक Skill के कॉन्फ़िगरेशन मान।
+- मौजूदा Hermes OpenAI Codex OAuth क्रेडेंशियल और OpenCode OpenAI OAuth क्रेडेंशियल, जब इंटरैक्टिव क्रेडेंशियल माइग्रेशन स्वीकार किया गया हो, या जब `--include-secrets` सेट हो। Hermes और OpenClaw को एक ही इंपोर्ट किए गए रीफ़्रेश ग्रांट का उपयोग करते न रहने दें।
+- Hermes `.env` और OpenCode `auth.json` से समर्थित API कुंजियाँ और टोकन, जब इंटरैक्टिव क्रेडेंशियल माइग्रेशन स्वीकार किया गया हो, या जब `--include-secrets` सेट हो।
 
-- `AI_GATEWAY_API_KEY`
-- `ALIBABA_API_KEY`
-- `ANTHROPIC_API_KEY`
-- `ARCEEAI_API_KEY`
-- `CEREBRAS_API_KEY`
-- `CHUTES_API_KEY`
-- `CLOUDFLARE_AI_GATEWAY_API_KEY`
-- `COPILOT_GITHUB_TOKEN`
-- `DASHSCOPE_API_KEY`
-- `DEEPINFRA_API_KEY`
-- `DEEPSEEK_API_KEY`
-- `FIREWORKS_API_KEY`
-- `GEMINI_API_KEY`
-- `GH_TOKEN`
-- `GITHUB_TOKEN`
-- `GLM_API_KEY`
-- `GOOGLE_API_KEY`
-- `GROQ_API_KEY`
-- `HF_TOKEN`
-- `HUGGINGFACE_HUB_TOKEN`
-- `KILOCODE_API_KEY`
-- `KIMICODE_API_KEY`
-- `KIMI_API_KEY`
-- `MINIMAX_API_KEY`
-- `MINIMAX_CODING_API_KEY`
-- `MISTRAL_API_KEY`
-- `MODELSTUDIO_API_KEY`
-- `MOONSHOT_API_KEY`
-- `NVIDIA_API_KEY`
-- `OPENAI_API_KEY`
-- `OPENCODE_API_KEY`
-- `OPENCODE_GO_API_KEY`
-- `OPENCODE_ZEN_API_KEY`
-- `OPENROUTER_API_KEY`
-- `QIANFAN_API_KEY`
-- `QWEN_API_KEY`
-- `TOGETHER_API_KEY`
-- `VENICE_API_KEY`
-- `XAI_API_KEY`
-- `XIAOMI_API_KEY`
-- `ZAI_API_KEY`
-- `Z_AI_API_KEY`
+### समर्थित `.env` कुंजियाँ
 
-### Archive-only state
+`AI_GATEWAY_API_KEY`, `ALIBABA_API_KEY`, `ANTHROPIC_API_KEY`, `ARCEEAI_API_KEY`, `CEREBRAS_API_KEY`, `CHUTES_API_KEY`, `CLOUDFLARE_AI_GATEWAY_API_KEY`, `COPILOT_GITHUB_TOKEN`, `DASHSCOPE_API_KEY`, `DEEPINFRA_API_KEY`, `DEEPSEEK_API_KEY`, `FIREWORKS_API_KEY`, `GEMINI_API_KEY`, `GH_TOKEN`, `GITHUB_TOKEN`, `GLM_API_KEY`, `GOOGLE_API_KEY`, `GROQ_API_KEY`, `HF_TOKEN`, `HUGGINGFACE_HUB_TOKEN`, `KILOCODE_API_KEY`, `KIMICODE_API_KEY`, `KIMI_API_KEY`, `KIMI_CODING_API_KEY`, `MINIMAX_API_KEY`, `MINIMAX_CODING_API_KEY`, `MISTRAL_API_KEY`, `MODELSTUDIO_API_KEY`, `MOONSHOT_API_KEY`, `NVIDIA_API_KEY`, `OPENAI_API_KEY`, `OPENCODE_API_KEY`, `OPENCODE_GO_API_KEY`, `OPENCODE_ZEN_API_KEY`, `OPENROUTER_API_KEY`, `QIANFAN_API_KEY`, `QWEN_API_KEY`, `TOGETHER_API_KEY`, `VENICE_API_KEY`, `XAI_API_KEY`, `XIAOMI_API_KEY`, `ZAI_API_KEY`, `Z_AI_API_KEY`।
 
-Hermes state जिसे OpenClaw सुरक्षित रूप से interpret नहीं कर सकता, manual review के लिए migration report में copy किया जाता है, लेकिन इसे live OpenClaw config या credentials में load नहीं किया जाता। यह opaque या unsafe state को सुरक्षित रखता है, बिना यह दिखावा किए कि OpenClaw उसे automatically execute या trust कर सकता है:
+### केवल-आर्काइव स्थिति
 
-- `plugins/`
-- `sessions/`
-- `logs/`
-- `cron/`
-- `mcp-tokens/`
-- `state.db`
+जिस Hermes स्थिति की OpenClaw सुरक्षित रूप से व्याख्या नहीं कर सकता, उसे मैन्युअल समीक्षा के लिए माइग्रेशन रिपोर्ट में कॉपी किया जाता है, लेकिन उसे सक्रिय OpenClaw कॉन्फ़िगरेशन या क्रेडेंशियल में लोड नहीं किया जाता। इसमें `plugins/`, `sessions/`, `logs/`, `cron/`, `mcp-tokens/`, `plans/`, `workspace/`, `skins/`, `kanban/`, पेयरिंग/प्लेटफ़ॉर्म स्थिति, Gateway रूटिंग/प्रोसेस स्थिति, और पहचाने गए Hermes SQLite डेटाबेस शामिल हैं।
 
-### Apply करने के बाद
+### लागू करने के बाद
 
 ```bash
 openclaw doctor
 ```
 
-## Plugin contract
+## Plugin अनुबंध
 
-Migration sources plugins हैं। कोई plugin `openclaw.plugin.json` में अपने provider ids declare करता है:
+माइग्रेशन स्रोत Plugin होते हैं। कोई Plugin `openclaw.plugin.json` में अपने प्रोवाइडर आईडी घोषित करता है:
 
 ```json
 {
@@ -320,22 +232,22 @@ Migration sources plugins हैं। कोई plugin `openclaw.plugin.json` �
 }
 ```
 
-Runtime पर plugin `api.registerMigrationProvider(...)` call करता है। Provider `detect`, `plan`, और `apply` implement करता है। Core CLI orchestration, backup policy, prompts, JSON output, और conflict preflight का owner है। Core reviewed plan को `apply(ctx, plan)` में pass करता है, और providers compatibility के लिए plan को केवल तभी rebuild कर सकते हैं जब वह argument absent हो।
+रनटाइम पर Plugin `api.registerMigrationProvider(...)` को कॉल करता है। प्रोवाइडर `detect`, `plan`, और `apply` को लागू करता है। कोर CLI ऑर्केस्ट्रेशन, बैकअप नीति, प्रॉम्प्ट, JSON आउटपुट, और विरोध प्रीफ़्लाइट का स्वामी है। कोर समीक्षा की गई योजना को `apply(ctx, plan)` में पास करता है, और संगतता के लिए प्रोवाइडर केवल तभी योजना को फिर से बना सकते हैं जब वह आर्ग्युमेंट अनुपस्थित हो। माइग्रेशन आइटम बाहरी सक्रियण प्रभावों के लिए `applyPhase: "after-promotion"` सेट कर सकते हैं, जिन्हें ऑनबोर्डिंग को तब तक स्थगित करना चाहिए जब तक स्टेज किया गया स्थानीय डेटा स्थायी रूप से प्रकाशित न हो जाए। उन प्रोवाइडर को `deferredApply: { retrySafe: true }` घोषित करना होगा और हर स्थगित प्रभाव को बाधित प्रोसेस के बाद फिर से चलाने के लिए सुरक्षित बनाना होगा; ऑनबोर्डिंग अघोषित स्थगित प्रभावों को अस्वीकार करती है। किसी आइडेम्पोटेंट नो-ऑप को `deferredCompletion: true` वाला गैर-परिवर्तनकारी आइटम लौटाना चाहिए, ताकि रिकवरी उसे पूर्ण के रूप में दर्ज कर सके। स्टैंडअलोन `openclaw migrate` अब भी अपनी सामान्य बैकअप-समर्थित प्रक्रिया के माध्यम से पूरी योजना लागू करता है।
 
-Provider plugins item construction और summary counts के लिए `openclaw/plugin-sdk/migration`, साथ ही conflict-aware file copies, archive-only report copies, cached config-runtime wrappers, और migration reports के लिए `openclaw/plugin-sdk/migration-runtime` का उपयोग कर सकते हैं।
+प्रोवाइडर Plugin आइटम निर्माण और सारांश गणनाओं के लिए `openclaw/plugin-sdk/migration`, तथा विरोध-जागरूक फ़ाइल कॉपी, केवल-आर्काइव रिपोर्ट कॉपी, कैश किए गए कॉन्फ़िगरेशन-रनटाइम रैपर और माइग्रेशन रिपोर्ट के लिए `openclaw/plugin-sdk/migration-runtime` का उपयोग कर सकते हैं।
 
-## Onboarding integration
+## ऑनबोर्डिंग एकीकरण
 
-जब कोई provider known source detect करता है, तो onboarding migration offer कर सकती है। `openclaw onboard --flow import` और `openclaw setup --wizard --import-from hermes` दोनों वही plugin migration provider उपयोग करते हैं और apply करने से पहले अभी भी preview दिखाते हैं।
+जब कोई प्रोवाइडर किसी ज्ञात स्रोत का पता लगाता है, तो ऑनबोर्डिंग माइग्रेशन की पेशकश कर सकती है। `openclaw onboard --flow import` और `openclaw setup --wizard --import-from hermes` दोनों एक ही Plugin माइग्रेशन प्रोवाइडर का उपयोग करते हैं और लागू करने से पहले फिर भी पूर्वावलोकन दिखाते हैं। स्टैंडअलोन माइग्रेशन के विपरीत, नए-लक्ष्य वाला ऑनबोर्डिंग पथ स्थानीय आर्टिफ़ैक्ट और इंपोर्ट किए गए क्रेडेंशियल को स्टेज करता है, स्टेजिंग के भीतर इंपोर्ट किए गए इन्फ़रेंस को सत्यापित या सुधारता है, फिर कॉन्फ़िगरेशन कमिट करने से पहले वर्कस्पेस और एजेंट स्थिति को प्रमोट करता है। mode-`0600` वाला प्रमोशन जर्नल अगली रन को बाधित प्रकाशन पूरा करने या वापस रोल करने देता है—जिसमें कोई भी स्थगित बाहरी सक्रियण शामिल है—और इसके लिए इंपोर्ट किए गए स्थानीय डेटा को फिर से चलाना नहीं पड़ता।
 
 <Note>
-Onboarding imports के लिए fresh OpenClaw setup आवश्यक है। यदि आपके पास पहले से local state है, तो पहले config, credentials, sessions, और workspace reset करें। Backup-plus-overwrite या merge imports existing setups के लिए feature-gated हैं।
+ऑनबोर्डिंग इंपोर्ट के लिए नया OpenClaw सेटअप आवश्यक है। यदि आपके पास पहले से स्थानीय स्थिति है, तो पहले कॉन्फ़िगरेशन, क्रेडेंशियल, सेशन और वर्कस्पेस रीसेट करें। मौजूदा सेटअप के लिए बैकअप-प्लस-ओवरराइट या मर्ज इंपोर्ट फ़ीचर-गेटेड हैं।
 </Note>
 
-## Related
+## संबंधित
 
-- [Hermes से migration](/hi/install/migrating-hermes): user-facing walkthrough।
-- [Claude से migration](/hi/install/migrating-claude): user-facing walkthrough।
-- [Migrating](/hi/install/migrating): OpenClaw को नई machine पर move करें।
-- [Doctor](/hi/gateway/doctor): migration apply करने के बाद health check।
-- [Plugins](/hi/tools/plugin): plugin install और registration।
+- [Hermes से माइग्रेट करना](/hi/install/migrating-hermes): उपयोगकर्ता-केंद्रित चरण-दर-चरण मार्गदर्शिका।
+- [Claude से माइग्रेट करना](/hi/install/migrating-claude): उपयोगकर्ता-केंद्रित चरण-दर-चरण मार्गदर्शिका।
+- [माइग्रेट करना](/hi/install/migrating): OpenClaw को नई मशीन पर ले जाएँ।
+- [Doctor](/hi/gateway/doctor): माइग्रेशन लागू करने के बाद स्वास्थ्य जाँच।
+- [Plugin](/hi/tools/plugin): Plugin इंस्टॉल और पंजीकरण।

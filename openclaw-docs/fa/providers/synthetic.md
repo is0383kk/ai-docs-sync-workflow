@@ -1,52 +1,53 @@
 ---
 read_when:
-    - می‌خواهید از Synthetic به‌عنوان ارائه‌دهندهٔ مدل استفاده کنید
+    - می‌خواهید از Synthetic به‌عنوان ارائه‌دهنده مدل استفاده کنید
     - به یک کلید API یا پیکربندی URL پایه برای Synthetic نیاز دارید
-summary: استفاده از API سازگار با Anthropic متعلق به Synthetic در OpenClaw
-title: مصنوعی
+summary: از API سازگار با Anthropic متعلق به Synthetic در OpenClaw استفاده کنید
+title: Synthetic
 x-i18n:
-    generated_at: "2026-07-12T10:47:10Z"
+    generated_at: "2026-07-27T15:52:30Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f1882a34aa1ca52403b92effdbf3b753fd911575af6d8b8aa5d692245b8e8f1b
+    source_hash: c3f6cc89a7b837f57555d176ce78e62a39095d4ef0765c96b6b7b93ffebd7388
     source_path: providers/synthetic.md
     workflow: 16
 ---
 
-[Synthetic](https://synthetic.new) نقاط پایانی سازگار با Anthropic ارائه می‌کند.
-OpenClaw آن را به‌عنوان ارائه‌دهندهٔ `synthetic` عرضه می‌کند و از API پیام‌های Anthropic
+[Synthetic](https://synthetic.new) نقطه‌های پایانی سازگار با Anthropic را ارائه می‌دهد.
+OpenClaw آن را به‌عنوان ارائه‌دهندهٔ `synthetic` همراه خود دارد و از API پیام‌های Anthropic
 استفاده می‌کند.
 
-| ویژگی        | مقدار                                  |
-| ------------ | -------------------------------------- |
-| ارائه‌دهنده  | `synthetic`                            |
-| احراز هویت   | `SYNTHETIC_API_KEY`                    |
-| API          | پیام‌های Anthropic                     |
-| نشانی پایه   | `https://api.synthetic.new/anthropic`  |
+| ویژگی | مقدار                                 |
+| -------- | ------------------------------------- |
+| ارائه‌دهنده | `synthetic`                           |
+| احراز هویت     | `SYNTHETIC_API_KEY`                   |
+| API      | پیام‌های Anthropic                    |
+| نشانی پایه | `https://api.synthetic.new/anthropic` |
 
 ## شروع به کار
 
 <Steps>
   <Step title="دریافت کلید API">
-    یک `SYNTHETIC_API_KEY` از حساب Synthetic خود دریافت کنید، یا اجازه دهید فرایند راه‌اندازی
+    یک `SYNTHETIC_API_KEY` از حساب Synthetic خود دریافت کنید، یا اجازه دهید فرایند راه‌اندازی اولیه
     آن را از شما درخواست کند.
   </Step>
-  <Step title="اجرای راه‌اندازی">
+  <Step title="اجرای راه‌اندازی اولیه">
     ```bash
     openclaw onboard --auth-choice synthetic-api-key
     ```
   </Step>
   <Step title="بررسی مدل پیش‌فرض">
-    فرایند راه‌اندازی، مدل پیش‌فرض را روی مقدار زیر تنظیم می‌کند:
+    راه‌اندازی اولیه، مدل پیش‌فرض را روی مقدار زیر تنظیم می‌کند:
     ```text
-    synthetic/hf:MiniMaxAI/MiniMax-M2.5
+    synthetic/hf:MiniMaxAI/MiniMax-M3
     ```
   </Step>
 </Steps>
 
 <Warning>
-کلاینت Anthropic در OpenClaw به‌طور خودکار `/v1` را به نشانی پایه اضافه می‌کند؛ بنابراین از
+کلاینت Anthropic در OpenClaw به‌طور خودکار `/v1` را به نشانی پایه می‌افزاید؛ بنابراین از
 `https://api.synthetic.new/anthropic` استفاده کنید (نه `/anthropic/v1`). اگر Synthetic
 نشانی پایهٔ خود را تغییر داد، `models.providers.synthetic.baseUrl` را بازنویسی کنید.
 </Warning>
@@ -58,8 +59,8 @@ OpenClaw آن را به‌عنوان ارائه‌دهندهٔ `synthetic` عر�
   env: { SYNTHETIC_API_KEY: "sk-..." },
   agents: {
     defaults: {
-      model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M2.5" },
-      models: { "synthetic/hf:MiniMaxAI/MiniMax-M2.5": { alias: "MiniMax M2.5" } },
+      model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M3" },
+      models: { "synthetic/hf:MiniMaxAI/MiniMax-M3": { alias: "MiniMax M3" } },
     },
   },
   models: {
@@ -71,12 +72,12 @@ OpenClaw آن را به‌عنوان ارائه‌دهندهٔ `synthetic` عر�
         api: "anthropic-messages",
         models: [
           {
-            id: "hf:MiniMaxAI/MiniMax-M2.5",
-            name: "MiniMax M2.5",
-            reasoning: false,
-            input: ["text"],
+            id: "hf:MiniMaxAI/MiniMax-M3",
+            name: "MiniMax M3",
+            reasoning: true,
+            input: ["text", "image"],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-            contextWindow: 192000,
+            contextWindow: 262144,
             maxTokens: 65536,
           },
         ],
@@ -86,43 +87,30 @@ OpenClaw آن را به‌عنوان ارائه‌دهندهٔ `synthetic` عر�
 }
 ```
 
-## فهرست داخلی
+## کاتالوگ داخلی
 
-هزینهٔ همهٔ مدل‌های Synthetic برابر با `0` است (ورودی/خروجی/حافظهٔ نهان).
+همهٔ مدل‌های Synthetic از هزینهٔ `0` (ورودی/خروجی/کش) استفاده می‌کنند. برای اطلاع از دسترس‌پذیری سرویس، به
+[فهرست مدل‌های فعلی](https://dev.synthetic.new/docs/api/models) Synthetic مراجعه کنید.
 
-| شناسهٔ مدل                                             | پنجرهٔ زمینه | حداکثر توکن | استدلال | ورودی       |
-| ------------------------------------------------------ | ------------ | ----------- | ------- | ----------- |
-| `hf:MiniMaxAI/MiniMax-M2.5`                            | 192,000      | 65,536      | خیر     | متن         |
-| `hf:moonshotai/Kimi-K2-Thinking`                       | 256,000      | 8,192       | بله     | متن         |
-| `hf:zai-org/GLM-4.7`                                   | 198,000      | 128,000     | خیر     | متن         |
-| `hf:deepseek-ai/DeepSeek-R1-0528`                      | 128,000      | 8,192       | خیر     | متن         |
-| `hf:deepseek-ai/DeepSeek-V3-0324`                      | 128,000      | 8,192       | خیر     | متن         |
-| `hf:deepseek-ai/DeepSeek-V3.1`                         | 128,000      | 8,192       | خیر     | متن         |
-| `hf:deepseek-ai/DeepSeek-V3.1-Terminus`                | 128,000      | 8,192       | خیر     | متن         |
-| `hf:deepseek-ai/DeepSeek-V3.2`                         | 159,000      | 8,192       | خیر     | متن         |
-| `hf:meta-llama/Llama-3.3-70B-Instruct`                 | 128,000      | 8,192       | خیر     | متن         |
-| `hf:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8` | 524,000      | 8,192       | خیر     | متن         |
-| `hf:moonshotai/Kimi-K2-Instruct-0905`                  | 256,000      | 8,192       | خیر     | متن         |
-| `hf:moonshotai/Kimi-K2.5`                              | 256,000      | 8,192       | بله     | متن + تصویر |
-| `hf:openai/gpt-oss-120b`                               | 128,000      | 8,192       | خیر     | متن         |
-| `hf:Qwen/Qwen3-235B-A22B-Instruct-2507`                | 256,000      | 8,192       | خیر     | متن         |
-| `hf:Qwen/Qwen3-Coder-480B-A35B-Instruct`               | 256,000      | 8,192       | خیر     | متن         |
-| `hf:Qwen/Qwen3-VL-235B-A22B-Instruct`                  | 250,000      | 8,192       | خیر     | متن + تصویر |
-| `hf:zai-org/GLM-4.5`                                   | 128,000      | 128,000     | خیر     | متن         |
-| `hf:zai-org/GLM-4.6`                                   | 198,000      | 128,000     | خیر     | متن         |
-| `hf:zai-org/GLM-5`                                     | 256,000      | 128,000     | بله     | متن + تصویر |
-| `hf:deepseek-ai/DeepSeek-V3`                           | 128,000      | 8,192       | خیر     | متن         |
-| `hf:Qwen/Qwen3-235B-A22B-Thinking-2507`                | 256,000      | 8,192       | بله     | متن         |
+| شناسهٔ مدل                                            | پنجرهٔ زمینه | حداکثر توکن | استدلال | ورودی        |
+| --------------------------------------------------- | -------------- | ---------- | --------- | ------------ |
+| `hf:MiniMaxAI/MiniMax-M3`                           | 262,144        | 65,536     | بله       | متن + تصویر |
+| `hf:moonshotai/Kimi-K2.7-Code`                      | 262,144        | 8,192      | بله       | متن + تصویر |
+| `hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4` | 262,144        | 8,192      | بله       | متن         |
+| `hf:openai/gpt-oss-120b`                            | 131,072        | 8,192      | بله       | متن         |
+| `hf:Qwen/Qwen3.6-27B`                               | 262,144        | 81,920     | بله       | متن + تصویر |
+| `hf:zai-org/GLM-4.7-Flash`                          | 196,608        | 131,072    | بله       | متن         |
+| `hf:zai-org/GLM-5.2`                                | 524,288        | 131,072    | بله       | متن         |
 
 <Tip>
-ارجاع‌های مدل از قالب `synthetic/<modelId>` استفاده می‌کنند. برای مشاهدهٔ همهٔ مدل‌های موجود در
+ارجاع‌های مدل از قالب `synthetic/<modelId>` استفاده می‌کنند. برای مشاهدهٔ همهٔ مدل‌های دردسترس در
 حساب خود، از `openclaw models list --provider synthetic` استفاده کنید.
 </Tip>
 
 <AccordionGroup>
   <Accordion title="فهرست مجاز مدل‌ها">
-    اگر فهرست مجاز مدل‌ها (`agents.defaults.models`) را فعال می‌کنید، همهٔ
-    مدل‌های Synthetic را که قصد استفاده از آن‌ها دارید، اضافه کنید. مدل‌هایی که در فهرست مجاز نیستند
+    اگر فهرست مجاز مدل‌ها (`agents.defaults.modelPolicy.allow`) را فعال می‌کنید، همهٔ
+    مدل‌های Synthetic را که قصد استفاده از آن‌ها را دارید اضافه کنید. مدل‌هایی که در فهرست مجاز نیستند
     از عامل پنهان می‌شوند.
   </Accordion>
 
@@ -150,12 +138,12 @@ OpenClaw آن را به‌عنوان ارائه‌دهندهٔ `synthetic` عر�
 
 <CardGroup cols={2}>
   <Card title="ارائه‌دهندگان مدل" href="/fa/concepts/model-providers" icon="layers">
-    قواعد ارائه‌دهندگان، ارجاع‌های مدل و رفتار جایگزینی هنگام خرابی.
+    قواعد ارائه‌دهنده، ارجاع‌های مدل و رفتار جایگزینی هنگام خرابی.
   </Card>
   <Card title="مرجع پیکربندی" href="/fa/gateway/configuration-reference" icon="gear">
     طرح‌وارهٔ کامل پیکربندی، شامل تنظیمات ارائه‌دهنده.
   </Card>
   <Card title="Synthetic" href="https://synthetic.new" icon="arrow-up-right-from-square">
-    پیشخوان Synthetic و مستندات API.
+    داشبورد و مستندات API مربوط به Synthetic.
   </Card>
 </CardGroup>

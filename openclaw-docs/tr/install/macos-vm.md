@@ -1,15 +1,16 @@
 ---
 read_when:
     - OpenClaw'u ana macOS ortamınızdan yalıtmak istiyorsunuz
-    - Korumalı bir alanda iMessage entegrasyonu istiyorsunuz
+    - Korumalı alanda iMessage entegrasyonu istiyorsunuz
     - Klonlayabileceğiniz, sıfırlanabilir bir macOS ortamı istiyorsunuz
-    - Yerel ve barındırılan macOS sanal makine seçeneklerini karşılaştırmak istiyorsunuz
-summary: Yalıtım veya iMessage gerektiğinde OpenClaw'u korumalı bir macOS sanal makinesinde (yerel veya barındırılan) çalıştırın
+    - Yerel ve barındırılan macOS VM seçeneklerini karşılaştırmak istiyorsunuz
+summary: Yalıtım veya iMessage gerektiğinde OpenClaw'u korumalı alana alınmış bir macOS sanal makinesinde (yerel ya da barındırılan) çalıştırın
 title: macOS sanal makineleri
 x-i18n:
-    generated_at: "2026-07-12T11:54:15Z"
+    generated_at: "2026-07-26T23:25:09Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 7e6b963faaf40f65adce1081715bc295059b8bed278a8c71a05a86e04ad7a7a5
     source_path: install/macos-vm.md
@@ -19,10 +20,10 @@ x-i18n:
 ## Önerilen varsayılan seçenek (çoğu kullanıcı için)
 
 - Sürekli çalışan bir Gateway ve düşük maliyet için **küçük bir Linux VPS**. Bkz. [VPS barındırma](/tr/vps).
-- Tam denetim ve tarayıcı otomasyonu için **konut IP'si** istiyorsanız **özel donanım** (Mac mini veya Linux bilgisayar). Birçok site veri merkezi IP'lerini engellediğinden yerel tarama genellikle daha iyi çalışır.
-- **Hibrit**: Gateway'i ucuz bir VPS'te tutun ve tarayıcı/kullanıcı arayüzü otomasyonuna ihtiyaç duyduğunuzda Mac'inizi bir **Node** olarak bağlayın. Bkz. [Node'lar](/tr/nodes) ve [Uzak Gateway](/tr/gateway/remote).
+- Tam denetim ve tarayıcı otomasyonu için **konut IP'si** istiyorsanız **özel donanım** (Mac mini veya Linux makinesi). Birçok site veri merkezi IP'lerini engellediğinden yerel tarama genellikle daha iyi çalışır.
+- **Hibrit**: Gateway'i ucuz bir VPS'te tutun ve tarayıcı/kullanıcı arayüzü otomasyonuna ihtiyaç duyduğunuzda Mac'inizi **Node** olarak bağlayın. Bkz. [Node'lar](/tr/nodes) ve [Uzak Gateway](/tr/gateway/remote).
 
-macOS sanal makinesini yalnızca iMessage gibi macOS'e özgü özelliklere özellikle ihtiyaç duyduğunuzda veya günlük kullandığınız Mac'ten kesin olarak yalıtmak istediğinizde kullanın.
+macOS sanal makinesini yalnızca iMessage gibi macOS'e özgü özelliklere özellikle ihtiyaç duyduğunuzda veya günlük kullandığınız Mac'ten kesin şekilde yalıtmak istediğinizde kullanın.
 
 ## macOS sanal makine seçenekleri
 
@@ -31,7 +32,7 @@ macOS sanal makinesini yalnızca iMessage gibi macOS'e özgü özelliklere özel
 Mevcut Apple Silicon Mac'inizde [Lume](https://cua.ai/docs/lume) kullanarak OpenClaw'u korumalı bir macOS sanal makinesinde çalıştırın. Bunun sağladıkları:
 
 - Yalıtılmış tam macOS ortamı (ana sisteminiz temiz kalır)
-- `imsg` aracılığıyla iMessage desteği; varsayılan yerel yöntem Linux/Windows üzerinde kullanılamaz
+- `imsg` aracılığıyla iMessage desteği; varsayılan yerel yol Linux/Windows'ta mümkün değildir
 - Sanal makineleri klonlayarak anında sıfırlama
 - Ek donanım veya bulut maliyeti yok
 
@@ -42,13 +43,13 @@ Bulutta macOS kullanmak istiyorsanız barındırılan Mac sağlayıcıları da u
 - [MacStadium](https://www.macstadium.com/) (barındırılan Mac'ler)
 - Diğer barındırılan Mac sağlayıcıları da kullanılabilir; sanal makine ve SSH belgelerini izleyin
 
-Bir macOS sanal makinesine SSH erişimi sağladıktan sonra aşağıdaki [OpenClaw'u yükleme](#6-install-openclaw) bölümünden devam edin.
+Bir macOS sanal makinesine SSH erişimi sağladıktan sonra aşağıdaki [OpenClaw'u yükleme](#6-install-openclaw) bölümüne geçin.
 
 ## Hızlı yol (Lume, deneyimli kullanıcılar)
 
 1. Lume'u yükleyin.
 2. `lume create openclaw --os macos --ipsw latest`
-3. Ayarlama Yardımcısı'nı tamamlayın ve Remote Login'i (SSH) etkinleştirin.
+3. Setup Assistant'ı tamamlayın ve Remote Login'i (SSH) etkinleştirin.
 4. `lume run openclaw --no-display`
 5. SSH ile bağlanın, OpenClaw'u yükleyin ve kanalları yapılandırın.
 6. Tamamlandı.
@@ -66,7 +67,7 @@ Bir macOS sanal makinesine SSH erişimi sağladıktan sonra aşağıdaki [OpenCl
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/trycua/cua/main/libs/lume/scripts/install.sh)"
 ```
 
-`~/.local/bin`, PATH'inizde değilse:
+`~/.local/bin` PATH'inizde değilse:
 
 ```bash
 echo 'export PATH="$PATH:$HOME/.local/bin"' >> ~/.zshrc && source ~/.zshrc
@@ -89,24 +90,24 @@ lume create openclaw --os macos --ipsw latest
 Bu komut macOS'i indirir ve sanal makineyi oluşturur. Bir VNC penceresi otomatik olarak açılır.
 
 <Note>
-İndirme işlemi bağlantınıza bağlı olarak biraz zaman alabilir.
+Bağlantınıza bağlı olarak indirme işlemi biraz zaman alabilir.
 </Note>
 
-## 3) Ayarlama Yardımcısı'nı tamamlayın
+## 3) Setup Assistant'ı tamamlayın
 
 VNC penceresinde:
 
 1. Dili ve bölgeyi seçin.
 2. Apple ID adımını atlayın (veya daha sonra iMessage kullanmak istiyorsanız giriş yapın).
 3. Bir kullanıcı hesabı oluşturun (kullanıcı adını ve parolayı unutmayın).
-4. İsteğe bağlı tüm özellikleri atlayın.
+4. Tüm isteğe bağlı özellikleri atlayın.
 
-Ayarlama tamamlandıktan sonra:
+Kurulum tamamlandıktan sonra:
 
 1. SSH'yi etkinleştirin: System Settings -> General -> Sharing bölümünde "Remote Login" seçeneğini etkinleştirin.
-2. Ekransız sanal makine kullanımı için otomatik girişi etkinleştirin: System Settings -> Users & Groups bölümünde "Automatically log in as:" seçeneğini belirleyin ve sanal makine kullanıcısını seçin.
+2. Sanal makineyi ekransız kullanmak için otomatik girişi etkinleştirin: System Settings -> Users & Groups bölümünde "Automatically log in as:" seçeneğini belirleyip sanal makine kullanıcısını seçin.
 
-## 4) Sanal makinenin IP adresini alın
+## 4) Sanal makinenin IP adresini öğrenin
 
 ```bash
 lume get openclaw
@@ -114,13 +115,13 @@ lume get openclaw
 
 IP adresini bulun (genellikle `192.168.64.x`).
 
-## 5) SSH ile sanal makineye bağlanın
+## 5) Sanal makineye SSH ile bağlanın
 
 ```bash
 ssh youruser@192.168.64.X
 ```
 
-`youruser` değerini oluşturduğunuz hesapla, IP'yi ise sanal makinenizin IP'siyle değiştirin.
+`youruser` değerini oluşturduğunuz hesapla, IP adresini ise sanal makinenizin IP adresiyle değiştirin.
 
 ## 6) OpenClaw'u yükleyin
 
@@ -131,7 +132,7 @@ npm install -g openclaw@latest
 openclaw onboard --install-daemon
 ```
 
-Model sağlayıcınızı (Anthropic, OpenAI vb.) ayarlamak için ilk kullanım istemlerini izleyin.
+Model sağlayıcınızı (Anthropic, OpenAI vb.) ayarlamak için ilk katılım istemlerini izleyin.
 
 ## 7) Kanalları yapılandırın
 
@@ -172,21 +173,21 @@ lume stop openclaw
 lume run openclaw --no-display
 ```
 
-Sanal makine arka planda çalışır; OpenClaw arka plan hizmeti Gateway'in çalışmasını sürdürür. Durumu denetlemek için:
+Sanal makine arka planda çalışır; OpenClaw daemon'u Gateway'in çalışmasını sürdürür. Durumu denetlemek için:
 
 ```bash
 ssh youruser@192.168.64.X "openclaw status"
 ```
 
-## Ek: iMessage entegrasyonu
+## Bonus: iMessage entegrasyonu
 
-Bu, macOS üzerinde çalıştırmanın en önemli özelliğidir. Mesajlar uygulamasını OpenClaw'a eklemek için `imsg` ile [iMessage](/tr/channels/imessage) kullanın.
+Bu, macOS'te çalıştırmanın en önemli özelliğidir. Messages'ı OpenClaw'a eklemek için [iMessage](/tr/channels/imessage) ile `imsg` kullanın.
 
 Sanal makinenin içinde:
 
-1. Mesajlar uygulamasında oturum açın.
-2. `imsg` aracını yükleyin.
-3. OpenClaw/`imsg` çalıştıran işleme Tam Disk Erişimi ve Otomasyon izni verin.
+1. Messages'da oturum açın.
+2. `imsg` yükleyin.
+3. OpenClaw/`imsg` çalıştıran işleme Full Disk Access ve Automation izni verin.
 4. `imsg rpc --help` ile RPC desteğini doğrulayın.
 
 OpenClaw yapılandırmanıza ekleyin:
@@ -205,7 +206,7 @@ OpenClaw yapılandırmanıza ekleyin:
 
 Gateway'i yeniden başlatın. Aracınız artık iMessage gönderip alabilir. Tüm kurulum ayrıntıları: [iMessage kanalı](/tr/channels/imessage).
 
-## Temiz bir kalıp görüntü kaydedin
+## Altın kalıp kaydedin
 
 Daha fazla özelleştirmeden önce temiz durumunuzun anlık görüntüsünü alın:
 
@@ -222,11 +223,11 @@ lume clone openclaw-golden openclaw
 lume run openclaw --no-display
 ```
 
-## 7/24 çalıştırma
+## 24/7 çalıştırma
 
 Sanal makineyi çalışır durumda tutmak için:
 
-- Mac'inizi güç kaynağına bağlı tutun
+- Mac'inizi prize takılı tutun
 - System Settings -> Energy Saver bölümünde uyku modunu devre dışı bırakın
 - Gerekirse `caffeinate` kullanın
 
@@ -234,12 +235,12 @@ Gerçek anlamda sürekli çalışma için özel bir Mac mini veya küçük bir V
 
 ## Sorun giderme
 
-| Sorun                            | Çözüm                                                                                                                 |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Sanal makineye SSH ile bağlanılamıyor | Sanal makinenin System Settings bölümünde "Remote Login" seçeneğinin etkin olduğunu denetleyin                    |
-| Sanal makine IP'si görünmüyor    | Sanal makinenin tamamen açılmasını bekleyin ve `lume get openclaw` komutunu yeniden çalıştırın                         |
-| Lume komutu bulunamıyor          | `~/.local/bin` dizinini PATH'inize ekleyin                                                                             |
-| WhatsApp QR kodu taranmıyor      | `openclaw channels login` komutunu çalıştırırken ana sistemde değil, sanal makinede oturum açtığınızdan emin olun      |
+| Sorun                         | Çözüm                                                                                                     |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Sanal makineye SSH ile bağlanılamıyor | Sanal makinenin System Settings bölümünde "Remote Login" seçeneğinin etkin olduğunu denetleyin             |
+| Sanal makine IP'si görünmüyor | Sanal makinenin tamamen açılmasını bekleyin ve `lume get openclaw` komutunu yeniden çalıştırın              |
+| Lume komutu bulunamadı        | `~/.local/bin` değerini PATH'inize ekleyin                                                            |
+| WhatsApp QR kodu taranmıyor   | `openclaw channels login` komutunu çalıştırırken ana sistemde değil, sanal makinede oturum açtığınızdan emin olun |
 
 ## İlgili belgeler
 

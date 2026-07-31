@@ -1,49 +1,51 @@
 ---
 read_when:
-    - Bir yan etki çalışmadan önce sormak için bir Plugin kancasına veya araca ihtiyacınız var
+    - Bir yan etki çalıştırılmadan önce sormak için bir plugin kancasına veya aracına ihtiyacınız var
     - Plugin onay istemlerinin nereye iletileceğini yapılandırmanız gerekir
-    - İsteğe bağlı araçlar, exec onayları ve Plugin onayları arasında karar veriyorsunuz
+    - İsteğe bağlı araçlar, yürütme onayları ve plugin onayları arasında karar veriyorsunuz
 sidebarTitle: Permission requests
 summary: Kullanıcılardan Plugin araç çağrılarını ve Plugin'e ait izin istemlerini onaylamalarını isteyin
 title: Plugin izin istekleri
 x-i18n:
-    generated_at: "2026-06-28T00:57:06Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T22:53:56Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 72b860e9f8ddef80c70e943ec05353cbc0a917577382289649432a58c3ce6bd0
+    source_hash: 675534212e70cc7b2e7bdc801955929c6a8156b08d620483edf0133afc3bfdaa
     source_path: plugins/plugin-permission-requests.md
     workflow: 16
 ---
 
-Plugin izin istekleri, bir kullanıcı onaylayana veya reddedene kadar Plugin kodunun bir araç çağrısını ya da Plugin’e ait bir işlemi duraklatmasını sağlar. Gateway `plugin.approval.*` akışını ve sohbet onay düğmeleri ile `/approve` komutlarını işleyen aynı onay UI yüzeylerini kullanırlar.
+Plugin izin istekleri, kullanıcı onaylayana veya reddedene kadar Plugin kodunun bir araç çağrısını ya da Plugin'e ait bir işlemi duraklatmasına olanak tanır. Bunlar Gateway
+`plugin.approval.*` akışını ve sohbet onay düğmeleriyle `/approve` komutlarını işleyen aynı onay kullanıcı arabirimi yüzeylerini kullanır.
 
-Plugin izin isteklerini Plugin/uygulama izinleri için kullanın. Bunlar host exec onaylarının, isteğe bağlı araç izin listelerinin veya Codex’in yerel izin incelemesinin yerine geçmez.
+Plugin/uygulama izinleri için Plugin izin isteklerini kullanın. Bunlar ana makine yürütme onaylarının, isteğe bağlı araç izin listelerinin veya Codex'in yerel izin incelemesinin yerini almaz.
 
-## Doğru geçidi seçin
+## Doğru geçidi seçme
 
-İhtiyacınız olan karar noktasına uygun geçidi seçin:
+İhtiyaç duyduğunuz karar noktasına uygun geçidi seçin:
 
-| Geçit                             | Ne zaman kullanılır                                                        | Neyi denetler                                                                                                           |
-| --------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| İsteğe bağlı araçlar              | Kullanıcı katılmayı seçene kadar bir araç modele görünmemelidir.           | `tools.allow` üzerinden araç görünürlüğü.                                                                               |
-| Plugin izin istekleri             | Bir Plugin hook’u veya Plugin’e ait işlem, bir eylem çalışmadan önce sormalıdır. | `plugin.approval.*` üzerinden çalışma zamanı onayı.                                                                     |
-| Exec onayları                     | Bir host komutu veya kabuk benzeri aracın operatör onayına ihtiyacı vardır. | Host exec ilkesi ve kalıcı exec izin listeleri.                                                                         |
-| Codex yerel izin istekleri        | Codex yerel kabuk, dosya, MCP veya app-server eylemlerinden önce sorar.     | Codex app-server veya yerel hook onay işleme; OpenClaw isteme metninin sahibi olduğunda Plugin onayları üzerinden yönlendirilir. |
-| MCP onay istemleri                | Bir Codex MCP sunucusu bir araç çağrısı için onay ister.                   | OpenClaw Plugin onayları üzerinden köprülenen MCP onay yanıtları.                                                       |
+| Geçit                            | Kullanılacağı durum                                                       | Denetlediği öğe                                                                                                      |
+| -------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| İsteğe bağlı araçlar             | Kullanıcı kabul edene kadar bir araç modele görünmemelidir.                | `tools.allow` üzerinden araç erişimi.                                                                           |
+| Plugin izin istekleri            | Bir Plugin kancası veya Plugin'e ait işlem, bir eylem çalışmadan önce sormalıdır. | `plugin.approval.*` üzerinden çalışma zamanı onayı.                                                              |
+| Yürütme onayları                 | Bir ana makine komutu veya kabuk benzeri araç için operatör onayı gerekir. | Ana makine yürütme politikası ve kalıcı yürütme izin listeleri.                                                       |
+| Codex yerel izin istekleri       | Codex, yerel kabuk, dosya, MCP veya uygulama sunucusu eylemlerinden önce sorar. | Codex uygulama sunucusu veya yerel kanca onaylarının işlenmesi; istem OpenClaw'a ait olduğunda Plugin onayları üzerinden yönlendirilir. |
+| MCP onay talepleri               | Bir Codex MCP sunucusu, araç çağrısı için onay ister.                      | OpenClaw Plugin onayları üzerinden köprülenen MCP onay yanıtları.                                                     |
 
-İsteğe bağlı araçlar keşif zamanı geçididir. Plugin izin istekleri çağrı başına bir geçittir. Hassas bir aracın model tarafından görülebilmeden önce açık katılım ve eylem çalışmadan önce onay gerektirmesi gerektiğinde ikisini birlikte kullanın.
+İsteğe bağlı araçlar, keşif zamanında uygulanan bir geçittir. Plugin izin istekleri ise çağrı başına uygulanan bir geçittir. Hassas bir aracın model tarafından görülebilmesi için açıkça kabul edilmesi ve eylem çalışmadan önce onaylanması gerekiyorsa ikisini birlikte kullanın.
 
-## Bir araç çağrısından önce onay isteyin
+## Araç çağrısından önce onay isteme
 
-Plugin tarafından yazılan çoğu istem bir `before_tool_call` hook’unda başlamalıdır. Hook, model bir araç seçtikten sonra ve OpenClaw onu çalıştırmadan önce çalışır:
+Plugin tarafından oluşturulan istemlerin çoğu bir `before_tool_call` kancasında başlamalıdır. Kanca, model bir araç seçtikten sonra ve OpenClaw aracı çalıştırmadan önce yürütülür:
 
 ```typescript
 import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 
 export default definePluginEntry({
   id: "deploy-policy",
-  name: "Deploy Policy",
+  name: "Dağıtım Politikası",
   register(api) {
     api.on("before_tool_call", async (event) => {
       if (event.toolName !== "deploy_service") {
@@ -55,17 +57,16 @@ export default definePluginEntry({
 
       return {
         requireApproval: {
-          title: "Deploy service",
-          description: `Deploy service to ${environment}.`,
+          title: "Hizmeti dağıt",
+          description: `Hizmeti ${environment} ortamına dağıt.`,
           severity: environment === "production" ? "critical" : "warning",
           allowedDecisions:
             environment === "production"
               ? ["allow-once", "deny"]
               : ["allow-once", "allow-always", "deny"],
           timeoutMs: 120_000,
-          timeoutBehavior: "deny",
           onResolution(decision) {
-            console.log(`deploy approval resolved: ${decision}`);
+            console.log(`dağıtım onayı sonuçlandı: ${decision}`);
           },
         },
       };
@@ -74,36 +75,40 @@ export default definePluginEntry({
 });
 ```
 
-İstem metnini eylemi onaylayacak kişi için yazın:
+İstem metnini, eylemi onaylayacak kişi için yazın:
 
-- `title` kısa ve eylem odaklı olsun. Gateway en fazla 80 karakter kabul eder.
-- `description` belirli ve sınırlı olsun. Gateway en fazla 256 karakter kabul eder.
-- Eylemi, hedefi ve riski ekleyin. Sohbet onay yüzeylerinde görünmemesi gereken gizli anahtarları, token’ları veya özel yükleri eklemeyin.
-- `severity: "critical"` değerini yalnızca yanlış kararın üretim hasarına veya veri kaybına neden olabileceği eylemler için kullanın.
-- Kalıcı güven bu eylem için güvenli değilse `allowedDecisions: ["allow-once", "deny"]` kullanın.
+- `title` değerini kısa ve eylem odaklı tutun; Gateway bunu 80 karakterle sınırlar.
+- `description` değerini belirli ve sınırlı tutun; Gateway bunu 512
+  karakterle sınırlar.
+- Eylemi, hedefi ve riski belirtin. Sohbet onay yüzeylerinde görünmemesi gereken gizli bilgileri, belirteçleri veya özel yükleri eklemeyin.
+- `severity` belirtilmediğinde varsayılan olarak `"warning"` kullanılır. `"critical"` değerini yalnızca yanlış kararın üretim ortamında hasara veya veri kaybına yol açabileceği eylemler için kullanın.
+- `allowedDecisions` belirtilmediğinde varsayılan olarak `["allow-once", "allow-always", "deny"]` kullanılır. Söz konusu eylem için kalıcı güven uygun değilse `["allow-once", "deny"]` değerini geçirin.
+- `timeoutMs` varsayılan olarak 120000 (2 dakika) değerindedir ve istenen değerden bağımsız olarak en fazla 600000 (10 dakika) olabilir.
 
 ## Karar davranışı
 
-OpenClaw `plugin:` ID’si olan bekleyen bir onay oluşturur, bunu kullanılabilir onay yüzeylerine iletir ve bir karar bekler.
+OpenClaw, bir `plugin:` kimliğiyle bekleyen bir onay oluşturur, bunu kullanılabilir onay yüzeylerine iletir ve karar verilmesini bekler.
 
 | Karar             | Sonuç                                                                     |
 | ----------------- | ------------------------------------------------------------------------- |
 | `allow-once`      | Geçerli çağrı devam eder.                                                 |
-| `allow-always`    | Geçerli çağrı devam eder ve karar Plugin’e geçirilir.                     |
-| `deny`            | Çağrı reddedilmiş araç sonucu ile engellenir.                             |
-| Zaman aşımı       | `timeoutBehavior` `"allow"` olmadığı sürece çağrı engellenir.             |
-| İptal             | Çalıştırma durdurulduğunda çağrı engellenir.                              |
-| Onay rotası yok   | Bağlı hiçbir onay yüzeyi bunu çözemediği için çağrı engellenir.           |
+| `allow-always`    | Geçerli çağrı devam eder ve karar Plugin'e aktarılır.                     |
+| `deny`            | Çağrı, reddedilmiş bir araç sonucuyla engellenir.                         |
+| Zaman aşımı       | Çağrı engellenir.                                                         |
+| İptal             | Çalıştırma iptal edildiğinde çağrı engellenir.                            |
+| Onay yolu yok     | Bağlı hiçbir onay yüzeyi isteği sonuçlandıramadığı için çağrı engellenir. |
 
-`allow-always` yalnızca istekte bulunan Plugin veya çalışma zamanı bu kalıcılığı uyguladığında kalıcıdır. Sıradan `before_tool_call.requireApproval` hook’ları için OpenClaw, `allow-once` ve `allow-always` kararlarını geçerli çağrıya yönelik onay kararları olarak ele alır ve çözümlenen değeri `onResolution`’a geçirir. Plugin’iniz `allow-always` sunuyorsa, gelecekte hangi çağrılara güvendiğini tam olarak belgeleyin ve uygulayın.
+Yalnızca isteğin izin verdiği tam `allow-once` ve `allow-always` kararları yürütmeye izin verir. Bilinmeyen, hatalı biçimlendirilmiş, eşleşmeyen, eksik ve zaman aşımına uğramış kararlar güvenli biçimde reddedilir. Eski `timeoutBehavior` alanı Plugin uyumluluğu için kabul edilmeye devam eder ancak kullanımdan kaldırılmıştır ve yok sayılır; yeni kancalarda bunu ayarlamayın.
 
-Hook ayrıca `params` döndürürse, OpenClaw bu parametre değişikliklerini yalnızca onay başarılı olduktan sonra uygular. Daha düşük öncelikli bir hook, daha yüksek öncelikli bir hook onay istemiş olsa bile yine de engelleyebilir.
+`allow-always` yalnızca istekte bulunan Plugin veya çalışma zamanı bu kalıcılığı uyguladığında kalıcıdır. Sıradan `before_tool_call.requireApproval` kancalarında OpenClaw, `allow-once` ve `allow-always` değerlerini geçerli çağrıya yönelik onay kararları olarak değerlendirir ve çözümlenen değeri `onResolution` öğesine aktarır. Plugin'iniz `allow-always` seçeneğini sunuyorsa gelecekteki hangi çağrılara güvendiğini tam olarak belgeleyip uygulayın.
 
-`allowedDecisions`, kullanıcıya gösterilen düğmeleri ve komutları sınırlar. Gateway, isteğin sunmadığı herhangi bir karar için çözümleme girişimini reddeder.
+Kanca ayrıca `params` döndürürse OpenClaw bu parametre değişikliklerini yalnızca onay başarılı olduktan sonra uygular. Daha düşük öncelikli bir kanca, daha yüksek öncelikli bir kanca onay istemiş olsa bile çağrıyı engelleyebilir.
 
-## Onay istemlerini yönlendirin
+`allowedDecisions`, kullanıcıya gösterilen düğmeleri ve komutları sınırlar. Gateway, isteğin sunmadığı herhangi bir karara yönelik çözümleme girişimini reddeder.
 
-Onay istemleri yerel UI yüzeylerinde veya onay işlemeyi destekleyen sohbet kanallarında çözümlenebilir. Plugin onay istemlerini açık sohbet hedeflerine iletmek için `approvals.plugin` yapılandırın:
+## Onay istemlerini yönlendirme
+
+Onay istemleri yerel kullanıcı arabirimi yüzeylerinde veya onay işlemeyi destekleyen sohbet kanallarında çözümlenebilir. Plugin onay istemlerini açık sohbet hedeflerine iletmek için `approvals.plugin` öğesini yapılandırın:
 
 ```json5
 {
@@ -118,9 +123,9 @@ Onay istemleri yerel UI yüzeylerinde veya onay işlemeyi destekleyen sohbet kan
 }
 ```
 
-`approvals.plugin`, `approvals.exec`’ten bağımsızdır. Exec onayı iletmeyi etkinleştirmek Plugin onay istemlerini yönlendirmez; Plugin onayı iletmeyi etkinleştirmek de host exec ilkesini değiştirmez.
+`approvals.plugin`, `approvals.exec` öğesinden bağımsızdır. Yürütme onayı iletimini etkinleştirmek Plugin onay istemlerini yönlendirmez; Plugin onayı iletimini etkinleştirmek de ana makine yürütme politikasını değiştirmez.
 
-Bir istem manuel onay metni içerdiğinde, sunulan kararlardan biriyle çözümleyin:
+Bir istem manuel onay metni içerdiğinde bunu sunulan kararlardan biriyle çözümleyin:
 
 ```text
 /approve <id> allow-once
@@ -128,32 +133,32 @@ Bir istem manuel onay metni içerdiğinde, sunulan kararlardan biriyle çözüml
 /approve <id> deny
 ```
 
-Tam iletme modeli, aynı sohbet onay davranışı, yerel kanal teslimi ve kanala özgü onaylayan kuralları için [Gelişmiş exec onayları](/tr/tools/exec-approvals-advanced#plugin-approval-forwarding) bölümüne bakın.
+Tam iletim modeli, aynı sohbette onay davranışı, yerel kanal iletimi ve kanala özgü onaylayan kuralları için [Gelişmiş yürütme onayları](/tr/tools/exec-approvals-advanced#plugin-approval-forwarding) bölümüne bakın.
 
 ## Codex yerel izinleri
 
-Codex yerel izin istemleri de Plugin onayları üzerinden ilerleyebilir, ancak sahiplikleri Plugin tarafından yazılmış hook’lardan farklıdır.
+Codex yerel izin istemleri de Plugin onayları üzerinden iletilebilir ancak bunların sahipliği, Plugin tarafından oluşturulan kancalardan farklıdır.
 
-- Codex app-server onay istekleri Codex incelemesinden sonra OpenClaw üzerinden yönlendirilir.
-- Yerel hook `permission_request` rölesi, bu röle etkin olduğunda `plugin.approval.request` üzerinden sorabilir.
-- MCP araç onay istemleri, Codex `_meta.codex_approval_kind` değerini `"mcp_tool_call"` olarak işaretlediğinde Plugin onayları üzerinden yönlendirilir.
+- Codex uygulama sunucusu onay istekleri, Codex incelemesinden sonra OpenClaw üzerinden yönlendirilir.
+- Yerel `permission_request` kanca aktarıcısı etkinleştirildiğinde `plugin.approval.request` üzerinden istekte bulunabilir.
+- Codex, `_meta.codex_approval_kind` öğesini `"mcp_tool_call"` olarak işaretlediğinde MCP araç onayı talepleri Plugin onayları üzerinden yönlendirilir.
 
-Codex’e özgü davranış ve fallback kuralları için [Codex harness çalışma zamanı](/tr/plugins/codex-harness-runtime#native-permissions-and-mcp-elicitations) bölümüne bakın.
+Codex'e özgü davranış ve geri dönüş kuralları için [Codex çalıştırma altyapısı çalışma zamanı](/tr/plugins/codex-harness-runtime#native-permissions-and-mcp-elicitations) bölümüne bakın.
 
 ## Sorun giderme
 
-**Araç, Plugin onaylarının kullanılamadığını söylüyor.** Hiçbir onay UI’sı veya yapılandırılmış onay rotası isteği kabul etmedi. Onay yetenekli bir istemci bağlayın, aynı sohbet içinde `/approve` destekleyen bir kanal kullanın veya `approvals.plugin` yapılandırın.
+**Araç, Plugin onaylarının kullanılamadığını söylüyor.** Hiçbir onay kullanıcı arabirimi veya yapılandırılmış onay yolu isteği kabul etmedi. Onay özelliğine sahip bir istemci bağlayın, aynı sohbette `/approve` desteği sunan bir kanal kullanın veya `approvals.plugin` öğesini yapılandırın.
 
-**`allow-always` görünüyor ama sonraki çağrı tekrar istem gösteriyor.** Genel Plugin onay akışı rastgele hook’lar için güveni otomatik olarak kalıcı hale getirmez. `onResolution("allow-always")` sonrasında Plugin’e ait güveni Plugin’inizde kalıcı hale getirin veya yalnızca `allow-once` ve `deny` sunun.
+**`allow-always` görünüyor ancak sonraki çağrı yeniden istem gösteriyor.** Genel Plugin onay akışı, rastgele kancalar için güveni otomatik olarak kalıcı hâle getirmez. `onResolution("allow-always")` sonrasında Plugin'e ait güveni Plugin'inizde kalıcılaştırın veya yalnızca `allow-once` ve `deny` seçeneklerini sunun.
 
-**`/approve` kararı reddediyor.** İstek `allowedDecisions` değerini kısıtladı. İstemde yazdırılan kararlardan birini kullanın.
+**`/approve` kararı reddediyor.** İstek, `allowedDecisions` değerini sınırlandırmıştır. İstemde yazdırılan kararlardan birini kullanın.
 
-**Bir Slack, Discord, Telegram veya Matrix istemi exec onaylarından farklı yönlendiriliyor.** Plugin onayları ve exec onayları ayrı yapılandırma kullanır ve farklı yetkilendirme kontrolleri kullanabilir. Yalnızca `approvals.exec` denetlemek yerine `approvals.plugin` değerini ve kanalın Plugin onay desteğini doğrulayın.
+**Bir Discord, Matrix, Slack veya Telegram istemi, yürütme onaylarından farklı şekilde yönlendiriliyor.** Plugin onayları ve yürütme onayları ayrı yapılandırmalar kullanır ve farklı yetkilendirme kontrolleri uygulayabilir. Yalnızca `approvals.exec` öğesini kontrol etmek yerine `approvals.plugin` öğesini ve kanalın Plugin onayı desteğini doğrulayın.
 
-## İlgili
+## İlgili konular
 
-- [Plugin hook’ları](/tr/plugins/hooks#tool-call-policy)
-- [Plugin oluşturma](/tr/plugins/building-plugins#registering-agent-tools)
-- [Gelişmiş exec onayları](/tr/tools/exec-approvals-advanced#plugin-approval-forwarding)
+- [Plugin kancaları](/tr/plugins/hooks#tool-call-policy)
+- [Plugin oluşturma](/tr/plugins/building-plugins#registering-tools)
+- [Gelişmiş yürütme onayları](/tr/tools/exec-approvals-advanced#plugin-approval-forwarding)
 - [Gateway protokolü](/tr/gateway/protocol)
-- [Codex harness çalışma zamanı](/tr/plugins/codex-harness-runtime#native-permissions-and-mcp-elicitations)
+- [Codex çalıştırma altyapısı çalışma zamanı](/tr/plugins/codex-harness-runtime#native-permissions-and-mcp-elicitations)

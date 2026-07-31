@@ -5,17 +5,17 @@ read_when:
 summary: Von OpenClaw unterstützte Modell-Provider (LLMs)
 title: Provider-Verzeichnis
 x-i18n:
-    generated_at: "2026-07-12T15:53:39Z"
+    generated_at: "2026-07-26T18:06:36Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 15
+    prompt_version: 32
     provider: openai
-    source_hash: b59843b53265500866e87ee8d888892dacd6045bdb9401a1e7ec08ad4f364090
+    source_hash: e98910f016e461dedcd06e40a2933631bbd6ac09ceebd340bab82f14805e06a6
     source_path: providers/index.md
     workflow: 16
 ---
 
-OpenClaw kann viele LLM-Provider verwenden. Wählen Sie einen Provider aus, authentifizieren Sie sich und legen Sie anschließend das
+OpenClaw kann zahlreiche LLM-Provider verwenden. Wählen Sie einen Provider aus, authentifizieren Sie sich und legen Sie anschließend das
 Standardmodell als `provider/model` fest.
 
 Suchen Sie nach Dokumentation zu Chat-Kanälen (WhatsApp/Telegram/Discord/Slack/Mattermost (Plugin)/usw.)? Siehe [Kanäle](/de/channels).
@@ -39,10 +39,11 @@ Suchen Sie nach Dokumentation zu Chat-Kanälen (WhatsApp/Telegram/Discord/Slack/
 - [Anthropic (API + Claude CLI)](/de/providers/anthropic)
 - [Arcee AI (Trinity-Modelle)](/de/providers/arcee)
 - [Azure Speech](/de/providers/azure-speech)
+- [Baseten (Inkling + Modell-APIs)](/de/providers/baseten)
 - [BytePlus (International)](/de/concepts/model-providers#byteplus-international)
 - [Cerebras](/de/providers/cerebras)
 - [Chutes](/de/providers/chutes)
-- [ClawRouter (verwaltetes Multi-Provider-Routing)](/de/providers/clawrouter)
+- [ClawRouter (verwaltetes Routing über mehrere Provider)](/de/providers/clawrouter)
 - [Cloudflare AI Gateway](/de/providers/cloudflare-ai-gateway)
 - [Cohere](/de/providers/cohere)
 - [ComfyUI](/de/providers/comfy)
@@ -50,7 +51,7 @@ Suchen Sie nach Dokumentation zu Chat-Kanälen (WhatsApp/Telegram/Discord/Slack/
 - [ds4 (lokales DeepSeek V4)](/de/providers/ds4)
 - [ElevenLabs](/de/providers/elevenlabs)
 - [fal](/de/providers/fal)
-- [Featherless AI](/providers/featherless)
+- [Featherless AI](/de/providers/featherless)
 - [Fireworks](/de/providers/fireworks)
 - [GitHub Copilot](/de/providers/github-copilot)
 - [GMI Cloud](/de/providers/gmi)
@@ -77,7 +78,6 @@ Suchen Sie nach Dokumentation zu Chat-Kanälen (WhatsApp/Telegram/Discord/Slack/
 - [Perplexity (Websuche)](/de/providers/perplexity-provider)
 - [Qianfan](/de/providers/qianfan)
 - [Qwen Cloud](/de/providers/qwen)
-- [Qwen OAuth / Portal](/de/providers/qwen-oauth)
 - [Runway](/de/providers/runway)
 - [SenseAudio](/de/providers/senseaudio)
 - [SGLang (lokale Modelle)](/de/providers/sglang)
@@ -97,9 +97,9 @@ Suchen Sie nach Dokumentation zu Chat-Kanälen (WhatsApp/Telegram/Discord/Slack/
 ## Gemeinsame Übersichtsseiten
 
 - [Zusätzliche Provider-Varianten](/de/providers/models#additional-provider-variants) - Anthropic Vertex, Copilot Proxy und Gemini CLI OAuth
-- [Bilderzeugung](/de/tools/image-generation) - Gemeinsames `image_generate`-Tool, Provider-Auswahl und Failover
-- [Musikerzeugung](/de/tools/music-generation) - Gemeinsames `music_generate`-Tool, Provider-Auswahl und Failover
-- [Videoerzeugung](/de/tools/video-generation) - Gemeinsames `video_generate`-Tool, Provider-Auswahl und Failover
+- [Bildgenerierung](/de/tools/image-generation) - Gemeinsames `image_generate`-Tool, Provider-Auswahl und Failover
+- [Musikgenerierung](/de/tools/music-generation) - Gemeinsames `music_generate`-Tool, Provider-Auswahl und Failover
+- [Videogenerierung](/de/tools/video-generation) - Gemeinsames `video_generate`-Tool, Provider-Auswahl und Failover
 
 ## Transkriptions-Provider
 
@@ -112,7 +112,7 @@ Suchen Sie nach Dokumentation zu Chat-Kanälen (WhatsApp/Telegram/Discord/Slack/
 
 ## Community-Tools
 
-- [Claude Max API Proxy](/de/providers/claude-max-api-proxy) - Community-Proxy für Zugangsdaten eines Claude-Abonnements (prüfen Sie vor der Verwendung die Richtlinien/Nutzungsbedingungen von Anthropic)
+- [Claude Max API Proxy](/de/providers/claude-max-api-proxy) - Community-Proxy für Claude-Abonnementzugangsdaten (prüfen Sie vor der Verwendung die Richtlinien/Nutzungsbedingungen von Anthropic)
 
 Den vollständigen Provider-Katalog (xAI, Groq, Mistral usw.) und die erweiterte Konfiguration
 finden Sie unter [Modell-Provider](/de/concepts/model-providers).

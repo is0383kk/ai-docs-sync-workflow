@@ -1,24 +1,25 @@
 ---
 read_when:
-    - Je wilt contacten/groepen/eigen ID's voor een kanaal opzoeken
-    - Je ontwikkelt een adapter voor de kanaaldirectory
-summary: CLI-referentie voor `openclaw directory` (uzelf, peers, groepen)
+    - Je wilt contact-, groeps- of eigen ID's voor een kanaal opzoeken
+    - Je ontwikkelt een adapter voor een kanaalmap
+summary: CLI-referentie voor `openclaw directory` (zelf, peers, groepen)
 title: Map
 x-i18n:
-    generated_at: "2026-07-12T08:44:15Z"
+    generated_at: "2026-07-27T05:40:45Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: d9e1a952525f79dcb6eedb87eb433be7cb378fa19de5f252521e287d2c52275c
+    source_hash: 33f1cabd0954f2e6e6affbfbff9f8e1f543bffebc54baff7c1ffaa21778744a0
     source_path: cli/directory.md
     workflow: 16
 ---
 
 # `openclaw directory`
 
-Adreslijstzoekopdrachten voor kanalen die deze ondersteunen: contacten/peers, groepen en 'mijzelf' (eigen identiteit).
+Directoryzoekopdrachten voor kanalen die deze ondersteunen: contacten/peers, groepen en "me" (jezelf).
 
-De resultaten zijn bedoeld om in andere opdrachten te plakken, met name in `openclaw message send --target ...`.
+De resultaten zijn bedoeld om in andere opdrachten te plakken, met name `openclaw message send --target ...`.
 
 ## Algemene vlaggen
 
@@ -30,8 +31,9 @@ De standaarduitvoer (niet-JSON) bestaat uit `id` (en soms `name`), gescheiden do
 
 ## Opmerkingen
 
-- Voor veel kanalen zijn de resultaten gebaseerd op de configuratie (toegestane lijsten / geconfigureerde groepen) in plaats van op een live adreslijst van de provider.
-- Een reeds geïnstalleerde kanaalplugin kan adreslijstondersteuning missen. In dat geval meldt de opdracht dat de bewerking niet wordt ondersteund; de plugin wordt niet opnieuw geïnstalleerd of bijgewerkt om ondersteuning toe te voegen.
+- Voor veel kanalen zijn de resultaten gebaseerd op de configuratie (toegestane lijsten/geconfigureerde groepen) en niet op een live providerdirectory.
+- De WhatsApp-groepslijst is live. Gateway-zoekopdrachten hergebruiken de bijbehorende beheerde verbinding; een zelfstandige opdracht opent de gekoppelde sessie alleen wanneer geen ander proces eigenaar is van dat account en meldt anders dat live groepen niet beschikbaar zijn.
+- Een reeds geïnstalleerde kanaalplugin ondersteunt mogelijk geen directory's. In dat geval meldt de opdracht dat de bewerking niet wordt ondersteund; de Plugin wordt niet opnieuw geïnstalleerd of bijgewerkt om ondersteuning toe te voegen.
 
 ## Resultaten gebruiken met `message send`
 
@@ -42,19 +44,19 @@ openclaw message send --channel slack --target user:U012ABCDEF --message "hello"
 
 ## ID-indelingen per kanaal
 
-| Kanaal                              | Indeling doel-id                                                                                                                        |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Kanaal                              | Indeling van doel-id                                                                                                        |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | WhatsApp                            | `+15551234567` (privébericht), `1234567890-1234567890@g.us` (groep), `120363123456789@newsletter` (kanaal/nieuwsbrief, alleen uitgaand) |
-| Signal                              | Geconfigureerde aliassen worden omgezet naar E.164-/UUID-doelen voor privéberichten of groepsdoelen met `group:<id>`                   |
-| Telegram                            | `@username` of numerieke chat-id; groepen gebruiken numerieke id's                                                                      |
-| Slack                               | `user:U…` en `channel:C…`                                                                                                               |
-| Discord                             | `user:<id>` en `channel:<id>`                                                                                                           |
-| Matrix (plugin)                     | `user:@user:server`, `room:!roomId:server` of `#alias:server`                                                                           |
-| Microsoft Teams (plugin)            | `user:<id>` en `conversation:<id>`                                                                                                      |
-| Zalo (plugin)                       | Gebruikers-id (Bot API)                                                                                                                 |
-| Zalo Personal / `zalouser` (plugin) | Thread-id (privébericht/groep), afkomstig van `zca` (`me`, `friend list`, `group list`)                                                  |
+| Signal                              | Geconfigureerde aliassen worden omgezet in E.164-/UUID-doelen voor privéberichten of `group:<id>`-groepsdoelen |
+| Telegram                            | `@username` of numerieke chat-id; groepen gebruiken numerieke id's |
+| Slack                               | `user:U…` en `channel:C…` |
+| Discord                             | `user:<id>` en `channel:<id>` |
+| Matrix (Plugin)                     | `user:@user:server`, `room:!roomId:server` of `#alias:server` |
+| Microsoft Teams (Plugin)            | `user:<id>` en `conversation:<id>` |
+| Zalo (Plugin)                       | Gebruikers-id (Bot API) |
+| Zalo Personal / `zalouser` (Plugin) | Thread-id (privébericht/groep), uit `zca` (`me`, `friend list`, `group list`) |
 
-## Eigen identiteit ('mijzelf')
+## Jezelf ("me")
 
 ```bash
 openclaw directory self --channel zalouser

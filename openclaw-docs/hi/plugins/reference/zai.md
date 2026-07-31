@@ -1,21 +1,22 @@
 ---
 read_when:
-    - आप zai plugin को इंस्टॉल, कॉन्फ़िगर, या ऑडिट कर रहे हैं
-summary: OpenClaw में Z.AI मॉडल प्रदाता समर्थन जोड़ता है।
+    - आप zai Plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
+summary: OpenClaw में Z.AI मॉडल प्रदाता के लिए समर्थन जोड़ता है।
 title: Z.AI Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:50:59Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:19:46Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f02339093c874b13e97cfbeaca4a5343159079a008618faac435ac80f2f935c4
+    source_hash: c722638d50bf95db7a8a95b688d53dab3a944633eeb1d7734939819a87f81278
     source_path: plugins/reference/zai.md
     workflow: 16
 ---
 
 # Z.AI Plugin
 
-OpenClaw में Z.AI मॉडल प्रदाता समर्थन जोड़ता है।
+OpenClaw में Z.AI मॉडल प्रदाता का समर्थन जोड़ता है।
 
 ## वितरण
 
@@ -24,7 +25,7 @@ OpenClaw में Z.AI मॉडल प्रदाता समर्थन �
 
 ## सतह
 
-providers: zai; contracts: mediaUnderstandingProviders
+प्रदाता: `zai`; अनुबंध: `mediaUnderstandingProviders`, `usageProviders`
 
 ## संबंधित दस्तावेज़
 

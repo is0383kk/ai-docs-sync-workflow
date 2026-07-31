@@ -1,12 +1,13 @@
 ---
 read_when:
-    - U wilt een volledig overzicht van de documentatie
-summary: Hubs met links naar alle OpenClaw-documentatie
+    - Je wilt een volledig overzicht van de documentatie
+summary: Hubs die naar elk OpenClaw-document linken
 title: Documentatiehubs
 x-i18n:
-    generated_at: "2026-07-12T09:26:33Z"
+    generated_at: "2026-07-27T05:22:54Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 9b51fc77155b2e7ed6cb6e36d375585ebd457c3d89f97c4151877d1aae20717f
     source_path: start/hubs.md
@@ -14,17 +15,17 @@ x-i18n:
 ---
 
 <Note>
-Als OpenClaw nieuw voor u is, begin dan met [Aan de slag](/nl/start/getting-started).
+Als OpenClaw nieuw voor je is, begin dan met [Aan de slag](/nl/start/getting-started).
 </Note>
 
-Gebruik deze centrale pagina's om alle pagina's te ontdekken, inclusief diepgaande uitleg en referentiedocumentatie die niet in de linkernavigatie staan.
+Gebruik deze hubs om elke pagina te vinden, waaronder diepgaande uitleg en referentiedocumentatie die niet in de linkernavigatie staan.
 
 ## Begin hier
 
 - [Index](/nl)
 - [Aan de slag](/nl/start/getting-started)
-- [Ingebruikname](/nl/start/onboarding)
-- [Ingebruikname (CLI)](/nl/start/wizard)
+- [Onboarding](/nl/start/onboarding)
+- [Onboarding (CLI)](/nl/start/wizard)
 - [Installatie](/nl/start/setup)
 - [Dashboard (lokale Gateway)](http://127.0.0.1:18789/)
 - [Help](/nl/help)
@@ -32,26 +33,26 @@ Gebruik deze centrale pagina's om alle pagina's te ontdekken, inclusief diepgaan
 - [Configuratie](/nl/gateway/configuration)
 - [Configuratievoorbeelden](/nl/gateway/configuration-examples)
 - [OpenClaw-assistent](/nl/start/openclaw)
-- [Voorbeelden](/nl/start/showcase)
+- [Showcase](/nl/start/showcase)
 - [Achtergrondverhaal](/nl/start/lore)
 
-## Installatie en updates
+## Installatie + updates
 
 - [Docker](/nl/install/docker)
 - [Nix](/nl/install/nix)
-- [Bijwerken/terugdraaien](/nl/install/updating)
-- [Bun-werkwijze (experimenteel)](/nl/install/bun)
+- [Bijwerken / terugdraaien](/nl/install/updating)
+- [Bun-workflow (experimenteel)](/nl/install/bun)
 
 ## Kernconcepten
 
 - [Architectuur](/nl/concepts/architecture)
 - [Functies](/nl/concepts/features)
-- [Netwerkcentrum](/nl/network)
+- [Netwerkhub](/nl/network)
 - [Agent-runtime](/nl/concepts/agent)
-- [Agentwerkruimte](/nl/concepts/agent-workspace)
+- [Agent-werkruimte](/nl/concepts/agent-workspace)
 - [Geheugen](/nl/concepts/memory)
-- [Agentlus](/nl/concepts/agent-loop)
-- [Streaming en opdelen](/nl/concepts/streaming)
+- [Agent-lus](/nl/concepts/agent-loop)
+- [Streaming + segmentering](/nl/concepts/streaming)
 - [Routering met meerdere agents](/nl/concepts/multi-agent)
 - [Compaction](/nl/concepts/compaction)
 - [Sessies](/nl/concepts/session)
@@ -63,18 +64,18 @@ Gebruik deze centrale pagina's om alle pagina's te ontdekken, inclusief diepgaan
 - [TypeBox-schema's](/nl/concepts/typebox)
 - [Tijdzoneverwerking](/nl/concepts/timezone)
 - [Aanwezigheid](/nl/concepts/presence)
-- [Detectie en transporten](/nl/gateway/discovery)
+- [Detectie + transporten](/nl/gateway/discovery)
 - [Bonjour](/nl/gateway/bonjour)
 - [Kanaalroutering](/nl/channels/channel-routing)
 - [Groepen](/nl/channels/groups)
 - [Groepsberichten](/nl/channels/group-messages)
-- [Modelomschakeling bij storingen](/nl/concepts/model-failover)
+- [Model-failover](/nl/concepts/model-failover)
 - [OAuth](/nl/concepts/oauth)
 
-## Providers en inkomend verkeer
+## Providers + binnenkomend verkeer
 
-- [Centrum voor chatkanalen](/nl/channels)
-- [Centrum voor modelproviders](/nl/providers/models)
+- [Hub voor chatkanalen](/nl/channels)
+- [Hub voor modelproviders](/nl/providers/models)
 - [Discord](/nl/channels/discord)
 - [iMessage](/nl/channels/imessage)
 - [Mattermost](/nl/channels/mattermost)
@@ -84,13 +85,13 @@ Gebruik deze centrale pagina's om alle pagina's te ontdekken, inclusief diepgaan
 - [Telegram](/nl/channels/telegram)
 - [WebChat](/nl/web/webchat)
 - [WhatsApp](/nl/channels/whatsapp)
-- [Locatieverwerking](/nl/channels/location)
+- [Locaties parseren](/nl/channels/location)
 - [Webhooks](/nl/automation/cron-jobs#webhooks)
 - [Gmail Pub/Sub](/nl/automation/cron-jobs#gmail-pubsub-integration)
 
-## Gateway en beheer
+## Gateway + beheer
 
-- [Gateway-draaiboek](/nl/gateway)
+- [Gateway-runbook](/nl/gateway)
 - [Netwerkmodel](/nl/network#core-model)
 - [Gateway-koppeling](/nl/gateway/pairing)
 - [Gateway-vergrendeling](/nl/gateway/gateway-lock)
@@ -108,17 +109,17 @@ Gebruik deze centrale pagina's om alle pagina's te ontdekken, inclusief diepgaan
 - [Beveiliging](/nl/gateway/security)
 - [Probleemoplossing](/nl/gateway/troubleshooting)
 
-## Tools en automatisering
+## Tools + automatisering
 
 - [Tooloppervlak](/nl/tools)
 - [OpenProse](/nl/prose)
 - [CLI-referentie](/nl/cli)
-- [Uitvoeringstool](/nl/tools/exec)
+- [Exec-tool](/nl/tools/exec)
 - [PDF-tool](/nl/tools/pdf)
-- [Modus met verhoogde rechten](/nl/tools/elevated)
+- [Verhoogde modus](/nl/tools/elevated)
 - [Cron-taken](/nl/automation/cron-jobs)
 - [Automatisering](/nl/automation)
-- [Redeneren en uitgebreide uitvoer](/nl/tools/thinking)
+- [Redeneren + uitgebreid](/nl/tools/thinking)
 - [Modellen](/nl/concepts/models)
 - [Subagents](/nl/tools/subagents)
 - [CLI voor verzenden via agent](/nl/tools/agent-send)
@@ -127,7 +128,7 @@ Gebruik deze centrale pagina's om alle pagina's te ontdekken, inclusief diepgaan
 - [Browser (probleemoplossing voor Linux)](/nl/tools/browser-linux-troubleshooting)
 - [Peilingen](/nl/cli/message)
 
-## Nodes, media en spraak
+## Nodes, media, spraak
 
 - [Overzicht van Nodes](/nl/nodes)
 - [Camera](/nl/nodes/camera)
@@ -137,17 +138,17 @@ Gebruik deze centrale pagina's om alle pagina's te ontdekken, inclusief diepgaan
 - [Spraakactivering](/nl/nodes/voicewake)
 - [Gespreksmodus](/nl/nodes/talk)
 
-## Platformen
+## Platforms
 
 - [Platformoverzicht](/nl/platforms)
 - [macOS](/nl/platforms/macos)
 - [iOS](/nl/platforms/ios)
 - [Android](/nl/platforms/android)
-- [Windows-centrum](/nl/platforms/windows)
+- [Windows-hub](/nl/platforms/windows)
 - [Linux](/nl/platforms/linux)
 - [Webinterfaces](/nl/web)
 
-## macOS-begeleidende app (geavanceerd)
+## Bijbehorende macOS-app (geavanceerd)
 
 - [macOS-ontwikkelomgeving](/nl/platforms/mac/dev-setup)
 - [macOS-menubalk](/nl/platforms/mac/menu-bar)
@@ -160,11 +161,11 @@ Gebruik deze centrale pagina's om alle pagina's te ontdekken, inclusief diepgaan
 - [macOS-pictogram](/nl/platforms/mac/icon)
 - [macOS-logboekregistratie](/nl/platforms/mac/logging)
 - [macOS-machtigingen](/nl/platforms/mac/permissions)
-- [macOS op afstand](/nl/platforms/mac/remote)
+- [Externe macOS-toegang](/nl/platforms/mac/remote)
 - [macOS-ondertekening](/nl/platforms/mac/signing)
-- [macOS Gateway (launchd)](/nl/platforms/mac/bundled-gateway)
+- [macOS-Gateway (launchd)](/nl/platforms/mac/bundled-gateway)
 - [macOS XPC](/nl/platforms/mac/xpc)
-- [macOS Skills](/nl/platforms/mac/skills)
+- [macOS-Skills](/nl/platforms/mac/skills)
 - [macOS Peekaboo](/nl/platforms/mac/peekaboo)
 
 ## Plugins
@@ -173,17 +174,17 @@ Gebruik deze centrale pagina's om alle pagina's te ontdekken, inclusief diepgaan
 - [Plugins bouwen](/nl/plugins/building-plugins)
 - [Plugin-hooks](/nl/plugins/hooks)
 - [Plugin-manifest](/nl/plugins/manifest)
-- [Agenttools](/nl/plugins/building-plugins#registering-agent-tools)
+- [Agent-tools](/nl/plugins/building-plugins#registering-agent-tools)
 - [Plugin-bundels](/nl/plugins/bundles)
-- [ClawHub](/clawhub)
-- [Receptenboek voor mogelijkheden](/nl/plugins/adding-capabilities)
+- [ClawHub](/nl/clawhub)
+- [Kookboek voor mogelijkheden](/nl/plugins/adding-capabilities)
 - [Plugin voor spraakoproepen](/nl/plugins/voice-call)
 - [Zalo-gebruikersplugin](/nl/plugins/zalouser)
 
-## Werkruimte en sjablonen
+## Werkruimte + sjablonen
 
 - [Skills](/nl/tools/skills)
-- [ClawHub](/clawhub)
+- [ClawHub](/nl/clawhub)
 - [Skills-configuratie](/nl/tools/skills-config)
 - [Standaard-AGENTS](/nl/reference/AGENTS.default)
 - [Sjablonen: AGENTS](/nl/reference/templates/AGENTS)
@@ -196,12 +197,12 @@ Gebruik deze centrale pagina's om alle pagina's te ontdekken, inclusief diepgaan
 
 ## Project
 
-- [Dankbetuigingen](/nl/reference/credits)
+- [Met dank aan](/nl/reference/credits)
 
-## Testen en uitbrengen
+## Testen + release
 
 - [Testen](/nl/reference/test)
-- [Uitgavebeleid](/nl/reference/RELEASING)
+- [Releasebeleid](/nl/reference/RELEASING)
 - [Apparaatmodellen](/nl/reference/device-models)
 
 ## Gerelateerd

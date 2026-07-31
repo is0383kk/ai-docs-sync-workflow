@@ -1,99 +1,85 @@
 ---
 read_when:
-    - Yeni kurulum, başlangıç yapılandırmasında takılma veya ilk çalıştırma hataları
+    - Yeni kurulum, takılı kalan ilk katılım veya ilk çalıştırma hataları
     - Kimlik doğrulama ve sağlayıcı aboneliklerini seçme
-    - docs.openclaw.ai’ye erişilemiyor, gösterge paneli açılamıyor, kurulum takıldı
+    - docs.openclaw.ai adresine erişilemiyor, kontrol paneli açılamıyor, kurulum takıldı
 sidebarTitle: First-run FAQ
-summary: 'SSS: hızlı başlangıç ve ilk çalıştırma kurulumu — kurulum, onboard, kimlik doğrulama, abonelikler, ilk hatalar'
+summary: 'SSS: hızlı başlangıç ve ilk çalıştırma kurulumu — yükleme, ilk katılım, kimlik doğrulama, abonelikler, başlangıç hataları'
 title: 'SSS: ilk çalıştırma kurulumu'
 x-i18n:
-    generated_at: "2026-06-28T20:43:17Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T23:43:02Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 6ef4122bc0c3068806591ccdc1bf7f3eb5a81cc7efd2066d07f948fe953284be
+    source_hash: e1c93b89da625ae5f092db854c9b74adc005be75dd913af4bf89ed1a4f35396a
     source_path: help/faq-first-run.md
     workflow: 16
 ---
 
-  Hızlı başlangıç ve ilk çalıştırma SSS. Günlük işlemler, modeller, kimlik doğrulama, oturumlar
-  ve sorun giderme için ana [SSS](/tr/help/faq) sayfasına bakın.
+Hızlı başlangıç ve ilk çalıştırma soru-cevapları. Günlük işlemler, modeller, kimlik doğrulama, oturumlar
+ve sorun giderme için ana [SSS](/tr/help/faq) sayfasına bakın.
 
-  ## Hızlı başlangıç ve ilk çalıştırma kurulumu
+## Hızlı başlangıç ve ilk çalıştırma kurulumu
 
-  <AccordionGroup>
-  <Accordion title="Takıldım, en hızlı nasıl ilerlerim?">
-    **Makinenizi görebilen** yerel bir AI agent kullanın. Bu, Discord'da sormaktan çok daha etkilidir,
-    çünkü çoğu "takıldım" durumu, uzaktaki yardımcıların inceleyemeyeceği **yerel yapılandırma veya ortam sorunlarıdır**.
+<AccordionGroup>
+  <Accordion title="Takıldım, sorunu çözmenin en hızlı yolu">
+    **Makinenizi görebilen** yerel bir yapay zekâ aracısı kullanın. "Takıldım" durumlarının çoğu,
+    uzaktaki bir yardımcının inceleyemeyeceği **yerel yapılandırma veya ortam sorunlarından** kaynaklanır;
+    bu nedenle bu yöntem Discord'da sormaktan daha etkilidir.
 
     - **Claude Code**: [https://www.anthropic.com/claude-code/](https://www.anthropic.com/claude-code/)
     - **OpenAI Codex**: [https://openai.com/codex/](https://openai.com/codex/)
 
-    Bu araçlar repo'yu okuyabilir, komut çalıştırabilir, günlükleri inceleyebilir ve makine düzeyindeki
-    kurulumunuzu (PATH, servisler, izinler, kimlik doğrulama dosyaları) düzeltmeye yardımcı olabilir. Onlara
-    hacklenebilir (git) kurulum aracılığıyla **tam kaynak checkout'unu** verin:
+    Kodu ve belgeleri okuyabilmesi ve çalıştırdığınız tam sürüm hakkında akıl yürütebilmesi için
+    aracıya özelleştirilebilir (git) kurulum aracılığıyla kaynak kodun tamamını verin:
 
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
     ```
 
-    Bu, OpenClaw'ı **bir git checkout'undan** kurar; böylece agent kodu + belgeleri okuyabilir ve
-    çalıştırdığınız tam sürüm hakkında akıl yürütebilir. Daha sonra kurucuyu `--install-method git` olmadan
-    yeniden çalıştırarak her zaman kararlı sürüme geri dönebilirsiniz.
+    Aracıdan düzeltmeyi adım adım planlayıp denetlemesini, ardından yalnızca gerekli
+    komutları yürütmesini isteyin; daha küçük farkların denetlenmesi daha kolaydır.
 
-    İpucu: agent'tan düzeltmeyi **planlamasını ve denetlemesini** (adım adım) isteyin, sonra yalnızca
-    gerekli komutları çalıştırın. Bu, değişiklikleri küçük ve denetlemesi daha kolay tutar.
+    Yardım isterken (Discord'da veya bir GitHub kaydında) şu çıktıları paylaşın:
 
-    Gerçek bir hata veya düzeltme keşfederseniz lütfen GitHub issue'su açın ya da PR gönderin:
-    [https://github.com/openclaw/openclaw/issues](https://github.com/openclaw/openclaw/issues)
-    [https://github.com/openclaw/openclaw/pulls](https://github.com/openclaw/openclaw/pulls)
+    | Komut | Gösterdikleri |
+    | --- | --- |
+    | `openclaw status` | Gateway/aracı durumu + temel yapılandırma anlık görüntüsü |
+    | `openclaw status --all` | Yapıştırılabilir, tam salt okunur tanılama |
+    | `openclaw models status` | Sağlayıcı kimlik doğrulaması + model kullanılabilirliği |
+    | `openclaw doctor` | Yaygın yapılandırma/durum sorunlarını doğrular ve onarır |
+    | `openclaw logs --follow` | Canlı günlük takibi |
+    | `openclaw gateway status --deep` | Ayrıntılı Gateway/yapılandırma/plugin durum denetimi |
+    | `openclaw health --verbose` | Ayrıntılı durum raporu |
 
-    Şu komutlarla başlayın (yardım isterken çıktıları paylaşın):
+    Gerçek bir hata veya düzeltme mi buldunuz? Bir kayıt açın veya PR gönderin:
+    [Kayıtlar](https://github.com/openclaw/openclaw/issues) /
+    [Pull request'ler](https://github.com/openclaw/openclaw/pulls).
 
-    ```bash
-    openclaw status
-    openclaw models status
-    openclaw doctor
-    ```
-
-    Ne yaparlar:
-
-    - `openclaw status`: gateway/agent sağlığı + temel yapılandırmanın hızlı anlık görüntüsü.
-    - `openclaw models status`: provider kimlik doğrulamasını + model kullanılabilirliğini kontrol eder.
-    - `openclaw doctor`: yaygın yapılandırma/durum sorunlarını doğrular ve onarır.
-
-    Diğer yararlı CLI kontrolleri: `openclaw status --all`, `openclaw logs --follow`,
-    `openclaw gateway status`, `openclaw health --verbose`.
-
-    Hızlı hata ayıklama döngüsü: [Bir şey bozuksa ilk 60 saniye](/tr/help/faq#first-60-seconds-if-something-is-broken).
+    Hızlı hata ayıklama döngüsü: [Bir şey bozulduğunda ilk 60 saniye](/tr/help/faq#first-60-seconds-if-something-is-broken).
     Kurulum belgeleri: [Kurulum](/tr/install), [Kurucu bayrakları](/tr/install/installer), [Güncelleme](/tr/install/updating).
 
   </Accordion>
 
   <Accordion title="Heartbeat sürekli atlanıyor. Atlama nedenleri ne anlama geliyor?">
-    Yaygın heartbeat atlama nedenleri:
+    | Atlama nedeni | Anlamı |
+    | --- | --- |
+    | `quiet-hours` | Yapılandırılmış etkin saatler aralığının dışında |
+    | `empty-heartbeat-file` | Heartbeat izleyicisinin taslağı mevcut ancak yalnızca boşluk, yorum, başlık, çit veya boş kontrol listesi iskeleti içeriyor |
+    | `alerts-disabled` | Tüm Heartbeat görünürlüğü kapalı (`showOk`, `showAlerts` ve `useIndicator` seçeneklerinin tümü devre dışı) |
 
-    - `quiet-hours`: yapılandırılmış aktif saatler penceresinin dışında
-    - `empty-heartbeat-file`: `HEARTBEAT.md` var, ancak yalnızca boş, yorum, başlık, fence veya boş checklist iskeleti içeriyor
-    - `no-tasks-due`: `HEARTBEAT.md` görev modu aktif, ancak görev aralıklarından hiçbiri henüz zamanı gelmiş değil
-    - `alerts-disabled`: tüm heartbeat görünürlüğü devre dışı (`showOk`, `showAlerts` ve `useIndicator` hepsi kapalı)
-
-    Görev modunda, zamanı gelen zaman damgaları yalnızca gerçek bir heartbeat çalışması
-    tamamlandıktan sonra ilerletilir. Atlanan çalışmalar görevleri tamamlanmış olarak işaretlemez.
+    Eski Heartbeat `tasks:` blokları, `openclaw doctor --fix` ile bağımsız olarak zamanlanan cron işlerine taşınır.
 
     Belgeler: [Heartbeat](/tr/gateway/heartbeat), [Otomasyon](/tr/automation).
 
   </Accordion>
 
-  <Accordion title="OpenClaw'ı kurmak ve ayarlamak için önerilen yol">
-    Repo, kaynaktan çalıştırmayı ve onboarding kullanmayı önerir:
-
+  <Accordion title="OpenClaw'u kurmak ve ayarlamak için önerilen yöntem">
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
     openclaw onboard --install-daemon
     ```
-
-    Sihirbaz UI varlıklarını otomatik olarak da oluşturabilir. Onboarding sonrasında Gateway'i genellikle **18789** portunda çalıştırırsınız.
 
     Kaynaktan (katkıda bulunanlar/geliştiriciler):
 
@@ -106,90 +92,106 @@ x-i18n:
     openclaw onboard
     ```
 
-    Henüz global kurulumunuz yoksa `pnpm openclaw onboard` ile çalıştırın.
+    Henüz genel kurulum yok mu? Bunun yerine `pnpm openclaw onboard` çalıştırın. Control UI varlıkları
+    eksikse katılım süreci bunları kendisi oluşturmaya çalışır ve başarısız olursa `pnpm ui:build` kullanır.
 
   </Accordion>
 
-  <Accordion title="Onboarding sonrasında dashboard'u nasıl açarım?">
-    Sihirbaz, onboarding'in hemen ardından tarayıcınızı temiz (token içermeyen) bir dashboard URL'siyle açar ve bağlantıyı özette de yazdırır. O sekmeyi açık tutun; açılmadıysa, yazdırılan URL'yi aynı makinede kopyalayıp yapıştırın.
+  <Accordion title="Katılım sürecinden sonra gösterge panelini nasıl açarım?">
+    Katılım süreci, kurulumdan hemen sonra tarayıcınızı temiz (token içermeyen) bir gösterge paneli
+    URL'sinde açar ve bağlantıyı özette yazdırır. Bu sekmeyi açık tutun; açılmadıysa yazdırılan
+    URL'yi aynı makinede kopyalayıp yapıştırın.
   </Accordion>
 
-  <Accordion title="Dashboard'da localhost ile uzak erişimde kimliği nasıl doğrularım?">
+  <Accordion title="Gösterge panelinde localhost ve uzak bağlantı için nasıl kimlik doğrularım?">
     **Localhost (aynı makine):**
 
     - `http://127.0.0.1:18789/` adresini açın.
-    - Paylaşılan gizli anahtar kimlik doğrulaması isterse, yapılandırılmış token'ı veya parolayı Control UI ayarlarına yapıştırın.
+    - Paylaşılan gizli bilgiyle kimlik doğrulaması isterse yapılandırılmış token'ı veya parolayı Control UI ayarlarına yapıştırın.
     - Token kaynağı: `gateway.auth.token` (veya `OPENCLAW_GATEWAY_TOKEN`).
     - Parola kaynağı: `gateway.auth.password` (veya `OPENCLAW_GATEWAY_PASSWORD`).
-    - Henüz paylaşılan gizli anahtar yapılandırılmadıysa, `openclaw doctor --generate-gateway-token` ile bir token oluşturun.
+    - Henüz paylaşılan gizli bilgi yapılandırılmadı mı? `openclaw doctor --generate-gateway-token` (veya `openclaw doctor --fix --generate-gateway-token`) çalıştırın.
 
-    **Localhost değilse:**
+    **Localhost üzerinde değilse:**
 
-    - **Tailscale Serve** (önerilir): bind loopback'i koruyun, `openclaw gateway --tailscale serve` çalıştırın, `https://<magicdns>/` adresini açın. `gateway.auth.allowTailscale` `true` ise, identity header'ları Control UI/WebSocket kimlik doğrulamasını karşılar (yapıştırılan paylaşılan gizli anahtar yoktur, güvenilir gateway host'u varsayılır); HTTP API'leri, bilinçli olarak private-ingress `none` veya trusted-proxy HTTP kimlik doğrulaması kullanmadığınız sürece yine de paylaşılan gizli anahtar kimlik doğrulaması gerektirir.
-      Aynı istemciden gelen hatalı eşzamanlı Serve kimlik doğrulama denemeleri, failed-auth sınırlayıcısı onları kaydetmeden önce seri hale getirilir; bu nedenle ikinci hatalı yeniden deneme zaten `retry later` gösterebilir.
-    - **Tailnet bind**: `openclaw gateway --bind tailnet --token "<token>"` çalıştırın (veya parola kimlik doğrulamasını yapılandırın), `http://<tailscale-ip>:18789/` adresini açın, sonra eşleşen paylaşılan gizli anahtarı dashboard ayarlarına yapıştırın.
-    - **Kimlik farkındalıklı reverse proxy**: Gateway'i güvenilir bir proxy arkasında tutun, `gateway.auth.mode: "trusted-proxy"` yapılandırın, sonra proxy URL'sini açın. Aynı host loopback proxy'leri açıkça `gateway.auth.trustedProxy.allowLoopback = true` gerektirir.
-    - **SSH tüneli**: `ssh -N -L 18789:127.0.0.1:18789 user@host` ardından `http://127.0.0.1:18789/` adresini açın. Paylaşılan gizli anahtar kimlik doğrulaması tünel üzerinden de geçerlidir; istenirse yapılandırılmış token'ı veya parolayı yapıştırın.
+    - **Tailscale Serve** (önerilen): bağlamayı geri döngüde tutun, `openclaw gateway --tailscale serve` çalıştırın ve `https://<magicdns>/` adresini açın. `gateway.auth.allowTailscale: true` ile kimlik üstbilgileri Control UI/WebSocket kimlik doğrulamasını karşılar (paylaşılan gizli bilgi yapıştırılmaz, güvenilir bir Gateway ana makinesi varsayılır); özel giriş `none` veya güvenilir proxy HTTP kimlik doğrulamasını bilinçli olarak kullanmadığınız sürece HTTP API'leri yine paylaşılan gizli bilgiyle kimlik doğrulaması gerektirir.
+      Aynı istemciden gelen eşzamanlı hatalı kimlik doğrulamalı Serve girişimleri, başarısız kimlik doğrulama sınırlayıcısı bunları kaydetmeden önce sıralı hâle getirilir; bu nedenle ikinci bir hatalı yeniden deneme zaten `retry later` gösterebilir.
+    - **Tailnet bağlaması**: `openclaw gateway --bind tailnet --token "<token>"` çalıştırın (veya parola kimlik doğrulamasını yapılandırın), `http://<tailscale-ip>:18789/` adresini açın ve eşleşen paylaşılan gizli bilgiyi gösterge paneli ayarlarına yapıştırın.
+    - **Kimlik farkındalıklı ters proxy**: Gateway'i güvenilir bir proxy'nin arkasında tutun, `gateway.auth.mode: "trusted-proxy"` ayarlayın ve proxy URL'sini açın. Aynı ana makinedeki geri döngü proxy'leri açıkça `gateway.auth.trustedProxy.allowLoopback: true` gerektirir.
+    - **SSH tüneli**: `ssh -N -L 18789:127.0.0.1:18789 user@gateway-host`, ardından `http://127.0.0.1:18789/` adresini açın. Paylaşılan gizli bilgiyle kimlik doğrulaması tünel üzerinden de geçerlidir; istenirse yapılandırılmış token'ı veya parolayı yapıştırın.
 
-    Bind modları ve kimlik doğrulama ayrıntıları için [Dashboard](/tr/web/dashboard) ve [Web yüzeyleri](/tr/web) sayfalarına bakın.
-
-  </Accordion>
-
-  <Accordion title="Sohbet onayları için neden iki exec approval yapılandırması var?">
-    Farklı katmanları kontrol ederler:
-
-    - `approvals.exec`: onay istemlerini sohbet hedeflerine iletir
-    - `channels.<channel>.execApprovals`: o kanalın exec onayları için yerel bir onay istemcisi gibi davranmasını sağlar
-
-    Host exec politikası hâlâ gerçek onay kapısıdır. Sohbet yapılandırması yalnızca onay
-    istemlerinin nerede görüneceğini ve insanların bunları nasıl yanıtlayabileceğini kontrol eder.
-
-    Çoğu kurulumda ikisine de ihtiyacınız **yoktur**:
-
-    - Sohbet zaten komutları ve yanıtları destekliyorsa, aynı sohbet `/approve` paylaşılan yol üzerinden çalışır.
-    - Desteklenen bir yerel kanal onaylayanları güvenli biçimde çıkarabiliyorsa, OpenClaw artık `channels.<channel>.execApprovals.enabled` ayarlanmamışsa veya `"auto"` ise DM öncelikli yerel onayları otomatik etkinleştirir.
-    - Yerel onay kartları/düğmeleri mevcut olduğunda, o yerel UI birincil yoldur; agent yalnızca araç sonucu sohbet onaylarının kullanılamadığını veya manuel onayın tek yol olduğunu söylüyorsa manuel `/approve` komutu eklemelidir.
-    - `approvals.exec` yalnızca istemlerin başka sohbetlere veya açık ops odalarına da iletilmesi gerektiğinde kullanın.
-    - `channels.<channel>.execApprovals.target: "channel"` veya `"both"` yalnızca onay istemlerinin kaynak oda/konuya geri gönderilmesini açıkça istediğinizde kullanın.
-    - Plugin onayları ayrıca ayrıdır: varsayılan olarak aynı sohbet `/approve`, isteğe bağlı `approvals.plugin` yönlendirmesi kullanırlar ve yalnızca bazı yerel kanallar bunun üzerine plugin onayı yerel işleme özelliğini korur.
-
-    Kısa sürüm: yönlendirme routing içindir, yerel istemci yapılandırması daha zengin kanala özel UX içindir.
-    Bkz. [Exec Onayları](/tr/tools/exec-approvals).
+    Bağlama modları ve kimlik doğrulama ayrıntıları için [Gösterge paneli](/tr/web/dashboard) ve [Web yüzeyleri](/tr/web) sayfalarına bakın.
 
   </Accordion>
 
-  <Accordion title="Hangi runtime'a ihtiyacım var?">
-    Node **>= 22** gereklidir. `pnpm` önerilir. Bun, Gateway için **önerilmez**.
+  <Accordion title="Sohbet onayları için neden iki exec onay yapılandırması var?">
+    Farklı katmanları denetlerler:
+
+    - `approvals.exec` - onay istemlerini sohbet hedeflerine iletir.
+    - `channels.<channel>.execApprovals` - ilgili kanalı exec onayları için yerel bir onay istemcisi yapar.
+
+    Ana makinenin exec politikası gerçek onay kapısı olmaya devam eder; sohbet yapılandırması yalnızca
+    istemlerin nerede görüneceğini ve kişilerin bunları nasıl yanıtlayacağını denetler.
+
+    Her ikisine birden nadiren ihtiyaç duyulur:
+
+    - Sohbet zaten komutları ve yanıtları destekliyorsa aynı sohbetteki `/approve` paylaşılan yol üzerinden çalışır.
+    - Desteklenen yerel bir kanal onaylayıcıları güvenle çıkarabiliyorsa OpenClaw, `channels.<channel>.execApprovals.enabled` ayarlanmamış veya `"auto"` olduğunda önce DM kullanan yerel onayları otomatik olarak etkinleştirir.
+    - Yerel onay kartları/düğmeleri kullanılabiliyorsa birincil arayüz budur; yalnızca araç sonucu sohbet onaylarının kullanılamadığını söylüyorsa elle kullanılan `/approve` komutundan söz edin.
+    - Yalnızca istemlerin diğer sohbetlere veya açıkça belirtilmiş operasyon odalarına da ulaşması gerekiyorsa `approvals.exec` kullanın.
+    - Yalnızca onay istemlerinin kaynak odaya/konuya geri gönderilmesini istiyorsanız `channels.<channel>.execApprovals.target: "channel"` veya `"both"` kullanın.
+    - Plugin onayları ayrıdır: varsayılan olarak aynı sohbette `/approve`, isteğe bağlı `approvals.plugin` iletimi kullanılır ve yalnızca bazı yerel kanallar bunlar için de yerel işlemeyi korur.
+
+    Kısaca: iletme yönlendirme içindir, yerel istemci yapılandırması ise kanala özgü daha zengin bir kullanıcı deneyimi içindir.
+    [Exec Onayları](/tr/tools/exec-approvals) sayfasına bakın.
+
+  </Accordion>
+
+  <Accordion title="Hangi çalışma zamanına ihtiyacım var?">
+    Node **22.22.3+**, **24.15+** veya **25.9+** gereklidir (Node 24 önerilir). `pnpm`, deponun paket yöneticisidir.
+    Bun bağımlılıkları kurabilir ve paket betiklerini çalıştırabilir ancak `node:sqlite` içermediğinden OpenClaw CLI veya Gateway'i çalıştıramaz.
   </Accordion>
 
   <Accordion title="Raspberry Pi üzerinde çalışır mı?">
-    Evet. Gateway hafiftir - belgeler kişisel kullanım için **512MB-1GB RAM**, **1 çekirdek** ve yaklaşık **500MB**
-    diskin yeterli olduğunu listeler ve bir **Raspberry Pi 4'ün çalıştırabileceğini** belirtir.
+    Evet, ancak önce RAM'i kontrol edin: Pi 5 ve Pi 4 (2 GB+) en uygun seçeneklerdir; Pi 3B+ (1 GB) çalışır ancak yavaştır; Pi Zero 2 W (512 MB) önerilmez.
 
-    Ek pay istiyorsanız (günlükler, medya, diğer servisler), **2GB önerilir**, ancak bu
-    kesin bir minimum değildir.
+    | Model | RAM | Uygunluk |
+    | --- | --- | --- |
+    | Pi 5 | 4/8 GB | En iyi |
+    | Pi 4 | 4 GB | İyi |
+    | Pi 4 | 2 GB | Uygun, takas alanı ekleyin |
+    | Pi 4 | 1 GB | Kısıtlı |
+    | Pi 3B+ | 1 GB | Yavaş |
+    | Pi Zero 2 W | 512 MB | Önerilmez |
 
-    İpucu: küçük bir Raspberry Pi/VPS Gateway'i barındırabilir; yerel ekran/kamera/canvas veya komut yürütme için
-    dizüstü bilgisayarınızda/telefonunuzda **node'ları** eşleştirebilirsiniz. Bkz. [Node'lar](/tr/nodes).
+    Mutlak minimum: 1 GB RAM, 1 çekirdek, 500 MB boş disk, 64 bit işletim sistemi. Pi yalnızca
+    Gateway'i çalıştırdığından (modeller bulut API'lerini çağırır), mütevazı bir Pi bile yükü kaldırabilir.
 
-  </Accordion>
+    Küçük bir Pi/VPS yalnızca Gateway'i de barındırabilir; yerel ekran/kamera/tuval veya komut yürütme için
+    dizüstü bilgisayarınızda/telefonunuzda **Node'ları** eşleştirebilirsiniz. [Node'lar](/tr/nodes) sayfasına bakın.
 
-  <Accordion title="Raspberry Pi kurulumları için ipucu var mı?">
-    Kısa sürüm: çalışır, ancak pürüzler bekleyin.
-
-    - **64-bit** OS kullanın ve Node >= 22 tutun.
-    - Günlükleri görebilmek ve hızlı güncellemek için **hacklenebilir (git) kurulumu** tercih edin.
-    - Kanallar/skills olmadan başlayın, sonra bunları tek tek ekleyin.
-    - Garip binary sorunlarıyla karşılaşırsanız, bu genellikle bir **ARM uyumluluğu** sorunudur.
-
-    Belgeler: [Linux](/tr/platforms/linux), [Kurulum](/tr/install).
+    Tam kurulum kılavuzu: [Raspberry Pi](/tr/install/raspberry-pi).
 
   </Accordion>
 
-  <Accordion title="wake up my friend ekranında takıldı / onboarding hatch olmuyor. Şimdi ne yapmalıyım?">
-    Bu ekran, Gateway'in erişilebilir ve kimliği doğrulanmış olmasına bağlıdır. TUI ayrıca ilk hatch sırasında
-    "Wake up, my friend!" mesajını otomatik olarak gönderir. Bu satırı **yanıt olmadan** görüyorsanız
-    ve token'lar 0'da kalıyorsa, agent hiç çalışmamıştır.
+  <Accordion title="Raspberry Pi kurulumları için öneriler var mı?">
+    - **64 bit** işletim sistemi kullanın; 32 bit Raspberry Pi OS kullanmayın.
+    - 2 GB veya daha küçük kartlara takas alanı ekleyin.
+    - Performans ve kullanım ömrü için SD kart yerine **USB SSD** tercih edin.
+    - Günlükleri görebilmek ve hızlı güncelleme yapabilmek için özelleştirilebilir (git) kurulumu tercih edin.
+    - Kanallar/Skills olmadan başlayın ve bunları tek tek ekleyin.
+    - Tuhaf ikili dosya hataları ("exec format error") genellikle isteğe bağlı bir beceri aracının ARM64 derlemesinin eksik olmasından kaynaklanır.
+
+    Tam kılavuz: [Raspberry Pi](/tr/install/raspberry-pi). Ayrıca [Linux](/tr/platforms/linux) sayfasına bakın.
+
+  </Accordion>
+
+  <Accordion title="Wake up my friend ekranında takılıyor / katılım süreci tamamlanmıyor. Ne yapmalıyım?">
+    Bu ekran, Gateway'in erişilebilir ve kimliği doğrulanmış olmasına bağlıdır. Bir model sağlayıcısı
+    yapılandırıldığında TUI, ilk açılışta otomatik olarak "Wake up, my friend!" mesajını da gönderir.
+    Model/kimlik doğrulama kurulumunu atladıysanız katılım süreci "Model auth missing" notunu gösterir ve
+    hiçbir şey göndermeden TUI'yi açar; `openclaw configure --section model` ile bir sağlayıcı ekleyin.
+    Uyandırma satırını görüyor ancak **yanıt alamıyorsanız** ve token sayısı 0'da kalıyorsa aracı hiç çalışmamıştır.
 
     1. Gateway'i yeniden başlatın:
 
@@ -197,7 +199,7 @@ x-i18n:
     openclaw gateway restart
     ```
 
-    2. Durum + kimlik doğrulamayı kontrol edin:
+    2. Durumu ve kimlik doğrulamasını kontrol edin:
 
     ```bash
     openclaw status
@@ -205,83 +207,82 @@ x-i18n:
     openclaw logs --follow
     ```
 
-    3. Hâlâ takılıyorsa şunu çalıştırın:
+    3. Hâlâ takılıyor mu? Şunu çalıştırın:
 
     ```bash
     openclaw doctor
     ```
 
-    Gateway uzaktaysa, tünel/Tailscale bağlantısının açık olduğundan ve UI'ın
-    doğru Gateway'e yönlendirildiğinden emin olun. Bkz. [Uzak erişim](/tr/gateway/remote).
+    Gateway uzaktaysa tünel/Tailscale bağlantısının etkin olduğunu ve kullanıcı arayüzünün
+    doğru Gateway'i gösterdiğini doğrulayın. [Uzaktan erişim](/tr/gateway/remote) sayfasına bakın.
 
   </Accordion>
 
-  <Accordion title="Onboarding'i yeniden yapmadan kurulumumu yeni bir makineye (Mac mini) taşıyabilir miyim?">
-    Evet. **Durum dizinini** ve **workspace'i** kopyalayın, sonra Doctor'ı bir kez çalıştırın. Bu,
-    **her iki** konumu da kopyaladığınız sürece bot'unuzu "tamamen aynı" (memory, oturum geçmişi, kimlik doğrulama ve kanal
-    durumu) tutar:
+  <Accordion title="Katılım sürecini yeniden yapmadan kurulumumu yeni bir makineye taşıyabilir miyim?">
+    Evet. **Durum dizinini** ve **çalışma alanını** kopyalayın, ardından Doctor'ı bir kez çalıştırın:
 
-    1. Yeni makineye OpenClaw kurun.
-    2. Eski makineden `$OPENCLAW_STATE_DIR` (varsayılan: `~/.openclaw`) kopyalayın.
-    3. Workspace'inizi kopyalayın (varsayılan: `~/.openclaw/workspace`).
-    4. `openclaw doctor` çalıştırın ve Gateway servisini yeniden başlatın.
+    1. OpenClaw'u yeni makineye kurun.
+    2. `$OPENCLAW_STATE_DIR` dizinini (varsayılan: `~/.openclaw`) eski makineden kopyalayın.
+    3. Çalışma alanınızı (varsayılan: `~/.openclaw/workspace`) kopyalayın.
+    4. `openclaw doctor` çalıştırın ve Gateway hizmetini yeniden başlatın.
 
-    Bu, yapılandırmayı, kimlik doğrulama profillerini, WhatsApp kimlik bilgilerini, oturumları ve memory'yi korur. Uzak
-    moddaysanız, session store ve workspace'in gateway host'una ait olduğunu unutmayın.
+    Bu işlem yapılandırmayı, kimlik doğrulama profillerini, WhatsApp kimlik bilgilerini, oturumları ve belleği korur;
+    **her iki** konumu da kopyaladığınız sürece botunuz tamamen aynı kalır. Uzak modda oturum deposunun ve
+    çalışma alanının sahibi Gateway ana makinesidir.
 
-    **Önemli:** yalnızca workspace'inizi GitHub'a commit/push ederseniz,
-    **memory + bootstrap dosyalarını** yedeklemiş olursunuz, ancak oturum geçmişini veya kimlik doğrulamayı **yedeklemiş olmazsınız**. Bunlar
-    `~/.openclaw/` altında yaşar (örneğin `~/.openclaw/agents/<agentId>/sessions/`).
+    **Önemli:** yalnızca çalışma alanınızı GitHub'a kaydedip gönderirseniz
+    **bellek + önyükleme dosyalarını** yedeklersiniz ancak oturum geçmişini veya kimlik doğrulama bilgilerini yedeklemezsiniz.
+    Bunlar `~/.openclaw/` altında bulunur (örneğin `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`).
 
-    İlgili: [Taşıma](/tr/install/migrating), [Diskte neler nerede bulunur](/tr/help/faq#where-things-live-on-disk),
-    [Agent workspace](/tr/concepts/agent-workspace), [Doctor](/tr/gateway/doctor),
+    İlgili konular: [Taşıma](/tr/install/migrating), [Dosyaların diskte bulunduğu yerler](/tr/help/faq#where-things-live-on-disk),
+    [Aracı çalışma alanı](/tr/concepts/agent-workspace), [Doctor](/tr/gateway/doctor),
     [Uzak mod](/tr/gateway/remote).
 
   </Accordion>
 
-  <Accordion title="En son sürümde nelerin yeni olduğunu nereden görürüm?">
-    GitHub changelog'unu kontrol edin:
+  <Accordion title="En son sürümdeki yenilikleri nerede görebilirim?">
+    GitHub değişiklik günlüğüne bakın:
     [https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md](https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md)
 
-    En yeni girdiler en üsttedir. En üstteki bölüm **Unreleased** olarak işaretlenmişse, bir sonraki tarihli
-    bölüm yayımlanmış en son sürümdür. Girdiler **Öne çıkanlar**, **Değişiklikler** ve
-    **Düzeltmeler** (gerektiğinde belgeler/diğer bölümlerle birlikte) altında gruplanır.
+    En yeni girdiler en üsttedir. En üstteki bölüm **Yayımlanmadı** ise sonraki tarihli
+    bölüm yayımlanmış en son sürümdür. Girdiler **Öne Çıkanlar**, **Değişiklikler**
+    ve **Düzeltmeler** altında gruplandırılır (gerektiğinde belgeler/diğer bölümler de bulunur).
 
   </Accordion>
 
-  <Accordion title="docs.openclaw.ai'ye erişilemiyor (SSL hatası)">
-    Bazı Comcast/Xfinity bağlantıları, Xfinity Advanced Security üzerinden `docs.openclaw.ai` adresini yanlışlıkla engeller.
-    Bunu devre dışı bırakın veya `docs.openclaw.ai` adresini allowlist'e ekleyin, ardından tekrar deneyin.
-    Engelini kaldırmamıza yardımcı olmak için lütfen burada bildirin: [https://spa.xfinity.com/check_url_status](https://spa.xfinity.com/check_url_status).
+  <Accordion title="docs.openclaw.ai adresine erişilemiyor (SSL hatası)">
+    Bazı Comcast/Xfinity bağlantıları, Xfinity Advanced Security aracılığıyla `docs.openclaw.ai` adresini
+    yanlışlıkla engeller. Bu özelliği devre dışı bırakın veya `docs.openclaw.ai` adresini izin verilenler
+    listesine ekleyip yeniden deneyin. Engelin kaldırılmasına yardımcı olun:
+    [https://spa.xfinity.com/check_url_status](https://spa.xfinity.com/check_url_status).
 
-    Siteye hâlâ erişemiyorsanız dokümanlar GitHub’da yansıtılmıştır:
+    Hâlâ engellendiniz mi? Belgeler GitHub'da yansıtılıyor:
     [https://github.com/openclaw/openclaw/tree/main/docs](https://github.com/openclaw/openclaw/tree/main/docs)
 
   </Accordion>
 
-  <Accordion title="Kararlı ve beta arasındaki fark">
-    **Kararlı** ve **beta**, ayrı kod hatları değil, **npm dist-tag** değerleridir:
+  <Accordion title="Kararlı sürüm ile beta arasındaki fark">
+    **Kararlı sürüm** ve **beta**, ayrı kod hatları değil, **npm dist-tag'leridir**:
 
-    - `latest` = kararlı
-    - `beta` = test için erken derleme
+    - `latest` = kararlı sürüm
+    - `beta` = test için erken derleme (beta yoksa veya mevcut kararlı sürümden eskiyse `latest` sürümüne geri döner)
 
-    Genellikle kararlı bir sürüm önce **beta** üzerine gelir, ardından açık bir
-    yükseltme adımı aynı sürümü `latest` konumuna taşır. Bakımcılar gerektiğinde
-    doğrudan `latest` üzerine de yayımlayabilir. Bu yüzden beta ve kararlı,
-    yükseltmeden sonra **aynı sürümü** gösterebilir.
+    Kararlı bir sürüm genellikle önce **beta** kanalına gelir, ardından açık bir yükseltme adımı
+    sürüm numarasını değiştirmeden aynı sürümü `latest` kanalına taşır. Bakım sorumluları
+    doğrudan `latest` kanalında da yayımlayabilir. Bu nedenle yükseltme sonrasında beta ve kararlı sürüm
+    **aynı sürümü** gösterebilir.
 
-    Nelerin değiştiğini görün:
-    [https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md](https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md)
+    Nelerin değiştiğine bakın: [CHANGELOG.md](https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md).
 
-    Kurulum tek satırlıkları ve beta ile dev arasındaki fark için aşağıdaki akordiyona bakın.
+    Tek satırlık kurulum komutları ve beta ile dev arasındaki fark için sonraki akordeona bakın.
 
   </Accordion>
 
-  <Accordion title="Beta sürümü nasıl kurarım ve beta ile dev arasındaki fark nedir?">
-    **Beta**, npm dist-tag değeri olan `beta`’dır (yükseltmeden sonra `latest` ile eşleşebilir).
-    **Dev**, `main` dalının hareketli başıdır (git); yayımlandığında npm dist-tag değeri olarak `dev` kullanır.
+  <Accordion title="Beta sürümünü nasıl kurarım ve beta ile dev arasındaki fark nedir?">
+    **Beta**, `beta` npm dist-tag'idir (yükseltme sonrasında `latest` ile eşleşebilir).
+    **Dev**, `main` dalının hareketli en güncel durumudur (git); npm'de yayımlandığında `dev` dist-tag'ini kullanır.
 
-    Tek satırlıklar (macOS/Linux):
+    Tek satırlık komutlar (macOS/Linux):
 
     ```bash
     curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --beta
@@ -291,33 +292,31 @@ x-i18n:
     curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
     ```
 
-    Windows yükleyicisi (PowerShell):
-    [https://openclaw.ai/install.ps1](https://openclaw.ai/install.ps1)
+    Windows yükleyicisi (PowerShell): `iwr -useb https://openclaw.ai/install.ps1 | iex`
 
-    Daha fazla ayrıntı: [Geliştirme kanalları](/tr/install/development-channels) ve [Yükleyici bayrakları](/tr/install/installer).
+    Ayrıntılı bilgi: [Geliştirme kanalları](/tr/install/development-channels) ve [Yükleyici bayrakları](/tr/install/installer).
 
   </Accordion>
 
-  <Accordion title="En son parçaları nasıl denerim?">
-    İki seçenek:
+  <Accordion title="En son bileşenleri nasıl deneyebilirim?">
+    İki seçenek vardır:
 
-    1. **Dev kanalı (git checkout):**
+    1. **Dev kanalı (mevcut kurulum):**
 
     ```bash
     openclaw update --channel dev
     ```
 
-    Bu, `main` dalına geçer ve kaynaktan günceller.
+    Bu işlem `main` dalının bir git çalışma kopyasına geçer, upstream üzerine rebase eder, derler ve
+    CLI'yi bu çalışma kopyasından kurar.
 
-    2. **Düzenlenebilir kurulum (yükleyici sitesinden):**
+    2. **Değiştirilebilir (git) kurulum (yeni makine):**
 
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
     ```
 
-    Bu size düzenleyebileceğiniz yerel bir repo verir; ardından git ile güncelleyebilirsiniz.
-
-    Temiz bir klonu elle tercih ediyorsanız şunu kullanın:
+    Manuel klonlamayı tercih edin:
 
     ```bash
     git clone https://github.com/openclaw/openclaw.git
@@ -326,94 +325,65 @@ x-i18n:
     pnpm build
     ```
 
-    Dokümanlar: [Güncelle](/tr/cli/update), [Geliştirme kanalları](/tr/install/development-channels),
-    [Kurulum](/tr/install).
+    Belgeler: [Güncelleme](/tr/cli/update), [Geliştirme kanalları](/tr/install/development-channels), [Kurulum](/tr/install).
 
   </Accordion>
 
   <Accordion title="Kurulum ve ilk yapılandırma genellikle ne kadar sürer?">
-    Yaklaşık rehber:
+    Yaklaşık süreler:
 
-    - **Kurulum:** 2-5 dakika
-    - **QuickStart ilk yapılandırma:** genellikle birkaç dakika
-    - **Tam ilk yapılandırma:** sağlayıcı oturum açma, kanal eşleştirme, daemon kurulumu,
-      ağ indirmeleri, skills veya isteğe bağlı plugins ek kurulum gerektirdiğinde daha uzun sürer
+    - **Kurulum:** 2-5 dakika.
+    - **QuickStart ilk yapılandırması:** birkaç dakika (geri döngü Gateway'i, otomatik token, varsayılan çalışma alanı).
+    - **Gelişmiş/tam ilk yapılandırma:** sağlayıcı oturumu açma, kanal eşleştirme, daemon kurulumu, ağ indirmeleri veya Skills ek kurulum gerektirdiğinde daha uzun sürer.
 
-    CLI sihirbazı bu zaman çizelgesini başta gösterir. İsteğe bağlı adımları atlayıp
-    daha sonra `openclaw configure` ile geri dönebilirsiniz.
+    Sihirbaz bu zaman çizelgesini baştan gösterir. İsteğe bağlı adımları atlayıp daha sonra
+    `openclaw configure` ile geri dönün.
 
-    Takılırsa [Yükleyici takıldı](#quick-start-and-first-run-setup)
-    ve [Takıldım](#quick-start-and-first-run-setup) bölümündeki hızlı hata ayıklama döngüsünü kullanın.
+    Takıldı mı? Yukarıdaki [Takıldım](#quick-start-and-first-run-setup) bölümüne bakın.
 
   </Accordion>
 
-  <Accordion title="Yükleyici takıldı mı? Nasıl daha fazla geri bildirim alırım?">
-    Yükleyiciyi **ayrıntılı çıktı** ile yeniden çalıştırın:
+  <Accordion title="Yükleyici takıldı mı? Nasıl daha fazla geri bildirim alabilirim?">
+    `--verbose` ile yeniden çalıştırın:
 
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --verbose
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --verbose
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --beta --verbose
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git --verbose
     ```
 
-    Ayrıntılı beta kurulumu:
-
-    ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --beta --verbose
-    ```
-
-    Düzenlenebilir (git) kurulum için:
-
-    ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git --verbose
-    ```
-
-    Windows (PowerShell) karşılığı:
-
-    ```powershell
-    # install.ps1 has no dedicated -Verbose flag yet.
-    Set-PSDebug -Trace 1
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
-    Set-PSDebug -Trace 0
-    ```
-
-    Daha fazla seçenek: [Yükleyici bayrakları](/tr/install/installer).
+    `install.ps1` için özel bir ayrıntılı çıktı anahtarı yoktur; bunun yerine onu `Set-PSDebug -Trace 1` /
+    `-Trace 0` içine alın. Bayrakların tam listesi: [Yükleyici bayrakları](/tr/install/installer).
 
   </Accordion>
 
   <Accordion title="Windows kurulumu git bulunamadı veya openclaw tanınmıyor diyor">
-    İki yaygın Windows sorunu:
+    Windows'ta sık karşılaşılan iki sorun:
 
-    **1) npm error spawn git / git bulunamadı**
+    **1) npm hatası: spawn git / git bulunamadı**
 
-    - **Git for Windows** kurun ve `git` komutunun PATH üzerinde olduğundan emin olun.
-    - PowerShell’i kapatıp yeniden açın, ardından yükleyiciyi tekrar çalıştırın.
+    - **Git for Windows** uygulamasını kurun ve `git` öğesinin PATH üzerinde olduğundan emin olun.
+    - PowerShell'i kapatıp yeniden açın, ardından yükleyiciyi yeniden çalıştırın.
 
-    **2) openclaw kurulumdan sonra tanınmıyor**
+    **2) Kurulumdan sonra openclaw tanınmıyor**
 
-    - npm global bin klasörünüz PATH üzerinde değil.
-    - Yolu kontrol edin:
+    - npm genel ikili dosya klasörünüz PATH üzerinde değil.
+    - Kontrol edin: `npm config get prefix`.
+    - Bu dizini kullanıcı PATH'inize ekleyin (`\bin` son eki gerekmez; çoğu sistemde `%AppData%\npm` konumundadır).
+    - PowerShell'i kapatıp yeniden açın.
 
-      ```powershell
-      npm config get prefix
-      ```
-
-    - Bu dizini kullanıcı PATH’inize ekleyin (Windows’ta `\bin` sonekine gerek yoktur; çoğu sistemde `%AppData%\npm` olur).
-    - PATH’i güncelledikten sonra PowerShell’i kapatıp yeniden açın.
-
-    Masaüstü kurulumu için yerel **Windows Hub** uygulamasını kullanın. Yalnızca terminal
-    kurulumu için PowerShell yükleyicisi ve WSL2 Gateway yolları desteklenir.
-    Dokümanlar: [Windows](/tr/platforms/windows).
+    Masaüstü uygulamasını mı tercih ediyorsunuz? **Windows Hub** kullanın. Yalnızca terminal kurulumu için hem PowerShell
+    yükleyicisi hem de WSL2 Gateway yolları desteklenir. Belgeler: [Windows](/tr/platforms/windows).
 
   </Accordion>
 
-  <Accordion title="Windows exec çıktısı bozuk Çince metin gösteriyor - ne yapmalıyım?">
-    Bu genellikle yerel Windows kabuklarında konsol kod sayfası uyumsuzluğudur.
+  <Accordion title="Windows exec çıktısında bozuk Çince metin görünüyor; ne yapmalıyım?">
+    Bu durum genellikle yerel Windows kabuklarındaki konsol kod sayfası uyuşmazlığından kaynaklanır.
 
-    Belirtiler:
+    Belirtiler: `system.run`/`exec` çıktısında Çince karakterler bozuk görünür; aynı komut
+    başka bir terminal profilinde düzgün görünür.
 
-    - `system.run`/`exec` çıktısı Çinceyi mojibake olarak işler
-    - Aynı komut başka bir terminal profilinde düzgün görünür
-
-    PowerShell’de hızlı geçici çözüm:
+    PowerShell'de geçici çözüm:
 
     ```powershell
     chcp 65001
@@ -422,159 +392,144 @@ x-i18n:
     $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
     ```
 
-    Ardından Gateway’i yeniden başlatın ve komutunuzu tekrar deneyin:
+    Ardından Gateway'i yeniden başlatıp tekrar deneyin:
 
     ```powershell
     openclaw gateway restart
     ```
 
-    Bunu en son OpenClaw’da hâlâ yeniden üretebiliyorsanız şurada takip edin/bildirin:
-
-    - [Issue #30640](https://github.com/openclaw/openclaw/issues/30640)
+    Bu sorun en son OpenClaw sürümünde hâlâ oluşuyor mu? Takip edin/bildirin: [Sorun #30640](https://github.com/openclaw/openclaw/issues/30640).
 
   </Accordion>
 
-  <Accordion title="Dokümanlar sorumu yanıtlamadı - nasıl daha iyi bir yanıt alırım?">
-    Tam kaynak ve dokümanlar yerelde olsun diye **düzenlenebilir (git) kurulumu** kullanın, ardından
-    botunuza (veya Claude/Codex’e) _o klasörden_ sorun; böylece repoyu okuyup kesin yanıt verebilir.
+  <Accordion title="Belgeler sorumu yanıtlamadı; nasıl daha iyi bir yanıt alabilirim?">
+    Tüm kaynak koduna ve belgelere yerel olarak sahip olmak için değiştirilebilir (git) kurulumu kullanın, ardından
+    botunuza (veya Claude/Codex'e) depoyu okuyup kesin yanıt verebilmesi için **o klasörden** sorun.
 
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
     ```
 
-    Daha fazla ayrıntı: [Kurulum](/tr/install) ve [Yükleyici bayrakları](/tr/install/installer).
+    Ayrıntılı bilgi: [Kurulum](/tr/install) ve [Yükleyici bayrakları](/tr/install/installer).
 
   </Accordion>
 
-  <Accordion title="OpenClaw’ı Linux’a nasıl kurarım?">
-    Kısa yanıt: Linux rehberini izleyin, ardından ilk yapılandırmayı çalıştırın.
-
-    - Linux hızlı yolu + servis kurulumu: [Linux](/tr/platforms/linux).
-    - Tam anlatım: [Başlarken](/tr/start/getting-started).
+  <Accordion title="OpenClaw'u Linux'a nasıl kurarım?">
+    - Linux hızlı yolu + hizmet kurulumu: [Linux](/tr/platforms/linux).
+    - Tam kılavuz: [Başlarken](/tr/start/getting-started).
     - Yükleyici + güncellemeler: [Kurulum ve güncellemeler](/tr/install/updating).
 
   </Accordion>
 
-  <Accordion title="OpenClaw’ı VPS üzerine nasıl kurarım?">
-    Herhangi bir Linux VPS çalışır. Sunucuya kurun, ardından Gateway’e erişmek için SSH/Tailscale kullanın.
+  <Accordion title="OpenClaw'u bir VPS'ye nasıl kurarım?">
+    Herhangi bir Linux VPS kullanılabilir. Sunucuya kurun, ardından Gateway'e SSH/Tailscale üzerinden erişin.
 
-    Rehberler: [exe.dev](/tr/install/exe-dev), [Hetzner](/tr/install/hetzner), [Fly.io](/tr/install/fly).
-    Uzaktan erişim: [Gateway uzaktan](/tr/gateway/remote).
+    Kılavuzlar: [exe.dev](/tr/install/exe-dev), [Hetzner](/tr/install/hetzner), [Fly.io](/tr/install/fly).
+    Uzaktan erişim: [Uzak Gateway](/tr/gateway/remote).
 
   </Accordion>
 
-  <Accordion title="Bulut/VPS kurulum rehberleri nerede?">
-    Yaygın sağlayıcıları içeren bir **barındırma merkezi** tutuyoruz. Birini seçip rehberi izleyin:
+  <Accordion title="Bulut/VPS kurulum kılavuzları nerede?">
+    Yaygın sağlayıcıların yer aldığı barındırma merkezi:
 
     - [VPS barındırma](/tr/vps) (tüm sağlayıcılar tek yerde)
     - [Fly.io](/tr/install/fly)
     - [Hetzner](/tr/install/hetzner)
     - [exe.dev](/tr/install/exe-dev)
 
-    Bulutta çalışma şekli: **Gateway sunucuda çalışır** ve ona
-    dizüstünüzden/telefonunuzdan Control UI (veya Tailscale/SSH) üzerinden erişirsiniz. Durumunuz + çalışma alanınız
-    sunucuda yaşar, bu yüzden ana makineyi doğruluk kaynağı olarak kabul edin ve yedekleyin.
+    Bulutta **Gateway sunucuda çalışır** ve dizüstü bilgisayarınızdan/telefonunuzdan ona
+    Control UI (veya Tailscale/SSH) üzerinden erişirsiniz. Durumunuz ve çalışma alanınız sunucuda bulunur; bu nedenle
+    ana makineyi doğruluk kaynağı olarak kabul edin ve yedekleyin.
 
-    Yerel ekran/kamera/canvas erişimi sağlamak veya Gateway’i bulutta tutarken
-    dizüstünüzde komutlar çalıştırmak için bu bulut Gateway’e **düğümler**
-    (Mac/iOS/Android/headless) eşleyebilirsiniz.
+    Gateway bulutta kalırken dizüstü bilgisayarınızda yerel
+    ekran/kamera/canvas veya komut yürütme için **Node'ları** (Mac/iOS/Android/headless) bu bulut Gateway'iyle eşleştirin.
 
-    Merkez: [Platformlar](/tr/platforms). Uzaktan erişim: [Gateway uzaktan](/tr/gateway/remote).
-    Düğümler: [Düğümler](/tr/nodes), [Düğümler CLI](/tr/cli/nodes).
+    Merkez: [Platformlar](/tr/platforms). Uzaktan erişim: [Uzak Gateway](/tr/gateway/remote).
+    Node'lar: [Node'lar](/tr/nodes), [Node CLI](/tr/cli/nodes).
 
   </Accordion>
 
-  <Accordion title="OpenClaw’dan kendini güncellemesini isteyebilir miyim?">
-    Kısa yanıt: **mümkün, önerilmez**. Güncelleme akışı Gateway’i yeniden
-    başlatabilir (bu da etkin oturumu düşürür), temiz bir git checkout gerektirebilir ve
-    onay isteyebilir. Daha güvenlisi: güncellemeleri operatör olarak bir kabuktan çalıştırın.
-
-    CLI kullanın:
+  <Accordion title="OpenClaw'dan kendisini güncellemesini isteyebilir miyim?">
+    Mümkündür ancak önerilmez. Güncelleme akışı Gateway'i yeniden başlatabilir (etkin
+    oturumu sonlandırır), temiz bir git çalışma kopyası gerektirebilir ve onay isteyebilir.
+    Güncellemeleri operatör olarak bir kabuktan çalıştırmak daha güvenlidir.
 
     ```bash
     openclaw update
     openclaw update status
-    openclaw update --channel stable|beta|dev
+    openclaw update --channel stable|extended-stable|beta|dev
     openclaw update --tag <dist-tag|version>
     openclaw update --no-restart
     ```
 
-    Bir ajandan otomasyon yapmanız gerekiyorsa:
+    Bir agent üzerinden otomatikleştirme:
 
     ```bash
     openclaw update --yes --no-restart
     openclaw gateway restart
     ```
 
-    Dokümanlar: [Güncelle](/tr/cli/update), [Güncelleme](/tr/install/updating).
+    Belgeler: [Güncelleme](/tr/cli/update), [Güncelleme](/tr/install/updating).
 
   </Accordion>
 
   <Accordion title="İlk yapılandırma gerçekte ne yapar?">
-    `openclaw onboard` önerilen kurulum yoludur. **Yerel modda** size şunlarda rehberlik eder:
+    `openclaw onboard` önerilen kurulum yoludur. **Yerel modda** şu adımları uygular:
 
-    - **Model/kimlik doğrulama kurulumu** (sağlayıcı OAuth, API anahtarları, Anthropic setup-token, ayrıca LM Studio gibi yerel model seçenekleri)
-    - **Çalışma alanı** konumu + bootstrap dosyaları
-    - **Gateway ayarları** (bind/port/auth/tailscale)
-    - **Kanallar** (WhatsApp, Telegram, Discord, Mattermost, Signal, iMessage, ayrıca QQ Bot gibi paketli kanal plugins)
-    - **Daemon kurulumu** (macOS’ta LaunchAgent; Linux/WSL2’de systemd kullanıcı birimi)
-    - **Sağlık kontrolleri** ve **skills** seçimi
+    1. **Model/Kimlik doğrulama** - sağlayıcı OAuth'ı, API anahtarları veya manuel kimlik doğrulama (LM Studio gibi yerel seçenekler dâhil); varsayılan modeli seçer.
+    2. **Çalışma alanı** - konum + başlangıç dosyaları.
+    3. **Gateway** - bağlantı noktası, bağlama adresi, kimlik doğrulama modu, Tailscale üzerinden erişim.
+    4. **Kanallar** - yerleşik ve resmî Plugin sohbet kanalları: iMessage, Discord, Feishu, Google Chat, Mattermost, Microsoft Teams, QQ Bot, Signal, Slack, Telegram, WhatsApp ve diğerleri.
+    5. **Daemon** - LaunchAgent (macOS), systemd kullanıcı birimi (Linux/WSL2) veya yerel Windows Scheduled Task.
+    6. **Sistem durumu denetimi** - Gateway'i başlatır ve çalıştığını doğrular.
+    7. **Skills** - önerilen becerileri ve isteğe bağlı bağımlılıkları kurar.
 
-    Ayrıca ana istemler başlamadan önce süre beklentilerini belirler ve yapılandırılmış
-    modeliniz bilinmiyorsa veya kimlik doğrulaması eksikse uyarır.
+    Süre beklentilerini baştan belirler ve yapılandırılmış modeliniz bilinmiyorsa
+    veya kimlik doğrulaması eksikse uyarır. Tam açıklama: [İlk yapılandırma (CLI)](/tr/start/wizard).
 
   </Accordion>
 
   <Accordion title="Bunu çalıştırmak için Claude veya OpenAI aboneliğine ihtiyacım var mı?">
-    Hayır. OpenClaw’ı **API anahtarları** (Anthropic/OpenAI/diğerleri) ile veya
-    verileriniz cihazınızda kalsın diye **yalnızca yerel modellerle** çalıştırabilirsiniz. Abonelikler (Claude
-    Pro/Max veya OpenAI Codex), bu sağlayıcılarda kimlik doğrulamak için isteğe bağlı yollardır.
+    Hayır. Verilerinizin cihazınızda kalması için OpenClaw'u **API anahtarlarıyla**
+    (Anthropic/OpenAI/diğerleri) veya **yalnızca yerel modellerle** çalıştırın. Abonelikler
+    (Claude Pro/Max, ChatGPT/Codex), bu sağlayıcılarda kimlik doğrulaması için isteğe bağlı yöntemlerdir.
 
-    OpenClaw’da Anthropic için pratik ayrım şöyledir:
+    Anthropic için: Bir **API anahtarı**, standart kullandıkça öde faturalandırması sağlar; **Claude CLI**
+    aynı ana makinedeki mevcut Claude Code oturumunu yeniden kullanır. Anthropic şu anda
+    Claude CLI'nin etkileşimsiz `claude -p` yolunu, aboneliğinizin plan sınırlarını
+    kullanmaya devam eden Agent SDK/programatik kullanım olarak değerlendirir; abonelik davranışına
+    güvenmeden önce güncel Anthropic faturalandırma belgelerini kontrol edin. Uzun süreli Gateway ana makineleri ve paylaşılan
+    otomasyon için Anthropic API anahtarı daha öngörülebilir bir seçimdir.
 
-    - **Anthropic API anahtarı**: normal Anthropic API faturalandırması
-    - **OpenClaw’da Claude CLI / Claude abonelik kimlik doğrulaması**: Anthropic çalışanları
-      bize bu kullanımın yeniden izinli olduğunu söyledi ve OpenClaw, Anthropic yeni bir
-      politika yayımlamadığı sürece `claude -p`
-      kullanımını bu entegrasyon için onaylı kabul ediyor
+    OpenAI Codex OAuth (ChatGPT/Codex aboneliği), agent modelleri için tamamen desteklenir.
+    OpenClaw ayrıca **Qwen Cloud Coding Plan**, **MiniMax Coding Plan**
+    ve **Z.AI / GLM Coding Plan** dâhil barındırılan abonelik tarzı seçenekleri destekler.
 
-    Uzun ömürlü gateway ana makineleri için Anthropic API anahtarları hâlâ daha
-    öngörülebilir kurulumdur. OpenAI Codex OAuth, OpenClaw gibi harici
-    araçlar için açıkça desteklenir.
-
-    OpenClaw ayrıca **Qwen Cloud Coding Plan**, **MiniMax Coding Plan** ve
-    **Z.AI / GLM Coding Plan** dahil başka barındırılan abonelik tarzı seçenekleri de destekler.
-
-    Dokümanlar: [Anthropic](/tr/providers/anthropic), [OpenAI](/tr/providers/openai),
-    [Qwen Cloud](/tr/providers/qwen),
-    [MiniMax](/tr/providers/minimax), [Z.AI (GLM)](/tr/providers/zai),
+    Belgeler: [Anthropic](/tr/providers/anthropic), [OpenAI](/tr/providers/openai),
+    [Qwen Cloud](/tr/providers/qwen), [MiniMax](/tr/providers/minimax), [Z.AI (GLM)](/tr/providers/zai),
     [Yerel modeller](/tr/gateway/local-models), [Modeller](/tr/concepts/models).
 
   </Accordion>
 
   <Accordion title="API anahtarı olmadan Claude Max aboneliğini kullanabilir miyim?">
-    Evet.
-
-    Anthropic çalışanları bize OpenClaw tarzı Claude CLI kullanımına yeniden izin verildiğini söyledi, bu yüzden
-    OpenClaw, Anthropic yeni bir politika yayımlamadığı sürece Claude abonelik kimlik doğrulamasını ve `claude -p` kullanımını
-    bu entegrasyon için onaylı kabul eder. En öngörülebilir sunucu tarafı kurulumu istiyorsanız bunun yerine
-    bir Anthropic API anahtarı kullanın.
-
+    Evet. OpenClaw, Pro/Max/Team/Enterprise planlarında Claude CLI'nin yeniden kullanılmasını destekler. Anthropic
+    şu anda OpenClaw'un kullandığı `claude -p` yolunu, ayrı bir ücretsiz kullanım hakkı olarak değil,
+    planınızın sınırlarına tabi abonelik planı kullanımı olarak değerlendirir; güncel faturalandırma ayrıntıları ve
+    Anthropic'in kendi destek makalelerine bağlantılar için [Anthropic](/tr/providers/anthropic) sayfasına bakın.
+    En öngörülebilir sunucu tarafı kurulumu için bunun yerine Anthropic API anahtarı kullanın.
   </Accordion>
 
-  <Accordion title="Claude abonelik kimlik doğrulamasını destekliyor musunuz (Claude Pro veya Max)?">
-    Evet.
+  <Accordion title="Claude aboneliğiyle kimlik doğrulamayı (Claude Pro veya Max) destekliyor musunuz?">
+    Evet, Claude CLI'nin yeniden kullanılması yoluyla. Anthropic'in `claude -p`/Agent SDK kullanımına yönelik faturalandırma yaklaşımı
+    zaman içinde değişmiştir; belirli bir faturalandırma davranışına güvenmeden önce güncel durum ve
+    Anthropic'in destek makalelerine giden tarihli bağlantılar için [Anthropic](/tr/providers/anthropic) sayfasına
+    bakın.
 
-    Anthropic çalışanları bize bu kullanımın yeniden izinli olduğunu söyledi, bu yüzden OpenClaw,
-    Anthropic yeni bir politika yayımlamadığı sürece Claude CLI yeniden kullanımını ve `claude -p` kullanımını
-    bu entegrasyon için onaylı kabul eder.
-
-    Anthropic setup-token hâlâ desteklenen bir OpenClaw token yolu olarak kullanılabilir, ancak OpenClaw artık mevcut olduğunda Claude CLI yeniden kullanımını ve `claude -p` yolunu tercih eder.
-    Üretim veya çok kullanıcılı iş yükleri için Anthropic API anahtarı kimlik doğrulaması hâlâ
-    daha güvenli ve daha öngörülebilir seçimdir. OpenClaw’da başka abonelik tarzı barındırılan
-    seçenekler istiyorsanız [OpenAI](/tr/providers/openai), [Qwen / Model
-    Cloud](/tr/providers/qwen), [MiniMax](/tr/providers/minimax) ve [GLM
-    Modelleri](/tr/providers/zai) sayfalarına bakın.
+    Anthropic setup-token kimlik doğrulaması da hâlâ desteklenen bir token yoludur, ancak OpenClaw kullanılabilir olduğunda
+    Claude CLI'ın yeniden kullanılmasını ve `claude -p` tercih eder. Üretim veya çok kullanıcılı
+    iş yükleri için Anthropic API anahtarı daha güvenli ve daha öngörülebilir seçenek olmaya devam eder. Diğer
+    abonelik tarzı barındırılan seçenekler: [OpenAI](/tr/providers/openai), [Qwen Cloud](/tr/providers/qwen),
+    [MiniMax](/tr/providers/minimax), [Z.AI (GLM)](/tr/providers/zai).
 
   </Accordion>
 
@@ -582,156 +537,185 @@ x-i18n:
 
 <a id="why-am-i-seeing-http-429-ratelimiterror-from-anthropic"></a>
 
-  <AccordionGroup>
+<AccordionGroup>
   <Accordion title="Anthropic'ten neden HTTP 429 rate_limit_error görüyorum?">
-    Bu, geçerli pencere için **Anthropic kota/hız sınırınızın** tükendiği anlamına gelir. **Claude CLI** kullanıyorsanız pencerenin sıfırlanmasını bekleyin veya planınızı yükseltin. **Anthropic API anahtarı** kullanıyorsanız kullanım/faturalandırma için Anthropic Console'u kontrol edin ve gerektiğinde sınırları artırın.
+    Geçerli dönem için **Anthropic kotanız/hız sınırınız** tükenmiştir. **Claude
+    CLI** kullanıyorsanız dönemin sıfırlanmasını bekleyin veya planınızı yükseltin. **Anthropic API anahtarı** kullanıyorsanız
+    Anthropic Console'da kullanımı/faturalandırmayı kontrol edin ve gerektiğinde sınırları yükseltin.
 
-    Mesaj özellikle şuysa:
-    `Extra usage is required for long context requests`, istek Anthropic'in 1M bağlam penceresini kullanmaya çalışıyordur (GA destekli 1M Claude 4.x modeli veya eski `context1m: true` yapılandırması). Bu yalnızca kimlik bilginiz uzun bağlam faturalandırmasına uygunsa çalışır (API anahtarı faturalandırması veya Extra Usage etkin OpenClaw Claude giriş yolu).
+    İleti özellikle `Extra usage is required for long context requests` ise
+    istek Anthropic'in 1M bağlam penceresini (genel kullanıma sunulabilen 1M Claude 4.x
+    modeli veya eski `params.context1m: true` yapılandırması) kullanmaya çalışıyordur ve mevcut kimlik bilginiz
+    uzun bağlam faturalandırmasına uygun değildir.
 
-    İpucu: OpenClaw'ın bir sağlayıcı hız sınırına takıldığında yanıt vermeyi sürdürebilmesi için bir **yedek model** ayarlayın.
+    Bir sağlayıcının hız sınırına ulaşıldığında OpenClaw'ın yanıt vermeye devam etmesi için bir **yedek model** ayarlayın.
     Bkz. [Modeller](/tr/cli/models), [OAuth](/tr/concepts/oauth) ve
-    [/gateway/troubleshooting#anthropic-429-extra-usage-required-for-long-context](/tr/gateway/troubleshooting#anthropic-429-extra-usage-required-for-long-context).
+    [Uzun bağlam için Anthropic 429 ek kullanım gereksinimi](/tr/gateway/troubleshooting#anthropic-429-extra-usage-required-for-long-context).
 
   </Accordion>
 
   <Accordion title="AWS Bedrock destekleniyor mu?">
-    Evet. OpenClaw paketlenmiş bir **Amazon Bedrock (Converse)** sağlayıcısına sahiptir. AWS ortam işaretleri mevcut olduğunda OpenClaw, akış/metin Bedrock kataloğunu otomatik keşfedip örtük bir `amazon-bedrock` sağlayıcısı olarak birleştirebilir; aksi halde `plugins.entries.amazon-bedrock.config.discovery.enabled` ayarını açıkça etkinleştirebilir veya manuel bir sağlayıcı girdisi ekleyebilirsiniz. Bkz. [Amazon Bedrock](/tr/providers/bedrock) ve [Model sağlayıcıları](/tr/providers/models). Yönetilen bir anahtar akışını tercih ediyorsanız Bedrock önünde OpenAI uyumlu bir proxy hâlâ geçerli bir seçenektir.
+    Evet. OpenClaw, paketle birlikte gelen bir **Amazon Bedrock (Converse)** sağlayıcısına sahiptir. AWS ortam
+    işaretçileri mevcutsa (`AWS_ACCESS_KEY_ID`, `AWS_PROFILE`, `AWS_BEARER_TOKEN_BEDROCK`),
+    OpenClaw model keşfi için örtük Bedrock sağlayıcısını otomatik olarak etkinleştirir; aksi takdirde
+    `plugins.entries.amazon-bedrock.config.discovery.enabled: true` ayarlayın veya elle bir
+    sağlayıcı girdisi ekleyin. Bkz. [Amazon Bedrock](/tr/providers/bedrock) ve [Model sağlayıcıları](/tr/providers/models).
+    Yönetilen bir anahtar akışını tercih ediyorsanız Bedrock'ın önündeki OpenAI uyumlu bir proxy de geçerli bir seçenektir.
   </Accordion>
 
   <Accordion title="Codex kimlik doğrulaması nasıl çalışır?">
-    OpenClaw, OAuth (ChatGPT oturum açma) üzerinden **OpenAI Code (Codex)** destekler. Yaygın kurulum için `openai/gpt-5.5` kullanın: ChatGPT/Codex abonelik kimlik doğrulaması artı yerel Codex uygulama sunucusu yürütmesi. Eski Codex GPT başvuruları, `openclaw doctor --fix` tarafından onarılan eski yapılandırmadır. Doğrudan OpenAI API anahtarı erişimi, ajan olmayan OpenAI API yüzeyleri ve sıralı bir `openai` API anahtarı profili üzerinden ajan modelleri için kullanılabilir kalır.
-    Bkz. [Model sağlayıcıları](/tr/concepts/model-providers) ve [İlk kurulum (CLI)](/tr/start/wizard).
+    OpenClaw, OAuth (ChatGPT oturum açma) üzerinden **OpenAI Codex** desteği sunar. Birincil
+    modeli olmayan yeni bir kurulum, ChatGPT/Codex abonelik kimlik doğrulaması ve yerel Codex
+    app-server yürütmesi için tam olarak `openai/gpt-5.6-sol` kullanır.
+    Yeniden kimlik doğrulama, `openai/gpt-5.5` dâhil olmak üzere açıkça belirtilmiş mevcut modeli korur.
+    Codex çalışma alanı GPT-5.6'yı sunmuyorsa
+    açıkça `openai/gpt-5.5` seçin; OpenClaw sessizce daha düşük bir sürüme geçmez. Eski
+    Codex ön ekli model başvuruları, `openclaw doctor
+    --fix` tarafından onarılan eski yapılandırmadır. Doğrudan OpenAI API anahtarıyla erişim, ajan dışı OpenAI
+    API yüzeyleri için ve sıralı bir `openai` API anahtarı profili aracılığıyla ajan
+    modelleri için de kullanılabilir. Bkz. [Model sağlayıcıları](/tr/concepts/model-providers) ve
+    [İlk kurulum (CLI)](/tr/start/wizard).
   </Accordion>
 
-  <Accordion title="OpenClaw neden hâlâ eski OpenAI Codex önekinden bahsediyor?">
-    `openai`, hem OpenAI API anahtarları hem de ChatGPT/Codex OAuth için sağlayıcı ve kimlik doğrulama profili kimliğidir. Eski yapılandırmada ve geçiş uyarılarında hâlâ eski OpenAI Codex önekini görebilirsiniz.
-    Daha eski yapılandırmalar bunu model öneki olarak da kullanıyordu:
+  <Accordion title="OpenClaw neden hâlâ eski OpenAI Codex ön ekinden söz ediyor?">
+    `openai`, hem OpenAI API anahtarları hem de
+    ChatGPT/Codex OAuth için geçerli sağlayıcı ve kimlik doğrulama profili kimliğidir; OpenAI Codex bununla birleştirilmiştir. Eski yapılandırmalarda ve geçiş uyarılarında hâlâ eski bir
+    `openai-codex` ön eki görebilirsiniz:
 
-    - `openai/gpt-5.5` = ajan dönüşleri için yerel Codex runtime ile ChatGPT/Codex abonelik kimlik doğrulaması
-    - eski Codex GPT-5.5 ref = `openclaw doctor --fix` tarafından onarılan eski model rotası
-    - `openai/gpt-5.5` artı sıralı bir `openai` API anahtarı profili = bir OpenAI ajan modeli için API anahtarı kimlik doğrulaması
-    - eski Codex kimlik doğrulama profili kimlikleri = `openclaw doctor --fix` tarafından taşınan eski kimlik doğrulama profili kimliği
+    - `openai/gpt-5.6-sol` = ajan turları için yerel Codex çalışma zamanı kullanan yeni ChatGPT/Codex abonelik kurulumu.
+    - `openai/gpt-5.5` = mevcut yapılandırma veya GPT-5.6 erişimi olmayan hesaplar için açıkça desteklenen seçim.
+    - Eski `openai-codex/*` model başvuruları = `openclaw doctor --fix` tarafından onarılan eski rota.
+    - `openai/gpt-5.5` ve sıralı bir `openai` API anahtarı profili = bir OpenAI ajan modeli için API anahtarı kimlik doğrulaması.
+    - Eski `openai-codex` kimlik doğrulama profili kimlikleri = `openclaw doctor --fix` tarafından taşınan eski kimlikler.
 
-    Doğrudan OpenAI Platform faturalandırma/sınır yolunu istiyorsanız `OPENAI_API_KEY` ayarlayın. ChatGPT/Codex abonelik kimlik doğrulaması istiyorsanız `openclaw models auth login --provider openai` ile oturum açın. Model ref değerini `openai/gpt-5.5` olarak tutun; eski Codex model ref değerleri, `openclaw doctor --fix` tarafından yeniden yazılan eski yapılandırmadır.
+    Doğrudan OpenAI Platform faturalandırması mı istiyorsunuz? `OPENAI_API_KEY` ayarlayın. ChatGPT/Codex
+    abonelik kimlik doğrulaması mı istiyorsunuz? `openclaw models auth login --provider openai` çalıştırın. Model
+    başvurularını standart `openai/*` sağlayıcısı altında tutun. Yeni abonelik
+    kurulumu tam olarak `openai/gpt-5.6-sol` kullanır; doctor, açıkça belirtilmiş bir `openai/gpt-5.5` seçimini
+    yükseltmeden eski Codex ön ekli başvuruları onarır.
 
   </Accordion>
 
   <Accordion title="Codex OAuth sınırları neden ChatGPT web'den farklı olabilir?">
-    Codex OAuth, OpenAI tarafından yönetilen, plana bağlı kota pencereleri kullanır. Pratikte bu sınırlar, ikisi de aynı hesaba bağlı olsa bile ChatGPT web sitesi/uygulama deneyiminden farklı olabilir.
+    Codex OAuth, aynı hesapta bile ChatGPT web sitesi/uygulaması deneyiminden farklı olabilen,
+    OpenAI tarafından yönetilen ve plana bağlı kota dönemlerini kullanır.
 
-    OpenClaw, o anda görünen sağlayıcı kullanım/kota pencerelerini `openclaw models status` içinde gösterebilir, ancak ChatGPT web haklarını doğrudan API erişimine uydurmaz veya normalleştirmez. Doğrudan OpenAI Platform faturalandırma/sınır yolunu istiyorsanız bir API anahtarıyla `openai/*` kullanın.
+    `openclaw models status`, o anda görülebilen sağlayıcı kullanım/kota dönemlerini gösterir ancak
+    ChatGPT web haklarını doğrudan API erişimine dönüştürmez veya normalleştirmez. Doğrudan
+    OpenAI Platform faturalandırma/sınır yolu için API anahtarıyla `openai/*` kullanın.
 
   </Accordion>
 
   <Accordion title="OpenAI abonelik kimlik doğrulamasını (Codex OAuth) destekliyor musunuz?">
-    Evet. OpenClaw, **OpenAI Code (Codex) abonelik OAuth** desteğini tam olarak sunar.
-    OpenAI, OpenClaw gibi harici araçlarda/iş akışlarında abonelik OAuth kullanımına açıkça izin verir. İlk kurulum OAuth akışını sizin için çalıştırabilir.
+    Evet, tamamen desteklenir. OpenAI, OpenClaw gibi harici
+    araçlarda/iş akışlarında abonelik OAuth kullanımına açıkça izin verir. İlk kurulum, OAuth akışını sizin için çalıştırabilir.
 
     Bkz. [OAuth](/tr/concepts/oauth), [Model sağlayıcıları](/tr/concepts/model-providers) ve [İlk kurulum (CLI)](/tr/start/wizard).
 
   </Accordion>
 
-  <Accordion title="Gemini CLI OAuth'u nasıl kurarım?">
-    Gemini CLI, `openclaw.json` içinde bir istemci kimliği veya gizli anahtar değil, bir **Plugin kimlik doğrulama akışı** kullanır.
+  <Accordion title="Gemini CLI OAuth'ı nasıl ayarlarım?">
+    Gemini CLI, `openclaw.json` içindeki bir istemci kimliği veya gizli anahtar yerine **Plugin kimlik doğrulama akışı** kullanır.
 
-    Adımlar:
-
-    1. Gemini CLI'yi yerel olarak kurun, böylece `gemini` `PATH` üzerinde olur
+    1. `gemini` öğesinin `PATH` üzerinde olması için Gemini CLI'ı yerel olarak kurun:
        - Homebrew: `brew install gemini-cli`
        - npm: `npm install -g @google/gemini-cli`
     2. Plugin'i etkinleştirin: `openclaw plugins enable google`
     3. Oturum açın: `openclaw models auth login --provider google-gemini-cli --set-default`
-    4. Oturum açtıktan sonraki varsayılan model: `google-gemini-cli/gemini-3-flash-preview`
-    5. İstekler başarısız olursa Gateway ana makinesinde `GOOGLE_CLOUD_PROJECT` veya `GOOGLE_CLOUD_PROJECT_ID` ayarlayın
+    4. Oturum açtıktan sonraki varsayılan model: `google/gemini-3.1-pro-preview` (çalışma zamanı `google-gemini-cli`)
+    5. Oturum açtıktan sonra istekler başarısız mı oluyor? Gateway ana makinesinde `GOOGLE_CLOUD_PROJECT` veya `GOOGLE_CLOUD_PROJECT_ID` ayarlayıp yeniden deneyin.
 
-    Bu, OAuth token'larını Gateway ana makinesindeki kimlik doğrulama profillerinde saklar. Ayrıntılar: [Model sağlayıcıları](/tr/concepts/model-providers).
+    OAuth token'ları Gateway ana makinesindeki kimlik doğrulama profillerinde saklanır. Ayrıntılar: [Google](/tr/providers/google), [Model sağlayıcıları](/tr/concepts/model-providers).
 
   </Accordion>
 
-  <Accordion title="Gündelik sohbetler için yerel model uygun mu?">
-    Genellikle hayır. OpenClaw büyük bağlam + güçlü güvenlik gerektirir; küçük kartlar kırpar ve sızıntı yapar. Mecbursanız yerel olarak çalıştırabileceğiniz **en büyük** model derlemesini çalıştırın (LM Studio) ve bkz. [/gateway/local-models](/tr/gateway/local-models). Daha küçük/nicelenmiş modeller prompt injection riskini artırır - bkz. [Güvenlik](/tr/gateway/security).
+  <Accordion title="Yerel bir model gündelik sohbetler için uygun mu?">
+    Genellikle hayır. OpenClaw geniş bağlam ve güçlü güvenlik gerektirir; küçük kartlar bağlamı
+    keser ve sağlayıcı tarafındaki güvenlik filtrelerini atlar. Kullanmanız gerekiyorsa yerel olarak çalıştırabileceğiniz **en büyük**
+    model derlemesini (LM Studio) çalıştırın; bkz. [Yerel modeller](/tr/gateway/local-models). Daha küçük/nicelenmiş
+    modeller istem enjeksiyonu riskini artırır; bkz. [Güvenlik](/tr/gateway/security).
   </Accordion>
 
   <Accordion title="Barındırılan model trafiğini belirli bir bölgede nasıl tutarım?">
-    Bölgeye sabitlenmiş uç noktaları seçin. OpenRouter, MiniMax, Kimi ve GLM için ABD'de barındırılan seçenekler sunar; verileri bölgede tutmak için ABD'de barındırılan varyantı seçin. Seçtiğiniz bölgesel sağlayıcıya saygı gösterirken yedeklerin kullanılabilir kalması için `models.mode: "merge"` kullanarak Anthropic/OpenAI modellerini bunların yanında listeleyebilirsiniz.
+    Bölgeye sabitlenmiş uç noktaları seçin. OpenRouter, MiniMax, Kimi
+    ve GLM için ABD'de barındırılan seçenekler sunar; verileri bölge içinde tutmak için ABD'de barındırılan çeşidi seçin. Seçtiğiniz bölgesel sağlayıcıya
+    uymaya devam ederken yedeklerin kullanılabilir kalması için bunların yanında `models.mode: "merge"` ile
+    Anthropic/OpenAI'ı listelemeye devam edebilirsiniz.
   </Accordion>
 
-  <Accordion title="Bunu kurmak için Mac Mini satın almam gerekir mi?">
-    Hayır. OpenClaw macOS veya Linux üzerinde çalışır (Windows, WSL2 üzerinden). Mac mini isteğe bağlıdır - bazı kişiler her zaman açık bir ana makine olarak bir tane satın alır, ancak küçük bir VPS, ev sunucusu veya Raspberry Pi sınıfı bir kutu da çalışır.
+  <Accordion title="Bunu kurmak için Mac Mini satın almam gerekiyor mu?">
+    Hayır. OpenClaw macOS veya Linux'ta çalışır (Windows'ta WSL2 üzerinden). Mac mini popüler bir
+    sürekli açık ana makine seçeneğidir ancak küçük bir VPS, ev sunucusu veya Raspberry Pi sınıfı cihaz da kullanılabilir.
 
-    Yalnızca **macOS'a özel araçlar** için Mac gerekir. iMessage için, Messages'a giriş yapılmış herhangi bir Mac'te `imsg` ile [iMessage](/tr/channels/imessage) kullanın. Gateway Linux üzerinde veya başka bir yerde çalışıyorsa `channels.imessage.cliPath` değerini o Mac'te `imsg` çalıştıran bir SSH sarmalayıcısına ayarlayın. Başka macOS'a özel araçlar istiyorsanız Gateway'i bir Mac'te çalıştırın veya bir macOS node eşleştirin.
+    Yalnızca **macOS'e özgü araçlar için** bir Mac gerekir. iMessage için Messages oturumu açık herhangi bir Mac'te
+    `imsg` ile [iMessage](/tr/channels/imessage) kullanın; Gateway Linux'ta veya başka bir yerde çalışıyorsa
+    `channels.imessage.cliPath` değerini, o Mac'te `imsg` çalıştıran bir SSH sarmalayıcısına ayarlayın. Diğer
+    macOS'e özgü araçlar için Gateway'i bir Mac'te çalıştırın veya bir macOS Node'u eşleştirin.
 
-    Dokümanlar: [iMessage](/tr/channels/imessage), [Node'lar](/tr/nodes), [Mac uzak modu](/tr/platforms/mac/remote).
+    Belgeler: [iMessage](/tr/channels/imessage), [Node'lar](/tr/nodes), [Mac uzak modu](/tr/platforms/mac/remote).
 
   </Accordion>
 
-  <Accordion title="iMessage desteği için Mac mini gerekir mi?">
-    Messages'a giriş yapılmış **bir macOS cihazına** ihtiyacınız vardır. Bunun Mac mini olması **gerekmez** -
-    herhangi bir Mac çalışır. **`imsg` ile [iMessage](/tr/channels/imessage) kullanın**; Gateway o Mac'te çalışabilir veya bir SSH sarmalayıcısı `cliPath` ile başka bir yerde çalışabilir.
+  <Accordion title="iMessage desteği için Mac mini gerekiyor mu?">
+    Messages oturumu açık **herhangi bir macOS cihazı** gerekir; bunun Mac mini olması gerekmez, herhangi bir
+    Mac kullanılabilir. `imsg` ile [iMessage](/tr/channels/imessage) kullanın; Gateway bu
+    Mac'te veya başka bir yerde `cliPath` SSH sarmalayıcısıyla çalışabilir.
 
     Yaygın kurulumlar:
 
-    - Gateway'i Linux/VPS üzerinde çalıştırın ve `channels.imessage.cliPath` değerini Messages'a giriş yapılmış bir Mac'te `imsg` çalıştıran bir SSH sarmalayıcısına ayarlayın.
-    - En basit tek makine kurulumunu istiyorsanız her şeyi Mac üzerinde çalıştırın.
+    - Gateway Linux/VPS üzerinde; `channels.imessage.cliPath`, Messages oturumu açık bir Mac'te `imsg` çalıştıran SSH sarmalayıcısına ayarlanır.
+    - En basit tek makineli kurulum için her şey tek bir Mac'te çalışır.
 
-    Dokümanlar: [iMessage](/tr/channels/imessage), [Node'lar](/tr/nodes),
-    [Mac uzak modu](/tr/platforms/mac/remote).
+    Belgeler: [iMessage](/tr/channels/imessage), [Node'lar](/tr/nodes), [Mac uzak modu](/tr/platforms/mac/remote).
 
   </Accordion>
 
-  <Accordion title="OpenClaw çalıştırmak için Mac mini alırsam onu MacBook Pro'ma bağlayabilir miyim?">
-    Evet. **Mac mini Gateway'i çalıştırabilir** ve MacBook Pro'nuz bir **node** (yardımcı cihaz) olarak bağlanabilir. Node'lar Gateway çalıştırmaz - o cihazda ekran/kamera/tuval ve `system.run` gibi ek yetenekler sağlar.
+  <Accordion title="OpenClaw'ı çalıştırmak için Mac mini satın alırsam onu MacBook Pro'ma bağlayabilir miyim?">
+    Evet. **Mac mini Gateway'i çalıştırabilir**, MacBook Pro'nuz ise bir **Node**
+    (yardımcı cihaz) olarak bağlanır. Node'lar Gateway'i çalıştırmaz; bu cihazda
+    ekran/kamera/canvas ve `system.run` gibi yetenekler ekler.
 
-    Yaygın desen:
+    Yaygın düzen: Gateway sürekli açık Mac mini'de çalışır; MacBook Pro macOS uygulamasını veya bir
+    Node ana makinesini çalıştırır ve Gateway ile eşleşir. `openclaw nodes status` / `openclaw nodes list` ile kontrol edin.
 
-    - Gateway Mac mini üzerinde (her zaman açık).
-    - MacBook Pro macOS uygulamasını veya bir node ana makinesini çalıştırır ve Gateway ile eşleşir.
-    - Bunu görmek için `openclaw nodes status` / `openclaw nodes list` kullanın.
-
-    Dokümanlar: [Node'lar](/tr/nodes), [Nodes CLI](/tr/cli/nodes).
+    Belgeler: [Node'lar](/tr/nodes), [Node CLI](/tr/cli/nodes).
 
   </Accordion>
 
   <Accordion title="Bun kullanabilir miyim?">
-    Bun **önerilmez**. Özellikle WhatsApp ve Telegram ile runtime hataları görüyoruz.
-    Kararlı gateway'ler için **Node** kullanın.
+    Bağımlılıkları kurmak veya paket betiklerini çalıştırmak için Bun kullanabilirsiniz. Standart durum deposu
+    `node:sqlite` kullandığı ve Bun bu API'yi sağlamadığı için OpenClaw CLI ve
+    Gateway, **Node** gerektirir.
+  </Accordion>
 
-    Yine de Bun ile deneme yapmak istiyorsanız bunu WhatsApp/Telegram olmayan, üretim dışı bir gateway üzerinde yapın.
+  <Accordion title="Telegram: allowFrom içine ne yazılır?">
+    `channels.telegram.allowFrom`, bot kullanıcı adı değil, **insan göndericinin sayısal Telegram kullanıcı kimliğidir**.
+    Kurulum yalnızca sayısal kullanıcı kimliklerini ister; `openclaw doctor --fix`,
+    eski `@username` girdilerini çözümlemeyi deneyebilir.
+
+    Daha güvenli (üçüncü taraf bot yok): Botunuza DM gönderin, `openclaw logs --follow` çalıştırın, `from.id` değerini okuyun.
+
+    Resmî Bot API: Botunuza DM gönderin, `https://api.telegram.org/bot<bot_token>/getUpdates` çağrısı yapın, `message.from.id` değerini okuyun.
+
+    Üçüncü taraf (daha az gizli): `@userinfobot` veya `@getidsbot` hesabına DM gönderin.
+
+    Bkz. [Telegram erişim denetimi](/tr/channels/telegram#access-control-and-activation).
 
   </Accordion>
 
-  <Accordion title="Telegram: allowFrom içine ne girilir?">
-    `channels.telegram.allowFrom`, **insan gönderenin Telegram kullanıcı kimliğidir** (sayısal). Bot kullanıcı adı değildir.
-
-    Kurulum yalnızca sayısal kullanıcı kimlikleri ister. Yapılandırmada hâlihazırda eski `@username` girdileriniz varsa `openclaw doctor --fix` bunları çözmeyi deneyebilir.
-
-    Daha güvenli (üçüncü taraf bot yok):
-
-    - Botunuza DM gönderin, ardından `openclaw logs --follow` çalıştırın ve `from.id` değerini okuyun.
-
-    Resmi Bot API:
-
-    - Botunuza DM gönderin, ardından `https://api.telegram.org/bot<bot_token>/getUpdates` çağırın ve `message.from.id` değerini okuyun.
-
-    Üçüncü taraf (daha az özel):
-
-    - `@userinfobot` veya `@getidsbot` hesabına DM gönderin.
-
-    Bkz. [/channels/telegram](/tr/channels/telegram#access-control-and-activation).
-
+  <Accordion title="Birden fazla kişi, farklı OpenClaw örnekleriyle tek bir WhatsApp numarasını kullanabilir mi?">
+    Evet, **çoklu ajan yönlendirmesi** aracılığıyla. Her göndericinin WhatsApp DM'sini (`peer: { kind: "direct", id: "+15551234567" }`) farklı bir `agentId` ile ilişkilendirerek her kişiye kendi çalışma alanını ve oturum deposunu verin. Yanıtlar yine **aynı WhatsApp hesabından** gelir; DM erişim denetimi (`channels.whatsapp.dmPolicy` / `channels.whatsapp.allowFrom`) hesap başına geneldir. Bkz. [Çoklu Ajan Yönlendirmesi](/tr/concepts/multi-agent) ve [WhatsApp](/tr/channels/whatsapp).
   </Accordion>
 
-  <Accordion title="Bir WhatsApp numarasını farklı OpenClaw örnekleriyle birden fazla kişi kullanabilir mi?">
-    Evet, **çoklu ajan yönlendirme** üzerinden. Her gönderenin WhatsApp **DM**'ini (peer `kind: "direct"`, gönderen E.164 örn. `+15551234567`) farklı bir `agentId` değerine bağlayın; böylece herkes kendi çalışma alanına ve oturum deposuna sahip olur. Yanıtlar yine **aynı WhatsApp hesabından** gelir ve DM erişim denetimi (`channels.whatsapp.dmPolicy` / `channels.whatsapp.allowFrom`) WhatsApp hesabı başına geneldir. Bkz. [Çoklu Ajan Yönlendirme](/tr/concepts/multi-agent) ve [WhatsApp](/tr/channels/whatsapp).
+  <Accordion title='Bir "hızlı sohbet" ajanı ve bir "kodlama için Opus" ajanı çalıştırabilir miyim?'>
+    Evet. Çoklu ajan yönlendirmesini kullanın: her ajana kendi varsayılan modelini verin, ardından gelen
+    rotaları (sağlayıcı hesabı veya belirli eşler) ilgili ajanlara bağlayın. Örnek yapılandırma:
+    [Çoklu Ajan Yönlendirmesi](/tr/concepts/multi-agent). Ayrıca bkz. [Modeller](/tr/concepts/models) ve
+    [Yapılandırma](/tr/gateway/configuration).
   </Accordion>
 
-  <Accordion title='"Hızlı sohbet" ajanı ve "kodlama için Opus" ajanı çalıştırabilir miyim?'>
-    Evet. Çoklu ajan yönlendirme kullanın: her ajana kendi varsayılan modelini verin, ardından gelen rotaları (sağlayıcı hesabı veya belirli peer'lar) her ajana bağlayın. Örnek yapılandırma [Çoklu Ajan Yönlendirme](/tr/concepts/multi-agent) içinde yer alır. Ayrıca bkz. [Modeller](/tr/concepts/models) ve [Yapılandırma](/tr/gateway/configuration).
-  </Accordion>
-
-  <Accordion title="Homebrew Linux üzerinde çalışır mı?">
-    Evet. Homebrew Linux'u destekler (Linuxbrew). Hızlı kurulum:
+  <Accordion title="Homebrew Linux'ta çalışır mı?">
+    Evet, Linuxbrew üzerinden:
 
     ```bash
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -740,25 +724,27 @@ x-i18n:
     brew install <formula>
     ```
 
-    OpenClaw'ı systemd üzerinden çalıştırıyorsanız, `brew` ile kurulan araçların oturum açma olmayan kabuklarda çözümlenebilmesi için servis PATH değerinin `/home/linuxbrew/.linuxbrew/bin` (veya brew önekinizi) içerdiğinden emin olun.
-    Son derlemeler ayrıca Linux systemd servislerinde yaygın kullanıcı bin dizinlerini başa ekler (örneğin `~/.local/bin`, `~/.npm-global/bin`, `~/.local/share/pnpm`, `~/.bun/bin`) ve ayarlandığında `PNPM_HOME`, `NPM_CONFIG_PREFIX`, `BUN_INSTALL`, `VOLTA_HOME`, `ASDF_DATA_DIR`, `NVM_DIR` ve `FNM_DIR` değerlerini dikkate alır.
+    OpenClaw'ı systemd üzerinden çalıştırırken hizmet PATH'inin
+    `/home/linuxbrew/.linuxbrew/bin` (veya brew ön ekinizi) içerdiğinden emin olun; böylece `brew` ile kurulan araçlar
+    oturum açılmayan kabuklarda çözümlenebilir. Son derlemeler ayrıca Linux
+    systemd hizmetlerinde yaygın kullanıcı bin dizinlerini (örneğin `~/.local/bin`, `~/.npm-global/bin`,
+    `~/.local/share/pnpm`, `~/.bun/bin`) başa ekler ve ayarlandıklarında `PNPM_HOME`, `NPM_CONFIG_PREFIX`,
+    `BUN_INSTALL`, `VOLTA_HOME`, `ASDF_DATA_DIR`, `NVM_DIR` ve `FNM_DIR` değerlerini dikkate alır.
 
   </Accordion>
 
-  <Accordion title="Hacklenebilir git kurulumu ile npm kurulumu arasındaki fark">
-    - **Hacklenebilir (git) kurulum:** tam kaynak checkout, düzenlenebilir, katkıda bulunanlar için en iyisi.
-      Derlemeleri yerel olarak çalıştırırsınız ve kod/dokümanlara yama yapabilirsiniz.
-    - **npm kurulumu:** global CLI kurulumu, repo yok, "sadece çalıştırmak" için en iyisi.
-      Güncellemeler npm dist-tag'lerinden gelir.
+  <Accordion title="Değiştirilebilir git kurulumu ile npm kurulumu arasındaki fark">
+    - **Değiştirilebilir (git) kurulum:** tam kaynak kodu çalışma kopyasıdır, düzenlenebilir ve katkıda bulunanlar için en uygun seçenektir. Yerel olarak derleyebilir ve kodu/belgeleri yamalayabilirsiniz.
+    - **npm kurulumu:** depo içermeyen genel CLI kurulumudur ve "yalnızca çalıştırmak" için en uygun seçenektir. Güncellemeler npm dist-tag'lerinden gelir.
 
-    Dokümanlar: [Başlarken](/tr/start/getting-started), [Güncelleme](/tr/install/updating).
+    Belgeler: [Başlarken](/tr/start/getting-started), [Güncelleme](/tr/install/updating).
 
   </Accordion>
 
-  <Accordion title="npm ve git kurulumları arasında daha sonra geçiş yapabilir miyim?">
-    Evet. OpenClaw zaten kuruluysa `openclaw update --channel ...` kullanın.
-    Bu **verilerinizi silmez** - yalnızca OpenClaw kod kurulumunu değiştirir.
-    Durumunuz (`~/.openclaw`) ve çalışma alanınız (`~/.openclaw/workspace`) dokunulmadan kalır.
+  <Accordion title="Daha sonra npm ve git kurulumları arasında geçiş yapabilir miyim?">
+    Evet, mevcut bir kurulumda `openclaw update --channel ...` ile geçiş yapabilirsiniz. Bu işlem **verilerinizi
+    silmez**; yalnızca OpenClaw kod kurulumu değişir. Durum (`~/.openclaw`) ve
+    çalışma alanı (`~/.openclaw/workspace`) olduğu gibi kalır.
 
     npm'den git'e:
 
@@ -766,89 +752,90 @@ x-i18n:
     openclaw update --channel dev
     ```
 
-    git'ten npm'e:
+    git'ten npm'ye:
 
     ```bash
     openclaw update --channel stable
     ```
 
-    Planlanan mod değişikliğini önce önizlemek için `--dry-run` ekleyin. Güncelleyici
-    Doctor takip işlemlerini çalıştırır, hedef kanal için plugin kaynaklarını yeniler ve
-    `--no-restart` geçmediğiniz sürece gateway'i yeniden başlatır.
+    Planlanan mod geçişini önce önizlemek için `--dry-run` ekleyin. Güncelleyici, Doctor
+    takip işlemlerini çalıştırır, hedef kanalın plugin kaynaklarını yeniler ve
+    `--no-restart` seçeneğini iletmediğiniz sürece Gateway'i yeniden başlatır.
 
-    Yükleyici iki modu da zorunlu kılabilir:
+    Kurucu da her iki modu zorunlu kılabilir:
 
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method git
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --install-method npm
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
+    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method npm
     ```
 
-    Yedekleme ipuçları: bkz. [Yedekleme stratejisi](/tr/help/faq#where-things-live-on-disk).
+    Yedekleme ipuçları: [Öğelerin diskte bulunduğu yerler](/tr/help/faq#where-things-live-on-disk).
 
   </Accordion>
 
-  <Accordion title="Gateway'i dizüstü bilgisayarımda mı yoksa bir VPS'te mi çalıştırmalıyım?">
-    Kısa yanıt: **7/24 güvenilirlik istiyorsanız, VPS kullanın**. En düşük
-    sürtünmeyi istiyorsanız ve uyku/yeniden başlatmalar sizin için sorun değilse, yerel olarak çalıştırın.
+  <Accordion title="Gateway'i dizüstü bilgisayarımda mı yoksa bir VPS'de mi çalıştırmalıyım?">
+    24/7 güvenilirlik mi istiyorsunuz? Bir **VPS** kullanın. En düşük kurulum zahmetini istiyor
+    ve uyku/yeniden başlatma durumlarını sorun etmiyor musunuz? Yerel olarak çalıştırın.
 
     **Dizüstü bilgisayar (yerel Gateway)**
 
-    - **Artıları:** sunucu maliyeti yok, yerel dosyalara doğrudan erişim, canlı tarayıcı penceresi.
-    - **Eksileri:** uyku/ağ kesintileri = bağlantı kopmaları, işletim sistemi güncellemeleri/yeniden başlatmaları kesintiye uğratır, uyanık kalması gerekir.
+    - **Artıları:** sunucu maliyeti yoktur, yerel dosyalara doğrudan erişilir, canlı bir tarayıcı penceresi vardır.
+    - **Eksileri:** uyku/ağ kesintileri bağlantıyı koparır, işletim sistemi güncellemeleri/yeniden başlatmaları çalışmayı kesintiye uğratır, bilgisayarın uyanık kalması gerekir.
 
     **VPS / bulut**
 
-    - **Artıları:** her zaman açık, kararlı ağ, dizüstü bilgisayar uyku sorunları yok, çalışır halde tutması daha kolay.
-    - **Eksileri:** genellikle başsız çalışır (ekran görüntüleri kullanın), yalnızca uzaktan dosya erişimi, güncellemeler için SSH kullanmanız gerekir.
+    - **Artıları:** sürekli açıktır, ağ kararlıdır, dizüstü bilgisayarın uyku sorunları yoktur, çalışır durumda tutmak daha kolaydır.
+    - **Eksileri:** genellikle başsızdır (ekran görüntülerini kullanın), yalnızca uzaktan dosya erişimi vardır, güncellemeler için SSH gerekir.
 
-    **OpenClaw'a özel not:** WhatsApp/Telegram/Slack/Mattermost/Discord bir VPS'ten sorunsuz çalışır. Tek gerçek ödünleşim **başsız tarayıcı** ile görünür pencere arasındadır. Bkz. [Tarayıcı](/tr/tools/browser).
+    WhatsApp/Telegram/Slack/Mattermost/Discord hizmetlerinin tümü bir VPS'den sorunsuz çalışır;
+    asıl ödünleşim, başsız tarayıcı ile görünür pencere arasındadır. Bkz. [Tarayıcı](/tr/tools/browser).
 
-    **Önerilen varsayılan:** Daha önce gateway bağlantı kopmaları yaşadıysanız VPS. Mac'i etkin olarak kullanırken ve görünür bir tarayıcıyla yerel dosya erişimi veya UI otomasyonu istediğinizde yerel kullanım harikadır.
-
-  </Accordion>
-
-  <Accordion title="OpenClaw'ı ayrılmış bir makinede çalıştırmak ne kadar önemlidir?">
-    Zorunlu değildir, ancak **güvenilirlik ve yalıtım için önerilir**.
-
-    - **Ayrılmış ana makine (VPS/Mac mini/Raspberry Pi):** her zaman açık, daha az uyku/yeniden başlatma kesintisi, daha temiz izinler, çalışır halde tutması daha kolay.
-    - **Paylaşılan dizüstü/masaüstü:** test ve etkin kullanım için tamamen uygundur, ancak makine uyuduğunda veya güncellendiğinde duraklamalar bekleyin.
-
-    İki dünyanın en iyisini istiyorsanız, Gateway'i ayrılmış bir ana makinede tutun ve dizüstü bilgisayarınızı yerel ekran/kamera/exec araçları için bir **düğüm** olarak eşleştirin. Bkz. [Düğümler](/tr/nodes).
-    Güvenlik yönergeleri için [Güvenlik](/tr/gateway/security) bölümünü okuyun.
+    Varsayılan öneri: Daha önce Gateway bağlantı kesintileri yaşadıysanız VPS kullanın; Mac'i
+    etkin olarak kullanıyorsanız ve yerel dosya erişimi ya da görünür tarayıcı kullanıcı arayüzü
+    otomasyonu istiyorsanız yerel kurulum idealdir.
 
   </Accordion>
 
-  <Accordion title="Minimum VPS gereksinimleri ve önerilen işletim sistemi nelerdir?">
-    OpenClaw hafiftir. Temel bir Gateway + bir sohbet kanalı için:
+  <Accordion title="OpenClaw'ı özel olarak ayrılmış bir makinede çalıştırmak ne kadar önemlidir?">
+    Zorunlu değildir ancak güvenilirlik ve yalıtım için önerilir.
 
-    - **Mutlak minimum:** 1 vCPU, 1GB RAM, ~500MB disk.
-    - **Önerilen:** ek kapasite için 1-2 vCPU, 2GB RAM veya daha fazlası (günlükler, medya, birden çok kanal). Node araçları ve tarayıcı otomasyonu kaynak tüketebilir.
+    - **Özel olarak ayrılmış ana makine (VPS/Mac mini/Raspberry Pi):** sürekli açıktır, uyku/yeniden başlatma kaynaklı kesintiler daha azdır, izinler daha düzenlidir, çalışır durumda tutmak daha kolaydır.
+    - **Paylaşılan dizüstü/masaüstü bilgisayar:** test ve etkin kullanım için uygundur ancak makine uykuya geçtiğinde veya güncellendiğinde duraklamalar beklenmelidir.
 
-    İşletim sistemi: **Ubuntu LTS** kullanın (veya modern bir Debian/Ubuntu). Linux kurulum yolu en iyi burada test edilmiştir.
-
-    Dokümanlar: [Linux](/tr/platforms/linux), [VPS barındırma](/tr/vps).
+    Her iki yaklaşımın avantajlarını birleştirmek için Gateway'i özel olarak ayrılmış bir ana makinede tutun ve
+    yerel ekran/kamera/çalıştırma araçları için dizüstü bilgisayarınızı bir **Node** olarak eşleştirin.
+    Bkz. [Node'lar](/tr/nodes) ve [Güvenlik](/tr/gateway/security).
 
   </Accordion>
 
-  <Accordion title="OpenClaw'ı bir VM'de çalıştırabilir miyim ve gereksinimler nelerdir?">
-    Evet. Bir VM'yi VPS ile aynı şekilde ele alın: her zaman açık, erişilebilir olmalı ve Gateway ile etkinleştirdiğiniz kanallar için yeterli
-    RAM'e sahip olmalıdır.
+  <Accordion title="Asgari VPS gereksinimleri ve önerilen işletim sistemi nedir?">
+    - **Mutlak asgari:** 1 vCPU, 1 GB RAM, ~500 MB disk.
+    - **Önerilen:** Ek kapasite (günlükler, medya, birden fazla kanal) için 1-2 vCPU, 2 GB+ RAM. Node araçları ve tarayıcı otomasyonu yoğun kaynak kullanabilir.
 
-    Temel yönergeler:
+    İşletim sistemi: **Ubuntu LTS** (veya herhangi bir modern Debian/Ubuntu); Linux için en kapsamlı şekilde test edilmiş kurulum yoludur.
 
-    - **Mutlak minimum:** 1 vCPU, 1GB RAM.
-    - **Önerilen:** birden çok kanal, tarayıcı otomasyonu veya medya araçları çalıştırıyorsanız 2GB RAM veya daha fazlası.
+    Belgeler: [Linux](/tr/platforms/linux), [VPS barındırma](/tr/vps).
+
+  </Accordion>
+
+  <Accordion title="OpenClaw'ı bir sanal makinede çalıştırabilir miyim ve gereksinimleri nelerdir?">
+    Evet. Bir sanal makineyi VPS gibi değerlendirin: sürekli açık ve erişilebilir olmalı, ayrıca
+    Gateway ve etkinleştirdiğiniz tüm kanallar için yeterli RAM'e sahip olmalıdır.
+
+    - **Mutlak asgari:** 1 vCPU, 1 GB RAM.
+    - **Önerilen:** Birden fazla kanal, tarayıcı otomasyonu veya medya araçları için 2 GB+ RAM.
     - **İşletim sistemi:** Ubuntu LTS veya başka bir modern Debian/Ubuntu.
 
-    Windows kullanıyorsanız masaüstü kurulumu için **Windows Hub** kullanın veya özellikle geniş araç uyumluluğuna sahip Linux tarzı bir Gateway VM istediğinizde WSL2 kullanın. Bkz. [Windows](/tr/platforms/windows), [VPS barındırma](/tr/vps).
-    macOS'i bir VM'de çalıştırıyorsanız bkz. [macOS VM](/tr/install/macos-vm).
+    Windows'ta masaüstü kurulumu için **Windows Hub**'ı, geniş araç uyumluluğuna sahip Linux tarzı
+    bir Gateway sanal makinesi içinse WSL2'yi kullanın. Bkz. [Windows](/tr/platforms/windows), [VPS barındırma](/tr/vps).
+    macOS'i bir sanal makinede çalıştırmak için bkz. [macOS sanal makinesi](/tr/install/macos-vm).
 
   </Accordion>
 </AccordionGroup>
 
 ## İlgili
 
-- [SSS](/tr/help/faq) — ana SSS (modeller, oturumlar, gateway, güvenlik, daha fazlası)
+- [SSS](/tr/help/faq) - ana SSS (modeller, oturumlar, Gateway, güvenlik ve daha fazlası)
 - [Kuruluma genel bakış](/tr/install)
 - [Başlarken](/tr/start/getting-started)
 - [Sorun giderme](/tr/help/troubleshooting)

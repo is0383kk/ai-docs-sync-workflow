@@ -1,51 +1,54 @@
 ---
 read_when:
     - आप OpenClaw के साथ Amazon Bedrock मॉडल का उपयोग करना चाहते हैं
-    - मॉडल कॉल के लिए आपको AWS क्रेडेंशियल/क्षेत्र सेटअप की आवश्यकता है
+    - मॉडल कॉल के लिए आपको AWS क्रेडेंशियल/रीजन सेटअप की आवश्यकता है
 summary: OpenClaw के साथ Amazon Bedrock (Converse API) मॉडल का उपयोग करें
 title: Amazon Bedrock
 x-i18n:
-    generated_at: "2026-06-28T23:57:01Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:22:21Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 3947ad565f3a0adcd62d4ce47c6ed760f73c77ba3f4bd43b0754a412511063f2
+    source_hash: 9cbc9534c0d06e0d5642b8d167c633c16880908812b97adbbf9c6bd6c5511603
     source_path: providers/bedrock.md
     workflow: 16
 ---
 
-OpenClaw अपने **Bedrock Converse** स्ट्रीमिंग प्रदाता के माध्यम से **Amazon Bedrock** मॉडल का उपयोग कर सकता है। Bedrock प्रमाणीकरण **AWS SDK default credential chain** का उपयोग करता है, API key का नहीं।
+OpenClaw अपने **Bedrock Converse** स्ट्रीमिंग प्रोवाइडर के माध्यम से **Amazon Bedrock**
+मॉडल का उपयोग कर सकता है। Bedrock प्रमाणीकरण **AWS SDK डिफ़ॉल्ट क्रेडेंशियल शृंखला**
+का उपयोग करता है, API कुंजी का नहीं।
 
-| गुण | मान                                                       |
+| गुण | मान                                                         |
 | -------- | ----------------------------------------------------------- |
-| प्रदाता | `amazon-bedrock`                                            |
+| प्रोवाइडर | `amazon-bedrock`                                            |
 | API      | `bedrock-converse-stream`                                   |
-| प्रमाणीकरण     | AWS credentials (env vars, shared config, या instance role) |
-| Region   | `AWS_REGION` या `AWS_DEFAULT_REGION` (डिफ़ॉल्ट: `us-east-1`) |
+| प्रमाणीकरण | AWS क्रेडेंशियल (एनवायरनमेंट वेरिएबल, साझा कॉन्फ़िगरेशन या इंस्टेंस भूमिका) |
+| क्षेत्र   | `AWS_REGION` या `AWS_DEFAULT_REGION` (डिफ़ॉल्ट: `us-east-1`) |
 
-## शुरू करना
+## आरंभ करना
 
-अपनी पसंदीदा प्रमाणीकरण विधि चुनें और सेटअप चरणों का पालन करें।
+अपनी पसंदीदा प्रमाणीकरण विधि चुनें और सेटअप के चरणों का पालन करें।
 
 <Tabs>
-  <Tab title="Access keys / env vars">
-    **इनके लिए सर्वोत्तम:** डेवलपर मशीनें, CI, या ऐसे होस्ट जहां आप AWS credentials को सीधे प्रबंधित करते हैं।
+  <Tab title="एक्सेस कुंजियाँ / एनवायरनमेंट वेरिएबल">
+    **इनके लिए सर्वोत्तम:** डेवलपर मशीनें, CI या वे होस्ट जहाँ आप AWS क्रेडेंशियल सीधे प्रबंधित करते हैं।
 
     <Steps>
-      <Step title="Gateway होस्ट पर AWS credentials सेट करें">
+      <Step title="Gateway होस्ट पर AWS क्रेडेंशियल सेट करें">
         ```bash
         export AWS_ACCESS_KEY_ID="EXAMPLE_AWS_ACCESS_KEY_ID"
         export AWS_SECRET_ACCESS_KEY="..."
         export AWS_REGION="us-east-1"
-        # Optional:
+        # वैकल्पिक:
         export AWS_SESSION_TOKEN="..."
         export AWS_PROFILE="your-profile"
-        # Optional (Bedrock API key/bearer token):
+        # वैकल्पिक (Bedrock API कुंजी/बेयरर टोकन):
         export AWS_BEARER_TOKEN_BEDROCK="..."
         ```
       </Step>
-      <Step title="अपने config में Bedrock प्रदाता और मॉडल जोड़ें">
-        कोई `apiKey` आवश्यक नहीं है। प्रदाता को `auth: "aws-sdk"` के साथ कॉन्फ़िगर करें:
+      <Step title="अपने कॉन्फ़िगरेशन में Bedrock प्रोवाइडर और मॉडल जोड़ें">
+        किसी `apiKey` की आवश्यकता नहीं है। प्रोवाइडर को `auth: "aws-sdk"` के साथ कॉन्फ़िगर करें:
 
         ```json5
         {
@@ -57,7 +60,7 @@ OpenClaw अपने **Bedrock Converse** स्ट्रीमिंग प्
                 auth: "aws-sdk",
                 models: [
                   {
-                    id: "us.anthropic.claude-opus-4-6-v1:0",
+                    id: "us.anthropic.claude-opus-4-6-v1",
                     name: "Claude Opus 4.6 (Bedrock)",
                     reasoning: true,
                     input: ["text", "image"],
@@ -71,7 +74,7 @@ OpenClaw अपने **Bedrock Converse** स्ट्रीमिंग प्
           },
           agents: {
             defaults: {
-              model: { primary: "amazon-bedrock/us.anthropic.claude-opus-4-6-v1:0" },
+              model: { primary: "amazon-bedrock/us.anthropic.claude-opus-4-6-v1" },
             },
           },
         }
@@ -85,34 +88,34 @@ OpenClaw अपने **Bedrock Converse** स्ट्रीमिंग प्
     </Steps>
 
     <Tip>
-    env-marker प्रमाणीकरण (`AWS_ACCESS_KEY_ID`, `AWS_PROFILE`, या `AWS_BEARER_TOKEN_BEDROCK`) के साथ, OpenClaw अतिरिक्त config के बिना मॉडल खोज के लिए implicit Bedrock प्रदाता को स्वतः सक्षम कर देता है।
+    एनवायरनमेंट-मार्कर प्रमाणीकरण (`AWS_ACCESS_KEY_ID`, `AWS_PROFILE` या `AWS_BEARER_TOKEN_BEDROCK`) के साथ, OpenClaw अतिरिक्त कॉन्फ़िगरेशन के बिना मॉडल खोज के लिए अंतर्निहित Bedrock प्रोवाइडर को स्वतः सक्षम करता है।
     </Tip>
 
   </Tab>
 
-  <Tab title="EC2 instance roles (IMDS)">
-    **इनके लिए सर्वोत्तम:** संलग्न IAM role वाले EC2 instances, जो प्रमाणीकरण के लिए instance metadata service का उपयोग करते हैं।
+  <Tab title="EC2 इंस्टेंस भूमिकाएँ (IMDS)">
+    **इनके लिए सर्वोत्तम:** संलग्न IAM भूमिका वाले EC2 इंस्टेंस, जो प्रमाणीकरण के लिए इंस्टेंस मेटाडेटा सेवा का उपयोग करते हैं।
 
     <Steps>
       <Step title="खोज को स्पष्ट रूप से सक्षम करें">
-        IMDS का उपयोग करते समय, OpenClaw केवल env markers से AWS auth का पता नहीं लगा सकता, इसलिए आपको opt in करना होगा:
+        IMDS का उपयोग करते समय, OpenClaw केवल एनवायरनमेंट मार्कर से AWS प्रमाणीकरण का पता नहीं लगा सकता, इसलिए आपको इसे स्पष्ट रूप से सक्षम करना होगा:
 
         ```bash
         openclaw config set plugins.entries.amazon-bedrock.config.discovery.enabled true
         openclaw config set plugins.entries.amazon-bedrock.config.discovery.region us-east-1
         ```
       </Step>
-      <Step title="auto mode के लिए वैकल्पिक रूप से env marker जोड़ें">
-        यदि आप env-marker auto-detection पथ को भी काम कराना चाहते हैं (उदाहरण के लिए, `openclaw status` सतहों के लिए):
+      <Step title="वैकल्पिक रूप से स्वचालित मोड के लिए एनवायरनमेंट मार्कर जोड़ें">
+        यदि आप एनवायरनमेंट-मार्कर स्वतः-पहचान पथ को भी सक्रिय रखना चाहते हैं (उदाहरण के लिए, `openclaw status` सतहों के लिए):
 
         ```bash
         export AWS_PROFILE=default
         export AWS_REGION=us-east-1
         ```
 
-        आपको fake API key की आवश्यकता **नहीं** है।
+        आपको नकली API कुंजी की आवश्यकता **नहीं** है।
       </Step>
-      <Step title="सत्यापित करें कि मॉडल खोजे गए हैं">
+      <Step title="सत्यापित करें कि मॉडल खोज लिए गए हैं">
         ```bash
         openclaw models list
         ```
@@ -120,18 +123,18 @@ OpenClaw अपने **Bedrock Converse** स्ट्रीमिंग प्
     </Steps>
 
     <Warning>
-    आपके EC2 instance से जुड़े IAM role के पास निम्नलिखित अनुमतियां होनी चाहिए:
+    आपके EC2 इंस्टेंस से संलग्न IAM भूमिका के पास निम्नलिखित अनुमतियाँ होनी चाहिए:
 
     - `bedrock:InvokeModel`
     - `bedrock:InvokeModelWithResponseStream`
     - `bedrock:ListFoundationModels` (स्वचालित खोज के लिए)
-    - `bedrock:ListInferenceProfiles` (inference profile खोज के लिए)
+    - `bedrock:ListInferenceProfiles` (इन्फ़रेंस प्रोफ़ाइल खोज के लिए)
 
-    या managed policy `AmazonBedrockFullAccess` संलग्न करें।
+    या प्रबंधित नीति `AmazonBedrockFullAccess` संलग्न करें।
     </Warning>
 
     <Note>
-    आपको `AWS_PROFILE=default` की आवश्यकता केवल तब है जब आप विशेष रूप से auto mode या status सतहों के लिए env marker चाहते हैं। वास्तविक Bedrock runtime auth पथ AWS SDK default chain का उपयोग करता है, इसलिए IMDS instance-role auth env markers के बिना भी काम करता है।
+    आपको `AWS_PROFILE=default` की आवश्यकता केवल तब है, जब आप विशेष रूप से स्वचालित मोड या स्थिति सतहों के लिए एनवायरनमेंट मार्कर चाहते हैं। वास्तविक Bedrock रनटाइम प्रमाणीकरण पथ AWS SDK डिफ़ॉल्ट शृंखला का उपयोग करता है, इसलिए IMDS इंस्टेंस-भूमिका प्रमाणीकरण एनवायरनमेंट मार्कर के बिना भी काम करता है।
     </Note>
 
   </Tab>
@@ -139,30 +142,30 @@ OpenClaw अपने **Bedrock Converse** स्ट्रीमिंग प्
 
 ## स्वचालित मॉडल खोज
 
-OpenClaw उन Bedrock मॉडलों को स्वचालित रूप से खोज सकता है जो **स्ट्रीमिंग**
-और **text output** का समर्थन करते हैं। खोज `bedrock:ListFoundationModels` और
-`bedrock:ListInferenceProfiles` का उपयोग करती है, और परिणाम cache किए जाते हैं (डिफ़ॉल्ट: 1 घंटा)।
+OpenClaw उन Bedrock मॉडल को स्वचालित रूप से खोज सकता है जो **स्ट्रीमिंग**
+और **टेक्स्ट आउटपुट** का समर्थन करते हैं। खोज `bedrock:ListFoundationModels` और
+`bedrock:ListInferenceProfiles` का उपयोग करती है, और परिणाम कैश किए जाते हैं (डिफ़ॉल्ट: 1 घंटा)।
 
-अंतर्निहित प्रदाता कैसे सक्षम होता है:
+अंतर्निहित प्रोवाइडर को सक्षम करने का तरीका:
 
-- यदि `plugins.entries.amazon-bedrock.config.discovery.enabled` `true` है,
-  तो OpenClaw discovery का प्रयास करेगा, भले ही कोई AWS env marker मौजूद न हो।
+- यदि `plugins.entries.amazon-bedrock.config.discovery.enabled`, `true` है,
+  तो AWS एनवायरनमेंट मार्कर मौजूद न होने पर भी OpenClaw खोज का प्रयास करेगा।
 - यदि `plugins.entries.amazon-bedrock.config.discovery.enabled` सेट नहीं है,
-  तो OpenClaw अंतर्निहित Bedrock प्रदाता को केवल तभी अपने-आप जोड़ता है
-  जब उसे इनमें से कोई AWS auth marker दिखता है:
+  तो OpenClaw अंतर्निहित Bedrock प्रोवाइडर को केवल तभी स्वतः जोड़ता है,
+  जब उसे इनमें से कोई AWS प्रमाणीकरण मार्कर दिखाई देता है:
   `AWS_BEARER_TOKEN_BEDROCK`, `AWS_ACCESS_KEY_ID` +
   `AWS_SECRET_ACCESS_KEY`, या `AWS_PROFILE`।
-- वास्तविक Bedrock runtime auth path अब भी AWS SDK default chain का उपयोग करता है, इसलिए
-  shared config, SSO, और IMDS instance-role auth काम कर सकते हैं, भले ही discovery
-  को opt in करने के लिए `enabled: true` की आवश्यकता रही हो।
+- वास्तविक Bedrock रनटाइम प्रमाणीकरण पथ फिर भी AWS SDK डिफ़ॉल्ट शृंखला का उपयोग करता है, इसलिए
+  साझा कॉन्फ़िगरेशन, SSO और IMDS इंस्टेंस-भूमिका प्रमाणीकरण तब भी काम कर सकते हैं, जब खोज
+  को स्पष्ट रूप से सक्षम करने के लिए `enabled: true` की आवश्यकता पड़ी हो।
 
 <Note>
-स्पष्ट `models.providers["amazon-bedrock"]` entries के लिए, OpenClaw अब भी `AWS_BEARER_TOKEN_BEDROCK` जैसे AWS env markers से Bedrock env-marker auth को जल्दी resolve कर सकता है, बिना full runtime auth loading को force किए। वास्तविक model-call auth path अब भी AWS SDK default chain का उपयोग करता है।
+स्पष्ट `models.providers["amazon-bedrock"]` प्रविष्टियों के लिए, OpenClaw पूर्ण रनटाइम प्रमाणीकरण लोड किए बिना भी `AWS_BEARER_TOKEN_BEDROCK` जैसे AWS एनवायरनमेंट मार्कर से Bedrock एनवायरनमेंट-मार्कर प्रमाणीकरण को पहले ही हल कर सकता है। वास्तविक मॉडल-कॉल प्रमाणीकरण पथ फिर भी AWS SDK डिफ़ॉल्ट शृंखला का उपयोग करता है।
 </Note>
 
 <AccordionGroup>
-  <Accordion title="Discovery config विकल्प">
-    Config options `plugins.entries.amazon-bedrock.config.discovery` के अंतर्गत रहते हैं:
+  <Accordion title="खोज कॉन्फ़िगरेशन विकल्प">
+    कॉन्फ़िगरेशन विकल्प `plugins.entries.amazon-bedrock.config.discovery` के अंतर्गत होते हैं:
 
     ```json5
     {
@@ -185,25 +188,40 @@ OpenClaw उन Bedrock मॉडलों को स्वचालित र�
     }
     ```
 
-    | विकल्प | Default | विवरण |
+    | विकल्प | डिफ़ॉल्ट | विवरण |
     | ------ | ------- | ----------- |
-    | `enabled` | auto | Auto mode में, OpenClaw अंतर्निहित Bedrock प्रदाता को केवल तब सक्षम करता है जब उसे कोई समर्थित AWS env marker दिखता है। Discovery को force करने के लिए `true` सेट करें। |
-    | `region` | `AWS_REGION` / `AWS_DEFAULT_REGION` / `us-east-1` | Discovery API calls के लिए उपयोग किया गया AWS region। |
-    | `providerFilter` | (सभी) | Bedrock provider names से match करता है (उदाहरण के लिए `anthropic`, `amazon`)। |
-    | `refreshInterval` | `3600` | Cache अवधि seconds में। Caching बंद करने के लिए `0` सेट करें। |
-    | `defaultContextWindow` | `32000` | Discovered models के लिए उपयोग की गई context window (यदि आपको अपने model limits पता हैं, तो override करें)। |
-    | `defaultMaxTokens` | `4096` | Discovered models के लिए उपयोग किए गए max output tokens (यदि आपको अपने model limits पता हैं, तो override करें)। |
+    | `enabled` | स्वचालित | स्वचालित मोड में, OpenClaw अंतर्निहित Bedrock प्रोवाइडर को केवल तभी सक्षम करता है, जब उसे कोई समर्थित AWS एनवायरनमेंट मार्कर दिखाई देता है। खोज को बाध्य करने के लिए `true` सेट करें। |
+    | `region` | `AWS_REGION` / `AWS_DEFAULT_REGION` / `us-east-1` | खोज API कॉल के लिए उपयोग किया जाने वाला AWS क्षेत्र। |
+    | `providerFilter` | (सभी) | Bedrock प्रोवाइडर नामों से मिलान करता है (उदाहरण के लिए `anthropic`, `amazon`)। |
+    | `refreshInterval` | `3600` | कैश अवधि, सेकंड में। कैशिंग अक्षम करने के लिए इसे `0` पर सेट करें। |
+    | `defaultContextWindow` | `32000` | अज्ञात टोकन सीमाओं वाले खोजे गए मॉडल के लिए उपयोग की जाने वाली संदर्भ विंडो (यदि आपको अपने मॉडल की सीमाएँ ज्ञात हैं, तो इसे ओवरराइड करें)। |
+    | `defaultMaxTokens` | `4096` | अज्ञात टोकन सीमाओं वाले खोजे गए मॉडल के लिए उपयोग किए जाने वाले अधिकतम आउटपुट टोकन (यदि आपको अपने मॉडल की सीमाएँ ज्ञात हैं, तो इसे ओवरराइड करें)। |
+
+  </Accordion>
+
+  <Accordion title="संदर्भ विंडो और अधिकतम टोकन सीमाएँ">
+    Bedrock `ListFoundationModels` और `GetFoundationModel` API कोई
+    टोकन-सीमा मेटाडेटा नहीं लौटाते, केवल मॉडल ID, नाम, मोडैलिटी और जीवनचक्र
+    स्थिति लौटाते हैं। OpenClaw लोकप्रिय Bedrock मॉडल (Claude, Nova, Llama, Mistral, DeepSeek
+    और अन्य) के ज्ञात संदर्भ विंडो और आउटपुट
+    सीमाओं की एक लुकअप तालिका के साथ आता है, ताकि उन मॉडल के लिए सत्र प्रबंधन, Compaction सीमाएँ और
+    संदर्भ-ओवरफ़्लो पहचान सही ढंग से काम करें।
+
+    तालिका में शामिल न होने वाले खोजे गए मॉडल `defaultContextWindow`
+    और `defaultMaxTokens` पर फ़ॉलबैक करते हैं। यदि आपके उपयोग का कोई मॉडल सटीक सीमाओं के बिना है,
+    तो उसे स्पष्ट
+    `models.providers["amazon-bedrock"].models` प्रविष्टि से ओवरराइड करें।
 
   </Accordion>
 </AccordionGroup>
 
-## त्वरित setup (AWS path)
+## त्वरित सेटअप (AWS पथ)
 
-यह walkthrough एक IAM role बनाता है, Bedrock permissions attach करता है, instance profile associate करता है,
-और EC2 host पर OpenClaw discovery सक्षम करता है।
+यह चरण-दर-चरण मार्गदर्शिका एक IAM भूमिका बनाती है, Bedrock अनुमतियाँ संलग्न करती है, इंस्टेंस
+प्रोफ़ाइल संबद्ध करती है और EC2 होस्ट पर OpenClaw खोज सक्षम करती है।
 
 ```bash
-# 1. Create IAM role and instance profile
+# 1. IAM भूमिका और इंस्टेंस प्रोफ़ाइल बनाएँ
 aws iam create-role --role-name EC2-Bedrock-Access \
   --assume-role-policy-document '{
     "Version": "2012-10-17",
@@ -222,72 +240,74 @@ aws iam add-role-to-instance-profile \
   --instance-profile-name EC2-Bedrock-Access \
   --role-name EC2-Bedrock-Access
 
-# 2. Attach to your EC2 instance
+# 2. अपने EC2 इंस्टेंस से संलग्न करें
 aws ec2 associate-iam-instance-profile \
   --instance-id i-xxxxx \
   --iam-instance-profile Name=EC2-Bedrock-Access
 
-# 3. On the EC2 instance, enable discovery explicitly
+# 3. EC2 इंस्टेंस पर खोज को स्पष्ट रूप से सक्षम करें
 openclaw config set plugins.entries.amazon-bedrock.config.discovery.enabled true
 openclaw config set plugins.entries.amazon-bedrock.config.discovery.region us-east-1
 
-# 4. Optional: add an env marker if you want auto mode without explicit enable
+# 4. वैकल्पिक: यदि आप स्पष्ट रूप से सक्षम किए बिना स्वचालित मोड चाहते हैं, तो एनवायरनमेंट मार्कर जोड़ें
 echo 'export AWS_PROFILE=default' >> ~/.bashrc
 echo 'export AWS_REGION=us-east-1' >> ~/.bashrc
 source ~/.bashrc
 
-# 5. Verify models are discovered
+# 5. सत्यापित करें कि मॉडल खोज लिए गए हैं
 openclaw models list
 ```
 
-## उन्नत configuration
+## उन्नत कॉन्फ़िगरेशन
 
 <AccordionGroup>
-  <Accordion title="Inference profiles">
-    OpenClaw foundation models के साथ-साथ **regional और global inference profiles** discover करता है।
-    जब कोई profile किसी ज्ञात foundation model से map होती है, तो
-    profile उस model की capabilities (context window, max tokens,
-    reasoning, vision) inherit करती है और सही Bedrock request region
-    अपने-आप inject हो जाता है। इसका मतलब है कि cross-region Claude profiles manual
-    provider overrides के बिना काम करते हैं।
+  <Accordion title="इन्फ़रेंस प्रोफ़ाइल">
+    OpenClaw फ़ाउंडेशन मॉडल के साथ-साथ **क्षेत्रीय और वैश्विक इन्फ़रेंस प्रोफ़ाइल**
+    खोजता है। जब कोई प्रोफ़ाइल किसी ज्ञात फ़ाउंडेशन मॉडल से मैप होती है, तो
+    प्रोफ़ाइल उस मॉडल की क्षमताएँ (संदर्भ विंडो, अधिकतम टोकन,
+    रीजनिंग, विज़न) ग्रहण करती है और सही Bedrock अनुरोध क्षेत्र
+    स्वचालित रूप से इंजेक्ट किया जाता है। इसका अर्थ है कि क्रॉस-रीजन Claude प्रोफ़ाइल मैन्युअल
+    प्रोवाइडर ओवरराइड के बिना काम करती हैं। वैश्विक क्रॉस-रीजन प्रोफ़ाइल (`global.*`) को
+    `openclaw models list` में पहले सूचीबद्ध किया जाता है, क्योंकि वे सामान्यतः बेहतर क्षमता
+    और स्वचालित फ़ेलओवर प्रदान करती हैं।
 
-    Inference profile IDs `us.anthropic.claude-opus-4-6-v1:0` (regional)
-    या `anthropic.claude-opus-4-6-v1:0` (global) जैसे दिखते हैं। यदि backing model पहले से
-    discovery results में है, तो profile उसका पूरा capability set inherit करती है;
-    अन्यथा सुरक्षित defaults लागू होते हैं।
+    इन्फ़रेंस प्रोफ़ाइल ID `us.anthropic.claude-opus-4-6-v1` (क्षेत्रीय)
+    या `anthropic.claude-opus-4-6-v1` (वैश्विक) जैसी होती हैं। यदि आधारभूत मॉडल पहले से
+    खोज परिणामों में है, तो प्रोफ़ाइल उसकी क्षमताओं का पूरा सेट ग्रहण करती है;
+    अन्यथा सुरक्षित डिफ़ॉल्ट लागू होते हैं।
 
-    कोई अतिरिक्त configuration आवश्यक नहीं है। जब तक discovery enabled है और IAM
-    principal के पास `bedrock:ListInferenceProfiles` है, profiles
-    `openclaw models list` में foundation models के साथ दिखाई देते हैं।
+    किसी अतिरिक्त कॉन्फ़िगरेशन की आवश्यकता नहीं है। जब तक खोज सक्षम है और IAM
+    प्रिंसिपल के पास `bedrock:ListInferenceProfiles` है, प्रोफ़ाइल
+    `openclaw models list` में फ़ाउंडेशन मॉडल के साथ दिखाई देती हैं।
 
   </Accordion>
 
-  <Accordion title="Service tier">
-    कुछ Bedrock models cost या latency के लिए optimize करने हेतु `service_tier` parameter support करते हैं।
-    निम्न tiers उपलब्ध हैं:
+  <Accordion title="सेवा स्तर">
+    कुछ Bedrock मॉडल लागत
+    या विलंबता को अनुकूलित करने के लिए `service_tier` पैरामीटर का समर्थन करते हैं। निम्न स्तर उपलब्ध हैं:
 
-    | Tier | विवरण |
+    | स्तर | विवरण |
     |------|-------------|
-    | `default` | Standard Bedrock tier |
-    | `flex` | उन workloads के लिए discounted processing जो अधिक latency सहन कर सकते हैं |
-    | `priority` | Latency-sensitive workloads के लिए prioritized processing |
-    | `reserved` | Steady-state workloads के लिए reserved capacity |
+    | `default` | मानक Bedrock स्तर |
+    | `flex` | उन कार्यभारों के लिए रियायती प्रोसेसिंग जो अधिक विलंबता सहन कर सकते हैं |
+    | `priority` | विलंबता-संवेदनशील कार्यभारों के लिए प्राथमिकता वाली प्रोसेसिंग |
+    | `reserved` | स्थिर-अवस्था वाले कार्यभारों के लिए आरक्षित क्षमता |
 
-    Bedrock model requests के लिए `agents.defaults.params` के माध्यम से
-    `serviceTier` (या `service_tier`) सेट करें, या per-model
-    `agents.defaults.models["<model-key>"].params` में सेट करें:
+    Bedrock मॉडल अनुरोधों के लिए `agents.defaults.params` के माध्यम से
+    `serviceTier` (या `service_tier`) सेट करें, या
+    `agents.defaults.models["<model-key>"].params` में प्रत्येक मॉडल के लिए अलग से सेट करें:
 
     ```json5
     {
       agents: {
         defaults: {
           params: {
-            serviceTier: "flex", // applies to all models
+            serviceTier: "flex", // सभी मॉडल पर लागू होता है
           },
           models: {
             "amazon-bedrock/mistral.mistral-large-3-675b-instruct": {
               params: {
-                serviceTier: "priority", // per-model override
+                serviceTier: "priority", // प्रत्येक मॉडल के लिए ओवरराइड
               },
             },
           },
@@ -296,50 +316,96 @@ openclaw models list
     }
     ```
 
-    मान्य values `default`, `flex`, `priority`, और `reserved` हैं। सभी
-    models सभी tiers support नहीं करते — यदि unsupported tier request किया जाता है, तो Bedrock
-    validation error लौटाएगा। Note: error message कुछ misleading है;
-    यह unsupported service tier बताने के बजाय "The provided model identifier is invalid" कह सकता है।
-    यदि आपको यह error दिखे, तो जांचें कि model requested tier
-    support करता है या नहीं।
+    मान्य मान `default`, `flex`, `priority`, और `reserved` हैं। Claude
+    Fable 5, Opus 5, और Sonnet 5 केवल `default` स्तर का समर्थन करते हैं; OpenClaw उन मॉडल के लिए अनुरोधित
+    `flex`, `priority`, या `reserved` को लेकर चेतावनी देता है और
+    उन्हें अनदेखा करता है। अन्य मॉडल के लिए, हर मॉडल हर स्तर का समर्थन नहीं करता है -- असमर्थित स्तर
+    Bedrock सत्यापन त्रुटि लौटाता है, और त्रुटि संदेश
+    भ्रामक हो सकता है (उदाहरण के लिए, स्तर को समस्या बताने के बजाय
+    "The provided model identifier is invalid")। यदि आपको यह त्रुटि दिखाई दे, तो जाँचें
+    कि मॉडल अनुरोधित स्तर का समर्थन करता है या नहीं।
 
   </Accordion>
 
-  <Accordion title="Claude Opus 4.7 temperature">
-    Bedrock Claude Opus 4.7 के लिए `temperature` parameter reject करता है। OpenClaw
-    किसी भी Opus 4.7 Bedrock ref के लिए `temperature` को अपने-आप omit करता है, जिसमें
-    foundation model ids, named inference profiles, application inference
-    profiles जिनका underlying model `bedrock:GetInferenceProfile` के माध्यम से Opus 4.7 में resolve होता है,
-    और optional region prefixes (`us.`, `eu.`, `ap.`, `apac.`, `au.`, `jp.`,
-    `global.`) वाले dotted `opus-4.7` variants शामिल हैं। किसी config knob की आवश्यकता नहीं है,
-    और omission request options object तथा `inferenceConfig` payload field दोनों पर लागू होता है।
+  <Accordion title="Claude Opus 5, 4.8, और 4.7 का तापमान">
+    Bedrock, Claude Opus 5, Opus 4.8,
+    और Opus 4.7 के लिए `temperature` पैरामीटर अस्वीकार करता है। OpenClaw किसी भी मेल खाने वाले Bedrock
+    रेफ़रेंस के लिए `temperature` को स्वचालित रूप से छोड़ देता है, जिसमें फ़ाउंडेशन मॉडल आईडी, नामित इन्फ़रेंस प्रोफ़ाइल, ऐसी एप्लिकेशन
+    इन्फ़रेंस प्रोफ़ाइल जिनका अंतर्निहित मॉडल `bedrock:GetInferenceProfile` के माध्यम से Opus 5/4.8/4.7 में रिज़ॉल्व होता है,
+    और वैकल्पिक रीजन प्रीफ़िक्स वाले डॉटेड `opus-4.7`/`opus-4.8` वेरिएंट
+    (`us.`, `eu.`, `ap.`, `apac.`, `au.`, `jp.`,
+    `global.`) शामिल हैं। किसी कॉन्फ़िगरेशन विकल्प की आवश्यकता नहीं है, और यह विलोपन
+    अनुरोध विकल्प ऑब्जेक्ट तथा `inferenceConfig` पेलोड फ़ील्ड, दोनों पर लागू होता है।
+  </Accordion>
+
+  <Accordion title="Claude Opus 5">
+    Messages-API Bedrock
+    एंडपॉइंट पर `amazon-bedrock/anthropic.claude-opus-5`, या Bedrock डिस्कवरी में दिखाई देने पर
+    `global.anthropic.claude-opus-5` जैसी रीजनल/ग्लोबल इन्फ़रेंस प्रोफ़ाइल का उपयोग करें।
+    OpenClaw 1,000,000-टोकन कॉन्टेक्स्ट विंडो, 128,000-टोकन आउटपुट
+    सीमा, इमेज इनपुट, प्रॉम्प्ट कैशिंग, अस्वीकृति-सुरक्षित स्ट्रीमिंग, और मूल
+    `xhigh`/`max` प्रयास स्तर लागू करता है।
+
+    अनुकूली चिंतन का डिफ़ॉल्ट `high` है। `/think off` चिंतन को अक्षम करता है, जबकि
+    `/think xhigh|max` अनुकूली चिंतन को सक्षम रखता है। OpenClaw कस्टम
+    सैंपलिंग पैरामीटर और असमर्थित गैर-डिफ़ॉल्ट सेवा स्तरों को छोड़ देता है।
+
   </Accordion>
 
   <Accordion title="Claude Fable 5">
     `us-east-1` में `amazon-bedrock/anthropic.claude-fable-5`, या
-    `us.anthropic.claude-fable-5` जैसे क्षेत्रीय inference ids का उपयोग करें।
-    OpenClaw Fable की 1M context window, 128K आउटपुट सीमा, हमेशा चालू
-    adaptive thinking, और समर्थित effort mapping लागू करता है। `/think off` और
-    `/think minimal` `low` पर मैप होते हैं; असमर्थित temperature और forced tool
-    choice controls छोड़ दिए जाते हैं। Streaming output को तब तक रोका जाता है जब तक Bedrock
-    terminal status वापस नहीं करता, ताकि mid-stream refusals आंशिक टेक्स्ट उजागर न करें।
-    Fable केवल standard service tier का समर्थन करता है; OpenClaw इस मॉडल के लिए कॉन्फ़िगर किए गए
-    `flex`, `priority`, और `reserved` tiers को अनदेखा करता है।
+    `us.anthropic.claude-fable-5` जैसी रीजनल इन्फ़रेंस आईडी का उपयोग करें।
+    OpenClaw Fable की 1M कॉन्टेक्स्ट विंडो, 128K आउटपुट सीमा, हमेशा-सक्रिय
+    अनुकूली चिंतन, और समर्थित प्रयास मैपिंग लागू करता है। `/think off` और
+    `/think minimal`, `low` में मैप होते हैं; Opus 4.7/4.8 रूट के अनुरूप,
+    तापमान और बाध्य टूल चयन नियंत्रण छोड़ दिए जाते हैं। स्ट्रीमिंग आउटपुट को
+    तब तक रोका जाता है जब तक Bedrock कोई अंतिम स्थिति नहीं लौटाता, ताकि स्ट्रीम के बीच होने वाली अस्वीकृतियाँ
+    आंशिक टेक्स्ट उजागर न करें।
 
-    AWS को Fable उपलब्ध होने से पहले स्पष्ट `provider_data_share` data-retention opt-in चाहिए।
-    Prompts और completions Anthropic के साथ साझा किए जाते हैं और
-    trust and safety के लिए 30 दिनों तक रखे जाते हैं। मॉडल सक्षम करने से पहले
-    [Bedrock data retention](https://docs.aws.amazon.com/bedrock/latest/userguide/data-retention.html)
+    Fable उपलब्ध होने से पहले AWS को स्पष्ट `provider_data_share` डेटा-प्रतिधारण सहमति
+    आवश्यक होती है। प्रॉम्प्ट और पूर्णताएँ Anthropic के साथ साझा की जाती हैं और
+    भरोसे तथा सुरक्षा के लिए अधिकतम 30 दिनों तक रखी जाती हैं। मॉडल सक्षम करने से पहले
+    [Bedrock डेटा प्रतिधारण](https://docs.aws.amazon.com/bedrock/latest/userguide/data-retention.html)
     की समीक्षा और कॉन्फ़िगरेशन करें।
 
   </Accordion>
 
-  <Accordion title="Guardrails">
-    `amazon-bedrock` Plugin config में `guardrail` object जोड़कर आप सभी Bedrock model invocations पर
-    [Amazon Bedrock Guardrails](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html)
-    लागू कर सकते हैं। Guardrails आपको content filtering,
-    topic denial, word filters, sensitive information filters, और contextual
-    grounding checks लागू करने देते हैं।
+  <Accordion title="Claude Mythos 5">
+    Claude Mythos 5, Bedrock के माध्यम से केवल उन खातों के लिए उपलब्ध है जिनके पास
+    आवश्यक सीमित-पहुँच स्वीकृति है। OpenClaw फ़ाउंडेशन मॉडल
+    `anthropic.claude-mythos-5` और `us.anthropic.claude-mythos-5` जैसी रीजनल या ग्लोबल इन्फ़रेंस प्रोफ़ाइल
+    को पहचानता है।
+
+    OpenClaw 1,000,000-टोकन कॉन्टेक्स्ट विंडो, 128,000-टोकन आउटपुट
+    सीमा, इमेज इनपुट, प्रॉम्प्ट कैशिंग, अस्वीकृति-सुरक्षित स्ट्रीमिंग, और मूल
+    प्रयास स्तर लागू करता है। अनुकूली चिंतन हमेशा सक्षम रहता है: `/think off` और
+    `/think minimal`, `low` में मैप होते हैं, जबकि `xhigh` और `max` उपलब्ध रहते हैं।
+    कस्टम सैंपलिंग और बाध्य टूल चयन मान छोड़ दिए जाते हैं।
+
+  </Accordion>
+
+  <Accordion title="Claude Sonnet 5">
+    AWS, Sonnet 5 को
+    [`bedrock-runtime` और `bedrock-mantle` एंडपॉइंट](https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-sonnet-5.html), दोनों के लिए दस्तावेज़ित करता है।
+    OpenClaw, Bedrock फ़ाउंडेशन मॉडल
+    `anthropic.claude-sonnet-5` और `us.anthropic.claude-sonnet-5` जैसी रीजनल या ग्लोबल इन्फ़रेंस प्रोफ़ाइल
+    को पहचानता है। यह 1,000,000-टोकन कॉन्टेक्स्ट
+    विंडो, 128,000-टोकन आउटपुट सीमा, इमेज इनपुट, मूल प्रयास स्तर,
+    प्रॉम्प्ट कैशिंग, और अस्वीकृति-सुरक्षित स्ट्रीमिंग लागू करता है।
+
+    Bedrock, Sonnet 5 के लिए अनुकूली चिंतन सक्षम रखता है। OpenClaw का डिफ़ॉल्ट
+    `high` है; `/think off` और `/think minimal`, `low` में मैप होते हैं क्योंकि यह रूट
+    चिंतन को अक्षम नहीं कर सकता। अनुकूली चिंतन सक्रिय रहने के दौरान कस्टम तापमान और बाध्य टूल चयन मान
+    छोड़ दिए जाते हैं।
+
+  </Accordion>
+
+  <Accordion title="गार्डरेल">
+    `amazon-bedrock` Plugin कॉन्फ़िगरेशन में `guardrail` ऑब्जेक्ट जोड़कर
+    सभी Bedrock मॉडल आह्वानों पर [Amazon Bedrock Guardrails](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html)
+    लागू किए जा सकते हैं। गार्डरेल से आप सामग्री फ़िल्टरिंग,
+    विषय निषेध, शब्द फ़िल्टर, संवेदनशील जानकारी फ़िल्टर, और संदर्भात्मक
+    ग्राउंडिंग जाँच लागू कर सकते हैं।
 
     ```json5
     {
@@ -348,10 +414,10 @@ openclaw models list
           "amazon-bedrock": {
             config: {
               guardrail: {
-                guardrailIdentifier: "abc123", // guardrail ID or full ARN
-                guardrailVersion: "1", // version number or "DRAFT"
-                streamProcessingMode: "sync", // optional: "sync" or "async"
-                trace: "enabled", // optional: "enabled", "disabled", or "enabled_full"
+                guardrailIdentifier: "abc123", // गार्डरेल आईडी या पूर्ण ARN
+                guardrailVersion: "1", // संस्करण संख्या या "DRAFT"
+                streamProcessingMode: "sync", // वैकल्पिक: "sync" या "async"
+                trace: "enabled", // वैकल्पिक: "enabled", "disabled", या "enabled_full"
               },
             },
           },
@@ -360,76 +426,77 @@ openclaw models list
     }
     ```
 
-    | विकल्प | आवश्यक | विवरण |
-    | ------ | -------- | ----------- |
-    | `guardrailIdentifier` | हाँ | Guardrail ID (जैसे `abc123`) या पूरा ARN (जैसे `arn:aws:bedrock:us-east-1:123456789012:guardrail/abc123`)। |
-    | `guardrailVersion` | हाँ | प्रकाशित version number, या working draft के लिए `"DRAFT"`। |
-    | `streamProcessingMode` | नहीं | streaming के दौरान guardrail evaluation के लिए `"sync"` या `"async"`। यदि छोड़ा जाए, तो Bedrock अपना default उपयोग करता है। |
-    | `trace` | नहीं | debugging के लिए `"enabled"` या `"enabled_full"`; production के लिए छोड़ दें या `"disabled"` सेट करें। |
+    `guardrailIdentifier` और `guardrailVersion` आवश्यक हैं।
+
+    | विकल्प | विवरण |
+    | ------ | ----------- |
+    | `guardrailIdentifier` | गार्डरेल आईडी (जैसे `abc123`) या पूर्ण ARN (जैसे `arn:aws:bedrock:us-east-1:123456789012:guardrail/abc123`)। |
+    | `guardrailVersion` | प्रकाशित संस्करण संख्या, या कार्यशील ड्राफ़्ट के लिए `"DRAFT"`। |
+    | `streamProcessingMode` | स्ट्रीमिंग के दौरान गार्डरेल मूल्यांकन के लिए `"sync"` या `"async"`। छोड़े जाने पर Bedrock अपने डिफ़ॉल्ट का उपयोग करता है। |
+    | `trace` | डीबगिंग के लिए `"enabled"` या `"enabled_full"`; प्रोडक्शन के लिए इसे छोड़ दें या `"disabled"` पर सेट करें। |
 
     <Warning>
-    Gateway द्वारा उपयोग किए गए IAM principal के पास standard invoke permissions के अतिरिक्त `bedrock:ApplyGuardrail` permission होना चाहिए।
+    Gateway द्वारा उपयोग किए गए IAM प्रिंसिपल के पास मानक आह्वान अनुमतियों के अतिरिक्त `bedrock:ApplyGuardrail` अनुमति होनी चाहिए।
     </Warning>
 
   </Accordion>
 
-  <Accordion title="Embeddings for memory search">
-    Bedrock
-    [मेमरी खोज](/hi/concepts/memory-search) के लिए embedding provider के रूप में भी काम कर सकता है। इसे
-    inference provider से अलग कॉन्फ़िगर किया जाता है -- `agents.defaults.memorySearch.provider` को `"bedrock"` पर सेट करें:
+  <Accordion title="मेमोरी खोज के लिए एम्बेडिंग">
+    Bedrock, [मेमोरी खोज](/hi/concepts/memory-search) के लिए एम्बेडिंग प्रदाता के रूप में भी काम कर सकता है।
+    इसे इन्फ़रेंस प्रदाता से अलग कॉन्फ़िगर किया जाता है -- `memory.search.provider` को `"bedrock"` पर सेट करें:
 
     ```json5
     {
-      agents: {
-        defaults: {
-          memorySearch: {
-            provider: "bedrock",
-            model: "amazon.titan-embed-text-v2:0", // default
-          },
+      memory: {
+        search: {
+          provider: "bedrock",
+          model: "amazon.titan-embed-text-v2:0", // डिफ़ॉल्ट
         },
       },
     }
     ```
 
-    Bedrock embeddings inference जैसी ही AWS SDK credential chain का उपयोग करते हैं (instance
-    roles, SSO, access keys, shared config, और web identity)। कोई API key
-    आवश्यक नहीं है। Bedrock embeddings का उपयोग करने के लिए `memorySearch.provider: "bedrock"` स्पष्ट रूप से सेट करें।
+    Bedrock एम्बेडिंग, इन्फ़रेंस के समान AWS SDK क्रेडेंशियल शृंखला का उपयोग करती हैं (इंस्टेंस
+    भूमिकाएँ, SSO, एक्सेस कुंजियाँ, साझा कॉन्फ़िगरेशन, और वेब पहचान)। किसी API कुंजी की
+    आवश्यकता नहीं है।
 
-    समर्थित embedding models में Amazon Titan Embed (v1, v2), Amazon Nova
-    Embed, Cohere Embed (v3, v4), और TwelveLabs Marengo शामिल हैं। पूरी model list और dimension options के लिए
-    [Memory configuration reference -- Bedrock](/hi/reference/memory-config#bedrock-embedding-config)
+    समर्थित एम्बेडिंग मॉडल में Amazon Titan Embed (v1, v2), Amazon Nova
+    Embed, Cohere Embed (v3, v4), और TwelveLabs Marengo शामिल हैं। पूरी मॉडल सूची और आयाम विकल्पों के लिए
+    [मेमोरी कॉन्फ़िगरेशन संदर्भ -- Bedrock](/hi/reference/memory-config#bedrock-embedding-config)
     देखें।
 
   </Accordion>
 
-  <Accordion title="Notes and caveats">
-    - Bedrock के लिए आपके AWS account/region में **model access** सक्षम होना आवश्यक है।
-    - Automatic discovery के लिए `bedrock:ListFoundationModels` और
-      `bedrock:ListInferenceProfiles` permissions चाहिए।
-    - यदि आप auto mode पर निर्भर हैं, तो gateway host पर समर्थित AWS auth env markers में से एक सेट करें। यदि आप env markers के बिना IMDS/shared-config auth पसंद करते हैं, तो
+  <Accordion title="टिप्पणियाँ और सावधानियाँ">
+    - Bedrock के लिए आपके AWS खाते/रीजन में **मॉडल एक्सेस** सक्षम होना आवश्यक है।
+    - स्वचालित डिस्कवरी के लिए `bedrock:ListFoundationModels` और
+      `bedrock:ListInferenceProfiles` अनुमतियाँ आवश्यक हैं।
+    - यदि आप ऑटो मोड पर निर्भर हैं, तो Gateway होस्ट पर समर्थित AWS प्रमाणीकरण एनवायरनमेंट मार्कर में से कोई एक सेट करें।
+      यदि आप एनवायरनमेंट मार्कर के बिना IMDS/साझा-कॉन्फ़िगरेशन प्रमाणीकरण पसंद करते हैं, तो
       `plugins.entries.amazon-bedrock.config.discovery.enabled: true` सेट करें।
-    - OpenClaw credential source को इस क्रम में दिखाता है: `AWS_BEARER_TOKEN_BEDROCK`,
-      फिर `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`, फिर `AWS_PROFILE`, फिर
-      default AWS SDK chain।
-    - Reasoning support model पर निर्भर करता है; वर्तमान क्षमताओं के लिए Bedrock model card देखें।
-    - यदि आप managed key flow पसंद करते हैं, तो आप Bedrock के सामने OpenAI-compatible
-      proxy भी रख सकते हैं और इसके बजाय उसे OpenAI provider के रूप में कॉन्फ़िगर कर सकते हैं।
+    - OpenClaw क्रेडेंशियल स्रोत को इस क्रम में दिखाता है: `AWS_BEARER_TOKEN_BEDROCK`,
+      फिर `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`, फिर `AWS_PROFILE`, और फिर
+      डिफ़ॉल्ट AWS SDK शृंखला।
+    - रीज़निंग समर्थन मॉडल पर निर्भर करता है; वर्तमान क्षमताओं के लिए Bedrock मॉडल कार्ड
+      देखें।
+    - यदि आप प्रबंधित कुंजी प्रवाह पसंद करते हैं, तो Bedrock के सामने OpenAI-संगत
+      प्रॉक्सी भी रख सकते हैं और इसके बजाय उसे OpenAI प्रदाता के रूप में कॉन्फ़िगर कर सकते हैं।
   </Accordion>
 </AccordionGroup>
 
 ## संबंधित
 
 <CardGroup cols={2}>
-  <Card title="Model selection" href="/hi/concepts/model-providers" icon="layers">
-    providers, model refs, और failover behavior चुनना।
+  <Card title="मॉडल चयन" href="/hi/concepts/model-providers" icon="layers">
+    प्रदाताओं, मॉडल रेफ़रेंस, और फ़ेलओवर व्यवहार का चयन।
   </Card>
-  <Card title="Memory search" href="/hi/concepts/memory-search" icon="magnifying-glass">
-    मेमरी खोज कॉन्फ़िगरेशन के लिए Bedrock embeddings।
+  <Card title="मेमोरी खोज" href="/hi/concepts/memory-search" icon="magnifying-glass">
+    मेमोरी खोज कॉन्फ़िगरेशन के लिए Bedrock एम्बेडिंग।
   </Card>
-  <Card title="Memory config reference" href="/hi/reference/memory-config#bedrock-embedding-config" icon="database">
-    पूरी Bedrock embedding model list और dimension options।
+  <Card title="मेमोरी कॉन्फ़िगरेशन संदर्भ" href="/hi/reference/memory-config#bedrock-embedding-config" icon="database">
+    Bedrock एम्बेडिंग मॉडल की पूरी सूची और आयाम विकल्प।
   </Card>
-  <Card title="Troubleshooting" href="/hi/help/troubleshooting" icon="wrench">
-    सामान्य troubleshooting और FAQ।
+  <Card title="समस्या निवारण" href="/hi/help/troubleshooting" icon="wrench">
+    सामान्य समस्या निवारण और अक्सर पूछे जाने वाले प्रश्न।
   </Card>
 </CardGroup>

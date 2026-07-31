@@ -5,11 +5,12 @@ read_when:
 summary: RPC-adapters voor externe CLI's (signal-cli, imsg) en Gateway-patronen
 title: RPC-adapters
 x-i18n:
-    generated_at: "2026-07-12T09:24:03Z"
+    generated_at: "2026-07-27T05:50:21Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 6ddb3fb741c90fe7b01ba35376b71865584b1e507cf610705392452790fb76f5
+    source_hash: 7deee8154dc824db4eccca9a26381711693972ba2606aec47d657e3724b3a5dd
     source_path: reference/rpc.md
     workflow: 16
 ---
@@ -18,17 +19,17 @@ OpenClaw integreert externe CLI's via JSON-RPC. Momenteel worden twee patronen g
 
 ## Patroon A: HTTP-daemon (signal-cli)
 
-- `signal-cli` draait als daemon met JSON-RPC via HTTP.
-- De gebeurtenisstroom gebruikt SSE (`/api/v1/events`).
+- `signal-cli` wordt uitgevoerd als daemon met JSON-RPC via HTTP.
+- De gebeurtenisstroom is SSE (`/api/v1/events`).
 - Statuscontrole: `/api/v1/check`.
-- OpenClaw beheert de levenscyclus wanneer `channels.signal.autoStart=true`.
+- OpenClaw beheert de levenscyclus bij `channels.signal.transport.kind="managed-native"` (de standaardinstelling).
 
 Zie [Signal](/nl/channels/signal) voor de configuratie en eindpunten.
 
-## Patroon B: stdio-subproces (imsg)
+## Patroon B: onderliggend stdio-proces (imsg)
 
-- OpenClaw start `imsg rpc` als subproces voor [iMessage](/nl/channels/imessage).
-- JSON-RPC is regelgescheiden via stdin/stdout (één JSON-object per regel).
+- OpenClaw start `imsg rpc` als onderliggend proces voor [iMessage](/nl/channels/imessage).
+- JSON-RPC wordt regelgescheiden via stdin/stdout verzonden (één JSON-object per regel).
 - Geen TCP-poort en geen daemon vereist.
 
 Gebruikte kernmethoden:
@@ -42,8 +43,8 @@ Zie [iMessage](/nl/channels/imessage) voor de configuratie en adressering (`chat
 
 ## Richtlijnen voor adapters
 
-- Gateway beheert het proces (starten/stoppen is gekoppeld aan de levenscyclus van de provider).
-- Houd RPC-clients robuust: gebruik time-outs en herstart ze na afsluiten.
+- De Gateway beheert het proces (starten/stoppen is gekoppeld aan de levenscyclus van de provider).
+- Maak RPC-clients robuust: gebruik time-outs en start opnieuw na afsluiting.
 - Geef de voorkeur aan stabiele ID's (bijvoorbeeld `chat_id`) boven weergaveteksten.
 
 ## Gerelateerd

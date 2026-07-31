@@ -1,194 +1,170 @@
 ---
 read_when:
-    - आपको एजेंट लूप या जीवनचक्र घटनाओं की सटीक क्रमिक मार्गदर्शिका चाहिए
-    - आप सत्र कतारबद्धता, ट्रांसक्रिप्ट लेखन, या सत्र लेखन लॉक व्यवहार बदल रहे हैं
-summary: Agent लूप जीवनचक्र, स्ट्रीम, और प्रतीक्षा सेमांटिक्स
+    - आपको एजेंट लूप या जीवनचक्र इवेंट का सटीक चरण-दर-चरण विवरण चाहिए
+    - आप सत्र कतारबद्धता, ट्रांसक्रिप्ट लेखन या सत्र लेखन लॉक का व्यवहार बदल रहे हैं
+summary: एजेंट लूप जीवनचक्र, स्ट्रीम और प्रतीक्षा सिमैंटिक्स
 title: एजेंट लूप
 x-i18n:
-    generated_at: "2026-06-28T22:55:53Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:09:12Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 1ccfdf4a3ea6b9c946064f051e32c88cefbcb707c7426abe85b04294030eedaf
+    source_hash: 1d0102ffb6ebf572ea0201470db138775be33b0f0b655d9d08742177be5f3f31
     source_path: concepts/agent-loop.md
     workflow: 16
 ---
 
-एजेंटिक लूप किसी एजेंट का पूरा "वास्तविक" रन होता है: इनटेक → संदर्भ असेंबली → मॉडल inference →
-टूल निष्पादन → स्ट्रीमिंग replies → persistence. यह वह आधिकारिक पथ है जो किसी message को
-actions और अंतिम reply में बदलता है, साथ ही session state को संगत रखता है।
+एजेंट लूप क्रमबद्ध, प्रति-सत्र रन है, जो किसी संदेश को
+कार्रवाइयों और उत्तर में बदलता है: ग्रहण, संदर्भ संयोजन, मॉडल अनुमान, टूल
+निष्पादन, स्ट्रीमिंग, स्थायित्व।
 
-OpenClaw में, loop प्रति session एक single, serialized run है, जो lifecycle और stream events emit करता है
-जब model सोचता है, tools call करता है, और output stream करता है। यह doc समझाता है कि वह authentic loop
-end-to-end कैसे wired है।
+## प्रवेश बिंदु
 
-## एंट्री पॉइंट्स
+- Gateway RPC: `agent` और `agent.wait`।
+- CLI: `openclaw agent`।
 
-- Gateway RPC: `agent` और `agent.wait`.
-- CLI: `agent` command.
+## रन क्रम
 
-## यह कैसे काम करता है (high-level)
+1. `agent` RPC पैरामीटर सत्यापित करता है, सत्र (`sessionKey`/`sessionId`) का समाधान करता है, सत्र मेटाडेटा सहेजता है, और तुरंत `{ runId, acceptedAt }` लौटाता है।
+2. `agentCommand` टर्न चलाता है: मॉडल + चिंतन/विस्तृत/ट्रेस डिफ़ॉल्ट का समाधान करता है, Skills स्नैपशॉट लोड करता है, `runEmbeddedAgent` को कॉल करता है, और यदि एम्बेडेड लूप ने पहले से ऐसा कोई उत्सर्जन नहीं किया है, तो फ़ॉलबैक **जीवनचक्र समाप्ति/त्रुटि** उत्सर्जित करता है।
+3. `runEmbeddedAgent`: प्रति-सत्र और वैश्विक कतारों के माध्यम से रन क्रमबद्ध करता है, मॉडल + प्रमाणीकरण प्रोफ़ाइल का समाधान करता है, OpenClaw सत्र बनाता है, रनटाइम इवेंट की सदस्यता लेता है, सहायक/टूल डेल्टा स्ट्रीम करता है, रन टाइमआउट लागू करता है (समाप्ति पर निरस्त करके), और उपयोग मेटाडेटा के साथ पेलोड लौटाता है। Codex ऐप-सर्वर टर्न के लिए, यह ऐसे स्वीकृत टर्न को भी निरस्त करता है जो टर्मिनल इवेंट से पहले ऐप-सर्वर प्रगति उत्पन्न करना बंद कर देता है।
+4. `subscribeEmbeddedAgentSession` रनटाइम इवेंट को `agent` स्ट्रीम से जोड़ता है: टूल इवेंट को `stream: "tool"`, सहायक डेल्टा को `stream: "assistant"`, जीवनचक्र इवेंट को `stream: "lifecycle"` (`phase: "start" | "end" | "error"`)।
+5. `agent.wait` (`waitForAgentRun`) किसी `runId` पर **जीवनचक्र समाप्ति/त्रुटि** की प्रतीक्षा करता है और `{ status: ok|error|timeout, startedAt, endedAt, error? }` लौटाता है।
 
-1. `agent` RPC params validate करता है, session resolve करता है (sessionKey/sessionId), session metadata persist करता है, और तुरंत `{ runId, acceptedAt }` लौटाता है।
-2. `agentCommand` agent चलाता है:
-   - model + thinking/verbose/trace defaults resolve करता है
-   - skills snapshot load करता है
-   - `runEmbeddedAgent` (OpenClaw agent runtime) call करता है
-   - अगर embedded loop lifecycle end/error emit नहीं करता, तो **lifecycle end/error** emit करता है
-3. `runEmbeddedAgent`:
-   - per-session + global queues के जरिए runs serialize करता है
-   - model + auth profile resolve करता है और OpenClaw session बनाता है
-   - runtime events subscribe करता है और assistant/tool deltas stream करता है
-   - timeout enforce करता है -> सीमा पार होने पर run abort करता है
-   - Codex app-server turns के लिए, terminal event से पहले app-server progress produce करना बंद करने वाले accepted turn को abort करता है
-   - payloads + usage metadata लौटाता है
-4. `subscribeEmbeddedAgentSession` agent runtime events को OpenClaw `agent` stream से bridge करता है:
-   - tool events => `stream: "tool"`
-   - assistant deltas => `stream: "assistant"`
-   - lifecycle events => `stream: "lifecycle"` (`phase: "start" | "end" | "error"`)
-5. `agent.wait` `waitForAgentRun` का उपयोग करता है:
-   - `runId` के लिए **lifecycle end/error** का इंतजार करता है
-   - `{ status: ok|error|timeout, startedAt, endedAt, error? }` लौटाता है
+## कतारबद्धता और समवर्तीता
 
-## Queueing + concurrency
+रन प्रति सत्र कुंजी (सत्र लेन) क्रमबद्ध होते हैं और वैकल्पिक रूप से वैश्विक लेन से होकर गुजरते हैं, जिससे टूल/सत्र रेस रोकी जाती हैं। संदेश चैनल एक कतार मोड (steer/followup/collect/interrupt) चुनते हैं, जो इस लेन प्रणाली को इनपुट देता है; [कमांड कतार](/hi/concepts/queue) देखें।
 
-- Runs प्रति session key (session lane) serialize होते हैं और optional रूप से global lane से गुजरते हैं।
-- यह tool/session races को रोकता है और session history को consistent रखता है।
-- Messaging channels queue modes (steer/followup/collect/interrupt) चुन सकते हैं जो इस lane system को feed करते हैं।
-  देखें [Command Queue](/hi/concepts/queue).
-- Transcript writes भी session file पर session write lock से protected होते हैं। Lock
-  process-aware और file-based है, इसलिए यह उन writers को पकड़ता है जो in-process queue को bypass करते हैं या
-  दूसरे process से आते हैं। Session transcript writers session busy report करने से पहले
-  `session.writeLock.acquireTimeoutMs` तक wait करते हैं; default `60000` ms है।
-- Session write locks default रूप से non-reentrant होते हैं। यदि कोई helper एक logical writer को preserve करते हुए
-  जानबूझकर same lock की acquisition nest करता है, तो उसे स्पष्ट रूप से
-  `allowReentrant: true` के साथ opt in करना होगा।
+ट्रांसक्रिप्ट लेखन को सत्र फ़ाइल पर सत्र लेखन लॉक द्वारा अतिरिक्त सुरक्षा दी जाती है। लॉक प्रक्रिया-जागरूक और फ़ाइल-आधारित है, इसलिए यह उन लेखकों को भी पकड़ता है जो प्रक्रिया-अंतर्गत कतार को बायपास करते हैं या किसी अन्य प्रक्रिया से आते हैं। सत्र को व्यस्त बताए जाने से पहले लेखक डिफ़ॉल्ट रूप से अधिकतम 60 सेकंड प्रतीक्षा करते हैं (एन्वायरमेंट ओवरराइड `OPENCLAW_SESSION_WRITE_LOCK_ACQUIRE_TIMEOUT_MS`)।
 
-## Session + workspace preparation
+सत्र लेखन लॉक डिफ़ॉल्ट रूप से पुनःप्रवेशी नहीं होते। एक ही तार्किक लेखक को बनाए रखते हुए जानबूझकर उसी लॉक के अधिग्रहण को नेस्ट करने वाले हेल्पर को `allowReentrant: true` के साथ ऑप्ट इन करना होगा।
 
-- Workspace resolve और create किया जाता है; sandboxed runs sandbox workspace root पर redirect हो सकते हैं।
-- Skills load किए जाते हैं (या snapshot से reused) और env तथा prompt में inject किए जाते हैं।
-- Bootstrap/context files resolve किए जाते हैं और system prompt report में inject किए जाते हैं।
-- Session write lock acquire किया जाता है; streaming से पहले `SessionManager` open और prepare किया जाता है। किसी भी
-  बाद के transcript rewrite, compaction, या truncation path को transcript file open या mutate करने से पहले
-  वही lock लेना होगा।
+## सत्र और कार्यक्षेत्र की तैयारी
 
-## Prompt assembly + system prompt
+- कार्यस्थल का समाधान करके उसे बनाया जाता है; सैंडबॉक्स किए गए रन को सैंडबॉक्स कार्यस्थल रूट पर पुनर्निर्देशित किया जा सकता है।
+- Skills लोड किए जाते हैं (या स्नैपशॉट से पुनः उपयोग किए जाते हैं) और एन्वायरमेंट तथा प्रॉम्प्ट में अंतःक्षेपित किए जाते हैं।
+- बूटस्ट्रैप/संदर्भ फ़ाइलों का समाधान करके उन्हें सिस्टम प्रॉम्प्ट में अंतःक्षेपित किया जाता है।
+- स्ट्रीमिंग शुरू होने से पहले सत्र लेखन लॉक अधिग्रहित किया जाता है और सत्र ट्रांसक्रिप्ट लक्ष्य तैयार किया जाता है। बाद में ट्रांसक्रिप्ट को पुनः लिखने, Compaction करने या छोटा करने वाले किसी भी पथ को SQLite ट्रांसक्रिप्ट पंक्तियों में बदलाव करने से पहले यही लॉक लेना होगा।
 
-- System prompt OpenClaw के base prompt, skills prompt, bootstrap context, और per-run overrides से बनाया जाता है।
-- Model-specific limits और compaction reserve tokens enforce किए जाते हैं।
-- Model क्या देखता है, इसके लिए [System prompt](/hi/concepts/system-prompt) देखें।
+## प्रॉम्प्ट संयोजन
 
-## Hook points (जहां आप intercept कर सकते हैं)
+सिस्टम प्रॉम्प्ट OpenClaw के आधार प्रॉम्प्ट, Skills प्रॉम्प्ट, बूटस्ट्रैप संदर्भ और प्रति-रन ओवरराइड से बनाया जाता है। मॉडल-विशिष्ट सीमाएँ और Compaction आरक्षित टोकन लागू किए जाते हैं। मॉडल क्या देखता है, इसके लिए [सिस्टम प्रॉम्प्ट](/hi/concepts/system-prompt) देखें।
 
-OpenClaw में दो hook systems हैं:
+## हुक
 
-- **Internal hooks** (Gateway hooks): commands और lifecycle events के लिए event-driven scripts.
-- **Plugin hooks**: agent/tool lifecycle और gateway pipeline के अंदर extension points.
+OpenClaw में दो हुक प्रणालियाँ हैं:
 
-### Internal hooks (Gateway hooks)
+- **आंतरिक हुक** (Gateway हुक): कमांड और जीवनचक्र इवेंट के लिए इवेंट-संचालित स्क्रिप्ट।
+- **Plugin हुक**: एजेंट/टूल जीवनचक्र और Gateway पाइपलाइन के भीतर विस्तार बिंदु।
 
-- **`agent:bootstrap`**: system prompt finalize होने से पहले bootstrap files बनाते समय चलता है।
-  Bootstrap context files add/remove करने के लिए इसका उपयोग करें।
-- **Command hooks**: `/new`, `/reset`, `/stop`, और अन्य command events (Hooks doc देखें)।
+### आंतरिक हुक (Gateway हुक)
 
-Setup और examples के लिए [Hooks](/hi/automation/hooks) देखें।
+- **`agent:bootstrap`**: सिस्टम प्रॉम्प्ट को अंतिम रूप दिए जाने से पहले बूटस्ट्रैप फ़ाइलें बनाते समय चलता है। बूटस्ट्रैप संदर्भ फ़ाइलें जोड़ने या हटाने के लिए इसका उपयोग करें।
+- **कमांड हुक**: `/new`, `/reset`, `/stop`, और अन्य कमांड इवेंट (हुक दस्तावेज़ देखें)।
 
-### Plugin hooks (agent + gateway lifecycle)
+सेटअप और उदाहरणों के लिए [हुक](/hi/automation/hooks) देखें।
 
-ये agent loop या gateway pipeline के अंदर चलते हैं:
+### Plugin हुक
 
-- **`before_model_resolve`**: model resolution से पहले provider/model को deterministically override करने के लिए pre-session (कोई `messages` नहीं) चलता है।
-- **`before_prompt_build`**: prompt submission से पहले `prependContext`, `systemPrompt`, `prependSystemContext`, या `appendSystemContext` inject करने के लिए session load के बाद (`messages` के साथ) चलता है। Per-turn dynamic text के लिए `prependContext` और stable guidance के लिए system-context fields का उपयोग करें, जिन्हें system prompt space में रहना चाहिए।
-- **`before_agent_start`**: legacy compatibility hook जो किसी भी phase में चल सकता है; ऊपर दिए explicit hooks को prefer करें।
-- **`before_agent_reply`**: inline actions के बाद और LLM call से पहले चलता है, जिससे कोई Plugin turn claim कर सकता है और synthetic reply लौटा सकता है या turn को पूरी तरह silence कर सकता है।
-- **`agent_end`**: completion के बाद final message list और run metadata inspect करें।
-- **`before_compaction` / `after_compaction`**: compaction cycles observe या annotate करें।
-- **`before_tool_call` / `after_tool_call`**: tool params/results intercept करें।
-- **`before_install`**: operator install policy चलने के बाद staged skill या Plugin install material inspect करें, जब Plugin hooks current OpenClaw process में loaded हों।
-- **`tool_result_persist`**: tool results को OpenClaw-owned session transcript में लिखे जाने से पहले synchronously transform करें।
-- **`message_received` / `message_sending` / `message_sent`**: inbound + outbound message hooks.
-- **`session_start` / `session_end`**: session lifecycle boundaries.
-- **`gateway_start` / `gateway_stop`**: gateway lifecycle events.
+ये एजेंट लूप या Gateway पाइपलाइन के भीतर चलते हैं:
 
-Outbound/tool guards के लिए hook decision rules:
+| हुक                                                    | कब चलता है                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `before_model_resolve`                                  | पूर्व-सत्र (`messages` के बिना), समाधान से पहले प्रदाता/मॉडल को नियतात्मक रूप से ओवरराइड करने के लिए।                                                                                                                                                                                                |
+| `before_prompt_build`                                   | सत्र लोड होने के बाद (`messages` के साथ), प्रस्तुति से पहले `prependContext`, `systemPrompt`, `prependSystemContext`, या `appendSystemContext` अंतःक्षेपित करने के लिए। प्रति-टर्न गतिशील टेक्स्ट के लिए `prependContext` और सिस्टम प्रॉम्प्ट स्थान में आने वाले स्थिर मार्गदर्शन के लिए सिस्टम-संदर्भ फ़ील्ड का उपयोग करें। |
+| `before_agent_reply`                                    | इनलाइन कार्रवाइयों के बाद, LLM कॉल से पहले। किसी Plugin को टर्न ग्रहण करके कृत्रिम उत्तर लौटाने या उसे पूरी तरह मौन करने देता है।                                                                                                                                                                |
+| `agent_end`                                             | पूर्णता के बाद, अंतिम संदेश सूची और रन मेटाडेटा के साथ।                                                                                                                                                                                                                             |
+| `before_compaction` / `after_compaction`                | Compaction चक्रों का अवलोकन या उन पर टिप्पणी करता है।                                                                                                                                                                                                                                                      |
+| `before_tool_call` / `after_tool_call`                  | टूल पैरामीटर/परिणामों को इंटरसेप्ट करता है।                                                                                                                                                                                                                                                              |
+| `before_install`                                        | ऑपरेटर स्थापना नीति चलने के बाद, चरणबद्ध skill/Plugin स्थापना सामग्री पर, जब Plugin हुक वर्तमान प्रक्रिया में लोड हों।                                                                                                                                                           |
+| `tool_result_persist`                                   | टूल परिणामों को OpenClaw के स्वामित्व वाले सत्र ट्रांसक्रिप्ट में लिखे जाने से पहले समकालिक रूप से रूपांतरित करता है।                                                                                                                                                                                      |
+| `message_received` / `message_sending` / `message_sent` | आवक और जावक संदेश हुक।                                                                                                                                                                                                                                                         |
+| `session_start` / `session_end`                         | सत्र जीवनचक्र सीमाएँ।                                                                                                                                                                                                                                                               |
+| `gateway_start` / `gateway_stop`                        | Gateway जीवनचक्र इवेंट।                                                                                                                                                                                                                                                                   |
 
-- `before_tool_call`: `{ block: true }` terminal है और lower-priority handlers को रोकता है।
-- `before_tool_call`: `{ block: false }` no-op है और prior block clear नहीं करता।
-- `before_install`: `{ block: true }` terminal है और lower-priority handlers को रोकता है।
-- `before_install`: `{ block: false }` no-op है और prior block clear नहीं करता।
-- Operator-owned install allow/block decisions के लिए `before_install` नहीं, `security.installPolicy` उपयोग करें, जिन्हें CLI install और update paths cover करने चाहिए।
-- `message_sending`: `{ cancel: true }` terminal है और lower-priority handlers को रोकता है।
-- `message_sending`: `{ cancel: false }` no-op है और prior cancel clear नहीं करता।
+जावक/टूल गार्ड के लिए हुक निर्णय नियम:
 
-Hook API और registration details के लिए [Plugin hooks](/hi/plugins/hooks) देखें।
+- `before_tool_call`: `{ block: true }` अंतिम है और कम-प्राथमिकता वाले हैंडलर को रोकता है। `{ block: false }` कोई कार्रवाई नहीं करता और किसी पिछले ब्लॉक को साफ़ नहीं करता।
+- `before_install`: ऊपर जैसे ही अंतिम/कोई-कार्रवाई-नहीं अर्थ। ऑपरेटर-स्वामित्व वाले स्थापना अनुमति/अवरोध निर्णयों, जिन्हें CLI स्थापना और अपडेट पथों को शामिल करना आवश्यक है, के लिए `before_install` नहीं, बल्कि `security.installPolicy` का उपयोग करें।
+- `message_sending`: `{ cancel: true }` अंतिम है और कम-प्राथमिकता वाले हैंडलर को रोकता है। `{ cancel: false }` कोई कार्रवाई नहीं करता और किसी पिछले निरस्तीकरण को साफ़ नहीं करता।
 
-Harnesses इन hooks को अलग तरह से adapt कर सकते हैं। Codex app-server harness documented mirrored
-surfaces के लिए compatibility contract के रूप में OpenClaw Plugin hooks रखता है, जबकि Codex native hooks
-एक अलग lower-level Codex mechanism बने रहते हैं।
+हुक API और पंजीकरण विवरण के लिए [Plugin हुक](/hi/plugins/hooks) देखें।
 
-## Streaming + partial replies
+हार्नेस इन हुक को अनुकूलित कर सकते हैं। Codex ऐप-सर्वर हार्नेस दस्तावेज़ीकृत प्रतिबिंबित सतहों के लिए OpenClaw Plugin हुक को संगतता अनुबंध के रूप में बनाए रखता है; Codex मूल हुक एक अलग, निम्न-स्तरीय Codex तंत्र हैं।
 
-- Assistant deltas agent runtime से stream किए जाते हैं और `assistant` events के रूप में emit होते हैं।
-- Block streaming partial replies को `text_end` या `message_end` पर emit कर सकती है।
-- Reasoning streaming अलग stream के रूप में या block replies के रूप में emit की जा सकती है।
-- Chunking और block reply behavior के लिए [Streaming](/hi/concepts/streaming) देखें।
+## स्ट्रीमिंग
 
-## Tool execution + messaging tools
+- सहायक डेल्टा एजेंट रनटाइम से `assistant` इवेंट के रूप में स्ट्रीम होते हैं।
+- ब्लॉक स्ट्रीमिंग `text_end` या `message_end` पर आंशिक उत्तर उत्सर्जित कर सकती है।
+- रीज़निंग स्ट्रीमिंग एक अलग स्ट्रीम हो सकती है या उत्तरों को अवरुद्ध कर सकती है।
+- खंडीकरण और ब्लॉक उत्तर व्यवहार के लिए [स्ट्रीमिंग](/hi/concepts/streaming) देखें।
 
-- Tool start/update/end events `tool` stream पर emit होते हैं।
-- Tool results logging/emitting से पहले size और image payloads के लिए sanitized होते हैं।
-- Messaging tool sends duplicate assistant confirmations suppress करने के लिए tracked होते हैं।
+## टूल निष्पादन
 
-## Reply shaping + suppression
+- टूल आरंभ/अपडेट/समाप्ति इवेंट `tool` स्ट्रीम पर उत्सर्जित होते हैं।
+- लॉगिंग/उत्सर्जन से पहले टूल परिणामों का आकार और छवि पेलोड के लिए शोधन किया जाता है।
+- डुप्लिकेट सहायक पुष्टियों को रोकने के लिए संदेश टूल प्रेषण ट्रैक किए जाते हैं।
 
-- Final payloads इनसे assemble होते हैं:
-  - assistant text (और optional reasoning)
-  - inline tool summaries (जब verbose + allowed हो)
-  - model error होने पर assistant error text
-- Exact silent token `NO_REPLY` / `no_reply` outgoing
-  payloads से filtered होता है।
-- Messaging tool duplicates final payload list से remove किए जाते हैं।
-- यदि कोई renderable payloads नहीं बचते और tool errored होता है, तो fallback tool error reply emit होता है
-  (जब तक messaging tool पहले ही user-visible reply send न कर चुका हो)।
+## उत्तर का स्वरूप निर्धारण
 
-## Compaction + retries
+अंतिम पेलोड सहायक टेक्स्ट (साथ में वैकल्पिक रीज़निंग), इनलाइन टूल सारांश (जब विस्तृत मोड चालू हो और अनुमति हो), और मॉडल में त्रुटि होने पर सहायक त्रुटि टेक्स्ट से संयोजित किए जाते हैं।
 
-- Auto-compaction `compaction` stream events emit करता है और retry trigger कर सकता है।
-- Retry पर, duplicate output से बचने के लिए in-memory buffers और tool summaries reset किए जाते हैं।
-- Compaction pipeline के लिए [Compaction](/hi/concepts/compaction) देखें।
+- सटीक मौन टोकन `NO_REPLY` को जावक पेलोड से फ़िल्टर किया जाता है।
+- संदेश टूल के डुप्लिकेट अंतिम पेलोड सूची से हटा दिए जाते हैं।
+- यदि कोई रेंडर करने योग्य पेलोड शेष नहीं रहता और किसी टूल में त्रुटि हुई है, तो एक फ़ॉलबैक टूल त्रुटि उत्तर उत्सर्जित किया जाता है, बशर्ते किसी संदेश टूल ने पहले से उपयोगकर्ता को दिखाई देने वाला उत्तर न भेजा हो।
 
-## Event streams (आज)
+## Compaction और पुनः प्रयास
 
-- `lifecycle`: `subscribeEmbeddedAgentSession` द्वारा emit होता है (और fallback के रूप में `agentCommand` द्वारा)
-- `assistant`: agent runtime से streamed deltas
-- `tool`: agent runtime से streamed tool events
+स्वचालित Compaction `compaction` स्ट्रीम इवेंट उत्सर्जित करता है और पुनः प्रयास ट्रिगर कर सकता है। पुनः प्रयास पर, डुप्लिकेट आउटपुट से बचने के लिए इन-मेमोरी बफ़र और टूल सारांश रीसेट किए जाते हैं। [Compaction](/hi/concepts/compaction) देखें।
 
-## Chat channel handling
+## इवेंट स्ट्रीम
 
-- Assistant deltas chat `delta` messages में buffered होते हैं।
-- **lifecycle end/error** पर chat `final` emit होता है।
+- `lifecycle`: `subscribeEmbeddedAgentSession` द्वारा उत्सर्जित (और फ़ॉलबैक के रूप में `agentCommand` द्वारा)।
+- `assistant`: एजेंट रनटाइम से स्ट्रीम किए गए डेल्टा।
+- `tool`: एजेंट रनटाइम से स्ट्रीम किए गए टूल इवेंट।
 
-## Timeouts
+Gateway जीवनचक्र और टूल आरंभ/टर्मिनल इवेंट को सीमित,
+केवल-मेटाडेटा [ऑडिट लेजर](/hi/cli/audit) में प्रक्षेपित करता है। यह प्रक्षेपण प्रॉम्प्ट, संदेश, टूल तर्क, टूल परिणाम,
+या अपरिष्कृत त्रुटियों को ट्रांसक्रिप्ट/रनटाइम पथ से बाहर कॉपी किए बिना उद्गम और
+परिणाम कोड रिकॉर्ड करता है।
 
-- `agent.wait` default: 30s (सिर्फ wait). `timeoutMs` param override करता है।
-- Agent runtime: `agents.defaults.timeoutSeconds` default 172800s (48 hours); `runEmbeddedAgent` abort timer में enforced.
-- Cron runtime: isolated agent-turn `timeoutSeconds` cron के स्वामित्व में है। Scheduler execution शुरू होने पर वह timer start करता है, configured deadline पर underlying run abort करता है, फिर timeout record करने से पहले bounded cleanup चलाता है ताकि stale child session lane को stuck न रख सके।
-- Session liveness diagnostics: diagnostics enabled होने पर, `diagnostics.stuckSessionWarnMs` लंबे `processing` sessions को classify करता है जिनमें कोई observed reply, tool, status, block, या ACP progress नहीं है। Active embedded runs, model calls, और tool calls `session.long_running` के रूप में report होते हैं; owned silent model calls भी `diagnostics.stuckSessionAbortMs` तक `session.long_running` रहते हैं ताकि slow या non-streaming providers को बहुत जल्दी stalled report न किया जाए। Recent progress के बिना active work `session.stalled` के रूप में report होता है; owned model calls abort threshold पर या उसके बाद `session.stalled` में switch करते हैं, और ownerless stale model/tool activity को long-running के रूप में hidden नहीं किया जाता। `session.stuck` recoverable stale session bookkeeping के लिए reserved है, जिसमें stale ownerless model/tool activity वाले idle queued sessions शामिल हैं। Stale session bookkeeping recovery gates pass होने के तुरंत बाद affected session lane release करता है; stalled embedded runs केवल `diagnostics.stuckSessionAbortMs` (default: कम से कम 5 minutes और warning threshold का 3x) के बाद abort-drained होते हैं ताकि queued work merely slow runs को काटे बिना resume कर सके। Recovery structured requested/completed outcomes emit करता है, और diagnostic state को idle केवल तब mark किया जाता है जब वही processing generation अभी भी current हो। Repeated `session.stuck` diagnostics back off करते हैं जबकि session unchanged रहता है।
-- Model idle timeout: OpenClaw model request को abort करता है जब idle window से पहले कोई response chunks नहीं आते। `models.providers.<id>.timeoutSeconds` slow local/self-hosted providers के लिए इस idle watchdog को extend करता है, लेकिन यह अभी भी किसी lower `agents.defaults.timeoutSeconds` या run-specific timeout से bounded होता है क्योंकि वे पूरे agent run को control करते हैं। अन्यथा OpenClaw configured होने पर `agents.defaults.timeoutSeconds` उपयोग करता है, default रूप से 120s पर capped. Explicit model या agent timeout के बिना Cron-triggered cloud model runs वही default idle watchdog उपयोग करते हैं; explicit cron run timeout के साथ, cloud model stream stalls 60s पर capped होते हैं ताकि configured model fallbacks outer cron deadline से पहले चल सकें। Cron-triggered local या self-hosted model runs implicit watchdog disable करते हैं जब तक explicit timeout configured न हो, और explicit cron run timeouts local/self-hosted providers के लिए idle window बने रहते हैं, इसलिए slow local providers को `models.providers.<id>.timeoutSeconds` set करना चाहिए।
-- Provider HTTP request timeout: `models.providers.<id>.timeoutSeconds` उस provider के model HTTP fetches पर apply होता है, जिसमें connect, headers, body, SDK request timeout, total guarded-fetch abort handling, और model stream idle watchdog शामिल हैं। Whole agent runtime timeout बढ़ाने से पहले slow local/self-hosted providers जैसे Ollama के लिए इसका उपयोग करें, और जब model request को longer run करने की जरूरत हो तो agent/runtime timeout कम से कम उतना high रखें।
+## चैट चैनल प्रबंधन
 
-## जहां चीजें जल्दी समाप्त हो सकती हैं
+सहायक डेल्टा चैट `delta` संदेशों में बफ़र होते हैं। **जीवनचक्र समाप्ति/त्रुटि** पर चैट `final` उत्सर्जित होता है।
 
-- एजेंट टाइमआउट (abort)
-- AbortSignal (cancel)
-- Gateway डिस्कनेक्ट या RPC टाइमआउट
-- `agent.wait` टाइमआउट (केवल प्रतीक्षा, एजेंट को रोकता नहीं)
+## टाइमआउट
+
+| समय-समाप्ति                                          | डिफ़ॉल्ट                                | टिप्पणियाँ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent.wait`                                     | 30s                                    | केवल प्रतीक्षा; `timeoutMs` पैरामीटर इसे ओवरराइड करता है। यह अंतर्निहित रन को नहीं रोकता।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| एजेंट रनटाइम (`agents.defaults.timeoutSeconds`) | 172800s (48h)                          | `runEmbeddedAgent` के निरस्तीकरण टाइमर द्वारा लागू। असीमित रन बजट के लिए `0` सेट करें; मॉडल स्ट्रीम की सक्रियता पर नज़र रखने वाले वॉचडॉग फिर भी लागू रहते हैं।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| CLI बैकएंड आउटपुट-रहित वॉचडॉग                   | प्रत्येक नए/फिर से शुरू किए गए CLI रन के लिए गणना की जाती है     | एजेंट रनटाइम से अलग और पंजीकृत बैकएंड Plugin के स्वामित्व में। CLI का आंतरिक बैकग्राउंड कार्य पैरेंट सबप्रोसेस साझा करता है और समग्र एजेंट समय-समाप्ति के बाद जारी नहीं रहता।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Cron पृथक एजेंट टर्न                         | Cron के स्वामित्व में                          | निष्पादन शुरू होने पर शेड्यूलर अपना टाइमर शुरू करता है, कॉन्फ़िगर की गई समय-सीमा पर रन निरस्त करता है, फिर समय-समाप्ति दर्ज करने से पहले सीमित क्लीनअप चलाता है, ताकि कोई पुराना चाइल्ड सेशन लेन को अटका न रख सके।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| मॉडल निष्क्रियता समय-समाप्ति                               | क्लाउड 120s; स्वयं-होस्टेड 300s           | निष्क्रियता अवधि से पहले कोई प्रतिक्रिया खंड न आने पर OpenClaw मॉडल अनुरोध निरस्त कर देता है। `models.providers.<id>.timeoutSeconds` धीमे स्थानीय/स्वयं-होस्टेड प्रदाताओं के लिए इस निष्क्रियता वॉचडॉग की अवधि बढ़ाता है, लेकिन यह किसी भी कम परिमित `agents.defaults.timeoutSeconds` या रन-विशिष्ट समय-समाप्ति से सीमित रहता है, क्योंकि वे पूरे एजेंट रन को नियंत्रित करते हैं। असीमित रन बजट में भी प्रदाता-वर्ग निष्क्रियता वॉचडॉग बना रहता है। बिना स्पष्ट मॉडल/एजेंट समय-समाप्ति वाले Cron-ट्रिगर किए गए क्लाउड मॉडल रन में यही डिफ़ॉल्ट लागू होता है; स्पष्ट Cron रन समय-समाप्ति होने पर, क्लाउड मॉडल स्ट्रीम का ठहराव अधिकतम 60s होता है, ताकि कॉन्फ़िगर किए गए मॉडल फ़ॉलबैक बाहरी Cron समय-सीमा से पहले फिर भी चल सकें। वास्तविक स्थानीय एंडपॉइंट (लूपबैक/निजी baseUrl) पर Cron-ट्रिगर किए गए रन स्थानीय निष्क्रियता ऑप्ट-आउट बनाए रखते हैं; नेटवर्क baseUrls पर स्वयं-होस्टेड प्रदाताओं को अंतर्निहित 300s वॉचडॉग मिलता है। स्पष्ट Cron रन समय-समाप्ति होने पर, स्थानीय/स्वयं-होस्टेड ठहराव अधिकतम उसी समय-समाप्ति तक सीमित रहता है। धीमे स्थानीय प्रदाताओं के लिए `models.providers.<id>.timeoutSeconds` सेट करें। |
+| प्रदाता HTTP अनुरोध समय-समाप्ति                    | `models.providers.<id>.timeoutSeconds` | उस प्रदाता के लिए कनेक्शन, हेडर, बॉडी, SDK अनुरोध समय-समाप्ति, सुरक्षित-fetch निरस्तीकरण प्रबंधन और मॉडल स्ट्रीम निष्क्रियता वॉचडॉग को कवर करता है। पूरे एजेंट रनटाइम की समय-समाप्ति बढ़ाने से पहले धीमे स्थानीय/स्वयं-होस्टेड प्रदाताओं (उदाहरण के लिए Ollama) के लिए इसका उपयोग करें; जब मॉडल अनुरोध को अधिक समय तक चलना हो, तो एजेंट/रनटाइम समय-समाप्ति को कम-से-कम उतना ही रखें।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+### अटके हुए सेशन का निदान
+
+निदान सक्षम होने पर, अंतर्निहित दो-मिनट की सीमा ऐसे लंबे `processing` सेशन को वर्गीकृत करती है जिनमें कोई प्रतिक्रिया, टूल, स्थिति, अवरोध या ACP प्रगति नहीं देखी गई है:
+
+- सक्रिय एम्बेडेड रन, मॉडल कॉल और टूल कॉल को `session.long_running` के रूप में रिपोर्ट किया जाता है। स्वामित्व वाली मौन मॉडल कॉल निरस्तीकरण सीमा तक `session.long_running` बनी रहती हैं, ताकि धीमे या गैर-स्ट्रीमिंग प्रदाताओं को बहुत जल्दी रुका हुआ न माना जाए।
+- हाल की प्रगति के बिना सक्रिय कार्य को `session.stalled` के रूप में रिपोर्ट किया जाता है। स्वामित्व वाली मॉडल कॉल निरस्तीकरण सीमा पर या उसके बाद `session.stalled` में बदल जाती हैं; स्वामी-रहित पुरानी मॉडल/टूल गतिविधि को लंबे समय से चल रही गतिविधि के रूप में छिपाया नहीं जाता।
+- `session.stuck` पुनर्प्राप्त किए जा सकने वाले पुराने सेशन रिकॉर्ड-रखरखाव के लिए आरक्षित है, जिसमें पुरानी स्वामी-रहित मॉडल/टूल गतिविधि वाले निष्क्रिय कतारबद्ध सेशन शामिल हैं।
+
+निरस्तीकरण सीमा कम-से-कम 5 मिनट और चेतावनी सीमा की 3x होती है। पुनर्प्राप्ति जाँच सफल होते ही पुराना सेशन रिकॉर्ड-रखरखाव प्रभावित सेशन लेन को तुरंत मुक्त कर देता है; रुके हुए एम्बेडेड रन केवल निरस्तीकरण सीमा के बाद ही निरस्त करके निकाले जाते हैं, ताकि कतारबद्ध कार्य केवल धीमे रन को बीच में रोके बिना फिर से शुरू हो सके। पुनर्प्राप्ति संरचित अनुरोधित/पूर्ण परिणाम उत्सर्जित करती है; निदान स्थिति को केवल तभी निष्क्रिय चिह्नित किया जाता है जब वही प्रसंस्करण पीढ़ी अभी भी वर्तमान हो, और सेशन के अपरिवर्तित रहने तक बार-बार होने वाले `session.stuck` निदान के बीच का अंतराल बढ़ता जाता है।
+
+## कार्य समय से पहले कहाँ समाप्त हो सकते हैं
+
+- एजेंट समय-समाप्ति (निरस्तीकरण)
+- AbortSignal (रद्द करना)
+- Gateway डिस्कनेक्शन या RPC समय-समाप्ति
+- `agent.wait` समय-समाप्ति (केवल प्रतीक्षा, एजेंट को नहीं रोकती)
 
 ## संबंधित
 
-- [टूल्स](/hi/tools) — उपलब्ध एजेंट टूल्स
-- [Hooks](/hi/automation/hooks) — एजेंट lifecycle इवेंट्स से ट्रिगर होने वाली event-driven स्क्रिप्ट्स
-- [Compaction](/hi/concepts/compaction) — लंबी बातचीत का सारांश कैसे बनाया जाता है
-- [Exec अनुमोदन](/hi/tools/exec-approvals) — shell commands के लिए अनुमोदन गेट्स
-- [सोच](/hi/tools/thinking) — सोच/रीजनिंग स्तर का कॉन्फ़िगरेशन
+- [टूल](/hi/tools) - उपलब्ध एजेंट टूल
+- [हुक](/hi/automation/hooks) - एजेंट जीवनचक्र घटनाओं से ट्रिगर होने वाली इवेंट-संचालित स्क्रिप्ट
+- [Compaction](/hi/concepts/compaction) - लंबी बातचीत को किस प्रकार संक्षेपित किया जाता है
+- [निष्पादन अनुमोदन](/hi/tools/exec-approvals) - शेल कमांड के लिए अनुमोदन द्वार
+- [चिंतन](/hi/tools/thinking) - चिंतन/तर्क स्तर का कॉन्फ़िगरेशन

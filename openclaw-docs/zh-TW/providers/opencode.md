@@ -1,13 +1,14 @@
 ---
 read_when:
     - 你想要存取由 OpenCode 託管的模型
-    - 您想在 Zen 與 Go 目錄之間做選擇
+    - 你想在 Zen 與 Go 目錄之間做選擇
 summary: 搭配 OpenClaw 使用 OpenCode Zen 與 Go 目錄
 title: OpenCode
 x-i18n:
-    generated_at: "2026-07-11T21:43:55Z"
+    generated_at: "2026-07-26T08:46:19Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: de287eb8a349f26c265f95b8b1de3af4035aa2bdc3501c7279f714d297bb8b9b
     source_path: providers/opencode.md
@@ -16,25 +17,25 @@ x-i18n:
 
 OpenCode 在 OpenClaw 中提供兩個託管目錄：
 
-| 目錄    | 前綴              | 執行階段供應商 |
-| ------- | ----------------- | -------------- |
-| **Zen** | `opencode/...`    | `opencode`     |
-| **Go**  | `opencode-go/...` | `opencode-go`  |
+| 目錄 | 前綴              | 執行階段供應商 |
+| ---- | ----------------- | -------------- |
+| **Zen** | `opencode/...`    | `opencode`       |
+| **Go**  | `opencode-go/...` | `opencode-go`    |
 
-兩個目錄共用一組 OpenCode API 金鑰（`OPENCODE_API_KEY`，別名為
+這兩個目錄共用一個 OpenCode API 金鑰（`OPENCODE_API_KEY`，別名為
 `OPENCODE_ZEN_API_KEY`）。OpenClaw 將執行階段供應商 ID 分開，以確保
-上游的個別模型路由維持正確，但初始設定與文件會將兩者視為同一套
-OpenCode 設定。
+上游的各模型路由維持正確，但引導設定與文件會將其視為
+同一套 OpenCode 設定。
 
 ## 開始使用
 
 <Tabs>
   <Tab title="Zen 目錄">
-    **最適合：** 精選的 OpenCode 多模型代理服務（Claude、GPT、Gemini、GLM、
+    **最適合：** 精選的 OpenCode 多模型代理（Claude、GPT、Gemini、GLM、
     DeepSeek、Kimi、MiniMax、Qwen）。
 
     <Steps>
-      <Step title="執行初始設定">
+      <Step title="執行引導設定">
         ```bash
         openclaw onboard --auth-choice opencode-zen
         ```
@@ -63,7 +64,7 @@ OpenCode 設定。
     **最適合：** 由 OpenCode 託管的 Kimi、GLM、MiniMax、Qwen 與 DeepSeek 模型陣容。
 
     <Steps>
-      <Step title="執行初始設定">
+      <Step title="執行引導設定">
         ```bash
         openclaw onboard --auth-choice opencode-go
         ```
@@ -102,23 +103,23 @@ OpenCode 設定。
 
 ### Zen
 
-| 屬性           | 值                                                                                            |
-| -------------- | --------------------------------------------------------------------------------------------- |
-| 執行階段供應商 | `opencode`                                                                                    |
-| 模型範例       | `opencode/claude-opus-4-6`, `opencode/gpt-5.5`, `opencode/gemini-3.1-pro`, `opencode/glm-5.2` |
+| 屬性             | 值                                                                                            |
+| ---------------- | --------------------------------------------------------------------------------------------- |
+| 執行階段供應商   | `opencode`                                                                                    |
+| 模型範例         | `opencode/claude-opus-4-6`、`opencode/gpt-5.5`、`opencode/gemini-3.1-pro`、`opencode/glm-5.2` |
 
-執行 `openclaw models list --provider opencode` 可查看目前的完整清單，其中
-也包含 `opencode/big-pickle` 和
-`opencode/deepseek-v4-flash-free` 等免費方案項目。
+執行 `openclaw models list --provider opencode` 以查看目前的完整清單，其中
+也包含免費方案項目，例如 `opencode/big-pickle` 與
+`opencode/deepseek-v4-flash-free`。
 
 ### Go
 
-| 屬性           | 值                                                                       |
-| -------------- | ------------------------------------------------------------------------ |
-| 執行階段供應商 | `opencode-go`                                                            |
-| 模型範例       | `opencode-go/kimi-k2.6`, `opencode-go/glm-5`, `opencode-go/minimax-m2.5` |
+| 屬性             | 值                                                                       |
+| ---------------- | ------------------------------------------------------------------------ |
+| 執行階段供應商   | `opencode-go`                                                            |
+| 模型範例         | `opencode-go/kimi-k2.6`、`opencode-go/glm-5`、`opencode-go/minimax-m2.5` |
 
-如需完整的 Go 模型表格，請參閱 [OpenCode Go](/zh-TW/providers/opencode-go)。
+如需完整的 Go 模型表，請參閱 [OpenCode Go](/zh-TW/providers/opencode-go)。
 
 ## 進階設定
 
@@ -127,25 +128,25 @@ OpenCode 設定。
     `OPENCODE_ZEN_API_KEY` 也可作為 `OPENCODE_API_KEY` 的別名使用。
   </Accordion>
 
-  <Accordion title="共用憑證">
-    在設定期間輸入一組 OpenCode 金鑰，會為兩個執行階段供應商儲存憑證。
-    你不需要分別為每個目錄執行初始設定。
+  <Accordion title="共用認證資訊">
+    在設定期間輸入一個 OpenCode 金鑰，便會儲存兩個執行階段
+    供應商的認證資訊。你不需要分別為每個目錄進行引導設定。
   </Accordion>
 
   <Accordion title="取得 API 金鑰">
-    請建立 OpenCode 帳戶，並前往
+    建立 OpenCode 帳號，並在
     [opencode.ai/auth](https://opencode.ai/auth) 產生 API 金鑰。帳務與目錄
-    可用性均透過 OpenCode 儀表板管理。
+    可用性由 OpenCode 儀表板管理。
   </Accordion>
 
   <Accordion title="Gemini 重播行為">
-    以 Gemini 為基礎的 OpenCode 參照會繼續使用代理 Gemini 路徑，因此 OpenClaw
-    會在該處保留 Gemini 思考簽章清理機制，而不啟用原生 Gemini
-    重播驗證或啟動重寫。
+    由 Gemini 支援的 OpenCode 參照會維持使用代理 Gemini 路徑，因此 OpenClaw 會在該路徑
+    保留 Gemini 思考簽章清理機制，而不會啟用原生 Gemini
+    重播驗證或啟動程序重寫。
   </Accordion>
 
   <Accordion title="非 Gemini 重播行為">
-    非 Gemini 的 OpenCode 參照會保留最低限度的 OpenAI 相容重播原則。
+    非 Gemini 的 OpenCode 參照會保留最低限度的 OpenAI 相容重播政策。
   </Accordion>
 </AccordionGroup>
 

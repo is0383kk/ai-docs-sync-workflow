@@ -1,13 +1,14 @@
 ---
 read_when:
-    - Quieres usar Perplexity Search para realizar búsquedas web
-    - Necesitas configurar PERPLEXITY_API_KEY u OPENROUTER_API_KEY
+    - Quieres usar Perplexity Search para búsquedas web
+    - Necesita configurar PERPLEXITY_API_KEY u OPENROUTER_API_KEY
 summary: Compatibilidad de la API de búsqueda de Perplexity y Sonar/OpenRouter con web_search
 title: Búsqueda de Perplexity
 x-i18n:
-    generated_at: "2026-07-11T23:39:30Z"
+    generated_at: "2026-07-26T04:56:52Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: a7ca97355110e70a05f1d57acab475dda8dec89393804df40c6e9be5e30780e8
     source_path: tools/perplexity-search.md
@@ -16,11 +17,11 @@ x-i18n:
 
 OpenClaw admite la API de búsqueda de Perplexity como proveedor de `web_search`. Devuelve resultados estructurados con los campos `title`, `url` y `snippet`.
 
-Por compatibilidad, OpenClaw también admite configuraciones heredadas de Perplexity Sonar/OpenRouter. Si usa `OPENROUTER_API_KEY`, una clave `sk-or-...` en `plugins.entries.perplexity.config.webSearch.apiKey`, o establece `plugins.entries.perplexity.config.webSearch.baseUrl` / `model`, el proveedor cambia a la ruta de finalización de chat y devuelve respuestas sintetizadas por IA con citas en lugar de resultados estructurados de la API de búsqueda.
+Por compatibilidad, OpenClaw también admite configuraciones heredadas de Perplexity Sonar/OpenRouter. Si se usa `OPENROUTER_API_KEY`, una clave `sk-or-...` en `plugins.entries.perplexity.config.webSearch.apiKey`, o se establece `plugins.entries.perplexity.config.webSearch.baseUrl` / `model`, el proveedor cambia a la ruta de finalizaciones de chat y devuelve respuestas sintetizadas por IA con citas en lugar de resultados estructurados de la API de búsqueda.
 
-## Instalar el Plugin
+## Instalar el plugin
 
-Instale el Plugin oficial y, a continuación, reinicie el Gateway:
+Instale el plugin oficial y, a continuación, reinicie el Gateway:
 
 ```bash
 openclaw plugins install @openclaw/perplexity-plugin
@@ -35,7 +36,7 @@ openclaw gateway restart
 
 ## Compatibilidad con OpenRouter
 
-Si ya usaba OpenRouter para Perplexity Sonar, mantenga `provider: "perplexity"` y establezca `OPENROUTER_API_KEY` en el entorno del Gateway, o guarde una clave `sk-or-...` en `plugins.entries.perplexity.config.webSearch.apiKey`.
+Si ya se usaba OpenRouter para Perplexity Sonar, conserve `provider: "perplexity"` y establezca `OPENROUTER_API_KEY` en el entorno del Gateway, o guarde una clave `sk-or-...` en `plugins.entries.perplexity.config.webSearch.apiKey`.
 
 Controles de compatibilidad opcionales:
 
@@ -98,11 +99,11 @@ Controles de compatibilidad opcionales:
 
 ## Dónde establecer la clave
 
-**Mediante la configuración:** ejecute `openclaw configure --section web`. La clave se guarda en `~/.openclaw/openclaw.json`, en `plugins.entries.perplexity.config.webSearch.apiKey`. Ese campo también admite objetos SecretRef.
+**Mediante la configuración:** ejecute `openclaw configure --section web`. Esto guarda la clave en `~/.openclaw/openclaw.json`, bajo `plugins.entries.perplexity.config.webSearch.apiKey`. Ese campo también acepta objetos SecretRef.
 
-**Mediante el entorno:** establezca `PERPLEXITY_API_KEY` u `OPENROUTER_API_KEY` en el entorno del proceso del Gateway. Para una instalación del Gateway, inclúyala en `~/.openclaw/.env` (o en el entorno de su servicio). Consulte [Variables de entorno](/es/help/faq#env-vars-and-env-loading).
+**Mediante el entorno:** establezca `PERPLEXITY_API_KEY` o `OPENROUTER_API_KEY` en el entorno del proceso del Gateway. Para una instalación del Gateway, colóquelo en `~/.openclaw/.env` (o en el entorno del servicio). Consulte [Variables de entorno](/es/help/faq#env-vars-and-env-loading).
 
-Si se configura `provider: "perplexity"` y la referencia SecretRef de la clave de Perplexity no se resuelve ni existe una alternativa en el entorno, el inicio o la recarga fallan de inmediato.
+Si `provider: "perplexity"` está configurado y el SecretRef de la clave de Perplexity no se puede resolver y no existe una alternativa en el entorno, el inicio o la recarga fallan de inmediato.
 
 ## Parámetros de la herramienta
 
@@ -125,7 +126,7 @@ Código de idioma ISO 639-1 (p. ej., `en`, `de`, `fr`).
 </ParamField>
 
 <ParamField path="freshness" type="'day' | 'week' | 'month' | 'year'">
-Filtro temporal: `day` equivale a 24 horas.
+Filtro temporal: `day` corresponde a 24 horas.
 </ParamField>
 
 <ParamField path="date_after" type="string">
@@ -148,10 +149,10 @@ Presupuesto total de contenido (máximo 1000000).
 Límite de tokens por página.
 </ParamField>
 
-Para la ruta de compatibilidad heredada con Sonar/OpenRouter:
+Para la ruta de compatibilidad heredada de Sonar/OpenRouter:
 
 - Se aceptan `query`, `count` y `freshness`.
-- En esta ruta, `count` solo se admite por compatibilidad; la respuesta sigue siendo una única respuesta sintetizada con citas, en lugar de una lista de N resultados.
+- `count` solo se admite por compatibilidad en esa ruta; la respuesta sigue siendo una única respuesta sintetizada con citas, en lugar de una lista de N resultados.
 - Los filtros exclusivos de la API de búsqueda (`country`, `language`, `date_after`, `date_before`, `domain_filter`, `max_tokens`, `max_tokens_per_page`) devuelven errores explícitos.
 
 **Ejemplos:**
@@ -159,39 +160,39 @@ Para la ruta de compatibilidad heredada con Sonar/OpenRouter:
 ```javascript
 // Búsqueda específica por país e idioma
 await web_search({
-  query: "renewable energy",
+  query: "energía renovable",
   country: "DE",
   language: "de",
 });
 
 // Resultados recientes (última semana)
 await web_search({
-  query: "AI news",
+  query: "noticias sobre IA",
   freshness: "week",
 });
 
 // Búsqueda por intervalo de fechas
 await web_search({
-  query: "AI developments",
+  query: "avances en IA",
   date_after: "2024-01-01",
   date_before: "2024-06-30",
 });
 
-// Filtrado por dominio (lista de permitidos)
+// Filtrado de dominios (lista de permitidos)
 await web_search({
-  query: "climate research",
+  query: "investigación climática",
   domain_filter: ["nature.com", "science.org", ".edu"],
 });
 
-// Filtrado por dominio (lista de denegados: use el prefijo -)
+// Filtrado de dominios (lista de denegados: usar el prefijo -)
 await web_search({
-  query: "product reviews",
+  query: "reseñas de productos",
   domain_filter: ["-reddit.com", "-pinterest.com"],
 });
 
 // Extracción de más contenido
 await web_search({
-  query: "detailed AI research",
+  query: "investigación detallada sobre IA",
   max_tokens: 50000,
   max_tokens_per_page: 4096,
 });
@@ -200,15 +201,15 @@ await web_search({
 ### Reglas del filtro de dominios
 
 - Máximo de 20 dominios por filtro.
-- No se pueden combinar entradas de la lista de permitidos y de la lista de denegados en una misma solicitud.
+- No se pueden mezclar entradas de la lista de permitidos y de la lista de denegados en la misma solicitud.
 - Use el prefijo `-` para las entradas de la lista de denegados (p. ej., `["-reddit.com"]`).
 
 ## Notas
 
 - La API de búsqueda de Perplexity devuelve resultados estructurados de búsqueda web (`title`, `url`, `snippet`).
-- OpenRouter, o un valor explícito de `plugins.entries.perplexity.config.webSearch.baseUrl` / `model`, hace que Perplexity vuelva a usar las finalizaciones de chat de Sonar por compatibilidad.
+- OpenRouter, o un valor explícito de `plugins.entries.perplexity.config.webSearch.baseUrl` / `model`, vuelve a cambiar Perplexity a las finalizaciones de chat de Sonar por compatibilidad.
 - La compatibilidad con Sonar/OpenRouter devuelve una única respuesta sintetizada con citas, no filas de resultados estructurados.
-- Los resultados se almacenan en caché durante 15 minutos de forma predeterminada (se puede configurar mediante `cacheTtlMinutes`).
+- Los resultados se almacenan en caché durante 15 minutos de forma predeterminada (configurable mediante `cacheTtlMinutes`).
 
 ## Contenido relacionado
 

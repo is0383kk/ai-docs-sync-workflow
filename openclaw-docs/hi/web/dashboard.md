@@ -1,90 +1,98 @@
 ---
 read_when:
     - डैशबोर्ड प्रमाणीकरण या एक्सपोज़र मोड बदलना
-summary: Gateway डैशबोर्ड (Control UI) की पहुंच और प्रमाणीकरण
+summary: Gateway डैशबोर्ड (नियंत्रण UI) की पहुँच और प्रमाणीकरण
 title: डैशबोर्ड
 x-i18n:
-    generated_at: "2026-06-29T00:26:49Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T21:52:07Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 07e11c1f71e6691ee053192e238a3b48568f81c3180e6b5f8e21b6874417e57e
+    source_hash: ca531ad2943dfdee1cd90a4efdc1fb69c4517780e2be52237fd558b8638e7cd0
     source_path: web/dashboard.md
     workflow: 16
 ---
 
-Gateway डैशबोर्ड वह ब्राउज़र Control UI है जो डिफ़ॉल्ट रूप से `/` पर सर्व किया जाता है
-(`gateway.controlUi.basePath` से ओवरराइड करें).
+Gateway डैशबोर्ड ब्राउज़र Control UI है, जो डिफ़ॉल्ट रूप से `/` पर उपलब्ध होता है (`gateway.controlUi.basePath` से ओवरराइड करें)।
 
-त्वरित खोलना (स्थानीय Gateway):
+तुरंत खोलें (स्थानीय Gateway):
 
 - [http://127.0.0.1:18789/](http://127.0.0.1:18789/) (या [http://localhost:18789/](http://localhost:18789/))
-- `gateway.tls.enabled: true` के साथ, WebSocket endpoint के लिए `https://127.0.0.1:18789/` और
-  `wss://127.0.0.1:18789` का उपयोग करें.
+- `gateway.tls.enabled: true` के साथ, WebSocket एंडपॉइंट के लिए `https://127.0.0.1:18789/` और `wss://127.0.0.1:18789` का उपयोग करें।
 
 मुख्य संदर्भ:
 
-- उपयोग और UI क्षमताओं के लिए [Control UI](/hi/web/control-ui).
-- Serve/Funnel automation के लिए [Tailscale](/hi/gateway/tailscale).
-- bind modes और सुरक्षा नोट्स के लिए [वेब सतहें](/hi/web).
+- उपयोग और UI क्षमताओं के लिए [Control UI](/hi/web/control-ui)।
+- Serve/Funnel ऑटोमेशन के लिए [Tailscale](/hi/gateway/tailscale)।
+- बाइंड मोड और सुरक्षा संबंधी टिप्पणियों के लिए [वेब सतहें](/hi/web)।
 
-Authentication कॉन्फ़िगर किए गए gateway auth path के माध्यम से WebSocket handshake पर लागू होता है:
+कॉन्फ़िगर किए गए Gateway प्रमाणीकरण पथ के माध्यम से WebSocket हैंडशेक पर प्रमाणीकरण लागू किया जाता है:
 
 - `connect.params.auth.token`
 - `connect.params.auth.password`
-- Tailscale Serve identity headers जब `gateway.auth.allowTailscale: true`
-- trusted-proxy identity headers जब `gateway.auth.mode: "trusted-proxy"`
+- `gateway.auth.allowTailscale: true` होने पर Tailscale Serve पहचान हेडर
+- `gateway.auth.mode: "trusted-proxy"` होने पर विश्वसनीय-प्रॉक्सी पहचान हेडर
 
-[Gateway configuration](/hi/gateway/configuration) में `gateway.auth` देखें.
+[Gateway कॉन्फ़िगरेशन](/hi/gateway/configuration) में `gateway.auth` देखें।
 
-सुरक्षा नोट: Control UI एक **admin surface** है (chat, config, exec approvals).
-इसे सार्वजनिक रूप से expose न करें. UI वर्तमान browser tab session और चुने गए gateway URL के लिए dashboard URL tokens को sessionStorage में रखता है, और load के बाद उन्हें URL से हटा देता है.
-localhost, Tailscale Serve, या SSH tunnel को प्राथमिकता दें.
+<Warning>
+Control UI एक **व्यवस्थापकीय सतह** है (चैट, कॉन्फ़िगरेशन, निष्पादन स्वीकृतियाँ)। इसे सार्वजनिक रूप से उजागर न करें। UI वर्तमान ब्राउज़र टैब और चयनित Gateway URL के लिए डैशबोर्ड URL टोकन sessionStorage में रखता है और लोड होने के बाद उन्हें URL से हटा देता है। localhost, Tailscale Serve या SSH टनल को प्राथमिकता दें।
+</Warning>
 
-## तेज़ पथ (अनुशंसित)
+## त्वरित तरीका (अनुशंसित)
 
-- Onboarding के बाद, CLI dashboard को auto-open करता है और एक clean (non-tokenized) link print करता है.
-- कभी भी फिर से खोलें: `openclaw dashboard` (link copy करता है, संभव हो तो browser खोलता है, headless होने पर SSH hint दिखाता है).
-- यदि clipboard और browser delivery fail हो जाए, तब भी `openclaw dashboard` clean URL print करता है और आपको URL fragment key `token` के रूप में `OPENCLAW_GATEWAY_TOKEN` या `gateway.auth.token` से token का उपयोग करने को कहता है; यह logs में token values print नहीं करता.
-- यदि UI shared-secret auth के लिए prompt करे, तो configured token या password को Control UI settings में paste करें.
+- ऑनबोर्डिंग के बाद, CLI डैशबोर्ड को अपने-आप खोलता है और एक साफ़ (बिना टोकन वाला) लिंक प्रिंट करता है।
+- कभी भी दोबारा खोलें: `openclaw dashboard` (लिंक कॉपी करता है, संभव होने पर ब्राउज़र खोलता है और हेडलेस होने पर SSH संकेत प्रिंट करता है)।
+- यदि क्लिपबोर्ड और ब्राउज़र दोनों के माध्यम से पहुँचाना विफल हो जाए, तब भी `openclaw dashboard` साफ़ URL प्रिंट करता है और आपको अपना टोकन (`OPENCLAW_GATEWAY_TOKEN` या `gateway.auth.token` से) URL फ़्रैगमेंट कुंजी `token` के रूप में जोड़ने के लिए कहता है; यह लॉग में टोकन मान कभी प्रिंट नहीं करता।
+- यदि UI साझा-गोपनीय प्रमाणीकरण के लिए संकेत दे, तो कॉन्फ़िगर किया गया टोकन या पासवर्ड Control UI सेटिंग्स में पेस्ट करें।
 
-## Auth basics (local बनाम remote)
+## प्रमाणीकरण की मूल बातें (स्थानीय बनाम रिमोट)
 
-- **Localhost**: `http://127.0.0.1:18789/` खोलें.
-- **Gateway TLS**: जब `gateway.tls.enabled: true`, dashboard/status links `https://` का उपयोग करते हैं और Control UI WebSocket links `wss://` का उपयोग करते हैं.
-- **Shared-secret token source**: `gateway.auth.token` (या
-  `OPENCLAW_GATEWAY_TOKEN`); `openclaw dashboard` one-time bootstrap के लिए इसे URL fragment के माध्यम से pass कर सकता है, और Control UI इसे localStorage के बजाय वर्तमान browser tab session और चुने गए gateway URL के लिए sessionStorage में रखता है.
-- यदि `gateway.auth.token` SecretRef-managed है, तो `openclaw dashboard`
-  design के अनुसार एक non-tokenized URL print/copy/open करता है. यह externally managed tokens को shell logs, clipboard history, या browser-launch arguments में expose होने से बचाता है.
-- यदि `gateway.auth.token` SecretRef के रूप में configured है और आपकी current shell में unresolved है, तो `openclaw dashboard` फिर भी एक non-tokenized URL और actionable auth setup guidance print करता है.
-- **Shared-secret password**: configured `gateway.auth.password` (या
-  `OPENCLAW_GATEWAY_PASSWORD`) का उपयोग करें. Dashboard reloads के बीच passwords persist नहीं करता.
-- **Identity-bearing modes**: Tailscale Serve identity headers के माध्यम से Control UI/WebSocket auth को satisfy कर सकता है जब `gateway.auth.allowTailscale: true`, और एक non-loopback identity-aware reverse proxy
-  `gateway.auth.mode: "trusted-proxy"` को satisfy कर सकता है. इन modes में dashboard को WebSocket के लिए pasted shared secret की आवश्यकता नहीं होती.
-- **Localhost नहीं**: Tailscale Serve, non-loopback shared-secret bind, `gateway.auth.mode: "trusted-proxy"` के साथ non-loopback identity-aware reverse proxy, या SSH tunnel का उपयोग करें. HTTP APIs तब भी shared-secret auth का उपयोग करते हैं जब तक आप जानबूझकर private-ingress
-  `gateway.auth.mode: "none"` या trusted-proxy HTTP auth नहीं चलाते. [वेब सतहें](/hi/web) देखें.
+- **Localhost**: `http://127.0.0.1:18789/` खोलें।
+- **Gateway TLS**: `gateway.tls.enabled: true` होने पर, डैशबोर्ड/स्थिति लिंक `https://` और Control UI WebSocket लिंक `wss://` का उपयोग करते हैं।
+- **साझा-गोपनीय टोकन स्रोत**: `gateway.auth.token` (या `OPENCLAW_GATEWAY_TOKEN`)। `openclaw dashboard` इसे एक बार की बूटस्ट्रैप प्रक्रिया के लिए URL फ़्रैगमेंट के माध्यम से भेज सकता है; Control UI इसे वर्तमान टैब और चयनित Gateway URL के लिए sessionStorage में रखता है, localStorage में नहीं।
+- **कॉन्फ़िगरेशन न होने पर रनटाइम टोकन**: यदि स्टार्टअप बताता है कि उसने रनटाइम टोकन जनरेट किया है, तो वह टोकन अस्थायी है और `openclaw config get gateway.auth.token` के माध्यम से उपलब्ध नहीं होता। लूपबैक के लिए भी प्रमाणीकरण आवश्यक है। `openclaw doctor --generate-gateway-token` चलाएँ, Gateway को पुनः आरंभ करें और फिर कॉन्फ़िगर किया गया टोकन Control UI सेटिंग्स में पेस्ट करें।
+- यदि `gateway.auth.token` को SecretRef से प्रबंधित किया जाता है, तो बाहरी रूप से प्रबंधित टोकन को शेल लॉग, क्लिपबोर्ड इतिहास या ब्राउज़र लॉन्च आर्ग्युमेंट में उजागर होने से बचाने के लिए `openclaw dashboard` जानबूझकर बिना टोकन वाला URL प्रिंट/कॉपी/खोलता है। यदि आपके वर्तमान शेल में रेफ़रेंस हल नहीं होता, तब भी यह बिना टोकन वाला URL और प्रमाणीकरण सेटअप के लिए कार्रवाई योग्य मार्गदर्शन प्रिंट करता है।
+- **साझा-गोपनीय पासवर्ड**: कॉन्फ़िगर किए गए `gateway.auth.password` (या `OPENCLAW_GATEWAY_PASSWORD`) का उपयोग करें। डैशबोर्ड पुनः लोड होने के बाद पासवर्ड बनाए नहीं रखता।
+- **पहचान-युक्त मोड**: `gateway.auth.allowTailscale: true` होने पर Tailscale Serve पहचान हेडर के माध्यम से Control UI/WebSocket प्रमाणीकरण पूरा करता है; एक गैर-लूपबैक, पहचान-सक्षम रिवर्स प्रॉक्सी `gateway.auth.mode: "trusted-proxy"` को पूरा करता है। दोनों में से किसी को भी WebSocket के लिए साझा गोपनीय मान पेस्ट करने की आवश्यकता नहीं होती।
+- **localhost नहीं**: Tailscale Serve, गैर-लूपबैक साझा-गोपनीय बाइंड, `gateway.auth.mode: "trusted-proxy"` वाला गैर-लूपबैक पहचान-सक्षम रिवर्स प्रॉक्सी या SSH टनल का उपयोग करें। HTTP API अब भी साझा-गोपनीय प्रमाणीकरण का उपयोग करते हैं, जब तक कि आप जानबूझकर निजी-इनग्रेस `gateway.auth.mode: "none"` या विश्वसनीय-प्रॉक्सी HTTP प्रमाणीकरण न चलाएँ। [वेब सतहें](/hi/web) देखें।
+
+## Telegram में खोलें
+
+Telegram बॉट `/dashboard` के साथ डैशबोर्ड को Telegram Mini App के रूप में खोल सकते हैं।
+
+आवश्यकताएँ:
+
+- `gateway.tailscale.mode: "serve"` या `"funnel"`, ताकि Telegram को HTTPS Mini App URL मिले।
+- Telegram प्रेषक बॉट का स्वामी होना चाहिए: `commands.ownerAllowFrom` में संख्यात्मक Telegram उपयोगकर्ता ID या चयनित खाते का प्रभावी `channels.telegram.allowFrom`।
+- बॉट के साथ DM में `/dashboard` चलाएँ। समूह में इसे चलाने पर केवल DM में कमांड खोलने के लिए कहा जाता है और कोई बटन शामिल नहीं होता।
+- Docker इंस्टॉलेशन: Serve/Funnel मोड के लिए Gateway को `tailscaled` के पास लूपबैक से बाइंड करना आवश्यक है, जिसे प्रकाशित पोर्ट वाली ब्रिज नेटवर्किंग पूरा नहीं कर सकती। Gateway कंटेनर को `network_mode: host` के साथ चलाएँ और होस्ट `tailscaled` सॉकेट (`/var/run/tailscale`) तथा `tailscale` CLI को कंटेनर में माउंट करें।
+
+Mini App स्वामी का एक बार हस्तांतरण करता है और अल्पकालिक बूटस्ट्रैप टोकन के साथ Control UI पर रीडायरेक्ट करता है। यह URL में साझा Gateway टोकन उजागर नहीं करता।
+
+v1 के गैर-लक्ष्य:
+
+- Telegram Web iframe समर्थित नहीं है।
+- Tailscale Serve/Funnel ही एकमात्र समर्थित प्रकाशित URL पथ है।
 
 <a id="if-you-see-unauthorized-1008"></a>
 
-## यदि आपको "unauthorized" / 1008 दिखे
+## यदि आपको "unauthorized" / 1008 दिखाई दे
 
-- सुनिश्चित करें कि gateway reachable है (local: `openclaw status`; remote: SSH tunnel `ssh -N -L 18789:127.0.0.1:18789 user@host` फिर `http://127.0.0.1:18789/` खोलें).
-- `AUTH_TOKEN_MISMATCH` के लिए, clients cached device token के साथ एक trusted retry कर सकते हैं जब gateway retry hints return करता है. वह cached-token retry token के cached approved scopes को reuse करता है; explicit `deviceToken` / explicit `scopes` callers अपना requested scope set रखते हैं. यदि उस retry के बाद भी auth fail हो, तो token drift को manually resolve करें.
-- `AUTH_SCOPE_MISMATCH` के लिए, device token पहचाना गया था लेकिन उसमें dashboard के requested scopes नहीं हैं; shared gateway token rotate करने के बजाय requested scope contract को re-pair या approve करें.
-- उस retry path के बाहर, connect auth precedence पहले explicit shared token/password है, फिर explicit `deviceToken`, फिर stored device token, फिर bootstrap token.
-- async Tailscale Serve Control UI path पर, उसी `{scope, ip}` के लिए failed attempts को failed-auth limiter द्वारा record किए जाने से पहले serialized किया जाता है, इसलिए दूसरा concurrent bad retry पहले से ही `retry later` दिखा सकता है.
-- token drift repair steps के लिए, [Token drift recovery checklist](/hi/cli/devices#token-drift-recovery-checklist) का पालन करें.
-- gateway host से shared secret retrieve या supply करें:
-  - Token: `openclaw config get gateway.auth.token`
-  - Password: configured `gateway.auth.password` या
-    `OPENCLAW_GATEWAY_PASSWORD` resolve करें
-  - SecretRef-managed token: external secret provider resolve करें या इस shell में
-    `OPENCLAW_GATEWAY_TOKEN` export करें, फिर `openclaw dashboard` दोबारा चलाएं
-  - कोई shared secret configured नहीं: `openclaw doctor --generate-gateway-token`
-- Dashboard settings में, token या password को auth field में paste करें,
-  फिर connect करें.
-- UI language picker **Overview -> Gateway Access -> Language** में है.
-  यह access card का हिस्सा है, Appearance section का नहीं.
+- पुष्टि करें कि Gateway तक पहुँचा जा सकता है: स्थानीय रूप से `openclaw status`; रिमोट के लिए, SSH टनल `ssh -N -L 18789:127.0.0.1:18789 user@gateway-host`, फिर `http://127.0.0.1:18789/` खोलें।
+- `AUTH_TOKEN_MISMATCH` के लिए, Gateway द्वारा पुनः प्रयास के संकेत लौटाने पर क्लाइंट कैश किए गए डिवाइस टोकन के साथ एक विश्वसनीय पुनः प्रयास कर सकते हैं; यह पुनः प्रयास टोकन के कैश किए गए स्वीकृत स्कोप का दोबारा उपयोग करता है (स्पष्ट `deviceToken`/`scopes` कॉलर अपने अनुरोधित स्कोप सेट को बनाए रखते हैं)। यदि उस पुनः प्रयास के बाद भी प्रमाणीकरण विफल होता है, तो टोकन विसंगति को मैन्युअल रूप से हल करें।
+- `AUTH_SCOPE_MISMATCH` के लिए, डिवाइस टोकन पहचाना गया था, लेकिन उसमें अनुरोधित स्कोप नहीं हैं; साझा Gateway टोकन बदलने के बजाय दोबारा पेयर करें या नए स्कोप सेट को स्वीकृति दें।
+- उस पुनः प्रयास पथ के बाहर, कनेक्शन प्रमाणीकरण की प्राथमिकता है: स्पष्ट साझा टोकन/पासवर्ड, फिर स्पष्ट `deviceToken`, फिर संग्रहीत डिवाइस टोकन, फिर बूटस्ट्रैप टोकन।
+- असिंक्रोनस Tailscale Serve पथ पर, समान `{scope, ip}` के विफल प्रयासों को विफल-प्रमाणीकरण सीमक द्वारा दर्ज किए जाने से पहले क्रमबद्ध किया जाता है, इसलिए दूसरा समकालिक गलत पुनः प्रयास पहले से ही `retry later` दिखा सकता है।
+- टोकन विसंगति सुधारने के चरणों के लिए, [टोकन विसंगति पुनर्प्राप्ति चेकलिस्ट](/hi/cli/devices#token-drift-recovery-checklist) देखें।
+- Gateway होस्ट से साझा गोपनीय मान प्राप्त करें या उपलब्ध कराएँ:
+  - टोकन: `openclaw config get gateway.auth.token`
+  - पासवर्ड: कॉन्फ़िगर किए गए `gateway.auth.password` या `OPENCLAW_GATEWAY_PASSWORD` को हल करें
+  - SecretRef-प्रबंधित टोकन: बाहरी गोपनीय मान प्रदाता को हल करें, या इस शेल में `OPENCLAW_GATEWAY_TOKEN` एक्सपोर्ट करें और `openclaw dashboard` दोबारा चलाएँ
+  - कोई साझा गोपनीय मान कॉन्फ़िगर न होने के कारण जनरेट किया गया रनटाइम टोकन: `openclaw doctor --generate-gateway-token` चलाएँ, Gateway को पुनः आरंभ करें, फिर कॉन्फ़िगर किए गए टोकन का उपयोग करें
+- डैशबोर्ड सेटिंग्स में, टोकन या पासवर्ड को प्रमाणीकरण फ़ील्ड में पेस्ट करें, फिर कनेक्ट करें।
+- UI भाषा चयनकर्ता **Settings -> General -> Language** में होता है, Appearance के अंतर्गत नहीं।
 
 ## संबंधित
 

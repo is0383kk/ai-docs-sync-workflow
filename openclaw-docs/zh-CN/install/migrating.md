@@ -1,16 +1,17 @@
 ---
 read_when:
-    - 你正在将 OpenClaw 迁移到新的笔记本电脑或服务器
-    - 你正从另一个智能体系统迁移过来，并希望保留状态
+    - 你正在将 OpenClaw 迁移到新的笔记本电脑或服务器上
+    - 你正在从另一个智能体系统迁移过来，并希望保留状态
     - 你正在原地升级插件
 summary: 迁移中心：跨系统导入、机器间迁移和插件升级
 title: 迁移指南
 x-i18n:
-    generated_at: "2026-07-11T20:40:57Z"
+    generated_at: "2026-07-26T06:49:38Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c7961f78bc654d328cb91a6ef982b6e47740fd831aec9249c8ffed3225dd0ccf
+    source_hash: e9ceb80045ab082c9cfc9e1aca59e079b6bf28b1d047265a0be40c03ebe5dac6
     source_path: install/migrating.md
     workflow: 16
 ---
@@ -19,18 +20,18 @@ OpenClaw 支持三种迁移路径：从其他智能体系统导入、将现有�
 
 ## 从其他智能体系统导入
 
-内置迁移提供商可将指令、MCP 服务器、技能、模型配置和（选择启用的）API 密钥导入 OpenClaw。系统会在进行任何更改前预览计划，在报告中隐去密钥，并在应用更改前创建并验证备份。
+内置迁移提供商可将指令、MCP 服务器、Skills、模型配置以及（选择启用的）API 密钥导入 OpenClaw。执行任何更改前都会预览计划，报告中的机密信息会被遮盖。独立执行的 `openclaw migrate` 以经过验证的备份为保障；而全新新手引导中的导入会先暂存并验证本地工件，在提交配置后再发布这些工件，之后才会执行任何不可逆的外部激活操作。
 
 <CardGroup cols={2}>
   <Card title="从 Claude 迁移" href="/zh-CN/install/migrating-claude" icon="brain">
-    导入 Claude Code 和 Claude Desktop 状态，包括 `CLAUDE.md`、MCP 服务器、技能和项目命令。
+    导入 Claude Code 和 Claude Desktop 状态，包括 `CLAUDE.md`、MCP 服务器、Skills 和项目命令。
   </Card>
   <Card title="从 Hermes 迁移" href="/zh-CN/install/migrating-hermes" icon="feather">
-    导入 Hermes 配置、提供商、MCP 服务器、记忆、技能和受支持的 `.env` 键。
+    导入 Hermes 配置、提供商、MCP 服务器、记忆、Skills 和支持的 `.env` 密钥。
   </Card>
 </CardGroup>
 
-CLI 入口点是 [`openclaw migrate`](/zh-CN/cli/migrate)。新手引导检测到已知来源时，也可以提供迁移选项（`openclaw onboard --flow import`）。
+CLI 入口点为 [`openclaw migrate`](/zh-CN/cli/migrate)。新手引导检测到已知来源（`openclaw onboard --flow import`）时，也可以提供迁移选项。
 
 ## 将 OpenClaw 迁移到新机器
 
@@ -39,18 +40,18 @@ CLI 入口点是 [`openclaw migrate`](/zh-CN/cli/migrate)。新手引导检测�
 - **配置** — `openclaw.json` 和所有 Gateway 网关设置。
 - **身份验证** — 每个智能体的 `auth-profiles.json`（API 密钥和 OAuth），以及 `credentials/` 下的所有渠道或提供商状态。
 - **会话** — 对话历史记录和智能体状态。
-- **渠道状态** — WhatsApp 登录、Telegram 会话等。
-- **工作区文件** — `MEMORY.md`、`USER.md`、技能和提示词。
+- **渠道状态** — WhatsApp 登录信息、Telegram 会话等。
+- **工作区文件** — `MEMORY.md`、`USER.md`、Skills 和提示词。
 
 <Tip>
-在旧机器上运行 `openclaw status`，确认状态目录路径。自定义配置文件使用 `~/.openclaw-<profile>/`，也可以通过 `OPENCLAW_STATE_DIR` 设置路径。
+在旧机器上运行 `openclaw status`，确认状态目录路径。自定义配置文件使用 `~/.openclaw-<profile>/`，或使用通过 `OPENCLAW_STATE_DIR` 设置的路径。
 </Tip>
 
 ### 迁移步骤
 
 <Steps>
   <Step title="停止 Gateway 网关并备份">
-    在**旧**机器上停止 Gateway 网关，避免复制过程中发生文件更改，然后创建归档：
+    在**旧**机器上停止 Gateway 网关，以免文件在复制过程中发生变化，然后创建归档：
 
     ```bash
     openclaw gateway stop
@@ -63,18 +64,18 @@ CLI 入口点是 [`openclaw migrate`](/zh-CN/cli/migrate)。新手引导检测�
   </Step>
 
   <Step title="在新机器上安装 OpenClaw">
-    在新机器上[安装](/zh-CN/install) CLI（如有需要，也安装 Node）。即使新手引导创建了新的 `~/.openclaw/` 也没有关系——下一步会将其覆盖。
+    在新机器上[安装](/zh-CN/install) CLI（如有需要，也安装 Node）。即使新手引导创建了全新的 `~/.openclaw/` 也没关系，因为下一步会将其覆盖。
   </Step>
 
   <Step title="复制状态目录和工作区">
-    通过 `scp`、`rsync -a` 或外置硬盘传输归档，然后解压：
+    通过 `scp`、`rsync -a` 或外部驱动器传输归档，然后解压：
 
     ```bash
     cd ~
     tar -xzf openclaw-state.tgz
     ```
 
-    确认归档包含隐藏目录，并且文件所有权与将要运行 Gateway 网关的用户一致。
+    确认归档中包含隐藏目录，并且文件所有权与将运行 Gateway 网关的用户一致。
 
   </Step>
 
@@ -90,23 +91,23 @@ CLI 入口点是 [`openclaw migrate`](/zh-CN/cli/migrate)。新手引导检测�
   </Step>
 </Steps>
 
-如果 Telegram 或 Discord 使用默认的环境变量回退机制（`TELEGRAM_BOT_TOKEN` 或 `DISCORD_BOT_TOKEN`），请验证迁移后的状态目录 `.env` 是否包含这些键，同时不要打印密钥值：
+如果 Telegram 或 Discord 使用默认环境变量回退（`TELEGRAM_BOT_TOKEN` 或 `DISCORD_BOT_TOKEN`），请验证迁移后的状态目录中，`.env` 包含这些键，但不要打印机密值：
 
 ```bash
 awk -F= '/^(TELEGRAM_BOT_TOKEN|DISCORD_BOT_TOKEN)=/ { print $1 "=present" }' ~/.openclaw/.env
 ```
 
-如果已启用的默认 Telegram 或 Discord 账户未配置令牌，并且 Doctor 进程无法使用相应的环境变量，`openclaw doctor` 也会发出警告。
+如果已启用的默认 Telegram 或 Discord 账号未配置令牌，并且 Doctor 进程无法访问对应的环境变量，`openclaw doctor` 也会发出警告。
 
 ### 常见问题
 
 <AccordionGroup>
   <Accordion title="配置文件或状态目录不匹配">
-    如果旧 Gateway 网关使用了 `--profile` 或 `OPENCLAW_STATE_DIR`，而新 Gateway 网关没有使用，渠道将显示为已退出登录，并且会话为空。请使用迁移时的**相同**配置文件或状态目录启动 Gateway 网关，然后重新运行 `openclaw doctor`。
+    如果旧 Gateway 网关使用了 `--profile` 或 `OPENCLAW_STATE_DIR`，而新 Gateway 网关没有使用，渠道将显示为已退出登录，会话也将为空。请使用迁移时的**同一**配置文件或状态目录启动 Gateway 网关，然后重新运行 `openclaw doctor`。
   </Accordion>
 
   <Accordion title="仅复制 openclaw.json">
-    仅复制配置文件是不够的。模型身份验证配置文件位于 `agents/<agentId>/agent/auth-profiles.json`，渠道和提供商状态位于 `credentials/`。始终迁移**整个**状态目录。
+    仅复制配置文件并不够。模型身份验证配置文件位于 `agents/<agentId>/agent/auth-profiles.json` 下，渠道和提供商状态位于 `credentials/` 下。始终迁移**整个**状态目录。
   </Accordion>
 
   <Accordion title="权限和所有权">
@@ -114,11 +115,11 @@ awk -F= '/^(TELEGRAM_BOT_TOKEN|DISCORD_BOT_TOKEN)=/ { print $1 "=present" }' ~/.
   </Accordion>
 
   <Accordion title="远程模式">
-    如果你的 UI 指向**远程** Gateway 网关，则会话和工作区归远程主机所有。请迁移 Gateway 网关主机本身，而不是本地笔记本电脑。请参阅[常见问题](/zh-CN/help/faq#where-things-live-on-disk)。
+    如果 UI 指向**远程** Gateway 网关，则会话和工作区归远程主机所有。请迁移 Gateway 网关主机本身，而不是本地笔记本电脑。请参阅[常见问题](/zh-CN/help/faq#where-things-live-on-disk)。
   </Accordion>
 
-  <Accordion title="备份中的密钥">
-    状态目录包含身份验证配置文件、渠道凭据和其他提供商状态。请加密存储备份，避免使用不安全的传输渠道；如果怀疑发生泄露，请轮换密钥。
+  <Accordion title="备份中的机密信息">
+    状态目录包含身份验证配置文件、渠道凭据和其他提供商状态。请加密存储备份，避免使用不安全的传输渠道；如果怀疑信息已泄露，请轮换密钥。
   </Accordion>
 </AccordionGroup>
 
@@ -127,13 +128,13 @@ awk -F= '/^(TELEGRAM_BOT_TOKEN|DISCORD_BOT_TOKEN)=/ { print $1 "=present" }' ~/.
 在新机器上确认：
 
 - [ ] `openclaw status` 显示 Gateway 网关正在运行。
-- [ ] 渠道仍处于连接状态（无需重新配对）。
+- [ ] 渠道仍保持连接（无需重新配对）。
 - [ ] 仪表板可以打开并显示现有会话。
-- [ ] 工作区文件（记忆、配置）均已存在。
+- [ ] 工作区文件（记忆、配置）均存在。
 
 ## 原地升级插件
 
-原地升级插件会保留相同的插件 ID 和配置键，但可能会将磁盘上的状态迁移到当前目录结构。插件专属升级指南位于相应渠道文档中：
+原地升级插件会保留相同的插件 ID 和配置键，但可能会将磁盘上的状态迁移到当前布局。各插件专用的升级指南与其渠道文档位于同一位置：
 
 - [Matrix 迁移](/zh-CN/channels/matrix-migration)：加密状态恢复限制、自动快照行为和手动恢复命令。
 

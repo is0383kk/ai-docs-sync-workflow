@@ -1,27 +1,28 @@
 ---
 read_when:
     - 你正在安装、配置或审计 voyage 插件
-summary: 新增记忆嵌入提供商支持。
+summary: 添加记忆嵌入提供商支持。
 title: Voyage 插件
 x-i18n:
-    generated_at: "2026-07-11T20:49:11Z"
+    generated_at: "2026-07-26T05:57:04Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: ba1dcf8d6f7c45c01f855797333e9d510bc822b2f7442c5a0727ac2a208ffe36
+    source_hash: 30470935000d501180467314647efe876dc956ae57e53e13279e7670aea554e3
     source_path: plugins/reference/voyage.md
     workflow: 16
 ---
 
 # Voyage 插件
 
-添加对记忆嵌入提供商的支持。
+添加记忆嵌入提供商支持。
 
 ## 分发
 
 - 软件包：`@openclaw/voyage-provider`
-- 安装方式：随 OpenClaw 提供
+- 安装方式：已包含在 OpenClaw 中
 
 ## 接口
 
-契约：memoryEmbeddingProviders
+契约：`memoryEmbeddingProviders`

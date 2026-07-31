@@ -1,123 +1,899 @@
 ---
 read_when:
-    - هشدار OPENCLAW_PLUGIN_SDK_COMPAT_DEPRECATED را می‌بینید
-    - هشدار OPENCLAW_EXTENSION_API_DEPRECATED را می‌بینید
-    - شما پیش از OpenClaw 2026.4.25 از api.registerEmbeddedExtensionFactory استفاده کرده‌اید
-    - شما در حال به‌روزرسانی یک plugin به معماری مدرن plugin هستید
-    - شما یک Plugin خارجی OpenClaw را نگهداری می‌کنید.
+    - هشدار OPENCLAW_PLUGIN_SDK_COMPAT_DEPRECATED را مشاهده می‌کنید
+    - هشدار OPENCLAW_EXTENSION_API_DEPRECATED را مشاهده می‌کنید
+    - پیش از OpenClaw 2026.4.25 از api.registerEmbeddedExtensionFactory استفاده می‌کردید
+    - در حال به‌روزرسانی یک Plugin به معماری مدرن Plugin هستید
+    - شما یک Plugin خارجی OpenClaw را نگهداری می‌کنید
 sidebarTitle: Migrate to SDK
-summary: از لایهٔ سازگاری با نسخه‌های قدیمی به SDK مدرن Plugin مهاجرت کنید
-title: مهاجرت SDK Plugin
+summary: از لایهٔ قدیمی سازگاری با نسخه‌های پیشین به SDK مدرن Plugin مهاجرت کنید
+title: مهاجرت SDK افزونه
 x-i18n:
-    generated_at: "2026-07-04T10:52:00Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T14:26:19Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 7873de40aea56f456781ecf8ac9a4705c958030f7c68f8a112ad3f0fce62f078
+    source_hash: a483f9c0f8409505fc2688872995382944e002520ceb651214dbc5ad8e3554fb
     source_path: plugins/sdk-migration.md
     workflow: 16
 ---
 
-OpenClaw از یک لایه گسترده سازگاری با نسخه‌های پیشین به معماری مدرن Plugin
-با importهای متمرکز و مستند منتقل شده است. اگر Plugin شما پیش از معماری
-جدید ساخته شده، این راهنما به شما کمک می‌کند مهاجرت کنید.
+OpenClaw یک لایهٔ گستردهٔ سازگاری با نسخه‌های پیشین را با معماری مدرن Plugin
+که از importهای کوچک و متمرکز ساخته شده است جایگزین کرد. اگر Plugin شما به پیش از آن
+تغییر مربوط است، این راهنما آن را با قراردادهای کنونی منطبق می‌کند.
 
-## چه چیزی تغییر می‌کند
+## چه چیزهایی تغییر کرد
 
-سیستم قدیمی Plugin دو سطح بسیار باز فراهم می‌کرد که به Pluginها اجازه می‌داد
-هر چیزی را که نیاز داشتند از یک نقطه ورود واحد import کنند:
+پیش‌تر چندین سطح import بسیار باز به Pluginها اجازه می‌دادند تقریباً به هر چیزی
+از یک نقطهٔ ورود واحد دسترسی پیدا کنند:
 
-- **`openclaw/plugin-sdk/compat`** - یک import واحد که ده‌ها
-  کمک‌کننده را دوباره export می‌کرد. این برای فعال نگه داشتن Pluginهای قدیمی مبتنی بر hook
-  در زمانی معرفی شد که معماری جدید Plugin در حال ساخت بود.
-- **`openclaw/plugin-sdk/infra-runtime`** - یک barrel گسترده کمک‌کننده runtime که
-  رویدادهای سیستم، وضعیت Heartbeat، صف‌های تحویل، کمک‌کننده‌های fetch/proxy،
-  کمک‌کننده‌های فایل، نوع‌های approval و ابزارهای نامرتبط را با هم مخلوط می‌کرد.
-- **`openclaw/plugin-sdk/config-runtime`** - یک barrel گسترده سازگاری config
-  که هنوز در بازه مهاجرت، کمک‌کننده‌های منسوخ‌شده بارگذاری/نوشتن مستقیم را حمل می‌کند.
-- **`openclaw/extension-api`** - پلی که به Pluginها دسترسی مستقیم به
-  کمک‌کننده‌های سمت میزبان مانند اجراکننده agent تعبیه‌شده می‌داد.
-- **`api.registerEmbeddedExtensionFactory(...)`** - یک hook حذف‌شده فقط مخصوص embedded-runner برای
-  افزونه‌های bundled که می‌توانست رویدادهای embedded-runner مانند
-  `tool_result` را مشاهده کند.
+- **`openclaw/plugin-sdk`** و **`openclaw/plugin-sdk/compat`** - در مدتی که SDK متمرکز ساخته می‌شد،
+  ده‌ها ابزار کمکی را دوباره export می‌کردند. اکنون هر دو ریشه
+  حذف شده‌اند؛ به‌جای آن، یک زیرمسیر مستندشده را import کنید.
+- **`openclaw/plugin-sdk/infra-runtime`** - یک barrel گسترده که رویدادهای سیستم،
+  وضعیت Heartbeat، صف‌های تحویل، ابزارهای کمکی fetch/proxy، ابزارهای کمکی فایل،
+  انواع تأیید و ابزارهای نامرتبط را درهم می‌آمیخت.
+- **`openclaw/plugin-sdk/config-runtime`** - یک barrel گستردهٔ پیکربندی که
+  فقط برای بازهٔ سازگاری بعدی خود حفظ شده بود؛ ابزارهای کمکی مستقیم بارگذاری/نوشتن در زمان اجرا
+  حذف شده‌اند.
+- **`openclaw/extension-api`** - یک پل حذف‌شده که به Pluginها دسترسی مستقیم
+  به ابزارهای کمکی سمت میزبان، مانند اجراکنندهٔ عامل تعبیه‌شده، می‌داد.
+- **`api.registerEmbeddedExtensionFactory(...)`** - یک hook حذف‌شدهٔ مختص اجراکنندهٔ تعبیه‌شده
+  که رویدادهای اجراکنندهٔ تعبیه‌شده مانند `tool_result` را مشاهده می‌کرد. به‌جای آن از میان‌افزار
+  نتیجهٔ ابزار عامل استفاده کنید (نگاه کنید به [انتقال افزونه‌های نتیجهٔ ابزار تعبیه‌شده
+  به میان‌افزار](#how-to-migrate)).
 
-سطح‌های import گسترده اکنون **منسوخ شده‌اند**. آن‌ها هنوز در runtime کار می‌کنند،
-اما Pluginهای جدید نباید از آن‌ها استفاده کنند، و Pluginهای موجود باید پیش از
-حذف آن‌ها در انتشار major بعدی مهاجرت کنند. API ثبت کارخانه افزونه فقط مخصوص embedded-runner
-حذف شده است؛ به‌جای آن از middleware نتیجه ابزار استفاده کنید.
-
-OpenClaw رفتار مستند Plugin را در همان تغییری که جایگزین را معرفی می‌کند
-حذف یا بازتفسیر نمی‌کند. تغییرات شکننده قرارداد باید ابتدا از
-adapter سازگاری، diagnostics، مستندات، و یک بازه deprecation عبور کنند.
-این موضوع درباره importهای SDK، فیلدهای manifest، APIهای setup، hookها، و رفتار
-ثبت runtime صدق می‌کند.
+SDK ریشه، barrel سازگاری، پل افزونه و کارخانهٔ افزونهٔ تعبیه‌شده
+حذف شده‌اند. `infra-runtime` و `config-runtime` فقط برای بازه‌های بعدی
+که جداگانه ثبت شده‌اند باقی می‌مانند؛ Pluginهای جدید باید از زیرمسیرهای متمرکز استفاده کنند.
 
 <Warning>
-  لایه سازگاری با نسخه‌های پیشین در یک انتشار major آینده حذف خواهد شد.
-  Pluginهایی که همچنان از این سطح‌ها import می‌کنند، هنگام رخ دادن آن تغییر خواهند شکست.
-  ثبت‌های legacy برای embedded extension factory از قبل دیگر بارگذاری نمی‌شوند.
+  Pluginهایی که سطوح حذف‌شدهٔ ریشه، سازگاری یا افزونه را import می‌کنند دیگر
+  بارگذاری نمی‌شوند. پیش از ارتقا، نگاشت‌های زیر را دنبال کنید.
 </Warning>
 
-## چرا این تغییر انجام شد
+OpenClaw رفتار مستندشدهٔ Plugin را هم‌زمان با
+معرفی جایگزین حذف یا بازتفسیر نمی‌کند. تغییرات شکنندهٔ قرارداد ابتدا از
+آداپتور سازگاری، عیب‌یابی، مستندات و یک بازهٔ منسوخ‌سازی عبور می‌کنند. این موضوع
+برای importهای SDK، فیلدهای manifest، APIهای راه‌اندازی، hookها و رفتار
+ثبت در زمان اجرا صدق می‌کند.
 
-رویکرد قدیمی مشکلاتی ایجاد می‌کرد:
+### چرا
 
-- **راه‌اندازی کند** - import کردن یک کمک‌کننده ده‌ها ماژول نامرتبط را بارگذاری می‌کرد
-- **وابستگی‌های چرخه‌ای** - re-exportهای گسترده ساختن چرخه‌های import را آسان می‌کردند
-- **سطح API نامشخص** - راهی برای تشخیص exportهای پایدار از داخلی وجود نداشت
+- **راه‌اندازی کند** - import کردن یک ابزار کمکی، ده‌ها ماژول نامرتبط را بارگذاری می‌کرد.
+- **وابستگی‌های چرخه‌ای** - exportهای مجدد گسترده، ایجاد چرخه‌های import را آسان
+  می‌کردند.
+- **سطح API نامشخص** - راهی برای تشخیص exportهای پایدار از موارد داخلی وجود نداشت.
 
-SDK مدرن Plugin این مشکل را حل می‌کند: هر مسیر import (`openclaw/plugin-sdk/\<subpath\>`)
-یک ماژول کوچک، خودبسنده، با هدف روشن و قرارداد مستند است.
+اکنون هر `openclaw/plugin-sdk/<subpath>` یک ماژول کوچک و مستقل با
+قراردادی مستندشده است.
 
-درزهای راحتی legacy provider برای کانال‌های bundled نیز حذف شده‌اند.
-درزهای کمک‌کننده با برند کانال shortcutهای خصوصی mono-repo بودند، نه
-قراردادهای پایدار Plugin. به‌جای آن از زیرمسیرهای باریک و عمومی SDK استفاده کنید. داخل workspace
-Pluginهای bundled، کمک‌کننده‌های متعلق به provider را در `api.ts` یا
-`runtime-api.ts` خود همان Plugin نگه دارید.
+مسیرهای تسهیل‌کنندهٔ قدیمی ارائه‌دهندگان برای کانال‌های همراه نیز حذف شده‌اند -
+میان‌برهای ابزار کمکی با نام تجاری کانال، تسهیلات خصوصی مونو‌ریپو بودند، نه
+قراردادهای پایدار Plugin. به‌جای آن از زیرمسیرهای عمومی و محدود SDK استفاده کنید. درون
+فضای کاری Pluginهای همراه، ابزارهای کمکی متعلق به ارائه‌دهنده را در
+`api.ts` یا `runtime-api.ts` همان Plugin نگه دارید:
 
-نمونه‌های فعلی providerهای bundled:
+- Anthropic ابزارهای کمکی جریان مختص Claude را در مسیر اختصاصی `api.ts` /
+  `contract-api.ts` خود نگه می‌دارد.
+- OpenAI سازنده‌های ارائه‌دهنده، ابزارهای کمکی مدل پیش‌فرض و سازنده‌های ارائه‌دهندهٔ
+  بلادرنگ را در `api.ts` اختصاصی خود نگه می‌دارد.
+- OpenRouter سازندهٔ ارائه‌دهنده و ابزارهای کمکی ورود اولیه/پیکربندی را در
+  `api.ts` اختصاصی خود نگه می‌دارد.
 
-- Anthropic کمک‌کننده‌های stream مخصوص Claude را در درز `api.ts` /
-  `contract-api.ts` خودش نگه می‌دارد
-- OpenAI سازنده‌های provider، کمک‌کننده‌های default-model، و سازنده‌های realtime provider
-  را در `api.ts` خودش نگه می‌دارد
-- OpenRouter سازنده provider و کمک‌کننده‌های onboarding/config را در
-  `api.ts` خودش نگه می‌دارد
+## خط‌مشی سازگاری
 
-## برنامه مهاجرت Talk و صدای realtime
+کار سازگاری Pluginهای خارجی این ترتیب را دنبال می‌کند:
 
-کد صدای realtime، تلفنی، جلسه، و Talk مرورگر از
-حسابداری turn محلی هر سطح به کنترلر مشترک نشست Talk منتقل می‌شود که توسط
-`openclaw/plugin-sdk/realtime-voice` export می‌شود. کنترلر جدید envelope مشترک رویداد Talk،
-وضعیت turn فعال، وضعیت capture، وضعیت output-audio، تاریخچه رویدادهای اخیر،
-و رد stale-turn را مالکیت می‌کند. Pluginهای provider باید همچنان مالک
-نشست‌های realtime مخصوص vendor باشند؛ Pluginهای سطح باید همچنان مالک capture،
-playback، تلفن، و ظرافت‌های جلسه باشند.
+1. قرارداد جدید را اضافه کنید.
+2. رفتار قدیمی را از طریق یک آداپتور سازگاری متصل نگه دارید.
+3. یک پیام عیب‌یابی یا هشدار منتشر کنید که مسیر قدیمی و جایگزین آن را نام می‌برد.
+4. هر دو مسیر را در آزمون‌ها پوشش دهید.
+5. منسوخ‌سازی و مسیر مهاجرت را مستند کنید.
+6. فقط پس از پایان بازهٔ مهاجرت اعلام‌شده، معمولاً در یک انتشار
+   اصلی، آن را حذف کنید.
 
-این مهاجرت Talk عمداً به‌صورت شکستن تمیز انجام می‌شود:
+اگر یک فیلد manifest همچنان پذیرفته می‌شود، تا زمانی که مستندات و
+پیام‌های عیب‌یابی خلاف آن را اعلام نکرده‌اند، به استفاده از آن ادامه دهید. کد جدید باید جایگزین مستندشده را ترجیح دهد؛
+Pluginهای موجود نباید طی انتشارهای فرعی معمولی از کار بیفتند.
 
-1. primitiveهای مشترک controller/runtime را در
-   `plugin-sdk/realtime-voice` نگه دارید.
-2. سطح‌های bundled را به کنترلر مشترک منتقل کنید: browser relay،
-   managed-room handoff، voice-call realtime، voice-call streaming STT، Google
-   Meet realtime، و native push-to-talk.
-3. خانواده‌های قدیمی RPC Talk را با API نهایی `talk.session.*` و
-   `talk.client.*` جایگزین کنید.
-4. یک کانال رویداد زنده Talk را در Gateway
-   `hello-ok.features.events` اعلام کنید: `talk.event`.
-5. endpoint قدیمی HTTP realtime و هر مسیر override دستورالعمل در زمان درخواست را حذف کنید.
+### سازگاری راه‌اندازی کانال‌های منتشرشده
 
-کد جدید نباید مستقیماً `createTalkEventSequencer(...)` را فراخوانی کند مگر اینکه
-در حال پیاده‌سازی یک adapter سطح پایین یا fixture تست باشد. کنترلر مشترک را ترجیح دهید
-تا رویدادهای محدود به turn نتوانند بدون شناسه turn منتشر شوند، فراخوانی‌های stale `turnEnd` /
-`turnCancel` نتوانند turn فعال جدیدتر را پاک کنند، و رویدادهای lifecycle مربوط به output-audio
-در تلفن، جلسات، browser relay، managed-room
-handoff، و کلاینت‌های native Talk سازگار بمانند.
+بسته‌های Slack، Discord، Signal و Microsoft Teams که از طریق
+`2026.7.1` منتشر شده‌اند، schemaهای پیکربندی مختص کانال را از
+`openclaw/plugin-sdk/bundled-channel-config-schema` import می‌کنند. بسته‌های منتشرشدهٔ Slack و
+Discord همچنین `createLegacyCompatChannelDmPolicy` و
+`promptLegacyChannelAllowFromForAccount` را از
+`openclaw/plugin-sdk/setup-runtime` import می‌کنند.
 
-شکل API عمومی هدف چنین است:
+این exportها به‌عنوان آداپتورهای منسوخ‌شدهٔ سازگاری زمان اجرا در دسترس باقی می‌مانند.
+Pluginهای جدید و بازنشرشده باید schemaهای پیکربندی و خط‌مشی راه‌اندازی خود را
+به‌صورت محلی در اختیار داشته باشند و از اجزای عمومی `channel-config-schema` و
+`setup-runtime` استفاده کنند. exportهای سازگاری فقط زمانی قابل حذف‌اند که
+حداقل نسخه‌های پشتیبانی‌شدهٔ بسته‌های منتشرشده دیگر آن‌ها را import نکنند.
+
+### سازگاری فیلدهای ورودی راه‌اندازی کانال
+
+`ChannelSetupInput` اکنون فقط پوشش راه‌اندازی مشترک میان کانال‌ها را به‌طور
+دائمی دارای نوع نگه می‌دارد. فیلدهای مختص کانال در یک سطح سازگاری منسوخ‌شده
+همچنان دارای نوع باقی می‌مانند تا Pluginهای خارجی موجود در مدتی که نویسندگان Plugin آن
+فیلدها را به انواع ورودی راه‌اندازی محلی Plugin منتقل می‌کنند، همچنان کامپایل شوند.
+
+OpenClaw انتشار اصلی ارائه نمی‌کند. یک پیمایش registry در 2026-07-22،
+426 Plugin کانال منتشرشدهٔ خارج از درخت را بررسی و 21 فیلد بدون خواننده را حذف کرد.
+هر یک از 22 فیلد حفظ‌شده، یک خوانندهٔ منتشرشدهٔ شناخته‌شده دارد. هر فیلد بعدی
+به‌محض اینکه هیچ Plugin منتشرشده‌ای آن را نخواند حذف می‌شود؛ مجموعهٔ حفظ‌شده با
+مهاجرت نویسندگان Plugin به انواع ورودی راه‌اندازی محلی Plugin کوچک‌تر می‌شود.
+
+همان پیمایش، 23 کلید قدیمی ارتقای آداپتور اعلام‌نشده را که وابستهٔ
+منتشرشده‌ای نداشتند حذف کرد. شش کلید رایج و کلید مختص راه‌اندازی `rooms` باقی مانده‌اند.
+این مجموعه نیز با اعلام `singleAccountKeysToMove` توسط Pluginهای منتشرشده کوچک‌تر می‌شود.
+
+نوع مشترک هیچ index signature ندارد. کلیدهای متعلق به Plugin همچنان می‌توانند
+در اشیای ورودی زمان اجرا وجود داشته باشند؛ آن‌ها را در یک intersection محلی Plugin اعلام کنید یا
+از طریق schema راه‌اندازی Plugin مالک محدودشان کنید.
+
+| `code`                                  | `owner`   | `replacement`                                                                                    | شرط حذف                                                     |
+| --------------------------------------- | --------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `plugin-sdk-channel-setup-input-fields` | `channel` | `ChannelSetupInput` را با یک نوع محلی Plugin که فیلدهای کانال مالک را اعلام می‌کند intersect کنید | وقتی پیمایش registry Pluginهای منتشرشده هیچ خواننده‌ای ندارد، فیلد را حذف کنید |
+
+سطح قدیمی ارتقای آداپتور اعلام‌نشده نیز از همان خط‌مشی
+مبتنی بر خواننده پیروی می‌کند. `singleAccountKeysToMove` را اعلام کنید، از جمله یک آرایهٔ خالی زمانی که
+Plugin به کلیدهای ارتقای اضافی نیاز ندارد، تا fallback مشترک بتواند هر بار یک
+کلید را بازنشسته کند.
+
+#### تأیید خواننده‌ها
+
+1. با هر `nextCursor` در `https://clawhub.ai/api/v1/packages?family=code-plugin&limit=100` صفحه‌به‌صفحه پیش بروید و بسته‌هایی را نگه دارید که `categories` آن‌ها شامل `channels` است.
+2. گزینه‌های npm را از `npm search --json --searchlimit=1000 "openclaw channel plugin"` اضافه کنید. گزینه‌های صرفاً منبع را از جست‌وجوهای کد GitHub برای `openclaw/plugin-sdk/channel-setup`، `openclaw/plugin-sdk/setup` و `openclaw/plugin-sdk/core` اضافه کنید.
+3. آخرین نسخهٔ منتشرشدهٔ هر گزینه را تعیین کنید. `npm pack <package>@<version> --json --pack-destination <temp-dir>` را اجرا و آن را باز کنید، سپس JavaScript و declarationهای عرضه‌شدهٔ `dist` را برای خواندن مستقیم یا destructured فیلد بررسی کنید. وقتی بسته‌ای انتشار npm ندارد، artifact مربوط به ClawHub را دانلود کنید.
+4. بسته، نسخه، فیلد یا کلید ارتقا و فایل منطبق را ثبت کنید. یک فیلد یا کلید فقط زمانی قابل حذف است که هیچ artifact منتشرشدهٔ Plugin آن را نخواند. نام خواننده‌ها را در توضیحات کد کنار فهرست فیلدها و کلیدهای حفظ‌شده، همگام با پیمایش نگه دارید.
+
+این فقط یک سابقهٔ سازگاری منبع/نوع است. هیچ آداپتور زمان اجرا یا
+ورودی registry سازگاری ندارد، زیرا اشیای ورودی راه‌اندازی زمان اجرا و رفتار
+راه‌اندازی تغییری نکرده‌اند.
+
+صف مهاجرت کنونی را با `pnpm plugins:boundary-report` ممیزی کنید:
+
+| پرچم                                                    | اثر                                                                         |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `--summary` (یا `pnpm plugins:boundary-report:summary`) | شمارش‌های فشرده به‌جای جزئیات کامل.                                         |
+| `--json`                                                | گزارش قابل‌خواندن توسط ماشین.                                                       |
+| `--owner <id>`                                          | محدود کردن به یک Plugin یا مالک سازگاری.                                   |
+| `--fail-on-cross-owner`                                 | خروج با کد غیرصفر برای importهای رزروشدهٔ SDK میان مالکان.                             |
+| `--fail-on-eligible-compat`                             | خروج با کد غیرصفر هنگامی که تاریخ `removeAfter` یک رکورد سازگاری منسوخ‌شده گذشته باشد. |
+| `--fail-on-unclassified-unused-reserved`                | خروج با کد غیرصفر برای shimهای رزروشده و استفاده‌نشدهٔ SDK.                                    |
+
+`pnpm plugins:boundary-report:ci` با هر سه پرچم شکست اجرا می‌شود. رکوردهای
+منسوخ‌شده معمولاً به‌جای عبارت مبهم «انتشار اصلی بعدی»، تاریخ صریح `removeAfter` دارند.
+رکوردی که مالک آن تاریخی را تأیید نکرده است،
+`removeAfter` ندارد، به‌شکل `no-date` نمایش داده می‌شود و هرگز واجد شرایط حذف نیست.
+گزارش، رکوردهای منسوخ‌شده را براساس تاریخ گروه‌بندی می‌کند، ارجاعات محلی کد/مستندات را می‌شمارد،
+importهای رزروشدهٔ SDK میان مالکان را نشان می‌دهد و پل خصوصی SDK
+میزبان حافظه را خلاصه می‌کند. زیرمسیرهای رزروشدهٔ SDK باید استفادهٔ ردیابی‌شده توسط مالک داشته باشند؛
+exportهای رزروشدهٔ بدون استفاده باید از SDK عمومی حذف شوند.
+
+### نگاشت قدیمی رسانه
+
+رکورد سازگاری `media-legacy-projection` فیلدهای موازی قدیمی
+رسانه، سازنده‌های payload، نام‌های مستعار metadata مربوط به hook و نام‌های template
+رسانه را پوشش می‌دهد. تاریخ تأییدشدهٔ `removeAfter` آن **2026-10-01** است (دو چرخهٔ انتشار
+پس از عرضهٔ جایگزین‌های facts-first). حذف همچنین مستلزم
+یک پیمایش پاک از artifactهای Plugin منتشرشده در آن زمان است؛ پیش از تاریخ مهاجرت کنید.
+
+برای ورودی کانال، `MediaPath`، `MediaUrl`،
+`MediaType`، `MediaPaths`، `MediaUrls`، `MediaTypes`،
+`MediaTranscribedIndexes`، `MediaWorkspaceDir` و `MediaStaged` مفرد/جمع را با
+facts مرتب‌شده جایگزین کنید:
+
+```ts
+import { toInboundMediaFacts } from "openclaw/plugin-sdk/channel-inbound";
+
+const media = toInboundMediaFacts([
+  { path: saved.path, url: nativeUrl, contentType: saved.contentType, messageId },
+]);
+
+const ctx = finalizeInboundContext({ Body: caption, media });
+```
+
+از `event.media` در hookهای `inbound_claim` و `message_received` استفاده کنید. اگر رسانهٔ
+راه‌دور به‌صورت محلی stage نشده است، از `event.originalMedia` برای هویت/عیب‌یابی
+استفاده کنید و منتظر `event.media` بمانید؛ `event.mediaStagingPending` آن
+وضعیت را متمایز می‌کند. ویژگی‌های منسوخ‌شدهٔ مفرد/جمع را از
+`event.metadata` نخوانید.
+
+برای مدل‌های رسانهٔ CLI، `{{MediaPath}}`، `{{MediaUrl}}`، `{{MediaType}}`
+و `{{MediaDir}}` را با `{{AttachmentPath}}`، `{{AttachmentUrl}}`،
+`{{AttachmentContentType}}` و `{{AttachmentDir}}` جایگزین کنید. هنگامی که
+موقعیت پیوست اهمیت دارد، از `{{AttachmentIndex}}` استفاده کنید.
+
+برای خط‌مشی خواندن رسانهٔ محلی، `getAgentScopedMediaLocalRoots(...)` یا
+`getAgentScopedMediaLocalRootsForSources(...)` را از
+`openclaw/plugin-sdk/media-local-roots` import کنید. facade مربوط به
+`openclaw/plugin-sdk/agent-media-payload` و نگاشت
+`buildAgentMediaPayload(...)` آن منسوخ شده‌اند.
+
+## نحوهٔ مهاجرت
+
+<Steps>
+  <Step title="مهاجرت ابزارهای کمکی بارگذاری/نوشتن پیکربندی زمان اجرا">
+    Pluginهای همراه باید فراخوانی مستقیم `api.runtime.config.loadConfig()` و
+    `api.runtime.config.writeConfigFile(...)` را متوقف کنند. پیکربندی‌ای را ترجیح دهید که از قبل
+    به مسیر فراخوانی فعال ارسال شده است. handlerهای طولانی‌عمر که به snapshot
+    فرایند کنونی نیاز دارند می‌توانند از `api.runtime.config.current()` استفاده کنند. ابزارهای عامل
+    طولانی‌عمر باید `ctx.getRuntimeConfig()` را درون `execute` بخوانند تا ابزاری
+    که پیش از نوشتن پیکربندی ایجاد شده است، همچنان پیکربندی تازه‌سازی‌شده را ببیند.
+
+    نوشتن پیکربندی از طریق ابزار کمکی تراکنشی با خط‌مشی صریح
+    پس از نوشتن انجام می‌شود:
+
+    ```typescript
+    await api.runtime.config.mutateConfigFile({
+      afterWrite: { mode: "auto" },
+      mutate(draft) {
+        draft.plugins ??= {};
+      },
+    });
+    ```
+
+    از `afterWrite: { mode: "restart", reason: "..." }` زمانی استفاده کنید که تغییر به
+    راه‌اندازی مجدد تمیز Gateway نیاز دارد، و از `afterWrite: { mode: "none", reason: "..." }`
+    فقط زمانی استفاده کنید که فراخواننده مالک پیگیری بعدی است و عمداً
+    برنامه‌ریز بارگذاری مجدد را غیرفعال می‌کند. نتایج جهش شامل یک خلاصهٔ نوع‌دار `followUp` برای
+    آزمون‌ها و ثبت گزارش هستند؛ Gateway همچنان مسئول اعمال یا
+    زمان‌بندی راه‌اندازی مجدد است.
+
+    `loadConfig` و `writeConfigFile` از زمان‌اجرای Plugin
+    حذف شده‌اند. Pluginهای همراه و کد زمان‌اجرای مخزن با
+    `pnpm check:deprecated-api-usage` و
+    `pnpm check:no-runtime-action-load-config` محافظت می‌شوند: استفادهٔ جدید در Plugin
+    تولیدی مستقیماً شکست می‌خورد، نوشتن مستقیم پیکربندی شکست می‌خورد، متدهای سرور Gateway باید از
+    تصویر لحظه‌ای زمان‌اجرای درخواست استفاده کنند، ابزارهای کمکی ارسال/کنش/کلاینت کانال در زمان‌اجرا
+    باید پیکربندی را از مرز خود دریافت کنند، و ماژول‌های زمان‌اجرای
+    بلندعمر اجازهٔ هیچ فراخوانی محیطی `loadConfig()` را ندارند.
+
+    کد جدید Plugin باید از barrel گستردهٔ `openclaw/plugin-sdk/config-runtime`
+    اجتناب کند. برای کار موردنظر از زیرمسیر محدود استفاده کنید:
+
+    | نیاز | درون‌ریزی |
+    | --- | --- |
+    | نوع‌های پیکربندی مانند `OpenClawConfig` | `openclaw/plugin-sdk/config-contracts` |
+    | جست‌وجوی پیکربندی در نقطهٔ ورود Plugin | `api.pluginConfig` |
+    | ادغام پیکربندی | منطق محلی Plugin در مرز پیکربندی |
+    | خواندن تصویر لحظه‌ای زمان‌اجرای فعلی | `openclaw/plugin-sdk/runtime-config-snapshot` |
+    | نوشتن پیکربندی | `openclaw/plugin-sdk/config-mutation` |
+    | ابزارهای کمکی ذخیره‌گاه نشست | `openclaw/plugin-sdk/session-store-runtime` |
+    | پیکربندی جدول Markdown | `openclaw/plugin-sdk/markdown-table-runtime` |
+    | ابزارهای کمکی زمان‌اجرای خط‌مشی گروه | `openclaw/plugin-sdk/runtime-group-policy` |
+    | تفکیک ورودی محرمانه | `openclaw/plugin-sdk/secret-input-runtime` |
+    | بازنویسی‌های مدل/نشست | `openclaw/plugin-sdk/model-session-runtime` |
+
+    Pluginهای همراه و آزمون‌هایشان در برابر barrel گسترده با اسکنر
+    محافظت می‌شوند تا درون‌ریزی‌ها و mockها به رفتار موردنیازشان محدود بمانند.
+    barrel همچنان برای سازگاری خارجی وجود دارد، اما کد جدید نباید
+    به آن وابسته باشد.
+
+  </Step>
+
+  <Step title="انتقال افزونه‌های تعبیه‌شدهٔ نتیجهٔ ابزار به میان‌افزار">
+    Pluginهای همراه باید کنترل‌کننده‌های نتیجهٔ ابزار `api.registerEmbeddedExtensionFactory(...)` را که
+    فقط برای اجراکنندهٔ تعبیه‌شده هستند، با میان‌افزار مستقل از زمان‌اجرا
+    جایگزین کنند:
+
+    ```typescript
+    // ابزارهای زمان‌اجرای OpenClaw و ابزارهای پویای زمان‌اجرای Codex (نتیجه ممکن است
+    // تبدیل شود). نتایج ابزارهای بومی Codex نیز برای مشاهده منتقل می‌شوند،
+    // اما خروجی تبدیل‌شدهٔ آن‌ها هرگز به مدل نمی‌رسد: قرارداد hook مربوط به
+    // PostToolUse در Codex نمی‌تواند پاسخ یک ابزار بومی را جایگزین کند.
+    api.registerAgentToolResultMiddleware(async (event) => {
+      return compactToolResult(event);
+    }, {
+      runtimes: ["openclaw", "codex"],
+    });
+    ```
+
+    هم‌زمان مانیفست Plugin را به‌روزرسانی کنید:
+
+    ```json
+    {
+      "contracts": {
+        "agentToolResultMiddleware": ["openclaw", "codex"]
+      }
+    }
+    ```
+
+    Pluginهای نصب‌شده نیز می‌توانند میان‌افزار نتیجهٔ ابزار را ثبت کنند، مشروط بر اینکه صریحاً
+    فعال شده باشند و هر زمان‌اجرای هدف در
+    `contracts.agentToolResultMiddleware` اعلام شده باشد. ثبت میان‌افزار نصب‌شدهٔ
+    اعلام‌نشده رد می‌شود.
+
+  </Step>
+
+  <Step title="انتقال کنترل‌کننده‌های بومی تأیید به واقعیت‌های قابلیت">
+    Pluginهای کانال دارای قابلیت تأیید، رفتار بومی تأیید را از طریق
+    `approvalCapability.nativeRuntime` به‌همراه رجیستری مشترک زمینهٔ زمان‌اجرا
+    ارائه می‌کنند:
+
+    - `approvalCapability.handler.loadRuntime(...)` را با
+      `approvalCapability.nativeRuntime` جایگزین کنید.
+    - احراز هویت/تحویل ویژهٔ تأیید را از سیم‌کشی قدیمی `plugin.auth` /
+      `plugin.approvals` به `approvalCapability` منتقل کنید.
+    - `ChannelPlugin.approvals` از قرارداد عمومی
+      Plugin کانال حذف شده است؛ فیلدهای تحویل/بومی/رندر را به
+      `approvalCapability` منتقل کنید.
+    - `plugin.auth` فقط برای جریان‌های ورود/خروج کانال باقی می‌ماند؛ هسته دیگر
+      hookهای احراز هویت تأیید را در آن نمی‌خواند.
+    - اشیای زمان‌اجرای متعلق به کانال (کلاینت‌ها، توکن‌ها، برنامه‌های Bolt) را
+      از طریق `openclaw/plugin-sdk/channel-runtime-context` ثبت کنید.
+    - از کنترل‌کننده‌های بومی تأیید، اعلان‌های تغییر مسیر متعلق به Plugin ارسال نکنید؛
+      هسته مالک اعلان‌های مسیریابی‌شده به مقصدی دیگر بر اساس نتایج واقعی تحویل است.
+    - هنگام ارسال `channelRuntime` به `createChannelManager(...)`، یک
+      سطح واقعی `createPluginRuntime().channel` ارائه کنید؛ stubهای ناقص
+      رد می‌شوند.
+
+    برای چیدمان فعلی قابلیت تأیید، [Pluginهای کانال](/fa/plugins/sdk-channel-plugins) را ببینید.
+
+  </Step>
+
+  <Step title="ممیزی رفتار fallback پوشش‌دهندهٔ Windows">
+    اگر Plugin شما از `openclaw/plugin-sdk/windows-spawn` استفاده می‌کند، پوشش‌دهنده‌های Windows
+    `.cmd`/`.bat` که تفکیک نمی‌شوند، اکنون بسته شکست می‌خورند؛ مگر اینکه صریحاً
+    `allowShellFallback: true` را ارسال کنید:
+
+    ```typescript
+    // پیش از تغییر
+    const program = applyWindowsSpawnProgramPolicy({ candidate });
+
+    // پس از تغییر
+    const program = applyWindowsSpawnProgramPolicy({
+      candidate,
+      // این مقدار را فقط برای فراخواننده‌های سازگاری مورداعتماد تنظیم کنید که عمداً
+      // fallback با واسطهٔ shell را می‌پذیرند.
+      allowShellFallback: true,
+    });
+    ```
+
+    اگر فراخوانندهٔ شما عمداً به fallback پوسته متکی نیست،
+    `allowShellFallback` را تنظیم نکنید و در عوض خطای پرتاب‌شده را مدیریت کنید.
+
+  </Step>
+
+  <Step title="یافتن درون‌ریزی‌های منسوخ">
+    ```bash
+    grep -r "plugin-sdk/compat" my-plugin/
+    grep -r "plugin-sdk/infra-runtime" my-plugin/
+    grep -r "plugin-sdk/config-runtime" my-plugin/
+    grep -r "openclaw/extension-api" my-plugin/
+    ```
+  </Step>
+
+  <Step title="جایگزینی با درون‌ریزی‌های متمرکز">
+    هر export از سطح قدیمی به یک مسیر درون‌ریزی مدرن و مشخص نگاشت می‌شود:
+
+    ```typescript
+    // پیش از تغییر (لایهٔ منسوخ سازگاری با نسخه‌های پیشین)
+    import {
+      createChannelReplyPipeline,
+      createPluginRuntimeStore,
+      resolveControlCommandGate,
+    } from "openclaw/plugin-sdk/compat";
+
+    // پس از تغییر (درون‌ریزی‌های مدرن و متمرکز)
+    import { createChannelReplyPipeline } from "openclaw/plugin-sdk/channel-reply-pipeline";
+    import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
+    import { resolveControlCommandGate } from "openclaw/plugin-sdk/command-auth";
+    ```
+
+    برای ابزارهای کمکی سمت میزبان، به‌جای درون‌ریزی مستقیم از زمان‌اجرای تزریق‌شدهٔ Plugin
+    استفاده کنید:
+
+    ```typescript
+    // پیش از تغییر (پل منسوخ extension-api)
+    import { runEmbeddedAgent } from "openclaw/extension-api";
+    const result = await runEmbeddedAgent({ sessionId, prompt });
+
+    // پس از تغییر (زمان‌اجرای تزریق‌شده)
+    const result = await api.runtime.agent.runEmbeddedAgent({ sessionId, prompt });
+    ```
+
+    همین الگو برای دیگر ابزارهای کمکی پل قدیمی نیز به‌کار می‌رود:
+
+    | درون‌ریزی قدیمی | معادل مدرن |
+    | --- | --- |
+    | `resolveAgentDir` | `api.runtime.agent.resolveAgentDir` |
+    | `resolveAgentWorkspaceDir` | `api.runtime.agent.resolveAgentWorkspaceDir` |
+    | `resolveAgentIdentity` | `api.runtime.agent.resolveAgentIdentity` |
+    | `resolveThinkingDefault` | `api.runtime.agent.resolveThinkingDefault` |
+    | `resolveAgentTimeoutMs` | `api.runtime.agent.resolveAgentTimeoutMs` |
+    | `ensureAgentWorkspace` | `api.runtime.agent.ensureAgentWorkspace` |
+    | ابزارهای کمکی ذخیره‌گاه نشست | `api.runtime.agent.session.*` |
+
+  </Step>
+
+  <Step title="جایگزینی درون‌ریزی‌های گستردهٔ infra-runtime">
+    `openclaw/plugin-sdk/infra-runtime` همچنان برای سازگاری خارجی وجود دارد،
+    اما کد جدید باید سطح متمرکزی را درون‌ریزی کند که واقعاً
+    به آن نیاز دارد:
+
+    | نیاز | درون‌ریزی |
+    | --- | --- |
+    | ابزارهای کمکی صف رویداد سیستم | `openclaw/plugin-sdk/system-event-runtime` |
+    | ابزارهای کمکی بیدارسازی، رویداد و مشاهده‌پذیری Heartbeat | `openclaw/plugin-sdk/heartbeat-runtime` |
+    | تخلیهٔ صف تحویل‌های در انتظار | `openclaw/plugin-sdk/delivery-queue-runtime` |
+    | تله‌متری فعالیت کانال | `openclaw/plugin-sdk/channel-activity-runtime` |
+    | حافظه‌های نهان حذف تکرار درون‌حافظه‌ای و متکی بر ذخیره‌گاه پایدار | `openclaw/plugin-sdk/dedupe-runtime` |
+    | ابزارهای کمکی امن مسیر فایل محلی/رسانه | `openclaw/plugin-sdk/file-access-runtime` |
+    | واکشی آگاه از dispatcher | `openclaw/plugin-sdk/runtime-fetch` |
+    | ابزارهای کمکی واکشی از طریق پراکسی و محافظت‌شده | `openclaw/plugin-sdk/fetch-runtime` |
+    | نوع‌های خط‌مشی dispatcher مربوط به SSRF | `openclaw/plugin-sdk/ssrf-dispatcher` |
+    | نوع‌های درخواست/تفکیک تأیید | `openclaw/plugin-sdk/approval-runtime` |
+    | ابزارهای کمکی payload پاسخ تأیید و فرمان | `openclaw/plugin-sdk/approval-reply-runtime` |
+    | ابزارهای کمکی قالب‌بندی خطا | `openclaw/plugin-sdk/error-runtime` |
+    | انتظار برای آمادگی انتقال | `openclaw/plugin-sdk/transport-ready-runtime` |
+    | ابزارهای کمکی امن توکن | `openclaw/plugin-sdk/secure-random-runtime` |
+    | هم‌زمانی محدود وظایف ناهمگام | `openclaw/plugin-sdk/concurrency-runtime` |
+    | assertionهای مقدار الزامی برای ناورداهای اثبات‌پذیر | `openclaw/plugin-sdk/expect-runtime` |
+    | تبدیل اجباری عددی | `openclaw/plugin-sdk/number-runtime` |
+    | قفل ناهمگام محلی فرایند | `openclaw/plugin-sdk/async-lock-runtime` |
+    | قفل‌های فایل | `openclaw/plugin-sdk/file-lock` |
+
+    Pluginهای همراه در برابر `infra-runtime` با اسکنر محافظت می‌شوند، بنابراین کد مخزن
+    نمی‌تواند به barrel گسترده بازگردد.
+
+  </Step>
+
+  <Step title="انتقال ابزارهای کمکی مسیر کانال">
+    کد جدید مسیر کانال از `openclaw/plugin-sdk/channel-route` استفاده می‌کند. نام‌های قدیمی‌تر
+    کلید مسیر به‌عنوان aliasهای سازگاری باقی می‌مانند:
+
+    | ابزار کمکی قدیمی | ابزار کمکی مدرن |
+    | --- | --- |
+    | `channelRouteIdentityKey(...)` | `channelRouteDedupeKey(...)` |
+    | `channelRouteKey(...)` | `channelRouteCompactKey(...)` |
+
+    ابزارهای کمکی مدرن مسیر، `{ channel, to, accountId, threadId }` را در تأییدهای بومی،
+    جلوگیری از پاسخ، حذف تکرار ورودی، تحویل Cron و مسیریابی نشست
+    به‌شکل سازگار نرمال‌سازی می‌کنند.
+
+    استفادهٔ جدیدی از `ChannelMessagingAdapter.parseExplicitTarget` یا
+    `resolveChannelRouteTargetWithParser(...)` از
+    `plugin-sdk/channel-route` اضافه نکنید؛ این موارد منسوخ شده‌اند و فقط برای Pluginهای
+    قدیمی‌تر باقی مانده‌اند. Pluginهای کانال جدید باید برای نرمال‌سازی شناسهٔ هدف
+    و fallback هنگام نبود نتیجه در دایرکتوری از
+    `messaging.targetResolver.resolveTarget(...)`،
+    هنگامی که هسته زودهنگام به نوع همتا نیاز دارد از `messaging.inferTargetChatType(...)`،
+    و برای هویت بومی ارائه‌دهندهٔ
+    نشست و رشته از `messaging.resolveOutboundSessionRoute(...)` استفاده کنند.
+
+  </Step>
+
+  <Step title="ساخت و آزمون">
+    ```bash
+    pnpm build
+    pnpm test my-plugin/
+    ```
+  </Step>
+</Steps>
+
+## مرجع مسیر درون‌ریزی
+
+نگاشت export عمومی بسته، منبع حقیقت برای زیرمسیرهای قابل درون‌ریزی SDK
+است. از راهنماهای موضوعی SDK که در [نمای کلی SDK](/fa/plugins/sdk-overview)
+پیوند داده شده‌اند استفاده کنید و محدودترین زیرمسیر عمومی مستندشده را ترجیح دهید. فهرست کامپایلر در
+`scripts/lib/plugin-sdk-entrypoints.json` همچنین شامل ورودی‌های خصوصی-محلی مورداستفاده
+برای ساخت Pluginهای همراه است؛ وجود آن‌ها در آنجا به‌معنای export عمومی بسته نیست.
+
+این جدول زیرمجموعهٔ رایج انتقال است، نه کل سطح SDK. فهرست نقطهٔ ورود
+کامپایلر در `scripts/lib/plugin-sdk-entrypoints.json` قرار دارد؛
+exportهای بسته از زیرمجموعهٔ عمومی تولید می‌شوند.
+
+درزهای ابزار کمکی رزروشده برای Pluginهای همراه از نگاشت export عمومی SDK
+بازنشسته شده‌اند، به‌جز facadeهای سازگاری صریحاً مستندشده مانند shim
+منسوخ `plugin-sdk/discord` که برای Pluginهای خارجی نگه داشته شده است که هنوز
+بستهٔ منتشرشدهٔ `@openclaw/discord` را مستقیماً درون‌ریزی می‌کنند. ابزارهای کمکی
+ویژهٔ مالک درون بستهٔ Plugin مالک قرار دارند؛ رفتار مشترک میزبان
+از طریق قراردادهای عمومی SDK مانند `plugin-sdk/gateway-runtime`،
+`plugin-sdk/security-runtime` و API تزریق‌شدهٔ Plugin منتقل می‌شود.
+
+از محدودترین درون‌ریزی متناسب با کار استفاده کنید. اگر exportی پیدا نمی‌کنید،
+منبع را در `src/plugin-sdk/` بررسی کنید یا از نگه‌دارندگان بپرسید کدام قرارداد عمومی
+باید مالک آن باشد.
+
+## سطوح سازگاری حذف‌شده
+
+پاک‌سازی ژوئیهٔ 2026، barrelهای SDK ریشه و سازگاری، پل API
+افزونه، aliasهای منقضی‌شدهٔ زیرمسیر SDK، زیرمسیرهای بلااستفادهٔ SDK و exportهای عمومی
+ماژول‌های SDK ویژهٔ Pluginهای همراه را حذف کرد. ماژول‌های ویژهٔ Pluginهای همراه از طریق
+نگاشت‌های ساخت خصوصی-محلی برای مالکان مخزنشان در دسترس می‌مانند؛ این ماژول‌ها از
+بستهٔ منتشرشده قابل درون‌ریزی نیستند.
+
+### انتشار سراسری فرایندِ ارائه‌دهندهٔ API
+
+`registerApiProvider(...)` و `unregisterApiProviders(...)` از
+`openclaw/plugin-sdk/llm` حذف شدند. آن‌ها انتقال‌های API را در وضعیت سراسری
+فرایند منتشر می‌کردند و سپس زمان‌اجراهای مدلِ دارای مالک چرخهٔ حیات مجبور بودند آن‌ها را در هر
+رجیستری آماده‌شده کپی کنند.
+
+Pluginهای ارائه‌دهنده باید ارائه‌دهندگان استنتاج متن را از طریق
+`api.registerProvider(...)` ثبت کنند. کد و آزمون‌های متعلق به میزبان که یک
+`ApiRegistry` می‌سازند باید مستقیماً در همان رجیستری ثبت کنند تا مالکیت
+ارائه‌دهنده و پاک‌سازی در محدودهٔ زمان‌اجرای آماده‌شده باقی بماند.
+
+### barrel خصوصی آزمون
+
+`openclaw/plugin-sdk/testing` محلی مخزن بود و از مصنوعات بستهٔ منتشرشده
+حذف می‌شد، بنابراین پیش از تاریخ `removeAfter` آن در 2026-07-28 حذف شد. آزمون‌های مخزن
+از زیرمسیرهای متمرکزی مانند `plugin-sdk/plugin-test-runtime`،
+`plugin-sdk/channel-test-helpers`، `plugin-sdk/channel-target-testing`،
+`plugin-sdk/test-env` و `plugin-sdk/test-fixtures` استفاده می‌کنند.
+
+## مرجع انتقال
+
+  این نگاشت‌ها هم سطوح حذف‌شده در ژوئیهٔ 2026 و هم منسوخ‌سازی‌های فعال در بازه‌های بعدی را پوشش می‌دهند. هر نگاشت، راهنمای مهاجرت است، نه مدرکی بر این‌که سطح قدیمی همچنان در دسترس است؛ برای وضعیت فعلی، به رجیستری سازگاری و جدول زمانی حذف مراجعه کنید.
+
+  <AccordionGroup>
+  <Accordion title="سازنده‌های راهنمای command-auth -> command-status">
+    **قدیمی (`openclaw/plugin-sdk/command-auth`)**: `buildCommandsMessage`،
+    `buildCommandsMessagePaginated`، `buildHelpMessage`.
+
+    **جدید (`openclaw/plugin-sdk/command-status`)**: همان امضاها که
+    از زیرمسیر محدودتر وارد می‌شوند. بازصادرهای سازگاری `command-auth`
+    حذف شده‌اند.
+
+    ```typescript
+    // پیش از این
+    import { buildHelpMessage } from "openclaw/plugin-sdk/command-auth";
+
+    // پس از این
+    import { buildHelpMessage } from "openclaw/plugin-sdk/command-status";
+    ```
+
+  </Accordion>
+
+  <Accordion title="کمک‌کننده‌های کنترل منشن -> resolveInboundMentionDecision">
+    **قدیمی**: `resolveMentionGating(params)` و
+    `resolveMentionGatingWithBypass(params)` از
+    `openclaw/plugin-sdk/channel-inbound` یا
+    `openclaw/plugin-sdk/channel-mention-gating`.
+
+    **جدید**: `resolveInboundMentionDecision({ facts, policy })` ــ یک شیء تصمیم‌گیری
+    به‌جای دو شکل فراخوانی مجزا.
+
+    این تغییر در Discord، iMessage، Matrix، MS Teams، QQBot، Signal،
+    Telegram، WhatsApp و Zalo اعمال شده است. مدل رویداد `app_mention` خود Slack
+    از این کمک‌کننده استفاده نمی‌کند.
+
+  </Accordion>
+
+  <Accordion title="شیم زمان اجرای کانال و کمک‌کننده‌های کنش‌های کانال">
+    `openclaw/plugin-sdk/channel-runtime` حذف شده است. برای ثبت اشیای
+    زمان اجرا از `openclaw/plugin-sdk/channel-runtime-context` استفاده کنید.
+
+    کمک‌کننده‌های شِمای پیام بومی در `openclaw/plugin-sdk/channel-actions`
+    همراه با خروجی‌های خام «actions» کانال حذف شدند. در عوض، قابلیت‌ها را
+    از طریق سطح معنایی `presentation` ارائه کنید ــ Pluginهای کانال
+    به‌جای نام کنش‌های خامی که می‌پذیرند، مواردی را که رندر می‌کنند
+    (کارت‌ها، دکمه‌ها، انتخاب‌گرها) اعلام می‌کنند.
+
+  </Accordion>
+
+  <Accordion title="کمک‌کنندهٔ tool() ارائه‌دهندهٔ جست‌وجوی وب -> createTool() روی Plugin">
+    **قدیمی**: کارخانهٔ `tool()` از `openclaw/plugin-sdk/provider-web-search`.
+
+    **جدید**: `createTool(...)` را مستقیماً روی Plugin ارائه‌دهنده پیاده‌سازی کنید.
+    OpenClaw دیگر برای ثبت پوشش ابزار به کمک‌کنندهٔ SDK نیاز ندارد.
+
+  </Accordion>
+
+  <Accordion title="پاکت‌های متن سادهٔ کانال -> BodyForAgent">
+    **قدیمی**: `api.runtime.channel.reply.formatInboundEnvelope(...)` (و فیلد
+    `channelEnvelope` روی اشیای پیام ورودی) برای ساخت یک پاکت پرامپت
+    متن ساده و تخت از پیام‌های ورودی کانال.
+
+    **جدید**: `BodyForAgent` به‌همراه بلوک‌های ساخت‌یافتهٔ زمینهٔ کاربر. Pluginهای
+    کانال، فرادادهٔ مسیریابی (رشته، موضوع، پاسخ‌به، واکنش‌ها) را
+    به‌صورت فیلدهای نوع‌دار پیوست می‌کنند، نه این‌که آن‌ها را در یک رشتهٔ پرامپت به هم بچسبانند.
+    کمک‌کنندهٔ `formatAgentEnvelope(...)` همچنان برای پاکت‌های ترکیبی
+    روبه‌دستیار پشتیبانی می‌شود، اما پاکت‌های متن سادهٔ ورودی در مسیر
+    حذف قرار دارند.
+
+    نواحی تحت‌تأثیر: `inbound_claim`، `message_received` و هر
+    Plugin سفارشی کانالی که متن پاکت قدیمی را پس‌پردازش می‌کرد.
+
+  </Accordion>
+
+  <Accordion title="قلاب deactivate -> gateway_stop">
+    **قدیمی**: `api.on("deactivate", handler)`.
+
+    **جدید**: `api.on("gateway_stop", handler)`. قرارداد پاک‌سازی هنگام خاموش‌شدن
+    یکسان است؛ فقط نام قلاب تغییر می‌کند.
+
+    ```typescript
+    // پیش از این
+    api.on("deactivate", async (event, ctx) => {
+      await stopPluginService(ctx);
+    });
+
+    // پس از این
+    api.on("gateway_stop", async (event, ctx) => {
+      await stopPluginService(ctx);
+    });
+    ```
+
+    `deactivate` تا زمان حذف پس از 2026-08-16، به‌عنوان یک نام مستعار
+    سازگاری منسوخ‌شده متصل باقی می‌ماند.
+
+  </Accordion>
+
+  <Accordion title="قلاب subagent_spawning -> اتصال رشته در هسته">
+    **قدیمی**: `api.on("subagent_spawning", handler)` که
+    `threadBindingReady` یا `deliveryOrigin` را برمی‌گرداند.
+
+    **جدید**: اجازه دهید هسته اتصال‌های عامل فرعی `thread: true` را از طریق
+    آداپتور اتصال نشست کانال آماده کند. از `api.on("subagent_spawned", handler)`
+    فقط برای مشاهدهٔ پس از راه‌اندازی استفاده کنید.
+
+    ```typescript
+    // پیش از این
+    api.on("subagent_spawning", async () => ({
+      status: "ok",
+      threadBindingReady: true,
+      deliveryOrigin: { channel: "discord", to: "channel:123", threadId: "456" },
+    }));
+
+    // پس از این
+    api.on("subagent_spawned", async (event) => {
+      await observeSubagentLaunch(event);
+    });
+    ```
+
+    `subagent_spawning`، `PluginHookSubagentSpawningEvent`،
+    `PluginHookSubagentSpawningResult` و
+    `SubagentLifecycleHookRunner.runSubagentSpawning(...)` فقط به‌عنوان
+    سطوح سازگاری منسوخ‌شده تا زمان مهاجرت Pluginهای خارجی باقی می‌مانند و
+    پس از 2026-08-30 حذف می‌شوند.
+
+  </Accordion>
+
+  <Accordion title="نوع‌های کشف ارائه‌دهنده -> نوع‌های کاتالوگ ارائه‌دهنده">
+    چهار نام مستعار نوع کشف اکنون پوشش‌های نازکی روی نوع‌های
+    دورهٔ کاتالوگ هستند:
+
+    | نام مستعار قدیمی                 | نوع جدید                  |
+    | ------------------------- | ------------------------- |
+    | `ProviderDiscoveryOrder`  | `ProviderCatalogOrder`    |
+    | `ProviderDiscoveryContext`| `ProviderCatalogContext`  |
+    | `ProviderDiscoveryResult` | `ProviderCatalogResult`   |
+    | `ProviderPluginDiscovery` | `ProviderPluginCatalog`   |
+
+    نام‌های مستعار و مجموعهٔ ایستای قدیمی `ProviderCapabilities`
+    حذف شده‌اند. Pluginهای ارائه‌دهنده
+    باید به‌جای یک شیء ایستا، از قلاب‌های صریح ارائه‌دهنده مانند `buildReplayPolicy`،
+    `normalizeToolSchemas` و `wrapStreamFn` استفاده کنند.
+
+  </Accordion>
+
+  <Accordion title="قلاب‌های سیاست تفکر -> resolveThinkingProfile">
+    **قدیمی** (سه قلاب مجزا روی `ProviderThinkingPolicy`):
+    `isBinaryThinking(ctx)`، `supportsXHighThinking(ctx)` و
+    `resolveDefaultThinkingLevel(ctx)`.
+
+    **جدید**: یک `resolveThinkingProfile(ctx)` واحد که یک
+    `ProviderThinkingProfile` را با `id` معیار، `label` اختیاری و یک
+    فهرست رتبه‌بندی‌شده از سطوح برمی‌گرداند. OpenClaw مقادیر ذخیره‌شدهٔ کهنه را بر اساس رتبهٔ پروفایل
+    به‌طور خودکار تنزل می‌دهد.
+
+    زمینه شامل `provider`، `modelId`، `reasoning` ادغام‌شدهٔ اختیاری
+    و واقعیت‌های مدل `compat` ادغام‌شدهٔ اختیاری است. Pluginهای ارائه‌دهنده می‌توانند از این
+    واقعیت‌های کاتالوگ استفاده کنند تا فقط هنگامی یک پروفایل مختص مدل ارائه دهند که قرارداد
+    درخواست پیکربندی‌شده از آن پشتیبانی کند.
+
+    به‌جای سه قلاب، یک قلاب پیاده‌سازی کنید. قلاب‌های قدیمی حذف شده‌اند.
+
+  </Accordion>
+
+  <Accordion title="ارائه‌دهندگان احراز هویت خارجی -> contracts.externalAuthProviders">
+    **قدیمی**: پیاده‌سازی قلاب‌های احراز هویت خارجی بدون اعلام ارائه‌دهنده
+    در مانیفست Plugin.
+
+    **جدید**: `contracts.externalAuthProviders` را در مانیفست Plugin اعلام
+    **و** `resolveExternalAuthProfiles(...)` را پیاده‌سازی کنید.
+
+    ```json
+    {
+      "contracts": {
+        "externalAuthProviders": ["anthropic", "openai"]
+      }
+    }
+    ```
+
+  </Accordion>
+
+  <Accordion title="جست‌وجوی متغیر محیطی ارائه‌دهنده -> setup.providers[].envVars">
+    فیلد مانیفست **قدیمی**: `providerAuthEnvVars: { anthropic: ["ANTHROPIC_API_KEY"] }`.
+
+    **جدید**: همان جست‌وجوی متغیر محیطی را در `setup.providers[].envVars`
+    روی مانیفست بازتاب دهید. این کار فرادادهٔ محیطی راه‌اندازی/وضعیت را در یک مکان یکپارچه می‌کند
+    و از راه‌اندازی زمان اجرای Plugin فقط برای پاسخ‌دادن به جست‌وجوهای متغیر محیطی جلوگیری می‌کند.
+
+    `providerAuthEnvVars` دیگر پذیرفته نمی‌شود.
+
+  </Accordion>
+
+  <Accordion title="ثبت Plugin حافظه -> registerMemoryCapability">
+    **قدیمی**: سه فراخوانی مجزا ــ `api.registerMemoryPromptSection(...)`،
+    `api.registerMemoryFlushPlan(...)`، `api.registerMemoryRuntime(...)`.
+
+    **جدید**: یک فراخوانی روی API وضعیت حافظه ــ
+    `registerMemoryCapability(pluginId, { promptBuilder, flushPlanResolver, runtime })`.
+
+    همان شکاف‌ها، یک فراخوانی ثبت. کمک‌کننده‌های افزایشی پرامپت و پیکره
+    (`registerMemoryPromptSupplement`، `registerMemoryCorpusSupplement`)
+    تحت‌تأثیر قرار نمی‌گیرند.
+
+  </Accordion>
+
+  <Accordion title="API ارائه‌دهندهٔ جاسازی حافظه">
+    **قدیمی**: `api.registerMemoryEmbeddingProvider(...)` به‌همراه
+    `contracts.memoryEmbeddingProviders`.
+
+    **جدید**: `api.registerEmbeddingProvider(...)` به‌همراه
+    `contracts.embeddingProviders`.
+
+    قرارداد عمومی ارائه‌دهندهٔ جاسازی خارج از حافظه نیز قابل استفادهٔ مجدد است و
+    مسیر پشتیبانی‌شده برای ارائه‌دهندگان جدید محسوب می‌شود. API ثبت مختص حافظه
+    در حین مهاجرت ارائه‌دهندگان موجود، به‌عنوان سازگاری منسوخ‌شده
+    متصل باقی می‌ماند. بازرسی Plugin، استفادهٔ غیرباندل‌شده را به‌عنوان
+    بدهی سازگاری گزارش می‌کند.
+
+  </Accordion>
+
+  <Accordion title="نتایج خام ارسال کانال -> OutboundDeliveryResult">
+    **قدیمی**: برگرداندن `{ ok, messageId, error }` از طریق
+    `ChannelSendRawResult` و نرمال‌سازی آن با
+    `createRawChannelSendResultAdapter(...)`.
+
+    **جدید**: فیلدهای `OutboundDeliveryResult` را برگردانید و کانال را با
+    `createAttachedChannelResultAdapter(...)` پیوست کنید. ارسال‌های ناموفق باید به‌جای
+    برگرداندن رشتهٔ خطا، استثنا ایجاد کنند. نوع نتیجهٔ خام تا
+    انتشار اصلی بعدی SDK مربوط به Plugin در دسترس باقی می‌ماند.
+
+  </Accordion>
+
+  <Accordion title="تغییر نام نوع‌های پیام نشست عامل فرعی">
+    دو نام مستعار نوع قدیمی همچنان از `src/plugins/runtime/types.ts` صادر می‌شوند:
+
+    | قدیمی                           | جدید                             |
+    | ----------------------------- | ------------------------------- |
+    | `SubagentReadSessionParams`   | `SubagentGetSessionMessagesParams` |
+    | `SubagentReadSessionResult`   | `SubagentGetSessionMessagesResult` |
+
+    متد زمان اجرای `readSession` به‌نفع
+    `getSessionMessages` منسوخ شده است. امضا یکسان است؛ متد قدیمی فراخوانی را به
+    متد جدید واگذار می‌کند.
+
+  </Accordion>
+
+  <Accordion title="APIهای حذف‌شدهٔ فایل نشست و رونوشت">
+    تغییر نشست/رونوشت به SQLite، APIهای روبه‌Plugin را که
+    مخزن‌های فعال `sessions.json`، مسیرهای رونوشت JSONL یا فهرست‌های
+    فایل نشست را افشا می‌کردند، حذف یا منسوخ می‌کند. Pluginهای زمان اجرا باید به‌جای
+    تفکیک یا تغییر فایل‌های فعال، از هویت نشست و کمک‌کننده‌های زمان اجرای SDK
+    استفاده کنند.
+
+    | سطح در حال مهاجرت | جایگزین |
+    | ----------------- | ----------- |
+    | `loadSessionStore(...)`، `updateSessionStore(...)` و `resolveSessionStoreEntry(...)` منسوخ‌شده | `getSessionEntry(...)`، `listSessionEntries(...)` و تغییرات نشست در سطح ردیف. |
+    | `resolveSessionFilePath(...)` منسوخ‌شده | هویت نشست (`sessionKey`، `sessionId` و کمک‌کننده‌های هدف زمان اجرای SDK) به‌همراه متدهای Gateway که روی نشست فعلی عمل می‌کنند. |
+    | `saveSessionStore(...)` حذف‌شده | APIهای زمان اجرای نشست تحت مالکیت Gateway؛ کد Plugin باید به‌جای نوشتن در فایل مخزن فعال، وضعیت نشست را از طریق کمک‌کننده‌های مستندشدهٔ زمان اجرا/زمینه درخواست یا تغییر دهد. |
+    | `resolveSessionTranscriptPathInDir(...)` و `resolveAndPersistSessionFile(...)` حذف‌شده | هویت نشست و متدهای Gateway که روی نشست فعلی عمل می‌کنند. |
+    | `readLatestAssistantTextFromSessionTranscript(...)` | خوانشگرهای رونوشت مبتنی بر هویت که زمینهٔ زمان اجرای فعلی ارائه می‌کند، یا متدهای تاریخچه/نشست Gateway هنگامی که Plugin خارج از مسیر مالک رونوشت است. |
+    | `SessionTranscriptUpdate.sessionFile` | `SessionTranscriptUpdate.target` با `agentId`، `sessionKey` و `sessionId`. |
+    | ورودی‌های همگام‌سازی حافظه مانند `sessionFiles` | منابع رونوشت/نشست مبتنی بر هویت که میزبان ارائه می‌کند؛ فایل‌های فعال JSONL را برای نشست‌های زنده پیمایش نکنید. |
+    | گزینه‌های زمان اجرا با نام `transcriptPath` یا `sessionFile` برای نشست‌های فعال | اشیای `sessionTarget`/هدف زمان اجرا که هویت نشست مستقل از ذخیره‌سازی را حمل می‌کنند. |
+
+    فایل‌های قدیمی رونوشت JSONL همچنان به‌عنوان مصنوعات واردکردن، بایگانی،
+    صادرکردن و پشتیبانی معتبر هستند. آن‌ها دیگر قرارداد پایدار زمان اجرا برای
+    نشست‌های فعال نیستند.
+
+    Pluginهای رسمی منتشرشده با `v2026.7.1-beta.5` چهار
+    کمک‌کنندهٔ منسوخ‌شدهٔ بالا را وارد می‌کردند. `openclaw/plugin-sdk/session-store-runtime`
+    دقیقاً همان پل را تا 2026-10-12 حفظ می‌کند؛ Pluginهای جدید باید از جایگزین‌ها استفاده کنند.
+    `resolveStorePath(...)` همچنان یک کمک‌کنندهٔ پشتیبانی‌شدهٔ SDK است و بخشی از
+    این منسوخ‌سازی نیست.
+
+    `openclaw plugins inspect --all --runtime`، Pluginهای غیرباندل‌شده‌ای را گزارش می‌کند که
+    خطاهای بارگذاری یا عیب‌یابی‌هایشان همچنان به این APIهای فایل حذف‌شده اشاره دارند. پیمایش
+    مشورتی `@openclaw/plugin-inspector` باید از نسخهٔ `0.3.17` یا
+    جدیدتر استفاده کند تا اسکن بسته‌های خارجی نیز کمک‌کننده‌های نشست در سطح کل مخزن،
+    کمک‌کننده‌های مسیر فایل نشست، هدف‌های قدیمی فایل رونوشت و کمک‌کننده‌های سطح پایین
+    رونوشت را پیش از انتشار علامت‌گذاری کند.
+
+  </Accordion>
+
+  <Accordion title="runtime.tasks.flow -> runtime.tasks.managedFlows">
+    **قدیمی**: `runtime.tasks.flow` (مفرد) یک دسترسی‌دهندهٔ زندهٔ جریان وظیفه
+    برمی‌گرداند.
+
+    **جدید**: `runtime.tasks.managedFlows` زمان اجرای تغییر مدیریت‌شدهٔ TaskFlow را
+    برای Pluginهایی که از یک جریان، وظایف فرزند را ایجاد، به‌روزرسانی، لغو یا اجرا می‌کنند حفظ می‌کند.
+    هنگامی که Plugin فقط به خواندن مبتنی بر DTO نیاز دارد، از `runtime.tasks.flows` استفاده کنید.
+
+    ```typescript
+    // پیش از تغییر
+    const flow = api.runtime.tasks.flow.fromToolContext(ctx);
+    // پس از تغییر
+    const flow = api.runtime.tasks.managedFlows.fromToolContext(ctx);
+    ```
+
+    نام‌های مستعار قدیمی در ژوئیهٔ ۲۰۲۶ حذف شدند.
+
+  </Accordion>
+
+  <Accordion title="کارخانه‌های افزونهٔ تعبیه‌شده -> میان‌افزار نتیجهٔ ابزار عامل">
+    این موضوع در بخش [نحوهٔ مهاجرت](#how-to-migrate) در بالا پوشش داده شده است. برای
+    تکمیل اطلاعات، مسیر حذف‌شدهٔ مختص اجراکنندهٔ تعبیه‌شدهٔ
+    `api.registerEmbeddedExtensionFactory(...)` با
+    `api.registerAgentToolResultMiddleware(...)` و یک فهرست صریح از زمان‌های اجرا
+    در `contracts.agentToolResultMiddleware` جایگزین می‌شود.
+  </Accordion>
+
+  <Accordion title="نام مستعار OpenClawSchemaType -> OpenClawConfig">
+    نام مستعار SDK ریشهٔ `OpenClawSchemaType` حذف شد. از نام متعارف
+    `OpenClawConfig` استفاده کنید.
+
+    ```typescript
+    // پیش از تغییر
+    import type { OpenClawSchemaType } from "openclaw/plugin-sdk";
+    // پس از تغییر
+    import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+    ```
+
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+موارد منسوخ‌شده در سطح افزونه (داخل Pluginهای کانال/ارائه‌دهندهٔ همراه در
+`extensions/`) در barrelهای `api.ts` و `runtime-api.ts`
+خودشان پیگیری می‌شوند. آن‌ها بر قراردادهای Pluginهای شخص ثالث تأثیری ندارند و
+در اینجا فهرست نشده‌اند. اگر barrel محلی یک Plugin همراه را مستقیماً مصرف می‌کنید،
+پیش از ارتقا دیدگاه‌های مربوط به منسوخ‌شدن در آن barrel را بخوانید.
+</Note>
+
+## مهاجرت Talk و صدای بی‌درنگ
+
+کد صدای بی‌درنگ، تلفن، جلسه و Talk مرورگر، یک کنترل‌کنندهٔ نشست Talk مشترک دارد
+که توسط `openclaw/plugin-sdk/realtime-voice` صادر می‌شود. این
+کنترل‌کننده مالک پوش رویداد مشترک Talk، وضعیت نوبت فعال، وضعیت ضبط،
+وضعیت صدای خروجی، تاریخچهٔ رویدادهای اخیر و رد نوبت‌های منقضی‌شده است.
+Pluginهای ارائه‌دهنده مالک نشست‌های بی‌درنگ مختص فروشنده هستند. Pluginهای جلسهٔ مرورگر
+از `openclaw/plugin-sdk/meeting-runtime` برای سازوکارهای نشست، مرورگر، صدا، میزبان Node،
+مشاوره با عامل و تماس صوتی استفاده می‌کنند و سپس `MeetingPlatformAdapter`
+را برای قواعد URL، اسکریپت‌های DOM، نگاشت اقدام دستی، زیرنویس‌ها، ایجاد و طرح‌های
+شماره‌گیری ورودی پیاده‌سازی می‌کنند. APIهای REST پلتفرم، OAuth، مصنوعات، انتخابگرها
+و نام‌های سیمی در Plugin باقی می‌مانند. طرح‌های مجوز مرورگر URL جلسهٔ درخواستی را
+دریافت می‌کنند تا هر پلتفرم بتواند فقط به مبدأهای دقیقاً پشتیبانی‌شدهٔ خود مجوز دهد.
+زمان‌های اجرای نشست باید سلامت زندهٔ مختص پلتفرم را نیز پس از خروج تأییدشده از مرورگر
+عادی‌سازی کنند؛ فیلدهای رونوشت تاریخی می‌توانند باقی بمانند، اما آمادگی زیرنویس و صدا
+نباید پس از خروج فعال بماند.
+
+همهٔ سطوح همراه روی کنترل‌کنندهٔ مشترک اجرا می‌شوند: رلهٔ مرورگر،
+واگذاری اتاق مدیریت‌شده، بی‌درنگ تماس صوتی، STT جریانی تماس صوتی، بی‌درنگ Google
+Meet و فشردن برای صحبت بومی. Gateway یک کانال رویداد زندهٔ Talk را
+در `hello-ok.features.events` اعلام می‌کند: `talk.event`.
+
+کد جدید نباید `createTalkEventSequencer(...)` را مستقیماً فراخوانی کند، مگر اینکه
+یک آداپتور سطح‌پایین یا فیکسچر آزمون را پیاده‌سازی کند. از کنترل‌کنندهٔ مشترک استفاده کنید
+تا رویدادهای محدود به نوبت بدون شناسهٔ نوبت منتشر نشوند، فراخوانی‌های منقضی‌شدهٔ
+`turnEnd` / `turnCancel` نتوانند نوبت فعال جدیدتری را پاک کنند و
+رویدادهای چرخهٔ عمر صدای خروجی در تلفن، جلسات، رلهٔ مرورگر، واگذاری اتاق مدیریت‌شده
+و کلاینت‌های بومی Talk سازگار بمانند.
+
+شکل API عمومی:
 
 ```typescript
-// Gateway-owned Talk session API.
+// API نشست Talk تحت مالکیت Gateway.
 await gateway.request("talk.session.create", {
   mode: "realtime",
   transport: "gateway-relay",
@@ -141,7 +917,7 @@ await gateway.request("talk.session.submitToolResult", {
 await gateway.request("talk.session.submitToolResult", { sessionId, callId, result });
 await gateway.request("talk.session.close", { sessionId });
 
-// Client-owned provider session API.
+// API نشست ارائه‌دهنده تحت مالکیت کلاینت.
 await gateway.request("talk.client.create", {
   mode: "realtime",
   transport: "webrtc",
@@ -152,33 +928,34 @@ await gateway.request("talk.client.toolCall", { sessionKey, callId, name, args }
 await gateway.request("talk.client.steer", { sessionKey, text, mode: "steer" });
 ```
 
-نشست‌های WebRTC/provider-websocket متعلق به مرورگر از `talk.client.create` استفاده می‌کنند،
-زیرا مرورگر مالک مذاکره provider و انتقال media است، در حالی که
-Gateway مالک credentials، دستورالعمل‌ها، و policy ابزار است. `talk.session.*`
-سطح مشترک مدیریت‌شده توسط Gateway برای gateway-relay realtime، gateway-relay
-transcription، و نشست‌های native STT/TTS در managed-room است.
+نشست‌های WebRTC/وب‌سوکت ارائه‌دهنده تحت مالکیت مرورگر از `talk.client.create`
+استفاده می‌کنند، زیرا مرورگر مالک مذاکره با ارائه‌دهنده و انتقال رسانه است، درحالی‌که
+Gateway مالک اعتبارنامه‌ها، دستورالعمل‌ها و سیاست ابزار است. `talk.session.*`
+سطح مشترک مدیریت‌شده توسط Gateway برای بی‌درنگ رلهٔ Gateway، رونویسی رلهٔ Gateway
+و نشست‌های بومی STT/TTS اتاق مدیریت‌شده است.
 
-configهای legacy که selectorهای realtime را کنار `talk.provider` /
-`talk.providers` قرار داده‌اند باید با `openclaw doctor --fix` تعمیر شوند؛ runtime Talk
-config provider مربوط به speech/TTS را به‌عنوان config provider realtime بازتفسیر نمی‌کند.
+پیکربندی‌های قدیمی که انتخابگرهای بی‌درنگ را کنار `talk.provider` /
+`talk.providers` قرار می‌دهند باید با `openclaw doctor --fix` تعمیر شوند؛ Talk در زمان اجرا
+پیکربندی ارائه‌دهندهٔ گفتار/TTS را به‌عنوان پیکربندی ارائه‌دهندهٔ بی‌درنگ بازتفسیر نمی‌کند.
 
-ترکیب‌های پشتیبانی‌شده `talk.session.create` عمداً کوچک هستند:
+ترکیب‌های پشتیبانی‌شدهٔ `talk.session.create` عمداً محدود هستند:
 
-| حالت            | انتقال          | Brain           | مالک               | یادداشت‌ها                                                                                                            |
+| حالت            | انتقال       | مغز           | مالک              | یادداشت‌ها                                                                                                              |
 | --------------- | --------------- | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `realtime`      | `gateway-relay` | `agent-consult` | Gateway            | صدای full-duplex provider از طریق Gateway پل می‌شود؛ فراخوانی‌های ابزار از طریق ابزار agent-consult مسیریابی می‌شوند. |
-| `transcription` | `gateway-relay` | `none`          | Gateway            | فقط streaming STT؛ فراخوان‌ها صدای ورودی می‌فرستند و رویدادهای transcript دریافت می‌کنند.                         |
-| `stt-tts`       | `managed-room`  | `agent-consult` | اتاق native/client | اتاق‌های سبک push-to-talk و walkie-talkie که کلاینت مالک capture/playback و Gateway مالک وضعیت turn است.         |
-| `stt-tts`       | `managed-room`  | `direct-tools`  | اتاق native/client | حالت اتاق فقط برای admin برای سطح‌های first-party مورداعتماد که actionهای ابزار Gateway را مستقیماً اجرا می‌کنند. |
+| `realtime`      | `gateway-relay` | `agent-consult` | Gateway            | صدای تمام‌دوطرفهٔ ارائه‌دهنده از طریق Gateway پل می‌شود؛ فراخوانی‌های ابزار از مسیر ابزار مشاوره با عامل هدایت می‌شوند.           |
+| `transcription` | `gateway-relay` | `none`          | Gateway            | فقط STT جریانی؛ فراخوانندگان صدای ورودی را ارسال و رویدادهای رونوشت را دریافت می‌کنند.                                        |
+| `stt-tts`       | `managed-room`  | `agent-consult` | اتاق بومی/کلاینت | اتاق‌هایی به سبک فشردن برای صحبت و واکی‌تاکی که در آن‌ها کلاینت مالک ضبط/پخش و Gateway مالک وضعیت نوبت است. |
+| `stt-tts`       | `managed-room`  | `direct-tools`  | اتاق بومی/کلاینت | حالت اتاق مختص مدیر برای سطوح شخص اول مورداعتماد که اقدامات ابزار Gateway را مستقیماً اجرا می‌کنند.                  |
 
-نگاشت methodهای حذف‌شده:
+نگاشت متد برای خوانندگانی که از خانواده‌های قدیمی `talk.realtime.*` /
+`talk.transcription.*` / `talk.handoff.*` مهاجرت می‌کنند (همگی حذف شده‌اند):
 
-| قدیمی                            | جدید                                                     |
+| قدیمی                              | جدید                                                      |
 | -------------------------------- | -------------------------------------------------------- |
 | `talk.realtime.session`          | `talk.client.create`                                     |
 | `talk.realtime.toolCall`         | `talk.client.toolCall`                                   |
 | `talk.realtime.relayAudio`       | `talk.session.appendAudio`                               |
-| `talk.realtime.relayCancel`      | `talk.session.cancelOutput` or `talk.session.cancelTurn` |
+| `talk.realtime.relayCancel`      | `talk.session.cancelOutput` یا `talk.session.cancelTurn` |
 | `talk.realtime.relayToolResult`  | `talk.session.submitToolResult`                          |
 | `talk.realtime.relayStop`        | `talk.session.close`                                     |
 | `talk.transcription.session`     | `talk.session.create({ mode: "transcription" })`         |
@@ -189,821 +966,62 @@ config provider مربوط به speech/TTS را به‌عنوان config provide
 | `talk.handoff.join`              | `talk.session.join`                                      |
 | `talk.handoff.revoke`            | `talk.session.close`                                     |
 
-واژگان کنترل یکپارچه نیز عمداً باریک است:
-
-  | روش                          | اعمال می‌شود به                                              | قرارداد                                                                                                                                                                                 |
-  | ------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | `talk.session.appendAudio`      | `realtime/gateway-relay`, `transcription/gateway-relay` | یک قطعه صوتی PCM با کدگذاری base64 را به نشست ارائه‌دهنده که متعلق به همان اتصال Gateway است اضافه می‌کند.                                                                                            |
-  | `talk.session.startTurn`        | `stt-tts/managed-room`                                  | یک نوبت کاربر در اتاق مدیریت‌شده را شروع می‌کند.                                                                                                                                                          |
-  | `talk.session.endTurn`          | `stt-tts/managed-room`                                  | پس از اعتبارسنجی نوبت کهنه، نوبت فعال را پایان می‌دهد.                                                                                                                                         |
-  | `talk.session.cancelTurn`       | همه نشست‌های متعلق به Gateway                              | کار فعال ضبط/ارائه‌دهنده/عامل/TTS را برای یک نوبت لغو می‌کند.                                                                                                                                |
-  | `talk.session.cancelOutput`     | `realtime/gateway-relay`                                | خروجی صوتی دستیار را بدون اینکه لزوماً نوبت کاربر پایان یابد متوقف می‌کند.                                                                                                                    |
-  | `talk.session.submitToolResult` | `realtime/gateway-relay`                                | یک فراخوانی ابزار ارائه‌دهنده را که توسط رله منتشر شده کامل می‌کند؛ برای خروجی موقت `options.willContinue` یا برای برآورده کردن فراخوانی بدون پاسخ دیگری از دستیار، `options.suppressResponse` را ارسال کنید. |
-  | `talk.session.steer`            | نشست‌های Talk پشتیبانی‌شده با عامل                              | کنترل گفتاری `status`، `steer`، `cancel` یا `followup` را به اجرای تعبیه‌شده فعال که از نشست Talk تعیین شده است ارسال می‌کند.                                                                |
-  | `talk.session.close`            | همه نشست‌های یکپارچه                                    | نشست‌های رله را متوقف می‌کند یا وضعیت اتاق مدیریت‌شده را لغو می‌کند، سپس شناسه نشست یکپارچه را فراموش می‌کند.                                                                                                    |
-
-  برای کار کردن این قابلیت، موارد ویژه ارائه‌دهنده یا پلتفرم را وارد هسته نکنید.
-  هسته مالک معناشناسی نشست Talk است. Pluginهای ارائه‌دهنده مالک راه‌اندازی نشست فروشنده هستند.
-  تماس صوتی و Google Meet مالک آداپتورهای تلفنی/جلسه هستند. مرورگر و برنامه‌های بومی
-  مالک تجربه کاربری ضبط/پخش دستگاه هستند.
-
-  ## سیاست سازگاری
-
-  برای Pluginهای خارجی، کار سازگاری به این ترتیب انجام می‌شود:
-
-  1. قرارداد جدید را اضافه کنید
-  2. رفتار قدیمی را از طریق یک آداپتور سازگاری متصل نگه دارید
-  3. یک عیب‌یابی یا هشدار منتشر کنید که مسیر قدیمی و جایگزین را نام می‌برد
-  4. هر دو مسیر را در آزمون‌ها پوشش دهید
-  5. مسیر منسوخ‌سازی و مهاجرت را مستند کنید
-  6. فقط پس از پنجره مهاجرت اعلام‌شده، معمولاً در یک انتشار اصلی، حذف کنید
-
-  نگه‌دارندگان می‌توانند صف مهاجرت فعلی را با
-  `pnpm plugins:boundary-report` بررسی کنند. برای شمارش‌های فشرده از `pnpm plugins:boundary-report:summary`،
-  برای یک Plugin یا مالک سازگاری از `--owner <id>`، و زمانی که یک دروازه CI باید روی رکوردهای
-  سازگاری موعددار، واردسازی‌های SDK رزروشده میان‌مالکی، یا زیرمسیرهای SDK رزروشده استفاده‌نشده شکست بخورد از
-  `pnpm plugins:boundary-report:ci` استفاده کنید. گزارش، رکوردهای سازگاری منسوخ‌شده را بر اساس تاریخ حذف گروه‌بندی می‌کند، ارجاع‌های کد/مستندات محلی را می‌شمارد،
-  واردسازی‌های SDK رزروشده میان‌مالکی را آشکار می‌کند، و پل SDK خصوصی میزبان حافظه را خلاصه می‌کند تا پاک‌سازی سازگاری به‌جای
-  تکیه بر جست‌وجوهای موردی، صریح باقی بماند. زیرمسیرهای SDK رزروشده باید استفاده مالک ردیابی‌شده داشته باشند؛
-  خروجی‌های کمکی رزروشده استفاده‌نشده باید از SDK عمومی حذف شوند.
-
-  اگر یک فیلد مانیفست همچنان پذیرفته می‌شود، نویسندگان Plugin می‌توانند تا زمانی که
-  مستندات و عیب‌یابی‌ها خلاف آن را بگویند به استفاده از آن ادامه دهند. کد جدید باید جایگزین مستندشده را ترجیح دهد،
-  اما Pluginهای موجود نباید در طول انتشارهای جزئی عادی خراب شوند.
-
-  ## شیوه مهاجرت
-
-  <Steps>
-  <Step title="مهاجرت helperهای بارگذاری/نوشتن پیکربندی زمان اجرا">
-    Pluginهای همراه باید فراخوانی مستقیم
-    `api.runtime.config.loadConfig()` و
-    `api.runtime.config.writeConfigFile(...)` را متوقف کنند. پیکربندی‌ای را ترجیح دهید که
-    از قبل به مسیر فراخوانی فعال ارسال شده است. handlerهای بلندمدتی که به snapshot فرایند فعلی نیاز دارند
-    می‌توانند از `api.runtime.config.current()` استفاده کنند. ابزارهای عامل بلندمدت باید از `ctx.getRuntimeConfig()` متن ابزار درون
-    `execute` استفاده کنند تا ابزاری که قبل از نوشتن پیکربندی ساخته شده همچنان پیکربندی زمان اجرای تازه‌شده را ببیند.
-
-    نوشتن پیکربندی باید از طریق helperهای تراکنشی انجام شود و یک
-    سیاست پس از نوشتن انتخاب کند:
-
-    ```typescript
-    await api.runtime.config.mutateConfigFile({
-      afterWrite: { mode: "auto" },
-      mutate(draft) {
-        draft.plugins ??= {};
-      },
-    });
-    ```
-
-    هنگامی که فراخواننده می‌داند تغییر به راه‌اندازی مجدد تمیز Gateway نیاز دارد از `afterWrite: { mode: "restart", reason: "..." }` استفاده کنید، و
-    فقط هنگامی از `afterWrite: { mode: "none", reason: "..." }` استفاده کنید که فراخواننده مالک
-    پیگیری است و عمداً می‌خواهد برنامه‌ریز بارگذاری مجدد را سرکوب کند.
-    نتایج mutation شامل یک خلاصه `followUp` تایپ‌شده برای آزمون‌ها و ثبت رویدادها است؛
-    Gateway همچنان مسئول اعمال یا زمان‌بندی راه‌اندازی مجدد است.
-    `loadConfig` و `writeConfigFile` در طول پنجره مهاجرت به‌عنوان
-    helperهای سازگاری منسوخ‌شده برای Pluginهای خارجی باقی می‌مانند و یک‌بار با
-    کد سازگاری `runtime-config-load-write` هشدار می‌دهند. Pluginهای همراه و کد زمان اجرای repo
-    با guardrailهای پویشگر در
-    `pnpm check:deprecated-api-usage` و
-    `pnpm check:no-runtime-action-load-config` محافظت می‌شوند: استفاده جدید Plugin تولیدی
-    کاملاً شکست می‌خورد، نوشتن مستقیم پیکربندی شکست می‌خورد، متدهای سرور Gateway باید از
-    snapshot زمان اجرای درخواست استفاده کنند، helperهای ارسال/اقدام/کلاینت کانال زمان اجرا
-    باید پیکربندی را از مرز خود دریافت کنند، و ماژول‌های زمان اجرای بلندمدت
-    هیچ فراخوانی محیطی مجاز `loadConfig()` ندارند.
-
-    کد Plugin جدید باید همچنین از وارد کردن barrel سازگاری گسترده
-    `openclaw/plugin-sdk/config-runtime` پرهیز کند. از زیرمسیر محدود
-    SDK که با کار مطابقت دارد استفاده کنید:
-
-    | نیاز | واردسازی |
-    | --- | --- |
-    | نوع‌های پیکربندی مانند `OpenClawConfig` | `openclaw/plugin-sdk/config-contracts` |
-    | assertionهای پیکربندی ازپیش‌بارگذاری‌شده و جست‌وجوی پیکربندی ورودی Plugin | `openclaw/plugin-sdk/plugin-config-runtime` |
-    | خواندن snapshot زمان اجرای فعلی | `openclaw/plugin-sdk/runtime-config-snapshot` |
-    | نوشتن پیکربندی | `openclaw/plugin-sdk/config-mutation` |
-    | helperهای ذخیره نشست | `openclaw/plugin-sdk/session-store-runtime` |
-    | پیکربندی جدول Markdown | `openclaw/plugin-sdk/markdown-table-runtime` |
-    | helperهای زمان اجرای سیاست گروه | `openclaw/plugin-sdk/runtime-group-policy` |
-    | حل ورودی محرمانه | `openclaw/plugin-sdk/secret-input-runtime` |
-    | بازنویسی‌های مدل/نشست | `openclaw/plugin-sdk/model-session-runtime` |
-
-    Pluginهای همراه و آزمون‌هایشان با پویشگر در برابر barrel گسترده محافظت می‌شوند
-    تا واردسازی‌ها و mockها نسبت به رفتار موردنیازشان محلی بمانند. barrel گسترده
-    همچنان برای سازگاری خارجی وجود دارد، اما کد جدید نباید
-    به آن وابسته باشد.
-
-  </Step>
-
-  <Step title="مهاجرت افزونه‌های نتیجه ابزار تعبیه‌شده به middleware">
-    Pluginهای همراه باید handlerهای نتیجه ابزار
-    `api.registerEmbeddedExtensionFactory(...)` مخصوص runner تعبیه‌شده را با
-    middleware خنثی نسبت به زمان اجرا جایگزین کنند.
-
-    ```typescript
-    // OpenClaw and Codex runtime dynamic tools
-    api.registerAgentToolResultMiddleware(async (event) => {
-      return compactToolResult(event);
-    }, {
-      runtimes: ["openclaw", "codex"],
-    });
-    ```
-
-    هم‌زمان مانیفست Plugin را به‌روزرسانی کنید:
-
-    ```json
-    {
-      "contracts": {
-        "agentToolResultMiddleware": ["openclaw", "codex"]
-      }
-    }
-    ```
-
-    Pluginهای نصب‌شده نیز می‌توانند middleware نتیجه ابزار را ثبت کنند، زمانی که
-    صریحاً فعال شده باشند و هر زمان اجرای هدف‌گذاری‌شده را در
-    `contracts.agentToolResultMiddleware` اعلام کنند. ثبت‌های middleware نصب‌شده اعلام‌نشده
-    رد می‌شوند.
-
-  </Step>
-
-  <Step title="مهاجرت handlerهای بومی تأیید به factهای قابلیت">
-    Pluginهای کانال دارای قابلیت تأیید اکنون رفتار تأیید بومی را از طریق
-    `approvalCapability.nativeRuntime` به‌علاوه رجیستری مشترک runtime-context آشکار می‌کنند.
-
-    تغییرات کلیدی:
-
-    - `approvalCapability.handler.loadRuntime(...)` را با
-      `approvalCapability.nativeRuntime` جایگزین کنید
-    - auth/delivery مخصوص تأیید را از سیم‌کشی قدیمی `plugin.auth` /
-      `plugin.approvals` به `approvalCapability` منتقل کنید
-    - `ChannelPlugin.approvals` از قرارداد عمومی channel-plugin
-      حذف شده است؛ فیلدهای delivery/native/render را به `approvalCapability` منتقل کنید
-    - `plugin.auth` فقط برای جریان‌های ورود/خروج کانال باقی می‌ماند؛ hookهای auth تأیید
-      دیگر در آنجا توسط هسته خوانده نمی‌شوند
-    - اشیای زمان اجرای متعلق به کانال مانند کلاینت‌ها، tokenها، یا برنامه‌های Bolt را از طریق `openclaw/plugin-sdk/channel-runtime-context` ثبت کنید
-    - اعلان‌های reroute متعلق به Plugin را از handlerهای تأیید بومی ارسال نکنید؛
-      هسته اکنون مالک اعلان‌های routed-elsewhere از نتایج واقعی تحویل است
-    - هنگام ارسال `channelRuntime` به `createChannelManager(...)`، یک
-      سطح واقعی `createPluginRuntime().channel` ارائه کنید. stubهای جزئی رد می‌شوند.
-
-    برای چیدمان فعلی قابلیت تأیید، `/plugins/sdk-channel-plugins` را ببینید.
-
-  </Step>
-
-  <Step title="بازرسی رفتار fallback wrapper ویندوز">
-    اگر Plugin شما از `openclaw/plugin-sdk/windows-spawn` استفاده می‌کند، wrapperهای `.cmd`/`.bat` حل‌نشده ویندوز
-    اکنون به‌صورت fail closed شکست می‌خورند مگر اینکه صریحاً
-    `allowShellFallback: true` را ارسال کنید.
-
-    ```typescript
-    // Before
-    const program = applyWindowsSpawnProgramPolicy({ candidate });
-
-    // After
-    const program = applyWindowsSpawnProgramPolicy({
-      candidate,
-      // Only set this for trusted compatibility callers that intentionally
-      // accept shell-mediated fallback.
-      allowShellFallback: true,
-    });
-    ```
-
-    اگر فراخواننده شما عمداً به shell fallback متکی نیست،
-    `allowShellFallback` را تنظیم نکنید و در عوض خطای پرتاب‌شده را مدیریت کنید.
-
-  </Step>
-
-  <Step title="یافتن واردسازی‌های منسوخ‌شده">
-    Plugin خود را برای واردسازی از هر یک از سطح‌های منسوخ‌شده جست‌وجو کنید:
-
-    ```bash
-    grep -r "plugin-sdk/compat" my-plugin/
-    grep -r "plugin-sdk/infra-runtime" my-plugin/
-    grep -r "plugin-sdk/config-runtime" my-plugin/
-    grep -r "openclaw/extension-api" my-plugin/
-    ```
-
-  </Step>
-
-  <Step title="جایگزینی با واردسازی‌های متمرکز">
-    هر export از سطح قدیمی به یک مسیر واردسازی مدرن مشخص نگاشت می‌شود:
-
-    ```typescript
-    // Before (deprecated backwards-compatibility layer)
-    import {
-      createChannelReplyPipeline,
-      createPluginRuntimeStore,
-      resolveControlCommandGate,
-    } from "openclaw/plugin-sdk/compat";
-
-    // After (modern focused imports)
-    import { createChannelReplyPipeline } from "openclaw/plugin-sdk/channel-reply-pipeline";
-    import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
-    import { resolveControlCommandGate } from "openclaw/plugin-sdk/command-auth";
-    ```
-
-    برای helperهای سمت میزبان، به‌جای واردسازی مستقیم از زمان اجرای Plugin تزریق‌شده استفاده کنید:
-
-    ```typescript
-    // Before (deprecated extension-api bridge)
-    import { runEmbeddedAgent } from "openclaw/extension-api";
-    const result = await runEmbeddedAgent({ sessionId, prompt });
-
-    // After (injected runtime)
-    const result = await api.runtime.agent.runEmbeddedAgent({ sessionId, prompt });
-    ```
-
-    همین الگو برای سایر کمک‌کننده‌های bridge قدیمی نیز اعمال می‌شود:
-
-    | ایمپورت قدیمی | معادل مدرن |
-    | --- | --- |
-    | `resolveAgentDir` | `api.runtime.agent.resolveAgentDir` |
-    | `resolveAgentWorkspaceDir` | `api.runtime.agent.resolveAgentWorkspaceDir` |
-    | `resolveAgentIdentity` | `api.runtime.agent.resolveAgentIdentity` |
-    | `resolveThinkingDefault` | `api.runtime.agent.resolveThinkingDefault` |
-    | `resolveAgentTimeoutMs` | `api.runtime.agent.resolveAgentTimeoutMs` |
-    | `ensureAgentWorkspace` | `api.runtime.agent.ensureAgentWorkspace` |
-    | کمک‌کننده‌های ذخیره‌سازی نشست | `api.runtime.agent.session.*` |
-
-  </Step>
-
-  <Step title="جایگزینی ایمپورت‌های گسترده infra-runtime">
-    `openclaw/plugin-sdk/infra-runtime` همچنان برای سازگاری خارجی وجود دارد،
-    اما کد جدید باید سطح کمک‌کننده متمرکزی را ایمپورت کند که واقعا به آن نیاز دارد:
-
-    | نیاز | ایمپورت |
-    | --- | --- |
-    | کمک‌کننده‌های صف رویداد سیستم | `openclaw/plugin-sdk/system-event-runtime` |
-    | کمک‌کننده‌های بیدارسازی، رویداد، و مشاهده‌پذیری Heartbeat | `openclaw/plugin-sdk/heartbeat-runtime` |
-    | تخلیه صف تحویل در انتظار | `openclaw/plugin-sdk/delivery-queue-runtime` |
-    | تله‌متری فعالیت کانال | `openclaw/plugin-sdk/channel-activity-runtime` |
-    | کش‌های حذف تکراری درون‌حافظه‌ای و مبتنی بر پایداری | `openclaw/plugin-sdk/dedupe-runtime` |
-    | کمک‌کننده‌های امن مسیر فایل/رسانه محلی | `openclaw/plugin-sdk/file-access-runtime` |
-    | fetch آگاه از dispatcher | `openclaw/plugin-sdk/runtime-fetch` |
-    | کمک‌کننده‌های پروکسی و fetch محافظت‌شده | `openclaw/plugin-sdk/fetch-runtime` |
-    | انواع سیاست dispatcher برای SSRF | `openclaw/plugin-sdk/ssrf-dispatcher` |
-    | انواع درخواست/حل تأیید | `openclaw/plugin-sdk/approval-runtime` |
-    | کمک‌کننده‌های payload پاسخ تأیید و فرمان | `openclaw/plugin-sdk/approval-reply-runtime` |
-    | کمک‌کننده‌های قالب‌بندی خطا | `openclaw/plugin-sdk/error-runtime` |
-    | انتظارهای آماده‌بودن ترابری | `openclaw/plugin-sdk/transport-ready-runtime` |
-    | کمک‌کننده‌های token امن | `openclaw/plugin-sdk/secure-random-runtime` |
-    | همزمانی محدودشده وظیفه async | `openclaw/plugin-sdk/concurrency-runtime` |
-    | تبدیل عددی | `openclaw/plugin-sdk/number-runtime` |
-    | قفل async محلی فرایند | `openclaw/plugin-sdk/async-lock-runtime` |
-    | قفل‌های فایل | `openclaw/plugin-sdk/file-lock` |
-
-    Pluginهای همراه در برابر `infra-runtime` با اسکنر محافظت می‌شوند، بنابراین کد مخزن
-    نمی‌تواند دوباره به barrel گسترده برگردد.
-
-  </Step>
-
-  <Step title="مهاجرت کمک‌کننده‌های مسیر کانال">
-    کد جدید مسیر کانال باید از `openclaw/plugin-sdk/channel-route` استفاده کند.
-    نام‌های قدیمی‌تر route-key و comparable-target در طول بازه مهاجرت به‌عنوان aliasهای
-    سازگاری باقی می‌مانند، اما Pluginهای جدید باید از نام‌های مسیر استفاده کنند
-    که رفتار را مستقیما توصیف می‌کنند:
-
-    | کمک‌کننده قدیمی | کمک‌کننده مدرن |
-    | --- | --- |
-    | `channelRouteIdentityKey(...)` | `channelRouteDedupeKey(...)` |
-    | `channelRouteKey(...)` | `channelRouteCompactKey(...)` |
-    | `ComparableChannelTarget` | `ChannelRouteParsedTarget` |
-    | `comparableChannelTargetsMatch(...)` | `channelRouteTargetsMatchExact(...)` |
-    | `comparableChannelTargetsShareRoute(...)` | `channelRouteTargetsShareConversation(...)` |
-
-    کمک‌کننده‌های مدرن مسیر، `{ channel, to, accountId, threadId }` را
-    در تأییدهای native، سرکوب پاسخ، حذف تکراری ورودی،
-    تحویل Cron، و مسیریابی نشست به‌صورت سازگار نرمال‌سازی می‌کنند.
-
-    کاربردهای جدیدی از `ChannelMessagingAdapter.parseExplicitTarget` یا
-    کمک‌کننده‌های loaded-route مبتنی بر parser (`parseExplicitTargetForLoadedChannel`
-    یا `resolveRouteTargetForLoadedChannel`) یا
-    `resolveChannelRouteTargetWithParser(...)` از `plugin-sdk/channel-route` اضافه نکنید.
-    این hookها منسوخ شده‌اند و فقط برای Pluginهای قدیمی‌تر در طول بازه
-    مهاجرت باقی می‌مانند. Pluginهای کانال جدید باید از
-    `messaging.targetResolver.resolveTarget(...)` برای نرمال‌سازی شناسه هدف
-    و fallback در صورت نبودن دایرکتوری، از `messaging.inferTargetChatType(...)` زمانی که core
-    به نوع peer زودهنگام نیاز دارد، و از `messaging.resolveOutboundSessionRoute(...)`
-    برای نشست provider-native و هویت thread استفاده کنند.
-
-  </Step>
-
-  <Step title="ساخت و آزمون">
-    ```bash
-    pnpm build
-    pnpm test -- my-plugin/
-    ```
-  </Step>
-</Steps>
-
-## مرجع مسیر ایمپورت
-
-  <Accordion title="Common import path table">
-  | مسیر import | هدف | exportهای کلیدی |
-  | --- | --- | --- |
-  | `plugin-sdk/plugin-entry` | کمکی ورودی رسمی Plugin | `definePluginEntry` |
-  | `plugin-sdk/core` | re-export چتری قدیمی برای تعریف‌ها/سازنده‌های ورودی کانال | `defineChannelPluginEntry`, `createChatChannelPlugin` |
-  | `plugin-sdk/config-schema` | export اسکیما پیکربندی ریشه | `OpenClawSchema` |
-  | `plugin-sdk/provider-entry` | کمکی ورودی تک‌ارائه‌دهنده | `defineSingleProviderPluginEntry` |
-  | `plugin-sdk/channel-core` | تعریف‌ها و سازنده‌های متمرکز ورودی کانال | `defineChannelPluginEntry`, `defineSetupPluginEntry`, `createChatChannelPlugin`, `createChannelPluginBase` |
-  | `plugin-sdk/setup` | کمکی‌های مشترک جادوگر راه‌اندازی | مترجم راه‌اندازی، اعلان‌های فهرست مجاز، سازنده‌های وضعیت راه‌اندازی |
-  | `plugin-sdk/setup-runtime` | کمکی‌های زمان اجرای زمان راه‌اندازی | `createSetupTranslator`, آداپتورهای وصله راه‌اندازی ایمن برای import، کمکی‌های یادداشت جست‌وجو، `promptResolvedAllowFrom`, `splitSetupEntries`, پروکسی‌های راه‌اندازی واگذارشده |
-  | `plugin-sdk/setup-adapter-runtime` | نام مستعار آداپتور راه‌اندازی منسوخ‌شده | از `plugin-sdk/setup-runtime` استفاده کنید |
-  | `plugin-sdk/setup-tools` | کمکی‌های ابزارسازی راه‌اندازی | `formatCliCommand`, `detectBinary`, `extractArchive`, `resolveBrewExecutable`, `formatDocsLink`, `CONFIG_DIR` |
-  | `plugin-sdk/account-core` | کمکی‌های چندحسابی | کمکی‌های فهرست حساب/پیکربندی/گیت اقدام |
-  | `plugin-sdk/account-id` | کمکی‌های شناسه حساب | `DEFAULT_ACCOUNT_ID`, عادی‌سازی شناسه حساب |
-  | `plugin-sdk/account-resolution` | کمکی‌های جست‌وجوی حساب | کمکی‌های جست‌وجوی حساب + پشتیبان پیش‌فرض |
-  | `plugin-sdk/account-helpers` | کمکی‌های محدود حساب | کمکی‌های فهرست حساب/اقدام حساب |
-  | `plugin-sdk/channel-setup` | آداپتورهای جادوگر راه‌اندازی | `createOptionalChannelSetupSurface`, `createOptionalChannelSetupAdapter`, `createOptionalChannelSetupWizard`, به‌علاوه `DEFAULT_ACCOUNT_ID`, `createTopLevelChannelDmPolicy`, `setSetupChannelEnabled`, `splitSetupEntries` |
-  | `plugin-sdk/channel-pairing` | پایه‌های جفت‌سازی DM | `createChannelPairingController` |
-  | `plugin-sdk/channel-reply-pipeline` | سیم‌کشی پیشوند پاسخ، تایپ، و تحویل منبع | `createChannelReplyPipeline`, `resolveChannelSourceReplyDeliveryMode` |
-  | `plugin-sdk/channel-config-helpers` | کارخانه‌های آداپتور پیکربندی و کمکی‌های دسترسی DM | `createHybridChannelConfigAdapter`, `resolveChannelDmAccess`, `resolveChannelDmAllowFrom`, `resolveChannelDmPolicy`, `normalizeChannelDmPolicy`, `normalizeLegacyDmAliases` |
-  | `plugin-sdk/channel-config-schema` | سازنده‌های اسکیما پیکربندی | فقط پایه‌های اسکیما پیکربندی مشترک کانال و سازنده عمومی |
-  | `plugin-sdk/bundled-channel-config-schema` | اسکیماهای پیکربندی باندل‌شده | فقط Pluginهای باندل‌شده نگه‌داری‌شده توسط OpenClaw؛ Pluginهای جدید باید اسکیماهای محلی Plugin را تعریف کنند |
-  | `plugin-sdk/channel-config-schema-legacy` | اسکیماهای پیکربندی باندل‌شده منسوخ‌شده | فقط نام مستعار سازگاری؛ برای Pluginهای باندل‌شده نگه‌داری‌شده از `plugin-sdk/bundled-channel-config-schema` استفاده کنید |
-  | `plugin-sdk/telegram-command-config` | کمکی‌های پیکربندی فرمان Telegram | عادی‌سازی نام فرمان، کوتاه‌سازی توضیح، اعتبارسنجی تکرار/تداخل |
-  | `plugin-sdk/channel-policy` | حل سیاست گروه/DM | `resolveChannelGroupRequireMention` |
-  | `plugin-sdk/channel-lifecycle` | نمای سازگاری منسوخ‌شده | از `plugin-sdk/channel-outbound` استفاده کنید |
-  | `plugin-sdk/inbound-envelope` | کمکی‌های پاکت ورودی | کمکی‌های مشترک سازنده مسیر + پاکت |
-  | `plugin-sdk/channel-inbound` | کمکی‌های دریافت ورودی | ساخت زمینه، قالب‌بندی، ریشه‌ها، اجراکننده‌ها، ارسال پاسخ آماده، و گزاره‌های ارسال |
-  | `plugin-sdk/messaging-targets` | مسیر import منسوخ‌شده برای تجزیه هدف | برای کمکی‌های عمومی تجزیه هدف از `plugin-sdk/channel-targets`، برای مقایسه مسیر از `plugin-sdk/channel-route`، و برای حل هدف ویژه ارائه‌دهنده از `messaging.targetResolver` / `messaging.resolveOutboundSessionRoute` متعلق به Plugin استفاده کنید |
-  | `plugin-sdk/outbound-media` | کمکی‌های رسانه خروجی | بارگذاری رسانه خروجی مشترک |
-  | `plugin-sdk/outbound-send-deps` | نمای سازگاری منسوخ‌شده | از `plugin-sdk/channel-outbound` استفاده کنید |
-  | `plugin-sdk/channel-outbound` | کمکی‌های چرخه عمر پیام خروجی | آداپتورهای پیام، رسیدها، کمکی‌های ارسال بادوام، کمکی‌های پیش‌نمایش زنده/استریم، گزینه‌های پاسخ، کمکی‌های چرخه عمر، هویت خروجی، و برنامه‌ریزی payload |
-  | `plugin-sdk/channel-streaming` | نمای سازگاری منسوخ‌شده | از `plugin-sdk/channel-outbound` استفاده کنید |
-  | `plugin-sdk/outbound-runtime` | نمای سازگاری منسوخ‌شده | از `plugin-sdk/channel-outbound` استفاده کنید |
-  | `plugin-sdk/thread-bindings-runtime` | کمکی‌های اتصال رشته | کمکی‌های چرخه عمر و آداپتور اتصال رشته |
-  | `plugin-sdk/agent-media-payload` | کمکی‌های payload رسانه قدیمی | سازنده payload رسانه عامل برای چیدمان‌های فیلد قدیمی |
-  | `plugin-sdk/channel-runtime` | لایه سازگاری منسوخ‌شده | فقط ابزارهای زمان اجرای کانال قدیمی |
-  | `plugin-sdk/channel-send-result` | انواع نتیجه ارسال | انواع نتیجه پاسخ |
-  | `plugin-sdk/runtime-store` | ذخیره‌سازی پایدار Plugin | `createPluginRuntimeStore` |
-  | `plugin-sdk/runtime` | کمکی‌های گسترده زمان اجرا | کمکی‌های زمان اجرا/لاگ‌گیری/پشتیبان‌گیری/نصب Plugin |
-  | `plugin-sdk/runtime-env` | کمکی‌های محدود محیط زمان اجرا | کمکی‌های لاگر/محیط زمان اجرا، مهلت زمانی، تلاش مجدد، و عقب‌نشینی |
-  | `plugin-sdk/plugin-runtime` | کمکی‌های مشترک زمان اجرای Plugin | کمکی‌های فرمان‌ها/هوک‌ها/http/تعاملی Plugin |
-  | `plugin-sdk/hook-runtime` | کمکی‌های خط لوله هوک | کمکی‌های مشترک خط لوله Webhook/هوک داخلی |
-  | `plugin-sdk/lazy-runtime` | کمکی‌های زمان اجرای تنبل | `createLazyRuntimeModule`, `createLazyRuntimeMethod`, `createLazyRuntimeMethodBinder`, `createLazyRuntimeNamedExport`, `createLazyRuntimeSurface` |
-  | `plugin-sdk/process-runtime` | کمکی‌های فرایند | کمکی‌های مشترک exec |
-  | `plugin-sdk/cli-runtime` | کمکی‌های زمان اجرای CLI | قالب‌بندی فرمان، انتظارها، کمکی‌های نسخه |
-  | `plugin-sdk/gateway-runtime` | کمکی‌های Gateway | کلاینت Gateway، کمکی شروع آماده حلقه رویداد، حل میزبان LAN اعلام‌شده، و کمکی‌های وصله وضعیت کانال |
-  | `plugin-sdk/config-runtime` | لایه سازگاری پیکربندی منسوخ‌شده | `config-contracts`, `plugin-config-runtime`, `runtime-config-snapshot`, و `config-mutation` را ترجیح دهید |
-  | `plugin-sdk/telegram-command-config` | کمکی‌های فرمان Telegram | کمکی‌های اعتبارسنجی فرمان Telegram پایدار با پشتیبان، زمانی که سطح قرارداد Telegram باندل‌شده در دسترس نیست |
-  | `plugin-sdk/approval-runtime` | کمکی‌های اعلان تأیید | payload تأیید Exec/Plugin، کمکی‌های قابلیت/نمایه تأیید، کمکی‌های مسیریابی/زمان اجرای تأیید بومی، و قالب‌بندی مسیر نمایش تأیید ساختاریافته |
-  | `plugin-sdk/approval-auth-runtime` | کمکی‌های احراز هویت تأیید | حل تأییدکننده، احراز هویت اقدام در همان چت |
-  | `plugin-sdk/approval-client-runtime` | کمکی‌های کلاینت تأیید | کمکی‌های نمایه/فیلتر تأیید Exec بومی |
-  | `plugin-sdk/approval-delivery-runtime` | کمکی‌های تحویل تأیید | آداپتورهای قابلیت/تحویل تأیید بومی |
-  | `plugin-sdk/approval-gateway-runtime` | کمکی‌های Gateway تأیید | کمکی مشترک حل Gateway تأیید |
-  | `plugin-sdk/approval-handler-adapter-runtime` | کمکی‌های آداپتور تأیید | کمکی‌های سبک بارگذاری آداپتور تأیید بومی برای نقطه‌های ورود داغ کانال |
-  | `plugin-sdk/approval-handler-runtime` | کمکی‌های هندلر تأیید | کمکی‌های گسترده‌تر زمان اجرای هندلر تأیید؛ وقتی آستانه‌های محدودتر آداپتور/Gateway کافی هستند آن‌ها را ترجیح دهید |
-  | `plugin-sdk/approval-native-runtime` | کمکی‌های هدف تأیید | کمکی‌های اتصال هدف/حساب تأیید بومی |
-  | `plugin-sdk/approval-reply-runtime` | کمکی‌های پاسخ تأیید | کمکی‌های payload پاسخ تأیید Exec/Plugin |
-  | `plugin-sdk/channel-runtime-context` | کمکی‌های زمینه زمان اجرای کانال | کمکی‌های عمومی ثبت/دریافت/تماشای زمینه زمان اجرای کانال |
-  | `plugin-sdk/security-runtime` | کمکی‌های امنیت | کمکی‌های مشترک اعتماد، گیت‌گذاری DM، فایل/مسیر محدود به ریشه، محتوای خارجی، و گردآوری secret |
-  | `plugin-sdk/ssrf-policy` | کمکی‌های سیاست SSRF | کمکی‌های فهرست مجاز میزبان و سیاست شبکه خصوصی |
-  | `plugin-sdk/ssrf-runtime` | کمکی‌های زمان اجرای SSRF | کمکی‌های دیسپچر سنجاق‌شده، fetch محافظت‌شده، سیاست SSRF |
-  | `plugin-sdk/system-event-runtime` | کمکی‌های رویداد سیستم | `enqueueSystemEvent`, `peekSystemEventEntries` |
-  | `plugin-sdk/heartbeat-runtime` | کمکی‌های Heartbeat | کمکی‌های بیدارسازی، رویداد، و مشاهده‌پذیری Heartbeat |
-  | `plugin-sdk/delivery-queue-runtime` | کمکی‌های صف تحویل | `drainPendingDeliveries` |
-  | `plugin-sdk/channel-activity-runtime` | کمکی‌های فعالیت کانال | `recordChannelActivity` |
-  | `plugin-sdk/dedupe-runtime` | کمکی‌های حذف تکراری | کش‌های حذف تکراری درون‌حافظه‌ای و پشتوانه‌دار با ذخیره‌سازی پایدار |
-  | `plugin-sdk/file-access-runtime` | کمکی‌های دسترسی فایل | کمکی‌های ایمن مسیر فایل/رسانه محلی |
-  | `plugin-sdk/transport-ready-runtime` | کمکی‌های آمادگی انتقال | `waitForTransportReady` |
-  | `plugin-sdk/exec-approvals-runtime` | کمکی‌های سیاست تأیید Exec | `loadExecApprovals`, `resolveExecApprovalsFromFile`, `ExecApprovalsFile` |
-  | `plugin-sdk/collection-runtime` | کمکی‌های کش محدود | `pruneMapToMaxSize` |
-  | `plugin-sdk/diagnostic-runtime` | کمکی‌های گیت‌گذاری عیب‌یابی | `isDiagnosticFlagEnabled`, `isDiagnosticsEnabled` |
-  | `plugin-sdk/error-runtime` | کمکی‌های قالب‌بندی خطا | `formatUncaughtError`, `isApprovalNotFoundError`, کمکی‌های گراف خطا |
-  | `plugin-sdk/fetch-runtime` | کمکی‌های fetch/proxy پوشش‌دار | `resolveFetch`, کمکی‌های proxy، کمکی‌های گزینه EnvHttpProxyAgent |
-  | `plugin-sdk/host-runtime` | کمکی‌های عادی‌سازی میزبان | `normalizeHostname`, `normalizeScpRemoteHost` |
-  | `plugin-sdk/retry-runtime` | کمکی‌های تلاش مجدد | `RetryConfig`, `retryAsync`, اجراکننده‌های سیاست |
-  | `plugin-sdk/allow-from` | قالب‌بندی فهرست مجاز و نگاشت ورودی | `formatAllowFromLowercase`, `mapAllowlistResolutionInputs` |
-  | `plugin-sdk/command-auth` | کمکی‌های گیت‌گذاری فرمان و سطح فرمان | `resolveControlCommandGate`, کمکی‌های مجوزدهی فرستنده، کمکی‌های رجیستری فرمان شامل قالب‌بندی منوی آرگومان پویا |
-  | `plugin-sdk/command-status` | رندرکننده‌های وضعیت/راهنمای فرمان | `buildCommandsMessage`, `buildCommandsMessagePaginated`, `buildHelpMessage` |
-  | `plugin-sdk/secret-input` | تجزیه ورودی secret | کمکی‌های ورودی secret |
-  | `plugin-sdk/webhook-ingress` | کمکی‌های درخواست Webhook | ابزارهای هدف Webhook |
-  | `plugin-sdk/webhook-request-guards` | کمکی‌های محافظ بدنه Webhook | کمکی‌های خواندن/محدودسازی بدنه درخواست |
-  | `plugin-sdk/reply-runtime` | زمان اجرای مشترک پاسخ | ارسال ورودی، Heartbeat، برنامه‌ریز پاسخ، قطعه‌بندی |
-  | `plugin-sdk/reply-dispatch-runtime` | کمکی‌های محدود ارسال پاسخ | نهایی‌سازی، ارسال ارائه‌دهنده، و کمکی‌های برچسب مکالمه |
-  | `plugin-sdk/reply-history` | کمکی‌های تاریخچه پاسخ | `createChannelHistoryWindow`; exportهای سازگاری منسوخ‌شده کمکی map مانند `buildPendingHistoryContextFromMap`, `recordPendingHistoryEntry`, و `clearHistoryEntriesIfEnabled` |
-  | `plugin-sdk/reply-reference` | برنامه‌ریزی مرجع پاسخ | `createReplyReferencePlanner` |
-  | `plugin-sdk/reply-chunking` | کمکی‌های قطعه پاسخ | کمکی‌های قطعه‌بندی متن/markdown |
-  | `plugin-sdk/session-store-runtime` | کمکی‌های ذخیره نشست | کمکی‌های مسیر ذخیره + به‌روزرسانی‌شده در |
-  | `plugin-sdk/state-paths` | کمکی‌های مسیر وضعیت | کمکی‌های دایرکتوری وضعیت و OAuth |
-  | `plugin-sdk/routing` | کمک‌کننده‌های مسیریابی/کلید نشست | `resolveAgentRoute`, `buildAgentSessionKey`, `resolveDefaultAgentBoundAccountId`، کمک‌کننده‌های عادی‌سازی کلید نشست |
-  | `plugin-sdk/status-helpers` | کمک‌کننده‌های وضعیت کانال | سازنده‌های خلاصه وضعیت کانال/حساب، پیش‌فرض‌های وضعیت زمان اجرا، کمک‌کننده‌های فراداده مسئله |
-  | `plugin-sdk/target-resolver-runtime` | کمک‌کننده‌های حل‌کننده هدف | کمک‌کننده‌های مشترک حل‌کننده هدف |
-  | `plugin-sdk/string-normalization-runtime` | کمک‌کننده‌های عادی‌سازی رشته | کمک‌کننده‌های عادی‌سازی اسلاگ/رشته |
-  | `plugin-sdk/request-url` | کمک‌کننده‌های URL درخواست | استخراج URLهای رشته‌ای از ورودی‌های شبیه درخواست |
-  | `plugin-sdk/run-command` | کمک‌کننده‌های فرمان زمان‌دار | اجراکننده فرمان زمان‌دار با stdout/stderr عادی‌شده |
-  | `plugin-sdk/param-readers` | خواننده‌های پارامتر | خواننده‌های مشترک پارامتر ابزار/CLI |
-  | `plugin-sdk/tool-payload` | استخراج محموله ابزار | استخراج محموله‌های عادی‌شده از اشیای نتیجه ابزار |
-  | `plugin-sdk/tool-send` | استخراج ارسال ابزار | استخراج فیلدهای متعارف هدف ارسال از آرگومان‌های ابزار |
-  | `plugin-sdk/temp-path` | کمک‌کننده‌های مسیر موقت | کمک‌کننده‌های مشترک مسیر بارگیری موقت |
-  | `plugin-sdk/logging-core` | کمک‌کننده‌های ثبت گزارش | کمک‌کننده‌های ثبت‌گر زیرسامانه و پنهان‌سازی |
-  | `plugin-sdk/markdown-table-runtime` | کمک‌کننده‌های جدول Markdown | کمک‌کننده‌های حالت جدول Markdown |
-  | `plugin-sdk/reply-payload` | انواع پاسخ پیام | انواع محموله پاسخ |
-  | `plugin-sdk/provider-setup` | کمک‌کننده‌های گزینش‌شده راه‌اندازی تامین‌کننده محلی/خودمیزبان | کمک‌کننده‌های کشف/پیکربندی تامین‌کننده خودمیزبان |
-  | `plugin-sdk/self-hosted-provider-setup` | کمک‌کننده‌های متمرکز راه‌اندازی تامین‌کننده خودمیزبان سازگار با OpenAI | همان کمک‌کننده‌های کشف/پیکربندی تامین‌کننده خودمیزبان |
-  | `plugin-sdk/provider-auth-runtime` | کمک‌کننده‌های احراز هویت زمان اجرای تامین‌کننده | کمک‌کننده‌های رفع API-key در زمان اجرا |
-  | `plugin-sdk/provider-auth-api-key` | کمک‌کننده‌های راه‌اندازی API-key تامین‌کننده | کمک‌کننده‌های ورود اولیه/نوشتن پروفایل API-key |
-  | `plugin-sdk/provider-auth-result` | کمک‌کننده‌های نتیجه احراز هویت تامین‌کننده | سازنده استاندارد نتیجه احراز هویت OAuth |
-  | `plugin-sdk/provider-selection-runtime` | کمک‌کننده‌های انتخاب تامین‌کننده | انتخاب تامین‌کننده پیکربندی‌شده یا خودکار و ادغام پیکربندی خام تامین‌کننده |
-  | `plugin-sdk/provider-env-vars` | کمک‌کننده‌های متغیرهای محیطی تامین‌کننده | کمک‌کننده‌های جست‌وجوی متغیر محیطی احراز هویت تامین‌کننده |
-  | `plugin-sdk/provider-model-shared` | کمک‌کننده‌های مشترک مدل/بازپخش تامین‌کننده | `ProviderReplayFamily`, `buildProviderReplayFamilyHooks`, `normalizeModelCompat`، سازنده‌های مشترک سیاست بازپخش، کمک‌کننده‌های نقطه پایانی تامین‌کننده، و کمک‌کننده‌های عادی‌سازی شناسه مدل |
-  | `plugin-sdk/provider-catalog-shared` | کمک‌کننده‌های مشترک کاتالوگ تامین‌کننده | `findCatalogTemplate`, `buildSingleProviderApiKeyCatalog`, `buildManifestModelProviderConfig`, `supportsNativeStreamingUsageCompat`, `applyProviderNativeStreamingUsageCompat` |
-  | `plugin-sdk/provider-onboard` | وصله‌های ورود اولیه تامین‌کننده | کمک‌کننده‌های پیکربندی ورود اولیه |
-  | `plugin-sdk/provider-http` | کمک‌کننده‌های HTTP تامین‌کننده | کمک‌کننده‌های عمومی قابلیت HTTP/نقطه پایانی تامین‌کننده، شامل کمک‌کننده‌های فرم چندبخشی رونویسی صوت |
-  | `plugin-sdk/provider-web-fetch` | کمک‌کننده‌های web-fetch تامین‌کننده | کمک‌کننده‌های ثبت/کش تامین‌کننده web-fetch |
-  | `plugin-sdk/provider-web-search-config-contract` | کمک‌کننده‌های پیکربندی web-search تامین‌کننده | کمک‌کننده‌های محدود پیکربندی/اعتبارنامه web-search برای تامین‌کنندگانی که به سیم‌کشی فعال‌سازی plugin نیاز ندارند |
-  | `plugin-sdk/provider-web-search-contract` | کمک‌کننده‌های قرارداد web-search تامین‌کننده | کمک‌کننده‌های محدود قرارداد پیکربندی/اعتبارنامه web-search مانند `createWebSearchProviderContractFields`, `enablePluginInConfig`, `resolveProviderWebSearchPluginConfig`، و تنظیم‌کننده‌ها/گیرنده‌های اعتبارنامه با دامنه مشخص |
-  | `plugin-sdk/provider-web-search` | کمک‌کننده‌های web-search تامین‌کننده | کمک‌کننده‌های ثبت/کش/زمان اجرای تامین‌کننده web-search |
-  | `plugin-sdk/provider-tools` | کمک‌کننده‌های سازگاری ابزار/اسکیمای تامین‌کننده | `ProviderToolCompatFamily`, `buildProviderToolCompatFamilyHooks`، و پاک‌سازی + عیب‌یابی اسکیمای DeepSeek/Gemini/OpenAI |
-  | `plugin-sdk/provider-usage` | کمک‌کننده‌های مصرف تامین‌کننده | `fetchClaudeUsage`, `fetchGeminiUsage`, `fetchGithubCopilotUsage`، و دیگر کمک‌کننده‌های مصرف تامین‌کننده |
-  | `plugin-sdk/provider-stream` | کمک‌کننده‌های پوشش‌دهنده استریم تامین‌کننده | `ProviderStreamFamily`, `buildProviderStreamFamilyHooks`, `composeProviderStreamWrappers`، انواع پوشش‌دهنده استریم، و کمک‌کننده‌های مشترک پوشش‌دهنده Anthropic/Bedrock/DeepSeek V4/Google/Kilocode/Moonshot/OpenAI/OpenRouter/Z.A.I/MiniMax/Copilot |
-  | `plugin-sdk/provider-transport-runtime` | کمک‌کننده‌های ترابری تامین‌کننده | کمک‌کننده‌های ترابری بومی تامین‌کننده مانند fetch محافظت‌شده، استخراج متن نتیجه ابزار، تبدیل‌های پیام ترابری، و استریم‌های رویداد ترابری نوشتنی |
-  | `plugin-sdk/keyed-async-queue` | صف ناهمگام مرتب | `KeyedAsyncQueue` |
-  | `plugin-sdk/media-runtime` | کمک‌کننده‌های مشترک رسانه | کمک‌کننده‌های دریافت/تبدیل/ذخیره رسانه، بررسی ابعاد ویدئو مبتنی بر ffprobe، و سازنده‌های محموله رسانه |
-  | `plugin-sdk/media-generation-runtime` | کمک‌کننده‌های مشترک تولید رسانه | کمک‌کننده‌های مشترک جایگزینی در خرابی، انتخاب نامزد، و پیام‌رسانی مدل مفقود برای تولید تصویر/ویدئو/موسیقی |
-  | `plugin-sdk/media-understanding` | کمک‌کننده‌های درک رسانه | انواع تامین‌کننده درک رسانه به‌همراه خروجی‌های کمکی تصویر/صوت برای تامین‌کننده |
-  | `plugin-sdk/text-runtime` | خروجی گسترده منسوخ سازگاری متن | از `string-coerce-runtime`, `text-chunking`, `text-utility-runtime`، و `logging-core` استفاده کنید |
-  | `plugin-sdk/text-chunking` | کمک‌کننده‌های قطعه‌بندی متن | کمک‌کننده قطعه‌بندی متن خروجی |
-  | `plugin-sdk/speech` | کمک‌کننده‌های گفتار | انواع تامین‌کننده گفتار به‌همراه کمک‌کننده‌های دستورالعمل، رجیستری و اعتبارسنجی برای تامین‌کننده، و سازنده TTS سازگار با OpenAI |
-  | `plugin-sdk/speech-core` | هسته مشترک گفتار | انواع تامین‌کننده گفتار، رجیستری، دستورالعمل‌ها، عادی‌سازی |
-  | `plugin-sdk/realtime-transcription` | کمک‌کننده‌های رونویسی بلادرنگ | انواع تامین‌کننده، کمک‌کننده‌های رجیستری، و کمک‌کننده مشترک نشست WebSocket |
-  | `plugin-sdk/realtime-voice` | کمک‌کننده‌های صدای بلادرنگ | انواع تامین‌کننده، کمک‌کننده‌های رجیستری/رفع، کمک‌کننده‌های نشست پل، صف‌های مشترک پاسخ گفتاری عامل، کنترل صوتی اجرای فعال، سلامت رونوشت/رویداد، سرکوب اکو، تطبیق پرسش مشاوره، هماهنگی مشاوره اجباری، ردیابی زمینه نوبت، ردیابی فعالیت خروجی، و کمک‌کننده‌های سریع مشاوره زمینه |
-  | `plugin-sdk/image-generation` | کمک‌کننده‌های تولید تصویر | انواع تامین‌کننده تولید تصویر به‌همراه کمک‌کننده‌های URL داده/دارایی تصویر و سازنده تامین‌کننده تصویر سازگار با OpenAI |
-  | `plugin-sdk/image-generation-core` | هسته مشترک تولید تصویر | انواع تولید تصویر، جایگزینی در خرابی، احراز هویت، و کمک‌کننده‌های رجیستری |
-  | `plugin-sdk/music-generation` | کمک‌کننده‌های تولید موسیقی | انواع تامین‌کننده/درخواست/نتیجه تولید موسیقی |
-  | `plugin-sdk/music-generation-core` | هسته مشترک تولید موسیقی | انواع تولید موسیقی، کمک‌کننده‌های جایگزینی در خرابی، جست‌وجوی تامین‌کننده، و تجزیه ارجاع مدل |
-  | `plugin-sdk/video-generation` | کمک‌کننده‌های تولید ویدئو | انواع تامین‌کننده/درخواست/نتیجه تولید ویدئو |
-  | `plugin-sdk/video-generation-core` | هسته مشترک تولید ویدئو | انواع تولید ویدئو، کمک‌کننده‌های جایگزینی در خرابی، جست‌وجوی تامین‌کننده، و تجزیه ارجاع مدل |
-  | `plugin-sdk/interactive-runtime` | کمک‌کننده‌های پاسخ تعاملی | عادی‌سازی/کاهش محموله پاسخ تعاملی |
-  | `plugin-sdk/channel-config-primitives` | بنیان‌های پیکربندی کانال | بنیان‌های محدود اسکیمای پیکربندی کانال |
-  | `plugin-sdk/channel-config-writes` | کمک‌کننده‌های نوشتن پیکربندی کانال | کمک‌کننده‌های مجوزدهی نوشتن پیکربندی کانال |
-  | `plugin-sdk/channel-plugin-common` | پیش‌درآمد مشترک کانال | خروجی‌های پیش‌درآمد مشترک Plugin کانال |
-  | `plugin-sdk/channel-status` | کمک‌کننده‌های وضعیت کانال | کمک‌کننده‌های مشترک نما/خلاصه وضعیت کانال |
-  | `plugin-sdk/allowlist-config-edit` | کمک‌کننده‌های پیکربندی فهرست مجاز | کمک‌کننده‌های ویرایش/خواندن پیکربندی فهرست مجاز |
-  | `plugin-sdk/group-access` | کمک‌کننده‌های دسترسی گروه | کمک‌کننده‌های مشترک تصمیم‌گیری دسترسی گروه |
-  | `plugin-sdk/direct-dm`, `plugin-sdk/direct-dm-access` | نماهای سازگاری منسوخ | از `plugin-sdk/channel-inbound` استفاده کنید |
-  | `plugin-sdk/direct-dm-guard-policy` | کمک‌کننده‌های محافظ Direct-DM | کمک‌کننده‌های محدود سیاست محافظ پیش از رمزنگاری |
-  | `plugin-sdk/extension-shared` | کمک‌کننده‌های مشترک افزونه | بنیان‌های کمکی کانال غیرفعال/وضعیت و پروکسی محیطی |
-  | `plugin-sdk/webhook-targets` | کمک‌کننده‌های هدف Webhook | رجیستری هدف Webhook و کمک‌کننده‌های نصب مسیر |
-  | `plugin-sdk/webhook-path` | نام مستعار منسوخ مسیر webhook | از `plugin-sdk/webhook-ingress` استفاده کنید |
-  | `plugin-sdk/web-media` | کمک‌کننده‌های مشترک رسانه وب | کمک‌کننده‌های بارگذاری رسانه راه‌دور/محلی |
-  | `plugin-sdk/zod` | بازصادرات منسوخ سازگاری Zod | `zod` را مستقیما از `zod` وارد کنید |
-  | `plugin-sdk/memory-core` | کمک‌کننده‌های memory-core بسته‌بندی‌شده | سطح کمکی مدیر/پیکربندی/فایل/CLI حافظه |
-  | `plugin-sdk/memory-core-engine-runtime` | نمای زمان اجرای موتور حافظه | نمای زمان اجرای نمایه/جست‌وجوی حافظه |
-  | `plugin-sdk/memory-core-host-embedding-registry` | رجیستری جاسازی حافظه | کمک‌کننده‌های سبک رجیستری تامین‌کننده جاسازی حافظه |
-  | `plugin-sdk/memory-core-host-engine-foundation` | موتور بنیاد میزبان حافظه | خروجی‌های موتور بنیاد میزبان حافظه |
-  | `plugin-sdk/memory-core-host-engine-embeddings` | موتور جاسازی میزبان حافظه | قراردادهای جاسازی حافظه، دسترسی رجیستری، تامین‌کننده محلی، و کمک‌کننده‌های عمومی دسته‌ای/راه‌دور؛ تامین‌کنندگان راه‌دور مشخص در pluginهای مالک خود قرار دارند |
-  | `plugin-sdk/memory-core-host-engine-qmd` | موتور QMD میزبان حافظه | خروجی‌های موتور QMD میزبان حافظه |
-  | `plugin-sdk/memory-core-host-engine-storage` | موتور ذخیره‌سازی میزبان حافظه | خروجی‌های موتور ذخیره‌سازی میزبان حافظه |
-  | `plugin-sdk/memory-core-host-multimodal` | کمک‌کننده‌های چندوجهی میزبان حافظه | کمک‌کننده‌های چندوجهی میزبان حافظه |
-  | `plugin-sdk/memory-core-host-query` | کمک‌کننده‌های پرس‌وجوی میزبان حافظه | کمک‌کننده‌های پرس‌وجوی میزبان حافظه |
-  | `plugin-sdk/memory-core-host-secret` | کمک‌کننده‌های راز میزبان حافظه | کمک‌کننده‌های راز میزبان حافظه |
-  | `plugin-sdk/memory-core-host-events` | نام مستعار منسوخ رویداد حافظه | از `plugin-sdk/memory-host-events` استفاده کنید |
-  | `plugin-sdk/memory-core-host-status` | کمک‌کننده‌های وضعیت میزبان حافظه | کمک‌کننده‌های وضعیت میزبان حافظه |
-  | `plugin-sdk/memory-core-host-runtime-cli` | زمان اجرای CLI میزبان حافظه | کمک‌کننده‌های زمان اجرای CLI میزبان حافظه |
-  | `plugin-sdk/memory-core-host-runtime-core` | زمان اجرای هسته میزبان حافظه | کمک‌کننده‌های زمان اجرای هسته میزبان حافظه |
-  | `plugin-sdk/memory-core-host-runtime-files` | کمک‌کننده‌های فایل/زمان اجرای میزبان حافظه | کمک‌کننده‌های فایل/زمان اجرای میزبان حافظه |
-  | `plugin-sdk/memory-host-core` | نام مستعار زمان اجرای هسته میزبان حافظه | نام مستعار بی‌طرف از نظر فروشنده برای کمک‌کننده‌های زمان اجرای هسته میزبان حافظه |
-  | `plugin-sdk/memory-host-events` | نام مستعار دفتر رویداد میزبان حافظه | نام مستعار بی‌طرف از نظر فروشنده برای کمک‌کننده‌های دفتر رویداد میزبان حافظه |
-  | `plugin-sdk/memory-host-files` | نام مستعار منسوخ فایل/زمان اجرای حافظه | از `plugin-sdk/memory-core-host-runtime-files` استفاده کنید |
-  | `plugin-sdk/memory-host-markdown` | کمک‌کننده‌های markdown مدیریت‌شده | کمک‌کننده‌های مشترک markdown مدیریت‌شده برای pluginهای مجاور حافظه |
-  | `plugin-sdk/memory-host-search` | نمای جست‌وجوی حافظه فعال | نمای زمان اجرای تنبل مدیر جست‌وجوی حافظه فعال |
-  | `plugin-sdk/memory-host-status` | نام مستعار منسوخ وضعیت میزبان حافظه | از `plugin-sdk/memory-core-host-status` استفاده کنید |
-  | `plugin-sdk/testing` | ابزارهای تست | barrel سازگاری منسوخ محلی مخزن؛ از زیربخش‌های تست متمرکز محلی مخزن مانند `plugin-sdk/plugin-test-runtime`, `plugin-sdk/channel-test-helpers`, `plugin-sdk/channel-target-testing`, `plugin-sdk/test-env`، و `plugin-sdk/test-fixtures` استفاده کنید |
-</Accordion>
-
-این جدول عمداً زیرمجموعهٔ مشترک مهاجرت است، نه سطح کامل SDK.
-فهرست نقطهٔ ورود کامپایلر در
-`scripts/lib/plugin-sdk-entrypoints.json` قرار دارد؛ exportهای package از
-زیرمجموعهٔ عمومی تولید می‌شوند.
-
-درزهای کمکی رزروشدهٔ bundled-plugin از export map عمومی SDK بازنشسته شده‌اند،
-به‌جز facadeهای سازگاری که صراحتاً مستند شده‌اند، مانند shim منسوخ‌شدهٔ
-`plugin-sdk/discord` که برای package منتشرشدهٔ
-`@openclaw/discord@2026.3.13` حفظ شده است. کمک‌کننده‌های owner-specific داخل
-package مالک Plugin قرار دارند؛ رفتار میزبان مشترک باید از طریق قراردادهای
-عمومی SDK مانند `plugin-sdk/gateway-runtime`، `plugin-sdk/security-runtime` و
-`plugin-sdk/plugin-config-runtime` منتقل شود.
-
-باریک‌ترین import متناسب با کار را استفاده کنید. اگر exportی پیدا نکردید،
-source را در `src/plugin-sdk/` بررسی کنید یا از نگه‌دارندگان بپرسید کدام
-قرارداد عمومی باید مالک آن باشد.
-
-## منسوخ‌سازی‌های فعال
-
-منسوخ‌سازی‌های محدودتری که در سراسر plugin SDK، قرارداد ارائه‌دهنده، سطح زمان
-اجرا و مانیفست اعمال می‌شوند. هر کدام امروز هنوز کار می‌کند، اما در یک major
-release آینده حذف خواهد شد. ورودی زیر هر مورد API قدیمی را به جایگزین canonical
-آن نگاشت می‌کند.
-
-<AccordionGroup>
-  <Accordion title="سازنده‌های راهنمای command-auth → command-status">
-    **قدیمی (`openclaw/plugin-sdk/command-auth`)**: `buildCommandsMessage`,
-    `buildCommandsMessagePaginated`, `buildHelpMessage`.
-
-    **جدید (`openclaw/plugin-sdk/command-status`)**: همان signatureها، همان
-    exportها - فقط از subpath باریک‌تر import می‌شوند. `command-auth`
-    آن‌ها را به‌عنوان stubهای سازگاری re-export می‌کند.
-
-    ```typescript
-    // Before
-    import { buildHelpMessage } from "openclaw/plugin-sdk/command-auth";
-
-    // After
-    import { buildHelpMessage } from "openclaw/plugin-sdk/command-status";
-    ```
-
-  </Accordion>
-
-  <Accordion title="کمک‌کننده‌های دروازه‌گذاری Mention → resolveInboundMentionDecision">
-    **قدیمی**: `resolveInboundMentionRequirement({ facts, policy })` و
-    `shouldDropInboundForMention(...)` از
-    `openclaw/plugin-sdk/channel-inbound` یا
-    `openclaw/plugin-sdk/channel-mention-gating`.
-
-    **جدید**: `resolveInboundMentionDecision({ facts, policy })` - به‌جای دو
-    فراخوانی جدا، یک شیء تصمیم واحد برمی‌گرداند.
-
-    Pluginهای کانال پایین‌دستی (Slack، Discord، Matrix، MS Teams) قبلاً
-    جابه‌جا شده‌اند.
-
-  </Accordion>
-
-  <Accordion title="shim زمان اجرای کانال و کمک‌کننده‌های کنش‌های کانال">
-    `openclaw/plugin-sdk/channel-runtime` یک shim سازگاری برای Pluginهای کانال
-    قدیمی‌تر است. آن را از کد جدید import نکنید؛ برای ثبت اشیای زمان اجرا از
-    `openclaw/plugin-sdk/channel-runtime-context` استفاده کنید.
-
-    کمک‌کننده‌های `channelActions*` در `openclaw/plugin-sdk/channel-actions`
-    همراه با exportهای خام کانال "actions" منسوخ شده‌اند. قابلیت‌ها را به‌جای
-    آن از طریق سطح معنایی `presentation` عرضه کنید - Pluginهای کانال اعلام
-    می‌کنند چه چیزی را render می‌کنند (کارت‌ها، دکمه‌ها، selectها)، نه اینکه چه
-    نام‌های خام action را می‌پذیرند.
-
-  </Accordion>
-
-  <Accordion title="کمک‌کنندهٔ tool() ارائه‌دهندهٔ جست‌وجوی وب → createTool() روی Plugin">
-    **قدیمی**: factory `tool()` از `openclaw/plugin-sdk/provider-web-search`.
-
-    **جدید**: `createTool(...)` را مستقیماً روی Plugin ارائه‌دهنده پیاده‌سازی
-    کنید. OpenClaw دیگر برای ثبت wrapper ابزار به کمک‌کنندهٔ SDK نیاز ندارد.
-
-  </Accordion>
-
-  <Accordion title="envelopeهای کانال plaintext → BodyForAgent">
-    **قدیمی**: `formatInboundEnvelope(...)` (و
-    `ChannelMessageForAgent.channelEnvelope`) برای ساخت یک envelope prompt
-    plaintext و تخت از پیام‌های کانال ورودی.
-
-    **جدید**: `BodyForAgent` به‌همراه بلوک‌های ساختاریافتهٔ user-context.
-    Pluginهای کانال metadata مسیریابی (thread، topic، reply-to، reactionها) را
-    به‌جای الحاق آن‌ها به یک رشتهٔ prompt، به‌صورت fieldهای typed پیوست
-    می‌کنند. کمک‌کنندهٔ `formatAgentEnvelope(...)` همچنان برای envelopeهای
-    ساخته‌شدهٔ رو به assistant پشتیبانی می‌شود، اما envelopeهای plaintext
-    ورودی در مسیر حذف هستند.
-
-    نواحی متاثر: `inbound_claim`، `message_received`، و هر Plugin کانال سفارشی
-    که متن `channelEnvelope` را post-process می‌کرد.
-
-  </Accordion>
-
-  <Accordion title="hook deactivate → gateway_stop">
-    **قدیمی**: `api.on("deactivate", handler)`.
-
-    **جدید**: `api.on("gateway_stop", handler)`. رویداد و context همان قرارداد
-    cleanup خاموش‌سازی هستند؛ فقط نام hook تغییر می‌کند.
-
-    ```typescript
-    // Before
-    api.on("deactivate", async (event, ctx) => {
-      await stopPluginService(ctx);
-    });
-
-    // After
-    api.on("gateway_stop", async (event, ctx) => {
-      await stopPluginService(ctx);
-    });
-    ```
-
-    `deactivate` تا پس از 2026-08-16 به‌عنوان alias سازگاری منسوخ‌شده
-    سیم‌کشی‌شده باقی می‌ماند.
-
-  </Accordion>
-
-  <Accordion title="hook subagent_spawning → اتصال thread در core">
-    **قدیمی**: `api.on("subagent_spawning", handler)` که
-    `threadBindingReady` یا `deliveryOrigin` برمی‌گرداند.
-
-    **جدید**: اجازه دهید core اتصال‌های subagent با `thread: true` را از طریق
-    adapter اتصال session کانال آماده کند. از
-    `api.on("subagent_spawned", handler)` فقط برای مشاهدهٔ پس از launch استفاده
-    کنید.
-
-    ```typescript
-    // Before
-    api.on("subagent_spawning", async () => ({
-      status: "ok",
-      threadBindingReady: true,
-      deliveryOrigin: { channel: "discord", to: "channel:123", threadId: "456" },
-    }));
-
-    // After
-    api.on("subagent_spawned", async (event) => {
-      await observeSubagentLaunch(event);
-    });
-    ```
-
-    `subagent_spawning`، `PluginHookSubagentSpawningEvent`،
-    `PluginHookSubagentSpawningResult`، و
-    `SubagentLifecycleHookRunner.runSubagentSpawning(...)` فقط به‌عنوان سطوح
-    سازگاری منسوخ‌شده باقی می‌مانند تا زمانی که Pluginهای خارجی مهاجرت کنند.
-
-  </Accordion>
-
-  <Accordion title="typeهای کشف ارائه‌دهنده → typeهای کاتالوگ ارائه‌دهنده">
-    چهار type alias کشف اکنون wrapperهای نازکی روی typeهای دورهٔ کاتالوگ هستند:
-
-    | alias قدیمی                 | type جدید                  |
-    | ------------------------- | ------------------------- |
-    | `ProviderDiscoveryOrder`  | `ProviderCatalogOrder`    |
-    | `ProviderDiscoveryContext`| `ProviderCatalogContext`  |
-    | `ProviderDiscoveryResult` | `ProviderCatalogResult`   |
-    | `ProviderPluginDiscovery` | `ProviderPluginCatalog`   |
-
-    به‌علاوهٔ bag ایستای legacy `ProviderCapabilities` - Pluginهای
-    ارائه‌دهنده باید به‌جای یک شیء ایستا از hookهای صریح ارائه‌دهنده مانند
-    `buildReplayPolicy`، `normalizeToolSchemas`، و `wrapStreamFn` استفاده کنند.
-
-  </Accordion>
-
-  <Accordion title="hookهای سیاست Thinking → resolveThinkingProfile">
-    **قدیمی** (سه hook جداگانه روی `ProviderThinkingPolicy`):
-    `isBinaryThinking(ctx)`، `supportsXHighThinking(ctx)`، و
-    `resolveDefaultThinkingLevel(ctx)`.
-
-    **جدید**: یک `resolveThinkingProfile(ctx)` واحد که یک
-    `ProviderThinkingProfile` با `id` canonical، `label` اختیاری، و فهرست
-    رتبه‌بندی‌شدهٔ levelها برمی‌گرداند. OpenClaw مقادیر ذخیره‌شدهٔ stale را
-    به‌صورت خودکار بر اساس رتبهٔ profile downgrade می‌کند.
-
-    context شامل `provider`، `modelId`، `reasoning` ادغام‌شدهٔ اختیاری، و facts
-    اختیاری `compat` مدل ادغام‌شده است. Pluginهای ارائه‌دهنده می‌توانند از این
-    facts کاتالوگ برای عرضهٔ profile ویژهٔ مدل فقط زمانی استفاده کنند که قرارداد
-    request پیکربندی‌شده از آن پشتیبانی کند.
-
-    به‌جای سه hook، یک hook پیاده‌سازی کنید. hookهای legacy در طول پنجرهٔ
-    منسوخ‌سازی همچنان کار می‌کنند، اما با نتیجهٔ profile ترکیب نمی‌شوند.
-
-  </Accordion>
-
-  <Accordion title="ارائه‌دهندگان auth خارجی → contracts.externalAuthProviders">
-    **قدیمی**: پیاده‌سازی hookهای auth خارجی بدون اعلام ارائه‌دهنده در مانیفست
-    Plugin.
-
-    **جدید**: `contracts.externalAuthProviders` را در مانیفست Plugin اعلام کنید
-    **و** `resolveExternalAuthProfiles(...)` را پیاده‌سازی کنید.
-
-    ```json
-    {
-      "contracts": {
-        "externalAuthProviders": ["anthropic", "openai"]
-      }
-    }
-    ```
-
-  </Accordion>
-
-  <Accordion title="جست‌وجوی env-var ارائه‌دهنده → setup.providers[].envVars">
-    field مانیفست **قدیمی**: `providerAuthEnvVars: { anthropic: ["ANTHROPIC_API_KEY"] }`.
-
-    **جدید**: همان جست‌وجوی env-var را در `setup.providers[].envVars` روی
-    مانیفست mirror کنید. این کار metadata مربوط به env برای setup/status را در
-    یک جا یکپارچه می‌کند و از boot کردن زمان اجرای Plugin فقط برای پاسخ‌دادن به
-    جست‌وجوهای env-var جلوگیری می‌کند.
-
-    `providerAuthEnvVars` تا زمان بسته‌شدن پنجرهٔ منسوخ‌سازی از طریق یک adapter
-    سازگاری پشتیبانی می‌شود.
-
-  </Accordion>
-
-  <Accordion title="ثبت Plugin حافظه → registerMemoryCapability">
-    **قدیمی**: سه فراخوانی جداگانه -
-    `api.registerMemoryPromptSection(...)`،
-    `api.registerMemoryFlushPlan(...)`،
-    `api.registerMemoryRuntime(...)`.
-
-    **جدید**: یک فراخوانی روی API memory-state -
-    `registerMemoryCapability(pluginId, { promptBuilder, flushPlanResolver, runtime })`.
-
-    همان slotها، یک فراخوانی ثبت واحد. کمک‌کننده‌های prompt و corpus افزایشی
-    (`registerMemoryPromptSupplement`، `registerMemoryCorpusSupplement`) متاثر
-    نیستند.
-
-  </Accordion>
-
-  <Accordion title="API ارائه‌دهندهٔ embedding حافظه">
-    **قدیمی**: `api.registerMemoryEmbeddingProvider(...)` به‌علاوهٔ
-    `contracts.memoryEmbeddingProviders`.
-
-    **جدید**: `api.registerEmbeddingProvider(...)` به‌علاوهٔ
-    `contracts.embeddingProviders`.
-
-    قرارداد عمومی ارائه‌دهندهٔ embedding خارج از memory هم قابل استفادهٔ مجدد
-    است و مسیر پشتیبانی‌شده برای ارائه‌دهندگان جدید محسوب می‌شود. API ثبت
-    ویژهٔ memory به‌عنوان سازگاری منسوخ‌شده همچنان سیم‌کشی‌شده می‌ماند تا
-    ارائه‌دهندگان موجود مهاجرت کنند. گزارش‌های بازرسی Plugin استفادهٔ
-    non-bundled را به‌عنوان بدهی سازگاری گزارش می‌کنند.
-
-  </Accordion>
-
-  <Accordion title="typeهای پیام‌های session مربوط به Subagent تغییر نام داده شدند">
-    دو type alias legacy که هنوز از `src/plugins/runtime/types.ts` export
-    می‌شوند:
-
-    | قدیمی                           | جدید                             |
-    | ----------------------------- | ------------------------------- |
-    | `SubagentReadSessionParams`   | `SubagentGetSessionMessagesParams` |
-    | `SubagentReadSessionResult`   | `SubagentGetSessionMessagesResult` |
-
-    method زمان اجرای `readSession` به نفع `getSessionMessages` منسوخ شده است.
-    همان signature؛ method قدیمی به method جدید فراخوانی را عبور می‌دهد.
-
-  </Accordion>
-
-  <Accordion title="runtime.tasks.flow → runtime.tasks.managedFlows">
-    **قدیمی**: `runtime.tasks.flow` (مفرد) یک accessor زندهٔ task-flow
-    برمی‌گرداند.
-
-    **جدید**: `runtime.tasks.managedFlows` زمان اجرای mutation مدیریت‌شدهٔ
-    TaskFlow را برای Pluginهایی نگه می‌دارد که taskهای فرزند را از یک flow
-    ایجاد، به‌روزرسانی، لغو یا اجرا می‌کنند. زمانی از `runtime.tasks.flows`
-    استفاده کنید که Plugin فقط به خواندن‌های مبتنی بر DTO نیاز دارد.
-
-    ```typescript
-    // Before
-    const flow = api.runtime.tasks.flow.fromToolContext(ctx);
-    // After
-    const flow = api.runtime.tasks.managedFlows.fromToolContext(ctx);
-    ```
-
-  </Accordion>
-
-  <Accordion title="factoryهای extension تعبیه‌شده → middleware نتیجهٔ ابزار agent">
-    در بخش «چگونه مهاجرت کنیم → extensionهای تعبیه‌شدهٔ tool-result را به
-    middleware مهاجرت دهید» در بالا پوشش داده شده است. برای کامل‌بودن اینجا هم
-    آمده است: مسیر حذف‌شدهٔ فقط embedded-runner
-    `api.registerEmbeddedExtensionFactory(...)` با
-    `api.registerAgentToolResultMiddleware(...)` و یک فهرست صریح runtime در
-    `contracts.agentToolResultMiddleware` جایگزین شده است.
-  </Accordion>
-
-  <Accordion title="alias OpenClawSchemaType → OpenClawConfig">
-    `OpenClawSchemaType` که از `openclaw/plugin-sdk` re-export می‌شود اکنون یک
-    alias تک‌خطی برای `OpenClawConfig` است. نام canonical را ترجیح دهید.
-
-    ```typescript
-    // Before
-    import type { OpenClawSchemaType } from "openclaw/plugin-sdk";
-    // After
-    import type { OpenClawConfig } from "openclaw/plugin-sdk/config-schema";
-    ```
-
-  </Accordion>
-</AccordionGroup>
-
-<Note>
-منسوخ‌سازی‌های سطح extension (داخل Pluginهای کانال/ارائه‌دهندهٔ bundled زیر
-`extensions/`) داخل barrelهای `api.ts` و `runtime-api.ts` خودشان پیگیری
-می‌شوند. آن‌ها روی قراردادهای Plugin شخص ثالث اثر نمی‌گذارند و اینجا فهرست
-نشده‌اند. اگر barrel محلی یک Plugin bundled را مستقیم مصرف می‌کنید، پیش از
-ارتقا، کامنت‌های منسوخ‌سازی را در همان barrel بخوانید.
-</Note>
+واژگان کنترل یکپارچه نیز عمداً محدود هستند:
+
+| متد                          | قابل‌اعمال به                                              | قرارداد                                                                                                                                                                                                                  |
+| ------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `talk.session.appendAudio`      | `realtime/gateway-relay`، `transcription/gateway-relay` | یک قطعهٔ صوتی PCM با کدگذاری base64 را به نشست ارائه‌دهندهٔ متعلق به همان اتصال Gateway اضافه می‌کند.                                                                                                                             |
+| `talk.session.startTurn`        | `stt-tts/managed-room`                                  | یک نوبت کاربر در اتاق مدیریت‌شده را آغاز می‌کند.                                                                                                                                                                                           |
+| `talk.session.endTurn`          | `stt-tts/managed-room`                                  | نوبت فعال را پس از اعتبارسنجی نوبت منقضی‌شده پایان می‌دهد.                                                                                                                                                                          |
+| `talk.session.cancelTurn`       | همهٔ نشست‌های تحت مالکیت Gateway                              | کار فعال ضبط/ارائه‌دهنده/عامل/TTS را برای یک نوبت لغو می‌کند.                                                                                                                                                                 |
+| `talk.session.cancelOutput`     | `realtime/gateway-relay`                                | خروجی صدای دستیار را بدون اینکه لزوماً نوبت کاربر پایان یابد متوقف می‌کند.                                                                                                                                                     |
+| `talk.session.submitToolResult` | `realtime/gateway-relay`                                | فراخوانی ابزار ارائه‌دهنده را پس از هر تکمیل ناهمگام در معرض‌گذاری‌شده توسط پل آن کامل می‌کند؛ برای خروجی موقت `options.willContinue` یا، در صورت پشتیبانی، برای جلوگیری از پاسخ دیگری از دستیار `options.suppressResponse` را ارسال کنید. |
+| `talk.session.steer`            | نشست‌های Talk متکی به عامل                              | کنترل گفتاری `status`، `steer`، `cancel` یا `followup` را به اجرای تعبیه‌شدهٔ فعال که از نشست Talk حل شده است ارسال می‌کند.                                                                                                 |
+| `talk.session.close`            | همهٔ نشست‌های یکپارچه                                    | نشست‌های رله را متوقف یا وضعیت اتاق مدیریت‌شده را لغو می‌کند و سپس شناسهٔ نشست یکپارچه را فراموش می‌کند.                                                                                                                                     |
+
+برای عملی‌کردن این سازوکار، موارد خاص ارائه‌دهنده یا پلتفرم را در هسته معرفی نکنید.
+هسته مالک معناشناسی نشست Talk است. Pluginهای ارائه‌دهنده مالک راه‌اندازی نشست فروشنده هستند.
+تماس صوتی و Google Meet مالک آداپتورهای تلفن/جلسه هستند. برنامه‌های مرورگر و بومی
+مالک تجربهٔ کاربری ضبط/پخش دستگاه هستند.
 
 ## جدول زمانی حذف
 
-| زمان | چه اتفاقی می‌افتد |
-| ---------------------- | ----------------------------------------------------------------------- |
-| **اکنون** | سطح‌های منسوخ‌شده هشدارهای زمان اجرا صادر می‌کنند |
-| **انتشار اصلی بعدی** | سطح‌های منسوخ‌شده حذف خواهند شد؛ Pluginهایی که همچنان از آن‌ها استفاده می‌کنند شکست خواهند خورد |
+| زمان                                        | چه اتفاقی می‌افتد                                                                                                                              |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **اکنون**                                     | سطوح منسوخ‌شده‌ای که قابلیت هشدار دارند، هشدارهای زمان اجرا صادر می‌کنند؛ محافظ‌های مخزن، واردسازی‌های SDK منسوخ‌شده از هسته و Pluginهای همراه را رد می‌کنند. |
+| **در انتظار تصمیم مالک**                  | رکوردهای بدون تاریخ تا زمانی که مالکشان یک تاریخ `removeAfter` منتشر نکند، منسوخ باقی می‌مانند و واجد شرایط حذف نیستند.                          |
+| **تاریخ `removeAfter` هر رکورد سازگاری** | آن سطح مشخص واجد شرایط حذف می‌شود؛ پس از گذشت تاریخ، `pnpm plugins:boundary-report --fail-on-eligible-compat` باعث شکست CI می‌شود.    |
+| **نسخه اصلی بعدی**                      | سطوح تاریخ‌دار فقط پس از تاریخ `removeAfter` خود قابل حذف هستند؛ رکوردهای بدون تاریخ همچنان به تأیید مالک و یک تاریخ منتشرشده نیاز دارند.   |
 
-همه Pluginهای هسته از قبل مهاجرت داده شده‌اند. Pluginهای خارجی باید
-پیش از انتشار اصلی بعدی مهاجرت کنند.
+زیرمسیرهای عمومی باقی‌مانده SDK در زیر، بازه‌های حذف مبتنی بر رجیستری دارند.
+ردیف‌های 30 ژوئیه پس از پاک‌سازی زودهنگامِ مجازشده توسط نگه‌دارنده حذف شدند:
+زیرمسیرهای استفاده‌نشده حذف شدند، نام‌های مستعار سازگاری پیشین حذف شدند و
+ماژول‌های مخصوص نسخه همراه به نگاشت‌های ساخت خصوصی و محلی تنزل یافتند.
+
+| `removeAfter` | رده                               | زیرمسیرهای SDK                                                                                                                                                                        |
+| ------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `2026-08-15`  | منسوخ‌سازی‌های سازگاری پیشین | `agent-config-primitives`، `channel-logging`، `channel-secret-runtime`، `channel-streaming`، `group-access`، `inbound-reply-dispatch`، `matrix`، `text-runtime`، `zod`              |
+| `2026-09-01`  | منسوخ‌سازی‌های سازگاری پیشین | `channel-lifecycle`، `channel-message`، `channel-reply-pipeline`، `config-runtime`، `infra-runtime`                                                                                 |
+| `2026-10-01`  | نگاشت قدیمی رسانه            | `agent-media-payload`، به‌علاوه فیلدهای غیرزیرمسیرِ `MsgContext Media*`، سازنده‌های محموله رسانه ورودی کانال، `buildMediaPayload`، نام‌های مستعار رسانه‌ای هوک و قالب‌های `{{Media*}}` |
+
+همه Pluginهای هسته از قبل مهاجرت کرده‌اند. Pluginهای خارجی باید
+پیش از نسخه اصلی بعدی مهاجرت کنند. برای مشاهده اینکه کدام
+رکوردهای سازگاری برای سطوح مورداستفاده Plugin شما زودتر سررسید می‌شوند، `pnpm plugins:boundary-report` را اجرا کنید.
 
 ## سرکوب موقت هشدارها
-
-هنگام کار روی مهاجرت، این متغیرهای محیطی را تنظیم کنید:
 
 ```bash
 OPENCLAW_SUPPRESS_PLUGIN_SDK_COMPAT_WARNING=1 openclaw gateway run
 OPENCLAW_SUPPRESS_EXTENSION_API_WARNING=1 openclaw gateway run
 ```
 
-این یک راه فرار موقت است، نه یک راه‌حل دائمی.
+این یک راه فرار موقت است، نه راه‌حلی دائمی.
 
 ## مرتبط
 
-- [شروع به کار](/fa/plugins/building-plugins) - نخستین plugin خود را بسازید
-- [نمای کلی SDK](/fa/plugins/sdk-overview) - مرجع کامل import زیرفرازها
-- [Pluginهای کانال](/fa/plugins/sdk-channel-plugins) - ساخت pluginهای کانال
-- [Pluginهای ارائه‌دهنده](/fa/plugins/sdk-provider-plugins) - ساخت pluginهای ارائه‌دهنده
-- [درون‌سازه‌های Plugin](/fa/plugins/architecture) - بررسی عمیق معماری
+- [شروع به کار](/fa/plugins/building-plugins) - نخستین Plugin خود را بسازید
+- [نمای کلی SDK](/fa/plugins/sdk-overview) - مرجع کامل واردسازی زیرمسیرها
+- [Pluginهای کانال](/fa/plugins/sdk-channel-plugins) - ساخت Pluginهای کانال
+- [Pluginهای ارائه‌دهنده](/fa/plugins/sdk-provider-plugins) - ساخت Pluginهای ارائه‌دهنده
+- [جزئیات داخلی Plugin](/fa/plugins/architecture) - بررسی عمیق معماری
 - [مانیفست Plugin](/fa/plugins/manifest) - مرجع شِمای مانیفست

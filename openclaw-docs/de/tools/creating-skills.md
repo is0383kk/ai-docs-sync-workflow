@@ -1,48 +1,48 @@
 ---
 read_when:
-    - Sie erstellen eine neue benutzerdefinierte Skill.
-    - Sie benötigen einen schnellen Einstiegs-Workflow für Skills auf Basis von SKILL.md
-    - Sie möchten Skill Workshop verwenden, um einen Skill zur Überprüfung durch einen Agenten vorzuschlagen
+    - Sie erstellen einen neuen benutzerdefinierten Skill
+    - Sie benötigen einen schnellen Einstiegs-Workflow für auf SKILL.md basierende Skills
+    - Sie möchten Skill Workshop verwenden, um ein Skill zur Agentenprüfung vorzuschlagen
 sidebarTitle: Creating skills
-summary: Erstellen, testen und veröffentlichen Sie benutzerdefinierte SKILL.md-Arbeitsbereich-Skills für Ihre OpenClaw-Agenten.
+summary: Erstellen, testen und veröffentlichen Sie benutzerdefinierte SKILL.md-Arbeitsbereichs-Skills für Ihre OpenClaw-Agenten.
 title: Skills erstellen
 x-i18n:
-    generated_at: "2026-07-12T15:56:39Z"
+    generated_at: "2026-07-26T18:12:40Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 15
+    prompt_version: 32
     provider: openai
     source_hash: cba2aa863ebd083d4592e8a764dbdc2c30a0dd8aff49d273927e82df0069bc81
     source_path: tools/creating-skills.md
     workflow: 16
 ---
 
-Skills zeigen dem Agenten, wie und wann er Tools verwenden soll. Jeder Skill ist ein Verzeichnis
+Skills vermitteln dem Agenten, wie und wann Werkzeuge verwendet werden. Jeder Skill ist ein Verzeichnis
 mit einer `SKILL.md`-Datei, die YAML-Frontmatter und Markdown-Anweisungen enthält.
 OpenClaw lädt Skills aus mehreren Stammverzeichnissen in einer festgelegten [Prioritätsreihenfolge](/de/tools/skills#loading-order).
 
-## Erstellen Sie Ihren ersten Skill
+## Ihren ersten Skill erstellen
 
 <Steps>
-  <Step title="Erstellen Sie das Skill-Verzeichnis">
-    Skills befinden sich im Ordner `skills/` Ihres Workspace:
+  <Step title="Skill-Verzeichnis erstellen">
+    Skills befinden sich im Ordner `skills/` Ihres Arbeitsbereichs:
 
     ```bash
     mkdir -p ~/.openclaw/workspace/skills/hello-world
     ```
 
-    Sie können Skills zur besseren Organisation in Unterordnern gruppieren — der Skill wird
-    weiterhin durch das `SKILL.md`-Frontmatter benannt, nicht durch den Ordnerpfad:
+    Zur besseren Organisation können Sie Skills in Unterordnern gruppieren — der Skill wird weiterhin
+    durch das `SKILL.md`-Frontmatter benannt, nicht durch den Ordnerpfad:
 
     ```bash
     mkdir -p ~/.openclaw/workspace/skills/personal/hello-world
-    # Der Skill heißt weiterhin "hello-world" und wird als /hello-world aufgerufen
+    # Der Skill-Name bleibt "hello-world", Aufruf mit /hello-world
     ```
 
   </Step>
 
-  <Step title="Schreiben Sie SKILL.md">
-    Das Frontmatter definiert die Metadaten; der Textkörper enthält die Anweisungen für den Agenten.
+  <Step title="SKILL.md schreiben">
+    Das Frontmatter definiert Metadaten; der Inhalt enthält Anweisungen für den Agenten.
 
     ```markdown
     ---
@@ -52,7 +52,7 @@ OpenClaw lädt Skills aus mehreren Stammverzeichnissen in einer festgelegten [Pr
 
     # Hallo Welt
 
-    Wenn der Benutzer um eine Begrüßung bittet, verwenden Sie das Tool `exec`, um Folgendes auszuführen:
+    Wenn der Benutzer um eine Begrüßung bittet, verwenden Sie das Werkzeug `exec`, um Folgendes auszuführen:
 
     ```bash
     echo "Hallo von Ihrem benutzerdefinierten Skill!"
@@ -61,13 +61,13 @@ OpenClaw lädt Skills aus mehreren Stammverzeichnissen in einer festgelegten [Pr
 
     Benennungsregeln:
     - Verwenden Sie für `name` Kleinbuchstaben, Ziffern und Bindestriche.
-    - Halten Sie den Verzeichnisnamen und den Frontmatter-Wert `name` konsistent.
-    - `description` wird dem Agenten und bei der Ermittlung von Slash-Befehlen angezeigt —
+    - Halten Sie den Verzeichnisnamen und den Frontmatter-Wert `name` identisch.
+    - `description` wird dem Agenten und bei der Erkennung von Slash-Befehlen angezeigt —
       halten Sie die Beschreibung einzeilig und kürzer als 160 Zeichen.
 
   </Step>
 
-  <Step title="Überprüfen Sie, ob der Skill geladen wurde">
+  <Step title="Laden des Skills überprüfen">
     ```bash
     openclaw skills list
     ```
@@ -80,49 +80,49 @@ OpenClaw lädt Skills aus mehreren Stammverzeichnissen in einer festgelegten [Pr
     # Im Chat — aktuelle Sitzung archivieren und eine neue starten
     /new
 
-    # Oder den Gateway neu starten
+    # Oder das Gateway neu starten
     openclaw gateway restart
     ```
 
   </Step>
 
-  <Step title="Testen Sie den Skill">
+  <Step title="Skill testen">
     ```bash
     openclaw agent --message "Gib mir eine Begrüßung"
     ```
 
     Alternativ können Sie einen Chat öffnen und den Agenten direkt fragen. Verwenden Sie `/skill hello-world`, um
-    den Skill ausdrücklich über seinen Namen aufzurufen.
+    den Skill ausdrücklich anhand seines Namens aufzurufen.
 
   </Step>
 </Steps>
 
 ## SKILL.md-Referenz
 
-### Erforderliche Felder
+### Pflichtfelder
 
-| Feld          | Beschreibung                                                            |
-| ------------- | ----------------------------------------------------------------------- |
-| `name`        | Eindeutiger Slug aus Kleinbuchstaben, Ziffern und Bindestrichen         |
-| `description` | Einzeilige Beschreibung, die dem Agenten und bei der Ermittlung angezeigt wird |
+| Feld          | Beschreibung                                                    |
+| ------------- | --------------------------------------------------------------- |
+| `name`        | Eindeutiger Slug aus Kleinbuchstaben, Ziffern und Bindestrichen  |
+| `description` | Einzeilige Beschreibung, die dem Agenten und in der Erkennungsausgabe angezeigt wird |
 
 ### Optionale Frontmatter-Schlüssel
 
-| Feld                       | Standardwert | Beschreibung                                                                        |
-| -------------------------- | ------------ | ----------------------------------------------------------------------------------- |
-| `user-invocable`           | `true`       | Stellt den Skill als Slash-Befehl für Benutzer bereit                               |
-| `disable-model-invocation` | `false`      | Schließt den Skill vom System-Prompt des Agenten aus (wird weiterhin über `/skill` ausgeführt) |
-| `command-dispatch`         | —            | Auf `tool` setzen, um den Slash-Befehl unter Umgehung des Modells direkt an ein Tool weiterzuleiten |
-| `command-tool`             | —            | Name des aufzurufenden Tools, wenn `command-dispatch: tool` festgelegt ist          |
-| `command-arg-mode`         | `raw`        | Leitet bei der Tool-Weiterleitung die unverarbeitete Argumentzeichenfolge an das Tool weiter |
-| `homepage`                 | —            | URL, die in der macOS-Benutzeroberfläche für Skills als "Website" angezeigt wird    |
+| Feld                       | Standardwert | Beschreibung                                                                      |
+| -------------------------- | ------------ | --------------------------------------------------------------------------------- |
+| `user-invocable`           | `true`  | Den Skill als Slash-Befehl für Benutzer verfügbar machen                          |
+| `disable-model-invocation` | `false` | Den Skill aus dem System-Prompt des Agenten ausschließen (Ausführung über `/skill` weiterhin möglich) |
+| `command-dispatch`         | —            | Auf `tool` setzen, um den Slash-Befehl unter Umgehung des Modells direkt an ein Werkzeug weiterzuleiten |
+| `command-tool`             | —            | Name des Werkzeugs, das aufgerufen wird, wenn `command-dispatch: tool` gesetzt ist      |
+| `command-arg-mode`         | `raw`   | Leitet beim Werkzeug-Dispatch die unverarbeitete Argumentzeichenfolge an das Werkzeug weiter |
+| `homepage`                 | —            | URL, die in der macOS-Benutzeroberfläche für Skills als "Website" angezeigt wird |
 
-Informationen zu Aktivierungsfeldern (`requires.bins`, `requires.env` usw.) finden Sie unter
-[Skills — Aktivierungsbedingungen](/de/tools/skills#gating).
+Informationen zu Zugriffssteuerungsfeldern (`requires.bins`, `requires.env` usw.) finden Sie unter
+[Skills — Zugriffssteuerung](/de/tools/skills#gating).
 
-### Verwendung von `{baseDir}`
+### `{baseDir}` verwenden
 
-Verweisen Sie auf Dateien innerhalb des Skill-Verzeichnisses, ohne Pfade fest zu codieren — der
+Referenzieren Sie Dateien innerhalb des Skill-Verzeichnisses, ohne Pfade fest zu codieren — der
 Agent löst `{baseDir}` relativ zum eigenen Verzeichnis des Skills auf:
 
 ```markdown
@@ -131,7 +131,7 @@ Führen Sie das Hilfsskript unter `{baseDir}/scripts/run.sh` aus.
 
 ## Bedingte Aktivierung hinzufügen
 
-Beschränken Sie Ihren Skill so, dass er nur geladen wird, wenn seine Abhängigkeiten verfügbar sind:
+Schränken Sie Ihren Skill so ein, dass er nur geladen wird, wenn seine Abhängigkeiten verfügbar sind:
 
 ```markdown
 ---
@@ -142,17 +142,17 @@ metadata: { "openclaw": { "requires": { "bins": ["gemini"] }, "primaryEnv": "GEM
 ```
 
 <AccordionGroup>
-  <Accordion title="Aktivierungsoptionen">
+  <Accordion title="Optionen für die Zugriffssteuerung">
     | Schlüssel | Beschreibung |
     | --- | --- |
-    | `requires.bins` | Alle Binärdateien müssen in `PATH` vorhanden sein |
-    | `requires.anyBins` | Mindestens eine Binärdatei muss in `PATH` vorhanden sein |
+    | `requires.bins` | Alle Binärdateien müssen unter `PATH` vorhanden sein |
+    | `requires.anyBins` | Mindestens eine Binärdatei muss unter `PATH` vorhanden sein |
     | `requires.env` | Jede Umgebungsvariable muss im Prozess oder in der Konfiguration vorhanden sein |
-    | `requires.config` | Jeder Pfad in `openclaw.json` muss einen Wahrheitswert ergeben |
+    | `requires.config` | Jeder `openclaw.json`-Pfad muss einen wahren Wert ergeben |
     | `os` | Plattformfilter: `["darwin"]`, `["linux"]`, `["win32"]` |
-    | `always` | Auf `true` setzen, um alle Aktivierungsbedingungen zu überspringen und den Skill immer einzubeziehen |
+    | `always` | Auf `true` setzen, um alle Einschränkungen zu überspringen und den Skill immer einzubeziehen |
 
-    Vollständige Referenz: [Skills — Aktivierungsbedingungen](/de/tools/skills#gating).
+    Vollständige Referenz: [Skills — Zugriffssteuerung](/de/tools/skills#gating).
 
   </Accordion>
   <Accordion title="Umgebung und API-Schlüssel">
@@ -180,8 +180,8 @@ metadata: { "openclaw": { "requires": { "bins": ["gemini"] }, "primaryEnv": "GEM
 
 ## Über Skill Workshop vorschlagen
 
-Verwenden Sie für vom Agenten entworfene Skills oder wenn Sie vor der
-Aktivierung eines Skills eine Prüfung durch den Betreiber wünschen, Vorschläge im [Skill Workshop](/de/tools/skill-workshop), statt
+Verwenden Sie für vom Agenten entworfene Skills oder wenn Sie vor der Aktivierung eines Skills eine
+Prüfung durch den Betreiber wünschen, Vorschläge im [Skill Workshop](/de/tools/skill-workshop), statt
 `SKILL.md` direkt zu schreiben.
 
 ```bash
@@ -191,7 +191,7 @@ openclaw skills workshop propose-create \
   --description "Ein einfacher Skill, der eine Begrüßung ausgibt." \
   --proposal ./PROPOSAL.md
 
-# Eine Aktualisierung für einen bestehenden Skill vorschlagen
+# Eine Aktualisierung eines bestehenden Skills vorschlagen
 openclaw skills workshop propose-update hello-world \
   --proposal ./PROPOSAL.md \
   --description "Aktualisierter Begrüßungs-Skill"
@@ -206,7 +206,7 @@ openclaw skills workshop propose-create \
   --proposal-dir ./hello-world-proposal/
 ```
 
-Das Verzeichnis muss in seinem Stammverzeichnis eine Datei namens `PROPOSAL.md` enthalten. Unterstützende Dateien gehören in
+Das Verzeichnis muss `PROPOSAL.md` in seinem Stammverzeichnis enthalten. Unterstützende Dateien gehören unter
 `assets/`, `examples/`, `references/`, `scripts/` oder `templates/`.
 
 Nach der Prüfung:
@@ -221,11 +221,11 @@ Den vollständigen Lebenszyklus eines Vorschlags finden Sie unter [Skill Worksho
 ## Auf ClawHub veröffentlichen
 
 <Steps>
-  <Step title="Stellen Sie sicher, dass Ihre SKILL.md vollständig ist">
-    Vergewissern Sie sich, dass `name`, `description` und alle Aktivierungsfelder unter `metadata.openclaw`
+  <Step title="Vollständigkeit Ihrer SKILL.md sicherstellen">
+    Stellen Sie sicher, dass `name`, `description` und alle `metadata.openclaw`-Zugriffssteuerungsfelder
     festgelegt sind. Fügen Sie eine `homepage`-URL hinzu, wenn Sie über eine Projektseite verfügen.
   </Step>
-  <Step title="Installieren Sie die eigenständige ClawHub CLI und melden Sie sich an">
+  <Step title="Eigenständige ClawHub CLI installieren und anmelden">
     ```bash
     npm i -g clawhub
     clawhub login
@@ -237,41 +237,41 @@ Den vollständigen Lebenszyklus eines Vorschlags finden Sie unter [Skill Worksho
     ```
 
     Fügen Sie `--version <version>` oder `--owner <owner>` hinzu, um die abgeleitete
-    Version zu überschreiben oder unter einem bestimmten Eigentümer zu veröffentlichen. Unter
-    [ClawHub — Veröffentlichung](/de/clawhub/publishing) und
-    [ClawHub CLI](/de/clawhub/cli) finden Sie den vollständigen Ablauf, die Zuordnung zu Eigentümern und weitere
-    Wartungsbefehle (`clawhub sync`, `clawhub skill rename`, ...).
+    Version zu überschreiben oder unter einem bestimmten Eigentümer zu veröffentlichen. Den vollständigen
+    Ablauf, die Eingrenzung nach Eigentümer und weitere Wartungsbefehle (`clawhub sync`, `clawhub skill rename`, ...)
+    finden Sie unter [ClawHub — Veröffentlichen](/de/clawhub/publishing) und
+    [ClawHub CLI](/de/clawhub/cli).
 
   </Step>
 </Steps>
 
-## Bewährte Methoden
+## Bewährte Vorgehensweisen
 
 <Tip>
-  - **Fassen Sie sich kurz** — weisen Sie das Modell an, *was* es tun soll, nicht, wie es eine KI sein soll.
+  - **Fassen Sie sich kurz** — weisen Sie das Modell an, *was* es tun soll, nicht wie es eine KI sein soll.
   - **Sicherheit zuerst** — wenn Ihr Skill `exec` verwendet, stellen Sie sicher, dass Prompts keine
     beliebige Befehlsinjektion aus nicht vertrauenswürdigen Eingaben ermöglichen.
-  - **Lokal testen** — verwenden Sie vor dem Teilen `openclaw agent --message "..."`.
-  - **ClawHub verwenden** — durchsuchen Sie die Community-Skills unter [clawhub.ai](https://clawhub.ai),
-    bevor Sie etwas von Grund auf neu entwickeln.
+  - **Lokal testen** — verwenden Sie vor der Weitergabe `openclaw agent --message "..."`.
+  - **ClawHub verwenden** — durchsuchen Sie vor einer Neuentwicklung die Community-Skills auf [clawhub.ai](https://clawhub.ai).
+
 </Tip>
 
 ## Verwandte Themen
 
 <CardGroup cols={2}>
   <Card title="Skills-Referenz" href="/de/tools/skills" icon="puzzle-piece">
-    Ladereihenfolge, Aktivierungsbedingungen, Zulassungslisten und das SKILL.md-Format.
+    Ladereihenfolge, Zugriffssteuerung, Zulassungslisten und SKILL.md-Format.
   </Card>
   <Card title="Skill Workshop" href="/de/tools/skill-workshop" icon="flask">
     Vorschlagswarteschlange für vom Agenten entworfene Skills.
   </Card>
   <Card title="Skills-Konfiguration" href="/de/tools/skills-config" icon="gear">
-    Vollständiges Konfigurationsschema für `skills.*`.
+    Vollständiges `skills.*`-Konfigurationsschema.
   </Card>
-  <Card title="ClawHub" href="/clawhub" icon="cloud">
-    Durchsuchen und veröffentlichen Sie Skills im öffentlichen Register.
+  <Card title="ClawHub" href="/de/clawhub" icon="cloud">
+    Skills im öffentlichen Verzeichnis durchsuchen und veröffentlichen.
   </Card>
   <Card title="Plugins entwickeln" href="/de/plugins/building-plugins" icon="plug">
-    Plugins können Skills zusammen mit den Tools bereitstellen, die sie dokumentieren.
+    Plugins können Skills zusammen mit den Werkzeugen bereitstellen, die darin dokumentiert werden.
   </Card>
 </CardGroup>

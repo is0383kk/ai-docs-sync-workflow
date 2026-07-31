@@ -1,106 +1,89 @@
 ---
 read_when:
-    - आप सादी MEMORY.md टिप्पणियों से आगे स्थायी ज्ञान चाहते हैं
-    - आप बंडल किए गए memory-wiki plugin को कॉन्फ़िगर कर रहे हैं
-    - आप wiki_search, wiki_get, या ब्रिज मोड को समझना चाहते हैं
-summary: 'memory-wiki: स्रोत-साक्ष्य, दावों, डैशबोर्ड और ब्रिज मोड के साथ संकलित ज्ञान भंडार'
-title: मेमोरी विकि
+    - आप सामान्य MEMORY.md नोट्स से परे स्थायी ज्ञान चाहते हैं
+    - आप बंडल किए गए memory-wiki Plugin को कॉन्फ़िगर कर रहे हैं
+    - एक Gateway में एजेंटों के लिए आपको अलग-अलग विकी वॉल्ट चाहिए
+    - आप wiki_search, wiki_get, या bridge मोड को समझना चाहते हैं
+summary: 'memory-wiki: स्रोत-उत्पत्ति, दावों, डैशबोर्ड और ब्रिज मोड के साथ संकलित ज्ञान भंडार'
+title: मेमोरी विकी
 x-i18n:
-    generated_at: "2026-06-28T23:38:12Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:37:05Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 91512fbab8bfa87d3be29a75c217f99dbae11d9d7065fcc5ae9aa2c51847ec42
+    source_hash: fda3c801ae39b529a3f1fcaf8791b6dcb1d8116ba2e73e99cca62dca6c64140a
     source_path: plugins/memory-wiki.md
     workflow: 16
 ---
 
-`memory-wiki` एक bundled Plugin है, जो टिकाऊ मेमरी को संकलित ज्ञान वॉल्ट में बदलता है।
+`memory-wiki` एक बंडल किया गया Plugin है, जो टिकाऊ ज्ञान को एक
+नेविगेट करने योग्य विकि में संकलित करता है: निर्धारक पृष्ठ, साक्ष्य सहित संरचित दावे,
+उद्गम, डैशबोर्ड और मशीन-पठनीय सार-संग्रह।
 
-यह Active Memory Plugin को **प्रतिस्थापित नहीं** करता। Active Memory Plugin अब भी recall, promotion, indexing, और dreaming का स्वामी है। `memory-wiki` इसके साथ रहता है और टिकाऊ ज्ञान को deterministic पेजों, संरचित दावों, provenance, dashboards, और मशीन-पठनीय digests वाली नेविगेट की जा सकने वाली wiki में संकलित करता है।
+यह Active Memory Plugin को प्रतिस्थापित नहीं करता। पुनःस्मरण, उन्नयन, अनुक्रमण और
+Dreaming का स्वामित्व कॉन्फ़िगर किए गए मेमोरी बैकएंड
+(`memory-core`, QMD, Honcho आदि) के पास ही रहता है। `memory-wiki` उसके साथ रहता है और
+ज्ञान को एक अनुरक्षित विकि परत में संकलित करता है।
 
-इसे तब उपयोग करें जब आप चाहते हैं कि मेमरी Markdown फ़ाइलों के ढेर जैसी कम और एक मेंटेन की गई ज्ञान परत जैसी अधिक व्यवहार करे।
+इसके CLI, टूल या रनटाइम एकीकरण का उपयोग करने से पहले Plugin सक्षम करें:
 
-## यह क्या जोड़ता है
+```bash
+openclaw plugins enable memory-wiki
+openclaw gateway restart
+```
 
-- deterministic पेज layout वाला समर्पित wiki वॉल्ट
-- केवल गद्य नहीं, बल्कि संरचित claim और evidence metadata
-- पेज-स्तरीय provenance, confidence, contradictions, और open questions
-- agent/runtime उपभोक्ताओं के लिए compiled digests
-- wiki-native search/get/apply/lint tools
-- Open Knowledge Format imports को compiled wiki concepts में बदलना
-- वैकल्पिक bridge mode, जो Active Memory Plugin से public artifacts import करता है
-- वैकल्पिक Obsidian-friendly render mode और CLI integration
-
-## यह मेमरी के साथ कैसे फिट बैठता है
-
-विभाजन को इस तरह सोचें:
-
-| परत                                                    | स्वामित्व                                                                                  |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| Active Memory Plugin (`memory-core`, QMD, Honcho, etc.) | Recall, semantic search, promotion, dreaming, memory runtime                               |
-| `memory-wiki`                                          | Compiled wiki pages, provenance-rich syntheses, dashboards, wiki-specific search/get/apply |
-
-यदि Active Memory Plugin साझा recall artifacts expose करता है, तो OpenClaw `memory_search corpus=all` के साथ दोनों परतों को एक ही pass में search कर सकता है।
-
-जब आपको wiki-specific ranking, provenance, या direct page access चाहिए, तो इसके बजाय wiki-native tools उपयोग करें।
-
-## अनुशंसित hybrid pattern
-
-local-first setups के लिए एक मजबूत default है:
-
-- recall और broad semantic search के लिए Active Memory backend के रूप में QMD
-- टिकाऊ synthesized knowledge pages के लिए `bridge` mode में `memory-wiki`
-
-यह विभाजन अच्छा काम करता है क्योंकि हर परत focused रहती है:
-
-- QMD raw notes, session exports, और अतिरिक्त collections को searchable रखता है
-- `memory-wiki` stable entities, claims, dashboards, और source pages compile करता है
+| परत                 | स्वामित्व                                                                           |
+| -------------------- | --------------------------------------------------------------------------------- |
+| Active Memory Plugin | पुनःस्मरण, सिमेंटिक खोज, उन्नयन, Dreaming, मेमोरी रनटाइम                           |
+| `memory-wiki`        | संकलित विकि पृष्ठ, उद्गम-समृद्ध संश्लेषण, डैशबोर्ड, विकि खोज/प्राप्ति/लागू करना |
 
 व्यावहारिक नियम:
 
-- जब आप मेमरी में एक broad recall pass चाहते हों, तो `memory_search` उपयोग करें
-- जब आप provenance-aware wiki results चाहते हों, तो `wiki_search` और `wiki_get` उपयोग करें
-- जब आप shared search को दोनों परतों तक फैलाना चाहते हों, तो `memory_search corpus=all` उपयोग करें
+- कॉन्फ़िगर किए गए सभी कॉर्पस में एक व्यापक पुनःस्मरण चरण के लिए `memory_search`
+- जब विकि-विशिष्ट रैंकिंग, उद्गम या पृष्ठ-स्तरीय विश्वास संरचना चाहिए, तब `wiki_search` / `wiki_get`
+- एक कॉल में दोनों परतों को समाहित करने के लिए `memory_search corpus=all`, जब Active Memory Plugin कॉर्पस चयन का समर्थन करता हो
 
-यदि bridge mode zero exported artifacts report करता है, तो Active Memory Plugin अभी public bridge inputs expose नहीं कर रहा है। पहले `openclaw wiki doctor` चलाएँ, फिर पुष्टि करें कि Active Memory Plugin public artifacts support करता है।
+एक सामान्य लोकल-फ़र्स्ट सेटअप: पुनःस्मरण के लिए Active Memory बैकएंड के रूप में QMD और
+टिकाऊ संश्लेषित पृष्ठों के लिए `bridge` मोड में
+`memory-wiki`। [कॉन्फ़िगरेशन](#configuration) के अंतर्गत QMD + ब्रिज मोड उदाहरण देखें।
 
-जब bridge mode active हो और `bridge.readMemoryArtifacts` enabled हो, तो `openclaw wiki status`, `openclaw wiki doctor`, और `openclaw wiki bridge
-import` running Gateway के माध्यम से पढ़ते हैं। इससे CLI bridge checks runtime memory Plugin context के साथ aligned रहते हैं। यदि bridge disabled है या artifact reads बंद हैं, तो वे commands अपना local/offline behavior बनाए रखते हैं।
+यदि ब्रिज मोड शून्य निर्यातित आर्टिफ़ैक्ट रिपोर्ट करता है, तो Active Memory Plugin
+वर्तमान में सार्वजनिक ब्रिज इनपुट उजागर नहीं कर रहा है। पहले `openclaw wiki doctor` चलाएँ,
+फिर पुष्टि करें कि Active Memory Plugin सार्वजनिक आर्टिफ़ैक्ट का समर्थन करता है।
 
-## Vault modes
+## वॉल्ट मोड
 
-`memory-wiki` तीन vault modes support करता है:
+- `isolated` (डिफ़ॉल्ट): अपना वॉल्ट, अपने स्रोत, Active Memory Plugin पर कोई निर्भरता नहीं। स्व-निहित, चयनित ज्ञान भंडार के लिए इसका उपयोग करें।
+- `bridge`: सार्वजनिक Plugin SDK सीमाओं के माध्यम से Active Memory Plugin से सार्वजनिक मेमोरी आर्टिफ़ैक्ट और इवेंट लॉग पढ़ता है। निजी Plugin आंतरिक संरचनाओं तक पहुँचे बिना मेमोरी Plugin के निर्यातित आर्टिफ़ैक्ट संकलित करने के लिए इसका उपयोग करें।
+- `unsafe-local`: स्थानीय निजी पथों के लिए स्पष्ट समान-मशीन निकास मार्ग। जानबूझकर प्रयोगात्मक और गैर-पोर्टेबल; इसका उपयोग केवल तभी करें जब आप विश्वास सीमा समझते हों और विशेष रूप से ऐसी स्थानीय फ़ाइल-सिस्टम पहुँच चाहिए जिसे ब्रिज मोड प्रदान नहीं कर सकता।
 
-### `isolated`
+वॉल्ट मोड और वॉल्ट कार्यक्षेत्र अलग-अलग विकल्प हैं:
 
-अपना vault, अपने sources, `memory-core` पर कोई dependency नहीं।
+- `vaultMode` चुनता है कि विकि इनपुट कहाँ से आते हैं।
+- `vault.scope` चुनता है कि सभी एजेंट एक वॉल्ट का उपयोग करें या प्रत्येक एजेंट को एक चाइल्ड वॉल्ट मिले।
 
-इसे तब उपयोग करें जब आप चाहते हैं कि wiki अपना curated knowledge store हो।
+`vault.scope: "global"` डिफ़ॉल्ट है और मौजूदा एकल-वॉल्ट
+व्यवहार को बनाए रखता है। जब एजेंटों को विकि पृष्ठ, संकलित सार-संग्रह, खोज परिणाम या लेखन
+साझा नहीं करने चाहिए, तब `isolated` या `bridge` मोड के साथ `vault.scope: "agent"` का उपयोग करें।
+एजेंट कार्यक्षेत्र को `unsafe-local` मोड के साथ संयोजित नहीं किया जा सकता, क्योंकि वे कॉन्फ़िगर किए गए
+निजी पथ एजेंट-स्वामित्व वाले इनपुट नहीं हैं। कॉन्फ़िगरेशन सत्यापन इस
+संयोजन को अस्वीकार करता है।
 
-### `bridge`
+ब्रिज मोड, `bridge.*` कॉन्फ़िगरेशन टॉगल के अनुसार, इन्हें अनुक्रमित कर सकता है:
 
-Public Plugin SDK seams के माध्यम से Active Memory Plugin से public memory artifacts और memory events पढ़ता है।
+- निर्यातित मेमोरी आर्टिफ़ैक्ट (`indexMemoryRoot`)
+- दैनिक नोट्स (`indexDailyNotes`)
+- Dreaming रिपोर्ट (`indexDreamReports`)
+- मेमोरी इवेंट लॉग (`followMemoryEvents`)
 
-इसे तब उपयोग करें जब आप चाहते हैं कि wiki memory Plugin के exported artifacts को compile और organize करे, private Plugin internals में पहुँचे बिना।
+जब ब्रिज मोड सक्रिय हो और `bridge.readMemoryArtifacts` सक्षम हो,
+`openclaw wiki status`, `openclaw wiki doctor` और `openclaw wiki bridge
+import` चालू Gateway से होकर रूट होते हैं, ताकि उन्हें एजेंट/रनटाइम मेमोरी के समान Active Memory
+Plugin संदर्भ दिखाई दे। यदि ब्रिज अक्षम हो या आर्टिफ़ैक्ट
+पठन बंद हो, तो ये कमांड स्थानीय/ऑफ़लाइन व्यवहार बनाए रखते हैं।
 
-Bridge mode इन्हें index कर सकता है:
-
-- exported memory artifacts
-- dream reports
-- daily notes
-- memory root files
-- memory event logs
-
-### `unsafe-local`
-
-local private paths के लिए explicit same-machine escape hatch।
-
-यह mode जानबूझकर experimental और non-portable है। इसे केवल तब उपयोग करें जब आप trust boundary समझते हों और खास तौर पर local filesystem access की जरूरत हो जो bridge mode नहीं दे सकता।
-
-## Vault layout
-
-Plugin vault को इस तरह initialize करता है:
+## वॉल्ट लेआउट
 
 ```text
 <vault>/
@@ -118,122 +101,105 @@ Plugin vault को इस तरह initialize करता है:
   .openclaw-wiki/
 ```
 
-Managed content generated blocks के भीतर रहता है। Human note blocks सुरक्षित रखे जाते हैं।
+प्रबंधित सामग्री जनरेट किए गए ब्लॉक के भीतर रहती है; मानवीय नोट ब्लॉक
+पुनर्जनन के दौरान संरक्षित रहते हैं।
 
-मुख्य page groups हैं:
+- `sources/`: आयातित अपरिष्कृत सामग्री और ब्रिज/असुरक्षित-स्थानीय-समर्थित पृष्ठ
+- `entities/`: टिकाऊ वस्तुएँ, लोग, प्रणालियाँ, परियोजनाएँ, ऑब्जेक्ट
+- `concepts/`: विचार, अमूर्तताएँ, पैटर्न, नीतियाँ (OKF आयातों का गंतव्य भी)
+- `syntheses/`: संकलित सारांश और अनुरक्षित समेकित विवरण
+- `reports/`: जनरेट किए गए डैशबोर्ड
 
-- imported raw material और bridge-backed pages के लिए `sources/`
-- टिकाऊ चीज़ों, लोगों, systems, projects, और objects के लिए `entities/`
-- ideas, abstractions, patterns, और policies के लिए `concepts/`
-- compiled summaries और maintained rollups के लिए `syntheses/`
-- generated dashboards के लिए `reports/`
-
-## Open Knowledge Format imports
-
-`memory-wiki` unpacked Open Knowledge Format bundles को इससे import कर सकता है:
+## Open Knowledge Format आयात
 
 ```bash
 openclaw wiki okf import ./bundles/ga4
 ```
 
-यह सबसे साफ़ fit है जब data catalog, documentation crawler, या enrichment agent पहले से OKF produce करता है: OKF को portable exchange artifact के रूप में रखें, फिर `memory-wiki` को उसे OpenClaw-native concept pages और compiled digests में बदलने दें।
+अनपैक किए गए Open Knowledge Format बंडल को विकि अवधारणा पृष्ठों में आयात करें। यह तब
+उपयुक्त है जब कोई डेटा कैटलॉग, दस्तावेज़ीकरण क्रॉलर या संवर्धन एजेंट पहले से
+OKF उत्पन्न करता हो: OKF को पोर्टेबल विनिमय आर्टिफ़ैक्ट के रूप में रखें और `memory-wiki` को
+उसे OpenClaw-मूल अवधारणा पृष्ठों और संकलित सार-संग्रहों में बदलने दें।
 
-Importer OKF v0.1 shape follow करता है:
+- गैर-आरक्षित `.md` फ़ाइलें अवधारणा दस्तावेज़ हैं
+- प्रत्येक आयातित अवधारणा के लिए गैर-रिक्त `type` फ्रंटमैटर फ़ील्ड आवश्यक है; अनुपस्थित `type` एक `missing-type` चेतावनी उत्पन्न करता है और फ़ाइल छोड़ दी जाती है
+- अज्ञात `type` मान सामान्य अवधारणाओं के रूप में स्वीकार किए जाते हैं
+- `index.md` और `log.md` आरक्षित हैं और कभी अवधारणाओं के रूप में आयात नहीं किए जाते
+- टूटे हुए या बाहरी Markdown लिंक अपरिवर्तित छोड़े जाते हैं
 
-- non-reserved `.md` files concept documents होती हैं
-- हर imported concept को non-empty `type` frontmatter field चाहिए
-- unknown OKF `type` values स्वीकार की जाती हैं
-- reserved `index.md` और `log.md` files concepts के रूप में import नहीं की जातीं
-- broken या external markdown links सुरक्षित रखे जाते हैं
+आयातित पृष्ठ `concepts/` के अंतर्गत समतल हो जाते हैं, ताकि मौजूदा संकलन, खोज, प्राप्ति और
+डैशबोर्ड प्रवाह उन्हें दूसरे विकि वृक्ष के बिना देख सकें। प्रत्येक पृष्ठ मूल
+OKF अवधारणा ID, स्रोत पथ, `type`, `resource`, `tags`, टाइमस्टैम्प और
+पूर्ण उत्पादक फ्रंटमैटर बनाए रखता है। आंतरिक OKF लिंक जनरेट किए गए
+विकि अवधारणा पृष्ठों के लिए पुनर्लिखित होते हैं और `kind: okf-link` सहित संरचित
+`relationships` प्रविष्टियाँ भी उत्सर्जित करते हैं।
 
-Imported concept pages को `concepts/` के अंतर्गत flatten किया जाता है, ताकि existing compile, search, get, dashboard, और prompt-digest paths उन्हें दूसरी wiki tree जोड़े बिना देख सकें। हर page original OKF concept ID, source path, `type`, `resource`, `tags`, timestamp, और full producer frontmatter रखता है। Internal OKF links generated wiki concept pages पर rewrite किए जाते हैं और `kind: okf-link` के साथ structured `relationships` entries के रूप में भी emit किए जाते हैं।
+## संरचित दावे और साक्ष्य
 
-## Structured claims और evidence
+पृष्ठों में केवल मुक्त-रूप पाठ नहीं, बल्कि संरचित `claims` फ्रंटमैटर होता है। प्रत्येक
+दावे में `id`, `text`, `status`, `confidence`, `evidence[]` और
+`updatedAt` शामिल हो सकते हैं। प्रत्येक साक्ष्य प्रविष्टि में `kind`, `sourceId`, `path`,
+`lines`, `weight`, `confidence`, `privacyTier`, `note` और `updatedAt` शामिल हो सकते हैं।
 
-Pages structured `claims` frontmatter रख सकते हैं, सिर्फ freeform text नहीं।
+इससे विकि निष्क्रिय नोट संग्रह के बजाय विश्वास परत की तरह व्यवहार करता है।
+दावों को ट्रैक, स्कोर, विवादित और स्रोतों तक वापस ले जाकर समाधान किया जा सकता है।
 
-हर claim में ये शामिल हो सकते हैं:
+## एजेंट-अभिमुख एंटिटी मेटाडेटा
 
-- `id`
-- `text`
-- `status`
-- `confidence`
-- `evidence[]`
-- `updatedAt`
+एंटिटी पृष्ठों में लोग, टीमें, प्रणालियाँ, परियोजनाएँ या किसी अन्य एंटिटी प्रकार के लिए
+उपयोग योग्य सामान्य रूटिंग मेटाडेटा होता है:
 
-Evidence entries में ये शामिल हो सकते हैं:
+- `entityType`: उदाहरण के लिए `person`, `team`, `system`, `project`
+- `canonicalId`: उपनामों और आयातों में स्थिर पहचान कुंजी
+- `aliases`: नाम, हैंडल या लेबल जो उसी पृष्ठ पर रिज़ॉल्व होते हैं
+- `privacyTier`: मुक्त-रूप स्ट्रिंग; `public` को समीक्षा-अनावश्यक माना जाता है, किसी अन्य मान (उदाहरण के लिए `local-private`, `sensitive`, `confirm-before-use`) को `reports/privacy-review.md` में चिह्नित किया जाता है
+- `bestUsedFor` / `notEnoughFor`: संक्षिप्त रूटिंग संकेत
+- `lastRefreshedAt`: स्रोत-रीफ़्रेश टाइमस्टैम्प, पृष्ठ संपादन समय से अलग
+- `personCard`: वैकल्पिक व्यक्ति-विशिष्ट रूटिंग कार्ड (हैंडल, सोशल, ईमेल, समयक्षेत्र, लेन, किसके लिए पूछें, किसके लिए न पूछें, विश्वसनीयता, गोपनीयता स्तर)
+- `relationships`: संबंधित पृष्ठों के लिए टाइप किए गए किनारे (लक्ष्य, प्रकार, भार, विश्वसनीयता, साक्ष्य प्रकार, गोपनीयता स्तर, नोट)
 
-- `kind`
-- `sourceId`
-- `path`
-- `lines`
-- `weight`
-- `confidence`
-- `privacyTier`
-- `note`
-- `updatedAt`
+लोगों की विकि के लिए, `reports/person-agent-directory.md` से शुरू करें, फिर संपर्क विवरण या अनुमानित
+तथ्यों का उपयोग करने से पहले `wiki_get` से व्यक्ति पृष्ठ खोलें।
 
-यही wiki को passive note dump की बजाय belief layer जैसा अधिक बनाता है। Claims को track, score, contest, और sources तक resolve किया जा सकता है।
-
-## Agent-facing entity metadata
-
-Entity pages agent use के लिए routing metadata भी रख सकते हैं। यह generic frontmatter है, इसलिए यह people, teams, systems, projects, या किसी भी other entity type के लिए काम करता है।
-
-Common fields में शामिल हैं:
-
-- `entityType`: उदाहरण के लिए `person`, `team`, `system`, या `project`
-- `canonicalId`: aliases और imports में उपयोग की जाने वाली stable identity key
-- `aliases`: names, handles, या labels जिन्हें उसी page पर resolve होना चाहिए
-- `privacyTier`: `public`, `local-private`, `sensitive`, या `confirm-before-use`
-- `bestUsedFor` / `notEnoughFor`: compact routing hints
-- `lastRefreshedAt`: page edit time से अलग source-refresh timestamp
-- `personCard`: optional person-specific routing card जिसमें handles, socials,
-  emails, timezone, lane, ask-for, avoid-asking-for, confidence, और privacy हों
-- `relationships`: target, kind, weight,
-  confidence, evidence kind, privacy tier, और note के साथ related pages तक typed edges
-
-people wiki के लिए, agent को आमतौर पर `reports/person-agent-directory.md` से शुरू करना चाहिए, फिर contact details या inferred facts उपयोग करने से पहले `wiki_get` के साथ person page खोलना चाहिए।
-
-उदाहरण:
-
+<Accordion title="एंटिटी पृष्ठ का उदाहरण">
 ```yaml
 pageType: entity
 entityType: person
-id: entity.brad-groux
-canonicalId: maintainer.brad-groux
+id: entity.example-person
+canonicalId: maintainer.example-person
 aliases:
-  - Brad
-  - bgroux
+  - Alex
+  - example-handle
 privacyTier: local-private
 bestUsedFor:
-  - Microsoft Teams and Azure routing
+  - उदाहरण पारिस्थितिकी तंत्र रूटिंग
 notEnoughFor:
-  - legal approval
+  - कानूनी अनुमोदन
 lastRefreshedAt: "2026-04-29T00:00:00.000Z"
 personCard:
   handles:
-    - "@bgroux"
+    - "@example-handle"
   socials:
-    - "https://x.example/bgroux"
+    - "https://x.example/example-handle"
   emails:
-    - brad@example.com
+    - alex@example.com
   timezone: America/Chicago
-  lane: Microsoft ecosystem
+  lane: उदाहरण पारिस्थितिकी तंत्र
   askFor:
-    - Teams rollout questions
+    - उदाहरण रोलआउट प्रश्न
   avoidAskingFor:
-    - unrelated billing decisions
+    - असंबंधित बिलिंग निर्णय
   confidence: 0.8
   privacyTier: confirm-before-use
 relationships:
-  - targetId: entity.alice
-    targetTitle: Alice
+  - targetId: entity.other-person
+    targetTitle: अन्य व्यक्ति
     kind: collaborates-with
     confidence: 0.7
     evidenceKind: discrawl-stat
 claims:
-  - id: claim.brad.teams
-    text: Brad is useful for Microsoft Teams routing.
+  - id: claim.example.routing
+    text: उदाहरण-पारिस्थितिकी-तंत्र रूटिंग के लिए Alex उपयोगी है।
     status: supported
     confidence: 0.9
     evidence:
@@ -241,137 +207,102 @@ claims:
         sourceId: source.maintainers
         privacyTier: local-private
 ```
+</Accordion>
 
-## Compile pipeline
+## संकलन पाइपलाइन
 
-Compile step wiki pages पढ़ता है, summaries normalize करता है, और stable machine-facing artifacts यहाँ emit करता है:
+संकलन विकि पृष्ठों को पढ़ता है, सारांशों को सामान्यीकृत करता है और OpenClaw की साझा SQLite
+Plugin स्थिति में मशीन-अभिमुख स्नैपशॉट बनाए रखता है। रनटाइम कोड एसिंक्रोनस प्रॉम्प्ट तैयारी के दौरान
+SQLite लोड करने के लिए जीवनचक्र-स्वामित्व वाले स्वामी स्नैपशॉट का उपयोग करता है;
+सिंक्रोनस प्रॉम्प्ट संयोजन कभी Markdown को स्क्रैप नहीं करता या कैश फ़ाइलें नहीं पढ़ता।
+संकलित आउटपुट खोज/प्राप्ति के लिए प्रथम-चरण विकि अनुक्रमण, दावे की ID से
+स्वामी पृष्ठ तक लुकअप, संक्षिप्त प्रॉम्प्ट पूरक और रिपोर्ट
+जनरेशन को भी संचालित करता है।
 
-- `.openclaw-wiki/cache/agent-digest.json`
-- `.openclaw-wiki/cache/claims.jsonl`
+स्रोत संपादन और वॉल्ट पुनर्स्थापन अगले
+संकलन के बाद ही मशीन-अभिमुख बनते हैं। Plugin जीवनचक्र को पुनः आरंभ या रीफ़्रेश करना वॉल्ट के
+कारणात्मक रूप से श्रृंखलाबद्ध संकलन प्रकाशन की SQLite से तुलना करता है और
+अधिक नए, रोल-बैक किए गए स्टेट के स्नैपशॉट को अस्वीकार करता है। रोलबैक से पहले शुरू हुआ कंपाइलर
+पुनर्स्थापित पूर्ववर्ती के विरुद्ध प्रकाशित नहीं कर सकता। प्रॉम्प्ट तैयारी
+वॉल्ट को पोल नहीं करती या फ़ाइल वॉचर स्थापित नहीं करती।
+रोलबैक क्वारंटीन के बाद, चालू प्रक्रिया में एक संकलन स्वामी को
+तुरंत साफ़ कर देता है; अलग कंपाइलर प्रक्रिया के लिए Plugin जीवनचक्र रीफ़्रेश आवश्यक है, ताकि
+डेमन नए टिकाऊ प्रकाशन की पुष्टि कर सके।
+संकलित कैश पुनर्निर्माण योग्य हैं: प्रकाशन युगों से पहले की कैश पंक्तियों को
+मिस माना जाता है और अगले संकलन द्वारा प्रतिस्थापित किया जाता है; उन्हें माइग्रेट नहीं किया जाता।
 
-ये digests इसलिए मौजूद हैं ताकि agents और runtime code को Markdown pages scrape न करने पड़ें।
+## डैशबोर्ड और स्वास्थ्य रिपोर्ट
 
-Compiled output यह भी power करता है:
+जब `render.createDashboards` सक्षम हो, संकलन
+`reports/` के अंतर्गत डैशबोर्ड बनाए रखता है:
 
-- search/get flows के लिए first-pass wiki indexing
-- owning pages तक claim-id lookup
-- compact prompt supplements
-- report/dashboard generation
+| रिपोर्ट                              | ट्रैक करता है                                       |
+| ----------------------------------- | -------------------------------------------------- |
+| `reports/open-questions.md`         | अनसुलझे प्रश्नों वाले पृष्ठ                         |
+| `reports/contradictions.md`         | विरोधाभासी नोट समूह                                 |
+| `reports/low-confidence.md`         | कम-विश्वसनीयता वाले पृष्ठ और दावे                   |
+| `reports/claim-health.md`           | संरचित साक्ष्य से रहित दावे                         |
+| `reports/stale-pages.md`            | पुराने या अज्ञात नवीनता स्तर                        |
+| `reports/person-agent-directory.md` | व्यक्ति/एंटिटी रूटिंग कार्ड                         |
+| `reports/relationship-graph.md`     | संरचित संबंध किनारे                                 |
+| `reports/provenance-coverage.md`    | साक्ष्य वर्ग कवरेज                                   |
+| `reports/privacy-review.md`         | उपयोग से पहले समीक्षा आवश्यक करने वाले गैर-सार्वजनिक गोपनीयता स्तर |
 
-## Dashboards और health reports
+## खोज और पुनर्प्राप्ति
 
-जब `render.createDashboards` enabled हो, compile `reports/` के अंतर्गत dashboards maintain करता है।
+दो खोज बैकएंड:
 
-Built-in reports में शामिल हैं:
+- `shared`: उपलब्ध होने पर साझा मेमोरी खोज प्रवाह का उपयोग करें
+- `local`: विकि में स्थानीय रूप से खोजें
 
-- `reports/open-questions.md`
-- `reports/contradictions.md`
-- `reports/low-confidence.md`
-- `reports/claim-health.md`
-- `reports/stale-pages.md`
-- `reports/person-agent-directory.md`
-- `reports/relationship-graph.md`
-- `reports/provenance-coverage.md`
-- `reports/privacy-review.md`
+तीन कॉर्पस: `wiki`, `memory`, `all`।
 
-ये reports इन जैसी चीज़ें track करती हैं:
+- `wiki_search` / `wiki_get` संभव होने पर प्रथम चरण के रूप में संकलित सार-संग्रह का उपयोग करते हैं
+- दावा ID वापस स्वामी पृष्ठ पर रिज़ॉल्व होती हैं
+- विवादित/पुराने/नए दावे रैंकिंग को प्रभावित करते हैं
+- उद्गम लेबल परिणामों में बने रहते हैं
 
-- contradiction note clusters
-- competing claim clusters
-- structured evidence missing वाले claims
-- low-confidence pages और claims
-- stale या unknown freshness
-- unresolved questions वाले pages
-- person/entity routing cards
-- structured relationship edges
-- evidence class coverage
-- non-public privacy tiers जिन्हें use से पहले review चाहिए
+खोज मोड (`--mode` / टूल `mode` पैरामीटर):
 
-## Search और retrieval
+| मोड              | संवर्धन                                                         |
+| ----------------- | -------------------------------------------------------------- |
+| `auto`            | संतुलित डिफ़ॉल्ट                                               |
+| `find-person`     | व्यक्ति-जैसी इकाइयाँ, उपनाम, हैंडल, सोशल प्रोफ़ाइल, कैनोनिकल ID |
+| `route-question`  | एजेंट कार्ड, किससे पूछें/किसके लिए सर्वोत्तम संकेत, संबंध संदर्भ |
+| `source-evidence` | स्रोत पृष्ठ और संरचित साक्ष्य मेटाडेटा                  |
+| `raw-claim`       | मेल खाते संरचित दावे; दावा/साक्ष्य मेटाडेटा लौटाता है    |
 
-`memory-wiki` दो search backends support करता है:
+जब कोई परिणाम किसी संरचित दावे से मेल खाता है, तो `wiki_search` अपने विवरण पेलोड में
+`matchedClaimId`, `matchedClaimStatus`, `matchedClaimConfidence`,
+`evidenceKinds`, और `evidenceSourceIds` लौटाता है। उपलब्ध होने पर टेक्स्ट आउटपुट में
+संक्षिप्त `Claim:` और `Evidence:` पंक्तियाँ शामिल होती हैं।
 
-- `shared`: उपलब्ध होने पर shared memory search flow उपयोग करें
-- `local`: wiki को locally search करें
+## एजेंट टूल
 
-यह तीन corpora भी support करता है:
+| टूल          | उद्देश्य                                                                                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `wiki_status` | वर्तमान वॉल्ट मोड और दायरा, निर्धारित एजेंट, स्वास्थ्य, Obsidian CLI की उपलब्धता                                                                               |
+| `wiki_search` | विकी पृष्ठों और कॉन्फ़िगर होने पर साझा मेमोरी कॉर्पस में खोज; व्यक्ति खोज, प्रश्न रूटिंग, स्रोत साक्ष्य या रॉ दावे की विस्तृत जाँच के लिए `mode` स्वीकार करता है |
+| `wiki_get`    | id/पथ द्वारा विकी पृष्ठ पढ़ता है; साझा खोज सक्षम होने और लुकअप विफल होने पर साझा मेमोरी कॉर्पस का उपयोग करता है                                     |
+| `wiki_apply`  | मुक्त-रूप पृष्ठ संशोधन के बिना सीमित संश्लेषण/मेटाडेटा परिवर्तन                                                                                             |
+| `wiki_lint`   | संरचनात्मक जाँच, उद्गम संबंधी अंतराल, विरोधाभास, खुले प्रश्न                                                                                            |
 
-- `wiki`
-- `memory`
-- `all`
+Plugin एक गैर-अनन्य मेमोरी कॉर्पस पूरक भी पंजीकृत करता है, ताकि सक्रिय मेमोरी
+Plugin द्वारा कॉर्पस चयन समर्थित होने पर साझा `memory_search` और `memory_get`
+विकी तक पहुँच सकें।
 
-महत्वपूर्ण behavior:
+## प्रॉम्प्ट और संदर्भ का व्यवहार
 
-- `wiki_search` और `wiki_get` संभव होने पर first pass के रूप में compiled digests उपयोग करते हैं
-- claim ids owning page तक वापस resolve हो सकते हैं
-- contested/stale/fresh claims ranking को प्रभावित करते हैं
-- provenance labels results में बच सकते हैं
-- search mode person lookup, question routing, source
-  evidence, या raw claims के लिए ranking bias कर सकता है
-
-व्यावहारिक नियम:
-
-- एक broad recall pass के लिए `memory_search corpus=all` उपयोग करें
-- जब आपको wiki-specific ranking,
-  provenance, या page-level belief structure की परवाह हो, तो `wiki_search` + `wiki_get` उपयोग करें
-
-Search modes:
-
-- `auto`: balanced default
-- `find-person`: person-like entities, aliases, handles, socials, और
-  canonical IDs को boost करें
-- `route-question`: agent cards, ask-for hints, best-used-for hints, और
-  relationship context को boost करें
-- `source-evidence`: source pages और structured evidence metadata को boost करें
-- `raw-claim`: matching structured claims को boost करें और results में claim/evidence
-  metadata लौटाएँ
-
-जब कोई result structured claim से match करता है, तो `wiki_search` अपने details payload में `matchedClaimId`, `matchedClaimStatus`, `matchedClaimConfidence`,
-`evidenceKinds`, और `evidenceSourceIds` लौटा सकता है। Text output में उपलब्ध होने पर compact `Claim:` और `Evidence:` lines भी शामिल होती हैं।
-
-## Agent tools
-
-Plugin ये tools register करता है:
-
-- `wiki_status`
-- `wiki_search`
-- `wiki_get`
-- `wiki_apply`
-- `wiki_lint`
-
-वे क्या करते हैं:
-
-- `wiki_status`: current vault mode, health, Obsidian CLI availability
-- `wiki_search`: wiki pages और, configured होने पर, shared memory corpora search करता है;
-  person lookup, question routing, source evidence, या raw
-  claim drilldown के लिए `mode` स्वीकार करता है
-- `wiki_get`: id/path से wiki page पढ़ता है या shared memory corpus पर fall back करता है
-- `wiki_apply`: freeform page surgery के बिना narrow synthesis/metadata mutations
-- `wiki_lint`: structural checks, provenance gaps, contradictions, open questions
-
-Plugin एक गैर-विशिष्ट मेमरी कॉर्पस सप्लीमेंट भी रजिस्टर करता है, ताकि साझा
-`memory_search` और `memory_get` wiki तक पहुंच सकें जब सक्रिय मेमरी
-Plugin कॉर्पस चयन का समर्थन करता हो।
-
-## प्रॉम्प्ट और संदर्भ व्यवहार
-
-जब `context.includeCompiledDigestPrompt` सक्षम होता है, मेमरी प्रॉम्प्ट सेक्शन
-`agent-digest.json` से एक संक्षिप्त कम्पाइल्ड स्नैपशॉट जोड़ते हैं।
-
-वह स्नैपशॉट जानबूझकर छोटा और उच्च-संकेत वाला है:
-
-- केवल शीर्ष पेज
-- केवल शीर्ष दावे
-- विरोधाभास संख्या
-- प्रश्न संख्या
-- विश्वास/ताजगी क्वालिफायर
-
-यह ऑप्ट-इन है क्योंकि यह प्रॉम्प्ट आकार बदलता है और मुख्य रूप से उन संदर्भ
-इंजनों या पुराने प्रॉम्प्ट असेंबली के लिए उपयोगी है जो स्पष्ट रूप से मेमरी सप्लीमेंट का उपयोग करते हैं।
+जब `context.includeCompiledDigestPrompt` सक्षम होता है, तो मेमोरी प्रॉम्प्ट अनुभाग
+Plugin स्थिति से एक संक्षिप्त संकलित स्नैपशॉट जोड़ते हैं: केवल शीर्ष पृष्ठ,
+केवल शीर्ष दावे, विरोधाभासों की संख्या, प्रश्नों की संख्या, विश्वसनीयता/ताज़गी
+विशेषक। यह वैकल्पिक है क्योंकि इससे प्रॉम्प्ट का स्वरूप बदलता है; यह मुख्यतः
+उन संदर्भ इंजनों या प्रॉम्प्ट संयोजन के लिए महत्वपूर्ण है जो मेमोरी
+पूरकों का स्पष्ट रूप से उपयोग करते हैं।
 
 ## कॉन्फ़िगरेशन
 
-कॉन्फ़िग को `plugins.entries.memory-wiki.config` के अंतर्गत रखें:
+कॉन्फ़िगरेशन को `plugins.entries.memory-wiki.config` के अंतर्गत रखें:
 
 ```json5
 {
@@ -382,6 +313,7 @@ Plugin कॉर्पस चयन का समर्थन करता ह�
         config: {
           vaultMode: "isolated",
           vault: {
+            scope: "global",
             path: "~/.openclaw/wiki/main",
             renderMode: "obsidian",
           },
@@ -398,6 +330,10 @@ Plugin कॉर्पस चयन का समर्थन करता ह�
             indexDailyNotes: true,
             indexMemoryRoot: true,
             followMemoryEvents: true,
+          },
+          unsafeLocal: {
+            allowPrivateMemoryCoreAccess: false,
+            paths: [],
           },
           ingest: {
             autoCompile: true,
@@ -425,20 +361,90 @@ Plugin कॉर्पस चयन का समर्थन करता ह�
 
 मुख्य टॉगल:
 
-- `vaultMode`: `isolated`, `bridge`, `unsafe-local`
-- `vault.renderMode`: `native` या `obsidian`
-- `bridge.readMemoryArtifacts`: सक्रिय मेमरी Plugin के सार्वजनिक आर्टिफैक्ट इम्पोर्ट करें
-- `bridge.followMemoryEvents`: ब्रिज मोड में इवेंट लॉग शामिल करें
-- `search.backend`: `shared` या `local`
-- `search.corpus`: `wiki`, `memory`, या `all`
-- `context.includeCompiledDigestPrompt`: मेमरी प्रॉम्प्ट सेक्शन में संक्षिप्त डाइजेस्ट स्नैपशॉट जोड़ें
-- `render.createBacklinks`: नियतात्मक संबंधित ब्लॉक जनरेट करें
-- `render.createDashboards`: डैशबोर्ड पेज जनरेट करें
+| कुंजी                                        | मान / डिफ़ॉल्ट                               | टिप्पणियाँ                                                                         |
+| ------------------------------------------ | ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| `vaultMode`                                | `isolated` (डिफ़ॉल्ट), `bridge`, `unsafe-local` | इनपुट और एकीकरण व्यवहार चुनता है                                        |
+| `vault.scope`                              | `global` (डिफ़ॉल्ट), `agent`                    | एक साझा वॉल्ट या प्रत्येक एजेंट के लिए एक चाइल्ड वॉल्ट                                 |
+| `vault.path`                               | वैश्विक डिफ़ॉल्ट `~/.openclaw/wiki/main`         | वैश्विक रूप से सटीक वॉल्ट; एजेंट-दायरा पैरेंट का डिफ़ॉल्ट `~/.openclaw/wiki` है       |
+| `vault.renderMode`                         | `native` (डिफ़ॉल्ट), `obsidian`                 |                                                                               |
+| `bridge.readMemoryArtifacts`               | डिफ़ॉल्ट `true`                                 | सक्रिय मेमोरी Plugin की सार्वजनिक कलाकृतियाँ आयात करता है                                  |
+| `bridge.followMemoryEvents`                | डिफ़ॉल्ट `true`                                 | ब्रिज मोड में इवेंट लॉग शामिल करता है                                             |
+| `unsafeLocal.allowPrivateMemoryCoreAccess` | डिफ़ॉल्ट `false`                                | `unsafe-local` आयात चलाने के लिए आवश्यक                                        |
+| `unsafeLocal.paths`                        | डिफ़ॉल्ट `[]`                                   | `unsafe-local` मोड में आयात करने के लिए स्पष्ट स्थानीय पथ                         |
+| `search.backend`                           | `shared` (डिफ़ॉल्ट), `local`                    |                                                                               |
+| `search.corpus`                            | `wiki` (डिफ़ॉल्ट), `memory`, `all`              |                                                                               |
+| `context.includeCompiledDigestPrompt`      | डिफ़ॉल्ट `false`                                | चयनित एजेंट का संक्षिप्त डाइजेस्ट स्नैपशॉट मेमोरी प्रॉम्प्ट अनुभागों में जोड़ता है |
+| `render.createBacklinks`                   | डिफ़ॉल्ट `true`                                 | नियतात्मक संबंधित ब्लॉक उत्पन्न करता है                                         |
+| `render.createDashboards`                  | डिफ़ॉल्ट `true`                                 | डैशबोर्ड पृष्ठ उत्पन्न करता है                                                      |
+
+### प्रति-एजेंट वॉल्ट
+
+प्रत्येक कॉन्फ़िगर किए गए एजेंट को अलग विकी देने के लिए `vault.scope` को `agent` पर सेट करें।
+इस दायरे में, `vault.path` एक पैरेंट डायरेक्टरी है और OpenClaw सामान्यीकृत
+एजेंट id जोड़ता है:
+
+```json5
+{
+  agents: {
+    list: [{ id: "support" }, { id: "marketing" }],
+  },
+  plugins: {
+    entries: {
+      "memory-wiki": {
+        enabled: true,
+        config: {
+          vaultMode: "bridge",
+          vault: {
+            scope: "agent",
+            path: "~/.openclaw/wiki",
+          },
+          bridge: {
+            enabled: true,
+            readMemoryArtifacts: true,
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+यह `~/.openclaw/wiki/support` और
+`~/.openclaw/wiki/marketing` में निर्धारित होता है। यदि एजेंट दायरे में `vault.path` छोड़ा गया है, तो
+पैरेंट का डिफ़ॉल्ट `~/.openclaw/wiki` होता है। इसलिए डिफ़ॉल्ट `main` एजेंट
+मौजूदा `~/.openclaw/wiki/main` पथ बनाए रखता है।
+
+एजेंट टूल, संकलित प्रॉम्प्ट डाइजेस्ट और
+`memory_search` / `memory_get` के माध्यम से उपलब्ध कराया गया विकी पूरक सक्रिय एजेंट संदर्भ से वॉल्ट निर्धारित करते हैं।
+कई कॉन्फ़िगर किए गए एजेंटों वाले सेटअप में CLI और Gateway कॉल के लिए,
+`openclaw wiki --agent <agentId> ...` या Gateway अनुरोध के `agentId` द्वारा
+एजेंट स्पष्ट रूप से प्रदान करें। केवल एक एजेंट कॉन्फ़िगर होने पर कोई id
+न दिए जाने पर वही डिफ़ॉल्ट रहता है।
+
+ब्रिज मोड में, एजेंट-दायरे वाले आयात किसी सार्वजनिक मेमोरी कलाकृति को केवल तभी स्वीकार करते हैं जब
+उसके `agentIds` में चयनित एजेंट शामिल हो। किसी अन्य एजेंट के स्वामित्व वाली,
+स्वामित्व मेटाडेटा रहित या अज्ञात स्वामी वाली कलाकृतियाँ छोड़ दी जाती हैं। वैश्विक दायरा
+मौजूदा साझा-कलाकृति व्यवहार बनाए रखता है।
+
+<Warning>
+`vault.scope` बदलने से मौजूदा वॉल्ट की प्रतिलिपि नहीं बनती या उसका विभाजन नहीं होता। एजेंट दायरे में,
+स्पष्ट रूप से कॉन्फ़िगर किया गया `vault.path` एक पैरेंट डायरेक्टरी बन जाता है, इसलिए उत्पादन एजेंटों को
+स्विच करने से पहले मौजूदा पृष्ठों को सोच-समझकर स्थानांतरित या आयात करें। पहले
+वॉल्ट का बैकअप लें।
+
+प्रति-एजेंट वॉल्ट समान-प्रक्रिया वाली ज्ञान सीमा हैं, ऑपरेटिंग-सिस्टम
+सुरक्षा सीमा नहीं। होस्ट फ़ाइल सिस्टम की पहुँच वाले Plugin और सैंडबॉक्स-रहित टूल
+अब भी किसी अन्य एजेंट की डायरेक्टरी पढ़ सकते हैं। जब एजेंट एक-दूसरे पर भरोसा न करते हों, तो
+[सैंडबॉक्सिंग](/hi/gateway/sandboxing) या
+[अलग Gateway प्रोफ़ाइल](/hi/gateway/multiple-gateways) का उपयोग करें।
+</Warning>
 
 ### उदाहरण: QMD + ब्रिज मोड
 
-इसका उपयोग तब करें जब आप रिकॉल के लिए QMD और एक मेंटेन किए गए
-ज्ञान स्तर के लिए `memory-wiki` चाहते हों:
+जब रिकॉल के लिए QMD और अनुरक्षित ज्ञान परत के लिए `memory-wiki` चाहिए, तब इसका उपयोग करें।
+प्रत्येक परत केंद्रित रहती है: QMD रॉ नोट्स, सत्र निर्यात और
+अतिरिक्त संग्रहों को खोजने योग्य रखता है, जबकि `memory-wiki`
+स्थिर इकाइयों, दावों, डैशबोर्ड और स्रोत पृष्ठों को संकलित करता है।
 
 ```json5
 {
@@ -473,15 +479,11 @@ Plugin कॉर्पस चयन का समर्थन करता ह�
 }
 ```
 
-यह बनाए रखता है:
-
-- सक्रिय मेमरी रिकॉल का नियंत्रण QMD के पास
-- कम्पाइल्ड पेजों और डैशबोर्ड पर केंद्रित `memory-wiki`
-- प्रॉम्प्ट आकार तब तक अपरिवर्तित जब तक आप जानबूझकर कम्पाइल्ड डाइजेस्ट प्रॉम्प्ट सक्षम नहीं करते
+यह सक्रिय मेमोरी रिकॉल की ज़िम्मेदारी QMD के पास रखता है, `memory-wiki` को
+संकलित पृष्ठों और डैशबोर्ड पर केंद्रित रखता है, और प्रॉम्प्ट स्वरूप को तब तक अपरिवर्तित रखता है जब तक
+संकलित डाइजेस्ट प्रॉम्प्ट जानबूझकर सक्षम न किए जाएँ।
 
 ## CLI
-
-`memory-wiki` एक शीर्ष-स्तरीय CLI सतह भी उपलब्ध कराता है:
 
 ```bash
 openclaw wiki status
@@ -497,36 +499,49 @@ openclaw wiki bridge import
 openclaw wiki obsidian status
 ```
 
-पूर्ण कमांड संदर्भ के लिए [CLI: wiki](/hi/cli/wiki) देखें।
+`wiki okf import`, `wiki apply metadata`, `wiki unsafe-local import`,
+`wiki chatgpt import` / `wiki chatgpt rollback`, और संपूर्ण `wiki obsidian`
+उपकमांड सेट सहित पूरे कमांड संदर्भ के लिए [CLI: विकी](/hi/cli/wiki) देखें।
 
 ## Obsidian समर्थन
 
-जब `vault.renderMode` `obsidian` होता है, तो Plugin Obsidian-अनुकूल
-Markdown लिखता है और वैकल्पिक रूप से आधिकारिक `obsidian` CLI का उपयोग कर सकता है।
+जब `vault.renderMode`, `obsidian` होता है, तो Plugin Obsidian-अनुकूल
+Markdown लिखता है और स्थिति जाँचने, वॉल्ट में खोजने, पृष्ठ खोलने, कमांड लागू करने और
+दैनिक नोट पर जाने के लिए वैकल्पिक रूप से आधिकारिक `obsidian` CLI का उपयोग कर सकता है।
+यह वैकल्पिक है; Obsidian के बिना भी विकी नेटिव मोड में काम करता है।
 
-समर्थित वर्कफ़्लो में शामिल हैं:
+एजेंट-दायरे वाले वॉल्ट अब भी Obsidian-अनुकूल Markdown का उपयोग कर सकते हैं, लेकिन कॉन्फ़िगरेशन
+सत्यापन `vault.scope: "agent"` के साथ `obsidian.useOfficialCli: true` को अस्वीकार करता है।
+वर्तमान `obsidian.vaultName` सेटिंग वैश्विक है और प्रत्येक एजेंट के लिए अलग
+Obsidian वॉल्ट नहीं चुन सकती। इसके बजाय विकी टूल और CLI संचालन का उपयोग करें,
+या Obsidian द्वारा संचालित विकी को वैश्विक दायरे में रखें।
 
-- स्टेटस प्रॉबिंग
-- वॉल्ट खोज
-- पेज खोलना
-- Obsidian कमांड चलाना
-- दैनिक नोट पर जाना
+## अनुशंसित कार्यप्रवाह
 
-यह वैकल्पिक है। wiki Obsidian के बिना भी नेटिव मोड में काम करती है।
-
-## अनुशंसित वर्कफ़्लो
-
-1. रिकॉल/प्रमोशन/dreaming के लिए अपना सक्रिय मेमरी Plugin रखें।
-2. `memory-wiki` सक्षम करें।
-3. जब तक आप स्पष्ट रूप से ब्रिज मोड नहीं चाहते, `isolated` मोड से शुरू करें।
-4. जब स्रोत-प्रमाण मायने रखता हो, `wiki_search` / `wiki_get` का उपयोग करें।
-5. संकीर्ण संश्लेषण या मेटाडेटा अपडेट के लिए `wiki_apply` का उपयोग करें।
-6. सार्थक बदलावों के बाद `wiki_lint` चलाएं।
-7. यदि आप पुरानेपन/विरोधाभास दृश्यता चाहते हैं, तो डैशबोर्ड चालू करें।
+<Steps>
+<Step title="स्मरण के लिए सक्रिय मेमोरी Plugin बनाए रखें">
+स्मरण, संवर्धन और Dreaming का स्वामित्व कॉन्फ़िगर किए गए मेमोरी बैकएंड के पास रहता है।
+</Step>
+<Step title="memory-wiki सक्षम करें">
+जब तक आप स्पष्ट रूप से ब्रिज मोड नहीं चाहते, `isolated` मोड से शुरू करें।
+</Step>
+<Step title="जब उद्गम महत्वपूर्ण हो, तब wiki_search / wiki_get का उपयोग करें">
+जब आपको विकी-विशिष्ट रैंकिंग या पृष्ठ-स्तरीय विश्वास संरचना चाहिए, तो `memory_search` के बजाय इन्हें प्राथमिकता दें।
+</Step>
+<Step title="सीमित संश्लेषण या मेटाडेटा अपडेट के लिए wiki_apply का उपयोग करें">
+प्रबंधित जनरेट किए गए ब्लॉक को हाथ से संपादित करने से बचें।
+</Step>
+<Step title="महत्वपूर्ण बदलावों के बाद wiki_lint चलाएँ">
+यह विरोधाभासों, अनसुलझे प्रश्नों और उद्गम की कमियों का पता लगाता है।
+</Step>
+<Step title="पुरानी/विरोधाभासी सामग्री की दृश्यता के लिए डैशबोर्ड चालू करें">
+`render.createDashboards: true` (डिफ़ॉल्ट) सेट करें।
+</Step>
+</Steps>
 
 ## संबंधित दस्तावेज़
 
-- [मेमरी अवलोकन](/hi/concepts/memory)
-- [CLI: memory](/hi/cli/memory)
-- [CLI: wiki](/hi/cli/wiki)
-- [Plugin SDK अवलोकन](/hi/plugins/sdk-overview)
+- [मेमोरी का अवलोकन](/hi/concepts/memory)
+- [CLI: मेमोरी](/hi/cli/memory)
+- [CLI: विकी](/hi/cli/wiki)
+- [Plugin SDK का अवलोकन](/hi/plugins/sdk-overview)

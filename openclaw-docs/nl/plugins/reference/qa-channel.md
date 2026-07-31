@@ -1,14 +1,15 @@
 ---
 read_when:
-    - U installeert, configureert of controleert de qa-channel-plugin
-summary: Voegt de QA-kanaalinterface toe voor het verzenden en ontvangen van OpenClaw-berichten.
+    - Je installeert, configureert of controleert de qa-channel-plugin
+summary: Voegt het QA Channel-oppervlak toe voor het verzenden en ontvangen van OpenClaw-berichten.
 title: QA-kanaalplugin
 x-i18n:
-    generated_at: "2026-07-12T09:08:26Z"
+    generated_at: "2026-07-27T05:42:39Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 3c6f0aec62fb014895d11fa46b75626d929c326eb2ded463188e4338f0fdae5d
+    source_hash: 09d9255a5f9783bd3153b7e790428ccbae9d9383cacda36b796494b5651fe91a
     source_path: plugins/reference/qa-channel.md
     workflow: 16
 ---
@@ -20,11 +21,11 @@ Voegt het QA Channel-oppervlak toe voor het verzenden en ontvangen van OpenClaw-
 ## Distributie
 
 - Pakket: `@openclaw/qa-channel`
-- Installatieroute: alleen vanuit een broncode-check-out
+- Installatieroute: alleen broncodecheckout
 
 ## Oppervlak
 
-kanalen: qa-channel
+kanalen: `qa-channel`
 
 ## Gerelateerde documentatie
 

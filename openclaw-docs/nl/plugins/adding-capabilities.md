@@ -1,82 +1,83 @@
 ---
 read_when:
-    - Een nieuwe kernfunctionaliteit en een registratie-interface voor Plugins toevoegen
+    - Een nieuwe kernfunctionaliteit en een registratie-interface voor plugins toevoegen
     - Bepalen of code thuishoort in de kern, een leveranciersplugin of een functieplugin
     - Een nieuwe runtimehelper voor kanalen of tools aansluiten
 sidebarTitle: Adding capabilities
-summary: Handleiding voor bijdragers voor het toevoegen van een nieuwe gedeelde mogelijkheid aan het pluginsysteem van OpenClaw
+summary: Handleiding voor bijdragers voor het toevoegen van een nieuwe gedeelde mogelijkheid aan het Plugin-systeem van OpenClaw
 title: Mogelijkheden toevoegen (gids voor bijdragers)
 x-i18n:
-    generated_at: "2026-07-12T09:07:07Z"
+    generated_at: "2026-07-27T05:39:38Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 3534b7521ab8183d91399cded8a3b397be46bf9bd18f2fdb88a8947bad67ffaa
+    source_hash: 14f86c98eb10c6e92970d1b65009ac7bb103afcb6bc57bad2c39e59bc038c961
     source_path: plugins/adding-capabilities.md
     workflow: 16
 ---
 
 <Info>
-  Dit is een **bijdragershandleiding** voor ontwikkelaars van de OpenClaw-kern. Als u
-  een externe Plugin bouwt, raadpleegt u in plaats daarvan [Plugins bouwen](/nl/plugins/building-plugins).
-  Voor de uitgebreide architectuurreferentie (capabiliteitsmodel, eigenaarschap,
-  laadpijplijn, runtimehelpers) raadpleegt u [Interne werking van Plugins](/nl/plugins/architecture).
+  Dit is een **bijdragershandleiding** voor ontwikkelaars van de OpenClaw-kern. Als je
+  een externe plugin bouwt, raadpleeg dan [Plugins bouwen](/nl/plugins/building-plugins).
+  Voor de diepgaande architectuurreferentie (capability-model, eigenaarschap,
+  laadpijplijn, runtimehelpers) raadpleeg je [Interne werking van plugins](/nl/plugins/architecture).
 </Info>
 
-Gebruik dit wanneer OpenClaw een nieuw gedeeld domein nodig heeft, zoals embeddings,
-beeldgeneratie, videogeneratie of een toekomstig functiegebied dat door leveranciers wordt ondersteund.
+Gebruik dit wanneer OpenClaw een nieuw gedeeld domein nodig heeft, zoals embeddings, het
+genereren van afbeeldingen, het genereren van video's of een toekomstig functiegebied dat door leveranciers wordt ondersteund.
 
 De regel:
 
-- **Plugin** = eigendomsgrens
-- **capabiliteit** = gedeeld kerncontract
+- **plugin** = eigenaarschapsgrens
+- **capability** = gedeeld kerncontract
 
-Koppel een leverancier niet rechtstreeks aan een kanaal of tool. Definieer eerst de capabiliteit.
+Koppel een leverancier niet rechtstreeks aan een kanaal of tool. Definieer eerst de capability.
 
-## Wanneer u een capabiliteit maakt
+## Wanneer je een capability maakt
 
-Maak alleen een nieuwe capabiliteit wanneer **al** het volgende waar is:
+Maak alleen een nieuwe capability wanneer **al** het volgende waar is:
 
 1. Meer dan één leverancier zou deze redelijkerwijs kunnen implementeren.
-2. Kanalen, tools of functie-Plugins moeten deze kunnen gebruiken zonder rekening te houden met de leverancier.
-3. De kern moet eigenaar zijn van fallback-, beleids-, configuratie- of afleveringsgedrag.
+2. Kanalen, tools of functieplugins moeten deze kunnen gebruiken zonder rekening te houden met de leverancier.
+3. De kern moet verantwoordelijk zijn voor fallback-, beleids-, configuratie- of afleveringsgedrag.
 
-Als het werk uitsluitend voor een leverancier is en er nog geen gedeeld contract bestaat, definieert u eerst het contract.
+Als het werk alleen voor een leverancier is en er nog geen gedeeld contract bestaat, definieer dan eerst het contract.
 
 ## De standaardvolgorde
 
 1. Definieer het getypeerde kerncontract.
-2. Voeg Plugin-registratie voor dat contract toe.
+2. Voeg pluginregistratie voor dat contract toe.
 3. Voeg een gedeelde runtimehelper toe.
-4. Koppel ter bevestiging één echte leveranciers-Plugin.
-5. Laat functie- en kanaalgebruikers de runtimehelper gebruiken.
+4. Koppel als bewijs één echte leveranciersplugin.
+5. Zet verbruikers in functies en kanalen over op de runtimehelper.
 6. Voeg contracttests toe.
-7. Documenteer de configuratie voor beheerders en het eigendomsmodel.
+7. Documenteer de configuratie voor operators en het eigenaarschapsmodel.
 
-## Wat hoort waar
+## Wat waar thuishoort
 
-| Laag                       | Is eigenaar van                                                                                                                                                                                                                       |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Kern**                   | Aanvraag-/antwoordtypen; providerregister en -resolutie; fallbackgedrag; configuratieschema met doorgegeven documentatiemetagegevens voor `title`/`description` op geneste object-, jokerteken-, array-item- en compositieknooppunten; runtimehelperoppervlak. |
-| **Leveranciers-Plugin**    | API-aanroepen naar de leverancier, afhandeling van leveranciersauthenticatie, leveranciersspecifieke normalisatie van aanvragen en registratie van de capabiliteitsimplementatie.                                                     |
-| **Functie-/kanaal-Plugin** | Roept `api.runtime.*` of de bijbehorende helper `plugin-sdk/*-runtime` aan. Roept nooit rechtstreeks een leveranciersimplementatie aan.                                                                                                |
+| Laag                       | Verantwoordelijk voor                                                                                                                                                                                                                  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Kern**                   | Aanvraag-/antwoordtypen; providerregister en -resolutie; fallbackgedrag; configuratieschema met doorgegeven `title`-/`description`-documentatiemetadata op geneste object-, jokerteken-, array-item- en compositieknooppunten; runtimehelperoppervlak. |
+| **Leveranciersplugin**     | API-aanroepen naar de leverancier, afhandeling van leveranciersauthenticatie, leveranciersspecifieke normalisatie van aanvragen en registratie van de capability-implementatie.                                                        |
+| **Functie-/kanaalplugin**  | Roept `api.runtime.*` of de overeenkomstige `plugin-sdk/*-runtime`-helper aan. Roept nooit rechtstreeks een leveranciersimplementatie aan.                                                                                              |
 
-## Koppelpunten voor providers en harnassen
+## Koppelvlakken voor providers en harnesses
 
-Gebruik **providerhooks** wanneer het gedrag bij het modelprovidercontract hoort in plaats van bij de algemene agentlus. Voorbeelden zijn providerspecifieke aanvraagparameters na transportselectie, voorkeuren voor authenticatieprofielen, promptoverlays en vervolgfallbackroutering na een failover van model of profiel.
+Gebruik **providerhooks** wanneer het gedrag bij het modelprovidercontract hoort in plaats van bij de generieke agentlus. Voorbeelden zijn providerspecifieke aanvraagparameters na transportselectie, voorkeuren voor authenticatieprofielen, promptoverlays en vervolgroutering voor fallback nadat een model of profiel is uitgevallen.
 
-Gebruik **agentharnashooks** wanneer het gedrag bij de runtime hoort die een beurt uitvoert. Harnassen kunnen expliciete protocolresultaten classificeren, zoals lege uitvoer, redeneringen zonder zichtbare uitvoer of een gestructureerd plan zonder definitief antwoord, zodat het buitenste fallbackbeleid voor modellen kan beslissen of opnieuw moet worden geprobeerd.
+Gebruik **agent-harnesshooks** wanneer het gedrag hoort bij de runtime die een beurt uitvoert. Harnesses kunnen expliciete protocoluitkomsten classificeren, zoals lege uitvoer, redenering zonder zichtbare uitvoer of een gestructureerd plan zonder definitief antwoord, zodat het fallbackbeleid van het buitenste model de beslissing over opnieuw proberen kan nemen.
 
-Houd beide koppelpunten beperkt:
+Houd beide koppelvlakken beperkt:
 
-- De kern is eigenaar van het beleid voor opnieuw proberen en fallback.
-- Provider-Plugins zijn eigenaar van providerspecifieke hints voor aanvragen, authenticatie en routering.
-- Harnas-Plugins zijn eigenaar van runtimespecifieke classificatie van pogingen.
+- De kern is verantwoordelijk voor het beleid voor opnieuw proberen en fallback.
+- Providerplugins zijn verantwoordelijk voor providerspecifieke hints voor aanvragen, authenticatie en routering.
+- Harnessplugins zijn verantwoordelijk voor runtimespecifieke classificatie van pogingen.
 - Plugins van derden retourneren hints en wijzigen de kernstatus niet rechtstreeks.
 
-## Bestandscontrolelijst
+## Bestandschecklist
 
-Voor een nieuwe capabiliteit zult u naar verwachting deze gebieden aanpassen:
+Voor een nieuwe capability moet je waarschijnlijk deze gebieden aanpassen:
 
 - `src/<capability>/types.ts`
 - `src/<capability>/...registry/runtime.ts`
@@ -88,23 +89,23 @@ Voor een nieuwe capabiliteit zult u naar verwachting deze gebieden aanpassen:
 - `src/plugins/runtime/index.ts`
 - `src/plugin-sdk/<capability>.ts`
 - `src/plugin-sdk/<capability>-runtime.ts`
-- Een of meer gebundelde Plugin-pakketten.
-- Configuratie, documentatie en tests.
+- Een of meer gebundelde pluginpakketten.
+- Configuratie, documentatie, tests.
 
-## Uitgewerkt voorbeeld: beeldgeneratie
+## Uitgewerkt voorbeeld: afbeeldingen genereren
 
-Beeldgeneratie volgt de standaardstructuur:
+Het genereren van afbeeldingen volgt de standaardstructuur:
 
 1. De kern definieert `ImageGenerationProvider`.
 2. De kern stelt `registerImageGenerationProvider(...)` beschikbaar.
 3. De kern stelt `api.runtime.imageGeneration.generate(...)` en `.listProviders(...)` beschikbaar.
-4. Leveranciers-Plugins (`comfy`, `deepinfra`, `fal`, `google`, `litellm`, `microsoft-foundry`, `minimax`, `openai`, `openrouter`, `vydra`, `xai`) registreren door leveranciers ondersteunde implementaties.
+4. Leveranciersplugins (`comfy`, `deepinfra`, `fal`, `google`, `litellm`, `microsoft-foundry`, `minimax`, `openai`, `openrouter`, `vydra`, `xai`) registreren door leveranciers ondersteunde implementaties.
 5. Toekomstige leveranciers registreren hetzelfde contract zonder kanalen of tools te wijzigen.
 
 De configuratiesleutel is bewust gescheiden van routering voor beeldanalyse:
 
 - `agents.defaults.imageModel` analyseert afbeeldingen.
-- `agents.defaults.imageGenerationModel` genereert afbeeldingen.
+- `agents.defaults.mediaModels.image` genereert afbeeldingen.
 
 Houd deze gescheiden, zodat fallback en beleid expliciet blijven.
 
@@ -112,29 +113,29 @@ Houd deze gescheiden, zodat fallback en beleid expliciet blijven.
 
 Gebruik `registerEmbeddingProvider(...)` / contract `embeddingProviders` voor
 herbruikbare providers van vectorembeddings. Dit contract is bewust breder
-dan geheugen: tools, zoekfuncties, informatieophaling, importeurs of toekomstige functie-Plugins
+dan geheugen: tools, zoekfuncties, retrieval, importers of toekomstige functieplugins
 kunnen embeddings gebruiken zonder afhankelijk te zijn van de geheugenengine. Zoeken in het geheugen
-gebruikt ook algemene `embeddingProviders`.
+gebruikt ook de generieke `embeddingProviders`.
 
 De oudere geheugenspecifieke registratie-API en het contract `memoryEmbeddingProviders`
 zijn verouderd. Gebruik `registerEmbeddingProvider` en
 `embeddingProviders` voor alle nieuwe embeddingproviders.
 
-## Controlelijst voor beoordeling
+## Reviewchecklist
 
-Controleer voordat u een nieuwe capabiliteit uitbrengt:
+Controleer het volgende voordat je een nieuwe capability uitbrengt:
 
-- Geen enkel kanaal of tool importeert leverancierscode rechtstreeks.
+- Geen enkel kanaal of tool importeert rechtstreeks leverancierscode.
 - De runtimehelper is het gedeelde pad.
-- Ten minste één contracttest bevestigt het gebundelde eigenaarschap.
-- De configuratiedocumentatie noemt de nieuwe model- of configuratiesleutel.
-- De Plugin-documentatie legt de eigendomsgrens uit.
+- Ten minste één contracttest controleert gebundeld eigenaarschap.
+- De configuratiedocumentatie vermeldt de nieuwe model-/configuratiesleutel.
+- De plugindocumentatie legt de eigenaarschapsgrens uit.
 
-Als een PR de capabiliteitslaag overslaat en leveranciersgedrag rechtstreeks in een kanaal of tool vastlegt, stuurt u deze terug en definieert u eerst het contract.
+Als een PR de capability-laag overslaat en leveranciersgedrag hardcodeert in een kanaal of tool, stuur deze dan terug en definieer eerst het contract.
 
 ## Gerelateerd
 
-- [Interne werking van Plugins](/nl/plugins/architecture) — capabiliteitsmodel, eigenaarschap, laadpijplijn en runtimehelpers.
-- [Plugins bouwen](/nl/plugins/building-plugins) — zelfstudie voor de eerste Plugin.
-- [SDK-overzicht](/nl/plugins/sdk-overview) — referentie voor de importtoewijzing en registratie-API.
+- [Interne werking van plugins](/nl/plugins/architecture) — capability-model, eigenaarschap, laadpijplijn, runtimehelpers.
+- [Plugins bouwen](/nl/plugins/building-plugins) — tutorial voor de eerste plugin.
+- [SDK-overzicht](/nl/plugins/sdk-overview) — referentie voor de importstructuur en registratie-API.
 - [Skills maken](/nl/tools/creating-skills) — aanvullend oppervlak voor bijdragers.

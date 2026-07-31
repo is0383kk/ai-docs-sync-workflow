@@ -1,25 +1,25 @@
 ---
 read_when:
-    - Sie automatisieren das Onboarding in Skripten oder CI.
-    - Sie benötigen nicht-interaktive Beispiele für bestimmte Provider
+    - Sie automatisieren das Onboarding in Skripten oder der CI.
+    - Sie benötigen nicht interaktive Beispiele für bestimmte Provider
 sidebarTitle: CLI automation
-summary: Skriptgestütztes Onboarding und Agenten-Setup für die OpenClaw CLI
+summary: Skriptgestütztes Onboarding und Agenteneinrichtung für die OpenClaw CLI
 title: CLI-Automatisierung
 x-i18n:
-    generated_at: "2026-07-12T15:55:54Z"
+    generated_at: "2026-07-26T18:39:04Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 15
+    prompt_version: 32
     provider: openai
-    source_hash: de3115fd0c675b92f22cf9c44ddd307a854e499c6f163235f991368429b2c152
+    source_hash: 2a9fd8530379927995641f8033651ff12ada98068f106672e6655a17b8265735
     source_path: start/wizard-cli-automation.md
     workflow: 16
 ---
 
-Verwenden Sie `openclaw onboard --non-interactive`, um die Einrichtung zu skripten. Dafür ist `--accept-risk` erforderlich: Die nicht interaktive Einrichtung kann Anmeldedaten und die Daemon-Konfiguration ohne Bestätigungsaufforderung schreiben. Das Flag dient daher als ausdrückliche Bestätigung dieses Risikos.
+Verwenden Sie `openclaw onboard --non-interactive`, um die Einrichtung per Skript durchzuführen. Dafür ist `--accept-risk` erforderlich: Die nicht interaktive Einrichtung kann Anmeldedaten und die Daemon-Konfiguration ohne Bestätigungsaufforderung schreiben, daher dient das Flag als ausdrückliche Bestätigung des Risikos.
 
 <Note>
-`--json` aktiviert nicht automatisch den nicht interaktiven Modus. Geben Sie für Skripte ausdrücklich `--non-interactive --accept-risk` an.
+`--json` impliziert keinen nicht interaktiven Modus. Übergeben Sie für Skripte ausdrücklich `--non-interactive --accept-risk`.
 </Note>
 
 ## Grundlegendes nicht interaktives Beispiel
@@ -39,9 +39,9 @@ openclaw onboard --non-interactive --accept-risk \
 
 Fügen Sie `--json` hinzu, um eine maschinenlesbare Zusammenfassung zu erhalten.
 
-- `--gateway-port` verwendet standardmäßig `18789`; geben Sie das Flag nur an, um diesen Wert zu überschreiben.
-- `--skip-bootstrap` überspringt die Erstellung der standardmäßigen Workspace-Dateien. Dies eignet sich für Automatisierungen, die ihren eigenen Workspace vorab befüllen.
-- `--secret-input-mode ref` speichert im Authentifizierungsprofil anstelle des Schlüssels im Klartext eine umgebungsvariablenbasierte Referenz (`{ source: "env", provider: "default", id: "<ENV_VAR>" }`). Im nicht interaktiven `ref`-Modus muss die Umgebungsvariable des Providers bereits in der Prozessumgebung gesetzt sein: Wird ein Inline-Schlüssel-Flag ohne die zugehörige Umgebungsvariable übergeben, schlägt der Vorgang sofort fehl.
+- `--gateway-port` verwendet standardmäßig `18789`; übergeben Sie es nur, um diesen Wert zu überschreiben.
+- `--skip-bootstrap` überspringt die Erstellung der standardmäßigen Workspace-Dateien für Automatisierungen, die ihren eigenen Workspace vorab befüllen.
+- `--secret-input-mode ref` speichert im Authentifizierungsprofil statt des Klartextschlüssels eine umgebungsvariablenbasierte Referenz (`{ source: "env", provider: "default", id: "<ENV_VAR>" }`). Im nicht interaktiven `ref`-Modus muss die Umgebungsvariable des Providers bereits in der Prozessumgebung gesetzt sein: Wird ein Schlüssel-Flag inline ohne die zugehörige Umgebungsvariable übergeben, schlägt der Vorgang sofort fehl.
 
 ```bash
 openclaw onboard --non-interactive --accept-risk \
@@ -160,9 +160,9 @@ openclaw onboard --non-interactive --accept-risk \
       --gateway-bind loopback
     ```
 
-    `--custom-api-key` ist optional; einige Endpunkte erfordern keine Authentifizierung. Wenn das Flag nicht angegeben wird, prüft das Onboarding die Umgebungsvariable `CUSTOM_API_KEY`. `--custom-provider-id` ist optional und wird bei fehlender Angabe automatisch aus der Basis-URL abgeleitet. `--custom-compatibility` verwendet standardmäßig `openai` (weitere Werte: `openai-responses`, `anthropic`).
+    `--custom-api-key` ist optional; einige Endpunkte erfordern keine Authentifizierung. Wenn es weggelassen wird, prüft das Onboarding `CUSTOM_API_KEY` in der Umgebung. `--custom-provider-id` ist optional und wird bei Auslassung automatisch aus der Basis-URL abgeleitet. `--custom-compatibility` verwendet standardmäßig `openai` (weitere Werte: `openai-responses`, `anthropic`).
 
-    OpenClaw leitet die Unterstützung für Bildeingaben aus bekannten Mustern für Vision-Modell-IDs ab (`gpt-4o`, `claude-3/4`, `gemini`, die Suffixe `-vl`/`vision` und ähnliche). Fügen Sie `--custom-image-input` hinzu, um sie für ein nicht erkanntes Vision-Modell zu erzwingen, oder `--custom-text-input`, um ausschließlich Texteingaben zu erzwingen.
+    OpenClaw leitet die Unterstützung für Bildeingaben aus bekannten Mustern für Vision-Modell-IDs ab (`gpt-4o`, `claude-3/4`, `gemini`, Suffixe `-vl`/`vision` und ähnliche). Fügen Sie `--custom-image-input` hinzu, um sie für ein nicht erkanntes Vision-Modell zu erzwingen, oder `--custom-text-input`, um ausschließlich Text zu erzwingen.
 
     Variante im Referenzmodus, die `apiKey` als `{ source: "env", provider: "default", id: "CUSTOM_API_KEY" }` speichert:
 
@@ -183,11 +183,11 @@ openclaw onboard --non-interactive --accept-risk \
   </Accordion>
 </AccordionGroup>
 
-Die Authentifizierung mit einem Anthropic-Einrichtungstoken wird weiterhin unterstützt. OpenClaw bevorzugt jedoch die Wiederverwendung der Claude CLI, wenn lokal eine Claude-CLI-Anmeldung verfügbar ist. Verwenden Sie für den Produktionseinsatz vorzugsweise einen Anthropic-API-Schlüssel.
+Die Authentifizierung mit einem Anthropic-Einrichtungstoken wird weiterhin unterstützt, OpenClaw bevorzugt jedoch die Wiederverwendung der Claude CLI, wenn eine lokale Anmeldung bei der Claude CLI verfügbar ist. Verwenden Sie für den Produktivbetrieb vorzugsweise einen Anthropic-API-Schlüssel.
 
 ## Weiteren Agenten hinzufügen
 
-`openclaw agents add <name>` erstellt einen separaten Agenten mit eigenem Workspace, eigenen Sitzungen und eigenen Authentifizierungsprofilen. Wenn Sie den Befehl ohne `--workspace` und ohne weitere Flags ausführen, wird der interaktive Assistent gestartet. Wenn Sie eines der Flags `--workspace`, `--model`, `--agent-dir`, `--bind` oder `--non-interactive` angeben, wird der Befehl nicht interaktiv ausgeführt und erfordert dann `--workspace`.
+`openclaw agents add <name>` erstellt einen separaten Agenten mit eigenem Workspace, eigenen Sitzungen und Authentifizierungsprofilen. Wird der Befehl ohne `--workspace` (und ohne weitere Flags) ausgeführt, startet der interaktive Assistent. Die Übergabe eines beliebigen der Flags `--workspace`, `--model`, `--agent-dir`, `--bind` oder `--non-interactive` führt ihn nicht interaktiv aus und erfordert anschließend `--workspace`.
 
 ```bash
 openclaw agents add work \
@@ -198,21 +198,21 @@ openclaw agents add work \
   --json
 ```
 
-Geschriebene Konfigurationsschlüssel (`agents.list[]`-Eintrag für die neue Agenten-ID):
+Geschriebene Konfigurationsschlüssel (`agents.entries.*`-Eintrag für die neue Agenten-ID):
 
 - `name`
 - `workspace`
 - `agentDir`
-- `model` (nur wenn `--model` angegeben wird)
+- `model` (nur wenn `--model` übergeben wird)
 
 Hinweise:
 
-- Standardmäßiger Workspace, wenn `--workspace` im interaktiven Assistenten nicht angegeben wird: `~/.openclaw/workspace-<agentId>`.
-- `--bind <channel[:accountId]>` kann mehrfach angegeben werden. Fügen Sie Bindungen hinzu, um eingehende Nachrichten an den neuen Agenten weiterzuleiten. Dies ist im Assistenten auch interaktiv möglich.
-- Der Name des Agenten wird zu einer gültigen Agenten-ID normalisiert; `main` ist reserviert.
+- Standard-Workspace (wenn `--workspace` im interaktiven Assistenten weggelassen wird): `~/.openclaw/workspace-<agentId>`.
+- `--bind <channel[:accountId]>` kann wiederholt angegeben werden; fügen Sie Bindungen hinzu, um eingehende Nachrichten an den neuen Agenten weiterzuleiten (der Assistent kann dies auch interaktiv erledigen).
+- Der Agentenname wird zu einer gültigen Agenten-ID normalisiert; `main` ist reserviert.
 
-## Verwandte Dokumentation
+## Zugehörige Dokumentation
 
-- Onboarding-Übersicht: [Onboarding (CLI)](/de/start/wizard)
-- Vollständige Referenz: [Referenz zur CLI-Einrichtung](/de/start/wizard-cli-reference)
+- Onboarding-Zentrale: [Onboarding (CLI)](/de/start/wizard)
+- Vollständige Referenz: [CLI-Einrichtungsreferenz](/de/start/wizard-cli-reference)
 - Befehlsreferenz: [`openclaw onboard`](/de/cli/onboard)

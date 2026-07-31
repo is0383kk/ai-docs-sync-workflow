@@ -1,26 +1,27 @@
 ---
 read_when:
-    - OpenClaw で StepFun モデルを使用したい場合
+    - OpenClaw で StepFun モデルを使用する場合
     - StepFun のセットアップ手順が必要です
 summary: OpenClaw で StepFun モデルを使用する
 title: StepFun
 x-i18n:
-    generated_at: "2026-07-11T22:37:23Z"
+    generated_at: "2026-07-26T09:16:17Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c65e6d395f4ea890efc0e4847ec21dc1c2796fa240d20ca3e6d40eea480ed9f4
+    source_hash: 462a2588f15e8d6188914e238a3e472052d0da1da151751adecdb63cf009fc64
     source_path: providers/stepfun.md
     workflow: 16
 ---
 
 StepFun は、2 つのプロバイダー ID を持つ外部公式 Plugin（`@openclaw/stepfun-provider`）として提供されます。
 
-- 標準エンドポイント用の `stepfun`
-- Step Plan エンドポイント用の `stepfun-plan`
+- `stepfun`：標準エンドポイント用
+- `stepfun-plan`：Step Plan エンドポイント用
 
 <Warning>
-標準と Step Plan は、エンドポイントとモデル参照プレフィックス（`stepfun/...` と `stepfun-plan/...`）が異なる**別々のプロバイダー**です。`.com` エンドポイントには中国向けキーを、`.ai` エンドポイントにはグローバル向けキーを使用してください。
+Standard と Step Plan は、異なるエンドポイントとモデル参照プレフィックス（`stepfun/...` と `stepfun-plan/...`）を使用する**別々のプロバイダー**です。`.com` エンドポイントには中国向けキーを、`.ai` エンドポイントにはグローバル向けキーを使用してください。
 </Warning>
 
 ## Plugin のインストール
@@ -32,49 +33,49 @@ openclaw gateway restart
 
 ## リージョンとエンドポイントの概要
 
-| エンドポイント | 中国（`.com`）                         | グローバル（`.ai`）                  |
-| -------------- | -------------------------------------- | ------------------------------------- |
-| 標準           | `https://api.stepfun.com/v1`           | `https://api.stepfun.ai/v1`           |
-| Step Plan      | `https://api.stepfun.com/step_plan/v1` | `https://api.stepfun.ai/step_plan/v1` |
+| エンドポイント | 中国（`.com`）                         | グローバル（`.ai`）                        |
+| --------- | -------------------------------------- | ------------------------------------- |
+| Standard  | `https://api.stepfun.com/v1`           | `https://api.stepfun.ai/v1`           |
+| Step Plan | `https://api.stepfun.com/step_plan/v1` | `https://api.stepfun.ai/step_plan/v1` |
 
-認証環境変数: `STEPFUN_API_KEY`
+認証環境変数：`STEPFUN_API_KEY`
 
 ## 組み込みカタログ
 
-標準（`stepfun`）:
+Standard（`stepfun`）：
 
-| モデル参照               | コンテキスト | 最大出力 | 備考                           |
-| ------------------------ | ------------ | -------- | ------------------------------ |
-| `stepfun/step-3.5-flash` | 262,144      | 65,536   | デフォルトの標準モデル         |
-| `stepfun/step-3.7-flash` | 262,144      | 262,144  | マルチモーダル画像入力に対応   |
+| モデル参照                | コンテキスト | 最大出力 | 備考                          |
+| ------------------------ | ------- | ---------- | ------------------------------ |
+| `stepfun/step-3.5-flash` | 262,144 | 65,536     | デフォルトの標準モデル         |
+| `stepfun/step-3.7-flash` | 262,144 | 262,144    | マルチモーダル画像入力をサポート |
 
-Step Plan（`stepfun-plan`）:
+Step Plan（`stepfun-plan`）：
 
-| モデル参照                         | コンテキスト | 最大出力 | 備考                             |
-| ---------------------------------- | ------------ | -------- | -------------------------------- |
-| `stepfun-plan/step-3.5-flash`      | 262,144      | 65,536   | デフォルトの Step Plan モデル    |
-| `stepfun-plan/step-3.7-flash`      | 262,144      | 262,144  | マルチモーダル画像入力に対応     |
-| `stepfun-plan/step-3.5-flash-2603` | 262,144      | 65,536   | 追加の Step Plan モデル          |
+| モデル参照                          | コンテキスト | 最大出力 | 備考                          |
+| ---------------------------------- | ------- | ---------- | ------------------------------ |
+| `stepfun-plan/step-3.5-flash`      | 262,144 | 65,536     | デフォルトの Step Plan モデル        |
+| `stepfun-plan/step-3.7-flash`      | 262,144 | 262,144    | マルチモーダル画像入力をサポート |
+| `stepfun-plan/step-3.5-flash-2603` | 262,144 | 65,536     | 追加の Step Plan モデル     |
 
 ## はじめに
 
 <Tabs>
-  <Tab title="標準">
-    標準の StepFun エンドポイントを介した汎用的な利用に最適です。
+  <Tab title="Standard">
+    標準の StepFun エンドポイントを介した汎用的な用途に最適です。
 
     <Steps>
       <Step title="エンドポイントのリージョンを選択">
-        | 認証の選択                     | エンドポイント                | リージョン |
-        | ------------------------------ | ----------------------------- | ---------- |
-        | `stepfun-standard-api-key-intl` | `https://api.stepfun.ai/v1`  | 国際       |
-        | `stepfun-standard-api-key-cn`   | `https://api.stepfun.com/v1` | 中国       |
+        | 認証の選択肢                    | エンドポイント                     | リージョン        |
+        | -------------------------------- | ----------------------------- | -------------- |
+        | `stepfun-standard-api-key-intl` | `https://api.stepfun.ai/v1`  | 国際 |
+        | `stepfun-standard-api-key-cn`   | `https://api.stepfun.com/v1` | 中国          |
       </Step>
       <Step title="オンボーディングを実行">
         ```bash
         openclaw onboard --auth-choice stepfun-standard-api-key-intl
         ```
 
-        中国向けエンドポイント:
+        中国向けエンドポイント：
 
         ```bash
         openclaw onboard --auth-choice stepfun-standard-api-key-cn
@@ -93,8 +94,8 @@ Step Plan（`stepfun-plan`）:
       </Step>
     </Steps>
 
-    デフォルトモデル: `stepfun/step-3.5-flash`
-    代替モデル: `stepfun/step-3.7-flash`
+    デフォルトモデル：`stepfun/step-3.5-flash`
+    代替モデル：`stepfun/step-3.7-flash`
 
   </Tab>
 
@@ -103,17 +104,17 @@ Step Plan（`stepfun-plan`）:
 
     <Steps>
       <Step title="エンドポイントのリージョンを選択">
-        | 認証の選択                  | エンドポイント                           | リージョン |
-        | --------------------------- | ---------------------------------------- | ---------- |
-        | `stepfun-plan-api-key-intl` | `https://api.stepfun.ai/step_plan/v1`  | 国際       |
-        | `stepfun-plan-api-key-cn`   | `https://api.stepfun.com/step_plan/v1` | 中国       |
+        | 認証の選択肢                 | エンドポイント                                | リージョン        |
+        | ------------------------------ | ------------------------------------------ | -------------- |
+        | `stepfun-plan-api-key-intl` | `https://api.stepfun.ai/step_plan/v1`  | 国際 |
+        | `stepfun-plan-api-key-cn`   | `https://api.stepfun.com/step_plan/v1` | 中国          |
       </Step>
       <Step title="オンボーディングを実行">
         ```bash
         openclaw onboard --auth-choice stepfun-plan-api-key-intl
         ```
 
-        中国向けエンドポイント:
+        中国向けエンドポイント：
 
         ```bash
         openclaw onboard --auth-choice stepfun-plan-api-key-cn
@@ -132,18 +133,18 @@ Step Plan（`stepfun-plan`）:
       </Step>
     </Steps>
 
-    デフォルトモデル: `stepfun-plan/step-3.5-flash`
-    代替モデル: `stepfun-plan/step-3.7-flash`、`stepfun-plan/step-3.5-flash-2603`
+    デフォルトモデル：`stepfun-plan/step-3.5-flash`
+    代替モデル：`stepfun-plan/step-3.7-flash`、`stepfun-plan/step-3.5-flash-2603`
 
   </Tab>
 </Tabs>
 
-1 回の認証フローで `stepfun` と `stepfun-plan` の両方にリージョンが一致するプロファイルが書き込まれるため、オンボーディングを 1 回実行すると、両方のインターフェースがまとめて検出されます。
+単一の認証フローにより、`stepfun` と `stepfun-plan` の両方にリージョンと一致するプロファイルが書き込まれるため、オンボーディングを 1 回実行すると両方のサーフェスがまとめて検出されます。
 
 ## 高度な設定
 
 <AccordionGroup>
-  <Accordion title="完全な設定: 標準プロバイダー">
+  <Accordion title="完全な設定：Standard プロバイダー">
     ```json5
     {
       env: { STEPFUN_API_KEY: "your-key" },
@@ -165,26 +166,6 @@ Step Plan（`stepfun-plan`）:
                 cost: { input: 0.2, output: 1.15, cacheRead: 0.04, cacheWrite: 0 },
                 contextWindow: 262144,
                 maxTokens: 262144,
-                compat: {
-                  supportsStore: false,
-                  supportsDeveloperRole: false,
-                  supportsUsageInStreaming: false,
-                  supportsReasoningEffort: true,
-                  supportsStrictMode: false,
-                  supportedReasoningEfforts: ["low", "medium", "high"],
-                  maxTokensField: "max_tokens",
-                  reasoningEffortMap: {
-                    off: "low",
-                    none: "low",
-                    minimal: "low",
-                    low: "low",
-                    medium: "medium",
-                    high: "high",
-                    xhigh: "high",
-                    adaptive: "high",
-                    max: "high",
-                  },
-                },
               },
               {
                 id: "step-3.5-flash",
@@ -203,7 +184,7 @@ Step Plan（`stepfun-plan`）:
     ```
   </Accordion>
 
-  <Accordion title="完全な設定: Step Plan プロバイダー">
+  <Accordion title="完全な設定：Step Plan プロバイダー">
     ```json5
     {
       env: { STEPFUN_API_KEY: "your-key" },
@@ -225,26 +206,6 @@ Step Plan（`stepfun-plan`）:
                 cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
                 contextWindow: 262144,
                 maxTokens: 262144,
-                compat: {
-                  supportsStore: false,
-                  supportsDeveloperRole: false,
-                  supportsUsageInStreaming: false,
-                  supportsReasoningEffort: true,
-                  supportsStrictMode: false,
-                  supportedReasoningEfforts: ["low", "medium", "high"],
-                  maxTokensField: "max_tokens",
-                  reasoningEffortMap: {
-                    off: "low",
-                    none: "low",
-                    minimal: "low",
-                    low: "low",
-                    medium: "medium",
-                    high: "high",
-                    xhigh: "high",
-                    adaptive: "high",
-                    max: "high",
-                  },
-                },
               },
               {
                 id: "step-3.5-flash",
@@ -272,10 +233,10 @@ Step Plan（`stepfun-plan`）:
     ```
   </Accordion>
 
-  <Accordion title="注記">
-    - `step-3.7-flash` は OpenClaw を介したテキスト入力と画像入力を受け付けます。StepFun の API は動画にも対応していますが、OpenClaw ではまだモデル入力モダリティとして対応していません。
-    - Step 3.7 は `low`、`medium`、`high` の推論強度に対応しています。このモデルには推論を行わないモードがないため、`/think off` は `low` にマッピングされます。
-    - `step-3.5-flash-2603` は現在 `stepfun-plan` でのみ公開されています。
+  <Accordion title="備考">
+    - `step-3.7-flash` は OpenClaw を介したテキストおよび画像入力に対応しています。StepFun の API は動画にも対応していますが、OpenClaw ではまだモデル入力モダリティとして利用できません。
+    - Step 3.7 は `low`、`medium`、`high` の推論エフォートをサポートします。このモデルには推論を無効にするモードがないため、`/think off` は `low` にマッピングされます。
+    - `step-3.5-flash-2603` は現在、`stepfun-plan` でのみ公開されています。
     - モデルを確認または切り替えるには、`openclaw models list` と `openclaw models set <provider/model>` を使用します。
 
   </Accordion>

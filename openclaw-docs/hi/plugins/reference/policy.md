@@ -1,21 +1,22 @@
 ---
 read_when:
-    - आप नीति Plugin इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
-summary: कार्यस्थल अनुरूपता के लिए नीति-समर्थित doctor जाँचें जोड़ता है।
-title: Policy Plugin
+    - आप पॉलिसी Plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
+summary: वर्कस्पेस अनुरूपता के लिए नीति-समर्थित डॉक्टर जाँचें जोड़ता है।
+title: नीति Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:48:12Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:48:16Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f01de4816a191a175367c06ff69e4ebf6032ee1a105d1d9a48a74093e5e6f774
+    source_hash: 440f2f46e4149fdd5e65bf0140d4981c6d840e8e8c8a85d05eeb23a0839a61ac
     source_path: plugins/reference/policy.md
     workflow: 16
 ---
 
 # नीति Plugin
 
-वर्कस्पेस अनुरूपता के लिए नीति-समर्थित doctor जाँचें जोड़ता है।
+वर्कस्पेस अनुरूपता के लिए नीति-समर्थित doctor जाँच जोड़ता है।
 
 ## वितरण
 
@@ -24,64 +25,30 @@ x-i18n:
 
 ## सतह
 
-plugin
+Plugin
 
 <!-- openclaw-plugin-reference:manual-start -->
 
 ## व्यवहार
 
-Policy plugin नीति-प्रबंधित OpenClaw
-सेटिंग्स और शासित वर्कस्पेस घोषणाओं के लिए doctor स्वास्थ्य जाँचें योगदान करता है। Policy वर्तमान में चैनल
-अनुरूपता, शासित टूल मेटाडेटा, MCP सर्वर स्थिति, मॉडल-प्रदाता स्थिति,
-निजी-नेटवर्क पहुँच स्थिति, Gateway एक्सपोज़र स्थिति, एजेंट वर्कस्पेस/टूल
-स्थिति, कॉन्फ़िगर की गई वैश्विक/प्रति-एजेंट टूल स्थिति, कॉन्फ़िगर की गई sandbox रनटाइम
-स्थिति, इनग्रेस/चैनल पहुँच स्थिति, डेटा-हैंडलिंग स्थिति, और OpenClaw config secret
-provider/auth profile स्थिति को कवर करती है।
+नीति Plugin, नीति-प्रबंधित OpenClaw सेटिंग्स और अभिशासित वर्कस्पेस घोषणाओं के लिए doctor स्वास्थ्य जाँच प्रदान करता है। नीति वर्तमान में चैनल अनुरूपता, अभिशासित टूल मेटाडेटा, MCP सर्वर स्थिति, मॉडल-प्रदाता स्थिति, निजी-नेटवर्क पहुँच स्थिति, Gateway एक्सपोज़र स्थिति, एजेंट वर्कस्पेस/टूल स्थिति, कॉन्फ़िगर की गई वैश्विक/प्रति-एजेंट टूल स्थिति, कॉन्फ़िगर की गई सैंडबॉक्स रनटाइम स्थिति, इनग्रेस/चैनल पहुँच स्थिति, डेटा-हैंडलिंग स्थिति और OpenClaw कॉन्फ़िग सीक्रेट प्रदाता/प्रमाणीकरण प्रोफ़ाइल स्थिति को कवर करती है।
 
-Policy लिखी गई आवश्यकताओं को `policy.jsonc` में संग्रहीत करती है, मौजूदा
-OpenClaw सेटिंग्स और वर्कस्पेस घोषणाओं को evidence के रूप में देखती है, और drift
-को `openclaw policy check` और `openclaw doctor --lint` के माध्यम से रिपोर्ट करती है। एक clean policy
-check नीति, evidence, findings, और attestation hashes उत्सर्जित करती है जिन्हें operators
-audit के लिए रिकॉर्ड कर सकते हैं।
+नीति, लिखी गई आवश्यकताओं को `policy.jsonc` में संग्रहीत करती है, मौजूदा OpenClaw सेटिंग्स और वर्कस्पेस घोषणाओं को साक्ष्य के रूप में देखती है और `openclaw policy check` तथा `openclaw doctor --lint` के माध्यम से विचलन की रिपोर्ट करती है। एक त्रुटिरहित नीति जाँच नीति, साक्ष्य, निष्कर्ष और सत्यापन हैश उत्सर्जित करती है, जिन्हें ऑपरेटर ऑडिट के लिए रिकॉर्ड कर सकते हैं।
 
-`openclaw policy compare --baseline <file>` एक policy file की दूसरी
-policy file से तुलना करता है। यह केवल config-level conformance है: यह policy rule metadata
-का उपयोग करके सत्यापित करता है कि जाँची गई policy लिखी गई
-baseline से missing या weaker नहीं है, और यह runtime state, credentials, या secret values का निरीक्षण नहीं करता।
+`openclaw policy compare --baseline <file>` एक नीति फ़ाइल की तुलना दूसरी नीति फ़ाइल से करता है। यह केवल कॉन्फ़िग-स्तरीय अनुरूपता है: यह नीति नियम मेटाडेटा का उपयोग करके सत्यापित करता है कि जाँची गई नीति में लिखी गई आधाररेखा की तुलना में कुछ अनुपस्थित या कमज़ोर नहीं है, और यह रनटाइम स्थिति, क्रेडेंशियल या सीक्रेट मानों की जाँच नहीं करता।
 
-Tool posture rules approved profiles, workspace-only filesystem
-tools, bounded exec security/ask/host settings, disabled elevated mode, exact
-`alsoAllow` entries, और required tool deny entries की आवश्यकता रख सकते हैं। Evidence records
-additive `alsoAllow` entries रिकॉर्ड करते हैं क्योंकि वे effective tool posture को चौड़ा कर सकते हैं।
-ये जाँचें केवल config conformance देखती हैं; वे runtime approval
-state नहीं पढ़तीं या runtime enforcement नहीं जोड़तीं।
+टूल स्थिति नियमों में अनुमोदित प्रोफ़ाइल, केवल-वर्कस्पेस फ़ाइलसिस्टम टूल, सीमित exec सुरक्षा/पूछताछ/होस्ट सेटिंग्स, अक्षम उन्नत मोड, सटीक `alsoAllow` प्रविष्टियाँ और आवश्यक टूल अस्वीकार प्रविष्टियाँ अपेक्षित हो सकती हैं। साक्ष्य रिकॉर्ड योगात्मक `alsoAllow` प्रविष्टियाँ जोड़ते हैं, क्योंकि वे प्रभावी टूल स्थिति का विस्तार कर सकती हैं। ये जाँच केवल कॉन्फ़िग अनुरूपता देखती हैं; वे रनटाइम अनुमोदन स्थिति नहीं पढ़तीं और न ही रनटाइम प्रवर्तन जोड़ती हैं।
 
-Sandbox posture rules approved sandbox modes/backends की आवश्यकता रख सकते हैं, host
-container networking को deny कर सकते हैं, container namespace joins को deny कर सकते हैं, read-only container
-mounts की आवश्यकता रख सकते हैं, container runtime socket mounts और unconfined container profiles को deny कर सकते हैं,
-और sandbox browser CDP source ranges की आवश्यकता रख सकते हैं।
-ये जाँचें केवल config conformance देखती हैं; वे runtime approval
-state नहीं पढ़तीं, live containers का निरीक्षण नहीं करतीं, या runtime enforcement नहीं जोड़तीं।
+सैंडबॉक्स स्थिति नियमों में अनुमोदित सैंडबॉक्स मोड/बैकएंड अपेक्षित हो सकते हैं, होस्ट कंटेनर नेटवर्किंग और कंटेनर नेमस्पेस में जुड़ना अस्वीकार किया जा सकता है, केवल-पठन कंटेनर माउंट अपेक्षित हो सकते हैं, कंटेनर रनटाइम सॉकेट माउंट और अप्रतिबंधित कंटेनर प्रोफ़ाइल अस्वीकार किए जा सकते हैं तथा सैंडबॉक्स ब्राउज़र CDP स्रोत श्रेणियाँ अपेक्षित हो सकती हैं।
+ये जाँच केवल कॉन्फ़िग अनुरूपता देखती हैं; वे रनटाइम अनुमोदन स्थिति नहीं पढ़तीं, सक्रिय कंटेनरों की जाँच नहीं करतीं और न ही रनटाइम प्रवर्तन जोड़ती हैं।
 
-Data-handling rules sensitive logging redaction की आवश्यकता रख सकते हैं, telemetry
-content capture को deny कर सकते हैं, session retention maintenance की आवश्यकता रख सकते हैं, और session
-transcript memory indexing को deny कर सकते हैं। ये जाँचें केवल config conformance देखती हैं; वे
-raw logs, telemetry exports, transcripts, memory files, secrets,
-या personal data का निरीक्षण नहीं करतीं।
+डेटा-हैंडलिंग नियमों में संवेदनशील लॉगिंग संशोधन अपेक्षित हो सकता है, टेलीमेट्री सामग्री कैप्चर अस्वीकार किया जा सकता है, सत्र प्रतिधारण रखरखाव अपेक्षित हो सकता है और सत्र ट्रांसक्रिप्ट मेमोरी इंडेक्सिंग अस्वीकार की जा सकती है। ये जाँच केवल कॉन्फ़िग अनुरूपता देखती हैं; वे अपरिष्कृत लॉग, टेलीमेट्री निर्यात, ट्रांसक्रिप्ट, मेमोरी फ़ाइलों, सीक्रेट या व्यक्तिगत डेटा की जाँच नहीं करतीं।
 
-`scopes.<scopeName>` के अंतर्गत नामित policy scopes अपने सूचीबद्ध selector के लिए अधिक सख्त सामान्य policy
-sections जोड़ सकते हैं। `agentIds` `tools`,
-`agents.workspace`, `sandbox`, और `dataHandling.memory` का समर्थन करता है; `channelIds`
-`ingress.channels` का समर्थन करता है।
-Runtime agent ids जो `agents.list[]` में स्पष्ट रूप से सूचीबद्ध नहीं हैं, उन्हें बिना
-evidence के चुपचाप पास करने के बजाय inherited global/default posture के विरुद्ध जाँचा जाता है।
-`policy.jsonc` में मौजूद प्रत्येक scope अपने selector के लिए valid और enforceable
-होना चाहिए। Overlay rules अतिरिक्त claims हैं, इसलिए वे
-top-level policy को कमजोर नहीं करते और जब वही observed
-config दोनों scopes का उल्लंघन करता है तो अपने findings उत्पन्न कर सकते हैं।
+`scopes.<scopeName>` के अंतर्गत नामित नीति स्कोप, सूचीबद्ध चयनकर्ता के लिए अधिक कठोर सामान्य नीति अनुभाग जोड़ सकते हैं। `agentIds`, `tools`, `agents.workspace`, `sandbox` और `dataHandling.memory` का समर्थन करता है; `channelIds`, `ingress.channels` का समर्थन करता है।
+वे रनटाइम एजेंट आईडी, जो `agents.entries.*` में स्पष्ट रूप से सूचीबद्ध नहीं हैं, बिना किसी साक्ष्य के मौन रूप से सफल होने के बजाय इनहेरिट की गई वैश्विक/डिफ़ॉल्ट स्थिति के विरुद्ध जाँची जाती हैं। `policy.jsonc` में उपस्थित प्रत्येक स्कोप अपने चयनकर्ता के लिए मान्य और प्रवर्तनीय होना चाहिए। ओवरले नियम अतिरिक्त दावे हैं, इसलिए वे शीर्ष-स्तरीय नीति को कमज़ोर नहीं करते और जब वही देखी गई कॉन्फ़िग दोनों स्कोप का उल्लंघन करती है, तो वे अपने अलग निष्कर्ष प्रस्तुत कर सकते हैं।
 
 <!-- openclaw-plugin-reference:manual-end -->
 
 ## संबंधित दस्तावेज़
 
-- [policy](/hi/cli/policy)
+- [नीति](/hi/cli/policy)

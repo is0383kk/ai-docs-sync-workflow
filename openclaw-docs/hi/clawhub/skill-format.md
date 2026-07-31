@@ -1,77 +1,84 @@
 ---
 read_when:
     - Skills प्रकाशित करना
-    - प्रकाशन विफलताओं को डीबग करना
-summary: Skill फ़ोल्डर का प्रारूप, आवश्यक फ़ाइलें, अनुमत फ़ाइल प्रकार, सीमाएँ।
+    - प्रकाशन विफलताओं की डीबगिंग
+summary: Skills फ़ोल्डर का प्रारूप, आवश्यक फ़ाइलें, सहायक आर्टिफ़ैक्ट, सीमाएँ।
 x-i18n:
-    generated_at: "2026-07-04T20:32:58Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T17:49:32Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: bbd17c0b7a5c4e6ad6c554bdd3f604424283990503a1c493f49000fbfbb29712
+    source_hash: fdf16a589b8961ccd9181a53a9fa92a358952b9147d22eaf977f23e0b4b4d653
     source_path: clawhub/skill-format.md
     workflow: 16
 ---
 
-# स्किल फ़ॉर्मैट
+# Skill प्रारूप
 
 ## डिस्क पर
 
-स्किल एक फ़ोल्डर है।
+Skill एक फ़ोल्डर है।
 
 आवश्यक:
 
-- `SKILL.md` (या `skill.md`; लेगेसी `skills.md` भी स्वीकार किया जाता है)
+- `SKILL.md` (या `skill.md`; पुराना `skills.md` भी स्वीकार किया जाता है)
 
 वैकल्पिक:
 
-- कोई भी सहायक _टेक्स्ट-आधारित_ फ़ाइलें (“अनुमत फ़ाइलें” देखें)
-- `.clawhubignore` (प्रकाशन के लिए ignore पैटर्न, लेगेसी `.clawdhubignore`)
-- `.gitignore` (इसका भी सम्मान किया जाता है)
+- कोई भी सहायक नियमित फ़ाइलें (“Skill फ़ाइलें” देखें)
+- `.clawhubignore` (प्रकाशन के लिए अनदेखा करने के पैटर्न, पुराना `.clawdhubignore`)
+- `.gitignore` (इसका भी पालन किया जाता है)
 
-## GitHub इम्पोर्ट
+## GitHub आयात
 
-वेब GitHub इम्पोर्टर स्थानीय publish/sync से अधिक सख्त है। यह केवल
-साइन-इन किए गए GitHub खाते के स्वामित्व वाली सार्वजनिक, non-fork repositories में
-`SKILL.md` या लेगेसी `skills.md` फ़ाइलें खोजता है। यह private repos, forks,
-archived/disabled repos, या third-party public repos इम्पोर्ट नहीं करता।
+वेब GitHub आयातक स्थानीय प्रकाशन/सिंक की तुलना में अधिक सख्त है। यह केवल
+साइन-इन किए हुए GitHub खाते के स्वामित्व वाली सार्वजनिक, गैर-फ़ोर्क रिपॉज़िटरी में
+`SKILL.md` या पुरानी `skills.md` फ़ाइलें खोजता है। यह निजी रिपॉज़िटरी, फ़ोर्क,
+आर्काइव/अक्षम रिपॉज़िटरी या तृतीय-पक्ष की सार्वजनिक रिपॉज़िटरी आयात नहीं करता।
 
-स्थानीय install metadata (CLI द्वारा लिखा गया):
+स्थानीय इंस्टॉल मेटाडेटा (CLI द्वारा लिखा गया):
 
-- `<skill>/.clawhub/origin.json` (लेगेसी `.clawdhub`)
+- `<skill>/.clawhub/origin.json` (पुराना `.clawdhub`)
 
-Workdir install state (CLI द्वारा लिखा गया):
+कार्य-निर्देशिका इंस्टॉल स्थिति (CLI द्वारा लिखी गई):
 
-- `<workdir>/.clawhub/lock.json` (लेगेसी `.clawdhub`)
+- `<workdir>/.clawhub/lock.json` (पुराना `.clawdhub`)
 
 ## `SKILL.md`
 
-- वैकल्पिक YAML frontmatter के साथ Markdown।
-- publish के दौरान server frontmatter से metadata निकालता है।
-- `description` को UI/search में skill summary के रूप में उपयोग किया जाता है।
+- वैकल्पिक YAML फ्रंटमैटर वाला Markdown।
+- प्रकाशन के दौरान सर्वर फ्रंटमैटर से मेटाडेटा निकालता है।
+- `description` का उपयोग UI/खोज में Skill सारांश के रूप में किया जाता है।
 
-## Frontmatter metadata
+पोर्टेबल Agent Skills के लिए, `name` को मूल निर्देशिका से मेल खाना चाहिए और इसमें
+1–64 छोटे अक्षर, संख्याएँ या हाइफ़न होने चाहिए। ClawHub रूट किए जा सकने वाले स्लग और
+कैटलॉग प्रदर्शन नाम को अलग रखता है, इसलिए अन्य क्लाइंट के मौजूदा नाम
+प्रकाशित किए जा सकते हैं और उन्हें चुपचाप दोबारा नहीं लिखा जाता। कैटलॉग सूचियाँ लंबे नामों को
+संग्रहीत नाम बदले बिना दृश्य रूप से छोटा कर सकती हैं।
 
-Skill metadata आपकी `SKILL.md` के शीर्ष पर YAML frontmatter में घोषित किया जाता है। यह registry (और security analysis) को बताता है कि आपके skill को चलने के लिए क्या चाहिए।
+## फ्रंटमैटर मेटाडेटा
 
-### मूल frontmatter
+Skill मेटाडेटा आपके `SKILL.md` के शीर्ष पर YAML फ्रंटमैटर में घोषित किया जाता है। यह रजिस्ट्री (और सुरक्षा विश्लेषण) को बताता है कि आपके Skill को चलने के लिए क्या चाहिए।
+
+### मूल फ्रंटमैटर
 
 ```yaml
 ---
 name: my-skill
-description: Short summary of what this skill does.
+description: यह Skill क्या करता है, इसका संक्षिप्त सारांश।
 version: 1.0.0
 ---
 ```
 
-### Runtime metadata (`metadata.openclaw`)
+### रनटाइम मेटाडेटा (`metadata.openclaw`)
 
-अपने skill की runtime requirements को `metadata.openclaw` के अंतर्गत घोषित करें (aliases: `metadata.clawdbot`, `metadata.clawdis`)।
+अपने Skill की रनटाइम आवश्यकताएँ `metadata.openclaw` के अंतर्गत घोषित करें (उपनाम: `metadata.clawdbot`, `metadata.clawdis`)।
 
 ```yaml
 ---
 name: my-skill
-description: Manage tasks via the Todoist API.
+description: Todoist API के माध्यम से कार्यों का प्रबंधन करें।
 metadata:
   openclaw:
     requires:
@@ -83,30 +90,30 @@ metadata:
 ---
 ```
 
-उन environment variables के लिए `requires.env` का उपयोग करें जो skill चलने से पहले मौजूद होने चाहिए। जब आपको प्रति-variable metadata चाहिए, जिसमें `required: false` वाले वैकल्पिक variables शामिल हैं, तब `envVars` का उपयोग करें।
+उन पर्यावरण चरों के लिए `requires.env` का उपयोग करें, जिनका Skill चलने से पहले मौजूद होना आवश्यक है। प्रति-चर मेटाडेटा की आवश्यकता होने पर `envVars` का उपयोग करें, जिसमें `required: false` वाले वैकल्पिक चर भी शामिल हैं।
 
-### पूरा field reference
+### संपूर्ण फ़ील्ड संदर्भ
 
-| Field              | Type       | Description                                                                                                                                  |
+| फ़ील्ड              | प्रकार       | विवरण                                                                                                                                  |
 | ------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `requires.env`     | `string[]` | आवश्यक environment variables जिनकी आपके skill को अपेक्षा है।                                                                                 |
-| `requires.bins`    | `string[]` | CLI binaries जो सभी installed होने चाहिए।                                                                                                    |
-| `requires.anyBins` | `string[]` | CLI binaries जिनमें से कम से कम एक मौजूद होना चाहिए।                                                                                         |
-| `requires.config`  | `string[]` | Config file paths जिन्हें आपका skill पढ़ता है।                                                                                               |
-| `primaryEnv`       | `string`   | आपके skill के लिए मुख्य credential env var।                                                                                                  |
-| `envVars`          | `array`    | `name`, वैकल्पिक `required`, और वैकल्पिक `description` के साथ environment variable declarations। वैकल्पिक env vars के लिए `required: false` सेट करें। |
-| `always`           | `boolean`  | यदि `true`, skill हमेशा active रहता है (explicit install की आवश्यकता नहीं)।                                                                  |
-| `skillKey`         | `string`   | skill की invocation key को override करें।                                                                                                    |
-| `emoji`            | `string`   | skill के लिए display emoji।                                                                                                                  |
-| `homepage`         | `string`   | skill के homepage या docs का URL।                                                                                                            |
-| `os`               | `string[]` | OS restrictions (जैसे `["macos"]`, `["linux"]`)।                                                                                             |
-| `install`          | `array`    | dependencies के लिए install specs (नीचे देखें)।                                                                                              |
-| `nix`              | `object`   | Nix Plugin spec (README देखें)।                                                                                                              |
-| `config`           | `object`   | Clawdbot config spec (README देखें)।                                                                                                         |
+| `requires.env`     | `string[]` | वे आवश्यक पर्यावरण चर जिनकी आपका Skill अपेक्षा करता है।                                                                                           |
+| `requires.bins`    | `string[]` | वे CLI बाइनरी जिन्हें सभी को इंस्टॉल किया जाना आवश्यक है।                                                                                                     |
+| `requires.anyBins` | `string[]` | वे CLI बाइनरी जिनमें से कम-से-कम एक का मौजूद होना आवश्यक है।                                                                                                  |
+| `requires.config`  | `string[]` | वे कॉन्फ़िगरेशन फ़ाइल पथ जिन्हें आपका Skill पढ़ता है।                                                                                                          |
+| `primaryEnv`       | `string`   | आपके Skill के लिए मुख्य क्रेडेंशियल पर्यावरण चर।                                                                                                  |
+| `envVars`          | `array`    | `name`, वैकल्पिक `required` और वैकल्पिक `description` वाली पर्यावरण चर घोषणाएँ। वैकल्पिक पर्यावरण चरों के लिए `required: false` सेट करें। |
+| `always`           | `boolean`  | यदि `true`, तो Skill हमेशा सक्रिय रहता है (स्पष्ट इंस्टॉल की आवश्यकता नहीं)।                                                                              |
+| `skillKey`         | `string`   | Skill की आह्वान कुंजी को ओवरराइड करें।                                                                                                         |
+| `emoji`            | `string`   | Skill के लिए प्रदर्शन इमोजी।                                                                                                                 |
+| `homepage`         | `string`   | Skill के होमपेज या दस्तावेज़ों का URL।                                                                                                         |
+| `os`               | `string[]` | OS प्रतिबंध (उदा. `["macos"]`, `["linux"]`)।                                                                                             |
+| `install`          | `array`    | निर्भरताओं के लिए इंस्टॉल विनिर्देश (नीचे देखें)।                                                                                                  |
+| `nix`              | `object`   | Nix Plugin विनिर्देश (README देखें)।                                                                                                                |
+| `config`           | `object`   | Clawdbot कॉन्फ़िगरेशन विनिर्देश (README देखें)।                                                                                                           |
 
-### Install specs
+### इंस्टॉल विनिर्देश
 
-यदि आपके skill को dependencies installed चाहिए, तो उन्हें `install` array में घोषित करें:
+यदि आपके Skill को निर्भरताएँ इंस्टॉल करने की आवश्यकता है, तो उन्हें `install` सरणी में घोषित करें:
 
 ```yaml
 metadata:
@@ -120,11 +127,11 @@ metadata:
         bins: [tsc]
 ```
 
-समर्थित install kinds: `brew`, `node`, `go`, `uv`।
+समर्थित इंस्टॉल प्रकार: `brew`, `node`, `go`, `uv`।
 
-### वैकल्पिक environment variables
+### वैकल्पिक पर्यावरण चर
 
-वैकल्पिक environment variables को `metadata.openclaw.envVars` के अंतर्गत घोषित करें और `required: false` सेट करें। वैकल्पिक entries को `requires.env` में न जोड़ें, क्योंकि `requires.env` का अर्थ है कि skill उनके बिना नहीं चल सकता।
+वैकल्पिक पर्यावरण चरों को `metadata.openclaw.envVars` के अंतर्गत घोषित करें और `required: false` सेट करें। `requires.env` में वैकल्पिक प्रविष्टियाँ न जोड़ें, क्योंकि `requires.env` का अर्थ है कि उनके बिना Skill नहीं चल सकता।
 
 ```yaml
 metadata:
@@ -133,22 +140,22 @@ metadata:
     envVars:
       - name: TODOIST_API_KEY
         required: true
-        description: Todoist API token used for authenticated requests.
+        description: प्रमाणित अनुरोधों के लिए प्रयुक्त Todoist API टोकन।
       - name: TODOIST_PROJECT_ID
         required: false
-        description: Optional default project ID when the user does not specify one.
+        description: उपयोगकर्ता द्वारा कोई प्रोजेक्ट निर्दिष्ट न किए जाने पर वैकल्पिक डिफ़ॉल्ट प्रोजेक्ट ID।
 ```
 
-### यह क्यों मायने रखता है
+### यह क्यों महत्वपूर्ण है
 
-ClawHub का security analysis जांचता है कि आपका skill जो declare करता है वह वास्तव में जो करता है उससे मेल खाता है। यदि आपका code `TODOIST_API_KEY` को reference करता है लेकिन आपका frontmatter उसे `requires.env`, `primaryEnv`, या `envVars` के अंतर्गत declare नहीं करता, तो analysis metadata mismatch flag करेगा। declarations को सटीक रखने से आपका skill review पास करने में मदद मिलती है और users समझ पाते हैं कि वे क्या install कर रहे हैं।
+ClawHub का सुरक्षा विश्लेषण जाँचता है कि आपका Skill जो घोषित करता है, वह उसके वास्तविक कार्य से मेल खाता है। यदि आपका कोड `TODOIST_API_KEY` को संदर्भित करता है, लेकिन आपका फ्रंटमैटर इसे `requires.env`, `primaryEnv` या `envVars` के अंतर्गत घोषित नहीं करता, तो विश्लेषण मेटाडेटा बेमेल को चिह्नित करेगा। घोषणाओं को सटीक रखने से आपके Skill को समीक्षा उत्तीर्ण करने में सहायता मिलती है और उपयोगकर्ताओं को यह समझने में मदद मिलती है कि वे क्या इंस्टॉल कर रहे हैं।
 
-### उदाहरण: पूरा frontmatter
+### उदाहरण: संपूर्ण फ्रंटमैटर
 
 ```yaml
 ---
 name: todoist-cli
-description: Manage Todoist tasks, projects, and labels from the command line.
+description: कमांड लाइन से Todoist कार्यों, प्रोजेक्ट और लेबल का प्रबंधन करें।
 version: 1.2.0
 metadata:
   openclaw:
@@ -161,48 +168,51 @@ metadata:
     envVars:
       - name: TODOIST_API_KEY
         required: true
-        description: Todoist API token.
+        description: Todoist API टोकन।
       - name: TODOIST_PROJECT_ID
         required: false
-        description: Optional default project ID.
+        description: वैकल्पिक डिफ़ॉल्ट प्रोजेक्ट ID।
     emoji: "\u2705"
     homepage: https://github.com/example/todoist-cli
 ---
 ```
 
-## अनुमत फ़ाइलें
+## Skill फ़ाइलें
 
-publish द्वारा केवल “text-based” files स्वीकार की जाती हैं।
+प्रकाशन Skill फ़ोल्डर की सभी नियमित फ़ाइलें स्वीकार करता है, चाहे उनका एक्सटेंशन कुछ भी हो। अनदेखी की गई फ़ाइलों,
+छिपे हुए पथों, सिमलिंक, macOS मेटाडेटा और सर्वर-पक्षीय आकार सीमाओं पर प्रतिबंध फिर भी लागू होते हैं।
 
-- Extension allowlist `packages/schema/src/textFiles.ts` (`TEXT_FILE_EXTENSIONS`) में है।
-- Script files upload के बाद भी scanned होती हैं; PowerShell `.ps1`, `.psm1`, और `.psd1` files text के रूप में स्वीकार की जाती हैं।
-- `text/` से शुरू होने वाले content types को text माना जाता है; साथ ही एक छोटी allowlist (JSON/YAML/TOML/JS/TS/Markdown/SVG) है।
+- मान्य UTF-8 वाली सीमित आकार की फ़ाइलों का एस्केप किए गए सादे टेक्स्ट के रूप में पूर्वावलोकन किया जा सकता है और उन्हें
+  सीमित टेक्स्ट विश्लेषण में शामिल किया जाता है।
+- अन्य फ़ाइलें अपने सटीक बाइट बनाए रखती हैं और डाउनलोड के लिए उपलब्ध होती हैं।
+- सुरक्षा स्कैनर संपूर्ण संग्रहीत आर्टिफ़ैक्ट प्राप्त करते हैं; टेक्स्ट पहचान रेंडरिंग और
+  विश्लेषण से संबंधित है, अपलोड अनुमति-सूची से नहीं।
 
-Limits (server-side):
+सीमाएँ (सर्वर-पक्षीय):
 
-- Total bundle size: 50MB।
-- Embedding text में `SKILL.md` + लगभग 40 तक non-`.md` files शामिल होती हैं (best-effort cap)।
+- कुल बंडल आकार: 50MB।
+- एम्बेडिंग टेक्स्ट में `SKILL.md` + लगभग 40 तक सीमित आकार की UTF-8 फ़ाइलें शामिल होती हैं (यथासंभव सीमा)।
 
-## Slugs
+## स्लग
 
-- Default रूप से folder name से derived।
-- Package scopes को ClawHub publisher handle से ठीक-ठीक match करना चाहिए। Publisher handles lowercase letters, numbers, hyphens, dots, और underscores का उपयोग कर सकते हैं; उन्हें lowercase letter या number से शुरू और समाप्त होना चाहिए।
-- Package slugs lowercase और npm-safe होने चाहिए, उदाहरण के लिए `@example.tools/demo-plugin` या `demo-plugin`।
+- डिफ़ॉल्ट रूप से फ़ोल्डर नाम से प्राप्त होते हैं।
+- पैकेज स्कोप ClawHub प्रकाशक हैंडल से सटीक रूप से मेल खाने चाहिए। प्रकाशक हैंडल में छोटे अक्षर, संख्याएँ, हाइफ़न, बिंदु और अंडरस्कोर हो सकते हैं; उन्हें छोटे अक्षर या संख्या से शुरू और समाप्त होना चाहिए।
+- पैकेज स्लग छोटे अक्षरों में और npm-सुरक्षित होने चाहिए, उदाहरण के लिए `@example.tools/demo-plugin` या `demo-plugin`।
 
-## Versioning + tags
+## संस्करण निर्धारण + टैग
 
-- हर publish एक नया version (semver) बनाता है।
-- Tags किसी version के string pointers होते हैं; `latest` आम तौर पर उपयोग किया जाता है।
+- प्रत्येक प्रकाशन एक नया संस्करण (semver) बनाता है।
+- टैग किसी संस्करण के लिए स्ट्रिंग पॉइंटर होते हैं; `latest` का सामान्यतः उपयोग किया जाता है।
 
-## License
+## लाइसेंस
 
-- ClawHub पर published सभी skills `MIT-0` के अंतर्गत licensed हैं।
-- कोई भी published skills का उपयोग, modify, और redistribute कर सकता है, commercial रूप से भी।
-- Attribution आवश्यक नहीं है।
-- `SKILL.md` में conflicting license terms न जोड़ें; ClawHub per-skill license overrides का support नहीं करता।
+- ClawHub पर प्रकाशित सभी Skills को `MIT-0` के अंतर्गत लाइसेंस दिया जाता है।
+- कोई भी प्रकाशित Skills का उपयोग, संशोधन और पुनर्वितरण कर सकता है, जिसमें व्यावसायिक उपयोग भी शामिल है।
+- श्रेय देना आवश्यक नहीं है।
+- `SKILL.md` में परस्पर-विरोधी लाइसेंस शर्तें न जोड़ें; ClawHub प्रत्येक Skill के लिए अलग लाइसेंस ओवरराइड का समर्थन नहीं करता।
 
-## Paid skills
+## सशुल्क Skills
 
-- ClawHub paid skills, per-skill pricing, paywalls, या revenue sharing का support नहीं करता।
-- `SKILL.md` में pricing metadata न जोड़ें; यह skill format का हिस्सा नहीं है और published skill को paid नहीं बनाएगा।
-- यदि आपका skill किसी paid third-party service के साथ integrate करता है, तो external cost और required account को skill instructions और env declarations में स्पष्ट रूप से document करें (`requires.env` required variables के लिए, या वैकल्पिक variables के लिए `required: false` के साथ `envVars`)।
+- ClawHub सशुल्क Skills, प्रत्येक Skill के लिए मूल्य निर्धारण, पेवॉल या राजस्व साझाकरण का समर्थन नहीं करता।
+- `SKILL.md` में मूल्य निर्धारण मेटाडेटा न जोड़ें; यह Skill प्रारूप का भाग नहीं है और किसी प्रकाशित Skill को सशुल्क नहीं बनाएगा।
+- यदि आपका Skill किसी सशुल्क तृतीय-पक्ष सेवा के साथ एकीकृत होता है, तो बाहरी लागत और आवश्यक खाते को Skill निर्देशों और पर्यावरण घोषणाओं में स्पष्ट रूप से दर्ज करें (आवश्यक चरों के लिए `requires.env`, या वैकल्पिक चरों के लिए `envVars` के साथ `required: false`)।

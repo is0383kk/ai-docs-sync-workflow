@@ -1,65 +1,66 @@
 ---
 read_when:
     - आप Synthetic को मॉडल प्रदाता के रूप में उपयोग करना चाहते हैं
-    - आपको एक Synthetic API कुंजी या बेस URL सेटअप की आवश्यकता है
-summary: OpenClaw में Synthetic के Anthropic-संगत API का उपयोग करें
-title: कृत्रिम
+    - आपको Synthetic API कुंजी या बेस URL सेटअप की आवश्यकता है
+summary: OpenClaw में Synthetic की Anthropic-संगत API का उपयोग करें
+title: Synthetic
 x-i18n:
-    generated_at: "2026-06-29T00:03:31Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:55:43Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 81a48573782d46f0b018d19ab607729b236c241e57535e4af52eb8c142fee59b
+    source_hash: c3f6cc89a7b837f57555d176ce78e62a39095d4ef0765c96b6b7b93ffebd7388
     source_path: providers/synthetic.md
     workflow: 16
 ---
 
-[Synthetic](https://synthetic.new) Anthropic-संगत एंडपॉइंट्स उपलब्ध कराता है।
-OpenClaw इसे `synthetic` provider के रूप में पंजीकृत करता है और Anthropic
+[Synthetic](https://synthetic.new) Anthropic-संगत एंडपॉइंट उपलब्ध कराता है।
+OpenClaw इसे `synthetic` प्रदाता के रूप में बंडल करता है और Anthropic
 Messages API का उपयोग करता है।
 
-| गुण | मान                                   |
+| गुण      | मान                                   |
 | -------- | ------------------------------------- |
-| Provider | `synthetic`                           |
-| Auth     | `SYNTHETIC_API_KEY`                   |
+| प्रदाता  | `synthetic`                    |
+| प्रमाणीकरण | `SYNTHETIC_API_KEY`                  |
 | API      | Anthropic Messages                    |
-| बेस URL | `https://api.synthetic.new/anthropic` |
+| बेस URL  | `https://api.synthetic.new/anthropic`                    |
 
-## शुरू करना
+## शुरुआत करना
 
 <Steps>
   <Step title="API कुंजी प्राप्त करें">
-    अपने Synthetic खाते से `SYNTHETIC_API_KEY` प्राप्त करें, या ऑनबोर्डिंग
-    विज़ार्ड को आपसे एक कुंजी मांगने दें।
+    अपने Synthetic खाते से `SYNTHETIC_API_KEY` प्राप्त करें, या ऑनबोर्डिंग को
+    इसके लिए आपसे पूछने दें।
   </Step>
-  <Step title="ऑनबोर्डिंग चलाएं">
+  <Step title="ऑनबोर्डिंग चलाएँ">
     ```bash
     openclaw onboard --auth-choice synthetic-api-key
     ```
   </Step>
   <Step title="डिफ़ॉल्ट मॉडल सत्यापित करें">
-    ऑनबोर्डिंग के बाद डिफ़ॉल्ट मॉडल इस पर सेट होता है:
-    ```
-    synthetic/hf:MiniMaxAI/MiniMax-M2.5
+    ऑनबोर्डिंग डिफ़ॉल्ट मॉडल को इस पर सेट करती है:
+    ```text
+    synthetic/hf:MiniMaxAI/MiniMax-M3
     ```
   </Step>
 </Steps>
 
 <Warning>
-OpenClaw का Anthropic क्लाइंट बेस URL में अपने आप `/v1` जोड़ता है, इसलिए
-`https://api.synthetic.new/anthropic` का उपयोग करें (`/anthropic/v1` नहीं)। अगर Synthetic
-अपना बेस URL बदलता है, तो `models.providers.synthetic.baseUrl` ओवरराइड करें।
+OpenClaw का Anthropic क्लाइंट बेस URL में `/v1` स्वतः जोड़ता है, इसलिए
+`https://api.synthetic.new/anthropic` का उपयोग करें (`/anthropic/v1` का नहीं)। यदि Synthetic
+अपना बेस URL बदलता है, तो `models.providers.synthetic.baseUrl` को ओवरराइड करें।
 </Warning>
 
-## कॉन्फ़िग उदाहरण
+## कॉन्फ़िगरेशन उदाहरण
 
 ```json5
 {
   env: { SYNTHETIC_API_KEY: "sk-..." },
   agents: {
     defaults: {
-      model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M2.5" },
-      models: { "synthetic/hf:MiniMaxAI/MiniMax-M2.5": { alias: "MiniMax M2.5" } },
+      model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M3" },
+      models: { "synthetic/hf:MiniMaxAI/MiniMax-M3": { alias: "MiniMax M3" } },
     },
   },
   models: {
@@ -71,12 +72,12 @@ OpenClaw का Anthropic क्लाइंट बेस URL में अप�
         api: "anthropic-messages",
         models: [
           {
-            id: "hf:MiniMaxAI/MiniMax-M2.5",
-            name: "MiniMax M2.5",
-            reasoning: false,
-            input: ["text"],
+            id: "hf:MiniMaxAI/MiniMax-M3",
+            name: "MiniMax M3",
+            reasoning: true,
+            input: ["text", "image"],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-            contextWindow: 192000,
+            contextWindow: 262144,
             maxTokens: 65536,
           },
         ],
@@ -88,46 +89,33 @@ OpenClaw का Anthropic क्लाइंट बेस URL में अप�
 
 ## अंतर्निहित कैटलॉग
 
-सभी Synthetic मॉडल लागत `0` (इनपुट/आउटपुट/कैश) का उपयोग करते हैं।
+सभी Synthetic मॉडल लागत `0` (इनपुट/आउटपुट/कैश) का उपयोग करते हैं। सेवा की उपलब्धता के लिए Synthetic की
+[वर्तमान मॉडल सूची](https://dev.synthetic.new/docs/api/models) देखें।
 
-| मॉडल ID                                               | संदर्भ विंडो | अधिकतम टोकन | रीजनिंग | इनपुट        |
-| ------------------------------------------------------ | -------------- | ---------- | --------- | ------------ |
-| `hf:MiniMaxAI/MiniMax-M2.5`                            | 192,000        | 65,536     | नहीं        | टेक्स्ट         |
-| `hf:moonshotai/Kimi-K2-Thinking`                       | 256,000        | 8,192      | हाँ       | टेक्स्ट         |
-| `hf:zai-org/GLM-4.7`                                   | 198,000        | 128,000    | नहीं        | टेक्स्ट         |
-| `hf:deepseek-ai/DeepSeek-R1-0528`                      | 128,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:deepseek-ai/DeepSeek-V3-0324`                      | 128,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:deepseek-ai/DeepSeek-V3.1`                         | 128,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:deepseek-ai/DeepSeek-V3.1-Terminus`                | 128,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:deepseek-ai/DeepSeek-V3.2`                         | 159,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:meta-llama/Llama-3.3-70B-Instruct`                 | 128,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8` | 524,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:moonshotai/Kimi-K2-Instruct-0905`                  | 256,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:moonshotai/Kimi-K2.5`                              | 256,000        | 8,192      | हाँ       | टेक्स्ट + छवि |
-| `hf:openai/gpt-oss-120b`                               | 128,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:Qwen/Qwen3-235B-A22B-Instruct-2507`                | 256,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:Qwen/Qwen3-Coder-480B-A35B-Instruct`               | 256,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:Qwen/Qwen3-VL-235B-A22B-Instruct`                  | 250,000        | 8,192      | नहीं        | टेक्स्ट + छवि |
-| `hf:zai-org/GLM-4.5`                                   | 128,000        | 128,000    | नहीं        | टेक्स्ट         |
-| `hf:zai-org/GLM-4.6`                                   | 198,000        | 128,000    | नहीं        | टेक्स्ट         |
-| `hf:zai-org/GLM-5`                                     | 256,000        | 128,000    | हाँ       | टेक्स्ट + छवि |
-| `hf:deepseek-ai/DeepSeek-V3`                           | 128,000        | 8,192      | नहीं        | टेक्स्ट         |
-| `hf:Qwen/Qwen3-235B-A22B-Thinking-2507`                | 256,000        | 8,192      | हाँ       | टेक्स्ट         |
+| मॉडल ID                                             | कॉन्टेक्स्ट विंडो | अधिकतम टोकन | रीजनिंग | इनपुट       |
+| --------------------------------------------------- | ---------------- | ------------ | -------- | ----------- |
+| `hf:MiniMaxAI/MiniMax-M3`                                  | 262,144          | 65,536       | हाँ      | टेक्स्ट + इमेज |
+| `hf:moonshotai/Kimi-K2.7-Code`                                  | 262,144          | 8,192        | हाँ      | टेक्स्ट + इमेज |
+| `hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4`                                  | 262,144          | 8,192        | हाँ      | टेक्स्ट      |
+| `hf:openai/gpt-oss-120b`                                  | 131,072          | 8,192        | हाँ      | टेक्स्ट      |
+| `hf:Qwen/Qwen3.6-27B`                                  | 262,144          | 81,920       | हाँ      | टेक्स्ट + इमेज |
+| `hf:zai-org/GLM-4.7-Flash`                                  | 196,608          | 131,072      | हाँ      | टेक्स्ट      |
+| `hf:zai-org/GLM-5.2`                                  | 524,288          | 131,072      | हाँ      | टेक्स्ट      |
 
 <Tip>
-मॉडल refs `synthetic/<modelId>` रूप का उपयोग करते हैं। अपने खाते पर उपलब्ध सभी
-मॉडल देखने के लिए `openclaw models list --provider synthetic` का उपयोग करें।
+मॉडल संदर्भ `synthetic/<modelId>` प्रारूप का उपयोग करते हैं। अपने
+खाते पर उपलब्ध सभी मॉडल देखने के लिए `openclaw models list --provider synthetic` का उपयोग करें।
 </Tip>
 
 <AccordionGroup>
-  <Accordion title="मॉडल allowlist">
-    अगर आप मॉडल allowlist (`agents.defaults.models`) सक्षम करते हैं, तो वह हर
-    Synthetic मॉडल जोड़ें जिसे आप उपयोग करने की योजना बनाते हैं। allowlist में नहीं मौजूद मॉडल
-    agent से छिपा दिए जाएंगे।
+  <Accordion title="मॉडल अनुमति-सूची">
+    यदि आप मॉडल अनुमति-सूची (`agents.defaults.modelPolicy.allow`) सक्षम करते हैं, तो उपयोग किए जाने वाले प्रत्येक
+    Synthetic मॉडल को जोड़ें। अनुमति-सूची में शामिल न होने वाले मॉडल एजेंट से
+    छिपे रहते हैं।
   </Accordion>
 
   <Accordion title="बेस URL ओवरराइड">
-    अगर Synthetic अपना API एंडपॉइंट बदलता है, तो अपने कॉन्फ़िग में बेस URL ओवरराइड करें:
+    यदि Synthetic अपना API एंडपॉइंट बदलता है, तो बेस URL को ओवरराइड करें:
 
     ```json5
     {
@@ -141,7 +129,7 @@ OpenClaw का Anthropic क्लाइंट बेस URL में अप�
     }
     ```
 
-    याद रखें कि OpenClaw अपने आप `/v1` जोड़ता है।
+    OpenClaw अब भी `/v1` स्वतः जोड़ता है।
 
   </Accordion>
 </AccordionGroup>
@@ -149,11 +137,11 @@ OpenClaw का Anthropic क्लाइंट बेस URL में अप�
 ## संबंधित
 
 <CardGroup cols={2}>
-  <Card title="मॉडल चयन" href="/hi/concepts/model-providers" icon="layers">
-    Provider नियम, मॉडल refs, और failover व्यवहार।
+  <Card title="मॉडल प्रदाता" href="/hi/concepts/model-providers" icon="layers">
+    प्रदाता नियम, मॉडल संदर्भ और फ़ेलओवर व्यवहार।
   </Card>
   <Card title="कॉन्फ़िगरेशन संदर्भ" href="/hi/gateway/configuration-reference" icon="gear">
-    provider सेटिंग्स सहित पूरा कॉन्फ़िग schema।
+    प्रदाता सेटिंग सहित पूरा कॉन्फ़िगरेशन स्कीमा।
   </Card>
   <Card title="Synthetic" href="https://synthetic.new" icon="arrow-up-right-from-square">
     Synthetic डैशबोर्ड और API दस्तावेज़।

@@ -1,20 +1,21 @@
 ---
 read_when:
     - Je wilt OpenClaw via een LiteLLM-proxy routeren
-    - Je hebt kostentracering, logboekregistratie of modelroutering via LiteLLM nodig
+    - Je hebt kostentracking, logboekregistratie of modelroutering via LiteLLM nodig
 summary: Voer OpenClaw uit via LiteLLM Proxy voor uniforme modeltoegang en kostenregistratie
 title: LiteLLM
 x-i18n:
-    generated_at: "2026-07-12T09:19:41Z"
+    generated_at: "2026-07-27T06:31:19Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 797b7d02a80a4cd37b92553665e260532af49e011398202d3504a28c511cee2f
+    source_hash: 22451f0eefcf991a602409701fc752f97600a67752c67304137c7f17f3dd1a16
     source_path: providers/litellm.md
     workflow: 16
 ---
 
-[LiteLLM](https://litellm.ai) is een opensource-LLM-gateway met één uniforme API voor meer dan 100 modelproviders. Leid OpenClaw via LiteLLM voor gecentraliseerde kostentracering, logboekregistratie, virtuele sleutels met bestedingslimieten en failover van backends, zonder de OpenClaw-configuratie te wijzigen.
+[LiteLLM](https://litellm.ai) is een opensource-LLM-gateway met één uniforme API voor meer dan 100 modelproviders. Routeer OpenClaw via LiteLLM voor gecentraliseerde kostentracering, logregistratie, virtuele sleutels met bestedingslimieten en failover van backends zonder de OpenClaw-configuratie te wijzigen.
 
 ## Snel aan de slag
 
@@ -24,7 +25,7 @@ x-i18n:
     openclaw onboard --auth-choice litellm-api-key
     ```
 
-    Geef voor een niet-interactieve configuratie met een externe proxy de proxy-URL expliciet door:
+    Geef voor een niet-interactieve configuratie met een externe proxy de proxy-URL expliciet op:
 
     ```bash
     openclaw onboard --non-interactive --accept-risk --auth-choice litellm-api-key \
@@ -41,7 +42,7 @@ x-i18n:
         litellm --model claude-opus-4-6
         ```
       </Step>
-      <Step title="OpenClaw naar LiteLLM laten verwijzen">
+      <Step title="OpenClaw naar LiteLLM verwijzen">
         ```bash
         export LITELLM_API_KEY="your-litellm-key"
         openclaw
@@ -90,11 +91,13 @@ x-i18n:
 }
 ```
 
-Het standaardmodel dat de onboarding schrijft, is `litellm/claude-opus-4-6`.
+Het standaardmodel dat de onboarding wegschrijft, is `litellm/claude-opus-4-6`.
 
 ## Afbeeldingen genereren
 
-LiteLLM kan de `image_generate`-tool ondersteunen via OpenAI-compatibele routes voor `/images/generations` en `/images/edits`. Het standaardafbeeldingsmodel is `gpt-image-2`; configureer een ander model onder `agents.defaults.imageGenerationModel`:
+LiteLLM kan de tool `image_generate` ondersteunen via OpenAI-compatibele routes voor `/images/generations` en
+`/images/edits`. Het standaardmodel voor afbeeldingen is `gpt-image-2`; configureer een ander model onder
+`agents.defaults.mediaModels.image`:
 
 ```json5
 {
@@ -117,7 +120,9 @@ LiteLLM kan de `image_generate`-tool ondersteunen via OpenAI-compatibele routes 
 }
 ```
 
-LiteLLM-URL's via local loopback (`http://localhost:4000`, `127.0.0.1`, `::1`, `host.docker.internal`) werken zonder een algemene uitzondering voor privénetwerken. Stel voor een proxy die op het LAN wordt gehost `models.providers.litellm.request.allowPrivateNetwork: true` in, omdat de API-sleutel naar die host wordt verzonden.
+Lokale loopback-URL's van LiteLLM (`http://localhost:4000`, `127.0.0.1`, `::1`, `host.docker.internal`) werken
+zonder een globale overschrijving voor privénetwerken. Stel voor een proxy die op het LAN wordt gehost
+`models.providers.litellm.request.allowPrivateNetwork: true` in, omdat de API-sleutel naar die host wordt verzonden.
 
 ## Geavanceerd
 
@@ -141,7 +146,7 @@ LiteLLM-URL's via local loopback (`http://localhost:4000`, `127.0.0.1`, `::1`, `
   </Accordion>
 
   <Accordion title="Modelroutering">
-    LiteLLM kan modelaanvragen naar verschillende backends routeren. Configureer dit in uw LiteLLM-`config.yaml`:
+    LiteLLM kan modelaanvragen naar verschillende backends routeren. Configureer dit in je LiteLLM-`config.yaml`:
 
     ```yaml
     model_list:
@@ -176,10 +181,11 @@ LiteLLM-URL's via local loopback (`http://localhost:4000`, `127.0.0.1`, `::1`, `
   <Accordion title="Opmerkingen over proxygedrag">
     - LiteLLM draait standaard op `http://localhost:4000`.
     - OpenClaw maakt verbinding via LiteLLM's proxyachtige, OpenAI-compatibele `/v1`-eindpunt.
-    - Aanpassing van aanvragen die uitsluitend voor de native OpenAI-integratie geldt, wordt niet toegepast via een geconfigureerde LiteLLM-basis-URL:
-      geen `service_tier`, geen Responses-`store`, geen aanwijzingen voor promptcaching en geen OpenAI-specifieke aanpassing van de payload voor de redeneerintensiteit.
+    - Aanvraagvorming die uitsluitend voor het oorspronkelijke OpenAI geldt, wordt niet toegepast via een geconfigureerde LiteLLM-basis-URL:
+      geen `service_tier`, geen Responses-`store`, geen hints voor promptcaching en geen vorming van
+      OpenAI-payloads voor reasoning effort.
     - Verborgen OpenClaw-toeschrijvingsheaders (`originator`, `version`, `User-Agent`) worden alleen naar
-      geverifieerde native OpenAI-eindpunten verzonden en worden daarom niet aan een aangepaste LiteLLM-basis-URL toegevoegd.
+      geverifieerde oorspronkelijke OpenAI-eindpunten verzonden en worden dus niet in een aangepaste LiteLLM-basis-URL geïnjecteerd.
   </Accordion>
 </AccordionGroup>
 

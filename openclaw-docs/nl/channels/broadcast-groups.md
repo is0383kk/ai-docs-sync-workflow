@@ -1,17 +1,18 @@
 ---
 read_when:
     - Broadcastgroepen configureren
-    - Antwoorden van meerdere agents debuggen in WhatsApp
+    - Fouten opsporen in antwoorden van meerdere agents in WhatsApp
 sidebarTitle: Broadcast groups
 status: experimental
-summary: Stuur een WhatsApp-bericht naar meerdere agents tegelijk
+summary: Zend een WhatsApp-bericht naar meerdere agents tegelijk
 title: Uitzendgroepen
 x-i18n:
-    generated_at: "2026-07-12T08:36:06Z"
+    generated_at: "2026-07-27T04:46:50Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2771c15b31592f11293385498b9c89decf84747a9172caafb994a5dca4bbdc06
+    source_hash: a468e4c65d2cc89bda24e8e599f8a45015e3f77f1073612b105daed8877c0ff9
     source_path: channels/broadcast-groups.md
     workflow: 16
 ---
@@ -22,9 +23,9 @@ x-i18n:
 
 ## Overzicht
 
-Broadcastgroepen voeren **meerdere agents** uit voor hetzelfde inkomende bericht. Elke agent verwerkt het bericht in een eigen geïsoleerde sessie en plaatst een eigen antwoord, zodat één WhatsApp-nummer in één groepschat of privébericht een team van gespecialiseerde agents kan huisvesten.
+Broadcastgroepen voeren **meerdere agents** uit voor hetzelfde inkomende bericht. Elke agent verwerkt het bericht in een eigen geïsoleerde sessie en plaatst een eigen antwoord, zodat één WhatsApp-nummer in één groepschat of DM een team van gespecialiseerde agents kan huisvesten.
 
-Broadcastgroepen worden geëvalueerd na de toestemmingslijsten van het kanaal en de activeringsregels voor groepen. In WhatsApp-groepen vinden broadcasts plaats wanneer OpenClaw normaal gesproken zou antwoorden (bijvoorbeeld bij een vermelding, afhankelijk van je groepsinstellingen). Ze veranderen alleen **welke agents worden uitgevoerd**, nooit of een bericht voor verwerking in aanmerking komt.
+Broadcastgroepen worden geëvalueerd na kanaaltoelatingslijsten en groepsactiveringsregels. In WhatsApp-groepen vinden broadcasts plaats wanneer OpenClaw normaal gesproken zou antwoorden (bijvoorbeeld: bij een vermelding, afhankelijk van je groepsinstellingen). Ze veranderen alleen **welke agents worden uitgevoerd**, nooit of een bericht voor verwerking in aanmerking komt.
 
 De live WhatsApp-QA-lane bevat `whatsapp-broadcast-group-fanout`, waarmee wordt gecontroleerd of één groepsbericht met een vermelding afzonderlijke zichtbare antwoorden van twee geconfigureerde agents kan opleveren.
 
@@ -32,10 +33,10 @@ De live WhatsApp-QA-lane bevat `whatsapp-broadcast-group-fanout`, waarmee wordt 
 
 ### Basisconfiguratie
 
-Voeg een `broadcast`-sectie op het hoogste niveau toe (naast `bindings`). De sleutels zijn WhatsApp-peer-id's en de waarden zijn arrays met agent-id's:
+Voeg een `broadcast`-sectie op het hoogste niveau toe (naast `bindings`). Sleutels zijn WhatsApp-peer-id's, waarden zijn arrays met agent-id's:
 
-- groepschats: groeps-JID (bijvoorbeeld `120363403215116621@g.us`)
-- privéberichten: E.164-telefoonnummer van de afzender (bijvoorbeeld `+15551234567`)
+- groepschats: groeps-JID (bijv. `120363403215116621@g.us`)
+- DM's: E.164-telefoonnummer van de afzender (bijv. `+15551234567`)
 
 ```json
 {
@@ -47,16 +48,16 @@ Voeg een `broadcast`-sectie op het hoogste niveau toe (naast `bindings`). De sle
 
 **Resultaat:** wanneer OpenClaw in deze chat zou antwoorden, worden alle drie de agents uitgevoerd.
 
-Elke vermelde agent-id moet bestaan in `agents.list`: configuratievalidatie meldt onbekende id's en de runtime slaat deze over met de waarschuwing `Broadcast agent <id> not found in agents.list; skipping`.
+Elke vermelde agent-id moet bestaan in `agents.entries`: configuratievalidatie meldt onbekende id's en de runtime slaat deze over met een `Broadcast agent <id> not found in agents.entries; skipping`-waarschuwing.
 
 ### Verwerkingsstrategie
 
 `broadcast.strategy` bepaalt hoe agents het bericht verwerken:
 
-| Strategie            | Gedrag                                                                 |
-| -------------------- | ---------------------------------------------------------------------- |
-| `parallel` (standaard) | Alle agents verwerken het bericht gelijktijdig; antwoorden kunnen in elke volgorde aankomen. |
-| `sequential`         | Agents verwerken het bericht in arrayvolgorde; elke agent wacht tot de vorige klaar is. |
+| Strategie             | Gedrag                                                                |
+| -------------------- | --------------------------------------------------------------------- |
+| `parallel` (standaard) | Alle agents verwerken gelijktijdig; antwoorden komen in willekeurige volgorde binnen. |
+| `sequential`         | Agents verwerken in arrayvolgorde; elke agent wacht tot de vorige klaar is. |
 
 ```json
 {
@@ -102,16 +103,16 @@ Elke vermelde agent-id moet bestaan in `agents.list`: configuratievalidatie meld
 }
 ```
 
-## Werking
+## Hoe het werkt
 
-### Berichtstroom
+### Berichtenstroom
 
 <Steps>
   <Step title="Inkomend bericht arriveert">
-    Er komt een WhatsApp-groepsbericht of privébericht binnen.
+    Er komt een WhatsApp-groepsbericht of DM binnen.
   </Step>
   <Step title="Routering en toelating">
-    OpenClaw past toestemmingslijsten voor kanalen, activeringsregels voor groepen en het geconfigureerde eigenaarschap van ACP-bindingen toe.
+    OpenClaw past kanaaltoelatingslijsten, groepsactiveringsregels en het geconfigureerde eigenaarschap van ACP-bindingen toe.
   </Step>
   <Step title="Broadcastcontrole">
     Als geen geconfigureerde ACP-binding eigenaar is van de route, controleert OpenClaw of de peer-id in `broadcast` staat.
@@ -119,32 +120,32 @@ Elke vermelde agent-id moet bestaan in `agents.list`: configuratievalidatie meld
   <Step title="Als broadcast van toepassing is">
     - Alle vermelde agents verwerken het bericht.
     - Elke agent heeft een eigen sessiesleutel en geïsoleerde context.
-    - Agents verwerken het bericht parallel (standaard) of sequentieel.
-    - Audiobijlagen worden vóór de fan-out één keer getranscribeerd, zodat agents één transcript delen in plaats van afzonderlijke STT-aanroepen uit te voeren.
+    - Agents verwerken parallel (standaard) of sequentieel.
+    - Audiobijlagen worden vóór de fan-out eenmaal getranscribeerd, zodat agents één transcript delen in plaats van afzonderlijke STT-aanroepen te doen.
 
   </Step>
   <Step title="Als broadcast niet van toepassing is">
-    OpenClaw verzendt het bericht via de gewone route of de geconfigureerde ACP-sessieroute die tijdens de routering is geselecteerd.
+    OpenClaw verzendt naar de gewone route of de geconfigureerde ACP-sessieroute die tijdens de routering is geselecteerd.
   </Step>
 </Steps>
 
 <Note>
-Broadcastgroepen omzeilen geen toestemmingslijsten voor kanalen of activeringsregels voor groepen (vermeldingen/opdrachten/enzovoort). Ze veranderen alleen _welke agents worden uitgevoerd_ wanneer een bericht voor verwerking in aanmerking komt.
+Broadcastgroepen omzeilen geen kanaaltoelatingslijsten of groepsactiveringsregels (vermeldingen/opdrachten/enz.). Ze veranderen alleen _welke agents worden uitgevoerd_ wanneer een bericht voor verwerking in aanmerking komt.
 </Note>
 
 ### Sessie-isolatie
 
-Elke agent in een broadcastgroep onderhoudt volledig afzonderlijke:
+Elke agent in een broadcastgroep houdt het volgende volledig gescheiden:
 
-- **Sessiesleutels** (`agent:alfred:whatsapp:group:120363...` tegenover `agent:baerbel:whatsapp:group:120363...`)
+- **Sessiesleutels** (`agent:alfred:whatsapp:group:120363...` versus `agent:baerbel:whatsapp:group:120363...`)
 - **Gespreksgeschiedenis** (een agent ziet de antwoorden van andere agents niet)
-- **Werkruimte** (afzonderlijke sandboxes, indien geconfigureerd)
-- **Toegang tot tools** (verschillende lijsten voor toestaan/weigeren)
-- **Geheugen/context** (afzonderlijke `IDENTITY.md`, `SOUL.md`, enzovoort)
+- **Werkruimte** (afzonderlijke sandboxes indien geconfigureerd)
+- **Toegang tot tools** (verschillende toestaan/weigeren-lijsten)
+- **Geheugen/context** (afzonderlijke `IDENTITY.md`, `SOUL.md`, enz.)
 
-Eén uitzondering wordt bewust gedeeld: de **groepscontextbuffer** (recente groepsberichten die als context worden gebruikt) wordt per peer gedeeld, zodat alle broadcastagents bij activering dezelfde context zien. Deze buffer wordt eenmaal gewist nadat de fan-out is voltooid.
+Eén uitzondering wordt bewust gedeeld: de **groepscontextbuffer** (recente groepsberichten die als context worden gebruikt) wordt per peer gedeeld, zodat alle broadcastagents bij activering dezelfde context zien. Deze wordt eenmaal gewist nadat de fan-out is voltooid.
 
-Hierdoor kan elke agent een andere persoonlijkheid, andere modellen, andere Skills en andere toegang tot tools hebben (bijvoorbeeld alleen-lezen tegenover lezen en schrijven).
+Hierdoor kan elke agent andere persoonlijkheden, modellen, Skills en toegang tot tools hebben (bijvoorbeeld alleen-lezen versus lezen-en-schrijven).
 
 ### Voorbeeld: geïsoleerde sessies
 
@@ -153,34 +154,34 @@ In groep `120363403215116621@g.us` met agents `["alfred", "baerbel"]`:
 <Tabs>
   <Tab title="Context van Alfred">
     ```text
-    Session: agent:alfred:whatsapp:group:120363403215116621@g.us
-    History: [user message, alfred's previous responses]
-    Workspace: ~/openclaw-alfred/
-    Tools: read, write, exec
+    Sessie: agent:alfred:whatsapp:group:120363403215116621@g.us
+    Geschiedenis: [gebruikersbericht, eerdere antwoorden van alfred]
+    Werkruimte: ~/openclaw-alfred/
+    Tools: lezen, schrijven, uitvoeren
     ```
   </Tab>
   <Tab title="Context van Baerbel">
     ```text
-    Session: agent:baerbel:whatsapp:group:120363403215116621@g.us
-    History: [user message, baerbel's previous responses]
-    Workspace: ~/openclaw-baerbel/
-    Tools: read only
+    Sessie: agent:baerbel:whatsapp:group:120363403215116621@g.us
+    Geschiedenis: [gebruikersbericht, eerdere antwoorden van baerbel]
+    Werkruimte: ~/openclaw-baerbel/
+    Tools: alleen-lezen
     ```
   </Tab>
 </Tabs>
 
 ## Gebruiksscenario's
 
-- **Gespecialiseerde agentteams**: een ontwikkelaarsgroep waarin `code-reviewer`, `security-auditor`, `test-generator` en `docs-checker` hetzelfde bericht elk vanuit hun eigen invalshoek beantwoorden.
-- **Meertalige ondersteuning**: één ondersteuningschat waarin `support-en`, `support-de` en `support-es` in hun eigen taal antwoorden.
-- **Kwaliteitsborging**: `support-agent` antwoordt terwijl `qa-agent` het antwoord beoordeelt en alleen reageert als er problemen worden gevonden.
+- **Gespecialiseerde agentteams**: een ontwikkelgroep waarin `code-reviewer`, `security-auditor`, `test-generator` en `docs-checker` elk vanuit hun eigen invalshoek op hetzelfde bericht antwoorden.
+- **Meertalige ondersteuning**: één supportchat waarin `support-en`, `support-de` en `support-es` in hun eigen taal antwoorden.
+- **Kwaliteitsborging**: `support-agent` antwoordt terwijl `qa-agent` controleert en alleen reageert wanneer er problemen worden gevonden.
 - **Taakautomatisering**: `task-tracker`, `time-logger` en `report-generator` verwerken allemaal dezelfde statusupdate.
 
 ## Aanbevolen werkwijzen
 
 <AccordionGroup>
   <Accordion title="1. Houd agents gericht">
-    Geef elke agent één duidelijke verantwoordelijkheid (`formatter`, `linter`, `tester`) in plaats van één algemene agent zoals "dev-helper".
+    Geef elke agent één duidelijke verantwoordelijkheid (`formatter`, `linter`, `tester`) in plaats van één algemene "dev-helper"-agent.
   </Accordion>
   <Accordion title="2. Gebruik beschrijvende id's en namen">
     ```json
@@ -207,14 +208,14 @@ In groep `120363403215116621@g.us` met agents `["alfred", "baerbel"]`:
     }
     ```
 
-    `reviewer` heeft alleen-lezen-toegang. `fixer` kan lezen en schrijven.
+    `reviewer` is alleen-lezen. `fixer` kan lezen en schrijven.
 
   </Accordion>
   <Accordion title="4. Bewaak de prestaties">
     Geef bij veel agents de voorkeur aan `"strategy": "parallel"` (standaard), beperk broadcastgroepen tot een handvol agents en gebruik snellere modellen voor eenvoudigere agents.
   </Accordion>
   <Accordion title="5. Fouten blijven geïsoleerd">
-    Agents kunnen onafhankelijk mislukken. De fout van één agent wordt geregistreerd (`Broadcast agent <id> failed: ...`) en blokkeert de andere agents niet.
+    Agents mislukken onafhankelijk van elkaar. De fout van één agent wordt geregistreerd (`Broadcast agent <id> failed: ...`) en blokkeert de andere agents niet.
   </Accordion>
 </AccordionGroup>
 
@@ -246,7 +247,7 @@ Broadcastgroepen werken naast de bestaande routering:
 - `GROUP_B`: agent1 EN agent2 antwoorden (broadcast).
 
 <Note>
-**Prioriteit:** `broadcast` heeft voorrang op gewone routebindingen. Geconfigureerde ACP-bindingen (`bindings[].type="acp"`) zijn exclusief: wanneer er één overeenkomt, verzendt OpenClaw het bericht naar de geconfigureerde ACP-sessie in plaats van naar een fan-out-broadcast.
+**Prioriteit:** `broadcast` heeft voorrang op gewone routebindingen. Geconfigureerde ACP-bindingen (`bindings[].type="acp"`) zijn exclusief: wanneer er één overeenkomt, verzendt OpenClaw naar de geconfigureerde ACP-sessie in plaats van een fan-outbroadcast uit te voeren.
 </Note>
 
 ## Probleemoplossing
@@ -255,9 +256,9 @@ Broadcastgroepen werken naast de bestaande routering:
   <Accordion title="Agents antwoorden niet">
     **Controleer:**
 
-    1. Agent-id's bestaan in `agents.list` (configuratievalidatie weigert onbekende id's).
-    2. De notatie van de peer-id is correct (een groeps-JID zoals `120363403215116621@g.us`, of E.164 zoals `+15551234567` voor privéberichten).
-    3. Het bericht heeft de normale toelatingscontrole doorstaan (regels voor vermeldingen/activering blijven van toepassing).
+    1. Agent-id's bestaan in `agents.entries` (configuratievalidatie wijst onbekende id's af).
+    2. De indeling van de peer-id is correct (groeps-JID zoals `120363403215116621@g.us`, of E.164 zoals `+15551234567` voor DM's).
+    3. Het bericht heeft de normale toelatingscontroles doorstaan (vermeldings-/activeringsregels blijven van toepassing).
 
     **Foutopsporing:**
 
@@ -271,18 +272,18 @@ Broadcastgroepen werken naast de bestaande routering:
   <Accordion title="Slechts één agent antwoordt">
     **Oorzaak:** de peer-id staat mogelijk in gewone routebindingen, maar niet in `broadcast`, of komt mogelijk overeen met een exclusieve geconfigureerde ACP-binding.
 
-    **Oplossing:** voeg peers die aan gewone routes zijn gebonden toe aan de broadcastconfiguratie, of verwijder/wijzig de geconfigureerde ACP-binding als een fan-out-broadcast gewenst is.
+    **Oplossing:** voeg peers met gewone routebindingen toe aan de broadcastconfiguratie, of verwijder/wijzig de geconfigureerde ACP-binding als een fan-outbroadcast gewenst is.
 
   </Accordion>
   <Accordion title="Prestatieproblemen">
-    Als het systeem traag is bij veel agents: verminder het aantal agents per groep, gebruik lichtere modellen en controleer de opstarttijd van de sandbox.
+    Bij traagheid met veel agents: verminder het aantal agents per groep, gebruik lichtere modellen en controleer de opstarttijd van de sandbox.
   </Accordion>
 </AccordionGroup>
 
 ## Voorbeelden
 
 <AccordionGroup>
-  <Accordion title="Voorbeeld 1: Team voor codebeoordeling">
+  <Accordion title="Voorbeeld 1: Codereviewteam">
     ```json
     {
       "broadcast": {
@@ -317,7 +318,7 @@ Broadcastgroepen werken naast de bestaande routering:
     }
     ```
 
-    Eén codefragment in de groep levert vier antwoorden op: opmaakcorrecties, een beveiligingsbevinding, een hiaat in de testdekking en een kleine documentatieopmerking.
+    Eén codefragment in de groep levert vier antwoorden op: opmaakcorrecties, een beveiligingsbevinding, een hiaat in de dekking en een kleine documentatieopmerking.
 
   </Accordion>
   <Accordion title="Voorbeeld 2: Meertalige pijplijn">
@@ -363,15 +364,15 @@ interface OpenClawConfig {
 
 ## Beperkingen
 
-1. **Maximumaantal agents:** er is geen harde limiet, maar veel agents (10+) kunnen traag zijn.
-2. **Gedeelde context:** agents zien elkaars antwoorden niet (bewust ontwerp).
-3. **Berichtvolgorde:** parallelle antwoorden kunnen in elke volgorde aankomen.
-4. **Snelheidslimieten:** alle antwoorden komen van één WhatsApp-account, dus het antwoord van elke agent telt mee voor dezelfde WhatsApp-snelheidslimieten.
+1. **Maximumaantal agents:** geen harde limiet, maar veel agents (10+) kunnen traag zijn.
+2. **Gedeelde context:** agents zien elkaars antwoorden niet (bewust zo ontworpen).
+3. **Berichtvolgorde:** parallelle antwoorden kunnen in elke volgorde binnenkomen.
+4. **Frequentielimieten:** alle antwoorden komen van één WhatsApp-account, dus het antwoord van elke agent telt mee voor dezelfde WhatsApp-frequentielimieten.
 
 ## Gerelateerd
 
 - [Kanaalroutering](/nl/channels/channel-routing)
 - [Groepen](/nl/channels/groups)
-- [Sandboxhulpmiddelen voor meerdere agents](/nl/tools/multi-agent-sandbox-tools)
-- [Koppeling](/nl/channels/pairing)
+- [Sandboxtools voor meerdere agents](/nl/tools/multi-agent-sandbox-tools)
+- [Koppelen](/nl/channels/pairing)
 - [Sessiebeheer](/nl/concepts/session)

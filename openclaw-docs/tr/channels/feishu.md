@@ -5,25 +5,24 @@ read_when:
 summary: Feishu botuna genel bakış, özellikler ve yapılandırma
 title: Feishu
 x-i18n:
-    generated_at: "2026-06-30T14:20:07Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T23:48:38Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 262dda9739de284e32b7e87edc336bdb5d16651dbf37148bad7593f3a6a6b951
+    source_hash: 5e7c4cbb704ce266b7c7b0f6e160c36c873050fee8d5808965e15b56ad637f28
     source_path: channels/feishu.md
     workflow: 16
 ---
 
-Feishu/Lark, ekiplerin sohbet ettiği, belge paylaştığı, takvimleri yönettiği ve birlikte iş yaptığı hepsi bir arada bir iş birliği platformudur.
+OpenClaw, resmi `@openclaw/feishu` plugin aracılığıyla Feishu/Lark'a (hepsi bir arada iş birliği platformu) bağlanır: bot DM'leri, grup sohbetleri, akışlı kart yanıtları ve Feishu belge/wiki/drive/Bitable araçları.
 
-**Durum:** bot DM'leri + grup sohbetleri için üretime hazır. WebSocket varsayılan moddur; Webhook modu isteğe bağlıdır.
-
----
+**Durum:** bot DM'leri ve grup sohbetleri için üretime hazırdır. WebSocket varsayılan olay aktarım yöntemidir (genel URL gerekmez); webhook modu isteğe bağlıdır.
 
 ## Hızlı başlangıç
 
 <Note>
-OpenClaw 2026.5.29 veya üzerini gerektirir. Kontrol etmek için `openclaw --version` çalıştırın. `openclaw update` ile yükseltin.
+OpenClaw 2026.5.29 veya üzerini gerektirir. Kontrol etmek için `openclaw --version` komutunu çalıştırın. `openclaw update` ile yükseltin.
 </Note>
 
 <Steps>
@@ -31,27 +30,38 @@ OpenClaw 2026.5.29 veya üzerini gerektirir. Kontrol etmek için `openclaw --ver
   ```bash
   openclaw channels login --channel feishu
   ```
-  Feishu Open Platform'dan bir App ID ve App Secret yapıştırmak için manuel kurulumu seçin veya otomatik olarak bot oluşturmak için QR kurulumunu seçin. Çin içi Feishu mobil uygulaması QR koduna tepki vermiyorsa kurulumu yeniden çalıştırın ve manuel kurulumu seçin.
-  </Step>
-  
-  <Step title="Kurulum tamamlandıktan sonra değişiklikleri uygulamak için gateway'i yeniden başlatın">
+  Bu işlem, eksikse `@openclaw/feishu` plugin'i yükler ve ardından kurulum adımlarında yönlendirir:
+
+- **Manuel kurulum**: Feishu Open Platform'dan (`https://open.feishu.cn`) veya Lark Developer'dan (`https://open.larksuite.com`) bir App ID ve App Secret yapıştırın.
+- **QR kurulumu**: otomatik olarak bot oluşturmak için Feishu uygulamasında bir QR kodu tarayın. Bu akış, DM'leri kendi hesabınızla sınırlar (`dmPolicy: "allowlist"`, `open_id` değerinizle).
+
+Sihirbaz ayrıca API etki alanını (Feishu veya Lark) ve grup politikasını sorar. Çin içi Feishu mobil uygulaması QR koduna tepki vermezse kurulumu yeniden çalıştırıp manuel kurulumu seçin.
+</Step>
+
+  <Step title="Kurulum tamamlandıktan sonra değişiklikleri uygulamak için Gateway'i yeniden başlatın">
   ```bash
   openclaw gateway restart
   ```
   </Step>
 </Steps>
 
----
+## Gelen olayların dayanıklılığı
 
-## Erişim kontrolü
+OpenClaw, kimliği doğrulanmış `im.message.receive_v1` ve `drive.notice.comment_add_v1` zarflarını agent'a göndermeden önce dayanıklı biçimde kuyruğa alır. Bekleyen veya yeniden denenebilir olaylar Gateway yeniden başlatıldığında korunur, sohbet veya belge başına sıralı kalır ve etkin ya da saklanan tamamlanma kaydı var olduğu sürece yinelenen kuyruk girdilerini engellemek için Feishu'nun olay kimliğini kullanır.
+
+Bir WebSocket olayı sınırlı sayıdaki yeniden denemenin ardından kalıcılaştırılamazsa OpenClaw, kaydedilmemiş bir turu atlayarak devam etmek yerine ilgili soketi kapatır ve kimliği yeniden doğrulanmış yeni bir bağlantıyı zorunlu kılar. Tepkiler ve VC toplantı davetleri dâhil diğer Feishu olay türleri normal olay yollarını kullanır ve bu dayanıklı kuyruk garantisinden yararlanmaz.
+
+## Erişim denetimi
 
 ### Doğrudan mesajlar
 
-Bota kimin DM gönderebileceğini denetlemek için `dmPolicy` yapılandırın:
+Bota kimlerin DM gönderebileceğini denetlemek için `channels.feishu.dmPolicy` ayarını (varsayılan: `pairing`) yapılandırın:
 
-- `"pairing"` - bilinmeyen kullanıcılar bir eşleştirme kodu alır; CLI üzerinden onaylayın
-- `"allowlist"` - yalnızca `allowFrom` içinde listelenen kullanıcılar sohbet edebilir
-- `"open"` - yalnızca `allowFrom` `"*"` içerdiğinde herkese açık DM'lere izin verilir; kısıtlayıcı girdilerle yalnızca eşleşen kullanıcılar sohbet edebilir
+| Değer         | Davranış                                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------- |
+| `"pairing"`   | Bilinmeyen kullanıcılar bir eşleştirme kodu alır; CLI üzerinden onaylayın                                                         |
+| `"allowlist"` | Yalnızca `allowFrom` içinde listelenen kullanıcılar sohbet edebilir                                                                     |
+| `"open"`      | Herkese açık DM'ler; yapılandırma doğrulaması `allowFrom` değerinin `"*"` içermesini gerektirir. Joker karakter olmayan girdiler erişimi yine sınırlar |
 
 **Bir eşleştirme isteğini onaylayın:**
 
@@ -62,40 +72,35 @@ openclaw pairing approve feishu <CODE>
 
 ### Grup sohbetleri
 
-**Grup ilkesi** (`channels.feishu.groupPolicy`):
+**Grup politikası** (`channels.feishu.groupPolicy`, varsayılan: `allowlist`):
 
 | Değer         | Davranış                                                                                     |
 | ------------- | -------------------------------------------------------------------------------------------- |
-| `"open"`      | Gruplardaki tüm mesajlara yanıt ver                                                          |
-| `"allowlist"` | Yalnızca `groupAllowFrom` içindeki veya `groups.<chat_id>` altında açıkça yapılandırılmış gruplara yanıt ver |
-| `"disabled"`  | Tüm grup mesajlarını devre dışı bırak; açık `groups.<chat_id>` girdileri bunu geçersiz kılmaz |
-
-Varsayılan: `allowlist`
+| `"open"`      | Gruplardaki tüm mesajları yanıtlar                                                            |
+| `"allowlist"` | Yalnızca `groupAllowFrom` içindeki veya `groups.<chat_id>` altında açıkça yapılandırılan grupları yanıtlar |
+| `"disabled"`  | Tüm grup mesajlarını devre dışı bırakır; açık `groups.<chat_id>` girdileri bunu geçersiz kılmaz         |
 
 **Bahsetme gereksinimi** (`channels.feishu.requireMention`):
 
-- `true` - @mention gerektir (varsayılan)
-- `false` - @mention olmadan yanıt ver
-- Grup başına geçersiz kılma: `channels.feishu.groups.<chat_id>.requireMention`
-- Yalnızca yayın amaçlı `@all` ve `@_all`, bot bahsetmeleri olarak değerlendirilmez. Hem `@all` hem de doğrudan bottan bahseden bir mesaj yine bot bahsetmesi sayılır.
+- Varsayılan: etkin grup politikası `"open"` olmadığı sürece @bahsetme gerekir; bu politikada, bahsetme içermeyen mesajların (örneğin görsellerin) yine de agent'a ulaşabilmesi için varsayılan değer `false` olur.
+- Geçersiz kılmak için `true` veya `false` değerini açıkça ayarlayın; grup başına geçersiz kılma: `channels.feishu.groups.<chat_id>.requireMention`.
+- Yalnızca yayın amaçlı `@all` ve `@_all`, bottan bahsetme olarak değerlendirilmez. Hem `@all` hem de doğrudan bottan bahseden bir mesaj yine bottan bahsetme sayılır.
 
----
+## Grup yapılandırması örnekleri
 
-## Grup yapılandırma örnekleri
-
-### Tüm gruplara izin ver, @mention gerekmez
+### Tüm gruplara izin verin, @bahsetme gerekmesin
 
 ```json5
 {
   channels: {
     feishu: {
-      groupPolicy: "open",
+      groupPolicy: "open", // "open" altında requireMention varsayılan olarak false olur
     },
   },
 }
 ```
 
-### Tüm gruplara izin ver, yine de @mention gerektir
+### Tüm gruplara izin verin, ancak yine de @bahsetme gerektirin
 
 ```json5
 {
@@ -108,21 +113,21 @@ Varsayılan: `allowlist`
 }
 ```
 
-### Yalnızca belirli gruplara izin ver
+### Yalnızca belirli gruplara izin verin
 
 ```json5
 {
   channels: {
     feishu: {
       groupPolicy: "allowlist",
-      // Group IDs look like: oc_xxx
+      // Grup kimlikleri şu biçimdedir: oc_xxx
       groupAllowFrom: ["oc_xxx", "oc_yyy"],
     },
   },
 }
 ```
 
-`allowlist` modunda, açık bir `groups.<chat_id>` girdisi ekleyerek bir grubu da kabul edebilirsiniz. Açık girdiler `groupPolicy: "disabled"` değerini geçersiz kılmaz. `groups.*` altındaki joker karakterli varsayılanlar eşleşen grupları yapılandırır, ancak tek başlarına grupları kabul etmezler.
+`allowlist` modunda açık bir `groups.<chat_id>` girdisi ekleyerek de bir gruba izin verebilirsiniz. Açık girdiler `groupPolicy: "disabled"` değerini geçersiz kılmaz. `groups.*` altındaki joker karakter varsayılanları eşleşen grupları yapılandırır ancak kendi başlarına gruplara izin vermez.
 
 ```json5
 {
@@ -139,7 +144,7 @@ Varsayılan: `allowlist`
 }
 ```
 
-### Grup içindeki göndericileri kısıtla
+### Bir grup içindeki gönderenleri sınırlayın
 
 ```json5
 {
@@ -149,7 +154,7 @@ Varsayılan: `allowlist`
       groupAllowFrom: ["oc_xxx"],
       groups: {
         oc_xxx: {
-          // User open_ids look like: ou_xxx
+          // Kullanıcı open_id değerleri şu biçimdedir: ou_xxx
           allowFrom: ["ou_user1", "ou_user2"],
         },
       },
@@ -158,7 +163,23 @@ Varsayılan: `allowlist`
 }
 ```
 
----
+`channels.feishu.groupSenderAllowFrom`, tüm gruplar için aynı gönderen izin listesini ayarlar; grup başına `allowFrom` önceliklidir.
+
+### Bot tarafından yazılan mesajlar
+
+Feishu, diğer botlar tarafından yazılan mesajları varsayılan olarak yok sayar. Botlar arası grup konuşmalarına izin vermek için uygulamaya `im:message.group_at_msg.include_bot:readonly` ve `im:message:readonly` kapsamlarını verin, ardından `allowBots` ayarını belirleyin:
+
+```json5
+{
+  channels: {
+    feishu: {
+      allowBots: true,
+    },
+  },
+}
+```
+
+Feishu, bot tarafından yazılan grup olaylarını yalnızca başka bir bot bu bottan bahsettiğinde iletir. Mevcut grup politikası, gönderen izin listeleri ve bahsetme gereksinimleri uygulanmaya devam eder. OpenClaw kendi yazdığı mesajları bırakır, her metin veya kart yanıtında eş botu belirtir ve paylaşılan [`channels.defaults.botLoopProtection`](/tr/channels/bot-loop-protection) korumasını uygular.
 
 <a id="get-groupuser-ids"></a>
 
@@ -166,76 +187,109 @@ Varsayılan: `allowlist`
 
 ### Grup kimlikleri (`chat_id`, biçim: `oc_xxx`)
 
-Grubu Feishu/Lark içinde açın, sağ üst köşedeki menü simgesine tıklayın ve **Ayarlar** bölümüne gidin. Grup kimliği (`chat_id`) ayarlar sayfasında listelenir.
+Grubu Feishu/Lark'ta açın, sağ üst köşedeki menü simgesine tıklayın ve **Settings** bölümüne gidin. Grup kimliği (`chat_id`) ayarlar sayfasında listelenir.
 
-![Grup Kimliğini Al](/images/feishu-get-group-id.png)
+![Grup Kimliğini Alma](/images/feishu-get-group-id.png)
 
 ### Kullanıcı kimlikleri (`open_id`, biçim: `ou_xxx`)
 
-Gateway'i başlatın, bota bir DM gönderin, ardından günlükleri kontrol edin:
+Gateway'i başlatın, bota bir DM gönderin ve ardından günlükleri kontrol edin:
 
 ```bash
 openclaw logs --follow
 ```
 
-Günlük çıktısında `open_id` arayın. Bekleyen eşleştirme isteklerini de kontrol edebilirsiniz:
+Günlük çıktısında `open_id` değerini arayın. Bekleyen eşleştirme isteklerini de kontrol edebilirsiniz:
 
 ```bash
 openclaw pairing list feishu
 ```
 
----
-
 ## Yaygın komutlar
 
-| Komut     | Açıklama                 |
-| --------- | ------------------------ |
-| `/status` | Bot durumunu göster      |
-| `/reset`  | Geçerli oturumu sıfırla  |
-| `/model`  | AI modelini göster veya değiştir |
+| Komut   | Açıklama                 |
+| --------- | --------------------------- |
+| `/status` | Bot durumunu göster             |
+| `/reset`  | Geçerli oturumu sıfırla   |
+| `/model`  | Yapay zekâ modelini göster veya değiştir |
 
 <Note>
-Feishu/Lark yerel eğik çizgi komutu menülerini desteklemez, bu nedenle bunları düz metin mesajları olarak gönderin.
+Feishu/Lark yerel eğik çizgi komutu menülerini desteklemez; bu nedenle bunları düz metin mesajları olarak gönderin.
 </Note>
-
----
 
 ## Sorun giderme
 
 ### Bot grup sohbetlerinde yanıt vermiyor
 
 1. Botun gruba eklendiğinden emin olun
-2. Bottan @mention ile bahsettiğinizden emin olun (varsayılan olarak gerekir)
+2. Bottan @bahsettiğinizden emin olun (varsayılan olarak gereklidir)
 3. `groupPolicy` değerinin `"disabled"` olmadığını doğrulayın
 4. Günlükleri kontrol edin: `openclaw logs --follow`
 
-### Bot mesaj almıyor
+### Bot mesajları almıyor
 
-1. Botun Feishu Open Platform / Lark Developer içinde yayınlandığından ve onaylandığından emin olun
-2. Etkinlik aboneliğinin `im.message.receive_v1` içerdiğinden emin olun
-3. **Kalıcı bağlantı** (WebSocket) seçildiğinden emin olun
-4. Gerekli tüm izin kapsamlarının verildiğinden emin olun
-5. Gateway'in çalıştığından emin olun: `openclaw gateway status`
-6. Günlükleri kontrol edin: `openclaw logs --follow`
+1. Botun Feishu Open Platform / Lark Developer'da yayımlandığından ve onaylandığından emin olun
+2. Olay aboneliğinin `im.message.receive_v1` içerdiğinden emin olun
+3. Toplantı davetlerine otomatik katılım için `vc.bot.meeting_invited_v1` olayına da abone olun
+4. **persistent connection** (WebSocket) seçeneğinin seçildiğinden emin olun
+5. Gerekli tüm izin kapsamlarının verildiğinden emin olun
+6. Gateway'in çalıştığından emin olun: `openclaw gateway status`
+7. Günlükleri kontrol edin: `openclaw logs --follow`
+
+Yalnızca `vc.bot.meeting_invited_v1` olayına abone olmak olayı iletir. Otomatik katılımlar
+varsayılan olarak kapalıdır. Bunları genel olarak etkinleştirmek için:
+
+```json5
+{
+  channels: {
+    feishu: {
+      vcAutoJoin: true,
+    },
+  },
+}
+```
+
+Yalnızca tek bir hesap için etkinleştirmek üzere üst düzey anahtarı kullanmayın ve hesap geçersiz kılmasını ayarlayın:
+
+```json5
+{
+  channels: {
+    feishu: {
+      accounts: {
+        meetings: { vcAutoJoin: true },
+      },
+    },
+  },
+}
+```
+
+Agent bir katılım turu almadan önce davet edenler yine normal Feishu DM politikasından, izin listesinden/eşleştirmeden, oturumdan ve yanıt
+yönlendirmesinden geçer. Katılım ayrıca uygulama kimliği için
+`vc:meeting.bot.join:write` kapsamıyla yapılandırılmış kullanılabilir bir Feishu VC katılım
+aracı gerektirir. Örneğin, resmi
+[`lark-cli` VC agent skill](https://github.com/larksuite/cli/tree/main/skills/lark-vc-agent)
+`vc +meeting-join` sağlar.
+
+<Warning>
+Resmi `lark-cli` VC agent skill şu anda toplantı botu eylemlerini sınırlı beta olarak işaretlemektedir. Araç `ErrNotInGray` veya `20017` hata kodunu döndürürse uygulama ya da kiracı bu beta için etkinleştirilmemiştir; sıradan kapsam izinleriyle ilgili sorunları gidermeden önce bağlantılı skill'deki erken erişim yönergelerini kullanın.
+</Warning>
 
 ### QR kurulumu Feishu mobil uygulamasında tepki vermiyor
 
 1. Kurulumu yeniden çalıştırın: `openclaw channels login --channel feishu`
 2. Manuel kurulumu seçin
-3. Feishu Open Platform içinde kendi oluşturduğunuz bir uygulama oluşturun ve App ID ile App Secret değerlerini kopyalayın
+3. Feishu Open Platform'da kendi oluşturduğunuz bir uygulama oluşturun ve App ID ile App Secret değerlerini kopyalayın
 4. Bu kimlik bilgilerini kurulum sihirbazına yapıştırın
 
-### App Secret sızdı
+### App Secret sızdırıldı
 
-1. Feishu Open Platform / Lark Developer içinde App Secret değerini sıfırlayın
+1. Feishu Open Platform / Lark Developer'da App Secret değerini sıfırlayın
 2. Yapılandırmanızdaki değeri güncelleyin
 3. Gateway'i yeniden başlatın: `openclaw gateway restart`
 
----
-
 ## Gelişmiş yapılandırma
 
-### Birden çok hesap
+### Birden fazla hesap
 
 ```json5
 {
@@ -265,37 +319,40 @@ Feishu/Lark yerel eğik çizgi komutu menülerini desteklemez, bu nedenle bunlar
 }
 ```
 
-`defaultAccount`, giden API'ler bir `accountId` belirtmediğinde hangi hesabın kullanılacağını denetler.
-`accounts.<id>.tts`, `messages.tts` ile aynı şekli kullanır ve genel TTS yapılandırmasının üzerine derin birleştirme uygular; böylece çok botlu Feishu kurulumları, hesap başına yalnızca ses, model, persona veya otomatik modu geçersiz kılarken paylaşılan sağlayıcı kimlik bilgilerini genel olarak tutabilir.
+`defaultAccount`, giden API'ler bir `accountId` belirtmediğinde hangi hesabın kullanılacağını denetler. Hesap girdileri üst düzey ayarları devralır; çoğu üst düzey anahtar hesap başına geçersiz kılınabilir.
+`accounts.<id>.tts`, `tts` ile aynı biçimi kullanır ve genel TTS yapılandırması üzerine derin birleştirme uygular; böylece çok botlu Feishu kurulumları, yalnızca ses, model, persona veya otomatik modu hesap başına geçersiz kılarken paylaşılan sağlayıcı kimlik bilgilerini genel düzeyde tutabilir.
 
 ### Mesaj sınırları
 
-- `textChunkLimit` - giden metin parçası boyutu (varsayılan: `2000` karakter)
+- `textChunkLimit` - giden metin parçası boyutu (varsayılan: `4000` karakter)
+- `streaming.chunkMode` - `"length"` (varsayılan) sınırda böler; `"newline"` satır sonu sınırlarını tercih eder
 - `mediaMaxMb` - medya yükleme/indirme sınırı (varsayılan: `30` MB)
 
 ### Akış
 
-Feishu/Lark, etkileşimli kartlar üzerinden akışlı yanıtları destekler. Etkinleştirildiğinde bot, metin üretirken kartı gerçek zamanlı olarak günceller.
+Feishu/Lark, etkileşimli kartlar (Card Kit akış API'si) aracılığıyla akışlı yanıtları destekler. Etkinleştirildiğinde bot, metin üretirken kartı gerçek zamanlı olarak günceller.
 
 ```json5
 {
   channels: {
     feishu: {
-      streaming: true, // enable streaming card output (default: true)
-      blockStreaming: true, // opt into completed-block streaming
+      streaming: {
+        mode: "partial", // akışlı kart çıktısı (varsayılan: "partial")
+        block: { enabled: true }, // tamamlanmış blok akışını etkinleştir
+      },
     },
   },
 }
 ```
 
-Tam yanıtı tek mesajda göndermek için `streaming: false` ayarlayın. `blockStreaming` varsayılan olarak kapalıdır; yalnızca tamamlanmış assistant bloklarının son yanıttan önce gönderilmesini istediğinizde etkinleştirin.
+Tam yanıtı tek bir mesajda göndermek için `streaming.mode: "off"` değerini ayarlayın; `renderMode: "raw"` (kartlar yerine düz metin) da kart akışını devre dışı bırakır. `streaming.block.enabled` varsayılan olarak kapalıdır; yalnızca tamamlanan asistan bloklarının son yanıttan önce gönderilmesini istediğinizde etkinleştirin. Eski Boole `streaming` değeri ve düz `blockStreaming` / `blockStreamingCoalesce` / `chunkMode` anahtarları, `openclaw doctor --fix` aracılığıyla bu iç içe yapıya taşınır.
 
 ### Kota optimizasyonu
 
 İki isteğe bağlı bayrakla Feishu/Lark API çağrılarının sayısını azaltın:
 
-- `typingIndicator` (varsayılan `true`): yazıyor tepkisi çağrılarını atlamak için `false` ayarlayın
-- `resolveSenderNames` (varsayılan `true`): gönderici profili aramalarını atlamak için `false` ayarlayın
+- `typingIndicator` (varsayılan `true`): yazıyor tepkisi çağrılarını atlamak için `false` olarak ayarlayın
+- `resolveSenderNames` (varsayılan `true`): gönderen profili sorgularını atlamak için `false` olarak ayarlayın
 
 ```json5
 {
@@ -308,9 +365,44 @@ Tam yanıtı tek mesajda göndermek için `streaming: false` ayarlayın. `blockS
 }
 ```
 
+### Grup oturumu kapsamı ve konu dizileri
+
+`channels.feishu.groupSessionScope` (üst düzeyde, hesap başına veya grup başına), grup mesajlarının ajan oturumlarıyla nasıl eşleştirileceğini denetler:
+
+| Değer                  | Oturum                                                          |
+| ---------------------- | ---------------------------------------------------------------- |
+| `"group"` (varsayılan)    | Grup sohbeti başına bir oturum                                       |
+| `"group_sender"`       | Her (grup + gönderen) için bir oturum                                 |
+| `"group_topic"`        | Konu dizisi başına bir oturum; grup oturumuna geri döner    |
+| `"group_topic_sender"` | Her (konu + gönderen) için bir oturum; (grup + gönderen) oturumuna geri döner |
+
+Konu kapsamlarında yerel Feishu/Lark konu grupları, standart konu oturumu anahtarı olarak `thread_id` (`omt_*`) olayını kullanır. Yerel bir konu başlatma olayında `thread_id` yoksa OpenClaw, turu yönlendirmeden önce bunu Feishu'dan tamamlar. OpenClaw'ın dizilere dönüştürdüğü normal grup yanıtları, ilk turun ve takip eden turların aynı oturumda kalması için yanıt kök mesaj kimliğini (`om_*`) kullanmaya devam eder.
+
+Bot yanıtlarının satır içinde yanıt vermek yerine bir Feishu konu dizisi oluşturmasını veya sürdürmesini sağlamak için `replyInThread: "enabled"` değerini (üst düzeyde veya grup başına) ayarlayın. `topicSessionMode`, `groupSessionScope` değerinin kullanımdan kaldırılmış öncülüdür; `groupSessionScope` tercih edin.
+
+### Feishu çalışma alanı araçları
+
+Plugin; Feishu belgeleri, sohbetleri, bilgi tabanı, bulut depolama, izinler ve Bitable için ajan araçlarının yanı sıra bunlarla eşleşen skills (`feishu-doc`, `feishu-drive`, `feishu-perm`, `feishu-wiki`) içerir. Araç aileleri `channels.feishu.tools` tarafından denetlenir:
+
+| Anahtar             | Araçlar                                         | Varsayılan             |
+| --------------- | --------------------------------------------- | ------------------- |
+| `tools.doc`     | `feishu_doc` belge işlemleri              | `true`              |
+| `tools.chat`    | `feishu_chat` sohbet bilgileri + üye sorguları      | `true`              |
+| `tools.wiki`    | `feishu_wiki` bilgi tabanı (`doc` gerektirir) | `true`              |
+| `tools.drive`   | `feishu_drive` bulut depolama                  | `true`              |
+| `tools.perm`    | `feishu_perm` izin yönetimi           | `false` (hassas) |
+| `tools.scopes`  | `feishu_app_scopes` uygulama kapsamı tanılaması     | `true`              |
+| `tools.bitable` | `feishu_bitable_*` Bitable/Base işlemleri    | `true`              |
+
+`tools.base`, `tools.bitable` için bir diğer addır; ikisi de ayarlandığında açıkça belirtilen `bitable` değeri önceliklidir. Hesap başına denetimler `accounts.<id>.tools` altında bulunur.
+
+Uygulama tam `drive:drive` kapsamına zaten sahip değilse kök
+dizinin dışındaki doğrudan `feishu_drive info` sorguları için `drive:drive.metadata:readonly` iznini verin. Her iki kapsam da yoksa `info`,
+`drive:drive:readonly` üzerinden eski kök dizin sorgusunu kullanılabilir durumda tutar.
+
 ### ACP oturumları
 
-Feishu/Lark, DM'ler ve grup konu mesajları için ACP'yi destekler. Feishu/Lark ACP metin komutuyla çalışır; yerel eğik çizgi komutu menüleri yoktur, bu nedenle `/acp ...` mesajlarını doğrudan konuşmada kullanın.
+Feishu/Lark, DM'ler ve grup dizisi mesajları için ACP'yi destekler. Feishu/Lark ACP metin komutlarıyla çalışır; yerel eğik çizgi komutu menüleri yoktur, bu nedenle `/acp ...` mesajlarını doğrudan konuşmada kullanın.
 
 #### Kalıcı ACP bağlaması
 
@@ -358,13 +450,13 @@ Feishu/Lark, DM'ler ve grup konu mesajları için ACP'yi destekler. Feishu/Lark 
 
 #### Sohbetten ACP başlatma
 
-Bir Feishu/Lark DM'sinde veya konu dizisinde:
+Bir Feishu/Lark DM'sinde veya dizisinde:
 
 ```text
 /acp spawn codex --thread here
 ```
 
-`--thread here`, DM'ler ve Feishu/Lark konu mesajları için çalışır. Bağlı konuşmadaki takip mesajları doğrudan bu ACP oturumuna yönlendirilir.
+`--thread here`, DM'ler ve Feishu/Lark dizisi mesajları için çalışır. Bağlı konuşmadaki takip mesajları doğrudan bu ACP oturumuna yönlendirilir.
 
 ### Çok ajanlı yönlendirme
 
@@ -404,9 +496,7 @@ Yönlendirme alanları:
 - `match.peer.kind`: `"direct"` (DM) veya `"group"` (grup sohbeti)
 - `match.peer.id`: kullanıcı Open ID'si (`ou_xxx`) veya grup kimliği (`oc_xxx`)
 
-Arama ipuçları için [Grup/kullanıcı kimliklerini alma](#get-groupuser-ids) bölümüne bakın.
-
----
+Sorgulama ipuçları için [Grup/kullanıcı kimliklerini edinme](#get-groupuser-ids) bölümüne bakın.
 
 ## Kullanıcı başına ajan yalıtımı (Dinamik Ajan Oluşturma)
 
@@ -415,14 +505,14 @@ Her DM kullanıcısı için otomatik olarak **yalıtılmış ajan örnekleri** o
 - Bağımsız çalışma alanı dizini
 - Ayrı `USER.md` / `SOUL.md` / `MEMORY.md`
 - Özel konuşma geçmişi
-- Yalıtılmış Skills ve durum
+- Yalıtılmış skills ve durum
 
-Bu, her kullanıcının kendi özel AI asistanı deneyimine sahip olmasını istediğiniz herkese açık botlar için gereklidir.
+Bu, her kullanıcının kendine ait özel bir yapay zekâ asistanı deneyimine sahip olmasını istediğiniz herkese açık botlar için zorunludur.
 
 <Note>
-Dinamik bağlamalar normalleştirilmiş Feishu `accountId` değerini içerir; böylece varsayılan ve adlandırılmış hesaplar her göndericiyi doğru dinamik ajana yönlendirir.
+Dinamik bağlamalar normalleştirilmiş Feishu `accountId` değerini içerir; böylece varsayılan ve adlandırılmış hesaplar her göndereni doğru dinamik ajana yönlendirir.
 
-Adlandırılmış bir hesap eski bir sürümde kapsamsız dinamik ajan oluşturduysa, bu eski ajan yine de `maxAgents` sınırına dahil edilir. Kaldırmadan önce varsayılan hesap tarafından kullanılmadığını doğrulayın veya `maxAgents` değerini geçici olarak artırın; OpenClaw belirsiz eski durumun hangi hesaba ait olduğunu güvenli şekilde çıkaramaz.
+Adlandırılmış bir hesap eski bir sürümde kapsamsız bir dinamik ajan oluşturduysa bu eski ajan hâlâ `maxAgents` sınırına dahil edilir. Kaldırmadan önce varsayılan hesap tarafından kullanılmadığını doğrulayın veya `maxAgents` değerini geçici olarak artırın; OpenClaw, belirsiz eski durumun hangi hesaba ait olduğunu güvenli biçimde çıkaramaz.
 </Note>
 
 ### Hızlı kurulum
@@ -441,32 +531,32 @@ Adlandırılmış bir hesap eski bir sürümde kapsamsız dinamik ajan oluşturd
     },
   },
   session: {
-    // Critical: makes each user's DM their "main session"
-    // Automatically loads USER.md / SOUL.md / MEMORY.md
-    // For stronger isolation, use "per-channel-peer" instead
+    // Kritik: Her kullanıcının DM'sini kendi "ana oturumu" yapar
+    // USER.md / SOUL.md / MEMORY.md dosyalarını otomatik olarak yükler
+    // Daha güçlü yalıtım için bunun yerine "per-channel-peer" kullanın
     dmScope: "main",
   },
 }
 ```
 
-### Nasıl çalışır
+### Nasıl çalışır?
 
 Yeni bir kullanıcı ilk DM'sini gönderdiğinde:
 
-1. Kanal benzersiz bir `agentId` üretir: varsayılan hesap için `feishu-{user_open_id}` veya adlandırılmış bir hesap için sınırlandırılmış, hesap önekli kimlik özeti
+1. Kanal benzersiz bir `agentId` oluşturur: varsayılan hesap için `feishu-{user_open_id}` veya adlandırılmış bir hesap için sınırlandırılmış, hesap önekli bir kimlik özeti
 2. `workspaceTemplate` yolunda yeni bir çalışma alanı oluşturur
 3. Ajanı kaydeder ve bu kullanıcı için bir bağlama oluşturur
-4. Çalışma alanı yardımcısı ilk erişimde önyükleme dosyalarını (`AGENTS.md`, `SOUL.md`, `USER.md` vb.) sağlar
-5. Bu kullanıcıdan gelen tüm gelecekteki mesajları ayrılmış ajanına yönlendirir
+4. Çalışma alanı yardımcısı ilk erişimde önyükleme dosyalarının (`AGENTS.md`, `SOUL.md`, `USER.md` vb.) bulunmasını sağlar
+5. Bu kullanıcıdan gelecek tüm mesajları kullanıcının özel ajanına yönlendirir
 
 ### Yapılandırma seçenekleri
 
-| Ayar                                                     | Açıklama                                      | Varsayılan                          |
-| -------------------------------------------------------- | --------------------------------------------- | ----------------------------------- |
-| `channels.feishu.dynamicAgentCreation.enabled`           | Otomatik kullanıcı başına ajan oluşturmayı etkinleştir | `false`                             |
-| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | Dinamik ajan çalışma alanları için yol şablonu | `~/.openclaw/workspace-{agentId}`   |
-| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | Ajan dizini adı şablonu                       | `~/.openclaw/agents/{agentId}/agent` |
-| `channels.feishu.dynamicAgentCreation.maxAgents`         | Oluşturulacak dinamik ajanların azami sayısı  | sınırsız                            |
+| Ayar                                                  | Açıklama                                | Varsayılan                              |
+| -------------------------------------------------------- | ------------------------------------------ | ------------------------------------ |
+| `channels.feishu.dynamicAgentCreation.enabled`           | Kullanıcı başına otomatik ajan oluşturmayı etkinleştirir   | `false`                              |
+| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | Dinamik ajan çalışma alanları için yol şablonu | `~/.openclaw/workspace-{agentId}`    |
+| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | Ajan dizini adı şablonu              | `~/.openclaw/agents/{agentId}/agent` |
+| `channels.feishu.dynamicAgentCreation.maxAgents`         | Oluşturulacak en fazla dinamik ajan sayısı | sınırsız                            |
 
 Şablon değişkenleri:
 
@@ -475,31 +565,20 @@ Yeni bir kullanıcı ilk DM'sini gönderdiğinde:
 
 ### Oturum kapsamı
 
-`session.dmScope`, doğrudan mesajların ajan oturumlarına nasıl eşlendiğini denetler. Bu, tüm kanalları etkileyen **genel bir ayardır**.
+`session.dmScope`, doğrudan mesajların ajan oturumlarıyla nasıl eşleştirileceğini denetler. Bu, tüm kanalları etkileyen **genel bir ayardır**.
 
-| Değer                        | Davranış                                                            | En uygun kullanım                                                   |
+| Değer                        | Davranış                                                            | En uygun kullanım                                                           |
 | ---------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `"main"`                     | Her kullanıcının DM'i, ajanının ana oturumuna eşlenir               | `USER.md` / `SOUL.md` dosyalarının otomatik yüklenmesini istediğiniz tek kullanıcılı botlar |
-| `"per-channel-peer"`         | Her (kanal + kullanıcı) birleşimi ayrı bir oturum alır              | Daha güçlü yalıtım gerektiren herkese açık çok kullanıcılı botlar  |
-| `"per-account-channel-peer"` | Her (hesap + kanal + kullanıcı) birleşimi ayrı bir oturum alır      | Hesap düzeyinde oturum yalıtımı gerektiren çok hesaplı botlar      |
+| `"main"`                     | Her kullanıcının DM'si, ajanının ana oturumuyla eşleştirilir                   | `USER.md` / `SOUL.md` dosyalarının otomatik yüklenmesinin istendiği tek kullanıcılı botlar |
+| `"per-peer"`                 | Her eş ayrı bir oturum alır (kanaldan bağımsız olarak)           | Yalnızca gönderen kimliğine göre anahtarlanan yalıtım                            |
+| `"per-channel-peer"`         | Her (kanal + kullanıcı) birleşimi ayrı bir oturum alır           | Daha güçlü yalıtım gerektiren herkese açık çok kullanıcılı botlar                  |
+| `"per-account-channel-peer"` | Her (hesap + kanal + kullanıcı) birleşimi ayrı bir oturum alır | Hesap düzeyinde oturum yalıtımı gerektiren çok hesaplı botlar         |
 
-**Ödünleşim**: `"main"` kullanmak otomatik önyükleme dosyası yüklemesini (`USER.md`, `SOUL.md`, `MEMORY.md`) etkinleştirir, ancak tüm kanallardaki tüm DM'lerin aynı oturum anahtarı desenini paylaşması anlamına gelir. Yalıtımın önyükleme otomatik yüklemesinden daha önemli olduğu herkese açık çok kullanıcılı botlar için `"per-channel-peer"` kullanmayı ve önyükleme dosyalarını elle yönetmeyi değerlendirin.
+**Ödünleşim**: `"main"` kullanmak, önyükleme dosyalarının (`USER.md`, `SOUL.md`, `MEMORY.md`) otomatik olarak yüklenmesini sağlar; ancak tüm kanallardaki tüm DM'lerin aynı oturum anahtarı kalıbını paylaşması anlamına gelir. Yalıtımın önyükleme dosyalarının otomatik yüklenmesinden daha önemli olduğu herkese açık çok kullanıcılı botlar için `"per-channel-peer"` kullanmayı ve önyükleme dosyalarını elle yönetmeyi değerlendirin.
 
 <Note>
 Adlandırılmış Feishu hesaplarının aynı gönderen için ayrı oturumlar tutması gerektiğinde `"per-account-channel-peer"` kullanın. Dinamik bağlamalar hesap kapsamını korur.
 </Note>
-
-```json5
-{
-  session: {
-    // For single-user personal bots: enables auto bootstrap loading
-    dmScope: "main",
-
-    // For public multi-user bots: stronger isolation
-    // dmScope: "per-channel-peer",
-  },
-}
-```
 
 ### Tipik çok kullanıcılı dağıtım
 
@@ -521,11 +600,11 @@ Adlandırılmış Feishu hesaplarının aynı gönderen için ayrı oturumlar tu
     },
   },
   session: {
-    // Choose dmScope based on your isolation needs:
-    // "main" for bootstrap auto-loading, "per-channel-peer" for stronger isolation
+    // Yalıtım gereksinimlerinize göre dmScope seçin:
+    // Önyüklemeyi otomatik yüklemek için "main", daha güçlü yalıtım için "per-channel-peer"
     dmScope: "main",
   },
-  bindings: [], // Empty - dynamic agents auto-bind
+  bindings: [], // Boş - dinamik ajanlar otomatik olarak bağlanır
 }
 ```
 
@@ -533,10 +612,10 @@ Adlandırılmış Feishu hesaplarının aynı gönderen için ayrı oturumlar tu
 
 Dinamik oluşturmanın çalıştığını doğrulamak için Gateway günlüklerini kontrol edin:
 
-```
-feishu: creating dynamic agent "feishu-ou_xxxxxx" for user ou_xxxxxx
-workspace: /Users/you/.openclaw/workspace-feishu-ou_xxxxxx
-feishu: dynamic agent created, new route: agent:feishu-ou_xxxxxx:main
+```text
+feishu: ou_xxxxxx kullanıcısı için "feishu-ou_xxxxxx" dinamik ajanı oluşturuluyor
+  çalışma alanı: /home/user/.openclaw/workspace-feishu-ou_xxxxxx
+  ajan dizini: /home/user/.openclaw/agents/feishu-ou_xxxxxx/agent
 ```
 
 Oluşturulan tüm çalışma alanlarını listeleyin:
@@ -547,56 +626,69 @@ ls -la ~/.openclaw/workspace-*
 
 ### Notlar
 
-- **Çalışma alanı yalıtımı**: Her kullanıcı kendi çalışma alanı dizinini ve ajan örneğini alır. Kullanıcılar normal mesajlaşma akışı içinde birbirlerinin konuşma geçmişini veya dosyalarını göremez.
-- **Güvenlik sınırı**: Bu, düşmanca bir ortak kiracı güvenlik sınırı değil, mesajlaşma bağlamı yalıtım mekanizmasıdır. Ajan süreci ve ana makine ortamı paylaşılır.
-- **`bindings` boş olmalıdır**: Dinamik ajanlar kendi bağlamalarını otomatik kaydeder
-- **Yükseltme yolu**: Mevcut elle yapılan bağlamalar dinamik ajanlarla birlikte çalışmaya devam eder
-- **`session.dmScope` geneldir**: Bu yalnızca Feishu'yu değil, tüm kanalları etkiler
+- **Çalışma alanı yalıtımı**: Her kullanıcı kendi çalışma alanı dizinine ve agent örneğine sahip olur. Kullanıcılar normal mesajlaşma akışı içinde birbirlerinin konuşma geçmişini veya dosyalarını göremez.
+- **Güvenlik sınırı**: Bu, düşmanca ortak kiracı güvenlik sınırı değil, bir mesajlaşma bağlamı yalıtım mekanizmasıdır. Agent işlemi ve ana makine ortamı paylaşılır.
+- **Yapılandırma yazmaları etkin kalmalıdır**: Dinamik agent oluşturma, agent'ları ve bağlamaları yapılandırmaya yazar; `channels.feishu.configWrites`, `false` olduğunda atlanır (varsayılan: etkin).
+- **`bindings` boş olmalıdır**: Dinamik agent'lar kendi bağlamalarını otomatik olarak kaydeder
+- **Yükseltme yolu**: Mevcut manuel bağlamalar dinamik agent'larla birlikte çalışmaya devam eder
+- **`session.dmScope` geneldir**: Bu, yalnızca Feishu'yu değil, tüm kanalları etkiler
 
----
-
-## Yapılandırma başvurusu
+## Yapılandırma referansı
 
 Tam yapılandırma: [Gateway yapılandırması](/tr/gateway/configuration)
 
-| Ayar                                                     | Açıklama                                                                      | Varsayılan                          |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------- |
-| `channels.feishu.enabled`                                | Kanalı etkinleştir/devre dışı bırak                                                       | `true`                              |
-| `channels.feishu.domain`                                 | API etki alanı (`feishu` veya `lark`)                                                  | `feishu`                            |
-| `channels.feishu.connectionMode`                         | Olay aktarımı (`websocket` veya `webhook`)                                       | `websocket`                         |
-| `channels.feishu.defaultAccount`                         | Giden yönlendirme için varsayılan hesap                                             | `default`                           |
-| `channels.feishu.verificationToken`                      | Webhook modu için gerekli                                                        | -                                   |
-| `channels.feishu.encryptKey`                             | Webhook modu için gerekli                                                        | -                                   |
-| `channels.feishu.webhookPath`                            | Webhook rota yolu                                                               | `/feishu/events`                    |
-| `channels.feishu.webhookHost`                            | Webhook bağlama ana makinesi                                                                | `127.0.0.1`                         |
-| `channels.feishu.webhookPort`                            | Webhook bağlama bağlantı noktası                                                                | `3000`                              |
-| `channels.feishu.accounts.<id>.appId`                    | Uygulama kimliği                                                                           | -                                   |
-| `channels.feishu.accounts.<id>.appSecret`                | Uygulama gizli anahtarı                                                                       | -                                   |
-| `channels.feishu.accounts.<id>.domain`                   | Hesap başına etki alanı geçersiz kılma                                                      | `feishu`                            |
-| `channels.feishu.accounts.<id>.tts`                      | Hesap başına TTS geçersiz kılma                                                         | `messages.tts`                      |
-| `channels.feishu.dmPolicy`                               | DM ilkesi                                                                        | `pairing`                           |
-| `channels.feishu.allowFrom`                              | DM izin listesi (open_id listesi)                                                      | -                                   |
-| `channels.feishu.groupPolicy`                            | Grup ilkesi                                                                     | `allowlist`                         |
-| `channels.feishu.groupAllowFrom`                         | Grup izin listesi                                                                  | -                                   |
-| `channels.feishu.requireMention`                         | Gruplarda @bahsetme gerektir                                                       | `true`                              |
-| `channels.feishu.groups.<chat_id>.requireMention`        | Grup başına @bahsetme geçersiz kılma; açık kimlikler grubu izin listesi modunda da kabul eder | devralınan                          |
-| `channels.feishu.groups.<chat_id>.enabled`               | Belirli bir grubu etkinleştir/devre dışı bırak                                                  | `true`                              |
-| `channels.feishu.dynamicAgentCreation.enabled`           | Otomatik kullanıcı başına ajan oluşturmayı etkinleştir                                         | `false`                             |
-| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | Dinamik ajan çalışma alanları için yol şablonu                                       | `~/.openclaw/workspace-{agentId}`   |
-| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | Ajan dizini adı şablonu                                                    | `~/.openclaw/agents/{agentId}/agent` |
-| `channels.feishu.dynamicAgentCreation.maxAgents`         | Oluşturulacak dinamik ajanların azami sayısı                                       | sınırsız                            |
-| `channels.feishu.textChunkLimit`                         | Mesaj parçası boyutu                                                               | `2000`                              |
-| `channels.feishu.mediaMaxMb`                             | Medya boyutu sınırı                                                                 | `30`                                |
-| `channels.feishu.streaming`                              | Akışlı kart çıktısı                                                            | `true`                              |
-| `channels.feishu.blockStreaming`                         | Tamamlanmış blok yanıtı akışı                                                  | `false`                             |
-| `channels.feishu.typingIndicator`                        | Yazıyor tepkileri gönder                                                            | `true`                              |
-| `channels.feishu.resolveSenderNames`                     | Gönderen görünen adlarını çözümle                                                     | `true`                              |
-| `channels.feishu.tools.bitable`                          | Bitable/Base araçlarını etkinleştir                                                        | `true`                              |
-| `channels.feishu.tools.base`                             | `channels.feishu.tools.bitable` için takma ad; ikisi de ayarlandığında açık `bitable` kazanır | `true`                              |
-| `channels.feishu.accounts.<id>.tools.bitable`            | Hesap başına Bitable/Base araç kapısı                                               | devralınan                          |
-| `channels.feishu.accounts.<id>.tools.base`               | `tools.bitable` için hesap başına takma ad                                            | devralınan                          |
-
----
+| Ayar                                                     | Açıklama                                                                             | Varsayılan                           |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------ |
+| `channels.feishu.enabled`                                | Kanalı etkinleştirir/devre dışı bırakır                                              | `true`                               |
+| `channels.feishu.domain`                                 | API etki alanı (`feishu`, `lark` veya bir `https://` temel URL'si)                     | `feishu`                             |
+| `channels.feishu.connectionMode`                         | Olay aktarımı (`websocket` veya `webhook`)                                           | `websocket`                          |
+| `channels.feishu.defaultAccount`                         | Giden yönlendirme için varsayılan hesap                                              | `default`                            |
+| `channels.feishu.verificationToken`                      | Webhook modu için gereklidir                                                         | -                                    |
+| `channels.feishu.encryptKey`                             | Webhook modu için gereklidir                                                         | -                                    |
+| `channels.feishu.webhookPath`                            | Webhook rota yolu                                                                    | `/feishu/events`                     |
+| `channels.feishu.webhookHost`                            | Webhook bağlama ana makinesi                                                         | `127.0.0.1`                          |
+| `channels.feishu.webhookPort`                            | Webhook bağlama portu                                                                | `3000`                               |
+| `channels.feishu.accounts.<id>.appId`                    | Uygulama kimliği                                                                     | -                                    |
+| `channels.feishu.accounts.<id>.appSecret`                | Uygulama gizli anahtarı                                                              | -                                    |
+| `channels.feishu.accounts.<id>.domain`                   | Hesap başına etki alanı geçersiz kılma                                               | `feishu`                             |
+| `channels.feishu.accounts.<id>.tts`                      | Hesap başına TTS geçersiz kılma                                                      | `tts`                                |
+| `channels.feishu.dmPolicy`                               | DM politikası (`pairing`, `allowlist`, `open`)                                           | `pairing`                            |
+| `channels.feishu.allowFrom`                              | DM izin listesi (open_id listesi)                                                    | -                                    |
+| `channels.feishu.groupPolicy`                            | Grup politikası (`open`, `allowlist`, `disabled`)                                       | `allowlist`                          |
+| `channels.feishu.groupAllowFrom`                         | Grup izin listesi                                                                    | -                                    |
+| `channels.feishu.groupSenderAllowFrom`                   | Tüm gruplara uygulanan gönderen izin listesi                                         | -                                    |
+| `channels.feishu.requireMention`                         | Gruplarda @bahsetme gerektirir                                                       | `true` (politika `open` olduğunda `false`)  |
+| `channels.feishu.allowBots`                              | Bot döngüsü korumasıyla bu bottan bahseden diğer botları kabul eder                  | `false`                              |
+| `channels.feishu.groups.<chat_id>.requireMention`        | Grup başına @bahsetme geçersiz kılma; açık kimlikler ayrıca izin listesi modunda grubu kabul eder | devralınır                           |
+| `channels.feishu.groups.<chat_id>.enabled`               | Belirli bir grubu etkinleştirir/devre dışı bırakır                                   | `true`                               |
+| `channels.feishu.groups.<chat_id>.allowFrom`             | Grup başına gönderen izin listesi (`groupSenderAllowFrom` değerini geçersiz kılar)   | -                                    |
+| `channels.feishu.groupSessionScope`                      | Grup oturumu eşlemesi (`group`, `group_sender`, `group_topic`, `group_topic_sender`) | `group`                              |
+| `channels.feishu.replyInThread`                          | Bot yanıtları konu ileti dizileri oluşturur/sürdürür (`disabled`, `enabled`)       | `disabled`                           |
+| `channels.feishu.reactionNotifications`                  | Gelen tepki olayları (`off`, `own`, `all`)                                        | `own`                                |
+| `channels.feishu.vcAutoJoin`                             | Normal DM yetkilendirmesinden sonra davet edilen VC toplantılarına katılır           | `false`                              |
+| `channels.feishu.dynamicAgentCreation.enabled`           | Kullanıcı başına otomatik agent oluşturmayı etkinleştirir                            | `false`                              |
+| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | Dinamik agent çalışma alanları için yol şablonu                                      | `~/.openclaw/workspace-{agentId}`    |
+| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | Agent dizini adı şablonu                                                             | `~/.openclaw/agents/{agentId}/agent` |
+| `channels.feishu.dynamicAgentCreation.maxAgents`         | Oluşturulacak maksimum dinamik agent sayısı                                          | sınırsız                             |
+| `channels.feishu.textChunkLimit`                         | Mesaj parçası boyutu                                                                 | `4000`                               |
+| `channels.feishu.streaming.chunkMode`                    | Parça bölme (`length` veya `newline`)                                              | `length`                             |
+| `channels.feishu.mediaMaxMb`                             | Medya boyutu sınırı                                                                  | `30`                                 |
+| `channels.feishu.renderMode`                             | Yanıt işleme (`auto`, `raw`, `card`)                                              | `auto`                               |
+| `channels.feishu.streaming.mode`                         | Akış kartı çıktısı (`partial` veya `off`)                                       | `partial`                            |
+| `channels.feishu.streaming.block.enabled`                | Tamamlanan bloklar için yanıt akışı                                                  | `false`                              |
+| `channels.feishu.typingIndicator`                        | Yazıyor tepkileri gönderir                                                           | `true`                               |
+| `channels.feishu.resolveSenderNames`                     | Gönderen görünen adlarını çözümler                                                   | `true`                               |
+| `channels.feishu.configWrites`                           | Kanal tarafından başlatılan yapılandırma yazmalarına izin verir (dinamik agent'lar için gereklidir) | `true`                               |
+| `channels.feishu.tools.doc`                              | Belge araçlarını etkinleştirir                                                       | `true`                               |
+| `channels.feishu.tools.chat`                             | Sohbet bilgisi araçlarını etkinleştirir                                              | `true`                               |
+| `channels.feishu.tools.wiki`                             | Bilgi tabanı araçlarını etkinleştirir (`doc` gerektirir)                            | `true`                               |
+| `channels.feishu.tools.drive`                            | Bulut depolama araçlarını etkinleştirir                                              | `true`                               |
+| `channels.feishu.tools.perm`                             | İzin yönetimi araçlarını etkinleştirir                                               | `false`                              |
+| `channels.feishu.tools.scopes`                           | Uygulama kapsamları tanılama aracını etkinleştirir                                   | `true`                               |
+| `channels.feishu.tools.bitable`                          | Bitable/Base araçlarını etkinleştirir                                                | `true`                               |
+| `channels.feishu.tools.base`                             | `channels.feishu.tools.bitable` için takma ad; ikisi de ayarlandığında açık `bitable` değeri önceliklidir | `true`                               |
+| `channels.feishu.accounts.<id>.tools.bitable`            | Hesap başına Bitable/Base araç geçidi                                                | devralınır                           |
+| `channels.feishu.accounts.<id>.tools.base`               | `tools.bitable` için hesap başına takma ad                                           | devralınır                           |
 
 ## Desteklenen mesaj türleri
 
@@ -610,7 +702,13 @@ Tam yapılandırma: [Gateway yapılandırması](/tr/gateway/configuration)
 - ✅ Video/medya
 - ✅ Çıkartmalar
 
-Gelen Feishu/Lark ses mesajları, ham `file_key` JSON yerine medya yer tutucuları olarak normalleştirilir. `tools.media.audio` yapılandırıldığında OpenClaw sesli not kaynağını indirir ve ajan turundan önce paylaşılan ses yazıya dökme işlemini çalıştırır; böylece ajan konuşulan dökümü alır. Feishu ses yükünde döküm metnini doğrudan içeriyorsa, bu metin başka bir ASR çağrısı yapılmadan kullanılır. Bir ses yazıya dökme sağlayıcısı olmadığında ajan yine de ham Feishu kaynak yükü yerine bir `<media:audio>` yer tutucusu ve kaydedilmiş eki alır.
+Gelen Feishu/Lark sesli mesajları, ham `file_key` JSON yerine medya
+yer tutucuları olarak normalleştirilir. `tools.media.audio` yapılandırıldığında OpenClaw,
+sesli not kaynağını indirir ve agent işlem sırasından önce paylaşılan ses dökümünü
+çalıştırır; böylece agent konuşmanın dökümünü alır. Feishu, ses yükünde doğrudan
+döküm metni içeriyorsa bu metin başka bir ASR çağrısı yapılmadan kullanılır.
+Bir ses dökümü sağlayıcısı olmadan da agent, ham Feishu kaynak yükü yerine
+`<media:audio>` yer tutucusunu ve kaydedilen eki alır.
 
 ### Gönderme
 
@@ -620,33 +718,29 @@ Gelen Feishu/Lark ses mesajları, ham `file_key` JSON yerine medya yer tutucular
 - ✅ Ses
 - ✅ Video/medya
 - ✅ Etkileşimli kartlar (akış güncellemeleri dahil)
-- ⚠️ Zengin metin (gönderi tarzı biçimlendirme; tam Feishu/Lark yazarlık özelliklerini desteklemez)
+- ⚠️ Zengin metin (gönderi tarzı biçimlendirme; Feishu/Lark'ın tüm içerik oluşturma yeteneklerini desteklemez)
 
-Yerel Feishu/Lark ses balonları, Feishu `audio` ileti türünü kullanır ve
-Ogg/Opus yükleme medyası (`file_type: "opus"`) gerektirir. Mevcut `.opus` ve `.ogg` medyası
-doğrudan yerel ses olarak gönderilir. MP3/WAV/M4A ve diğer olası ses formatları,
-yalnızca yanıt sesli teslimat istediğinde (`audioAsVoice` / ileti aracı `asVoice`, TTS sesli not
-yanıtları dahil) `ffmpeg` ile 48kHz Ogg/Opus biçimine dönüştürülür. Sıradan MP3 ekleri normal dosyalar olarak kalır. `ffmpeg` eksikse veya
-dönüştürme başarısız olursa, OpenClaw dosya ekine geri döner ve nedeni günlüğe kaydeder.
+Yerel Feishu/Lark ses baloncukları, Feishu `audio` ileti türünü kullanır ve
+Ogg/Opus yükleme ortamı (`file_type: "opus"`) gerektirir. Mevcut `.opus` ve `.ogg` ortamı
+doğrudan yerel ses olarak gönderilir. MP3/WAV/M4A ve diğer olası ses biçimleri,
+yalnızca yanıt sesli teslim istediğinde (`audioAsVoice` / TTS sesli not
+yanıtları dâhil ileti aracı `asVoice`) `ffmpeg` ile 48kHz Ogg/Opus biçimine
+dönüştürülür. Sıradan MP3 ekleri normal dosyalar olarak kalır. `ffmpeg` eksikse veya
+dönüştürme başarısız olursa OpenClaw bir dosya ekine geri döner ve nedenini günlüğe kaydeder.
 
 ### Konular ve yanıtlar
 
 - ✅ Satır içi yanıtlar
 - ✅ Konu yanıtları
-- ✅ Medya yanıtları, bir konu iletisine yanıt verirken konu farkındalığını korur
+- ✅ Bir konu iletisi yanıtlanırken medya yanıtları konu bağlamını korur
 
-`groupSessionScope: "group_topic"` ve `"group_topic_sender"` için yerel
-Feishu/Lark konu grupları, olay `thread_id` değerini (`omt_*`) kanonik
-konu oturumu anahtarı olarak kullanır. Yerel bir konu başlatıcı olayı `thread_id` değerini atlarsa, OpenClaw
-tur yönlendirilmeden önce bunu Feishu'dan doldurur. OpenClaw'ın konuya dönüştürdüğü normal grup yanıtları,
-ilk tur ve takip turu aynı oturumda kalsın diye yanıt kök ileti kimliğini (`om_*`) kullanmaya devam eder.
-
----
+Konu grubu oturum yönlendirmesi
+[Grup oturumu kapsamı ve konu dizileri](#group-session-scope-and-topic-threads) altında ele alınmıştır.
 
 ## İlgili
 
 - [Kanallara Genel Bakış](/tr/channels) - desteklenen tüm kanallar
 - [Eşleştirme](/tr/channels/pairing) - DM kimlik doğrulaması ve eşleştirme akışı
-- [Gruplar](/tr/channels/groups) - grup sohbeti davranışı ve bahsetme kapısı
-- [Kanal Yönlendirme](/tr/channels/channel-routing) - iletiler için oturum yönlendirmesi
+- [Gruplar](/tr/channels/groups) - grup sohbeti davranışı ve bahsetme kısıtlaması
+- [Kanal Yönlendirmesi](/tr/channels/channel-routing) - iletiler için oturum yönlendirmesi
 - [Güvenlik](/tr/gateway/security) - erişim modeli ve güçlendirme

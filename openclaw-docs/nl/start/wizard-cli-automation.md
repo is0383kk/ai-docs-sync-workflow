@@ -1,24 +1,25 @@
 ---
 read_when:
-    - U automatiseert onboarding in scripts of CI
-    - U hebt niet-interactieve voorbeelden nodig voor specifieke providers
+    - Je automatiseert de onboarding in scripts of CI
+    - Je hebt niet-interactieve voorbeelden nodig voor specifieke providers
 sidebarTitle: CLI automation
 summary: Gescripte onboarding en agentconfiguratie voor de OpenClaw CLI
 title: CLI-automatisering
 x-i18n:
-    generated_at: "2026-07-12T09:19:46Z"
+    generated_at: "2026-07-27T05:52:18Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: de3115fd0c675b92f22cf9c44ddd307a854e499c6f163235f991368429b2c152
+    source_hash: 2a9fd8530379927995641f8033651ff12ada98068f106672e6655a17b8265735
     source_path: start/wizard-cli-automation.md
     workflow: 16
 ---
 
-Gebruik `openclaw onboard --non-interactive` om de configuratie te scripten. Hiervoor is `--accept-risk` vereist: niet-interactieve configuratie kan aanmeldgegevens en daemonconfiguratie wegschrijven zonder bevestigingsprompt, dus deze vlag is de expliciete erkenning van het risico.
+Gebruik `openclaw onboard --non-interactive` voor installatie via scripts. Hiervoor is `--accept-risk` vereist: een niet-interactieve installatie kan referenties en daemonconfiguratie zonder bevestigingsprompt schrijven, dus de vlag is de expliciete erkenning van het risico.
 
 <Note>
-`--json` activeert niet automatisch de niet-interactieve modus. Geef voor scripts expliciet `--non-interactive --accept-risk` door.
+`--json` impliceert geen niet-interactieve modus. Geef `--non-interactive --accept-risk` expliciet door voor scripts.
 </Note>
 
 ## Niet-interactief basisvoorbeeld
@@ -38,9 +39,9 @@ openclaw onboard --non-interactive --accept-risk \
 
 Voeg `--json` toe voor een machineleesbare samenvatting.
 
-- `--gateway-port` is standaard `18789`; geef deze optie alleen door om de standaardwaarde te overschrijven.
-- `--skip-bootstrap` slaat het aanmaken van standaardwerkruimtebestanden over, voor automatisering die vooraf een eigen werkruimte vult.
-- `--secret-input-mode ref` slaat in het authenticatieprofiel een door een omgevingsvariabele ondersteunde verwijzing (`{ source: "env", provider: "default", id: "<ENV_VAR>" }`) op in plaats van de sleutel als platte tekst. In de niet-interactieve `ref`-modus moet de omgevingsvariabele van de provider al in de procesomgeving zijn ingesteld: het doorgeven van een inline sleutelvlag zonder de bijbehorende omgevingsvariabele mislukt onmiddellijk.
+- `--gateway-port` is standaard ingesteld op `18789`; geef dit alleen door om de standaardwaarde te overschrijven.
+- `--skip-bootstrap` slaat het aanmaken van standaardwerkruimtebestanden over voor automatisering die vooraf een eigen werkruimte vult.
+- `--secret-input-mode ref` slaat een door een omgevingsvariabele ondersteunde verwijzing (`{ source: "env", provider: "default", id: "<ENV_VAR>" }`) op in het authenticatieprofiel in plaats van de sleutel als platte tekst. In de niet-interactieve `ref`-modus moet de omgevingsvariabele van de provider al in de procesomgeving zijn ingesteld: het doorgeven van een inline sleutelvlag zonder de bijbehorende omgevingsvariabele mislukt onmiddellijk.
 
 ```bash
 openclaw onboard --non-interactive --accept-risk \
@@ -116,7 +117,7 @@ openclaw onboard --non-interactive --accept-risk \
       --opencode-zen-api-key "$OPENCODE_API_KEY" \
       --gateway-bind loopback
     ```
-    Gebruik `--auth-choice opencode-go --opencode-go-api-key "$OPENCODE_API_KEY"` voor de Go-catalogus.
+    Schakel over naar `--auth-choice opencode-go --opencode-go-api-key "$OPENCODE_API_KEY"` voor de Go-catalogus.
   </Accordion>
   <Accordion title="Voorbeeld met Synthetic">
     ```bash
@@ -159,11 +160,11 @@ openclaw onboard --non-interactive --accept-risk \
       --gateway-bind loopback
     ```
 
-    `--custom-api-key` is optioneel; sommige eindpunten vereisen geen authenticatie. Wanneer deze optie wordt weggelaten, controleert het onboardingproces de omgevingsvariabele `CUSTOM_API_KEY`. `--custom-provider-id` is optioneel en wordt bij weglating automatisch afgeleid van de basis-URL. `--custom-compatibility` is standaard `openai` (andere waarden: `openai-responses`, `anthropic`).
+    `--custom-api-key` is optioneel; sommige eindpunten vereisen geen authenticatie. Als dit wordt weggelaten, controleert het onboardingproces `CUSTOM_API_KEY` in de omgeving. `--custom-provider-id` is optioneel en wordt bij weglating automatisch afgeleid van de basis-URL. `--custom-compatibility` is standaard ingesteld op `openai` (andere waarden: `openai-responses`, `anthropic`).
 
-    OpenClaw leidt ondersteuning voor beeldinvoer af uit bekende patronen voor model-ID's van beeldmodellen (`gpt-4o`, `claude-3/4`, `gemini`, de achtervoegsels `-vl`/`vision` en vergelijkbare patronen). Voeg `--custom-image-input` toe om deze ondersteuning af te dwingen voor een niet-herkend beeldmodel, of `--custom-text-input` om alleen tekst af te dwingen.
+    OpenClaw leidt ondersteuning voor afbeeldingsinvoer af uit bekende patronen voor vision-model-id's (`gpt-4o`, `claude-3/4`, `gemini`, achtervoegsels `-vl`/`vision` en vergelijkbare patronen). Voeg `--custom-image-input` toe om dit voor een niet-herkend vision-model geforceerd in te schakelen, of `--custom-text-input` om alleen tekst af te dwingen.
 
-    Variant voor de verwijzingsmodus, waarbij `apiKey` wordt opgeslagen als `{ source: "env", provider: "default", id: "CUSTOM_API_KEY" }`:
+    Variant in verwijzingsmodus, waarbij `apiKey` als `{ source: "env", provider: "default", id: "CUSTOM_API_KEY" }` wordt opgeslagen:
 
     ```bash
     export CUSTOM_API_KEY="your-key"
@@ -182,11 +183,11 @@ openclaw onboard --non-interactive --accept-risk \
   </Accordion>
 </AccordionGroup>
 
-Authenticatie met een Anthropic-configuratietoken blijft ondersteund, maar OpenClaw geeft de voorkeur aan hergebruik van de Claude CLI wanneer lokaal een Claude CLI-aanmelding beschikbaar is. Gebruik voor productie bij voorkeur een Anthropic API-sleutel.
+Authenticatie met een Anthropic-installatietoken blijft ondersteund, maar OpenClaw geeft de voorkeur aan hergebruik van de Claude CLI wanneer lokaal een Claude CLI-aanmelding beschikbaar is. Geef voor productie de voorkeur aan een Anthropic API-sleutel.
 
 ## Nog een agent toevoegen
 
-`openclaw agents add <name>` maakt een afzonderlijke agent met een eigen werkruimte, sessies en authenticatieprofielen. Als u deze opdracht zonder `--workspace` (en zonder andere vlaggen) uitvoert, wordt de interactieve wizard gestart; als u `--workspace`, `--model`, `--agent-dir`, `--bind` of `--non-interactive` doorgeeft, wordt de opdracht niet-interactief uitgevoerd en is `--workspace` vereist.
+`openclaw agents add <name>` maakt een afzonderlijke agent met een eigen werkruimte, sessies en authenticatieprofielen. Als je dit uitvoert zonder `--workspace` (en zonder andere vlaggen), wordt de interactieve wizard gestart; als je een van `--workspace`, `--model`, `--agent-dir`, `--bind` of `--non-interactive` doorgeeft, wordt de opdracht niet-interactief uitgevoerd en is vervolgens `--workspace` vereist.
 
 ```bash
 openclaw agents add work \
@@ -197,7 +198,7 @@ openclaw agents add work \
   --json
 ```
 
-Configuratiesleutels die worden geschreven (`agents.list[]`-vermelding voor het ID van de nieuwe agent):
+Configuratiesleutels die worden geschreven (`agents.entries.*`-item voor de nieuwe agent-id):
 
 - `name`
 - `workspace`
@@ -207,11 +208,11 @@ Configuratiesleutels die worden geschreven (`agents.list[]`-vermelding voor het 
 Opmerkingen:
 
 - Standaardwerkruimte (wanneer `--workspace` in de interactieve wizard wordt weggelaten): `~/.openclaw/workspace-<agentId>`.
-- `--bind <channel[:accountId]>` kan meerdere keren worden gebruikt; voeg bindingen toe om inkomende berichten naar de nieuwe agent te routeren (dit kan ook interactief in de wizard).
-- De naam van de agent wordt genormaliseerd naar een geldig agent-ID; `main` is gereserveerd.
+- `--bind <channel[:accountId]>` kan worden herhaald; voeg bindingen toe om inkomende berichten naar de nieuwe agent te routeren (dit kan ook interactief via de wizard).
+- De agentnaam wordt genormaliseerd tot een geldige agent-id; `main` is gereserveerd.
 
 ## Gerelateerde documentatie
 
-- Onboardingcentrum: [Onboarding (CLI)](/nl/start/wizard)
-- Volledige naslag: [Naslag voor CLI-configuratie](/nl/start/wizard-cli-reference)
-- Opdrachtnaslag: [`openclaw onboard`](/nl/cli/onboard)
+- Onboardinghub: [Onboarding (CLI)](/nl/start/wizard)
+- Volledige referentie: [CLI-installatiereferentie](/nl/start/wizard-cli-reference)
+- Opdrachtenreferentie: [`openclaw onboard`](/nl/cli/onboard)

@@ -1,14 +1,15 @@
 ---
 read_when:
-    - आप volcengine Plugin इंस्टॉल, कॉन्फ़िगर, या ऑडिट कर रहे हैं
-summary: OpenClaw में Volcengine और Volcengine Plan मॉडल प्रदाता समर्थन जोड़ता है।
+    - आप volcengine Plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
+summary: OpenClaw में Volcengine और Volcengine Plan मॉडल प्रदाता के लिए समर्थन जोड़ता है।
 title: Volcengine Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:50:44Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T21:31:30Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 1b2b3e14d69cd0a8629d7c63c907efaba7fc71dbc1453d4bf92830b9b9a8ed7f
+    source_hash: 6e78d9277f1c37a799156b5acee0c07af17bf1695112dfb0cb50c730e0d53eeb
     source_path: plugins/reference/volcengine.md
     workflow: 16
 ---
@@ -24,7 +25,7 @@ OpenClaw में Volcengine, Volcengine Plan मॉडल प्रदात�
 
 ## सतह
 
-प्रदाता: volcengine, volcengine-plan; अनुबंध: speechProviders
+प्रदाता: `volcengine`, `volcengine-plan`; अनुबंध: `speechProviders`
 
 ## संबंधित दस्तावेज़
 

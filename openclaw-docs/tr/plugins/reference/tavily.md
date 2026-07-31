@@ -1,21 +1,22 @@
 ---
 read_when:
-    - tavily Plugin'ini kuruyor, yapılandırıyor veya denetliyorsunuz
-summary: Aracı tarafından çağrılabilen araçlar ekler. Web arama sağlayıcısı desteği ekler.
-title: Tavily Plugin’i
+    - tavily pluginini yüklüyor, yapılandırıyor veya denetliyorsunuz
+summary: Ajan tarafından çağrılabilen araçlar ekler. Web arama sağlayıcısı desteği ekler.
+title: Tavily Plugin'i
 x-i18n:
-    generated_at: "2026-07-12T12:38:57Z"
+    generated_at: "2026-07-27T00:12:31Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 409da2bdfca9c2dd5a2c64565787175b57f2d43f09b1fa484ac54dd1f528c9fb
+    source_hash: c7bbeb8a0580d9248fdc1ffa08a556e8d2d91cb263f859b1d26a519ec2014f38
     source_path: plugins/reference/tavily.md
     workflow: 16
 ---
 
 # Tavily Plugin
 
-Aracıların çağırabildiği araçlar ekler. Web arama sağlayıcısı desteği ekler.
+Ajanların çağırabildiği araçlar ekler. Web arama sağlayıcısı desteği ekler.
 
 ## Dağıtım
 
@@ -24,7 +25,7 @@ Aracıların çağırabildiği araçlar ekler. Web arama sağlayıcısı desteğ
 
 ## Yüzey
 
-sözleşmeler: araçlar, web arama sağlayıcıları; Skills
+sözleşmeler: `tools`, `webSearchProviders`; Skills
 
 ## İlgili belgeler
 

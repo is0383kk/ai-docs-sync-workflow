@@ -2,9 +2,10 @@
 summary: تغییر مسیر به /cli/message
 title: نظرسنجی‌ها
 x-i18n:
-    generated_at: "2026-07-12T09:31:49Z"
+    generated_at: "2026-07-27T15:03:15Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 071617c5fe910ad8a5d4a03416876ba3092d4fc67d5c206570a0456469ef73a9
     source_path: automation/poll.md

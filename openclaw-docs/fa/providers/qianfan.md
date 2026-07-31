@@ -1,20 +1,21 @@
 ---
 read_when:
-    - شما یک کلید API واحد برای چندین مدل زبانی بزرگ می‌خواهید
-    - شما به راهنمای راه‌اندازی Baidu Qianfan نیاز دارید
-summary: از API یکپارچهٔ Qianfan برای دسترسی به مدل‌های متعدد در OpenClaw استفاده کنید
-title: چیان‌فان
+    - برای چندین LLM یک کلید API واحد می‌خواهید
+    - به راهنمای راه‌اندازی Baidu Qianfan نیاز دارید
+summary: از API یکپارچه Qianfan برای دسترسی به مدل‌های متعدد در OpenClaw استفاده کنید
+title: Qianfan
 x-i18n:
-    generated_at: "2026-07-12T10:43:00Z"
+    generated_at: "2026-07-27T15:42:20Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 31387a53ee4472e2d20ae939ea75cea0d6f6367501becd56a8654fd97fdf0804
     source_path: providers/qianfan.md
     workflow: 16
 ---
 
-Qianfan پلتفرم MaaS شرکت Baidu است: یک API یکپارچه و سازگار با OpenAI که درخواست‌ها را از طریق یک نقطه پایانی و کلید API واحد به مدل‌های متعدد هدایت می‌کند. OpenClaw آن را به‌عنوان Plugin خارجی رسمی `@openclaw/qianfan-provider` ارائه می‌کند.
+Qianfan پلتفرم MaaS شرکت Baidu است: یک API یکپارچه و سازگار با OpenAI که درخواست‌ها را از طریق یک نقطه پایانی و کلید API واحد به مدل‌های متعددی هدایت می‌کند. OpenClaw آن را به‌عنوان Plugin خارجی رسمی `@openclaw/qianfan-provider` عرضه می‌کند.
 
 | ویژگی         | مقدار                                    |
 | ------------- | ---------------------------------------- |
@@ -33,14 +34,14 @@ openclaw plugins install @openclaw/qianfan-provider
 openclaw gateway restart
 ```
 
-## شروع کار
+## شروع به کار
 
 <Steps>
   <Step title="ایجاد حساب Baidu Cloud">
-    در [کنسول Qianfan](https://console.bce.baidu.com/qianfan/ais/console/apiKey) ثبت‌نام یا وارد شوید و مطمئن شوید دسترسی شما به API سرویس Qianfan فعال است.
+    در [Qianfan Console](https://console.bce.baidu.com/qianfan/ais/console/apiKey) ثبت‌نام یا وارد شوید و مطمئن شوید دسترسی API به Qianfan برای شما فعال است.
   </Step>
   <Step title="ایجاد کلید API">
-    یک برنامه جدید ایجاد یا برنامه‌ای موجود را انتخاب کنید، سپس یک کلید API بسازید. کلیدهای Baidu Cloud از قالب `bce-v3/ALTAK-...` استفاده می‌کنند.
+    یک برنامه جدید ایجاد کنید یا یکی از برنامه‌های موجود را انتخاب کنید، سپس یک کلید API بسازید. کلیدهای Baidu Cloud از قالب `bce-v3/ALTAK-...` استفاده می‌کنند.
   </Step>
   <Step title="اجرای راه‌اندازی اولیه">
     ```bash
@@ -48,29 +49,29 @@ openclaw gateway restart
     ```
 
     اجراهای غیرتعاملی کلید را از `--qianfan-api-key <key>` یا
-    `QIANFAN_API_KEY` می‌خوانند. راه‌اندازی اولیه پیکربندی ارائه‌دهنده را می‌نویسد، نام مستعار
-    `QIANFAN` را برای مدل پیش‌فرض اضافه می‌کند و در صورت پیکربندی‌نشدن هیچ مدلی،
-    `qianfan/deepseek-v3.2` را به‌عنوان مدل پیش‌فرض تنظیم می‌کند.
+    `QIANFAN_API_KEY` می‌خوانند. راه‌اندازی اولیه، پیکربندی ارائه‌دهنده را می‌نویسد،
+    نام مستعار `QIANFAN` را برای مدل پیش‌فرض اضافه می‌کند و اگر هیچ مدلی
+    پیکربندی نشده باشد، `qianfan/deepseek-v3.2` را به‌عنوان مدل پیش‌فرض تنظیم می‌کند.
 
   </Step>
-  <Step title="بررسی دردسترس‌بودن مدل">
+  <Step title="بررسی در دسترس بودن مدل">
     ```bash
     openclaw models list --provider qianfan
     ```
   </Step>
 </Steps>
 
-## فهرست داخلی
+## کاتالوگ داخلی
 
-| مرجع مدل                            | ورودی       | زمینه   | حداکثر خروجی | استدلال | توضیحات       |
-| ------------------------------------ | ----------- | ------- | ------------ | ------- | ------------- |
-| `qianfan/deepseek-v3.2`              | متن         | 98,304  | 32,768       | بله     | مدل پیش‌فرض   |
-| `qianfan/ernie-5.0-thinking-preview` | متن، تصویر  | 119,000 | 64,000       | بله     | چندوجهی       |
+| ارجاع مدل                            | ورودی       | پنجره زمینه | حداکثر خروجی | استدلال | توضیحات         |
+| ------------------------------------ | ----------- | ------- | ---------- | --------- | ------------- |
+| `qianfan/deepseek-v3.2`              | متن        | 98,304  | 32,768     | بله       | مدل پیش‌فرض |
+| `qianfan/ernie-5.0-thinking-preview` | متن، تصویر | 119,000 | 64,000     | بله       | چندوجهی    |
 
-این فهرست ثابت است؛ شناسایی زنده مدل وجود ندارد.
+کاتالوگ ایستا است؛ شناسایی زنده مدل‌ها انجام نمی‌شود.
 
 <Tip>
-تنها زمانی لازم است `models.providers.qianfan` را بازنویسی کنید که به نشانی پایه سفارشی یا فراداده سفارشی مدل نیاز داشته باشید.
+فقط زمانی لازم است `models.providers.qianfan` را بازنویسی کنید که به نشانی پایه سفارشی یا فراداده مدل نیاز داشته باشید.
 </Tip>
 
 ## نمونه پیکربندی
@@ -118,17 +119,17 @@ openclaw gateway restart
 ```
 
 <Note>
-مراجع مدل از پیشوند `qianfan/` استفاده می‌کنند (برای مثال `qianfan/deepseek-v3.2`).
+ارجاع‌های مدل از پیشوند `qianfan/` استفاده می‌کنند (برای مثال `qianfan/deepseek-v3.2`).
 </Note>
 
 <AccordionGroup>
   <Accordion title="انتقال و سازگاری">
-    Qianfan از مسیر انتقال سازگار با OpenAI استفاده می‌کند، نه قالب‌بندی بومی درخواست‌های OpenAI. قابلیت‌های استاندارد SDK مربوط به OpenAI کار می‌کنند، اما ممکن است پارامترهای مختص ارائه‌دهنده ارسال نشوند.
+    Qianfan از مسیر انتقال سازگار با OpenAI استفاده می‌کند، نه قالب‌بندی بومی درخواست‌های OpenAI. قابلیت‌های استاندارد SDK مربوط به OpenAI کار می‌کنند، اما ممکن است پارامترهای ویژه ارائه‌دهنده ارسال نشوند.
   </Accordion>
 
   <Accordion title="عیب‌یابی">
-    - مطمئن شوید کلید API شما با `bce-v3/ALTAK-` آغاز می‌شود و دسترسی آن به API سرویس Qianfan در کنسول Baidu Cloud فعال است.
-    - اگر مدل‌ها فهرست نمی‌شوند، تأیید کنید سرویس Qianfan برای حساب شما فعال شده است.
+    - مطمئن شوید کلید API شما با `bce-v3/ALTAK-` شروع می‌شود و دسترسی API به Qianfan در کنسول Baidu Cloud برای آن فعال است.
+    - اگر مدل‌ها فهرست نمی‌شوند، تأیید کنید که سرویس Qianfan برای حساب شما فعال شده است.
     - نشانی پایه را فقط در صورت استفاده از نقطه پایانی یا پراکسی سفارشی تغییر دهید.
 
   </Accordion>
@@ -138,7 +139,7 @@ openclaw gateway restart
 
 <CardGroup cols={2}>
   <Card title="انتخاب مدل" href="/fa/concepts/model-providers" icon="layers">
-    انتخاب ارائه‌دهندگان، مراجع مدل و رفتار جایگزینی در صورت خرابی.
+    انتخاب ارائه‌دهندگان، ارجاع‌های مدل و رفتار جایگزینی هنگام خرابی.
   </Card>
   <Card title="مرجع پیکربندی" href="/fa/gateway/configuration-reference" icon="gear">
     مرجع کامل پیکربندی OpenClaw.
@@ -146,7 +147,7 @@ openclaw gateway restart
   <Card title="راه‌اندازی عامل" href="/fa/concepts/agent" icon="robot">
     پیکربندی پیش‌فرض‌های عامل و تخصیص مدل‌ها.
   </Card>
-  <Card title="مستندات API سرویس Qianfan" href="https://cloud.baidu.com/doc/qianfan-api/s/3m7of64lb" icon="arrow-up-right-from-square">
-    مستندات رسمی API سرویس Qianfan.
+  <Card title="مستندات API مربوط به Qianfan" href="https://cloud.baidu.com/doc/qianfan-api/s/3m7of64lb" icon="arrow-up-right-from-square">
+    مستندات رسمی API مربوط به Qianfan.
   </Card>
 </CardGroup>

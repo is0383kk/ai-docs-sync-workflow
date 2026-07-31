@@ -2,71 +2,61 @@
 read_when:
     - 既存の Matrix インストールのアップグレード
     - 暗号化された Matrix の履歴とデバイス状態の移行
-summary: 暗号化状態の復旧に関する制限と手動復旧手順を含め、OpenClaw が以前の Matrix Plugin をインプレースでアップグレードする仕組み。
+summary: 暗号化状態の復旧制限と手動復旧手順を含め、OpenClaw が以前の Matrix Plugin をその場でアップグレードする方法。
 title: Matrix の移行
 x-i18n:
-    generated_at: "2026-07-12T14:20:10Z"
+    generated_at: "2026-07-26T08:54:28Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 15
+    prompt_version: 32
     provider: openai
-    source_hash: 33d5ac134338c8032ca1507ceee6eade2d37b3c86f0045fb883304ad208cd5e5
+    source_hash: 475c96914900a5597f37001264bd3d8f69a69dbd0600f2704c2a1be46924fac4
     source_path: channels/matrix-migration.md
     workflow: 16
 ---
 
-以前の公開 `matrix` plugin から現在の実装へアップグレードします。
+以前の公開 `matrix` Plugin から現在の実装にアップグレードします。
 
 ほとんどのユーザーは、そのままアップグレードできます。
 
-- plugin は引き続き `@openclaw/matrix`
-- チャンネルは引き続き `matrix`
-- 設定は引き続き `channels.matrix` 配下
-- キャッシュされた認証情報は引き続き `~/.openclaw/credentials/matrix/` 配下
-- ランタイム状態は引き続き `~/.openclaw/matrix/` 配下
+- Plugin は `@openclaw/matrix` のままです
+- チャンネルは `matrix` のままです
+- 設定は引き続き `channels.matrix` の下にあります
+- キャッシュされた認証情報は共有 `state/openclaw.sqlite` Plugin 状態に移動します
+- ランタイム状態は引き続き `~/.openclaw/matrix/` の下にあります
 
-設定キーの名前を変更したり、新しい名前でpluginを再インストールしたりする必要はありません。
-ルートの `openclaw` パッケージには、MatrixのランタイムコードやMatrix SDKの
-依存関係が含まれなくなりました。`openclaw channels status` でMatrixが設定済みと表示される一方、
-pluginがインストールされていない場合は、`openclaw doctor --fix` または
-`openclaw plugins install @openclaw/matrix` を実行してください。Matrix SDKパッケージを
-ルートのOpenClawパッケージにインストールしないでください。
+設定キーの名前を変更したり、新しい名前で Plugin を再インストールしたりする必要はありません。
+ルートの `openclaw` パッケージには、Matrix ランタイムコードや Matrix SDK の依存関係がバンドルされなくなりました。`openclaw channels status` で Matrix が設定済みであるものの Plugin がインストールされていないと表示される場合は、`openclaw doctor --fix` または `openclaw plugins install @openclaw/matrix` を実行してください。Matrix SDK パッケージをルートの OpenClaw パッケージにインストールしないでください。
 
 ## 移行によって自動的に行われること
 
-Matrixの移行は、[`openclaw doctor --fix`](/ja-JP/gateway/doctor) の実行時に行われます。また、Matrixクライアントの起動時にSQLiteストアの隣にファイルベースのサイドカー状態が残っている場合は、フォールバックとして実行されます。
+Matrix の移行は、[`openclaw doctor --fix`](/ja-JP/gateway/doctor) を実行すると行われます。専用の Matrix ストアの隣にあるファイルベースのサイドカーでは、クライアント起動時のフォールバックが維持されますが、認証情報ファイルのインポートは Doctor でのみ行われます。ランタイムは正規の SQLite 認証情報状態のみを読み取ります。
 
-自動移行の対象は次のとおりです。
+Doctor の移行対象は次のとおりです。
 
-- キャッシュされたMatrix認証情報の再利用
-- 同じアカウント選択と `channels.matrix` 設定の維持
-- ファイルベースのサイドカー状態（`bot-storage.json` 同期キャッシュ、`recovery-key.json`、`legacy-crypto-migration.json`、IndexedDBスナップショット）のMatrix SQLite状態へのインポート。移行済みファイルは `.migrated` サフィックス付きでアーカイブされます
-- 後からアクセストークンが変更された場合でも、同じMatrixアカウント、ホームサーバー、ユーザー、デバイスに対して、既存のうち最も完全なトークンハッシュストレージルートを再利用
+- 廃止された `~/.openclaw/credentials/matrix/credentials*.json` ファイルをアーカイブする前にインポートして検証する
+- 同じアカウント選択と `channels.matrix` 設定を維持する
+- ファイルベースのサイドカー状態（`bot-storage.json` 同期キャッシュ、`recovery-key.json`、`legacy-crypto-migration.json`、IndexedDB スナップショット）を Matrix SQLite 状態にインポートする。移行されたファイルは `.migrated` サフィックスを付けてアーカイブされます
+- 後でアクセストークンが変更された場合に、同じ Matrix アカウント、ホームサーバー、ユーザー、デバイスについて、既存の最も完全なトークンハッシュストレージルートを再利用する
 
-## 2026.4より前のOpenClawリリースからのアップグレード
+## 2026.4 より前の OpenClaw リリースからのアップグレード
 
-2026.6系列までのリリースでは、元のフラットな単一ストアの
-Matrixレイアウト（`~/.openclaw/matrix/bot-storage.json` と
-`~/.openclaw/matrix/crypto/`）も移行し、古いRust暗号化ストアから
-暗号化状態を復旧する準備を行っていました。現在のリリースには、この移行処理は含まれていません。
+2026.6 系までのリリースでは、元のフラットな単一ストアの Matrix レイアウト（`~/.openclaw/matrix/bot-storage.json` と `~/.openclaw/matrix/crypto/`）も移行し、古い Rust 暗号化ストアから暗号化状態を復旧する準備を行っていました。現在のリリースには、その移行処理は含まれていません。
 
-まだフラットレイアウトを使用しているインストールをアップグレードする場合は、まず
-2026.6リリースへアップグレードし、`openclaw doctor --fix` を実行してから、Gatewayを
-一度起動し、フラットストアと復旧可能なルームキーを移行してください。その後、
-最新リリースへ更新してください。
+まだフラットレイアウトを使用しているインストール環境をアップグレードする場合は、まず 2026.6 リリースにアップグレードし、`openclaw doctor --fix` を実行して、Gateway を一度起動してください。これにより、フラットストアと復旧可能なルームキーが移行されます。その後、最新リリースに更新してください。
 
-以前の公開Matrix pluginは、Matrixのルームキーバックアップを自動的には作成して**いませんでした**。古いインストールに一度もバックアップされなかったローカル限定の暗号化履歴がある場合、移行方法にかかわらず、アップグレード後も一部の古い暗号化メッセージを読めない可能性があります。
+以前の公開 Matrix Plugin は、Matrix のルームキーバックアップを自動的には作成して**いませんでした**。古いインストール環境に、バックアップされたことのないローカルのみの暗号化履歴があった場合、移行方法にかかわらず、アップグレード後も一部の古い暗号化メッセージを読み取れないことがあります。
 
 ## 推奨アップグレード手順
 
-1. OpenClawとMatrix pluginを通常どおり更新します。
+1. OpenClaw と Matrix Plugin を通常どおり更新します。
 2. 次を実行します。
 
    ```bash
    openclaw doctor --fix
    ```
 
-3. Gatewayを起動または再起動します。
+3. Gateway を起動または再起動します。
 4. 現在の検証状態とバックアップ状態を確認します。
 
    ```bash
@@ -74,34 +64,31 @@ Matrixレイアウト（`~/.openclaw/matrix/bot-storage.json` と
    openclaw matrix verify backup status
    ```
 
-5. 修復するMatrixアカウントのリカバリーキーを、アカウント固有の環境変数に設定します。単一のデフォルトアカウントでは、`MATRIX_RECOVERY_KEY` で問題ありません。複数のアカウントでは、アカウントごとに1つの変数を使用します。たとえば `MATRIX_RECOVERY_KEY_ASSISTANT` を使用し、コマンドに `--account assistant` を追加します。
+5. 修復する Matrix アカウントのリカバリーキーを、アカウント固有の環境変数に設定します。デフォルトアカウントが 1 つだけの場合は、`MATRIX_RECOVERY_KEY` で問題ありません。複数のアカウントがある場合は、アカウントごとに 1 つの変数（例: `MATRIX_RECOVERY_KEY_ASSISTANT`）を使用し、コマンドに `--account assistant` を追加します。
 
-6. リカバリーキーが必要だとOpenClawに表示された場合は、該当するアカウントに対してコマンドを実行します。
+6. リカバリーキーが必要であると OpenClaw に表示された場合は、該当するアカウントに対して次のコマンドを実行します。
 
    ```bash
    printf '%s\n' "$MATRIX_RECOVERY_KEY" | openclaw matrix verify backup restore --recovery-key-stdin
    printf '%s\n' "$MATRIX_RECOVERY_KEY_ASSISTANT" | openclaw matrix verify backup restore --recovery-key-stdin --account assistant
    ```
 
-7. このデバイスがまだ未検証の場合は、該当するアカウントに対してコマンドを実行します。
+7. このデバイスがまだ未検証の場合は、該当するアカウントに対して次のコマンドを実行します。
 
    ```bash
    printf '%s\n' "$MATRIX_RECOVERY_KEY" | openclaw matrix verify device --recovery-key-stdin
    printf '%s\n' "$MATRIX_RECOVERY_KEY_ASSISTANT" | openclaw matrix verify device --recovery-key-stdin --account assistant
    ```
 
-   リカバリーキーが受け入れられ、バックアップが利用可能でも、`Cross-signing verified`
-   がまだ `no` の場合は、別のMatrixクライアントから自己検証を完了します。
+   リカバリーキーが受け入れられ、バックアップを使用できるにもかかわらず、`Cross-signing verified` がまだ `no` の場合は、別の Matrix クライアントから自己検証を完了します。
 
    ```bash
    openclaw matrix verify self
    ```
 
-   別のMatrixクライアントでリクエストを承認し、絵文字または数字を比較して、
-   一致する場合にのみ `yes` と入力します。このコマンドは、完全なMatrix
-   アイデンティティの信頼が確立されるまで待機してから、成功を報告します。
+   別の Matrix クライアントでリクエストを承認し、絵文字または数字を比較して、一致する場合にのみ `yes` と入力します。コマンドは、Matrix ID が完全に信頼されるまで待機してから成功を報告します。
 
-8. 復旧不能な古い履歴を意図的に破棄し、今後のメッセージ用に新しいバックアップの基準状態を作成する場合は、次を実行します。
+8. 復旧できない古い履歴を意図的に破棄し、今後のメッセージ用に新しいバックアップの基準状態を作成する場合は、次を実行します。
 
    ```bash
    openclaw matrix verify backup reset --yes
@@ -115,60 +102,57 @@ Matrixレイアウト（`~/.openclaw/matrix/bot-storage.json` と
    openclaw matrix verify bootstrap
    ```
 
-## 一般的なメッセージとその意味
+## よくあるメッセージとその意味
 
 `Failed migrating legacy Matrix client storage: ...`
 
-- 意味：Matrixクライアント側のフォールバックがファイルベースのサイドカー状態を検出しましたが、SQLiteへのインポートに失敗しました。OpenClawは、新しいストアで暗黙的に起動するのではなく、完了済みの移動をロールバックして、そのフォールバックを中止します。
-- 対処方法：ファイルシステムの権限や競合を確認し、古い状態をそのまま維持して、エラーを修正した後に再試行します。
+- 意味: Matrix のクライアント側フォールバックでファイルベースのサイドカー状態が見つかりましたが、SQLite へのインポートに失敗しました。OpenClaw は、何も通知せずに新しいストアで起動するのではなく、完了した移動をロールバックして、そのフォールバックを中止します。
+- 対処方法: ファイルシステムの権限や競合を調べ、古い状態をそのまま保持し、エラーを修正してから再試行します。
 
 `Matrix is installed from a custom path: ...`
 
-- 意味：Matrixはパス指定でインストールされた状態に固定されているため、メインラインの更新ではデフォルトのMatrixパッケージへ自動的に置き換えられません。
-- 対処方法：デフォルトのMatrix pluginに戻す場合は、`openclaw plugins install @openclaw/matrix` で再インストールします。
+- 意味: Matrix がパスインストールに固定されているため、メインラインの更新ではデフォルトの Matrix パッケージに自動的に置き換えられません。
+- 対処方法: デフォルトの Matrix Plugin に戻す場合は、`openclaw plugins install @openclaw/matrix` で再インストールします。
 
 `Matrix is installed from a custom path that no longer exists: ...`
 
-- 意味：pluginのインストール記録が、既に存在しないローカルパスを指しています。
-- 対処方法：`openclaw plugins install @openclaw/matrix` で再インストールします。リポジトリのチェックアウトから実行している場合は、`openclaw plugins install ./path/to/local/matrix-plugin` を使用します。`openclaw doctor --fix` でも、古いMatrix pluginの参照を削除できます。
+- 意味: Plugin のインストールレコードが、存在しなくなったローカルパスを指しています。
+- 対処方法: `openclaw plugins install @openclaw/matrix` で再インストールするか、リポジトリのチェックアウトから実行している場合は `openclaw plugins install ./path/to/local/matrix-plugin` を使用します。`openclaw doctor --fix` を使用して、古い Matrix Plugin の参照を削除することもできます。
 
 ### 手動復旧メッセージ
 
-`openclaw matrix verify status` と `openclaw matrix verify backup status` は、このデバイス上でルームキーバックアップが正常でない場合に、`Backup issue:` 行と `Next steps:` のガイダンスを出力します。
+このデバイスでルームキーのバックアップが正常でない場合、`openclaw matrix verify status` と `openclaw matrix verify backup status` は、`Backup issue:` 行と `Next steps:` のガイダンスを出力します。
 
-| バックアップの問題                                                    | 意味                                               | 修正方法                                                                                                                                  |
+| バックアップの問題                                                      | 意味                                               | 修正方法                                                                                                                                   |
 | --------------------------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `no room-key backup exists on the homeserver`                         | 復元元がありません                                 | `openclaw matrix verify bootstrap` でルームキーバックアップを作成します                                                                   |
-| `backup decryption key is not loaded on this device`                  | キーは存在しますが、このデバイスでは有効ではありません | `openclaw matrix verify backup restore`。それでもキーを読み込めない場合は、`--recovery-key-stdin` でリカバリーキーをパイプ入力します       |
-| `backup decryption key could not be loaded from secret storage (...)` | シークレットストレージからの読み込みに失敗したか、サポートされていません | リカバリーキーをパイプ入力します：`printf '%s\n' "$MATRIX_RECOVERY_KEY" \| openclaw matrix verify backup restore --recovery-key-stdin`      |
-| `backup key mismatch (...)`                                           | 保存されたキーが有効なサーバーバックアップと一致しません | 有効なサーバーバックアップキーを使用して `verify backup restore --recovery-key-stdin` を再実行するか、`verify backup reset --yes` で新しい基準状態を作成します |
-| `backup signature chain is not trusted by this device`                | デバイスがクロス署名チェーンをまだ信頼していません | `verify device --recovery-key-stdin` を実行し、信頼がまだ不完全な場合は、別の検証済みクライアントから `verify self` を実行します           |
-| `backup exists but is not active on this device`                      | サーバーバックアップは存在しますが、ローカルセッションでは無効です | まずデバイスを検証し、その後 `openclaw matrix verify backup status` で再確認します                                                         |
-| `backup trust state could not be fully determined`                    | 診断では結論を得られませんでした                   | `openclaw matrix verify status --verbose`                                                                                                 |
+| `no room-key backup exists on the homeserver`                         | 復元元がない                                       | `openclaw matrix verify bootstrap` でルームキーのバックアップを作成する                                                                            |
+| `backup decryption key is not loaded on this device`                  | キーは存在するが、ここでは有効になっていない       | `openclaw matrix verify backup restore`。それでもキーを読み込めない場合は、`--recovery-key-stdin` を使用してリカバリーキーをパイプで渡す                |
+| `backup decryption key could not be loaded from secret storage (...)` | シークレットストレージの読み込みに失敗したか、サポートされていない | リカバリーキーをパイプで渡す: `printf '%s\n' "$MATRIX_RECOVERY_KEY" \| openclaw matrix verify backup restore --recovery-key-stdin`               |
+| `backup key mismatch (...)`                                           | 保存されたキーが有効なサーバーバックアップと一致しない | 有効なサーバーバックアップキーを使用して `verify backup restore --recovery-key-stdin` を再実行するか、`verify backup reset --yes` で新しい基準状態を作成する |
+| `backup signature chain is not trusted by this device`                | デバイスがクロス署名チェーンをまだ信頼していない   | `verify device --recovery-key-stdin` を実行し、信頼がまだ不完全な場合は別の検証済みクライアントから `verify self` を実行する                        |
+| `backup exists but is not active on this device`                      | サーバーバックアップは存在するが、ローカルセッションが無効 | まずデバイスを検証し、`openclaw matrix verify backup status` で再確認する                                                         |
+| `backup trust state could not be fully determined`                    | 診断で結論を得られなかった                         | `openclaw matrix verify status --verbose`                                                                                                 |
 
-その他の復旧エラー：
+その他の復旧エラー:
 
 `Matrix recovery key is required`
 
-- 意味：リカバリーキーが必要な復旧手順を、リカバリーキーを指定せずに実行しました。
-- 対処方法：`--recovery-key-stdin` を指定してコマンドを再実行します。例：`printf '%s\n' "$MATRIX_RECOVERY_KEY" | openclaw matrix verify device --recovery-key-stdin`。
+- 意味: リカバリーキーが必要な復旧手順を、リカバリーキーを指定せずに実行しました。
+- 対処方法: `--recovery-key-stdin` を指定してコマンドを再実行します。例: `printf '%s\n' "$MATRIX_RECOVERY_KEY" | openclaw matrix verify device --recovery-key-stdin`。
 
 `Invalid Matrix recovery key: ...`
 
-- 意味：指定されたキーを解析できなかったか、想定された形式と一致しませんでした。
-- 対処方法：Matrixクライアントまたはリカバリーキーのエクスポートから取得した正確なリカバリーキーで再試行します。
+- 意味: 指定されたキーを解析できなかったか、想定される形式と一致しませんでした。
+- 対処方法: Matrix クライアントまたはリカバリーキーのエクスポートから取得した正確なリカバリーキーを使用して再試行します。
 
 `Matrix recovery key was applied, but this device still lacks full Matrix identity trust.`
 
-- 意味：リカバリーキーによって使用可能なバックアップデータを解除できましたが、Matrixはこのデバイスに対する完全なクロス署名アイデンティティの信頼をまだ確立していません。コマンド出力で `Recovery key accepted`、`Backup usable`、`Cross-signing verified`、`Device verified by owner` を確認してください。
-- 対処方法：`openclaw matrix verify self` を実行し、別のMatrixクライアントでリクエストを承認してSASを比較し、一致する場合にのみ `yes` と入力します。現在のクロス署名アイデンティティを意図的に置き換える場合にのみ、`printf '%s\n' "$MATRIX_RECOVERY_KEY" | openclaw matrix verify bootstrap --recovery-key-stdin --force-reset-cross-signing` を使用します。
+- 意味: リカバリーキーによって使用可能なバックアップデータを解除できましたが、Matrix はこのデバイスに対する完全なクロス署名 ID の信頼をまだ確立していません。コマンド出力で `Recovery key accepted`、`Backup usable`、`Cross-signing verified`、`Device verified by owner` を確認してください。
+- 対処方法: `openclaw matrix verify self` を実行し、別の Matrix クライアントでリクエストを承認して SAS を比較し、一致する場合にのみ `yes` と入力します。現在のクロス署名 ID を意図的に置き換える場合にのみ、`printf '%s\n' "$MATRIX_RECOVERY_KEY" | openclaw matrix verify bootstrap --recovery-key-stdin --force-reset-cross-signing` を使用してください。
 
-復旧不能な古い暗号化履歴が失われることを受け入れる場合は、代わりに
-`openclaw matrix verify backup reset --yes` で現在のバックアップの基準状態をリセットできます。
-保存されたバックアップシークレットが壊れている場合、このリセットではシークレットストレージも修復されるため、
-再起動後に新しいバックアップキーを正しく読み込めるようになります。
+復旧できない古い暗号化履歴を失うことを受け入れる場合は、代わりに `openclaw matrix verify backup reset --yes` を使用して現在のバックアップの基準状態をリセットできます。保存されたバックアップシークレットが破損している場合、このリセットによってシークレットストレージも修復され、再起動後に新しいバックアップキーを正しく読み込めるようになります。
 
-## 暗号化履歴がまだ復元されない場合
+## 暗号化履歴がまだ戻らない場合
 
 次の確認を順番に実行します。
 
@@ -178,11 +162,11 @@ openclaw matrix verify backup status --verbose
 printf '%s\n' "$MATRIX_RECOVERY_KEY" | openclaw matrix verify backup restore --recovery-key-stdin --verbose
 ```
 
-バックアップが正常に復元されても、一部の古いルームの履歴が欠落したままの場合、欠落しているキーは以前のpluginによって一度もバックアップされなかった可能性があります。
+バックアップが正常に復元されても、一部の古いルームの履歴がまだ欠落している場合、それらの欠落したキーは以前の Plugin でバックアップされていなかった可能性があります。
 
-## 今後のメッセージ用に新しく開始する場合
+## 今後のメッセージ用に新しく始める場合
 
-復旧不能な古い暗号化履歴が失われることを受け入れ、今後に向けてクリーンなバックアップの基準状態だけを作成する場合は、次のコマンドを順番に実行します。
+復旧できない古い暗号化履歴を失うことを受け入れ、今後に向けたクリーンなバックアップの基準状態のみが必要な場合は、次のコマンドを順番に実行します。
 
 ```bash
 openclaw matrix verify backup reset --yes
@@ -190,12 +174,12 @@ openclaw matrix verify backup status --verbose
 openclaw matrix verify status
 ```
 
-その後もデバイスが未検証の場合は、MatrixクライアントでSASの絵文字または数字コードを比較し、一致することを確認して検証を完了します。
+その後もデバイスが未検証の場合は、Matrix クライアントで SAS の絵文字または数字コードを比較し、一致することを確認して検証を完了します。
 
 ## 関連項目
 
-- [Matrix](/ja-JP/channels/matrix)：チャンネルのセットアップと設定。
-- [Matrixプッシュルール](/ja-JP/channels/matrix-push-rules)：通知ルーティング。
-- [Doctor](/ja-JP/gateway/doctor)：健全性チェックと自動移行のトリガー。
-- [移行ガイド](/ja-JP/install/migrating)：すべての移行方法（マシン間の移動、システム間のインポート）。
-- [Plugins](/ja-JP/tools/plugin)：pluginのインストールと登録。
+- [Matrix](/ja-JP/channels/matrix): チャンネルのセットアップと設定。
+- [Matrix プッシュルール](/ja-JP/channels/matrix-push-rules): 通知のルーティング。
+- [Doctor](/ja-JP/gateway/doctor): ヘルスチェックと自動移行のトリガー。
+- [移行ガイド](/ja-JP/install/migrating): すべての移行パス（マシン間の移動、システム間のインポート）。
+- [Plugins](/ja-JP/tools/plugin): Plugin のインストールと登録。

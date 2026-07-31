@@ -1,30 +1,31 @@
 ---
 read_when:
-    - OpenCode でホストされているモデルへのアクセスを利用したい場合
-    - Zen と Go のカタログから選択する場合
-summary: OpenCode ZenおよびGoカタログをOpenClawで使用する
+    - OpenCode でホストされているモデルへのアクセスが必要な場合
+    - Zen カタログと Go カタログのどちらかを選択したい場合
+summary: OpenCode Zen および Go カタログを OpenClaw で使用する
 title: OpenCode
 x-i18n:
-    generated_at: "2026-07-11T22:38:09Z"
+    generated_at: "2026-07-26T10:28:58Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: de287eb8a349f26c265f95b8b1de3af4035aa2bdc3501c7279f714d297bb8b9b
     source_path: providers/opencode.md
     workflow: 16
 ---
 
-OpenCode は OpenClaw で2つのホスト型カタログを提供します。
+OpenCode は、OpenClaw で 2 つのホスト型カタログを提供します。
 
-| カタログ | プレフィックス      | ランタイムプロバイダー |
-| -------- | ------------------- | ---------------------- |
-| **Zen**  | `opencode/...`      | `opencode`             |
-| **Go**   | `opencode-go/...`   | `opencode-go`          |
+| カタログ | プレフィックス            | ランタイムプロバイダー |
+| ------- | ----------------- | ---------------- |
+| **Zen** | `opencode/...`    | `opencode`       |
+| **Go**  | `opencode-go/...` | `opencode-go`    |
 
-両方のカタログで1つの OpenCode API キー（`OPENCODE_API_KEY`、エイリアスは
-`OPENCODE_ZEN_API_KEY`）を共有します。OpenClaw では、上流のモデルごとのルーティングを
-正しく維持するためにランタイムプロバイダー ID を分けていますが、オンボーディングとドキュメントでは
-1つの OpenCode セットアップとして扱います。
+両方のカタログは、1 つの OpenCode API キー（`OPENCODE_API_KEY`、エイリアス
+`OPENCODE_ZEN_API_KEY`）を共有します。OpenClaw は、上流のモデル別ルーティングを正しく保つために
+ランタイムプロバイダー ID を分離していますが、オンボーディングとドキュメントでは
+1 つの OpenCode セットアップとして扱います。
 
 ## はじめに
 
@@ -50,7 +51,7 @@ OpenCode は OpenClaw で2つのホスト型カタログを提供します。
         openclaw config set agents.defaults.model.primary "opencode/claude-opus-4-6"
         ```
       </Step>
-      <Step title="モデルが利用可能か確認">
+      <Step title="モデルが利用可能であることを確認">
         ```bash
         openclaw models list --provider opencode
         ```
@@ -60,7 +61,7 @@ OpenCode は OpenClaw で2つのホスト型カタログを提供します。
   </Tab>
 
   <Tab title="Go カタログ">
-    **最適な用途:** OpenCode がホストする Kimi、GLM、MiniMax、Qwen、DeepSeek のモデル群。
+    **最適な用途:** OpenCode がホストする Kimi、GLM、MiniMax、Qwen、DeepSeek のラインナップ。
 
     <Steps>
       <Step title="オンボーディングを実行">
@@ -79,7 +80,7 @@ OpenCode は OpenClaw で2つのホスト型カタログを提供します。
         openclaw config set agents.defaults.model.primary "opencode-go/kimi-k2.6"
         ```
       </Step>
-      <Step title="モデルが利用可能か確認">
+      <Step title="モデルが利用可能であることを確認">
         ```bash
         openclaw models list --provider opencode-go
         ```
@@ -102,34 +103,34 @@ OpenCode は OpenClaw で2つのホスト型カタログを提供します。
 
 ### Zen
 
-| プロパティ             | 値                                                                                            |
-| ---------------------- | --------------------------------------------------------------------------------------------- |
+| プロパティ         | 値                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------- |
 | ランタイムプロバイダー | `opencode`                                                                                    |
-| モデル例               | `opencode/claude-opus-4-6`, `opencode/gpt-5.5`, `opencode/gemini-3.1-pro`, `opencode/glm-5.2` |
+| モデル例   | `opencode/claude-opus-4-6`、`opencode/gpt-5.5`、`opencode/gemini-3.1-pro`、`opencode/glm-5.2` |
 
-現在の完全な一覧を確認するには `openclaw models list --provider opencode` を実行してください。この一覧には
-`opencode/big-pickle` や `opencode/deepseek-v4-flash-free` などの
-無料枠の行も含まれます。
+現在の完全な一覧を確認するには `openclaw models list --provider opencode` を実行してください。
+この一覧には、`opencode/big-pickle` や `opencode/deepseek-v4-flash-free` などの無料枠の行も
+含まれます。
 
 ### Go
 
-| プロパティ             | 値                                                                       |
-| ---------------------- | ------------------------------------------------------------------------ |
+| プロパティ         | 値                                                                    |
+| ---------------- | ------------------------------------------------------------------------ |
 | ランタイムプロバイダー | `opencode-go`                                                            |
-| モデル例               | `opencode-go/kimi-k2.6`, `opencode-go/glm-5`, `opencode-go/minimax-m2.5` |
+| モデル例   | `opencode-go/kimi-k2.6`、`opencode-go/glm-5`、`opencode-go/minimax-m2.5` |
 
-Go モデルの完全な表については、[OpenCode Go](/ja-JP/providers/opencode-go)を参照してください。
+Go モデルの完全な表については、[OpenCode Go](/ja-JP/providers/opencode-go) を参照してください。
 
 ## 高度な設定
 
 <AccordionGroup>
   <Accordion title="API キーのエイリアス">
-    `OPENCODE_ZEN_API_KEY` も `OPENCODE_API_KEY` のエイリアスとして使用できます。
+    `OPENCODE_ZEN_API_KEY` は、`OPENCODE_API_KEY` のエイリアスとしても使用できます。
   </Accordion>
 
   <Accordion title="共有認証情報">
-    セットアップ中に1つの OpenCode キーを入力すると、両方のランタイム
-    プロバイダー用の認証情報が保存されます。各カタログを個別にオンボーディングする必要はありません。
+    セットアップ中に OpenCode キーを 1 つ入力すると、両方のランタイム
+    プロバイダーの認証情報が保存されます。各カタログを個別にオンボーディングする必要はありません。
   </Accordion>
 
   <Accordion title="API キーの取得">
@@ -139,17 +140,17 @@ Go モデルの完全な表については、[OpenCode Go](/ja-JP/providers/open
   </Accordion>
 
   <Accordion title="Gemini のリプレイ動作">
-    Gemini を基盤とする OpenCode の参照はプロキシ Gemini パスを維持するため、OpenClaw はそこで
-    Gemini の思考署名のサニタイズを維持し、ネイティブ Gemini の
-    リプレイ検証やブートストラップの書き換えは有効にしません。
+    Gemini を基盤とする OpenCode 参照はプロキシ Gemini パスに留まるため、OpenClaw は
+    ネイティブ Gemini のリプレイ検証やブートストラップ書き換えを有効にせず、そのパスで
+    Gemini の思考シグネチャのサニタイズを維持します。
   </Accordion>
 
   <Accordion title="Gemini 以外のリプレイ動作">
-    Gemini 以外の OpenCode の参照では、最小限の OpenAI 互換リプレイポリシーを維持します。
+    Gemini 以外の OpenCode 参照では、最小限の OpenAI 互換リプレイポリシーが維持されます。
   </Accordion>
 </AccordionGroup>
 
-## 関連項目
+## 関連情報
 
 <CardGroup cols={2}>
   <Card title="OpenCode Go" href="/ja-JP/providers/opencode-go" icon="server">

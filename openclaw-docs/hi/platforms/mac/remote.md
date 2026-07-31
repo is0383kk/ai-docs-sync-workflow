@@ -2,72 +2,58 @@
 read_when:
     - रिमोट Mac नियंत्रण सेट अप करना या डीबग करना
 summary: दूरस्थ OpenClaw Gateway को नियंत्रित करने के लिए macOS ऐप प्रवाह
-title: रिमोट कंट्रोल
+title: दूरस्थ नियंत्रण
 x-i18n:
-    generated_at: "2026-07-03T23:33:37Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T21:14:18Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 4d1ac5065011ef16085b3349ee7224fe3e806a6de61feaac2dcd5c9ed264227e
+    source_hash: 7e558c39fa173a77bf11270a8961c14c6e2350dfc4f458da3633532513b98bf6
     source_path: platforms/mac/remote.md
     workflow: 16
 ---
 
-यह flow macOS ऐप को किसी अन्य host (desktop/server) पर चल रहे OpenClaw Gateway के लिए पूर्ण remote control की तरह काम करने देता है। ऐप trusted LAN/Tailnet Gateway URLs से सीधे connect कर सकता है या remote Gateway के केवल loopback होने पर SSH tunnel manage कर सकता है। Health checks, Voice Wake forwarding, और Web Chat _Settings → General_ से वही remote configuration reuse करते हैं।
+यह प्रवाह macOS ऐप को किसी अन्य होस्ट (डेस्कटॉप/सर्वर) पर चल रहे OpenClaw Gateway के लिए पूर्ण रिमोट कंट्रोल के रूप में काम करने देता है। ऐप विश्वसनीय LAN/Tailnet Gateway URLs से सीधे कनेक्ट होता है, या जब रिमोट Gateway केवल लूपबैक पर उपलब्ध हो, तब SSH टनल प्रबंधित करता है। स्वास्थ्य जाँच, Voice Wake फ़ॉरवर्डिंग और Web Chat, _Settings -> General_ से समान रिमोट कॉन्फ़िगरेशन का पुनः उपयोग करते हैं।
 
-## Modes
+## मोड
 
-- **Local (यह Mac)**: सब कुछ laptop पर चलता है। SSH शामिल नहीं है।
-- **Remote over SSH (default)**: OpenClaw commands remote host पर execute होते हैं। mac ऐप `-o BatchMode` के साथ आपकी चुनी हुई identity/key और local port-forward का उपयोग करके SSH connection खोलता है।
-- **Remote direct (ws/wss)**: कोई SSH tunnel नहीं। mac ऐप Gateway URL से सीधे connect करता है (उदाहरण के लिए, LAN, Tailscale, Tailscale Serve, या public HTTPS reverse proxy के माध्यम से)।
+- **स्थानीय (यह Mac)**: सब कुछ लैपटॉप पर चलता है; SSH शामिल नहीं होता।
+- **SSH के माध्यम से रिमोट (डिफ़ॉल्ट)**: OpenClaw कमांड रिमोट होस्ट पर चलते हैं। ऐप `-o BatchMode`, आपकी चुनी हुई आइडेंटिटी/कुंजी और स्थानीय पोर्ट-फ़ॉरवर्ड के साथ SSH कनेक्शन खोलता है।
+- **सीधा रिमोट (ws/wss)**: कोई SSH टनल नहीं; ऐप सीधे Gateway URL से कनेक्ट होता है (LAN, Tailscale, Tailscale Serve या सार्वजनिक HTTPS रिवर्स प्रॉक्सी)।
 
-## Remote transports
+## रिमोट ट्रांसपोर्ट
 
-Remote mode दो transports support करता है:
+- **SSH टनल** (डिफ़ॉल्ट): Gateway पोर्ट को localhost पर फ़ॉरवर्ड करने के लिए `ssh -N -L ...` का उपयोग करता है। टनल के लूपबैक होने के कारण Gateway को Node का IP `127.0.0.1` के रूप में दिखाई देता है।
+- **सीधा (ws/wss)**: सीधे Gateway URL से कनेक्ट होता है। Gateway को वास्तविक क्लाइंट IP दिखाई देता है।
 
-- **SSH tunnel** (default): Gateway port को localhost पर forward करने के लिए `ssh -N -L ...` का उपयोग करता है। Gateway को Node का IP `127.0.0.1` दिखेगा क्योंकि tunnel loopback है।
-- **Direct (ws/wss)**: Gateway URL से सीधे connect करता है। Gateway को वास्तविक client IP दिखता है।
+ऐप अपनी SSH प्रक्रियाओं के लिए SSH कनेक्शन मल्टीप्लेक्सिंग और प्रमाणीकरण के बाद बैकग्राउंड में जाने को अक्षम करता है, ताकि वह ठीक उसी प्रक्रिया की निगरानी करके उसे पुनः शुरू कर सके, भले ही चयनित एलियास `ControlMaster` या `ForkAfterAuthentication` सक्षम करता हो।
 
-ऐप app-owned SSH processes के लिए SSH connection multiplexing और post-authentication backgrounding disable करता है, ताकि selected alias में `ControlMaster` या `ForkAfterAuthentication` enabled होने पर भी वह exact process को monitor और restart कर सके।
+SSH होस्ट-कुंजी सत्यापन डिफ़ॉल्ट रूप से सख़्त होता है, क्योंकि Gateway क्रेडेंशियल इस टनल से होकर जाते हैं। किसी प्रबंधित SSH एलियास के अपने विश्वास व्यवहार को स्वीकार करने के लिए, `openclaw-mac configure-remote` के माध्यम से `--ssh-host-key-policy openssh` सेट करें, या सीधे `gateway.remote.sshHostKeyPolicy` को `"openssh"` पर सेट करें। इसे स्वीकार करने से पहले एलियास और उससे मेल खाने वाले किसी भी `Host *` या सिस्टम कॉन्फ़िगरेशन की समीक्षा करें। SSH लक्ष्य बदलने पर (ऐप में या `configure-remote` के माध्यम से), नीति वापस `strict` पर रीसेट हो जाती है, जब तक कि आप नए लक्ष्य के लिए इसे स्पष्ट रूप से फिर से स्वीकार न करें।
 
-SSH host-key verification default रूप से strict है क्योंकि Gateway credentials इस tunnel से होकर जाते हैं। किसी managed SSH alias के लिए, जिसका trust behavior आप स्पष्ट रूप से उपयोग करना चाहते हैं, `openclaw-mac configure-remote --ssh-target <alias> --ssh-host-key-policy openssh` के साथ opt in करें या `gateway.remote.sshHostKeyPolicy` को `"openssh"` पर set करें। यह opt-in effective OpenSSH host-key policy का उपयोग करता है; पहले alias और किसी matching `Host *` या system configuration की review करें। ऐप में या `configure-remote` के साथ SSH target बदलने पर policy `strict` पर reset हो जाती है, जब तक आप फिर से स्पष्ट रूप से opt in न करें।
+SSH टनल मोड में, खोजे गए LAN/Tailnet होस्टनेम `gateway.remote.sshTarget` के रूप में सहेजे जाते हैं। ऐप स्थानीय टनल एंडपॉइंट पर `gateway.remote.url` बनाए रखता है (उदाहरण के लिए `ws://127.0.0.1:18789`), ताकि CLI, Web Chat और स्थानीय Node-होस्ट सेवा सभी समान लूपबैक ट्रांसपोर्ट का उपयोग करें। जब खोज कच्चे Tailnet IP और स्थिर होस्टनेम दोनों लौटाती है, तो ऐप Tailscale MagicDNS या LAN नामों को प्राथमिकता देता है, ताकि पते बदलने पर भी कनेक्शन बेहतर ढंग से बने रहें। यदि स्थानीय टनल पोर्ट रिमोट Gateway पोर्ट से अलग है, तो `gateway.remote.remotePort` को रिमोट होस्ट के पोर्ट पर सेट करें।
 
-SSH tunnel mode में, discovered LAN/tailnet hostnames
-`gateway.remote.sshTarget` के रूप में save किए जाते हैं। ऐप `gateway.remote.url` को local
-tunnel endpoint पर रखता है, उदाहरण के लिए `ws://127.0.0.1:18789`, ताकि CLI, Web Chat, और
-local node-host service सभी वही सुरक्षित loopback transport उपयोग करें।
-जब discovery raw Tailnet IPs और stable hostnames दोनों लौटाती है, तो ऐप
-Tailscale MagicDNS या LAN names को prefer करता है ताकि remote connections address
-changes के बाद बेहतर तरीके से बने रहें।
-अगर local tunnel port remote Gateway port से अलग है, तो
-`gateway.remote.remotePort` को remote host के port पर set करें।
+रिमोट मोड में ब्राउज़र ऑटोमेशन का स्वामित्व CLI Node होस्ट के पास होता है, मूल macOS ऐप Node के पास नहीं। संभव होने पर ऐप इंस्टॉल की गई Node होस्ट सेवा शुरू करता है; उस Mac से ब्राउज़र नियंत्रण सक्षम करने के लिए, इसे `openclaw node install ...` और `openclaw node start` के साथ इंस्टॉल/शुरू करें (या `openclaw node run ...` को फ़ोरग्राउंड में चलाएँ), फिर उस ब्राउज़र-सक्षम Node को लक्ष्य बनाएँ।
 
-Remote mode में browser automation CLI Node host के स्वामित्व में होता है, native
-macOS app Node के नहीं। संभव होने पर ऐप installed Node host service start करता है;
-अगर आपको उस Mac से browser control चाहिए, तो इसे
-`openclaw node install ...` और `openclaw node start` के साथ install/start करें (या foreground में
-`openclaw node run ...` चलाएं), फिर उस browser-capable
-Node को target करें।
+## रिमोट होस्ट पर पूर्वापेक्षाएँ
 
-## Remote host पर prerequisites
+1. Node + pnpm इंस्टॉल करें और OpenClaw CLI (`pnpm install && pnpm build && pnpm link --global`) को बिल्ड/इंस्टॉल करें।
+2. सुनिश्चित करें कि गैर-इंटरैक्टिव शेल के लिए `openclaw` PATH में है (आवश्यक होने पर `/usr/local/bin` या `/opt/homebrew/bin` में सिमलिंक बनाएँ)।
+3. SSH ट्रांसपोर्ट के लिए: कुंजी-आधारित SSH प्रमाणीकरण सेट करें। LAN से बाहर स्थिर पहुँच के लिए Tailscale IP की अनुशंसा की जाती है।
 
-1. Node + pnpm install करें और OpenClaw CLI build/install करें (`pnpm install && pnpm build && pnpm link --global`)।
-2. सुनिश्चित करें कि non-interactive shells के लिए `openclaw` PATH पर है (जरूरत हो तो `/usr/local/bin` या `/opt/homebrew/bin` में symlink करें)।
-3. केवल SSH transport के लिए: key auth के साथ SSH खोलें। Off-LAN stable reachability के लिए हम **Tailscale** IPs recommend करते हैं।
+## macOS ऐप सेटअप
 
-## macOS app setup
-
-Welcome flow के बिना ऐप को preconfigure करने के लिए:
+स्वागत प्रवाह के बिना ऐप को पहले से कॉन्फ़िगर करने के लिए, SSH के माध्यम से:
 
 ```bash
 openclaw-mac configure-remote \
-  --ssh-target user@gateway.local \
+  --ssh-target user@gateway-host \
   --local-port 18789 \
   --remote-port 18789 \
   --token "$OPENCLAW_GATEWAY_TOKEN"
 ```
 
-Trusted LAN या Tailnet पर पहले से reachable Gateway के लिए, SSH को पूरी तरह skip करें:
+या किसी विश्वसनीय LAN या Tailnet पर पहले से पहुँच योग्य Gateway के लिए, SSH को पूरी तरह छोड़ दें:
 
 ```bash
 openclaw-mac configure-remote \
@@ -75,64 +61,67 @@ openclaw-mac configure-remote \
   --token "$OPENCLAW_GATEWAY_TOKEN"
 ```
 
-यह remote config लिखता है, onboarding complete mark करता है, और ऐप start होने पर
-selected transport को own करने देता है।
+`openclaw-mac connect`, `wizard` और `configure-remote` सक्रिय कॉन्फ़िगरेशन को इस क्रम में हल करते हैं: `OPENCLAW_CONFIG_PATH`, फिर `$OPENCLAW_STATE_DIR/openclaw.json`, फिर `~/.openclaw/openclaw.json`। दोनों कॉन्फ़िगरेशन रूप उस सक्रिय फ़ाइल में लिखते हैं, ऑनबोर्डिंग को पूर्ण चिह्नित करते हैं और अगली बार शुरू होने पर ऐप को चयनित ट्रांसपोर्ट का स्वामित्व लेने देते हैं। `--local-port`/`--remote-port` डिफ़ॉल्ट रूप से `18789` होते हैं। अन्य फ़्लैग: `--password`, `--identity <path>`, `--ssh-host-key-policy <strict|openssh>`, `--project-root <path>`, `--cli-path <path>`, `--json`। संपूर्ण संदर्भ के लिए `openclaw-mac configure-remote --help` चलाएँ।
 
-1. _Settings → General_ खोलें।
-2. **OpenClaw runs** के अंतर्गत, **Remote** चुनें और set करें:
+इसके बजाय UI से कॉन्फ़िगर करने के लिए:
+
+1. _Settings -> General_ खोलें।
+2. **OpenClaw runs** के अंतर्गत, **Remote** चुनें और ये सेट करें:
    - **Transport**: **SSH tunnel** या **Direct (ws/wss)**।
-   - **SSH target**: `user@host` (optional `:port`)।
-     - अगर Gateway उसी LAN पर है और Bonjour advertise करता है, तो इस field को auto-fill करने के लिए discovered list से उसे चुनें।
-   - **Gateway URL** (केवल Direct): `wss://gateway.example.ts.net` (या local/LAN के लिए `ws://...`)।
-   - **Identity file** (advanced): आपकी key का path।
-   - **Project root** (advanced): commands के लिए उपयोग किया गया remote checkout path।
-   - **CLI path** (advanced): runnable `openclaw` entrypoint/binary का optional path (advertised होने पर auto-filled)।
-3. **Test remote** दबाएं। Success का मतलब है कि remote `openclaw status --json` सही तरह चलता है। Failures आमतौर पर PATH/CLI issues होते हैं; exit 127 का मतलब है कि CLI remote पर नहीं मिला।
-4. Health checks और Web Chat अब selected transport के माध्यम से automatically चलेंगे।
+   - **SSH target**: `user@host` (वैकल्पिक `:port`)। यदि Gateway समान LAN पर है और Bonjour के माध्यम से प्रसारित होता है, तो इस फ़ील्ड को स्वतः भरने के लिए खोजी गई सूची से उसे चुनें।
+   - **Gateway URL** (केवल Direct): `wss://gateway.example.ts.net` (या स्थानीय/LAN के लिए `ws://...`)।
+   - **Identity file** (उन्नत): आपकी कुंजी का पथ।
+   - **Project root** (उन्नत): कमांड के लिए उपयोग किया जाने वाला रिमोट चेकआउट पथ।
+   - **CLI path** (उन्नत): चलाने योग्य `openclaw` एंट्रीपॉइंट/बाइनरी का वैकल्पिक पथ (प्रसारित होने पर स्वतः भरा जाता है)।
+3. **Test remote** दबाएँ। सफलता का अर्थ है कि रिमोट `openclaw status --json` सही ढंग से चला। विफलताएँ आमतौर पर PATH/CLI समस्याओं का संकेत देती हैं; एग्ज़िट 127 का अर्थ है कि CLI रिमोट रूप से नहीं मिला।
+4. स्वास्थ्य जाँच और Web Chat अब चयनित ट्रांसपोर्ट के माध्यम से स्वचालित रूप से चलते हैं।
 
 ## Web Chat
 
-- **SSH tunnel**: Web Chat forwarded WebSocket control port (default 18789) पर Gateway से connect करता है।
-- **Direct (ws/wss)**: Web Chat configured Gateway URL से सीधे connect करता है।
-- अब कोई अलग WebChat HTTP server नहीं है।
+- **SSH टनल**: फ़ॉरवर्ड किए गए WebSocket नियंत्रण पोर्ट (डिफ़ॉल्ट 18789) के माध्यम से Gateway से कनेक्ट होता है।
+- **सीधा (ws/wss)**: सीधे कॉन्फ़िगर किए गए Gateway URL से कनेक्ट होता है।
+- कोई अलग Web Chat HTTP सर्वर नहीं है।
 
-## Permissions
+## अनुमतियाँ
 
-- Remote host को local जैसी ही TCC approvals चाहिए (Automation, Accessibility, Screen Recording, Microphone, Speech Recognition, Notifications)। इन्हें एक बार grant करने के लिए उस machine पर onboarding चलाएं।
-- Nodes अपनी permission state `node.list` / `node.describe` के माध्यम से advertise करते हैं ताकि agents जान सकें कि क्या available है।
+- रिमोट होस्ट को स्थानीय होस्ट के समान TCC अनुमोदनों (Automation, Accessibility, Screen Recording, Microphone, Speech Recognition, Notifications) की आवश्यकता होती है। इन्हें प्रदान करने के लिए उस मशीन पर एक बार ऑनबोर्डिंग चलाएँ।
+- Node अपनी अनुमति स्थिति को `node.list` / `node.describe` के माध्यम से प्रसारित करते हैं, ताकि एजेंट जान सकें कि क्या उपलब्ध है।
 
-## Security notes
+## सुरक्षा संबंधी टिप्पणियाँ
 
-- Remote host पर loopback binds prefer करें और SSH, Tailscale Serve, या trusted Tailnet/LAN direct URL के माध्यम से connect करें।
-- SSH tunneling default रूप से पहले से trusted host key require करता है। पहले host key पर trust करें ताकि वह configured known-hosts file में मौजूद हो, या किसी managed alias के लिए, जिसकी OpenSSH trust policy आप accept करते हैं, स्पष्ट रूप से `gateway.remote.sshHostKeyPolicy: "openssh"` चुनें।
-- अगर आप Gateway को non-loopback interface पर bind करते हैं, तो valid Gateway auth require करें: token, password, या `gateway.auth.mode: "trusted-proxy"` वाला identity-aware reverse proxy।
-- [Security](/hi/gateway/security) और [Tailscale](/hi/gateway/tailscale) देखें।
+- रिमोट होस्ट पर लूपबैक बाइंड को प्राथमिकता दें और SSH, Tailscale Serve या किसी विश्वसनीय Tailnet/LAN सीधे URL के माध्यम से कनेक्ट करें।
+- SSH टनलिंग के लिए डिफ़ॉल्ट रूप से पहले से विश्वसनीय होस्ट कुंजी आवश्यक होती है। पहले होस्ट कुंजी पर विश्वास स्थापित करें (उसे कॉन्फ़िगर की गई known-hosts फ़ाइल में जोड़ें), या किसी ऐसे प्रबंधित एलियास के लिए स्पष्ट रूप से `gateway.remote.sshHostKeyPolicy: "openssh"` सेट करें जिसकी OpenSSH विश्वास नीति आपको स्वीकार है।
+- यदि आप Gateway को गैर-लूपबैक इंटरफ़ेस से बाइंड करते हैं, तो वैध Gateway प्रमाणीकरण आवश्यक करें: टोकन, पासवर्ड या `gateway.auth.mode: "trusted-proxy"` वाला आइडेंटिटी-जागरूक रिवर्स प्रॉक्सी।
+- सीधे `wss://` कनेक्शन ऑपरेटर/नियंत्रण ट्रैफ़िक और Mac सहायक Node, दोनों पर एक ही प्रमाणपत्र नीति लागू करते हैं। स्पष्ट पिन के लिए `gateway.remote.tlsFingerprint` सेट करें। इसके बिना, ऐप सामान्य macOS विश्वास सफल होने के बाद ही प्रथम-उपयोग पिन दर्ज करता है।
+- [सुरक्षा](/hi/gateway/security) और [Tailscale](/hi/gateway/tailscale) देखें।
 
-## WhatsApp login flow (remote)
+## WhatsApp लॉगिन प्रवाह (रिमोट)
 
-- Remote host पर `openclaw channels login --verbose` चलाएं। अपने phone पर WhatsApp से QR scan करें।
-- अगर auth expire हो जाए, तो उसी host पर login फिर से चलाएं। Health check link problems दिखाएगा।
+- `openclaw channels login --channel whatsapp --verbose` को **रिमोट होस्ट पर** चलाएँ। अपने फ़ोन पर WhatsApp से QR स्कैन करें।
+- यदि प्रमाणीकरण की अवधि समाप्त हो जाए, तो उस होस्ट पर लॉगिन फिर से चलाएँ। स्वास्थ्य जाँच लिंक संबंधी समस्याएँ दिखाती है।
 
-## Troubleshooting
+## समस्या निवारण
 
-- **exit 127 / not found**: non-login shells के लिए `openclaw` PATH पर नहीं है। इसे `/etc/paths`, अपने shell rc में add करें, या `/usr/local/bin`/`/opt/homebrew/bin` में symlink करें।
-- **Health probe failed**: SSH reachability, PATH, और यह check करें कि Baileys logged in है (`openclaw status --json`)।
-- **Web Chat stuck**: confirm करें कि Gateway remote host पर चल रहा है और forwarded port Gateway WS port से match करता है; UI को healthy WS connection चाहिए।
-- **Node IP shows 127.0.0.1**: SSH tunnel के साथ expected है। अगर आप चाहते हैं कि Gateway को real client IP दिखे, तो **Transport** को **Direct (ws/wss)** पर switch करें।
-- **Dashboard works but Mac capabilities are offline**: इसका मतलब है कि ऐप का operator/control connection healthy है, लेकिन companion Node connection connected नहीं है या उसका command surface missing है। Menu bar device section खोलें और check करें कि Mac `paired · disconnected` है या नहीं। `wss://*.ts.net` Tailscale Serve endpoints के लिए, ऐप certificate rotation के बाद stale legacy TLS leaf pins detect करता है, macOS द्वारा नए certificate पर trust करने पर stale pin clear करता है, और automatically retry करता है। अगर certificate system-trusted नहीं है या host Tailscale Serve name नहीं है, तो `gateway.remote.tlsFingerprint` को expected certificate fingerprint पर set करें, certificate review करें, या **Remote over SSH** पर switch करें।
-- **Voice Wake**: remote mode में trigger phrases automatically forward होते हैं; अलग forwarder की जरूरत नहीं है।
+| लक्षण                                          | कारण / समाधान                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `exit 127` / नहीं मिला                           | गैर-लॉगिन शेल के लिए `openclaw` PATH में नहीं है। इसे `/etc/paths`, अपने शेल rc में जोड़ें, या `/usr/local/bin`/`/opt/homebrew/bin` में सिमलिंक बनाएँ।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| स्वास्थ्य जाँच विफल हुई                              | SSH पहुँच-क्षमता, PATH और यह जाँचें कि Baileys (WhatsApp) लॉग इन है (`openclaw status --json`)।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| वेब चैट अटक गई                                   | पुष्टि करें कि Gateway दूरस्थ होस्ट पर चल रहा है और फ़ॉरवर्ड किया गया पोर्ट Gateway WS पोर्ट से मेल खाता है; UI के लिए एक स्वस्थ WS कनेक्शन आवश्यक है।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Node IP में `127.0.0.1` दिखाई देता है                        | SSH टनल के साथ यह अपेक्षित है। यदि आप चाहते हैं कि Gateway वास्तविक क्लाइंट IP देखे, तो **Transport** को **Direct (ws/wss)** पर स्विच करें।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| डैशबोर्ड काम करता है, लेकिन Mac क्षमताएँ ऑफ़लाइन हैं | ऑपरेटर/नियंत्रण कनेक्शन स्वस्थ है, लेकिन सहायक Node कनेक्शन जुड़ा नहीं है या उसमें कमांड सतह अनुपस्थित है। मेनू बार का डिवाइस अनुभाग खोलें और जाँचें कि Mac `paired · disconnected` है या नहीं। प्रत्यक्ष `wss://` ऑपरेटर और Node कनेक्शन समान कॉन्फ़िगर की गई या संग्रहीत प्रमाणपत्र नीति का उपयोग करते हैं। विश्वसनीय `wss://*.ts.net` Tailscale Serve एंडपॉइंट के लिए, प्रमाणपत्र रोटेशन के बाद पुराने संग्रहीत लीफ़ पिन बदल दिए जाते हैं और स्वचालित रूप से पुनः प्रयास किया जाता है। कॉन्फ़िगर किए गए पिन कभी भी स्वचालित रूप से रोटेट नहीं होते; नए प्रमाणपत्र की समीक्षा करने के बाद `gateway.remote.tlsFingerprint` अपडेट करें, या **Remote over SSH** पर स्विच करें। |
+| वॉइस वेक                                       | दूरस्थ मोड में ट्रिगर वाक्यांश स्वचालित रूप से फ़ॉरवर्ड होते हैं; किसी अलग फ़ॉरवर्डर की आवश्यकता नहीं है।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
-## Notification sounds
+## सूचना ध्वनियाँ
 
-`openclaw` और `node.invoke` वाले scripts से प्रति notification sounds चुनें, जैसे:
+`openclaw nodes notify` वाली स्क्रिप्ट से प्रत्येक सूचना के लिए ध्वनि चुनें, उदाहरण के लिए:
 
 ```bash
 openclaw nodes notify --node <id> --title "Ping" --body "Remote gateway ready" --sound Glass
 ```
 
-ऐप में अब कोई global "default sound" toggle नहीं है; callers हर request के लिए sound (या कोई sound नहीं) चुनते हैं।
+ऐप में कोई वैश्विक डिफ़ॉल्ट-ध्वनि टॉगल नहीं है; कॉलर प्रत्येक अनुरोध के लिए कोई ध्वनि चुनते हैं (या कोई ध्वनि नहीं चुनते)।
 
-## Related
+## संबंधित
 
-- [macOS app](/hi/platforms/macos)
-- [Remote access](/hi/gateway/remote)
+- [macOS ऐप](/hi/platforms/macos)
+- [दूरस्थ पहुँच](/hi/gateway/remote)

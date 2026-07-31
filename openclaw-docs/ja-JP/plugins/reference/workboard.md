@@ -1,31 +1,32 @@
 ---
 read_when:
-    - workboard Pluginをインストール、設定、または監査している場合
-summary: エージェントが担当する課題とセッションのためのダッシュボード型作業ボード。
+    - workboard Plugin をインストール、設定、または監査しています
+summary: エージェントが担当する課題とセッションのためのダッシュボード型ワークボード。
 title: Workboard Plugin
 x-i18n:
-    generated_at: "2026-07-11T22:32:46Z"
+    generated_at: "2026-07-26T10:13:33Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 1e5a48a52d45dbe87b73020103c2bc3f0bd46305b4c0d26b3010864af65fa99c
+    source_hash: 4be96893d46c009a127ed3dca5047f8ee4c33fe3c243f8e6867d64976b50b783
     source_path: plugins/reference/workboard.md
     workflow: 16
 ---
 
 # Workboard Plugin
 
-エージェントが担当する Issue とセッションのダッシュボード型ワークボード。
+エージェントが所有する課題とセッションのためのダッシュボード Workboard。
 
 ## 配布
 
 - パッケージ: `@openclaw/workboard`
-- インストール方法: OpenClaw に同梱
+- インストール経路: OpenClaw に同梱
 
-## 提供機能
+## サーフェス
 
-コントラクト: ツール
+コントラクト: `tools`; ダッシュボードのデータバインディング: `workboard.cards.list`, `workboard.stats`, `workboard.boards.list`; ダッシュボードのアクション動詞: `workboard.dispatch`
 
 ## 関連ドキュメント
 
-- [ワークボード](/ja-JP/plugins/workboard)
+- [Workboard](/ja-JP/plugins/workboard)

@@ -1,30 +1,31 @@
 ---
 read_when:
-    - ブラウザーPluginをインストール、設定、または監査しています
-summary: エージェントから呼び出し可能なツールを追加します。
-title: ブラウザー Plugin
+    - ブラウザ Plugin をインストール、設定、または監査しています
+summary: エージェントから呼び出せるツールを追加します。
+title: ブラウザ Plugin
 x-i18n:
-    generated_at: "2026-07-11T22:31:49Z"
+    generated_at: "2026-07-26T09:11:47Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2dcf562660fa3d05d22856335a7d2e6e467a432ee6dda5650efd94edde661ba4
+    source_hash: fa1ca51dce3992d718cdb6e6fec1656c224c021419852e2a2c467a334f251289
     source_path: plugins/reference/browser.md
     workflow: 16
 ---
 
-# ブラウザーPlugin
+# ブラウザー Plugin
 
-エージェントから呼び出せるツールを追加します。
+エージェントから呼び出し可能なツールを追加します。
 
 ## 配布
 
 - パッケージ: `@openclaw/browser-plugin`
-- インストール方法: OpenClaw に同梱
+- インストール経路: OpenClaw に同梱
 
-## 提供機能
+## サーフェス
 
-コントラクト: ツール、Skills
+コントラクト: `tools`; Skills
 
 ## 関連ドキュメント
 

@@ -1,71 +1,67 @@
 ---
 read_when:
-    - SSRF ve DNS yeniden bağlama saldırılarına karşı derinlemesine savunma istiyorsunuz
-    - OpenClaw çalışma zamanı trafiği için harici bir ileri proxy yapılandırma
-summary: OpenClaw çalışma zamanı HTTP ve WebSocket trafiğini operatör tarafından yönetilen bir filtreleme proxy'si üzerinden yönlendirme yöntemi
+    - SSRF ve DNS yeniden bağlama saldırılarına karşı çok katmanlı savunma istiyorsunuz
+    - OpenClaw çalışma zamanı trafiği için harici bir iletme proxy'si yapılandırma
+summary: OpenClaw çalışma zamanı HTTP ve WebSocket trafiği operatör tarafından yönetilen bir filtreleme proxy'si üzerinden nasıl yönlendirilir?
 title: Ağ proxy'si
 x-i18n:
-    generated_at: "2026-07-12T12:48:31Z"
+    generated_at: "2026-07-26T23:36:20Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: fd82684a17a79242891eca69c549c0bfcdd5bde40fa4e791dda7f2b62c473c89
+    source_hash: e948189d691e2cfe32e911e24071fd77157397b510d606423ef738c2565071b5
     source_path: security/network-proxy.md
     workflow: 16
 ---
 
-OpenClaw, çalışma zamanı HTTP ve WebSocket trafiğini operatör tarafından yönetilen bir ileri vekil sunucu üzerinden yönlendirebilir. Bu, isteğe bağlı bir derinlemesine savunma katmanıdır: merkezi çıkış trafiği denetimi, daha güçlü SSRF koruması ve ağ sınırında hedeflerin denetlenebilirliği sağlar. Vekil sunucu hedefi bağlantı kurulurken, DNS çözümlemesinden sonra ve üst akış bağlantısını açmadan hemen önce değerlendirdiği için, DNS yeniden bağlama saldırısının daha önceki uygulama düzeyindeki DNS denetimi ile gerçek giden bağlantı arasındaki zaman aralığından yararlanma olanağını da daraltır. Tek bir vekil sunucu politikası ayrıca operatörlere OpenClaw'ı yeniden derlemeden hedef kurallarını, ağ segmentasyonunu, hız sınırlarını veya giden trafik izin listelerini uygulayabilecekleri tek bir yer sağlar.
+OpenClaw, çalışma zamanı HTTP ve WebSocket trafiğini operatör tarafından yönetilen bir ileri proxy üzerinden yönlendirebilir. Bu, isteğe bağlı bir derinlemesine savunma katmanıdır: merkezi çıkış kontrolü, daha güçlü SSRF koruması ve ağ sınırında hedef denetlenebilirliği sağlar. Proxy, hedefi DNS çözümlemesinden sonra ve yukarı akış bağlantısını açmadan hemen önce, bağlantı kurulurken değerlendirdiğinden, DNS yeniden bağlama saldırısının daha önceki bir uygulama düzeyi DNS denetimi ile gerçek giden bağlantı arasındaki zaman aralığına dayanma olanağını da daraltır. Tek bir proxy politikası ayrıca operatörlere OpenClaw'ı yeniden derlemeden hedef kurallarını, ağ segmentasyonunu, hız sınırlarını veya giden trafik izin listelerini uygulayabilecekleri tek bir yer sağlar.
 
-OpenClaw bir vekil sunucu sağlamaz, indirmez, başlatmaz, yapılandırmaz veya onaylamaz. Ortamınıza uygun vekil sunucu teknolojisini siz çalıştırırsınız; OpenClaw kendi HTTP ve WebSocket istemcilerini bunun üzerinden yönlendirir.
+OpenClaw bir proxy sunmaz, indirmez, başlatmaz, yapılandırmaz veya onaylamaz. Ortamınıza uygun proxy teknolojisini siz çalıştırırsınız; OpenClaw kendi HTTP ve WebSocket istemcilerini bunun üzerinden yönlendirir.
 
 ## Yapılandırma
 
 ```yaml
 proxy:
-  enabled: true
   proxyUrl: http://127.0.0.1:3128
 ```
 
-`proxy.enabled: true` yapılandırmada kalırken URL'yi ortam üzerinden de ayarlayabilirsiniz:
+URL'yi ortam üzerinden de ayarlayabilirsiniz:
 
 ```bash
 OPENCLAW_PROXY_URL=http://127.0.0.1:3128 openclaw gateway run
 ```
 
-`proxy.proxyUrl`, `OPENCLAW_PROXY_URL` değerine göre önceliklidir. `proxy.enabled` değeri `true` olduğu hâlde geçerli bir URL çözümlenemezse korunan komutlar doğrudan ağ erişimine geri dönmek yerine başlangıçta başarısız olur.
+`proxy.proxyUrl`, `OPENCLAW_PROXY_URL` değerine göre önceliklidir. Yapılandırılmış bir URL, yönetilen proxy yönlendirmesini etkinleştirir; her iki URL'nin de kaldırılması bunu devre dışı bırakır.
 
-| Anahtar              | Tür                                  | Varsayılan     | Notlar                                                                                                                                               |
-| -------------------- | ------------------------------------ | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `proxy.enabled`      | boolean                              | ayarlanmamış   | Yönlendirmeyi etkinleştirmek için `true` olmalıdır.                                                                                                  |
-| `proxy.proxyUrl`     | string                               | ayarlanmamış   | `http://` veya `https://` ileri vekil sunucu URL'si. URL'ye gömülü kimlik bilgileri hassas kabul edilir ve anlık görüntülerden/günlüklerden çıkarılır. |
-| `proxy.tls.caFile`   | string                               | ayarlanmamış   | Özel bir CA tarafından imzalanmış `https://` vekil sunucu uç noktasını doğrulamak için CA paketi.                                                     |
-| `proxy.loopbackMode` | `gateway-only` \| `proxy` \| `block` | `gateway-only` | local loopback atlama davranışını denetler; aşağıya bakın.                                                                                           |
+| Anahtar                  | Tür                                  | Varsayılan     | Notlar                                                                                                                                 |
+| -------------------- | ------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `proxy.proxyUrl`     | string                               | ayarlanmamış   | `http://` veya `https://` ileri proxy URL'si. URL'ye gömülü kimlik bilgileri hassas kabul edilir ve anlık görüntülerden/günlüklerden sansürlenir. |
+| `proxy.tls.caFile`   | string                               | ayarlanmamış   | Özel bir CA tarafından imzalanmış `https://` proxy uç noktasını doğrulamak için CA paketi.                                                          |
+| `proxy.loopbackMode` | `gateway-only` \| `proxy` \| `block` | `gateway-only` | Geri döngü atlama davranışını denetler; aşağıya bakın.                                                                                         |
 
-Yönetilen Gateway hizmetlerinde URL'yi ön plan ortam değişkenine bağlı kalmak yerine yeniden kurulumdan sonra da korunması için yapılandırmada saklayın:
+Yönetilen Gateway hizmetlerinde, ön plandaki ortam değişkenine güvenmek yerine yeniden kurulum sonrasında korunması için URL'yi yapılandırmada saklayın:
 
 ```bash
-openclaw config set proxy.enabled true
 openclaw config set proxy.proxyUrl http://127.0.0.1:3128
 openclaw gateway install --force
 openclaw gateway start
 ```
 
-`OPENCLAW_PROXY_URL` ortam değişkeni geri dönüşü, ön plandaki çalıştırmalar için en uygundur. Bunu kurulu bir hizmetle kullanmak için hizmetin kalıcı ortamına (`$OPENCLAW_STATE_DIR/.env`, varsayılan `~/.openclaw/.env`) ekleyin, ardından launchd/systemd/Zamanlanmış Görevler tarafından alınması için yeniden kurun.
+`OPENCLAW_PROXY_URL` ortam yedeği, ön plandaki çalıştırmalar için en uygunudur. Kurulu bir hizmetle kullanmak için bunu hizmetin kalıcı ortamına (`$OPENCLAW_STATE_DIR/.env`, varsayılan `~/.openclaw/.env`) koyun, ardından launchd/systemd/Scheduled Tasks tarafından alınması için yeniden kurun.
 
-### Özel CA kullanan HTTPS vekil sunucu uç noktası
+### Özel CA kullanan HTTPS proxy uç noktası
 
 ```yaml
 proxy:
-  enabled: true
   proxyUrl: https://proxy.corp.example:8443
   tls:
     caFile: /etc/openclaw/proxy-ca.pem
 ```
 
-`proxy.tls.caFile`, vekil sunucu uç noktasının kendi TLS sertifikasını doğrular. Bu, hedef MITM güven ayarı, istemci sertifikası veya vekil sunucunun hedef politikasının yerine geçen bir ayar değildir. Bunun yerine `NODE_EXTRA_CA_CERTS` değişkenini yalnızca tüm Node işleminin başlangıçtan itibaren ek bir CA'ya güvenmesi gerektiğinde kullanın (örneğin, her HTTPS hedef sertifikasını yeniden imzalayan kurumsal bir TLS inceleme sistemi) — bu değişken işlem genelinde geçerlidir ve Node başlamadan önce ayarlanmalıdır; dolayısıyla OpenClaw bunu `proxy.tls.caFile` ayarını uyguladığı gibi çalışma sırasında uygulayamaz. HTTPS vekil sunucu uç noktasına güvenmek için `proxy.tls.caFile` kullanmayı tercih edin: tüm işlem yerine yönetilen vekil sunucu yönlendirmesiyle sınırlıdır.
+`proxy.tls.caFile`, proxy uç noktasının kendi TLS sertifikasını doğrular. Bu, hedefe yönelik bir MITM güven ayarı, istemci sertifikası veya proxy'nin hedef politikasının yerine geçen bir ayar değildir. Yalnızca tüm Node işleminin başlangıçtan itibaren ek bir CA'ya güvenmesi gerektiğinde (örneğin, her HTTPS hedef sertifikasını yeniden imzalayan kurumsal bir TLS inceleme sistemi) bunun yerine `NODE_EXTRA_CA_CERTS` kullanın — bu değişken işlem genelindedir ve Node başlamadan önce ayarlanmalıdır; dolayısıyla OpenClaw bunu `proxy.tls.caFile` ayarını uyguladığı gibi çalışma sırasında uygulayamaz. HTTPS proxy uç noktası güveni için `proxy.tls.caFile` tercih edin: tüm işlem yerine yönetilen proxy yönlendirmesiyle sınırlıdır.
 
 ```bash
-openclaw config set proxy.enabled true
 openclaw config set proxy.proxyUrl https://proxy.corp.example:8443
 openclaw config set proxy.tls.caFile /etc/openclaw/proxy-ca.pem
 openclaw gateway run
@@ -73,94 +69,96 @@ openclaw gateway run
 
 ## Yönlendirme nasıl çalışır?
 
-`proxy.enabled: true` ve geçerli bir URL ile korunan çalışma zamanı işlemleri (`openclaw gateway run`, `openclaw node run`, `openclaw agent --local`) normal HTTP ve WebSocket çıkış trafiğini vekil sunucu üzerinden yönlendirir:
+Geçerli bir proxy URL'siyle, korunan çalışma zamanı işlemleri (`openclaw gateway run`, `openclaw node run`, `openclaw agent --local`) normal HTTP ve WebSocket çıkışını proxy üzerinden yönlendirir:
 
 ```text
 OpenClaw işlemi
-  fetch, node:http, node:https, WebSocket istemcileri  -> operatör vekil sunucusu -> hedef
+  fetch, node:http, node:https, WebSocket istemcileri  -> operatör proxy'si -> hedef
 ```
 
-OpenClaw, işlem düzeyindeki yönlendirme çalışma zamanı olarak dahili biçimde [Proxyline](https://github.com/openclaw/proxyline) kurar. `fetch`, undici tabanlı istemciler, `node:http`/`node:https`, yaygın WebSocket istemcileri ve yardımcılar tarafından oluşturulan `CONNECT` tünellerini kapsar; ayrıca çağıranın sağladığı Node HTTP aracılarının yerine geçerek açıkça belirtilen aracıların (`axios`, `got`, `node-fetch` ve benzeri Node aracısı tabanlı istemciler dâhil) vekil sunucuyu sessizce atlayamamasını sağlar.
+OpenClaw, dahili olarak işlem düzeyinde yönlendirme çalışma zamanı olarak [Proxyline](https://github.com/openclaw/proxyline) kurar. `fetch`, undici tabanlı istemciler, `node:http`/`node:https`, yaygın WebSocket istemcileri ve yardımcılar tarafından oluşturulan `CONNECT` tünellerini kapsar ve çağıran tarafından sağlanan Node HTTP aracılarının yerine geçerek açıkça belirtilmiş aracıların (`axios`, `got`, `node-fetch` ve benzer Node aracısı tabanlı istemciler dâhil) proxy'yi sessizce atlayamamasını sağlar.
 
-Vekil sunucu URL şeması, OpenClaw'dan vekil sunucuya olan bağlantı adımını tanımlar; son hedefe olan bağlantıyı değil:
+Proxy URL şeması, OpenClaw'dan proxy'ye olan atlamayı tanımlar; nihai hedefe olanı değil:
 
-- `http://proxy.example:3128` — vekil sunucuya düz TCP; OpenClaw, HTTPS hedefleri için `CONNECT` dâhil HTTP vekil sunucu istekleri gönderir.
-- `https://proxy.example:8443` — OpenClaw vekil sunucunun kendisine TLS bağlantısı açar (vekil sunucunun sertifikasını doğrulayarak), ardından bu oturum içinde HTTP vekil sunucu istekleri gönderir.
+- `http://proxy.example:3128` — proxy'ye düz TCP; OpenClaw, HTTPS hedefleri için `CONNECT` dâhil olmak üzere HTTP proxy istekleri gönderir.
+- `https://proxy.example:8443` — OpenClaw, proxy'nin kendisine TLS bağlantısı açar (proxy'nin sertifikasını doğrulayarak), ardından bu oturumun içinde HTTP proxy istekleri gönderir.
 
-Hedef TLS, vekil sunucu uç noktası TLS'sinden bağımsızdır: OpenClaw, bir HTTPS hedefi için her zaman vekil sunucudan bir `CONNECT` tüneli ister ve hedef TLS bağlantısını bu tünel üzerinden başlatır.
+Hedef TLS, proxy uç noktası TLS'sinden bağımsızdır: Bir HTTPS hedefi için OpenClaw her zaman proxy'den bir `CONNECT` tüneli ister ve hedef TLS'yi bu tünel üzerinden başlatır.
 
-Vekil sunucu etkinken OpenClaw, `no_proxy`/`NO_PROXY` değişkenlerini temizler. Bu atlama listeleri hedef tabanlıdır; `localhost` veya `127.0.0.1` değerlerini burada bırakmak, SSRF hedeflerinin vekil sunucuyu tamamen atlamasına olanak tanır. OpenClaw kapanırken önceki vekil sunucu ortamını geri yükler ve önbelleğe alınmış yönlendirme durumunu sıfırlar.
+Proxy etkinken OpenClaw, `no_proxy`/`NO_PROXY` değerlerini temizler. Bu atlama listeleri hedef tabanlıdır; `localhost` veya `127.0.0.1` değerlerinin burada bırakılması, SSRF hedeflerinin proxy'yi tamamen atlamasına izin verir. Kapatma sırasında OpenClaw önceki proxy ortamını geri yükler ve önbelleğe alınmış yönlendirme durumunu sıfırlar.
 
-Bazı Plugin'ler, işlem düzeyinde yönlendirme etkin olsa bile kendi vekil sunucu bağlantısına ihtiyaç duyan özel bir aktarım mekanizmasına sahiptir. Telegram'ın Bot API istemcisi kendi HTTP/1 undici dağıtıcısını kullanır ve işlem vekil sunucu ortam değişkenleriyle birlikte `OPENCLAW_PROXY_URL` geri dönüşünü ayrıca dikkate alır.
+Bazı plugin'ler, işlem düzeyinde yönlendirme etkin olsa bile kendi proxy bağlantı düzenine ihtiyaç duyan özel bir aktarımın sahibidir. Telegram'ın Bot API istemcisi kendi HTTP/1 undici dağıtıcısını kullanır ve işlem proxy ortamının yanı sıra `OPENCLAW_PROXY_URL` yedeğini de ayrıca dikkate alır.
 
-### Gateway local loopback modu
+### Gateway geri döngü modu
 
-Yerel Gateway denetim düzlemi istemcileri normalde `ws://127.0.0.1:18789` gibi bir local loopback WebSocket'e bağlanır. `proxy.loopbackMode`, bu trafiğin yönetilen vekil sunucuyu atlayıp atlamayacağını denetler:
+Yerel Gateway denetim düzlemi istemcileri normalde `ws://127.0.0.1:18789` gibi bir geri döngü WebSocket'ine bağlanır. `proxy.loopbackMode`, bu trafiğin yönetilen proxy'yi atlayıp atlamayacağını denetler:
 
 ```yaml
 proxy:
-  enabled: true
   proxyUrl: http://127.0.0.1:3128
   loopbackMode: gateway-only # gateway-only, proxy veya block
 ```
 
-| Mod                      | Davranış                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gateway-only` (varsayılan) | OpenClaw etkin Gateway local loopback yetkili adresini doğrudan bağlantı istisnası olarak kaydeder; böylece yerel Gateway WebSocket trafiği vekil sunucu olmadan bağlanır. İstisna tam olarak yapılandırılmış ana bilgisayarı/bağlantı noktasını hedeflediğinden özel local loopback bağlantı noktaları çalışır. Paketle gelen tarayıcı Plugin'i, OpenClaw tarafından başlatılan yönetilen tarayıcıların tam yerel CDP hazırlık ve DevTools WebSocket URL'leri için aynı türde bir istisna kaydeder; paketle gelen Ollama bellek gömme sağlayıcısıysa tam olarak yapılandırılmış ana bilgisayar yerel local loopback gömme kaynağı için daha dar ve korumalı bir doğrudan yola sahiptir. |
-| `proxy`                  | Hiçbir local loopback istisnası kaydedilmez; Gateway ve Ollama local loopback trafiği vekil sunucu üzerinden gider. Uzak bir vekil sunucu, OpenClaw ana bilgisayarının local loopback hizmetine geri yönlendirme yapabilmelidir (örneğin erişilebilir bir ana bilgisayar adı, IP veya tünel üzerinden) — standart bir uzak vekil sunucu `127.0.0.1`/`localhost` adresini OpenClaw ana bilgisayarına göre değil, kendisine göre çözümler.                                                                                                                                                                                        |
-| `block`                  | OpenClaw, bir soket açmadan önce Gateway local loopback denetim düzlemi bağlantılarını ve korumalı Ollama local loopback gömme bağlantılarını reddeder.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+Yapılandırılmış bir `proxyUrl` veya `OPENCLAW_PROXY_URL`, yönetilen yönlendirmeyi etkinleştirir. URL'yi etkinleştirmeden saklayan gelişmiş bir vazgeçme seçeneği olarak yalnızca
+`proxy.enabled: false` ayarını kullanın.
 
-Gateway denetim düzlemi atlaması `localhost` ve değişmez local loopback IP URL'leriyle sınırlıdır — `ws://127.0.0.1:18789`, `ws://[::1]:18789` veya `ws://localhost:18789` kullanın. Diğer ana bilgisayar adları sıradan trafik gibi yönlendirilir.
+| Mod                      | Davranış                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gateway-only` (varsayılan) | OpenClaw, etkin Gateway geri döngü yetkilisini doğrudan bağlantı istisnası olarak kaydeder; böylece yerel Gateway WebSocket trafiği proxy olmadan bağlanır. İstisna tam olarak yapılandırılmış ana bilgisayarı/bağlantı noktasını hedeflediğinden özel geri döngü bağlantı noktaları çalışır. Paketle gelen tarayıcı plugin'i, OpenClaw tarafından başlatılan yönetilen tarayıcıların tam yerel CDP hazırlık ve DevTools WebSocket URL'leri için aynı türde bir istisna kaydeder; paketle gelen Ollama bellek gömme sağlayıcısı ise tam olarak yapılandırılmış ana bilgisayar yerelindeki geri döngü gömme kaynağı için daha dar ve korumalı bir doğrudan yola sahiptir. |
+| `proxy`                  | Hiçbir geri döngü istisnası kaydedilmez; Gateway ve Ollama geri döngü trafiği proxy üzerinden geçer. Uzak bir proxy, OpenClaw ana bilgisayarının geri döngü hizmetine geri yönlendirme yapabilmelidir (örneğin erişilebilir bir ana bilgisayar adı, IP veya tünel üzerinden) — standart bir uzak proxy, `127.0.0.1`/`localhost` değerlerini OpenClaw ana bilgisayarına göre değil, kendisine göre çözümler.                                                                                                                                                                                                                |
+| `block`                  | OpenClaw, bir soket açmadan önce Gateway geri döngü denetim düzlemi bağlantılarını ve korumalı Ollama geri döngü gömme bağlantılarını reddeder.                                                                                                                                                                                                                                                                                                                                                                                                                               |
+
+Gateway denetim düzlemi atlaması, `localhost` ve değişmez geri döngü IP URL'leriyle sınırlıdır — `ws://127.0.0.1:18789`, `ws://[::1]:18789` veya `ws://localhost:18789` kullanın. Diğer ana bilgisayar adları sıradan trafik gibi yönlendirilir.
 
 ### Kapsayıcılar
 
-`openclaw --container ...` komutlarında OpenClaw, ayarlanmışsa `OPENCLAW_PROXY_URL` değerini kapsayıcıyı hedefleyen alt CLI'ye iletir. URL'ye kapsayıcının içinden erişilebilmelidir — buradaki `127.0.0.1` ana bilgisayarı değil, kapsayıcının kendisini ifade eder. Denetimi açıkça geçersiz kılmak için `OPENCLAW_CONTAINER_ALLOW_LOOPBACK_PROXY_URL=1` ayarlamadığınız sürece OpenClaw, kapsayıcıyı hedefleyen komutlarda local loopback vekil sunucu URL'lerini reddeder.
+`openclaw --container ...` komutları için OpenClaw, ayarlandığında `OPENCLAW_PROXY_URL` değerini kapsayıcıyı hedefleyen alt CLI'a iletir. URL'ye kapsayıcının içinden erişilebilmelidir — oradaki `127.0.0.1`, ana bilgisayarı değil kapsayıcının kendisini ifade eder. Bu denetimi açıkça geçersiz kılmak için `OPENCLAW_CONTAINER_ALLOW_LOOPBACK_PROXY_URL=1` ayarını yapmadığınız sürece OpenClaw, kapsayıcıyı hedefleyen komutlarda geri döngü proxy URL'lerini reddeder.
 
-## İlgili vekil sunucu terimleri
+## İlgili proxy terimleri
 
-- `proxy.enabled` / `proxy.proxyUrl` — çalışma zamanı çıkış trafiği için giden ileri vekil sunucu yönlendirmesi. Bu sayfa.
-- `gateway.auth.mode: "trusted-proxy"` — Gateway erişimi için gelen, kimlik duyarlı ters vekil sunucu kimlik doğrulaması. Bkz. [Güvenilir vekil sunucu kimlik doğrulaması](/tr/gateway/trusted-proxy-auth).
-- `openclaw proxy` — geliştirme ve destek için yerel hata ayıklama vekil sunucusu ve yakalama inceleyicisi. Bkz. [openclaw proxy](/tr/cli/proxy).
-- `tools.web.fetch.useTrustedEnvProxy` — varsayılan olarak katı DNS sabitlemesini ve ana bilgisayar adı politikasını korurken `web_fetch` aracının, DNS'i operatör denetimindeki bir HTTP(S) ortam vekil sunucusunun çözmesine izin vermek için isteğe bağlı ayar. Bkz. [Web getirme](/tr/tools/web-fetch#trusted-env-proxy).
-- Kanala veya sağlayıcıya özgü vekil sunucu ayarları — tek bir aktarım için sahip bileşene özgü geçersiz kılmalar. Çalışma zamanı genelinde merkezi çıkış trafiği denetimi için yönetilen ağ vekil sunucusunu tercih edin.
+- `proxy.enabled` / `proxy.proxyUrl` — çalışma zamanı çıkışı için giden ileri proxy yönlendirmesi. Bu sayfa.
+- `gateway.auth.mode: "trusted-proxy"` — Gateway erişimi için gelen, kimlik duyarlı ters proxy kimlik doğrulaması. [Güvenilen proxy kimlik doğrulaması](/tr/gateway/trusted-proxy-auth) bölümüne bakın.
+- `openclaw proxy` — geliştirme ve destek için yerel hata ayıklama proxy'si ve yakalama denetleyicisi. [openclaw proxy](/tr/cli/proxy) bölümüne bakın.
+- `tools.web.fetch.useTrustedEnvProxy` — varsayılan olarak katı DNS sabitlemesini ve ana bilgisayar adı politikasını korurken, operatör denetimindeki HTTP(S) ortam proxy'sinin DNS çözümlemesine izin vermek üzere `web_fetch` için isteğe bağlı etkinleştirme. [Web getirme](/tr/tools/web-fetch#trusted-env-proxy) bölümüne bakın.
+- Kanala veya sağlayıcıya özgü proxy ayarları — tek bir aktarım için sahibine özgü geçersiz kılmalar. Çalışma zamanının tamamında merkezi çıkış denetimi için yönetilen ağ proxy'sini tercih edin.
 
-## Vekil sunucuyu doğrulama
+## Proxy'yi doğrulama
 
-Vekil sunucunun hedef politikası gerçek güvenlik sınırıdır; OpenClaw, vekil sunucunuzun doğru hedefleri engellediğini doğrulayamaz. Şu şekilde yapılandırın:
+Proxy'nin hedef politikası gerçek güvenlik sınırıdır; OpenClaw, proxy'nizin doğru hedefleri engellediğini doğrulayamaz. Proxy'yi şunları yapacak şekilde yapılandırın:
 
-- Yalnızca local loopback veya özel ve güvenilir bir arabirime bağlayın; yalnızca OpenClaw işlemi/ana bilgisayarı/kapsayıcısı/hizmet hesabı tarafından erişilebilir olsun.
-- Hedefleri kendisi çözümlesin ve hem düz HTTP hem de HTTPS `CONNECT` tünelleri için bağlantı sırasında, DNS çözümlemesinden sonra IP'ye göre engellesin.
-- local loopback, özel, bağlantı yerel, meta veri, çok noktaya yayın, ayrılmış ve belgeleme aralıklarına yönelik hedef tabanlı atlamaları reddetsin.
-- DNS çözümleme yoluna tamamen güvenmediğiniz sürece ana bilgisayar adı izin listelerinden kaçının.
-- Hedefi, kararı, durumu ve nedeni günlüğe kaydedin — istek gövdelerini, yetkilendirme üstbilgilerini, çerezleri veya diğer sırları asla kaydetmeyin.
+- Yalnızca geri döngüye veya güvenilir bir özel arayüze bağlayın; yalnızca OpenClaw işlemi/ana bilgisayarı/kapsayıcısı/hizmet hesabı tarafından erişilebilir olmalıdır.
+- Hedefleri kendisi çözümlemeli ve hem düz HTTP hem de HTTPS `CONNECT` tünelleri için DNS çözümlemesinden sonra, bağlantı kurulurken IP'ye göre engellemelidir.
+- Geri döngü, özel, bağlantı yerel, meta veri, çok noktaya yayın, ayrılmış ve dokümantasyon aralıklarına yönelik hedef tabanlı atlamaları reddetmelidir.
+- DNS çözümleme yoluna tamamen güvenmiyorsanız ana bilgisayar adı izin listelerinden kaçının.
+- Hedefi, kararı, durumu ve nedeni günlüğe kaydedin — istek gövdelerini, yetkilendirme üstbilgilerini, çerezleri veya diğer gizli bilgileri asla kaydetmeyin.
 - Politikayı sürüm denetimi altında tutun ve değişiklikleri güvenlik açısından hassas olarak inceleyin.
 
-OpenClaw'ı çalıştıran aynı ana bilgisayardan/kapsayıcıdan/hizmet hesabından doğrulayın:
+OpenClaw'ı çalıştıran aynı ana bilgisayar/kapsayıcı/hizmet hesabından doğrulayın:
 
 ```bash
 openclaw proxy validate --proxy-url http://127.0.0.1:3128
 ```
 
-Özel CA kullanan bir HTTPS vekil sunucu uç noktasıyla:
+Özel CA kullanan bir HTTPS proxy uç noktasıyla:
 
 ```bash
 openclaw proxy validate --proxy-url https://proxy.corp.example:8443 --proxy-ca-file /etc/openclaw/proxy-ca.pem
 ```
 
-| Bayrak                   | Amaç                                                                      |
-| ------------------------ | ------------------------------------------------------------------------- |
-| `--proxy-url <url>`      | Yapılandırmayı/ortamı çözümlemek yerine bu URL'yi doğrular.                |
-| `--proxy-ca-file <path>` | Bir HTTPS proxy uç noktası için CA paketi.                                 |
-| `--allowed-url <url>`    | Başarılı olması beklenen hedef (tekrarlanabilir).                          |
-| `--denied-url <url>`     | Engellenmesi beklenen hedef (tekrarlanabilir).                             |
-| `--apns-reachable`       | Proxy'nin doğrudan sandbox APNs HTTP/2 sondasını tünelleyebildiğini de doğrular. |
-| `--apns-authority <url>` | `--apns-reachable` ile sınanan APNs yetkili adresini geçersiz kılar.       |
-| `--timeout-ms <ms>`      | İstek başına zaman aşımı.                                                  |
-| `--json`                 | Makine tarafından okunabilir çıktı.                                       |
+| Bayrak                   | Amaç                                                                 |
+| ------------------------ | -------------------------------------------------------------------- |
+| `--proxy-url <url>`      | Yapılandırmayı/ortamı çözümlemek yerine bu URL'yi doğrulayın.        |
+| `--proxy-ca-file <path>` | Bir HTTPS proxy uç noktası için CA paketi.                            |
+| `--allowed-url <url>`    | Başarılı olması beklenen hedef (yinelenebilir).                       |
+| `--denied-url <url>`     | Engellenmesi beklenen hedef (yinelenebilir).                          |
+| `--apns-reachable`       | Ayrıca proxy'nin doğrudan bir korumalı alan APNs HTTP/2 yoklamasını tünelleyebildiğini doğrulayın. |
+| `--apns-authority <url>` | `--apns-reachable` ile yoklanan APNs yetkilisini geçersiz kılın.     |
+| `--timeout-ms <ms>`      | İstek başına zaman aşımı.                                            |
+| `--json`                 | Makine tarafından okunabilir çıktı.                                  |
 
-`proxy.enabled`, `true` değilse ve `--proxy-url` verilmemişse komut doğrulama yapmak yerine bir yapılandırma sorunu bildirir; yapılandırmayı değiştirmeden önce tek seferlik bir ön kontrol için `--proxy-url` iletin.
+Herhangi bir yapılandırma, ortam veya `--proxy-url` değeri yoksa komut bir yapılandırma sorunu bildirir; yapılandırmayı değiştirmeden önce tek seferlik bir ön kontrol için `--proxy-url` iletin.
 
-`--allowed-url`/`--denied-url` olmadan varsayılan kontroller şunlardır: `https://example.com/` başarılı olmalı ve proxy'nin erişmemesi gereken geçici bir local loopback kanarya sunucusu engellenmelidir. local loopback kontrolü bir aktarım hatasında veya kanaryanın her çalıştırmaya özgü belirtecini içermeyen 2xx dışı bir yanıtta başarılı olur; belirtecin bulunmadığı bir 2xx yanıtında (kanarya dışındaki bir kaynaktan gelen beklenmedik başarı) ve özellikle eşleşen belirteci taşıyan herhangi bir yanıtta başarısız olur; çünkü bu, proxy'nin reddetmesi gereken bir local loopback hedefini gerçekten ilettiğini kanıtlar. Özel `--denied-url` hedeflerinde böyle bir kanarya belirteci yoktur; bu nedenle kapalı durumda başarısız olurlar: herhangi bir HTTP yanıtı erişilebilir sayılır (başarısızlık) ve bir aktarım hatası, engellendiği kanıtlanmış kabul edilmek yerine sonuçsuz olarak bildirilir; çünkü OpenClaw, proxy'nizin erişilebilir bir kaynağı reddettiğini mi yoksa başka bir şeyin mi ters gittiğini doğrulayamaz. `--apns-reachable` kasıtlı olarak geçersiz bir sağlayıcı belirteci gönderir; dolayısıyla `403 InvalidProviderToken` yanıtı, tünelin Apple'a ulaştığının kanıtı sayılır. Komut, herhangi bir doğrulama hatasında `1` koduyla çıkar; proxy URL kimlik bilgileri hem metin hem de JSON çıktısında gizlenir.
+`--allowed-url`/`--denied-url` belirtilmediğinde varsayılan kontroller şunlardır: `https://example.com/` başarılı olmalı ve proxy'nin erişememesi gereken geçici bir geri döngü kanarya sunucusu engellenmelidir. Geri döngü kontrolü, aktarım hatasında veya kanaryanın çalıştırmaya özgü belirtecini içermeyen 2xx dışı bir yanıtta başarılı olur; belirtecin bulunmadığı bir 2xx yanıtta (kanarya dışındaki bir kaynaktan gelen beklenmedik başarı) ve özellikle eşleşen belirteci taşıyan herhangi bir yanıtta başarısız olur; çünkü bu, proxy'nin reddetmesi gereken bir geri döngü hedefini gerçekten ilettiğini kanıtlar. Özel `--denied-url` hedeflerinde böyle bir kanarya belirteci yoktur, bu nedenle kapalı kalacak şekilde başarısız olurlar: Herhangi bir HTTP yanıtı hedefin erişilebilir olduğu anlamına gelir (başarısızlık) ve OpenClaw, proxy'nizin erişilebilir bir kaynağı reddettiğini başka bir şeyin ters gitmesinden ayırt edemediği için aktarım hatası, engellendiği kanıtlanmış sayılmak yerine sonuçsuz olarak bildirilir. `--apns-reachable` kasıtlı olarak geçersiz bir sağlayıcı belirteci gönderir; bu nedenle `403 InvalidProviderToken` yanıtı, tünelin Apple'a ulaştığının kanıtı sayılır. Komut, herhangi bir doğrulama hatasında `1` koduyla çıkar; proxy URL kimlik bilgileri hem metin hem de JSON çıktısında sansürlenir.
 
 ```json
 {
@@ -178,7 +176,7 @@ openclaw proxy validate --proxy-url https://proxy.corp.example:8443 --proxy-ca-f
 }
 ```
 
-Manuel `curl` kontrolü (genel istek başarılı olmalı; local loopback ve meta veri istekleri proxy'nin kendisi tarafından engellenmelidir — tek başına `curl`, `openclaw proxy validate` komutunun yerleşik kanaryasının yapabildiği gibi bir proxy reddini erişilemeyen bir kaynaktan ayırt edemez):
+Elle `curl` kontrolü (genel istek başarılı olmalı; geri döngü ve meta veri istekleri proxy'nin kendisi tarafından engellenmelidir — `curl` tek başına, proxy reddini erişilemeyen bir kaynaktan `openclaw proxy validate`'ün yerleşik kanaryasının ayırt ettiği şekilde ayırt edemez):
 
 ```bash
 curl -x http://127.0.0.1:3128 https://example.com/
@@ -186,44 +184,44 @@ curl -x http://127.0.0.1:3128 http://127.0.0.1/
 curl -x http://127.0.0.1:3128 http://169.254.169.254/
 ```
 
-## Engellenmesi önerilen hedefler
+## Önerilen engellenmiş hedefler
 
-Herhangi bir ileri proxy, güvenlik duvarı veya dışarı çıkış ilkesi için başlangıç engelleme listesi. OpenClaw'ın kendi SSRF sınıflandırıcısı `src/infra/net/ssrf.ts` ve `packages/net-policy/src/ip.ts` dosyalarında bulunur (`BLOCKED_HOSTNAMES`, `BLOCKED_IPV4_SPECIAL_USE_RANGES`, `BLOCKED_IPV6_SPECIAL_USE_RANGES`, RFC 2544 kıyaslama ön eki ve NAT64/6to4/Teredo/ISATAP/IPv4 eşlemeli biçimler için gömülü IPv4 işleme) — bunlar yararlı referanslardır ancak OpenClaw, harici proxy'nizde bu kuralları dışa aktarmaz veya uygulamaz.
+Herhangi bir ileri proxy, güvenlik duvarı veya çıkış ilkesi için başlangıç ret listesi. OpenClaw'ın kendi SSRF sınıflandırıcısı `src/infra/net/ssrf.ts` ve `packages/net-policy/src/ip.ts` içinde bulunur (`BLOCKED_HOSTNAMES`, `BLOCKED_IPV4_SPECIAL_USE_RANGES`, `BLOCKED_IPV6_SPECIAL_USE_RANGES`, RFC 2544 kıyaslama ön eki ve NAT64/6to4/Teredo/ISATAP/IPv4 eşlemeli biçimler için gömülü IPv4 işleme) — bunlar yararlı başvuru kaynaklarıdır ancak OpenClaw, harici proxy'nizde bu kuralları dışa aktarmaz veya uygulamaz.
 
-| Aralık veya ana makine                                                                | Engelleme nedeni                                         |
-| ------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `127.0.0.0/8`, `localhost`, `localhost.localdomain`                                   | IPv4 local loopback                                      |
-| `::1/128`                                                                             | IPv6 local loopback                                      |
-| `0.0.0.0/8`, `::/128`                                                                 | Belirtilmemiş / bu ağ adresleri                           |
-| `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`                                       | RFC 1918 özel ağları                                     |
-| `169.254.0.0/16`, `fe80::/10`                                                         | Yaygın bulut meta verisi yolları dâhil bağlantı yerel    |
-| `169.254.169.254`, `metadata.google.internal`                                         | Bulut meta verisi hizmetleri                             |
-| `100.64.0.0/10`                                                                       | Operatör sınıfı NAT paylaşımlı adres alanı                |
-| `198.18.0.0/15`, `2001:2::/48`                                                        | Kıyaslama aralıkları                                     |
-| `192.0.0.0/24`, `192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`, `2001:db8::/32`  | Özel kullanım ve belgelendirme aralıkları                |
-| `224.0.0.0/4`, `ff00::/8`                                                             | Çok noktaya yayın                                        |
-| `240.0.0.0/4`                                                                         | Ayrılmış IPv4                                            |
-| `fc00::/7`, `fec0::/10`                                                               | IPv6 yerel/özel aralıkları                               |
-| `100::/64`, `2001:20::/28`                                                            | IPv6 atma ve ORCHIDv2 aralıkları                         |
-| `64:ff9b::/96`, `64:ff9b:1::/48`                                                      | Gömülü IPv4 içeren NAT64 ön ekleri                       |
-| `2002::/16`, `2001::/32`                                                              | Gömülü IPv4 içeren 6to4 ve Teredo                        |
-| `::/96`, `::ffff:0:0/96`                                                              | IPv4 uyumlu ve IPv4 eşlemeli IPv6                        |
+| Aralık veya ana makine                                                               | Engelleme nedeni                                   |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| `127.0.0.0/8`, `localhost`, `localhost.localdomain`                                  | IPv4 geri döngü                                    |
+| `::1/128`                                                                            | IPv6 geri döngü                                    |
+| `0.0.0.0/8`, `::/128`                                                                | Belirtilmemiş / bu ağa ait adresler                |
+| `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`                                      | RFC 1918 özel ağları                               |
+| `169.254.0.0/16`, `fe80::/10`                                                        | Yaygın bulut meta veri yolları dâhil bağlantı yereli |
+| `169.254.169.254`, `metadata.google.internal`                                        | Bulut meta veri hizmetleri                         |
+| `100.64.0.0/10`                                                                      | Operatör sınıfı NAT paylaşımlı adres alanı         |
+| `198.18.0.0/15`, `2001:2::/48`                                                       | Kıyaslama aralıkları                               |
+| `192.0.0.0/24`, `192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`, `2001:db8::/32` | Özel kullanım ve belgelendirme aralıkları          |
+| `224.0.0.0/4`, `ff00::/8`                                                            | Çok noktaya yayın                                  |
+| `240.0.0.0/4`                                                                        | Ayrılmış IPv4                                      |
+| `fc00::/7`, `fec0::/10`                                                              | IPv6 yerel/özel aralıkları                         |
+| `100::/64`, `2001:20::/28`                                                           | IPv6 atma ve ORCHIDv2 aralıkları                   |
+| `64:ff9b::/96`, `64:ff9b:1::/48`                                                     | Gömülü IPv4 içeren NAT64 ön ekleri                 |
+| `2002::/16`, `2001::/32`                                                             | Gömülü IPv4 içeren 6to4 ve Teredo                  |
+| `::/96`, `::ffff:0:0/96`                                                             | IPv4 uyumlu ve IPv4 eşlemeli IPv6                  |
 
 Bulut sağlayıcınızın veya ağ platformunuzun belgelediği diğer meta veri ana makinelerini ya da ayrılmış aralıkları ekleyin.
 
 ## Sınırlar
 
-| Yüzey                                                       | Yönetilen proxy durumu                                                                                                                                                        |
-| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fetch`, `node:http`, `node:https`, yaygın WebSocket istemcileri | Yapılandırıldığında yönetilen proxy kancaları üzerinden yönlendirilir.                                                                                                    |
-| APNs doğrudan HTTP/2                                        | APNs tarafından yönetilen `CONNECT` yardımcısı üzerinden yönlendirilir.                                                                                                       |
-| Gateway denetim düzlemi local loopback                      | Yalnızca tam olarak yapılandırılmış yerel local loopback Gateway URL'si için doğrudandır.                                                                                      |
-| Hata ayıklama proxy'sinin yukarı akış iletimi               | Yerel tanılama için açıkça etkinleştirilmediği sürece yönetilen proxy modu etkinken devre dışıdır.                                                                             |
-| IRC                                                         | Ham TCP/TLS; yönetilen HTTP proxy modu tarafından proxy'lenmez. Dağıtımınız tüm dışarı çıkışların ileri proxy üzerinden gerçekleşmesini gerektiriyorsa `channels.irc.enabled: false` ayarını yapın. |
-| Diğer ham `net`, `tls` veya `http2` istemci çağrıları       | Birleştirilmeden önce ham soket koruması tarafından sınıflandırılmalıdır.                                                                                                     |
+| Yüzey                                                       | Yönetilen proxy durumu                                                                                                                                   |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fetch`, `node:http`, `node:https`, yaygın WebSocket istemcileri | Yapılandırıldığında yönetilen proxy kancaları üzerinden yönlendirilir.                                                                                   |
+| APNs doğrudan HTTP/2                                         | APNs tarafından yönetilen `CONNECT` yardımcısı üzerinden yönlendirilir.                                                                         |
+| Gateway denetim düzlemi geri döngüsü                         | Yalnızca tam olarak yapılandırılmış yerel geri döngü Gateway URL'si için doğrudandır.                                                                     |
+| Hata ayıklama proxy'sinin yukarı akış iletimi                | Yerel tanılama için açıkça etkinleştirilmediği sürece yönetilen proxy modu etkinken devre dışıdır.                                                        |
+| IRC                                                          | Ham TCP/TLS; yönetilen HTTP proxy modu tarafından proxy üzerinden geçirilmez. Dağıtımınız tüm çıkış trafiğinin ileri proxy üzerinden geçmesini gerektiriyorsa `channels.irc.enabled: false` ayarlayın. |
+| Diğer ham `net`, `tls` veya `http2` istemci çağrıları | Birleştirilmeden önce ham yuva koruması tarafından sınıflandırılmalıdır.                                                                                  |
 
-- Bu, JavaScript HTTP/WebSocket istemcileri için süreç düzeyinde kapsama sağlar; işletim sistemi düzeyinde bir ağ sandbox'ı değildir.
-- Ham `net`, `tls`, `http2` soketleri, yerel eklentiler ve OpenClaw dışı alt süreçler, proxy ortam değişkenlerini devralıp bunlara uymadıkları sürece Node düzeyindeki yönlendirmeyi atlayabilir. Çatallanmış OpenClaw alt CLI'ları, yönetilen proxy URL'sini ve `proxy.loopbackMode` durumunu devralır.
-- Kullanıcıya ait yerel WebUI'lar ve yerel model sunucuları, genel bir yerel ağ atlaması kapsamında değildir — gerekirse bunları operatör proxy ilkesindeki izin listesine ekleyin. Bunun istisnası, paketle gelen Ollama bellek gömme sağlayıcısının korumalı doğrudan yoludur; bu yol, yapılandırılmış `baseUrl` değerindeki tam ana makine yerel local loopback kaynağıyla sınırlıdır; LAN, tailnet, özel ağ ve genel Ollama ana makineleri yönetilen proxy'yi kullanmaya devam eder.
-- Yerel hata ayıklama proxy'sinin doğrudan yukarı akış iletimi (proxy istekleri ve `CONNECT` tünelleri için), yönetilen proxy modu etkinken varsayılan olarak devre dışıdır; bunu yalnızca onaylanmış yerel tanılamalar için etkinleştirin.
+- Bu, işletim sistemi düzeyinde bir ağ korumalı alanı değil, JavaScript HTTP/WebSocket istemcileri için işlem düzeyinde kapsama alanıdır.
+- Ham `net`, `tls`, `http2` yuvaları, yerel eklentiler ve OpenClaw dışı alt işlemler, proxy ortam değişkenlerini devralıp bunlara uymadıkları sürece Node düzeyindeki yönlendirmeyi atlayabilir. Çatallanmış OpenClaw alt CLI'ları, yönetilen proxy URL'sini ve `proxy.loopbackMode` durumunu devralır.
+- Kullanıcıya ait yerel WebUI'ler ve yerel model sunucuları genel bir yerel ağ atlaması kapsamında değildir — gerekirse bunları operatör proxy ilkesindeki izin listesine ekleyin. Bunun istisnası, paketle gelen Ollama bellek gömme sağlayıcısının korumalı doğrudan yoludur; bu yol, yapılandırılmış `baseUrl` değerindeki tam ana makine yerel geri döngü kaynağıyla sınırlıdır; LAN, tailnet, özel ağ ve genel Ollama ana makineleri yönetilen proxy'yi kullanmaya devam eder.
+- Yerel hata ayıklama proxy'sinin doğrudan yukarı akış iletimi (proxy istekleri ve `CONNECT` tünelleri için), yönetilen proxy modu etkinken varsayılan olarak devre dışıdır; yalnızca onaylanmış yerel tanılama için etkinleştirin.
 - OpenClaw, proxy ilkenizi incelemez, test etmez veya onaylamaz. Proxy ilkesi değişikliklerini güvenlik açısından hassas operasyonel değişiklikler olarak değerlendirin.

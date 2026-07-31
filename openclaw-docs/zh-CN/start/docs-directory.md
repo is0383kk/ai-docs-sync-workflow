@@ -1,12 +1,13 @@
 ---
 read_when:
     - 你希望快速访问关键文档页面
-summary: 精选的 OpenClaw 常用文档链接。
+summary: OpenClaw 最常用文档的精选链接。
 title: 文档目录
 x-i18n:
-    generated_at: "2026-07-11T20:58:13Z"
+    generated_at: "2026-07-26T07:02:22Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 48859dc0b31139f1f5acaa403e506cd6d9767ee32e502a4ef74340dbbc21918f
     source_path: start/docs-directory.md
@@ -15,7 +16,7 @@ x-i18n:
 
 <Note>
 此页面是精心整理的索引。如果你是新用户，请从[入门指南](/zh-CN/start/getting-started)开始。
-如需查看完整的文档地图，请参阅[文档中心](/zh-CN/start/hubs)。
+有关完整的文档地图，请参阅[文档中心](/zh-CN/start/hubs)。
 </Note>
 
 ## 从这里开始
@@ -65,9 +66,9 @@ x-i18n:
 ## 运维和安全
 
 - [会话](/zh-CN/concepts/session)
-- [Cron 作业](/zh-CN/automation/cron-jobs)
+- [定时任务](/zh-CN/automation/cron-jobs)
 - [Webhooks](/zh-CN/automation/cron-jobs#webhooks)
-- [Gmail Hooks（Pub/Sub）](/zh-CN/automation/cron-jobs#gmail-pubsub-integration)
+- [Gmail 钩子（Pub/Sub）](/zh-CN/automation/cron-jobs#gmail-pubsub-integration)
 - [安全](/zh-CN/gateway/security)
 - [故障排查](/zh-CN/gateway/troubleshooting)
 

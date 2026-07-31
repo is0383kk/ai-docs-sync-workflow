@@ -1,16 +1,16 @@
 ---
 read_when:
     - デフォルトモデルを変更する、またはプロバイダーの認証状態を確認する場合
-    - 利用可能なモデル／プロバイダーをスキャンし、認証プロファイルをデバッグする場合
-summary: '`openclaw models` の CLI リファレンス（ステータス／一覧／設定／スキャン、エイリアス、フォールバック、認証）'
+    - 利用可能なモデル／プロバイダーを調べ、認証プロファイルをデバッグする場合
+summary: '`openclaw models` の CLI リファレンス（status/list/set/scan、エイリアス、フォールバック、認証）'
 title: モデル
 x-i18n:
-    generated_at: "2026-07-12T14:23:20Z"
+    generated_at: "2026-07-26T10:08:53Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 15
+    prompt_version: 32
     provider: openai
-    source_hash: 330598225664ff961ab41bf6358226ad64eb43e941be7f422cfde0fe9d93cea8
+    source_hash: f7405c25694f04afe9c3029a8af64ae3ae7e1bdcf4c4ac31b8b84ff512d6a90e
     source_path: cli/models.md
     workflow: 16
 ---
@@ -25,7 +25,7 @@ x-i18n:
 - モデル選択の概念と `/models` スラッシュコマンド: [モデルの概念](/ja-JP/concepts/models)
 - プロバイダー認証のセットアップ: [はじめに](/ja-JP/start/getting-started)
 
-## よく使うコマンド
+## よく使用するコマンド
 
 ```bash
 openclaw models status
@@ -35,77 +35,77 @@ openclaw models set-image <model-or-alias>
 openclaw models scan
 ```
 
-`status` および `auth` サブコマンドは、設定済みエージェントを対象にするための `--agent <id>` を受け付けます。`list`、`scan`、`aliases`、`fallbacks`/`image-fallbacks` は常に設定済みのデフォルトエージェントを使用し、`set`/`set-image` は `--agent` を明示的に拒否します。省略した場合、`--agent` 対応コマンドは、設定されていれば `OPENCLAW_AGENT_DIR` を使用し、それ以外の場合は設定済みのデフォルトエージェントを使用します。
+`status` および `auth` サブコマンドでは、設定済みエージェントを対象にするために `--agent <id>` を指定できます。`list`、`scan`、`aliases`、および `fallbacks`/`image-fallbacks` は常に設定済みのデフォルトエージェントを使用し、`set`/`set-image` は `--agent` を一切受け付けません。省略した場合、`--agent` 対応コマンドは、設定されていれば `OPENCLAW_AGENT_DIR` を使用し、それ以外の場合は設定済みのデフォルトエージェントを使用します。
 
 ### ステータス
 
-`openclaw models status` は、解決済みのデフォルトモデルとフォールバックに加えて、認証の概要を表示します。プロバイダーの使用状況スナップショットが利用可能な場合、OAuth/API キーのステータスセクションには、プロバイダーの使用期間とクォータのスナップショットが含まれます。現在の使用期間対応プロバイダーは、Anthropic、GitHub Copilot、Gemini CLI、OpenAI、MiniMax、Xiaomi、z.ai です。使用状況の認証情報は、利用可能な場合はプロバイダー固有のフックから取得されます。それ以外の場合、OpenClaw は認証プロファイル、環境変数、または設定から、一致する OAuth/API キー認証情報を使用します。
+`openclaw models status` は、解決済みのデフォルトおよびフォールバックと、認証の概要を表示します。Codex など、Plugin が所有するエージェントランタイムについては、所有元の Plugin が有効であり、起動ペイロード検証に合格したかどうかも確認します。有効な認証情報があってもランタイムを利用できないルートでは、`usable` ではなく `status: unavailable` が報告されます。JSON 出力には、個別の `authStatus`、`runtimeStatus`、および制限付きのランタイム診断が含まれます。プロバイダー使用状況のスナップショットを利用できる場合、OAuth/API キーのステータスセクションには、プロバイダーの使用期間とクォータのスナップショットが含まれます。現在の使用期間対応プロバイダーは、Anthropic、GitHub Copilot、Gemini CLI、OpenAI、MiniMax、Xiaomi、z.ai です。使用状況の認証には、利用可能な場合はプロバイダー固有のフックが使用されます。それ以外の場合、OpenClaw は認証プロファイル、環境、または設定にある一致する OAuth/API キー認証情報へフォールバックします。
 
-`--json` 出力では、`auth.providers` は環境変数、設定、ストアを考慮したプロバイダー概要であり、`auth.oauth` は認証ストア内のプロファイルの健全性のみを示します。
+`--json` 出力では、`auth.providers` は環境変数、設定、ストアを考慮したプロバイダーの概要であり、`auth.oauth` は認証ストアのプロファイルの健全性のみを示します。
 
 オプション:
 
-| フラグ                    | 効果                                                                                                                               |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `--json`                  | JSON 出力。標準出力を `jq` にパイプできる状態に保つため、認証プロファイル、プロバイダー、起動時の診断は標準エラー出力に送られます。 |
-| `--plain`                 | プレーンテキスト出力。                                                                                                             |
-| `--check`                 | 認証の期限切れが近い、または期限切れの場合に 0 以外で終了します: `1` = 期限切れ/欠落、`2` = 期限切れ間近。                           |
-| `--probe`                 | 設定済み認証プロファイルのライブプローブ。実際にリクエストを送信するため、トークンを消費し、レート制限が発生する可能性があります。  |
-| `--probe-provider <name>` | 1 つのプロバイダーのみをプローブします。                                                                                            |
-| `--probe-profile <id>`    | 特定の認証プロファイル ID をプローブします（繰り返し指定またはカンマ区切り）。                                                      |
-| `--probe-timeout <ms>`    | プローブごとのタイムアウト。                                                                                                       |
-| `--probe-concurrency <n>` | 同時実行するプローブ数。                                                                                                           |
-| `--probe-max-tokens <n>`  | プローブの最大トークン数（ベストエフォート）。                                                                                     |
-| `--agent <id>`            | 設定済みエージェント ID。`OPENCLAW_AGENT_DIR` より優先されます。                                                                    |
+| フラグ                      | 効果                                                                                                                                   |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `--json`                  | JSON 出力。標準出力を `jq` にパイプ可能な状態に保つため、認証プロファイル、プロバイダー、および起動診断は標準エラー出力へ送られます。                            |
+| `--plain`                 | プレーンテキスト出力。                                                                                                                       |
+| `--check`                 | 認証が期限切れ間近または期限切れの場合、あるいは選択したエージェントランタイムが利用できない場合に、ゼロ以外で終了します: `1` = 利用不可/期限切れ/欠落、`2` = 期限切れ間近。 |
+| `--probe`                 | 設定済み認証プロファイルのライブプローブ。実際のリクエストを行うため、トークンを消費したりレート制限を引き起こしたりする可能性があります。                                       |
+| `--probe-provider <name>` | 1 つのプロバイダーのみをプローブします。                                                                                                                 |
+| `--probe-profile <id>`    | 特定の認証プロファイル ID をプローブします（繰り返し指定またはカンマ区切り）。                                                                             |
+| `--probe-timeout <ms>`    | プローブごとのタイムアウト。                                                                                                                       |
+| `--probe-concurrency <n>` | 同時プローブ数。                                                                                                                       |
+| `--probe-max-tokens <n>`  | プローブの最大トークン数（ベストエフォート）。                                                                                                          |
+| `--agent <id>`            | 設定済みエージェント ID。`OPENCLAW_AGENT_DIR` を上書きします。                                                                                     |
 
-プローブ行の取得元には、認証プロファイル、環境変数の認証情報、または `models.json` があります。プローブステータスの分類: `ok`、`auth`、`rate_limit`、`billing`、`timeout`、`format`、`unknown`、`no_model`。
+プローブ行は、認証プロファイル、環境の認証情報、または `models.json` から生成される場合があります。プローブステータスの分類: `ok`、`auth`、`rate_limit`、`billing`、`timeout`、`format`、`unknown`、`no_model`。
 
-プローブがモデル呼び出しに到達しなかった場合に想定される詳細/理由コード:
+プローブがモデル呼び出しに到達しない場合に想定される詳細/理由コード:
 
-- `excluded_by_auth_order`: 保存済みプロファイルは存在しますが、明示的な `auth.order.<provider>` から除外されているため、プローブは試行せず除外されたことを報告します。
-- `missing_credential`、`invalid_expires`、`expired`、`unresolved_ref`: プロファイルは存在しますが、使用資格がないか、解決できません。
+- `excluded_by_auth_order`: 保存済みプロファイルは存在しますが、明示的な `auth.order.<provider>` で省略されたため、プローブは試行せず除外を報告します。
+- `missing_credential`、`invalid_expires`、`expired`、`unresolved_ref`: プロファイルは存在しますが、適格でないか解決できません。
 - `ineligible_profile`: 別の理由により、プロファイルがプロバイダー設定と互換性を持ちません。
-- `no_model`: プロバイダーの認証情報は存在しますが、OpenClaw はそのプロバイダーについてプローブ可能なモデル候補を解決できませんでした。
+- `no_model`: プロバイダー認証は存在しますが、OpenClaw はそのプロバイダーでプローブ可能なモデル候補を解決できませんでした。
 
-OpenAI ChatGPT/Codex OAuth のトラブルシューティングでは、`openclaw models status`、`openclaw models auth list --provider openai`、`openclaw config get agents.defaults.model --json` を使用すると、エージェントがネイティブ Codex ランタイムを通じて `openai/*` に使用できる `openai` OAuth プロファイルを持っているかどうかを最も迅速に確認できます。[OpenAI プロバイダーのセットアップ](/ja-JP/providers/openai#check-and-recover-codex-oauth-routing)を参照してください。
+OpenAI ChatGPT/Codex OAuth のトラブルシューティングでは、`openclaw models status`、`openclaw models auth list --provider openai`、および `openclaw config get agents.defaults.model --json` を使用することで、エージェントがネイティブ Codex ランタイム経由で `openai/*` に使用可能な `openai` OAuth プロファイルを持っているかどうかを最も迅速に確認できます。[OpenAI プロバイダーのセットアップ](/ja-JP/providers/openai#check-and-recover-codex-oauth-routing)を参照してください。
 
 ### 一覧
 
-`openclaw models list` は読み取り専用です。設定、認証プロファイル、既存のカタログ状態、プロバイダー所有のカタログ行を読み取りますが、`models.json` を書き換えることはありません。
+`openclaw models list` は読み取り専用です。設定、認証プロファイル、既存のカタログ状態、およびプロバイダー所有のカタログ行を読み取りますが、`models.json` を書き換えることはありません。
 
-オプション: `--all`（完全なカタログ）、`--local`（ローカルモデルに絞り込み）、`--provider <id>`、`--json`、`--plain`。
+オプション: `--all`（完全なカタログ）、`--local`（ローカルモデルのみに絞り込み）、`--provider <id>`、`--json`、`--plain`。
 
-注記:
+注:
 
-- `Auth` 列は読み取り専用です。OpenAI などのプロバイダー所有モデルルートでは、各行の API/ベース URL ルートを、有効な `auth.order` 内の使用可能なプロファイル、環境変数/設定の認証情報、および解決済みのコマンドスコープ SecretRef と照合します。具体的な OpenAI 行では、そのルートポリシーが利用できない場合、プロバイダーレベルの認証を借用せず不明のままになります。プロバイダーのみのレガシーチェックとその他のプロバイダーでは、プロバイダーレベルの動作が維持されます。Plugin の合成認証メタデータはランタイム機能のヒントにすぎず、ネイティブアカウント認証の証明ではないため、レジストリから明確な証拠がない限り、アカウント依存のルートは不明のままです。このコマンドは、プロバイダーランタイムの読み込み、キーチェーンのシークレットの読み取り、プロバイダー API の呼び出し、正確な実行準備状況の証明を行いません。
-- `models list --all --provider <id>` には、そのプロバイダーでまだ認証していない場合でも、Plugin マニフェストまたはバンドルされたプロバイダーカタログのメタデータから取得した、プロバイダー所有の静的カタログ行が含まれることがあります。一致する認証が設定されるまで、これらの行は引き続き利用不可として表示されます。
-- `models list` は、プロバイダーカタログの検出が遅い場合でも、コントロールプレーンの応答性を維持します。デフォルトビューと設定済みビューは、短い待機時間の後に設定済みまたは合成モデル行へフォールバックし、検出をバックグラウンドで完了させます。検出された正確な完全版カタログが必要で、プロバイダーの検出を待つことができる場合は、`--all` を使用してください。
-- 広範な `models list --all` は、プロバイダーランタイムの補足フックを読み込まず、マニフェストカタログ行をレジストリ行より優先してマージします。プロバイダーで絞り込まれたマニフェストの高速パスでは、`static` とマークされたプロバイダーのみを使用します。`refreshable` とマークされたプロバイダーはレジストリ/キャッシュを基盤とし、マニフェスト行を補足として追加します。一方、`runtime` とマークされたプロバイダーはレジストリ/ランタイム検出を継続して使用します。
-- `models list` は、ネイティブモデルのメタデータとランタイム上限を区別して保持します。テーブル出力では、有効なランタイム上限がネイティブのコンテキストウィンドウと異なる場合、`Ctx` に `contextTokens/contextWindow` が表示されます。プロバイダーがその上限を公開している場合、JSON 行には `contextTokens` が含まれます。
-- プロバイダー所有のルートについて、`models list` は 1 つの論理的なプロバイダー/モデル行を、選択されたルートに投影します。`Input` と `Ctx` は、完全に一致する物理ルートのカタログ行のみから取得され、明示的に設定された論理オーバーライドが最後に適用されます。ルート選択を解決できない場合、兄弟ルートのメタデータを借用せず、機能フィールドは不明として表示されます。
+- `Auth` 列は読み取り専用です。OpenAI などのプロバイダー所有モデルルートでは、各行の API/ベース URL ルートを、有効な `auth.order`、環境変数/設定の認証情報、および解決済みのコマンドスコープ SecretRef に含まれる適格なプロファイルと照合します。具体的な OpenAI 行は、そのルートポリシーを利用できない場合、プロバイダーレベルの認証を借用せず不明のままになります。プロバイダーのみのレガシーチェックおよびその他のプロバイダーでは、プロバイダーレベルの動作が維持されます。Plugin の合成認証メタデータはランタイム機能のヒントにすぎず、ネイティブアカウント認証の証明ではありません。そのため、アカウントに依存するルートは、レジストリに肯定的な証拠がない限り不明のままです。このコマンドは、プロバイダーランタイムの読み込み、キーチェーンのシークレットの読み取り、プロバイダー API の呼び出し、または正確な実行準備状況の証明を行いません。
+- `models list --all --provider <id>` には、そのプロバイダーでまだ認証していない場合でも、Plugin マニフェストまたはバンドルされたプロバイダーカタログのメタデータに含まれる、プロバイダー所有の静的カタログ行が含まれる場合があります。一致する認証が設定されるまでは、それらの行も利用不可として表示されます。
+- `models list` は、プロバイダーカタログの検出が遅い場合でもコントロールプレーンの応答性を維持します。デフォルトビューと設定済みビューは、短時間待機した後に設定済みまたは合成モデル行へフォールバックし、バックグラウンドで検出を完了させます。検出された正確で完全なカタログが必要で、プロバイダー検出の完了を待機できる場合は、`--all` を使用してください。
+- 広範な `models list --all` は、プロバイダーランタイムの補足フックを読み込まずに、レジストリ行へマニフェストカタログ行をマージします。プロバイダーで絞り込んだマニフェストの高速パスでは、`static` とマークされたプロバイダーのみが使用されます。`refreshable` とマークされたプロバイダーはレジストリ/キャッシュを引き続き基盤とし、マニフェスト行を補足として追加します。一方、`runtime` とマークされたプロバイダーは、引き続きレジストリ/ランタイム検出を使用します。
+- `models list` は、ネイティブモデルのメタデータとランタイム上限を区別して保持します。表形式の出力では、有効なランタイム上限がネイティブのコンテキストウィンドウと異なる場合、`Ctx` に `contextTokens/contextWindow` が表示されます。プロバイダーがその上限を公開している場合、JSON 行には `contextTokens` が含まれます。
+- プロバイダー所有のルートでは、`models list` は 1 つの論理プロバイダー/モデル行を選択されたルートへ投影します。`Input` と `Ctx` は、完全に一致する物理ルートのカタログ行からのみ取得され、明示的に設定された論理オーバーライドが最後に適用されます。ルート選択を解決できない場合、兄弟ルートのメタデータを借用せず、機能フィールドは不明として表示されます。
 - `models list --provider <id>` は、`moonshot` や `openai` などのプロバイダー ID で絞り込みます。`Moonshot AI` など、対話型プロバイダー選択画面の表示ラベルは受け付けません。
-- モデル参照は、**最初の** `/` で分割して解析されます。モデル ID に `/` が含まれる場合（OpenRouter 形式）は、プロバイダープレフィックスを含めてください（例: `openrouter/moonshotai/kimi-k2`）。
-- プロバイダーを省略した場合、OpenClaw はまず入力をエイリアスとして解決し、次にその正確なモデル ID に対する一意の設定済みプロバイダー一致として解決します。それでも解決できない場合にのみ、非推奨警告を表示して設定済みのデフォルトプロバイダーへフォールバックします。そのプロバイダーが設定済みのデフォルトモデルを公開しなくなった場合、OpenClaw は削除済みプロバイダーの古いデフォルトを表示する代わりに、最初の設定済みプロバイダー/モデルへフォールバックします。
+- モデル参照は、**最初の** `/` で分割して解析されます。モデル ID に `/` が含まれる場合（OpenRouter 形式）は、プロバイダーのプレフィックスを含めてください（例: `openrouter/moonshotai/kimi-k2`）。
+- プロバイダーを省略すると、OpenClaw は最初に入力をエイリアスとして解決し、次にその正確なモデル ID に一意に一致する設定済みプロバイダーとして解決します。その後に限り、非推奨警告を表示して設定済みのデフォルトプロバイダーへフォールバックします。そのプロバイダーが設定済みのデフォルトモデルを公開しなくなった場合、OpenClaw は削除済みプロバイダーの古いデフォルトを表示する代わりに、最初の設定済みプロバイダー/モデルへフォールバックします。
 - `models status` は、シークレットではないプレースホルダー（例: `OPENAI_API_KEY`、`secretref-managed`、`minimax-oauth`、`oauth:chutes`、`ollama-local`）について、シークレットとしてマスクする代わりに、認証出力に `marker(<value>)` を表示する場合があります。
 
-### デフォルトモデル/画像モデルの設定
+### デフォルトモデル / 画像モデルの設定
 
 ```bash
 openclaw models set <model-or-alias>
 openclaw models set-image <model-or-alias>
 ```
 
-`set` は `agents.defaults.model.primary` に書き込み、`set-image` は `agents.defaults.imageModel.primary` に書き込みます。どちらも `provider/model` または設定済みエイリアスを受け付けます。`set` は、新しく選択したモデルで必要な場合、Codex/Copilot ランタイム Plugin のインストールも修復しますが、`set-image` は修復しません。どちらのコマンドも `--agent` を受け付けず、常にエージェントのデフォルト設定へ書き込みます。
+`set` は `agents.defaults.model.primary` を書き込み、`set-image` は `agents.defaults.imageModel.primary` を書き込みます。どちらも `provider/model` または設定済みのエイリアスを受け付けます。`set` は、新しく選択したモデルで必要な場合に Codex/Copilot ランタイム Plugin のインストールも修復しますが、`set-image` は修復しません。どちらのコマンドも `--agent` を受け付けず、常にエージェントのデフォルトを書き込みます。
 
 ### スキャン
 
-`models scan` は OpenRouter の公開 `:free` カタログを読み取り、フォールバック用途の候補をランク付けします。カタログ自体は公開されているため、メタデータのみのスキャンに OpenRouter キーは必要ありません。
+`models scan` は OpenRouter の公開 `:free` カタログを読み取り、フォールバック用途の候補をランク付けします。カタログ自体は公開されているため、メタデータのみのスキャンには OpenRouter キーは不要です。
 
-デフォルトでは、OpenClaw はライブモデル呼び出しによってツールと画像のサポートをプローブしようとします。OpenRouter キーが設定されていない場合、コマンドはメタデータのみの出力へフォールバックし、`:free` モデルでもプローブと推論には `OPENROUTER_API_KEY` が必要であることを説明します。
+デフォルトでは、OpenClaw はライブモデル呼び出しを使用してツールと画像の対応状況をプローブしようとします。OpenRouter キーが設定されていない場合、コマンドはメタデータのみの出力へフォールバックし、`:free` モデルでのプローブと推論には引き続き `OPENROUTER_API_KEY` が必要であることを説明します。
 
 オプション:
 
-- `--no-probe`（メタデータのみ。設定/シークレットを参照しません）
+- `--no-probe`（メタデータのみ。設定/シークレットの参照なし）
 - `--min-params <b>`
 - `--max-age-days <days>`
 - `--provider <name>`
@@ -128,7 +128,8 @@ openclaw models aliases add <alias> <model-or-alias>
 openclaw models aliases remove <alias>
 ```
 
-エイリアスは、モデルエントリごとに `agents.defaults.models.<key>.alias` として保存されます。`add` はまず `<model-or-alias>` を正規のプロバイダー/モデルキーに解決するため、エイリアスに別のエイリアスを割り当てると、連鎖するのではなく参照先が変更されます。
+エイリアスは、モデルエントリごとに `agents.defaults.models.<key>.alias` として保存されます。`add` は最初に `<model-or-alias>` を正規のプロバイダー/モデルキーへ解決するため、エイリアスに別のエイリアスを設定すると、チェーン化するのではなく参照先が変更されます。
+エイリアスを追加しても、`agents.defaults.modelPolicy.allow` は変更されず、モデルのオーバーライドも制限されません。
 
 ## フォールバック
 
@@ -139,7 +140,7 @@ openclaw models fallbacks remove <model-or-alias>
 openclaw models fallbacks clear
 ```
 
-`agents.defaults.model.fallbacks` を管理します。`openclaw models image-fallbacks list|add|remove|clear` は、同じサブコマンド形式で、対応する `agents.defaults.imageModel.fallbacks` リストを管理します。
+`agents.defaults.model.fallbacks` を管理します。`openclaw models image-fallbacks list|add|remove|clear` は、同じサブコマンド形式で並列の `agents.defaults.imageModel.fallbacks` リストを管理します。
 
 ## 認証プロファイル
 
@@ -157,17 +158,17 @@ openclaw models auth order set --provider <id> <profileIds...>
 openclaw models auth order clear --provider <id>
 ```
 
-`models auth add` は対話型の認証ヘルパーです。選択したプロバイダーに応じて、プロバイダーの認証フロー（OAuth/API キー）を開始するか、トークンを手動で貼り付ける手順を案内します。
+`models auth add` は対話型認証ヘルパーです。選択したプロバイダーに応じて、プロバイダーの認証フロー（OAuth/API キー）を開始するか、トークンを手動で貼り付ける手順を案内します。
 
-`models auth list` は、トークン、API キー、OAuth シークレットの内容を表示せずに、選択したエージェントに保存されている認証プロファイルを一覧表示します。`openai` などの単一プロバイダーに絞り込むには `--provider <id>` を使用し、スクリプトで処理するには `--json` を使用してください。
+`models auth list` は、トークン、API キー、OAuth シークレットの内容を表示せずに、選択したエージェントに保存されている認証プロファイルを一覧表示します。`--provider <id>` を使用すると、`openai` などの単一プロバイダーに絞り込めます。スクリプトでは `--json` を使用します。
 
-`models auth login` は、プロバイダー Plugin の認証フロー（OAuth/API キー）を実行します。インストール済みのプロバイダーを確認するには、`openclaw plugins list` を使用してください。`login` は、ログイン時に名前付きプロファイルをサポートするプロバイダー向けの `--profile-id <id>`（同じプロバイダーの複数のログインを分けて保持する場合に使用）、特定の認証方式を選択する `--method <id>`、`--method device-code` のショートカットである `--device-code`、プロバイダー推奨のデフォルトモデルを適用する `--set-default`、およびそのプロバイダーの既存プロファイルを先に削除する `--force`（キャッシュされた OAuth プロファイルが動作しない場合や、アカウントを切り替える場合に使用）を受け付けます。
+`models auth login` は、プロバイダー Plugin の認証フロー（OAuth/API キー）を実行します。インストールされているプロバイダーを確認するには、`openclaw plugins list` を使用します。`login` では、ログイン時に名前付きプロファイルをサポートするプロバイダー向けの `--profile-id <id>`（同じプロバイダーへの複数のログインを分けて保持する場合に使用）、特定の認証方式を選択する `--method <id>`、`--method device-code` のショートカットである `--device-code`、プロバイダーが推奨するデフォルトモデルを適用する `--set-default`、およびそのプロバイダーの既存プロファイルを先に削除する `--force`（キャッシュされた OAuth プロファイルが機能しない場合や、アカウントを切り替える場合に使用）を指定できます。
 
-`models auth login-github-copilot` は `models auth login --provider github-copilot --method device`（GitHub デバイスフロー）のショートカットです。プロンプトを表示せずに既存プロファイルを上書きするには、`--yes` を使用できます。
+`models auth login-github-copilot` は `models auth login --provider github-copilot --method device`（GitHub デバイスフロー）のショートカットです。`--yes` を指定すると、確認プロンプトを表示せずに既存のプロファイルを上書きします。
 
-`openclaw models auth --agent <id> <subcommand>`を使用すると、認証結果を設定済みの特定のエージェントストアに書き込めます。親の`--agent`フラグは、`add`、`list`、`login`、`paste-api-key`、`setup-token`、`paste-token`、`login-github-copilot`、および`order get`/`set`/`clear`で有効です。
+認証結果を設定済みの特定エージェントストアに書き込むには、`openclaw models auth --agent <id> <subcommand>` を使用します。親の `--agent` フラグは、`add`、`list`、`login`、`paste-api-key`、`setup-token`、`paste-token`、`login-github-copilot`、および `order get`/`set`/`clear` で有効です。
 
-OpenAIモデルでは、`--provider openai`のデフォルトはChatGPT/Codexアカウントへのログインです。OpenAI APIキープロファイルを追加する場合にのみ`--method api-key`を使用してください。通常は、Codexサブスクリプションの制限に備えたバックアップとして使用します。古いレガシーOpenAI Codexプレフィックスの認証/プロファイル状態を`openai`に移行するには、`openclaw doctor --fix`を実行します。
+OpenAI モデルの場合、`--provider openai` のデフォルトは ChatGPT/Codex アカウントへのログインです。OpenAI API キープロファイルを追加する場合にのみ `--method api-key` を使用します。通常は、Codex サブスクリプションの上限に備えたバックアップとして使用します。以前のレガシーな OpenAI Codex プレフィックスの認証/プロファイル状態を `openai` に移行するには、`openclaw doctor --fix` を実行します。
 
 例:
 
@@ -180,17 +181,17 @@ openclaw models auth list --provider openai
 
 注:
 
-- `paste-api-key`は別の場所で生成されたAPIキーを受け付け、キーの値を入力するよう求め、`--profile-id`を渡さない限りデフォルトのプロファイルID`<provider>:manual`に書き込みます。自動化では、たとえば`printf "%s\n" "$OPENAI_API_KEY" | openclaw models auth paste-api-key --provider openai`のように、標準入力からキーをパイプしてください。
-- `setup-token`と`paste-token`は、トークン認証方式を公開するプロバイダー向けの汎用トークンコマンドとして引き続き使用できます。
-- `setup-token`には対話型TTYが必要で、プロバイダーのトークン認証方式を実行します（プロバイダーが`setup-token`方式を公開している場合、デフォルトではその方式を使用します）。
-- `paste-token`には`--provider`が必要です。デフォルトではトークン値の入力を求め、`--profile-id`を渡さない限りデフォルトのプロファイルID`<provider>:manual`に書き込みます。自動化では、プロバイダーの認証情報がシェル履歴やプロセス一覧に表示されないよう、引数として渡すのではなく、標準入力からトークンをパイプしてください。
-- `paste-token --expires-in <duration>`は、`365d`や`12h`などの相対期間から算出したトークンの絶対有効期限を保存します。
-- `openai`では、OpenAI APIキーとChatGPT/OAuthトークン情報は異なる認証形式です。`sk-...`形式のOpenAI APIキーには`paste-api-key`を使用し、`paste-token`はトークン認証情報にのみ使用してください。
-- Anthropic: `setup-token`/`paste-token`は`anthropic`向けのOpenClaw認証経路としてサポートされていますが、ホスト上でClaude CLI（`claude -p`）を利用できる場合、OpenClawはその再利用を優先します。
-- `auth order get/set/clear`は、1つのプロバイダーについてエージェント単位の認証プロファイル順序オーバーライドを管理し、`auth-state.json`に保存します（`auth.order.<provider>`設定キーとは別です）。`set`には、優先順位順に1つ以上のプロファイルIDを指定します。`clear`を実行すると、設定またはラウンドロビンによる順序付けにフォールバックします。
+- `paste-api-key` は別の場所で生成された API キーを受け付け、キーの値を入力するよう求めます。`--profile-id` を指定しない限り、デフォルトのプロファイル ID `<provider>:manual` に書き込みます。自動化では、たとえば `printf "%s\n" "$OPENAI_API_KEY" | openclaw models auth paste-api-key --provider openai` のように、標準入力からキーをパイプで渡します。
+- `setup-token` と `paste-token` は、トークン認証方式を公開するプロバイダー向けの汎用トークンコマンドとして引き続き使用できます。
+- `setup-token` には対話型 TTY が必要で、プロバイダーのトークン認証方式を実行します（プロバイダーが `setup-token` 方式を公開している場合は、それがデフォルトになります）。
+- `paste-token` には `--provider` が必要です。デフォルトではトークンの値を入力するよう求め、`--profile-id` を指定しない限り、デフォルトのプロファイル ID `<provider>:manual` に書き込みます。自動化では、プロバイダーの認証情報がシェル履歴やプロセス一覧に表示されないように、トークンを引数として渡すのではなく、標準入力からパイプで渡します。
+- `paste-token --expires-in <duration>` は、`365d` や `12h` などの相対期間から算出したトークンの絶対有効期限を保存します。
+- `openai` では、OpenAI API キーと ChatGPT/OAuth トークンの内容は異なる認証形式です。`sk-...` OpenAI API キーには `paste-api-key` を使用し、トークン認証の内容にのみ `paste-token` を使用します。
+- Anthropic: `setup-token`/`paste-token` は、`anthropic` 向けにサポートされている OpenClaw の認証経路ですが、ホストで Claude CLI（`claude -p`）を利用できる場合、OpenClaw はその再利用を優先します。
+- `auth order get/set/clear` は、1 つのプロバイダーについて、エージェントごとの認証プロファイル順序の上書きを管理します。これは `auth-state.json` に保存されます（`auth.order.<provider>` 設定キーとは別です）。`set` は、優先順位順に 1 つ以上のプロファイル ID を受け取ります。`clear` は、設定/ラウンドロビン順序にフォールバックします。
 
 ## 関連項目
 
-- [CLIリファレンス](/ja-JP/cli)
+- [CLI リファレンス](/ja-JP/cli)
 - [モデルの選択](/ja-JP/concepts/model-providers)
 - [モデルのフェイルオーバー](/ja-JP/concepts/model-failover)

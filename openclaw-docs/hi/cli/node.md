@@ -1,45 +1,71 @@
 ---
 read_when:
     - हेडलेस Node होस्ट चलाना
-    - system.run के लिए non-macOS नोड को पेयर करना
-summary: '`openclaw node` के लिए CLI संदर्भ (हेडलेस Node होस्ट)'
+    - system.run के लिए किसी गैर-macOS Node को पेयर करना
+summary: '`openclaw node` (हेडलेस Node होस्ट) के लिए CLI संदर्भ'
 title: Node
 x-i18n:
-    generated_at: "2026-07-01T13:00:18Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T17:39:24Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b7e68602cb655a6852544f055b9b6c26f2e9cfe1b4d7933e7c27e67011c7cd55
+    source_hash: 341539d05545ddcbf6175c34af7dca49332ba55906283b9933b9c9b1732c0e4d
     source_path: cli/node.md
     workflow: 16
 ---
 
 # `openclaw node`
 
-एक **हेडलेस Node होस्ट** चलाएँ जो Gateway WebSocket से जुड़ता है और इस मशीन पर
+एक **हेडलेस Node होस्ट** चलाएँ, जो Gateway WebSocket से कनेक्ट होता है और इस मशीन पर
 `system.run` / `system.which` उपलब्ध कराता है।
+
+macOS पर, मेनू बार ऐप पहले से ही इस Node-होस्ट रनटाइम को अपने
+Node कनेक्शन में एम्बेड करता है और मूल Mac क्षमताएँ जोड़ता है। Mac पर
+`openclaw node run` का उपयोग केवल तब करें, जब आप जानबूझकर ऐप के बिना हेडलेस Node चाहते हों। दोनों को
+चलाने से एक ही मशीन के लिए दो Node पहचान बनती हैं।
 
 ## Node होस्ट का उपयोग क्यों करें?
 
-जब आप एजेंटों से अपने नेटवर्क की **अन्य मशीनों पर कमांड चलवाना** चाहते हैं, बिना
-वहाँ पूरा macOS companion app इंस्टॉल किए, तब Node होस्ट का उपयोग करें।
+जब आप अपने नेटवर्क की **अन्य मशीनों पर कमांड चलाने** के लिए एजेंटों का उपयोग करना चाहते हैं,
+और वहाँ पूर्ण macOS सहयोगी ऐप इंस्टॉल नहीं करना चाहते, तब Node होस्ट का उपयोग करें।
 
-सामान्य उपयोग मामले:
+सामान्य उपयोग के मामले:
 
-- रिमोट Linux/Windows मशीनों पर कमांड चलाएँ (बिल्ड सर्वर, लैब मशीनें, NAS)।
-- Gateway पर exec को **sandboxed** रखें, लेकिन स्वीकृत रन अन्य होस्टों को सौंपें।
-- ऑटोमेशन या CI नोड्स के लिए हल्का, हेडलेस execution target उपलब्ध कराएँ।
+- दूरस्थ Linux/Windows मशीनों (बिल्ड सर्वर, लैब मशीनें, NAS) पर कमांड चलाएँ।
+- Gateway पर exec को **सैंडबॉक्स में** रखें, लेकिन स्वीकृत रन अन्य होस्ट को सौंपें।
+- ऑटोमेशन या CI Node के लिए हल्का, हेडलेस निष्पादन लक्ष्य उपलब्ध कराएँ।
 
-Execution फिर भी Node होस्ट पर **exec approvals** और प्रति-एजेंट allowlists द्वारा सुरक्षित रहता है, इसलिए आप कमांड access को scoped और explicit रख सकते हैं।
+निष्पादन अब भी Node होस्ट पर **exec अनुमोदनों** और प्रति-एजेंट अनुमत-सूचियों द्वारा सुरक्षित
+रहता है, इसलिए आप कमांड पहुँच को सीमित और स्पष्ट रख सकते हैं।
 
-## ब्राउज़र प्रॉक्सी (zero-config)
+`openclaw node run` कनेक्ट होने के बाद Plugin या MCP-समर्थित टूल प्रकाशित कर सकता है।
+Gateway डिफ़ॉल्ट रूप से युग्मित Node के डिस्क्रिप्टर पर भरोसा करता है, जबकि यह आवश्यक बनाता है
+कि प्रत्येक डिस्क्रिप्टर का कमांड Node की स्वीकृत कमांड सतह के भीतर रहे। एजेंट प्रत्येक
+स्वीकृत डिस्क्रिप्टर को सामान्य Plugin टूल के रूप में देखता है, लेकिन निष्पादन अब भी
+`node.invoke` से होकर जाता है, इसलिए Node को डिस्कनेक्ट करने पर टूल नए
+एजेंट रन से हट जाता है। Gateway ऑपरेटर
+`gateway.nodes.pluginTools.enabled: false` से प्रकाशन अक्षम कर सकते हैं।
 
-अगर Node पर `browser.enabled` अक्षम नहीं है, तो Node होस्ट अपने-आप ब्राउज़र प्रॉक्सी advertise करते हैं। इससे एजेंट उस Node पर अतिरिक्त configuration के बिना browser automation का उपयोग कर सकता है।
+घोषणात्मक MCP टूल के लिए, Node मशीन पर `openclaw.json` में
+`nodeHost.mcp.servers` के अंतर्गत सामान्य MCP सर्वर संरचना जोड़ें, फिर
+Node होस्ट पुनः प्रारंभ करें। Node अनुमोदन-नियंत्रित `mcp.tools.call.v1` कमांड
+परिवार घोषित करता है और कनेक्ट होने के बाद सूचीबद्ध टूल प्रकाशित करता है; सर्वर सूची को
+बाद में बदलने के लिए दोबारा युग्मित करना आवश्यक नहीं है। देखें
+[Node द्वारा होस्ट किए गए MCP सर्वर](/hi/nodes#node-hosted-mcp-servers)।
 
-डिफ़ॉल्ट रूप से, प्रॉक्सी Node की सामान्य browser profile surface उपलब्ध कराता है। अगर आप `nodeHost.browserProxy.allowProfiles` सेट करते हैं, तो प्रॉक्सी restrictive हो जाता है:
-allowlist में न होने वाले profile targeting को reject किया जाता है, और persistent profile create/delete routes प्रॉक्सी के माध्यम से blocked रहते हैं।
+## ब्राउज़र प्रॉक्सी (शून्य-कॉन्फ़िगरेशन)
 
-ज़रूरत हो तो इसे Node पर अक्षम करें:
+यदि Node पर `browser.enabled` अक्षम नहीं है, तो Node होस्ट स्वचालित रूप से
+ब्राउज़र प्रॉक्सी घोषित करते हैं। इससे एजेंट अतिरिक्त कॉन्फ़िगरेशन के बिना उस Node पर
+ब्राउज़र ऑटोमेशन का उपयोग कर सकता है।
+
+डिफ़ॉल्ट रूप से, प्रॉक्सी Node की सामान्य ब्राउज़र प्रोफ़ाइल सतह उपलब्ध कराता है। यदि आप
+`nodeHost.browserProxy.allowProfiles` सेट करते हैं, तो प्रॉक्सी प्रतिबंधात्मक हो जाता है:
+अनुमत-सूची में शामिल न की गई प्रोफ़ाइल को लक्षित करने के अनुरोध अस्वीकार किए जाते हैं, और स्थायी प्रोफ़ाइल
+बनाने/हटाने के रूट प्रॉक्सी के माध्यम से अवरुद्ध कर दिए जाते हैं।
+
+आवश्यकता होने पर इसे Node पर अक्षम करें:
 
 ```json5
 {
@@ -51,7 +77,7 @@ allowlist में न होने वाले profile targeting को rejec
 }
 ```
 
-## चलाएँ (foreground)
+## चलाएँ (अग्रभूमि)
 
 ```bash
 openclaw node run --host <gateway-host> --port 18789
@@ -61,35 +87,37 @@ openclaw node run --host <gateway-host> --port 18789
 
 - `--host <host>`: Gateway WebSocket होस्ट (डिफ़ॉल्ट: `127.0.0.1`)
 - `--port <port>`: Gateway WebSocket पोर्ट (डिफ़ॉल्ट: `18789`)
-- `--context-path <path>`: Gateway WebSocket context path (जैसे `/openclaw-gw`)। WebSocket URL में जोड़ा जाता है।
-- `--tls`: Gateway connection के लिए TLS उपयोग करें
-- `--tls-fingerprint <sha256>`: अपेक्षित TLS certificate fingerprint (sha256)
-- `--node-id <id>`: Node id override करें (pairing token साफ़ करता है)
-- `--display-name <name>`: Node display name override करें
+- `--context-path <path>`: Gateway WebSocket संदर्भ पथ (उदा. `/openclaw-gw`)। WebSocket URL में जोड़ा जाता है।
+- `--tls`: Gateway कनेक्शन के लिए TLS का उपयोग करें
+- `--no-tls`: स्थानीय Gateway कॉन्फ़िगरेशन में TLS सक्षम होने पर भी प्लेनटेक्स्ट Gateway कनेक्शन बाध्य करें
+- `--tls-fingerprint <sha256>`: अपेक्षित TLS प्रमाणपत्र फ़िंगरप्रिंट (sha256)
+- `--node-id <id>`: साझा SQLite स्थिति में संग्रहीत क्लाइंट इंस्टेंस ID को ओवरराइड करें (युग्मन रीसेट नहीं होता)
+- `--display-name <name>`: Node प्रदर्शन नाम को ओवरराइड करें
 
-## Node होस्ट के लिए Gateway auth
+## Node होस्ट के लिए Gateway प्रमाणीकरण
 
-`openclaw node run` और `openclaw node install` config/env से Gateway auth resolve करते हैं (Node commands पर कोई `--token`/`--password` flags नहीं):
+`openclaw node run` और `openclaw node install` कॉन्फ़िगरेशन/पर्यावरण से Gateway प्रमाणीकरण निर्धारित करते हैं (Node कमांड पर कोई `--token`/`--password` फ़्लैग नहीं):
 
-- `OPENCLAW_GATEWAY_TOKEN` / `OPENCLAW_GATEWAY_PASSWORD` पहले checked होते हैं।
-- फिर local config fallback: `gateway.auth.token` / `gateway.auth.password`।
-- local mode में, Node होस्ट जानबूझकर `gateway.remote.token` / `gateway.remote.password` inherit नहीं करता।
-- अगर `gateway.auth.token` / `gateway.auth.password` SecretRef के माध्यम से explicitly configured है और unresolved है, तो Node auth resolution fail closed करता है (कोई remote fallback masking नहीं)।
-- `gateway.mode=remote` में, remote client fields (`gateway.remote.token` / `gateway.remote.password`) भी remote precedence rules के अनुसार eligible हैं।
-- Node होस्ट auth resolution केवल `OPENCLAW_GATEWAY_*` env vars का सम्मान करता है।
+- पहले `OPENCLAW_GATEWAY_TOKEN` / `OPENCLAW_GATEWAY_PASSWORD` की जाँच की जाती है।
+- फिर स्थानीय कॉन्फ़िगरेशन फ़ॉलबैक: `gateway.auth.token` / `gateway.auth.password`।
+- स्थानीय मोड में, Node होस्ट जानबूझकर `gateway.remote.token` / `gateway.remote.password` इनहेरिट नहीं करता।
+- यदि `gateway.auth.token` / `gateway.auth.password` को SecretRef के माध्यम से स्पष्ट रूप से कॉन्फ़िगर किया गया है और वह अनिर्धारित है, तो Node प्रमाणीकरण निर्धारण सुरक्षित रूप से विफल होता है (दूरस्थ फ़ॉलबैक द्वारा छिपाया नहीं जाता)।
+- `gateway.mode=remote` में, दूरस्थ क्लाइंट फ़ील्ड (`gateway.remote.token` / `gateway.remote.password`) भी दूरस्थ प्राथमिकता नियमों के अनुसार पात्र होते हैं।
+- Node होस्ट प्रमाणीकरण निर्धारण केवल `OPENCLAW_GATEWAY_*` पर्यावरण चर स्वीकार करता है।
 
-plaintext `ws://` Gateway से जुड़ने वाले Node के लिए, loopback, private IP
-literals, `.local`, और Tailnet `*.ts.net` hosts accepted हैं। अन्य
-trusted private-DNS names के लिए, `OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1` सेट करें; इसके बिना
-Node startup fail closed करता है और आपसे `wss://`, SSH tunnel, या
-Tailscale उपयोग करने को कहता है। यह process-environment opt-in है, `openclaw.json` config
-key नहीं।
-`openclaw node install` इसे supervised Node service में persist करता है जब यह
-install command environment में मौजूद हो।
+प्लेनटेक्स्ट `ws://` Gateway से कनेक्ट होने वाले Node के लिए, लूपबैक, निजी IP
+लिटरल, `.local`, और Tailnet `*.ts.net` होस्ट स्वीकार किए जाते हैं। अन्य
+विश्वसनीय निजी-DNS नामों के लिए, `OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1` सेट करें; इसके बिना
+Node स्टार्टअप सुरक्षित रूप से विफल होता है और आपको `wss://`, SSH टनल, या
+Tailscale का उपयोग करने के लिए कहता है। यह प्रक्रिया-पर्यावरण की स्वैच्छिक स्वीकृति है, `openclaw.json`
+कॉन्फ़िगरेशन कुंजी नहीं।
+इंस्टॉल कमांड के परिवेश में मौजूद होने पर `openclaw node install` इसे पर्यवेक्षित Node सेवा में
+स्थायी बनाता है।
 
-## Service (background)
+## सेवा (पृष्ठभूमि)
 
-हेडलेस Node होस्ट को user service के रूप में इंस्टॉल करें।
+हेडलेस Node होस्ट को उपयोगकर्ता सेवा के रूप में इंस्टॉल करें (macOS पर launchd, Linux पर systemd,
+Windows पर Windows Task Scheduler)।
 
 ```bash
 openclaw node install --host <gateway-host> --port 18789
@@ -99,15 +127,15 @@ openclaw node install --host <gateway-host> --port 18789
 
 - `--host <host>`: Gateway WebSocket होस्ट (डिफ़ॉल्ट: `127.0.0.1`)
 - `--port <port>`: Gateway WebSocket पोर्ट (डिफ़ॉल्ट: `18789`)
-- `--context-path <path>`: Gateway WebSocket context path (जैसे `/openclaw-gw`)। WebSocket URL में जोड़ा जाता है।
-- `--tls`: Gateway connection के लिए TLS उपयोग करें
-- `--tls-fingerprint <sha256>`: अपेक्षित TLS certificate fingerprint (sha256)
-- `--node-id <id>`: Node id override करें (pairing token साफ़ करता है)
-- `--display-name <name>`: Node display name override करें
-- `--runtime <runtime>`: Service runtime (`node` या `bun`)
-- `--force`: अगर पहले से installed है, तो reinstall/overwrite करें
+- `--context-path <path>`: Gateway WebSocket संदर्भ पथ (उदा. `/openclaw-gw`)। WebSocket URL में जोड़ा जाता है।
+- `--tls`: Gateway कनेक्शन के लिए TLS का उपयोग करें
+- `--tls-fingerprint <sha256>`: अपेक्षित TLS प्रमाणपत्र फ़िंगरप्रिंट (sha256)
+- `--node-id <id>`: साझा SQLite स्थिति में संग्रहीत क्लाइंट इंस्टेंस ID को ओवरराइड करें (युग्मन रीसेट नहीं होता)
+- `--display-name <name>`: Node प्रदर्शन नाम को ओवरराइड करें
+- `--runtime <runtime>`: सेवा रनटाइम (`node`)
+- `--force`: पहले से इंस्टॉल होने पर पुनः इंस्टॉल/ओवरराइट करें
 
-Service manage करें:
+सेवा प्रबंधित करें:
 
 ```bash
 openclaw node status
@@ -117,27 +145,46 @@ openclaw node restart
 openclaw node uninstall
 ```
 
-foreground Node होस्ट के लिए `openclaw node run` उपयोग करें (कोई service नहीं)।
+अग्रभूमि Node होस्ट (कोई सेवा नहीं) के लिए `openclaw node run` का उपयोग करें।
 
-Service commands machine-readable output के लिए `--json` स्वीकार करते हैं।
+सेवा कमांड मशीन-पठनीय आउटपुट के लिए `--json` स्वीकार करते हैं।
 
-Node होस्ट Gateway restart और network closes को in-process retry करता है। अगर
-Gateway terminal token/password/bootstrap auth pause report करता है, तो Node होस्ट
-close detail log करता है और non-zero exit करता है ताकि launchd/systemd fresh
-config और credentials के साथ उसे restart कर सके। Pairing-required pauses foreground
-flow में रहते हैं ताकि pending request approve की जा सके।
+Node होस्ट प्रक्रिया के भीतर Gateway पुनः प्रारंभ और नेटवर्क कनेक्शन बंद होने पर पुनः प्रयास करता है। यदि
+Gateway टर्मिनल टोकन/पासवर्ड/बूटस्ट्रैप प्रमाणीकरण विराम की रिपोर्ट करता है, तो Node होस्ट
+कनेक्शन बंद होने का विवरण लॉग करता है और गैर-शून्य स्थिति के साथ बाहर निकलता है, ताकि launchd/systemd/Task Scheduler
+उसे नए कॉन्फ़िगरेशन और क्रेडेंशियल के साथ पुनः प्रारंभ कर सके। युग्मन-आवश्यक विराम
+अग्रभूमि प्रवाह में बने रहते हैं, ताकि लंबित अनुरोध स्वीकृत किया जा सके।
 
-## Pairing
+## युग्मन
 
-पहला connection Gateway पर pending device pairing request (`role: node`) बनाता है।
-इसे approve करें:
+पहला कनेक्शन Gateway पर लंबित डिवाइस युग्मन अनुरोध (`role: node`) बनाता है।
+
+जब Gateway होस्ट Node होस्ट से गैर-संवादात्मक रूप से SSH कर सकता है (समान उपयोगकर्ता,
+विश्वसनीय होस्ट कुंजी), तो लंबित अनुरोध स्वचालित रूप से स्वीकृत हो जाता है: Gateway
+SSH के माध्यम से Node होस्ट पर `openclaw node identity --json` चलाता है और
+डिवाइस-कुंजी के सटीक मिलान पर स्वीकृति देता है। यह डिफ़ॉल्ट रूप से चालू है; आवश्यकताओं और इसे अक्षम करने के तरीके
+(`gateway.nodes.pairing.sshVerify: false`) के लिए
+[SSH-सत्यापित डिवाइस स्वतः-अनुमोदन](/hi/gateway/pairing#ssh-verified-device-auto-approval-default)
+देखें।
+
+अन्यथा मैन्युअल रूप से स्वीकृत करें:
 
 ```bash
 openclaw devices list
 openclaw devices approve <requestId>
 ```
 
-कड़ाई से नियंत्रित Node networks पर, Gateway operator trusted CIDRs से first-time Node pairing को auto-approve करने के लिए explicitly opt in कर सकता है:
+उस स्थानीय Node पहचान की जाँच करें, जिसके विरुद्ध Gateway सत्यापन करता है:
+
+```bash
+openclaw node identity --json
+```
+
+यह `state/openclaw.sqlite` में `primary` पंक्ति से डिवाइस ID और सार्वजनिक कुंजी
+प्रिंट करता है और कभी भी डेटाबेस या नई पहचान नहीं बनाता।
+
+सख्ती से नियंत्रित Node नेटवर्क पर, Gateway ऑपरेटर विश्वसनीय CIDR से पहली बार होने वाले
+Node युग्मन को स्वतः स्वीकृत करने के लिए स्पष्ट रूप से स्वैच्छिक स्वीकृति दे सकता है:
 
 ```json5
 {
@@ -151,32 +198,76 @@ openclaw devices approve <requestId>
 }
 ```
 
-यह डिफ़ॉल्ट रूप से disabled है। यह केवल fresh `role: node` pairing पर लागू होता है
-जब कोई requested scopes नहीं हों। Operator/browser clients, Control UI, WebChat, और role,
-scope, metadata, या public-key upgrades को फिर भी manual approval चाहिए।
+यह डिफ़ॉल्ट रूप से अक्षम है (`autoApproveCidrs` सेट नहीं है)। यह केवल
+बिना अनुरोधित स्कोप वाले नए `role: node` युग्मन पर, ऐसे क्लाइंट IP से लागू होता है जिस पर
+Gateway भरोसा करता है। ऑपरेटर/ब्राउज़र क्लाइंट, Control UI, WebChat, और भूमिका,
+स्कोप, मेटाडेटा या सार्वजनिक-कुंजी अपग्रेड के लिए अब भी मैन्युअल अनुमोदन आवश्यक है।
 
-अगर Node बदले हुए auth details (role/scopes/public key) के साथ pairing retry करता है,
-तो पिछला pending request superseded हो जाता है और नया `requestId` बनाया जाता है।
-approval से पहले `openclaw devices list` फिर से चलाएँ।
+यदि Node बदले हुए प्रमाणीकरण विवरण (भूमिका/स्कोप/सार्वजनिक कुंजी) के साथ युग्मन का पुनः प्रयास करता है,
+तो पिछला लंबित अनुरोध निरस्त होकर उसकी जगह नया `requestId` बनता है।
+अनुमोदन से पहले `openclaw devices list` फिर से चलाएँ।
 
-Node होस्ट अपना Node id, token, display name, और Gateway connection info
-`~/.openclaw/node.json` में store करता है।
+### पहचान और युग्मन स्थिति
 
-## Exec approvals
+हेडलेस Node अपने क्लाइंट इंस्टेंस ID को उस हस्ताक्षरित डिवाइस
+पहचान से अलग रखता है जिसका उपयोग Gateway युग्मन और रूटिंग के लिए करता है। यह स्थिति
+OpenClaw स्थिति डायरेक्टरी (डिफ़ॉल्ट रूप से `~/.openclaw`, या सेट होने पर `$OPENCLAW_STATE_DIR`)
+में रहती है:
 
-`system.run` local exec approvals द्वारा gated है:
+| स्थिति                                                    | उद्देश्य                                                                                                                          |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `state/openclaw.sqlite` (`node_host_config`)             | क्लाइंट इंस्टेंस ID, प्रदर्शन नाम और Gateway कनेक्शन मेटाडेटा। क्लाइंट इस ID को `instanceId` के रूप में भेजता है।                     |
+| `state/openclaw.sqlite` (`device_identities`, `primary`) | हस्ताक्षरित Ed25519 कुंजी-युग्म और उससे व्युत्पन्न डिवाइस ID। हस्ताक्षरित कनेक्शन के लिए, यह डिवाइस ID रूट किया गया Node ID और युग्मन पहचान है। |
+| `state/openclaw.sqlite` (`device_auth_tokens`)           | युग्मित डिवाइस टोकन, जिन्हें क्रिप्टोग्राफ़िक डिवाइस ID और भूमिका के अनुसार कुंजीबद्ध किया गया है।                                                                 |
+
+`--node-id` केवल साझा SQLite स्थिति में क्लाइंट इंस्टेंस ID बदलता है। यह
+क्रिप्टोग्राफ़िक डिवाइस ID नहीं बदलता और युग्मन प्रमाणीकरण साफ़ नहीं करता। `openclaw doctor --fix` से किसी निष्क्रिय
+`node.json` को माइग्रेट करने पर भी युग्मन रीसेट नहीं होता। किसी
+Node को निरस्त करके दोबारा युग्मित करने के लिए:
+
+1. Gateway पर `openclaw nodes remove --node <id|name|ip>` चलाएँ।
+2. Node पर इंस्टॉल की गई सेवा को `openclaw node restart` से पुनः प्रारंभ करें, या
+   अग्रभूमि `openclaw node run` कमांड को रोककर फिर से चलाएँ। इससे
+   डिवाइस-युग्मन प्रवाह शुरू होता है। यदि `openclaw devices list` कोई अनुरोध नहीं दिखाता
+   और Node `AUTH_DEVICE_TOKEN_MISMATCH` की रिपोर्ट करता है, तो इसे एक बार
+   और पुनः प्रारंभ या पुनः चलाएँ। अस्वीकृत प्रयास अब निरस्त हो चुका स्थानीय टोकन साफ़ करता है; अगला
+   प्रयास युग्मन का अनुरोध कर सकता है।
+3. Gateway पर `openclaw devices list`, फिर
+   `openclaw devices approve <deviceRequestId>` चलाएँ।
+4. Node को फिर से पुनः प्रारंभ या पुनः चलाएँ। युग्मन के लिए रुका हुआ क्लाइंट अनुमोदन के बाद
+   स्वचालित रूप से फिर शुरू नहीं होता; यह पुनः कनेक्शन अलग
+   कमांड-सतह अनुरोध बनाता है।
+5. Gateway पर `openclaw nodes pending`, फिर
+   `openclaw nodes approve <nodeRequestId>` चलाएँ।
+
+दोनों अनुरोध ID अलग-अलग हैं। लागू विश्वसनीय-CIDR नीति
+पहली बार के डिवाइस-युग्मन चरण को स्वतः स्वीकृत कर सकती है; कमांड-सतह अनुमोदन
+अलग जाँच बना रहता है।
+
+OpenClaw के पुराने रिलीज़ Node-होस्ट स्थिति को `node.json`, हस्ताक्षरित
+पहचान को `identity/device.json`, और युग्मित प्रमाणीकरण को
+`identity/device-auth.json` में संग्रहीत करते थे। Node होस्ट रोकें और
+`openclaw doctor --fix` एक बार चलाएँ; Doctor प्रत्येक निष्क्रिय स्रोत पर स्वामित्व लेता है, उसका सत्यापन करता है,
+मानक SQLite पंक्ति को आयात और सत्यापित करता है, फिर पुरानी फ़ाइल हटाता है। जब तक कोई निष्क्रिय फ़ाइल
+या बाधित Doctor दावा शेष रहता है, सामान्य Node कमांड इस सुधार निर्देश के साथ सुरक्षित रूप से
+विफल होते हैं। `state/openclaw.sqlite` को निजी रखें;
+इसमें डिवाइस कुंजी-युग्म और प्रमाणीकरण टोकन होते हैं।
+
+## Exec अनुमोदन
+
+`system.run` स्थानीय exec अनुमोदनों द्वारा नियंत्रित है:
 
 - `$OPENCLAW_STATE_DIR/exec-approvals.json`, या
-  variable unset होने पर `~/.openclaw/exec-approvals.json`
-- [Exec approvals](/hi/tools/exec-approvals)
-- `openclaw approvals --node <id|name|ip>` (Gateway से edit करें)
+  चर सेट न होने पर `~/.openclaw/exec-approvals.json`
+- [Exec अनुमोदन](/hi/tools/exec-approvals)
+- `openclaw approvals --node <id|name|ip>` (Gateway से संपादित करें)
 
-approved async Node exec के लिए, OpenClaw prompting से पहले canonical `systemRunPlan`
-तैयार करता है। बाद का approved `system.run` forward उस stored
-plan को reuse करता है, इसलिए approval request बनने के बाद command/cwd/session fields में edits
-Node द्वारा execute की जाने वाली चीज़ बदलने के बजाय reject कर दिए जाते हैं।
+स्वीकृत असिंक्रोनस Node exec के लिए, OpenClaw संकेत देने से पहले एक मानक `systemRunPlan`
+तैयार करता है। बाद में स्वीकृत `system.run` फ़ॉरवर्ड उसी संग्रहीत
+योजना का पुनः उपयोग करता है, इसलिए अनुमोदन अनुरोध बनने के बाद कमांड/cwd/सत्र फ़ील्ड में किए गए
+संपादन, Node द्वारा निष्पादित होने वाली चीज़ को बदलने के बजाय अस्वीकार कर दिए जाते हैं।
 
 ## संबंधित
 
-- [CLI reference](/hi/cli)
-- [Nodes](/hi/nodes)
+- [CLI संदर्भ](/hi/cli)
+- [Node](/hi/nodes)

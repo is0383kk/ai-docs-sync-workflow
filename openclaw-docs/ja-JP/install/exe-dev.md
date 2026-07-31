@@ -1,49 +1,50 @@
 ---
 read_when:
-    - Gateway 用の低コストな常時稼働 Linux ホストが必要な場合
-    - 独自の VPS を運用せずにリモートから Control UI にアクセスしたい場合
+    - Gateway 用の安価な常時稼働 Linux ホストが必要な場合
+    - 独自の VPS を運用せずに、Control UI へリモートアクセスしたい場合
 summary: リモートアクセス用に exe.dev（VM + HTTPS プロキシ）で OpenClaw Gateway を実行する
 title: exe.dev
 x-i18n:
-    generated_at: "2026-07-11T22:20:51Z"
+    generated_at: "2026-07-26T09:05:44Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: a768511d2d7e4e4ec10bcdae83684417bde05286468b0534200f8dd5ec015f7b
     source_path: install/exe-dev.md
     workflow: 16
 ---
 
-**目標:** OpenClaw Gatewayを[exe.dev](https://exe.dev) VM上で実行し、`https://<vm-name>.exe.xyz`でアクセスできるようにします。
+**目標:** [exe.dev](https://exe.dev) VM 上で OpenClaw Gateway を実行し、`https://<vm-name>.exe.xyz` からアクセス可能にします。
 
-このガイドでは、exe.devのデフォルトの**exeuntu**イメージを前提としています。他のディストリビューションでは、対応するパッケージに読み替えてください。
+このガイドでは、exe.dev のデフォルトの **exeuntu** イメージを前提としています。他のディストリビューションでは、対応するパッケージに読み替えてください。
 
 ## 必要なもの
 
-- exe.devアカウント
-- exe.dev VMへの`ssh exe.dev`アクセス（手動セットアップの場合のみ）
+- exe.dev アカウント
+- `ssh exe.dev` による exe.dev VM へのアクセス（手動セットアップの場合は任意）
 
 ## 初心者向けクイック手順
 
-1. [https://exe.new/openclaw](https://exe.new/openclaw)を開きます
-2. 必要に応じて認証キーまたはトークンを入力します
-3. VMの横にある「Agent」をクリックし、Shelleyによるプロビジョニングが完了するまで待ちます
-4. `https://<vm-name>.exe.xyz/`を開き、設定した共有シークレットで認証します（デフォルトはトークン認証です。`gateway.auth.mode`を切り替えた場合はパスワード認証も使用できます）
-5. `openclaw devices approve <requestId>`で保留中のデバイスペアリング要求を承認します
+1. [https://exe.new/openclaw](https://exe.new/openclaw) を開く
+2. 必要に応じて認証キーまたはトークンを入力する
+3. VM の横にある「Agent」をクリックし、Shelley によるプロビジョニングが完了するまで待つ
+4. `https://<vm-name>.exe.xyz/` を開き、設定済みの共有シークレットで認証する（デフォルトはトークン認証。`gateway.auth.mode` を切り替えた場合はパスワード認証も使用可能）
+5. `openclaw devices approve <requestId>` で保留中のデバイスペアリング要求を承認する
 
-## Shelleyによる自動インストール
+## Shelley による自動インストール
 
-exe.devのエージェントであるShelleyは、プロンプトからOpenClawをインストールできます。
+exe.dev のエージェントである Shelley は、プロンプトから OpenClaw をインストールできます。
 
 ```text
-このVMにOpenClaw (https://docs.openclaw.ai/install)をセットアップしてください。openclawのオンボーディングには、非対話モードとリスク承認のフラグを使用してください。必要に応じて、指定された認証情報またはトークンを追加してください。nginxを設定して、デフォルトで有効なサイト設定のルートロケーションで、デフォルトポート18789へ転送するようにし、WebSocketサポートを必ず有効にしてください。ペアリングは「openclaw devices list」と「openclaw devices approve <request id>」で行います。ダッシュボードにOpenClawのヘルスが正常であると表示されることを確認してください。exe.devがポート8000からポート80/443への転送とHTTPSを処理するため、最終的な「アクセス可能」なアドレスは、ポート指定なしの<vm-name>.exe.xyzにしてください。
+この VM に OpenClaw（https://docs.openclaw.ai/install）をセットアップしてください。openclaw のオンボーディングでは、非対話モードとリスク承認のフラグを使用してください。必要に応じて、指定された認証情報またはトークンを追加してください。デフォルトで有効なサイト設定のルートロケーションで、デフォルトポート 18789 から転送するように nginx を設定し、WebSocket サポートを必ず有効にしてください。ペアリングは「openclaw devices list」と「openclaw devices approve <request id>」で行います。ダッシュボードに OpenClaw のヘルスが正常であると表示されることを確認してください。exe.dev がポート 8000 からポート 80/443 への転送と HTTPS を処理するため、最終的な「アクセス可能」なアドレスは、ポートを指定せずに <vm-name>.exe.xyz としてください。
 ```
 
 ## 手動インストール
 
 <Steps>
-  <Step title="VMを作成する">
-    使用中のデバイスから次を実行します。
+  <Step title="VM を作成する">
+    デバイスから次を実行します。
 
     ```bash
     ssh exe.dev new
@@ -56,26 +57,26 @@ exe.devのエージェントであるShelleyは、プロンプトからOpenClaw�
     ```
 
     <Tip>
-    このVMは**ステートフル**な状態を維持してください。OpenClawは`openclaw.json`、エージェントごとの`auth-profiles.json`、セッション、チャンネルおよびプロバイダーの状態を`~/.openclaw/`以下に保存し、ワークスペースを`~/.openclaw/workspace/`以下に保存します。
+    この VM は **ステートフル** に保ってください。OpenClaw は、`openclaw.json`、エージェントごとの `auth-profiles.json`、セッション、チャンネルおよびプロバイダーの状態を `~/.openclaw/` 配下に保存し、ワークスペースを `~/.openclaw/workspace/` 配下に保存します。
     </Tip>
 
   </Step>
 
-  <Step title="前提パッケージをインストールする（VM上）">
+  <Step title="前提パッケージをインストールする（VM 上）">
     ```bash
     sudo apt-get update
     sudo apt-get install -y git curl jq ca-certificates openssl
     ```
   </Step>
 
-  <Step title="OpenClawをインストールする">
+  <Step title="OpenClaw をインストールする">
     ```bash
     curl -fsSL https://openclaw.ai/install.sh | bash
     ```
   </Step>
 
-  <Step title="ポート8000へのプロキシとしてnginxを設定する">
-    `/etc/nginx/sites-enabled/default`を編集します。
+  <Step title="ポート 8000 へのプロキシとして nginx を設定する">
+    `/etc/nginx/sites-enabled/default` を編集します。
 
     ```nginx
     server {
@@ -90,7 +91,7 @@ exe.devのエージェントであるShelleyは、プロンプトからOpenClaw�
             proxy_pass http://127.0.0.1:18789;
             proxy_http_version 1.1;
 
-            # WebSocketサポート
+            # WebSocket のサポート
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";
 
@@ -107,25 +108,25 @@ exe.devのエージェントであるShelleyは、プロンプトからOpenClaw�
     }
     ```
 
-    クライアントから提供されたチェーンを保持せず、転送ヘッダーを上書きしてください。OpenClawは、明示的に設定されたプロキシからの転送IPメタデータのみを信頼します。また、追記形式の`X-Forwarded-For`チェーンはセキュリティ強化上のリスクとして扱われます。
+    クライアントから提供されたチェーンを保持せず、転送ヘッダーを上書きしてください。OpenClaw は、明示的に設定されたプロキシからの転送 IP メタデータのみを信頼します。追記形式の `X-Forwarded-For` チェーンは、セキュリティ強化上のリスクとして扱われます。
 
   </Step>
 
-  <Step title="OpenClawにアクセスしてデバイスを承認する">
-    `https://<vm-name>.exe.xyz/`を開きます（オンボーディングによるControl UIの出力を参照してください）。認証を求められた場合は、VMで設定した共有シークレットを貼り付けます。
+  <Step title="OpenClaw にアクセスしてデバイスを承認する">
+    `https://<vm-name>.exe.xyz/` を開きます（オンボーディングの Control UI 出力を参照）。認証を求められた場合は、VM で設定した共有シークレットを貼り付けます。
 
-    このガイドではデフォルトでトークン認証を使用するため、`openclaw config get gateway.auth.token`で`gateway.auth.token`を取得するか、`openclaw doctor --n`で新しいトークンを生成します。Gatewayをパスワード認証に切り替えた場合は、代わりに`gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD`を使用します。
+    このガイドではデフォルトでトークン認証を使用するため、`openclaw config get gateway.auth.token` で `gateway.auth.token` を取得するか、`openclaw doctor --n` で新しいトークンを生成します。Gateway をパスワード認証に切り替えた場合は、代わりに `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD` を使用してください。
 
-    `openclaw devices list`と`openclaw devices approve <requestId>`でデバイスを承認します。判断に迷う場合は、ブラウザーからShelleyを使用してください。
+    `openclaw devices list` と `openclaw devices approve <requestId>` でデバイスを承認します。不明な場合は、ブラウザーから Shelley を使用してください。
 
   </Step>
 </Steps>
 
 ## リモートチャンネルのセットアップ
 
-リモートホストでは、`config set`を使用する多数のSSH呼び出しよりも、1回の`config patch`呼び出しを推奨します。実際のトークンはVM環境または`~/.openclaw/.env`に保持し、`openclaw.json`にはSecretRefsのみを記述してください。SecretRefの完全な契約については、[シークレット管理](/ja-JP/gateway/secrets)を参照してください。
+リモートホストでは、`config set` への多数の SSH 呼び出しよりも、1 回の `config patch` 呼び出しを推奨します。実際のトークンは VM の環境または `~/.openclaw/.env` に保持し、`openclaw.json` には SecretRef のみを記述してください。SecretRef の完全な規約については、[シークレット管理](/ja-JP/gateway/secrets)を参照してください。
 
-VM上で、サービス環境に必要なシークレットが含まれるようにします。
+VM 上で、サービス環境に必要なシークレットを含めます。
 
 ```bash
 cat >> ~/.openclaw/.env <<'EOF'
@@ -136,7 +137,7 @@ OPENAI_API_KEY=sk-...
 EOF
 ```
 
-ローカルマシンでパッチファイルを作成し、VMへパイプで渡します。
+ローカルマシンでパッチファイルを作成し、VM にパイプで渡します。
 
 ```json5
 // openclaw.remote.patch.json5
@@ -180,17 +181,17 @@ ssh <vm-name>.exe.xyz 'openclaw config patch --stdin' < ./openclaw.remote.patch.
 ssh <vm-name>.exe.xyz 'openclaw gateway restart && openclaw health'
 ```
 
-ネストされた許可リストをパッチ値と完全に一致させる必要がある場合は、`--replace-path`を使用します。たとえば、Discordチャンネルの許可リストを置き換える場合は次のようにします。
+ネストされた許可リストをパッチ値と完全に一致させる場合は、`--replace-path` を使用します。たとえば、Discord チャンネルの許可リストを置き換える場合は、次のようにします。
 
 ```bash
 ssh <vm-name>.exe.xyz 'openclaw config patch --stdin --replace-path "channels.discord.guilds[\"123\"].channels"' < ./discord.patch.json5
 ```
 
-チャンネル設定の完全なリファレンスについては、[Discord](/ja-JP/channels/discord)および[Slack](/ja-JP/channels/slack)を参照してください。
+チャンネル設定の完全なリファレンスについては、[Discord](/ja-JP/channels/discord) と [Slack](/ja-JP/channels/slack) を参照してください。
 
 ## リモートアクセス
 
-exe.devはリモートアクセスの認証を処理します。デフォルトでは、ポート8000からのHTTPトラフィックが、メール認証付きで`https://<vm-name>.exe.xyz`へ転送されます。
+exe.dev がリモートアクセスの認証を処理します。デフォルトでは、ポート 8000 からの HTTP トラフィックは、メール認証を使用して `https://<vm-name>.exe.xyz` に転送されます。
 
 ## 更新
 
@@ -202,5 +203,5 @@ openclaw update
 
 ## 関連項目
 
-- [リモートGateway](/ja-JP/gateway/remote)
+- [リモート Gateway](/ja-JP/gateway/remote)
 - [インストールの概要](/ja-JP/install)

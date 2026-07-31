@@ -3,54 +3,55 @@ read_when:
     - Je wilt lokale ComfyUI-workflows gebruiken met OpenClaw
     - Je wilt Comfy Cloud gebruiken met workflows voor afbeeldingen, video of muziek
     - Je hebt de configuratiesleutels van de meegeleverde comfy-plugin nodig
-summary: Installatie van ComfyUI-workflows voor het genereren van afbeeldingen, video's en muziek in OpenClaw
+summary: ComfyUI-workflowconfiguratie voor het genereren van afbeeldingen, video's en muziek in OpenClaw
 title: ComfyUI
 x-i18n:
-    generated_at: "2026-07-12T09:12:50Z"
+    generated_at: "2026-07-27T05:18:35Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 74150d202a422de8e0f4b2b82d5d12bd42eb46991e8ef688832208e1a2ff7793
     source_path: providers/comfy.md
     workflow: 16
 ---
 
-OpenClaw levert een gebundelde `comfy`-Plugin voor workflowgestuurde ComfyUI-uitvoeringen. De
-Plugin is volledig workflowgestuurd: OpenClaw koppelt algemene instellingen zoals `size`,
-`aspectRatio`, `resolution`, `durationSeconds` of TTS-achtige bedieningselementen niet aan
-je grafiek.
+OpenClaw wordt geleverd met een gebundelde `comfy`-plugin voor workflowgestuurde ComfyUI-uitvoeringen. De
+plugin is volledig workflowgestuurd: OpenClaw koppelt geen algemene `size`-,
+`aspectRatio`-, `resolution`-, `durationSeconds`- of TTS-achtige bedieningselementen aan
+jouw graaf.
 
-| Eigenschap         | Details                                                                            |
-| ------------------ | ---------------------------------------------------------------------------------- |
-| Provider           | `comfy`                                                                            |
-| Model              | `comfy/workflow`                                                                   |
-| Gedeelde tools     | `image_generate`, `video_generate`, `music_generate`                               |
-| Authenticatie      | Geen voor lokale ComfyUI; `COMFY_API_KEY` of `COMFY_CLOUD_API_KEY` voor Comfy Cloud |
-| API                | ComfyUI `/prompt` / `/history` / `/view`; Comfy Cloud `/api/*`                     |
+| Eigenschap        | Details                                                                          |
+| ----------------- | -------------------------------------------------------------------------------- |
+| Provider          | `comfy`                                                               |
+| Model             | `comfy/workflow`                                                               |
+| Gedeelde tools    | `image_generate`, `video_generate`, `music_generate`                       |
+| Authenticatie     | Geen voor lokale ComfyUI; `COMFY_API_KEY` of `COMFY_CLOUD_API_KEY` voor Comfy Cloud |
+| API               | ComfyUI `/prompt` / `/history` / `/view`; Comfy Cloud `/api/*` |
 
 ## Wat wordt ondersteund
 
 - Afbeeldingen genereren en bewerken vanuit een workflow-JSON (voor bewerken is 1 geüploade referentieafbeelding nodig)
 - Video's genereren vanuit een workflow-JSON, van tekst naar video of van afbeelding naar video (1 referentieafbeelding)
 - Muziek/audio genereren via de gedeelde tool `music_generate`, met optioneel 1 referentieafbeelding
-- Uitvoer downloaden van een geconfigureerde Node, of van alle overeenkomende uitvoer-Nodes wanneer er geen is geconfigureerd
+- Uitvoer downloaden van een geconfigureerd knooppunt, of van alle overeenkomende uitvoerknooppunten wanneer er geen is geconfigureerd
 
 ## Aan de slag
 
-Kies tussen ComfyUI uitvoeren op je eigen machine en Comfy Cloud gebruiken.
+Kies tussen het uitvoeren van ComfyUI op je eigen computer en het gebruik van Comfy Cloud.
 
 <Tabs>
   <Tab title="Lokaal">
-    **Het meest geschikt voor:** je eigen ComfyUI-instantie uitvoeren op je machine of LAN.
+    **Meest geschikt voor:** het uitvoeren van je eigen ComfyUI-instantie op je computer of LAN.
 
     <Steps>
-      <Step title="ComfyUI lokaal starten">
-        Zorg dat je lokale ComfyUI-instantie actief is (standaard op `http://127.0.0.1:8188`).
+      <Step title="Start ComfyUI lokaal">
+        Zorg ervoor dat je lokale ComfyUI-instantie actief is (standaard `http://127.0.0.1:8188`).
       </Step>
-      <Step title="Je workflow-JSON voorbereiden">
-        Exporteer of maak een ComfyUI-workflow-JSON-bestand. Noteer de Node-ID's van de invoer-Node voor de prompt en de uitvoer-Node waarvan OpenClaw moet lezen.
+      <Step title="Bereid je workflow-JSON voor">
+        Exporteer of maak een ComfyUI-workflow-JSON-bestand. Noteer de knooppunt-ID's van het invoerknooppunt voor de prompt en het uitvoerknooppunt waarvan OpenClaw moet lezen.
       </Step>
-      <Step title="De provider configureren">
+      <Step title="Configureer de provider">
         Stel `mode: "local"` in en verwijs naar je workflowbestand. Minimaal voorbeeld voor afbeeldingen:
 
         ```json5
@@ -73,8 +74,8 @@ Kies tussen ComfyUI uitvoeren op je eigen machine en Comfy Cloud gebruiken.
         }
         ```
       </Step>
-      <Step title="Het standaardmodel instellen">
-        Laat OpenClaw voor de geconfigureerde mogelijkheid het model `comfy/workflow` gebruiken:
+      <Step title="Stel het standaardmodel in">
+        Laat OpenClaw voor de geconfigureerde mogelijkheid naar het model `comfy/workflow` verwijzen:
 
         ```json5
         {
@@ -88,7 +89,7 @@ Kies tussen ComfyUI uitvoeren op je eigen machine en Comfy Cloud gebruiken.
         }
         ```
       </Step>
-      <Step title="Verifiëren">
+      <Step title="Verifieer">
         ```bash
         openclaw models list --provider comfy
         ```
@@ -98,33 +99,33 @@ Kies tussen ComfyUI uitvoeren op je eigen machine en Comfy Cloud gebruiken.
   </Tab>
 
   <Tab title="Comfy Cloud">
-    **Het meest geschikt voor:** workflows uitvoeren op Comfy Cloud zonder lokale GPU-resources te beheren.
+    **Meest geschikt voor:** workflows uitvoeren in Comfy Cloud zonder lokale GPU-resources te beheren.
 
     <Steps>
-      <Step title="Een API-sleutel verkrijgen">
-        Registreer je bij [comfy.org](https://comfy.org) en genereer een API-sleutel via het dashboard van je account.
+      <Step title="Verkrijg een API-sleutel">
+        Meld je aan bij [comfy.org](https://comfy.org) en genereer een API-sleutel via het dashboard van je account.
       </Step>
-      <Step title="De API-sleutel instellen">
+      <Step title="Stel de API-sleutel in">
         Geef je sleutel op via een van deze methoden:
 
         ```bash
-        # Onboarding flag
+        # Onboarding-vlag
         openclaw onboard --comfy-api-key "your-key"
 
-        # Environment variable (preferred for daemons)
+        # Omgevingsvariabele (aanbevolen voor daemons)
         export COMFY_API_KEY="your-key"
 
-        # Alternative environment variable
+        # Alternatieve omgevingsvariabele
         export COMFY_CLOUD_API_KEY="your-key"
 
-        # Or inline in config
+        # Of rechtstreeks in de configuratie
         openclaw config set plugins.entries.comfy.config.apiKey "your-key"
         ```
       </Step>
-      <Step title="Je workflow-JSON voorbereiden">
-        Exporteer of maak een ComfyUI-workflow-JSON-bestand. Noteer de Node-ID's van de invoer-Node voor de prompt en de uitvoer-Node.
+      <Step title="Bereid je workflow-JSON voor">
+        Exporteer of maak een ComfyUI-workflow-JSON-bestand. Noteer de knooppunt-ID's van het invoerknooppunt voor de prompt en het uitvoerknooppunt.
       </Step>
-      <Step title="De provider configureren">
+      <Step title="Configureer de provider">
         Stel `mode: "cloud"` in en verwijs naar je workflowbestand:
 
         ```json5
@@ -147,10 +148,10 @@ Kies tussen ComfyUI uitvoeren op je eigen machine en Comfy Cloud gebruiken.
         ```
 
         <Tip>
-        In de cloudmodus is de standaardwaarde voor `baseUrl` `https://cloud.comfy.org`. Stel `baseUrl` alleen in voor een aangepast cloudeindpunt.
+        In cloudmodus wordt `baseUrl` standaard ingesteld op `https://cloud.comfy.org`. Stel `baseUrl` alleen in voor een aangepast cloudeindpunt.
         </Tip>
       </Step>
-      <Step title="Het standaardmodel instellen">
+      <Step title="Stel het standaardmodel in">
         ```json5
         {
           agents: {
@@ -163,7 +164,7 @@ Kies tussen ComfyUI uitvoeren op je eigen machine en Comfy Cloud gebruiken.
         }
         ```
       </Step>
-      <Step title="Verifiëren">
+      <Step title="Verifieer">
         ```bash
         openclaw models list --provider comfy
         ```
@@ -209,15 +210,15 @@ Comfy ondersteunt gedeelde verbindingsinstellingen op het hoogste niveau en work
 
 ### Gedeelde sleutels
 
-| Sleutel                | Type                    | Beschrijving                                                                            |
-| ---------------------- | ----------------------- | --------------------------------------------------------------------------------------- |
-| `mode`                 | `"local"` of `"cloud"`  | Verbindingsmodus. Standaardwaarde is `"local"`.                                         |
-| `baseUrl`              | tekenreeks              | Standaard `http://127.0.0.1:8188` voor lokaal of `https://cloud.comfy.org` voor de cloud. |
-| `apiKey`               | tekenreeks              | Optionele inline sleutel, als alternatief voor de omgevingsvariabelen `COMFY_API_KEY` / `COMFY_CLOUD_API_KEY`. |
-| `allowPrivateNetwork`  | booleaanse waarde       | Sta in de cloudmodus een privé-/LAN-`baseUrl` of een lokale privé-DNS-FQDN toe.         |
+| Sleutel                | Type                   | Beschrijving                                                                          |
+| ---------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
+| `mode`     | `"local"` of `"cloud"` | Verbindingsmodus. Standaard `"local"`.                           |
+| `baseUrl`     | tekenreeks             | Standaard `http://127.0.0.1:8188` voor lokaal of `https://cloud.comfy.org` voor de cloud. |
+| `apiKey`     | tekenreeks             | Optionele inline sleutel, als alternatief voor de omgevingsvariabelen `COMFY_API_KEY` / `COMFY_CLOUD_API_KEY`. |
+| `allowPrivateNetwork`     | booleaans              | Sta een privé-/LAN-`baseUrl` toe in cloudmodus of een lokale privé-DNS-FQDN. |
 
 <Note>
-In de modus `local` werken letterlijke loopback-/privé-IP-adressen en servicenames met één label, zoals `http://comfyui:8188`, zonder `allowPrivateNetwork`. Op openbare adressen lijkende privé-DNS-FQDN's, zoals `https://comfy.local.example.com`, vereisen `allowPrivateNetwork: true`. Vertrouwen voor een privé-oorsprong blijft beperkt tot het geconfigureerde schema, de hostnaam en de poort; lokale omleidingen mogen de geconfigureerde hostnaam niet verlaten, terwijl omleidingen vanuit de cloud naar openbare CDN's met het standaard-SSRF-beleid worden gecontroleerd.
+In de modus `local` werken letterlijke loopback-/privé-IP-adressen en servicenames met één label, zoals `http://comfyui:8188`, zonder `allowPrivateNetwork`. Privé-DNS-FQDN's die er openbaar uitzien, zoals `https://comfy.local.example.com`, vereisen `allowPrivateNetwork: true`. Vertrouwen in een privé-oorsprong blijft beperkt tot het geconfigureerde schema, de hostnaam en de poort; lokale omleidingen kunnen de geconfigureerde hostnaam niet verlaten, terwijl cloudomleidingen naar openbare CDN's worden gecontroleerd met het standaard-SSRF-beleid.
 </Note>
 
 ### Sleutels per mogelijkheid
@@ -226,27 +227,27 @@ Deze sleutels zijn van toepassing binnen de secties `image`, `video` of `music`:
 
 | Sleutel                      | Vereist | Standaard | Beschrijving                                                               |
 | ---------------------------- | ------- | --------- | -------------------------------------------------------------------------- |
-| `workflow` of `workflowPath` | Ja      | --        | Inline workflow-JSON of pad naar het ComfyUI-workflow-JSON-bestand.        |
-| `promptNodeId`               | Ja      | --        | Node-ID die de tekstprompt ontvangt.                                       |
-| `promptInputName`            | Nee     | `"text"`  | Naam van de invoer op de prompt-Node.                                      |
-| `outputNodeId`               | Nee     | --        | Node-ID waarvan de uitvoer wordt gelezen. Indien weggelaten, worden alle overeenkomende uitvoer-Nodes gebruikt. |
-| `pollIntervalMs`             | Nee     | `1500`    | Pollinginterval in milliseconden voor het voltooien van de taak.           |
-| `timeoutMs`                  | Nee     | `300000`  | Time-out in milliseconden voor de workflowuitvoering.                      |
+| `workflow` of `workflowPath` | Ja | -- | Inline workflow-JSON of het pad naar het ComfyUI-workflow-JSON-bestand. |
+| `promptNodeId`           | Ja      | --        | Knooppunt-ID dat de tekstprompt ontvangt.                                  |
+| `promptInputName`           | Nee     | `"text"` | Invoernaam op het promptknooppunt.                              |
+| `outputNodeId`           | Nee     | --        | Knooppunt-ID waarvan de uitvoer wordt gelezen. Indien weggelaten, worden alle overeenkomende uitvoerknooppunten gebruikt. |
+| `pollIntervalMs`           | Nee     | `1500` | Pollinginterval in milliseconden voor het voltooien van de taak. |
+| `timeoutMs`           | Nee     | `300000` | Time-out in milliseconden voor de uitvoering van de workflow.   |
 
-De secties `image` en `video` ondersteunen ook een invoer-Node voor een referentieafbeelding:
+De secties `image` en `video` ondersteunen ook een invoerknooppunt voor referentieafbeeldingen:
 
-| Sleutel                | Vereist                                      | Standaard | Beschrijving                                              |
-| ---------------------- | -------------------------------------------- | --------- | --------------------------------------------------------- |
-| `inputImageNodeId`     | Ja (bij het meegeven van een referentieafbeelding) | --  | Node-ID die de geüploade referentieafbeelding ontvangt.   |
-| `inputImageInputName`  | Nee                                          | `"image"` | Naam van de invoer op de afbeeldings-Node.                |
+| Sleutel                | Vereist                                      | Standaard | Beschrijving                                             |
+| ---------------------- | -------------------------------------------- | --------- | -------------------------------------------------------- |
+| `inputImageNodeId`     | Ja (wanneer een referentieafbeelding wordt doorgegeven) | -- | Knooppunt-ID dat de geüploade referentieafbeelding ontvangt. |
+| `inputImageInputName`     | Nee                                          | `"image"` | Invoernaam op het afbeeldingsknooppunt.          |
 
-`apiKey` accepteert een letterlijke tekenreeks of een [geheimreferentie](/nl/gateway/configuration-reference#secrets)-object.
+`apiKey` accepteert een letterlijke tekenreeks of een [geheimverwijzing](/nl/gateway/configuration-reference#secrets)-object.
 
 ## Workflowdetails
 
 <AccordionGroup>
   <Accordion title="Afbeeldingsworkflows">
-    Stel het standaardmodel voor afbeeldingen in op `comfy/workflow`:
+    Stel het standaardafbeeldingsmodel in op `comfy/workflow`:
 
     ```json5
     {
@@ -260,9 +261,9 @@ De secties `image` en `video` ondersteunen ook een invoer-Node voor een referent
     }
     ```
 
-    **Voorbeeld voor bewerken met een referentieafbeelding:**
+    **Voorbeeld van bewerken met een referentieafbeelding:**
 
-    Voeg `inputImageNodeId` toe aan je afbeeldingsconfiguratie om bewerken met een geüploade referentieafbeelding in te schakelen:
+    Voeg `inputImageNodeId` toe aan je afbeeldingsconfiguratie om afbeeldingen te kunnen bewerken met een geüploade referentieafbeelding:
 
     ```json5
     {
@@ -287,7 +288,7 @@ De secties `image` en `video` ondersteunen ook een invoer-Node voor een referent
   </Accordion>
 
   <Accordion title="Videoworkflows">
-    Stel het standaardmodel voor video in op `comfy/workflow`:
+    Stel het standaardvideomodel in op `comfy/workflow`:
 
     ```json5
     {
@@ -301,7 +302,7 @@ De secties `image` en `video` ondersteunen ook een invoer-Node voor een referent
     }
     ```
 
-    Comfy-videoworkflows ondersteunen tekst-naar-video en afbeelding-naar-video via de geconfigureerde grafiek.
+    Comfy-videoworkflows ondersteunen tekst-naar-video en afbeelding-naar-video via de geconfigureerde graaf.
 
     <Note>
     OpenClaw geeft geen invoervideo's door aan Comfy-workflows. Alleen tekstprompts en afzonderlijke referentieafbeeldingen worden als invoer ondersteund.
@@ -310,13 +311,13 @@ De secties `image` en `video` ondersteunen ook een invoer-Node voor een referent
   </Accordion>
 
   <Accordion title="Muziekworkflows">
-    De gebundelde Plugin registreert een provider voor muziekgeneratie voor door workflows gedefinieerde audio- of muziekuitvoer, die beschikbaar wordt gesteld via de gedeelde tool `music_generate`. Deze accepteert een optionele referentieafbeelding (maximaal 1):
+    De gebundelde plugin registreert een provider voor het genereren van muziek voor door workflows gedefinieerde audio- of muziekuitvoer, beschikbaar via de gedeelde tool `music_generate`. Deze accepteert een optionele referentieafbeelding (maximaal 1):
 
     ```text
-    /tool music_generate prompt="Warm ambient synth loop with soft tape texture"
+    /tool music_generate prompt="Warme ambient-synthloop met zachte bandtextuur"
     ```
 
-    Gebruik de configuratiesectie `music` om naar je audio-workflow-JSON en uitvoer-Node te verwijzen.
+    Gebruik de configuratiesectie `music` om naar de JSON van je audioworkflow en het uitvoerknooppunt te verwijzen.
 
   </Accordion>
 
@@ -339,18 +340,18 @@ De secties `image` en `video` ondersteunen ook een invoer-Node voor een referent
     }
     ```
 
-    OpenClaw behandelt die verouderde structuur als de configuratie voor de afbeeldingsworkflow. Je hoeft niet onmiddellijk te migreren, maar de geneste secties `image` / `video` / `music` worden aanbevolen voor nieuwe configuraties. Als je alleen afbeeldingsgeneratie gebruikt, zijn de verouderde platte configuratie en de nieuwe geneste sectie `image` functioneel gelijkwaardig.
+    OpenClaw behandelt die verouderde vorm als de configuratie voor de afbeeldingsworkflow. Je hoeft niet onmiddellijk te migreren, maar de geneste secties `image` / `video` / `music` worden aanbevolen voor nieuwe configuraties. Als je alleen afbeeldingsgeneratie gebruikt, zijn de verouderde platte configuratie en de nieuwe geneste sectie `image` functioneel gelijkwaardig.
 
   </Accordion>
 
   <Accordion title="Live-tests">
-    Er is optionele live-testdekking beschikbaar voor de gebundelde Plugin:
+    Voor de gebundelde plugin is optionele live-testdekking beschikbaar:
 
     ```bash
     OPENCLAW_LIVE_TEST=1 COMFY_LIVE_TEST=1 pnpm test:live -- extensions/comfy/comfy.live.test.ts
     ```
 
-    De live-test slaat afzonderlijke gevallen voor afbeeldingen, video’s of muziek over, tenzij de bijbehorende Comfy-workflowsectie is geconfigureerd.
+    De live-test slaat afzonderlijke gevallen voor afbeeldingen, video's of muziek over, tenzij de bijbehorende Comfy-workflowsectie is geconfigureerd.
 
   </Accordion>
 </AccordionGroup>
@@ -359,13 +360,13 @@ De secties `image` en `video` ondersteunen ook een invoer-Node voor een referent
 
 <CardGroup cols={2}>
   <Card title="Afbeeldingen genereren" href="/nl/tools/image-generation" icon="image">
-    Configuratie en gebruik van het hulpmiddel voor het genereren van afbeeldingen.
+    Configuratie en gebruik van de tool voor afbeeldingsgeneratie.
   </Card>
-  <Card title="Video’s genereren" href="/nl/tools/video-generation" icon="video">
-    Configuratie en gebruik van het hulpmiddel voor het genereren van video’s.
+  <Card title="Video's genereren" href="/nl/tools/video-generation" icon="video">
+    Configuratie en gebruik van de tool voor videogeneratie.
   </Card>
   <Card title="Muziek genereren" href="/nl/tools/music-generation" icon="music">
-    Instellen van het hulpmiddel voor het genereren van muziek en audio.
+    Instellen van de tool voor muziek- en audiogeneratie.
   </Card>
   <Card title="Provideroverzicht" href="/nl/providers/index" icon="layers">
     Overzicht van alle providers en modelreferenties.

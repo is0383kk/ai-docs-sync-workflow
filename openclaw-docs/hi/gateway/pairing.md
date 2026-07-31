@@ -1,46 +1,53 @@
 ---
 read_when:
     - macOS UI के बिना Node पेयरिंग अनुमोदन लागू करना
-    - दूरस्थ नोड्स को अनुमोदित करने के लिए CLI फ्लो जोड़ना
-    - Node प्रबंधन के साथ Gateway प्रोटोकॉल का विस्तार
-summary: iOS और अन्य रिमोट नोड्स के लिए Gateway-स्वामित्व वाली नोड पेयरिंग (विकल्प B)
-title: Gateway-स्वामित्व वाली पेयरिंग
+    - दूरस्थ Nodes को स्वीकृत करने के लिए CLI प्रवाह जोड़ना
+    - Node प्रबंधन के साथ Gateway प्रोटोकॉल का विस्तार करना
+summary: 'Node क्षमता अनुमोदन: डिवाइस पेयरिंग के बाद Nodes को कमांड एक्सपोज़र कैसे मिलता है'
+title: Node पेयरिंग
 x-i18n:
-    generated_at: "2026-06-28T23:11:53Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:20:31Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: aefddafaef419fc59b04ee17dae8ef21685b4f514f4286530bf07362663a8996
+    source_hash: 25e4016657379573ddb7e9027899afd8b97b16709da6e73ed44d4016b99e715a
     source_path: gateway/pairing.md
     workflow: 16
 ---
 
-Gateway-स्वामित्व वाली पेयरिंग में, **Gateway** सत्य का स्रोत है कि किन नोड्स
-को जुड़ने की अनुमति है। यूआई (macOS ऐप, भविष्य के क्लाइंट) केवल फ्रंटएंड हैं जो
-लंबित अनुरोधों को अनुमोदित या अस्वीकार करते हैं.
+Node पेयरिंग की दो परतें हैं, और दोनों युग्मित डिवाइस रिकॉर्ड में
+Gateway के SQLite स्टेट डेटाबेस में संग्रहीत होती हैं:
 
-**महत्वपूर्ण:** WS नोड्स `connect` के दौरान **डिवाइस पेयरिंग** (role `node`) का उपयोग करते हैं।
-`node.pair.*` एक अलग पेयरिंग स्टोर है और WS हैंडशेक को गेट **नहीं** करता।
-केवल वे क्लाइंट जो स्पष्ट रूप से `node.pair.*` कॉल करते हैं, इस फ्लो का उपयोग करते हैं.
+- **डिवाइस पेयरिंग** (भूमिका `node`) `connect` हैंडशेक को नियंत्रित करती है। नीचे
+  [विश्वसनीय-CIDR डिवाइस स्वतः-अनुमोदन](#trusted-cidr-device-auto-approval)
+  और [चैनल पेयरिंग](/hi/channels/pairing) देखें।
+- **Node क्षमता अनुमोदन** (`node.pair.*`) यह नियंत्रित करता है कि कनेक्टेड Node किन घोषित
+  क्षमताओं/कमांड को उपलब्ध करा सकता है। Gateway सत्य का
+  स्रोत है; UI (macOS ऐप, Control UI) ऐसे फ़्रंटएंड हैं जो लंबित अनुरोधों को अनुमोदित या
+  अस्वीकार करते हैं।
 
-## अवधारणाएँ
+पूर्व स्वतंत्र Node पेयरिंग स्टोर (`nodes/paired.json`, जिसमें प्रत्येक Node के लिए
+टोकन था और जिसे जनवरी 2026 में कनेक्ट पथ से हटा दिया गया था) अब समाप्त हो चुका है: Gateway
+स्टार्टअप पर एक बार बची हुई सभी पंक्तियों को डिवाइस रिकॉर्ड में समाहित करते हैं और
+लीगेसी फ़ाइलों को `.migrated` प्रत्यय के साथ संग्रहित करते हैं। लीगेसी TCP ब्रिज समर्थन
+हटा दिया गया है।
 
-- **लंबित अनुरोध**: किसी नोड ने जुड़ने का अनुरोध किया; अनुमोदन आवश्यक है.
-- **पेयर किया गया नोड**: जारी किए गए auth टोकन वाला अनुमोदित नोड.
-- **ट्रांसपोर्ट**: Gateway WS endpoint अनुरोधों को फॉरवर्ड करता है लेकिन
-  सदस्यता तय नहीं करता। (लेगेसी TCP bridge समर्थन हटा दिया गया है.)
+## क्षमता अनुमोदन कैसे काम करता है
 
-## पेयरिंग कैसे काम करती है
+1. एक Node Gateway WS से कनेक्ट होता है (डिवाइस पेयरिंग इस चरण को नियंत्रित करती है)।
+2. Gateway घोषित क्षमता/कमांड सतह की तुलना
+   अनुमोदित सतह से करता है; नई या विस्तृत सतहें डिवाइस रिकॉर्ड पर एक **लंबित अनुरोध**
+   संग्रहीत करती हैं और `node.pair.requested` उत्सर्जित करती हैं।
+3. आप अनुरोध को अनुमोदित या अस्वीकार करते हैं (CLI या UI)।
+4. अनुमोदन तक Node कमांड फ़िल्टर किए रहते हैं; अनुमोदन सामान्य कमांड नीति के अधीन
+   घोषित सतह उपलब्ध कराता है।
 
-1. कोई नोड Gateway WS से कनेक्ट होता है और पेयरिंग का अनुरोध करता है.
-2. Gateway एक **लंबित अनुरोध** स्टोर करता है और `node.pair.requested` emit करता है.
-3. आप अनुरोध को अनुमोदित या अस्वीकार करते हैं (CLI या UI).
-4. अनुमोदन पर, Gateway एक **नया टोकन** जारी करता है (re-pair पर टोकन rotate होते हैं).
-5. नोड टोकन का उपयोग करके फिर से कनेक्ट होता है और अब "paired" है.
+लंबित अनुरोध Node के अंतिम पुनः प्रयास के **5 मिनट बाद** स्वतः समाप्त हो जाते हैं —
+सक्रिय रूप से पुनः कनेक्ट होने वाला Node प्रत्येक प्रयास पर नया अनुरोध (और अनुमोदन संकेत)
+बनाने के बजाय अपने एक लंबित अनुरोध को सक्रिय रखता है।
 
-लंबित अनुरोध **5 मिनट** के बाद अपने-आप समाप्त हो जाते हैं.
-
-## CLI वर्कफ्लो (headless friendly)
+## CLI कार्यप्रवाह (हेडलेस-अनुकूल)
 
 ```bash
 openclaw nodes pending
@@ -51,94 +58,163 @@ openclaw nodes remove --node <id|name|ip>
 openclaw nodes rename --node <id|name|ip> --name "Living Room iPad"
 ```
 
-`nodes status` पेयर किए गए/कनेक्टेड नोड्स और उनकी क्षमताएँ दिखाता है.
+`nodes status` युग्मित/कनेक्टेड Node और उनकी क्षमताएँ दिखाता है।
 
-## API सतह (gateway protocol)
+## API सतह (Gateway प्रोटोकॉल)
 
 इवेंट:
 
-- `node.pair.requested` - जब नया लंबित अनुरोध बनाया जाता है तब emit होता है.
-- `node.pair.resolved` - जब कोई अनुरोध अनुमोदित/अस्वीकृत/समाप्त होता है तब emit होता है.
+- `node.pair.requested` - नया लंबित अनुरोध बनने पर उत्सर्जित होता है।
+- `node.pair.resolved` - अनुरोध अनुमोदित, अस्वीकृत या
+  समाप्त होने पर उत्सर्जित होता है।
 
-मेथड:
+विधियाँ:
 
-- `node.pair.request` - लंबित अनुरोध बनाएँ या पुनः उपयोग करें.
-- `node.pair.list` - लंबित + पेयर किए गए नोड्स सूचीबद्ध करें (`operator.pairing`).
-- `node.pair.approve` - लंबित अनुरोध अनुमोदित करें (टोकन जारी करता है).
-- `node.pair.reject` - लंबित अनुरोध अस्वीकार करें.
-- `node.pair.remove` - पेयर किया गया नोड हटाएँ। डिवाइस-समर्थित पेयरिंग के लिए यह
-  डिवाइस की `node` भूमिका revoke करता है: यह `devices/paired.json` को mutate करता है और
-  उस डिवाइस के node-role sessions को अमान्य/डिस्कनेक्ट करता है। एक **mixed-role**
-  डिवाइस (उदा. उसके पास `operator` भी है) अपनी row रखता है और केवल `node`
-  भूमिका खोता है; node-only डिवाइस row delete हो जाती है। यह कोई matching legacy
-  gateway-owned node pairing entry भी हटाता है। Authz: `operator.pairing` non-operator
-  node rows हटा सकता है; किसी mixed-role डिवाइस पर अपनी **own** node role revoke करने वाले
-  device-token caller को अतिरिक्त रूप से `operator.admin` चाहिए.
-- `node.pair.verify` - `{ nodeId, token }` verify करें.
+- `node.pair.list` - लंबित और युग्मित Node की सूची देता है (`operator.pairing`)।
+- `node.pair.approve` - लंबित अनुरोध को अनुमोदित करता है।
+- `node.pair.reject` - लंबित अनुरोध को अस्वीकार करता है।
+- `node.pair.remove` - युग्मित Node हटाता है। यह युग्मित-डिवाइस स्टोर में डिवाइस की `node`
+  भूमिका रद्द करता है, उसके साथ अनुमोदित Node सतह हटाता है, और
+  उस डिवाइस के Node-भूमिका सत्रों को अमान्य/डिस्कनेक्ट करता है। **मिश्रित-भूमिका**
+  वाला डिवाइस (उदाहरण के लिए, जिसके पास `operator` भी है) अपनी पंक्ति बनाए रखता है और केवल
+  `node` भूमिका खोता है; केवल-Node डिवाइस की पंक्ति हटा दी जाती है। प्राधिकरण:
+  `operator.pairing` गैर-ऑपरेटर Node पंक्तियाँ हटा सकता है; मिश्रित-भूमिका डिवाइस पर
+  अपनी **स्वयं की** Node भूमिका रद्द करने वाले डिवाइस-टोकन कॉलर को अतिरिक्त रूप से
+  `operator.admin` चाहिए।
+- `node.rename` - युग्मित Node के ऑपरेटर-दृश्य डिस्प्ले नाम को बदलता है।
 
-नोट्स:
+2026.7 में हटाए गए: `node.pair.request` और `node.pair.verify`। लंबित
+अनुरोध Node कनेक्शन के दौरान स्वयं Gateway बनाता है, और जिस
+स्वतंत्र प्रति-Node टोकन के लिए वे काम करते थे वह अब मौजूद नहीं है; Node प्रमाणीकरण
+डिवाइस पेयरिंग टोकन है।
 
-- `node.pair.request` प्रति नोड idempotent है: बार-बार कॉल वही
-  लंबित अनुरोध लौटाते हैं.
-- उसी लंबित नोड के लिए दोहराए गए अनुरोध stored node metadata और operator visibility के लिए latest allowlisted declared command snapshot भी refresh करते हैं.
-- अनुमोदन **हमेशा** fresh token बनाता है; `node.pair.request` से कभी कोई token return नहीं होता.
-- Operator scope levels और approval-time checks का सारांश
-  [ऑपरेटर स्कोप](/hi/gateway/operator-scopes) में है.
-- auto-approval flows के लिए संकेत के रूप में अनुरोधों में `silent: true` शामिल हो सकता है.
-- `node.pair.approve` अतिरिक्त approval scopes enforce करने के लिए लंबित अनुरोध के declared commands का उपयोग करता है:
-  - commandless request: `operator.pairing`
-  - non-exec command request: `operator.pairing` + `operator.write`
-  - `system.run` / `system.run.prepare` / `system.which` request:
-    `operator.pairing` + `operator.admin`
+टिप्पणियाँ:
+
+- अपरिवर्तित सतह के साथ पुनः कनेक्शन लंबित अनुरोध का पुनः उपयोग करते हैं; बार-बार किए गए
+  अनुरोध संग्रहीत Node मेटाडेटा और ऑपरेटर दृश्यता के लिए नवीनतम अनुमत-सूचीबद्ध
+  घोषित कमांड स्नैपशॉट को रीफ़्रेश करते हैं।
+- ऑपरेटर स्कोप स्तरों और अनुमोदन-समय जाँचों का सारांश
+  [ऑपरेटर स्कोप](/hi/gateway/operator-scopes) में दिया गया है।
+- `node.pair.approve` अतिरिक्त अनुमोदन स्कोप लागू करने के लिए लंबित अनुरोध के घोषित कमांड का
+  उपयोग करता है:
+  - कमांड-रहित अनुरोध: `operator.pairing`
+  - सामान्य कमांड अनुरोध: `operator.pairing` + `operator.write`
+  - `system.run`, `system.run.prepare`,
+    `system.which`, `browser.proxy`, `fs.listDir`, या
+    `system.execApprovals.get/set` वाला एडमिन-संवेदनशील अनुरोध: `operator.pairing` + `operator.admin`
 
 <Warning>
-Node pairing trust और identity flow है, साथ ही token issuance भी है। यह प्रति नोड live node command surface को pin **नहीं** करता.
+Node पेयरिंग अनुमोदन विश्वसनीय क्षमता सतह को रिकॉर्ड करता है। यह प्रत्येक Node की लाइव Node कमांड सतह को **पिन नहीं करता**।
 
-- Live node commands वही होते हैं जो node connect पर declare करता है, gateway की global node command policy (`gateway.nodes.allowCommands` और `denyCommands`) apply होने के बाद.
-- Per-node `system.run` allow और ask policy node पर `exec.approvals.node.*` में रहती है, pairing record में नहीं.
+- लाइव Node कमांड कनेक्ट होने पर Node द्वारा घोषित चीज़ों से आते हैं, जिन्हें
+  Gateway की वैश्विक Node कमांड नीति (`gateway.nodes.commands.allow` और
+  `gateway.nodes.commands.deny`) फ़िल्टर करती है।
+- प्रति-Node `system.run` अनुमति और पूछताछ नीति पेयरिंग रिकॉर्ड में नहीं,
+  बल्कि `exec.approvals.node.*` में Node पर रहती है।
 
 </Warning>
 
-## Node command gating (2026.3.31+)
+## Node कमांड नियंत्रण (2026.3.31+)
 
 <Warning>
-**Breaking change:** `2026.3.31` से शुरू होकर, node commands तब तक disabled रहते हैं जब तक node pairing approve न हो। केवल device pairing अब declared node commands expose करने के लिए पर्याप्त नहीं है.
+**ब्रेकिंग परिवर्तन:** `2026.3.31` से शुरू होकर, Node पेयरिंग अनुमोदित होने तक Node कमांड अक्षम रहते हैं। घोषित Node कमांड उपलब्ध कराने के लिए अब केवल डिवाइस पेयरिंग पर्याप्त नहीं है।
 </Warning>
 
-जब कोई node पहली बार connect करता है, pairing अपने-आप request होती है। जब तक pairing request approve नहीं होती, उस node से आने वाले सभी pending node commands filter हो जाते हैं और execute नहीं होंगे। Pairing approval के जरिए trust establish होने के बाद, node के declared commands normal command policy के अधीन available हो जाते हैं.
+जब कोई Node पहली बार कनेक्ट होता है, तो पेयरिंग का अनुरोध स्वतः किया जाता है।
+जब तक वह अनुरोध अनुमोदित नहीं होता, उस Node के सभी लंबित Node कमांड
+फ़िल्टर किए जाते हैं और निष्पादित नहीं होंगे। पेयरिंग अनुमोदित होने के बाद, Node के घोषित
+कमांड सामान्य कमांड नीति के अधीन उपलब्ध हो जाते हैं।
 
 इसका अर्थ है:
 
-- जो nodes पहले commands expose करने के लिए केवल device pairing पर निर्भर थे, उन्हें अब node pairing complete करनी होगी.
-- Pairing approval से पहले queued commands drop हो जाते हैं, defer नहीं होते.
+- जो Node पहले कमांड उपलब्ध कराने के लिए केवल डिवाइस पेयरिंग पर निर्भर थे, उन्हें
+  अब Node पेयरिंग भी पूरी करनी होगी।
+- पेयरिंग अनुमोदन से पहले कतारबद्ध कमांड स्थगित नहीं, बल्कि हटा दिए जाते हैं।
 
-## Node event trust boundaries (2026.3.31+)
+## Node इवेंट की विश्वास सीमाएँ (2026.3.31+)
 
 <Warning>
-**Breaking change:** Node-originated runs अब reduced trusted surface पर रहते हैं.
+**ब्रेकिंग परिवर्तन:** Node से शुरू किए गए रन अब सीमित विश्वसनीय सतह पर रहते हैं।
 </Warning>
 
-Node-originated summaries और संबंधित session events intended trusted surface तक restricted हैं। Notification-driven या node-triggered flows जो पहले broader host या session tool access पर निर्भर थे, उन्हें adjustment की आवश्यकता हो सकती है। यह hardening सुनिश्चित करती है कि node events node की trust boundary से आगे host-level tool access में escalate नहीं हो सकते.
+Node से शुरू किए गए सारांश और संबंधित सत्र इवेंट इच्छित
+विश्वसनीय सतह तक सीमित हैं। सूचना-संचालित या Node-ट्रिगर किए गए प्रवाह, जो
+पहले व्यापक होस्ट या सत्र टूल पहुँच पर निर्भर थे, उनमें समायोजन की आवश्यकता हो सकती है।
+यह सुदृढ़ीकरण Node इवेंट को Node की विश्वास सीमा द्वारा अनुमत सीमा से बाहर
+होस्ट-स्तरीय टूल पहुँच तक अधिकार बढ़ाने से रोकता है।
 
-Durable node presence updates भी वही identity boundary follow करते हैं। `node.presence.alive` event
-केवल authenticated node device sessions से accepted है और pairing metadata केवल तब update करता है जब
-device/node identity पहले से paired हो। Self-declared `client.id` values last-seen state लिखने के लिए
-पर्याप्त नहीं हैं.
+स्थायी Node उपस्थिति अपडेट समान पहचान सीमा का पालन करते हैं:
+`node.presence.alive` इवेंट केवल प्रमाणित Node डिवाइस
+सत्रों से स्वीकार किया जाता है और पेयरिंग मेटाडेटा केवल तभी अपडेट करता है जब डिवाइस/Node पहचान
+पहले से युग्मित हो। स्वयं घोषित `client.id` मान अंतिम-देखी गई
+स्थिति लिखने के लिए पर्याप्त नहीं है।
 
-## Auto-approval (macOS app)
+## SSH-सत्यापित डिवाइस स्वतः-अनुमोदन (डिफ़ॉल्ट)
 
-macOS ऐप वैकल्पिक रूप से **silent approval** का प्रयास कर सकता है जब:
+निजी/CGNAT पते से पहली बार होने वाली `role: node` डिवाइस पेयरिंग
+तब स्वतः अनुमोदित होती है, जब Gateway **SSH के माध्यम से मशीन का स्वामित्व सिद्ध** कर सकता है: यह
+पेयरिंग होस्ट (`BatchMode`, `StrictHostKeyChecking=yes`) से वापस कनेक्ट होता है,
+वहाँ `openclaw node identity --json` चलाता है, और केवल तभी अनुमोदित करता है जब रिमोट
+डिवाइस आईडी और सार्वजनिक कुंजी लंबित अनुरोध से पूरी तरह मेल खाते हैं। कुंजी का मिलान ही
+इसे सुरक्षित बनाता है: केवल पहुँच-योग्यता कभी अनुमोदन नहीं करती, इसलिए NAT सह-निवासी,
+साझा होस्ट के अन्य उपयोगकर्ता और LAN स्पूफ़िंग सभी सामान्य
+संकेत प्रवाह पर लौटते हैं।
 
-- request को `silent` mark किया गया हो, और
-- app उसी user का उपयोग करके gateway host से SSH connection verify कर सके.
+डिफ़ॉल्ट रूप से सक्षम। इसके सक्रिय होने की आवश्यकताएँ:
 
-यदि silent approval fail होता है, तो यह normal "Approve/Reject" prompt पर वापस आ जाता है.
+- Gateway प्रक्रिया उपयोगकर्ता (या `sshVerify.user`) Node होस्ट पर
+  गैर-संवादात्मक रूप से SSH कर सकता है (कुंजियाँ/एजेंट; Tailscale SSH भी काम करता है), और होस्ट कुंजी
+  पहले से विश्वसनीय है।
+- `openclaw` गैर-संवादात्मक `sh -lc` के लिए रिमोट `PATH` पर हल हो जाता है।
+- कनेक्ट होने वाला IP प्रत्यक्ष (गैर-प्रॉक्सी, गैर-लूपबैक) निजी, ULA,
+  लिंक-लोकल या CGNAT पता है, या सेट होने पर `sshVerify.cidrs` से मेल खाता है।
+- विश्वसनीय-CIDR अनुमोदन के समान पात्रता आधार: केवल नई, स्कोप-रहित Node
+  पेयरिंग; अपग्रेड, ब्राउज़र, Control UI और WebChat हमेशा संकेत दिखाते हैं।
 
-## Trusted-CIDR device auto-approval
+जाँच चलने के दौरान Node क्लाइंट को मैन्युअल अनुमोदन के लिए रुकने के बजाय
+पुनः प्रयास करते रहने (`wait_then_retry`) के लिए कहा जाता है; यदि जाँच
+विफल हो जाती है, तो अगला प्रयास सामान्य संकेत प्रवाह पर लौटता है। विफल लक्ष्य
+एक छोटी कूलडाउन अवधि पाते हैं (कुंजी बेमेल होने के बाद 5 मिनट)।
 
-`role: node` के लिए WS device pairing default रूप से manual रहती है। Private
-node networks के लिए जहाँ Gateway पहले से network path पर trust करता है, operators
-explicit CIDRs या exact IPs के साथ opt in कर सकते हैं:
+अनुमोदित डिवाइस `approvedVia: "ssh-verified"` रिकॉर्ड करते हैं और उनकी पहली घोषित
+क्षमता सतह उसी चरण में अनुमोदित हो जाती है — कुंजी मिलान पहले ही सिद्ध कर देता है कि
+Node ऑपरेटर के खाते के अंतर्गत उनकी अपनी मशीन पर चल रहा है, जो वही
+दावा है जिसे मैन्युअल क्षमता अनुमोदन पुष्ट करता है। बाद के सतह अपग्रेड पर फिर भी
+संकेत दिखता है।
+
+सुदृढ़ करें या अक्षम करें:
+
+```json5
+{
+  gateway: {
+    nodes: {
+      pairing: {
+        // पूरी तरह अक्षम करें:
+        sshVerify: false,
+        // ...या जाँच का स्कोप/समायोजन निर्धारित करें:
+        // sshVerify: { user: "me", identity: "~/.ssh/probe", timeoutMs: 7000, cidrs: ["10.0.0.0/8"] },
+      },
+    },
+  },
+}
+```
+
+## स्वतः-अनुमोदन (macOS ऐप)
+
+macOS ऐप Node क्षमता अनुरोधों के **मौन अनुमोदन** का प्रयास कर सकता है
+जब:
+
+- अनुरोध को `silent` चिह्नित किया गया हो (जब डिवाइस पेयरिंग गैर-संवादात्मक रूप से अनुमोदित हुई हो,
+  तो Gateway पहली क्षमता सतह को मौन चिह्नित करता है), और
+- ऐप उसी उपयोगकर्ता का उपयोग करके Gateway होस्ट से SSH कनेक्शन सत्यापित कर सके।
+
+यदि मौन अनुमोदन विफल होता है, तो यह सामान्य Approve/Reject संकेत पर लौट जाता है।
+
+## विश्वसनीय-CIDR डिवाइस स्वतः-अनुमोदन
+
+`role: node` के लिए WS डिवाइस पेयरिंग डिफ़ॉल्ट रूप से मैन्युअल रहती है। निजी Node
+नेटवर्क में, जहाँ Gateway पहले से नेटवर्क पथ पर विश्वास करता है, ऑपरेटर स्पष्ट CIDR या सटीक IP के साथ
+इसे वैकल्पिक रूप से सक्षम कर सकते हैं:
 
 ```json5
 {
@@ -154,65 +230,109 @@ explicit CIDRs या exact IPs के साथ opt in कर सकते ह�
 
 सुरक्षा सीमा:
 
-- `gateway.nodes.pairing.autoApproveCidrs` unset होने पर disabled.
-- कोई blanket LAN या private-network auto-approve mode मौजूद नहीं है.
-- केवल fresh `role: node` device pairing, जिसमें requested scopes न हों, eligible है.
-- Operator, browser, Control UI, और WebChat clients manual रहते हैं.
-- Role, scope, metadata, और public-key upgrades manual रहते हैं.
-- Same-host loopback trusted-proxy header paths eligible नहीं हैं क्योंकि उस
-  path को local callers spoof कर सकते हैं.
+- `gateway.nodes.pairing.autoApproveCidrs` सेट न होने पर अक्षम।
+- कोई व्यापक LAN या निजी-नेटवर्क स्वतः-अनुमोदन मोड मौजूद नहीं है; SSH-सत्यापित
+  स्वतः-अनुमोदन (ऊपर) के लिए क्रिप्टोग्राफ़िक डिवाइस-कुंजी मिलान आवश्यक है, केवल
+  नेटवर्क निकटता कभी पर्याप्त नहीं होती।
+- केवल बिना अनुरोधित स्कोप वाला नया `role: node` डिवाइस पेयरिंग अनुरोध
+  पात्र है।
+- ऑपरेटर, ब्राउज़र, Control UI और WebChat क्लाइंट मैन्युअल रहते हैं।
+- भूमिका, स्कोप, मेटाडेटा और सार्वजनिक-कुंजी अपग्रेड मैन्युअल रहते हैं।
+- समान-होस्ट लूपबैक विश्वसनीय-प्रॉक्सी हेडर पथ पात्र नहीं हैं, क्योंकि उस
+  पथ को स्थानीय कॉलर द्वारा स्पूफ़ किया जा सकता है।
 
-## Metadata-upgrade auto-approval
+## मौन पेयरिंग प्रतिस्थापन सफ़ाई
 
-जब पहले से paired device केवल non-sensitive metadata changes
-(उदाहरण के लिए, display name या client platform hints) के साथ reconnect करता है, OpenClaw उसे
-`metadata-upgrade` के रूप में treat करता है। Silent auto-approval narrow है: यह केवल
-trusted non-browser local reconnects पर apply होता है, जिन्होंने local
-या shared credentials का possession पहले ही prove किया हो, जिसमें OS
-version metadata changes के बाद same-host native app reconnects शामिल हैं। Browser/Control UI clients और remote clients अभी भी
-explicit re-approval flow का उपयोग करते हैं। Scope upgrades (read to write/admin) और
-public key changes metadata-upgrade auto-approval के लिए eligible **नहीं** हैं -
-वे explicit re-approval requests ही रहते हैं.
+गैर-संवादात्मक अनुमोदन युग्मित-डिवाइस पंक्ति पर अपना उद्गम रिकॉर्ड करते हैं:
+समान-होस्ट स्थानीय नीति अनुमोदन `silent` के रूप में, विश्वसनीय-CIDR Node अनुमोदन
+`trusted-cidr` के रूप में और SSH-सत्यापित Node अनुमोदन `ssh-verified` के रूप में। जिन क्लाइंट की स्टेट डायरेक्टरी अस्थायी है (अस्थायी होम,
+कंटेनर, प्रति-रन सैंडबॉक्स), वे प्रत्येक रन में नई डिवाइस कुंजी-जोड़ी बनाते हैं, और प्रत्येक
+रन एक बिलकुल नए डिवाइस के रूप में मौन रूप से फिर से पेयर होता है — सफ़ाई के बिना युग्मित सूची
+हर रन में एक बासी पंक्ति से बढ़ती है।
 
-## QR pairing helpers
+जब Gateway किसी **स्थानीय** डिवाइस पेयरिंग को मौन रूप से अनुमोदित करता है, तो वह
+उसी क्लाइंट क्लस्टर से संबंधित पुराने `silent`-अनुमोदित रिकॉर्ड को सेवानिवृत्त करता है
+(जो `clientId`, `clientMode` और डिस्प्ले नाम से मेल खाते हैं) और वर्तमान में
+कनेक्टेड नहीं हैं। स्थानीय क्लाइंट स्वयं Gateway होस्ट पर चलते हैं, इसलिए क्लस्टर कुंजी
+किसी दूसरी मशीन से मेल नहीं खा सकती। सेवानिवृत्त पंक्तियाँ तुरंत अपने टोकन खो देती हैं;
+किसी भी मेल खाती लीगेसी Node पेयरिंग प्रविष्टि को साफ़ कर दिया जाता है और `node.pair.resolved`
+हटाने का इवेंट प्रसारित किया जाता है।
 
-`/pair qr` pairing payload को structured media के रूप में render करता है ताकि mobile और
-browser clients उसे सीधे scan कर सकें.
+सीमाएँ:
 
-Device delete करने से उस
-device id के लिए कोई भी stale pending pairing requests भी sweep हो जाते हैं, इसलिए revoke के बाद `nodes pending` orphaned rows नहीं दिखाता.
+- केवल वे रिकॉर्ड पात्र हैं जिनका नवीनतम अनुमोदन उसी होस्ट पर स्थानीय (`silent`) था,
+  ट्रिगर और लक्ष्य दोनों के रूप में। विश्वसनीय-CIDR और SSH-सत्यापित पेयरिंग
+  उन होस्ट के बीच होती हैं जहाँ प्रदर्शन मेटाडेटा मशीन की पहचान नहीं है, इसलिए उन्हें
+  कभी भी स्वचालित रूप से नहीं हटाया जाता — उनके लिए Control UI क्लीनअप या
+  `openclaw nodes remove` का उपयोग करें।
+- स्वामी द्वारा अनुमोदित और QR/सेटअप-कोड (बूटस्ट्रैप) पेयरिंग कभी भी
+  स्वचालित रूप से नहीं हटाई जातीं। उद्गम-जानकारी उपलब्ध होने से पहले अनुमोदित रिकॉर्ड सुरक्षित रहते हैं,
+  उसी डिवाइस आईडी के बाद में हुए मूक पुनः-अनुमोदन के बाद भी।
+- वर्तमान में कनेक्टेड डिवाइस छोड़ दिए जाते हैं, ताकि अलग-अलग स्थिति डायरेक्टरी वाले
+  समवर्ती स्थानीय सत्र लाइव रहने के दौरान अपने टोकन बनाए रखें। पिछले एक मिनट में अनुमोदित रिकॉर्ड
+  भी छोड़ दिए जाते हैं, ताकि एक साथ होने वाले पेयरिंग हैंडशेक अपने कनेक्शन पंजीकृत होने से पहले
+  एक-दूसरे को निष्क्रिय न कर सकें।
+- प्रभावित क्लाइंट संरचना के अनुसार स्थानीय होते हैं, इसलिए वे
+  अपने अगले कनेक्शन पर चुपचाप फिर से पेयर हो जाते हैं।
 
-## Locality और forwarded headers
+## मेटाडेटा-अपग्रेड का स्वचालित अनुमोदन
 
-Gateway pairing किसी connection को loopback केवल तब treat करती है जब raw socket
-और कोई upstream proxy evidence दोनों सहमत हों। यदि कोई request loopback पर आती है लेकिन
-`Forwarded`, कोई `X-Forwarded-*`, या `X-Real-IP` header evidence लाती है, तो वह
-forwarded-header evidence loopback locality claim को disqualify कर देता है। Pairing
-path तब request को same-host connect मानकर silently treat करने के बजाय explicit approval
-मांगता है। Operator auth पर equivalent rule के लिए [Trusted Proxy Auth](/hi/gateway/trusted-proxy-auth) देखें.
+जब पहले से पेयर किया गया डिवाइस केवल गैर-संवेदनशील मेटाडेटा
+परिवर्तनों (उदाहरण के लिए प्रदर्शन नाम या क्लाइंट प्लेटफ़ॉर्म संकेत) के साथ फिर से कनेक्ट होता है, तो OpenClaw
+इसे `metadata-upgrade` मानता है। मूक स्वचालित अनुमोदन का दायरा सीमित है: यह केवल
+विश्वसनीय गैर-ब्राउज़र स्थानीय पुनः-कनेक्शन पर लागू होता है, जो पहले ही
+स्थानीय या साझा क्रेडेंशियल के अधिकार को प्रमाणित कर चुके हैं, जिसमें
+OS संस्करण मेटाडेटा बदलने के बाद उसी होस्ट पर नेटिव ऐप के पुनः-कनेक्शन शामिल हैं।
+ब्राउज़र/Control UI क्लाइंट और रिमोट क्लाइंट अब भी स्पष्ट पुनः-अनुमोदन प्रवाह
+का उपयोग करते हैं। दायरा अपग्रेड (रीड से
+राइट/एडमिन) और सार्वजनिक कुंजी परिवर्तन मेटाडेटा-अपग्रेड स्वचालित अनुमोदन के लिए
+**पात्र नहीं** हैं; वे स्पष्ट पुनः-अनुमोदन अनुरोध बने रहते हैं।
 
-## Storage (local, private)
+## QR पेयरिंग सहायक
 
-Pairing state Gateway state directory (default `~/.openclaw`) के अंतर्गत stored है:
+`/pair qr` पेयरिंग पेलोड को संरचित मीडिया के रूप में रेंडर करता है, ताकि मोबाइल और
+ब्राउज़र क्लाइंट उसे सीधे स्कैन कर सकें।
 
-- `~/.openclaw/nodes/paired.json`
-- `~/.openclaw/nodes/pending.json`
+किसी डिवाइस को हटाने पर उस डिवाइस आईडी के सभी पुराने लंबित पेयरिंग अनुरोध भी
+हटा दिए जाते हैं, ताकि निरस्तीकरण के बाद `nodes pending` अनाथ पंक्तियाँ न दिखाए।
 
-यदि आप `OPENCLAW_STATE_DIR` override करते हैं, तो `nodes/` folder उसके साथ move होता है.
+## स्थानीयता और फ़ॉरवर्ड किए गए हेडर
 
-सुरक्षा नोट्स:
+Gateway पेयरिंग किसी कनेक्शन को केवल तभी लूपबैक मानती है, जब रॉ सॉकेट
+और अपस्ट्रीम प्रॉक्सी के सभी प्रमाण सहमत हों। यदि कोई अनुरोध लूपबैक पर आता है, लेकिन
+उसमें `Forwarded`, कोई भी `X-Forwarded-*`, या `X-Real-IP` हेडर प्रमाण मौजूद है, तो
+वह फ़ॉरवर्डेड-हेडर प्रमाण लूपबैक स्थानीयता के दावे को अमान्य कर देता है, और
+पेयरिंग पथ अनुरोध को उसी होस्ट का कनेक्शन मानकर चुपचाप स्वीकार करने के बजाय
+स्पष्ट अनुमोदन आवश्यक करता है। ऑपरेटर प्रमाणीकरण पर समान नियम के लिए
+[विश्वसनीय प्रॉक्सी प्रमाणीकरण](/hi/gateway/trusted-proxy-auth) देखें।
 
-- Tokens secrets हैं; `paired.json` को sensitive मानें.
-- Token rotate करने के लिए re-approval (या node entry delete करना) आवश्यक है.
+## संग्रहण (स्थानीय, निजी)
 
-## Transport behavior
+पेयरिंग स्थिति, Gateway स्थिति डायरेक्टरी के अंतर्गत साझा SQLite स्थिति
+डेटाबेस में पेयर किए गए डिवाइस रिकॉर्ड पर रहती है (डिफ़ॉल्ट `~/.openclaw`):
 
-- Transport **stateless** है; यह membership store नहीं करता.
-- यदि Gateway offline है या pairing disabled है, तो nodes pair नहीं कर सकते.
-- यदि Gateway remote mode में है, तो pairing फिर भी remote Gateway के store के विरुद्ध होती है.
+- `~/.openclaw/state/openclaw.sqlite` (डिवाइस प्रमाणीकरण वाले पेयर किए गए डिवाइस,
+  अनुमोदित Node सतहें, लंबित सतह अनुरोध, लंबित डिवाइस पेयरिंग
+  अनुरोध और बूटस्ट्रैप टोकन)
+
+यदि आप `OPENCLAW_STATE_DIR` को ओवरराइड करते हैं, तो डेटाबेस भी उसके साथ स्थानांतरित हो जाता है। JSON स्टोर वाली
+रिलीज़ से अपग्रेड किए गए Gateway उन्हें स्टार्टअप पर आयात करते हैं और
+`devices/*.json.migrated` तथा `nodes/*.json.migrated` अभिलेख पीछे छोड़ देते हैं।
+
+सुरक्षा संबंधी टिप्पणियाँ:
+
+- डिवाइस टोकन गोपनीय जानकारी हैं; स्थिति डेटाबेस को संवेदनशील मानें।
+- डिवाइस टोकन को रोटेट करने के लिए `openclaw devices rotate` /
+  `device.token.rotate` का उपयोग होता है।
+
+## ट्रांसपोर्ट व्यवहार
+
+- ट्रांसपोर्ट **स्थितिरहित** है; यह सदस्यता संग्रहीत नहीं करता।
+- यदि Gateway ऑफ़लाइन है या पेयरिंग अक्षम है, तो Node पेयर नहीं कर सकते।
+- रिमोट मोड में, पेयरिंग रिमोट Gateway के स्टोर के विरुद्ध होती है।
 
 ## संबंधित
 
-- [Channel pairing](/hi/channels/pairing)
-- [Nodes](/hi/nodes)
-- [Devices CLI](/hi/cli/devices)
+- [चैनल पेयरिंग](/hi/channels/pairing)
+- [Node CLI](/hi/cli/nodes)
+- [डिवाइस CLI](/hi/cli/devices)

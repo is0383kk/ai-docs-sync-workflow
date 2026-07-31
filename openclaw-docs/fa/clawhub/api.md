@@ -1,12 +1,13 @@
 ---
 read_when:
     - ساخت کلاینت‌های API
-    - افزودن endpointها یا schemaها
-summary: نمای کلی و قراردادهای API عمومی REST (v1).
+    - افزودن نقاط پایانی یا طرح‌واره‌ها
+summary: مروری بر API عمومی REST (نسخه ۱) و قراردادهای آن.
 x-i18n:
-    generated_at: "2026-07-04T20:37:45Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T14:56:50Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 31b0051506912d2aa0d724ed7b6542e09ef16dc92998ddbdd3e379f783954436
     source_path: clawhub/api.md
@@ -19,18 +20,18 @@ x-i18n:
 
 OpenAPI: `/api/v1/openapi.json`
 
-## استفادهٔ دوباره از کاتالوگ عمومی
+## استفادهٔ مجدد از کاتالوگ عمومی
 
-می‌توانید یک کاتالوگ، فهرست، یا سطح جست‌وجوی شخص ثالث را بر پایهٔ APIهای خواندن عمومی ClawHub بسازید. فرادادهٔ عمومی Skills و فایل‌های Skills تحت قواعد مجوز Skills در ClawHub منتشر می‌شوند، درحالی‌که خود API دارای محدودیت نرخ است و باید مسئولانه مصرف شود.
+می‌توانید با استفاده از APIهای خواندنی عمومی ClawHub، یک کاتالوگ، فهرست یا رابط جست‌وجوی شخص ثالث بسازید. فراداده‌ها و فایل‌های عمومی Skills طبق قواعد مجوز Skills در ClawHub منتشر می‌شوند، درحالی‌که خود API دارای محدودیت نرخ است و باید مسئولانه از آن استفاده شود.
 
-راهنماها:
+رهنمودها:
 
-- برای فهرست‌های کاتالوگ از endpointهای خواندن عمومی مانند `GET /api/v1/skills`، `GET /api/v1/search`، و `GET /api/v1/skills/{slug}` استفاده کنید.
-- پاسخ‌ها را کش کنید و به‌جای polling تهاجمی، به `429`، `Retry-After`، و سربرگ‌های محدودیت نرخ احترام بگذارید.
-- هنگام نمایش فهرست‌ها، به URL متعارف Skills در ClawHub لینک بدهید تا کاربران بتوانند رکورد رجیستری منبع را بررسی کنند.
-- از URLهای صفحهٔ متعارف به شکل `https://clawhub.ai/<owner>/skills/<slug>` استفاده کنید.
-- القا نکنید که ClawHub سایت شخص ثالث را تأیید، راستی‌آزمایی، یا اداره می‌کند.
-- محتوای پنهان، خصوصی، یا مسدودشده توسط moderation را با دور زدن فیلترهای API عمومی یا مرزهای احراز هویت mirror نکنید.
+- برای فهرست‌های کاتالوگ، از نقطه‌های پایانی خواندنی عمومی مانند `GET /api/v1/skills`، `GET /api/v1/search` و `GET /api/v1/skills/{slug}` استفاده کنید.
+- به‌جای نظرسنجی مکرر، پاسخ‌ها را ذخیره کنید و به `429`، `Retry-After` و سرآیندهای محدودیت نرخ احترام بگذارید.
+- هنگام نمایش فهرست‌ها، به نشانی متعارف Skill در ClawHub پیوند دهید تا کاربران بتوانند رکورد رجیستری منبع را بررسی کنند.
+- از نشانی‌های متعارف صفحه با قالب `https://clawhub.ai/<owner>/skills/<slug>` استفاده کنید.
+- این تصور را ایجاد نکنید که ClawHub وب‌سایت شخص ثالث را تأیید، راستی‌آزمایی یا اداره می‌کند.
+- با دور زدن فیلترهای API عمومی یا مرزهای احراز هویت، محتوای پنهان، خصوصی یا مسدودشده توسط نظارت را آینه‌سازی نکنید.
 
 ## احراز هویت
 
@@ -42,24 +43,24 @@ OpenAPI: `/api/v1/openapi.json`
 اعمال آگاه از احراز هویت:
 
 - درخواست‌های ناشناس: به‌ازای هر IP.
-- درخواست‌های احرازشده (توکن Bearer معتبر): به‌ازای bucket هر کاربر.
-- توکن ناموجود/نامعتبر به اعمال بر پایهٔ IP برمی‌گردد.
+- درخواست‌های احرازشده (توکن Bearer معتبر): به‌ازای هر سبد کاربر.
+- توکن مفقود یا نامعتبر به اعمال محدودیت بر اساس IP بازمی‌گردد.
 
-- خواندن: 3000/min به‌ازای هر IP، 12000/min به‌ازای هر key
-- نوشتن: 300/min به‌ازای هر IP، 3000/min به‌ازای هر key
-- دانلود: 1200/min به‌ازای هر IP، 6000/min به‌ازای هر key
+- خواندن: 3000/دقیقه به‌ازای هر IP، 12000/دقیقه به‌ازای هر کلید
+- نوشتن: 300/دقیقه به‌ازای هر IP، 3000/دقیقه به‌ازای هر کلید
+- دانلود: 1200/دقیقه به‌ازای هر IP، 6000/دقیقه به‌ازای هر کلید
 
-سربرگ‌ها: `X-RateLimit-Limit`، `X-RateLimit-Reset`، `RateLimit-Limit`، `RateLimit-Reset`;
-`X-RateLimit-Remaining`، `RateLimit-Remaining`، و `Retry-After` در `429` گنجانده می‌شوند.
+سرآیندها: `X-RateLimit-Limit`، `X-RateLimit-Reset`، `RateLimit-Limit`، `RateLimit-Reset`؛
+`X-RateLimit-Remaining`، `RateLimit-Remaining` و `Retry-After` در `429` گنجانده می‌شوند.
 
 معناشناسی:
 
-- `X-RateLimit-Reset`: ثانیه‌های Unix epoch (زمان بازنشانی مطلق)
-- `RateLimit-Reset`: ثانیه‌های تأخیر تا بازنشانی
-- `X-RateLimit-Remaining` / `RateLimit-Remaining`: بودجهٔ دقیق باقی‌مانده وقتی
-  وجود داشته باشد؛ درخواست‌های موفق sharded آن را حذف می‌کنند، نه اینکه یک مقدار
-  تقریبی سراسری برگردانند
-- `Retry-After`: ثانیه‌های تأخیر برای انتظار روی `429`
+- `X-RateLimit-Reset`: ثانیه‌های دورهٔ یونیکس (زمان مطلق بازنشانی)
+- `RateLimit-Reset`: مدت تأخیر برحسب ثانیه تا بازنشانی
+- `X-RateLimit-Remaining` / `RateLimit-Remaining`: بودجهٔ دقیق باقی‌مانده در صورت
+  وجود؛ درخواست‌های موفق بخش‌بندی‌شده به‌جای بازگرداندن یک مقدار تقریبی
+  سراسری، آن را حذف می‌کنند
+- `Retry-After`: مدت تأخیر برحسب ثانیه برای انتظار در `429`
 
 نمونهٔ `429`:
 
@@ -74,33 +75,33 @@ ratelimit-reset: 34
 retry-after: 34
 ```
 
-مدیریت کلاینت:
+مدیریت سمت کلاینت:
 
-- وقتی `Retry-After` وجود دارد، آن را ترجیح دهید.
-- در غیر این صورت از `RateLimit-Reset` استفاده کنید یا تأخیر را از `X-RateLimit-Reset` استخراج کنید.
-- به تلاش‌های دوباره jitter اضافه کنید.
+- در صورت وجود، `Retry-After` را ترجیح دهید.
+- در غیر این صورت، از `RateLimit-Reset` استفاده کنید یا تأخیر را از `X-RateLimit-Reset` محاسبه کنید.
+- به تلاش‌های مجدد جیتر اضافه کنید.
 
 ## خطاها
 
-- خطاهای v1 متن ساده هستند (`text/plain; charset=utf-8`)، شامل `400`،
-  `401`، `403`، `404`، `429`، و پاسخ‌های دانلود مسدودشده.
-- پارامترهای query ناشناخته برای سازگاری نادیده گرفته می‌شوند.
-- پارامترهای query شناخته‌شده با مقدارهای نامعتبر `400` برمی‌گردانند.
+- خطاهای نسخهٔ ۱ متن ساده هستند (`text/plain; charset=utf-8`)، از جمله `400`،
+  `401`، `403`، `404`، `429` و پاسخ‌های دانلود مسدودشده.
+- پارامترهای پرس‌وجوی ناشناخته برای سازگاری نادیده گرفته می‌شوند.
+- پارامترهای پرس‌وجوی شناخته‌شده با مقادیر نامعتبر، `400` را بازمی‌گردانند.
 
-## Endpointها
+## نقطه‌های پایانی
 
 خواندن عمومی:
 
 - `GET /api/v1/search?q=...`
   - فیلترهای اختیاری: `highlightedOnly=true`، `nonSuspiciousOnly=true`
-  - نام مستعار legacy: `nonSuspicious=true`
+  - نام مستعار قدیمی: `nonSuspicious=true`
 - `GET /api/v1/skills?limit=&cursor=&sort=`
-  - `sort`: `updated` (پیش‌فرض)، `recommended` (`default`)، `createdAt` (`newest`)، `downloads`، `stars` (`rating`)، نام‌های مستعار نصب legacy یعنی `installsCurrent`/`installs`/`installsAllTime` به `downloads` نگاشت می‌شوند، `trending`
-  - مقدارهای نامعتبر `sort` مقدار `400` برمی‌گردانند
-  - `cursor` برای sortهای غیر از `trending` اعمال می‌شود
+  - `sort`: `updated` (پیش‌فرض)، `recommended` (`default`)، `createdAt` (`newest`)، `downloads`، `stars` (`rating`)، نام‌های مستعار قدیمی نصب `installsCurrent`/`installs`/`installsAllTime` به `downloads`، `trending` نگاشت می‌شوند
+  - مقادیر نامعتبر `sort`، `400` را بازمی‌گردانند
+  - `cursor` برای مرتب‌سازی‌های غیر `trending` اعمال می‌شود
   - فیلتر اختیاری: `nonSuspiciousOnly=true`
-  - نام مستعار legacy: `nonSuspicious=true`
-  - با `nonSuspiciousOnly=true`، صفحه‌های مبتنی بر cursor ممکن است کمتر از `limit` مورد داشته باشند؛ برای ادامه از `nextCursor` استفاده کنید.
+  - نام مستعار قدیمی: `nonSuspicious=true`
+  - با `nonSuspiciousOnly=true`، صفحه‌های مبتنی بر مکان‌نما ممکن است کمتر از `limit` مورد داشته باشند؛ برای ادامه از `nextCursor` استفاده کنید.
   - `recommended` از سیگنال‌های تعامل و تازگی استفاده می‌کند.
 - `GET /api/v1/skills/{slug}`
 - `GET /api/v1/skills/{slug}/moderation`
@@ -110,16 +111,18 @@ retry-after: 34
 - `GET /api/v1/skills/{slug}/file?path=&version=&tag=`
 - `GET /api/v1/resolve?slug=&hash=`
 - `GET /api/v1/download?slug=&version=&tag=`
-  - Skills میزبانی‌شده byteهای ZIP قطعی برمی‌گردانند.
-  - Skills فعلی مبتنی بر GitHub با اسکن `clean` یا `suspicious` به‌جای byteهای ClawHub، یک توصیف‌گر handoff از نوع JSON `public-github` برمی‌گردانند.
+  - Skills میزبانی‌شده، بایت‌های ZIP قطعی بازمی‌گردانند.
+  - Skills فعلی مبتنی بر GitHub با اسکن `clean` یا `suspicious`، به‌جای بایت‌های ClawHub
+    یک توصیف‌گر واگذاری JSON با `public-github` بازمی‌گردانند.
 - `GET /api/v1/skills/export?startDate=&endDate=&limit=&cursor=`
-  - Skills میزبانی‌شده به‌صورت فایل‌های ذخیره‌شده export می‌شوند.
-  - Skills فعلی مبتنی بر GitHub با اسکن `clean` یا `suspicious` به‌صورت توصیف‌گرهای handoff از نوع `public-github` export می‌شوند.
+  - Skills میزبانی‌شده به‌شکل فایل‌های ذخیره‌شده صادر می‌شوند.
+  - Skills فعلی مبتنی بر GitHub با اسکن `clean` یا `suspicious`،
+    به‌شکل توصیف‌گرهای واگذاری `public-github` صادر می‌شوند.
 - `GET /api/v1/packages?limit=&cursor=&sort=`
-  - `sort`: `updated` (پیش‌فرض)، `recommended`، `downloads`، نام مستعار legacy یعنی `installs`
-  - مقدارهای نامعتبر `sort` مقدار `400` برمی‌گردانند
+  - `sort`: `updated` (پیش‌فرض)، `recommended`، `downloads`، نام مستعار قدیمی `installs`
+  - مقادیر نامعتبر `sort`، `400` را بازمی‌گردانند
 - `GET /api/v1/plugins?limit=&cursor=&sort=`
-  - `sort`: `recommended` (پیش‌فرض)، `downloads`، `updated`، نام مستعار legacy یعنی `installs`
+  - `sort`: `recommended` (پیش‌فرض)، `downloads`، `updated`، نام مستعار قدیمی `installs`
 - `GET /api/v1/plugins/search?q=...`
 - `GET /api/v1/packages/{name}/versions/{version}/artifact`
 - `GET /api/v1/packages/{name}/versions/{version}/security`
@@ -129,7 +132,7 @@ retry-after: 34
 
 نیازمند احراز هویت:
 
-- `POST /api/v1/skills` (انتشار، multipart ترجیح داده می‌شود)
+- `POST /api/v1/skills` (انتشار، چندبخشی ترجیح داده می‌شود)
 - `DELETE /api/v1/skills/{slug}`
 - `DELETE /api/v1/packages/{name}`
 - `POST /api/v1/skills/{slug}/undelete`
@@ -149,8 +152,8 @@ retry-after: 34
 
 فقط مدیر:
 
-- `POST /api/v1/users/reserve` اسلاگ‌های ریشه و placeholderهای package خصوصی بدون release را برای handle مالک رزرو می‌کند.
+- `POST /api/v1/users/reserve` نامک‌های ریشه و جای‌نگهدارهای خصوصی بستهٔ بدون انتشار را برای شناسهٔ مالک رزرو می‌کند.
 
-## Legacy
+## قدیمی
 
-`/api/*` و `/api/cli/*` از نوع legacy هنوز در دسترس هستند. `DEPRECATIONS.md` را ببینید.
+`/api/*` و `/api/cli/*` قدیمی همچنان در دسترس هستند. `DEPRECATIONS.md` را ببینید.

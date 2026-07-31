@@ -1,49 +1,55 @@
 ---
 read_when:
-    - 你想让 OpenClaw 使用 antirez/ds4 运行
+    - 你想要使用 antirez/ds4 运行 OpenClaw
     - 你需要一个支持工具调用的本地 DeepSeek V4 Flash 后端
-    - 你需要用于 ds4-server 的 OpenClaw 配置
-summary: 通过 ds4（本地兼容 OpenAI 的 DeepSeek V4 Flash 服务器）运行 OpenClaw
+    - 你需要 ds4-server 的 OpenClaw 配置
+summary: 通过 ds4（本地 DeepSeek V4 Flash OpenAI 兼容服务器）运行 OpenClaw
 title: ds4
 x-i18n:
-    generated_at: "2026-07-11T20:52:51Z"
+    generated_at: "2026-07-26T06:57:35Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: be449813295648694625ef8003b3f4b12903535b74816916ca5af0695174fbf4
     source_path: providers/ds4.md
     workflow: 16
 ---
 
-[ds4](https://github.com/antirez/ds4) 通过本地 Metal 后端提供 DeepSeek V4 Flash，并提供兼容 OpenAI 的 `/v1` API。OpenClaw 通过通用 `openai-completions` 提供商系列连接到 ds4。
+[ds4](https://github.com/antirez/ds4) 通过本地 Metal 后端提供 DeepSeek V4 Flash，并支持兼容 OpenAI 的 `/v1` API。OpenClaw 通过通用 `openai-completions` 提供商系列连接到 ds4。
 
-ds4 不是 OpenClaw 内置的提供商插件。请在 `models.providers.ds4` 下配置它，然后选择 `ds4/deepseek-v4-flash`。
+ds4 不是 OpenClaw 内置的提供商插件。请在
+`models.providers.ds4` 下配置它，然后选择 `ds4/deepseek-v4-flash`。
 
 | 属性        | 值                                                        |
 | ----------- | --------------------------------------------------------- |
-| 提供商 ID   | `ds4`                                                     |
+| 提供商 ID   | `ds4`                                        |
 | 插件        | 无（仅配置）                                              |
-| API         | 兼容 OpenAI 的 Chat Completions（`openai-completions`）   |
-| 基础 URL    | `http://127.0.0.1:18000/v1`（建议）                       |
-| 模型 ID     | `deepseek-v4-flash`                                       |
-| 工具调用    | OpenAI 风格的 `tools` / `tool_calls`                      |
-| 推理        | DeepSeek 风格的 `thinking` 和 `reasoning_effort`          |
+| API         | 兼容 OpenAI 的 Chat Completions（`openai-completions`）     |
+| 基础 URL    | `http://127.0.0.1:18000/v1`（建议）                                |
+| 模型 ID     | `deepseek-v4-flash`                                        |
+| 工具调用    | OpenAI 风格的 `tools` / `tool_calls`     |
+| 推理        | DeepSeek 风格的 `thinking` 和 `reasoning_effort`  |
 
 ## 要求
 
 - 支持 Metal 的 macOS。
 - 可正常工作的 ds4 检出目录，其中包含 `ds4-server` 和 DeepSeek V4 Flash GGUF 文件。
-- 有足够的内存容纳你选择的上下文；较大的 `--ctx` 值会在服务器启动时分配更多 KV 内存。
+- 足够的内存以容纳所选上下文；更大的 `--ctx` 值会在服务器启动时分配更多
+  KV 内存。
 
 <Warning>
-OpenClaw 智能体轮次包含工具架构和工作区上下文。像 `--ctx 4096` 这样很小的上下文可能可以通过直接 curl 测试，但在完整智能体运行时会因 `500 prompt exceeds context` 而失败。进行智能体和工具冒烟测试时，请至少使用 `--ctx 32768`。只有在内存充足并且需要启用 ds4 Think Max 时，才使用 `--ctx 393216`。
+OpenClaw 智能体轮次包含工具架构和工作区上下文。像 `--ctx 4096` 这样很小的上下文
+可能通过直接 curl 测试，但完整智能体运行会因
+`500 prompt exceeds context` 而失败。智能体和工具冒烟测试应至少使用 `--ctx 32768`。仅在内存充足且需要启用 ds4
+Think Max 时使用 `--ctx 393216`。
 </Warning>
 
 ## 快速开始
 
 <Steps>
-  <Step title="Start ds4-server">
-    将 `<DS4_DIR>` 替换为你的 ds4 检出路径。
+  <Step title="启动 ds4-server">
+    将 `<DS4_DIR>` 替换为 ds4 检出目录的路径。
 
     ```bash
     <DS4_DIR>/ds4-server \
@@ -55,16 +61,17 @@ OpenClaw 智能体轮次包含工具架构和工作区上下文。像 `--ctx 409
     ```
 
   </Step>
-  <Step title="Verify the OpenAI-compatible endpoint">
+  <Step title="验证兼容 OpenAI 的端点">
     ```bash
     curl http://127.0.0.1:18000/v1/models
     ```
 
-    响应中应包含 `deepseek-v4-flash`。
+    响应应包含 `deepseek-v4-flash`。
 
   </Step>
-  <Step title="Add the OpenClaw provider config">
-    添加[完整配置](#full-config)中的配置，然后运行一次性模型检查：
+  <Step title="添加 OpenClaw 提供商配置">
+    添加[完整配置](#full-config)中的配置，然后运行一次性模型
+    检查：
 
     ```bash
     openclaw infer model run \
@@ -127,11 +134,13 @@ OpenClaw 智能体轮次包含工具架构和工作区上下文。像 `--ctx 409
 }
 ```
 
-请让 `contextWindow` 与 `ds4-server --ctx` 保持一致。除非你有意让 OpenClaw 请求的输出少于服务器默认值，否则请让 `maxTokens` 与 `--tokens` 保持一致。
+让 `contextWindow` 与 `ds4-server --ctx` 保持一致。让 `maxTokens` 与
+`--tokens` 保持一致，除非你有意让 OpenClaw 请求比服务器默认值更少的输出。
 
 ## 按需启动
 
-OpenClaw 可以仅在选中 `ds4/...` 模型时启动 ds4。请将 `localService` 添加到同一个提供商条目：
+OpenClaw 可以仅在选择 `ds4/...` 模型时启动 ds4。将
+`localService` 添加到同一个提供商条目：
 
 ```json5
 {
@@ -186,16 +195,18 @@ OpenClaw 可以仅在选中 `ds4/...` 模型时启动 ds4。请将 `localService
 }
 ```
 
-`command` 必须是可执行文件的绝对路径。不会使用 Shell 查找或 `~` 展开。有关每个 `localService` 字段的信息，请参阅[本地模型服务](/zh-CN/gateway/local-model-services)。
+`command` 必须是绝对可执行文件路径。不会使用 shell 查找或 `~` 展开。
+有关所有 `localService` 字段，请参阅[本地模型服务](/zh-CN/gateway/local-model-services)。
 
 ## Think Max
 
-只有同时满足以下两个条件时，ds4 才会应用 Think Max：
+仅当以下两个条件都满足时，ds4 才会应用 Think Max：
 
-- `ds4-server` 使用 `--ctx 393216` 或更高值启动。
-- 请求使用 `reasoning_effort: "max"`（或等效的 ds4 推理强度字段）。
+- `ds4-server` 以 `--ctx 393216` 或更高值启动。
+- 请求使用 `reasoning_effort: "max"`（或等效的 ds4 工作强度字段）。
 
-如果运行如此大的上下文，请同时更新服务器标志和 OpenClaw 模型元数据：
+如果运行如此大的上下文，请同时更新服务器标志和 OpenClaw 模型
+元数据：
 
 ```json5
 {
@@ -214,7 +225,7 @@ OpenClaw 可以仅在选中 `ds4/...` 模型时启动 ds4。请将 `localService
 
 ## 测试
 
-绕过 OpenClaw，直接进行 HTTP 检查：
+绕过 OpenClaw 进行直接 HTTP 检查：
 
 ```bash
 curl http://127.0.0.1:18000/v1/chat/completions \
@@ -222,7 +233,7 @@ curl http://127.0.0.1:18000/v1/chat/completions \
   -d '{"model":"deepseek-v4-flash","messages":[{"role":"user","content":"Reply with exactly: ds4-ok"}],"max_tokens":16,"stream":false,"thinking":{"type":"disabled"}}'
 ```
 
-OpenClaw 模型路由（与快速开始中的检查相同）：
+OpenClaw 模型路由（与快速开始检查相同）：
 
 ```bash
 openclaw infer model run \
@@ -233,7 +244,7 @@ openclaw infer model run \
   --json
 ```
 
-完整智能体和工具调用冒烟测试，上下文至少为 32768：
+完整的智能体和工具调用冒烟测试，上下文至少为 32768：
 
 ```bash
 openclaw agent \
@@ -256,8 +267,9 @@ openclaw agent \
 ## 故障排查
 
 <AccordionGroup>
-  <Accordion title="curl /v1/models cannot connect">
-    ds4 未运行，或未绑定到 `baseUrl` 中的主机/端口。启动 `ds4-server`，然后重试：
+  <Accordion title="curl /v1/models 无法连接">
+    ds4 未运行，或未绑定到 `baseUrl` 中的主机/端口。启动
+    `ds4-server`，然后重试：
 
     ```bash
     curl http://127.0.0.1:18000/v1/models
@@ -265,29 +277,34 @@ openclaw agent \
 
   </Accordion>
 
-  <Accordion title="500 prompt exceeds context">
-    配置的 `--ctx` 对 OpenClaw 轮次而言过小。提高 `ds4-server --ctx`，然后更新 `models.providers.ds4.models[].contextWindow` 以保持一致。包含工具的完整智能体轮次所需的上下文远多于直接发送单条消息的 curl 请求。
+  <Accordion title="500 提示词超出上下文">
+    配置的 `--ctx` 对 OpenClaw 轮次来说太小。增大
+    `ds4-server --ctx`，然后更新 `models.providers.ds4.models[].contextWindow`
+    以保持一致。包含工具的完整智能体轮次需要的上下文远多于直接发送单条消息的 curl 请求。
   </Accordion>
 
-  <Accordion title="Think Max does not activate">
-    只有当 `--ctx` 至少为 `393216`，并且请求指定 `reasoning_effort: "max"` 时，ds4 才会使用 Think Max。较小的上下文会回退到高强度推理。
+  <Accordion title="Think Max 未激活">
+    仅当 `--ctx` 至少为 `393216`，并且请求要求
+    `reasoning_effort: "max"` 时，ds4 才会使用 Think Max。较小的上下文会回退到高强度
+    推理。
   </Accordion>
 
-  <Accordion title="The first request is slow">
-    ds4 存在 Metal 冷启动驻留和模型预热阶段。当 OpenClaw 按需启动服务器时，请设置 `localService.readyTimeoutMs: 300000`。
+  <Accordion title="首次请求较慢">
+    ds4 存在 Metal 冷驻留和模型预热阶段。当 OpenClaw 按需启动服务器时，请设置
+    `localService.readyTimeoutMs: 300000`。
   </Accordion>
 </AccordionGroup>
 
 ## 相关内容
 
 <CardGroup cols={2}>
-  <Card title="Local model services" href="/zh-CN/gateway/local-model-services" icon="play">
-    在模型请求之前按需启动本地模型服务器。
+  <Card title="本地模型服务" href="/zh-CN/gateway/local-model-services" icon="play">
+    在模型请求前按需启动本地模型服务器。
   </Card>
-  <Card title="Local models" href="/zh-CN/gateway/local-models" icon="server">
+  <Card title="本地模型" href="/zh-CN/gateway/local-models" icon="server">
     选择并运行本地模型后端。
   </Card>
-  <Card title="Model providers" href="/zh-CN/concepts/model-providers" icon="layers">
+  <Card title="模型提供商" href="/zh-CN/concepts/model-providers" icon="layers">
     配置提供商引用、身份验证和故障转移。
   </Card>
   <Card title="DeepSeek" href="/zh-CN/providers/deepseek" icon="brain">

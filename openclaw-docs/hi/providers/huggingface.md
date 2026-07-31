@@ -1,49 +1,51 @@
 ---
 read_when:
     - आप OpenClaw के साथ Hugging Face Inference का उपयोग करना चाहते हैं
-    - आपको HF टोकन पर्यावरण चर या CLI प्रमाणीकरण विकल्प चाहिए
+    - आपको HF टोकन एनवायरनमेंट वेरिएबल या CLI प्रमाणीकरण विकल्प की आवश्यकता है
 summary: Hugging Face Inference सेटअप (प्रमाणीकरण + मॉडल चयन)
-title: Hugging Face (इन्फरेंस)
+title: Hugging Face (इन्फ़रेंस)
 x-i18n:
-    generated_at: "2026-06-28T23:59:20Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:25:44Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 93b3049e8d42787acba12ec3ddf70603159251dae1d870047f8ffc9242f202a5
+    source_hash: 92c400b78c5ad2cc724ad4029560dccc5bc2006fdeae400fc6b58998e727e17c
     source_path: providers/huggingface.md
     workflow: 16
 ---
 
-[Hugging Face Inference Providers](https://huggingface.co/docs/inference-providers) एकल router API के माध्यम से OpenAI-संगत चैट completions प्रदान करते हैं। आपको एक token से कई models (DeepSeek, Llama, और अधिक) तक पहुंच मिलती है। OpenClaw **OpenAI-संगत endpoint** (केवल chat completions) का उपयोग करता है; text-to-image, embeddings, या speech के लिए [HF inference clients](https://huggingface.co/docs/api-inference/quicktour) का सीधे उपयोग करें।
+[Hugging Face Inference Providers](https://huggingface.co/docs/inference-providers) एक टोकन के अंतर्गत कई होस्ट किए गए मॉडल (DeepSeek, Llama और अन्य) के लिए OpenAI-संगत चैट कम्प्लीशन्स राउटर उपलब्ध कराता है। OpenClaw केवल **चैट कम्प्लीशन्स एंडपॉइंट** से संचार करता है; टेक्स्ट-टू-इमेज, एम्बेडिंग या स्पीच के लिए सीधे [HF इन्फ़रेंस क्लाइंट](https://huggingface.co/docs/api-inference/quicktour) का उपयोग करें।
 
-- प्रदाता: `huggingface`
-- प्रमाणीकरण: `HUGGINGFACE_HUB_TOKEN` या `HF_TOKEN` (**Make calls to Inference Providers** के साथ fine-grained token)
-- API: OpenAI-संगत (`https://router.huggingface.co/v1`)
-- बिलिंग: एकल HF token; [मूल्य निर्धारण](https://huggingface.co/docs/inference-providers/pricing) एक निःशुल्क tier के साथ provider rates का पालन करता है।
+| गुण          | मान                                                                                                                         |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| प्रोवाइडर आईडी | `huggingface`                                                                                                         |
+| Plugin       | बंडल किया गया (डिफ़ॉल्ट रूप से सक्षम, इंस्टॉल करने का कोई चरण नहीं)                                                         |
+| प्रमाणीकरण एनवायरनमेंट वेरिएबल | `HUGGINGFACE_HUB_TOKEN` या `HF_TOKEN` (सूक्ष्म अनुमतियों वाला टोकन)                                  |
+| API          | OpenAI-संगत (`https://router.huggingface.co/v1`)                                                                                            |
+| बिलिंग       | एक HF टोकन; [मूल्य निर्धारण](https://huggingface.co/docs/inference-providers/pricing) मुफ़्त टियर के साथ प्रोवाइडर की दरों का अनुसरण करता है |
 
-## शुरुआत करना
+## आरंभ करना
 
 <Steps>
-  <Step title="एक fine-grained token बनाएं">
-    [Hugging Face Settings Tokens](https://huggingface.co/settings/tokens/new?ownUserPermissions=inference.serverless.write&tokenType=fineGrained) पर जाएं और नया fine-grained token बनाएं।
+  <Step title="सूक्ष्म अनुमतियों वाला टोकन बनाएँ">
+    [Hugging Face Settings Tokens](https://huggingface.co/settings/tokens/new?ownUserPermissions=inference.serverless.write&tokenType=fineGrained) पर जाएँ और सूक्ष्म अनुमतियों वाला नया टोकन बनाएँ।
 
     <Warning>
-    token में **Make calls to Inference Providers** अनुमति सक्षम होनी चाहिए, नहीं तो API requests अस्वीकार कर दिए जाएंगे।
+    टोकन के लिए **Make calls to Inference Providers** अनुमति सक्षम होनी चाहिए, अन्यथा API अनुरोध अस्वीकार कर दिए जाएँगे।
     </Warning>
 
   </Step>
-  <Step title="onboarding चलाएं">
-    provider dropdown में **Hugging Face** चुनें, फिर संकेत मिलने पर अपनी API key दर्ज करें:
+  <Step title="ऑनबोर्डिंग चलाएँ">
+    प्रोवाइडर ड्रॉपडाउन में **Hugging Face** चुनें, फिर संकेत मिलने पर अपनी API कुंजी दर्ज करें:
 
     ```bash
     openclaw onboard --auth-choice huggingface-api-key
     ```
 
   </Step>
-  <Step title="default model चुनें">
-    **Default Hugging Face model** dropdown में, वह model चुनें जिसे आप चाहते हैं। जब आपके पास valid token होता है, तो सूची Inference API से load होती है; अन्यथा built-in सूची दिखाई जाती है। आपका चयन default model के रूप में save किया जाता है।
-
-    आप बाद में config में default model set या change भी कर सकते हैं:
+  <Step title="डिफ़ॉल्ट मॉडल चुनें">
+    **Default Hugging Face model** ड्रॉपडाउन में कोई मॉडल चुनें। आपका टोकन मान्य होने पर सूची Inference API से लोड होती है; अन्यथा OpenClaw नीचे दिया गया अंतर्निहित कैटलॉग दिखाता है। आपका चयन `agents.defaults.model.primary` के रूप में सहेजा जाता है:
 
     ```json5
     {
@@ -56,14 +58,14 @@ x-i18n:
     ```
 
   </Step>
-  <Step title="पुष्टि करें कि model उपलब्ध है">
+  <Step title="सत्यापित करें कि मॉडल उपलब्ध है">
     ```bash
     openclaw models list --provider huggingface
     ```
   </Step>
 </Steps>
 
-### Non-interactive setup
+### गैर-इंटरैक्टिव सेटअप
 
 ```bash
 openclaw onboard --non-interactive \
@@ -72,48 +74,48 @@ openclaw onboard --non-interactive \
   --huggingface-api-key "$HF_TOKEN"
 ```
 
-यह `huggingface/deepseek-ai/DeepSeek-R1` को default model के रूप में set करेगा।
+`huggingface/deepseek-ai/DeepSeek-R1` को डिफ़ॉल्ट मॉडल के रूप में सेट करता है।
 
-## Model IDs
+## मॉडल आईडी
 
-Model refs `huggingface/<org>/<model>` (Hub-style IDs) form का उपयोग करते हैं। नीचे दी गई सूची **GET** `https://router.huggingface.co/v1/models` से है; आपके catalog में और भी शामिल हो सकते हैं।
+मॉडल संदर्भ `huggingface/<org>/<model>` प्रारूप (Hub-शैली की आईडी) का उपयोग करते हैं। OpenClaw का अंतर्निहित कैटलॉग:
 
-| Model                  | Ref (`huggingface/` prefix के साथ)    |
-| ---------------------- | ----------------------------------- |
-| DeepSeek R1            | `deepseek-ai/DeepSeek-R1`           |
-| DeepSeek V3.2          | `deepseek-ai/DeepSeek-V3.2`         |
-| Qwen3 8B               | `Qwen/Qwen3-8B`                     |
-| Qwen2.5 7B Instruct    | `Qwen/Qwen2.5-7B-Instruct`          |
-| Qwen3 32B              | `Qwen/Qwen3-32B`                    |
-| Llama 3.3 70B Instruct | `meta-llama/Llama-3.3-70B-Instruct` |
-| Llama 3.1 8B Instruct  | `meta-llama/Llama-3.1-8B-Instruct`  |
-| GPT-OSS 120B           | `openai/gpt-oss-120b`               |
-| GLM 4.7                | `zai-org/GLM-4.7`                   |
-| Kimi K2.5              | `moonshotai/Kimi-K2.5`              |
+| मॉडल          | संदर्भ (`huggingface/` उपसर्ग के साथ) |
+| ------------- | -------------------------------- |
+| DeepSeek R1   | `deepseek-ai/DeepSeek-R1`        |
+| DeepSeek V3.1 | `deepseek-ai/DeepSeek-V3.1`      |
+| GPT-OSS 120B  | `openai/gpt-oss-120b`            |
 
 <Tip>
-आप किसी भी model id में `:fastest` या `:cheapest` जोड़ सकते हैं। अपना default order [Inference Provider settings](https://hf.co/settings/inference-providers) में set करें; पूरी सूची के लिए [Inference Providers](https://huggingface.co/docs/inference-providers) और **GET** `https://router.huggingface.co/v1/models` देखें।
+आपका टोकन मान्य होने पर OpenClaw ऑनबोर्डिंग के समय और Gateway के आरंभ होने पर **GET** `https://router.huggingface.co/v1/models` से अन्य सभी मॉडल भी खोजता है, इसलिए आपके कैटलॉग में ऊपर दिए गए तीन मॉडलों से कहीं अधिक मॉडल शामिल हो सकते हैं। आप किसी भी मॉडल आईडी के अंत में `:fastest` या `:cheapest` जोड़ सकते हैं; HF का राउटर अनुरूप इन्फ़रेंस प्रोवाइडर तक रूट करता है। [Inference Provider settings](https://hf.co/settings/inference-providers) में अपना डिफ़ॉल्ट प्रोवाइडर क्रम सेट करें।
 </Tip>
 
-## उन्नत configuration
+## उन्नत कॉन्फ़िगरेशन
 
 <AccordionGroup>
-  <Accordion title="Model discovery और onboarding dropdown">
-    OpenClaw **Inference endpoint को सीधे** call करके models discover करता है:
+  <Accordion title="मॉडल खोज और ऑनबोर्डिंग ड्रॉपडाउन">
+    OpenClaw निम्न अनुरोध से मॉडल खोजता है:
 
     ```bash
     GET https://router.huggingface.co/v1/models
+    Authorization: Bearer $HUGGINGFACE_HUB_TOKEN   # या $HF_TOKEN
     ```
 
-    (वैकल्पिक: पूरी सूची के लिए `Authorization: Bearer $HUGGINGFACE_HUB_TOKEN` या `$HF_TOKEN` भेजें; कुछ endpoints बिना auth के subset लौटाते हैं।) response OpenAI-style `{ "object": "list", "data": [ { "id": "Qwen/Qwen3-8B", "owned_by": "Qwen", ... }, ... ] }` है।
+    प्रतिक्रिया OpenAI-शैली की होती है: `{ "object": "list", "data": [ { "id": "Qwen/Qwen3-8B", "owned_by": "Qwen", ... }, ... ] }`।
 
-    जब आप Hugging Face API key configure करते हैं (onboarding, `HUGGINGFACE_HUB_TOKEN`, या `HF_TOKEN` के माध्यम से), OpenClaw उपलब्ध chat-completion models discover करने के लिए इस GET का उपयोग करता है। **interactive setup** के दौरान, token दर्ज करने के बाद आपको उस सूची से populate किया गया **Default Hugging Face model** dropdown दिखाई देता है (या request fail होने पर built-in catalog)। runtime पर (जैसे Gateway startup), key मौजूद होने पर, OpenClaw catalog refresh करने के लिए फिर से **GET** `https://router.huggingface.co/v1/models` call करता है। सूची को built-in catalog के साथ merge किया जाता है (context window और cost जैसे metadata के लिए)। यदि request fail हो जाता है या कोई key set नहीं है, तो केवल built-in catalog का उपयोग किया जाता है।
+    कॉन्फ़िगर की गई कुंजी (ऑनबोर्डिंग, `HUGGINGFACE_HUB_TOKEN` या `HF_TOKEN`) के साथ, इंटरैक्टिव सेटअप के दौरान **Default Hugging Face model** ड्रॉपडाउन में इस एंडपॉइंट से प्राप्त मॉडल भरे जाते हैं। Gateway आरंभ होने पर कैटलॉग को रीफ़्रेश करने के लिए वही कॉल दोहराई जाती है। खोजे गए मॉडलों को ऊपर दिए गए अंतर्निहित कैटलॉग के साथ मर्ज किया जाता है (आईडी मेल खाने पर कॉन्टेक्स्ट विंडो और लागत जैसे मेटाडेटा के लिए इसका उपयोग होता है)। यदि अनुरोध विफल होता है, कोई डेटा नहीं लौटाता या कोई कुंजी सेट नहीं है, तो OpenClaw केवल अंतर्निहित कैटलॉग का उपयोग करता है।
+
+    प्रोवाइडर हटाए बिना खोज अक्षम करें:
+
+    ```bash
+    openclaw config set plugins.entries.huggingface.config.discovery.enabled false
+    ```
 
   </Accordion>
 
-  <Accordion title="Model names, aliases, और policy suffixes">
-    - **API से नाम:** model display name **GET /v1/models से hydrate** होता है जब API `name`, `title`, या `display_name` लौटाता है; अन्यथा यह model id से derive होता है (जैसे `deepseek-ai/DeepSeek-R1` "DeepSeek R1" बन जाता है)।
-    - **display name override करें:** आप config में प्रति model custom label set कर सकते हैं ताकि वह CLI और UI में आपकी इच्छानुसार दिखाई दे:
+  <Accordion title="मॉडल नाम, उपनाम और नीति प्रत्यय">
+    - **API से नाम:** उपलब्ध होने पर खोजे गए मॉडल API के `name`, `title` या `display_name` का उपयोग करते हैं; अन्यथा OpenClaw मॉडल आईडी से नाम प्राप्त करता है (उदाहरण के लिए, `deepseek-ai/DeepSeek-R1` "DeepSeek R1" बन जाता है)।
+    - **प्रदर्शित नाम बदलें:** कॉन्फ़िगरेशन में प्रत्येक मॉडल के लिए कस्टम लेबल सेट करें:
 
     ```json5
     {
@@ -128,76 +130,31 @@ Model refs `huggingface/<org>/<model>` (Hub-style IDs) form का उपयो�
     }
     ```
 
-    - **Policy suffixes:** OpenClaw के bundled Hugging Face docs और helpers अभी इन दो suffixes को built-in policy variants मानते हैं:
-      - **`:fastest`** — सबसे अधिक throughput.
-      - **`:cheapest`** — प्रति output token सबसे कम cost.
-
-      आप इन्हें `models.providers.huggingface.models` में अलग entries के रूप में जोड़ सकते हैं या suffix के साथ `model.primary` set कर सकते हैं। आप अपना default provider order [Inference Provider settings](https://hf.co/settings/inference-providers) में भी set कर सकते हैं (कोई suffix नहीं = उस order का उपयोग करें)।
-
-    - **Config merge:** `models.providers.huggingface.models` में मौजूदा entries (जैसे `models.json` में) config merge होने पर रखी जाती हैं। इसलिए आपके द्वारा वहां set किए गए custom `name`, `alias`, या model options सुरक्षित रहते हैं।
+    - **नीति प्रत्यय:** `:fastest` और `:cheapest` HF राउटर के नियम हैं, इन्हें OpenClaw पुनर्लिखित नहीं करता: प्रत्यय को मॉडल आईडी के भाग के रूप में ज्यों का त्यों भेजा जाता है और HF का राउटर अनुरूप इन्फ़रेंस प्रोवाइडर चुनता है। यदि आप प्रत्येक प्रत्यय के लिए अलग उपनाम चाहते हैं, तो प्रत्येक वेरिएंट को `models.providers.huggingface.models` के अंतर्गत (या `model.primary` में) अलग प्रविष्टि के रूप में जोड़ें।
+    - **कॉन्फ़िगरेशन मर्ज:** कॉन्फ़िगरेशन मर्ज के दौरान `models.providers.huggingface.models` की मौजूदा प्रविष्टियाँ (उदाहरण के लिए, `models.json` में) रखी जाती हैं, इसलिए वहाँ सेट किए गए कस्टम `name`, `alias` या मॉडल विकल्प पुनः आरंभ होने के बाद भी बने रहते हैं।
 
   </Accordion>
 
-  <Accordion title="Environment और daemon setup">
-    यदि Gateway daemon (launchd/systemd) के रूप में चलता है, तो सुनिश्चित करें कि `HUGGINGFACE_HUB_TOKEN` या `HF_TOKEN` उस process के लिए उपलब्ध है (उदाहरण के लिए, `~/.openclaw/.env` में या `env.shellEnv` के माध्यम से)।
+  <Accordion title="एनवायरनमेंट और डेमन सेटअप">
+    यदि Gateway डेमन (launchd/systemd) के रूप में चलता है, तो सुनिश्चित करें कि उस प्रोसेस के लिए `HUGGINGFACE_HUB_TOKEN` या `HF_TOKEN` उपलब्ध हो (उदाहरण के लिए, `~/.openclaw/.env` में या `env.shellEnv` के माध्यम से)।
 
     <Note>
-    OpenClaw `HUGGINGFACE_HUB_TOKEN` और `HF_TOKEN` दोनों को env var aliases के रूप में स्वीकार करता है। इनमें से कोई भी काम करता है; यदि दोनों set हैं, तो `HUGGINGFACE_HUB_TOKEN` को प्राथमिकता मिलती है।
+    OpenClaw, `HUGGINGFACE_HUB_TOKEN` और `HF_TOKEN` दोनों स्वीकार करता है। यदि दोनों सेट हैं, तो `HUGGINGFACE_HUB_TOKEN` को प्राथमिकता मिलती है।
     </Note>
 
   </Accordion>
 
-  <Accordion title="Config: Qwen fallback के साथ DeepSeek R1">
+  <Accordion title="कॉन्फ़िगरेशन: फ़ॉलबैक के साथ DeepSeek R1">
     ```json5
     {
       agents: {
         defaults: {
           model: {
             primary: "huggingface/deepseek-ai/DeepSeek-R1",
-            fallbacks: ["huggingface/Qwen/Qwen3-8B"],
+            fallbacks: ["huggingface/openai/gpt-oss-120b"],
           },
           models: {
             "huggingface/deepseek-ai/DeepSeek-R1": { alias: "DeepSeek R1" },
-            "huggingface/Qwen/Qwen3-8B": { alias: "Qwen3 8B" },
-          },
-        },
-      },
-    }
-    ```
-  </Accordion>
-
-  <Accordion title="Config: cheapest और fastest variants के साथ Qwen">
-    ```json5
-    {
-      agents: {
-        defaults: {
-          model: { primary: "huggingface/Qwen/Qwen3-8B" },
-          models: {
-            "huggingface/Qwen/Qwen3-8B": { alias: "Qwen3 8B" },
-            "huggingface/Qwen/Qwen3-8B:cheapest": { alias: "Qwen3 8B (cheapest)" },
-            "huggingface/Qwen/Qwen3-8B:fastest": { alias: "Qwen3 8B (fastest)" },
-          },
-        },
-      },
-    }
-    ```
-  </Accordion>
-
-  <Accordion title="Config: aliases के साथ DeepSeek + Llama + GPT-OSS">
-    ```json5
-    {
-      agents: {
-        defaults: {
-          model: {
-            primary: "huggingface/deepseek-ai/DeepSeek-V3.2",
-            fallbacks: [
-              "huggingface/meta-llama/Llama-3.3-70B-Instruct",
-              "huggingface/openai/gpt-oss-120b",
-            ],
-          },
-          models: {
-            "huggingface/deepseek-ai/DeepSeek-V3.2": { alias: "DeepSeek V3.2" },
-            "huggingface/meta-llama/Llama-3.3-70B-Instruct": { alias: "Llama 3.3 70B" },
             "huggingface/openai/gpt-oss-120b": { alias: "GPT-OSS 120B" },
           },
         },
@@ -206,17 +163,35 @@ Model refs `huggingface/<org>/<model>` (Hub-style IDs) form का उपयो�
     ```
   </Accordion>
 
-  <Accordion title="Config: policy suffixes के साथ कई Qwen और DeepSeek">
+  <Accordion title="कॉन्फ़िगरेशन: सबसे सस्ते और सबसे तेज़ वेरिएंट के साथ DeepSeek">
     ```json5
     {
       agents: {
         defaults: {
-          model: { primary: "huggingface/Qwen/Qwen2.5-7B-Instruct:cheapest" },
+          model: { primary: "huggingface/deepseek-ai/DeepSeek-R1" },
           models: {
-            "huggingface/Qwen/Qwen2.5-7B-Instruct": { alias: "Qwen2.5 7B" },
-            "huggingface/Qwen/Qwen2.5-7B-Instruct:cheapest": { alias: "Qwen2.5 7B (cheap)" },
-            "huggingface/deepseek-ai/DeepSeek-R1:fastest": { alias: "DeepSeek R1 (fast)" },
-            "huggingface/meta-llama/Llama-3.1-8B-Instruct": { alias: "Llama 3.1 8B" },
+            "huggingface/deepseek-ai/DeepSeek-R1": { alias: "DeepSeek R1" },
+            "huggingface/deepseek-ai/DeepSeek-R1:cheapest": { alias: "DeepSeek R1 (cheapest)" },
+            "huggingface/deepseek-ai/DeepSeek-R1:fastest": { alias: "DeepSeek R1 (fastest)" },
+          },
+        },
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="कॉन्फ़िगरेशन: उपनामों के साथ DeepSeek + GPT-OSS">
+    ```json5
+    {
+      agents: {
+        defaults: {
+          model: {
+            primary: "huggingface/deepseek-ai/DeepSeek-V3.1",
+            fallbacks: ["huggingface/openai/gpt-oss-120b"],
+          },
+          models: {
+            "huggingface/deepseek-ai/DeepSeek-V3.1": { alias: "DeepSeek V3.1" },
+            "huggingface/openai/gpt-oss-120b": { alias: "GPT-OSS 120B" },
           },
         },
       },
@@ -228,16 +203,16 @@ Model refs `huggingface/<org>/<model>` (Hub-style IDs) form का उपयो�
 ## संबंधित
 
 <CardGroup cols={2}>
-  <Card title="Model selection" href="/hi/concepts/model-providers" icon="layers">
-    सभी providers, model refs, और failover behavior का overview.
+  <Card title="मॉडल चयन" href="/hi/concepts/model-providers" icon="layers">
+    सभी प्रोवाइडर, मॉडल संदर्भ और फ़ेलओवर व्यवहार का अवलोकन।
   </Card>
-  <Card title="Model selection" href="/hi/concepts/models" icon="brain">
-    models कैसे चुनें और configure करें।
+  <Card title="मॉडल चयन" href="/hi/concepts/models" icon="brain">
+    मॉडल चुनने और कॉन्फ़िगर करने का तरीका।
   </Card>
-  <Card title="Inference Providers docs" href="https://huggingface.co/docs/inference-providers" icon="book">
-    आधिकारिक Hugging Face Inference Providers documentation.
+  <Card title="Inference Providers दस्तावेज़" href="https://huggingface.co/docs/inference-providers" icon="book">
+    आधिकारिक Hugging Face Inference Providers दस्तावेज़।
   </Card>
-  <Card title="Configuration" href="/hi/gateway/configuration" icon="gear">
-    पूरा config reference.
+  <Card title="कॉन्फ़िगरेशन" href="/hi/gateway/configuration" icon="gear">
+    संपूर्ण कॉन्फ़िगरेशन संदर्भ।
   </Card>
 </CardGroup>

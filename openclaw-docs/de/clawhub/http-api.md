@@ -1,14 +1,15 @@
 ---
 read_when:
     - Endpunkte hinzufügen/ändern
-    - CLI ↔ Registry-Anfragen debuggen
-summary: HTTP-API-Referenz (öffentliche + CLI-Endpunkte + Authentifizierung).
+    - Debugging von CLI-↔-Registry-Anfragen
+summary: HTTP-API-Referenz (öffentliche Endpunkte, CLI-Endpunkte und Authentifizierung).
 x-i18n:
-    generated_at: "2026-07-04T20:27:58Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T17:40:47Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 8926327c9d81d535c5683dad55b8e0aff704261f17c2b17c95bd7026bb31887d
+    source_hash: 5b180bbd56d20a3d88c1fe74ccab0fd0ecbe0e8c9624cd1afd2070a2ca1f7fb3
     source_path: clawhub/http-api.md
     workflow: 16
 ---
@@ -23,42 +24,42 @@ OpenAPI: `/api/v1/openapi.json`.
 
 ## Wiederverwendung des öffentlichen Katalogs
 
-Drittanbieter-Verzeichnisse dürfen die öffentlichen Lese-Endpunkte verwenden, um ClawHub-Skills aufzulisten oder zu durchsuchen. Bitte cachen Sie Ergebnisse, beachten Sie `429`/`Retry-After`, verlinken Sie Benutzer zurück zum kanonischen ClawHub-Eintrag (`https://clawhub.ai/<owner>/skills/<slug>`) und vermeiden Sie den Eindruck, ClawHub unterstütze die Drittanbieter-Website. Versuchen Sie nicht, ausgeblendete, private oder durch Moderation blockierte Inhalte außerhalb der öffentlichen API-Oberfläche zu spiegeln.
+Drittanbieter-Verzeichnisse dürfen die öffentlichen Lese-Endpunkte verwenden, um ClawHub-Skills aufzulisten oder zu durchsuchen. Bitte speichern Sie Ergebnisse im Cache, beachten Sie `429`/`Retry-After`, verlinken Sie Benutzer zurück zum kanonischen ClawHub-Eintrag (`https://clawhub.ai/<owner>/skills/<slug>`) und vermeiden Sie den Eindruck, ClawHub unterstütze die Drittanbieter-Website. Versuchen Sie nicht, verborgene, private oder durch die Moderation blockierte Inhalte außerhalb der öffentlichen API-Oberfläche zu spiegeln.
 
-Web-Slug-Kurzformen werden über Registry-Familien hinweg aufgelöst, aber API-Clients sollten die von Lese-Endpunkten zurückgegebenen kanonischen URLs verwenden, statt die Routen-Priorität zu rekonstruieren.
+Web-Slug-Kurzformen werden über Registry-Familien hinweg aufgelöst, API-Clients sollten jedoch die von Lese-Endpunkten zurückgegebenen kanonischen URLs verwenden, anstatt die Routenpriorität zu rekonstruieren.
 
-## Ratenlimits
+## Ratenbegrenzungen
 
 Durchsetzungsmodell:
 
-- Anonyme Anfragen: pro IP durchgesetzt.
-- Authentifizierte Anfragen (gültiges Bearer-Token): pro Benutzer-Bucket durchgesetzt.
-- Wenn das Token fehlt/ungültig ist, fällt das Verhalten auf IP-Durchsetzung zurück.
+- Anonyme Anfragen: Durchsetzung pro IP-Adresse.
+- Authentifizierte Anfragen (gültiges Bearer-Token): Durchsetzung pro Benutzer-Bucket.
+- Wenn das Token fehlt oder ungültig ist, fällt das Verhalten auf die Durchsetzung pro IP-Adresse zurück.
 - Authentifizierte Schreib-Endpunkte sollten kein bloßes `Unauthorized` zurückgeben, wenn
-  der Server den Grund kennt. Fehlende Tokens, ungültige/widerrufene Tokens und
-  gelöschte/gesperrte/deaktivierte Konten sollten jeweils handlungsorientierten Text erhalten, damit CLI-
-  Clients Benutzern mitteilen können, wodurch sie blockiert wurden.
+  dem Server der Grund bekannt ist. Fehlende Tokens, ungültige/widerrufene Tokens und
+  gelöschte/gesperrte/deaktivierte Konten sollten jeweils einen handlungsorientierten Text erhalten, damit CLI-
+  Clients den Benutzern mitteilen können, wodurch sie blockiert wurden.
 
-- Lesen: 3000/min pro IP, 12000/min pro Schlüssel
-- Schreiben: 300/min pro IP, 3000/min pro Schlüssel
-- Download: 1200/min pro IP, 6000/min pro Schlüssel (Download-Endpunkte)
+- Lesen: 3000/min pro IP-Adresse, 12000/min pro Schlüssel
+- Schreiben: 300/min pro IP-Adresse, 3000/min pro Schlüssel
+- Download: 1200/min pro IP-Adresse, 6000/min pro Schlüssel (Download-Endpunkte)
 
 Header:
 
-- Legacy-Kompatibilität: `X-RateLimit-Limit`, `X-RateLimit-Reset`
+- Abwärtskompatibilität: `X-RateLimit-Limit`, `X-RateLimit-Reset`
 - Standardisiert: `RateLimit-Limit`, `RateLimit-Reset`
 - Bei `429`: `X-RateLimit-Remaining: 0` und `RateLimit-Remaining: 0`
 - Bei `429`: `Retry-After`
 
 Header-Semantik:
 
-- `X-RateLimit-Reset`: absolute Unix-Epochen-Sekunden
+- `X-RateLimit-Reset`: absolute Unix-Epochenzeit in Sekunden
 - `RateLimit-Reset`: Sekunden bis zum Zurücksetzen (Verzögerung)
-- `X-RateLimit-Remaining` / `RateLimit-Remaining`: exaktes verbleibendes Budget, wenn vorhanden.
-  Erfolgreiche sharded Anfragen lassen diesen Header weg, statt einen ungefähren globalen Wert zurückzugeben.
-- `Retry-After`: Sekunden, die vor einem erneuten Versuch gewartet werden sollen (Verzögerung), bei `429`
+- `X-RateLimit-Remaining` / `RateLimit-Remaining`: exakt verbleibendes Kontingent, sofern vorhanden.
+  Erfolgreiche Shard-Anfragen lassen diesen Header weg, anstatt einen ungefähren globalen Wert zurückzugeben.
+- `Retry-After`: Wartezeit in Sekunden vor einem erneuten Versuch (Verzögerung) bei `429`
 
-Beispielantwort `429`:
+Beispielantwort für `429`:
 
 ```http
 HTTP/2 429
@@ -71,43 +72,43 @@ ratelimit-remaining: 0
 ratelimit-reset: 34
 retry-after: 34
 
-Rate limit exceeded
+Ratenbegrenzung überschritten
 ```
 
-Client-Anleitung:
+Hinweise für Clients:
 
-- Wenn `Retry-After` vorhanden ist, warten Sie diese Anzahl Sekunden vor einem erneuten Versuch.
-- Verwenden Sie Backoff mit Jitter, um synchronisierte erneute Versuche zu vermeiden.
-- Wenn `Retry-After` fehlt, fallen Sie auf `RateLimit-Reset` zurück (oder berechnen Sie aus `X-RateLimit-Reset`).
+- Wenn `Retry-After` vorhanden ist, warten Sie vor dem erneuten Versuch entsprechend viele Sekunden.
+- Verwenden Sie einen mit Zufallsabweichung versehenen Backoff, um synchronisierte Wiederholungsversuche zu vermeiden.
+- Wenn `Retry-After` fehlt, greifen Sie auf `RateLimit-Reset` zurück (oder berechnen Sie den Wert anhand von `X-RateLimit-Reset`).
 
 IP-Quelle:
 
-- Verwendet vertrauenswürdige Client-IP-Header, einschließlich `cf-connecting-ip`, nur wenn das
-  Deployment vertrauenswürdige weitergeleitete Header ausdrücklich aktiviert.
-- ClawHub verwendet vertrauenswürdige Forwarding-Header, um Client-IPs am Edge zu identifizieren.
-- Wenn keine vertrauenswürdige Client-IP verfügbar ist, verwenden anonyme Anfragen Fallback-Buckets,
-  die nur nach Art des Ratenlimits abgegrenzt sind. Diese Fallback-Buckets enthalten keine
-  vom Aufrufer bereitgestellten Pfade, Slugs, Paketnamen, Versionen, Query-Strings oder anderen
+- Verwendet vertrauenswürdige Client-IP-Header, einschließlich `cf-connecting-ip`, nur wenn die
+  Bereitstellung vertrauenswürdige weitergeleitete Header ausdrücklich aktiviert.
+- ClawHub verwendet vertrauenswürdige Weiterleitungs-Header, um Client-IP-Adressen am Edge zu ermitteln.
+- Wenn keine vertrauenswürdige Client-IP-Adresse verfügbar ist, verwenden anonyme Anfragen Fallback-Buckets,
+  deren Geltungsbereich ausschließlich durch die Art der Ratenbegrenzung bestimmt wird. Diese Fallback-Buckets enthalten keine
+  vom Aufrufer bereitgestellten Pfade, Slugs, Paketnamen, Versionen, Abfragezeichenfolgen oder anderen
   Artefaktparameter.
 
 ## Fehlerantworten
 
 Öffentliche v1-Fehlerantworten sind Klartext mit `content-type: text/plain; charset=utf-8`.
 Dazu gehören Validierungsfehler (`400`), fehlende öffentliche Ressourcen (`404`), Authentifizierungs- und
-Berechtigungsfehler (`401`/`403`), Ratenlimits (`429`) und blockierte Downloads. Clients
-sollten den Antworttext als menschenlesbare Zeichenfolge lesen. Unbekannte Query-Parameter werden
-aus Kompatibilitätsgründen ignoriert, aber erkannte Query-Parameter mit ungültigen Werten geben
+Berechtigungsfehler (`401`/`403`), Ratenbegrenzungen (`429`) und blockierte Downloads. Clients
+sollten den Antworttext als menschenlesbare Zeichenfolge auslesen. Unbekannte Abfrageparameter werden
+aus Kompatibilitätsgründen ignoriert, erkannte Abfrageparameter mit ungültigen Werten geben jedoch
 `400` zurück.
 
 ## Öffentliche Endpunkte (keine Authentifizierung)
 
 ### `GET /api/v1/search`
 
-Query-Parameter:
+Abfrageparameter:
 
-- `q` (erforderlich): Query-String
+- `q` (erforderlich): Abfragezeichenfolge
 - `limit` (optional): Ganzzahl
-- `highlightedOnly` (optional): `true`, um auf hervorgehobene Skills zu filtern
+- `highlightedOnly` (optional): `true`, um nach hervorgehobenen Skills zu filtern
 - `nonSuspiciousOnly` (optional): `true`, um verdächtige (`flagged.suspicious`) Skills auszublenden
 - `nonSuspicious` (optional): veralteter Alias für `nonSuspiciousOnly`
 
@@ -136,26 +137,26 @@ Antwort:
 
 Hinweise:
 
-- Ergebnisse werden in Relevanzreihenfolge zurückgegeben (Embedding-Ähnlichkeit + exakte Slug-/Namens-Token-Boosts + ein kleiner Popularitäts-Prior).
-- Relevanz ist stärker als Popularität. Eine präzise Slug- oder Anzeigenamen-Token-Übereinstimmung kann eine lockerere Übereinstimmung mit deutlich stärkerem Engagement übertreffen.
-- ASCII-Text wird an Wort- und Satzzeichengrenzen tokenisiert. Beispielsweise enthält `personal-map` ein eigenständiges `map`-Token, während `amap-jsapi-skill` `amap`, `jsapi` und `skill` enthält; die Suche nach `map` gibt `personal-map` daher eine stärkere lexikalische Übereinstimmung als `amap-jsapi-skill`.
-- Popularität ist logarithmisch skaliert und gedeckelt. Skills mit hohem Engagement können niedriger eingestuft werden, wenn der Query-Text schwächer übereinstimmt.
-- Verdächtiger oder ausgeblendeter Moderationsstatus kann einen Skill je nach Aufruferfiltern und aktuellem Moderationsstatus aus der öffentlichen Suche entfernen.
+- Ergebnisse werden nach Relevanz sortiert zurückgegeben (Ähnlichkeit der Einbettungen + Verstärkungen für exakte Slug-/Namenstoken + eine geringe vorherige Gewichtung der Popularität).
+- Die Relevanz wird stärker gewichtet als die Popularität. Eine genaue Übereinstimmung mit einem Slug- oder Anzeigenamen-Token kann eine ungenauere Übereinstimmung mit deutlich stärkerer Interaktion übertreffen.
+- ASCII-Text wird an Wort- und Interpunktionsgrenzen tokenisiert. Beispielsweise enthält `personal-map` ein eigenständiges `map`-Token, während `amap-jsapi-skill` die Tokens `amap`, `jsapi` und `skill` enthält; eine Suche nach `map` ergibt daher für `personal-map` eine stärkere lexikalische Übereinstimmung als für `amap-jsapi-skill`.
+- Die Popularität wird logarithmisch skaliert und gedeckelt. Skills mit hoher Interaktion können niedriger eingestuft werden, wenn der Abfragetext weniger gut übereinstimmt.
+- Ein verdächtiger oder verborgener Moderationsstatus kann abhängig von den Aufruferfiltern und dem aktuellen Moderationsstatus dazu führen, dass ein Skill aus der öffentlichen Suche entfernt wird.
 
-Anleitung zur Auffindbarkeit für Publisher:
+Hinweise zur Auffindbarkeit für Herausgeber:
 
-- Platzieren Sie die Begriffe, nach denen Benutzer buchstäblich suchen werden, im Anzeigenamen, in der Zusammenfassung und in den Tags. Verwenden Sie ein eigenständiges Slug-Token nur, wenn es auch eine stabile Identität ist, die Sie beibehalten möchten.
-- Benennen Sie einen Slug nicht nur um, um eine einzelne Query zu bedienen, es sei denn, der neue Slug ist ein besserer langfristiger kanonischer Name. Alte Slugs werden zu Weiterleitungsaliasen, aber die kanonische URL, der angezeigte Slug und künftige Such-Digests verwenden den neuen Slug.
-- Umbenennungsaliase erhalten die Auflösung für alte URLs und Installationen, die über die Registry auflösen, aber das Suchranking basiert nach der Indexierung der Umbenennung auf den kanonischen Skill-Metadaten. Bestehende Statistiken bleiben beim Skill.
-- Wenn ein Skill unerwartet unsichtbar ist, prüfen Sie zuerst den Moderationsstatus mit `clawhub inspect @owner/slug`, während Sie angemeldet sind, bevor Sie rankingbezogene Metadaten ändern.
+- Nehmen Sie die Begriffe, nach denen Benutzer tatsächlich suchen werden, in den Anzeigenamen, die Zusammenfassung und die Tags auf. Verwenden Sie ein eigenständiges Slug-Token nur, wenn es zugleich eine stabile Identität darstellt, die Sie beibehalten möchten.
+- Benennen Sie einen Slug nicht nur um, um eine einzelne Abfrage zu bedienen, es sei denn, der neue Slug ist langfristig ein besserer kanonischer Name. Alte Slugs werden zu Weiterleitungsaliasen, aber die kanonische URL, der angezeigte Slug und zukünftige Suchübersichten verwenden den neuen Slug.
+- Umbenennungsaliase bewahren die Auflösung für alte URLs und Installationen, die über die Registry aufgelöst werden, die Suchrangfolge basiert jedoch nach der Indizierung der Umbenennung auf den kanonischen Skill-Metadaten. Bestehende Statistiken bleiben dem Skill zugeordnet.
+- Wenn ein Skill unerwartet unsichtbar ist, prüfen Sie im angemeldeten Zustand zunächst den Moderationsstatus mit `clawhub inspect @owner/slug`, bevor Sie rangfolgerelevante Metadaten ändern.
 
 ### `GET /api/v1/skills`
 
-Query-Parameter:
+Abfrageparameter:
 
 - `limit` (optional): Ganzzahl (1–200)
-- `cursor` (optional): Paginierungs-Cursor für jede nicht-`trending`-Sortierung
-- `sort` (optional): `updated` (Standard), `recommended` (Alias: `default`), `createdAt` (Alias: `newest`), `downloads`, `stars` (Alias: `rating`), veraltete Installationsaliase `installsCurrent`/`installs`/`installsAllTime` werden auf `downloads` abgebildet, `trending`
+- `cursor` (optional): Paginierungscursor für jede Sortierung außer `trending`
+- `sort` (optional): `updated` (Standard), `recommended` (Alias: `default`), `createdAt` (Alias: `newest`), `downloads`, `stars` (Alias: `rating`), die veralteten Installationsaliase `installsCurrent`/`installs`/`installsAllTime` werden `downloads`, `trending` zugeordnet
 - `nonSuspiciousOnly` (optional): `true`, um verdächtige (`flagged.suspicious`) Skills auszublenden
 - `nonSuspicious` (optional): veralteter Alias für `nonSuspiciousOnly`
 
@@ -163,11 +164,11 @@ Ungültige `sort`-Werte geben `400` zurück.
 
 Hinweise:
 
-- `recommended` verwendet Engagement- und Aktualitätssignale.
-- `trending` rankt nach Installationen in den letzten 7 Tagen (telemetriebasiert).
-- `createdAt` ist stabil für Crawls neuer Skills; `updated` ändert sich, wenn bestehende Skills neu veröffentlicht werden.
-- Wenn `nonSuspiciousOnly=true`, können Cursor-basierte Sortierungen auf einer Seite weniger als `limit` Elemente zurückgeben, weil verdächtige Skills nach dem Abruf der Seite gefiltert werden.
-- Verwenden Sie `nextCursor`, um die Paginierung fortzusetzen, wenn vorhanden. Eine kurze Seite bedeutet für sich genommen nicht das Ende der Ergebnisse.
+- `recommended` verwendet Interaktions- und Aktualitätssignale.
+- `trending` sortiert nach Installationen in den letzten 7 Tagen (telemetriebasiert).
+- `createdAt` ist für Crawls neuer Skills stabil; `updated` ändert sich, wenn bestehende Skills erneut veröffentlicht werden.
+- Bei `nonSuspiciousOnly=true` können cursorbasierte Sortierungen weniger als `limit` Elemente auf einer Seite zurückgeben, da verdächtige Skills erst nach dem Abruf der Seite herausgefiltert werden.
+- Verwenden Sie `nextCursor`, sofern vorhanden, um die Paginierung fortzusetzen. Eine kurze Seite bedeutet für sich genommen nicht, dass das Ende der Ergebnisse erreicht ist.
 
 Antwort:
 
@@ -224,15 +225,15 @@ Antwort:
 
 Hinweise:
 
-- Alte Slugs, die durch Umbenennungs-/Zusammenführungsabläufe des Owners erstellt wurden, werden zum kanonischen Skill aufgelöst.
-- `metadata.os`: In der Skill-Frontmatter deklarierte OS-Einschränkungen (z. B. `["macos"]`, `["linux"]`). `null`, wenn nicht deklariert.
+- Alte Slugs, die durch Umbenennungs-/Zusammenführungsabläufe des Eigentümers erstellt wurden, werden zum kanonischen Skill aufgelöst.
+- `metadata.os`: im Skill-Frontmatter deklarierte Betriebssystemeinschränkungen (z. B. `["macos"]`, `["linux"]`). `null`, wenn nicht deklariert.
 - `metadata.systems`: Nix-Systemziele (z. B. `["aarch64-darwin", "x86_64-linux"]`). `null`, wenn nicht deklariert.
-- `metadata` ist `null`, wenn der Skill keine Plattform-Metadaten hat.
-- `moderation` wird nur einbezogen, wenn der Skill markiert ist oder der Owner ihn betrachtet.
+- `metadata` ist `null`, wenn der Skill keine Plattformmetadaten besitzt.
+- `moderation` ist nur enthalten, wenn der Skill markiert wurde oder der Eigentümer ihn aufruft.
 
 ### `GET /api/v1/skills/{slug}/moderation`
 
-Gibt strukturierten Moderationsstatus zurück.
+Gibt den strukturierten Moderationsstatus zurück.
 
 Antwort:
 
@@ -263,14 +264,14 @@ Antwort:
 
 Hinweise:
 
-- Owner und Moderatoren können auf Moderationsdetails für ausgeblendete Skills zugreifen.
+- Eigentümer und Moderatoren können auf Moderationsdetails für verborgene Skills zugreifen.
 - Öffentliche Aufrufer erhalten `200` nur für bereits markierte sichtbare Skills.
-- Nachweise werden für öffentliche Aufrufer redigiert und enthalten Roh-Snippets nur für Owner/Moderatoren.
+- Belege werden für öffentliche Aufrufer redigiert und enthalten nur für Eigentümer/Moderatoren unverarbeitete Ausschnitte.
 
 ### `POST /api/v1/skills/{slug}/report`
 
-Melden Sie einen Skill zur Prüfung durch Moderatoren. Meldungen gelten auf Skill-Ebene, sind optional mit
-einer Version verknüpft und speisen die Skill-Meldewarteschlange.
+Meldet einen Skill zur Überprüfung durch Moderatoren. Meldungen gelten auf Skill-Ebene, können optional
+mit einer Version verknüpft sein und werden in die Warteschlange für Skill-Meldungen aufgenommen.
 
 Authentifizierung:
 
@@ -279,7 +280,7 @@ Authentifizierung:
 Anfrage:
 
 ```json
-{ "reason": "Suspicious install step", "version": "1.2.3" }
+{ "reason": "Verdächtiger Installationsschritt", "version": "1.2.3" }
 ```
 
 Antwort:
@@ -297,13 +298,13 @@ Antwort:
 
 ### `GET /api/v1/skills/-/reports`
 
-Moderator-/Admin-Endpunkt für die Erfassung von Skill-Meldungen.
+Moderator-/Administrator-Endpunkt zur Entgegennahme von Skill-Meldungen.
 
-Query-Parameter:
+Abfrageparameter:
 
 - `status` (optional): `open` (Standard), `confirmed`, `dismissed` oder `all`
 - `limit` (optional): Ganzzahl (1-200)
-- `cursor` (optional): Paginierungs-Cursor
+- `cursor` (optional): Paginierungscursor
 
 Antwort:
 
@@ -317,13 +318,13 @@ Antwort:
       "slug": "gifgrep",
       "displayName": "GifGrep",
       "version": "1.2.3",
-      "reason": "Suspicious install step",
+      "reason": "Verdächtiger Installationsschritt",
       "status": "open",
       "createdAt": 1730000000000,
       "reporter": {
         "userId": "users:...",
         "handle": "reporter",
-        "displayName": "Reporter"
+        "displayName": "Meldende Person"
       },
       "triagedAt": null,
       "triagedBy": null,
@@ -337,54 +338,54 @@ Antwort:
 
 ### `POST /api/v1/skills/-/reports/{reportId}/triage`
 
-Moderator-/Admin-Endpunkt zum Erledigen oder Wiedereröffnen von Skill-Meldungen.
+Moderator-/Administrator-Endpunkt zum Abschließen oder erneuten Öffnen von Skill-Meldungen.
 
 Anfrage:
 
 ```json
-{ "status": "confirmed", "note": "Reviewed and hid affected version.", "finalAction": "hide" }
+{ "status": "confirmed", "note": "Geprüft und betroffene Version ausgeblendet.", "finalAction": "hide" }
 ```
 
-`note` ist für `confirmed` und `dismissed` erforderlich; sie kann weggelassen werden, wenn
-`status` wieder auf `open` gesetzt wird. Übergeben Sie `finalAction: "hide"` mit einer triagierten
-Meldung, um den Skill im selben auditierbaren Workflow auszublenden.
+`note` ist für `confirmed` und `dismissed` erforderlich; beim
+Zurücksetzen von `status` auf `open` kann es entfallen. Übergeben Sie `finalAction: "hide"` mit einer triagierten
+Meldung, um den Skill im selben auditierbaren Arbeitsablauf auszublenden.
 
 ### `GET /api/v1/skills/{slug}/versions`
 
-Query-Parameter:
+Abfrageparameter:
 
 - `limit` (optional): Ganzzahl
-- `cursor` (optional): Paginierungs-Cursor
+- `cursor` (optional): Paginierungscursor
 
 ### `GET /api/v1/skills/{slug}/versions/{version}`
 
-Gibt Versionsmetadaten + Dateiliste zurück.
+Gibt Versionsmetadaten und eine Dateiliste zurück.
 
 - `version.security` enthält den normalisierten Verifizierungsstatus des Scans und Scannerdetails
-  (VirusTotal + LLM), wenn verfügbar.
+  (VirusTotal + LLM), sofern verfügbar.
 
 ### `GET /api/v1/skills/{slug}/scan`
 
 Gibt Details zur Verifizierung des Sicherheitsscans für eine Skill-Version zurück.
 
-Query-Parameter:
+Abfrageparameter:
 
-- `version` (optional): spezifische Versionszeichenfolge.
-- `tag` (optional): löst eine getaggte Version auf (zum Beispiel `latest`).
+- `version` (optional): bestimmte Versionszeichenfolge.
+- `tag` (optional): eine mit einem Tag versehene Version auflösen (zum Beispiel `latest`).
 
 Hinweise:
 
 - Wenn weder `version` noch `tag` angegeben ist, wird die neueste Version verwendet.
-- Enthält den normalisierten Verifizierungsstatus sowie Scanner-spezifische Details.
-- `security.hasScanResult` ist nur dann `true`, wenn ein Scanner ein eindeutiges Urteil (`clean`, `suspicious` oder `malicious`) erzeugt hat.
-- `moderation` ist ein aktueller Moderations-Snapshot auf Skill-Ebene, der aus der neuesten Version abgeleitet wird.
-- Wenn Sie eine historische Version abfragen, prüfen Sie `moderation.matchesRequestedVersion` und `moderation.sourceVersion`, bevor Sie `moderation` und `security` als denselben Versionskontext behandeln.
+- Enthält den normalisierten Verifizierungsstatus sowie scannerspezifische Details.
+- `security.hasScanResult` ist nur dann `true`, wenn ein Scanner ein eindeutiges Urteil geliefert hat (`clean`, `suspicious` oder `malicious`).
+- `moderation` ist eine aktuelle, aus der neuesten Version abgeleitete Moderationsmomentaufnahme auf Skill-Ebene.
+- Prüfen Sie bei der Abfrage einer historischen Version `moderation.matchesRequestedVersion` und `moderation.sourceVersion`, bevor Sie `moderation` und `security` demselben Versionskontext zuordnen.
 
 ### `POST /api/v1/skills/-/scan`
 
-Authentifizierter Einreichungs-Endpunkt für neue ClawScan-Jobs.
+Authentifizierter Übermittlungsendpunkt für neue ClawScan-Aufträge.
 
-Lokale Upload-Scans werden nicht mehr unterstützt. Anfragen mit
+Scans lokaler Uploads werden nicht mehr unterstützt. Anfragen mit
 `multipart/form-data` oder `{ "source": { "kind": "upload" } }` geben `410` zurück.
 
 Veröffentlichte Scans verwenden JSON:
@@ -398,44 +399,44 @@ Veröffentlichte Scans verwenden JSON:
 
 Hinweise:
 
-- Scan-Anfrage-Payloads und herunterladbare Berichte laufen nach dem Aufbewahrungszeitraum aus dem Scan-Anforderungsspeicher ab.
-- Veröffentlichte Scans erfordern Verwaltungszugriff als Owner/Publisher oder Plattformmoderator-/Adminberechtigung.
-- Veröffentlichte Scans schreiben nur zurück, wenn `update: true` ist und der Scan erfolgreich abgeschlossen wird.
-- Die Antwort ist `202` mit `{ "ok": true, "scanId": "...", "jobId": "...", "status": "queued", "sourceKind": "published", "update": false, "queue": { "queuedAhead": 0, "queuedAheadIsEstimate": false, "position": 1, "running": 0, "runningIsEstimate": false, "note": "Scans are asynchronous and may take time to complete." } }`.
-- Scan-Jobs sind asynchron. Manuelle Scan-Anfragen werden gegenüber normaler Veröffentlichungs-/Backfill-Arbeit priorisiert, der Abschluss hängt jedoch weiterhin von der Verfügbarkeit der Worker ab.
+- Nutzdaten von Scananfragen und herunterladbare Berichte verfallen nach Ablauf des Aufbewahrungszeitraums im Scananfragenspeicher.
+- Veröffentlichte Scans erfordern Verwaltungszugriff als Eigentümer oder Herausgeber oder die Berechtigung eines Plattformmoderators bzw. -administrators.
+- Veröffentlichte Scans schreiben Ergebnisse nur zurück, wenn `update: true` und der Scan erfolgreich abgeschlossen wird.
+- Die Antwort lautet `202` mit `{ "ok": true, "scanId": "...", "jobId": "...", "status": "queued", "sourceKind": "published", "update": false, "queue": { "queuedAhead": 0, "queuedAheadIsEstimate": false, "position": 1, "running": 0, "runningIsEstimate": false, "note": "Scans are asynchronous and may take time to complete." } }`.
+- Scanaufträge werden asynchron ausgeführt. Manuelle Scananfragen werden vor regulären Veröffentlichungs- und Backfill-Aufträgen priorisiert, ihre Fertigstellung hängt jedoch weiterhin von der Verfügbarkeit der Worker ab.
 
 ### `GET /api/v1/skills/-/scan/{scanId}`
 
-Authentifizierter Poll-Endpunkt für einen eingereichten Scan.
+Authentifizierter Abfrageendpunkt für einen übermittelten Scan.
 
-- Gibt den Status queued/running/succeeded/failed zurück.
-- Gibt `queue.queuedAhead` und `queue.position` zurück, solange die Anfrage in der Warteschlange steht, damit Clients anzeigen können, wie viele priorisierte manuelle Scans vor der Anfrage liegen. Sehr große Warteschlangen werden begrenzt und mit `queuedAheadIsEstimate: true` gemeldet.
-- Wenn verfügbar, enthält `report` die Abschnitte `clawscan`, `skillspector`, `staticAnalysis` und `virustotal`.
-- Fehlgeschlagene Scan-Jobs geben `status: "failed"` mit `lastError` zurück.
+- Gibt den Status „in Warteschlange“, „wird ausgeführt“, „erfolgreich“ oder „fehlgeschlagen“ zurück.
+- Gibt während des Wartens `queue.queuedAhead` und `queue.position` zurück, damit Clients anzeigen können, wie viele priorisierte manuelle Scans sich vor der Anfrage befinden. Sehr große Warteschlangen werden begrenzt und mit `queuedAheadIsEstimate: true` gemeldet.
+- Sofern verfügbar, enthält `report` die Abschnitte `clawscan`, `skillspector`, `staticAnalysis` und `virustotal`.
+- Fehlgeschlagene Scanaufträge geben `status: "failed"` mit `lastError` zurück.
 
 ### `GET /api/v1/skills/-/scan/{scanId}/download`
 
 Authentifizierter Endpunkt für Berichtsarchive.
 
-- Erfordert einen erfolgreichen Scan; nicht terminale Scans geben `409` zurück.
+- Erfordert einen erfolgreichen Scan; noch nicht abgeschlossene Scans geben `409` zurück.
 - Gibt eine ZIP-Datei mit `manifest.json`, `clawscan.json`, `skillspector.json`, `static-analysis.json`, `virustotal.json` und `README.md` zurück.
 
 ### `GET /api/v1/skills/-/scan/download/{name}?version=<version>&kind=skill|plugin`
 
-Authentifizierter Endpunkt für gespeicherte Berichtsarchive eingereichter Versionen.
+Authentifizierter Endpunkt für gespeicherte Berichtsarchive übermittelter Versionen.
 
-- Erfordert Verwaltungszugriff als Owner/Publisher auf den Skill oder das Plugin oder Plattformmoderator-/Adminberechtigung.
-- Gibt gespeicherte Scan-Ergebnisse für die exakt eingereichte Version zurück, einschließlich blockierter oder ausgeblendeter Versionen.
-- `kind` ist standardmäßig `skill`; verwenden Sie `kind=plugin` für Plugin-/Paket-Scans.
-- Gibt dieselbe ZIP-Struktur wie Scan-Anforderungsdownloads zurück.
+- Erfordert Verwaltungszugriff als Eigentümer oder Herausgeber des Skills oder Plugins oder die Berechtigung eines Plattformmoderators bzw. -administrators.
+- Gibt gespeicherte Scanergebnisse für die exakt übermittelte Version zurück, einschließlich blockierter oder ausgeblendeter Versionen.
+- `kind` verwendet standardmäßig `skill`; verwenden Sie `kind=plugin` für Plugin-/Paketscans.
+- Gibt dieselbe ZIP-Struktur wie Downloads von Scananfragen zurück.
 
 ### `POST /api/v1/skills/-/scan/batch`
 
-Nur für Admins verfügbare kanonische Route für Batch-Rescans. Sie akzeptiert dieselbe Payload-Struktur wie das Legacy-`POST /api/v1/skills/-/rescan-batch`.
+Nur für Administratoren zugängliche kanonische Route für erneute Batch-Scans. Sie akzeptiert dieselbe Nutzdatenstruktur wie das veraltete `POST /api/v1/skills/-/rescan-batch`.
 
 ### `POST /api/v1/skills/-/scan/batch/status`
 
-Nur für Admins verfügbare kanonische Route für Batch-Status. Sie akzeptiert `{ "jobIds": ["..."] }` und gibt dieselben aggregierten Zähler wie das Legacy-`POST /api/v1/skills/-/rescan-batch/status` zurück.
+Nur für Administratoren zugängliche kanonische Batch-Statusroute. Sie akzeptiert `{ "jobIds": ["..."] }` und gibt dieselben aggregierten Zähler wie das veraltete `POST /api/v1/skills/-/rescan-batch/status` zurück.
 
 ### `GET /api/v1/skills/{slug}/verify`
 
@@ -444,22 +445,22 @@ Gibt den von `clawhub skill verify` verwendeten Skill-Card-Verifizierungsumschla
 Abfrageparameter:
 
 - `version` (optional): bestimmte Versionszeichenfolge.
-- `tag` (optional): löst eine getaggte Version auf (zum Beispiel `latest`).
+- `tag` (optional): eine mit einem Tag versehene Version auflösen (zum Beispiel `latest`).
 
 Hinweise:
 
-- `ok` ist nur dann `true`, wenn die ausgewählte Version eine generierte Skill Card hat, nicht durch Moderation als Malware blockiert ist und die ClawScan-Verifizierung sauber ist.
-- Skill-Identität, Herausgeberidentität und Metadaten der ausgewählten Version sind Top-Level-Felder des Umschlags (`slug`, `displayName`, `publisherHandle`, `version`, `resolvedFrom`, `tag`, `createdAt`), damit Shell-Automatisierung sie lesen kann, ohne verschachtelte Wrapper zu entpacken.
-- `security` ist das Top-Level-ClawScan-/Sicherheitsurteil. Automatisierung sollte sich an `ok`, `decision`, `reasons` und `security.status` orientieren.
-- `security.signals` enthält unterstützende Scanner-Nachweise wie `staticScan`, `virusTotal` und `skillSpector`.
-- `security.signals.dependencyRegistry` bleibt für die Kompatibilität der v1-Antwort erhalten, aber der Scanner für die Existenz im Dependency Registry ist eingestellt und dieser Schlüssel ist immer `null`.
-- `provenance` ist nur dann `server-resolved-github-import`, wenn ClawHub beim Veröffentlichen oder Importieren ein GitHub-Repo/eine Ref/einen Commit/einen Pfad aufgelöst und gespeichert hat; andernfalls ist es `unavailable`.
+- `ok` ist nur dann `true`, wenn für die ausgewählte Version eine Skill Card generiert wurde, sie nicht durch die Malware-Moderation blockiert ist und die ClawScan-Verifizierung keine Probleme ergibt.
+- Skill-Identität, Herausgeberidentität und Metadaten der ausgewählten Version sind Felder der obersten Umschlagebene (`slug`, `displayName`, `publisherHandle`, `version`, `resolvedFrom`, `tag`, `createdAt`), damit Shell-Automatisierungen sie lesen können, ohne verschachtelte Wrapper entpacken zu müssen.
+- `security` ist das ClawScan-/Sicherheitsurteil auf oberster Ebene. Automatisierungen sollten sich an `ok`, `decision`, `reasons` und `security.status` orientieren.
+- `security.signals` enthält unterstützende Scannerbelege wie `staticScan`, `virusTotal` und `skillSpector`.
+- `security.signals.dependencyRegistry` bleibt für die Kompatibilität mit v1-Antworten erhalten, aber der Scanner zur Existenzprüfung in der Abhängigkeitsregistrierung wurde eingestellt und dieser Schlüssel ist immer `null`.
+- `provenance` ist nur dann `server-resolved-github-import`, wenn ClawHub während der Veröffentlichung oder des Imports ein GitHub-Repository, eine Referenz, einen Commit und einen Pfad aufgelöst und gespeichert hat; andernfalls ist es `unavailable`.
 
 ### `POST /api/v1/skills/-/security-verdicts`
 
 Gibt aktuelle kompakte Sicherheitsurteile für exakte Skill-Versionen zurück. Dieser
-Collection-Endpunkt ist für Clients gedacht, die bereits wissen, welche installierten
-ClawHub-Skill-Versionen sie anzeigen müssen, wie etwa OpenClaw Control UI.
+Sammlungsendpunkt ist für Clients vorgesehen, die bereits wissen, welche installierten
+ClawHub-Skill-Versionen sie anzeigen müssen, beispielsweise die OpenClaw Control UI.
 
 Anfrage:
 
@@ -471,13 +472,13 @@ Anfrage:
 
 Hinweise:
 
-- `items` muss 1-100 eindeutige `{ slug, version }`-Paare enthalten.
-- Ergebnisse gelten pro Element; ein fehlender Skill oder eine fehlende Version lässt nicht die gesamte Antwort fehlschlagen.
-- Die Antwort ist ausschließlich sicherheitsbezogen. Sie enthält keine Skill-Card-Daten, keinen Status generierter Karten, keine Artefakt-Dateilisten und keine detaillierten Scanner-Payloads.
-- `security.signals` enthält nur unterstützende Nachweise auf Statusebene; verwenden Sie `/scan` oder die ClawHub-Seite für Sicherheitsprüfungen, um vollständige Scanner-Details zu erhalten.
-- `security.signals.dependencyRegistry` bleibt für die Kompatibilität der v1-Antwort erhalten, aber der Scanner für die Existenz im Dependency Registry ist eingestellt und dieser Schlüssel ist immer `null`.
-- Das Fehlen einer Skill Card wirkt sich nicht auf `ok`, `decision` oder `reasons` dieses Endpunkts aus; Clients sollten die installierte `skill-card.md` lokal lesen, wenn sie Karteninhalt benötigen.
-- Verwenden Sie `/verify`, wenn Sie den Skill-Card-Verifizierungsumschlag für einen einzelnen Skill benötigen, `/card`, wenn Sie generiertes Karten-Markdown benötigen, und `/scan`, wenn Sie detaillierte Scanner-Daten benötigen.
+- `items` muss 1–100 eindeutige `{ slug, version }`-Paare enthalten.
+- Ergebnisse werden pro Element zurückgegeben; ein fehlender Skill oder eine fehlende Version lässt nicht die gesamte Antwort fehlschlagen.
+- Die Antwort enthält ausschließlich Sicherheitsinformationen. Sie enthält keine Skill-Card-Daten, keinen Status der generierten Karte, keine Artefaktdateilisten und keine detaillierten Scanner-Nutzdaten.
+- `security.signals` enthält nur unterstützende Belege auf Statusebene; verwenden Sie `/scan` oder die ClawHub-Seite für Sicherheitsaudits, um vollständige Scannerdetails abzurufen.
+- `security.signals.dependencyRegistry` bleibt für die Kompatibilität mit v1-Antworten erhalten, aber der Scanner zur Existenzprüfung in der Abhängigkeitsregistrierung wurde eingestellt und dieser Schlüssel ist immer `null`.
+- Das Fehlen einer Skill Card wirkt sich nicht auf `ok`, `decision` oder `reasons` dieses Endpunkts aus; Clients sollten die installierte `skill-card.md` lokal lesen, wenn sie Karteninhalte benötigen.
+- Verwenden Sie `/verify`, wenn Sie den Skill-Card-Verifizierungsumschlag für einen einzelnen Skill benötigen, `/card` für das generierte Karten-Markdown und `/scan` für detaillierte Scannerdaten.
 
 Antwort:
 
@@ -517,7 +518,7 @@ Antwort:
       "reasons": ["version.not_found"],
       "requestedSlug": "missing-version",
       "requestedVersion": "1.0.0",
-      "error": { "code": "version_not_found", "message": "Version not found" },
+      "error": { "code": "version_not_found", "message": "Version nicht gefunden" },
       "security": null
     }
   ]
@@ -526,127 +527,131 @@ Antwort:
 
 ### `GET /api/v1/skills/{slug}/file`
 
-Gibt Rohtextinhalt zurück.
+Gibt die exakt gespeicherten Dateibytes als Download zurück. Fügen Sie `preview=1` hinzu, um eine begrenzte Vorschau
+mit maskiertem Text anzufordern; jede Datei mit gültigen UTF-8-Bytes kann unabhängig von ihrer Erweiterung oder ihren MIME-
+Metadaten in der Vorschau angezeigt werden.
 
-Query-Parameter:
+Abfrageparameter:
 
 - `path` (erforderlich)
 - `version` (optional)
 - `tag` (optional)
+- `preview=1` (optional; gibt `text/plain` oder `415` zurück, wenn die Bytes kein gültiges UTF-8 darstellen)
 
 Hinweise:
 
 - Verwendet standardmäßig die neueste Version.
-- Dateigrößenlimit: 200 KB.
+- Limit für Rohdownloads: 10MB.
+- Limit für Textvorschauen: 200KB.
 
 ### `GET /api/v1/packages`
 
-Einheitlicher Katalog-Endpunkt für:
+Einheitlicher Katalogendpunkt für:
 
 - Skills
 - Code-Plugins
 - Bundle-Plugins
 
-Query-Parameter:
+Abfrageparameter:
 
 - `limit` (optional): Ganzzahl (1–100)
-- `cursor` (optional): Paginierungs-Cursor
+- `cursor` (optional): Paginierungscursor
 - `family` (optional): `skill`, `code-plugin` oder `bundle-plugin`
 - `channel` (optional): `official`, `community` oder `private`
 - `isOfficial` (optional): `true` oder `false`
-- `sort` (optional): `updated` (Standard), `recommended`, `trending`, `downloads`, Legacy-Alias `installs`
+- `sort` (optional): `updated` (Standard), `recommended`, `trending`, `downloads`, veralteter Alias `installs`
 - `category` (optional): Plugin-Kategoriefilter. Wird nur unterstützt, wenn die
   Anfrage auf Plugin-Pakete beschränkt ist (`/api/v1/plugins`,
-  `/api/v1/code-plugins`, `/api/v1/bundle-plugins` oder Paket-Endpunkte mit
-  `family=code-plugin`/`family=bundle-plugin`). Gesteuerte Kategorien und
-  Legacy-v1-Filter-Aliasse sind unter `GET /api/v1/plugins` dokumentiert.
+  `/api/v1/code-plugins`, `/api/v1/bundle-plugins` oder Paketendpunkte mit
+  `family=code-plugin`/`family=bundle-plugin`). Kontrollierte Kategorien und
+  veraltete v1-Filteraliase sind unter `GET /api/v1/plugins` dokumentiert.
 
 Hinweise:
 
 - Ungültige Werte für `family`, `channel`, `isOfficial`, `featured`,
-  `highlightedOnly` oder `sort` geben `400` zurück. Unbekannte Query-Parameter werden ignoriert.
-- `GET /api/v1/code-plugins` und `GET /api/v1/bundle-plugins` bleiben Fixed-Family-Aliasse.
-- Skill-Einträge bleiben durch die Skill-Registry gestützt und können weiterhin nur über `POST /api/v1/skills` veröffentlicht werden.
-- `POST /api/v1/packages` ist weiterhin nur für Code-Plugin- und Bundle-Plugin-Releases vorgesehen.
-- Anonyme Aufrufer sehen nur öffentliche Paket-Channels.
-- Authentifizierte Aufrufer können private Pakete für Publisher sehen, denen sie in Listen-/Suchergebnissen angehören.
-- `channel=private` gibt nur Pakete zurück, die der authentifizierte Aufrufer lesen kann.
+  `highlightedOnly` oder `sort` geben `400` zurück. Unbekannte Abfrageparameter werden ignoriert.
+- `GET /api/v1/code-plugins` und `GET /api/v1/bundle-plugins` bleiben Aliase für feste Familien.
+- Skill-Einträge basieren weiterhin auf der Skill-Registrierung und können nach wie vor nur über `POST /api/v1/skills` veröffentlicht werden.
+- `POST /api/v1/packages` ist weiterhin ausschließlich für Veröffentlichungen von Code-Plugins und Bundle-Plugins vorgesehen.
+- Anonyme Aufrufer sehen nur öffentliche Paketkanäle.
+- Authentifizierte Aufrufer können in Listen-/Suchergebnissen private Pakete von Herausgebern sehen, denen sie angehören.
+- `channel=private` gibt nur Pakete zurück, die der authentifizierte Aufrufer lesen darf.
 
 ### `GET /api/v1/packages/search`
 
-Einheitliche Katalogsuche über Skills + Plugin-Pakete hinweg.
+Einheitliche Katalogsuche über Skills und Plugin-Pakete hinweg.
 
-Query-Parameter:
+Abfrageparameter:
 
-- `q` (erforderlich): Suchstring
+- `q` (erforderlich): Abfragezeichenfolge
 - `limit` (optional): Ganzzahl (1–100)
 - `family` (optional): `skill`, `code-plugin` oder `bundle-plugin`
 - `channel` (optional): `official`, `community` oder `private`
 - `isOfficial` (optional): `true` oder `false`
 - `category` (optional): Plugin-Kategoriefilter. Wird nur unterstützt, wenn die
-  Anfrage auf Plugin-Pakete beschränkt ist. Gesteuerte Kategorien und Legacy-v1
-  Filter-Aliasse sind unter `GET /api/v1/plugins` dokumentiert.
+  Anfrage auf Plugin-Pakete beschränkt ist. Kontrollierte Kategorien und ältere v1-
+  Filteraliase sind unter `GET /api/v1/plugins` dokumentiert.
 
 Hinweise:
 
 - Ungültige Werte für `family`, `channel`, `isOfficial`, `featured` oder
-  `highlightedOnly` geben `400` zurück. Unbekannte Query-Parameter werden ignoriert.
-- Anonyme Aufrufer sehen nur öffentliche Paket-Channels.
-- Authentifizierte Aufrufer können private Pakete für Publisher suchen, denen sie angehören.
+  `highlightedOnly` geben `400` zurück. Unbekannte Abfrageparameter werden ignoriert.
+- Anonyme Aufrufer sehen nur öffentliche Paketkanäle.
+- Authentifizierte Aufrufer können private Pakete von Herausgebern durchsuchen, denen sie angehören.
 - `channel=private` gibt nur Pakete zurück, die der authentifizierte Aufrufer lesen kann.
 
 ### `GET /api/v1/plugins`
 
-Nur-Plugin-Katalogsuche über Code-Plugin- und Bundle-Plugin-Pakete hinweg.
+Reine Plugin-Katalogübersicht über Code-Plugin- und Bundle-Plugin-Pakete.
 
-Query-Parameter:
+Abfrageparameter:
 
 - `limit` (optional): Ganzzahl (1-100)
-- `cursor` (optional): Paginierungs-Cursor
+- `cursor` (optional): Paginierungscursor
 - `isOfficial` (optional): `true` oder `false`
-- `sort` (optional): `recommended` (Standard), `trending`, `downloads`, `updated`, Legacy-Alias `installs`
+- `sort` (optional): `recommended` (Standard), `trending`, `downloads`, `updated`, älterer Alias `installs`
 - `category` (optional): Plugin-Kategoriefilter. Aktuelle Werte:
   `channels`, `models`, `memory`, `context`, `voice`, `media`, `web`,
   `tools`, `runtime`, `gateway`, `security`, `other`.
 
-Legacy-v1-Filter-Aliasse werden auf Lese-Endpunkten weiterhin akzeptiert:
+Ältere v1-Filteraliase werden an Leseendpunkten weiterhin akzeptiert:
 
-- `mcp-tooling`, `data` und `automation` werden zu `tools` aufgelöst.
-- `observability` und `deployment` werden zu `gateway` aufgelöst.
-- `dev-tools` wird zu `runtime` aufgelöst.
+- `mcp-tooling`, `data` und `automation` werden in `tools` aufgelöst.
+- `observability` und `deployment` werden in `gateway` aufgelöst.
+- `dev-tools` wird in `runtime` aufgelöst.
 
-`trending` ist eine Sieben-Tage-Installations-/Download-Bestenliste und verwendet keine Gesamtzahlen über die gesamte Zeit.
-Auf dem einheitlichen Endpunkt `/api/v1/packages` ist es nur für Plugins vorgesehen; verwenden Sie
-`/api/v1/skills?sort=trending` für den Skill-Katalog.
+`trending` ist eine Rangliste der Installationen/Downloads über sieben Tage und verwendet keine Gesamtwerte über den gesamten Zeitraum.
+Am vereinheitlichten Endpunkt `/api/v1/packages` gilt sie nur für Plugins; verwenden Sie
+`/api/v1/skills?sort=trending` für den Skills-Katalog.
 
-Legacy-Aliasse werden nicht als gespeicherte oder vom Autor deklarierte Kategoriewerte akzeptiert.
+Ältere Aliase werden nicht als gespeicherte oder vom Autor deklarierte Kategoriewerte akzeptiert.
 
 ### `GET /api/v1/skills/export`
 
-Massenexport der neuesten öffentlichen Skills für Offline-Analysen.
+Massenexport der neuesten öffentlichen Skills für die Offline-Analyse.
 
-Auth:
+Authentifizierung:
 
 - API-Token erforderlich.
 
-Query-Parameter:
+Abfrageparameter:
 
-- `startDate` (erforderlich): Untere Grenze in Unix-Millisekunden für Skill-`updatedAt`.
-- `endDate` (erforderlich): Obere Grenze in Unix-Millisekunden für Skill-`updatedAt`.
-- `limit` (optional): Ganzzahl (1-250), Standard `250`.
-- `cursor` (optional): Paginierungs-Cursor aus der vorherigen Antwort.
+- `startDate` (erforderlich): Untergrenze in Unix-Millisekunden für Skill-`updatedAt`.
+- `endDate` (erforderlich): Obergrenze in Unix-Millisekunden für Skill-`updatedAt`.
+- `limit` (optional): Ganzzahl (1-250), Standardwert `250`.
+- `cursor` (optional): Paginierungscursor aus der vorherigen Antwort.
 
 Antwort:
 
-- Body: ZIP-Archiv.
-- Jeder exportierte Skill ist unter `{publisher}/{slug}/` verwurzelt.
-- Gehostete Skills enthalten die neuesten gespeicherten Versionsdateien und sind in
+- Inhalt: ZIP-Archiv.
+- Jeder exportierte Skill hat sein Stammverzeichnis unter `{publisher}/{slug}/`.
+- Gehostete Skills enthalten die Dateien der neuesten gespeicherten Version und sind in
   `_manifest.json` mit `sourceRef: "public-clawhub"` aufgeführt.
 - Aktuelle GitHub-gestützte Skills mit einem `clean`- oder `suspicious`-Scan enthalten
   `_source_handoff.json` mit `sourceRef: "public-github"`, Repository, Commit, Pfad,
   Inhalts-Hash und Archiv-URL. Sie enthalten keine von ClawHub gehosteten Quelldateien.
 - Jeder Skill enthält `_export_skill_meta.json`.
-- `_manifest.json` ist immer im ZIP-Root enthalten.
+- `_manifest.json` ist immer im Stammverzeichnis der ZIP-Datei enthalten.
 - `_errors.json` ist enthalten, wenn einzelne Skills oder Dateien nicht
   exportiert werden konnten.
 
@@ -660,7 +665,7 @@ Header:
 
 ### `GET /api/v1/plugins/export`
 
-Massenexport der neuesten öffentlichen Plugin-Releases für Offline-Analysen.
+Massenexport der neuesten öffentlichen Plugin-Releases für die Offline-Analyse.
 
 Authentifizierung:
 
@@ -668,21 +673,21 @@ Authentifizierung:
 
 Abfrageparameter:
 
-- `startDate` (erforderlich): Untere Grenze in Unix-Millisekunden für Plugin-`updatedAt`.
-- `endDate` (erforderlich): Obere Grenze in Unix-Millisekunden für Plugin-`updatedAt`.
+- `startDate` (erforderlich): Untergrenze in Unix-Millisekunden für Plugin-`updatedAt`.
+- `endDate` (erforderlich): Obergrenze in Unix-Millisekunden für Plugin-`updatedAt`.
 - `limit` (optional): Ganzzahl (1-250), Standardwert `250`.
-- `cursor` (optional): Paginierungs-Cursor aus der vorherigen Antwort.
-- `family` (optional): `code-plugin` oder `bundle-plugin`. Ohne Angabe werden beide
-  Plugin-Familien verwendet.
+- `cursor` (optional): Paginierungscursor aus der vorherigen Antwort.
+- `family` (optional): `code-plugin` oder `bundle-plugin`. Wenn nicht angegeben, sind beide
+  Plugin-Familien gemeint.
 
 Antwort:
 
-- Body: ZIP-Archiv.
+- Inhalt: ZIP-Archiv.
 - Jedes exportierte Plugin hat sein Stammverzeichnis unter `{family}/{packageName}/`.
 - Jedes exportierte Plugin enthält die gespeicherten Dateien des neuesten Releases.
-- Exportmetadaten pro Plugin werden unter
+- Die Exportmetadaten je Plugin werden unter
   `__clawhub_export/{family}/{packageName}/plugin_meta.json` gespeichert.
-- `_manifest.json` ist immer im ZIP-Stammverzeichnis enthalten.
+- `_manifest.json` ist immer im Stammverzeichnis der ZIP-Datei enthalten.
 - `_errors.json` ist enthalten, wenn einzelne Plugins oder Dateien nicht
   exportiert werden konnten.
 
@@ -696,44 +701,44 @@ Header:
 
 ### `GET /api/v1/plugins/search`
 
-Reine Plugin-Suche über code-plugin- und bundle-plugin-Pakete.
+Reine Plugin-Suche über Code-Plugin- und Bundle-Plugin-Pakete.
 
 Abfrageparameter:
 
-- `q` (erforderlich): Suchzeichenfolge
+- `q` (erforderlich): Abfragezeichenfolge
 - `limit` (optional): Ganzzahl (1-100)
 - `isOfficial` (optional): `true` oder `false`
-- `category` (optional): Filter für Plugin-Kategorien. Aktuelle Werte:
+- `category` (optional): Plugin-Kategoriefilter. Aktuelle Werte:
   `channels`, `models`, `memory`, `context`, `voice`, `media`, `web`,
   `tools`, `runtime`, `gateway`, `security`, `other`.
 
 Hinweise:
 
-- Die unter `GET /api/v1/plugins` dokumentierten Legacy-v1-Filteraliasse werden ebenfalls
+- Die unter `GET /api/v1/plugins` dokumentierten älteren v1-Filteraliase werden ebenfalls
   akzeptiert.
-- Kategoriefilterung ist ein echter API-Filter, der auf Digest-Zeilen der Plugin-Kategorie
-  basiert, keine Umschreibung der Suchabfrage.
-- Ergebnisse werden nach Relevanz sortiert zurückgegeben und unterstützen derzeit keine Paginierung.
-- Sortiersteuerelemente der Browser-UI für die Plugin-Suche sortieren die geladenen Relevanzergebnisse neu,
-  passend zum aktuellen Browse-Verhalten von `/skills`.
+- Die Kategoriefilterung ist ein echter API-Filter, der auf Digest-
+  Zeilen für Plugin-Kategorien basiert, und keine Umschreibung der Suchabfrage.
+- Die Ergebnisse werden nach Relevanz sortiert zurückgegeben und derzeit nicht paginiert.
+- Die Sortiersteuerelemente der Browser-Benutzeroberfläche für die Plugin-Suche ordnen die geladenen Relevanzergebnisse neu,
+  entsprechend dem aktuellen Übersichtsverhalten von `/skills`.
 
 ### `GET /api/v1/packages/{name}`
 
-Gibt Detailmetadaten des Pakets zurück.
+Gibt Detailmetadaten zum Paket zurück.
 
 Hinweise:
 
-- Skills können in dem einheitlichen Katalog ebenfalls über diese Route aufgelöst werden.
-- Private Pakete geben `404` zurück, sofern der Aufrufer den besitzenden Publisher nicht lesen kann.
+- Im vereinheitlichten Katalog können über diese Route auch Skills aufgelöst werden.
+- Private Pakete geben `404` zurück, sofern der Aufrufer den zugehörigen Herausgeber nicht lesen darf.
 
 ### `DELETE /api/v1/packages/{name}`
 
-Löscht ein Paket und alle Releases per Soft Delete.
+Löscht ein Paket und alle Releases vorläufig.
 
 Hinweise:
 
-- Erfordert ein API-Token für den Paketbesitzer, einen Owner/Admin des Organisations-Publishers,
-  einen Plattformmoderator oder einen Plattformadmin.
+- Erfordert ein API-Token des Paketinhabers, eines Inhabers/Administrators des veröffentlichenden Unternehmens,
+  eines Plattformmoderators oder eines Plattformadministrators.
 
 ### `GET /api/v1/packages/{name}/versions`
 
@@ -742,11 +747,11 @@ Gibt den Versionsverlauf zurück.
 Abfrageparameter:
 
 - `limit` (optional): Ganzzahl (1–100)
-- `cursor` (optional): Paginierungs-Cursor
+- `cursor` (optional): Paginierungscursor
 
 Hinweise:
 
-- Private Pakete geben `404` zurück, sofern der Aufrufer den besitzenden Publisher nicht lesen kann.
+- Private Pakete geben `404` zurück, sofern der Aufrufer den zugehörigen Herausgeber nicht lesen darf.
 
 ### `GET /api/v1/packages/{name}/versions/{version}`
 
@@ -755,27 +760,27 @@ Verifizierung, Artefaktmetadaten und Scandaten.
 
 Hinweise:
 
-- `version.artifact.kind` ist `legacy-zip` für Paketarchive der alten Welt oder
+- `version.artifact.kind` ist `legacy-zip` für Paketarchive des alten Formats oder
   `npm-pack` für ClawPack-gestützte Releases.
-- ClawPack-Releases enthalten npm-kompatible Felder `npmIntegrity`, `npmShasum` und
+- ClawPack-Releases enthalten npm-kompatible Felder für `npmIntegrity`, `npmShasum` und
   `npmTarballName`.
-- `version.sha256hash` ist veraltete Kompatibilitätsmetadaten für alte Clients. Es
-  hasht die exakten ZIP-Bytes, die von `/api/v1/packages/{name}/download` zurückgegeben werden.
+- `version.sha256hash` sind veraltete Kompatibilitätsmetadaten für alte Clients. Sie
+  bilden einen Hash der exakten ZIP-Bytes, die von `/api/v1/packages/{name}/download` zurückgegeben werden.
   Moderne Clients sollten `version.artifact.sha256` verwenden, das das
   kanonische Release-Artefakt identifiziert.
 - `version.vtAnalysis`, `version.llmAnalysis` und `version.staticScan` sind
   enthalten, wenn Scandaten vorhanden sind.
-- Private Pakete geben `404` zurück, sofern der Aufrufer den besitzenden Publisher nicht lesen kann.
+- Private Pakete geben `404` zurück, sofern der Aufrufer den zugehörigen Herausgeber nicht lesen darf.
 
 ### `GET /api/v1/packages/{name}/versions/{version}/security`
 
-Gibt die exakte Sicherheits- und Vertrauenszusammenfassung des Paket-Releases für Installationsclients
-zurück. Dies ist die öffentliche OpenClaw-Konsumoberfläche zur Entscheidung, ob ein
-aufgelöstes Release installiert werden kann.
+Gibt die exakte Sicherheits- und Vertrauenszusammenfassung eines Paket-Releases für Installations-
+Clients zurück. Dies ist die öffentliche OpenClaw-Nutzungsoberfläche für die Entscheidung, ob ein
+aufgelöstes Release installiert werden darf.
 
 Authentifizierung:
 
-- Öffentlicher Leseendpunkt. Es ist kein Owner-, Publisher-, Moderator- oder Admin-Token
+- Öffentlicher Leseendpunkt. Es ist kein Token eines Inhabers, Herausgebers, Moderators oder Administrators
   erforderlich.
 
 Antwort:
@@ -811,48 +816,48 @@ Antwort:
 Antwortfelder:
 
 - `package.name`, `package.displayName` und `package.family` identifizieren das
-  aufgelöste Registry-Paket.
+  aufgelöste Registrierungspaket.
 - `release.releaseId`, `release.version` und `release.createdAt` identifizieren das
-  exakte Release, das bewertet wurde.
+  exakt ausgewertete Release.
 - `release.artifactKind`, `release.artifactSha256`, `release.npmIntegrity`,
   `release.npmShasum` und `release.npmTarballName` sind vorhanden, wenn sie für
   das Release-Artefakt bekannt sind.
 - `trust.scanStatus` ist der effektive Vertrauensstatus, der aus Scanner-Eingaben
-  und manueller Release-Moderation abgeleitet wird.
-- `trust.moderationState` ist nullable. Er ist `null`, wenn keine manuelle Release-
-  Moderation vorhanden ist.
-- `trust.blockedFromDownload` ist das Installationsblockiersignal. OpenClaw und andere
-  Installationsclients sollten die Installation blockieren, wenn dieser Wert `true` ist, anstatt
-  Blockierregeln aus Scanner- oder Moderationsfeldern neu abzuleiten.
-- `trust.reasons` ist die benutzerorientierte und auditierbare Erklärungsliste. Ursachencodes
+  und der manuellen Release-Moderation abgeleitet wird.
+- `trust.moderationState` kann null sein. Der Wert ist `null`, wenn keine manuelle Release-
+  Moderation vorliegt.
+- `trust.blockedFromDownload` ist das Installationssperrsignal. OpenClaw und andere
+  Installations-Clients sollten die Installation sperren, wenn dieser Wert `true` ist, anstatt
+  Sperrregeln aus Scanner- oder Moderationsfeldern neu abzuleiten.
+- `trust.reasons` ist die Liste der für Benutzer sichtbaren Erklärungen und Prüfprotokollerläuterungen. Ursachencodes
   sind stabile, kompakte Zeichenfolgen wie `manual:quarantined`, `scan:malicious`
   und `package:malicious`.
-- `trust.pending` bedeutet, dass eine oder mehrere Vertrauenseingaben noch auf Abschluss warten.
+- `trust.pending` bedeutet, dass eine oder mehrere Vertrauenseingaben noch auf ihren Abschluss warten.
 - `trust.stale` bedeutet, dass die Vertrauenszusammenfassung aus veralteten Eingaben berechnet wurde und
-  vor einer Allow-Entscheidung mit hoher Vertrauenswürdigkeit als aktualisierungsbedürftig behandelt werden sollte.
+  vor einer Freigabeentscheidung mit hoher Sicherheit als aktualisierungsbedürftig behandelt werden sollte.
 
 Hinweise:
 
-- Dieser Endpunkt ist versionsexakt. Clients sollten ihn aufrufen, nachdem sie die
-  Paketversion aufgelöst haben, die sie installieren möchten, nicht nur nachdem sie die neuesten
-  Paketmetadaten gelesen haben.
-- Private Pakete geben `404` zurück, sofern der Aufrufer den besitzenden Publisher nicht lesen kann.
-- Dieser Endpunkt ist absichtlich enger gefasst als Owner-/Moderator-Moderationsendpunkte.
-  Er stellt die Installationsentscheidung und öffentliche Erklärung bereit, nicht
-  Reporter-Identitäten, Berichtsinhalte, private Nachweise oder interne Review-
-  Zeitachsen.
+- Dieser Endpunkt ist versionsgenau. Clients sollten ihn nach dem Auflösen der
+  zu installierenden Paketversion aufrufen, nicht bereits nach dem Lesen der neuesten
+  Paketmetadaten.
+- Private Pakete geben `404` zurück, sofern der Aufrufer den zugehörigen Herausgeber nicht lesen darf.
+- Dieser Endpunkt ist absichtlich enger gefasst als Moderationsendpunkte für Inhaber/Moderatoren.
+  Er stellt die Installationsentscheidung und die öffentliche Erklärung bereit, nicht jedoch
+  die Identitäten der Meldenden, Meldungsinhalte, private Beweismittel oder interne Prüfungs-
+  zeitleisten.
 
 ### `GET /api/v1/packages/{name}/versions/{version}/artifact`
 
-Gibt die expliziten Artefakt-Resolver-Metadaten für eine Paketversion zurück.
+Gibt die expliziten Metadaten des Artefakt-Resolvers für eine Paketversion zurück.
 
 Hinweise:
 
-- Legacy-Paketversionen geben ein `legacy-zip`-Artefakt und eine Legacy-ZIP-
+- Ältere Paketversionen geben ein `legacy-zip`-Artefakt und eine ältere ZIP-
   `downloadUrl` zurück.
-- ClawPack-Versionen geben ein `npm-pack`-Artefakt, npm-Integritätsfelder, eine
-  `tarballUrl` und die Legacy-ZIP-Kompatibilitäts-URL zurück.
-- Dies ist die OpenClaw-Resolver-Oberfläche; sie vermeidet, das Archivformat aus
+- ClawPack-Versionen geben ein `npm-pack`-Artefakt, npm-Integritätsfelder, ein
+  `tarballUrl` und die ältere ZIP-Kompatibilitäts-URL zurück.
+- Dies ist die OpenClaw-Resolver-Oberfläche; sie vermeidet es, das Archivformat anhand
   einer gemeinsam genutzten URL zu erraten.
 
 ### `GET /api/v1/packages/{name}/versions/{version}/artifact/download`
@@ -861,21 +866,21 @@ Lädt das Versionsartefakt über den expliziten Resolver-Pfad herunter.
 
 Hinweise:
 
-- ClawPack-Versionen streamen die exakten hochgeladenen npm-pack-`.tgz`-Bytes.
-- Legacy-ZIP-Versionen leiten zu `/api/v1/packages/{name}/download?version=` weiter.
-- Verwendet den Download-Raten-Bucket.
+- ClawPack-Versionen streamen exakt die Bytes des hochgeladenen npm-Packs `.tgz`.
+- Veraltete ZIP-Versionen leiten zu `/api/v1/packages/{name}/download?version=` weiter.
+- Verwendet das Ratenlimit-Kontingent für Downloads.
 
 ### `GET /api/v1/packages/{name}/readiness`
 
-Gibt die berechnete Bereitschaft für zukünftige OpenClaw-Nutzung zurück.
+Gibt die berechnete Bereitschaft für die zukünftige Nutzung durch OpenClaw zurück.
 
-Readiness-Prüfungen umfassen:
+Die Bereitschaftsprüfungen umfassen:
 
-- offiziellen Kanalstatus
+- Status des offiziellen Kanals
 - Verfügbarkeit der neuesten Version
-- Verfügbarkeit des ClawPack-npm-pack-Artefakts
+- Verfügbarkeit des ClawPack-npm-Pack-Artefakts
 - Artefakt-Digest
-- Herkunft von Source-Repo und Commit
+- Provenienz von Quell-Repository und Commit
 - OpenClaw-Kompatibilitätsmetadaten
 - Host-Ziele
 - Scanstatus
@@ -886,7 +891,7 @@ Antwort:
 {
   "package": {
     "name": "@openclaw/example-plugin",
-    "displayName": "Example Plugin",
+    "displayName": "Beispiel-Plugin",
     "family": "code-plugin",
     "isOfficial": true,
     "latestVersion": "1.2.3"
@@ -895,9 +900,9 @@ Antwort:
   "checks": [
     {
       "id": "clawpack",
-      "label": "ClawPack artifact",
+      "label": "ClawPack-Artefakt",
       "status": "fail",
-      "message": "Latest version is legacy ZIP-only."
+      "message": "Die neueste Version ist eine veraltete Version, die nur als ZIP vorliegt."
     }
   ],
   "blockers": ["clawpack"]
@@ -906,11 +911,11 @@ Antwort:
 
 ### `GET /api/v1/packages/migrations`
 
-Moderator-Endpunkt zum Auflisten offizieller OpenClaw-Plugin-Migrationszeilen.
+Moderator-Endpunkt zum Auflisten der Migrationszeilen offizieller OpenClaw-Plugins.
 
 Authentifizierung:
 
-- Erfordert ein API-Token für einen Moderator- oder Admin-Benutzer.
+- Erfordert ein API-Token für einen Moderator oder Administrator.
 
 Abfrageparameter:
 
@@ -918,7 +923,7 @@ Abfrageparameter:
   `legacy-zip-only`, `metadata-ready`, `blocked`, `ready-for-openclaw` oder
   `all` (Standardwert).
 - `limit` (optional): Ganzzahl (1-100)
-- `cursor` (optional): Paginierungs-Cursor
+- `cursor` (optional): Paginierungscursor
 
 Antwort:
 
@@ -935,7 +940,7 @@ Antwort:
       "sourcePath": "plugins/search",
       "sourceCommit": "abc123",
       "phase": "blocked",
-      "blockers": ["missing ClawPack"],
+      "blockers": ["ClawPack fehlt"],
       "hostTargetsComplete": true,
       "scanClean": false,
       "moderationApproved": false,
@@ -952,11 +957,11 @@ Antwort:
 
 ### `POST /api/v1/packages/migrations`
 
-Admin-Endpunkt zum Erstellen oder Aktualisieren einer offiziellen Plugin-Migrationszeile.
+Administrator-Endpunkt zum Erstellen oder Aktualisieren einer Migrationszeile für ein offizielles Plugin.
 
 Authentifizierung:
 
-- Erfordert ein API-Token für einen Admin-Benutzer.
+- Erfordert ein API-Token für einen Administrator.
 
 Anfragetext:
 
@@ -969,43 +974,43 @@ Anfragetext:
   "sourcePath": "plugins/search",
   "sourceCommit": "abc123",
   "phase": "blocked",
-  "blockers": ["missing ClawPack"],
+  "blockers": ["ClawPack fehlt"],
   "hostTargetsComplete": true,
   "scanClean": false,
   "moderationApproved": false,
   "runtimeBundlesReady": false,
-  "notes": "waiting on publisher upload"
+  "notes": "Warten auf den Upload durch den Herausgeber"
 }
 ```
 
 Hinweise:
 
 - `bundledPluginId` wird in Kleinbuchstaben normalisiert und ist der stabile Upsert-Schlüssel.
-- `packageName` wird als npm-Name normalisiert; das Paket kann bei geplanten
-  Migrationen fehlen.
-- Dies verfolgt nur die Migrationsbereitschaft. Es ändert OpenClaw nicht und erzeugt
+- `packageName` wird als npm-Name normalisiert; bei geplanten Migrationen kann das Paket
+  fehlen.
+- Dies erfasst nur die Migrationsbereitschaft. Es verändert OpenClaw nicht und erzeugt
   keine ClawPacks.
 
 ### `GET /api/v1/packages/moderation/queue`
 
-Moderator-/Admin-Endpunkt für Warteschlangen zur Prüfung von Paket-Releases.
+Moderator-/Administrator-Endpunkt für Warteschlangen zur Prüfung von Paketveröffentlichungen.
 
 Authentifizierung:
 
-- Erfordert ein API-Token für einen Moderator- oder Admin-Benutzer.
+- Erfordert ein API-Token für einen Moderator oder Administrator.
 
 Abfrageparameter:
 
 - `status` (optional): `open` (Standardwert), `blocked`, `manual` oder `all`
 - `limit` (optional): Ganzzahl (1-100)
-- `cursor` (optional): Paginierungs-Cursor
+- `cursor` (optional): Paginierungscursor
 
-Statusbedeutungen:
+Bedeutung der Statuswerte:
 
-- `open`: verdächtige, schädliche, ausstehende, quarantänisierte, widerrufene oder gemeldete Releases.
-- `blocked`: quarantänisierte, widerrufene oder schädliche Releases.
-- `manual`: jedes Release mit einer manuellen Moderationsüberschreibung.
-- `all`: jedes Release mit einer manuellen Überschreibung, einem nicht sauberen Scanstatus oder einem Paketbericht.
+- `open`: verdächtige, schädliche, ausstehende, unter Quarantäne gestellte, widerrufene oder gemeldete Veröffentlichungen.
+- `blocked`: unter Quarantäne gestellte, widerrufene oder schädliche Veröffentlichungen.
+- `manual`: jede Veröffentlichung mit einer manuellen Moderationsüberschreibung.
+- `all`: jede Veröffentlichung mit einer manuellen Überschreibung, einem nicht sauberen Scanstatus oder einer Paketmeldung.
 
 Antwort:
 
@@ -1016,7 +1021,7 @@ Antwort:
       "packageId": "packages:...",
       "releaseId": "packageReleases:...",
       "name": "@openclaw/example-plugin",
-      "displayName": "Example Plugin",
+      "displayName": "Beispiel-Plugin",
       "family": "code-plugin",
       "channel": "community",
       "isOfficial": false,
@@ -1025,7 +1030,7 @@ Antwort:
       "artifactKind": "npm-pack",
       "scanStatus": "malicious",
       "moderationState": "quarantined",
-      "moderationReason": "manual review",
+      "moderationReason": "manuelle Prüfung",
       "sourceRepo": "openclaw/example-plugin",
       "sourceCommit": "abc123",
       "reportCount": 2,
@@ -1040,10 +1045,10 @@ Antwort:
 
 ### `POST /api/v1/packages/{name}/report`
 
-Meldet ein Paket zur Moderatorprüfung. Meldungen erfolgen auf Paketebene und sind optional
-mit einer Version verknüpft. Sie speisen die Moderationswarteschlange, blenden Downloads aber nicht automatisch aus
-und blockieren sie nicht eigenständig; Moderatoren sollten Release-Moderation verwenden, um
-Artefakte zu genehmigen, zu quarantänisieren oder zu widerrufen.
+Meldet ein Paket zur Prüfung durch einen Moderator. Meldungen beziehen sich auf das Paket und können optional
+mit einer Version verknüpft werden. Sie fließen in die Moderationswarteschlange ein, blenden jedoch nicht automatisch
+Inhalte aus und blockieren selbst keine Downloads; Moderatoren sollten die Veröffentlichungsmoderation verwenden, um
+Artefakte zu genehmigen, unter Quarantäne zu stellen oder zu widerrufen.
 
 Authentifizierung:
 
@@ -1052,7 +1057,7 @@ Authentifizierung:
 Anfrage:
 
 ```json
-{ "reason": "Suspicious native binary", "version": "1.2.3" }
+{ "reason": "Verdächtige native Binärdatei", "version": "1.2.3" }
 ```
 
 Antwort:
@@ -1070,7 +1075,7 @@ Antwort:
 
 ### `GET /api/v1/packages/reports`
 
-Moderator-/Admin-Endpunkt zur Entgegennahme von Paketmeldungen.
+Moderator-/Administrator-Endpunkt für den Eingang von Paketmeldungen.
 
 Authentifizierung:
 
@@ -1078,9 +1083,9 @@ Authentifizierung:
 
 Abfrageparameter:
 
-- `status` (optional): `open` (Standard), `confirmed`, `dismissed` oder `all`
+- `status` (optional): `open` (Standardwert), `confirmed`, `dismissed` oder `all`
 - `limit` (optional): Ganzzahl (1-100)
-- `cursor` (optional): Paginierungs-Cursor
+- `cursor` (optional): Paginierungscursor
 
 Antwort:
 
@@ -1092,16 +1097,16 @@ Antwort:
       "packageId": "packages:...",
       "releaseId": "packageReleases:...",
       "name": "@openclaw/example-plugin",
-      "displayName": "Example Plugin",
+      "displayName": "Beispiel-Plugin",
       "family": "code-plugin",
       "version": "1.2.3",
-      "reason": "Suspicious native binary",
+      "reason": "Verdächtige native Binärdatei",
       "status": "open",
       "createdAt": 1730000000000,
       "reporter": {
         "userId": "users:...",
         "handle": "reporter",
-        "displayName": "Reporter"
+        "displayName": "Meldende Person"
       },
       "triagedAt": null,
       "triagedBy": null,
@@ -1115,11 +1120,11 @@ Antwort:
 
 ### `GET /api/v1/packages/{name}/moderation`
 
-Owner-/Moderator-Endpunkt für die Sichtbarkeit der Paketmoderation.
+Eigentümer-/Moderator-Endpunkt für die Sichtbarkeit der Paketmoderation.
 
 Authentifizierung:
 
-- Erfordert ein API-Token für den Paketinhaber, ein Publisher-Mitglied, einen Moderator oder
+- Erfordert ein API-Token für den Paketeigentümer, ein Mitglied des Herausgebers, einen Moderator oder
   Administrator.
 
 Antwort:
@@ -1129,7 +1134,7 @@ Antwort:
   "package": {
     "packageId": "packages:...",
     "name": "@openclaw/example-plugin",
-    "displayName": "Example Plugin",
+    "displayName": "Beispiel-Plugin",
     "family": "code-plugin",
     "channel": "community",
     "isOfficial": false,
@@ -1143,7 +1148,7 @@ Antwort:
     "artifactKind": "npm-pack",
     "scanStatus": "malicious",
     "moderationState": "quarantined",
-    "moderationReason": "manual review",
+    "moderationReason": "manuelle Prüfung",
     "blockedFromDownload": true,
     "reasons": ["manual:quarantined", "scan:malicious", "reports:2"],
     "createdAt": 1730000000000
@@ -1153,22 +1158,22 @@ Antwort:
 
 ### `POST /api/v1/packages/reports/{reportId}/triage`
 
-Moderator-/Admin-Endpunkt zum Abschließen oder Wiederöffnen von Paketmeldungen.
+Moderator-/Administrator-Endpunkt zum Abschließen oder erneuten Öffnen von Paketmeldungen.
 
 Anfrage:
 
 ```json
 {
   "status": "confirmed",
-  "note": "Reviewed and quarantined affected release.",
+  "note": "Betroffene Veröffentlichung wurde geprüft und unter Quarantäne gestellt.",
   "finalAction": "quarantine"
 }
 ```
 
-`note` ist für `confirmed` und `dismissed` erforderlich; beim Zurücksetzen von
-`status` auf `open` kann es weggelassen werden. Übergeben Sie `finalAction: "quarantine"` oder
-`finalAction: "revoke"` mit einer bestätigten Meldung, um die Release-Moderation im
-selben auditierbaren Workflow anzuwenden.
+`note` ist für `confirmed` und `dismissed` erforderlich; es kann weggelassen werden, wenn
+`status` wieder auf `open` gesetzt wird. Übergeben Sie bei einer bestätigten Meldung `finalAction: "quarantine"` oder
+`finalAction: "revoke"`, um die Veröffentlichungsmoderation im selben
+auditierbaren Arbeitsablauf anzuwenden.
 
 Antwort:
 
@@ -1184,45 +1189,47 @@ Antwort:
 
 ### `POST /api/v1/packages/{name}/versions/{version}/moderation`
 
-Moderator-/Admin-Endpunkt für die Prüfung von Paket-Releases.
+Moderator-/Administrator-Endpunkt zur Prüfung von Paketveröffentlichungen.
 
 Anfrage:
 
 ```json
-{ "state": "quarantined", "reason": "Suspicious native payload." }
+{ "state": "quarantined", "reason": "Verdächtige native Nutzlast." }
 ```
 
-Unterstützte Zustände:
+Unterstützte Statuswerte:
 
 - `approved`: manuell geprüft und zugelassen.
-- `quarantined`: bis zur Nachverfolgung blockiert.
-- `revoked`: blockiert, nachdem ein Release zuvor als vertrauenswürdig galt.
+- `quarantined`: bis zur weiteren Prüfung blockiert.
+- `revoked`: blockiert, nachdem einer Veröffentlichung zuvor vertraut wurde.
 
-Unter Quarantäne gestellte und widerrufene Releases geben bei Artefakt-Download-Routen `403` zurück.
-Jede Änderung schreibt einen Eintrag ins Audit-Log.
+Unter Quarantäne gestellte und widerrufene Veröffentlichungen geben über Artefakt-Downloadrouten `403` zurück.
+Jede Änderung schreibt einen Eintrag in das Auditprotokoll.
 
 ### `GET /api/v1/packages/{name}/file`
 
-Gibt den Rohtextinhalt einer Paketdatei zurück.
+Gibt exakt die gespeicherten Bytes einer Paketdatei als Download zurück. Fügen Sie `preview=1` hinzu, um dieselbe begrenzte
+UTF-8-Textvorschau anzufordern, die für Skill-Dateien verwendet wird.
 
 Abfrageparameter:
 
 - `path` (erforderlich)
 - `version` (optional)
 - `tag` (optional)
+- `preview=1` (optional; gibt `text/plain` oder `415` zurück, wenn die Bytes kein gültiges UTF-8 sind)
 
 Hinweise:
 
-- Verwendet standardmäßig das neueste Release.
-- Verwendet den Lese-Raten-Bucket, nicht den Download-Bucket.
-- Binärdateien geben `415` zurück.
-- Dateigrößenlimit: 200 KB.
-- Ausstehende VirusTotal-Scans blockieren Lesezugriffe nicht; schädliche Releases können an anderer Stelle weiterhin zurückgehalten werden.
-- Private Pakete geben `404` zurück, sofern der Aufrufer den besitzenden Publisher nicht lesen kann.
+- Verwendet standardmäßig die neueste Veröffentlichung.
+- Verwendet das Ratenlimit-Kontingent für Lesezugriffe, nicht das Download-Kontingent.
+- Limit für Rohdownloads: 10MB.
+- Limit für Textvorschauen: 200KB; undurchsichtige Dateien geben nur bei Vorschauanfragen `415` zurück.
+- Ausstehende VirusTotal-Scans blockieren Lesezugriffe nicht; schädliche Veröffentlichungen können an anderer Stelle dennoch zurückgehalten werden.
+- Private Pakete geben `404` zurück, sofern der Aufrufer nicht zum Lesen des besitzenden Herausgebers berechtigt ist.
 
 ### `GET /api/v1/packages/{name}/download`
 
-Lädt das alte deterministische ZIP-Archiv für ein Paket-Release herunter.
+Lädt das veraltete deterministische ZIP-Archiv für eine Paketveröffentlichung herunter.
 
 Abfrageparameter:
 
@@ -1231,16 +1238,16 @@ Abfrageparameter:
 
 Hinweise:
 
-- Verwendet standardmäßig das neueste Release.
+- Verwendet standardmäßig die neueste Veröffentlichung.
 - Skills leiten zu `GET /api/v1/download` weiter.
-- Plugin-/Paketarchive sind ZIP-Dateien mit einem `package/`-Wurzelverzeichnis, damit alte OpenClaw-
+- Plugin-/Paketarchive sind ZIP-Dateien mit einem `package/`-Stammverzeichnis, damit ältere OpenClaw-
   Clients weiterhin funktionieren.
-- Diese Route bleibt ausschließlich ZIP-basiert. Sie streamt keine ClawPack-`.tgz`-Dateien.
+- Diese Route bleibt ausschließlich für ZIP-Dateien vorgesehen. Sie streamt keine ClawPack-Dateien des Typs `.tgz`.
 - Antworten enthalten die Header `ETag`, `Digest`, `X-ClawHub-Artifact-Type` und
-  `X-ClawHub-Artifact-Sha256` für Integritätsprüfungen durch Resolver.
-- Reine Registry-Metadaten werden nicht in das heruntergeladene Archiv eingefügt.
-- Ausstehende VirusTotal-Scans blockieren Downloads nicht; schädliche Releases geben `403` zurück.
-- Private Pakete geben `404` zurück, sofern der Aufrufer nicht der Owner ist.
+  `X-ClawHub-Artifact-Sha256` für Integritätsprüfungen des Resolvers.
+- Metadaten, die nur in der Registry vorhanden sind, werden nicht in das heruntergeladene Archiv eingefügt.
+- Ausstehende VirusTotal-Scans blockieren Downloads nicht; schädliche Veröffentlichungen geben `403` zurück.
+- Private Pakete geben `404` zurück, sofern der Aufrufer nicht der Eigentümer ist.
 
 ### `GET /api/npm/{package}`
 
@@ -1248,31 +1255,31 @@ Gibt ein npm-kompatibles Packument für ClawPack-gestützte Paketversionen zurü
 
 Hinweise:
 
-- Es werden nur Versionen mit hochgeladenen ClawPack-npm-pack-Tarballs aufgelistet.
-- Alte reine ZIP-Versionen werden absichtlich ausgelassen.
+- Es werden nur Versionen mit hochgeladenen ClawPack-npm-Pack-Tarballs aufgeführt.
+- Veraltete Versionen, die nur als ZIP vorliegen, werden absichtlich ausgelassen.
 - `dist.tarball`, `dist.integrity` und `dist.shasum` verwenden npm-kompatible
-  Felder, damit Benutzer npm bei Bedarf auf den Mirror ausrichten können.
-- Packuments für scoped Pakete unterstützen sowohl `/api/npm/@scope/name` als auch npms
+  Felder, sodass Benutzer npm bei Bedarf auf den Spiegelserver verweisen können.
+- Packuments für Pakete mit Gültigkeitsbereich unterstützen sowohl `/api/npm/@scope/name` als auch den von npm
   codierten Anfragepfad `/api/npm/@scope%2Fname`.
 
 ### `GET /api/npm/{package}/-/{tarball}.tgz`
 
-Streamt die exakt hochgeladenen ClawPack-Tarball-Bytes für npm-Mirror-Clients.
+Streamt exakt die Bytes des hochgeladenen ClawPack-Tarballs für npm-Spiegelclients.
 
 Hinweise:
 
-- Verwendet den Download-Raten-Bucket.
-- Download-Header enthalten ClawHub-SHA-256 sowie npm-Integritäts-/shasum-Metadaten.
-- Moderations- und Zugriffprüfungen für private Pakete gelten weiterhin.
+- Verwendet das Ratenlimit-Kontingent für Downloads.
+- Download-Header enthalten ClawHub-SHA-256 sowie npm-Integritäts-/Shasum-Metadaten.
+- Prüfungen der Moderation und des Zugriffs auf private Pakete gelten weiterhin.
 
 ### `GET /api/v1/resolve`
 
-Wird von der CLI verwendet, um einen lokalen Fingerprint einer bekannten Version zuzuordnen.
+Wird von der CLI verwendet, um einen lokalen Fingerabdruck einer bekannten Version zuzuordnen.
 
 Abfrageparameter:
 
 - `slug` (erforderlich)
-- `hash` (erforderlich): 64 Zeichen langer Hex-SHA256 des Bundle-Fingerprints
+- `hash` (erforderlich): 64-stelliger hexadezimaler SHA-256-Wert des Bundle-Fingerabdrucks
 
 Antwort:
 
@@ -1282,8 +1289,8 @@ Antwort:
 
 ### `GET /api/v1/download`
 
-Lädt ein gehostetes ZIP einer Skill-Version herunter oder gibt eine GitHub-Quellübergabe für einen
-aktuellen GitHub-gestützten Skill mit einem `clean`- oder `suspicious`-Scan und ohne gehostete
+Lädt eine ZIP-Datei einer gehosteten Skill-Version herunter oder gibt eine GitHub-Quellübergabe für einen
+aktuellen GitHub-basierten Skill mit einem `clean`- oder `suspicious`-Scan und ohne gehostete
 Version zurück.
 
 Abfrageparameter:
@@ -1295,14 +1302,14 @@ Abfrageparameter:
 Hinweise:
 
 - Wenn weder `version` noch `tag` angegeben ist, wird die neueste Version verwendet.
-- Soft-gelöschte Versionen geben `410` zurück.
-- GitHub-gestützte Skill-Übergaben proxen oder spiegeln keine Bytes. Die JSON-Antwort
+- Als vorläufig gelöscht markierte Versionen geben `410` zurück.
+- Übergaben GitHub-basierter Skills leiten keine Bytes weiter und spiegeln sie nicht. Die JSON-Antwort
   enthält `sourceRef: "public-github"`, `repo`, `commit`, `path`, `contentHash`
-  und `archiveUrl`; Scan-/aktueller Zustand ist ein Gate und wird nicht als Erfolgs-
-  Payload-Metadaten eingeschlossen.
-- Download-Statistiken werden pro UTC-Tag als eindeutige Identitäten gezählt (`userId`, wenn das API-Token gültig ist, andernfalls IP).
+  und `archiveUrl`; der Scan-/Aktualitätsstatus dient als Sperre und ist nicht als Metadaten
+  der erfolgreichen Nutzlast enthalten.
+- Downloadstatistiken werden als eindeutige Identitäten pro UTC-Tag gezählt (`userId` bei gültigem API-Token, andernfalls IP-Adresse).
 
-## Authentifizierungs-Endpunkte (Bearer-Token)
+## Authentifizierungsendpunkte (Bearer-Token)
 
 Alle Endpunkte erfordern:
 
@@ -1318,59 +1325,59 @@ Validiert das Token und gibt den Benutzer-Handle zurück.
 
 Veröffentlicht eine neue Version.
 
-- Bevorzugt: `multipart/form-data` mit `payload`-JSON + `files[]`-Blobs.
-- JSON-Body mit `files` (storageId-basiert) wird ebenfalls akzeptiert.
-- Optionales Payload-Feld: `ownerHandle`. Wenn vorhanden, löst die API diesen
-  Publisher serverseitig auf und erfordert, dass der Akteur Publisher-Zugriff hat.
-- Optionales Payload-Feld: `migrateOwner`. Wenn `true` zusammen mit `ownerHandle`, kann ein
-  vorhandener Skill zu diesem Owner verschoben werden, sofern der Akteur Admin/Owner bei beiden
-  aktuellen und Ziel-Publishern ist. Ohne dieses Opt-in werden Owner-Änderungen
-  abgelehnt.
+- Bevorzugt: `multipart/form-data` mit `payload`-JSON und `files[]`-Blobs.
+- Ein JSON-Body mit `files` (auf Basis der Speicher-ID) wird ebenfalls akzeptiert.
+- Optionales Nutzlastfeld: `ownerHandle`. Wenn vorhanden, löst die API diesen
+  Herausgeber serverseitig auf und verlangt, dass der Akteur Herausgeberzugriff besitzt.
+- Optionales Nutzlastfeld: `migrateOwner`. Bei `true` zusammen mit `ownerHandle` kann
+  ein bestehender Skill zu diesem Eigentümer verschoben werden, wenn der Akteur sowohl beim
+  aktuellen als auch beim Zielherausgeber Administrator oder Eigentümer ist. Ohne diese ausdrückliche Zustimmung werden
+  Eigentümeränderungen abgelehnt.
 
 ### `POST /api/v1/packages`
 
-Veröffentlicht ein Code-Plugin- oder Bundle-Plugin-Release.
+Veröffentlicht eine Code-Plugin- oder Bundle-Plugin-Version.
 
-- Erfordert Bearer-Token-Authentifizierung.
+- Erfordert Authentifizierung per Bearer-Token.
 - Erfordert `multipart/form-data`.
-- Zulässige Formularfelder sind `payload`, wiederholte `files`-Blobs oder eine `clawpack`-
-  Tarball-Referenz. `clawpack` kann ein `.tgz`-Blob oder eine von
-  dem Upload-URL-Flow zurückgegebene Storage-ID sein. Veröffentlichungen mit bereitgestellter Storage-ID müssen außerdem das
-  mit dieser Upload-URL zurückgegebene `clawpackUploadTicket` enthalten.
-- Verwenden Sie entweder `files` oder `clawpack`, niemals beides in derselben Anfrage.
-- JSON-Bodys und vom Aufrufer bereitgestellte `payload.files`- / `payload.artifact`-
+- Zulässige Formularfelder sind `payload`, wiederholte `files`-Blobs oder eine einzelne `clawpack`-
+  Tarball-Referenz. `clawpack` kann ein `.tgz`-Blob oder eine vom
+  Upload-URL-Ablauf zurückgegebene Speicher-ID sein. Veröffentlichungen mit bereitgestellter Speicher-ID müssen außerdem
+  das mit dieser Upload-URL zurückgegebene `clawpackUploadTicket` enthalten.
+- Verwenden Sie entweder `files` oder `clawpack`, niemals beide in derselben Anfrage.
+- JSON-Bodies und vom Aufrufer bereitgestellte `payload.files`- bzw. `payload.artifact`-
   Metadaten werden abgelehnt.
-- Direkte Multipart-Veröffentlichungsanfragen sind auf 18 MB begrenzt. ClawPack-Tarballs können
-  den Upload-URL-Flow bis zur Tarball-Obergrenze von 120 MB verwenden.
-- Optionales Payload-Feld: `ownerHandle`. Wenn vorhanden, dürfen nur Admins im Namen dieses Owners veröffentlichen.
+- Direkte mehrteilige Veröffentlichungsanfragen sind auf 18MB begrenzt. ClawPack-Tarballs können
+  den Upload-URL-Ablauf bis zur Tarball-Obergrenze von 120MB verwenden.
+- Optionales Nutzlastfeld: `ownerHandle`. Wenn vorhanden, dürfen nur Administratoren im Namen dieses Eigentümers veröffentlichen.
 
-Validierungshighlights:
+Wichtige Validierungsregeln:
 
 - `family` muss `code-plugin` oder `bundle-plugin` sein.
 - Plugin-Pakete erfordern `openclaw.plugin.json`. ClawPack-`.tgz`-Uploads müssen
-  sie unter `package/openclaw.plugin.json` enthalten.
-- Code-Plugins erfordern `package.json`, Quell-Repository-Metadaten, Quell-Commit-
-  Metadaten, Konfigurationsschema-Metadaten, `openclaw.compat.pluginApi` und
+  es unter `package/openclaw.plugin.json` enthalten.
+- Code-Plugins erfordern `package.json`, Metadaten zum Quell-Repository, Metadaten
+  zum Quell-Commit, Metadaten zum Konfigurationsschema, `openclaw.compat.pluginApi` und
   `openclaw.build.openclawVersion`.
 - `openclaw.hostTargets` und `openclaw.environment` sind optionale Metadaten.
-- Nur der Publisher der `openclaw`-Organisation und persönliche Publisher aktueller Mitglieder der
-  `openclaw`-Organisation dürfen im `official`-Channel veröffentlichen.
-- Veröffentlichungen im Auftrag anderer validieren die Berechtigung für den Official-Channel weiterhin gegen das Ziel-Owner-Konto.
+- Nur der Organisationsherausgeber `openclaw` und die persönlichen Herausgeber aktueller Mitglieder
+  der Organisation `openclaw` dürfen im Kanal `official` veröffentlichen.
+- Veröffentlichungen im Namen anderer prüfen die Berechtigung für den offiziellen Kanal weiterhin anhand des Ziel-Eigentümerkontos.
 
 ### `DELETE /api/v1/skills/{slug}` / `POST /api/v1/skills/{slug}/undelete`
 
-Einen Skill soft-löschen / wiederherstellen (Owner, Moderator oder Admin).
+Einen Skill vorläufig löschen bzw. wiederherstellen (Eigentümer, Moderator oder Administrator).
 
 Optionaler JSON-Body:
 
 ```json
-{ "reason": "Held for moderation pending legal review." }
+{ "reason": "Zur Moderation bis zum Abschluss der rechtlichen Prüfung zurückgehalten." }
 ```
 
-Wenn vorhanden, wird `reason` als Moderationsnotiz des Skills gespeichert und ins Audit-Log kopiert.
-Vom Owner initiierte Soft-Löschungen reservieren den Slug 30 Tage lang; danach kann der Slug von
-einem anderen Publisher beansprucht werden. Die Löschantwort enthält `slugReservedUntil`, wenn diese Ablaufzeit gilt.
-Moderator-/Admin-Ausblendungen und Sicherheitsentfernungen laufen nicht auf diese Weise ab.
+Wenn vorhanden, wird `reason` als Moderationshinweis des Skills gespeichert und in das Auditprotokoll kopiert.
+Vom Eigentümer veranlasste vorläufige Löschungen reservieren den Slug für 30 Tage; anschließend kann der Slug von
+einem anderen Herausgeber beansprucht werden. Die Löschantwort enthält `slugReservedUntil`, wenn dieser Ablauf gilt.
+Ausblendungen durch Moderatoren/Administratoren und sicherheitsbedingte Entfernungen laufen nicht auf diese Weise ab.
 
 Löschantwort:
 
@@ -1380,17 +1387,17 @@ Löschantwort:
 
 Statuscodes:
 
-- `200`: ok
-- `401`: nicht authentifiziert
+- `200`: erfolgreich
+- `401`: nicht autorisiert
 - `403`: verboten
 - `404`: Skill/Benutzer nicht gefunden
 - `500`: interner Serverfehler
 
 ### `POST /api/v1/users/publisher`
 
-Nur für Admins. Stellt sicher, dass für einen Handle ein Organisations-Publisher existiert. Wenn der Handle noch auf einen
-alten geteilten Benutzer-/persönlichen Publisher zeigt, migriert der Endpunkt ihn zuerst in einen Organisations-Publisher.
-Geben Sie für eine neu erstellte Organisation `memberHandle` an; der handelnde Admin wird nicht als Mitglied hinzugefügt.
+Nur für Administratoren. Stellt sicher, dass für einen Handle ein Organisationsherausgeber vorhanden ist. Wenn der Handle noch auf einen
+alten gemeinsam genutzten Benutzer-/persönlichen Herausgeber verweist, migriert der Endpunkt ihn zunächst zu einem Organisationsherausgeber.
+Geben Sie für eine neu erstellte Organisation `memberHandle` an; der ausführende Administrator wird nicht als Mitglied hinzugefügt.
 `memberRole` ist standardmäßig `owner`.
 
 - Body: `{ "handle": "openclaw", "displayName": "OpenClaw", "memberHandle": "alice", "memberRole": "owner", "trusted": true }`
@@ -1398,45 +1405,45 @@ Geben Sie für eine neu erstellte Organisation `memberHandle` an; der handelnde 
 
 ### `POST /api/v1/publishers`
 
-Authentifizierte Self-Service-Erstellung eines Organisations-Publishers. Erstellt einen neuen Organisations-Publisher und fügt den
-Aufrufer als Owner hinzu. Dieser Endpunkt migriert keine vorhandenen Benutzer-/persönlichen Handles und
-markiert den Publisher nicht als vertrauenswürdig/offiziell.
+Authentifizierte Self-Service-Erstellung eines Organisationsherausgebers. Erstellt einen neuen Organisationsherausgeber und fügt den
+Aufrufer als Eigentümer hinzu. Dieser Endpunkt migriert keine bestehenden Benutzer-/persönlichen Handles und
+markiert den Herausgeber nicht als vertrauenswürdig/offiziell.
 
 - Body: `{ "handle": "opik", "displayName": "Opik" }`
 - Antwort: `{ "ok": true, "publisherId": "...", "handle": "opik", "created": true, "trusted": false }`
-- Gibt `409` zurück, wenn der Handle bereits von einem Publisher, Benutzer oder persönlichen Publisher verwendet wird.
+- Gibt `409` zurück, wenn der Handle bereits von einem Herausgeber, Benutzer oder persönlichen Herausgeber verwendet wird.
 
 ### `POST /api/v1/users/reserve`
 
-Nur für Admins. Reserviert Root-Slugs und Paketnamen für einen rechtmäßigen Owner, ohne ein
-Release zu veröffentlichen. Paketnamen werden zu privaten Platzhalterpaketen ohne Release-Zeilen, sodass derselbe
-Owner später das echte Code-Plugin- oder Bundle-Plugin-Release unter diesem Namen veröffentlichen kann.
+Nur für Administratoren. Reserviert Root-Slugs und Paketnamen für einen rechtmäßigen Eigentümer, ohne eine
+Version zu veröffentlichen. Paketnamen werden zu privaten Platzhalterpaketen ohne Versionszeilen, sodass derselbe
+Eigentümer später die tatsächliche Code-Plugin- oder Bundle-Plugin-Version unter diesem Namen veröffentlichen kann.
 
 - Body: `{ "handle": "openclaw", "slugs": ["diffs"], "packageNames": ["@openclaw/diffs"], "reason": "reserved for official OpenClaw plugin" }`
 - Antwort: `{ "ok": true, "succeeded": 2, "failed": 0, "results": [{ "kind": "slug", "name": "diffs", "ok": true, "action": "reserved" }] }`
 
 ### `POST /api/v1/users/publisher-recovery`
 
-Nur für Admins. Stellt einen persönlichen Publisher für einen verifizierten Ersatz-GitHub-OAuth-Principal wieder her,
-ohne Convex-Auth-Kontozeilen zu bearbeiten. Die Anfrage muss beide unveränderlichen GitHub-
-Provider-Konto-IDs nennen; veränderliche Handles werden nur als bedienerorientierte Absicherung verwendet.
+Nur für Administratoren. Stellt einen persönlichen Herausgeber für einen verifizierten Ersatz-GitHub-OAuth-Principal
+wieder her, ohne Convex-Auth-Kontozeilen zu bearbeiten. Die Anfrage muss beide unveränderlichen GitHub-
+Provider-Konto-IDs angeben; veränderliche Handles dienen nur als Kontrollmaßnahme für Bediener.
 
 Der Endpunkt verwendet standardmäßig einen Probelauf. Das Anwenden der Wiederherstellung erfordert `dryRun: false` und
-`confirmIdentityVerified: true`, nachdem Mitarbeitende die Kontinuität zwischen beiden
-GitHub-Principals unabhängig verifiziert haben. Die Wiederherstellung schlägt geschlossen fehl, wenn der aktuelle persönliche
-Publisher des Zielbenutzers Skills, Pakete oder GitHub-Skill-Quellen hat.
-Die Wiederherstellung migriert außerdem veraltete `ownerUserId`-Felder für die Skills des wiederhergestellten Publishers,
-Skill-Slug-Aliase, Pakete, Paket-Inspector-Warnungen und abgeleitete Such-Digest-Zeilen, damit
-Direct-Owner-Pfade mit der neuen Publisher-Autorität übereinstimmen. Eine aktive Protected-Handle-
-Reservierung für den wiederhergestellten Handle wird ebenfalls dem Ersatzbenutzer zugewiesen, damit spätere
-Profilsynchronisierung die konkurrierende Autorität des früheren Benutzers nicht wiederherstellen kann. Jede primäre Tabelle ist auf
-100 Zeilen pro Apply-Transaktion begrenzt; größere Wiederherstellungen müssen zuerst eine fortsetzbare Owner-Migration verwenden.
-GitHub-Skill-Quellen sind Publisher-scoped und werden als geprüft gemeldet, statt umgeschrieben zu werden.
+`confirmIdentityVerified: true`, nachdem Mitarbeiter die Kontinuität zwischen beiden
+GitHub-Principals unabhängig überprüft haben. Die Wiederherstellung wird sicher abgebrochen, wenn der aktuelle persönliche
+Herausgeber des Zielbenutzers Skills, Pakete oder GitHub-Skill-Quellen besitzt.
+Die Wiederherstellung migriert außerdem alte `ownerUserId`-Felder für die Skills des wiederhergestellten Herausgebers,
+Skill-Slug-Aliasse, Pakete, Warnungen der Paketprüfung und abgeleitete Such-Digest-Zeilen, damit
+Pfade direkter Eigentümer mit der neuen Herausgeberautorität übereinstimmen. Eine aktive Reservierung eines geschützten Handles
+für den wiederhergestellten Handle wird ebenfalls dem Ersatzbenutzer zugewiesen, sodass eine spätere
+Profilsynchronisierung die konkurrierende Autorität des früheren Benutzers nicht wiederherstellen kann. Jede Primärtabelle ist auf
+100 Zeilen pro Anwendungstransaktion begrenzt; größere Wiederherstellungen müssen zunächst eine fortsetzbare Eigentümermigration verwenden.
+GitHub-Skill-Quellen sind herausgeberspezifisch und werden als geprüft gemeldet, statt neu geschrieben zu werden.
 
 - Body: `{ "handle": "gingiris", "nextUserHandle": "gingiris-1031", "previousGitHubProviderAccountId": "123", "nextGitHubProviderAccountId": "456", "reason": "Verified account continuity for issue #2555", "confirmIdentityVerified": true, "dryRun": false }`
 - Antwort: `{ "ok": true, "dryRun": false, "recovered": true, "publisherId": "...", "handle": "gingiris", "previousUser": { "userId": "...", "handle": "gingiris", "nextHandle": "gingiris-recovered", "githubProviderAccountId": "123", "authAccountCount": 1 }, "nextUser": { "userId": "...", "handle": "gingiris-1031", "nextHandle": "gingiris", "githubProviderAccountId": "456", "authAccountCount": 1 }, "retiredPersonalPublisher": null, "resourceOwnerMigration": { "limitPerTable": 100, "skills": 1, "skillSlugAliases": 1, "packages": 0, "packageInspectorWarnings": 0, "githubSourcesChecked": 1, "handleReservations": 1 }, "identityVerified": true, "reason": "Verified account continuity for issue #2555" }`
 
-### Endpunkte zur Verwaltung von Owner-Slugs
+### Endpunkte zur Verwaltung von Eigentümer-Slugs
 
 - `POST /api/v1/skills/{slug}/rename`
   - Body: `{ "newSlug": "new-canonical-slug" }`
@@ -1447,11 +1454,11 @@ GitHub-Skill-Quellen sind Publisher-scoped und werden als geprüft gemeldet, sta
 
 Hinweise:
 
-- Beide Endpunkte erfordern API-Token-Authentifizierung und funktionieren nur für den Skill-Owner.
+- Beide Endpunkte erfordern eine Authentifizierung per API-Token und funktionieren nur für den Skill-Eigentümer.
 - `rename` behält den vorherigen Slug als Weiterleitungsalias bei.
 - `merge` blendet den Quelleintrag aus und leitet den Quell-Slug zum Zieleintrag weiter.
 
-### Endpunkte zur Übertragung der Eigentümerschaft
+### Endpunkte zur Eigentumsübertragung
 
 - `POST /api/v1/skills/{slug}/transfer`
   - Body: `{ "toUserHandle": "target_handle", "message": "optional" }`
@@ -1459,25 +1466,25 @@ Hinweise:
 - `POST /api/v1/skills/{slug}/transfer/accept`
 - `POST /api/v1/skills/{slug}/transfer/reject`
 - `POST /api/v1/skills/{slug}/transfer/cancel`
-  - Antwort (accept/reject/cancel): `{ "ok": true, "skillSlug": "demo-skill?" }`
+  - Antwort (annehmen/ablehnen/abbrechen): `{ "ok": true, "skillSlug": "demo-skill?" }`
 - `GET /api/v1/transfers/incoming`
 - `GET /api/v1/transfers/outgoing`
-  - Antwortformat: `{ "transfers": [{ "_id": "...", "skill": { "slug": "demo", "displayName": "Demo" }, "fromUser"|"toUser": { "handle": "..." }, "message": "...", "requestedAt": 0, "expiresAt": 0 }] }`
+  - Antwortstruktur: `{ "transfers": [{ "_id": "...", "skill": { "slug": "demo", "displayName": "Demo" }, "fromUser"|"toUser": { "handle": "..." }, "message": "...", "requestedAt": 0, "expiresAt": 0 }] }`
 
 ### `POST /api/v1/users/ban`
 
-Sperrt einen Benutzer und löscht eigene Skills dauerhaft (nur Moderator/Admin).
+Einen Benutzer sperren und dessen Skills dauerhaft löschen (nur Moderatoren/Administratoren).
 
 Body:
 
 ```json
-{ "handle": "user_handle", "reason": "optional ban reason" }
+{ "handle": "user_handle", "reason": "optionaler Sperrgrund" }
 ```
 
 oder
 
 ```json
-{ "userId": "users_...", "reason": "optional ban reason" }
+{ "userId": "users_...", "reason": "optionaler Sperrgrund" }
 ```
 
 Antwort:
@@ -1488,18 +1495,18 @@ Antwort:
 
 ### `POST /api/v1/users/unban`
 
-Hebt die Sperre eines Benutzers auf und stellt berechtigte Skills wieder her (nur Admin).
+Die Sperre eines Benutzers aufheben und berechtigte Skills wiederherstellen (nur Administratoren).
 
 Body:
 
 ```json
-{ "handle": "user_handle", "reason": "optional unban reason" }
+{ "handle": "user_handle", "reason": "optionaler Grund für die Aufhebung der Sperre" }
 ```
 
 oder
 
 ```json
-{ "userId": "users_...", "reason": "optional unban reason" }
+{ "userId": "users_...", "reason": "optionaler Grund für die Aufhebung der Sperre" }
 ```
 
 Antwort:
@@ -1510,19 +1517,19 @@ Antwort:
 
 ### `POST /api/v1/users/reclassify-ban`
 
-Ändert den gespeicherten Grund für eine bestehende Sperre, ohne die Sperre aufzuheben oder
-Inhalte wiederherzustellen (nur Admin). Standardmäßig ein Probelauf, sofern `dryRun` nicht `false` ist.
+Den gespeicherten Grund einer bestehenden Sperre ändern, ohne die Sperre aufzuheben oder
+Inhalte wiederherzustellen (nur Administratoren). Verwendet standardmäßig einen Probelauf, sofern `dryRun` nicht `false` ist.
 
 Body:
 
 ```json
-{ "handle": "user_handle", "reason": "bulk publishing spam", "dryRun": true }
+{ "handle": "user_handle", "reason": "Spam durch Massenveröffentlichungen", "dryRun": true }
 ```
 
 oder
 
 ```json
-{ "userId": "users_...", "reason": "bulk publishing spam", "dryRun": false }
+{ "userId": "users_...", "reason": "Spam durch Massenveröffentlichungen", "dryRun": false }
 ```
 
 Antwort:
@@ -1533,15 +1540,15 @@ Antwort:
   "dryRun": false,
   "userId": "users_...",
   "handle": "user_handle",
-  "previousReason": "malware auto-ban",
-  "nextReason": "bulk publishing spam",
+  "previousReason": "automatische Sperre wegen Schadsoftware",
+  "nextReason": "Spam durch Massenveröffentlichungen",
   "changed": true
 }
 ```
 
 ### `POST /api/v1/users/role`
 
-Ändert eine Benutzerrolle (nur Admin).
+Eine Benutzerrolle ändern (nur Administratoren).
 
 Body:
 
@@ -1563,13 +1570,13 @@ Antwort:
 
 ### `GET /api/v1/users`
 
-Listet Benutzer auf oder sucht nach Benutzern (nur Admin).
+Benutzer auflisten oder suchen (nur Administratoren).
 
-Query-Parameter:
+Abfrageparameter:
 
 - `q` (optional): Suchanfrage
 - `query` (optional): Alias für `q`
-- `limit` (optional): maximale Ergebnisse (Standard 20, maximal 200)
+- `limit` (optional): maximale Anzahl von Ergebnissen (Standardwert 20, maximal 200)
 
 Antwort:
 
@@ -1579,8 +1586,8 @@ Antwort:
     {
       "userId": "users_...",
       "handle": "user_handle",
-      "displayName": "User",
-      "name": "User",
+      "displayName": "Benutzer",
+      "name": "Benutzer",
       "role": "moderator"
     }
   ],
@@ -1590,7 +1597,8 @@ Antwort:
 
 ### `POST /api/v1/stars/{slug}` / `DELETE /api/v1/stars/{slug}`
 
-Fügt einen Star hinzu oder entfernt ihn (Highlights). Beide Endpunkte sind idempotent.
+Ein Lesezeichen hinzufügen/entfernen. Die alte Route `stars` und die Namen der Antwortfelder bleiben
+aus Kompatibilitätsgründen erhalten. Beide Endpunkte sind idempotent.
 
 Antworten:
 
@@ -1602,7 +1610,7 @@ Antworten:
 { "ok": true, "unstarred": true, "alreadyUnstarred": false }
 ```
 
-## Legacy-CLI-Endpunkte (veraltet)
+## Alte CLI-Endpunkte (veraltet)
 
 Für ältere CLI-Versionen weiterhin unterstützt:
 
@@ -1613,18 +1621,18 @@ Für ältere CLI-Versionen weiterhin unterstützt:
 - `POST /api/cli/skill/delete`
 - `POST /api/cli/skill/undelete`
 
-Siehe `DEPRECATIONS.md` für den Entfernungsplan.
+Den Plan zur Entfernung finden Sie unter `DEPRECATIONS.md`.
 
-`POST /api/cli/upload-url` gibt `uploadUrl` und `uploadTicket` zurück. Paket-
-Veröffentlichungen, die ein ClawPack-Tarball stagen, müssen die resultierende Storage-ID als
+`POST /api/cli/upload-url` gibt `uploadUrl` und `uploadTicket` zurück. Paketveröffentlichungen,
+die einen ClawPack-Tarball bereitstellen, müssen die resultierende Speicher-ID als
 `clawpack` und das zurückgegebene Ticket als `clawpackUploadTicket` senden.
 
 ## Registry-Erkennung (`/.well-known/clawhub.json`)
 
-Die CLI kann Registry-/Authentifizierungseinstellungen von der Site erkennen:
+Die CLI kann Registry-/Authentifizierungseinstellungen von der Website ermitteln:
 
 - `/.well-known/clawhub.json` (JSON, bevorzugt)
-- `/.well-known/clawdhub.json` (Legacy)
+- `/.well-known/clawdhub.json` (alt)
 
 Schema:
 
@@ -1632,4 +1640,4 @@ Schema:
 { "apiBase": "https://clawhub.ai", "authBase": "https://clawhub.ai", "minCliVersion": "0.0.5" }
 ```
 
-Wenn Sie selbst hosten, stellen Sie diese Datei bereit (oder setzen Sie `CLAWHUB_REGISTRY` explizit; Legacy `CLAWDHUB_REGISTRY`).
+Wenn Sie selbst hosten, stellen Sie diese Datei bereit (oder setzen Sie `CLAWHUB_REGISTRY` ausdrücklich; früher `CLAWDHUB_REGISTRY`).

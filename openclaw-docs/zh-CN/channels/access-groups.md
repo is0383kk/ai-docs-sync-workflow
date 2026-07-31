@@ -6,24 +6,25 @@ read_when:
 summary: 消息渠道的可复用发送者允许列表
 title: 访问组
 x-i18n:
-    generated_at: "2026-07-11T20:19:15Z"
+    generated_at: "2026-07-26T06:32:53Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 099abc95e90d9a7b7006d19062c46b4ffdb2aecb1e8e714454a3182131a786d0
     source_path: channels/access-groups.md
     workflow: 16
 ---
 
-访问组是命名的发送者列表，你可以在 `accessGroups` 下定义一次，然后通过 `accessGroup:<name>` 从渠道允许列表中引用。
+访问组是命名的发送者列表，你可以在 `accessGroups` 下定义一次，然后使用 `accessGroup:<name>` 从渠道允许列表中引用。
 
-当多条消息渠道应允许同一批人员，或同一受信任集合应同时用于私信和群组发送者授权时，可以使用访问组。
+当同一批人员需要获准使用多个消息渠道，或一组受信任的人员应同时适用于私信和群组发送者授权时，可使用访问组。
 
 访问组本身不授予任何权限。只有当允许列表字段引用它时，它才会生效。
 
 ## 静态消息发送者组
 
-静态发送者组使用 `type: "message.senders"`。`members` 以消息渠道 ID 为键，并可使用 `"*"` 表示所有渠道共享的条目：
+静态发送者组使用 `type: "message.senders"`。`members` 以消息渠道 ID 为键，此外还可使用 `"*"` 指定由所有渠道共享的条目：
 
 ```json5
 {
@@ -41,16 +42,16 @@ x-i18n:
 }
 ```
 
-| 键                         | 含义                                                       |
-| -------------------------- | ---------------------------------------------------------- |
-| `"*"`                      | 对每个引用该组的消息渠道都进行检查的共享条目。             |
-| `discord`、`telegram` 等   | 仅在匹配该渠道的允许列表时检查的条目。                     |
+| 键                         | 含义                                                                        |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `"*"`                      | 每个引用该组的消息渠道都会检查的共享条目。                                  |
+| `discord`、`telegram`、... | 仅在匹配该渠道的允许列表时检查的条目。                                      |
 
-条目使用目标渠道的常规 `allowFrom` 规则进行匹配。OpenClaw 不会在渠道之间转换发送者 ID：如果 Alice 同时拥有 Telegram ID 和 Discord ID，请将这两个 ID 分别列在对应的渠道键下。
+条目按照目标渠道的常规 `allowFrom` 规则进行匹配。OpenClaw 不会在渠道之间转换发送者 ID：如果 Alice 同时拥有 Telegram ID 和 Discord ID，请将这两个 ID 分别列在对应的渠道键下。
 
-## 从允许列表引用访问组
+## 从允许列表引用组
 
-凡是消息渠道路径支持发送者允许列表的地方，都可以使用 `accessGroup:<name>` 引用访问组。
+在消息渠道路径支持发送者允许列表的任何位置，均可使用 `accessGroup:<name>` 引用访问组。
 
 私信允许列表示例：
 
@@ -107,7 +108,7 @@ x-i18n:
 }
 ```
 
-你可以混合使用访问组和直接条目：
+可以混合使用访问组和直接条目：
 
 ```json5
 {
@@ -122,14 +123,14 @@ x-i18n:
 
 ## 支持的消息渠道路径
 
-访问组可用于共享的消息渠道授权路径：
+访问组适用于共享的消息渠道授权路径：
 
 - 私信发送者允许列表，例如 `channels.<channel>.allowFrom`
 - 群组发送者允许列表，例如 `channels.<channel>.groupAllowFrom`
-- 使用相同发送者匹配规则的渠道专属单房间发送者允许列表（例如 Google Chat 的 `groups.<space>.users`）
+- 使用相同发送者匹配规则的渠道专属房间级发送者允许列表（例如 Google Chat `groups.<space>.users`）
 - 复用消息渠道发送者允许列表的命令授权路径
 
-渠道是否支持访问组，取决于该渠道是否接入 OpenClaw 共享的发送者授权辅助函数。当前内置支持包括 ClickClack、Discord、Feishu、Google Chat、iMessage、IRC、LINE、Mattermost、Microsoft Teams、Nextcloud Talk、Nostr、QQ Bot、Signal、Slack、SMS、Telegram、WhatsApp、Zalo 和 Zalo Personal。静态 `message.senders` 组与渠道无关，因此新的消息渠道只需使用共享的插件 SDK 入口辅助函数，而不是自定义允许列表展开逻辑，即可支持这些组。
+渠道是否支持访问组，取决于该渠道是否接入 OpenClaw 共享的发送者授权辅助函数。目前内置支持包括 ClickClack、Discord、Feishu、Google Chat、iMessage、IRC、LINE、Mattermost、Microsoft Teams、Nextcloud Talk、Nostr、QQ Bot、Signal、Slack、SMS、Telegram、WhatsApp、Zalo 和 Zalo Personal。静态 `message.senders` 组与渠道无关，因此新消息渠道只要使用共享的插件 SDK 入口辅助函数，而非自定义允许列表展开逻辑，即可支持这些组。
 
 ## Discord 渠道受众
 
@@ -154,15 +155,15 @@ Discord 还支持一种动态访问组类型：
 }
 ```
 
-`discord.channelAudience` 表示“允许当前能够查看此服务器渠道的 Discord 私信发送者”。OpenClaw 会在授权时通过 Discord 解析发送者，并应用 Discord 的 `ViewChannel` 权限规则。`membership` 是可选项，默认值为 `canViewChannel`。
+`discord.channelAudience` 表示“允许当前可以查看此服务器渠道的 Discord 私信发送者”。OpenClaw 会在授权时通过 Discord 解析发送者，并应用 Discord `ViewChannel` 权限规则。`membership` 是可选项，默认值为 `canViewChannel`。
 
-当某个 Discord 渠道已经是团队的事实依据时，例如 `#maintainers` 或 `#on-call`，可以使用此方式。
+当某个 Discord 渠道已经是团队的事实来源时（例如 `#maintainers` 或 `#on-call`），可使用此类型。
 
 要求和失败行为：
 
-- Bot 需要能够访问该服务器和渠道。
+- Bot 需要拥有该服务器和渠道的访问权限。
 - Bot 需要启用 Discord Developer Portal 中的 **Server Members Intent**。
-- 当 Discord 返回 `Missing Access`、无法将发送者解析为服务器成员，或渠道属于其他服务器时，访问组会以拒绝方式失败。
+- 当 Discord 返回 `Missing Access`、无法将发送者解析为服务器成员，或该渠道属于另一个服务器时，访问组会以拒绝访问的方式失败。
 
 更多 Discord 专属示例：[Discord 访问控制](/zh-CN/channels/discord#access-control-and-routing)
 
@@ -183,23 +184,23 @@ const state = await resolveAccessGroupAllowFromState({
 });
 ```
 
-结果会报告已引用、已匹配、缺失、不支持和失败的访问组。可将其用于诊断或一致性测试。仅对仍要求扁平 `allowFrom` 数组的兼容路径使用 `expandAllowFromWithAccessGroups(...)`。
+结果会报告已引用、已匹配、缺失、不受支持以及失败的组。可将其用于诊断或一致性测试。仅在仍然要求扁平 `allowFrom` 数组的兼容路径中使用 `expandAllowFromWithAccessGroups(...)`。
 
-## 安全说明
+## 安全注意事项
 
 - 访问组是允许列表别名，而不是角色。它们本身不会创建所有者、批准配对请求或授予工具权限。
-- `dmPolicy: "open"` 仍要求有效私信允许列表中包含 `"*"`。引用访问组并不等同于公开访问。
-- 缺失的访问组名称会以拒绝方式失败。如果 `allowFrom` 包含 `accessGroup:operators`，但 `accessGroups.operators` 不存在，则该条目不会授权任何人。
-- 保持渠道 ID 稳定。当渠道同时支持 ID 和显示名称时，优先使用数字 ID 或用户 ID，而不是显示名称。
+- `dmPolicy: "open"` 仍要求有效的私信允许列表中包含 `"*"`。引用访问组并不等同于公开访问。
+- 缺失的组名会以拒绝访问的方式失败。如果 `allowFrom` 包含 `accessGroup:operators`，而 `accessGroups.operators` 不存在，则该条目不会授权任何人。
+- 保持渠道 ID 稳定。当渠道同时支持数字/用户 ID 和显示名称时，优先使用数字/用户 ID。
 
-## 故障排查
+## 故障排除
 
 如果发送者本应匹配却被阻止：
 
 1. 确认允许列表字段包含完全一致的 `accessGroup:<name>` 引用。
 2. 确认 `accessGroups.<name>.type` 正确。
-3. 确认发送者 ID 列在对应的渠道键或 `"*"` 下。
-4. 确认条目使用该渠道的常规允许列表语法。
-5. 对于 Discord 渠道受众，确认 Bot 能够看到服务器渠道，并且已启用 Server Members Intent。
+3. 确认发送者 ID 已列在对应的渠道键下或 `"*"` 下。
+4. 确认该条目使用此渠道的常规允许列表语法。
+5. 对于 Discord 渠道受众，请确认 Bot 可以查看服务器渠道，并且已启用 Server Members Intent。
 
 编辑访问控制配置后，运行 `openclaw doctor`。它可以在运行时之前发现许多无效的允许列表和策略组合。

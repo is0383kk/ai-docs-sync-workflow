@@ -1,27 +1,32 @@
 ---
 read_when:
-    - '`openclaw secrets apply` योजनाएँ जनरेट करना या उनकी समीक्षा करना'
-    - '`Invalid plan target path` त्रुटियों को डीबग करना'
+    - '`openclaw secrets apply` योजनाएँ बनाना या उनकी समीक्षा करना'
+    - '`Invalid plan target path` त्रुटियों की डीबगिंग'
     - लक्ष्य प्रकार और पथ सत्यापन व्यवहार को समझना
 summary: '`secrets apply` योजनाओं के लिए अनुबंध: लक्ष्य सत्यापन, पथ मिलान, और `auth-profiles.json` लक्ष्य दायरा'
 title: सीक्रेट्स लागू करने की योजना का अनुबंध
 x-i18n:
-    generated_at: "2026-06-28T23:13:32Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:47:00Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 03f0ca9b433553a2f6d86d01b8c227a24b6f53ef7034a94bd648fbf04c81f13e
+    source_hash: 71ee8afd958646930af4db3bbad08e033ff79da48890a989d72b361abcbda3bb
     source_path: gateway/secrets-plan-contract.md
     workflow: 16
 ---
 
-यह पेज `openclaw secrets apply` द्वारा लागू किए गए सख्त अनुबंध को परिभाषित करता है।
+यह पृष्ठ `openclaw secrets apply` द्वारा लागू किए गए सख्त अनुबंध को परिभाषित करता है। यदि कोई लक्ष्य इन नियमों से मेल नहीं खाता, तो किसी भी फ़ाइल में बदलाव करने से पहले लागू करने की प्रक्रिया विफल हो जाती है।
 
-यदि कोई लक्ष्य इन नियमों से मेल नहीं खाता, तो कॉन्फ़िगरेशन बदलने से पहले apply विफल हो जाता है।
+## योजना फ़ाइल की आवश्यकताएँ
 
-## प्लान फ़ाइल का आकार
+`openclaw secrets apply --from <plan.json>` अधिकतम 16 MiB (16,777,216 बाइट) की सामान्य फ़ाइलें स्वीकार करता है। यह सीमा रिक्त स्थान सहित पूरी क्रमबद्ध फ़ाइल पर लागू होती है। JSON पार्सिंग या लक्ष्य सत्यापन से पहले निर्देशिकाएँ, FIFO, डिवाइस फ़ाइलें और सीमा से बड़ी फ़ाइलें अस्वीकार कर दी जाती हैं।
 
-`openclaw secrets apply --from <plan.json>` प्लान लक्ष्यों की `targets` array की अपेक्षा करता है:
+`openclaw secrets configure --plan-out <plan.json>` फ़ाइल बनाने से पहले UTF-8 क्रमबद्ध आउटपुट पर भी यही सीमा लागू करता है। हाथ से लिखी गई योजनाओं और बाहरी योजना जनरेटरों को भी क्रमबद्ध फ़ाइल को इस सीमा के भीतर रखना होगा।
+
+## योजना फ़ाइल की संरचना
+
+`openclaw secrets apply --from <plan.json>` योजना लक्ष्यों की एक `targets` सरणी की अपेक्षा करता है:
 
 ```json5
 {
@@ -46,22 +51,16 @@ x-i18n:
 }
 ```
 
-## Provider upserts और deletes
+`openclaw secrets configure` इस संरचना में योजनाएँ जनरेट करता है। आप किसी योजना को हाथ से लिख या संपादित भी कर सकते हैं।
 
-प्लान में दो वैकल्पिक शीर्ष-स्तरीय फ़ील्ड भी शामिल हो सकते हैं, जो प्रति-लक्ष्य writes के साथ
-`secrets.providers` map को बदलते हैं:
+## प्रदाता अपसर्ट और विलोपन
 
-- `providerUpserts` — provider alias के आधार पर keyed object. हर value एक
-  provider definition है (वही आकार जो `openclaw.json` में
-  `secrets.providers.<alias>` के तहत स्वीकार किया जाता है, जैसे कोई `exec` या `file`
-  provider).
-- `providerDeletes` — हटाए जाने वाले provider aliases की array.
+योजनाओं में दो वैकल्पिक शीर्ष-स्तरीय फ़ील्ड भी शामिल हो सकते हैं, जो प्रत्येक लक्ष्य के लेखन के साथ `secrets.providers` मैप में बदलाव करते हैं:
 
-`providerUpserts`, `targets` से पहले चलता है, इसलिए कोई `target.ref.provider`
-ऐसे provider alias को संदर्भित कर सकता है जिसे वही प्लान
-`providerUpserts` में पेश करता है। इसके बिना, ऐसे प्लान जो ऐसे alias को संदर्भित करते हैं जो अभी
-`openclaw.json` में कॉन्फ़िगर नहीं है, `provider "<alias>" is not
-configured` के साथ विफल हो जाते हैं।
+- `providerUpserts` -- प्रदाता उपनाम के आधार पर कुंजीबद्ध एक ऑब्जेक्ट। प्रत्येक मान एक प्रदाता परिभाषा है (`openclaw.json` में `secrets.providers.<alias>` के अंतर्गत स्वीकार की जाने वाली संरचना के समान, उदाहरण के लिए कोई `exec` या `file` प्रदाता)।
+- `providerDeletes` -- हटाए जाने वाले प्रदाता उपनामों की एक सरणी।
+
+`providerUpserts`, `targets` से पहले चलता है, इसलिए कोई `target.ref.provider` उस प्रदाता उपनाम का संदर्भ दे सकता है जिसे वही योजना `providerUpserts` में प्रस्तुत करती है। इस क्रम के बिना, ऐसे उपनाम का संदर्भ देने वाली योजनाएँ जो अभी तक `openclaw.json` में कॉन्फ़िगर नहीं है, `provider "<alias>" is not configured` के साथ विफल हो जाती हैं।
 
 ```json5
 {
@@ -87,82 +86,77 @@ configured` के साथ विफल हो जाते हैं।
 }
 ```
 
-`providerUpserts` के माध्यम से पेश किए गए exec providers अभी भी
-[Exec provider consent behavior](#exec-provider-consent-behavior) में दिए गए
-exec consent नियमों के अधीन हैं:
-exec providers वाले प्लान के लिए write mode में `--allow-exec` आवश्यक है।
+`providerUpserts` के माध्यम से प्रस्तुत किए गए exec प्रदाता अब भी [Exec प्रदाता सहमति व्यवहार](#exec-provider-consent-behavior) में दिए गए exec सहमति नियमों के अधीन हैं: exec प्रदाताओं वाली योजनाओं को लेखन मोड में `--allow-exec` की आवश्यकता होती है।
 
-## समर्थित लक्ष्य scope
+## समर्थित लक्ष्य दायरा
 
-प्लान लक्ष्य इन समर्थित credential paths के लिए स्वीकार किए जाते हैं:
+योजना लक्ष्य [SecretRef क्रेडेंशियल सतह](/hi/reference/secretref-credential-surface) में दिए गए समर्थित क्रेडेंशियल पथों के लिए स्वीकार किए जाते हैं।
 
-- [SecretRef Credential Surface](/hi/reference/secretref-credential-surface)
+## लक्ष्य प्रकार का व्यवहार
 
-## लक्ष्य type व्यवहार
+`target.type` एक मान्यताप्राप्त लक्ष्य प्रकार होना चाहिए और सामान्यीकृत `target.path` को उस प्रकार की पंजीकृत पथ संरचना से मेल खाना चाहिए।
 
-सामान्य नियम:
+कुछ लक्ष्य प्रकार अपने प्रामाणिक प्रकार नाम के अतिरिक्त मौजूदा योजनाओं के लिए `target.type` के रूप में एक संगतता उपनाम स्वीकार करते हैं:
 
-- `target.type` पहचाना हुआ होना चाहिए और normalized `target.path` shape से मेल खाना चाहिए।
+| प्रामाणिक प्रकार                       | स्वीकृत उपनाम                                  |
+| ------------------------------------ | ----------------------------------------------- |
+| `models.providers.apiKey`            | `models.providers.*.apiKey`                     |
+| `skills.entries.apiKey`              | `skills.entries.*.apiKey`                       |
+| `channels.googlechat.serviceAccount` | `channels.googlechat.accounts.*.serviceAccount` |
 
-मौजूदा प्लान के लिए compatibility aliases स्वीकार किए जाते रहेंगे:
+## पथ सत्यापन नियम
 
-- `models.providers.apiKey`
-- `skills.entries.apiKey`
-- `channels.googlechat.serviceAccount`
+प्रत्येक लक्ष्य का सत्यापन निम्नलिखित सभी नियमों के अनुसार किया जाता है:
 
-## Path validation नियम
+- `type` एक मान्यताप्राप्त लक्ष्य प्रकार होना चाहिए।
+- `path` एक गैर-रिक्त डॉट पथ होना चाहिए।
+- `pathSegments` को छोड़ा जा सकता है। यदि दिया गया हो, तो सामान्यीकरण के बाद इसका पथ ठीक `path` के समान होना चाहिए।
+- निषिद्ध खंड अस्वीकार किए जाते हैं: `__proto__`, `prototype`, `constructor`।
+- सामान्यीकृत पथ को लक्ष्य प्रकार के लिए पंजीकृत पथ संरचना से मेल खाना चाहिए।
+- यदि `providerId` या `accountId` सेट है, तो उसे पथ में एन्कोड की गई आईडी से मेल खाना चाहिए।
+- `auth-profiles.json` लक्ष्यों के लिए `agentId` आवश्यक है।
+- नई `auth-profiles.json` मैपिंग बनाते समय `authProfileProvider` शामिल करें।
 
-हर लक्ष्य को निम्नलिखित सभी के साथ validate किया जाता है:
+## विफलता का व्यवहार
 
-- `type` एक पहचाना हुआ target type होना चाहिए।
-- `path` एक non-empty dot path होना चाहिए।
-- `pathSegments` छोड़ा जा सकता है। यदि दिया गया हो, तो उसे `path` के बिल्कुल उसी path में normalize होना चाहिए।
-- निषिद्ध segments अस्वीकार किए जाते हैं: `__proto__`, `prototype`, `constructor`.
-- normalized path को target type के लिए registered path shape से मेल खाना चाहिए।
-- यदि `providerId` या `accountId` सेट है, तो उसे path में encoded id से मेल खाना चाहिए।
-- `auth-profiles.json` targets के लिए `agentId` आवश्यक है।
-- नया `auth-profiles.json` mapping बनाते समय, `authProfileProvider` शामिल करें।
-
-## विफलता व्यवहार
-
-यदि कोई लक्ष्य validation में विफल होता है, तो apply इस तरह की error के साथ exit करता है:
+यदि कोई लक्ष्य सत्यापन में विफल होता है, तो लागू करने की प्रक्रिया इस तरह की त्रुटि के साथ बंद हो जाती है:
 
 ```text
-Invalid plan target path for models.providers.apiKey: models.providers.openai.baseUrl
+models.providers.apiKey के लिए अमान्य योजना लक्ष्य पथ: models.providers.openai.baseUrl
 ```
 
-invalid plan के लिए कोई writes commit नहीं किए जाते।
+अमान्य योजना के लिए कोई लेखन कमिट नहीं किया जाता: किसी भी फ़ाइल को छूने से पहले लक्ष्य समाधान और पथ सत्यापन चलाए जाते हैं। अलग से, जब कोई मान्य योजना लिखना शुरू करती है, तो लागू करने की प्रक्रिया पहले प्रत्येक प्रभावित फ़ाइल का स्नैपशॉट लेती है और यदि उसी रन में बाद का कोई लेखन विफल हो जाए, तो उन स्नैपशॉट को पुनर्स्थापित कर देती है। इस तरह आंशिक लेखन कभी भी कॉन्फ़िगरेशन, प्रमाणीकरण-प्रोफ़ाइल या परिवेश स्थिति को असंगत नहीं छोड़ता।
 
-## Exec provider consent व्यवहार
+## Exec प्रदाता सहमति व्यवहार
 
-- `--dry-run` default रूप से exec SecretRef checks को skip करता है।
-- exec SecretRefs/providers वाले प्लान write mode में अस्वीकार किए जाते हैं, जब तक `--allow-exec` सेट न हो।
-- exec-containing plans validate/apply करते समय, dry-run और write commands दोनों में `--allow-exec` pass करें।
+- `--dry-run` डिफ़ॉल्ट रूप से exec SecretRef जाँचों को छोड़ देता है।
+- exec SecretRefs/प्रदाताओं वाली योजनाएँ लेखन मोड में अस्वीकार कर दी जाती हैं, जब तक `--allow-exec` सेट न हो।
+- exec वाली योजनाओं का सत्यापन/अनुप्रयोग करते समय ड्राई-रन और लेखन, दोनों कमांड में `--allow-exec` पास करें।
 
-## Runtime और audit scope notes
+## रनटाइम और ऑडिट दायरे संबंधी टिप्पणियाँ
 
-- Ref-only `auth-profiles.json` entries (`keyRef`/`tokenRef`) runtime resolution और audit coverage में शामिल हैं।
-- `secrets apply` समर्थित `openclaw.json` targets, समर्थित `auth-profiles.json` targets, और वैकल्पिक scrub targets लिखता है।
+- केवल-संदर्भ `auth-profiles.json` प्रविष्टियाँ (`keyRef`/`tokenRef`) रनटाइम क्रेडेंशियल समाधान और ऑडिट कवरेज में शामिल की जाती हैं।
+- `secrets apply` समर्थित `openclaw.json` लक्ष्यों, समर्थित `auth-profiles.json` लक्ष्यों और तीन वैकल्पिक स्क्रब पास को लिखता है, जिनमें से प्रत्येक डिफ़ॉल्ट रूप से चालू होता है: `scrubEnv` (प्रभावी स्थिति और सक्रिय-कॉन्फ़िगरेशन निर्देशिकाओं की `.env` फ़ाइलों से माइग्रेट किए गए प्लेनटेक्स्ट मानों को हटाता है), `scrubAuthProfilesForProviderTargets` (उन प्रदाताओं के लिए `auth-profiles.json` में प्लेनटेक्स्ट/अप्रयुक्त-संदर्भ अवशेष साफ़ करता है जिन्हें किसी योजना ने अभी माइग्रेट किया है), और `scrubLegacyAuthJson` (पुराने `auth.json` स्टोर से माइग्रेट की गई `api_key` प्रविष्टियाँ हटाता है)। किसी पास को छोड़ने के लिए योजना में `options.scrubEnv`, `options.scrubAuthProfilesForProviderTargets`, `options.scrubLegacyAuthJson` में से संबंधित मान को `false` पर सेट करें।
 
-## Operator checks
+## ऑपरेटर जाँच
 
 ```bash
-# Validate plan without writes
+# बिना लिखे योजना सत्यापित करें
 openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --dry-run
 
-# Then apply for real
+# फिर वास्तव में लागू करें
 openclaw secrets apply --from /tmp/openclaw-secrets-plan.json
 
-# For exec-containing plans, opt in explicitly in both modes
+# exec वाली योजनाओं के लिए दोनों मोड में स्पष्ट रूप से सहमति दें
 openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --dry-run --allow-exec
 openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --allow-exec
 ```
 
-यदि apply invalid target path message के साथ विफल होता है, तो `openclaw secrets configure` के साथ प्लान फिर से generate करें या target path को ऊपर दिए गए समर्थित shape में ठीक करें।
+यदि लागू करने की प्रक्रिया अमान्य लक्ष्य पथ संदेश के साथ विफल होती है, तो `openclaw secrets configure` से योजना दोबारा जनरेट करें या लक्ष्य पथ को ऊपर दी गई किसी समर्थित संरचना के अनुसार ठीक करें।
 
-## संबंधित docs
+## संबंधित दस्तावेज़
 
-- [Secrets Management](/hi/gateway/secrets)
+- [सीक्रेट प्रबंधन](/hi/gateway/secrets)
 - [CLI `secrets`](/hi/cli/secrets)
-- [SecretRef Credential Surface](/hi/reference/secretref-credential-surface)
-- [Configuration Reference](/hi/gateway/configuration-reference)
+- [SecretRef क्रेडेंशियल सतह](/hi/reference/secretref-credential-surface)
+- [कॉन्फ़िगरेशन संदर्भ](/hi/gateway/configuration-reference)

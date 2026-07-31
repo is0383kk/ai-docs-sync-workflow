@@ -1,46 +1,45 @@
 ---
 read_when:
     - आप OpenClaw के साथ Arcee AI का उपयोग करना चाहते हैं
-    - आपको API कुंजी env var या CLI प्रमाणीकरण विकल्प चाहिए
+    - आपको API कुंजी के एनवायरनमेंट वेरिएबल या CLI प्रमाणीकरण विकल्प की आवश्यकता है
 summary: Arcee AI सेटअप (प्रमाणीकरण + मॉडल चयन)
 title: Arcee AI
 x-i18n:
-    generated_at: "2026-06-28T23:56:09Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:18:32Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 15570c1d018104377a473fe5f9b556d9a6ffd2dea6db5d55d46ca3702e237101
+    source_hash: a4c2fc7b8d86dd0d2a300dfc48951657cbcfcd9250016f52c1804777b2966e11
     source_path: providers/arcee.md
     workflow: 16
 ---
 
-[Arcee AI](https://arcee.ai) OpenAI-संगत API के माध्यम से मिश्रित-विशेषज्ञ मॉडलों के Trinity परिवार तक पहुँच प्रदान करता है। सभी Trinity मॉडल Apache 2.0 लाइसेंस प्राप्त हैं।
+[Arcee AI](https://arcee.ai) OpenAI-संगत API के माध्यम से विशेषज्ञ-मिश्रण मॉडल का Trinity परिवार प्रदान करता है। सभी Trinity मॉडल Apache 2.0 लाइसेंस के अंतर्गत हैं। Arcee एक आधिकारिक OpenClaw Plugin है, जो कोर के साथ बंडल नहीं है, इसलिए ऑनबोर्डिंग से पहले इसे इंस्टॉल करना आवश्यक है।
 
-Arcee AI मॉडलों तक सीधे Arcee प्लेटफ़ॉर्म के माध्यम से या [OpenRouter](/hi/providers/openrouter) के ज़रिए पहुँचा जा सकता है।
+Arcee मॉडल को सीधे Arcee प्लेटफ़ॉर्म या [OpenRouter](/hi/providers/openrouter) के माध्यम से एक्सेस करें।
 
-| गुण | मान                                                                                 |
+| प्रॉपर्टी | मान                                                                                 |
 | -------- | ------------------------------------------------------------------------------------- |
 | प्रदाता | `arcee`                                                                               |
-| प्रमाणीकरण     | `ARCEEAI_API_KEY` (सीधा) या `OPENROUTER_API_KEY` (OpenRouter के ज़रिए)                   |
+| प्रमाणीकरण     | `ARCEEAI_API_KEY` (प्रत्यक्ष) या `OPENROUTER_API_KEY` (OpenRouter के माध्यम से)                   |
 | API      | OpenAI-संगत                                                                     |
-| आधार URL | `https://api.arcee.ai/api/v1` (सीधा) या `https://openrouter.ai/api/v1` (OpenRouter) |
+| बेस URL | `https://api.arcee.ai/api/v1` (प्रत्यक्ष) या `https://openrouter.ai/api/v1` (OpenRouter) |
 
 ## Plugin इंस्टॉल करें
-
-आधिकारिक Plugin इंस्टॉल करें, फिर Gateway पुनः प्रारंभ करें:
 
 ```bash
 openclaw plugins install @openclaw/arcee-provider
 openclaw gateway restart
 ```
 
-## शुरू करना
+## आरंभ करना
 
 <Tabs>
-  <Tab title="सीधा (Arcee प्लेटफ़ॉर्म)">
+  <Tab title="प्रत्यक्ष (Arcee प्लेटफ़ॉर्म)">
     <Steps>
       <Step title="API कुंजी प्राप्त करें">
-        [Arcee AI](https://chat.arcee.ai/) पर एक API कुंजी बनाएँ।
+        [Arcee AI](https://chat.arcee.ai/) पर API कुंजी बनाएँ।
       </Step>
       <Step title="ऑनबोर्डिंग चलाएँ">
         ```bash
@@ -61,10 +60,10 @@ openclaw gateway restart
     </Steps>
   </Tab>
 
-  <Tab title="OpenRouter के ज़रिए">
+  <Tab title="OpenRouter के माध्यम से">
     <Steps>
       <Step title="API कुंजी प्राप्त करें">
-        [OpenRouter](https://openrouter.ai/keys) पर एक API कुंजी बनाएँ।
+        [OpenRouter](https://openrouter.ai/keys) पर API कुंजी बनाएँ।
       </Step>
       <Step title="ऑनबोर्डिंग चलाएँ">
         ```bash
@@ -82,7 +81,7 @@ openclaw gateway restart
         }
         ```
 
-        वही मॉडल रेफ़रेंस सीधे और OpenRouter, दोनों सेटअप के लिए काम करते हैं (उदाहरण के लिए `arcee/trinity-large-thinking`)।
+        समान मॉडल रेफ़रेंस प्रत्यक्ष और OpenRouter, दोनों सेटअप के लिए काम करते हैं।
       </Step>
     </Steps>
 
@@ -92,7 +91,7 @@ openclaw gateway restart
 ## गैर-इंटरैक्टिव सेटअप
 
 <Tabs>
-  <Tab title="सीधा (Arcee प्लेटफ़ॉर्म)">
+  <Tab title="प्रत्यक्ष (Arcee प्लेटफ़ॉर्म)">
     ```bash
     openclaw onboard --non-interactive \
       --mode local \
@@ -101,7 +100,7 @@ openclaw gateway restart
     ```
   </Tab>
 
-  <Tab title="OpenRouter के ज़रिए">
+  <Tab title="OpenRouter के माध्यम से">
     ```bash
     openclaw onboard --non-interactive \
       --mode local \
@@ -111,41 +110,44 @@ openclaw gateway restart
   </Tab>
 </Tabs>
 
-## अंतर्निहित कैटलॉग
+## प्रत्यक्ष Arcee कैटलॉग
 
-OpenClaw अभी यह Arcee स्थैतिक कैटलॉग शिप करता है:
-
-| मॉडल रेफ़रेंस                      | नाम                   | इनपुट | संदर्भ | लागत (प्रति 1M अंदर/बाहर) | नोट्स                                     |
-| ------------------------------ | ---------------------- | ----- | ------- | -------------------- | ----------------------------------------- |
-| `arcee/trinity-large-thinking` | Trinity Large Thinking | text  | 256K    | $0.25 / $0.90        | डिफ़ॉल्ट मॉडल; रीजनिंग सक्षम          |
-| `arcee/trinity-large-preview`  | Trinity Large Preview  | text  | 128K    | $0.25 / $1.00        | सामान्य-उद्देश्य; 400B पैरामीटर, 13B सक्रिय  |
-| `arcee/trinity-mini`           | Trinity Mini 26B       | text  | 128K    | $0.045 / $0.15       | तेज़ और लागत-किफ़ायती; फ़ंक्शन कॉलिंग |
+| मॉडल रेफ़रेंस                      | नाम                   | इनपुट | कॉन्टेक्स्ट | अधिकतम आउटपुट | लागत (प्रति 1M इनपुट/आउटपुट) | टूल | टिप्पणियाँ                                     |
+| ------------------------------ | ---------------------- | ----- | ------- | ---------- | -------------------- | ----- | ----------------------------------------- |
+| `arcee/trinity-large-thinking` | Trinity Large Thinking | टेक्स्ट  | 256K    | 80K        | $0.25 / $0.90        | नहीं    | डिफ़ॉल्ट मॉडल; विस्तारित चिंतन          |
+| `arcee/trinity-large-preview`  | Trinity Large Preview  | टेक्स्ट  | 128K    | 16K        | $0.25 / $1.00        | हाँ   | सामान्य-उद्देश्य; 400B पैरामीटर, 13B सक्रिय  |
+| `arcee/trinity-mini`           | Trinity Mini 26B       | टेक्स्ट  | 128K    | 80K        | $0.045 / $0.15       | हाँ   | तेज़ और किफ़ायती; फ़ंक्शन कॉलिंग |
 
 <Tip>
 ऑनबोर्डिंग प्रीसेट `arcee/trinity-large-thinking` को डिफ़ॉल्ट मॉडल के रूप में सेट करता है।
 </Tip>
 
+## OpenRouter कैटलॉग
+
+OpenRouter ऑनबोर्डिंग `arcee/trinity-large-preview` और `arcee/trinity-large-thinking` उपलब्ध कराती है। OpenClaw उन प्रदाता-योग्य मॉडल रेफ़रेंस को कॉन्फ़िगरेशन में बनाए रखता है और OpenRouter के कैनोनिकल `arcee-ai/*` रनटाइम ID भेजता है। Trinity Mini अब OpenRouter द्वारा उपलब्ध नहीं कराया जाता; उस मॉडल के लिए प्रत्यक्ष Arcee API का उपयोग करें।
+
 ## समर्थित सुविधाएँ
 
-| सुविधा                                       | समर्थित                                    |
+| सुविधा                                       | समर्थन                                    |
 | --------------------------------------------- | -------------------------------------------- |
 | स्ट्रीमिंग                                     | हाँ                                          |
 | टूल उपयोग / फ़ंक्शन कॉलिंग                   | हाँ (Trinity Mini, Trinity Large Preview)    |
 | संरचित आउटपुट (JSON मोड और JSON स्कीमा) | हाँ                                          |
-| विस्तारित सोच                             | हाँ (Trinity Large Thinking; टूल अक्षम) |
+| विस्तारित चिंतन                             | हाँ (Trinity Large Thinking; टूल अक्षम) |
 
 <AccordionGroup>
-  <Accordion title="पर्यावरण नोट">
+  <Accordion title="परिवेश संबंधी टिप्पणी">
     यदि Gateway डेमन (launchd/systemd) के रूप में चलता है, तो सुनिश्चित करें कि `ARCEEAI_API_KEY`
-    (या `OPENROUTER_API_KEY`) उस प्रक्रिया के लिए उपलब्ध है (उदाहरण के लिए,
-    `~/.openclaw/.env` में या `env.shellEnv` के माध्यम से)।
+    (या `OPENROUTER_API_KEY`) उस प्रक्रिया के लिए उपलब्ध हो, उदाहरण के लिए
+    `~/.openclaw/.env` में या `env.shellEnv` के माध्यम से।
   </Accordion>
 
   <Accordion title="OpenRouter रूटिंग">
-    OpenRouter के माध्यम से Arcee मॉडल इस्तेमाल करते समय, वही `arcee/*` मॉडल रेफ़रेंस लागू होते हैं।
-    OpenClaw आपके प्रमाणीकरण विकल्प के आधार पर रूटिंग को पारदर्शी रूप से संभालता है। OpenRouter-विशिष्ट
-    कॉन्फ़िगरेशन विवरणों के लिए
-    [OpenRouter provider दस्तावेज़](/hi/providers/openrouter) देखें।
+    OpenRouter उसी `arcee/trinity-large-thinking` OpenClaw मॉडल रेफ़रेंस का उपयोग करता है।
+    OpenClaw इसे कैनोनिकल `arcee-ai/trinity-large-thinking`
+    OpenRouter रनटाइम ID के साथ रूट करता है। OpenRouter-विशिष्ट
+    कॉन्फ़िगरेशन विवरण के लिए
+    [OpenRouter प्रदाता दस्तावेज़](/hi/providers/openrouter) देखें।
   </Accordion>
 </AccordionGroup>
 
@@ -153,9 +155,9 @@ OpenClaw अभी यह Arcee स्थैतिक कैटलॉग शि�
 
 <CardGroup cols={2}>
   <Card title="OpenRouter" href="/hi/providers/openrouter" icon="shuffle">
-    एक ही API कुंजी के माध्यम से Arcee मॉडल और कई अन्य तक पहुँचें।
+    एकल API कुंजी के माध्यम से Arcee मॉडल और कई अन्य मॉडल एक्सेस करें।
   </Card>
   <Card title="मॉडल चयन" href="/hi/concepts/model-providers" icon="layers">
-    प्रदाताओं, मॉडल रेफ़रेंस और फ़ेलओवर व्यवहार को चुनना।
+    प्रदाताओं, मॉडल रेफ़रेंस और फ़ेलओवर व्यवहार का चयन।
   </Card>
 </CardGroup>

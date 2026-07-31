@@ -5,16 +5,17 @@ read_when:
 summary: Chạy OpenClaw với LM Studio
 title: LM Studio
 x-i18n:
-    generated_at: "2026-07-12T08:21:02Z"
+    generated_at: "2026-07-21T13:34:24Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b4223f90e786e285651fc889985dd61124c60758b4e9c3599d76201d9ac20b46
+    source_hash: f43b4d04aad6e5edfdf224747083834ebd441aa7f91ccbf2d61de990443fc414
     source_path: providers/lmstudio.md
     workflow: 16
 ---
 
-LM Studio chạy các mô hình llama.cpp (GGUF) hoặc MLX cục bộ dưới dạng ứng dụng GUI hoặc daemon `llmster`
+LM Studio chạy các mô hình llama.cpp (GGUF) hoặc MLX cục bộ, dưới dạng ứng dụng GUI hoặc daemon `llmster`
 không giao diện. Để xem tài liệu cài đặt và sản phẩm, hãy truy cập [lmstudio.ai](https://lmstudio.ai/).
 
 ## Bắt đầu nhanh
@@ -37,7 +38,7 @@ không giao diện. Để xem tài liệu cài đặt và sản phẩm, hãy tru
     [hướng dẫn JIT và TTL của LM Studio](https://lmstudio.ai/docs/developer/core/ttl-and-auto-evict).
 
   </Step>
-  <Step title="Đặt khóa API nếu đã bật xác thực">
+  <Step title="Đặt khóa API nếu xác thực được bật">
     ```bash
     export LM_API_TOKEN="your-lm-studio-api-token"
     ```
@@ -53,6 +54,14 @@ không giao diện. Để xem tài liệu cài đặt và sản phẩm, hãy tru
 
     Chọn `LM Studio`, sau đó chọn một mô hình tại lời nhắc `Default model`.
 
+    Trong lần thiết lập có hướng dẫn mới, trước tiên OpenClaw truy vấn `/api/v1/models` trên máy chủ
+    LM Studio mặc định hoặc đã cấu hình. Một LLM hiện có chỉ được tự động đề xuất
+    khi LM Studio báo cáo khả năng huấn luyện công cụ và ngữ cảnh hiệu dụng ít nhất 16K.
+    Đối với các mô hình đã tải, ngữ cảnh của phiên bản đã tải được ưu tiên hơn
+    mức tối đa lớn hơn được công bố. Cùng một chuỗi thiết lập CLI/macOS sẽ xác minh
+    tuyến bằng một lượt hoàn thành thực tế trước khi lưu. Quá trình kiểm tra tự động không bao giờ
+    tải xuống mô hình và bỏ qua các mục danh mục chỉ dành cho embedding.
+
   </Step>
 </Steps>
 
@@ -63,7 +72,7 @@ openclaw models set lmstudio/qwen/qwen3.5-9b
 ```
 
 Khóa mô hình LM Studio sử dụng định dạng `author/model-name` (ví dụ: `qwen/qwen3.5-9b`); tham chiếu mô hình OpenClaw
-thêm nhà cung cấp ở đầu: `lmstudio/qwen/qwen3.5-9b`. Để tìm khóa chính xác của một mô hình, hãy chạy
+thêm nhà cung cấp vào trước: `lmstudio/qwen/qwen3.5-9b`. Tìm khóa chính xác của một mô hình bằng cách chạy
 lệnh bên dưới và xem trường `key`:
 
 ```bash
@@ -89,33 +98,33 @@ openclaw onboard \
 ```
 
 `--custom-model-id` nhận khóa mô hình do LM Studio trả về (ví dụ: `qwen/qwen3.5-9b`), không có
-tiền tố nhà cung cấp `lmstudio/`. Truyền `--lmstudio-api-key` (hoặc đặt `LM_API_TOKEN`) cho các
-máy chủ có xác thực; bỏ qua tùy chọn này đối với máy chủ không xác thực và OpenClaw sẽ lưu một dấu hiệu cục bộ không chứa bí mật.
-`--custom-api-key` vẫn được chấp nhận để tương thích, nhưng nên dùng `--lmstudio-api-key`.
+tiền tố nhà cung cấp `lmstudio/`. Truyền `--lmstudio-api-key` (hoặc đặt `LM_API_TOKEN`) cho các máy chủ
+có xác thực; bỏ qua đối số này đối với máy chủ không xác thực và OpenClaw sẽ lưu một dấu hiệu cục bộ không bí mật.
+`--custom-api-key` vẫn được chấp nhận để đảm bảo khả năng tương thích, nhưng ưu tiên `--lmstudio-api-key`.
 
 Thao tác này ghi `models.providers.lmstudio` và đặt mô hình mặc định thành `lmstudio/<custom-model-id>`.
 Việc cung cấp khóa API cũng ghi hồ sơ xác thực `lmstudio:default`.
 
-Quá trình thiết lập tương tác còn có thể nhắc nhập độ dài ngữ cảnh tải mong muốn và áp dụng giá trị đó cho
-các mô hình được phát hiện mà nó lưu vào cấu hình.
+Thiết lập tương tác còn có thể nhắc chọn độ dài ngữ cảnh tải ưu tiên và áp dụng giá trị đó cho
+các mô hình được phát hiện mà thiết lập lưu vào cấu hình.
 
 ## Cấu hình
 
-### Khả năng tương thích với mức sử dụng khi phát trực tiếp
+### Khả năng tương thích với mức sử dụng khi truyền phát
 
-LM Studio không phải lúc nào cũng phát đối tượng `usage` theo định dạng OpenAI trong các phản hồi được phát trực tiếp. Thay vào đó, OpenClaw
-khôi phục số lượng token từ siêu dữ liệu kiểu llama.cpp `timings.prompt_n` / `timings.predicted_n`.
-Mọi điểm cuối tương thích với OpenAI được xác định là điểm cuối cục bộ (máy chủ local loopback) đều nhận cùng
-cơ chế dự phòng này, bao gồm các phần phụ trợ cục bộ khác như vLLM, SGLang, llama.cpp, LocalAI, Jan, TabbyAPI
+LM Studio không phải lúc nào cũng phát ra đối tượng `usage` theo cấu trúc OpenAI trong phản hồi truyền phát. OpenClaw
+thay vào đó khôi phục số lượng token từ siêu dữ liệu kiểu llama.cpp `timings.prompt_n` / `timings.predicted_n`.
+Mọi endpoint tương thích với OpenAI được phân giải là endpoint cục bộ (máy chủ loopback) đều sử dụng cùng
+cơ chế dự phòng này, bao gồm các backend cục bộ khác như vLLM, SGLang, llama.cpp, LocalAI, Jan, TabbyAPI
 và text-generation-webui.
 
-### Khả năng tương thích với suy luận
+### Khả năng tương thích với chế độ suy luận
 
-Khi quá trình khám phá `/api/v1/models` của LM Studio báo cáo các tùy chọn suy luận dành riêng cho mô hình, OpenClaw
+Khi hoạt động khám phá `/api/v1/models` của LM Studio báo cáo các tùy chọn suy luận dành riêng cho mô hình, OpenClaw
 hiển thị các giá trị `reasoning_effort` tương ứng (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`) trong
 siêu dữ liệu tương thích của mô hình. Một số bản dựng LM Studio công bố tùy chọn UI nhị phân (`allowed_options: ["off",
 "on"]`) nhưng từ chối các giá trị nguyên văn đó trên `/v1/chat/completions`; OpenClaw chuẩn hóa
-dạng nhị phân này thành thang sáu mức trước khi gửi yêu cầu, kể cả đối với cấu hình cũ đã lưu
+dạng nhị phân này thành thang sáu mức trước khi gửi yêu cầu, kể cả với cấu hình cũ đã lưu
 vẫn có ánh xạ suy luận `off`/`on`.
 
 ### Cấu hình tường minh
@@ -147,9 +156,9 @@ vẫn có ánh xạ suy luận `off`/`on`.
 
 ### Tắt tải trước
 
-LM Studio hỗ trợ tải mô hình đúng lúc (JIT), tức tải mô hình khi có yêu cầu đầu tiên. Theo mặc định, OpenClaw
-tải trước mô hình thông qua điểm cuối tải gốc của LM Studio, điều này hữu ích khi JIT
-bị tắt. Để LM Studio JIT, TTL khi không hoạt động và cơ chế tự động loại bỏ tự quản lý vòng đời mô hình,
+LM Studio hỗ trợ tải mô hình đúng lúc (JIT), tức là tải mô hình khi có yêu cầu đầu tiên. Theo mặc định, OpenClaw
+tải trước các mô hình thông qua endpoint tải gốc của LM Studio, giúp ích khi JIT
+bị tắt. Để LM Studio JIT, TTL khi không hoạt động và hành vi tự động loại bỏ tự quản lý vòng đời mô hình,
 hãy tắt bước tải trước của OpenClaw:
 
 ```json5
@@ -169,8 +178,8 @@ hãy tắt bước tải trước của OpenClaw:
 
 ### Máy chủ LAN hoặc tailnet
 
-Sử dụng địa chỉ có thể truy cập của máy chủ LM Studio, giữ nguyên `/v1` và bảo đảm LM Studio được liên kết
-vượt ra ngoài loopback trên máy đó:
+Sử dụng địa chỉ có thể truy cập của máy chủ LM Studio, giữ nguyên `/v1` và bảo đảm LM Studio được liên kết vượt ra ngoài
+loopback trên máy đó:
 
 ```json5
 {
@@ -187,23 +196,23 @@ vượt ra ngoài loopback trên máy đó:
 }
 ```
 
-`lmstudio` tự động tin cậy điểm cuối đã cấu hình cho các yêu cầu mô hình, bao gồm các máy chủ loopback,
-LAN và tailnet (ngoại trừ nguồn gốc siêu dữ liệu/liên kết cục bộ). Mọi mục nhập nhà cung cấp tùy chỉnh/cục bộ
-tương thích với OpenAI đều nhận cùng mức tin cậy theo nguồn gốc chính xác. Các yêu cầu đến một máy chủ riêng tư
-hoặc cổng khác vẫn yêu cầu `models.providers.<id>.request.allowPrivateNetwork: true`; đặt thành `false` để
-từ chối mức tin cậy mặc định.
+`lmstudio` tự động tin cậy endpoint đã cấu hình cho các yêu cầu mô hình, bao gồm máy chủ loopback,
+LAN và tailnet (ngoại trừ các nguồn metadata/link-local). Mọi mục nhà cung cấp tùy chỉnh/cục bộ tương thích
+với OpenAI đều nhận cùng mức tin cậy theo nguồn chính xác. Các yêu cầu đến một máy chủ riêng tư hoặc cổng khác vẫn
+yêu cầu `models.providers.<id>.request.allowPrivateNetwork: true`; đặt thành `false` để từ chối
+mức tin cậy mặc định.
 
 ## Khắc phục sự cố
 
 ### Không phát hiện được LM Studio
 
-Hãy bảo đảm LM Studio đang chạy:
+Đảm bảo LM Studio đang chạy:
 
 ```bash
 lms server start --port 1234
 ```
 
-Nếu xác thực được bật, hãy đặt cả `LM_API_TOKEN`. Xác minh rằng có thể truy cập API:
+Nếu xác thực được bật, hãy đặt cả `LM_API_TOKEN`. Xác minh rằng API có thể truy cập được:
 
 ```bash
 curl http://localhost:1234/api/v1/models

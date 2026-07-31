@@ -4,9 +4,10 @@ read_when:
 summary: En çok kullanılan OpenClaw belgelerine yönelik seçilmiş bağlantılar.
 title: Dokümanlar dizini
 x-i18n:
-    generated_at: "2026-07-12T12:49:24Z"
+    generated_at: "2026-07-27T00:18:42Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 48859dc0b31139f1f5acaa403e506cd6d9767ee32e502a4ef74340dbbc21918f
     source_path: start/docs-directory.md
@@ -14,13 +15,13 @@ x-i18n:
 ---
 
 <Note>
-Bu sayfa özenle hazırlanmış bir dizindir. Yeniyseniz [Başlarken](/tr/start/getting-started) sayfasından başlayın.
-Belgelerin eksiksiz bir haritası için [Belge merkezleri](/tr/start/hubs) sayfasına bakın.
+Bu sayfa özenle düzenlenmiş bir dizindir. Yeniyseniz [Başlarken](/tr/start/getting-started) ile başlayın.
+Belgelerin eksiksiz haritası için [Belge merkezleri](/tr/start/hubs) bölümüne bakın.
 </Note>
 
 ## Buradan başlayın
 
-- [Belge merkezleri (tüm sayfalar bağlantılıdır)](/tr/start/hubs)
+- [Belge merkezleri (tüm sayfalara bağlantı verilir)](/tr/start/hubs)
 - [Yardım](/tr/help)
 - [Yapılandırma](/tr/gateway/configuration)
 - [Yapılandırma örnekleri](/tr/gateway/configuration-examples)
@@ -37,7 +38,7 @@ Belgelerin eksiksiz bir haritası için [Belge merkezleri](/tr/start/hubs) sayfa
 - [Gateway operasyon kılavuzu](/tr/gateway)
 - [Node'lar (iOS ve Android)](/tr/nodes)
 - [Web yüzeyleri (Denetim Arayüzü)](/tr/web)
-- [Keşif ve taşıma yöntemleri](/tr/gateway/discovery)
+- [Keşif ve taşıma mekanizmaları](/tr/gateway/discovery)
 - [Uzaktan erişim](/tr/gateway/remote)
 
 ## Kanallar ve kullanıcı deneyimi

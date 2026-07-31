@@ -1,23 +1,27 @@
 ---
 read_when:
-    - ペアリングモードのDMを使用しており、送信者を承認する必要があります
+    - ペアリングモードの DM を使用しているため、送信者を承認する必要があります
 summary: '`openclaw pairing` の CLI リファレンス（ペアリング要求の承認/一覧表示）'
 title: ペアリング
 x-i18n:
-    generated_at: "2026-07-11T22:03:30Z"
+    generated_at: "2026-07-26T09:36:10Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: ca83ad9d9e55cfffd49301cb529b28df370c2dcff03484880f7cfc85ec2d6440
+    source_hash: e4c6c53f1a3eefe50b4b7a45fa535e9a05faabb50df1ba5195a7635ee13d9da0
     source_path: cli/pairing.md
     workflow: 16
 ---
 
 # `openclaw pairing`
 
-ペアリングに対応するチャンネルの DM ペアリングリクエストを承認または確認します（チャット DM のみ。Node/デバイスのペアリングには `openclaw devices` を使用します）。
+ペアリングをサポートするチャンネルの DM ペアリングリクエストを承認または確認します（チャット DM のみ。Node/デバイスのペアリングには `openclaw devices` を使用します）。
 
-関連項目: [ペアリングフロー](/ja-JP/channels/pairing)
+関連項目: [ペアリングの流れ](/ja-JP/channels/pairing)
+
+同じ保留中のリクエストは、Control UI の **Settings →
+Channels → DM access requests** でも確認できます。Control UI では、承認、リクエスト送信者への任意の通知、破棄が可能です。破棄すると現在のリクエストは削除されますが、送信者が永続的にブロックされることはありません。
 
 ## コマンド
 
@@ -35,14 +39,14 @@ openclaw pairing approve --channel telegram --account work <code> --notify
 
 1 つのチャンネルについて、保留中のペアリングリクエストを一覧表示します。
 
-| オプション                | 説明                                       |
-| ------------------------- | ------------------------------------------ |
-| `[channel]`               | 位置引数で指定するチャンネル ID            |
-| `--channel <channel>`     | 明示的に指定するチャンネル ID              |
-| `--account <accountId>`   | 複数アカウント対応チャンネルのアカウント ID |
-| `--json`                  | 機械可読形式の出力                         |
+| オプション                  | 説明                           |
+| ----------------------- | ------------------------------------- |
+| `[channel]`             | 位置引数で指定するチャンネル ID                 |
+| `--channel <channel>`   | 明示的に指定するチャンネル ID                   |
+| `--account <accountId>` | 複数アカウント対応チャンネルのアカウント ID |
+| `--json`                | 機械可読形式の出力               |
 
-ペアリングに対応するチャンネルが複数設定されている場合は、位置引数または `--channel` でチャンネルを指定します。チャンネル ID が有効であれば、拡張チャンネルも使用できます。
+ペアリング対応チャンネルが複数設定されている場合は、チャンネルを位置引数または `--channel` で指定します。チャンネル ID が有効であれば、拡張チャンネルも使用できます。
 
 ## `pairing approve`
 
@@ -52,17 +56,17 @@ openclaw pairing approve --channel telegram --account work <code> --notify
 
 - `openclaw pairing approve <channel> <code>`
 - `openclaw pairing approve --channel <channel> <code>`
-- ペアリングに対応するチャンネルが 1 つだけ設定されている場合は `openclaw pairing approve <code>`
+- `openclaw pairing approve <code>`（ペアリング対応チャンネルが 1 つだけ設定されている場合）
 
-オプション: `--channel <channel>`、`--account <accountId>`、`--notify`（同じチャンネルでリクエスト元へ確認メッセージを送信します）。
+オプション: `--channel <channel>`、`--account <accountId>`、`--notify`（同じチャンネルでリクエスト送信者に確認を返信します）。
 
-### 所有者の初期設定
+### オーナーの初期設定
 
-ペアリングコードを承認した時点で `commands.ownerAllowFrom` が空の場合、OpenClaw は承認した送信者をコマンド所有者としても記録し、`telegram:123456789` のようなチャンネルスコープのエントリを使用します。これは最初の所有者のみを初期設定します。以降のペアリング承認によって `commands.ownerAllowFrom` が置き換えられたり、拡張されたりすることはありません。
+ペアリングコードを承認した時点で `commands.ownerAllowFrom` が空の場合、CLI は承認された送信者をコマンドオーナーとしても記録し、`telegram:123456789` のようなチャンネル単位のエントリを使用します。これは最初のオーナーを初期設定する場合にのみ行われます。その後のペアリング承認によって `commands.ownerAllowFrom` が置き換えられたり、拡張されたりすることはありません。Control UI では、この権限昇格は自動的に適用されず、`operator.admin` で保護された別個のチェックボックスとして表示されます。
 
-コマンド所有者とは、所有者専用コマンドを実行し、`/diagnostics`、`/export-trajectory`、`/config`、exec の承認などの危険な操作を承認できる人間のオペレーターアカウントです。ペアリングで許可されるのは、送信者がエージェントと会話することだけです。この 1 回限りの初期設定を除き、ペアリング自体によって所有者権限が付与されることはありません。
+コマンドオーナーとは、オーナー専用コマンドの実行と、`/diagnostics`、`/export-session`、`/export-trajectory`、`/config`、および exec の承認などの危険な操作の承認を許可された人間のオペレーターアカウントです。ペアリングで可能になるのは、送信者がエージェントと会話することだけです。この 1 回限りの初期設定を除き、ペアリング自体によってオーナー権限が付与されることはありません。
 
-この初期設定が導入される前に送信者を承認していた場合は、`openclaw doctor` を実行してください。コマンド所有者が設定されていない場合に警告が表示され、修正に必要な `openclaw config set commands.ownerAllowFrom ...` コマンドが正確に示されます。
+この初期設定機能が導入される前に送信者を承認していた場合は、`openclaw doctor` を実行してください。コマンドオーナーが設定されていない場合に警告が表示され、修正に使用する正確な `openclaw config set commands.ownerAllowFrom ...` コマンドが示されます。
 
 ## 関連項目
 

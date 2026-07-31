@@ -7,42 +7,43 @@ sidebarTitle: CLI backend plugins
 summary: ローカル AI CLI バックエンドを登録する Plugin を構築する
 title: CLI バックエンド Plugin の構築
 x-i18n:
-    generated_at: "2026-07-11T22:25:04Z"
+    generated_at: "2026-07-26T09:50:41Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 6448cdac02a03e5fdf0d802a54189998d97c08769b1b85c8d9963301fa2c5b79
+    source_hash: 1923b0829b46a309e4b5a6cbbbfd3dcb76a1e14fe4106310d7a9fb37bca41d70
     source_path: plugins/cli-backend-plugins.md
     workflow: 16
 ---
 
-CLI バックエンド Plugin を使うと、OpenClaw はローカル AI CLI をテキスト推論
-バックエンドとして呼び出せます。バックエンドはモデル参照内でプロバイダーのプレフィックスとして表示されます。
+CLI バックエンド Plugin を使用すると、OpenClaw はローカルの AI CLI をテキスト推論バックエンドとして呼び出せます。バックエンドは、モデル参照内でプロバイダープレフィックスとして表されます。
 
 ```text
 acme-cli/acme-large
 ```
 
-アップストリーム統合がすでにローカルコマンドとして公開されている場合、CLI がローカルのログイン状態を所有する場合、または API プロバイダーが利用できない場合のフォールバックとして、CLI バックエンドを使用します。
+アップストリーム連携がすでにローカルコマンドとして公開されている場合、CLI がローカルのログイン状態を管理する場合、または API プロバイダーが利用できない場合のフォールバックとして、CLI バックエンドを使用します。
 
 <Info>
   アップストリームサービスが通常の HTTP モデル API を公開している場合は、代わりに
-  [プロバイダー Plugin](/ja-JP/plugins/sdk-provider-plugins)を作成してください。アップストリーム
+  [プロバイダー Plugin](/ja-JP/plugins/sdk-provider-plugins) を作成します。アップストリーム
   ランタイムが完全なエージェントセッション、ツールイベント、Compaction、またはバックグラウンド
-  タスクの状態を所有する場合は、[エージェントハーネス](/ja-JP/plugins/sdk-agent-harness)を使用してください。
+  タスクの状態を管理する場合は、[エージェントハーネス](/ja-JP/plugins/sdk-agent-harness) を使用します。
 </Info>
 
-## Plugin が所有するもの
+## Plugin が管理するもの
 
-CLI バックエンド Plugin には、次の 3 つの契約があります。
+CLI バックエンド Plugin には、3 つのコントラクトがあります。
 
-| 契約                 | ファイル               | 目的                                                      |
+| コントラクト         | ファイル               | 目的                                                      |
 | -------------------- | ---------------------- | --------------------------------------------------------- |
-| パッケージエントリ   | `package.json`         | OpenClaw に Plugin のランタイムモジュールを指定する       |
-| マニフェストの所有権 | `openclaw.plugin.json` | ランタイムの読み込み前にバックエンド ID を宣言する        |
+| パッケージエントリ   | `package.json`         | OpenClaw に Plugin ランタイムモジュールを指定する          |
+| マニフェスト所有権   | `openclaw.plugin.json` | ランタイムのロード前にバックエンド ID を宣言する          |
 | ランタイム登録       | `index.ts`             | コマンドのデフォルト値を指定して `api.registerCliBackend(...)` を呼び出す |
 
-マニフェストは検出用メタデータです。CLI を実行したり、ランタイム動作を登録したりするものではありません。ランタイム動作は、Plugin エントリが `api.registerCliBackend(...)` を呼び出した時点で開始されます。
+マニフェストは検出用メタデータです。CLI を実行したり、ランタイム動作を登録したりするものではありません。ランタイム動作は、Plugin エントリが
+`api.registerCliBackend(...)` を呼び出した時点で開始されます。
 
 ## 最小構成のバックエンド Plugin
 
@@ -74,8 +75,8 @@ CLI バックエンド Plugin には、次の 3 つの契約があります。
     ```
 
     公開するパッケージには、ビルド済みの JavaScript ランタイムファイルを含める必要があります。ソース
-    エントリが `./src/index.ts` の場合は、対応するビルド済み JavaScript を指す
-    `openclaw.runtimeExtensions` を追加してください。[エントリポイント](/ja-JP/plugins/sdk-entrypoints)を参照してください。
+    エントリが `./src/index.ts` の場合は、ビルド済みの
+    JavaScript 側を指す `openclaw.runtimeExtensions` を追加します。[エントリポイント](/ja-JP/plugins/sdk-entrypoints)を参照してください。
 
   </Step>
 
@@ -84,7 +85,7 @@ CLI バックエンド Plugin には、次の 3 つの契約があります。
     {
       "id": "acme-cli",
       "name": "Acme CLI",
-      "description": "Run Acme's local AI CLI through OpenClaw",
+      "description": "OpenClaw を通じて Acme のローカル AI CLI を実行する",
       "cliBackends": ["acme-cli"],
       "setup": {
         "cliBackends": ["acme-cli"],
@@ -100,9 +101,11 @@ CLI バックエンド Plugin には、次の 3 つの契約があります。
     }
     ```
 
-    `cliBackends` はランタイムの所有権リストです。これにより、設定またはモデル選択で `acme-cli/...` が指定されたときに、OpenClaw が Plugin を自動的に読み込めます。
+    `cliBackends` はランタイムの所有権リストです。これにより、モデル選択または `agentRuntime.id` で `acme-cli` が指定された場合に、OpenClaw が
+    Plugin を自動ロードできます。
 
-    `setup.cliBackends` は、記述子を優先するセットアップ用サーフェスです。Plugin ランタイムを読み込まずにモデル検出、オンボーディング、またはステータスでバックエンドを認識させる必要がある場合に追加します。セットアップにこれらの静的記述子だけで十分な場合に限り、`requiresRuntime: false` を使用してください。
+    `setup.cliBackends` は、記述子を優先するセットアップサーフェスです。モデル検出、オンボーディング、またはステータスで、Plugin ランタイムをロードせずにバックエンドを認識する必要がある場合に追加します。
+    セットアップにこれらの静的記述子だけで十分な場合にのみ、`requiresRuntime: false` を使用します。
 
   </Step>
 
@@ -129,17 +132,33 @@ CLI バックエンド Plugin には、次の 3 つの契約があります。
         },
         config: {
           command: "acme",
-          args: ["chat", "--json"],
-          output: "json",
-          input: "stdin",
+          args: ["chat", "--output-format", "stream-json", "--prompt", "{prompt}"],
+          resumeArgs: [
+            "chat",
+            "--resume",
+            "{sessionId}",
+            "--output-format",
+            "stream-json",
+            "--prompt",
+            "{prompt}",
+          ],
+          output: "jsonl",
+          resumeOutput: "jsonl",
+          jsonlDialect: "gemini-stream-json",
+          input: "arg",
           modelArg: "--model",
-          sessionArg: "--session",
+          modelAliases: {
+            large: "acme-large-2026",
+            fast: "acme-fast-2026",
+          },
+          sessionArgs: ["--session", "{sessionId}"],
           sessionMode: "existing",
           sessionIdFields: ["session_id", "conversation_id"],
           systemPromptFileArg: "--system-file",
           systemPromptWhen: "first",
           imageArg: "--image",
           imageMode: "repeat",
+          imagePathScope: "workspace",
           reliability: {
             watchdog: {
               fresh: { ...CLI_FRESH_WATCHDOG_DEFAULTS },
@@ -161,86 +180,102 @@ CLI バックエンド Plugin には、次の 3 つの契約があります。
     });
     ```
 
-    バックエンド ID は、マニフェストの `cliBackends` エントリと一致する必要があります。登録された `config` はデフォルト値にすぎません。実行時には、`agents.defaults.cliBackends.acme-cli` 以下のユーザー設定がその上にマージされます。
+    バックエンド ID は、マニフェストの `cliBackends` エントリと一致する必要があります。登録された
+    アダプターが正式な Plugin コードです。OpenClaw の設定はバックエンドを選択しますが、そのコマンドコントラクトを書き換えることはありません。
 
   </Step>
 </Steps>
 
 ## 設定の構造
 
-`CliBackendConfig` は、OpenClaw が CLI を起動して解析する方法を記述します。
+`CliBackendConfig` は、OpenClaw が CLI を起動して解析する方法を定義します。上記の実例では、バンドルされている
+`google-gemini-cli` アダプターと同じコマンド、再開、JSONL、モデルエイリアス、セッション、画像、ウォッチドッグの各フィールドを意図的に使用しています。
 
 | フィールド                                                | 用途                                                                              |
 | --------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `command`                                                 | バイナリ名またはコマンドの絶対パス                                                |
+| `command`                                                 | バイナリ名またはコマンドの絶対パス                                               |
 | `args`                                                    | 新規実行用の基本 argv                                                             |
-| `resumeArgs`                                              | 再開セッション用の代替 argv。`{sessionId}` をサポート                             |
-| `output` / `resumeOutput`                                 | パーサー：`json`、`jsonl`、または `text`                                          |
-| `jsonlDialect`                                            | JSONL イベント方言：`claude-stream-json` または `gemini-stream-json`              |
-| `liveSession`                                             | 長時間稼働する CLI プロセスモード（`claude-stdio`）                               |
-| `input`                                                   | プロンプトの転送方法：`arg` または `stdin`                                        |
-| `maxPromptArgChars`                                       | stdin にフォールバックするまでの `arg` モードでのプロンプト最大長                 |
-| `env` / `clearEnv`                                        | 注入する追加の環境変数、または起動前に削除する環境変数名                          |
-| `modelArg`                                                | モデル ID の前に使用するフラグ                                                     |
-| `modelAliases`                                            | OpenClaw のモデル ID を CLI ネイティブ ID に対応付けるマップ                      |
-| `sessionArg` / `sessionArgs`                              | セッション ID の渡し方                                                            |
-| `sessionMode`                                             | `always`、`existing`、または `none`                                               |
-| `sessionIdFields`                                         | OpenClaw が CLI 出力から読み取る JSON フィールド                                  |
+| `resumeArgs`                                              | 再開セッション用の代替 argv。`{sessionId}` をサポート                       |
+| `output` / `resumeOutput`                                 | パーサー：`json`、`jsonl`、または `text`                                                |
+| `jsonlDialect`                                            | JSONL イベント方言：`claude-stream-json` または `gemini-stream-json`                 |
+| `liveSession`                                             | 長時間実行される CLI プロセスモード（`claude-stdio`）                                      |
+| `input`                                                   | プロンプトの転送方法：`arg` または `stdin`                                                |
+| `maxPromptArgChars`                                       | `arg` モードで stdin にフォールバックするまでの最大プロンプト長                     |
+| `env` / `clearEnv`                                        | 注入する追加環境変数、または起動前に削除する環境変数名                         |
+| `modelArg`                                                | モデル ID の前に使用するフラグ                                                    |
+| `modelAliases`                                            | OpenClaw のモデル ID を CLI ネイティブ ID にマッピングする                       |
+| `sessionArgs`                                             | `{sessionId}` を使用してセッション ID を渡す方法                                      |
+| `sessionMode`                                             | `always`、`existing`、または `none`                                                   |
+| `sessionIdFields`                                         | OpenClaw が CLI 出力から読み取る JSON フィールド                                 |
 | `systemPromptArg` / `systemPromptFileArg`                 | システムプロンプトの転送方法                                                      |
-| `systemPromptFileConfigArg` / `systemPromptFileConfigKey` | システムプロンプトファイルの設定上書き用転送方法（例：`-c`）                      |
-| `systemPromptMode`                                        | `append` または `replace`                                                         |
-| `systemPromptWhen`                                        | `first`、`always`、または `never`                                                 |
-| `imageArg` / `imageMode`                                  | 画像パス用フラグと複数画像の渡し方（`repeat` または `list`）                      |
-| `imagePathScope`                                          | 引き渡し前にステージングされた画像ファイルを配置する場所：`temp` または `workspace` |
-| `serialize`                                               | 同一バックエンドの実行順序を維持する                                              |
-| `reseedFromRawTranscriptWhenUncompacted`                  | 安全なセッションリセットのため、Compaction 前に制限付きの生トランスクリプト再投入を有効にする |
-| `reliability.outputLimits`                                | 1 回のライブ CLI ターンで保持する生の JSONL の最大文字数／行数（ライブセッションバックエンド） |
-| `reliability.watchdog`                                    | 出力なしタイムアウトの調整。新規実行と再開実行で個別に設定                        |
+| `systemPromptFileConfigArg` / `systemPromptFileConfigKey` | システムプロンプトファイルを設定で上書きするための転送方法（例：`-c`）             |
+| `systemPromptMode`                                        | `append` または `replace`                                                             |
+| `systemPromptWhen`                                        | `first`、`always`、または `never`                                                     |
+| `imageArg` / `imageMode`                                  | 画像パスのフラグと複数画像の渡し方（`repeat` または `list`）              |
+| `imagePathScope`                                          | 引き渡し前にステージングされた画像ファイルを置く場所：`temp` または `workspace`               |
+| `serialize`                                               | 同じバックエンドの実行順序を維持する                                             |
+| `reseedFromRawTranscriptWhenUncompacted`                  | 安全なセッションリセットのため、Compaction 前に制限付きの生トランスクリプト再シードを有効にする |
+| `reliability.watchdog`                                    | 出力なしタイムアウトの調整。新規実行と再開実行で個別に設定                       |
 
-CLI に合致する最小限の静的設定を優先してください。Plugin コールバックは、実際にバックエンドが所有すべき動作にのみ追加します。
+CLI に合致する最小限の静的設定を推奨します。本当にバックエンドが担うべき動作にのみ、Plugin コールバックを追加してください。
 
 ## 高度なバックエンドフック
 
 `CliBackendPlugin` では、次の項目も定義できます。
 
-| フック                               | 用途                                                                          |
-| ------------------------------------ | ----------------------------------------------------------------------------- |
-| `normalizeConfig(config, context)`   | マージ後に従来のユーザー設定を書き換える                                      |
-| `resolveExecutionArgs(ctx)`          | 思考強度やサイド質問の分離など、リクエスト単位のフラグを追加する              |
-| `prepareExecution(ctx)`              | 起動前に一時的な認証または設定ブリッジを作成する                              |
-| `transformSystemPrompt(ctx)`         | CLI 固有の最終的なシステムプロンプト変換を適用する                            |
-| `textTransforms`                     | プロンプト／出力の双方向置換                                                  |
-| `defaultAuthProfileId`               | 特定の OpenClaw 認証プロファイルを優先する                                    |
-| `authEpochMode`                      | 認証変更によって保存済み CLI セッションを無効化する方法を決定する             |
-| `nativeToolMode`                     | ネイティブツールが存在しないか、常時有効か、ホスト側で選択可能かを宣言する    |
-| `sideQuestionToolMode`               | `/btw` のサイド質問で無効にするネイティブツールを宣言する                     |
-| `bundleMcp` / `bundleMcpMode`        | OpenClaw の loopback MCP ツールブリッジを有効にする                            |
-| `ownsNativeCompaction`               | バックエンドが独自の Compaction を所有し、OpenClaw は処理を委ねる             |
-| `runtimeArtifact`                    | スクリプトランチャーを完全な同梱パッケージツリーに制限する                    |
+| フック                             | 用途                                                                        |
+| ---------------------------------- | --------------------------------------------------------------------------- |
+| `normalizeConfig(config, context)` | 登録済みの静的アダプターをランタイムコンテキストで正規化する               |
+| `resolveExecutionArgs(ctx)`        | 思考労力や補助質問の分離など、リクエスト単位のフラグを追加する             |
+| `prepareExecution(ctx)`            | 起動前に一時的な認証、設定、または環境のブリッジを作成する                 |
+| `transformSystemPrompt(ctx)`       | CLI 固有のシステムプロンプト変換を最後に適用する                            |
+| `textTransforms`                   | プロンプトと出力を双方向に置換する                                          |
+| `defaultAuthProfileId`             | 特定の OpenClaw 認証プロファイルを優先する                                  |
+| `authEpochMode`                    | 認証の変更によって保存済み CLI セッションを無効化する方法を決定する        |
+| `nativeToolMode`                   | ネイティブツールが存在しない、常に有効、またはホストで選択可能かを宣言する |
+| `toolAvailabilityEnforcement`      | 正確なツール上限を argv または実行ステージングで適用するかを宣言する       |
+| `sideQuestionToolMode`             | `/btw` の補助質問で無効にするネイティブツールを宣言する                     |
+| `bundleMcp` / `bundleMcpMode`      | OpenClaw のループバック MCP ツールブリッジを有効にする                      |
+| `ownsNativeCompaction`             | バックエンドが独自の Compaction を管理し、OpenClaw は処理を委ねる           |
+| `subscriptionAuthDispatch`         | オプトインされたサブスクリプション認証情報による組み込み実行を、このバックエンド経由で実行する |
+| `runtimeArtifact`                  | スクリプトランチャーを、バンドルされた完全なパッケージツリーに限定する     |
 
-これらのフックはプロバイダー所有のままにしてください。バックエンドフックで動作を表現できる場合は、コアに CLI 固有の分岐を追加しないでください。
+これらのフックはプロバイダー側で管理してください。バックエンドフックで動作を表現できる場合は、コアに CLI 固有の分岐を追加しないでください。
 
-`runtimeArtifact` は Plugin が所有し、ユーザーは上書きできません。これは、ライブ推論ターンが検証済みセットアップ権限を発行または再検証するときにのみ参照されます。通常の CLI 実行では必要ありません。この宣言がないバックエンドは、検証済み CLI セットアップ権限を発行できません。`bundled-package-tree` 宣言では、正確な `package.json` の所有者を指定し、パッケージのエントリポイントがコマンドであることを要求します。OpenClaw は、ネストされた依存関係を含む、範囲が限定されたインストール済みパッケージツリー全体をハッシュ化し、リダイレクトするシンボリックリンク、宣言されたパッケージ外のランチャー、必須の外部依存関係の宣言、サイズ超過のツリー、不明なスクリプトについては安全側に倒して失敗します。この宣言は、そのツリーに完全な推論実装が含まれる場合にのみ使用してください。任意のツール統合があっても、外部実装グラフが安全になるわけではありません。
+`prepareExecution(ctx)` は、実行用に選択された有効なトークン上限である `ctx.contextTokenBudget` を受け取ります。ネイティブ Compaction を所有するバックエンドは、その予算を各 CLI 固有の起動契約にマッピングできます。
 
-同じバックエンドが自己完結型のネイティブ実行可能ファイルも提供する場合は、その正規のベース名を `nativeExecutableNames` に列挙してください。ユーザーがバックエンドコマンドを上書きした場合でも、それ以外のネイティブコマンドは未検証のままです。
+`runtimeArtifact` は Plugin が所有します。これは、ライブ推論ターンが検証済みセットアップ権限を新規発行または再検証する場合にのみ参照されます。通常の CLI 実行では必要ありません。この宣言がないバックエンドは、検証済み CLI セットアップ権限を発行できません。`bundled-package-tree` 宣言では、正確な `package.json` 所有者を指定し、パッケージのエントリポイントがコマンドであることを必須とします。OpenClaw は、ネストされた依存関係を含む、制限された完全なインストール済みパッケージツリーをハッシュし、リダイレクトするシンボリックリンク、宣言されたパッケージ外のランチャー、必須の外部依存関係宣言、サイズ超過のツリー、不明なスクリプトがある場合はフェイルクローズします。そのツリーに完全な推論実装が含まれる場合にのみ、これを宣言してください。オプションのツール統合があっても、外部実装グラフが安全になるわけではありません。
 
-`ctx.executionMode` は通常のターンでは `"agent"`、一時的な `/btw` 呼び出しでは `"side-question"` です。BTW 用にネイティブツール、セッション永続化、再開動作を無効化する場合など、CLI に異なるワンショットフラグが必要なときに使用します。バックエンドが通常 `nativeToolMode: "always-on"` であっても、サイドクエスチョンの argv でそれらのツールを確実に無効化できる場合は、`sideQuestionToolMode: "disabled"` も設定します。それ以外の場合、BTW がツールなしの CLI 実行を必要とすると、OpenClaw はフェイルクローズします。
+同じバックエンドが自己完結型のネイティブ実行可能ファイルも提供する場合は、その正規ベース名を `nativeExecutableNames` に列挙します。その他のネイティブコマンドは未検証のままです。
 
-`nativeToolMode: "selectable"` は、`resolveExecutionArgs` が個別の実行についてバックエンドネイティブのすべてのツールを無効化できる場合にのみ設定します。このような制限付き実行では、`ctx.toolAvailability.native` は空のタプルであり、`ctx.toolAvailability.mcp` はホストによって分離された正確な MCP 許可リストです。フックは競合するツールフラグを置き換え、両方の値を強制する argv を返す必要があります。OpenClaw は最終的な新規または再開用 argv を使用してこれを一度呼び出し、バックエンドが制限を強制できない場合はフェイルクローズします。このコンテキストの MCP 名を安全に自動承認できるのは、ホストが生成される MCP 設定を事前にそれらのサーバーとツールだけに制限しているためです。
+`ctx.executionMode` は、通常のターンでは `"agent"`、一時的な `/btw` 呼び出しでは `"side-question"` です。BTW のためにネイティブツール、セッションの永続化、再開動作を無効にする場合など、CLI に異なるワンショットフラグが必要なときに使用します。通常は `nativeToolMode: "always-on"` を持つバックエンドでも、補足質問用の argv によってそれらのツールが確実に無効化される場合は、`sideQuestionToolMode: "disabled"` も設定してください。そうでない場合、BTW がツールなしの CLI 実行を必要とすると、OpenClaw はフェイルクローズします。
 
-### `ownsNativeCompaction`: OpenClaw の Compaction を使用しない
+バックエンドが実行ごとにすべてのバックエンドネイティブツールを無効化できる場合にのみ、`nativeToolMode: "selectable"` を設定してください。制限付き実行には正規契約が渡されます。`ctx.toolAvailability.native` はバックエンドネイティブツールの正確なリスト、`ctx.toolAvailability.openClaw` は OpenClaw ツール名の正確なリストです。ホストは、生成される MCP 設定と付与も、その OpenClaw リストに独立して制限します。Plugin はこれをコア内で変換したり、トランスポートプレフィックスを追加したりしてはなりません。
 
-バックエンドが**独自の**トランスクリプトを圧縮するエージェントを実行する場合は、`ownsNativeCompaction: true` を設定します。これにより、OpenClaw の保護用要約処理がそのセッションに対して実行されなくなり、CLI の Compaction ライフサイクルは何もせずに終了してターンが続行されます。`claude-cli` は、Claude Code がハーネスエンドポイントを使用せず内部で圧縮するため、この設定を宣言しています。一方、Codex などのネイティブハーネスセッションは、引き続きハーネスの Compaction エンドポイントへルーティングされます。
+バックエンドがその契約をどのように適用するかを宣言します。
 
-**以下の条件をすべて満たす場合にのみ宣言してください**。そうでない場合、後回しにされた予算超過セッションが予算超過のままになったり、古くなったりする可能性があります（OpenClaw はそのセッションを復旧しなくなります）。
+- `toolAvailabilityEnforcement: "execution-args"` には
+  `resolveExecutionArgs` が必要です。フックは競合するツールフラグを置換し、選択されたツール以外を実行できるカスタマイズ面を無効化して、新規実行と再開実行の両方に適用 argv を返す必要があります。
+- `toolAvailabilityEnforcement: "prepare-execution"` には
+  `prepareExecution` が必要です。フックは実行ごとの正確なポリシーをステージングして `toolAvailabilityEnforced: true` を返す必要があります。確認応答がない場合はフェイルクローズし、OpenClaw は起動前にステージング済みリソースをクリーンアップします。
 
-- バックエンドがウィンドウの上限に近づいたとき、独自のトランスクリプトを確実に圧縮するか、サイズを制限する。
-- 圧縮済みの状態がターンをまたいで維持されるよう、再開可能なセッションを永続化する（例: `--resume` / `--session-id`）。
-- ネイティブハーネスの Compaction セッションではない。一致する `agentHarnessId` のセッションは、代わりにハーネスエンドポイントへルーティングされる。
+Cron の `toolsAllow` などのランタイム上限は、この契約が構築される前に OpenClaw によって正規化され、グループ展開されます。ネイティブツールは無効化され、完全に宣言された適用経路を持たないバックエンドは実行前に失敗します。
+
+`v2026.7.2-beta.1` から `v2026.7.2-beta.3` を対象として構築された Plugin は、非推奨の `ctx.toolAvailability.mcp` トランスポート名プロジェクションを引き続き読み取れる場合があり、選択可能なバックエンドが `resolveExecutionArgs` を実装している場合は `toolAvailabilityEnforcement` を省略できる場合があります。OpenClaw は、Plugin パッケージに必須の `openclaw.build.openclawVersion` メタデータから、そのリリース済みベータ経路を認識し、`2026.8.x` 系列まで維持します。新規および更新済みの Plugin では、正規の `ctx.toolAvailability.openClaw` 名を使用し、`toolAvailabilityEnforcement: "execution-args"` を明示的に宣言してください。ベータ互換経路は、その期間の終了後に削除される予定です。
+
+### `ownsNativeCompaction`: OpenClaw Compaction のオプトアウト
+
+バックエンドが**独自の**トランスクリプトを Compaction するエージェントを実行する場合は、`ownsNativeCompaction: true` を設定し、OpenClaw のセーフガード要約機能がそのセッションに対して決して実行されないようにします。CLI Compaction のライフサイクルは何もせずに戻り、ターンが続行されます。Claude Code はハーネスエンドポイントを使用せずに内部で Compaction を行うため、`claude-cli` を宣言します。一方、Codex などのネイティブハーネスセッションは、引き続きハーネスの Compaction エンドポイントにルーティングされます。
+
+**以下のすべてを満たす場合にのみ宣言してください**。そうでない場合、遅延された予算超過セッションが予算超過のままになったり、古くなったりする可能性があります（OpenClaw はそのセッションを救済しなくなります）。
+
+- バックエンドは、ウィンドウ上限に近づくと、独自のトランスクリプトを確実に Compaction または制限する。
+- Compaction 済みの状態がターンをまたいで保持されるよう、再開可能なセッションを永続化する（例: `--resume` / `--session-id`）。
+- ネイティブハーネスの Compaction セッションではない。`agentHarnessId` に一致するセッションは、代わりにハーネスエンドポイントへルーティングされる。
 
 ## MCP ツールブリッジ
 
-CLI バックエンドは、デフォルトでは OpenClaw ツールを受け取りません。CLI が MCP 設定を利用できる場合は、明示的に有効化します。
+CLI バックエンドは、デフォルトでは OpenClaw ツールを受け取りません。CLI が MCP 設定を利用できる場合は、明示的にオプトインします。
 
 ```typescript
 return {
@@ -255,33 +290,25 @@ return {
 };
 ```
 
-サポートされているブリッジモード:
+サポートされるブリッジモード:
 
-| モード                   | 用途                                                             |
+| モード                     | 用途                                                              |
 | ------------------------ | ---------------------------------------------------------------- |
-| `claude-config-file`     | MCP 設定ファイルを受け付ける CLI                                 |
-| `codex-config-overrides` | argv 上の設定オーバーライドを受け付ける CLI                       |
-| `gemini-system-settings` | システム設定ディレクトリから MCP 設定を読み取る CLI               |
+| `claude-config-file`     | MCP 設定ファイルを受け取る CLI                              |
+| `codex-config-overrides` | argv で設定オーバーライドを受け取る CLI                        |
+| `gemini-system-settings` | システム設定ディレクトリから MCP 設定を読み取る CLI |
 
-ブリッジは、CLI が実際に利用できる場合にのみ有効化してください。CLI に無効化できない組み込みツールレイヤーがある場合は、`nativeToolMode: "always-on"` を設定し、呼び出し元がネイティブツールなしを要求したときに OpenClaw がフェイルクローズできるようにします。実行ごとにすべてのネイティブツールを無効化できる場合は、前述の `resolveExecutionArgs` コントラクトとともに `"selectable"` を使用します。
+CLI が実際にブリッジを利用できる場合にのみ有効化してください。CLI に無効化できない独自の組み込みツールレイヤーがある場合は、`nativeToolMode:
+"always-on"` を設定します。これにより、呼び出し元がネイティブツールなしを要求したときに OpenClaw がフェイルクローズできます。実行ごとにすべてのネイティブツールを無効化できる場合は、上記の `resolveExecutionArgs` 契約とともに `"selectable"` を使用します。
 
-## ユーザー設定
+## バックエンドの選択
 
-ユーザーは任意のバックエンドのデフォルト値を上書きできます。
+ユーザーは、モデル参照プレフィックスを使用してスタンドアロンバックエンドを選択します。正規の `modelProvider` を宣言するバックエンドは、代わりにそのプロバイダーモデルの `agentRuntime.id` を通じて選択できます。アダプターの仕組みは Plugin 内に保持されます。
 
 ```json5
 {
   agents: {
     defaults: {
-      cliBackends: {
-        "acme-cli": {
-          command: "/opt/acme/bin/acme",
-          args: ["chat", "--json", "--profile", "work"],
-          modelAliases: {
-            large: "acme-large-2026",
-          },
-        },
-      },
       model: {
         primary: "openai/gpt-5.6-sol",
         fallbacks: ["acme-cli/large"],
@@ -291,38 +318,38 @@ return {
 }
 ```
 
-ユーザーが必要とする可能性が高い最小限のオーバーライドを文書化してください。通常、バイナリが `PATH` にない場合の `command` だけです。
+認証情報は、OpenClaw の認証プロファイルまたは Plugin 所有の設定に配置します。登録済みコマンドが Gateway サービスの `PATH` 上にあることを確認してください。異なるパスまたは argv を必要とするデプロイでは、Plugin 登録を変更するかラップする必要があります。
 
 ## 検証
 
-同梱 Plugin では、ビルダーとセットアップ登録に焦点を絞ったテストを追加し、Plugin の対象テストレーンを実行します。
+バンドルされた Plugin の場合は、ビルダーとセットアップ登録に焦点を絞ったテストを追加してから、Plugin の対象テストレーンを実行します。
 
 ```bash
 pnpm test extensions/acme-cli
 ```
 
-ローカルまたはインストール済みの Plugin では、検出と実際のモデル実行を1回検証します。
+ローカルまたはインストール済みの Plugin の場合は、検出と実際のモデル実行を 1 回検証します。
 
 ```bash
 openclaw plugins inspect acme-cli --runtime --json
-openclaw agent --message "reply exactly: backend ok" --model acme-cli/acme-large
+openclaw agent --message "正確に返信してください: backend ok" --model acme-cli/acme-large
 ```
 
-バックエンドが画像または MCP をサポートする場合は、実際の CLI でそれらの経路を実証するライブスモークテストを追加します。プロンプト、画像、MCP、またはセッション再開の動作について、静的検査だけに依存しないでください。
+バックエンドが画像または MCP をサポートする場合は、実際の CLI でそれらの経路を実証するライブスモークテストを追加します。プロンプト、画像、MCP、セッション再開の動作について、静的検査だけに依存しないでください。
 
 ## チェックリスト
 
-<Check>公開パッケージの `package.json` に `openclaw.extensions` とビルド済みランタイムエントリがある</Check>
-<Check>`openclaw.plugin.json` で `cliBackends` と意図的な `activation.onStartup` が宣言されている</Check>
-<Check>セットアップやモデル検出がコールド状態のバックエンドを認識する必要がある場合、`setup.cliBackends` が存在する</Check>
+<Check>`package.json` に `openclaw.extensions` があり、公開パッケージ用にビルドされたランタイムエントリがある</Check>
+<Check>`openclaw.plugin.json` が `cliBackends` と意図した `activation.onStartup` を宣言している</Check>
+<Check>セットアップまたはモデル検出がコールド状態でバックエンドを認識すべき場合、`setup.cliBackends` が存在する</Check>
 <Check>`api.registerCliBackend(...)` がマニフェストと同じバックエンド ID を使用している</Check>
-<Check>`agents.defaults.cliBackends.<id>` 配下のユーザーオーバーライドが引き続き優先される</Check>
-<Check>セッション、システムプロンプト、画像、出力パーサーの設定が実際の CLI コントラクトと一致している</Check>
-<Check>対象テストと少なくとも1回のライブ CLI スモークテストでバックエンド経路が実証されている</Check>
+<Check>バックエンドのモデルプレフィックスまたはモデルスコープの `agentRuntime.id` が登録を選択する</Check>
+<Check>セッション、システムプロンプト、画像、出力パーサーの設定が実際の CLI 契約と一致する</Check>
+<Check>対象テストと少なくとも 1 回のライブ CLI スモークテストでバックエンド経路を実証する</Check>
 
 ## 関連項目
 
-- [CLI バックエンド](/ja-JP/gateway/cli-backends) - ユーザー設定とランタイム動作
+- [CLI バックエンド](/ja-JP/gateway/cli-backends) - ランタイムの選択と動作
 - [Plugin の構築](/ja-JP/plugins/building-plugins) - パッケージとマニフェストの基本
 - [Plugin SDK の概要](/ja-JP/plugins/sdk-overview) - 登録 API リファレンス
 - [Plugin マニフェスト](/ja-JP/plugins/manifest) - `cliBackends` とセットアップ記述子

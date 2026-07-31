@@ -1,26 +1,28 @@
 ---
 read_when:
-    - Bir kaynak checkout'unu güvenli şekilde güncellemek istiyorsunuz
-    - '`openclaw update` çıktısını veya seçeneklerini hata ayıklıyorsunuz'
+    - Bir kaynak kod deposu çalışma kopyasını güvenli bir şekilde güncellemek istiyorsunuz
+    - '`openclaw update` çıktısında veya seçeneklerinde hata ayıklıyorsunuz'
     - '`--update` kısaltma davranışını anlamanız gerekir'
-summary: '`openclaw update` için CLI referansı (görece güvenli kaynak güncellemesi + Gateway otomatik yeniden başlatma)'
-title: Güncelle
+summary: '`openclaw update` için CLI başvurusu (nispeten güvenli kaynak güncellemesi + Gateway''in otomatik yeniden başlatılması)'
+title: Güncelleme
 x-i18n:
-    generated_at: "2026-06-28T00:25:54Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T23:17:06Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: a3503e1cd15baa4d4f6c26734b37556831c612f1da0da5ccfe7bcde35b9be64b
+    source_hash: b46696f6b9cba5c318f870bcb6c5ea8e0652940968da2ad85e86709fe4c11146
     source_path: cli/update.md
     workflow: 16
 ---
 
 # `openclaw update`
 
-OpenClaw'ı güvenle güncelleyin ve stable/beta/dev kanalları arasında geçiş yapın.
+OpenClaw'u güncelleyin ve stable/extended-stable/beta/dev kanalları arasında geçiş yapın.
 
-**npm/pnpm/bun** ile kurduysanız (genel kurulum, git meta verisi yok),
-güncellemeler [Güncelleme](/tr/install/updating) bölümündeki paket yöneticisi akışıyla gerçekleşir.
+**npm/pnpm/bun** aracılığıyla yüklediyseniz (genel yükleme, git meta verisi yok),
+güncellemeler [Güncelleme](/tr/install/updating) bölümünde açıklanan
+paket yöneticisi akışı üzerinden gerçekleştirilir.
 
 ## Kullanım
 
@@ -29,6 +31,7 @@ openclaw update
 openclaw update status
 openclaw update repair
 openclaw update wizard
+openclaw update --channel extended-stable
 openclaw update --channel beta
 openclaw update --channel dev
 openclaw update --tag beta
@@ -41,30 +44,43 @@ openclaw update --json
 openclaw --update
 ```
 
+`openclaw --update`, `openclaw update` olarak yeniden yazılır (kabuklar ve
+başlatıcı betikleri için kullanışlıdır).
+
 ## Seçenekler
 
-- `--no-restart`: başarılı bir güncellemeden sonra Gateway hizmetini yeniden başlatmayı atlar.
-- `--channel <stable|beta|dev>`: güncelleme kanalını ayarlar (git + npm; yapılandırmada kalıcılaştırılır).
-- `--tag <dist-tag|version|spec>`: yalnızca bu güncelleme için paket hedefini geçersiz kılar.
-- `--dry-run`: yapılandırma yazmadan, kurulum yapmadan, Plugin eşitlemeden veya yeniden başlatmadan planlanan güncelleme işlemlerini önizler.
-- `--json`: makine tarafından okunabilir `UpdateRunResult` JSON çıktısı yazdırır.
-- `--timeout <seconds>`: adım başına zaman aşımı (varsayılan 1800 sn).
-- `--yes`: onay istemlerini atlar.
-- `--acknowledge-clawhub-risk`: topluluk ClawHub güven uyarılarını inceledikten sonra, güncelleme sonrası Plugin eşitlemesinin etkileşimli istem olmadan devam etmesine izin verir.
+| Bayrak                                             | Açıklama                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--no-restart`                                   | Başarılı bir güncellemeden sonra Gateway hizmetinin yeniden başlatılmasını atlayın. Yeniden başlatma yapan paket yöneticisi güncellemeleri, komut başarıyla tamamlanmadan önce yeniden başlatılan hizmetin beklenen sürümü bildirdiğini doğrular.                                                                                                                                                |
+| `--channel <stable\|extended-stable\|beta\|dev>` | Güncelleme kanalını ayarlayın ve çekirdek güncellemesi başarıyla tamamlandıktan sonra kalıcı hâle getirin. Extended-stable yalnızca paketler içindir.                                                                                                                                                                                                                                            |
+| `--tag <dist-tag\|version\|spec>`                | Yalnızca bu güncelleme için paket hedefini geçersiz kılın. Doğrulanmış kesin hedefi zorunlu olan etkin bir `extended-stable` kanalıyla birlikte kullanılamaz. Diğer paket yüklemelerinde `main`, `github:openclaw/openclaw#main` ile eşleşir; GitHub/git kaynak belirtimleri, aşamalı genel npm yüklemesinden önce geçici bir tarball olarak paketlenir. |
+| `--dry-run`                                      | Yapılandırmayı yazmadan, yükleme yapmadan, plugin'leri eşitlemeden veya yeniden başlatmadan planlanan işlemleri (kanal/etiket/hedef/yeniden başlatma akışı) önizleyin.                                                                                                                                                                                                                |
+| `--json`                                         | Makine tarafından okunabilir `UpdateRunResult` JSON çıktısı verin. Yönetilen bir plugin'in onarılması gerektiğinde `postUpdate.plugins.warnings`, beta kanalı plugin geri dönüş ayrıntıları ve güncelleme sonrası eşitleme sırasında npm plugin yapıtı sapması algılandığında `postUpdate.plugins.integrityDrifts` içerir.                                                                 |
+| `--timeout <seconds>`                            | Adım başına zaman aşımı. Varsayılan: `1800`.                                                                                                                                                                                                                                                                                                            |
+| `--yes`                                          | Onay istemlerini atlayın (örneğin sürüm düşürme onayı).                                                                                                                                                                                                                                                                              |
+| `--acknowledge-clawhub-risk`                     | Güncelleme sonrası plugin eşitlemesinin, etkileşimli bir istem olmadan topluluk ClawHub güven uyarılarını geçerek devam etmesine izin verin. Bu seçenek olmadan, OpenClaw istem gösteremediğinde riskli topluluk sürümleri atlanır ve değiştirilmeden bırakılır. Resmî ClawHub paketleri ve paketle birlikte sunulan plugin kaynakları bu istemi atlar.                                                     |
 
-`openclaw update` komutunun `--verbose` bayrağı yoktur. Planlanan kanal/etiket/kurulum/yeniden başlatma işlemlerini önizlemek için `--dry-run`, makine tarafından okunabilir sonuçlar için `--json`, yalnızca kanal ve kullanılabilirlik ayrıntılarına ihtiyacınız olduğunda `openclaw update status --json` kullanın.
+`--verbose` bayrağı yoktur. Planlanan işlemleri önizlemek için `--dry-run`,
+makine tarafından okunabilir sonuçlar için `--json` ve yalnızca
+kanal/kullanılabilirlik için `openclaw update status --json` kullanın. Gateway konsol ayrıntı düzeyi
+(`--verbose`) ve dosya günlük düzeyi (`logging.level: "debug"`/`"trace"`)
+birbirinden bağımsız ayarlardır; bkz. [Gateway günlük kaydı](/tr/gateway/logging).
 
 <Note>
-Nix modunda (`OPENCLAW_NIX_MODE=1`), durumu değiştiren `openclaw update` çalıştırmaları devre dışıdır. Bunun yerine bu kurulum için Nix kaynağını veya flake girdisini güncelleyin; nix-openclaw için agent öncelikli [Hızlı Başlangıç](https://github.com/openclaw/nix-openclaw#quick-start) bölümünü kullanın. `openclaw update status` ve `openclaw update --dry-run` salt okunur kalır.
+Nix modunda (`OPENCLAW_NIX_MODE=1`), değişiklik yapan `openclaw update` çalıştırmaları devre dışıdır. Bunun yerine bu yüklemenin Nix kaynağını veya flake girdisini güncelleyin; nix-openclaw için önce ajan yaklaşımını kullanan [Hızlı Başlangıç](https://github.com/openclaw/nix-openclaw#quick-start) kılavuzunu kullanın. `openclaw update status` ve `openclaw update --dry-run` salt okunur kalır.
 </Note>
 
 <Warning>
-Daha eski sürümler yapılandırmayı bozabileceğinden sürüm düşürmeler onay gerektirir.
+Eski sürümler yapılandırmayı bozabileceğinden sürüm düşürme işlemleri onay gerektirir.
+Yükleme oturumları zaten SQLite'a taşıdıysa, dosya destekli eski bir sürümü
+başlatmadan önce arşivlenmiş eski transkript yapıtlarını geri yükleyin. Bkz.
+[Doctor: Oturum SQLite geçişinden sonra sürüm düşürme](/tr/cli/doctor#downgrading-after-session-sqlite-migration).
 </Warning>
 
 ## `update status`
 
-Etkin güncelleme kanalını + git etiketi/dalı/SHA değerini (kaynak checkout'ları için) ve güncelleme kullanılabilirliğini gösterir.
+Etkin güncelleme kanalını, git etiketini/dalını/SHA'sını (yalnızca kaynak
+çalışma kopyalarında) ve güncelleme kullanılabilirliğini gösterin.
 
 ```bash
 openclaw update status
@@ -72,14 +88,24 @@ openclaw update status --json
 openclaw update status --timeout 10
 ```
 
-Seçenekler:
+| Bayrak                  | Varsayılan | Açıklama                         |
+| --------------------- | ------- | ----------------------------------- |
+| `--json`              | `false` | Makine tarafından okunabilir durum JSON'u çıktısı verin. |
+| `--timeout <seconds>` | `3`     | Denetimler için zaman aşımı.                 |
 
-- `--json`: makine tarafından okunabilir durum JSON çıktısı yazdırır.
-- `--timeout <seconds>`: denetimler için zaman aşımı (varsayılan 3 sn).
+Extended-stable paket yüklemelerinde durum, ön plan güncellemesiyle aynı genel
+seçiciyi ve kesin paket doğrulamasını gerçekleştirir. Yüklü sürüm daha yeniyse
+`ahead of extended-stable` bildirebilir. JSON hataları
+`registry.reason` (`selector_missing`, `selector_query_failed`,
+`exact_package_mismatch` veya `unsupported_git_channel`) içerir.
 
 ## `update repair`
 
-Çekirdek paket zaten değiştikten ancak sonraki onarım işi temiz şekilde tamamlanmadıktan sonra güncelleme sonlandırmasını yeniden çalıştırır.
+Çekirdek paket zaten değiştirildikten ancak sonraki onarım çalışması düzgün
+tamamlanmadıktan sonra güncelleme sonlandırmasını yeniden çalıştırın.
+`openclaw update` yeni çekirdek paketi yüklediği hâlde çekirdek sonrası plugin
+eşitlemesi, yönetilen npm plugin meta verileri, kayıt defteri yenilemesi veya
+doctor onarımı yakınsamadığında desteklenen kurtarma yolu budur.
 
 ```bash
 openclaw update repair
@@ -88,114 +114,218 @@ openclaw update repair --acknowledge-clawhub-risk
 openclaw update repair --json
 ```
 
-Seçenekler:
+| Bayrak                                             | Açıklama                                                                                                                                                                                                                                                         |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--channel <stable\|extended-stable\|beta\|dev>` | Onarımdan önce çekirdek güncelleme kanalını kalıcı hâle getirin. Extended-stable için, yalın/varsayılan veya `latest` amacını izleyen uygun resmî npm plugin'leri, yüklü kesin çekirdek sürümünü hedefler. Extended-stable onarımı, yapılandırmayı değiştirmeden Git çalışma kopyalarında reddedilir. |
+| `--json`                                         | Makine tarafından okunabilir sonlandırma JSON'u çıktısı verin.                                                                                                                                                                                                                           |
+| `--timeout <seconds>`                            | Onarım adımları için zaman aşımı. Varsayılan: `1800`.                                                                                                                                                                                                                           |
+| `--yes`                                          | Onay istemlerini atlayın.                                                                                                                                                                                                                                          |
+| `--acknowledge-clawhub-risk`                     | `openclaw update` üzerindekiyle aynı davranış.                                                                                                                                                                                                                              |
+| `--no-restart`                                   | Eşdeğerlik için kabul edilir; onarım Gateway'i hiçbir zaman yeniden başlatmaz.                                                                                                                                                                                                             |
 
-- `--channel <stable|beta|dev>`: onarımdan önce güncelleme kanalını kalıcılaştırır ve Plugin yakınsamasını bu kanala göre çalıştırır.
-- `--json`: makine tarafından okunabilir sonlandırma JSON çıktısı yazdırır.
-- `--timeout <seconds>`: onarım adımları için zaman aşımı (varsayılan `1800`).
-- `--yes`: onay istemlerini atlar.
-- `--acknowledge-clawhub-risk`: topluluk ClawHub güven uyarılarını inceledikten sonra, onarım sırasında Plugin yakınsamasının etkileşimli istem olmadan devam etmesine izin verir.
-- `--no-restart`: update komutuyla uyumluluk için kabul edilir; repair Gateway'i hiçbir zaman yeniden başlatmaz.
-
-`openclaw update repair`, `openclaw doctor --fix` çalıştırır, onarılan yapılandırmayı ve kurulum kayıtlarını yeniden yükler, etkin güncelleme kanalı için izlenen Plugin'leri eşitler, yönetilen npm Plugin kurulumlarını günceller, eksik yapılandırılmış Plugin yüklerini onarır, Plugin kayıt defterini yeniler ve yakınsanmış kurulum kaydı meta verilerini yazar.
+`update repair`, `openclaw doctor --fix` işlemini çalıştırır, onarılan
+yapılandırmayı ve yükleme kayıtlarını yeniden yükler, izlenen plugin'leri etkin
+güncelleme kanalı için eşitler, yönetilen npm plugin yüklemelerini günceller,
+eksik yapılandırılmış plugin yüklerini onarır, plugin kayıt defterini yeniler
+ve yakınsanmış yükleme kaydı meta verilerini yazar. Yeni bir çekirdek paket
+yüklemez ve Gateway'i yeniden başlatmaz.
 
 ## `update wizard`
 
-Bir güncelleme kanalı seçmek ve güncellemeden sonra Gateway'in yeniden başlatılıp başlatılmayacağını onaylamak için etkileşimli akış (varsayılan yeniden başlatmadır).
+Bir güncelleme kanalı seçmek ve ardından Gateway'in yeniden başlatılıp
+başlatılmayacağını onaylamak için etkileşimli akış (varsayılan olarak yeniden
+başlatılır). Git çalışma kopyası olmadan `dev` seçildiğinde bir
+tane oluşturulması önerilir.
 
-Seçenekler:
+| Bayrak                  | Varsayılan | Açıklama                   |
+| --------------------- | ------- | ----------------------------- |
+| `--timeout <seconds>` | `1800`  | Her güncelleme adımı için zaman aşımı. |
 
-- `--timeout <seconds>`: her güncelleme adımı için zaman aşımı (varsayılan `1800`)
+## Ne yapar?
 
-## Ne yapar
+Kanallar arasında açıkça geçiş yapılması (`--channel ...`), yükleme yöntemini
+de uyumlu tutar:
 
-Kanalları açıkça değiştirdiğinizde (`--channel ...`), OpenClaw kurulum yöntemini de hizalı tutar:
+- `dev` -> bir git çalışma kopyasının bulunmasını sağlar (varsayılan `~/openclaw` veya
+  `OPENCLAW_HOME` ayarlandığında `$OPENCLAW_HOME/openclaw`; `OPENCLAW_GIT_DIR` ile
+  geçersiz kılın), bunu günceller ve genel CLI'ı bu çalışma kopyasından
+  yükler.
+- `stable` -> `latest` kullanarak npm'den yükler.
+- `extended-stable` -> genel npm `extended-stable` seçicisini çözümler,
+  seçilen kesin paketi doğrular ve tam olarak bu sürümü yükler. Başka bir
+  seçiciye geri dönmez ve Git çalışma kopyalarında reddedilir.
+- `beta` -> npm dist-tag `beta` değerini tercih eder; beta eksikse
+  veya mevcut kararlı sürümden daha eskiyse `latest` değerine geri döner.
 
-- `dev` → bir git checkout'ı sağlar, günceller ve genel CLI'yi bu checkout'tan kurar.
-- `stable` → npm'den `latest` kullanarak kurar.
-- `beta` → npm dist-tag `beta` değerini tercih eder, ancak beta eksikse veya mevcut stable sürümden daha eskiyse `latest` değerine geri döner.
+### Yeniden başlatma devri
 
-Gateway çekirdek otomatik güncelleyicisi (yapılandırma üzerinden etkinleştirildiğinde), CLI güncelleme yolunu canlı Gateway istek işleyicisinin dışında başlatır.
+Gateway çekirdek otomatik güncelleyicisi (yapılandırma aracılığıyla
+etkinleştirildiğinde), CLI güncelleme yolunu canlı Gateway istek işleyicisinin
+dışında başlatır. Denetim düzlemi `update.run` paket yöneticisi
+güncellemeleri ve denetlenen git çalışma kopyası güncellemeleri, canlı Gateway
+işlemi içinde paket ağacını değiştirmek veya `dist/` öğesini yeniden
+oluşturmak yerine aynı yönetilen hizmet devrini kullanır: Gateway ayrılmış bir
+yardımcı başlatıp çıkar ve bu yardımcı `openclaw update --yes --json` işlemini Gateway işlem
+ağacının dışından çalıştırır. Devir kullanılamıyorsa `update.run`, elle
+çalıştırılacak güvenli kabuk komutunu içeren yapılandırılmış bir yanıt döndürür.
 
-Paket yöneticisi kurulumları için `openclaw update`, paket yöneticisini çağırmadan önce hedef paket sürümünü çözer. npm genel kurulumları aşamalı kurulum kullanır: OpenClaw yeni paketi geçici bir npm önekine kurar, paketlenmiş `dist` envanterini orada doğrular, ardından bu temiz paket ağacını gerçek genel öneke taşır.
+Saklanan extended-stable seçimler, `update.checkOnStart` etkinleştirildiğinde başlangıçta ve 24 saatlik aralıklarla salt okunur güncelleme
+ipuçları alır. Bu kontroller hiçbir zaman güncelleme uygulamaz,
+devir başlatmaz, Gateway'i yeniden başlatmaz, kararlı sürüm gecikmesi/jitter'ı kullanmaz veya beta
+yoklama sıklığını kullanmaz. Açık ön plan güncellemeleri, saklanan
+`update.channel: "extended-stable"` ile yalın ön plan güncellemeleri, isteğe bağlı durum ve bunların yönetilen
+Gateway devri desteklenmeye devam eder.
 
-Yerel yönetilen Gateway hizmeti kurulu olduğunda ve yeniden başlatma etkin olduğunda, paket yöneticisi ve git-checkout güncellemeleri paket ağacını değiştirmeden veya checkout/derleme çıktısını değiştirmeden önce çalışan hizmeti durdurur. Güncelleyici daha sonra hizmet meta verilerini güncellenmiş kurulumdan yeniler, hizmeti yeniden başlatır ve `Gateway: restarted and verified.` bildirmeden önce yeniden başlatılan Gateway'i doğrular.
+Yerel bir yönetilen Gateway hizmeti kuruluysa ve yeniden başlatma etkinse,
+paket yöneticisi ve git checkout güncellemeleri, paket ağacını değiştirmeden veya
+checkout/derleme çıktısını değiştirmeden önce çalışan hizmeti durdurur. Güncelleyici
+ardından hizmet meta verilerini yeniler, hizmeti yeniden başlatır ve
+`Gateway: restarted and verified.` bildirmeden önce yeniden başlatılan Gateway'i doğrular.
+Paket yöneticisi güncellemeleri ayrıca yeniden başlatılan Gateway'in beklenen
+paket sürümünü bildirdiğini doğrular; git checkout güncellemeleri ise yeniden derlemeden sonra
+gateway sağlığını ve hizmetin hazır olmasını doğrular.
 
-### Kontrol düzlemi yanıt şekli
+Paket yöneticisi güncellemeleri normalde yönetilen hizmette kayıtlı Node ikilisini
+kullanmaya devam eder. Bu Node hedef sürümü çalıştıramıyorsa ancak mevcut
+CLI Node çalıştırabiliyorsa ve hizmetin güncellenen pakete ait olduğu
+kanıtlanmışsa, yeniden başlatma etkin bir güncelleme sonlandırma için mevcut Node'u kullanır ve
+hizmet meta verilerini bu çalışma zamanına göre yeniden yazar. `--no-restart` hizmet
+meta verilerini onaramaz; bu nedenle aynı çalışma zamanı uyumsuzluğu paket değiştirilmeden önce işlemi durdurur.
 
-`update.run`, bir paket yöneticisi kurulumu veya denetimli git checkout üzerinde Gateway kontrol düzlemi üzerinden çağrıldığında, işleyici handoff başlatmasını Gateway çıktıktan sonra devam eden CLI güncellemesinden ayrı olarak bildirir:
+macOS'ta güncelleme sonrası kontrol ayrıca LaunchAgent'ın etkin profil için
+yüklü/çalışır durumda olduğunu ve yapılandırılmış geri döngü portunun
+sağlıklı olduğunu doğrular. Plist kurulu ancak launchd tarafından denetlenmiyorsa OpenClaw,
+LaunchAgent'ı otomatik olarak yeniden önyükler ve sağlık/sürüm/
+kanal hazır olma kontrollerini yeniden çalıştırır (yeni bir önyükleme `RunAtLoad` işini doğrudan yükler,
+bu nedenle kurtarma yeni oluşturulan Gateway'i hemen `kickstart -k` etmez). Gateway
+yine de sağlıklı duruma gelmezse komut sıfır dışı kodla çıkar ve
+yeniden başlatma günlük yoluyla birlikte yeniden başlatma, yeniden kurma ve paket geri alma
+talimatlarını yazdırır.
 
-- `ok: true`, `result.status: "skipped"`, `result.reason: "managed-service-handoff-started"` ve `handoff.status: "started"` Gateway'in yönetilen hizmet handoff'unu oluşturduğu anlamına gelir.
-- `ok: false`, `result.reason: "managed-service-handoff-unavailable"` ve `handoff.status: "unavailable"` OpenClaw'ın güvenli bir handoff için denetleyici hizmet sınırı ve kalıcı hizmet kimliği bulamadığı anlamına gelir.
-- `ok: false`, `result.reason: "managed-service-handoff-failed"` Gateway'in handoff'u oluşturmaya çalıştığını ancak ayrılmış yardımcıyı başlatamadığını gösterir.
+Yeniden başlatma çalıştırılamazsa komut, manuel `openclaw gateway restart` ipucuyla birlikte
+`Gateway: restart skipped (...)` veya `Gateway: restart failed: ...` yazdırır.
+`--no-restart` ile paket değiştirme veya git yeniden derleme yine çalışır ancak
+yönetilen hizmet durdurulmaz veya yeniden başlatılmaz; dolayısıyla çalışan Gateway, siz
+manuel olarak yeniden başlatana kadar eski kodu kullanmaya devam eder.
 
-`sentinel` yükü Gateway çıkmadan önce yine yazılır ve CLI handoff'u, yönetilen hizmet yeniden başlatma sağlık denetimleri tamamlandıktan sonra aynı yeniden başlatma sentinel'ını günceller.
+### Kontrol düzlemi yanıt biçimi
+
+`update.run`, bir paket yöneticisi kurulumu veya denetlenen git checkout üzerinde
+Gateway kontrol düzlemi üzerinden çalıştığında işleyici, Gateway çıktıktan sonra
+devam eden CLI güncellemesinden devir başlatmayı ayrı olarak bildirir:
+
+- `ok: true`, `result.status: "skipped"`,
+  `result.reason: "managed-service-handoff-started"` ve
+  `handoff.status: "started"`: Gateway, yönetilen hizmet devrini oluşturdu
+  ve ayrılmış yardımcının canlı hizmet işlemi dışında
+  `openclaw update --yes --json` çalıştırabilmesi için kendi yeniden başlatmasını zamanladı.
+- `ok: false`, `result.reason: "managed-service-handoff-unavailable"` ve
+  `handoff.status: "unavailable"`: OpenClaw güvenli bir devir için denetleyici
+  hizmet sınırı ve kalıcı hizmet kimliği bulamadı (örneğin
+  systemd devri yalnızca ortam systemd işlem işaretçilerini değil,
+  `OPENCLAW_SYSTEMD_UNIT` birim kimliğini gerektirir). Yanıt,
+  Gateway dışından çalıştırılacak kabuk komutu olan `handoff.command` değerini içerir.
+- `ok: false`, `result.reason: "managed-service-handoff-failed"`: Gateway
+  devri oluşturmayı denedi ancak ayrılmış yardımcıyı başlatamadı.
+
+`sentinel` yükü Gateway çıkmadan önce yazılır ve CLI
+devri, yönetilen hizmetin yeniden başlatma sağlık kontrolleri tamamlandıktan sonra aynı yeniden başlatma
+nöbetçisini günceller. Devir sırasında nöbetçi, başarı devamı olmadan
+`stats.reason: "restart-health-pending"` taşıyabilir;
+yeniden başlatılan Gateway bunu yoklar ve yalnızca CLI hizmet sağlığını
+doğrulayıp nöbetçiyi nihai `ok` sonucuyla yeniden yazdıktan sonra devamı tetikler.
+`openclaw status` ve `openclaw status --all`, bu nöbetçi beklemede veya başarısızken
+bir `Update restart` satırı gösterir; `update.status` ise yenileyip
+en son nöbetçiyi döndürür.
 
 ## Git checkout akışı
 
 ### Kanal seçimi
 
-- `stable`: en son beta olmayan etiketi checkout eder, ardından derler ve doctor çalıştırır.
-- `beta`: en son `-beta` etiketini tercih eder, ancak beta eksikse veya daha eskiyse en son stable etikete geri döner.
-- `dev`: `main` dalını checkout eder, ardından fetch ve rebase yapar.
+- `stable`: en son beta olmayan etiketi checkout yapar, ardından derler ve doctor'ı çalıştırır.
+- `beta`: en son `-beta` etiketini tercih eder; beta yoksa veya daha eskiyse
+  en son kararlı etikete geri döner.
+- `dev`: `main` checkout yapar, ardından getirir ve rebase eder.
+- `extended-stable`: Git checkout'ları için desteklenmez; checkout üzerinde
+  değişiklik yapılmaz.
 
 ### Güncelleme adımları
 
 <Steps>
   <Step title="Temiz çalışma ağacını doğrula">
-    Commit edilmemiş değişiklik olmamasını gerektirir.
+    Kaydedilmemiş değişiklik bulunmamasını gerektirir.
   </Step>
   <Step title="Kanalı değiştir">
-    Seçili kanala (etiket veya dal) geçer.
+    Seçilen kanala (etiket veya dal) geçer.
   </Step>
   <Step title="Upstream'i getir">
-    Yalnızca geliştirme için.
+    Yalnızca geliştirme.
   </Step>
   <Step title="Ön kontrol derlemesi (yalnızca geliştirme)">
-    TypeScript derlemesini geçici bir çalışma ağacında çalıştırır. Uç başarısız olursa, derlenebilen en yeni commit'i bulmak için en fazla 10 commit geriye gider. Bu ön kontrol sırasında lint de çalıştırmak için `OPENCLAW_UPDATE_PREFLIGHT_LINT=1` ayarlayın; kullanıcı güncelleme ana makineleri çoğu zaman CI çalıştırıcılarından daha küçük olduğu için lint kısıtlı seri modda çalışır.
+    TypeScript derlemesini geçici bir çalışma ağacında çalıştırır. Uç başarısız olursa derlenebilen en yeni commit'i bulmak için en fazla 10 commit geriye gider. Bu ön kontrol sırasında lint'i de çalıştırmak için `OPENCLAW_UPDATE_PREFLIGHT_LINT=1` ayarlayın; kullanıcı güncelleme ana makineleri genellikle CI çalıştırıcılarından daha küçük olduğundan lint, kısıtlı seri modda çalışır.
   </Step>
-  <Step title="Rebase">
-    Seçili commit'in üzerine rebase yapar (yalnızca geliştirme için).
+  <Step title="Rebase et">
+    Seçilen commit üzerine rebase eder (yalnızca geliştirme).
   </Step>
-  <Step title="Bağımlılıkları yükle">
-    Repo paket yöneticisini kullanır. pnpm checkout'ları için güncelleyici, pnpm çalışma alanı içinde `npm run build` çalıştırmak yerine `pnpm`'i gerektiğinde önyükler (önce `corepack` üzerinden, ardından geçici bir `npm install pnpm@11` geri dönüşüyle).
+  <Step title="Bağımlılıkları kur">
+    Repo paket yöneticisini kullanır. pnpm checkout'larında güncelleyici, bir pnpm çalışma alanı içinde `npm run build` çalıştırmak yerine gerektiğinde `pnpm` önyüklemesi yapar (önce `corepack`, ardından geçici bir `npm install pnpm@11` geri dönüşü aracılığıyla). pnpm önyüklemesi yine de başarısız olursa güncelleyici, checkout içinde `npm run build` denemek yerine paket yöneticisine özgü bir hatayla erkenden durur.
   </Step>
   <Step title="Control UI'ı derle">
     Gateway'i ve Control UI'ı derler.
   </Step>
-  <Step title="doctor çalıştır">
-    `openclaw doctor` son güvenli güncelleme kontrolü olarak çalışır.
+  <Step title="Doctor'ı çalıştır">
+    `openclaw doctor`, son güvenli güncelleme kontrolü olarak çalışır.
   </Step>
   <Step title="Plugin'leri eşitle">
-    Plugin'leri etkin kanala eşitler. Geliştirme, paketlenmiş Plugin'leri kullanır; stable ve beta npm kullanır. İzlenen Plugin kurulumlarını günceller.
+    Plugin'leri etkin kanalla eşitler. Geliştirme, paketlenmiş Plugin'leri; kararlı ve beta ise npm'i kullanır. İzlenen Plugin kurulumlarını günceller.
   </Step>
 </Steps>
 
-Beta güncelleme kanalında, default/latest çizgisini izleyen izlenen npm ve
-ClawHub Plugin kurulumları önce bir Plugin `@beta` sürümünü dener. Plugin'in beta
-sürümü yoksa OpenClaw kaydedilmiş default/latest tanımına geri döner ve bunu bir
-uyarı olarak bildirir. npm Plugin'leri için OpenClaw, beta paket mevcut olsa
-ancak kurulum doğrulamasından geçemese de geri döner. Bu Plugin geri dönüş
-uyarıları çekirdek güncellemenin başarısız olmasına neden olmaz. Tam sürümler ve
-açık etiketler yeniden yazılmaz.
+### Plugin eşitleme ayrıntıları
+
+Beta kanalında, varsayılan/en son hattı izleyen takip edilen npm ve ClawHub Plugin
+kurulumları önce bir Plugin `@beta` sürümünü dener. Plugin'in beta sürümü yoksa
+OpenClaw, kayıtlı varsayılan/en son tanıma geri döner ve
+bir uyarı bildirir. OpenClaw, npm Plugin'lerinde beta
+paketi mevcut olup kurulum doğrulamasında başarısız olduğunda da geri döner. Bu geri dönüş uyarıları
+çekirdek güncellemesinin başarısız olmasına neden olmaz. Kesin sürümler ve açık etiketler hiçbir zaman yeniden yazılmaz.
 
 <Warning>
-Tam olarak sabitlenmiş bir npm Plugin güncellemesi, bütünlüğü depolanan kurulum kaydından farklı olan bir yapıta çözümlenirse, `openclaw update` bu Plugin yapıt güncellemesini yüklemek yerine durdurur. Yeni yapıta güvendiğinizi doğruladıktan sonra Plugin'i açıkça yeniden yükleyin veya güncelleyin.
+Tam olarak sabitlenmiş bir npm Plugin güncellemesi, bütünlüğü saklanan kurulum kaydından farklı bir yapıta çözümlenirse `openclaw update`, bu Plugin yapıtı güncellemesini kurmak yerine iptal eder. Yeni yapıta güvendiğinizi doğruladıktan sonra Plugin'i açıkça yeniden kurun veya güncelleyin.
 </Warning>
 
 <Note>
-Yönetilen bir Plugin kapsamındaki ve eşitleme yolunun etrafından dolaşabildiği güncelleme sonrası Plugin eşitleme hataları (ör. zorunlu olmayan bir Plugin için erişilemeyen npm kayıt deposu), çekirdek güncelleme başarılı olduktan sonra uyarı olarak bildirilir. JSON sonucu üst düzey güncelleme `status: "ok"` değerini korur ve `openclaw update repair` ile `openclaw plugins inspect <id> --runtime --json` yönlendirmesiyle birlikte `postUpdate.plugins.status: "warning"` bildirir. Beklenmeyen güncelleyici veya eşitleme istisnaları yine de güncelleme sonucunu başarısız yapar. Plugin kurulumunu veya güncelleme hatasını düzeltin, ardından `openclaw update repair` komutunu yeniden çalıştırın.
+Yönetilen bir Plugin ile sınırlı olan ve eşitleme yolunun etrafından dolaşabildiği güncelleme sonrası Plugin eşitleme hataları (örneğin temel olmayan bir Plugin için erişilemeyen bir npm kayıt defteri), çekirdek güncellemesi başarıyla tamamlandıktan sonra uyarı olarak bildirilir. JSON sonucu, üst düzey güncelleme `status: "ok"` değerini korur ve `openclaw update repair` ile `openclaw plugins inspect <id> --runtime --json` yönlendirmesini içeren `postUpdate.plugins.status: "warning"` değerini bildirir. Beklenmeyen güncelleyici veya eşitleme istisnaları yine de güncelleme sonucunu başarısız kılar. Plugin kurulum veya güncelleme hatasını düzeltin, ardından `openclaw update repair` komutunu yeniden çalıştırın. Başarısız bir güncelleme yönetilen bir Plugin'i kullanılamaz durumda bıraktığında OpenClaw, operatör tarafından yazılmış `plugins.allow` veya `plugins.deny` politikasını değiştirmeden çalışma zamanı girdisini devre dışı bırakır ve etkin yuvaları sıfırlar.
 
-Plugin başına eşitleme adımından sonra, `openclaw update` Gateway yeniden başlatılmadan önce zorunlu bir **çekirdek sonrası yakınsama** geçişi çalıştırır: eksik yapılandırılmış Plugin yüklerini onarır, diskteki her _etkin_ izlenen kurulum kaydını doğrular ve `package.json` dosyasının ayrıştırılabilir olduğunu (ve açıkça bildirilmiş herhangi bir `main` varsa mevcut olduğunu) statik olarak doğrular. Bu geçişten kaynaklanan hatalar ve geçersiz bir OpenClaw yapılandırma anlık görüntüsü, `postUpdate.plugins.status: "error"` döndürür ve üst düzey güncelleme `status` değerini `"error"` olarak değiştirir; böylece `openclaw update` sıfır olmayan kodla çıkar ve Gateway doğrulanmamış bir Plugin kümesiyle yeniden başlatılmaz. Hata, takip için `openclaw update repair` ve `openclaw plugins inspect <id> --runtime --json` komutlarını işaret eden yapılandırılmış `postUpdate.plugins.warnings[].guidance` satırları içerir. Devre dışı Plugin girdileri ve güvenilir kaynakla bağlantılı resmi eşitleme hedefleri olmayan kayıtlar burada atlanır; bu, eksik yük denetimi tarafından kullanılan `skipDisabledPlugins` politikasını yansıtır, böylece eski bir devre dışı Plugin kaydı aksi halde geçerli olan bir güncellemeyi engelleyemez.
+Plugin başına eşitleme adımından sonra `openclaw update`, gateway yeniden başlatılmadan önce zorunlu bir **çekirdek sonrası yakınsama** geçişi çalıştırır: eksik yapılandırılmış Plugin yüklerini onarır, diskteki her _etkin_ izlenen kurulum kaydını doğrular ve `package.json` değerinin ayrıştırılabilir olduğunu (ve açıkça bildirilmiş tüm `main` değerlerinin mevcut olduğunu) statik olarak doğrular. Bu geçişten kaynaklanan hatalar ve geçersiz bir yapılandırma anlık görüntüsü `postUpdate.plugins.status: "error"` döndürür ve üst düzey güncelleme `status` değerini `"error"` olarak değiştirir; böylece `openclaw update` sıfır dışı kodla çıkar ve gateway doğrulanmamış bir Plugin kümesiyle _yeniden başlatılmaz_. Hata, `openclaw update repair` ve `openclaw plugins inspect <id> --runtime --json` konumlarını gösteren yapılandırılmış `postUpdate.plugins.warnings[].guidance` satırlarını içerir. Devre dışı bırakılmış Plugin girdileri ve güvenilir kaynak bağlantılı resmî eşitleme hedefleri olmayan kayıtlar burada atlanır (eksik yük kontrolünün kullandığı `skipDisabledPlugins` politikası yansıtılır); böylece eski bir devre dışı Plugin kaydı, başka bakımdan geçerli bir güncellemeyi engelleyemez.
 
-Güncellenmiş Gateway başlatıldığında, Plugin yükleme yalnızca doğrulama amaçlıdır: başlangıçta paket yöneticileri çalıştırılmaz veya bağımlılık ağaçları değiştirilmez. Paket yöneticisi `update.run` yeniden başlatmaları CLI yönetilen hizmet yoluna devredilir; böylece paket değişimi eski Gateway işleminin dışında gerçekleşir ve güncellemenin tamamlanmış olarak bildirilebilip bildirilemeyeceğine hizmet sağlık kontrolleri karar verir.
-
-pnpm önyüklemesi yine de başarısız olursa, güncelleyici checkout içinde `npm run build` denemek yerine paket yöneticisine özgü bir hatayla erken durur.
+Güncellenen Gateway başladığında Plugin yükleme yalnızca doğrulama yapar: başlangıç, paket yöneticilerini çalıştırmaz veya bağımlılık ağaçlarını değiştirmez. Paket yöneticisi `update.run` yeniden başlatmaları CLI yönetilen hizmet yoluna devredilir; böylece paket değişimi eski Gateway işleminin dışında gerçekleşir ve güncellemenin tamamlanmış olarak bildirilip bildirilemeyeceğine hizmet sağlık kontrolleri karar verir.
 </Note>
 
-## `--update` kısaltması
+Bir extended-stable çekirdek güncellemesi başarıyla tamamlandıktan sonra çekirdek sonrası Plugin bütünlüğü ve
+yakınsama, uygun resmî npm Plugin'lerini tam kurulu çekirdek
+sürümünde hedefler. Varsayılan/`latest` amacı için OpenClaw, Plugin
+`@extended-stable` değerini sorgulamaz veya npm `latest` değerine geri dönmez; paket sürümünü
+kurulu çekirdekten türetir. Açık sürüm sabitlemeleri, açık `latest` olmayan etiketler,
+üçüncü taraf paketler ve npm dışı kaynaklar mevcut amaçlarını korur.
 
-`openclaw --update`, `openclaw update` olarak yeniden yazılır (kabuklar ve başlatıcı betikleri için kullanışlıdır).
+Paket yöneticisi kurulumları için `openclaw update`, paket yöneticisini
+çağırmadan önce hedef paket sürümünü çözümler. npm global kurulumları aşamalı
+kurulum kullanır: OpenClaw yeni paketi geçici bir npm önekine kurar,
+aday paketin `preinstall` sırasında ana makine Node sürümünü doğrulamasına izin verir
+ve buradaki paketlenmiş `dist` envanterini doğrular. Paketlenmiş bir tamamlama koruması
+`preinstall` başarılı olana kadar bu envanterin dışında kalır; böylece yaşam döngüsü betiklerini
+atlayan paket yöneticileri de etkinleştirmeden önce durur. npm 12 ve daha yeni sürümlerde
+güncelleyici yalnızca aday OpenClaw yaşam döngüsünü onaylar; geçişli
+bağımlılık betikleri engellenmiş kalır. OpenClaw daha sonra temiz paket ağacını
+gerçek global öneke geçirir. Doğrulama başarısız olursa güncelleme sonrası doctor, Plugin
+eşitleme ve yeniden başlatma işlemleri şüpheli ağaçtan çalıştırılmaz. Kurulu
+sürüm hedefle zaten eşleşse bile komut global paket kurulumunu
+yeniler, ardından Plugin eşitlemeyi, çekirdek komut tamamlama yenilemesini
+ve yeniden başlatma işlemlerini çalıştırır. Bu, paketlenmiş yan bileşenleri ve kanalın sahip olduğu
+Plugin kayıtlarını kurulu OpenClaw derlemesiyle uyumlu tutarken tam
+Plugin komutu tamamlama yeniden derlemelerini açık
+`openclaw completion --write-state` çalıştırmalarına bırakır.
 
 ## İlgili
 

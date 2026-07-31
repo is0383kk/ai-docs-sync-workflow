@@ -1,31 +1,88 @@
 ---
 read_when:
-    - Gateway WS क्लाइंट लागू करना या अपडेट करना
-    - प्रोटोकॉल असंगतियों या कनेक्शन विफलताओं की डीबगिंग
-    - प्रोटोकॉल स्कीमा/मॉडल को फिर से जनरेट करना
-summary: 'Gateway WebSocket प्रोटोकॉल: हैंडशेक, फ़्रेम, वर्शनिंग'
+    - Gateway WS क्लाइंट को लागू या अपडेट करना
+    - प्रोटोकॉल बेमेल या कनेक्शन विफलताओं की डीबगिंग
+    - प्रोटोकॉल स्कीमा/मॉडल पुनः जनरेट करना
+summary: 'Gateway WebSocket प्रोटोकॉल: हैंडशेक, फ़्रेम, संस्करण प्रबंधन'
 title: Gateway प्रोटोकॉल
 x-i18n:
-    generated_at: "2026-07-04T17:59:41Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:45:19Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 763dd5cba2f1aa0de95243a4996b4da1b4aa32c5c1a4b5b6c112d605e677bd70
+    source_hash: 89d637a9070bc6512a182fea0fd890b56287e0080515ba4fba9b2591c6247e0d
     source_path: gateway/protocol.md
     workflow: 16
 ---
 
-Gateway WS प्रोटोकॉल OpenClaw के लिए **एकमात्र कंट्रोल प्लेन + नोड ट्रांसपोर्ट** है। सभी क्लाइंट (CLI, वेब UI, macOS ऐप, iOS/Android नोड, हेडलेस नोड) WebSocket पर कनेक्ट होते हैं और हैंडशेक समय पर अपनी **भूमिका** + **स्कोप** घोषित करते हैं।
+Gateway WS प्रोटोकॉल OpenClaw के लिए एकमात्र नियंत्रण तल और Node परिवहन है।
+ऑपरेटर और Node क्लाइंट (CLI, वेब UI, macOS ऐप, iOS/Android Node,
+हेडलेस Node) WebSocket पर कनेक्ट होते हैं और हैंडशेक के समय एक **भूमिका** और **स्कोप**
+घोषित करते हैं।
 
-## ट्रांसपोर्ट
+## npm पैकेज
 
-- WebSocket, JSON पेलोड वाले टेक्स्ट फ्रेम।
-- पहला फ्रेम **अनिवार्य रूप से** `connect` अनुरोध होना चाहिए।
-- प्री-कनेक्ट फ्रेम 64 KiB तक सीमित हैं। सफल हैंडशेक के बाद, क्लाइंट को `hello-ok.policy.maxPayload` और `hello-ok.policy.maxBufferedBytes` सीमाओं का पालन करना चाहिए। डायग्नॉस्टिक्स सक्षम होने पर, बहुत बड़े इनबाउंड फ्रेम और धीमे आउटबाउंड बफर gateway के प्रभावित फ्रेम को बंद करने या छोड़ने से पहले `payload.large` इवेंट उत्सर्जित करते हैं। ये इवेंट आकार, सीमाएँ, सतहें, और सुरक्षित कारण कोड रखते हैं। वे संदेश बॉडी, अटैचमेंट सामग्री, रॉ फ्रेम बॉडी, टोकन, कुकीज़, या गुप्त मान नहीं रखते।
+ये पैकेज OpenClaw रिलीज़ शृंखलाओं के साथ भेजे जाते हैं। प्रारंभिक रोलआउट के दौरान,
+पहला पैकेज-सहित रिलीज़ प्रकाशित होने तक npm `E404` लौटा सकता है।
 
-## हैंडशेक (connect)
+- [`@openclaw/gateway-protocol`](https://www.npmjs.com/package/@openclaw/gateway-protocol)
+  स्कीमा, वैलिडेटर, TypeScript प्रकार, हल्के फ़्रेम और त्रुटि
+  सहायक तथा संस्करण कॉन्स्टेंट प्रकाशित करता है। इसके टारबॉल में जनरेट किया गया
+  [`protocol.schema.json`](https://unpkg.com/@openclaw/gateway-protocol/protocol.schema.json)
+  मशीन-पठनीय अनुबंध शामिल है।
+- [`@openclaw/gateway-client`](https://www.npmjs.com/package/@openclaw/gateway-client)
+  संदर्भ Node क्लाइंट और `@openclaw/gateway-client/browser` पर एक
+  ब्राउज़र-सुरक्षित एंट्री प्रकाशित करता है।
 
-Gateway → क्लाइंट (प्री-कनेक्ट चुनौती):
+एप्लिकेशन जीवनचक्र मार्गदर्शन के लिए,
+[Gateway क्लाइंट बनाना](https://docs.openclaw.ai/gateway/clients) देखें। Gateway को
+चाइल्ड प्रोसेस के रूप में पर्यवेक्षित करने वाले ऐप्स के लिए,
+[OpenClaw एम्बेड करना](https://docs.openclaw.ai/gateway/embedding) देखें।
+
+## परिवहन और फ़्रेमिंग
+
+- WebSocket, टेक्स्ट फ़्रेम, JSON पेलोड।
+- पहला फ़्रेम `connect` अनुरोध **होना आवश्यक है**।
+- कनेक्ट होने से पहले के फ़्रेम 64 KiB (`MAX_PREAUTH_PAYLOAD_BYTES`) तक सीमित हैं। हैंडशेक के बाद,
+  `hello-ok.policy.maxPayload` और
+  `hello-ok.policy.maxBufferedBytes` का पालन करें। डायग्नोस्टिक्स सक्षम होने पर, बहुत बड़े
+  इनबाउंड फ़्रेम और धीमे आउटबाउंड बफ़र, Gateway द्वारा फ़्रेम बंद करने या
+  हटाने से पहले `payload.large` इवेंट उत्सर्जित करते हैं। इन इवेंट में `surface`, बाइट
+  आकार, सीमाएँ और एक सुरक्षित कारण कोड होते हैं; संदेश बॉडी, अटैचमेंट
+  सामग्री, कच्चे फ़्रेम बाइट, टोकन, कुकी या सीक्रेट कभी नहीं होते।
+
+फ़्रेम संरचनाएँ:
+
+- अनुरोध: `{type:"req", id, method, params}`
+- प्रतिक्रिया: `{type:"res", id, ok, payload|error}`
+- इवेंट: `{type:"event", event, payload, seq?, stateVersion?}`
+
+प्रतिक्रिया त्रुटियाँ `{ code, message, details?, retryable?, retryAfterMs? }` का उपयोग करती हैं।
+क्लाइंट को `code` और `details.code` के आधार पर शाखा बनानी चाहिए; `message` मानव-पठनीय रहता है
+और बदल सकता है, सिवाय उन स्थानों के जहाँ संगतता नोट कुछ और कहता हो। विधि-स्तरीय
+प्राधिकरण विफलताएँ संरचित अनुपलब्ध-स्कोप विवरण के साथ शीर्ष-स्तरीय
+`code: "FORBIDDEN"` का उपयोग करती हैं:
+
+- अनुपलब्ध स्कोप: `{ code: "MISSING_SCOPE", missingScope, requiredScopes }`।
+  `requiredScopes` अनुरोधित ऑपरेशन के लिए ज्ञात स्कोप का पूर्ण सेट है।
+  पुराने क्लाइंट के लिए विरासती `missing scope: <scope>` संदेश बनाए रखा गया है।
+
+क्लाइंट को पहले `details` पढ़ना चाहिए और विरासती संदेश का उपयोग केवल संगतता
+फ़ॉलबैक के रूप में करना चाहिए। `readMissingScopeError` और `readMissingScopeErrorDetails`
+`@openclaw/gateway-protocol/gateway-error-details` से एक्सपोर्ट किए जाते हैं; ब्राउज़र-सुरक्षित Gateway क्लाइंट
+उन्हें `@openclaw/gateway-client/browser` से फिर से एक्सपोर्ट करता है।
+
+स्कीमा `@openclaw/gateway-protocol/schema` से `GatewayErrorDetailsSchema`,
+`MissingScopeErrorDetailsSchema` के रूप में एक्सपोर्ट किए जाते हैं।
+HTTP स्कोप विफलताएँ `error.details` के अंतर्गत `MISSING_SCOPE` ऑब्जेक्ट को प्रतिबिंबित करती हैं और
+HTTP स्थिति `403` का उपयोग करती हैं।
+
+दुष्प्रभाव उत्पन्न करने वाली विधियों को आइडेम्पोटेंसी कुंजियों की आवश्यकता होती है (स्कीमा देखें)।
+
+## हैंडशेक
+
+Gateway कनेक्ट होने से पहले एक चुनौती भेजता है:
 
 ```json
 {
@@ -35,7 +92,7 @@ Gateway → क्लाइंट (प्री-कनेक्ट चुनौ�
 }
 ```
 
-क्लाइंट → Gateway:
+क्लाइंट `connect` से उत्तर देता है:
 
 ```json
 {
@@ -43,7 +100,7 @@ Gateway → क्लाइंट (प्री-कनेक्ट चुनौ�
   "id": "…",
   "method": "connect",
   "params": {
-    "minProtocol": 3,
+    "minProtocol": 4,
     "maxProtocol": 4,
     "client": {
       "id": "cli",
@@ -70,7 +127,7 @@ Gateway → क्लाइंट (प्री-कनेक्ट चुनौ�
 }
 ```
 
-Gateway → क्लाइंट:
+Gateway `hello-ok` से प्रतिक्रिया देता है:
 
 ```json
 {
@@ -96,26 +153,26 @@ Gateway → क्लाइंट:
 }
 ```
 
-जब Gateway अभी भी स्टार्टअप साइडकार पूरा कर रहा हो, तो `connect` अनुरोध `details.reason` को `"startup-sidecars"` और `retryAfterMs` पर सेट किए हुए पुनः प्रयास योग्य `UNAVAILABLE` त्रुटि लौटा सकता है। क्लाइंट को इसे अंतिम हैंडशेक विफलता के रूप में दिखाने के बजाय अपने कुल कनेक्शन बजट के भीतर उस प्रतिक्रिया का पुनः प्रयास करना चाहिए।
+`server`, `features`, `snapshot`, `policy` और `auth`, सभी
+`HelloOkSchema` (`packages/gateway-protocol/src/schema/frames.ts`) के लिए आवश्यक हैं। `auth`
+डिवाइस टोकन जारी न होने पर भी तय की गई भूमिका/स्कोप की रिपोर्ट करता है (ऊपर दी गई
+संरचना)। `pluginSurfaceUrls` वैकल्पिक है और Plugin सतह नामों (जैसे
+`canvas`) को स्कोप किए गए होस्टेड URL से मैप करता है; इसकी समय-सीमा समाप्त हो सकती है, इसलिए Node
+नई एंट्री के लिए `{ "surface": "canvas" }` के साथ `node.pluginSurface.refresh` को कॉल करते हैं।
+बहिष्कृत `canvasHostUrl` / `canvasCapability` / `node.canvas.capability.refresh`
+पथ समर्थित नहीं है; Plugin सतहों का उपयोग करें।
+स्नैपशॉट का वैकल्पिक `appliedConfigHash`, सक्रिय Gateway रनटाइम द्वारा स्वीकार किया गया
+रिज़ॉल्व किया हुआ स्रोत-कॉन्फ़िग संशोधन है। क्लाइंट इसकी तुलना
+`config.get.configRevisionHash` से करके यह निर्धारित कर सकते हैं कि क्या नए सहेजे गए कॉन्फ़िग को अभी भी
+रीस्टार्ट की आवश्यकता है। `config.get.hash`, कॉन्फ़िग लेखन टकराव गार्ड द्वारा उपयोग किया जाने वाला
+कच्चा रूट-फ़ाइल संशोधन बना रहता है।
 
-`server`, `features`, `snapshot`, और `policy` सभी स्कीमा (`packages/gateway-protocol/src/schema/frames.ts`) द्वारा आवश्यक हैं। `auth` भी आवश्यक है और नेगोशिएट की गई भूमिका/स्कोप रिपोर्ट करता है। `pluginSurfaceUrls` वैकल्पिक है और `canvas` जैसे Plugin सतह नामों को स्कोप किए गए होस्टेड URL से मैप करता है।
+जब Gateway अभी भी स्टार्टअप साइडकार को पूरा कर रहा हो, तब `connect`,
+`details.reason: "startup-sidecars"` और `retryAfterMs` के साथ पुनः प्रयास योग्य
+`UNAVAILABLE` त्रुटि लौटा सकता है। इसे अंतिम हैंडशेक विफलता मानने के बजाय
+अपनी कनेक्शन सीमा के भीतर पुनः प्रयास करें।
 
-स्कोप किए गए Plugin सतह URL समाप्त हो सकते हैं। नोड `{ "surface": "canvas" }` के साथ `node.pluginSurface.refresh` कॉल करके `pluginSurfaceUrls` में नया एंट्री प्राप्त कर सकते हैं। प्रायोगिक Canvas Plugin रिफैक्टर बहिष्कृत `canvasHostUrl`, `canvasCapability`, या `node.canvas.capability.refresh` संगतता पथ का समर्थन नहीं करता; वर्तमान नेटिव क्लाइंट और gateway को Plugin सतहों का उपयोग करना चाहिए।
-
-जब कोई डिवाइस टोकन जारी नहीं होता, तो `hello-ok.auth` टोकन फ़ील्ड के बिना नेगोशिएट की गई अनुमतियाँ रिपोर्ट करता है:
-
-```json
-{
-  "auth": {
-    "role": "operator",
-    "scopes": ["operator.read", "operator.write"]
-  }
-}
-```
-
-विश्वसनीय समान-प्रक्रिया बैकएंड क्लाइंट (`client.id: "gateway-client"`, `client.mode: "backend"`) साझा gateway टोकन/पासवर्ड से प्रमाणीकरण करने पर सीधे loopback कनेक्शन पर `device` छोड़ सकते हैं। यह पथ आंतरिक कंट्रोल-प्लेन RPCs के लिए आरक्षित है और पुराने CLI/डिवाइस पेयरिंग बेसलाइन को सबएजेंट सेशन अपडेट जैसे स्थानीय बैकएंड कार्य को ब्लॉक करने से रोकता है। रिमोट क्लाइंट, ब्राउज़र-ओरिजिन क्लाइंट, नोड क्लाइंट, और स्पष्ट डिवाइस-टोकन/डिवाइस-आइडेंटिटी क्लाइंट अभी भी सामान्य पेयरिंग और स्कोप-अपग्रेड जांचों का उपयोग करते हैं।
-
-जब डिवाइस टोकन जारी होता है, तो `hello-ok` में यह भी शामिल होता है:
+डिवाइस टोकन जारी होने पर, `hello-ok.auth` उसे जोड़ता है:
 
 ```json
 {
@@ -127,7 +184,9 @@ Gateway → क्लाइंट:
 }
 ```
 
-बिल्ट-इन QR/setup-code बूटस्ट्रैप एक नया मोबाइल हैंडऑफ पथ है। सफल बेसलाइन setup-code connect एक प्राथमिक नोड टोकन और एक सीमित operator टोकन लौटाता है:
+अंतर्निहित QR/सेटअप-कोड बूटस्ट्रैप एक मोबाइल हैंडऑफ़ पथ है। सफल
+बेसलाइन सेटअप-कोड कनेक्शन एक प्राथमिक Node टोकन और एक सीमित
+ऑपरेटर टोकन लौटाता है:
 
 ```json
 {
@@ -146,9 +205,51 @@ Gateway → क्लाइंट:
 }
 ```
 
-operator हैंडऑफ जानबूझकर सीमित है ताकि QR ऑनबोर्डिंग मोबाइल operator लूप शुरू कर सके और पेयरिंग म्यूटेशन स्कोप या `operator.admin` दिए बिना नेटिव सेटअप पूरा कर सके। इसमें `operator.talk.secrets` शामिल है ताकि नेटिव क्लाइंट बूटस्ट्रैप के बाद आवश्यक Talk कॉन्फ़िगरेशन पढ़ सके। व्यापक पेयरिंग और एडमिन एक्सेस के लिए अलग स्वीकृत operator पेयरिंग या टोकन फ़्लो चाहिए। क्लाइंट को `hello-ok.auth.deviceTokens` केवल तब स्थायी रखना चाहिए जब connect ने `wss://` या loopback/local pairing जैसे विश्वसनीय ट्रांसपोर्ट पर बूटस्ट्रैप auth का उपयोग किया हो।
+इस ऑपरेटर हैंडऑफ़ को जानबूझकर सीमित रखा गया है: यह मोबाइल
+ऑपरेटर लूप और नेटिव सेटअप शुरू करने के लिए पर्याप्त है, जिसमें Talk
+कॉन्फ़िग पढ़ने के लिए `operator.talk.secrets` शामिल है, लेकिन इसमें पेयरिंग-म्यूटेशन स्कोप और
+`operator.admin` नहीं हैं। अधिक व्यापक पेयरिंग/एडमिन पहुँच के लिए अलग स्वीकृत
+पेयरिंग या टोकन प्रवाह आवश्यक है। `hello-ok.auth.deviceTokens` को केवल तभी स्थायी रूप से सहेजें जब
+बूटस्ट्रैप प्रमाणीकरण किसी विश्वसनीय परिवहन (`wss://` या लूपबैक/स्थानीय पेयरिंग)
+पर चला हो।
 
-### नोड उदाहरण
+विश्वसनीय समान-प्रोसेस बैकएंड क्लाइंट (`client.id: "gateway-client"`,
+`client.mode: "backend"`), साझा Gateway टोकन/पासवर्ड से प्रमाणीकरण करते समय
+सीधे लूपबैक कनेक्शन पर `device` को छोड़ सकते हैं। यह पथ आंतरिक
+नियंत्रण-तल RPC (जैसे सबएजेंट सत्र अपडेट) के लिए आरक्षित है और पुरानी
+CLI/डिवाइस पेयरिंग बेसलाइन को स्थानीय बैकएंड कार्य अवरुद्ध करने से रोकता है। रिमोट,
+ब्राउज़र-मूल, Node और स्पष्ट डिवाइस-टोकन/डिवाइस-पहचान क्लाइंट अभी भी
+सामान्य पेयरिंग और स्कोप-अपग्रेड जाँच से गुजरते हैं।
+
+### वर्कर भूमिका और बंद प्रोटोकॉल
+
+क्लाउड वर्कर Gateway-स्वामित्व वाली, होस्ट-कुंजी-पिन की गई SSH टनल के माध्यम से
+एक समर्पित लूपबैक प्रवेश का उपयोग करते हैं। यह केवल वर्कर पहचान स्वीकार करता है और
+सामान्य प्रमाणीकरण, Node इवेंट, ऑपरेटर RPC या Plugin विधियों को कभी डिस्पैच नहीं करता।
+एक सख्त `connect`, परिवेश, बंडल हैश, स्वामी युग, RPC-सेट संस्करण,
+समाप्ति और एक शून्य-योग्य सत्र से बंधे, स्थिर अवस्था में हैश किए गए, अल्पकालिक क्रेडेंशियल
+को सत्यापित करता है; यह वर्तमान संस्करण और सुविधा सेट की अलग से जाँच करता है। सफलता पर न्यूनतम
+`worker-hello-ok` लौटता है; सुविधा वार्ता सामान्य प्रोटोकॉल संस्करण से स्वतंत्र है।
+फ़्रेम 64 KiB से कम रहते हैं, सिवाय तय किए गए `worker.inference.start`
+फ़्रेम के, जो 25 MiB तक हो सकता है। बंद अनुमति-सूची में `worker.heartbeat`,
+`worker.transcript.commit`, `worker.live-event`, `worker.inference.start` और
+`worker.inference.cancel` शामिल हैं।
+
+ट्रांसक्रिप्ट कमिट स्वामी-युग फ़ेंसिंग, Gateway-स्वामित्व वाली सत्र बाइंडिंग,
+बेस-लीफ़ कंपेयर-एंड-स्वैप और टिकाऊ अनुक्रम रीप्ले का उपयोग करते हैं; Gateway सामान्य
+सत्र राइटर के माध्यम से ट्रांसक्रिप्ट एंट्री और पैरेंट ID जनरेट करता है। प्रत्येक RPC पर
+स्वामित्व और समाप्ति की दोबारा जाँच की जाती है।
+
+### क्लाइंट क्षमताएँ
+
+ऑपरेटर क्लाइंट `connect.params.caps` में वैकल्पिक क्षमताएँ घोषित कर सकते हैं:
+
+- `tool-events`: संरचित टूल जीवनचक्र इवेंट स्वीकार करता है।
+- `inline-widgets`: होस्ट किए गए इनलाइन विजेट टूल परिणाम रेंडर कर सकता है।
+
+क्लाइंट क्षमताएँ कनेक्ट किए गए क्लाइंट का वर्णन करती हैं, प्राधिकरण का नहीं। एजेंट टूल आवश्यक क्षमताएँ घोषित कर सकते हैं; जब तक प्रत्येक आवश्यकता मूल क्लाइंट के `caps` में उपस्थित न हो, Gateway उन टूल को छोड़ देता है। चैनल से शुरू किए गए रन में कोई Gateway क्लाइंट क्षमता नहीं होती, इसलिए क्षमता-नियंत्रित टूल तब भी अनुपलब्ध रहते हैं जब टूल नीति उन्हें स्पष्ट रूप से अनुमति देती है।
+
+### Node कनेक्शन उदाहरण
 
 ```json
 {
@@ -156,7 +257,7 @@ operator हैंडऑफ जानबूझकर सीमित है त�
   "id": "…",
   "method": "connect",
   "params": {
-    "minProtocol": 3,
+    "minProtocol": 4,
     "maxProtocol": 4,
     "client": {
       "id": "ios-node",
@@ -183,26 +284,27 @@ operator हैंडऑफ जानबूझकर सीमित है त�
 }
 ```
 
-## फ्रेमिंग
+Node कनेक्ट होते समय क्षमता दावे घोषित करते हैं:
 
-- **अनुरोध**: `{type:"req", id, method, params}`
-- **प्रतिक्रिया**: `{type:"res", id, ok, payload|error}`
-- **इवेंट**: `{type:"event", event, payload, seq?, stateVersion?}`
+- `caps`: `camera`, `canvas`, `screen`,
+  `location`, `voice`, `talk` जैसी उच्च-स्तरीय श्रेणियाँ।
+- `commands`: इनवोक के लिए कमांड अनुमति-सूची।
+- `permissions`: विस्तृत टॉगल (जैसे `screen.record`, `camera.capture`)।
 
-साइड-इफ़ेक्ट करने वाली विधियों के लिए **idempotency keys** आवश्यक हैं (स्कीमा देखें)।
+Gateway इन्हें दावों के रूप में मानता है और सर्वर-साइड अनुमति-सूचियाँ लागू करता है।
 
-## भूमिकाएँ + स्कोप
+## भूमिकाएँ और स्कोप
 
-पूर्ण operator स्कोप मॉडल, approval-time जांचों, और shared-secret अर्थों के लिए, [Operator scopes](/hi/gateway/operator-scopes) देखें।
+संपूर्ण ऑपरेटर स्कोप मॉडल, स्वीकृति-समय जाँच और साझा-सीक्रेट
+अर्थविज्ञान के लिए, [ऑपरेटर स्कोप](/hi/gateway/operator-scopes) देखें।
 
-### भूमिकाएँ
+भूमिकाएँ:
 
-- `operator` = कंट्रोल प्लेन क्लाइंट (CLI/UI/ऑटोमेशन)।
-- `node` = क्षमता होस्ट (camera/screen/canvas/system.run)।
+- `operator`: नियंत्रण-तल क्लाइंट (CLI/UI/ऑटोमेशन)।
+- `node`: क्षमता होस्ट (camera/screen/canvas/system.run)।
+- `worker`: समर्पित, बंद वर्कर प्रोटोकॉल पर क्लाउड निष्पादन होस्ट।
 
-### स्कोप (operator)
-
-सामान्य स्कोप:
+ऑपरेटर स्कोप (`src/gateway/operator-scopes.ts`), पूर्ण बंद सेट:
 
 - `operator.read`
 - `operator.write`
@@ -211,39 +313,82 @@ operator हैंडऑफ जानबूझकर सीमित है त�
 - `operator.pairing`
 - `operator.talk.secrets`
 
-`includeSecrets: true` के साथ `talk.config` के लिए `operator.talk.secrets` (या `operator.admin`) आवश्यक है।
-जब सीक्रेट शामिल हों, तो क्लाइंट को सक्रिय Talk provider credential `talk.resolved.config.apiKey` से पढ़ना चाहिए; `talk.providers.<id>.apiKey` स्रोत-आकार में रहता है और SecretRef ऑब्जेक्ट या संपादित स्ट्रिंग हो सकता है।
+`includeSecrets: true` के साथ `talk.config` को `operator.talk.secrets` (या
+`operator.admin`) की आवश्यकता होती है। सीक्रेट शामिल होने पर, सक्रिय Talk प्रदाता
+क्रेडेंशियल को `talk.resolved.config.apiKey` से पढ़ें; `talk.providers.<id>.apiKey`
+स्रोत-आकार में बना रहता है और SecretRef ऑब्जेक्ट या संपादित स्ट्रिंग हो सकता है।
 
-Plugin-registered gateway RPC विधियाँ अपना operator स्कोप मांग सकती हैं, लेकिन आरक्षित core admin prefixes (`config.*`, `exec.approvals.*`, `wizard.*`, `update.*`) हमेशा `operator.admin` में रिज़ॉल्व होते हैं।
+Plugin-पंजीकृत Gateway RPC विधियाँ अपने ऑपरेटर स्कोप का अनुरोध कर सकती हैं,
+लेकिन ये आरक्षित कोर प्रीफ़िक्स हमेशा `operator.admin`
+(`src/shared/gateway-method-policy.ts`) में रिज़ॉल्व होते हैं: `config.*`, `exec.approvals.*`,
+`wizard.*`, `update.*`।
 
-विधि स्कोप केवल पहला गेट है। `chat.send` के माध्यम से पहुँचे कुछ slash commands इसके ऊपर अधिक कड़ी command-level जांच लागू करते हैं। उदाहरण के लिए, स्थायी `/config set` और `/config unset` writes के लिए `operator.admin` आवश्यक है।
+विधि स्कोप केवल पहला गेट है। `chat.send` के माध्यम से पहुँचने वाले कुछ
+स्लैश कमांड अधिक सख्त कमांड-स्तरीय जाँच लागू करते हैं: स्थायी `/config set` और
+`/config unset` लेखन के लिए `operator.admin` आवश्यक है, उन Gateway क्लाइंट के लिए भी
+जिनके पास पहले से निम्न ऑपरेटर स्कोप है।
 
-`node.pair.approve` में base method scope के ऊपर अतिरिक्त approval-time scope check भी है:
+`node.pair.approve` में आधार विधि स्कोप (`operator.pairing`) के अतिरिक्त,
+लंबित अनुरोध के घोषित `commands` (`src/infra/node-pairing-authz.ts`) पर आधारित
+एक अतिरिक्त स्वीकृति-समय स्कोप जाँच होती है:
 
-- कमांड-रहित अनुरोध: `operator.pairing`
-- non-exec node commands वाले अनुरोध: `operator.pairing` + `operator.write`
-- ऐसे अनुरोध जिनमें `system.run`, `system.run.prepare`, या `system.which` शामिल हो:
-  `operator.pairing` + `operator.admin`
+| घोषित कमांड                                                                                                                   | आवश्यक स्कोप                         |
+| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| कोई नहीं                                                                                                                       | `operator.pairing`                    |
+| सामान्य कमांड                                                                                                                  | `operator.pairing` + `operator.write` |
+| इसमें `system.run`, `system.run.prepare`, `system.which`, `browser.proxy`, `fs.listDir`, या `system.execApprovals.get/set` शामिल हैं | `operator.pairing` + `operator.admin` |
 
-### कैप्स/कमांड/अनुमतियाँ (नोड)
+### क्षमताएँ/कमांड/अनुमतियाँ (नोड)
 
-नोड connect समय पर capability claims घोषित करते हैं:
+नोड कनेक्ट होते समय क्षमता के दावे घोषित करते हैं:
 
-- `caps`: उच्च-स्तरीय capability categories जैसे `camera`, `canvas`, `screen`, `location`, `voice`, और `talk`।
-- `commands`: invoke के लिए command allowlist।
-- `permissions`: सूक्ष्म toggles (जैसे `screen.record`, `camera.capture`)।
+- `caps`: उच्च-स्तरीय क्षमता श्रेणियाँ, जैसे `camera`, `canvas`, `screen`,
+  `location`, `voice`, और `talk`।
+- `commands`: इनवोक के लिए कमांड अनुमत-सूची।
+- `permissions`: सूक्ष्म टॉगल (उदा. `screen.record`, `camera.capture`)।
 
-Gateway इन्हें **claims** मानता है और server-side allowlists लागू करता है।
+Gateway इन्हें **दावे** मानता है और सर्वर-साइड अनुमत-सूचियाँ लागू करता है।
+कनेक्ट किए गए नोड सफल कनेक्ट या पुनः कनेक्ट के बाद `node.pluginTools.update` के साथ वैकल्पिक, एजेंट को दिखाई देने वाले Plugin या MCP टूल
+डिस्क्रिप्टर प्रकाशित कर सकते हैं। हेडलेस नोड होस्ट घोषणात्मक MCP इन्वेंटरी
+परिवर्तनों को लागू करने के लिए पुनः शुरू होते हैं। यह अपडेट विधि प्रकाशन का एकमात्र मार्ग है; Plugin टूल डिस्क्रिप्टर
+`connect` पैरामीटर में स्वीकार नहीं किए जाते। प्रत्येक डिस्क्रिप्टर को प्रदाता-सुरक्षित टूल `name` का उपयोग करना और
+नोड की वर्तमान कमांड अनुमत-सूची में मौजूद `command` का नाम देना आवश्यक है। Gateway युग्मित नोड से प्राप्त डिस्क्रिप्टर
+मेटाडेटा पर भरोसा करता है, स्वीकृत कमांड
+सतह से बाहर के डिस्क्रिप्टर फ़िल्टर करता है, नोड के डिस्कनेक्ट होने पर उन्हें हटा देता है और किसी अन्य नोड के कैटलॉग में
+परिवर्तन करने के ऑपरेटर प्रयासों को अस्वीकार करता है। नोड द्वारा प्रकाशित डिस्क्रिप्टर अनदेखे करने के लिए `gateway.nodes.pluginTools.enabled: false`
+सेट करें।
+
+कनेक्ट किए गए नोड होस्ट अपना संपूर्ण प्रतिस्थापन Skills कैटलॉग
+`node.skills.update` के साथ प्रकाशित करते हैं। यह नोड-भूमिका विधि नोड Skills के प्रकाशन का एकमात्र
+मार्ग है; Skills `connect` पैरामीटर में स्वीकार नहीं किए जाते। प्रत्येक डिस्क्रिप्टर में
+एक सुरक्षित नाम, विवरण और सीमित `SKILL.md` सामग्री होती है। Gateway उस
+सामग्री को सामान्य Skills लोडर से पार्स करता है, नोड के कनेक्ट रहने तक उसे एजेंट Skills स्नैपशॉट में
+शामिल करता है और डिस्कनेक्ट होने पर हटा देता है। नोड द्वारा प्रकाशित Skills अनदेखे करने के लिए
+`gateway.nodes.allowSkills: false` सेट करें।
 
 ## उपस्थिति
 
-- `system-presence` डिवाइस पहचान द्वारा keyed entries लौटाता है।
-- उपस्थिति entries में `deviceId`, `roles`, और `scopes` शामिल होते हैं ताकि UI प्रति डिवाइस एक ही row दिखा सकें, भले ही वह **operator** और **node** दोनों के रूप में कनेक्ट हो।
-- `node.list` में वैकल्पिक `lastSeenAtMs` और `lastSeenReason` फ़ील्ड शामिल हैं। कनेक्टेड नोड अपने वर्तमान कनेक्शन समय को `connect` कारण के साथ `lastSeenAtMs` के रूप में रिपोर्ट करते हैं; paired nodes विश्वसनीय नोड इवेंट द्वारा उनकी pairing metadata अपडेट किए जाने पर durable background presence भी रिपोर्ट कर सकते हैं।
+- `system-presence` डिवाइस पहचान के अनुसार कुंजीबद्ध प्रविष्टियाँ लौटाता है, जिनमें
+  `deviceId`, `roles`, और `scopes` शामिल हैं, ताकि UI प्रत्येक डिवाइस के लिए एक पंक्ति दिखा सकें, भले
+  वह ऑपरेटर और नोड दोनों के रूप में कनेक्ट हो।
+- `node.list` में वैकल्पिक `lastSeenAtMs` और `lastSeenReason` शामिल होते हैं। कनेक्ट किए गए
+  नोड `connect` कारण के साथ वर्तमान कनेक्शन समय रिपोर्ट करते हैं; युग्मित नोड
+  किसी विश्वसनीय नोड इवेंट के माध्यम से टिकाऊ पृष्ठभूमि उपस्थिति भी रिपोर्ट कर सकते हैं।
 
-### नोड बैकग्राउंड alive इवेंट
+मूल macOS नोड सीमित इनपुट निष्क्रिय समय के साथ प्रमाणित `node.presence.activity` इवेंट भी भेज सकते हैं।
+Gateway अपनी घड़ी पर गतिविधि टाइमस्टैम्प प्राप्त करता है, `node.list` और
+`node.describe` के माध्यम से सबसे हाल में सक्रिय कनेक्टेड Mac को प्रदर्शित करता है और पठन-स्कोप वाले क्लाइंट को `node.presence` अपडेट प्रसारित करता है।
+जब उपयोगकर्ता गतिविधि साझाकरण अक्षम करता है, तो ऐप `{ "action": "clear" }` भेजता है;
+Gateway केवल उसी प्रमाणित नोड कनेक्शन के टाइमस्टैम्प साफ़ करता है।
+इस स्वीकृत क्रिया से पुराने Gateway इसे अनहैंडल्ड के रूप में लौटाते हैं, इसलिए Mac
+नोड एक बार पुनः कनेक्ट होता है और डिस्कनेक्ट क्लीनअप को पुरानी कनेक्शन स्थिति हटाने देता है।
+चयन, गोपनीयता, मॉडल संदर्भ और सूचना-रूटिंग व्यवहार के लिए
+[सक्रिय कंप्यूटर उपस्थिति](/hi/nodes/presence) देखें।
 
-नोड `event: "node.presence.alive"` के साथ `node.event` कॉल कर सकते हैं ताकि रिकॉर्ड हो कि paired node background wake के दौरान connected चिह्नित हुए बिना alive था।
+### नोड पृष्ठभूमि सक्रिय इवेंट
+
+नोड यह दर्ज करने के लिए `event: "node.presence.alive"` के साथ `node.event` कॉल करते हैं कि कोई
+युग्मित नोड पृष्ठभूमि वेक के दौरान सक्रिय था, बिना उसे कनेक्टेड चिह्नित किए:
 
 ```json
 {
@@ -252,9 +397,13 @@ Gateway इन्हें **claims** मानता है और server-side 
 }
 ```
 
-`trigger` एक बंद enum है: `background`, `silent_push`, `bg_app_refresh`, `significant_location`, `manual`, या `connect`। अज्ञात trigger strings को persistence से पहले gateway द्वारा `background` में normalized किया जाता है। इवेंट केवल authenticated node device sessions के लिए durable है; device-less या unpaired sessions `handled: false` लौटाते हैं।
+`trigger` एक बंद एनम है: `background`, `silent_push`, `bg_app_refresh`,
+`significant_location`, `manual`, `connect`। अज्ञात मान
+`background` (`src/shared/node-presence.ts`) में सामान्यीकृत होते हैं। इवेंट केवल
+प्रमाणित नोड डिवाइस सत्रों के लिए स्थायी रहता है; डिवाइस-रहित या अयुग्मित सत्र
+`handled: false` लौटाते हैं।
 
-सफल gateway structured result लौटाते हैं:
+सफल Gateway एक संरचित परिणाम लौटाते हैं:
 
 ```json
 {
@@ -265,476 +414,762 @@ Gateway इन्हें **claims** मानता है और server-side 
 }
 ```
 
-पुराने gateway `node.event` के लिए अभी भी `{ "ok": true }` लौटा सकते हैं; क्लाइंट को इसे acknowledged RPC मानना चाहिए, durable presence persistence नहीं।
+पुराने Gateway `node.event` के लिए केवल `{ "ok": true }` लौटा सकते हैं; इसे
+स्वीकृत RPC मानें, टिकाऊ उपस्थिति स्थायित्व नहीं।
 
-## ब्रॉडकास्ट इवेंट स्कोपिंग
+## प्रसारण इवेंट स्कोपिंग
 
-Server-pushed WebSocket broadcast events scope-gated होते हैं ताकि pairing-scoped या node-only sessions निष्क्रिय रूप से session content प्राप्त न करें।
+सर्वर द्वारा पुश किए गए प्रसारण इवेंट स्कोप-गेटेड होते हैं, ताकि युग्मन-स्कोप वाले या केवल-नोड
+सत्र निष्क्रिय रूप से सत्र सामग्री प्राप्त न करें
+(`src/gateway/server-broadcast.ts`):
 
-- **Chat, agent, और tool-result frames** (streamed `agent` events और tool call results सहित) के लिए कम से कम `operator.read` आवश्यक है। `operator.read` के बिना sessions इन frames को पूरी तरह छोड़ देते हैं।
-- **Plugin-defined `plugin.*` broadcasts** `operator.write` या `operator.admin` तक gated होते हैं, यह इस पर निर्भर करता है कि plugin ने उन्हें कैसे registered किया है।
-- **Status और transport events** (`heartbeat`, `presence`, `tick`, connect/disconnect lifecycle, आदि) unrestricted रहते हैं ताकि transport health हर authenticated session के लिए observable रहे।
-- **Unknown broadcast event families** डिफ़ॉल्ट रूप से scope-gated होते हैं (fail-closed), जब तक कोई registered handler उन्हें स्पष्ट रूप से relax न करे।
+- चैट, एजेंट और टूल-परिणाम फ़्रेम (स्ट्रीम किए गए `agent` इवेंट, टूल-परिणाम
+  इवेंट) के लिए कम-से-कम `operator.read` आवश्यक है। इसके बिना सत्र इन
+  फ़्रेम को पूरी तरह छोड़ देते हैं।
+- Plugin-परिभाषित `plugin.*` प्रसारण डिफ़ॉल्ट रूप से `operator.write` या
+  `operator.admin` तक सीमित होते हैं; `plugin.approval.requested` /
+  `plugin.approval.resolved` जैसी स्पष्ट प्रविष्टियाँ इसके बजाय
+  `operator.approvals` का उपयोग करती हैं।
+- स्थिति/ट्रांसपोर्ट इवेंट (`heartbeat`, `presence`, `tick`, कनेक्ट/डिस्कनेक्ट
+  जीवनचक्र) अप्रतिबंधित रहते हैं, ताकि प्रत्येक प्रमाणित सत्र को ट्रांसपोर्ट की स्थिति
+  दिखाई दे सके।
+- अज्ञात प्रसारण इवेंट परिवार डिफ़ॉल्ट रूप से स्कोप-गेटेड (विफलता पर बंद)
+  होते हैं, जब तक कोई पंजीकृत हैंडलर स्पष्ट रूप से उन्हें शिथिल न करे।
 
-हर client connection अपना per-client sequence number रखता है ताकि broadcasts उस socket पर monotonic ordering बनाए रखें, भले ही अलग-अलग clients event stream के अलग-अलग scope-filtered subsets देखें।
+प्रत्येक क्लाइंट कनेक्शन अपनी प्रति-क्लाइंट क्रम संख्या रखता है, इसलिए अलग-अलग क्लाइंट द्वारा
+इवेंट स्ट्रीम के अलग-अलग स्कोप-फ़िल्टर किए गए उपसमुच्चय देखने पर भी प्रसारण
+उस सॉकेट पर एकदिश रूप से क्रमबद्ध रहते हैं।
 
-## सामान्य RPC method families
+## RPC विधि परिवार
 
-सार्वजनिक WS surface ऊपर दिए handshake/auth examples से व्यापक है। यह generated dump नहीं है — `hello-ok.features.methods` `src/gateway/server-methods-list.ts` और loaded plugin/channel method exports से बनी conservative discovery list है। इसे feature discovery मानें, `src/gateway/server-methods/*.ts` की full enumeration नहीं।
+`hello-ok.features.methods`, `src/gateway/server-methods-list.ts` और लोड किए गए Plugin/चैनल विधि
+निर्यातों से निर्मित एक रूढ़िवादी खोज सूची है—यह प्रत्येक विधि का जनरेट किया गया डंप नहीं है और कुछ विधियाँ (उदाहरण के लिए
+`push.test`, `web.login.start`, `web.login.wait`, `sessions.usage`)
+वास्तविक, कॉल करने योग्य विधियाँ होने के बावजूद जानबूझकर खोज से बाहर रखी जाती हैं।
+इसे सुविधा खोज मानें, `src/gateway/server-methods/*.ts` की पूर्ण गणना नहीं।
 
-  <AccordionGroup>
+<AccordionGroup>
   <Accordion title="सिस्टम और पहचान">
-    - `health` कैश किया हुआ या नए सिरे से जांचा गया gateway health snapshot लौटाता है।
-    - `diagnostics.stability` हाल का सीमित diagnostic stability recorder लौटाता है। यह event names, counts, byte sizes, memory readings, queue/session state, channel/plugin names, और session ids जैसी परिचालन metadata रखता है। यह chat text, webhook bodies, tool outputs, raw request या response bodies, tokens, cookies, या secret values नहीं रखता। Operator read scope आवश्यक है।
-    - `status` `/status`-शैली का gateway सारांश लौटाता है; संवेदनशील फ़ील्ड केवल admin-scoped operator clients के लिए शामिल किए जाते हैं।
-    - `gateway.identity.get` relay और pairing flows द्वारा उपयोग की जाने वाली gateway device identity लौटाता है।
-    - `system-presence` connected operator/node devices के लिए वर्तमान presence snapshot लौटाता है।
-    - `system-event` एक system event जोड़ता है और presence context को update/broadcast कर सकता है।
-    - `last-heartbeat` नवीनतम persisted heartbeat event लौटाता है।
-    - `set-heartbeats` Gateway पर heartbeat processing को toggle करता है।
+    - `health` कैश किया हुआ या नए सिरे से जाँचा गया Gateway स्वास्थ्य स्नैपशॉट लौटाता है।
+    - `diagnostics.stability` हाल का सीमित नैदानिक स्थिरता रिकॉर्डर लौटाता है: इवेंट नाम, गणनाएँ, बाइट आकार, मेमोरी रीडिंग, क्यू/सत्र स्थिति, चैनल/Plugin नाम, सत्र आईडी। कोई चैट टेक्स्ट, Webhook बॉडी, टूल आउटपुट, रॉ अनुरोध/प्रतिक्रिया बॉडी, टोकन, कुकी या सीक्रेट नहीं। `operator.read` आवश्यक है।
+    - `status`, `/status`-शैली का Gateway सारांश लौटाता है; संवेदनशील फ़ील्ड केवल एडमिन-स्कोप वाले ऑपरेटर क्लाइंट के लिए।
+    - `gateway.identity.get` रिले और युग्मन प्रवाहों द्वारा उपयोग की जाने वाली Gateway डिवाइस पहचान लौटाता है।
+    - `system-presence` कनेक्ट किए गए ऑपरेटर/नोड डिवाइसों के लिए वर्तमान उपस्थिति स्नैपशॉट लौटाता है।
+    - `system-event` एक सिस्टम इवेंट जोड़ता है और उपस्थिति संदर्भ को अपडेट/प्रसारित कर सकता है।
+    - `last-heartbeat` नवीनतम स्थायी Heartbeat इवेंट लौटाता है।
+    - `set-heartbeats` Gateway पर Heartbeat प्रोसेसिंग टॉगल करता है।
+    - `gateway.suspend.prepare` केवल तभी एक छोटी सहयोगात्मक-निलंबन लीज़ बनाता है, जब ट्रैक किया गया Gateway कार्य निष्क्रिय हो। `gateway.suspend.status` उस लीज़ की जाँच करता है और `gateway.suspend.resume` थॉ के बाद या निरस्त होस्ट ऑपरेशन के पश्चात उसे जारी करता है।
 
   </Accordion>
 
-  <Accordion title="Models और उपयोग">
-    - `models.list` runtime-allowed model catalog लौटाता है। picker-sized configured models (`agents.defaults.models` पहले, फिर `models.providers.*.models`) के लिए `{ "view": "configured" }` पास करें, या पूरे catalog के लिए `{ "view": "all" }` पास करें।
-    - `usage.status` provider usage windows/remaining quota summaries लौटाता है।
-    - `usage.cost` date range के लिए aggregated cost usage summaries लौटाता है।
-      एक agent के लिए `agentId` पास करें, या configured agents को aggregate करने के लिए `agentScope: "all"` पास करें।
-    - `doctor.memory.status` active default agent workspace के लिए vector-memory / cached embedding readiness लौटाता है। `{ "probe": true }` या `{ "deep": true }` केवल तब पास करें जब caller स्पष्ट रूप से live embedding provider ping चाहता हो। Dreaming-aware clients चयनित agent workspace तक Dreaming store stats को scope करने के लिए `{ "agentId": "agent-id" }` भी पास कर सकते हैं; `agentId` छोड़ने पर default-agent fallback बना रहता है और configured Dreaming workspaces aggregate होते हैं।
-    - `doctor.memory.dreamDiary`, `doctor.memory.backfillDreamDiary`, `doctor.memory.resetDreamDiary`, `doctor.memory.resetGroundedShortTerm`, `doctor.memory.repairDreamingArtifacts`, और `doctor.memory.dedupeDreamDiary` चयनित-agent Dreaming views/actions के लिए वैकल्पिक `{ "agentId": "agent-id" }` params स्वीकार करते हैं। जब `agentId` छोड़ा जाता है, वे configured default agent workspace पर काम करते हैं।
-    - `doctor.memory.remHarness` remote control-plane clients के लिए bounded, read-only REM harness preview लौटाता है। इसमें workspace paths, memory snippets, rendered grounded markdown, और deep promotion candidates शामिल हो सकते हैं, इसलिए callers को `operator.read` चाहिए।
-    - `sessions.usage` per-session usage summaries लौटाता है। एक
-      agent के लिए `agentId` पास करें, या configured agents को साथ में list करने के लिए `agentScope: "all"` पास करें।
-    - `sessions.usage.timeseries` एक session के लिए timeseries usage लौटाता है।
-    - `sessions.usage.logs` एक session के लिए usage log entries लौटाता है।
+  <Accordion title="मॉडल और उपयोग">
+    - `models.list` रनटाइम-अनुमत मॉडल कैटलॉग लौटाता है। नीचे "`models.list` दृश्य" देखें।
+    - `usage.status` प्रदाता उपयोग विंडो/शेष कोटा सारांश लौटाता है।
+    - `usage.cost` किसी दिनांक सीमा के लिए समेकित लागत-उपयोग सारांश लौटाता है। एक एजेंट के लिए `agentId` पास करें या कॉन्फ़िगर किए गए एजेंटों को समेकित करने के लिए `agentScope: "all"` पास करें।
+    - `doctor.memory.status` सक्रिय डिफ़ॉल्ट एजेंट वर्कस्पेस के लिए वेक्टर-मेमोरी / कैश किए गए एम्बेडिंग की तत्परता लौटाता है। केवल स्पष्ट लाइव एम्बेडिंग प्रदाता पिंग के लिए `{ "probe": true }` या `{ "deep": true }` पास करें। Dreaming स्टोर आँकड़ों को एक एजेंट वर्कस्पेस तक सीमित करने के लिए `{ "agentId": "agent-id" }` पास करें; इसे छोड़ने पर कॉन्फ़िगर किए गए Dreaming वर्कस्पेस समेकित होते हैं।
+    - `doctor.memory.dreamDiary`, `doctor.memory.backfillDreamDiary`, `doctor.memory.resetDreamDiary`, `doctor.memory.resetGroundedShortTerm`, `doctor.memory.repairDreamingArtifacts`, और `doctor.memory.dedupeDreamDiary` वैकल्पिक `{ "agentId": "agent-id" }` स्वीकार करते हैं; इसे छोड़ने पर वे कॉन्फ़िगर किए गए डिफ़ॉल्ट एजेंट वर्कस्पेस पर काम करते हैं।
+    - `doctor.memory.remHarness` रिमोट कंट्रोल-प्लेन क्लाइंट के लिए सीमित, केवल-पठन REM हार्नेस पूर्वावलोकन लौटाता है, जिसमें वर्कस्पेस पथ, मेमोरी अंश, रेंडर किया गया आधारयुक्त Markdown और गहन प्रोमोशन उम्मीदवार शामिल हैं। `operator.read` आवश्यक है।
+    - `sessions.usage` प्रति-सत्र उपयोग सारांश लौटाता है। एक एजेंट के लिए `agentId` पास करें या कॉन्फ़िगर किए गए एजेंटों को एक साथ सूचीबद्ध करने के लिए `agentScope: "all"` पास करें।
+      दोनों उपयोग विधियाँ DST-जागरूक कैलेंडर-दिन सीमाओं और बकेट के लिए IANA `timeZone` सहित `mode: "specific"` स्वीकार करती हैं। पुराने क्लाइंट के लिए और जब Gateway रनटाइम अनुरोधित ज़ोन को नहीं पहचानता, तब फ़ॉलबैक के रूप में `utcOffset` समर्थित रहता है।
+    - `sessions.usage.timeseries` एक सत्र के लिए समय-श्रृंखला उपयोग लौटाता है।
+    - `sessions.usage.logs` एक सत्र के लिए उपयोग लॉग प्रविष्टियाँ लौटाता है।
 
   </Accordion>
 
-  <Accordion title="Channels और login helpers">
-    - `channels.status` built-in + bundled channel/plugin status summaries लौटाता है।
-    - `channels.logout` उस specific channel/account को log out करता है जहां channel logout support करता है।
-    - `web.login.start` वर्तमान QR-capable web channel provider के लिए QR/web login flow शुरू करता है।
-    - `web.login.wait` उस QR/web login flow के complete होने की प्रतीक्षा करता है और success पर channel शुरू करता है।
-    - `push.test` registered iOS node को test APNs push भेजता है।
-    - `voicewake.get` stored wake-word triggers लौटाता है।
-    - `voicewake.set` wake-word triggers update करता है और change broadcast करता है।
+  <Accordion title="चैनल और लॉगिन सहायक">
+    - `channels.status` अंतर्निहित + बंडल किए गए चैनल/Plugin स्थिति सारांश लौटाता है।
+    - `channels.logout` जहाँ चैनल इसका समर्थन करता है, वहाँ किसी विशिष्ट चैनल/खाते को लॉग आउट करता है।
+    - `web.login.start` वर्तमान QR-सक्षम वेब चैनल प्रदाता के लिए QR/वेब लॉगिन प्रवाह शुरू करता है।
+    - `web.login.wait` उस प्रवाह के पूरा होने की प्रतीक्षा करता है और सफलता पर चैनल शुरू करता है।
+    - `push.test` पंजीकृत iOS नोड को एक परीक्षण APNs पुश भेजता है।
+    - `voicewake.get` संग्रहीत वेक-वर्ड ट्रिगर लौटाता है।
+    - `voicewake.set` वेक-वर्ड ट्रिगर अपडेट करता है और परिवर्तन प्रसारित करता है।
 
   </Accordion>
 
-  <Accordion title="Messaging और logs">
-    - `send` chat runner के बाहर channel/account/thread-targeted sends के लिए direct outbound-delivery RPC है।
-    - `logs.tail` cursor/limit और max-byte controls के साथ configured gateway file-log tail लौटाता है।
+  <Accordion title="Plugin प्रबंधन">
+    - `plugins.list` (`operator.read`) इंस्टॉल किए गए Plugin की सूची के साथ स्थानीय रूप से चयनित आधिकारिक विकल्प, निदान, और यह जानकारी लौटाता है कि वर्तमान इंस्टॉल मोड बदलावों की अनुमति देता है या नहीं।
+    - `plugins.search` (`operator.read`) इंस्टॉल किए जा सकने वाले ClawHub कोड-Plugin और बंडल-Plugin समूहों को खोजता है। 1 से 100 तक गैर-रिक्त `query` और वैकल्पिक `limit` पास करें।
+    - `plugins.install` (`operator.admin`) या तो `{ source: "official", pluginId }` वाली आधिकारिक कैटलॉग प्रविष्टि या `{ source: "clawhub", packageName, version?, acknowledgeClawHubRisk? }` वाला ClawHub पैकेज इंस्टॉल करता है। ClawHub इंस्टॉल Gateway के विश्वास, अखंडता और इंस्टॉल-नीति जाँचों को बनाए रखते हैं। सफल इंस्टॉल के लिए Gateway पुनः आरंभ करना आवश्यक है।
+    - `plugins.setEnabled` (`operator.admin`) `{ pluginId, enabled }` के साथ इंस्टॉल किए गए एक Plugin की सक्षम करने की नीति बदलता है। प्रतिक्रिया में अपडेट की गई कैटलॉग प्रविष्टि, पुनः आरंभ मेटाडेटा और स्लॉट-चयन संबंधी चेतावनियाँ शामिल होती हैं।
+    - `plugins.uninstall` (`operator.admin`) `{ pluginId }` के साथ बाहरी रूप से इंस्टॉल किए गए एक Plugin को हटाता है: कॉन्फ़िगरेशन संदर्भ, इंस्टॉल रिकॉर्ड और प्रबंधित फ़ाइलें। बंडल किए गए Plugin अनइंस्टॉल नहीं किए जा सकते, केवल अक्षम किए जा सकते हैं। प्रतिक्रिया हटाने की कार्रवाइयों को सूचीबद्ध करती है और हमेशा Gateway पुनः आरंभ करने की आवश्यकता बताती है।
+
+  </Accordion>
+
+  <Accordion title="संदेश और लॉग">
+    - `send` चैट रनर के बाहर चैनल/खाते/थ्रेड को लक्षित करके भेजने के लिए प्रत्यक्ष आउटबाउंड-डिलीवरी RPC है।
+    - `logs.tail` कर्सर/सीमा और अधिकतम-बाइट नियंत्रणों के साथ कॉन्फ़िगर किए गए Gateway फ़ाइल-लॉग का अंतिम भाग लौटाता है।
+
+  </Accordion>
+
+  <Accordion title="ऑपरेटर टर्मिनल">
+    - `terminal.open` किसी स्पष्ट `agentId` या डिफ़ॉल्ट एजेंट के लिए होस्ट PTY शुरू करता है और निर्धारित एजेंट, कार्यशील डायरेक्टरी, शेल तथा परिसीमन स्थिति लौटाता है।
+    - `terminal.input`, `terminal.resize`, और `terminal.close` केवल कॉल करने वाले कनेक्शन के स्वामित्व वाले सत्रों पर काम करते हैं।
+    - `terminal.upload` अधिकतम 16 MiB की एक base64 फ़ाइल स्वीकार करता है, उसे सत्र के Gateway या युग्मित-Node होस्ट पर निजी 24-घंटे की अस्थायी डायरेक्टरी में रखता है और निरपेक्ष पथ लौटाता है। कॉलर को अभी भी उस पथ को पेस्ट करना या किसी अन्य प्रकार से उपयोग करना होगा; RPC कभी भी टर्मिनल इनपुट नहीं लिखता या कोई कमांड निष्पादित नहीं करता।
+    - `terminal.data` और `terminal.exit` ईवेंट केवल सत्र के स्वामी कनेक्शन पर स्ट्रीम होते हैं।
+    - जिन सत्रों का कनेक्शन टूट जाता है उन्हें समाप्त नहीं, बल्कि अलग किया जाता है: वे `gateway.terminal.detachedSessionTimeoutSeconds` (डिफ़ॉल्ट 300; `0` कनेक्शन टूटने पर समाप्त करने की व्यवस्था पुनर्स्थापित करता है) तक पुनः संलग्न किए जा सकते हैं, जबकि हालिया आउटपुट सीमित सर्वर-साइड बफ़र में एकत्र होता रहता है।
+    - `terminal.list` संलग्न किए जा सकने वाले सत्र लौटाता है; `terminal.attach` किसी सक्रिय या अलग किए गए सत्र को कॉल करने वाले कनेक्शन से पुनः बाँधता है और पुनर्चालन बफ़र लौटाता है (tmux-शैली अधिग्रहण—पिछले सक्रिय स्वामी को कारण `detached` के साथ `terminal.exit` प्राप्त होता है); `terminal.text` बिना संलग्न किए बफ़र को सादे टेक्स्ट के रूप में पढ़ता है।
+    - प्रत्येक टर्मिनल विधि के लिए `operator.admin` आवश्यक है; `gateway.terminal.enabled` स्पष्ट रूप से true होना चाहिए। पूर्णतः सैंडबॉक्स किए गए एजेंट अस्वीकार कर दिए जाते हैं और एजेंट नीति में बदलाव मौजूदा तथा प्रक्रियाधीन PTY को बंद कर देता है, जिसमें अलग किए गए PTY भी शामिल हैं।
 
   </Accordion>
 
   <Accordion title="Talk और TTS">
-    - `talk.catalog` speech, streaming transcription, और realtime voice के लिए read-only Talk provider catalog लौटाता है। इसमें provider secrets लौटाए बिना या global config mutate किए बिना canonical provider ids, registry aliases, labels, configured state, optional group-level `ready` result, exposed model/voice ids, canonical modes, transports, brain strategies, और realtime audio/capability flags शामिल होते हैं। Current Gateways runtime provider selection apply करने के बाद `ready` set करते हैं; clients को older Gateways के साथ compatibility के लिए इसकी अनुपस्थिति को unverified मानना चाहिए।
-    - `talk.config` effective Talk config payload लौटाता है; `includeSecrets` के लिए `operator.talk.secrets` (या `operator.admin`) आवश्यक है।
-    - `talk.session.create` `realtime/gateway-relay`, `transcription/gateway-relay`, या `stt-tts/managed-room` के लिए Gateway-owned Talk session बनाता है। `stt-tts/managed-room` के लिए, `sessionKey` पास करने वाले `operator.write` callers को scoped session-key visibility के लिए `spawnedBy` भी पास करना होगा; unscoped `sessionKey` creation और `brain: "direct-tools"` के लिए `operator.admin` आवश्यक है।
-    - `talk.session.join` managed-room session token validate करता है, जरूरत के अनुसार `session.ready` या `session.replaced` events emit करता है, और plaintext token या stored token hash के बिना room/session metadata plus recent Talk events लौटाता है।
-    - `talk.session.appendAudio` Gateway-owned realtime relay और transcription sessions में base64 PCM input audio append करता है।
-    - `talk.session.startTurn`, `talk.session.endTurn`, और `talk.session.cancelTurn` state clear होने से पहले stale-turn rejection के साथ managed-room turn lifecycle चलाते हैं।
-    - `talk.session.cancelOutput` assistant audio output रोकता है, मुख्य रूप से Gateway relay sessions में VAD-gated barge-in के लिए।
-    - `talk.session.submitToolResult` Gateway-owned realtime relay session द्वारा emitted provider tool call complete करता है। interim tool output के लिए `options: { willContinue: true }` पास करें जब final result बाद में आएगा, या `options: { suppressResponse: true }` पास करें जब tool result को दूसरी realtime assistant response शुरू किए बिना provider call satisfy करनी चाहिए।
-    - `talk.session.steer` Gateway-owned agent-backed Talk session में active-run voice control भेजता है। यह `{ sessionId, text, mode? }` स्वीकार करता है, जहां `mode` `status`, `steer`, `cancel`, या `followup` है; छोड़ा गया mode spoken text से classified होता है।
-    - `talk.session.close` Gateway-owned relay, transcription, या managed-room session बंद करता है और terminal Talk events emit करता है।
-    - `talk.mode` WebChat/Control UI clients के लिए वर्तमान Talk mode state set/broadcast करता है।
-    - `talk.client.create` `webrtc` या `provider-websocket` का उपयोग करके client-owned realtime provider session बनाता है, जबकि Gateway config, credentials, instructions, और tool policy own करता है।
-    - `talk.client.toolCall` client-owned realtime transports को provider tool calls Gateway policy तक forward करने देता है। पहला supported tool `openclaw_agent_consult` है; provider-specific tool result submit करने से पहले clients को run id मिलता है और वे normal chat lifecycle events की प्रतीक्षा करते हैं।
-    - `talk.client.steer` client-owned realtime transports के लिए active-run voice control भेजता है। Gateway `sessionKey` से active embedded run resolve करता है और steering को चुपचाप drop करने के बजाय structured accepted/rejected result लौटाता है।
-    - `talk.event` realtime, transcription, STT/TTS, managed-room, telephony, और meeting adapters के लिए single Talk event channel है।
-    - `talk.speak` active Talk speech provider के माध्यम से speech synthesize करता है।
-    - `tts.status` TTS enabled state, active provider, fallback providers, और provider config state लौटाता है।
-    - `tts.providers` visible TTS provider inventory लौटाता है।
-    - `tts.enable` और `tts.disable` TTS prefs state toggle करते हैं।
-    - `tts.setProvider` preferred TTS provider update करता है।
-    - `tts.convert` one-shot text-to-speech conversion चलाता है।
+    - `talk.catalog` वाक्, स्ट्रीमिंग ट्रांसक्रिप्शन और रीयलटाइम वॉइस के लिए केवल-पढ़ने योग्य Talk प्रदाता कैटलॉग लौटाता है: प्रामाणिक प्रदाता आईडी, रजिस्ट्री उपनाम, लेबल, कॉन्फ़िगर की गई स्थिति, वैकल्पिक समूह-स्तरीय `ready` परिणाम, उपलब्ध मॉडल/वॉइस आईडी, प्रामाणिक मोड, ट्रांसपोर्ट, ब्रेन रणनीतियाँ और रीयलटाइम ऑडियो/क्षमता फ़्लैग; यह प्रदाता सीक्रेट लौटाए या वैश्विक कॉन्फ़िगरेशन बदले बिना ऐसा करता है। वर्तमान Gateway रनटाइम प्रदाता चयन लागू करने के बाद `ready` सेट करते हैं; पुराने Gateway पर इसकी अनुपस्थिति को असत्यापित मानें।
+    - `talk.config` प्रभावी Talk कॉन्फ़िगरेशन पेलोड लौटाता है; `includeSecrets` के लिए `operator.talk.secrets` (या `operator.admin`) आवश्यक है।
+    - `talk.session.create` `realtime/gateway-relay`, `transcription/gateway-relay`, या `stt-tts/managed-room` के लिए Gateway के स्वामित्व वाला Talk सत्र बनाता है। `stt-tts/managed-room` के लिए, `sessionKey` पास करने वाले `operator.write` कॉलर को सीमित सत्र-कुंजी दृश्यता के लिए `spawnedBy` भी पास करना होगा; बिना सीमांकन वाला `sessionKey` निर्माण और `brain: "direct-tools"` के लिए `operator.admin` आवश्यक है।
+    - `talk.session.join` प्रबंधित-कक्ष सत्र टोकन को सत्यापित करता है, आवश्यकतानुसार `session.ready` या `session.replaced` उत्सर्जित करता है और कक्ष/सत्र मेटाडेटा के साथ हालिया Talk ईवेंट लौटाता है, लेकिन कभी भी प्लेनटेक्स्ट टोकन या उसका हैश नहीं लौटाता।
+    - `talk.session.appendAudio` Gateway के स्वामित्व वाले रीयलटाइम रिले और ट्रांसक्रिप्शन सत्रों में base64 PCM इनपुट ऑडियो जोड़ता है।
+    - `talk.session.startTurn`, `talk.session.endTurn`, और `talk.session.cancelTurn` स्थिति साफ़ होने से पहले पुराने टर्न को अस्वीकार करते हुए प्रबंधित-कक्ष टर्न जीवनचक्र संचालित करते हैं।
+    - `talk.session.cancelOutput` सहायक का ऑडियो आउटपुट रोकता है, मुख्यतः Gateway रिले सत्रों में VAD-नियंत्रित बीच में बोलने के लिए।
+    - `talk.session.submitToolResult` Gateway के स्वामित्व वाले रीयलटाइम रिले सत्र द्वारा उत्सर्जित प्रदाता टूल कॉल को पूरा करता है। अनुरोध प्रदाता ब्रिज द्वारा उपलब्ध कराए गए किसी भी अतुल्यकालिक पूर्णता संकेत की प्रतीक्षा करता है; विफल सबमिशन संबद्ध रन को सक्रिय रखते हैं और सफल टूल-परिणाम ईवेंट उत्सर्जित नहीं करते। अंतरिम टूल आउटपुट के लिए `options: { willContinue: true }` पास करें या जब प्रदाता ब्रिज दमन समर्थन घोषित करता हो और परिणाम से दूसरी प्रतिक्रिया शुरू नहीं होनी चाहिए, तब `options: { suppressResponse: true }` पास करें।
+    - `talk.session.steer` Gateway के स्वामित्व वाले एजेंट-समर्थित Talk सत्र में सक्रिय-रन वॉइस नियंत्रण भेजता है: `{ sessionId, text, mode? }`, जहाँ `mode`, `status`, `steer`, `cancel`, या `followup` है; छोड़े गए मोड को बोले गए टेक्स्ट से वर्गीकृत किया जाता है।
+    - `talk.session.close` Gateway के स्वामित्व वाले रिले, ट्रांसक्रिप्शन या प्रबंधित-कक्ष सत्र को बंद करता है और अंतिम Talk ईवेंट उत्सर्जित करता है।
+    - `talk.mode` WebChat/Control UI क्लाइंट के लिए वर्तमान Talk मोड स्थिति सेट/प्रसारित करता है।
+    - `talk.client.create` `webrtc` या `provider-websocket` का उपयोग करके क्लाइंट के स्वामित्व वाला रीयलटाइम प्रदाता सत्र बनाता या फिर से शुरू करता है, जबकि Gateway क्रेडेंशियल, निर्देश, टूल नीति और लौटाए गए `voiceSessionId` का स्वामित्व रखता है। क्लाइंट `sessionKey` पास करते हैं और एक कॉल के दौरान प्रदाता ट्रांसपोर्ट बदलते समय `voiceSessionId` का पुनः उपयोग करते हैं।
+    - `talk.client.transcript` सामान्य एजेंट सत्र में एक अंतिम रूप दिया गया `{ role, text }` आइटम जोड़ता है। आवश्यक `entryId`, `voiceSessionId` के भीतर इडेम्पोटेंट है; पुनः प्रयास ट्रांसक्रिप्ट संदेशों की प्रतिलिपि नहीं बनाते।
+    - `talk.client.close` लंबित ट्रांसक्रिप्ट लेखन के बाद तार्किक वॉइस सत्र बंद करता है। बंद करना इडेम्पोटेंट है और यह सत्र के अंतिम गैर-WebChat चैनल पर केवल-म्यूटेशन कॉल सारांश पहुँचा सकता है।
+    - `talk.client.toolCall` क्लाइंट के स्वामित्व वाले रीयलटाइम ट्रांसपोर्ट को प्रदाता टूल कॉल Gateway नीति तक अग्रेषित करने देता है। पहला समर्थित टूल `openclaw_agent_consult` है; क्लाइंट को एक रन आईडी मिलती है और वे प्रदाता-विशिष्ट टूल परिणाम सबमिट करने से पहले सामान्य चैट जीवनचक्र ईवेंट की प्रतीक्षा करते हैं। वॉइस-बाउंड उच्च-प्रभाव वाली कार्रवाइयाँ तब तक `VOICE_CONFIRMATION_REQUIRED:<id>` लौटाती हैं, जब तक बाद का अंतिम रूप दिया गया उपयोगकर्ता कथन उस सटीक कार्रवाई की स्पष्ट रूप से पुष्टि नहीं करता और अगला परामर्श `confirmationId` प्रदान नहीं करता।
+    - `talk.client.steer` क्लाइंट के स्वामित्व वाले रीयलटाइम ट्रांसपोर्ट के लिए सक्रिय-रन वॉइस नियंत्रण भेजता है। Gateway `sessionKey` से सक्रिय एम्बेडेड रन निर्धारित करता है और निर्देशन को चुपचाप छोड़ने के बजाय संरचित स्वीकृत/अस्वीकृत परिणाम लौटाता है।
+    - `talk.event` रीयलटाइम, ट्रांसक्रिप्शन, STT/TTS, प्रबंधित-कक्ष, टेलीफ़ोनी और मीटिंग एडाप्टर के लिए एकल Talk ईवेंट चैनल है।
+    - `talk.speak` सक्रिय Talk वाक् प्रदाता के माध्यम से वाक् संश्लेषित करता है।
+    - `tts.status` TTS सक्षम स्थिति, सक्रिय प्रदाता, फ़ॉलबैक प्रदाता और प्रदाता कॉन्फ़िगरेशन स्थिति लौटाता है।
+    - `tts.providers` दृश्यमान TTS प्रदाता सूची लौटाता है।
+    - `tts.enable` और `tts.disable` TTS प्राथमिकता स्थिति को टॉगल करते हैं।
+    - `tts.setProvider` पसंदीदा TTS प्रदाता को अपडेट करता है।
+    - `tts.convert` एकबारगी टेक्स्ट-से-वाक् रूपांतरण चलाता है।
+    - `tts.speak` (`operator.write`) कॉन्फ़िगर की गई सामान्य TTS प्रदाता शृंखला के साथ गैर-रिक्त `text` रेंडर करता है और एक संपूर्ण क्लिप को इनलाइन `audioBase64` के रूप में लौटाता है, साथ ही `provider` और वैकल्पिक `outputFormat`, `mimeType`, तथा `fileExtension` मेटाडेटा भी लौटाता है। `tts.convert` के विपरीत, यह Gateway-स्थानीय पथ नहीं लौटाता; `talk.speak` के विपरीत, इसे Talk प्रदाता की आवश्यकता नहीं होती। `tts.maxTextLength` से अधिक टेक्स्ट `INVALID_REQUEST` लौटाता है; संश्लेषण विफलताएँ `UNAVAILABLE` लौटाती हैं।
 
   </Accordion>
 
-  <Accordion title="Secrets, config, update, और wizard">
-    - `secrets.reload` active SecretRefs को फिर से resolve करता है और केवल full success पर runtime secret state swap करता है।
-    - `secrets.resolve` specific command/target set के लिए command-target secret assignments resolve करता है।
-    - `config.get` current config snapshot और hash लौटाता है।
-    - `config.set` validated config payload लिखता है।
-    - `config.patch` partial config update merge करता है। Destructive array
-      replacement के लिए affected path `replacePaths` में होना आवश्यक है; array entries के नीचे nested arrays `agents.list[].skills` जैसे `[]` paths का उपयोग करते हैं।
-    - `config.apply` full config payload validate + replace करता है।
-    - `config.schema` Control UI और CLI tooling द्वारा उपयोग किया जाने वाला live config schema payload लौटाता है: schema, `uiHints`, version, और generation metadata, जिसमें plugin + channel schema metadata शामिल होता है जब runtime उसे load कर सकता है। schema में UI द्वारा उपयोग किए गए समान labels और help text से derived field `title` / `description` metadata शामिल होता है, जिसमें matching field documentation मौजूद होने पर nested object, wildcard, array-item, और `anyOf` / `oneOf` / `allOf` composition branches भी शामिल होते हैं।
-    - `config.schema.lookup` एक config path के लिए path-scoped lookup payload लौटाता है: normalized path, shallow schema node, matched hint + `hintPath`, optional `reloadKind`, और UI/CLI drill-down के लिए immediate child summaries। `reloadKind` `restart`, `hot`, या `none` में से एक है और requested path के लिए Gateway config reload planner को mirror करता है। Lookup schema nodes user-facing docs और common validation fields (`title`, `description`, `type`, `enum`, `const`, `format`, `pattern`, numeric/string/array/object bounds, और `additionalProperties`, `deprecated`, `readOnly`, `writeOnly` जैसे flags) रखते हैं। Child summaries `key`, normalized `path`, `type`, `required`, `hasChildren`, optional `reloadKind`, plus matched `hint` / `hintPath` expose करते हैं।
-    - `update.run` gateway update flow चलाता है और restart केवल तब schedule करता है जब update स्वयं succeed हुआ हो; session वाले callers `continuationMessage` शामिल कर सकते हैं ताकि startup restart continuation queue के माध्यम से एक follow-up agent turn resume करे। control plane से package-manager updates और supervised git-checkout updates live Gateway के अंदर package tree replace करने या checkout/build output mutate करने के बजाय detached managed-service handoff का उपयोग करते हैं। शुरू किया गया handoff `result.reason: "managed-service-handoff-started"` और `handoff.status: "started"` के साथ `ok: true` लौटाता है; unavailable या failed handoffs `managed-service-handoff-unavailable` या `managed-service-handoff-failed` के साथ `ok: false` लौटाते हैं, plus manual shell update आवश्यक होने पर `handoff.command`। unavailable handoff का अर्थ है कि OpenClaw के पास safe supervisor boundary या durable service identity नहीं है, जैसे systemd के लिए `OPENCLAW_SYSTEMD_UNIT`। शुरू किए गए handoff के दौरान, restart sentinel briefly `stats.reason: "restart-health-pending"` report कर सकता है; continuation तब तक delay होती है जब तक CLI restarted Gateway verify करके final `ok` sentinel नहीं लिख देता।
-    - `update.status` latest update restart sentinel refresh और return करता है, जिसमें उपलब्ध होने पर post-restart running version शामिल होता है।
-    - `wizard.start`, `wizard.next`, `wizard.status`, और `wizard.cancel` WS RPC पर onboarding wizard expose करते हैं।
+  <Accordion title="सीक्रेट, कॉन्फ़िगरेशन, अपडेट और विज़ार्ड">
+    - `secrets.reload` सक्रिय SecretRefs को फिर से रिज़ॉल्व करता है और स्वामी-जागरूक रनटाइम स्थिति को परमाण्विक रूप से प्रकाशित करता है। पात्र स्वामी विफलताएँ `warningCount` के साथ कोल्ड या स्टेल डिग्रेडेशन के रूप में प्रकाशित हो सकती हैं; सख्त या अमैप्ड विफलताएँ रीलोड को अस्वीकार करती हैं और सक्रिय स्नैपशॉट को सुरक्षित रखती हैं।
+    - `secrets.resolve` किसी विशिष्ट कमांड/लक्ष्य सेट के लिए कमांड-लक्ष्य सीक्रेट असाइनमेंट रिज़ॉल्व करता है।
+    - `config.get` वर्तमान ऑन-डिस्क कॉन्फ़िगरेशन स्नैपशॉट, रॉ रूट-फ़ाइल `hash`, रिज़ॉल्व किया गया `configRevisionHash`, और सक्रिय Gateway रनटाइम द्वारा स्वीकार किए गए रिज़ॉल्व किए गए संशोधन के लिए वैकल्पिक `appliedConfigHash` लौटाता है।
+    - `config.set` सत्यापित कॉन्फ़िगरेशन पेलोड लिखता है।
+    - `config.patch` आंशिक कॉन्फ़िगरेशन अपडेट को मर्ज करता है। विनाशकारी ऐरे प्रतिस्थापन के लिए प्रभावित पथ का `replacePaths` में होना आवश्यक है; ऐरे प्रविष्टियों के अंतर्गत नेस्टेड ऐरे `agents.entries.*.skills` जैसे `[]` पथों का उपयोग करते हैं।
+    - `config.apply` पूर्ण कॉन्फ़िगरेशन पेलोड को सत्यापित करके प्रतिस्थापित करता है।
+    - `config.schema` Control UI और CLI टूलिंग द्वारा उपयोग किया जाने वाला लाइव कॉन्फ़िगरेशन स्कीमा पेलोड लौटाता है: स्कीमा, `uiHints`, संस्करण, जनरेशन मेटाडेटा, और लोड किए जा सकने पर Plugin + चैनल स्कीमा मेटाडेटा। इसमें UI के समान लेबल/सहायता टेक्स्ट से `title` / `description` मेटाडेटा शामिल होता है, जिसमें मेल खाने वाला फ़ील्ड दस्तावेज़ उपलब्ध होने पर नेस्टेड ऑब्जेक्ट, वाइल्डकार्ड, ऐरे-आइटम और `anyOf` / `oneOf` / `allOf` संयोजन शाखाएँ शामिल हैं।
+    - `config.schema.lookup` एक कॉन्फ़िगरेशन पथ के लिए पथ-स्कोप्ड लुकअप पेलोड लौटाता है: सामान्यीकृत पथ, एक शैलो स्कीमा नोड, मेल खाने वाला संकेत + `hintPath`, वैकल्पिक `reloadKind`, और UI/CLI ड्रिल-डाउन के लिए निकटतम चाइल्ड सारांश। `reloadKind`, `restart`, `hot`, या `none` (`src/config/schema.ts`) में से एक है और अनुरोधित पथ के लिए Gateway कॉन्फ़िगरेशन रीलोड प्लानर को प्रतिबिंबित करता है। लुकअप स्कीमा नोड उपयोगकर्ता-दृश्य दस्तावेज़ और सामान्य सत्यापन फ़ील्ड (`title`, `description`, `type`, `enum`, `const`, `format`, `pattern`, संख्यात्मक/स्ट्रिंग/ऐरे/ऑब्जेक्ट सीमाएँ, `additionalProperties`, `deprecated`, `readOnly`, `writeOnly`) बनाए रखते हैं। चाइल्ड सारांश `key`, सामान्यीकृत `path`, `type`, `required`, `hasChildren`, वैकल्पिक `reloadKind`, और मेल खाने वाला `hint` / `hintPath` प्रदर्शित करते हैं।
+    - `update.run` Gateway अपडेट प्रवाह चलाता है और केवल अपडेट सफल होने पर पुनरारंभ शेड्यूल करता है; सत्र वाले कॉलर `continuationMessage` शामिल कर सकते हैं, ताकि स्टार्टअप पुनरारंभ निरंतरता कतार के माध्यम से एजेंट का एक अनुवर्ती टर्न फिर से शुरू करे। कंट्रोल प्लेन से पैकेज-मैनेजर अपडेट और पर्यवेक्षित git-checkout अपडेट, लाइव Gateway के भीतर पैकेज ट्री को प्रतिस्थापित करने या checkout/build आउटपुट को बदलने के बजाय एक अलग किए गए प्रबंधित-सेवा हैंडऑफ़ का उपयोग करते हैं। आरंभ किया गया हैंडऑफ़ `result.reason: "managed-service-handoff-started"` और `handoff.status: "started"` के साथ `ok: true` लौटाता है। उसी Gateway प्रक्रिया द्वारा संभाला गया दूसरा समवर्ती `update.run`, `result.reason: "managed-service-handoff-already-running"` और `handoff.status: "already-running"` के साथ `ok: false` लौटाता है; उसकी निरंतरता स्वीकार नहीं की जाती, इसलिए सक्रिय अपडेट पूरा होने के बाद कॉलर पुनः प्रयास कर सकता है। स्टैंडअलोन CLI अपडेटर और प्रतिस्थापन Gateway प्रक्रियाएँ इस प्रक्रिया-स्थानीय गार्ड के बाहर हैं। अनुपलब्ध या विफल हैंडऑफ़ `managed-service-handoff-unavailable` या `managed-service-handoff-failed` के साथ `ok: false`, तथा मैन्युअल शेल अपडेट आवश्यक होने पर `handoff.command` लौटाते हैं। अनुपलब्ध का अर्थ है कि OpenClaw में सुरक्षित सुपरवाइज़र सीमा या स्थायी सेवा पहचान का अभाव है, जैसे systemd के लिए `OPENCLAW_SYSTEMD_UNIT`। आरंभ किए गए हैंडऑफ़ के दौरान पुनरारंभ सेंटिनल थोड़े समय के लिए `stats.reason: "restart-health-pending"` रिपोर्ट कर सकता है; निरंतरता तब तक विलंबित रहती है, जब तक CLI पुनरारंभ किए गए Gateway को सत्यापित करके अंतिम `ok` सेंटिनल नहीं लिख देता।
+    - `update.status` नवीनतम अपडेट पुनरारंभ सेंटिनल को रीफ़्रेश करके लौटाता है, जिसमें उपलब्ध होने पर पुनरारंभ के बाद चल रहा संस्करण शामिल होता है।
+    - `wizard.start`, `wizard.next`, `wizard.status`, और `wizard.cancel` ऑनबोर्डिंग विज़ार्ड को WS RPC के माध्यम से उपलब्ध कराते हैं।
 
   </Accordion>
 
-  <Accordion title="एजेंट और वर्कस्पेस हेल्पर">
-    - `agents.list` कॉन्फ़िगर की गई एजेंट प्रविष्टियाँ लौटाता है, जिनमें प्रभावी मॉडल और रनटाइम मेटाडेटा शामिल होता है।
-    - `agents.create`, `agents.update`, और `agents.delete` एजेंट रिकॉर्ड और वर्कस्पेस वायरिंग प्रबंधित करते हैं।
-    - `agents.files.list`, `agents.files.get`, और `agents.files.set` किसी एजेंट के लिए उजागर की गई बूटस्ट्रैप वर्कस्पेस फ़ाइलें प्रबंधित करते हैं।
-    - `tasks.list`, `tasks.get`, और `tasks.cancel` SDK और ऑपरेटर क्लाइंट के लिए Gateway टास्क लेजर उजागर करते हैं।
-    - `artifacts.list`, `artifacts.get`, और `artifacts.download` किसी स्पष्ट `sessionKey`, `runId`, या `taskId` स्कोप के लिए ट्रांसक्रिप्ट-व्युत्पन्न आर्टिफ़ैक्ट सारांश और डाउनलोड उजागर करते हैं। रन और टास्क क्वेरी सर्वर-साइड स्वामी सेशन का समाधान करती हैं और केवल मेल खाते उद्गम वाले ट्रांसक्रिप्ट मीडिया लौटाती हैं; असुरक्षित या स्थानीय URL स्रोत सर्वर-साइड फ़ेच करने के बजाय असमर्थित डाउनलोड लौटाते हैं।
-    - `environments.list` और `environments.status` SDK क्लाइंट के लिए केवल-पढ़ने योग्य Gateway-स्थानीय और नोड परिवेश खोज उजागर करते हैं।
-    - `agent.identity.get` किसी एजेंट या सेशन के लिए प्रभावी असिस्टेंट पहचान लौटाता है।
-    - `agent.wait` किसी रन के समाप्त होने की प्रतीक्षा करता है और उपलब्ध होने पर टर्मिनल स्नैपशॉट लौटाता है।
+  <Accordion title="एजेंट और कार्यक्षेत्र सहायक">
+    - `agents.list` Gateway को दिखाई देने वाली एजेंट प्रविष्टियाँ लौटाता है, जिनमें प्रभावी मॉडल/रनटाइम मेटाडेटा और वैकल्पिक अर्थगत `kind` (`agent` या `system`) शामिल हैं। पूर्ण टाइप्ड रोस्टर प्राप्त करने के लिए क्लाइंट `agent-kind` हैंडशेक क्षमता घोषित करते हैं; इसके बिना क्लाइंट सिस्टम पंक्तियों से रहित पुराना, सिलेक्टर-सुरक्षित रोस्टर बनाए रखते हैं। प्रकार-जागरूक क्लाइंट सामान्य सिलेक्टरों से `system` पंक्तियाँ बाहर रखते हैं, जबकि उन्हें डायग्नोस्टिक दृश्यों में बनाए रखते हैं। पुराने v4 Gateway `kind` के बिना पंक्तियाँ लौटा सकते हैं।
+    - `agents.create`, `agents.update`, और `agents.delete` एजेंट रिकॉर्ड और कार्यक्षेत्र वायरिंग का प्रबंधन करते हैं।
+    - `agents.files.list`, `agents.files.get`, और `agents.files.set` किसी एजेंट के लिए उपलब्ध कराई गई बूटस्ट्रैप कार्यक्षेत्र फ़ाइलों का प्रबंधन करते हैं।
+    - `audit.activity.list` संस्करणयुक्त, केवल-मेटाडेटा गतिविधि लेजर लौटाता है; `audit.list` संगतता-सुरक्षित रन/टूल RPC बना रहता है।
+    - `agents.workspace.list` और `agents.workspace.get` (`operator.read`), [ऑपरेटर स्कोप](/hi/gateway/operator-scopes) में वर्णित विश्वसनीय ऑपरेटर डोमेन के क्लाइंट के लिए एजेंट की कार्यक्षेत्र डायरेक्टरी की केवल-पढ़ने योग्य, पृष्ठांकित ब्राउज़िंग उपलब्ध कराते हैं। अनुरोध केवल कार्यक्षेत्र-सापेक्ष पथ स्वीकार करते हैं; रीड वास्तविक पथ में बदले गए कार्यक्षेत्र रूट तक सीमित रहते हैं (सिमलिंक और हार्डलिंक एस्केप अस्वीकार किए जाते हैं), आकार-सीमित होते हैं, और UTF-8 टेक्स्ट तथा सामान्य इमेज प्रकारों (base64) तक सीमित रहते हैं। प्रतिक्रियाएँ होस्ट कार्यक्षेत्र पथ प्रदर्शित नहीं करतीं। इस नेमस्पेस में कोई लेखन ऑपरेशन नहीं है।
+    - `tasks.list`, `tasks.get`, और `tasks.cancel` SDK और ऑपरेटर क्लाइंट के लिए Gateway टास्क लेजर उपलब्ध कराते हैं। नीचे [टास्क लेजर RPC](#task-ledger-rpcs) देखें।
+    - `artifacts.list`, `artifacts.get`, और `artifacts.download` स्पष्ट `sessionKey`, `runId`, या `taskId` स्कोप के लिए ट्रांसक्रिप्ट से प्राप्त आर्टिफ़ैक्ट सारांश और डाउनलोड उपलब्ध कराते हैं। रन और टास्क क्वेरी स्वामी सत्र को सर्वर-साइड पर रिज़ॉल्व करती हैं और केवल मेल खाने वाले उद्गम वाला ट्रांसक्रिप्ट मीडिया लौटाती हैं; असुरक्षित या स्थानीय URL स्रोतों को सर्वर-साइड पर फ़ेच करने के बजाय असमर्थित डाउनलोड लौटाए जाते हैं।
+    - `environments.list` और `environments.status` Gateway-स्थानीय और Node परिवेश खोज को बनाए रखते हैं। कॉन्फ़िगर किए गए क्लाउड वर्कर और पुराने प्रोफ़ाइल द्वारा छोड़े गए स्थायी रिकॉर्ड, `providerId`, वैकल्पिक `leaseId`, `state`, `ageMs`, वैकल्पिक `idleMs`, और `attachedSessionIds` के साथ `worker` मेटाडेटा जोड़ते हैं। वर्कर जीवनचक्र स्थितियाँ `requested`, `provisioning`, `bootstrapping`, `ready`, `attached`, `idle`, `draining`, `destroying`, `destroyed`, `failed`, और `orphaned` हैं।
+    - `environments.create` (`{ profileId, idempotencyKey }`) कॉन्फ़िगर की गई Plugin प्रदाता प्रोफ़ाइल से एक वर्कर प्रोविज़न करता है; समान कुंजी वाले पुनः प्रयास स्थायी ऑपरेशन का पुनः उपयोग करते हैं। `environments.destroy` (`{ environmentId }`) स्थायी वर्कर परिवेश को इडेम्पोटेंट रूप से हटाने का अनुरोध करता है। दोनों को `operator.admin` आवश्यक है, दोनों कंट्रोल-प्लेन लेखन हैं, और दोनों स्थिति प्रतिक्रियाओं में प्रयुक्त समान परिवेश सारांश संरचना लौटाते हैं।
+    - `agent.identity.get` किसी एजेंट या सत्र के लिए प्रभावी सहायक पहचान लौटाता है।
+    - `agent.wait` रन समाप्त होने की प्रतीक्षा करता है और उपलब्ध होने पर अंतिम स्नैपशॉट लौटाता है।
 
   </Accordion>
 
-  <Accordion title="सेशन नियंत्रण">
-    - `sessions.list` वर्तमान सेशन इंडेक्स लौटाता है, जिसमें एजेंट रनटाइम बैकएंड कॉन्फ़िगर होने पर प्रति-पंक्ति `agentRuntime` मेटाडेटा शामिल होता है।
-    - `sessions.subscribe` और `sessions.unsubscribe` वर्तमान WS क्लाइंट के लिए सेशन परिवर्तन इवेंट सदस्यताएँ टॉगल करते हैं।
-    - `sessions.messages.subscribe` और `sessions.messages.unsubscribe` एक सेशन के लिए ट्रांसक्रिप्ट/संदेश इवेंट सदस्यताएँ टॉगल करते हैं।
-    - `sessions.preview` विशिष्ट सेशन कुंजियों के लिए सीमित ट्रांसक्रिप्ट पूर्वावलोकन लौटाता है।
-    - `sessions.describe` किसी सटीक सेशन कुंजी के लिए एक Gateway सेशन पंक्ति लौटाता है।
-    - `sessions.resolve` सेशन लक्ष्य का समाधान या कैननिकलाइज़ करता है।
-    - `sessions.create` नई सेशन प्रविष्टि बनाता है।
-    - `sessions.send` किसी मौजूदा सेशन में संदेश भेजता है।
-    - `sessions.steer` सक्रिय सेशन के लिए इंटरप्ट-और-स्टीयर वैरिएंट है।
-    - `sessions.abort` किसी सेशन के लिए सक्रिय कार्य रोकता है। कॉलर `key` के साथ वैकल्पिक `runId` पास कर सकता है, या उन सक्रिय रन के लिए केवल `runId` पास कर सकता है जिन्हें Gateway किसी सेशन से जोड़ सकता है।
-    - `sessions.patch` सेशन मेटाडेटा/ओवरराइड अपडेट करता है और हल किए गए कैननिकल मॉडल के साथ प्रभावी `agentRuntime` रिपोर्ट करता है।
-    - `sessions.reset`, `sessions.delete`, और `sessions.compact` सेशन रखरखाव करते हैं।
-    - `sessions.get` पूरी संग्रहीत सेशन पंक्ति लौटाता है।
-    - चैट निष्पादन अब भी `chat.history`, `chat.send`, `chat.abort`, और `chat.inject` का उपयोग करता है। `chat.history` UI क्लाइंट के लिए डिस्प्ले-सामान्यीकृत है: इनलाइन निर्देश टैग दृश्यमान टेक्स्ट से हटाए जाते हैं, सादा-पाठ टूल-कॉल XML पेलोड (जिसमें `<tool_call>...</tool_call>`, `<function_call>...</function_call>`, `<tool_calls>...</tool_calls>`, `<function_calls>...</function_calls>`, और काटे गए टूल-कॉल ब्लॉक शामिल हैं) और लीक हुए ASCII/फुल-विथ मॉडल कंट्रोल टोकन हटाए जाते हैं, सटीक `NO_REPLY` / `no_reply` जैसी शुद्ध साइलेंट-टोकन असिस्टेंट पंक्तियाँ छोड़ी जाती हैं, और अत्यधिक बड़ी पंक्तियों को प्लेसहोल्डर से बदला जा सकता है।
-    - `chat.message.get` एकल दृश्यमान ट्रांसक्रिप्ट प्रविष्टि के लिए additive सीमित पूर्ण-संदेश रीडर है। क्लाइंट `sessionKey`, सेशन चयन एजेंट-स्कोप्ड होने पर वैकल्पिक `agentId`, और `chat.history` के माध्यम से पहले उजागर किया गया ट्रांसक्रिप्ट `messageId` पास करते हैं, और Gateway वही डिस्प्ले-सामान्यीकृत प्रोजेक्शन हल्के इतिहास काटने की सीमा के बिना लौटाता है, जब संग्रहीत प्रविष्टि अब भी उपलब्ध हो और अत्यधिक बड़ी न हो।
-    - `chat.send` ऑटो कटऑफ़ से पहले शुरू हुई मॉडल कॉल के लिए फास्ट मोड का उपयोग करने हेतु एक-टर्न `fastMode: "auto"` स्वीकार करता है, फिर बाद की रीट्राई, फॉलबैक, टूल-रिज़ल्ट, या कंटिन्युएशन कॉल फास्ट मोड के बिना शुरू करता है। कटऑफ़ डिफ़ॉल्ट रूप से 60 सेकंड है और इसे प्रति मॉडल `agents.defaults.models["<provider>/<model>"].params.fastAutoOnSeconds` से कॉन्फ़िगर किया जा सकता है। `chat.send` कॉलर उस अनुरोध के लिए कटऑफ़ ओवरराइड करने हेतु एक-टर्न `fastAutoOnSeconds` पास कर सकता है।
+  <Accordion title="सत्र नियंत्रण">
+    - `sessions.list` वर्तमान सत्र अनुक्रमणिका लौटाता है, जिसमें एजेंट रनटाइम बैकएंड कॉन्फ़िगर होने पर प्रत्येक पंक्ति का `agentRuntime` मेटाडेटा शामिल होता है। क्लाउड-वर्कर प्लेसमेंट सक्षम होने या टिकाऊ पुनर्प्राप्ति स्थिति मौजूद होने पर, सत्र पंक्तियों में एक बंद `placement` स्थिति (`local`, `requested`, `provisioning`, `syncing`, `starting`, `active`, `draining`, `reconciling`, `reclaimed`, या `failed`) के साथ स्थिति-विशिष्ट परिवेश, स्वामी-युग, कार्यक्षेत्र, बंडल, ACK-कर्सर या पुनर्प्राप्ति फ़ील्ड भी शामिल होते हैं।
+    - `sessions.subscribe` और `sessions.unsubscribe` वर्तमान WS क्लाइंट के लिए सत्र परिवर्तन इवेंट सदस्यताओं को चालू या बंद करते हैं।
+    - `sessions.messages.subscribe` और `sessions.messages.unsubscribe` किसी एक सत्र के लिए ट्रांसक्रिप्ट/संदेश इवेंट सदस्यताओं को चालू या बंद करते हैं। उन अनुमोदनों के लिए सैनिटाइज़ किए गए `session.approval` जीवनचक्र इवेंट भी प्राप्त करने हेतु `includeApprovals: true` पास करें, जिनके स्थायी ऑडियंस में वही सटीक सत्र शामिल है और जिनकी समीक्षक बाइंडिंग सदस्यता लेने वाले क्लाइंट को अधिकृत करती है। तब सदस्यता प्रतिक्रिया में एक सीमित लंबित `approvalReplay` शामिल होता है; `truncated` के false होने पर यह प्रामाणिक होता है। ऑप्ट-इन प्रत्येक सदस्यता कॉल के लिए होता है, स्थायी नहीं: उसी सत्र की `includeApprovals: true` के बिना दोबारा सदस्यता लेने पर मौजूदा अनुमोदन सदस्यता हट जाती है। सामान्य सत्र-पठन प्राधिकार के अतिरिक्त, इस ऑप्ट-इन के लिए `operator.admin`, या युग्मित डिवाइस पर `operator.approvals` आवश्यक है।
+    - `sessions.preview` विशिष्ट सत्र कुंजियों के लिए सीमित ट्रांसक्रिप्ट पूर्वावलोकन लौटाता है।
+    - `sessions.describe` किसी सटीक सत्र कुंजी के लिए एक Gateway सत्र पंक्ति लौटाता है।
+    - `sessions.resolve` किसी सत्र लक्ष्य को हल या कैनॉनिकलाइज़ करता है।
+    - `sessions.create` एक नई सत्र प्रविष्टि बनाता है। वैकल्पिक `model` और `thinkingLevel` मान प्रारंभिक मॉडल और रीजनिंग ओवरराइड को परमाण्विक रूप से स्थायी करते हैं। `worktree: true` एक प्रबंधित वर्कट्री का प्रावधान करता है; वैकल्पिक `worktreeBaseRef`/`worktreeName` आधार रेफ़ और शाखा नाम चुनते हैं, और `execNode` (`operator.admin`) सत्र निष्पादन को किसी Node होस्ट से बाँधता है। बनाया गया वर्कट्री परिणाम में दोहराया जाता है और सत्र पंक्ति (`worktree: { id, branch, repoRoot }`) पर स्थायी किया जाता है। जब प्रविष्टि बन जाती है लेकिन उसका नेस्टेड प्रारंभिक `chat.send` अस्वीकार हो जाता है, तो सफल परिणाम में `runStarted: false` और `runError` शामिल होते हैं; क्लाइंट प्रॉम्प्ट को बनाए रखकर लौटाई गई सत्र कुंजी के विरुद्ध पुनः प्रयास कर सकते हैं। `emitCommandHooks: true` के साथ `parentSessionKey` पास करने वाले कॉलर को किसी अलग चाइल्ड की जीवनचक्र व्यवस्था भी घोषित करनी चाहिए: `succeedsParent: true`, `session_end` के साथ पैरेंट को समाप्त करता है, जबकि `false` पैरेंट को सक्रिय रखता है और केवल चाइल्ड का `session_start` उत्सर्जित करता है। `succeedsParent` को छोड़ देने पर मौजूदा क्लाइंट के लिए विरासती पैरेंट-रोलओवर व्यवहार बना रहता है। इस व्यवस्था के लिए पैरेंट लिंकेज और कमांड हुक, दोनों आवश्यक हैं; कोई फ़ोर्क अपने पैरेंट को सफल नहीं कर सकता। मुख्य सत्र का उसी स्थान पर रीसेट होने का व्यवहार अपरिवर्तित रहता है, क्योंकि कोई अलग चाइल्ड नहीं बनाया जाता। नई पंक्तियों पर विश्वसनीय निर्माण सीम से केवल-एक-बार लिखी जाने वाली निर्माण उत्पत्ति (`createdVia`, `createdActor`, `createdAt`) अंकित की जाती है; किसी मौजूदा कुंजी को अपनाने पर इसे दोबारा अंकित नहीं किया जाता। मानव प्रोफ़ाइल अभिनेताओं के लिए, पंक्ति को प्रक्षेपित करते समय `createdActor.label` को वर्तमान उपयोगकर्ता प्रोफ़ाइल से हल किया जाता है और इसे सत्र प्रविष्टि पर कभी संग्रहीत नहीं किया जाता, इसलिए प्रोफ़ाइल का नाम बदलने पर विचलन नहीं होता। सत्र पंक्तियों में `parentSessionKey` (नेविगेशन पैरेंट, स्थायी), `controlOwnerSessionKey` (लाइव होने पर रनटाइम नियंत्रक), `forkSource` (फ़ोर्क के लिए सटीक स्रोत कुंजी + ट्रांसक्रिप्ट जनरेशन), और `previousSessionId` (उसी कुंजी के अंतर्गत पिछला ट्रांसक्रिप्ट जनरेशन) भी होते हैं।
+    - `sessions.dispatch` (`operator.admin`) किसी सत्र-स्वामित्व वाले प्रबंधित वर्कट्री सहित मौजूदा स्थानीय OpenClaw सत्र को कॉन्फ़िगर किए गए क्लाउड-वर्कर प्रोफ़ाइल में ले जाता है। `{ key, profileId, agentId? }` पास करें। कोई वर्कर प्रोफ़ाइल कॉन्फ़िगर न होने पर यह विधि अनुपस्थित रहती है, सक्रिय कार्य को समाप्त होने देने से पहले स्थानीय टर्न प्रवेश बंद करती है, और प्लेसमेंट के `active` वर्कर स्वामित्व तक पहुँचने के बाद ही लौटती है। डिस्पैच एकतरफ़ा है; वर्कर से स्थानीय में वापस खींचना इस RPC का भाग नहीं है।
+    - `sessions.groups.list`, `sessions.groups.put`, `sessions.groups.rename`, और `sessions.groups.delete` Gateway-स्वामित्व वाली कस्टम सत्र समूह सूची (नाम + प्रदर्शन क्रम) को प्रबंधित करते हैं। सदस्यता प्रत्येक सत्र के `category` फ़ील्ड पर रहती है; नाम बदलने और हटाने पर सर्वर की ओर से सदस्य सत्र अपडेट होते हैं।
+    - `sessions.send` किसी मौजूदा सत्र में संदेश भेजता है।
+    - `sessions.steer` सक्रिय सत्र के लिए बाधित-करें-और-दिशा-दें प्रकार है।
+    - `sessions.abort` किसी सत्र का सक्रिय कार्य रद्द करता है। `key` के साथ वैकल्पिक `runId` पास करें, या उन सक्रिय रन के लिए केवल `runId` पास करें जिन्हें Gateway किसी सत्र से संबद्ध कर सकता है। `runId` देने पर रद्दीकरण उसी रन तक सीमित रहता है। केवल-कुंजी वाले गैर-ग्लोबल अनुरोध पर `clearQueued: true` सेट करने से उस सत्र के स्वामित्व वाली फ़ॉलोअप और लेन कतारें भी हटा दी जाती हैं। `clearQueued` को छोड़ने वाले मौजूदा कॉलर उन कतारों को बनाए रखते हैं। शाब्दिक `global` कुंजी मौजूदा एजेंट-योग्य `chat.abort` स्वामित्व नियम बनाए रखती है और गैर-ग्लोबल फ़ॉलोअप या लेन सफ़ाई नहीं करती।
+    - `sessions.patch` सत्र मेटाडेटा/ओवरराइड अपडेट करता है और हल किया गया कैनॉनिकल मॉडल तथा प्रभावी `agentRuntime` रिपोर्ट करता है। स्पॉन वंशावली (`spawnedBy`, `spawnedWorkspaceDir`, `spawnedCwd`, `spawnDepth`, `subagentRole`, `subagentControlScope`) अब सार्वजनिक रूप से पैच नहीं की जा सकती; ये तथ्य विश्वसनीय निर्माण पथों द्वारा केवल एक बार लिखे जाते हैं, और इन्हें अब भी भेजने वाले अनुरोध अस्वीकार कर दिए जाते हैं।
+    - `sessions.reset`, `sessions.delete`, और `sessions.compact` सत्र रखरखाव करते हैं।
+    - `sessions.get` पूर्ण संग्रहीत सत्र पंक्ति लौटाता है।
+    - चैट निष्पादन अब भी `chat.history`, `chat.send`, `chat.abort`, और `chat.inject` का उपयोग करता है। UI क्लाइंट के लिए `chat.history` को प्रदर्शन हेतु सामान्यीकृत किया जाता है: दृश्यमान टेक्स्ट से इनलाइन डायरेक्टिव टैग हटा दिए जाते हैं, सादे-टेक्स्ट वाले टूल-कॉल XML पेलोड (`<tool_call>...</tool_call>`, `<function_call>...</function_call>`, `<tool_calls>...</tool_calls>`, `<function_calls>...</function_calls>`, और काटे गए टूल-कॉल ब्लॉक) तथा लीक हुए ASCII/पूर्ण-चौड़ाई मॉडल नियंत्रण टोकन हटा दिए जाते हैं, पूर्णतः मौन-टोकन सहायक पंक्तियाँ (सटीक `NO_REPLY` / `no_reply`) छोड़ दी जाती हैं, और बहुत बड़ी पंक्तियों को प्लेसहोल्डर से बदला जा सकता है।
+    - `chat.message.get` किसी एक दृश्यमान ट्रांसक्रिप्ट प्रविष्टि के लिए योगात्मक, सीमित पूर्ण-संदेश रीडर है। `sessionKey`, सत्र चयन के एजेंट-स्कोप्ड होने पर वैकल्पिक `agentId`, और पहले `chat.history` के माध्यम से सामने आया ट्रांसक्रिप्ट `messageId` पास करें; यदि संग्रहीत प्रविष्टि अब भी उपलब्ध है और बहुत बड़ी नहीं है, तो Gateway हल्की हिस्ट्री की काट-छाँट सीमा के बिना वही प्रदर्शन-सामान्यीकृत प्रक्षेपण लौटाता है।
+    - `chat.toolTitles` Control UI में रेंडर किए गए टूल कॉल के लिए छोटे उद्देश्य शीर्षक लौटाता है (बैच में, सीमित इनपुट के साथ अधिकतम 24 आइटम)। यह सुविधा `gateway.controlUi.toolTitles` के माध्यम से ऑप्ट-इन है (डिफ़ॉल्ट रूप से बंद); अक्षम Gateway बिना मॉडल कॉल के `{ titles: {}, disabled: true }` का उत्तर देते हैं, ताकि क्लाइंट पूछना बंद कर दें। सक्षम होने पर, शीर्षक मानक यूटिलिटी-मॉडल रूटिंग का उपयोग करते हैं: स्पष्ट रूप से कॉन्फ़िगर किया गया `utilityModel` (एक ऑपरेटर निर्णय, जो सभी यूटिलिटी कार्यों की तरह सीमित कार्य सामग्री चुने गए प्रदाता को भेज सकता है), अन्यथा सत्र प्रदाता का घोषित छोटा-मॉडल डिफ़ॉल्ट, ताकि कोई नया निर्गमन गंतव्य अप्रत्यक्ष रूप से न दिखाई दे; खाली `utilityModel` इन्हें पूरी तरह अक्षम कर देता है। शीर्षक कभी भी प्राथमिक मॉडल पर फ़ॉलबैक नहीं करते। परिणामों को टूल नाम + इनपुट के आधार पर प्रत्येक एजेंट की स्थिति डेटाबेस में कैश किया जाता है, इसलिए बार-बार देखने पर समान कॉल का दोबारा शुल्क नहीं लगता।
+    - `chat.send` स्वचालित कटऑफ़ से पहले शुरू हुए मॉडल कॉल के लिए फ़ास्ट मोड उपयोग करने हेतु एक-टर्न `fastMode: "auto"` स्वीकार करता है, फिर बाद के पुनः प्रयास, फ़ॉलबैक, टूल-परिणाम या निरंतरता कॉल को फ़ास्ट मोड के बिना शुरू करता है। कटऑफ़ डिफ़ॉल्ट रूप से 60 सेकंड (`DEFAULT_FAST_MODE_AUTO_ON_SECONDS`) होता है और इसे `agents.defaults.models["<provider>/<model>"].params.fastAutoOnSeconds` से प्रत्येक मॉडल के लिए कॉन्फ़िगर किया जा सकता है। कोई `chat.send` कॉलर उस अनुरोध के लिए कटऑफ़ ओवरराइड करने हेतु एक-टर्न `fastAutoOnSeconds` पास कर सकता है। केवल इस अनुरोध के लिए संग्रहीत कतार मोड ओवरराइड करने हेतु `queueMode` (`steer`, `followup`, `collect`, या `interrupt`) पास करें; स्पष्ट Control UI दिशा-परिवर्तन क्रियाएँ `queueMode: "steer"` का उपयोग करती हैं। इंटरैक्टिव क्लाइंट अपने द्वारा प्रदर्शित सक्रिय ट्रांसक्रिप्ट-शाखा लीफ़ के साथ `expectedLeafEntryId`, या प्रामाणिक खाली ट्रांसक्रिप्ट के लिए `null` पास कर सकते हैं; यदि किसी अन्य क्लाइंट ने पहले शाखा बदल दी हो, तो Gateway `details.reason: "active-leaf-changed"` के साथ भेजना अस्वीकार कर देता है।
 
   </Accordion>
 
-  <Accordion title="डिवाइस पेयरिंग और डिवाइस टोकन">
-    - `device.pair.list` लंबित और स्वीकृत पेयर्ड डिवाइस लौटाता है।
-    - `device.pair.setupCode` मोबाइल सेटअप कोड और, डिफ़ॉल्ट रूप से, PNG QR डेटा URL बनाता है। इसके लिए `operator.admin` आवश्यक है और इसे जानबूझकर विज्ञापित खोज से बाहर रखा गया है। परिणाम में `setupCode`, वैकल्पिक `qrDataUrl`, `gatewayUrl`, गैर-गोपनीय `auth` लेबल, और `urlSource` शामिल होते हैं।
-    - `device.pair.approve`, `device.pair.reject`, और `device.pair.remove` डिवाइस-पेयरिंग रिकॉर्ड प्रबंधित करते हैं।
-    - `device.token.rotate` किसी पेयर्ड डिवाइस टोकन को उसकी स्वीकृत भूमिका और कॉलर स्कोप सीमाओं के भीतर रोटेट करता है।
-    - `device.token.revoke` किसी पेयर्ड डिवाइस टोकन को उसकी स्वीकृत भूमिका और कॉलर स्कोप सीमाओं के भीतर निरस्त करता है।
+  <Accordion title="डिवाइस युग्मन और डिवाइस टोकन">
+    - `device.pair.list` लंबित और अनुमोदित युग्मित डिवाइस लौटाता है।
+    - `device.pair.setupCode` एक मोबाइल सेटअप कोड और, डिफ़ॉल्ट रूप से, PNG QR डेटा URL बनाता है। इसके लिए `operator.admin` आवश्यक है और इसे जानबूझकर विज्ञापित खोज से बाहर रखा गया है। परिणाम में `setupCode`, वैकल्पिक `qrDataUrl`, `gatewayUrl`, गैर-गोपनीय `auth` लेबल, और `urlSource` शामिल होते हैं।
+    - `device.pair.approve`, `device.pair.reject`, और `device.pair.remove` डिवाइस-युग्मन रिकॉर्ड प्रबंधित करते हैं।
+    - `device.pair.rename` एक ऑपरेटर लेबल (`{ deviceId, label }`) निर्दिष्ट करता है, जिसे क्लाइंट द्वारा रिपोर्ट किए गए प्रदर्शन नाम पर वरीयता दी जाती है और जो डिवाइस की मरम्मत या पुनः अनुमोदन के बाद भी बना रहता है।
+    - `device.token.rotate` किसी युग्मित डिवाइस टोकन को उसकी अनुमोदित भूमिका और कॉलर स्कोप की सीमाओं के भीतर रोटेट करता है।
+    - `device.token.revoke` किसी युग्मित डिवाइस टोकन को उसकी अनुमोदित भूमिका और कॉलर स्कोप की सीमाओं के भीतर निरस्त करता है।
 
-    सेटअप कोड में अल्पकालिक बूटस्ट्रैप क्रेडेंशियल एम्बेड होता है। क्लाइंट को इसे पेयरिंग फ़्लो से आगे
-    लॉग या स्थायी नहीं रखना चाहिए।
-
-  </Accordion>
-
-  <Accordion title="Node पेयरिंग, इनवोक, और लंबित कार्य">
-    - `node.pair.request`, `node.pair.list`, `node.pair.approve`, `node.pair.reject`, `node.pair.remove`, और `node.pair.verify` नोड पेयरिंग और बूटस्ट्रैप सत्यापन कवर करते हैं।
-    - `node.list` और `node.describe` ज्ञात/कनेक्टेड नोड स्थिति लौटाते हैं।
-    - `node.rename` पेयर्ड नोड लेबल अपडेट करता है।
-    - `node.invoke` किसी कनेक्टेड नोड को कमांड अग्रेषित करता है।
-    - `node.invoke.result` इनवोक अनुरोध का परिणाम लौटाता है।
-    - `node.event` नोड-उत्पन्न इवेंट को वापस Gateway में ले जाता है।
-    - `node.pending.pull` और `node.pending.ack` कनेक्टेड-नोड क्यू API हैं।
-    - `node.pending.enqueue` और `node.pending.drain` ऑफ़लाइन/डिस्कनेक्टेड नोड के लिए टिकाऊ लंबित कार्य प्रबंधित करते हैं।
+    सेटअप कोड में अल्पकालिक बूटस्ट्रैप क्रेडेंशियल अंतर्निहित होता है। क्लाइंट को
+    युग्मन प्रवाह के बाद इसे लॉग या स्थायी नहीं करना चाहिए।
 
   </Accordion>
 
-  <Accordion title="स्वीकृति परिवार">
-    - `exec.approval.request`, `exec.approval.get`, `exec.approval.list`, और `exec.approval.resolve` वन-शॉट exec स्वीकृति अनुरोधों के साथ लंबित स्वीकृति लुकअप/रीप्ले कवर करते हैं।
-    - `exec.approval.waitDecision` एक लंबित exec स्वीकृति पर प्रतीक्षा करता है और अंतिम निर्णय लौटाता है (या टाइमआउट पर `null`)।
-    - `exec.approvals.get` और `exec.approvals.set` gateway exec स्वीकृति नीति स्नैपशॉट प्रबंधित करते हैं।
-    - `exec.approvals.node.get` और `exec.approvals.node.set` नोड रिले कमांड के माध्यम से नोड-स्थानीय exec स्वीकृति नीति प्रबंधित करते हैं।
-    - `plugin.approval.request`, `plugin.approval.list`, `plugin.approval.waitDecision`, और `plugin.approval.resolve` plugin-परिभाषित स्वीकृति फ़्लो कवर करते हैं।
+  <Accordion title="Node युग्मन, आह्वान और लंबित कार्य">
+    - `node.pair.list`, `node.pair.approve`, `node.pair.reject`, और `node.pair.remove` Node क्षमता अनुमोदनों को कवर करते हैं। `node.pair.request` और `node.pair.verify` को स्वतंत्र Node युग्मन स्टोर के साथ 2026.7 में हटा दिया गया था; लंबित अनुरोध Node कनेक्ट होने के दौरान Gateway द्वारा बनाए जाते हैं।
+    - `node.list` और `node.describe` ज्ञात/कनेक्टेड Node स्थिति लौटाते हैं।
+    - `node.rename` किसी युग्मित Node लेबल को अपडेट करता है।
+    - `node.invoke` किसी कनेक्टेड Node को कमांड अग्रेषित करता है।
+    - `node.invoke.result` किसी आह्वान अनुरोध का परिणाम लौटाता है।
+    - `mcp.tools.call.v1` किसी कॉन्फ़िगर किए गए Node-स्थानीय MCP टूल को कॉल करने के लिए हेडलेस Node-होस्ट कमांड है। इसे `node.invoke` के माध्यम से ले जाया जाता है, इसके लिए Node द्वारा कमांड घोषित करना आवश्यक है, और यह युग्मन अनुमोदन तथा `gateway.nodes.commands.deny` के अधीन रहता है।
+    - `node.event` Node से उत्पन्न इवेंट को वापस Gateway में ले जाता है।
+    - `node.pluginTools.update` कनेक्टेड Node के एजेंट-दृश्यमान Plugin/MCP टूल विवरणकों को बदलने का एकमात्र प्रकाशन पथ है; `connect` पैरामीटर उन्हें नहीं ले जाते।
+    - `node.pending.pull` और `node.pending.ack` कनेक्टेड-Node कतार API हैं।
+    - `node.pending.enqueue` और `node.pending.drain` ऑफ़लाइन/डिस्कनेक्टेड Node के लिए टिकाऊ लंबित कार्य प्रबंधित करते हैं।
 
   </Accordion>
 
-  <Accordion title="ऑटोमेशन, Skills, और टूल">
-    - ऑटोमेशन: `wake` तत्काल या अगले-Heartbeat वेक टेक्स्ट इंजेक्शन को शेड्यूल करता है; `cron.get`, `cron.list`, `cron.status`, `cron.add`, `cron.update`, `cron.remove`, `cron.run`, `cron.runs` शेड्यूल किए गए कार्य प्रबंधित करते हैं।
-    - `cron.run` मैनुअल रन के लिए एनक्यू-शैली RPC बना रहता है। जिन क्लाइंट को पूर्णता सिमेंटिक्स चाहिए, उन्हें लौटाया गया `runId` पढ़ना चाहिए और `cron.runs` पोल करना चाहिए।
-    - `cron.runs` वैकल्पिक गैर-खाली `runId` फ़िल्टर स्वीकार करता है ताकि क्लाइंट उसी जॉब के अन्य इतिहास प्रविष्टियों से रेस किए बिना एक क्यू किए गए मैनुअल रन का अनुसरण कर सकें।
-    - Skills और टूल: `commands.list`, `skills.*`, `tools.catalog`, `tools.effective`, `tools.invoke`.
+  <Accordion title="अनुमोदन समूह">
+    - `approval.history` exec, plugin और system-agent अनुरोधों (दायरा `operator.approvals`) के लिए 30 दिनों तक रखे गए नवीनतम-प्रथम अंतिम अनुमोदन लौटाता है। यह कर्सर पृष्ठांकन के साथ वैकल्पिक प्रकार फ़िल्टर का समर्थन करता है; लंबित अनुमोदन इतिहास की पंक्तियाँ नहीं हैं।
+    - `approval.get` और `approval.resolve` प्रकार-निरपेक्ष टिकाऊ अनुमोदन विधियाँ हैं (दायरा `operator.approvals`)। `approval.get` स्थिर `urlPath` के साथ स्वच्छ किया गया लंबित या रखा गया अंतिम प्रक्षेपण लौटाता है; `approval.resolve` विहित अनुमोदन आईडी, स्पष्ट `kind` और निर्णय स्वीकार करता है, पहले उत्तर को अंतिम मानने वाला समाधान लागू करता है और हमेशा दर्ज किया गया विहित परिणाम लौटाता है।
+    - `exec.approval.request`, `exec.approval.get`, `exec.approval.list` और `exec.approval.resolve` एकबारगी exec अनुमोदन अनुरोधों के साथ लंबित अनुमोदन खोज/पुनर्चालन को कवर करते हैं। वे उसी टिकाऊ अनुमोदन रजिस्ट्री पर प्रोटोकॉल-सीमा अडैप्टर हैं।
+    - `exec.approval.waitDecision` एक लंबित exec अनुमोदन की प्रतीक्षा करता है और अंतिम निर्णय (या टाइमआउट होने पर `null`) लौटाता है।
+    - `exec.approvals.get` और `exec.approvals.set` Gateway की exec अनुमोदन नीति के स्नैपशॉट प्रबंधित करते हैं।
+    - `exec.approvals.node.get` और `exec.approvals.node.set` Node रिले कमांड के माध्यम से Node-स्थानीय exec अनुमोदन नीति प्रबंधित करते हैं।
+    - `plugin.approval.request`, `plugin.approval.list`, `plugin.approval.waitDecision` और `plugin.approval.resolve` Plugin द्वारा परिभाषित अनुमोदन प्रवाहों को कवर करते हैं।
+
+  </Accordion>
+
+  <Accordion title="Control UI कमांड">
+    - `ui.command`, `operator.write` कॉलर को उन कनेक्टेड Control UI क्लाइंट को टाइपयुक्त लेआउट और नेविगेशन कमांड भेजने देता है जो `ui-commands` क्षमता घोषित करते हैं।
+    - कमांड पेन विभाजन/बंद करना/फ़ोकस, साइडबार दृश्यता, टर्मिनल/ब्राउज़र पैनल की दृश्यता और डॉक तथा सत्र नेविगेशन को कवर करते हैं।
+    - प्रोटोकॉल v1 जानबूझकर प्रत्येक कनेक्टेड और सक्षम Control UI तक प्रसारित होता है। यदि कोई कनेक्टेड नहीं है, तो लेआउट बदलने का दिखावा करने के बजाय अनुरोध `UNAVAILABLE` के साथ विफल होता है।
+
+  </Accordion>
+
+  <Accordion title="स्वचालन, Skills और उपकरण">
+    - स्वचालन: `wake` तत्काल या अगले Heartbeat पर सक्रियण-पाठ अंतःक्षेप निर्धारित करता है; `cron.get`, `cron.list`, `cron.status`, `cron.add`, `cron.update`, `cron.remove`, `cron.run`, `cron.runs` निर्धारित कार्य प्रबंधित करते हैं।
+    - `cron.run` मैन्युअल संचालनों के लिए कतारबद्ध करने की शैली वाला RPC बना रहता है। जिन क्लाइंट को पूर्णता संबंधी अर्थविज्ञान चाहिए, उन्हें लौटाया गया `runId` पढ़ना और `cron.runs` को पोल करना चाहिए।
+    - `cron.runs` वैकल्पिक गैर-रिक्त `runId` फ़िल्टर स्वीकार करता है, ताकि क्लाइंट उसी जॉब की अन्य इतिहास प्रविष्टियों से होड़ किए बिना कतारबद्ध मैन्युअल संचालन का अनुसरण कर सकें।
+    - Skills और उपकरण: `commands.list`, `skills.*`, `tools.catalog`, `tools.effective`, `tools.invoke`। नीचे [ऑपरेटर सहायक विधियाँ](#operator-helper-methods) देखें।
 
   </Accordion>
 </AccordionGroup>
 
-### सामान्य इवेंट परिवार
+### सामान्य इवेंट समूह
 
-- `chat`: UI चैट अपडेट जैसे `chat.inject` और अन्य केवल-ट्रांसक्रिप्ट चैट
+- `chat`: UI चैट अपडेट, जैसे `chat.inject` और अन्य केवल-प्रतिलेख चैट
   इवेंट। प्रोटोकॉल v4 में, डेल्टा पेलोड `deltaText` रखते हैं; `message`
-  संचयी असिस्टेंट स्नैपशॉट बना रहता है। गैर-प्रीफ़िक्स प्रतिस्थापन `replace=true`
-  सेट करते हैं और `deltaText` को प्रतिस्थापन टेक्स्ट के रूप में उपयोग करते हैं।
-- `session.message`, `session.operation`, और `session.tool`: सब्सक्राइब किए गए
-  सेशन के लिए ट्रांसक्रिप्ट, इन-फ़्लाइट सेशन ऑपरेशन, और इवेंट-स्ट्रीम अपडेट।
-- `sessions.changed`: सेशन इंडेक्स या मेटाडेटा बदला।
-- `presence`: सिस्टम प्रेज़ेंस स्नैपशॉट अपडेट।
-- `tick`: आवधिक keepalive / liveness इवेंट।
-- `health`: gateway स्वास्थ्य स्नैपशॉट अपडेट।
-- `heartbeat`: heartbeat इवेंट स्ट्रीम अपडेट।
-- `cron`: cron रन/जॉब परिवर्तन इवेंट।
-- `shutdown`: gateway शटडाउन सूचना।
-- `node.pair.requested` / `node.pair.resolved`: नोड पेयरिंग जीवनचक्र।
-- `node.invoke.request`: नोड इनवोक अनुरोध प्रसारण।
-- `device.pair.requested` / `device.pair.resolved`: पेयर्ड-डिवाइस जीवनचक्र।
-- `voicewake.changed`: वेक-वर्ड ट्रिगर कॉन्फ़िग बदला।
-- `exec.approval.requested` / `exec.approval.resolved`: exec स्वीकृति
+  संचयी सहायक स्नैपशॉट बना रहता है। गैर-उपसर्ग प्रतिस्थापन
+  `replace=true` सेट करते हैं और प्रतिस्थापन पाठ के रूप में `deltaText` का उपयोग करते हैं।
+- `session.message`, `session.operation`, `session.tool`: सदस्यता लिए गए सत्र के लिए प्रतिलेख, प्रगति में चल रहा
+  सत्र संचालन और इवेंट-स्ट्रीम अपडेट।
+- `session.approval`: स्पष्ट रूप से सहमति देने वाले सटीक-सत्र सदस्य के लिए स्वच्छ किया गया लंबित और अंतिम अनुमोदन सत्य।
+  चाइल्ड अनुमोदन स्थायी पूर्वज ऑडियंस का उपयोग करते हैं; इवेंट कभी भी
+  प्रतिलेख परिवर्तित नहीं करते या एजेंट को सक्रिय नहीं करते।
+- `sessions.changed`: सत्र इंडेक्स या मेटाडेटा बदला।
+- `presence`: सिस्टम उपस्थिति स्नैपशॉट अपडेट।
+- `tick`: आवधिक कीपअलाइव/सक्रियता इवेंट।
+- `health`: Gateway स्वास्थ्य स्नैपशॉट अपडेट।
+- `heartbeat`: Heartbeat इवेंट स्ट्रीम अपडेट।
+- `cron`: Cron संचालन/जॉब परिवर्तन इवेंट।
+- `shutdown`: Gateway शटडाउन सूचना।
+- `node.pair.requested` / `node.pair.resolved`: Node पेयरिंग जीवनचक्र।
+- `node.invoke.request`: Node इनवोक अनुरोध प्रसारण।
+- `device.pair.requested` / `device.pair.resolved`: पेयर किए गए डिवाइस का जीवनचक्र।
+- `voicewake.changed`: वेक-वर्ड ट्रिगर कॉन्फ़िगरेशन बदला।
+- `config.changed`: कॉन्फ़िगरेशन लेखन स्थायी हुआ (पेलोड में कॉन्फ़िगरेशन पथ,
+  नया स्नैपशॉट हैश और टाइमस्टैम्प होता है—कॉन्फ़िगरेशन सामग्री कभी नहीं)। ऑपरेटर-पठन
+  दायरे वाला; क्लाइंट `config.get` के माध्यम से रीफ़्रेश करते हैं।
+- `exec.approval.requested` / `exec.approval.resolved`: exec अनुमोदन
   जीवनचक्र।
-- `plugin.approval.requested` / `plugin.approval.resolved`: plugin स्वीकृति
+- `plugin.approval.requested` / `plugin.approval.resolved`: Plugin अनुमोदन
   जीवनचक्र।
 
-### नोड हेल्पर विधियाँ
+### Node सहायक विधियाँ
 
-- नोड ऑटो-अलाउ जाँचों के लिए कौशल निष्पाद्य फ़ाइलों की वर्तमान सूची पाने हेतु `skills.bins` कॉल कर सकते हैं।
+स्वतः-अनुमति जाँच के लिए कौशल निष्पादनयोग्य फ़ाइलों की वर्तमान सूची प्राप्त करने हेतु
+Node, `skills.bins` को कॉल कर सकते हैं।
 
-### टास्क लेजर RPC
+## ऑडिट लेजर RPC
 
-ऑपरेटर क्लाइंट टास्क लेजर RPC के माध्यम से Gateway बैकग्राउंड टास्क रिकॉर्ड का निरीक्षण और रद्द कर सकते हैं। ये विधियाँ स्वच्छ किए गए टास्क सारांश लौटाती हैं, कच्ची रनटाइम स्थिति नहीं।
+`audit.activity.list` ऑपरेटर क्लाइंट को एजेंट संचालन, उपकरण क्रिया और सहमति-आधारित संदेश
+जीवनचक्र मेटाडेटा का स्थिर नवीनतम-प्रथम दृश्य देता है। इसके लिए
+`operator.read` आवश्यक है। क्वेरी 30 दिनों से पुराने रिकॉर्ड बाहर रखती हैं और साझा
+SQLite लेजर की सीमा 100,000 रिकॉर्ड है। समय-सीमा समाप्त पंक्तियाँ
+Gateway स्टार्टअप, प्रति घंटे रखरखाव और बाद के लेखनों के दौरान हटाई जाती हैं। डेटा मॉडल और गोपनीयता अर्थविज्ञान के लिए
+[ऑडिट इतिहास](/hi/gateway/audit) देखें।
+
+- पैरामीटर: वैकल्पिक सटीक `agentId`, `sessionKey` या `runId`; वैकल्पिक `kind`
+  (`"agent_run"`, `"tool_action"` या `"message"`); वैकल्पिक `status`
+  (`"started"`, `"succeeded"`, `"failed"`, `"cancelled"`, `"timed_out"`,
+  `"blocked"` या `"unknown"`); वैकल्पिक संदेश `direction` (`"inbound"` या
+  `"outbound"`) और सटीक `channel`; वैकल्पिक समावेशी `after` / `before`
+  यूनिक्स-मिलीसेकंड सीमाएँ; `1` से `500` तक वैकल्पिक `limit`; और पिछले पृष्ठ का वैकल्पिक
+  स्ट्रिंग `cursor`।
+- परिणाम: `{ "events": AuditActivityEventV1[], "nextCursor"?: string }`।
+
+नामित V1 परिणाम यूनियन में एजेंट-संचालन, उपकरण-क्रिया, इनबाउंड-संदेश
+और आउटबाउंड-संदेश के लिए अलग-अलग स्कीमा हैं। `eventType` डिस्क्रिमिनेटर क्रमशः
+`agent_run`, `tool_action`, `inbound_message` या `outbound_message` है; `kind` और
+संदेश `direction` फ़िल्टरिंग और प्रदर्शन के लिए उपलब्ध रहते हैं। प्रत्येक इवेंट में पूर्णांक
+`schemaVersion: 1` होता है। संदेश पहचान संदर्भ सटीक
+`hmac-sha256:v1:<32 hex key id>:<64 hex digest>` प्रारूप का उपयोग करते हैं; चैनल-प्रेषक अभिनेता
+आईडी भी इसी प्रारूप का उपयोग करती है।
+
+सभी वेरिएंट के लिए `eventType`, `schemaVersion`, `eventId`, `sequence`,
+`sourceSequence`, `occurredAt`, `kind`, `action`, `status`, `actor` और
+`redaction` आवश्यक हैं। वेरिएंट फ़ील्ड ये हैं:
+
+| `eventType`        | आवश्यक फ़ील्ड                                                   | वैकल्पिक फ़ील्ड                                                                                                                 |
+| ------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `agent_run`        | `agentId`, `runId`; `kind: "agent_run"`                           | `sessionKey`, `sessionId`, `errorCode`                                                                                          |
+| `tool_action`      | `agentId`, `runId`; `kind: "tool_action"`                         | `sessionKey`, `sessionId`, `toolCallId`, `toolName`, `errorCode`                                                                |
+| `inbound_message`  | `direction: "inbound"`, `channel`, `conversationKind`, `outcome`  | `agentId`, `runId`, `durationMs`, `resultCount`, पहचान संदर्भ, `reasonCode`, `errorCode`                                 |
+| `outbound_message` | `direction: "outbound"`, `channel`, `conversationKind`, `outcome` | `agentId`, `runId`, `durationMs`, `resultCount`, पहचान संदर्भ, `reasonCode`, `deliveryKind`, `failureStage`, `errorCode` |
+
+बंद संदेश एनम ये हैं:
+
+- `conversationKind`: `direct`, `group`, `channel` या `unknown`।
+- इनबाउंड `outcome`: `completed`, `skipped` या `failed`; वैकल्पिक
+  `reasonCode`: `duplicate`, `reply_operation_active`,
+  `reply_operation_aborted`, `fast_abort`, `plugin_bound_handled`,
+  `plugin_bound_unavailable`, `plugin_bound_declined`, `plugin_bound_error`,
+  `before_dispatch_handled`, `acp_dispatch_completed`, `acp_dispatch_failed`,
+  `acp_dispatch_empty` या `acp_dispatch_aborted`।
+- आउटबाउंड `outcome`: `sent`, `suppressed`, `failed` या `unknown`; वैकल्पिक
+  `reasonCode`: `cancelled_by_message_sending_hook`,
+  `cancelled_by_reply_payload_sending_hook`,
+  `empty_after_message_sending_hook`, `empty_after_reply_payload_sending_hook`
+  या `no_visible_payload`। जो अडैप्टर कोई प्लेटफ़ॉर्म पहचान नहीं लौटाता, वह
+  `unknown` है, क्योंकि बाहरी दुष्प्रभाव को असत्य सिद्ध नहीं किया जा सकता।
+- `deliveryKind`: `text`, `media` या `other`; `failureStage`:
+  `platform_send`, `queue` या `unknown`।
+
+अंतिम फ़ील्ड सहसंबद्ध हैं, स्वतंत्र रूप से वैकल्पिक नहीं:
+
+| वेरिएंट          | अंतिम मैपिंग                                                                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| एजेंट संचालन        | `started` में `errorCode` नहीं होता; प्रत्येक गैर-सफल पूर्ण स्थिति के लिए उसका मेल खाता `run_*` कोड आवश्यक है।                                                                 |
+| उपकरण क्रिया      | `started` और सफल स्थिति में `errorCode` नहीं होता; प्रत्येक अन्य पूर्ण स्थिति के लिए उसका मेल खाता `tool_*` कोड आवश्यक है।                                                       |
+| इनबाउंड संदेश  | सफल = `completed`; अवरुद्ध = `skipped`; विफल = `failed` के साथ `message_processing_failed`। `reasonCode`, मौजूद होने पर, उसी अंतिम समूह से संबंधित होना चाहिए। |
+| आउटबाउंड संदेश | सफल = `sent`; अवरुद्ध = `suppressed` के साथ `reasonCode`; विफल = `failed` के साथ `errorCode` और `failureStage`; अज्ञात = `unknown` के साथ `failureStage`।      |
+
+प्रत्येक गतिविधि इवेंट में स्थिर इवेंट आईडी, एकदिश बढ़ता लेजर अनुक्रम,
+स्रोत इवेंट अनुक्रम, टाइमस्टैम्प, अभिनेता, क्रिया, स्थिति, पूर्णांक
+`schemaVersion: 1` और `redaction: "metadata_only"` शामिल हैं। संचालन और उपकरण रिकॉर्ड के लिए
+एजेंट और संचालन उद्गम आवश्यक हैं तथा उनमें सत्र उद्गम शामिल हो सकता है। संदेश
+रिकॉर्ड में एजेंट और संचालन आईडी शामिल हो सकती हैं, लेकिन जानबूझकर कभी भी
+`sessionKey` या `sessionId` शामिल नहीं होते; इसलिए `sessionKey` क्वेरी फ़िल्टर केवल
+संचालन और उपकरण पंक्तियों पर लागू होता है। उपकरण इवेंट में उपकरण कॉल आईडी और उपकरण नाम शामिल हो सकते हैं।
+
+संदेश रिकॉर्ड `message.inbound.processed` या
+`message.outbound.finished` का उपयोग करते हैं और दिशा, चैनल, वार्तालाप प्रकार,
+सामान्यीकृत परिणाम, तथा वैकल्पिक वितरण प्रकार, विफलता चरण, अवधि,
+परिणाम संख्या, कारण कोड, और इंस्टॉलेशन-स्थानीय कुंजीयुक्त
+खाता/वार्तालाप/संदेश/लक्ष्य छद्मनाम जोड़ते हैं। ये छद्मनाम
+सहसंबंध में सहायता करते हैं, लेकिन अनामिकीकरण नहीं हैं: स्थिति डेटाबेस में उनकी कुंजी होती है,
+जबकि RPC और CLI निर्यातों में नहीं। लेजर प्रॉम्प्ट, संदेश
+मुख्य भाग, टूल तर्क, टूल परिणाम, कमांड आउटपुट या अपरिष्कृत त्रुटि टेक्स्ट संग्रहीत नहीं करता।
+रन/टूल `sessionKey` मान अपरिष्कृत सहसंबंध मेटाडेटा बने रहते हैं और उनमें
+प्लेटफ़ॉर्म खाता या पीयर आईडी समाहित हो सकती हैं; संदेश रिकॉर्ड में सत्र कुंजियाँ शामिल नहीं होतीं।
+
+इनबाउंड पंक्तियों के लिए, `durationMs` कोर डिस्पैच से उसके समापन तक का मापन करता है और
+`resultCount` अंतिम रूप दिए गए कतारबद्ध टूल, ब्लॉक और उत्तर पेलोड की गणना करता है। 
+आउटबाउंड पंक्तियों के लिए, `durationMs` वितरण स्वामित्व से अभिस्वीकृति,
+डेड लेटर या समाधान तक (कतारबद्ध प्रतीक्षा समय सहित) की अवधि को समेटता है, और `resultCount`
+पहचाने गए वास्तविक प्लेटफ़ॉर्म प्रेषणों की गणना करता है। `deliveryKind`, मौजूद होने पर,
+हुक और रेंडरिंग के बाद प्रभावी पेलोड का वर्णन करता है; दबाई गई या
+क्रैश-संदिग्ध पंक्तियों में यह शामिल नहीं होता।
+
+वर्तमान संदेश कवरेज में कोर
+डिस्पैच तक पहुँचने वाले स्वीकृत इनबाउंड संदेश शामिल हैं, जिनमें कोर डुप्लिकेट/समापन परिणाम भी शामिल हैं। आउटबाउंड कवरेज
+साझा टिकाऊ वितरण तक पहुँचने वाले प्रत्येक मूल तार्किक उत्तर पेलोड के लिए
+एक समापन पंक्ति लिखता है; खंडन और अडैप्टर फ़ैन-आउट को `resultCount` में समेकित किया जाता है। कतारबद्ध
+पुनः प्रयास योग्य या संदिग्ध प्रेषण केवल अभिस्वीकृति, डेड
+लेटर या समाधान के बाद रिकॉर्ड किए जाते हैं। उन साझा
+सीमाओं को दरकिनार करने वाले Plugin-स्थानीय और प्रत्यक्ष-प्रेषण पथ अभी कवर नहीं किए गए हैं। सीमित वर्कर कतार सर्वोत्तम-प्रयास
+आधारित है और विफलता या संतृप्ति पर रिकॉर्ड छोड़ सकती है, इसलिए यह सतह
+हानिरहित अनुपालन संग्रह नहीं है।
+
+रिकॉर्डिंग डिफ़ॉल्ट रूप से चालू होती है और
+[`audit.enabled`](/hi/gateway/configuration-reference#audit) द्वारा नियंत्रित होती है। संदेश रिकॉर्डिंग
+अलग से `audit.messages` द्वारा नियंत्रित होती है और डिफ़ॉल्ट रूप से `"off"` होती है। जब
+रिकॉर्डिंग अक्षम होती है, तब `audit.activity.list` पहले लिखे गए रिकॉर्ड की
+समाप्ति तक उन्हें प्रस्तुत करता रहता है।
+
+जारी किए गए `audit.list` अनुरोध, परिणाम और `AuditEvent` स्कीमा
+अपरिवर्तित रहते हैं और केवल एजेंट-रन तथा टूल-क्रिया रिकॉर्ड लौटाते हैं। नए ऑपरेटर
+क्लाइंट को `audit.activity.list` कॉल करना चाहिए, जब Gateway इसका विज्ञापन करे। पुराने
+Gateway या तो `unknown method: audit.activity.list` रिपोर्ट कर सकते हैं या, क्योंकि
+जारी किए गए संस्करणों में प्राधिकरण विधि खोज से पहले होता था, पठन-स्कोप वाले अनुरोध को `missing scope:
+operator.admin` रिपोर्ट कर सकते हैं। बाद वाले को विधि की अनुपस्थिति
+केवल तभी मानें, जब विधि का विज्ञापन नहीं किया गया था। इसके बाद क्लाइंट `audit.list` का पुनः प्रयास
+केवल तभी कर सकता है, जब उसके फ़िल्टर को संदेश प्रकार, दिशा या चैनल
+समर्थन की आवश्यकता न हो।
+
+टेक्स्ट क्वेरी और सीमित JSON निर्यातों के लिए [`openclaw audit`](/hi/cli/audit) का उपयोग करें।
+
+## कार्य लेजर RPC
+
+ऑपरेटर क्लाइंट कार्य लेजर RPC (`packages/gateway-protocol/src/schema/tasks.ts`) के माध्यम से
+Gateway पृष्ठभूमि कार्य रिकॉर्ड का निरीक्षण और निरस्तीकरण करते हैं। ये
+साफ़ किए गए कार्य सारांश लौटाते हैं, अपरिष्कृत रनटाइम स्थिति नहीं।
 
 - `tasks.list` के लिए `operator.read` आवश्यक है।
   - पैरामीटर: वैकल्पिक `status` (`"queued"`, `"running"`, `"completed"`,
-    `"failed"`, `"cancelled"`, या `"timed_out"`) या उन स्थितियों की सरणी,
-    वैकल्पिक `agentId`, वैकल्पिक `sessionKey`, वैकल्पिक `limit` `1` से
-    `500` तक, और वैकल्पिक स्ट्रिंग `cursor`।
+    `"failed"`, `"cancelled"` या `"timed_out"`) या उन स्थितियों की एक सरणी,
+    वैकल्पिक `agentId`, वैकल्पिक `sessionKey`, `1` से
+    `500` तक वैकल्पिक `limit`, और वैकल्पिक स्ट्रिंग `cursor`।
   - परिणाम: `{ "tasks": TaskSummary[], "nextCursor"?: string }`।
 - `tasks.get` के लिए `operator.read` आवश्यक है।
   - पैरामीटर: `{ "taskId": string }`।
   - परिणाम: `{ "task": TaskSummary }`।
-  - अनुपस्थित टास्क id Gateway not-found त्रुटि आकार लौटाते हैं।
+  - अनुपलब्ध कार्य आईडी Gateway की नॉट-फाउंड त्रुटि संरचना लौटाती हैं।
 - `tasks.cancel` के लिए `operator.write` आवश्यक है।
   - पैरामीटर: `{ "taskId": string, "reason"?: string }`।
-  - परिणाम:
-    `{ "found": boolean, "cancelled": boolean, "reason"?: string, "task"?: TaskSummary }`।
-  - `found` रिपोर्ट करता है कि लेजर में मेल खाता टास्क था या नहीं। `cancelled`
-    रिपोर्ट करता है कि रनटाइम ने रद्दीकरण स्वीकार किया या रिकॉर्ड किया या नहीं।
+  - परिणाम: `{ "found": boolean, "cancelled": boolean, "reason"?: string, "task"?: TaskSummary }`।
+  - `found` बताता है कि लेजर में मेल खाता कार्य था या नहीं। `cancelled`
+    बताता है कि रनटाइम ने निरस्तीकरण स्वीकार किया या रिकॉर्ड किया अथवा नहीं।
 
-`TaskSummary` में `id`, `status`, और वैकल्पिक मेटाडेटा शामिल हैं, जैसे `kind`,
+`TaskSummary` में `id`, `status` और वैकल्पिक मेटाडेटा शामिल हैं: `kind`,
 `runtime`, `title`, `agentId`, `sessionKey`, `childSessionKey`, `ownerKey`,
 `runId`, `taskId`, `flowId`, `parentTaskId`, `sourceId`, टाइमस्टैम्प, प्रगति,
-टर्मिनल सारांश, और स्वच्छ किया गया त्रुटि टेक्स्ट। `agentId` टास्क निष्पादित
-कर रहे एजेंट की पहचान करता है; `sessionKey` और `ownerKey` अनुरोधकर्ता और नियंत्रण
-संदर्भ को सुरक्षित रखते हैं।
+समापन सारांश और साफ़ किया गया त्रुटि टेक्स्ट। `agentId` कार्य निष्पादित करने वाले
+एजेंट की पहचान करता है; `sessionKey` और `ownerKey` अनुरोधकर्ता और नियंत्रण
+संदर्भ को बनाए रखते हैं।
 
-### ऑपरेटर हेल्पर विधियाँ
+## ऑपरेटर सहायक विधियाँ
 
-- ऑपरेटर किसी एजेंट के लिए रनटाइम कमांड इन्वेंटरी लाने हेतु `commands.list` (`operator.read`) कॉल कर सकते हैं।
+- `commands.list` (`operator.read`) किसी एजेंट के लिए रनटाइम कमांड सूची प्राप्त करता है।
   - `agentId` वैकल्पिक है; डिफ़ॉल्ट एजेंट कार्यस्थान पढ़ने के लिए इसे छोड़ दें।
-  - `scope` नियंत्रित करता है कि प्राथमिक `name` किस सतह को लक्षित करता है:
-    - `text` अग्रणी `/` के बिना प्राथमिक टेक्स्ट कमांड टोकन लौटाता है
-    - `native` और डिफ़ॉल्ट `both` पथ उपलब्ध होने पर प्रदाता-सचेत नेटिव नाम लौटाते हैं
-  - `textAliases` `/model` और `/m` जैसे सटीक स्लैश उपनाम रखता है।
-  - `nativeName` प्रदाता-सचेत नेटिव कमांड नाम रखता है, जब कोई मौजूद हो।
-  - `provider` वैकल्पिक है और केवल नेटिव नामकरण तथा नेटिव Plugin कमांड उपलब्धता को प्रभावित करता है।
-  - `includeArgs=false` प्रतिक्रिया से क्रमबद्ध आर्ग्युमेंट मेटाडेटा हटा देता है।
-- ऑपरेटर किसी एजेंट के लिए रनटाइम टूल कैटलॉग लाने हेतु `tools.catalog` (`operator.read`) कॉल कर सकते हैं। प्रतिक्रिया में समूहबद्ध टूल और उत्पत्ति मेटाडेटा शामिल होते हैं:
+  - `scope` नियंत्रित करता है कि प्राथमिक `name` किस सतह को लक्षित करता है: `text` प्रारंभिक `/` के बिना
+    प्राथमिक टेक्स्ट कमांड टोकन लौटाता है; `native` और
+    डिफ़ॉल्ट `both` पथ उपलब्ध होने पर प्रदाता-सजग नेटिव नाम लौटाते हैं।
+  - `textAliases` `/model` और `/m` जैसे हूबहू स्लैश उपनाम रखता है।
+  - `nativeName` मौजूद होने पर प्रदाता-सजग नेटिव कमांड नाम रखता है।
+  - `provider` वैकल्पिक है और केवल नेटिव नामकरण तथा नेटिव Plugin
+    कमांड उपलब्धता को प्रभावित करता है।
+  - `includeArgs=false` प्रतिक्रिया से क्रमबद्ध तर्क मेटाडेटा हटा देता है।
+- `tools.catalog` (`operator.read`) किसी
+  एजेंट के लिए रनटाइम टूल कैटलॉग प्राप्त करता है। प्रतिक्रिया में समूहित टूल और उद्गम मेटाडेटा शामिल होते हैं:
   - `source`: `core` या `plugin`
   - `pluginId`: `source="plugin"` होने पर Plugin स्वामी
-  - `optional`: क्या कोई Plugin टूल वैकल्पिक है
-- ऑपरेटर किसी सत्र के लिए रनटाइम-प्रभावी टूल इन्वेंटरी लाने हेतु `tools.effective` (`operator.read`) कॉल कर सकते हैं।
+  - `optional`: क्या Plugin टूल वैकल्पिक है
+- `tools.effective` (`operator.read`) किसी सत्र के लिए
+  रनटाइम-प्रभावी टूल सूची प्राप्त करता है।
   - `sessionKey` आवश्यक है।
-  - Gateway कॉलर-आपूर्ति किए गए ऑथ या डिलीवरी संदर्भ को स्वीकार करने के बजाय सत्र से सर्वर-साइड विश्वसनीय रनटाइम संदर्भ निकालता है।
-  - प्रतिक्रिया सक्रिय इन्वेंटरी का सत्र-स्कोप, सर्वर-व्युत्पन्न प्रोजेक्शन है, जिसमें core, Plugin, चैनल, और पहले से खोजे गए MCP सर्वर टूल शामिल हैं।
-  - `tools.effective` MCP के लिए केवल-पठन है: यह अंतिम टूल नीति के माध्यम से गर्म सत्र MCP कैटलॉग को प्रोजेक्ट कर सकता है, लेकिन यह MCP रनटाइम नहीं बनाता, ट्रांसपोर्ट कनेक्ट नहीं करता, या `tools/list` जारी नहीं करता। यदि कोई मिलान वाला गर्म कैटलॉग मौजूद नहीं है, तो प्रतिक्रिया में `mcp-not-yet-connected`, `mcp-not-yet-listed`, या `mcp-stale-catalog` जैसी सूचना शामिल हो सकती है।
-  - प्रभावी टूल प्रविष्टियां `source="core"`, `source="plugin"`, `source="channel"`, या `source="mcp"` का उपयोग करती हैं।
-- ऑपरेटर `/tools/invoke` जैसे ही Gateway नीति पथ के माध्यम से एक उपलब्ध टूल लागू करने के लिए `tools.invoke` (`operator.write`) कॉल कर सकते हैं।
-  - `name` आवश्यक है। `args`, `sessionKey`, `agentId`, `confirm`, और `idempotencyKey` वैकल्पिक हैं।
-  - यदि `sessionKey` और `agentId` दोनों मौजूद हैं, तो हल किए गए सत्र एजेंट को `agentId` से मेल खाना चाहिए।
-  - `cron`, `gateway`, और `nodes` जैसे केवल-स्वामी core wrappers को स्वामी/एडमिन पहचान (`operator.admin`) चाहिए, भले ही `tools.invoke` विधि स्वयं `operator.write` हो।
-  - प्रतिक्रिया `ok`, `toolName`, वैकल्पिक `output`, और टाइप किए गए `error` फ़ील्ड के साथ SDK-सामना करने वाला एनवेलप है। अनुमोदन या नीति अस्वीकार Gateway टूल नीति पाइपलाइन को बायपास करने के बजाय पेलोड में `ok:false` लौटाते हैं।
-- ऑपरेटर किसी एजेंट के लिए दृश्यमान Skills इन्वेंटरी लाने हेतु `skills.status` (`operator.read`) कॉल कर सकते हैं।
+  - Gateway कॉलर द्वारा दी गई प्रमाणीकरण या वितरण प्रसंग को स्वीकार करने के बजाय
+    सर्वर-साइड सत्र से विश्वसनीय रनटाइम प्रसंग प्राप्त करता है।
+  - प्रतिक्रिया सक्रिय सूची का सत्र-स्कोप वाला, सर्वर-व्युत्पन्न प्रक्षेपण है,
+    जिसमें कोर, Plugin, चैनल और पहले से खोजे गए MCP
+    सर्वर टूल शामिल हैं।
+  - `tools.effective` MCP के लिए केवल-पठन है: यह अंतिम टूल नीति के माध्यम से किसी सक्रिय सत्र MCP
+    कैटलॉग को प्रक्षेपित कर सकता है, लेकिन MCP रनटाइम नहीं बनाता,
+    ट्रांसपोर्ट कनेक्ट नहीं करता, या `tools/list` जारी नहीं करता। यदि कोई मेल खाता सक्रिय कैटलॉग
+    मौजूद नहीं है, तो प्रतिक्रिया में `mcp-not-yet-connected`,
+    `mcp-not-yet-listed` या `mcp-stale-catalog` जैसी सूचना शामिल हो सकती है।
+  - प्रभावी टूल प्रविष्टियाँ `source="core"`, `source="plugin"`,
+    `source="channel"` या `source="mcp"` का उपयोग करती हैं।
+- `tools.invoke` (`operator.write`) `/tools/invoke` के समान
+  Gateway नीति पथ के माध्यम से एक उपलब्ध टूल का आह्वान करता है।
+  - `name` आवश्यक है। `args`, `sessionKey`, `agentId`, `confirm` और
+    `idempotencyKey` वैकल्पिक हैं।
+  - यदि `sessionKey` और `agentId` दोनों मौजूद हैं, तो समाधान किया गया सत्र एजेंट
+    `agentId` से मेल खाना चाहिए।
+  - केवल-स्वामी कोर रैपर, जैसे `cron`, `gateway` और `nodes`, के लिए
+    स्वामी/व्यवस्थापक पहचान (`operator.admin`) आवश्यक है, भले ही `tools.invoke` स्वयं
+    `operator.write` हो।
+  - प्रतिक्रिया SDK-उन्मुख आवरण है, जिसमें `ok`, `toolName`, वैकल्पिक
+    `output` और टाइप किए गए `error` फ़ील्ड होते हैं। अनुमोदन या नीति अस्वीकृतियाँ
+    Gateway टूल नीति पाइपलाइन को दरकिनार करने के बजाय पेलोड में
+    `ok:false` लौटाती हैं।
+- `skills.status` (`operator.read`) किसी एजेंट के लिए दृश्यमान Skills सूची प्राप्त करता है।
   - `agentId` वैकल्पिक है; डिफ़ॉल्ट एजेंट कार्यस्थान पढ़ने के लिए इसे छोड़ दें।
-  - प्रतिक्रिया में कच्चे सीक्रेट मानों को उजागर किए बिना पात्रता, अनुपलब्ध आवश्यकताएं, कॉन्फ़िग जांच, और स्वच्छ किए गए इंस्टॉल विकल्प शामिल होते हैं।
-- ऑपरेटर ClawHub खोज मेटाडेटा के लिए `skills.search` और `skills.detail` (`operator.read`) कॉल कर सकते हैं।
-- ऑपरेटर किसी निजी स्किल आर्काइव को इंस्टॉल करने से पहले स्टेज करने के लिए `skills.upload.begin`, `skills.upload.chunk`, और `skills.upload.commit` (`operator.admin`) कॉल कर सकते हैं। यह विश्वसनीय क्लाइंट के लिए अलग एडमिन अपलोड पथ है, सामान्य ClawHub स्किल इंस्टॉल प्रवाह नहीं, और `skills.install.allowUploadedArchives` सक्षम न होने तक डिफ़ॉल्ट रूप से अक्षम रहता है।
-  - `skills.upload.begin({ kind: "skill-archive", slug, sizeBytes, sha256?, force?, idempotencyKey? })` उस slug और force मान से बंधा अपलोड बनाता है।
-  - `skills.upload.chunk({ uploadId, offset, dataBase64 })` सटीक डिकोडेड ऑफ़सेट पर बाइट्स जोड़ता है।
-  - `skills.upload.commit({ uploadId, sha256? })` अंतिम आकार और SHA-256 सत्यापित करता है। कमिट केवल अपलोड को अंतिम रूप देता है; यह स्किल इंस्टॉल नहीं करता।
-  - अपलोड किए गए स्किल आर्काइव zip आर्काइव होते हैं जिनमें `SKILL.md` रूट होता है। आर्काइव का आंतरिक डायरेक्टरी नाम कभी इंस्टॉल लक्ष्य नहीं चुनता।
-- ऑपरेटर तीन मोड में `skills.install` (`operator.admin`) कॉल कर सकते हैं:
-  - ClawHub मोड: `{ source: "clawhub", slug, version?, force? }` डिफ़ॉल्ट एजेंट कार्यस्थान की `skills/` डायरेक्टरी में स्किल फ़ोल्डर इंस्टॉल करता है।
-  - अपलोड मोड: `{ source: "upload", uploadId, slug, force?, sha256?, timeoutMs? }` कमिट किए गए अपलोड को डिफ़ॉल्ट एजेंट कार्यस्थान की `skills/<slug>` डायरेक्टरी में इंस्टॉल करता है। slug और force मान को मूल `skills.upload.begin` अनुरोध से मेल खाना चाहिए। यह मोड तब तक अस्वीकृत रहता है जब तक `skills.install.allowUploadedArchives` सक्षम न हो। यह सेटिंग ClawHub इंस्टॉल को प्रभावित नहीं करती।
-  - Gateway इंस्टॉलर मोड: `{ name, installId, timeoutMs? }` Gateway होस्ट पर घोषित `metadata.openclaw.install` कार्रवाई चलाता है। पुराने क्लाइंट अब भी `dangerouslyForceUnsafeInstall` भेज सकते हैं; यह फ़ील्ड अप्रचलित है, केवल प्रोटोकॉल संगतता के लिए स्वीकार किया जाता है, और अनदेखा किया जाता है। ऑपरेटर-स्वामित्व वाले इंस्टॉल निर्णयों के लिए `security.installPolicy` का उपयोग करें।
-- ऑपरेटर दो मोड में `skills.update` (`operator.admin`) कॉल कर सकते हैं:
-  - ClawHub मोड डिफ़ॉल्ट एजेंट कार्यस्थान में एक ट्रैक किए गए slug या सभी ट्रैक किए गए ClawHub इंस्टॉल अपडेट करता है।
-  - कॉन्फ़िग मोड `skills.entries.<skillKey>` मानों जैसे `enabled`, `apiKey`, और `env` को पैच करता है।
+  - प्रतिक्रिया में अपरिष्कृत गुप्त मानों को उजागर किए बिना पात्रता, अनुपलब्ध आवश्यकताएँ, कॉन्फ़िगरेशन जाँच
+    और साफ़ किए गए इंस्टॉल विकल्प शामिल होते हैं।
+- `skills.search` और `skills.detail` (`operator.read`) ClawHub
+  खोज मेटाडेटा लौटाते हैं।
+- `skills.upload.begin`, `skills.upload.chunk` और `skills.upload.commit`
+  (`operator.admin`) किसी निजी Skill संग्रह को इंस्टॉल करने से पहले तैयार करते हैं। यह
+  विश्वसनीय क्लाइंट के लिए एक अलग व्यवस्थापक अपलोड पथ है, सामान्य ClawHub
+  Skill इंस्टॉल प्रवाह नहीं, और डिफ़ॉल्ट रूप से तब तक अक्षम रहता है जब तक
+  `skills.install.allowUploadedArchives` सक्षम न हो।
+  - `skills.upload.begin({ kind: "skill-archive", slug, sizeBytes, sha256?, force?, idempotencyKey? })`
+    उस स्लग और फ़ोर्स मान से बँधा अपलोड बनाता है।
+  - `skills.upload.chunk({ uploadId, offset, dataBase64 })`
+    सटीक डिकोड किए गए ऑफ़सेट पर बाइट जोड़ता है।
+  - `skills.upload.commit({ uploadId, sha256? })` अंतिम आकार और
+    SHA-256 सत्यापित करता है। कमिट केवल अपलोड को अंतिम रूप देता है; यह Skill इंस्टॉल नहीं करता।
+  - अपलोड किए गए Skill संग्रह ऐसे zip संग्रह होते हैं जिनमें `SKILL.md` रूट होता है। संग्रह का
+    आंतरिक डायरेक्टरी नाम कभी भी इंस्टॉल लक्ष्य नहीं चुनता।
+- `skills.install` (`operator.admin`) के तीन मोड हैं:
+  - ClawHub मोड: `{ source: "clawhub", slug, version?, force? }`
+    डिफ़ॉल्ट एजेंट कार्यस्थान की `skills/` डायरेक्टरी में एक Skill फ़ोल्डर इंस्टॉल करता है।
+  - अपलोड मोड: `{ source: "upload", uploadId, slug, force?, sha256?, timeoutMs? }`
+    प्रतिबद्ध अपलोड को डिफ़ॉल्ट एजेंट कार्यस्थान की
+    `skills/<slug>` डायरेक्टरी में इंस्टॉल करता है। स्लग और फ़ोर्स मान मूल
+    `skills.upload.begin` अनुरोध से मेल खाने चाहिए। जब तक
+    `skills.install.allowUploadedArchives` सक्षम न हो, इसे अस्वीकार किया जाता है; यह सेटिंग
+    ClawHub इंस्टॉल को प्रभावित नहीं करती।
+  - Gateway इंस्टॉलर मोड: `{ name, installId, timeoutMs? }` Gateway होस्ट पर घोषित
+    `metadata.openclaw.install` क्रिया चलाता है। पुराने क्लाइंट अभी भी
+    `dangerouslyForceUnsafeInstall` भेज सकते हैं; यह फ़ील्ड पदावनत है,
+    केवल प्रोटोकॉल संगतता के लिए स्वीकार किया जाता है और अनदेखा किया जाता है। ऑपरेटर-स्वामित्व वाले इंस्टॉल निर्णयों के लिए
+    `security.installPolicy` का उपयोग करें।
+- `skills.update` (`operator.admin`) के दो मोड हैं:
+  - ClawHub मोड डिफ़ॉल्ट एजेंट कार्यस्थान में एक ट्रैक किए गए स्लग या सभी ट्रैक किए गए ClawHub इंस्टॉल को
+    अपडेट करता है।
+  - कॉन्फ़िगरेशन मोड `skills.entries.<skillKey>` मानों, जैसे `enabled`,
+    `apiKey` और `env`, को पैच करता है।
 
 ### `models.list` दृश्य
 
-`models.list` एक वैकल्पिक `view` पैरामीटर स्वीकार करता है:
+`models.list` एक वैकल्पिक `view` पैरामीटर
+(`src/agents/model-catalog-visibility.ts`) स्वीकार करता है:
 
-- छोड़ा गया या `"default"`: वर्तमान रनटाइम व्यवहार। यदि `agents.defaults.models` कॉन्फ़िगर किया गया है, तो प्रतिक्रिया अनुमत कैटलॉग होती है, जिसमें `provider/*` प्रविष्टियों के लिए गतिशील रूप से खोजे गए मॉडल शामिल होते हैं। अन्यथा प्रतिक्रिया पूरा Gateway कैटलॉग होती है।
-- `"configured"`: पिकर-आकार का व्यवहार। यदि `agents.defaults.models` कॉन्फ़िगर किया गया है, तो यह फिर भी प्राथमिक रहता है, जिसमें `provider/*` प्रविष्टियों के लिए प्रदाता-स्कोप खोज शामिल है। allowlist के बिना, प्रतिक्रिया स्पष्ट `models.providers.*.models` प्रविष्टियों का उपयोग करती है, और केवल तब पूरे कैटलॉग पर लौटती है जब कोई कॉन्फ़िगर की गई मॉडल पंक्तियां मौजूद नहीं होतीं।
-- `"all"`: पूरा Gateway कैटलॉग, `agents.defaults.models` को बायपास करते हुए। इसे निदान और खोज UI के लिए उपयोग करें, सामान्य मॉडल पिकर के लिए नहीं।
+- छोड़ा गया या `"default"`: यदि `agents.defaults.modelPolicy.allow` कॉन्फ़िगर किया गया है, तो
+  प्रतिक्रिया अनुमत कैटलॉग होती है, जिसमें `provider/*` प्रविष्टियों के लिए
+  गतिशील रूप से खोजे गए मॉडल शामिल होते हैं। अन्यथा प्रतिक्रिया पूर्ण Gateway
+  कैटलॉग होती है।
+- `"configured"`: पिकर-आकार का व्यवहार। यदि `agents.defaults.modelPolicy.allow`
+  कॉन्फ़िगर किया गया है, तो उसे फिर भी प्राथमिकता मिलती है, जिसमें
+  `provider/*` प्रविष्टियों के लिए प्रदाता-स्कोप वाली खोज शामिल है। अनुमति-सूची के बिना, प्रतिक्रिया स्पष्ट
+  `models.providers.<provider>.models` प्रविष्टियों का उपयोग करती है और केवल तब पूर्ण
+  कैटलॉग पर वापस जाती है, जब कोई कॉन्फ़िगर की गई मॉडल पंक्ति मौजूद न हो।
+- `"provider-config"`: स्रोत-निर्मित `models.providers.*.models` सूची,
+  पिकर अनुमति-सूचियों से स्वतंत्र। पंक्तियों में सार्वजनिक मॉडल क्षमताएँ और
+  रूट-सजग उपलब्धता शामिल होती हैं, लेकिन प्रदाता एंडपॉइंट, प्रमाणीकरण सामग्री और
+  रनटाइम अनुरोध कॉन्फ़िगरेशन शामिल नहीं होते।
+- `"all"`: पूर्ण Gateway कैटलॉग, `agents.defaults.modelPolicy.allow` को दरकिनार करते हुए। इसका उपयोग
+  निदान/खोज UI के लिए करें, सामान्य मॉडल पिकर के लिए नहीं।
 
-## Exec अनुमोदन
+## निष्पादन अनुमोदन
 
-- जब किसी exec अनुरोध को अनुमोदन चाहिए, तो Gateway `exec.approval.requested` प्रसारित करता है।
-- ऑपरेटर क्लाइंट `exec.approval.resolve` कॉल करके समाधान करते हैं (`operator.approvals` स्कोप आवश्यक)।
-- `host=node` के लिए, `exec.approval.request` में `systemRunPlan` (कैननिकल `argv`/`cwd`/`rawCommand`/सत्र मेटाडेटा) शामिल होना चाहिए। `systemRunPlan` रहित अनुरोध अस्वीकृत किए जाते हैं।
-- अनुमोदन के बाद, आगे भेजे गए `node.invoke system.run` कॉल उस कैननिकल `systemRunPlan` को प्रामाणिक कमांड/cwd/सत्र संदर्भ के रूप में पुनः उपयोग करते हैं।
-- यदि कोई कॉलर prepare और अंतिम अनुमोदित `system.run` forward के बीच `command`, `rawCommand`, `cwd`, `agentId`, या `sessionKey` बदलता है, तो Gateway बदले हुए पेलोड पर भरोसा करने के बजाय रन अस्वीकृत करता है।
+- जब किसी exec अनुरोध को अनुमोदन की आवश्यकता होती है, तो Gateway
+  `exec.approval.requested` प्रसारित करता है।
+- ऑपरेटर क्लाइंट `exec.approval.resolve` को कॉल करके समाधान करते हैं (इसके लिए
+  `operator.approvals` आवश्यक है)।
+- `host=node` के लिए, `exec.approval.request` में `systemRunPlan`
+  (कैनोनिकल `argv`/`cwd`/`rawCommand`/सत्र मेटाडेटा) शामिल होना चाहिए। जिन अनुरोधों में
+  `systemRunPlan` नहीं होता, उन्हें अस्वीकार कर दिया जाता है।
+- अनुमोदन के बाद, अग्रेषित `node.invoke system.run` कॉल उसी
+  कैनोनिकल `systemRunPlan` को आधिकारिक कमांड/cwd/सत्र संदर्भ के रूप में पुनः उपयोग करती हैं।
+- यदि कोई कॉलर तैयार करने और अंतिम अनुमोदित `system.run` अग्रेषण के बीच `command`, `rawCommand`, `cwd`, `agentId`, या
+  `sessionKey` में बदलाव करता है, तो
+  Gateway बदले हुए पेलोड पर भरोसा करने के बजाय रन को अस्वीकार कर देता है।
 
-## एजेंट डिलीवरी fallback
+## एजेंट डिलीवरी फ़ॉलबैक
 
-- `agent` अनुरोध आउटबाउंड डिलीवरी मांगने के लिए `deliver=true` शामिल कर सकते हैं।
-- `bestEffortDeliver=false` सख्त व्यवहार रखता है: अनसुलझे या केवल-आंतरिक डिलीवरी लक्ष्य `INVALID_REQUEST` लौटाते हैं।
-- `bestEffortDeliver=true` तब सत्र-केवल निष्पादन पर fallback की अनुमति देता है जब कोई बाहरी डिलीवर योग्य रूट हल नहीं किया जा सकता (उदाहरण के लिए आंतरिक/webchat सत्र या अस्पष्ट बहु-चैनल कॉन्फ़िग)।
-- अंतिम `agent` परिणामों में डिलीवरी मांगी जाने पर `result.deliveryStatus` शामिल हो सकता है, जो [`openclaw agent --json --deliver`](/hi/cli/agent#json-delivery-status) के लिए दस्तावेज़ित समान `sent`, `suppressed`, `partial_failed`, और `failed` स्थितियों का उपयोग करता है।
+- `agent` अनुरोधों में आउटबाउंड डिलीवरी का अनुरोध करने के लिए `deliver=true` शामिल हो सकता है।
+- `bestEffortDeliver=false` (डिफ़ॉल्ट) सख्त व्यवहार बनाए रखता है: अनसुलझे या
+  केवल-आंतरिक डिलीवरी लक्ष्य `INVALID_REQUEST` लौटाते हैं।
+- जब कोई बाहरी डिलीवरी-योग्य रूट हल नहीं किया जा सकता (उदाहरण के लिए आंतरिक/webchat
+  सत्र या अस्पष्ट मल्टी-चैनल कॉन्फ़िगरेशन), तब `bestEffortDeliver=true` केवल-सत्र निष्पादन पर फ़ॉलबैक की अनुमति देता है।
+- यदि डिलीवरी का अनुरोध किया गया था, तो अंतिम `agent` परिणामों में `result.deliveryStatus` शामिल हो सकता है, जिसमें
+  [`openclaw agent --json --deliver`](/hi/cli/agent#json-delivery-status) के लिए दस्तावेज़ित वही `sent`, `suppressed`, `partial_failed`, और
+  `failed` स्थितियाँ उपयोग की जाती हैं।
 
-## संस्करणीकरण
+## संस्करण निर्धारण
 
-- `PROTOCOL_VERSION` `packages/gateway-protocol/src/version.ts` में रहता है।
-- क्लाइंट `minProtocol` + `maxProtocol` भेजते हैं; सर्वर उन रेंज को अस्वीकृत करता है जिनमें उसका वर्तमान प्रोटोकॉल शामिल नहीं होता। वर्तमान क्लाइंट और सर्वर को प्रोटोकॉल v4 चाहिए।
-- स्कीमा + मॉडल TypeBox परिभाषाओं से जनरेट किए जाते हैं:
+- `PROTOCOL_VERSION`, `MIN_CLIENT_PROTOCOL_VERSION`,
+  `MIN_NODE_PROTOCOL_VERSION`, और `MIN_PROBE_PROTOCOL_VERSION`
+  `packages/gateway-protocol/src/version.ts` में मौजूद हैं।
+- क्लाइंट `minProtocol` + `maxProtocol` भेजते हैं। ऑपरेटर और UI क्लाइंट को
+  उस सीमा में वर्तमान प्रोटोकॉल शामिल करना आवश्यक है; वर्तमान क्लाइंट और सर्वर
+  प्रोटोकॉल v4 चलाते हैं।
+- `role: "node"` और `client.mode: "node"` दोनों वाले प्रमाणित क्लाइंट
+  N-1 Node प्रोटोकॉल (वर्तमान में v3) का उपयोग कर सकते हैं। हल्के रीस्टार्ट प्रोब
+  समान N-1 विंडो का उपयोग करते हैं। इस संगतता विंडो से डिवाइस प्रमाणीकरण, पेयरिंग, स्कोप, कमांड नीति और exec
+  अनुमोदन अपरिवर्तित रहते हैं। Plugin-स्वामित्व वाली Node
+  क्षमताएँ और कमांड तब तक उपलब्ध नहीं कराए जाते, जब तक Node वर्तमान
+  प्रोटोकॉल पर अपग्रेड नहीं हो जाता, क्योंकि उनकी होस्ट की गई सतहें N-1 अनुबंध का हिस्सा नहीं हैं।
+- स्कीमा और मॉडल TypeBox परिभाषाओं से जनरेट किए जाते हैं:
   - `pnpm protocol:gen`
   - `pnpm protocol:gen:swift`
   - `pnpm protocol:check`
 
-### क्लाइंट कॉन्स्टेंट
+### क्लाइंट स्थिरांक
 
-`src/gateway/client.ts` में संदर्भ क्लाइंट ये डिफ़ॉल्ट उपयोग करता है। मान प्रोटोकॉल v4 में स्थिर हैं और तृतीय-पक्ष क्लाइंट के लिए अपेक्षित आधाररेखा हैं।
+संदर्भ क्लाइंट कार्यान्वयन `packages/gateway-client/src/` में मौजूद है
+(OpenClaw इसे पतले `src/gateway/client.ts` फ़साड के माध्यम से रैप करता है)। ये
+डिफ़ॉल्ट प्रोटोकॉल v4 में स्थिर हैं और तृतीय-पक्ष क्लाइंट के लिए अपेक्षित आधार-रेखा हैं।
 
-| कॉन्स्टेंट | डिफ़ॉल्ट | स्रोत |
-| ----------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `PROTOCOL_VERSION`                        | `4`                                                   | `packages/gateway-protocol/src/version.ts`                                                 |
-| `MIN_CLIENT_PROTOCOL_VERSION`             | `4`                                                   | `packages/gateway-protocol/src/version.ts`                                                 |
-| अनुरोध टाइमआउट (प्रति RPC)                 | `30_000` ms                                           | `src/gateway/client.ts` (`requestTimeoutMs`)                                               |
-| प्रीऑथ / connect-challenge टाइमआउट       | `15_000` ms                                           | `src/gateway/handshake-timeouts.ts` (config/env युग्मित सर्वर/क्लाइंट बजट बढ़ा सकते हैं) |
-| प्रारंभिक reconnect backoff                 | `1_000` ms                                            | `src/gateway/client.ts` (`backoffMs`)                                                      |
-| अधिकतम reconnect backoff                     | `30_000` ms                                           | `src/gateway/client.ts` (`scheduleReconnect`)                                              |
-| device-token close के बाद तेज़-retry clamp | `250` ms                                              | `src/gateway/client.ts`                                                                    |
-| `terminate()` से पहले force-stop grace     | `250` ms                                              | `FORCE_STOP_TERMINATE_GRACE_MS`                                                            |
-| `stopAndWait()` डिफ़ॉल्ट टाइमआउट           | `1_000` ms                                            | `STOP_AND_WAIT_TIMEOUT_MS`                                                                 |
-| डिफ़ॉल्ट tick अंतराल (pre `hello-ok`)    | `30_000` ms                                           | `src/gateway/client.ts`                                                                    |
-| Tick-timeout close                        | silence `tickIntervalMs * 2` से अधिक होने पर code `4000` | `src/gateway/client.ts`                                                                    |
-| `MAX_PAYLOAD_BYTES`                       | `25 * 1024 * 1024` (25 MB)                            | `src/gateway/server-constants.ts`                                                          |
+| स्थिरांक                                  | डिफ़ॉल्ट                                               | स्रोत                                                                                                                    |
+| ----------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `PROTOCOL_VERSION`                        | `4`                                                   | `packages/gateway-protocol/src/version.ts`                                                                                |
+| `MIN_CLIENT_PROTOCOL_VERSION`             | `4`                                                   | `packages/gateway-protocol/src/version.ts`                                                                                |
+| `MIN_NODE_PROTOCOL_VERSION`               | `3`                                                   | `packages/gateway-protocol/src/version.ts`                                                                                |
+| `MIN_PROBE_PROTOCOL_VERSION`              | `3`                                                   | `packages/gateway-protocol/src/version.ts`                                                                                |
+| अनुरोध टाइमआउट (प्रति RPC)                 | `30_000` ms                                           | `packages/gateway-client/src/client.ts` (`requestTimeoutMs`)                                                              |
+| प्रीऑथ / कनेक्ट-चैलेंज टाइमआउट       | `15_000` ms                                           | `packages/gateway-client/src/timeouts.ts` (`OPENCLAW_HANDSHAKE_TIMEOUT_MS` env युग्मित सर्वर/क्लाइंट बजट बढ़ा सकता है) |
+| प्रारंभिक पुनःकनेक्ट बैकऑफ़                 | `1_000` ms                                            | `packages/gateway-client/src/client.ts` (`GATEWAY_RECONNECT_POLICY`)                                                      |
+| अधिकतम पुनःकनेक्ट बैकऑफ़                     | `30_000` ms                                           | `packages/gateway-client/src/client.ts` (`GATEWAY_RECONNECT_POLICY`)                                                      |
+| डिवाइस-टोकन बंद होने के बाद तेज़-पुनःप्रयास क्लैंप | `250` ms                                              | `packages/gateway-client/src/client.ts`                                                                                   |
+| `terminate()` से पहले बलपूर्वक-रोकने की छूट     | `250` ms                                              | `FORCE_STOP_TERMINATE_GRACE_MS`                                                                                           |
+| `stopAndWait()` डिफ़ॉल्ट टाइमआउट           | `1_000` ms                                            | `STOP_AND_WAIT_TIMEOUT_MS`                                                                                                |
+| डिफ़ॉल्ट टिक अंतराल (`hello-ok` से पहले)    | `30_000` ms                                           | `packages/gateway-client/src/client.ts`                                                                                   |
+| टिक-टाइमआउट क्लोज़                        | जब मौन `tickIntervalMs * 2` से अधिक हो, तब कोड `4000` | `packages/gateway-client/src/client.ts`                                                                                   |
+| `MAX_PAYLOAD_BYTES`                       | `25 * 1024 * 1024` (25 MB)                            | `src/gateway/server-constants.ts`                                                                                         |
 
-सर्वर `hello-ok` में प्रभावी `policy.tickIntervalMs`, `policy.maxPayload`, और `policy.maxBufferedBytes` प्रकाशित करता है; क्लाइंट को pre-handshake डिफ़ॉल्ट के बजाय उन मानों का सम्मान करना चाहिए।
+सर्वर प्रभावी `policy.tickIntervalMs`,
+`policy.maxPayload`, और `policy.maxBufferedBytes` को `hello-ok` में घोषित करता है; क्लाइंट को
+प्री-हैंडशेक डिफ़ॉल्ट के बजाय उन मानों का पालन करना चाहिए।
 
-## Auth
+जब प्रत्येक लंबित अनुरोध की अपनी समय-सीमा होती है, तो संदर्भ क्लाइंट सीमित अनुरोधों को उनकी कॉन्फ़िगर की गई समय-सीमा नियंत्रित करने देता है। सीमित
+`timeoutMs` के बिना कोई `expectFinal` अनुरोध, `timeoutMs: null` वाला कोई भी अनुरोध, या सीमित और
+असीमित अनुरोधों का मिश्रण टिक वॉचडॉग को सक्रिय रखता है। यदि इनबाउंड ईवेंट और
+प्रतिक्रियाएँ टिक-टाइमआउट सीमा के बाद भी मौन रहती हैं, तो क्लाइंट
+कोड `4000` के साथ सॉकेट बंद करता है, प्रत्येक लंबित अनुरोध को अस्वीकार करता है और पुनः कनेक्ट करता है। यह
+पुनः कनेक्ट होने के बाद अस्वीकृत अनुरोधों को दोबारा नहीं चलाता।
 
-- Shared-secret Gateway auth कॉन्फ़िगर किए गए auth mode के आधार पर `connect.params.auth.token` या
+## प्रमाणीकरण
+
+- साझा-सीक्रेट Gateway प्रमाणीकरण कॉन्फ़िगर किए गए
+  `gateway.auth.mode` (`"none" | "token" | "password" | "trusted-proxy"`) के आधार पर `connect.params.auth.token` या
   `connect.params.auth.password` का उपयोग करता है।
-- Tailscale Serve जैसे identity-bearing modes
-  (`gateway.auth.allowTailscale: true`) या non-loopback
-  `gateway.auth.mode: "trusted-proxy"` connect auth check को
-  `connect.params.auth.*` के बजाय request headers से पूरा करते हैं।
-- Private-ingress `gateway.auth.mode: "none"` shared-secret connect auth को
-  पूरी तरह छोड़ देता है; उस mode को public/untrusted ingress पर expose न करें।
-- Pairing के बाद, Gateway connection
-  role + scopes तक सीमित एक **device token** जारी करता है। यह
-  `hello-ok.auth.deviceToken` में लौटाया जाता है और client को future connects के लिए
-  persist करना चाहिए।
-- Clients को किसी भी
-  successful connect के बाद primary `hello-ok.auth.deviceToken` persist करना चाहिए।
-- उस **stored** device token से reconnect करने पर उस token के लिए stored
-  approved scope set भी reuse होना चाहिए। इससे पहले से granted read/probe/status access
-  preserved रहता है और reconnects को चुपचाप narrower implicit admin-only scope में
-  collapse होने से बचाया जाता है।
-- Client-side connect auth assembly (`selectConnectAuth` in
-  `src/gateway/client.ts`):
-  - `auth.password` orthogonal है और set होने पर हमेशा forward किया जाता है।
-  - `auth.token` priority order में populate होता है: पहले explicit shared token,
-    फिर explicit `deviceToken`, फिर stored per-device token (`deviceId` + `role` से keyed)।
-  - `auth.bootstrapToken` केवल तब भेजा जाता है जब ऊपर में से किसी ने भी
-    `auth.token` resolve न किया हो। Shared token या कोई भी resolved device token इसे suppress करता है।
-  - One-shot `AUTH_TOKEN_MISMATCH` retry पर stored device token का auto-promotion
-    केवल **trusted endpoints** तक gated है —
-    loopback, या pinned `tlsFingerprint` के साथ `wss://`। Pinning के बिना public `wss://`
-    qualify नहीं करता।
-- Built-in setup-code bootstrap primary node
-  `hello-ok.auth.deviceToken` और trusted mobile handoff के लिए
-  `hello-ok.auth.deviceTokens` में bounded operator token लौटाता है। Operator token
-  native Talk configuration reads के लिए `operator.talk.secrets` शामिल करता है, लेकिन
-  pairing mutation scopes और `operator.admin` को exclude करता है।
-- जब non-baseline setup-code bootstrap approval का इंतज़ार कर रहा हो, `PAIRING_REQUIRED`
-  details में `recommendedNextStep: "wait_then_retry"`, `retryable: true`,
-  और `pauseReconnect: false` शामिल होते हैं। Clients को request approve होने या token invalid होने तक उसी
-  bootstrap token से reconnect करते रहना चाहिए।
-- `hello-ok.auth.deviceTokens` को केवल तब persist करें जब connect ने bootstrap auth का उपयोग
-  `wss://` या loopback/local pairing जैसे trusted transport पर किया हो।
-- यदि कोई client **explicit** `deviceToken` या explicit `scopes` देता है, तो वह
-  caller-requested scope set authoritative रहता है; cached scopes केवल तब
-  reuse होते हैं जब client stored per-device token reuse कर रहा हो।
-- Device tokens को `device.token.rotate` और
-  `device.token.revoke` के ज़रिए rotate/revoke किया जा सकता है (`operator.pairing` scope आवश्यक)। Node या
-  अन्य non-operator role को rotate या revoke करने के लिए `operator.admin` भी आवश्यक है।
-- `device.token.rotate` rotation metadata लौटाता है। यह replacement
-  bearer token केवल same-device calls के लिए echo करता है जो पहले से
-  उस device token से authenticated हों, ताकि token-only clients reconnect करने से पहले
-  अपना replacement persist कर सकें। Shared/admin rotations bearer token echo नहीं करते।
-- Token issuance, rotation, और revocation उस device की pairing entry में recorded
-  approved role set तक bounded रहते हैं; token mutation किसी device role को expand या
-  target नहीं कर सकता जिसे pairing approval ने कभी grant नहीं किया।
-- Paired-device token sessions के लिए, device management self-scoped होता है जब तक
-  caller के पास `operator.admin` भी न हो: non-admin callers केवल अपने **own** device entry के
-  operator token को manage कर सकते हैं। Node और अन्य non-operator
-  token management admin-only है, caller के अपने device के लिए भी।
-- `device.token.rotate` और `device.token.revoke` target operator
-  token scope set को caller के current session scopes के विरुद्ध भी check करते हैं। Non-admin callers
-  अपने पास पहले से मौजूद scope से broader operator token को rotate या revoke नहीं कर सकते।
-- Auth failures में `error.details.code` और recovery hints शामिल होते हैं:
-  - `error.details.canRetryWithDeviceToken` (boolean)
-  - `error.details.recommendedNextStep` (`retry_with_device_token`, `update_auth_configuration`, `update_auth_credentials`, `wait_then_retry`, `review_auth_configuration`)
-- `AUTH_TOKEN_MISMATCH` के लिए client behavior:
-  - Trusted clients cached per-device token के साथ एक bounded retry attempt कर सकते हैं।
-  - यदि वह retry fail हो, तो clients को automatic reconnect loops रोकने चाहिए और operator action guidance surface करनी चाहिए।
-- `AUTH_SCOPE_MISMATCH` का मतलब है कि device token recognized था लेकिन requested role/scopes
-  cover नहीं करता। Clients को इसे bad token के रूप में present नहीं करना चाहिए;
-  operator से re-pair करने या narrower/broader scope contract approve करने को prompt करें।
+- Tailscale Serve (`gateway.auth.allowTailscale: true`) या गैर-लूपबैक
+  `gateway.auth.mode: "trusted-proxy"` जैसे पहचान-युक्त मोड, `connect.params.auth.*` के बजाय अनुरोध
+  हेडर से कनेक्ट प्रमाणीकरण जाँच पूरी करते हैं।
+- निजी-इनग्रेस `gateway.auth.mode: "none"` साझा-सीक्रेट कनेक्ट प्रमाणीकरण
+  को पूरी तरह छोड़ देता है; उस मोड को सार्वजनिक/अविश्वसनीय इनग्रेस पर उजागर न करें।
+- पेयरिंग के बाद, Gateway कनेक्शन की भूमिका + स्कोप तक सीमित एक डिवाइस
+  टोकन जारी करता है, जो `hello-ok.auth.deviceToken` में लौटाया जाता है। क्लाइंट को
+  प्रत्येक सफल कनेक्ट के बाद इसे स्थायी रूप से सहेजना चाहिए।
+- उस संग्रहीत डिवाइस टोकन से पुनः कनेक्ट करते समय उस टोकन के लिए संग्रहीत
+  स्वीकृत स्कोप सेट का भी पुनः उपयोग किया जाना चाहिए। इससे पहले से दी गई
+  रीड/प्रोब/स्टेटस पहुँच सुरक्षित रहती है और पुनः कनेक्शन चुपचाप किसी अधिक सीमित,
+  अंतर्निहित केवल-एडमिन स्कोप में सिमटने से बचते हैं।
+- क्लाइंट-साइड कनेक्ट प्रमाणीकरण संयोजन (`packages/gateway-client/src/client.ts` में
+  `selectConnectAuth`):
+  - `auth.password` स्वतंत्र है और सेट होने पर हमेशा अग्रेषित किया जाता है।
+  - `auth.token` को प्राथमिकता क्रम में भरा जाता है: पहले स्पष्ट साझा टोकन,
+    फिर स्पष्ट `deviceToken`, और फिर संग्रहीत प्रति-डिवाइस टोकन
+    (`deviceId` + `role` द्वारा कुंजीबद्ध)।
+  - `auth.bootstrapToken` केवल तभी भेजा जाता है, जब उपरोक्त में से किसी ने भी
+    `auth.token` का समाधान न किया हो। साझा टोकन या कोई भी हल किया गया
+    डिवाइस टोकन इसे रोक देता है।
+  - एकल-प्रयास `AUTH_TOKEN_MISMATCH` पुनः प्रयास पर संग्रहीत डिवाइस टोकन का
+    स्वतः-प्रोमोशन केवल विश्वसनीय एंडपॉइंट तक सीमित है: लूपबैक, या पिन किए गए
+    `tlsFingerprint` वाला `wss://`। पिनिंग के बिना सार्वजनिक
+    `wss://` योग्य नहीं है।
+- अंतर्निहित सेटअप-कोड बूटस्ट्रैप विश्वसनीय मोबाइल हैंडऑफ़ के लिए प्राथमिक
+  Node `hello-ok.auth.deviceToken` के साथ `hello-ok.auth.deviceTokens` में एक सीमित ऑपरेटर
+  टोकन लौटाता है। ऑपरेटर टोकन में नेटिव Talk कॉन्फ़िगरेशन रीड के लिए
+  `operator.talk.secrets` शामिल है, लेकिन पेयरिंग-म्यूटेशन स्कोप और
+  `operator.admin` शामिल नहीं हैं।
+- जब कोई गैर-बेसलाइन सेटअप-कोड बूटस्ट्रैप स्वीकृति की प्रतीक्षा करता है,
+  `PAIRING_REQUIRED` विवरण में `recommendedNextStep: "wait_then_retry"`, `retryable: true`,
+  और `pauseReconnect: false` शामिल होते हैं। अनुरोध स्वीकृत होने या टोकन अमान्य
+  होने तक उसी बूटस्ट्रैप टोकन से पुनः कनेक्ट करते रहें।
+- `hello-ok.auth.deviceTokens` को केवल तभी स्थायी रूप से सहेजें, जब कनेक्ट ने
+  `wss://` या लूपबैक/स्थानीय पेयरिंग जैसे विश्वसनीय ट्रांसपोर्ट पर
+  बूटस्ट्रैप प्रमाणीकरण का उपयोग किया हो।
+- यदि कोई क्लाइंट स्पष्ट `deviceToken` या स्पष्ट `scopes`
+  देता है, तो कॉलर द्वारा अनुरोधित वह स्कोप सेट प्रामाणिक बना रहता है; कैश किए
+  गए स्कोप का पुनः उपयोग केवल तब होता है, जब क्लाइंट संग्रहीत प्रति-डिवाइस
+  टोकन का पुनः उपयोग कर रहा हो।
+- डिवाइस टोकन को `device.token.rotate` और `device.token.revoke` के माध्यम
+  से रोटेट/निरस्त किया जा सकता है (`operator.pairing` आवश्यक है)। किसी Node
+  या अन्य गैर-ऑपरेटर भूमिका को रोटेट या निरस्त करने के लिए
+  `operator.admin` भी आवश्यक है।
+- `device.token.rotate` रोटेशन मेटाडेटा लौटाता है। यह प्रतिस्थापन बेयरर
+  टोकन केवल उसी डिवाइस की उन कॉल के लिए दोहराता है, जो पहले से उस डिवाइस टोकन
+  से प्रमाणित हैं, ताकि केवल-टोकन क्लाइंट पुनः कनेक्ट करने से पहले अपना
+  प्रतिस्थापन सहेज सकें। साझा/एडमिन रोटेशन बेयरर टोकन नहीं दोहराते।
+- टोकन जारी करना, रोटेशन और निरसन उस डिवाइस की पेयरिंग प्रविष्टि में दर्ज
+  स्वीकृत भूमिका सेट तक सीमित रहते हैं; टोकन म्यूटेशन उस डिवाइस भूमिका का विस्तार
+  या उसे लक्षित नहीं कर सकता, जिसे पेयरिंग स्वीकृति ने कभी प्रदान नहीं किया।
+- पेयर किए गए डिवाइस टोकन सत्रों के लिए, डिवाइस प्रबंधन स्वयं तक सीमित
+  रहता है, जब तक कॉलर के पास `operator.admin` भी न हो: गैर-एडमिन कॉलर
+  केवल अपनी डिवाइस प्रविष्टि का ऑपरेटर टोकन प्रबंधित कर सकते हैं। Node और अन्य
+  गैर-ऑपरेटर टोकन का प्रबंधन केवल एडमिन कर सकता है, भले ही वह कॉलर का अपना
+  डिवाइस हो।
+- `device.token.rotate` और `device.token.revoke` लक्षित ऑपरेटर टोकन स्कोप
+  सेट की जाँच कॉलर के वर्तमान सत्र स्कोप से भी करते हैं। गैर-एडमिन कॉलर अपने
+  पास पहले से मौजूद ऑपरेटर टोकन से अधिक व्यापक टोकन को रोटेट या निरस्त नहीं
+  कर सकते।
+- प्रमाणीकरण विफलताओं में `error.details.code` और पुनर्प्राप्ति संकेत शामिल हैं:
+  - `error.details.canRetryWithDeviceToken` (बूलियन)
+  - `error.details.recommendedNextStep`: `retry_with_device_token`,
+    `update_auth_configuration`, `update_auth_credentials`,
+    `wait_then_retry`, `review_auth_configuration`
+    (`packages/gateway-protocol/src/connect-error-details.ts`) में से एक।
+- `AUTH_TOKEN_MISMATCH` के लिए क्लाइंट व्यवहार:
+  - विश्वसनीय क्लाइंट कैश किए गए प्रति-डिवाइस टोकन के साथ एक सीमित पुनः प्रयास
+    कर सकते हैं।
+  - यदि वह पुनः प्रयास विफल हो जाए, तो स्वचालित पुनः कनेक्ट लूप रोकें और ऑपरेटर
+    कार्रवाई संबंधी मार्गदर्शन दिखाएँ।
+- `AUTH_SCOPE_MISMATCH` का अर्थ है कि डिवाइस टोकन पहचाना गया था, लेकिन वह
+  अनुरोधित भूमिका/स्कोप को कवर नहीं करता। इसे खराब टोकन के रूप में प्रस्तुत न करें;
+  ऑपरेटर को पुनः पेयर करने या अधिक सीमित/व्यापक स्कोप अनुबंध स्वीकृत करने के लिए
+  कहें।
 
-## Device identity + pairing
+## डिवाइस पहचान और पेयरिंग
 
-- Nodes को keypair fingerprint से derived stable device identity (`device.id`) शामिल करनी चाहिए।
-- Gateways per device + role tokens issue करते हैं।
-- नए device IDs के लिए pairing approvals आवश्यक हैं, जब तक local auto-approval
-  enabled न हो।
-- Pairing auto-approval direct local loopback connects पर centered है।
-- OpenClaw में trusted shared-secret helper flows के लिए एक narrow backend/container-local self-connect path भी है।
-- Same-host tailnet या LAN connects को pairing के लिए अभी भी remote माना जाता है और
-  approval आवश्यक होता है।
-- WS clients आम तौर पर `connect` के दौरान `device` identity शामिल करते हैं (operator +
-  node)। केवल device-less operator exceptions explicit trust paths हैं:
-  - localhost-only insecure HTTP compatibility के लिए `gateway.controlUi.allowInsecureAuth=true`।
-  - successful `gateway.auth.mode: "trusted-proxy"` operator Control UI auth।
-  - `gateway.controlUi.dangerouslyDisableDeviceAuth=true` (break-glass, severe security downgrade)।
-  - reserved internal
-    helper path पर direct-loopback `gateway-client` backend RPCs।
-- Device identity omit करने के scope consequences होते हैं। जब device-less operator
-  connection explicit trust path के ज़रिए allowed हो, OpenClaw फिर भी
-  self-declared scopes को empty set पर clear करता है, जब तक उस path में named
-  scope-preservation exception न हो। Scope-gated methods फिर
-  `missing scope` के साथ fail होते हैं।
-- `gateway.controlUi.dangerouslyDisableDeviceAuth=true` Control UI
-  break-glass scope-preservation path है। यह arbitrary
-  custom backend या CLI-shaped WebSocket clients को scopes grant नहीं करता।
-- Reserved direct-loopback `gateway-client` backend helper path
-  scopes केवल internal local control-plane RPCs के लिए preserve करता है; custom backend IDs को
-  यह exception नहीं मिलता।
-- सभी connections को server-provided `connect.challenge` nonce sign करना होगा।
+- Nodes को कीपेयर फ़िंगरप्रिंट से प्राप्त एक स्थिर डिवाइस पहचान
+  (`device.id`) शामिल करनी चाहिए।
+- Gateways प्रति डिवाइस + भूमिका टोकन जारी करते हैं।
+- नई डिवाइस ID के लिए पेयरिंग स्वीकृति आवश्यक है, जब तक स्थानीय
+  स्वतः-स्वीकृति सक्षम न हो।
+- पेयरिंग स्वतः-स्वीकृति सीधे स्थानीय लूपबैक कनेक्ट पर केंद्रित है।
+- OpenClaw में विश्वसनीय साझा-सीक्रेट सहायक प्रवाहों के लिए एक सीमित
+  बैकएंड/कंटेनर-स्थानीय स्व-कनेक्ट पथ भी है।
+- समान-होस्ट टेलनेट या LAN कनेक्ट को पेयरिंग के लिए अब भी रिमोट माना जाता
+  है और इनके लिए स्वीकृति आवश्यक है।
+- WS क्लाइंट सामान्यतः `connect` के दौरान `device`
+  पहचान शामिल करते हैं (ऑपरेटर + Node)। बिना डिवाइस वाले ऑपरेटर के एकमात्र अपवाद
+  स्पष्ट विश्वास पथ हैं:
+  - सफल `gateway.auth.mode: "trusted-proxy"` ऑपरेटर Control UI प्रमाणीकरण।
+  - आरक्षित आंतरिक सहायक पथ पर सीधे-लूपबैक `gateway-client` बैकएंड RPC।
+- डिवाइस पहचान छोड़ने से स्कोप पर प्रभाव पड़ता है। जब किसी स्पष्ट विश्वास
+  पथ से बिना डिवाइस वाले ऑपरेटर कनेक्शन की अनुमति दी जाती है, तब भी OpenClaw
+  स्वयं-घोषित स्कोप को खाली सेट में साफ़ कर देता है, जब तक उस पथ के लिए नामित
+  स्कोप-संरक्षण अपवाद न हो। इसके बाद स्कोप-गेटेड विधियाँ `missing scope`
+  के साथ विफल हो जाती हैं।
+- आरक्षित सीधे-लूपबैक `gateway-client` बैकएंड सहायक पथ केवल आंतरिक
+  स्थानीय कंट्रोल-प्लेन RPC के लिए स्कोप सुरक्षित रखता है; कस्टम बैकएंड ID को
+  यह अपवाद नहीं मिलता।
+- सभी कनेक्शन को सर्वर द्वारा दिए गए `connect.challenge` नॉन्स पर हस्ताक्षर
+  करना आवश्यक है।
 
-### Device auth migration diagnostics
+### डिवाइस प्रमाणीकरण माइग्रेशन निदान
 
-Legacy clients के लिए जो अभी भी pre-challenge signing behavior का उपयोग करते हैं, `connect` अब
-`error.details.code` के अंतर्गत `DEVICE_AUTH_*` detail codes और stable `error.details.reason` लौटाता है।
+उन पुराने क्लाइंट के लिए, जो अभी भी प्री-चैलेंज हस्ताक्षर व्यवहार का उपयोग करते हैं,
+`connect`, `error.details.code` के अंतर्गत स्थिर `error.details.reason`
+के साथ `DEVICE_AUTH_*` विवरण कोड लौटाता है।
 
-Common migration failures:
+सामान्य माइग्रेशन विफलताएँ:
 
-| Message                     | details.code                     | details.reason           | Meaning                                            |
+| संदेश                     | details.code                     | details.reason           | अर्थ                                            |
 | --------------------------- | -------------------------------- | ------------------------ | -------------------------------------------------- |
-| `device nonce required`     | `DEVICE_AUTH_NONCE_REQUIRED`     | `device-nonce-missing`   | Client ने `device.nonce` omit किया (या blank भेजा)। |
-| `device nonce mismatch`     | `DEVICE_AUTH_NONCE_MISMATCH`     | `device-nonce-mismatch`  | Client ने stale/wrong nonce से sign किया।          |
-| `device signature invalid`  | `DEVICE_AUTH_SIGNATURE_INVALID`  | `device-signature`       | Signature payload v2 payload से match नहीं करता।  |
-| `device signature expired`  | `DEVICE_AUTH_SIGNATURE_EXPIRED`  | `device-signature-stale` | Signed timestamp allowed skew के बाहर है।         |
-| `device identity mismatch`  | `DEVICE_AUTH_DEVICE_ID_MISMATCH` | `device-id-mismatch`     | `device.id` public key fingerprint से match नहीं करता। |
-| `device public key invalid` | `DEVICE_AUTH_PUBLIC_KEY_INVALID` | `device-public-key`      | Public key format/canonicalization fail हुआ।      |
+| `device nonce required`     | `DEVICE_AUTH_NONCE_REQUIRED`     | `device-nonce-missing`   | क्लाइंट ने `device.nonce` छोड़ दिया (या रिक्त भेजा)।     |
+| `device nonce mismatch`     | `DEVICE_AUTH_NONCE_MISMATCH`     | `device-nonce-mismatch`  | क्लाइंट ने पुराने/गलत नॉन्स से हस्ताक्षर किए।            |
+| `device signature invalid`  | `DEVICE_AUTH_SIGNATURE_INVALID`  | `device-signature`       | हस्ताक्षर पेलोड v2 पेलोड से मेल नहीं खाता।       |
+| `device signature expired`  | `DEVICE_AUTH_SIGNATURE_EXPIRED`  | `device-signature-stale` | हस्ताक्षरित टाइमस्टैम्प अनुमत अंतर से बाहर है।          |
+| `device identity mismatch`  | `DEVICE_AUTH_DEVICE_ID_MISMATCH` | `device-id-mismatch`     | `device.id` सार्वजनिक कुंजी फ़िंगरप्रिंट से मेल नहीं खाता। |
+| `device public key invalid` | `DEVICE_AUTH_PUBLIC_KEY_INVALID` | `device-public-key`      | सार्वजनिक कुंजी प्रारूप/कैनॉनिकलाइज़ेशन विफल रहा।         |
 
-Migration target:
+माइग्रेशन लक्ष्य:
 
-- हमेशा `connect.challenge` का इंतज़ार करें।
-- Server nonce शामिल करने वाले v2 payload को sign करें।
-- वही nonce `connect.params.device.nonce` में भेजें।
-- Preferred signature payload `v3` है, जो device/client/role/scopes/token/nonce fields के अलावा
-  `platform` और `deviceFamily` को bind करता है।
-- Legacy `v2` signatures compatibility के लिए accepted रहते हैं, लेकिन paired-device
-  metadata pinning reconnect पर command policy को अभी भी control करती है।
+- हमेशा `connect.challenge` की प्रतीक्षा करें।
+- सर्वर नॉन्स शामिल करने वाले v2 पेलोड पर हस्ताक्षर करें।
+- `connect.params.device.nonce` में वही नॉन्स भेजें।
+- वरीय हस्ताक्षर पेलोड `v3`
+  (`packages/gateway-client/src/device-auth.ts` में `buildDeviceAuthPayloadV3`) है,
+  जो डिवाइस/क्लाइंट/भूमिका/स्कोप/टोकन/नॉन्स फ़ील्ड के अतिरिक्त
+  `platform` और `deviceFamily` को भी बाँधता है।
+- संगतता के लिए पुराने `v2` हस्ताक्षर अभी भी स्वीकार किए जाते हैं,
+  लेकिन पेयर किए गए डिवाइस की मेटाडेटा पिनिंग पुनः कनेक्ट होने पर भी कमांड नीति
+  नियंत्रित करती है।
 
-## TLS + pinning
+## TLS और पिनिंग
 
-- WS connections के लिए TLS supported है।
-- Clients optionally gateway cert fingerprint pin कर सकते हैं (देखें `gateway.tls`
-  config plus `gateway.remote.tlsFingerprint` या CLI `--tls-fingerprint`)।
+- WS कनेक्शन के लिए TLS समर्थित है (`gateway.tls` कॉन्फ़िगरेशन)।
+- क्लाइंट वैकल्पिक रूप से `gateway.remote.tlsFingerprint` या CLI
+  `--tls-fingerprint` के माध्यम से Gateway प्रमाणपत्र फ़िंगरप्रिंट पिन कर सकते हैं।
 
-## Scope
+## दायरा
 
-यह protocol **full Gateway API** expose करता है (status, channels, models, chat,
-agent, sessions, nodes, approvals, etc.)। Exact surface
-`packages/gateway-protocol/src/schema.ts` में TypeBox schemas द्वारा defined है।
+यह प्रोटोकॉल संपूर्ण Gateway API उपलब्ध कराता है: स्टेटस, चैनल, मॉडल, चैट,
+एजेंट, सत्र, Nodes, स्वीकृतियाँ और बहुत कुछ। सटीक सतह `packages/gateway-protocol/src/schema.ts`
+से पुनः निर्यात किए गए TypeBox स्कीमा द्वारा परिभाषित होती है।
 
 ## संबंधित
 
-- [Bridge protocol](/hi/gateway/bridge-protocol)
-- [Gateway runbook](/hi/gateway)
+- [Gateway क्लाइंट बनाना](https://docs.openclaw.ai/gateway/clients)
+- [OpenClaw एम्बेड करना](https://docs.openclaw.ai/gateway/embedding)
+- [ब्रिज प्रोटोकॉल](/hi/gateway/bridge-protocol)
+- [Gateway रनबुक](/hi/gateway)

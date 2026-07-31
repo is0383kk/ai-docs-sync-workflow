@@ -4,9 +4,10 @@ read_when:
 summary: HashiCorp Vault SecretRef 提供商集成。
 title: Vault 插件
 x-i18n:
-    generated_at: "2026-07-11T20:49:00Z"
+    generated_at: "2026-07-26T06:18:47Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 687ee6457cbd180f6aa1345cc1285ca69d430f4dbe811db87738dfbc4b03a2d4
     source_path: plugins/reference/vault.md
@@ -17,10 +18,10 @@ x-i18n:
 
 HashiCorp Vault SecretRef 提供商集成。
 
-## 分发方式
+## 分发
 
 - 软件包：`@openclaw/vault`
-- 安装方式：包含在 OpenClaw 中
+- 安装方式：内置于 OpenClaw
 
 ## 类型
 
@@ -28,4 +29,4 @@ HashiCorp Vault SecretRef 提供商集成。
 
 ## 相关文档
 
-- [vault](/plugins/vault)
+- [vault](/zh-CN/plugins/vault)

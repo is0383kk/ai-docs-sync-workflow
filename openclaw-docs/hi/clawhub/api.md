@@ -2,11 +2,12 @@
 read_when:
     - API क्लाइंट बनाना
     - एंडपॉइंट या स्कीमा जोड़ना
-summary: सार्वजनिक REST API (v1) का अवलोकन और कन्वेंशन।
+summary: सार्वजनिक REST API (v1) का अवलोकन और परंपराएँ।
 x-i18n:
-    generated_at: "2026-07-04T20:31:48Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T17:48:28Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 31b0051506912d2aa0d724ed7b6542e09ef16dc92998ddbdd3e379f783954436
     source_path: clawhub/api.md
@@ -19,45 +20,46 @@ x-i18n:
 
 OpenAPI: `/api/v1/openapi.json`
 
-## सार्वजनिक कैटलॉग का पुन: उपयोग
+## सार्वजनिक कैटलॉग का पुनः उपयोग
 
-आप ClawHub के सार्वजनिक रीड API के ऊपर तृतीय-पक्ष कैटलॉग, डायरेक्टरी, या खोज सतह बना सकते हैं। सार्वजनिक Skills मेटाडेटा और Skills फ़ाइलें ClawHub के Skills लाइसेंस नियमों के तहत प्रकाशित की जाती हैं, जबकि API स्वयं दर-सीमित है और इसका जिम्मेदारी से उपयोग किया जाना चाहिए।
+आप ClawHub की सार्वजनिक रीड API के आधार पर तृतीय-पक्ष कैटलॉग, डायरेक्टरी या खोज सुविधा बना सकते हैं। सार्वजनिक स्किल मेटाडेटा और स्किल फ़ाइलें ClawHub के स्किल लाइसेंस नियमों के अंतर्गत प्रकाशित की जाती हैं, जबकि API पर दर सीमा लागू होती है और इसका उपयोग ज़िम्मेदारी से किया जाना चाहिए।
 
 दिशानिर्देश:
 
-- कैटलॉग लिस्टिंग के लिए `GET /api/v1/skills`, `GET /api/v1/search`, और `GET /api/v1/skills/{slug}` जैसे सार्वजनिक रीड एंडपॉइंट्स का उपयोग करें।
-- प्रतिक्रियाओं को कैश करें और आक्रामक पोलिंग करने के बजाय `429`, `Retry-After`, और दर-सीमा हेडरों का सम्मान करें।
-- लिस्टिंग दिखाते समय कैनॉनिकल ClawHub Skills URL पर वापस लिंक करें ताकि उपयोगकर्ता स्रोत रजिस्ट्री रिकॉर्ड की जांच कर सकें।
-- `https://clawhub.ai/<owner>/skills/<slug>` रूप में कैनॉनिकल पेज URL का उपयोग करें।
-- यह संकेत न दें कि ClawHub तृतीय-पक्ष साइट का समर्थन, सत्यापन, या संचालन करता है।
-- सार्वजनिक API फ़िल्टर या auth सीमाओं को बायपास करके छिपी, निजी, या मॉडरेशन-अवरुद्ध सामग्री को मिरर न करें।
+- कैटलॉग सूचियों के लिए `GET /api/v1/skills`, `GET /api/v1/search`, और `GET /api/v1/skills/{slug}` जैसे सार्वजनिक रीड एंडपॉइंट का उपयोग करें।
+- बार-बार आक्रामक रूप से पोल करने के बजाय प्रतिक्रियाओं को कैश करें और `429`, `Retry-After`, तथा दर-सीमा हेडर का सम्मान करें।
+- सूचियाँ प्रदर्शित करते समय प्रामाणिक ClawHub स्किल URL का लिंक दें, ताकि उपयोगकर्ता स्रोत रजिस्ट्री रिकॉर्ड देख सकें।
+- `https://clawhub.ai/<owner>/skills/<slug>` के रूप में प्रामाणिक पेज URL का उपयोग करें।
+- ऐसा संकेत न दें कि ClawHub तृतीय-पक्ष साइट का समर्थन, सत्यापन या संचालन करता है।
+- सार्वजनिक API फ़िल्टर या प्रमाणीकरण सीमाओं को दरकिनार करके छिपी हुई, निजी या मॉडरेशन द्वारा अवरुद्ध सामग्री को मिरर न करें।
 
-## Auth
+## प्रमाणीकरण
 
-- सार्वजनिक रीड: कोई टोकन आवश्यक नहीं।
-- लेखन + खाता: `Authorization: Bearer clh_...`।
+- सार्वजनिक रीड: किसी टोकन की आवश्यकता नहीं।
+- राइट + खाता: `Authorization: Bearer clh_...`।
 
 ## दर सीमाएँ
 
-Auth-सचेत प्रवर्तन:
+प्रमाणीकरण-जागरूक प्रवर्तन:
 
 - अनाम अनुरोध: प्रति IP।
 - प्रमाणित अनुरोध (मान्य Bearer टोकन): प्रति उपयोगकर्ता बकेट।
-- अनुपस्थित/अमान्य टोकन IP प्रवर्तन पर वापस जाता है।
+- टोकन अनुपस्थित/अमान्य होने पर IP प्रवर्तन लागू होता है।
 
-- रीड: 3000/min प्रति IP, 12000/min प्रति कुंजी
-- लेखन: 300/min प्रति IP, 3000/min प्रति कुंजी
-- डाउनलोड: 1200/min प्रति IP, 6000/min प्रति कुंजी
+- रीड: प्रति IP 3000/मिनट, प्रति कुंजी 12000/मिनट
+- राइट: प्रति IP 300/मिनट, प्रति कुंजी 3000/मिनट
+- डाउनलोड: प्रति IP 1200/मिनट, प्रति कुंजी 6000/मिनट
 
 हेडर: `X-RateLimit-Limit`, `X-RateLimit-Reset`, `RateLimit-Limit`, `RateLimit-Reset`;
-`429` पर `X-RateLimit-Remaining`, `RateLimit-Remaining`, और `Retry-After` शामिल होते हैं।
+`X-RateLimit-Remaining`, `RateLimit-Remaining`, और `Retry-After` को `429` पर शामिल किया जाता है।
 
-सिमैंटिक्स:
+अर्थ:
 
 - `X-RateLimit-Reset`: Unix epoch सेकंड (पूर्ण रीसेट समय)
-- `RateLimit-Reset`: रीसेट तक विलंब सेकंड
-- `X-RateLimit-Remaining` / `RateLimit-Remaining`: मौजूद होने पर सटीक शेष बजट; शार्ड किए गए सफल अनुरोध अनुमानित वैश्विक मान लौटाने के बजाय इसे छोड़ देते हैं
-- `Retry-After`: `429` पर प्रतीक्षा करने के लिए विलंब सेकंड
+- `RateLimit-Reset`: रीसेट होने तक विलंब के सेकंड
+- `X-RateLimit-Remaining` / `RateLimit-Remaining`: मौजूद होने पर सटीक शेष बजट;
+  शार्ड किए गए सफल अनुरोध अनुमानित वैश्विक मान लौटाने के बजाय इसे छोड़ देते हैं
+- `Retry-After`: `429` पर प्रतीक्षा के लिए विलंब के सेकंड
 
 उदाहरण `429`:
 
@@ -72,19 +74,20 @@ ratelimit-reset: 34
 retry-after: 34
 ```
 
-क्लाइंट हैंडलिंग:
+क्लाइंट प्रबंधन:
 
 - मौजूद होने पर `Retry-After` को प्राथमिकता दें।
 - अन्यथा `RateLimit-Reset` का उपयोग करें या `X-RateLimit-Reset` से विलंब निकालें।
-- पुनः प्रयासों में jitter जोड़ें।
+- पुनः प्रयासों में जिटर जोड़ें।
 
 ## त्रुटियाँ
 
-- v1 त्रुटियाँ सादा पाठ (`text/plain; charset=utf-8`) हैं, जिनमें `400`, `401`, `403`, `404`, `429`, और अवरुद्ध-डाउनलोड प्रतिक्रियाएँ शामिल हैं।
+- v1 त्रुटियाँ सादा टेक्स्ट (`text/plain; charset=utf-8`) होती हैं, जिनमें `400`,
+  `401`, `403`, `404`, `429`, और अवरुद्ध-डाउनलोड प्रतिक्रियाएँ शामिल हैं।
 - संगतता के लिए अज्ञात क्वेरी पैरामीटर अनदेखे किए जाते हैं।
 - अमान्य मानों वाले ज्ञात क्वेरी पैरामीटर `400` लौटाते हैं।
 
-## एंडपॉइंट्स
+## एंडपॉइंट
 
 सार्वजनिक रीड:
 
@@ -92,13 +95,13 @@ retry-after: 34
   - वैकल्पिक फ़िल्टर: `highlightedOnly=true`, `nonSuspiciousOnly=true`
   - लेगेसी उपनाम: `nonSuspicious=true`
 - `GET /api/v1/skills?limit=&cursor=&sort=`
-  - `sort`: `updated` (डिफ़ॉल्ट), `recommended` (`default`), `createdAt` (`newest`), `downloads`, `stars` (`rating`), लेगेसी इंस्टॉल उपनाम `installsCurrent`/`installs`/`installsAllTime` `downloads` पर मैप होते हैं, `trending`
+  - `sort`: `updated` (डिफ़ॉल्ट), `recommended` (`default`), `createdAt` (`newest`), `downloads`, `stars` (`rating`), लेगेसी इंस्टॉल उपनाम `installsCurrent`/`installs`/`installsAllTime`, `downloads`, `trending` पर मैप होते हैं
   - अमान्य `sort` मान `400` लौटाते हैं
-  - `cursor` गैर-`trending` sort पर लागू होता है
+  - `cursor`, गैर-`trending` सॉर्ट पर लागू होता है
   - वैकल्पिक फ़िल्टर: `nonSuspiciousOnly=true`
   - लेगेसी उपनाम: `nonSuspicious=true`
-  - `nonSuspiciousOnly=true` के साथ, cursor-आधारित पेजों में `limit` से कम आइटम हो सकते हैं; जारी रखने के लिए `nextCursor` का उपयोग करें।
-  - `recommended` एंगेजमेंट और नवीनता संकेतों का उपयोग करता है।
+  - `nonSuspiciousOnly=true` के साथ, कर्सर-आधारित पेजों में `limit` से कम आइटम हो सकते हैं; जारी रखने के लिए `nextCursor` का उपयोग करें।
+  - `recommended` सहभागिता और नवीनता संकेतों का उपयोग करता है।
 - `GET /api/v1/skills/{slug}`
 - `GET /api/v1/skills/{slug}/moderation`
 - `GET /api/v1/skills/{slug}/versions?limit=&cursor=`
@@ -107,11 +110,13 @@ retry-after: 34
 - `GET /api/v1/skills/{slug}/file?path=&version=&tag=`
 - `GET /api/v1/resolve?slug=&hash=`
 - `GET /api/v1/download?slug=&version=&tag=`
-  - होस्ट किए गए Skills निर्धारक ZIP बाइट्स लौटाते हैं।
-  - `clean` या `suspicious` स्कैन वाले वर्तमान GitHub-समर्थित Skills ClawHub बाइट्स के बजाय JSON `public-github` हैंडऑफ़ डिस्क्रिप्टर लौटाते हैं।
+  - होस्ट की गई स्किल नियतात्मक ZIP बाइट लौटाती हैं।
+  - `clean` या `suspicious` स्कैन वाली वर्तमान GitHub-समर्थित स्किल, ClawHub बाइट के बजाय
+    JSON `public-github` हैंडऑफ़ डिस्क्रिप्टर लौटाती हैं।
 - `GET /api/v1/skills/export?startDate=&endDate=&limit=&cursor=`
-  - होस्ट किए गए Skills संग्रहीत फ़ाइलों के रूप में निर्यात किए जाते हैं।
-  - `clean` या `suspicious` स्कैन वाले वर्तमान GitHub-समर्थित Skills `public-github` हैंडऑफ़ डिस्क्रिप्टर के रूप में निर्यात किए जाते हैं।
+  - होस्ट की गई स्किल संग्रहीत फ़ाइलों के रूप में निर्यात की जाती हैं।
+  - `clean` या `suspicious` स्कैन वाली वर्तमान GitHub-समर्थित स्किल
+    `public-github` हैंडऑफ़ डिस्क्रिप्टर के रूप में निर्यात की जाती हैं।
 - `GET /api/v1/packages?limit=&cursor=&sort=`
   - `sort`: `updated` (डिफ़ॉल्ट), `recommended`, `downloads`, लेगेसी उपनाम `installs`
   - अमान्य `sort` मान `400` लौटाते हैं
@@ -124,9 +129,9 @@ retry-after: 34
 - `GET /api/npm/{package}`
 - `GET /api/npm/{package}/-/{tarball}.tgz`
 
-Auth आवश्यक:
+प्रमाणीकरण आवश्यक:
 
-- `POST /api/v1/skills` (प्रकाशित करें, multipart प्राथमिक)
+- `POST /api/v1/skills` (प्रकाशित करें, multipart को प्राथमिकता)
 - `DELETE /api/v1/skills/{slug}`
 - `DELETE /api/v1/packages/{name}`
 - `POST /api/v1/skills/{slug}/undelete`
@@ -146,7 +151,7 @@ Auth आवश्यक:
 
 केवल एडमिन:
 
-- `POST /api/v1/users/reserve` किसी owner handle के लिए root slugs और निजी no-release package placeholders आरक्षित करता है।
+- `POST /api/v1/users/reserve`, स्वामी हैंडल के लिए रूट स्लग और निजी, बिना-रिलीज़ वाले पैकेज प्लेसहोल्डर आरक्षित करता है।
 
 ## लेगेसी
 

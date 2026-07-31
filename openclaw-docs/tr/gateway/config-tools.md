@@ -1,74 +1,75 @@
 ---
 read_when:
-    - '`tools.*` politikasını, izin verilenler listelerini veya deneysel özellikleri yapılandırma'
+    - '`tools.*` politikası, izin listeleri veya deneysel özellikler yapılandırılıyor'
     - Özel sağlayıcıları kaydetme veya temel URL'leri geçersiz kılma
-    - OpenAI uyumlu, kendi barındırdığınız uç noktaları ayarlama
+    - OpenAI uyumlu, kendi sunucunuzda barındırılan uç noktaları ayarlama
 sidebarTitle: Tools and custom providers
-summary: Araç yapılandırması (politika, deneysel anahtarlar, sağlayıcı destekli araçlar) ve özel sağlayıcı/temel URL kurulumu
+summary: Araç yapılandırması (politika, deneysel geçişler, sağlayıcı destekli araçlar) ve özel sağlayıcı/temel URL kurulumu
 title: Yapılandırma — araçlar ve özel sağlayıcılar
 x-i18n:
-    generated_at: "2026-07-12T12:16:02Z"
+    generated_at: "2026-07-26T22:45:16Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 91f392efc7ca08ddd18875625ed3c95d21c5c12f70396594f8dc8e88a20293fc
+    source_hash: 2010a2e48e8f4c8d0049e5c707bb8286e291a92312baac94301a7b5a674583c1
     source_path: gateway/config-tools.md
     workflow: 16
 ---
 
-`tools.*` yapılandırma anahtarları ve özel sağlayıcı / temel URL kurulumu. Aracılar, kanallar ve diğer üst düzey yapılandırma anahtarları için [Yapılandırma başvurusuna](/tr/gateway/configuration-reference) bakın.
+`tools.*` yapılandırma anahtarları ve özel sağlayıcı / temel URL kurulumu. Aracılar, kanallar ve diğer üst düzey yapılandırma anahtarları için [Yapılandırma referansı](/tr/gateway/configuration-reference) bölümüne bakın.
 
 ## Araçlar
 
 ### Araç profilleri
 
-`tools.profile`, `tools.allow`/`tools.deny` öncesinde temel bir izin listesi belirler:
+`tools.profile`, `tools.allow`/`tools.deny` öncesinde temel bir izin verilenler listesi ayarlar:
 
 <Note>
-Yerel ilk katılım, ayarlanmamışsa yeni yerel yapılandırmalarda varsayılan olarak `tools.profile: "coding"` değerini kullanır (mevcut açık profiller korunur).
+Yerel ilk katılım, ayarlanmamışsa yeni yerel yapılandırmalar için varsayılan olarak `tools.profile: "coding"` değerini kullanır (mevcut açık profiller korunur).
 </Note>
 
-| Profil      | İçerik                                                                                                                                                                                                                       |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `minimal`   | Yalnızca `session_status`                                                                                                                                                                                                    |
-| `coding`    | `group:fs`, `group:runtime`, `group:web`, `group:sessions`, `group:memory`, `cron`, `get_goal`, `create_goal`, `update_goal`, `update_plan`, `skill_workshop`, `image`, `image_generate`, `music_generate`, `video_generate` |
-| `messaging` | `group:messaging`, `sessions_list`, `sessions_history`, `sessions_send`, `session_status`                                                                                                                                    |
-| `full`      | Kısıtlama yok (ayarlanmamış olmasıyla aynı)                                                                                                                                                                                  |
+| Profil     | İçerik                                                                                                                                                                                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `minimal`   | Yalnızca `session_status`                                                                                                                                                                                                                                   |
+| `coding`    | `group:fs`, `group:runtime`, `group:web`, `group:sessions`, `group:memory`, `cron`, `get_goal`, `create_goal`, `update_goal`, `update_plan`, `ask_user`, `skill_workshop`, `image`, `image_generate`, `music_generate`, `video_generate`                |
+| `messaging` | `group:messaging`, `sessions`, `sessions_list`, `sessions_history`, `sessions_search`, `conversations_list`, `conversations_send`, `conversations_turn`, `sessions_send`, `sessions_spawn`, `sessions_yield`, `subagents`, `session_status`, `ask_user` |
+| `full`      | Kısıtlama yok (ayarlanmamış olmasıyla aynı)                                                                                                                                                                                                                          |
 
-`coding` ve `messaging`, `bundle-mcp` öğesine (yapılandırılmış MCP sunucuları) da örtük olarak izin verir.
+`coding` ve `messaging`, `bundle-mcp` öğesine de örtük olarak izin verir (yapılandırılmış MCP sunucuları).
 
 ### Araç grupları
 
-| Grup               | Araçlar                                                                                                                                               |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `group:runtime`    | `exec`, `process`, `code_execution` (`bash`, `exec` için takma ad olarak kabul edilir)                                                                 |
-| `group:fs`         | `read`, `write`, `edit`, `apply_patch`                                                                                                                |
-| `group:sessions`   | `sessions_list`, `sessions_history`, `sessions_send`, `sessions_spawn`, `sessions_yield`, `subagents`, `session_status`, `spawn_task`, `dismiss_task` |
-| `group:memory`     | `memory_search`, `memory_get`                                                                                                                         |
-| `group:web`        | `web_search`, `x_search`, `web_fetch`                                                                                                                 |
-| `group:ui`         | `browser`, `canvas`                                                                                                                                   |
-| `group:automation` | `heartbeat_respond`, `cron`, `gateway`                                                                                                                |
-| `group:messaging`  | `message`                                                                                                                                             |
-| `group:nodes`      | `nodes`, `computer`                                                                                                                                   |
-| `group:agents`     | `agents_list`, `get_goal`, `create_goal`, `update_goal`, `update_plan`, `skill_workshop`                                                              |
-| `group:media`      | `image`, `image_generate`, `music_generate`, `video_generate`, `tts`                                                                                  |
-| `group:openclaw`   | Yukarıdaki yerleşik araçların `read`/`write`/`edit`/`apply_patch`/`exec`/`process`/`canvas` dışındakilerin tümü (Plugin araçları hariç)                |
-| `group:plugins`    | `bundle-mcp` aracılığıyla sunulan yapılandırılmış MCP sunucuları dâhil, yüklenen Plugin'lerin sahip olduğu araçlar                                      |
+| Grup              | Araçlar                                                                                                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `group:runtime`    | `exec`, `process`, `code_execution` (`bash`, `exec` için takma ad olarak kabul edilir)                                                                                                                                                                        |
+| `group:fs`         | `read`, `write`, `edit`, `apply_patch`                                                                                                                                                                                                                 |
+| `group:sessions`   | `sessions`, `sessions_list`, `sessions_history`, `sessions_search`, `conversations_list`, `conversations_send`, `conversations_turn`, `sessions_send`, `sessions_spawn`, `sessions_yield`, `subagents`, `session_status`, `spawn_task`, `dismiss_task` |
+| `group:memory`     | `memory_search`, `memory_get`                                                                                                                                                                                                                          |
+| `group:web`        | `web_search`, `x_search`, `web_fetch`                                                                                                                                                                                                                  |
+| `group:ui`         | `browser`, `screen`, `terminal`, `canvas`, `show_widget`                                                                                                                                                                                               |
+| `group:automation` | `heartbeat_respond`, `cron`, `gateway`                                                                                                                                                                                                                 |
+| `group:messaging`  | `message`                                                                                                                                                                                                                                              |
+| `group:nodes`      | `nodes`, `computer`                                                                                                                                                                                                                                    |
+| `group:agents`     | `agents_list`, `get_goal`, `create_goal`, `update_goal`, `update_plan`, `ask_user`, `skill_workshop`                                                                                                                                                   |
+| `group:media`      | `image`, `image_generate`, `music_generate`, `video_generate`, `tts`                                                                                                                                                                                   |
+| `group:openclaw`   | `read`/`write`/`edit`/`apply_patch`/`exec`/`process`/`canvas` hariç yukarıdaki tüm yerleşik araçlar (Plugin araçlarını hariç tutar)                                                                                                                                  |
+| `group:plugins`    | `bundle-mcp` aracılığıyla sunulan yapılandırılmış MCP sunucuları dahil, yüklenmiş Plugin'lerin sahip olduğu araçlar                                                                                                                                                           |
 
-`spawn_task`, bir kodlama aracısının başlatmadan, onaylanmış takip çalışması önermesine olanak tanır. Control UI, başlığı ve özeti eyleme dönüştürülebilir bir çip olarak gösterir; Gateway destekli bir TUI, eşdeğer bir etkileşimli istem gösterir. İkisinden birinin kabul edilmesi, yeni bir yönetilen çalışma ağacı oturumu oluşturur ve mevcut işlem devam ederken tam istemi oraya gönderir. `dismiss_task`, `spawn_task` tarafından döndürülen geçici `task_id` aracılığıyla hâlâ beklemede olan bir öneriyi geri çeker.
+`spawn_task`, bir kodlama aracısının onaylanmış takip çalışmasını başlatmadan önermesini sağlar. Control UI, başlığı ve özeti eyleme geçirilebilir bir çip olarak gösterir; Gateway destekli bir TUI, eşdeğer bir etkileşimli istem gösterir. Bunlardan herhangi birinin kabul edilmesi yeni bir yönetilen çalışma ağacı oturumu oluşturur ve mevcut tur devam ederken tam istemi oraya gönderir. `dismiss_task`, `spawn_task` tarafından döndürülen geçici `task_id` aracılığıyla hâlâ beklemede olan bir öneriyi geri çeker.
 
-Araçlar yalnızca başlatan operatör yüzeyi Gateway görev önerisi olaylarını alıp işleyebildiğinde sunulur. Kanal oturumları ve yerel/gömülü TUI oturumları bunları almaz; kanal aktarımlarının bu akışı güvenli biçimde sunabilmesi için taşınabilir, türü belirlenmiş bir görev eylemi gerekir. Öneriler işleme özeldir ve Gateway yeniden başlatıldığında kaybolur. Her iki araç da `coding` profilinde ve `group:sessions` içinde kalır; böylece normal `tools.allow` ve `tools.deny` ilkesi, yüzey bunları desteklediğinde araçları otomatik olarak yapılandırır.
+Araçlar yalnızca başlatan operatör yüzeyi Gateway görev önerisi olaylarını alıp işleyebildiğinde sunulur. Kanal oturumları ile yerel/gömülü TUI oturumları bunları almaz; kanal aktarımlarının bu akışı güvenli biçimde sunabilmesi için taşınabilir ve türü belirlenmiş bir görev eylemine ihtiyacı vardır. Öneriler işleme özeldir ve Gateway yeniden başlatıldığında kaybolur. Her iki araç da `coding` profilinde ve `group:sessions` içinde kalır; böylece yüzey bunları desteklediğinde normal `tools.allow` ve `tools.deny` ilkesi bunları otomatik olarak yapılandırır.
 
 ### Korumalı alan araç ilkesi içindeki MCP ve Plugin araçları
 
-Yapılandırılmış MCP sunucuları, `bundle-mcp` Plugin kimliği altında Plugin'e ait araçlar olarak sunulur. Normal araç profilleri bunlara izin verebilir; ancak `tools.sandbox.tools`, korumalı alan oturumları için ek bir geçittir. Korumalı alan modu `"all"` veya `"non-main"` ise MCP/Plugin araçlarının görünür olması gerektiğinde korumalı alan araç izin listesine şu girdilerden birini ekleyin:
+Yapılandırılmış MCP sunucuları, `bundle-mcp` Plugin kimliği altında Plugin'e ait araçlar olarak sunulur. Normal araç profilleri bunlara izin verebilir, ancak `tools.sandbox.tools`, korumalı alan oturumları için ek bir geçittir. Korumalı alan modu `"all"` veya `"non-main"` ise MCP/Plugin araçlarının görünür olması gerektiğinde korumalı alan araç izin verilenler listesine şu girdilerden birini ekleyin:
 
 - `mcp.servers` kaynağındaki OpenClaw tarafından yönetilen MCP sunucuları için `bundle-mcp`
-- Belirli bir yerel Plugin için Plugin kimliği
-- Yüklenen ve Plugin'e ait tüm araçlar için `group:plugins`
-- Yalnızca bir sunucu istiyorsanız tam MCP sunucu araç adları veya `outlook__send_mail` ya da `outlook__*` gibi sunucu glob kalıpları
+- belirli bir yerel Plugin için Plugin kimliği
+- yüklenmiş ve Plugin'e ait tüm araçlar için `group:plugins`
+- yalnızca tek bir sunucu istediğinizde `outlook__send_mail` veya `outlook__*` gibi tam MCP sunucu araç adları ya da sunucu glob kalıpları
 
-Sunucu glob kalıpları, ham `mcp.servers` anahtarını değil, sağlayıcı açısından güvenli MCP sunucu önekini kullanır. `[A-Za-z0-9_-]` dışında kalan karakterler `-` olur, harfle başlamayan adlara `mcp-` öneki eklenir ve uzun ya da yinelenen önekler kısaltılabilir veya son ek alabilir; örneğin `mcp.servers["Outlook Graph"]`, `outlook-graph__*` gibi bir glob kalıbı kullanır.
+Sunucu glob kalıpları, ham `mcp.servers` anahtarı olmak zorunda olmayan, sağlayıcı açısından güvenli MCP sunucu ön ekini kullanır. `[A-Za-z0-9_-]` dışındaki karakterler `-` olur, bir harfle başlamayan adlara `mcp-` ön eki eklenir ve uzun ya da yinelenen ön ekler kısaltılabilir veya son ek alabilir; örneğin `mcp.servers["Outlook Graph"]`, `outlook-graph__*` benzeri bir glob kalıbı kullanır.
 
 ```json5
 {
@@ -88,15 +89,15 @@ Sunucu glob kalıpları, ham `mcp.servers` anahtarını değil, sağlayıcı aç
 }
 ```
 
-Bu korumalı alan katmanı girdisi olmadan MCP sunucusu yine başarıyla yüklenebilir, ancak araçları sağlayıcı isteğinden önce filtrelenir. `mcp.servers` içindeki OpenClaw tarafından yönetilen sunucularda bu yapıyı yakalamak için `openclaw doctor` kullanın. Paketlenmiş Plugin manifestlerinden veya Claude `.mcp.json` dosyasından yüklenen MCP sunucuları aynı korumalı alan geçidini kullanır; ancak bu tanılama henüz bu kaynakları listelemez. Araçları korumalı alan işlemlerinde kaybolursa aynı izin listesi girdilerini kullanın.
+Bu korumalı alan katmanı girdisi olmadan MCP sunucusu yine başarıyla yüklenebilir, ancak araçları sağlayıcı isteğinden önce filtrelenir. `mcp.servers` içindeki OpenClaw tarafından yönetilen sunucularda bu durumu yakalamak için `openclaw doctor` kullanın. Paketlenmiş Plugin manifestlerinden veya Claude `.mcp.json` üzerinden yüklenen MCP sunucuları aynı korumalı alan geçidini kullanır, ancak bu tanılama henüz bu kaynakları listelemez; araçları korumalı alan turlarında kaybolursa aynı izin verilenler listesi girdilerini kullanın.
 
 ### `tools.codeMode`
 
-`tools.codeMode`, genel OpenClaw kod modu yüzeyini etkinleştirir. Araçları olan bir
-çalıştırma için etkinleştirildiğinde, normal OpenClaw araçları korumalı alan içindeki `tools.*`
+`tools.codeMode`, genel OpenClaw kod modu yüzeyini etkinleştirir. Araçların bulunduğu
+bir çalıştırma için etkinleştirildiğinde normal OpenClaw araçları, korumalı alan içindeki `tools.*`
 katalog köprüsünün arkasına taşınır ve MCP araçları oluşturulan `MCP`
-ad alanı üzerinden kullanılabilir. Model normalde `exec` ve `wait` araçlarını görür; yapılandırılmış
-sonuçları yalnızca JSON kullanan köprüden geçemeyen `computer` gibi araçlar doğrudan kalır.
+ad alanı üzerinden kullanılabilir. Model normalde `exec` ve `wait` öğelerini görür; yapılandırılmış sonuçları
+yalnızca JSON destekleyen köprüden geçemeyen `computer` gibi araçlar doğrudan kalır.
 
 ```json5
 {
@@ -116,15 +117,15 @@ Kısa gösterim de kabul edilir:
 }
 ```
 
-MCP bildirimleri, kod modunda salt okunur sanal API dosya yüzeyi üzerinden
-sunulur. Konuk kod, TypeScript tarzı imzaları incelemek için `API.list("mcp")` ve
-`API.read("mcp/<server>.d.ts")` çağrılarını, ardından
-`MCP.<server>.<tool>()` çağrısını yapabilir. Çalışma zamanı sözleşmesi, sınırlar
-ve hata ayıklama adımları için [Kod moduna](/tr/reference/code-mode) bakın.
+MCP bildirimleri, kod modundaki salt okunur sanal API dosyası yüzeyi üzerinden
+sunulur. Konuk kod, `MCP.<server>.<tool>()` çağrısından önce TypeScript tarzı
+imzaları incelemek için `API.list("mcp")` ve
+`API.read("mcp/<server>.d.ts")` çağrılarını yapabilir. Çalışma zamanı sözleşmesi,
+sınırlar ve hata ayıklama adımları için [Kod Modu](/tools/code-mode) bölümüne bakın.
 
 ### `tools.allow` / `tools.deny`
 
-Genel araç izin/engelleme politikası (engelleme önceliklidir). Büyük/küçük harfe duyarsızdır ve `*` joker karakterlerini destekler. Docker korumalı alanı kapalıyken bile uygulanır.
+Genel araç izin verme/reddetme ilkesi (reddetme önceliklidir). Büyük/küçük harfe duyarsızdır ve `*` joker karakterlerini destekler. Docker korumalı alanı kapalıyken bile uygulanır.
 
 ```json5
 {
@@ -132,7 +133,7 @@ Genel araç izin/engelleme politikası (engelleme önceliklidir). Büyük/küç�
 }
 ```
 
-`write` ve `apply_patch` ayrı araç kimlikleridir. `allow: ["write"]`, uyumlu modeller için `apply_patch` aracını da etkinleştirir; ancak `deny: ["write"]`, `apply_patch` aracını engellemez. Tüm dosya değişikliklerini engellemek için `group:fs` grubunu engelleyin veya değişiklik yapan her aracı açıkça listeleyin:
+`write` ve `apply_patch` ayrı araç kimlikleridir. `allow: ["write"]`, uyumlu modeller için `apply_patch` öğesini de etkinleştirir, ancak `deny: ["write"]`, `apply_patch` öğesini reddetmez. Tüm dosya değişikliklerini engellemek için `group:fs` öğesini reddedin veya değişiklik yapan her aracı açıkça listeleyin:
 
 ```json5
 {
@@ -141,12 +142,12 @@ Genel araç izin/engelleme politikası (engelleme önceliklidir). Büyük/küç�
 ```
 
 <Note>
-`allow` ve `alsoAllow` aynı kapsamda (`tools`, `tools.byProvider.<id>`, `agents.list[].tools`) birlikte ayarlanamaz; yapılandırma doğrulaması bunu reddeder. `alsoAllow` girdilerini `allow` içine birleştirin veya `allow` ayarını kaldırıp bunun yerine `profile` + `alsoAllow` kullanın.
+`allow` ve `alsoAllow` aynı kapsamda (`tools`, `tools.byProvider.<id>`, `agents.entries.*.tools`) birlikte ayarlanamaz; yapılandırma doğrulaması bunu reddeder. `alsoAllow` girdilerini `allow` içine birleştirin veya `allow` öğesini kaldırıp bunun yerine `profile` + `alsoAllow` kullanın.
 </Note>
 
 ### `tools.byProvider`
 
-Belirli sağlayıcılar veya modeller için araçları daha fazla kısıtlar. Sıralama: temel profil → sağlayıcı profili → izin/engelleme.
+Belirli sağlayıcılar veya modeller için araçları daha da kısıtlayın. Sıra: temel profil → sağlayıcı profili → izin verme/reddetme.
 
 ```json5
 {
@@ -162,7 +163,7 @@ Belirli sağlayıcılar veya modeller için araçları daha fazla kısıtlar. S�
 
 ### `tools.toolsBySender`
 
-Belirli bir istekte bulunan kimliği için araçları kısıtlar. Bu, kanal erişim denetimine ek bir derinlemesine savunma katmanıdır; gönderici değerleri mesaj metninden değil, kanal bağdaştırıcısından gelmelidir.
+Araçları, geçerli turdaki isteğin kaynak isteyicisi için kısıtlar. Bu, kanal erişim denetiminin üzerine eklenen derinlemesine savunmadır; gönderen değerleri mesaj metninden değil, kanal bağdaştırıcısından gelmelidir. Model istemindeki diğer içeriklerin kimliğini doğrulamaz; bkz. [İsteyici kapsamlı denetimler ve istem bağlamı](/tr/gateway/security#requester-scoped-controls-and-prompt-context).
 
 ```json5
 {
@@ -176,13 +177,13 @@ Belirli bir istekte bulunan kimliği için araçları kısıtlar. Bu, kanal eri�
 }
 ```
 
-Anahtarlar açık önekler kullanır: `channel:<channelId>:<senderId>`, `id:<senderId>`, `e164:<phone>`, `username:<handle>`, `name:<displayName>` veya `"*"`. Kanal kimlikleri, standart OpenClaw kimlikleridir; `teams` gibi diğer adlar `msteams` olarak normalleştirilir. Öneksiz eski anahtarlar yalnızca `id:` olarak kabul edilir. Eşleştirme sırası kanal+kimlik, kimlik, e164, kullanıcı adı, ad ve ardından joker karakterdir.
+Anahtarlar açık önekler kullanır: `channel:<channelId>:<senderId>`, `id:<senderId>`, `e164:<phone>`, `username:<handle>`, `name:<displayName>` veya `"*"`. Kanal kimlikleri standart OpenClaw kimlikleridir; `teams` gibi takma adlar `msteams` biçimine normalleştirilir. Eski, öneksiz anahtarlar yalnızca `id:` olarak kabul edilir. Eşleştirme sırası kanal+kimlik, kimlik, e164, kullanıcı adı, ad ve ardından joker karakterdir.
 
-Ajan başına `agents.list[].tools.toolsBySender`, eşleştiğinde boş bir `{}` politikasıyla bile genel gönderici eşleşmesini geçersiz kılar.
+Ajan başına `agents.entries.*.tools.toolsBySender`, eşleştiğinde boş bir `{}` politikasıyla bile genel gönderen eşleşmesini geçersiz kılar.
 
 ### `tools.elevated`
 
-Korumalı alan dışındaki yükseltilmiş `exec` erişimini denetler:
+Korumalı alan dışındaki yükseltilmiş exec erişimini denetler:
 
 ```json5
 {
@@ -198,9 +199,9 @@ Korumalı alan dışındaki yükseltilmiş `exec` erişimini denetler:
 }
 ```
 
-- Ajan başına geçersiz kılma (`agents.list[].tools.elevated`) yalnızca daha fazla kısıtlama uygulayabilir.
-- `/elevated on|off|ask|full`, durumu oturum başına saklar; satır içi yönergeler tek bir mesaja uygulanır.
-- Yükseltilmiş `exec`, korumalı alanı atlar ve yapılandırılmış çıkış yolunu kullanır (varsayılan olarak `gateway`; `exec` hedefi `node` olduğunda `node`).
+- Ajan başına geçersiz kılma (`agents.entries.*.tools.elevated`) yalnızca daha fazla kısıtlama getirebilir.
+- `/elevated on|off|ask|full` durumu oturum başına saklar; satır içi yönergeler tek bir mesaja uygulanır.
+- Yükseltilmiş `exec`, korumalı alanı atlar ve yapılandırılmış kaçış yolunu kullanır (varsayılan olarak `gateway`; exec hedefi `node` olduğunda ise `node`).
 
 ### `tools.exec`
 
@@ -224,66 +225,21 @@ Korumalı alan dışındaki yükseltilmiş `exec` erişimini denetler:
 }
 ```
 
-Gösterilen değerler, `applyPatch.allowModels` dışında varsayılan değerlerdir (`applyPatch.allowModels` varsayılan olarak boştur/ayarlanmamıştır; bu, uyumlu herhangi bir modelin `apply_patch` kullanabileceği anlamına gelir). `approvalRunningNoticeMs`, onay destekli `exec` uzun süre çalıştığında çalıştığına dair bir bildirim gönderir; `0` bu bildirimi devre dışı bırakır.
+Gösterilen değerler, `applyPatch.allowModels` dışında varsayılanlardır (varsayılan olarak boş/ayarlanmamış; bu, herhangi bir uyumlu modelin `apply_patch` kullanabileceği anlamına gelir). `approvalRunningNoticeMs`, onay destekli exec uzun sürdüğünde çalışıyor bildirimi yayınlar; `0` bunu devre dışı bırakır.
 
 ### `tools.loopDetection`
 
-Araç döngüsü güvenlik denetimleri **varsayılan olarak devre dışıdır**. Algılamayı etkinleştirmek için `enabled: true` ayarlayın. Ayarlar genel olarak `tools.loopDetection` içinde tanımlanabilir ve ajan başına `agents.list[].tools.loopDetection` konumunda geçersiz kılınabilir.
+Araç döngüsü güvenlik denetimleri **varsayılan olarak devre dışıdır**. Algılamayı etkinleştirmek için `enabled: true` ayarlayın. Ayarlar genel olarak `tools.loopDetection` içinde tanımlanabilir ve ajan başına `agents.entries.*.tools.loopDetection` konumunda geçersiz kılınabilir.
 
 ```json5
 {
   tools: {
     loopDetection: {
       enabled: true,
-      historySize: 30,
-      warningThreshold: 10,
-      unknownToolThreshold: 10,
-      criticalThreshold: 20,
-      globalCircuitBreakerThreshold: 30,
-      detectors: {
-        genericRepeat: true,
-        knownPollNoProgress: true,
-        pingPong: true,
-      },
-      postCompactionGuard: {
-        windowSize: 3,
-      },
     },
   },
 }
 ```
-
-<ParamField path="historySize" type="number">
-  Döngü analizi için tutulan araç çağrısı geçmişinin azami uzunluğu.
-</ParamField>
-<ParamField path="warningThreshold" type="number">
-  Uyarılar için ilerleme sağlamayan yinelenen örüntü eşiği.
-</ParamField>
-<ParamField path="unknownToolThreshold" type="number">
-  Aynı kullanılamayan veya bilinmeyen araç adına yapılan yinelenen çağrıları, bu sayıdaki başarısız denemeden sonra engeller.
-</ParamField>
-<ParamField path="criticalThreshold" type="number">
-  Kritik döngüleri engellemek için kullanılan daha yüksek yineleme eşiği.
-</ParamField>
-<ParamField path="globalCircuitBreakerThreshold" type="number">
-  İlerleme sağlamayan herhangi bir çalıştırma için kesin durdurma eşiği.
-</ParamField>
-<ParamField path="detectors.genericRepeat" type="boolean">
-  Aynı araç ve aynı bağımsız değişkenlerle yinelenen çağrılarda uyar.
-</ParamField>
-<ParamField path="detectors.knownPollNoProgress" type="boolean">
-  Bilinen yoklama araçlarında (`process.poll`, `command_status` vb.) uyarır veya engeller.
-</ParamField>
-<ParamField path="detectors.pingPong" type="boolean">
-  İlerleme sağlamayan dönüşümlü çift örüntülerinde uyarır veya engeller.
-</ParamField>
-<ParamField path="postCompactionGuard.windowSize" type="number">
-  Otomatik Compaction sonrasında korumanın etkin kaldığı deneme sayısıdır; ajan bu pencere içinde aynı (araç, bağımsız değişkenler, sonuç) birleşimini yinelerse işlemi iptal eder.
-</ParamField>
-
-<Warning>
-`warningThreshold >= criticalThreshold` veya `criticalThreshold >= globalCircuitBreakerThreshold` ise doğrulama başarısız olur.
-</Warning>
 
 ### `tools.web`
 
@@ -293,14 +249,14 @@ Araç döngüsü güvenlik denetimleri **varsayılan olarak devre dışıdır**.
     web: {
       search: {
         enabled: true,
-        apiKey: "brave_api_key", // or BRAVE_API_KEY env (Brave provider)
+        apiKey: "brave_api_key", // veya BRAVE_API_KEY ortam değişkeni (Brave sağlayıcısı)
         maxResults: 5,
         timeoutSeconds: 30,
         cacheTtlMinutes: 15,
       },
       fetch: {
         enabled: true,
-        provider: "firecrawl", // optional; omit for auto-detect
+        provider: "firecrawl", // isteğe bağlı; otomatik algılama için atlayın
         maxChars: 20000,
         maxCharsCap: 20000,
         maxResponseBytes: 750000,
@@ -315,74 +271,59 @@ Araç döngüsü güvenlik denetimleri **varsayılan olarak devre dışıdır**.
 }
 ```
 
-Gösterilen değerler, `provider` ve `userAgent` dışında varsayılan değerlerdir. `maxResponseBytes`, 32000–10000000 aralığıyla sınırlandırılır; `maxChars`, `maxCharsCap` ile sınırlandırılır (daha büyük yanıtlara izin vermek için `maxCharsCap` değerini yükseltin).
+Gösterilen değerler, `provider` ve `userAgent` dışında varsayılanlardır. `maxResponseBytes` değeri 32000–10000000 aralığıyla sınırlar; `maxChars` değeri `maxCharsCap` ile sınırlar (daha büyük yanıtlara izin vermek için `maxCharsCap` değerini artırın).
 
 ### `tools.media`
 
-Gelen medyanın anlaşılmasını (görüntü/ses/video) yapılandırır:
+Gelen medya anlamlandırmasını (görüntü/ses/video) yapılandırır:
 
 ```json5
 {
   tools: {
     media: {
       concurrency: 2,
-      asyncCompletion: {
-        directSend: false, // deprecated: completions stay agent-mediated
-      },
-      audio: {
-        enabled: true,
-        maxBytes: 20971520,
-        scope: {
-          default: "deny",
-          rules: [{ action: "allow", match: { chatType: "direct" } }],
+      models: [
+        { provider: "openai", model: "gpt-4o-mini-transcribe", capabilities: ["audio"] },
+        {
+          type: "cli",
+          command: "whisper",
+          args: ["--model", "base", "{{AttachmentPath}}"],
+          capabilities: ["audio"],
         },
-        models: [
-          { provider: "openai", model: "gpt-4o-mini-transcribe" },
-          { type: "cli", command: "whisper", args: ["--model", "base", "{{MediaPath}}"] },
-        ],
-      },
-      image: {
-        enabled: true,
-        timeoutSeconds: 180,
-        models: [{ provider: "ollama", model: "gemma4:26b", timeoutSeconds: 300 }],
-      },
-      video: {
-        enabled: true,
-        maxBytes: 52428800,
-        models: [{ provider: "google", model: "gemini-3-flash-preview" }],
-      },
+        { provider: "ollama", model: "gemma4:26b", capabilities: ["image"] },
+        { provider: "google", model: "gemini-3-flash-preview", capabilities: ["video"] },
+      ],
+      audio: { enabled: true, preferredModel: "openai/gpt-4o-mini-transcribe" },
+      image: { enabled: true, preferredModel: "ollama/gemma4:26b" },
+      video: { enabled: true },
     },
   },
 }
 ```
 
-`concurrency` (varsayılan `2`), `audio.maxBytes` (varsayılan 20 MB) ve `video.maxBytes` (varsayılan 50 MB) varsayılan değerleriyle gösterilmiştir; `image.maxBytes` varsayılan olarak 10 MB'dir. Yetenek başına istek zaman aşımı varsayılanları: görüntü/ses için `60` sn., video için `120` sn.
+`tools.media.models`, yapılandırılmış tek model listesidir. Her girdi, işlediği yetenekleri bildirir. İsteğe bağlı `preferredModel` seçicisi; `provider/model`, bir model kimliği, sağlayıcı varsayılanı girdileri için `provider:<id>` veya `cli:command` kabul eder; eşleşen girdiler ilgili yeteneğin geri dönüş sırasının başına taşınır. Yetenek başına istemler, sınırlar, istek ayarları, kapsam, ek politikası ve ses dökümü yankısı; yapılandırılmış ve otomatik algılanan modeller için varsayılan olarak kalır. Bir model girdisi, modele özgü alanları geçersiz kılabilir.
 
 <AccordionGroup>
   <Accordion title="Medya modeli girdisi alanları">
-    **Sağlayıcı girdisi** (`type: "provider"` veya belirtilmemiş):
+    **Sağlayıcı girdisi** (`type: "provider"` veya atlanmış):
 
     - `provider`: API sağlayıcı kimliği (`openai`, `anthropic`, `google`/`gemini`, `groq` vb.)
-    - `model`: model kimliği geçersiz kılma değeri
+    - `model`: model kimliği geçersiz kılması
     - `profile` / `preferredProfile`: `auth-profiles.json` profil seçimi
 
     **CLI girdisi** (`type: "cli"`):
 
     - `command`: çalıştırılacak yürütülebilir dosya
-    - `args`: şablonlanmış bağımsız değişkenler (`{{MediaPath}}`, `{{Prompt}}`, `{{MaxChars}}` vb. desteklenir; `openclaw doctor --fix`, kullanımdan kaldırılmış `{input}` yer tutucularını `{{MediaPath}}` biçimine taşır)
+    - `args`: şablonlu bağımsız değişkenler (`{{AttachmentPath}}`, `{{AttachmentUrl}}`, `{{AttachmentContentType}}`, `{{AttachmentDir}}`, `{{AttachmentIndex}}`, `{{Prompt}}`, `{{MaxChars}}` vb. destekler; `openclaw doctor --fix`, kullanım dışı bırakılmış `{input}` yer tutucularını `{{AttachmentPath}}` biçimine geçirir). Eski `{{MediaPath}}`, `{{MediaUrl}}`, `{{MediaType}}` ve `{{MediaDir}}` takma adları uyumluluk süreleri boyunca kullanılabilir durumda kalır ancak kullanımları önerilmez.
 
     **Ortak alanlar:**
 
-    - `capabilities`: isteğe bağlı liste (`image`, `audio`, `video`). Her sağlayıcı Plugin'i kendi varsayılan yetenek kümesini bildirir; örneğin paketle birlikte gelen `openai` sağlayıcısının varsayılanı görüntü+ses, `anthropic`/`minimax` sağlayıcılarının görüntü, `google` sağlayıcısının görüntü+ses+video ve `groq` sağlayıcısının sestir.
-    - `prompt`, `maxChars`, `maxBytes`, `timeoutSeconds`, `language`: girdi başına geçersiz kılma değerleri.
-    - `tools.media.image.timeoutSeconds` ve eşleşen görüntü modeli `timeoutSeconds` girdileri, ajan açık `image` aracını çağırdığında da uygulanır. Görüntü anlama için bu zaman aşımı isteğin kendisine uygulanır ve önceki hazırlık çalışmalarının süresi nedeniyle azaltılmaz.
-    - Başarısızlık durumunda sonraki girdiye geçilir.
+    - `capabilities`: `image`, `audio` ve `video` değerlerinden birini veya daha fazlasını içeren liste.
+    - `prompt`, `maxChars`, `maxBytes`, `timeoutSeconds`, `language`: girdi başına geçersiz kılmalar.
+    - Eşleşen görüntü modeli `timeoutSeconds` girdileri, ajan açık `image` aracını çağırdığında da uygulanır. Görüntü anlamlandırmasında bu zaman aşımı isteğin kendisine uygulanır ve önceki hazırlık çalışmaları nedeniyle azaltılmaz.
+    - Hatalarda sıradaki girdiye geri dönülür.
 
     Sağlayıcı kimlik doğrulaması standart sırayı izler: `auth-profiles.json` → ortam değişkenleri → `models.providers.*.apiKey`.
-
-    **Eşzamansız tamamlama alanları:**
-
-    - `asyncCompletion.directSend`: kullanımdan kaldırılmış uyumluluk bayrağı. Tamamlanan eşzamansız medya görevleri, ajanın sonucu alması, kullanıcıya nasıl bildireceğine karar vermesi ve kaynak teslimatı gerektiriyorsa mesaj aracını kullanması için istekte bulunan oturum aracılığıyla yürütülmeye devam eder.
 
   </Accordion>
 </AccordionGroup>
@@ -404,7 +345,8 @@ Gelen medyanın anlaşılmasını (görüntü/ses/video) yapılandırır:
 
 Oturum araçlarının (`sessions_list`, `sessions_history`, `sessions_send`) hangi oturumları hedefleyebileceğini denetler.
 
-Varsayılan: `tree` (geçerli oturum + alt ajanlar gibi bu oturum tarafından başlatılan oturumlar).
+Varsayılan: `tree` (geçerli oturum + alt ajanlar gibi onun başlattığı oturumlar ve aynı ajan için ortamdan
+izlenen grup oturumları).
 
 ```json5
 {
@@ -420,14 +362,21 @@ Varsayılan: `tree` (geçerli oturum + alt ajanlar gibi bu oturum tarafından ba
 <AccordionGroup>
   <Accordion title="Görünürlük kapsamları">
     - `self`: yalnızca geçerli oturum anahtarı.
-    - `tree`: geçerli oturum + geçerli oturum tarafından başlatılan oturumlar (alt ajanlar).
-    - `agent`: geçerli ajan kimliğine ait herhangi bir oturum (aynı ajan kimliği altında gönderici başına oturum çalıştırıyorsanız diğer kullanıcıları da içerebilir).
-    - `all`: herhangi bir oturum. Ajanlar arası hedefleme için yine de `tools.agentToAgent` gerekir.
-    - Korumalı alan sınırlaması: geçerli oturum korumalı alandaysa ve `agents.defaults.sandbox.sessionToolsVisibility="spawned"` (varsayılan) olarak ayarlanmışsa, `tools.sessions.visibility="all"` olsa bile görünürlük zorunlu olarak `tree` olur.
-    - Değer `all` olmadığında `sessions_list`, etkin modu açıklayan kısa bir `visibility` alanı ile bazı oturumların geçerli kapsamın dışında kaldıkları için gösterilmeyebileceğini belirten bir uyarı içerir.
+    - `tree`: geçerli oturum + geçerli oturumun başlattığı oturumlar (alt ajanlar). Okuma işlemleri için, geçerli oturumun ortamsal grup farkındalığı aracılığıyla izlediği aynı ajana ait grup oturumlarını da içerir.
+    - `agent`: geçerli ajan kimliğine ait herhangi bir oturum (aynı ajan kimliği altında gönderen başına oturumlar çalıştırıyorsanız diğer kullanıcıları içerebilir).
+    - `all`: herhangi bir oturum. Ajanlar arası hedefleme yine de `tools.agentToAgent` gerektirir.
+    - Korumalı alan sınırlaması: geçerli oturum korumalı alandaysa ve `agents.defaults.sandbox.sessionToolsVisibility="spawned"` (varsayılan) ise, `tools.sessions.visibility="all"` olsa bile görünürlük `tree` olarak zorlanır.
+    - `all` olmadığında, `sessions_list` etkili modu açıklayan ve bazı oturumların
+      geçerli kapsam dışında bırakılabileceği konusunda uyaran kısa bir `visibility` alanı içerir.
 
   </Accordion>
 </AccordionGroup>
+
+Varsayılan `session.dmScope: "main"` ile bir gruptaki insan etkinliği, aynı ajana ait bu grup
+oturumunu ajanın ana oturumuna ortamsal olarak görünür kılar. Çok kullanıcılı bir kurulumda `"main"` ayrıca
+kullanıcılar arasında tek bir DM oturumu paylaşır; böylece buraya yönlendirilen her kullanıcı, oturum belleği
+`memory_search` üzerinden de dahil olmak üzere ortamsal olarak izlenen gruplardan okuma yapabilir. DM yalıtımı için eş başına `dmScope` kullanın veya
+ortamsal izlenen oturum okumalarını devre dışı bırakmak için `tools.sessions.visibility: "self"` ayarlayın.
 
 ### `tools.sessions_spawn`
 
@@ -438,11 +387,11 @@ Varsayılan: `tree` (geçerli oturum + alt ajanlar gibi bu oturum tarafından ba
   tools: {
     sessions_spawn: {
       attachments: {
-        enabled: false, // opt-in: set true to allow inline file attachments
-        maxTotalBytes: 5242880, // 5 MB total across all files
+        enabled: false, // katılım gerektirir: satır içi dosya eklerine izin vermek için true olarak ayarlayın
+        maxTotalBytes: 5242880, // tüm dosyalarda toplam 5 MB
         maxFiles: 50,
-        maxFileBytes: 1048576, // 1 MB per file
-        retainOnSessionKeep: false, // keep attachments when cleanup="keep"
+        maxFileBytes: 1048576, // dosya başına 1 MB
+        retainOnSessionKeep: false, // cleanup="keep" olduğunda ekleri koru
       },
     },
   },
@@ -451,13 +400,13 @@ Varsayılan: `tree` (geçerli oturum + alt ajanlar gibi bu oturum tarafından ba
 
 <AccordionGroup>
   <Accordion title="Ek notları">
-    - Ekler için `enabled: true` gerekir.
-    - Alt ajan ekleri, alt çalışma alanında `.openclaw/attachments/<uuid>/` konumunda bir `.manifest.json` dosyasıyla somutlaştırılır.
-    - ACP ekleri yalnızca görüntü olabilir ve aynı dosya sayısı, dosya başına bayt ve toplam bayt sınırlarını geçtikten sonra ACP çalışma zamanına satır içinde iletilir.
-    - Ek içeriği, transkript kalıcılığından otomatik olarak çıkartılır.
+    - Ekler `enabled: true` gerektirir.
+    - Alt ajan ekleri, alt çalışma alanında `.openclaw/attachments/<uuid>/` konumuna bir `.manifest.json` ile yerleştirilir.
+    - ACP ekleri yalnızca görüntü olabilir ve aynı dosya sayısı, dosya başına bayt ve toplam bayt sınırları geçildikten sonra ACP çalışma zamanına satır içinde iletilir.
+    - Ek içeriği, döküm kalıcılığından otomatik olarak sansürlenir.
     - Base64 girdileri, katı alfabe/doldurma denetimleri ve kod çözme öncesi boyut korumasıyla doğrulanır.
-    - Alt ajan eki dosya izinleri dizinler için `0700`, dosyalar için `0600` değerindedir.
-    - Alt ajan temizliği `cleanup` politikasını izler: `delete` ekleri her zaman kaldırır; `keep` ise yalnızca `retainOnSessionKeep: true` olduğunda ekleri korur.
+    - Alt ajan eklerinin dosya izinleri, dizinler için `0700` ve dosyalar için `0600` değeridir.
+    - Alt ajan temizliği `cleanup` politikasını izler: `delete` ekleri her zaman kaldırır; `keep` bunları yalnızca `retainOnSessionKeep: true` olduğunda korur.
 
   </Accordion>
 </AccordionGroup>
@@ -466,21 +415,21 @@ Varsayılan: `tree` (geçerli oturum + alt ajanlar gibi bu oturum tarafından ba
 
 ### `tools.experimental`
 
-Deneysel yerleşik araç bayrakları. Katı ajanlı GPT-5 otomatik etkinleştirme kuralı uygulanmadığı sürece varsayılan olarak kapalıdır.
+Deneysel yerleşik araç bayrakları. Katı ajanlı GPT-5 otomatik etkinleştirme kuralı uygulanmadıkça varsayılan olarak kapalıdır.
 
 ```json5
 {
   tools: {
     experimental: {
-      planTool: true, // enable experimental update_plan
+      planTool: true, // deneysel update_plan aracını etkinleştir
     },
   },
 }
 ```
 
-- `planTool`: sıradan olmayan, çok adımlı çalışmaların takibi için yapılandırılmış `update_plan` aracını etkinleştirir.
-- Varsayılan: Bir `openai` sağlayıcı çalıştırmasında GPT-5 ailesinden bir model kimliği için `agents.defaults.embeddedAgent.executionContract` (veya ajan başına geçersiz kılma değeri) `"strict-agentic"` olarak ayarlanmadığı sürece `false` değerindedir (Codex kimlik doğrulaması ve model yönlendirmesi `openai` sağlayıcısı altında yer aldığından bu, OpenAI Codex CLI çalıştırmalarını da kapsar). Aracı bu kapsam dışında zorunlu olarak etkinleştirmek için `true`, katı ajanlı GPT-5 çalıştırmalarında bile kapalı tutmak için `false` olarak ayarlayın.
-- Etkinleştirildiğinde sistem istemi, modelin aracı yalnızca kapsamlı çalışmalarda kullanması ve en fazla bir adımı `in_progress` durumunda tutması için kullanım yönergeleri de ekler.
+- `planTool`: önemsiz olmayan çok adımlı çalışmaların izlenmesi için yapılandırılmış `update_plan` aracını etkinleştirir.
+- Varsayılan: Bir GPT-5 ailesi model kimliğine karşı `openai` sağlayıcı çalıştırması için `agents.defaults.embeddedAgent.executionContract` (veya ajan başına geçersiz kılma) `"strict-agentic"` olarak ayarlanmadıkça `false` değeridir (Codex kimlik doğrulaması/model yönlendirmesi `openai` sağlayıcısı altında bulunduğundan bu, OpenAI Codex CLI çalıştırmalarını da kapsar). Aracı bu kapsamın dışında zorla açmak için `true`, katı ajanlı GPT-5 çalıştırmalarında bile kapalı tutmak için `false` ayarlayın.
+- Etkinleştirildiğinde sistem istemi ayrıca kullanım rehberliği ekler; böylece model aracı yalnızca kapsamlı çalışmalar için kullanır ve en fazla bir adımı `in_progress` durumunda tutar.
 
 ### `agents.defaults.subagents`
 
@@ -501,31 +450,31 @@ Deneysel yerleşik araç bayrakları. Katı ajanlı GPT-5 otomatik etkinleştirm
 }
 ```
 
-- `model`: başlatılan alt ajanlar için varsayılan model. Belirtilmezse alt ajanlar çağıranın modelini devralır.
-- `allowAgents`: istekte bulunan ajan kendi `subagents.allowAgents` değerini ayarlamadığında `sessions_spawn` için yapılandırılmış hedef ajan kimliklerinin varsayılan izin listesi (`["*"]` = yapılandırılmış herhangi bir hedef; varsayılan: yalnızca aynı ajan). Ajan yapılandırması silinmiş eski girdiler `sessions_spawn` tarafından reddedilir ve `agents_list` çıktısında gösterilmez; bunları temizlemek için `openclaw doctor --fix` komutunu çalıştırın.
-- `maxConcurrent`: eşzamanlı alt ajan çalıştırmalarının azami sayısı. Varsayılan: `8`.
-- `runTimeoutSeconds`: çağıran kendi geçersiz kılma değerini iletmediğinde `sessions_spawn` için zaman aşımı (saniye). Varsayılan: `0` (zaman aşımı yok); yukarıda gösterilen `900`, yaygın olarak isteğe bağlı kullanılan bir değerdir, yerleşik varsayılan değildir.
-- `announceTimeoutMs`: Gateway `agent` duyuru teslimatı denemeleri için çağrı başına zaman aşımı (milisaniye). Varsayılan: `120000`. Geçici yeniden denemeler, toplam duyuru bekleme süresini yapılandırılmış tek bir zaman aşımından daha uzun hâle getirebilir.
-- `archiveAfterMinutes`: bir alt ajan oturumu tamamlandıktan sonra otomatik olarak arşivlenmesine kadar geçen dakika sayısı. Varsayılan: `60`; `0`, otomatik arşivlemeyi devre dışı bırakır.
+- `model`: oluşturulan alt ajanlar için varsayılan model. Belirtilmezse alt ajanlar çağıranın modelini devralır.
+- `allowAgents`: istekte bulunan ajan kendi `subagents.allowAgents` değerini ayarlamadığında `sessions_spawn` için yapılandırılmış hedef ajan kimliklerinin varsayılan izin listesi (`["*"]` = yapılandırılmış herhangi bir hedef; varsayılan: yalnızca aynı ajan). Ajan yapılandırması silinmiş eski girdiler `sessions_spawn` tarafından reddedilir ve `agents_list` kapsamına alınmaz; bunları temizlemek için `openclaw doctor --fix` komutunu çalıştırın.
+- `maxConcurrent`: eşzamanlı azami alt ajan çalıştırma sayısı. Varsayılan: `8`.
+- `runTimeoutSeconds`: çağıran kendi geçersiz kılma değerini iletmediğinde `sessions_spawn` için zaman aşımı (saniye). Varsayılan: `0` (zaman aşımı yok); yukarıda gösterilen `900` yerleşik varsayılan değil, yaygın bir isteğe bağlı değerdir.
+- `announceTimeoutMs`: Gateway `agent` duyuru teslimi denemeleri için çağrı başına zaman aşımı (milisaniye). Varsayılan: `120000`. Geçici yeniden denemeler, toplam duyuru bekleme süresini yapılandırılmış tek bir zaman aşımından daha uzun hâle getirebilir.
+- `archiveAfterMinutes`: bir alt ajan oturumu tamamlandıktan sonra otomatik olarak arşivlenmesine kadar geçen dakika. Varsayılan: `60`; `0` otomatik arşivlemeyi devre dışı bırakır.
 - Alt ajan başına araç politikası: `tools.subagents.tools.allow` / `tools.subagents.tools.deny`.
 
 ---
 
 ## Özel sağlayıcılar ve temel URL'ler
 
-Sağlayıcı Plugin'leri kendi model kataloğu satırlarını yayımlar. Yapılandırmadaki `models.providers` veya `~/.openclaw/agents/<agentId>/agent/models.json` aracılığıyla özel sağlayıcılar ekleyin.
+Sağlayıcı Plugin'leri kendi model kataloğu satırlarını yayımlar. Özel sağlayıcıları yapılandırmadaki `models.providers` veya `~/.openclaw/agents/<agentId>/agent/models.json` aracılığıyla ekleyin.
 
-Özel/yerel bir sağlayıcının `baseUrl` değerini yapılandırmak, model HTTP istekleri için dar kapsamlı ağ güveni kararıdır: OpenClaw, ayrı bir yapılandırma seçeneği eklemeden veya diğer özel kaynaklara güvenmeden tam olarak bu `scheme://host:port` kaynağına korumalı getirme yolu üzerinden izin verir.
+Özel/yerel bir sağlayıcının `baseUrl` değerini yapılandırmak, model HTTP istekleri için dar kapsamlı ağ güveni kararıdır: OpenClaw, ayrı bir yapılandırma seçeneği eklemeden veya diğer özel kaynaklara güvenmeden, korumalı getirme yolu üzerinden yalnızca tam olarak bu `scheme://host:port` kaynağına izin verir.
 
 ```json5
 {
   models: {
-    mode: "merge", // merge (default) | replace
+    mode: "merge", // birleştir (varsayılan) | değiştir
     providers: {
       "custom-proxy": {
         baseUrl: "http://localhost:4000/v1",
         apiKey: "LITELLM_KEY",
-        api: "openai-completions", // openai-completions | openai-responses | anthropic-messages | google-generative-ai | etc.
+        api: "openai-completions", // openai-completions | openai-responses | anthropic-messages | google-generative-ai | vb.
         models: [
           {
             id: "llama-3.1-8b",
@@ -545,20 +494,20 @@ Sağlayıcı Plugin'leri kendi model kataloğu satırlarını yayımlar. Yapıla
 ```
 
 <AccordionGroup>
-  <Accordion title="Auth and merge precedence">
+  <Accordion title="Kimlik doğrulama ve birleştirme önceliği">
     - Özel kimlik doğrulama gereksinimleri için `authHeader: true` + `headers` kullanın.
-    - Agent yapılandırma kökünü `OPENCLAW_AGENT_DIR` ile geçersiz kılın.
+    - Ajan yapılandırma kökünü `OPENCLAW_AGENT_DIR` ile geçersiz kılın.
     - Eşleşen sağlayıcı kimlikleri için birleştirme önceliği:
-      - Boş olmayan agent `models.json` `baseUrl` değerleri önceliklidir.
-      - Boş olmayan agent `apiKey` değerleri yalnızca ilgili sağlayıcı geçerli yapılandırma/kimlik doğrulama profili bağlamında SecretRef tarafından yönetilmiyorsa önceliklidir.
-      - SecretRef tarafından yönetilen sağlayıcı `apiKey` değerleri, çözümlenmiş gizli değerler kalıcılaştırılmak yerine kaynak işaretçilerinden (ortam referansları için `ENV_VAR_NAME`, dosya/çalıştırma referansları için `secretref-managed`) yenilenir.
-      - SecretRef tarafından yönetilen sağlayıcı üstbilgi değerleri, kaynak işaretçilerinden (ortam referansları için `secretref-env:ENV_VAR_NAME`, dosya/çalıştırma referansları için `secretref-managed`) yenilenir.
-      - Boş veya eksik agent `apiKey`/`baseUrl` değerleri, yapılandırmadaki `models.providers` değerine geri döner.
-      - Eşleşen model `contextWindow`/`maxTokens` değerlerinde: açık yapılandırma değeri mevcut ve geçerliyse (pozitif, sonlu bir sayı) önceliklidir; aksi takdirde örtük/oluşturulmuş katalog değeri kullanılır.
-      - Eşleşen model `contextTokens` değeri de aynı açık-değer-öncelikli-aksi-hâlde-örtük kuralını izler; yerel model meta verilerini değiştirmeden etkin bağlamı sınırlamak için bunu kullanın.
-      - Sağlayıcı Plugin katalogları, agent'ın Plugin durumu altında oluşturulmuş ve Plugin'e ait katalog parçaları olarak saklanır.
-      - Yapılandırmanın `models.json` dosyasını tamamen yeniden yazmasını ve Plugin'e ait katalog parçalarının birleştirilmesini atlamasını istediğinizde `models.mode: "replace"` kullanın.
-      - İşaretçilerin kalıcılaştırılmasında kaynak belirleyicidir: işaretçiler, çözümlenmiş çalışma zamanı gizli değerlerinden değil, etkin kaynak yapılandırma anlık görüntüsünden (çözümleme öncesi) yazılır.
+      - Boş olmayan ajan `models.json` `baseUrl` değerleri önceliklidir.
+      - Boş olmayan ajan `apiKey` değerleri yalnızca ilgili sağlayıcı geçerli yapılandırma/kimlik doğrulama profili bağlamında SecretRef tarafından yönetilmiyorsa önceliklidir.
+      - SecretRef tarafından yönetilen sağlayıcı `apiKey` değerleri, çözümlenmiş gizli bilgileri kalıcı hâle getirmek yerine kaynak işaretçilerinden (`ENV_VAR_NAME` ortam referansları, `secretref-managed` dosya/çalıştırma referansları için) yenilenir.
+      - SecretRef tarafından yönetilen sağlayıcı üst bilgi değerleri kaynak işaretçilerinden (`secretref-env:ENV_VAR_NAME` ortam referansları, `secretref-managed` dosya/çalıştırma referansları için) yenilenir.
+      - Boş veya eksik ajan `apiKey`/`baseUrl` değerleri, yapılandırmadaki `models.providers` değerine geri döner.
+      - Eşleşen model `contextWindow`/`maxTokens`: mevcut ve geçerli olduğunda (pozitif sonlu bir sayı) açık yapılandırma değeri önceliklidir; aksi takdirde örtük/oluşturulmuş katalog değeri kullanılır.
+      - Eşleşen model `contextTokens` aynı açık-değer-öncelikli-aksi-hâlde-örtük kuralını izler; yerel model meta verilerini değiştirmeden etkin bağlamı sınırlamak için bunu kullanın.
+      - Sağlayıcı Plugin'i katalogları, ajanın Plugin durumu altında oluşturulmuş ve Plugin'in sahip olduğu katalog parçaları olarak saklanır.
+      - Yapılandırmanın `models.json` değerini tamamen yeniden yazmasını ve Plugin'in sahip olduğu katalog parçalarının birleştirilmesini atlamasını istediğinizde `models.mode: "replace"` kullanın.
+      - İşaretçi kalıcılığı kaynak yetkilidir: işaretçiler, çözümlenmiş çalışma zamanı gizli bilgi değerlerinden değil, etkin kaynak yapılandırma anlık görüntüsünden (çözümleme öncesi) yazılır.
 
   </Accordion>
 </AccordionGroup>
@@ -566,67 +515,94 @@ Sağlayıcı Plugin'leri kendi model kataloğu satırlarını yayımlar. Yapıla
 ### Sağlayıcı alanı ayrıntıları
 
 <AccordionGroup>
-  <Accordion title="Top-level catalog">
+  <Accordion title="Üst düzey katalog">
     - `models.mode`: sağlayıcı kataloğu davranışı (`merge` veya `replace`).
     - `models.providers`: sağlayıcı kimliğine göre anahtarlanmış özel sağlayıcı eşlemesi.
-      - Güvenli düzenlemeler: eklemeli güncellemeler için `openclaw config set models.providers.<id> '<json>' --strict-json --merge` veya `openclaw config set models.providers.<id>.models '<json-array>' --strict-json --merge` kullanın. `--replace` iletmediğiniz sürece `config set`, yıkıcı değiştirmeleri reddeder.
+      - Güvenli düzenlemeler: eklemeli güncellemeler için `openclaw config set models.providers.<id> '<json>' --strict-json --merge` veya `openclaw config set models.providers.<id>.models '<json-array>' --strict-json --merge` kullanın. `config set`, `--replace` iletmediğiniz sürece yıkıcı değiştirmeleri reddeder.
 
   </Accordion>
-  <Accordion title="Provider connection and auth">
-    - `models.providers.*.api`: istek bağdaştırıcısı (`openai-completions`, `openai-responses`, `openai-chatgpt-responses`, `anthropic-messages`, `google-generative-ai`, `google-vertex`, `github-copilot`, `bedrock-converse-stream`, `ollama`, `azure-openai-responses`). MLX, vLLM, SGLang ve OpenAI ile uyumlu çoğu yerel sunucu gibi kendi barındırdığınız `/v1/chat/completions` arka uçları için `openai-completions` kullanın. `baseUrl` içeren ancak `api` içermeyen özel bir sağlayıcı varsayılan olarak `openai-completions` kullanır; yalnızca arka uç `/v1/responses` desteği sunuyorsa `openai-responses` ayarlayın.
+  <Accordion title="Sağlayıcı bağlantısı ve kimlik doğrulama">
+    - `models.providers.*.api`: istek bağdaştırıcısı (`openai-completions`, `openai-responses`, `openai-chatgpt-responses`, `anthropic-messages`, `google-generative-ai`, `google-vertex`, `github-copilot`, `bedrock-converse-stream`, `ollama`, `azure-openai-responses`). MLX, vLLM, SGLang ve çoğu OpenAI uyumlu yerel sunucu gibi kendi kendine barındırılan `/v1/chat/completions` arka uçları için `openai-completions` kullanın. `baseUrl` içeren ancak `api` içermeyen özel bir sağlayıcı varsayılan olarak `openai-completions` kullanır; `openai-responses` değerini yalnızca arka uç `/v1/responses` desteklediğinde ayarlayın.
     - `models.providers.*.apiKey`: sağlayıcı kimlik bilgisi (SecretRef/ortam değişkeni ikamesini tercih edin).
     - `models.providers.*.auth`: kimlik doğrulama stratejisi (`api-key`, `token`, `oauth`, `aws-sdk`).
     - `models.providers.*.contextWindow`: model girdisi `contextWindow` ayarlamadığında bu sağlayıcı altındaki modeller için varsayılan yerel bağlam penceresi.
     - `models.providers.*.contextTokens`: model girdisi `contextTokens` ayarlamadığında bu sağlayıcı altındaki modeller için varsayılan etkin çalışma zamanı bağlam sınırı.
     - `models.providers.*.maxTokens`: model girdisi `maxTokens` ayarlamadığında bu sağlayıcı altındaki modeller için varsayılan çıktı belirteci sınırı.
-    - `models.providers.*.timeoutSeconds`: bağlantı, üstbilgiler, gövde ve toplam istek iptal işlemleri dâhil olmak üzere sağlayıcı başına isteğe bağlı model HTTP isteği zaman aşımı süresi (saniye).
+    - `models.providers.*.timeoutSeconds`: bağlantı, üst bilgiler, gövde ve toplam istek iptal işlemleri dâhil olmak üzere sağlayıcı başına isteğe bağlı model HTTP isteği zaman aşımı (saniye).
     - `models.providers.*.injectNumCtxForOpenAICompat`: Ollama + `openai-completions` için isteklere `options.num_ctx` ekler (varsayılan: `true`).
-    - `models.providers.*.authHeader`: gerektiğinde kimlik bilgilerinin `Authorization` üstbilgisinde taşınmasını zorunlu kılar.
-    - `models.providers.*.baseUrl`: üst akış API temel URL'si.
-    - `models.providers.*.headers`: vekil/kiracı yönlendirmesi için ek statik üstbilgiler.
+    - `models.providers.*.authHeader`: gerektiğinde kimlik bilgilerinin `Authorization` üst bilgisinde taşınmasını zorunlu kılar.
+    - `models.providers.*.baseUrl`: yukarı akış API temel URL'si.
+    - `models.providers.*.headers`: proxy/kiracı yönlendirmesi için ek statik üst bilgiler.
 
   </Accordion>
-  <Accordion title="Request transport overrides">
-    `models.providers.*.request`: model sağlayıcısı HTTP istekleri için taşıma geçersiz kılmaları.
+  <Accordion title="İstek aktarımı geçersiz kılmaları">
+    `models.providers.*.request`: model sağlayıcısı HTTP istekleri için aktarım geçersiz kılmaları.
 
-    - `request.headers`: ek üstbilgiler (sağlayıcı varsayılanlarıyla birleştirilir). Değerler SecretRef kabul eder.
-    - `request.auth`: kimlik doğrulama stratejisi geçersiz kılması. Modlar: `"provider-default"` (sağlayıcının yerleşik kimlik doğrulamasını kullanır), `"authorization-bearer"` (`token` ile), `"header"` (`headerName`, `value` ve isteğe bağlı `prefix` ile).
-    - `request.proxy`: HTTP vekil sunucusu geçersiz kılması. Modlar: `"env-proxy"` (`HTTP_PROXY`/`HTTPS_PROXY` ortam değişkenlerini kullanır), `"explicit-proxy"` (`url` ile). Her iki mod da isteğe bağlı bir `tls` alt nesnesini kabul eder.
+    - `request.headers`: ek üst bilgiler (sağlayıcı varsayılanlarıyla birleştirilir). Değerler SecretRef kabul eder.
+    - `request.auth`: kimlik doğrulama stratejisi geçersiz kılması. Kipler: `"provider-default"` (sağlayıcının yerleşik kimlik doğrulamasını kullanır), `"authorization-bearer"` (`token` ile), `"header"` (`headerName`, `value` ve isteğe bağlı `prefix` ile).
+    - `request.proxy`: HTTP proxy geçersiz kılması. Kipler: `"env-proxy"` (`HTTP_PROXY`/`HTTPS_PROXY` ortam değişkenlerini kullanır), `"explicit-proxy"` (`url` ile). Her iki kip de isteğe bağlı bir `tls` alt nesnesi kabul eder.
     - `request.tls`: doğrudan bağlantılar için TLS geçersiz kılması. Alanlar: `ca`, `cert`, `key`, `passphrase` (tümü SecretRef kabul eder), `serverName`, `insecureSkipVerify`.
-    - `request.allowPrivateNetwork`: `true` olduğunda, model sağlayıcısı HTTP isteklerinin sağlayıcı HTTP getirme koruması üzerinden özel, CGNAT veya benzer aralıklara erişmesine izin verir. Özel/yerel sağlayıcı temel URL'leri, açıkça etkinleştirilmedikçe engellenmeye devam eden meta veri/bağlantı-yerel kaynakları dışında, tam olarak yapılandırılmış kaynağa zaten güvenir. Tam kaynak güvenini devre dışı bırakmak için bunu `false` olarak ayarlayın. WebSocket, üstbilgiler/TLS için aynı `request` değerini kullanır ancak bu getirme SSRF geçidini kullanmaz. Varsayılan `false`.
+    - `request.allowPrivateNetwork`: `true` olduğunda, model sağlayıcısı HTTP isteklerinin sağlayıcı HTTP getirme koruması üzerinden özel, CGNAT veya benzeri aralıklara erişmesine izin verir. Özel/yerel sağlayıcı temel URL'leri, açıkça kabul edilmedikçe engellenmeye devam eden meta veri/bağlantı-yerel kaynaklar hariç, zaten tam olarak yapılandırılmış kaynağa güvenir. Tam kaynak güvenini devre dışı bırakmak için bunu `false` olarak ayarlayın. WebSocket, üst bilgiler/TLS için aynı `request` değerini kullanır ancak bu getirme SSRF korumasını kullanmaz. Varsayılan `false`.
 
   </Accordion>
-  <Accordion title="Model catalog entries">
+  <Accordion title="Model kataloğu girdileri">
     - `models.providers.*.models`: açık sağlayıcı model kataloğu girdileri.
-    - `models.providers.*.models.*.input`: model girdi kipleri. Yalnızca metin kullanan modeller için `["text"]`, yerel görüntü/görme modelleri için `["text", "image"]` kullanın. Görüntü ekleri, yalnızca seçilen model görüntü destekli olarak işaretlendiğinde agent turlarına eklenir.
-    - `models.providers.*.models.*.contextWindow`: yerel model bağlam penceresi meta verisi. Bu değer, ilgili model için sağlayıcı düzeyindeki `contextWindow` değerini geçersiz kılar.
-    - `models.providers.*.models.*.contextTokens`: isteğe bağlı çalışma zamanı bağlam sınırı. Bu değer, sağlayıcı düzeyindeki `contextTokens` değerini geçersiz kılar; modelin yerel `contextWindow` değerinden daha küçük bir etkin bağlam bütçesi istediğinizde bunu kullanın; değerler farklı olduğunda `openclaw models list` her ikisini de gösterir.
-    - `models.providers.*.models.*.compat.supportsDeveloperRole`: isteğe bağlı uyumluluk ipucu. Boş olmayan, yerel olmayan bir `baseUrl` (`api.openai.com` olmayan ana makine) ile `api: "openai-completions"` kullanıldığında OpenClaw, çalışma zamanında bunu `false` olmaya zorlar. Boş/atlanmış `baseUrl`, varsayılan OpenAI davranışını korur.
-    - `models.providers.*.models.*.compat.requiresStringContent`: yalnızca dize kabul eden, OpenAI ile uyumlu sohbet uç noktaları için isteğe bağlı uyumluluk ipucu. `true` olduğunda OpenClaw, isteği göndermeden önce yalnızca metin içeren `messages[].content` dizilerini düz dizelere dönüştürür.
-    - `models.providers.*.models.*.compat.strictMessageKeys`: katı, OpenAI ile uyumlu sohbet uç noktaları için isteğe bağlı uyumluluk ipucu. `true` olduğunda OpenClaw, isteği göndermeden önce giden Chat Completions ileti nesnelerini `role` ve `content` alanlarıyla sınırlar.
-    - `models.providers.*.models.*.compat.thinkingFormat`: isteğe bağlı düşünme yükü ipucu. Together tarzı `reasoning.enabled` için `"together"`, üst düzey `enable_thinking` için `"qwen"` veya vLLM gibi istek düzeyinde sohbet şablonu anahtar sözcük bağımsız değişkenlerini destekleyen Qwen ailesi OpenAI uyumlu sunucularda `chat_template_kwargs.enable_thinking` için `"qwen-chat-template"` kullanın. Yapılandırılmış vLLM Qwen modelleri, bu biçimler için ikili `/think` seçenekleri (`off`, `on`) sunar.
-    - `models.providers.*.models.*.compat.requiresReasoningContentOnAssistantMessages`: önceki asistan iletilerinin yeniden oynatma sırasında `reasoning_content` alanını korumasını gerektiren DeepSeek tarzı Chat Completions arka uçları için isteğe bağlı uyumluluk ipucu. `true` olduğunda OpenClaw, giden asistan iletilerinde bu alanı korur. Ayıklanmış akıl yürütme sonrasında istekleri reddeden özel, DeepSeek uyumlu bir vekil bağlarken bunu kullanın. Varsayılan `false`.
+    - `models.providers.*.models.*.input`: model giriş kipleri. Yalnızca metin modelleri için `["text"]`, yerel görüntü/görme modelleri için `["text", "image"]` kullanın. Görüntü ekleri, yalnızca seçilen model görüntü destekli olarak işaretlendiğinde ajan turlarına eklenir.
+    - `models.providers.*.models.*.contextWindow`: yerel model bağlam penceresi meta verileri. Bu, ilgili model için sağlayıcı düzeyindeki `contextWindow` değerini geçersiz kılar.
+    - `models.providers.*.models.*.contextTokens`: isteğe bağlı çalışma zamanı bağlam sınırı. Bu, sağlayıcı düzeyindeki `contextTokens` değerini geçersiz kılar; modelin yerel `contextWindow` değerinden daha küçük bir etkin bağlam bütçesi istediğinizde bunu kullanın; değerler farklı olduğunda `openclaw models list` her ikisini de gösterir.
+
+    #### Özel sağlayıcı yetenek bildirimleri
+
+    Sağlayıcı katalogları, paketlenmiş ve katalog tarafından bilinen model yolları için `compat` değerinin sahibidir. Bu bayrakları yapılandırmaya kopyalamayın: yapılandırılmış `api` ve `baseUrl` hâlâ bu yolu tanımladığında OpenClaw katalog satırını kullanır. `openclaw doctor --fix`, eşleşen eski geçersiz kılmaları kaldırır ve farklı değerleri inceleme için bildirir.
+
+    Gerçek anlamda özel bir sağlayıcı, özel model veya farklı bir uç noktaya yönlendirilmiş katalog modeli için `compat` bloğu desteklenmeye devam eder. Yalnızca ilgili uç noktaya karşı doğrulanan yetenekleri ayarlayın:
+
+    | Özel yol anahtarı | Çalışma zamanı sözleşmesi |
+    | --- | --- |
+    | `supportsStore` | OpenAI `store` istek alanını kabul eder. |
+    | `supportsPromptCacheKey` | OpenAI istem önbelleği/oturum yakınlığı anahtarlarını kabul eder. |
+    | `supportsDeveloperRole` | `system` gerektirmek yerine `developer` iletilerini kabul eder. |
+    | `supportsReasoningEffort` | Bir akıl yürütme çabası denetimini kabul eder. |
+    | `supportsTemperature` | Bu model ve bağdaştırıcı için `temperature` kabul eder. |
+    | `supportsUsageInStreaming` | Akış yanıtlarında kullanım meta verilerini yayımlar. |
+    | `supportsTools` | Yapılandırılmış araç/işlev çağrısını destekler. Araçları devre dışı bırakmak için `false` ayarlayın. |
+    | `supportsStrictMode` | Katı araç şemalarını kabul eder. |
+    | `requiresStringContent` | Düz dize biçiminde Chat Completions ileti içeriği gerektirir. |
+    | `strictMessageKeys` | Giden iletilerin yalnızca kabul edilen anahtarları içermesini gerektirir. |
+    | `visibleReasoningDetailTypes` | Dökümlerde gösterilmesi güvenli akıl yürütme ayrıntısı blok türlerini adlandırır. |
+    | `supportedReasoningEfforts` | Uç noktanın kabul ettiği akıl yürütme etiketlerini listeler. |
+    | `reasoningEffortMap` | OpenClaw düşünme etiketlerini uç noktaya özgü etiketlerle eşler. |
+    | `maxTokensField` | `max_tokens` veya `max_completion_tokens` seçer. |
+    | `thinkingFormat` | Uç noktanın akıl yürütme yükü lehçesini seçer. |
+    | `requiresToolResultName` | Araç sonucu iletilerinde bir araç adı gerektirir. |
+    | `requiresAssistantAfterToolResult` | Araç sonuçlarından sonra bir asistan iletisi gerektirir. |
+    | `requiresThinkingAsText` | Akıl yürütmeyi yapılandırılmış içerik yerine metin olarak yeniden oynatır. |
+    | `requiresReasoningContentOnAssistantMessages` | Yeniden oynatma sırasında DeepSeek tarzı `reasoning_content` değerini korur. |
+    | `toolSchemaProfile` | Sağlayıcı tarafından tanımlanan bir araç şeması normalleştirme profili seçer. |
+    | `unsupportedToolSchemaKeywords` | Uç noktanın reddettiği adlandırılmış JSON Schema anahtar sözcüklerini kaldırır. |
+    | `toolCallArgumentsEncoding` | Uç noktanın araç çağrısı bağımsız değişkeni kodlamasını seçer. |
+    | `requiresOpenAiAnthropicToolPayload` | OpenAI biçimli araç çağrılarını Anthropic ailesi yüklerine dönüştürür. |
 
   </Accordion>
-  <Accordion title="Amazon Bedrock discovery">
+  <Accordion title="Amazon Bedrock keşfi">
     - `plugins.entries.amazon-bedrock.config.discovery`: Bedrock otomatik keşif ayarlarının kökü.
     - `plugins.entries.amazon-bedrock.config.discovery.enabled`: örtük keşfi açar/kapatır.
     - `plugins.entries.amazon-bedrock.config.discovery.region`: keşif için AWS bölgesi.
     - `plugins.entries.amazon-bedrock.config.discovery.providerFilter`: hedefli keşif için isteğe bağlı sağlayıcı kimliği filtresi.
-    - `plugins.entries.amazon-bedrock.config.discovery.refreshInterval`: keşif yenilemesinin yoklama aralığı.
+    - `plugins.entries.amazon-bedrock.config.discovery.refreshInterval`: keşif yenilemesi için yoklama aralığı.
     - `plugins.entries.amazon-bedrock.config.discovery.defaultContextWindow`: keşfedilen modeller için yedek bağlam penceresi.
-    - `plugins.entries.amazon-bedrock.config.discovery.defaultMaxTokens`: keşfedilen modeller için yedek azami çıktı belirteci sayısı.
+    - `plugins.entries.amazon-bedrock.config.discovery.defaultMaxTokens`: keşfedilen modeller için yedek maksimum çıktı token sayısı.
 
   </Accordion>
 </AccordionGroup>
 
-Etkileşimli özel sağlayıcı ilk katılımı; GPT-4o/GPT-4.1/GPT-5+, `o1`/`o3`/`o4` akıl yürütme aileleri, Claude, Gemini, `-vl` sonekli tüm kimlikler (Qwen-VL ve benzerleri) ve LLaVA, Pixtral, InternVL, Mllama, MiniCPM-V ve GLM-4V gibi adlandırılmış aileler dâhil olmak üzere bilinen görme modeli kimliği örüntüleri için görüntü girdisini çıkarır; yalnızca metin kullandığı bilinen ailelerde (Llama, DeepSeek, Mistral/Mixtral, Kimi/Moonshot, Codestral, Devstral, Phi, QwQ, CodeLlama ve vl/vision soneki bulunmayan yalın Qwen kimlikleri) ek soruyu atlar. Bilinmeyen model kimliklerinde görüntü desteği yine sorulur. Etkileşimsiz ilk katılım aynı çıkarımı kullanır; görüntü destekli meta verileri zorunlu kılmak için `--custom-image-input`, yalnızca metin meta verilerini zorunlu kılmak için `--custom-text-input` iletin.
+Etkileşimli özel sağlayıcı ilk kurulumu; GPT-4o/GPT-4.1/GPT-5+, `o1`/`o3`/`o4` akıl yürütme aileleri, Claude, Gemini, `-vl` son ekine sahip tüm kimlikler (Qwen-VL ve benzerleri) ve LLaVA, Pixtral, InternVL, Mllama, MiniCPM-V ve GLM-4V gibi adlandırılmış aileler dahil olmak üzere bilinen görsel model kimliği kalıpları için görüntü girdisini çıkarır; yalnızca metin kullandığı bilinen ailelerde (Llama, DeepSeek, Mistral/Mixtral, Kimi/Moonshot, Codestral, Devstral, Phi, QwQ, CodeLlama ve vl/vision son eki bulunmayan yalın Qwen kimlikleri) ek soruyu atlar. Bilinmeyen model kimliklerinde görüntü desteği yine sorulur. Etkileşimsiz ilk kurulum da aynı çıkarımı kullanır; görüntü özellikli meta verileri zorunlu kılmak için `--custom-image-input`, yalnızca metin meta verilerini zorunlu kılmak için `--custom-text-input` iletin.
 
 ### Sağlayıcı örnekleri
 
 <AccordionGroup>
   <Accordion title="Cerebras (GLM 4.7 / GPT OSS)">
-    Resmî harici `cerebras` sağlayıcı Plugin'i bunu `openclaw onboard --auth-choice cerebras-api-key` aracılığıyla yapılandırabilir. Açık sağlayıcı yapılandırmasını yalnızca varsayılanları geçersiz kılarken kullanın.
+    Resmî harici `cerebras` sağlayıcı plugini bunu `openclaw onboard --auth-choice cerebras-api-key` aracılığıyla yapılandırabilir. Açık sağlayıcı yapılandırmasını yalnızca varsayılanları geçersiz kılarken kullanın.
 
     ```json5
     {
@@ -680,7 +656,7 @@ Etkileşimli özel sağlayıcı ilk katılımı; GPT-4o/GPT-4.1/GPT-5+, `o1`/`o3
 
   </Accordion>
   <Accordion title="Yerel modeller (LM Studio)">
-    [Yerel Modeller](/tr/gateway/local-models) bölümüne bakın. Kısaca: güçlü donanımlarda LM Studio Responses API aracılığıyla büyük bir yerel model çalıştırın; geri dönüş için barındırılan modelleri birleştirilmiş olarak tutun.
+    [Yerel Modeller](/tr/gateway/local-models) bölümüne bakın. Kısaca: güçlü donanımlarda LM Studio Responses API aracılığıyla büyük bir yerel model çalıştırın; yedek olarak barındırılan modelleri birleştirilmiş durumda tutun.
   </Accordion>
   <Accordion title="MiniMax M3 (doğrudan)">
     ```json5
@@ -717,7 +693,7 @@ Etkileşimli özel sağlayıcı ilk katılımı; GPT-4o/GPT-4.1/GPT-5+, `o1`/`o3
     }
     ```
 
-    `MINIMAX_API_KEY` değerini ayarlayın. Kısayollar: `openclaw onboard --auth-choice minimax-global-api` veya `openclaw onboard --auth-choice minimax-cn-api`. Model kataloğu varsayılan olarak M3'ü kullanır ve M2.7 varyantlarını da içerir. Anthropic uyumlu akış yolunda OpenClaw, `thinking` değerini açıkça kendiniz ayarlamadığınız sürece MiniMax M2.x düşünme özelliğini varsayılan olarak devre dışı bırakır; MiniMax-M3 (ve M3.x) ise varsayılan olarak sağlayıcının atlanmış/uyarlanabilir düşünme yolunda kalır. `/fast on` veya `params.fastMode: true`, `MiniMax-M2.7` değerini `MiniMax-M2.7-highspeed` olarak yeniden yazar.
+    `MINIMAX_API_KEY` ayarlayın. Kısayollar: `openclaw onboard --auth-choice minimax-global-api` veya `openclaw onboard --auth-choice minimax-cn-api`. Model kataloğu varsayılan olarak M3'ü kullanır ve M2.7 varyantlarını da içerir. Anthropic uyumlu akış yolunda OpenClaw, `thinking` değerini açıkça kendiniz ayarlamadığınız sürece MiniMax M2.x düşünmesini varsayılan olarak devre dışı bırakır; MiniMax-M3 (ve M3.x) varsayılan olarak sağlayıcının belirtilmemiş/uyarlanabilir düşünme yolunda kalır. `/fast on` veya `params.fastMode: true`, `MiniMax-M2.7` değerini `MiniMax-M2.7-highspeed` olarak yeniden yazar.
 
   </Accordion>
   <Accordion title="Moonshot AI (Kimi)">
@@ -771,7 +747,7 @@ Etkileşimli özel sağlayıcı ilk katılımı; GPT-4o/GPT-4.1/GPT-5+, `o1`/`o3
     }
     ```
 
-    `OPENCODE_API_KEY` (veya `OPENCODE_ZEN_API_KEY`) değerini ayarlayın. Zen kataloğu için `opencode/...`, Go kataloğu için `opencode-go/...` başvurularını kullanın. Kısayol: `openclaw onboard --auth-choice opencode-zen` veya `openclaw onboard --auth-choice opencode-go`.
+    `OPENCODE_API_KEY` (veya `OPENCODE_ZEN_API_KEY`) ayarlayın. Zen kataloğu için `opencode/...` başvurularını, Go kataloğu için `opencode-go/...` başvurularını kullanın. Kısayol: `openclaw onboard --auth-choice opencode-zen` veya `openclaw onboard --auth-choice opencode-go`.
 
   </Accordion>
   <Accordion title="Synthetic (Anthropic uyumlu)">
@@ -780,8 +756,8 @@ Etkileşimli özel sağlayıcı ilk katılımı; GPT-4o/GPT-4.1/GPT-5+, `o1`/`o3
       env: { SYNTHETIC_API_KEY: "sk-..." },
       agents: {
         defaults: {
-          model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M2.5" },
-          models: { "synthetic/hf:MiniMaxAI/MiniMax-M2.5": { alias: "MiniMax M2.5" } },
+          model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M3" },
+          models: { "synthetic/hf:MiniMaxAI/MiniMax-M3": { alias: "MiniMax M3" } },
         },
       },
       models: {
@@ -793,12 +769,12 @@ Etkileşimli özel sağlayıcı ilk katılımı; GPT-4o/GPT-4.1/GPT-5+, `o1`/`o3
             api: "anthropic-messages",
             models: [
               {
-                id: "hf:MiniMaxAI/MiniMax-M2.5",
-                name: "MiniMax M2.5",
+                id: "hf:MiniMaxAI/MiniMax-M3",
+                name: "MiniMax M3",
                 reasoning: true,
-                input: ["text"],
+                input: ["text", "image"],
                 cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-                contextWindow: 192000,
+                contextWindow: 262144,
                 maxTokens: 65536,
               },
             ],
@@ -823,12 +799,12 @@ Etkileşimli özel sağlayıcı ilk katılımı; GPT-4o/GPT-4.1/GPT-5+, `o1`/`o3
     }
     ```
 
-    `ZAI_API_KEY` değerini ayarlayın. Model başvuruları standart `zai/*` sağlayıcı kimliğini kullanır. Kısayol: `openclaw onboard --auth-choice zai-api-key`.
+    `ZAI_API_KEY` ayarlayın. Model başvuruları standart `zai/*` sağlayıcı kimliğini kullanır. Kısayol: `openclaw onboard --auth-choice zai-api-key`.
 
     - Genel uç nokta: `https://api.z.ai/api/paas/v4`
     - Kodlama uç noktası: `https://api.z.ai/api/coding/paas/v4`
-    - Varsayılan `zai-api-key` kimlik doğrulama seçeneği anahtarınızı yoklar ve hangi uç noktaya ait olduğunu otomatik olarak algılar (algılama kesin sonuç vermezse varsayılanı Global olan bir isteme geri döner). Açık seçim için özel CN ve Coding-Plan kimlik doğrulama seçenekleri de kullanılabilir.
-    - Genel uç nokta için temel URL geçersiz kılma değeriyle özel bir sağlayıcı tanımlayın.
+    - Varsayılan `zai-api-key` kimlik doğrulama seçeneği anahtarınızı sınar ve hangi uç noktaya ait olduğunu otomatik olarak algılar (algılama kesin sonuç vermezse varsayılanı Global olan bir isteme geri döner). Açık seçim için özel CN ve Coding-Plan kimlik doğrulama seçenekleri de kullanılabilir.
+    - Genel uç nokta için temel URL geçersiz kılmasına sahip özel bir sağlayıcı tanımlayın.
 
   </Accordion>
 </AccordionGroup>
@@ -840,4 +816,4 @@ Etkileşimli özel sağlayıcı ilk katılımı; GPT-4o/GPT-4.1/GPT-5+, `o1`/`o3
 - [Yapılandırma — aracılar](/tr/gateway/config-agents)
 - [Yapılandırma — kanallar](/tr/gateway/config-channels)
 - [Yapılandırma başvurusu](/tr/gateway/configuration-reference) — diğer üst düzey anahtarlar
-- [Araçlar ve Plugin'ler](/tr/tools)
+- [Araçlar ve pluginler](/tr/tools)

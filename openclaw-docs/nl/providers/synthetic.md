@@ -1,55 +1,55 @@
 ---
 read_when:
     - Je wilt Synthetic als modelprovider gebruiken
-    - Je moet een Synthetic API-sleutel of basis-URL instellen
+    - Je moet een Synthetic-API-sleutel of basis-URL instellen
 summary: Gebruik de Anthropic-compatibele API van Synthetic in OpenClaw
-title: Synthetisch
+title: Synthetic
 x-i18n:
-    generated_at: "2026-07-12T09:20:32Z"
+    generated_at: "2026-07-27T05:31:52Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f1882a34aa1ca52403b92effdbf3b753fd911575af6d8b8aa5d692245b8e8f1b
+    source_hash: c3f6cc89a7b837f57555d176ce78e62a39095d4ef0765c96b6b7b93ffebd7388
     source_path: providers/synthetic.md
     workflow: 16
 ---
 
 [Synthetic](https://synthetic.new) biedt Anthropic-compatibele eindpunten.
-OpenClaw levert het mee als de `synthetic`-provider en gebruikt de Anthropic
+OpenClaw bundelt het als de provider `synthetic` en gebruikt de Anthropic
 Messages-API.
 
 | Eigenschap | Waarde                                |
 | ---------- | ------------------------------------- |
-| Provider   | `synthetic`                           |
-| Authenticatie | `SYNTHETIC_API_KEY`                |
+| Provider   | `synthetic`                    |
+| Auth       | `SYNTHETIC_API_KEY`                    |
 | API        | Anthropic Messages                    |
-| Basis-URL  | `https://api.synthetic.new/anthropic` |
+| Basis-URL  | `https://api.synthetic.new/anthropic`                    |
 
 ## Aan de slag
 
 <Steps>
   <Step title="Een API-sleutel verkrijgen">
-    Haal een `SYNTHETIC_API_KEY` op uit je Synthetic-account of laat het
-    onboardingproces erom vragen.
+    Haal een `SYNTHETIC_API_KEY` op uit je Synthetic-account of laat onboarding
+    je erom vragen.
   </Step>
-  <Step title="Het onboardingproces uitvoeren">
+  <Step title="Onboarding uitvoeren">
     ```bash
     openclaw onboard --auth-choice synthetic-api-key
     ```
   </Step>
   <Step title="Het standaardmodel verifiëren">
-    Het onboardingproces stelt het standaardmodel in op:
+    Onboarding stelt het standaardmodel in op:
     ```text
-    synthetic/hf:MiniMaxAI/MiniMax-M2.5
+    synthetic/hf:MiniMaxAI/MiniMax-M3
     ```
   </Step>
 </Steps>
 
 <Warning>
-De Anthropic-client van OpenClaw voegt automatisch `/v1` toe aan de basis-URL,
-dus gebruik `https://api.synthetic.new/anthropic` (niet `/anthropic/v1`). Als
-Synthetic de basis-URL wijzigt, overschrijf dan
-`models.providers.synthetic.baseUrl`.
+De Anthropic-client van OpenClaw voegt automatisch `/v1` toe aan de basis-URL, dus gebruik
+`https://api.synthetic.new/anthropic` (niet `/anthropic/v1`). Als Synthetic
+de basis-URL wijzigt, overschrijf dan `models.providers.synthetic.baseUrl`.
 </Warning>
 
 ## Configuratievoorbeeld
@@ -59,8 +59,8 @@ Synthetic de basis-URL wijzigt, overschrijf dan
   env: { SYNTHETIC_API_KEY: "sk-..." },
   agents: {
     defaults: {
-      model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M2.5" },
-      models: { "synthetic/hf:MiniMaxAI/MiniMax-M2.5": { alias: "MiniMax M2.5" } },
+      model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M3" },
+      models: { "synthetic/hf:MiniMaxAI/MiniMax-M3": { alias: "MiniMax M3" } },
     },
   },
   models: {
@@ -72,12 +72,12 @@ Synthetic de basis-URL wijzigt, overschrijf dan
         api: "anthropic-messages",
         models: [
           {
-            id: "hf:MiniMaxAI/MiniMax-M2.5",
-            name: "MiniMax M2.5",
-            reasoning: false,
-            input: ["text"],
+            id: "hf:MiniMaxAI/MiniMax-M3",
+            name: "MiniMax M3",
+            reasoning: true,
+            input: ["text", "image"],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-            contextWindow: 192000,
+            contextWindow: 262144,
             maxTokens: 65536,
           },
         ],
@@ -89,43 +89,30 @@ Synthetic de basis-URL wijzigt, overschrijf dan
 
 ## Ingebouwde catalogus
 
-Alle Synthetic-modellen gebruiken kostenwaarde `0` (invoer/uitvoer/cache).
+Alle Synthetic-modellen gebruiken kosten `0` (invoer/uitvoer/cache). Bekijk de
+[actuele modellenlijst](https://dev.synthetic.new/docs/api/models) van Synthetic voor de beschikbaarheid van de service.
 
-| Model-ID                                               | Contextvenster | Max. tokens | Redeneren | Invoer             |
-| ------------------------------------------------------ | -------------- | ----------- | --------- | ------------------ |
-| `hf:MiniMaxAI/MiniMax-M2.5`                            | 192,000        | 65,536      | nee       | tekst              |
-| `hf:moonshotai/Kimi-K2-Thinking`                       | 256,000        | 8,192       | ja        | tekst              |
-| `hf:zai-org/GLM-4.7`                                   | 198,000        | 128,000     | nee       | tekst              |
-| `hf:deepseek-ai/DeepSeek-R1-0528`                      | 128,000        | 8,192       | nee       | tekst              |
-| `hf:deepseek-ai/DeepSeek-V3-0324`                      | 128,000        | 8,192       | nee       | tekst              |
-| `hf:deepseek-ai/DeepSeek-V3.1`                         | 128,000        | 8,192       | nee       | tekst              |
-| `hf:deepseek-ai/DeepSeek-V3.1-Terminus`                | 128,000        | 8,192       | nee       | tekst              |
-| `hf:deepseek-ai/DeepSeek-V3.2`                         | 159,000        | 8,192       | nee       | tekst              |
-| `hf:meta-llama/Llama-3.3-70B-Instruct`                 | 128,000        | 8,192       | nee       | tekst              |
-| `hf:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8` | 524,000        | 8,192       | nee       | tekst              |
-| `hf:moonshotai/Kimi-K2-Instruct-0905`                  | 256,000        | 8,192       | nee       | tekst              |
-| `hf:moonshotai/Kimi-K2.5`                              | 256,000        | 8,192       | ja        | tekst + afbeelding |
-| `hf:openai/gpt-oss-120b`                               | 128,000        | 8,192       | nee       | tekst              |
-| `hf:Qwen/Qwen3-235B-A22B-Instruct-2507`                | 256,000        | 8,192       | nee       | tekst              |
-| `hf:Qwen/Qwen3-Coder-480B-A35B-Instruct`               | 256,000        | 8,192       | nee       | tekst              |
-| `hf:Qwen/Qwen3-VL-235B-A22B-Instruct`                  | 250,000        | 8,192       | nee       | tekst + afbeelding |
-| `hf:zai-org/GLM-4.5`                                   | 128,000        | 128,000     | nee       | tekst              |
-| `hf:zai-org/GLM-4.6`                                   | 198,000        | 128,000     | nee       | tekst              |
-| `hf:zai-org/GLM-5`                                     | 256,000        | 128,000     | ja        | tekst + afbeelding |
-| `hf:deepseek-ai/DeepSeek-V3`                           | 128,000        | 8,192       | nee       | tekst              |
-| `hf:Qwen/Qwen3-235B-A22B-Thinking-2507`                | 256,000        | 8,192       | ja        | tekst              |
+| Model-ID                                            | Contextvenster | Max. tokens | Redeneren | Invoer           |
+| --------------------------------------------------- | -------------- | ----------- | --------- | ---------------- |
+| `hf:MiniMaxAI/MiniMax-M3`                                  | 262,144        | 65,536      | ja        | tekst + afbeelding |
+| `hf:moonshotai/Kimi-K2.7-Code`                                  | 262,144        | 8,192       | ja        | tekst + afbeelding |
+| `hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4`                                  | 262,144        | 8,192       | ja        | tekst            |
+| `hf:openai/gpt-oss-120b`                                  | 131,072        | 8,192       | ja        | tekst            |
+| `hf:Qwen/Qwen3.6-27B`                                  | 262,144        | 81,920      | ja        | tekst + afbeelding |
+| `hf:zai-org/GLM-4.7-Flash`                                  | 196,608        | 131,072     | ja        | tekst            |
+| `hf:zai-org/GLM-5.2`                                  | 524,288        | 131,072     | ja        | tekst            |
 
 <Tip>
 Modelverwijzingen gebruiken de vorm `synthetic/<modelId>`. Gebruik
-`openclaw models list --provider synthetic` om alle modellen te zien die voor
-je account beschikbaar zijn.
+`openclaw models list --provider synthetic` om alle modellen te bekijken die beschikbaar zijn voor je
+account.
 </Tip>
 
 <AccordionGroup>
   <Accordion title="Toegestane modellen">
-    Als je een lijst met toegestane modellen (`agents.defaults.models`)
-    inschakelt, voeg dan elk Synthetic-model toe dat je wilt gebruiken.
-    Modellen die niet in de lijst staan, zijn verborgen voor de agent.
+    Als je een lijst met toegestane modellen inschakelt (`agents.defaults.modelPolicy.allow`), voeg dan elk
+    Synthetic-model toe dat je wilt gebruiken. Modellen die niet in de lijst staan, zijn verborgen
+    voor de agent.
   </Accordion>
 
   <Accordion title="Basis-URL overschrijven">

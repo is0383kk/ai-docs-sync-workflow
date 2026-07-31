@@ -1,125 +1,120 @@
 ---
 read_when:
-    - प्रदाता क्रेडेंशियल्स और `auth-profiles.json` refs के लिए SecretRefs कॉन्फ़िगर करना
+    - प्रदाता क्रेडेंशियल और `auth-profiles.json` रेफ़रेंस के लिए SecretRefs कॉन्फ़िगर करना
     - प्रोडक्शन में सीक्रेट्स को सुरक्षित रूप से रीलोड, ऑडिट, कॉन्फ़िगर और लागू करना
-    - स्टार्टअप fail-fast, निष्क्रिय-सतह फ़िल्टरिंग, और अंतिम-ज्ञात-अच्छे व्यवहार को समझना
+    - स्टार्टअप पर तुरंत विफलता, निष्क्रिय सतह फ़िल्टरिंग और अंतिम ज्ञात-सही व्यवहार को समझना
 sidebarTitle: Secrets management
-summary: 'Secrets प्रबंधन: SecretRef अनुबंध, runtime snapshot व्यवहार, और सुरक्षित एक-तरफा scrubbing'
-title: सीक्रेट प्रबंधन
+summary: 'गोपनीय जानकारी प्रबंधन: SecretRef अनुबंध, रनटाइम स्नैपशॉट व्यवहार और सुरक्षित एकतरफ़ा स्क्रबिंग'
+title: गोपनीय जानकारी का प्रबंधन
 x-i18n:
-    generated_at: "2026-06-28T23:13:09Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:47:12Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 6d90346b1e4abc39cf1ab314c242f0b976aa83ee06f6dfeb787aafb19fa90de9
+    source_hash: d10989ebbce367c68d28768244d4e3649028af5ab63c9523974352c270a3c55e
     source_path: gateway/secrets.md
     workflow: 16
 ---
 
-OpenClaw additive SecretRefs का समर्थन करता है ताकि समर्थित क्रेडेंशियल्स को कॉन्फ़िगरेशन में plaintext के रूप में संग्रहीत करने की आवश्यकता न हो।
+OpenClaw योगात्मक SecretRefs का समर्थन करता है, ताकि समर्थित क्रेडेंशियल को कॉन्फ़िगरेशन में प्लेनटेक्स्ट के रूप में रखने की आवश्यकता न हो।
 
 <Note>
-Plaintext अभी भी काम करता है। SecretRefs प्रत्येक क्रेडेंशियल के लिए opt-in हैं।
+प्लेनटेक्स्ट अब भी काम करता है। SecretRefs प्रत्येक क्रेडेंशियल के लिए वैकल्पिक हैं।
 </Note>
 
 <Warning>
-Plaintext क्रेडेंशियल्स एजेंट-पठनीय बने रहते हैं यदि वे उन फ़ाइलों में संग्रहीत हैं जिन्हें
-एजेंट निरीक्षण कर सकता है, जिनमें `openclaw.json`, `auth-profiles.json`, `.env`, या
-जनरेट की गई `agents/*/agent/models.json` फ़ाइलें शामिल हैं। SecretRefs उस स्थानीय blast
-radius को केवल तब घटाते हैं जब हर समर्थित क्रेडेंशियल माइग्रेट हो चुका हो और
-`openclaw secrets audit --check` कोई plaintext secret residue रिपोर्ट न करे।
+यदि प्लेनटेक्स्ट क्रेडेंशियल ऐसी फ़ाइलों में मौजूद हैं जिनका एजेंट निरीक्षण कर सकता है, तो वे एजेंट द्वारा पढ़ने योग्य बने रहते हैं; इनमें `openclaw.json`, `auth-profiles.json`, `.env`, या जनरेट की गई `agents/*/agent/models.json` फ़ाइलें शामिल हैं। SecretRefs उस स्थानीय प्रभाव-क्षेत्र को केवल तभी कम करते हैं, जब प्रत्येक समर्थित क्रेडेंशियल माइग्रेट हो चुका हो और `openclaw secrets audit --check` किसी प्लेनटेक्स्ट अवशेष की रिपोर्ट न करे।
 </Warning>
 
-## लक्ष्य और रनटाइम मॉडल
+## रनटाइम मॉडल
 
-Secrets को इन-मेमरी रनटाइम स्नैपशॉट में resolve किया जाता है।
+- Secrets अनुरोध पथों पर विलंबित रूप से नहीं, बल्कि सक्रियण के दौरान तत्परता से इन-मेमोरी रनटाइम स्नैपशॉट में रिज़ॉल्व होते हैं।
+- कोल्ड Gateway स्टार्टअप पुनः प्रयास योग्य SecretRef विफलता को किसी ज्ञात गैर-Gateway स्वामी तक सीमित रखता है, बशर्ते वह स्वामी पृथक्करण का समर्थन करता हो। मैप किए गए स्वामी वर्गों में मॉडल प्रदाता और Skills, मीडिया/TTS/Cron प्रदाता, पात्र प्रमाणीकरण प्रोफ़ाइल, प्रति-एजेंट मेमोरी, सैंडबॉक्स SSH, चैनल खाते और मैनिफ़ेस्ट में घोषित Plugin रूट शामिल हैं। Gateway प्रारंभ होता है, स्वामी को कॉन्फ़िगर-किंतु-अनुपलब्ध के रूप में दर्ज करता है और संशोधित अवनति चेतावनी जारी करता है। Gateway इनग्रेस प्रमाणीकरण, संरचनात्मक रूप से अमान्य रेफ़रेंस या रिज़ॉल्व किए गए मान, विफलता पर बंद होने वाले स्वामी और वे रेफ़रेंस जिनका रनटाइम स्वामी मैप नहीं किया गया है, अब भी स्टार्टअप को विफल करते हैं।
+- रीलोड प्रत्येक मैप किए गए स्वामी को स्वतंत्र रूप से सत्यापित करता है, फिर एक परमाण्विक स्नैपशॉट प्रकाशित करता है। स्वस्थ स्वामी रीफ़्रेश होते हैं। कोई पात्र विफल स्वामी अपना अंतिम-ज्ञात-सही मान बनाए रखता है और केवल तभी स्टेल होता है, जब उसकी रेफ़रेंस पहचानें, प्रदाता परिभाषाएँ और पूर्ण गैर-गोपनीय स्वामी अनुबंध अपरिवर्तित हों; बदला हुआ या नया विफल स्वामी कोल्ड हो जाता है। कोई कठोर विफलता रीलोड को अस्वीकार करती है और सक्रिय स्नैपशॉट को सुरक्षित रखती है।
+- नीति उल्लंघन (उदाहरण के लिए, SecretRef इनपुट के साथ संयुक्त OAuth-मोड प्रमाणीकरण प्रोफ़ाइल) रनटाइम अदला-बदली से पहले सक्रियण को विफल करते हैं।
+- रनटाइम अनुरोध केवल सक्रिय इन-मेमोरी स्नैपशॉट को पढ़ते हैं। मॉडल-प्रदाता SecretRef क्रेडेंशियल निर्गमन तक प्रमाणीकरण स्टोरेज और स्ट्रीम विकल्पों से प्रक्रिया-स्थानीय सेंटिनल के रूप में गुजरते हैं। आउटबाउंड डिलीवरी पथ (Discord उत्तर/थ्रेड डिलीवरी, Telegram कार्रवाई प्रेषण) भी उसी स्नैपशॉट को पढ़ते हैं और प्रत्येक प्रेषण पर रेफ़रेंस को दोबारा रिज़ॉल्व नहीं करते।
 
-- Resolution activation के दौरान eager होता है, request paths पर lazy नहीं।
-- जब कोई प्रभावी रूप से सक्रिय SecretRef resolve नहीं हो पाता, startup तुरंत fail होता है।
-- Reload atomic swap का उपयोग करता है: पूर्ण सफलता, या last-known-good snapshot बनाए रखें।
-- SecretRef policy violations (उदाहरण के लिए SecretRef input के साथ OAuth-mode auth profiles) runtime swap से पहले activation को fail करते हैं।
-- Runtime requests केवल active in-memory snapshot से पढ़ते हैं।
-- पहली सफल config activation/load के बाद, runtime code paths उस active in-memory snapshot को तब तक पढ़ते रहते हैं जब तक सफल reload उसे swap नहीं कर देता।
-- Outbound delivery paths भी उसी active snapshot से पढ़ते हैं (उदाहरण के लिए Discord reply/thread delivery और Telegram action sends); वे हर send पर SecretRefs को फिर से resolve नहीं करते।
+इससे गोपनीयता-प्रदाता की अनुपलब्धताएँ हॉट अनुरोध पथों से दूर रहती हैं।
 
-इससे secret-provider outages hot request paths से दूर रहते हैं।
+Gateway इनग्रेस सुरक्षा, संरचनात्मक रूप से अमान्य कॉन्फ़िगरेशन या रिज़ॉल्व किए गए मान, नीति उल्लंघन और अज्ञात स्वामित्व अब भी विफलता पर बंद होते हैं। पृथक किए गए स्वामी कभी भी कम-प्राथमिकता वाले क्रेडेंशियल स्रोत पर फ़ॉलबैक नहीं करते।
 
-## एजेंट-access boundary
+## निर्गमन-समय इंजेक्शन (सेंटिनल)
 
-SecretRefs समर्थित config और generated model surfaces में credentials को persist होने से बचाते हैं,
-लेकिन वे process-isolation boundary नहीं हैं। यदि कोई plaintext credential disk पर ऐसे path में रहता है
-जिसे agent पढ़ सकता है, तो agent file या shell tools का उपयोग करके उस file को inspect कर
-API-level redaction को bypass कर सकता है।
+SecretRefs द्वारा समर्थित मॉडल-प्रदाता क्रेडेंशियल के लिए, OpenClaw मॉडल-प्रमाणीकरण रिज़ॉल्यूशन के दौरान एक अपारदर्शी, प्रक्रिया-स्थानीय सेंटिनल बनाता है। इसलिए प्रमाणीकरण स्टोरेज, स्ट्रीम विकल्प, SDK कॉन्फ़िगरेशन, लॉग, त्रुटि ऑब्जेक्ट और अधिकांश रनटाइम निरीक्षण प्रदाता क्रेडेंशियल के बजाय `oc-sent-v1-...` जैसा मान देखते हैं। संरक्षित मॉडल फ़ेच और प्रबंधित स्थानीय-प्रदाता स्वास्थ्य प्रोब प्रत्येक अनुरोध के प्रक्रिया से बाहर जाने के ठीक पहले URL और हेडर मानों में ज्ञात सेंटिनल को बदल देते हैं।
 
-Production deployments के लिए जहाँ agent-accessible files scope में हैं, SecretRef migration को
-complete केवल तब मानें जब ये सभी true हों:
+अज्ञात सेंटिनल-जैसे मान नेटवर्क गतिविधि से पहले विफलता पर बंद हो जाते हैं। OpenClaw किसी अनरिज़ॉल्व्ड सेंटिनल को प्रदाता तक अग्रेषित करने के बजाय अनुरोध भेजने से मना करता है। अतिरिक्त सुरक्षा उपाय के रूप में रिज़ॉल्व किए गए गोपनीय मान भी सटीक-मान लॉग संशोधन के लिए पंजीकृत किए जाते हैं।
 
-- समर्थित credentials plaintext values के बजाय SecretRefs का उपयोग करते हैं
-- legacy plaintext residue को `openclaw.json`,
-  `auth-profiles.json`, `.env`, और generated `models.json` files से scrub किया गया है
-- migration के बाद `openclaw secrets audit --check` clean है
-- कोई भी शेष unsupported या rotating credentials operating
-  system isolation, container isolation, या external credential proxy से protected हैं
+प्रदाता अडैप्टर अपने SDK द्वारा समर्थित नवीनतम इंजेक्शन बिंदु का उपयोग करते हैं:
 
-इसीलिए audit/configure/apply workflow एक security migration gate है, केवल
-convenience helper नहीं।
+- कस्टम फ़ेच विकल्प वाले SDK को OpenClaw का संरक्षित फ़ेच मिलता है, इसलिए SDK सेंटिनल बनाए रखता है।
+- कस्टम फ़ेच विकल्प के बिना SDK क्लाइंट निर्माण के ठीक पहले सेंटिनल को अनरैप करते हैं। Plugin-स्वामित्व वाली प्रदाता स्ट्रीम और एजेंट हार्नेस अंतिम कोर-स्वामित्व वाले हैंडऑफ़ पर अनरैप करते हैं, क्योंकि वे ट्रांसपोर्ट OpenClaw के संरक्षित फ़ेच को साझा नहीं करते।
+
+सेंटिनल मॉडल-कॉल शृंखला में प्लेनटेक्स्ट अनावरण घटाते हैं, लेकिन वे प्रक्रिया पृथक्करण नहीं हैं। वास्तविक मान अब भी उसी प्रक्रिया की मेमोरी में मौजूद रहता है और अंतिम अडैप्टर सीमा पर दिखाई देता है। SecretRefs के माध्यम से कॉन्फ़िगर न किए गए साधारण पर्यावरण क्रेडेंशियल प्लेनटेक्स्ट बने रहते हैं और इस तंत्र से बाहर हैं।
+
+घटना प्रतिक्रिया या संगतता समस्या-निवारण के दौरान सेंटिनल निर्माण अक्षम करने के लिए `OPENCLAW_SECRET_SENTINELS=off` सेट करें (`0` या `false` भी स्वीकार किए जाते हैं, अक्षर-स्थिति से निरपेक्ष)। यह किल स्विच सटीक-मान संशोधन पंजीकरण को अक्षम नहीं करता।
+
+## एजेंट-अभिगम सीमा
+
+SecretRefs क्रेडेंशियल को कॉन्फ़िगरेशन और जनरेट की गई मॉडल फ़ाइलों में स्थायी होने से रोकते हैं, लेकिन वे प्रक्रिया-पृथक्करण सीमा नहीं हैं। एजेंट द्वारा पढ़े जा सकने वाले पथ में डिस्क पर छोड़ा गया प्लेनटेक्स्ट क्रेडेंशियल अब भी फ़ाइल या शेल टूल के माध्यम से पढ़ा जा सकता है, जिससे API-स्तरीय संशोधन बायपास हो जाता है।
+
+उन उत्पादन परिनियोजनों के लिए जहाँ एजेंट-अभिगम योग्य फ़ाइलें दायरे में हैं, माइग्रेशन को केवल तभी पूर्ण मानें जब ये सभी शर्तें पूरी हों:
+
+- समर्थित क्रेडेंशियल प्लेनटेक्स्ट मानों के बजाय SecretRefs का उपयोग करते हैं।
+- पुराना प्लेनटेक्स्ट अवशेष `openclaw.json`, `auth-profiles.json`, `.env`, और जनरेट की गई `models.json` फ़ाइलों से मिटा दिया गया है।
+- माइग्रेशन के बाद `openclaw secrets audit --check` स्वच्छ है।
+- शेष असमर्थित या घूर्णित क्रेडेंशियल OS पृथक्करण, कंटेनर पृथक्करण या बाहरी क्रेडेंशियल प्रॉक्सी द्वारा सुरक्षित हैं।
+
+इसी कारण ऑडिट/कॉन्फ़िगर/लागू करें कार्यप्रवाह केवल सुविधाजनक सहायक नहीं, बल्कि सुरक्षा माइग्रेशन गेट है।
 
 <Warning>
-SecretRefs arbitrary readable files को safe नहीं बनाते। Backups, copied configs,
-पुराने generated model catalogs, और unsupported credential classes को production secrets की तरह treat करना होगा
-जब तक उन्हें delete न किया जाए, agent trust
-boundary से बाहर move न किया जाए, या separate isolation layer से protected न किया जाए।
+SecretRefs मनमानी पढ़ने योग्य फ़ाइलों को सुरक्षित नहीं बनाते। बैकअप, कॉपी किए गए कॉन्फ़िगरेशन, पुराने जनरेट किए गए मॉडल कैटलॉग और असमर्थित क्रेडेंशियल वर्ग तब तक उत्पादन गोपनीयताएँ बने रहते हैं, जब तक उन्हें हटा न दिया जाए, एजेंट विश्वास सीमा से बाहर न ले जाया जाए या अलग से पृथक न किया जाए।
 </Warning>
 
-## Active-surface filtering
+## सक्रिय-सतह फ़िल्टरिंग
 
-SecretRefs केवल प्रभावी रूप से active surfaces पर validate किए जाते हैं।
+SecretRefs केवल प्रभावी रूप से सक्रिय सतहों पर सत्यापित किए जाते हैं:
 
-- Enabled surfaces: unresolved refs startup/reload को block करते हैं।
-- Inactive surfaces: unresolved refs startup/reload को block नहीं करते।
-- Inactive refs code `SECRETS_REF_IGNORED_INACTIVE_SURFACE` के साथ non-fatal diagnostics emit करते हैं।
+- **सक्षम सतहें**: मैप किए गए, पृथक किए जा सकने वाले स्वामियों की पुनः प्रयास योग्य विफलताएँ कोल्ड या स्टेल अवनति में प्रवेश करती हैं। कठोर, विफलता पर बंद, Gateway-आवश्यक या अमैप्ड विफलताएँ स्टार्टअप/रीलोड को अवरुद्ध करती हैं।
+- **निष्क्रिय सतहें**: अनरिज़ॉल्व्ड रेफ़रेंस स्टार्टअप/रीलोड को अवरुद्ध नहीं करते; वे एक गैर-घातक `SECRETS_REF_IGNORED_INACTIVE_SURFACE` निदान जारी करते हैं।
 
-<AccordionGroup>
-  <Accordion title="Examples of inactive surfaces">
-    - Disabled channel/account entries.
-    - Top-level channel credentials जिन्हें कोई enabled account inherit नहीं करता।
-    - Disabled tool/feature surfaces.
-    - Web search provider-specific keys जिन्हें `tools.web.search.provider` द्वारा select नहीं किया गया है। Auto mode (provider unset) में, keys provider auto-detection के लिए precedence के अनुसार consult की जाती हैं जब तक कोई resolve न हो जाए। Selection के बाद, non-selected provider keys को selected होने तक inactive treat किया जाता है।
-    - Sandbox SSH auth material (`agents.defaults.sandbox.ssh.identityData`, `certificateData`, `knownHostsData`, plus per-agent overrides) केवल तब active होता है जब effective sandbox backend default agent या enabled agent के लिए `ssh` हो।
-    - `gateway.remote.token` / `gateway.remote.password` SecretRefs active हैं यदि इनमें से कोई एक true है:
-      - `gateway.mode=remote`
-      - `gateway.remote.url` configured है
-      - `gateway.tailscale.mode` `serve` या `funnel` है
-      - उन remote surfaces के बिना local mode में:
-        - `gateway.remote.token` तब active होता है जब token auth win कर सकता है और कोई env/auth token configured नहीं है।
-        - `gateway.remote.password` केवल तब active होता है जब password auth win कर सकता है और कोई env/auth password configured नहीं है।
-    - `gateway.auth.token` SecretRef startup auth resolution के लिए inactive है जब `OPENCLAW_GATEWAY_TOKEN` set है, क्योंकि env token input उस runtime के लिए wins करता है।
+<Accordion title="निष्क्रिय सतहों के उदाहरण">
+- अक्षम चैनल/खाता प्रविष्टियाँ।
+- शीर्ष-स्तरीय चैनल क्रेडेंशियल जिन्हें कोई सक्षम खाता इनहेरिट नहीं करता।
+- अक्षम टूल/फ़ीचर सतहें।
+- वेब खोज प्रदाता-विशिष्ट कुंजियाँ जिन्हें `tools.web.search.provider` द्वारा चयनित नहीं किया गया है। स्वचालित मोड में (प्रदाता अनसेट), स्वतः-पहचान के लिए कुंजियों को प्राथमिकता के क्रम में तब तक देखा जाता है जब तक कोई रिज़ॉल्व न हो जाए; चयन के बाद, गैर-चयनित प्रदाता कुंजियाँ निष्क्रिय होती हैं।
+- सैंडबॉक्स SSH प्रमाणीकरण सामग्री (`agents.defaults.sandbox.ssh.identityData`, `certificateData`, `knownHostsData`, और प्रति-एजेंट ओवरराइड) केवल तभी सक्रिय होती है, जब प्रभावी सैंडबॉक्स बैकएंड `ssh` हो और सैंडबॉक्स मोड `off` न हो—डिफ़ॉल्ट एजेंट या किसी सक्षम एजेंट के लिए।
+- `gateway.remote.token` / `gateway.remote.password` SecretRefs सक्रिय होते हैं यदि इनमें से कोई शर्त पूरी हो:
+  - `gateway.mode=remote`
+  - `gateway.remote.url` कॉन्फ़िगर किया गया है
+  - `gateway.tailscale.mode`, `serve` या `funnel` है
+  - उन रिमोट सतहों के बिना स्थानीय मोड में: `gateway.remote.token` तब सक्रिय होता है जब टोकन प्रमाणीकरण जीत सकता हो और कोई पर्यावरण/प्रमाणीकरण टोकन कॉन्फ़िगर न हो; `gateway.remote.password` केवल तभी सक्रिय होता है जब पासवर्ड प्रमाणीकरण जीत सकता हो और कोई पर्यावरण/प्रमाणीकरण पासवर्ड कॉन्फ़िगर न हो।
+- स्टार्टअप प्रमाणीकरण रिज़ॉल्यूशन के लिए `gateway.auth.token` SecretRef तब निष्क्रिय होता है जब `OPENCLAW_GATEWAY_TOKEN` सेट हो, क्योंकि उस रनटाइम के लिए पर्यावरण टोकन इनपुट जीतता है।
 
-  </Accordion>
-</AccordionGroup>
+</Accordion>
 
-## Gateway auth surface diagnostics
+## Gateway प्रमाणीकरण सतह निदान
 
-जब `gateway.auth.token`, `gateway.auth.password`, `gateway.remote.token`, या `gateway.remote.password` पर SecretRef configured होता है, gateway startup/reload surface state को explicitly log करता है:
+जब `gateway.auth.token`, `gateway.auth.password`, `gateway.remote.token`, या `gateway.remote.password` पर SecretRef सेट होता है, तो Gateway स्टार्टअप/रीलोड कोड `SECRETS_GATEWAY_AUTH_SURFACE` के अंतर्गत सतह की स्थिति लॉग करता है:
 
-- `active`: SecretRef effective auth surface का हिस्सा है और must resolve.
-- `inactive`: SecretRef इस runtime के लिए ignored है क्योंकि कोई दूसरी auth surface wins करती है, या remote auth disabled/not active है।
+- `active`: SecretRef प्रभावी प्रमाणीकरण सतह का हिस्सा है और इसे रिज़ॉल्व होना आवश्यक है।
+- `inactive`: कोई अन्य प्रमाणीकरण सतह जीतती है, या रिमोट प्रमाणीकरण अक्षम/निष्क्रिय है।
 
-ये entries `SECRETS_GATEWAY_AUTH_SURFACE` के साथ log की जाती हैं और active-surface policy द्वारा उपयोग किया गया reason शामिल करती हैं, ताकि आप देख सकें कि credential को active या inactive क्यों treat किया गया।
+लॉग प्रविष्टि में सक्रिय-सतह नीति द्वारा उपयोग किया गया कारण शामिल होता है।
 
-## Onboarding reference preflight
+## ऑनबोर्डिंग रेफ़रेंस पूर्व-जाँच
 
-जब onboarding interactive mode में चलता है और आप SecretRef storage चुनते हैं, OpenClaw saving से पहले preflight validation चलाता है:
+इंटरैक्टिव ऑनबोर्डिंग में SecretRef स्टोरेज चुनने पर सहेजने से पहले पूर्व-जाँच सत्यापन चलता है:
 
-- Env refs: env var name validate करता है और confirm करता है कि setup के दौरान non-empty value visible है।
-- Provider refs (`file` या `exec`): provider selection validate करता है, `id` resolve करता है, और resolved value type check करता है।
-- Quickstart reuse path: जब `gateway.auth.token` पहले से SecretRef है, onboarding probe/dashboard bootstrap से पहले उसे resolve करता है (`env`, `file`, और `exec` refs के लिए) उसी fail-fast gate का उपयोग करके।
+- पर्यावरण रेफ़रेंस: पर्यावरण चर का नाम सत्यापित करता है और पुष्टि करता है कि सेटअप के दौरान कोई गैर-रिक्त मान दिखाई दे रहा है।
+- प्रदाता रेफ़रेंस (`file` या `exec`): प्रदाता चयन सत्यापित करता है, `id` को रिज़ॉल्व करता है और रिज़ॉल्व किए गए मान का प्रकार जाँचता है।
+- क्विकस्टार्ट प्रवाह: जब `gateway.auth.token` पहले से SecretRef हो, तो ऑनबोर्डिंग समान त्वरित-विफलता गेट का उपयोग करके प्रोब/डैशबोर्ड बूटस्ट्रैप से पहले उसे (`env`, `file`, और `exec` रेफ़रेंस के लिए) रिज़ॉल्व करती है।
 
-यदि validation fail होता है, onboarding error दिखाता है और आपको retry करने देता है।
+सत्यापन विफल होने पर त्रुटि दिखाई जाती है और आपको पुनः प्रयास करने दिया जाता है।
 
-## SecretRef contract
+## SecretRef अनुबंध
 
-हर जगह एक object shape का उपयोग करें:
+हर स्थान पर एक ही ऑब्जेक्ट आकार:
 
 ```json5
 { source: "env" | "file" | "exec", provider: "default", id: "..." }
@@ -131,17 +126,17 @@ SecretRefs केवल प्रभावी रूप से active surfaces �
     { source: "env", provider: "default", id: "OPENAI_API_KEY" }
     ```
 
-    समर्थित SecretInput fields exact string shorthands भी accept करते हैं:
+    SecretInput फ़ील्ड पर संक्षिप्त स्ट्रिंग भी स्वीकार की जाती हैं:
 
     ```json5
     "${OPENAI_API_KEY}"
     "$OPENAI_API_KEY"
     ```
 
-    Validation:
+    सत्यापन:
 
-    - `provider` must match `^[a-z][a-z0-9_-]{0,63}$`
-    - `id` must match `^[A-Z][A-Z0-9_]{0,127}$`
+    - `provider`, `^[a-z][a-z0-9_-]{0,63}$` से मेल खाना चाहिए
+    - `id`, `^[A-Z][A-Z0-9_]{0,127}$` से मेल खाना चाहिए
 
   </Tab>
   <Tab title="file">
@@ -149,11 +144,11 @@ SecretRefs केवल प्रभावी रूप से active surfaces �
     { source: "file", provider: "filemain", id: "/providers/openai/apiKey" }
     ```
 
-    Validation:
+    सत्यापन:
 
-    - `provider` must match `^[a-z][a-z0-9_-]{0,63}$`
-    - `id` must be an absolute JSON pointer (`/...`)
-    - RFC6901 escaping in segments: `~` => `~0`, `/` => `~1`
+    - `provider`, `^[a-z][a-z0-9_-]{0,63}$` से मेल खाना चाहिए
+    - `id` एक निरपेक्ष JSON पॉइंटर (`/...`) या `singleValue` प्रदाताओं के लिए शाब्दिक `value` होना चाहिए
+    - खंडों में RFC 6901 एस्केपिंग: `~`, `~0` बन जाता है; `/`, `~1` बन जाता है
 
   </Tab>
   <Tab title="exec">
@@ -161,18 +156,18 @@ SecretRefs केवल प्रभावी रूप से active surfaces �
     { source: "exec", provider: "vault", id: "providers/openai/apiKey#value" }
     ```
 
-    Validation:
+    सत्यापन:
 
-    - `provider` must match `^[a-z][a-z0-9_-]{0,63}$`
-    - `id` must match `^[A-Za-z0-9][A-Za-z0-9._:/#-]{0,255}$` (`secret#json_key` जैसे selectors support करता है)
-    - `id` में slash-delimited path segments के रूप में `.` या `..` नहीं होना चाहिए (उदाहरण के लिए `a/../b` rejected है)
+    - `provider`, `^[a-z][a-z0-9_-]{0,63}$` से मेल खाना चाहिए
+    - `id`, `^[A-Za-z0-9][A-Za-z0-9._:/#-]{0,255}$` से मेल खाना चाहिए (`secret#json_key` जैसे चयनकर्ताओं का समर्थन करता है)
+    - `id` में स्लैश-सीमांकित पथ खंडों के रूप में `.` या `..` नहीं होना चाहिए (उदाहरण के लिए, `a/../b` अस्वीकार किया जाता है)
 
   </Tab>
 </Tabs>
 
-## Provider config
+## प्रदाता कॉन्फ़िगरेशन
 
-Providers को `secrets.providers` के अंतर्गत define करें:
+`secrets.providers` के अंतर्गत प्रदाता परिभाषित करें:
 
 ```json5
 {
@@ -182,7 +177,7 @@ Providers को `secrets.providers` के अंतर्गत define कर�
       filemain: {
         source: "file",
         path: "~/.openclaw/secrets.json",
-        mode: "json", // or "singleValue"
+        mode: "json", // या "singleValue"
       },
       vault: {
         source: "exec",
@@ -204,71 +199,67 @@ Providers को `secrets.providers` के अंतर्गत define कर�
       file: "filemain",
       exec: "vault",
     },
-    resolution: {
-      maxProviderConcurrency: 4,
-      maxRefsPerProvider: 512,
-      maxBatchBytes: 262144,
-    },
   },
 }
 ```
 
-<AccordionGroup>
-  <Accordion title="Env provider">
-    - Optional allowlist via `allowlist`.
-    - Missing/empty env values fail resolution.
+<Accordion title="पर्यावरण प्रदाता">
+- `allowlist` के माध्यम से वैकल्पिक सटीक-नाम अनुमति सूची।
+- अनुपलब्ध या रिक्त पर्यावरण मान रिज़ॉल्यूशन को विफल करते हैं।
 
-  </Accordion>
-  <Accordion title="File provider">
-    - `path` से local file पढ़ता है।
-    - `mode: "json"` JSON object payload expect करता है और `id` को pointer के रूप में resolve करता है।
-    - `mode: "singleValue"` ref id `"value"` expect करता है और file contents return करता है।
-    - Path को ownership/permission checks pass करने होंगे।
-    - Windows fail-closed note: यदि किसी path के लिए ACL verification unavailable है, resolution fail होता है। केवल trusted paths के लिए, path security checks bypass करने हेतु उस provider पर `allowInsecurePath: true` set करें।
+</Accordion>
 
-  </Accordion>
-  <Accordion title="Exec provider">
-    - Configured absolute binary path चलाता है, shell नहीं।
-    - Default रूप से, `command` को regular file की ओर point करना चाहिए (symlink नहीं)।
-    - Symlink command paths allow करने के लिए `allowSymlinkCommand: true` set करें (उदाहरण के लिए Homebrew shims)। OpenClaw resolved target path validate करता है।
-    - Package-manager paths के लिए `allowSymlinkCommand` को `trustedDirs` के साथ pair करें (उदाहरण के लिए `["/opt/homebrew"]`)।
-    - Timeout, no-output timeout, output byte limits, env allowlist, और trusted dirs support करता है।
-    - Windows fail-closed note: यदि command path के लिए ACL verification unavailable है, resolution fail होता है। केवल trusted paths के लिए, path security checks bypass करने हेतु उस provider पर `allowInsecurePath: true` set करें।
-    - Plugin-managed exec providers copied `command`/`args` के बजाय `pluginIntegration` का उपयोग कर सकते हैं। OpenClaw startup/reload के दौरान installed plugin manifest से current command details resolve करता है। यदि plugin
-      disabled, removed, untrusted है, या अब integration declare नहीं करता,
-      तो उस provider का उपयोग करने वाले active SecretRefs fail closed होते हैं।
+<Accordion title="फ़ाइल प्रदाता">
+- `path` पर स्थानीय फ़ाइल पढ़ता है।
+- `mode: "json"` (डिफ़ॉल्ट) JSON ऑब्जेक्ट पेलोड अपेक्षित करता है और `id` को JSON पॉइंटर के रूप में रिज़ॉल्व करता है।
+- `mode: "singleValue"` रेफ़रेंस आईडी `"value"` अपेक्षित करता है और फ़ाइल की अपरिष्कृत सामग्री लौटाता है (अंतिम न्यूलाइन हटाकर)।
+- पथ को स्वामित्व/अनुमति जाँचों में सफल होना चाहिए; `timeoutMs` (डिफ़ॉल्ट 5000) और `maxBytes` (डिफ़ॉल्ट 1 MiB) पठन को सीमित करते हैं।
+- Windows में विफलता पर बंद: यदि पथ के लिए ACL सत्यापन उपलब्ध नहीं है, तो रिज़ॉल्यूशन विफल हो जाता है। केवल विश्वसनीय पथों के लिए, जाँच को बायपास करने हेतु उस प्रदाता पर `allowInsecurePath: true` सेट करें।
 
-    Request payload (stdin):
+</Accordion>
 
-    ```json
-    { "protocolVersion": 1, "provider": "vault", "ids": ["providers/openai/apiKey"] }
-    ```
+<Accordion title="Exec प्रदाता">
+- कॉन्फ़िगर किए गए निरपेक्ष बाइनरी पथ को बिना किसी शेल के सीधे चलाता है।
+- डिफ़ॉल्ट रूप से `command` एक नियमित फ़ाइल होनी चाहिए, सिमलिंक नहीं। सिमलिंक कमांड पथों (उदाहरण के लिए Homebrew शिम) की अनुमति देने के लिए `allowSymlinkCommand: true` सेट करें, और इसे `trustedDirs` (उदाहरण के लिए `["/opt/homebrew"]`) के साथ जोड़ें, ताकि केवल पैकेज-मैनेजर पथ ही योग्य हों।
+- `timeoutMs` (डिफ़ॉल्ट 5000), `noOutputTimeoutMs` (डिफ़ॉल्ट `timeoutMs` के बराबर), `maxOutputBytes` (डिफ़ॉल्ट 1 MiB), `env`/`passEnv` अनुमति-सूची और `trustedDirs` का समर्थन करता है।
+- `jsonOnly` का डिफ़ॉल्ट `true` है। `jsonOnly: false` और अनुरोधित एकल आईडी के साथ, सामान्य गैर-JSON stdout को उस आईडी के मान के रूप में स्वीकार किया जाता है।
+- Windows में विफलता पर बंद: यदि कमांड पथ के लिए ACL सत्यापन उपलब्ध नहीं है, तो रिज़ॉल्यूशन विफल हो जाता है। केवल विश्वसनीय पथों के लिए, जाँच को बायपास करने हेतु उस प्रदाता पर `allowInsecurePath: true` सेट करें।
+- Plugin-प्रबंधित exec प्रदाता कॉपी किए गए `command`/`args` के बजाय `pluginIntegration` का उपयोग कर सकते हैं। OpenClaw स्टार्टअप/रीलोड के दौरान इंस्टॉल किए गए Plugin मैनिफ़ेस्ट से वर्तमान कमांड विवरण रिज़ॉल्व करता है; यदि Plugin अक्षम, हटाया गया या अविश्वसनीय हो, अथवा अब इंटीग्रेशन घोषित न करता हो, तो उस प्रदाता के सक्रिय SecretRefs विफलता पर बंद हो जाते हैं।
 
-    Response payload (stdout):
+अनुरोध पेलोड (stdin):
 
-    ```jsonc
-    { "protocolVersion": 1, "values": { "providers/openai/apiKey": "<openai-api-key>" } } // pragma: allowlist secret
-    ```
+```json
+{ "protocolVersion": 1, "provider": "vault", "ids": ["providers/openai/apiKey"] }
+```
 
-    Optional per-id errors:
+प्रतिक्रिया पेलोड (stdout):
 
-    ```json
-    {
-      "protocolVersion": 1,
-      "values": {},
-      "errors": { "providers/openai/apiKey": { "message": "not found" } }
-    }
-    ```
+```jsonc
+{ "protocolVersion": 1, "values": { "providers/openai/apiKey": "<openai-api-key>" } } // pragma: allowlist secret
+```
 
-  </Accordion>
-</AccordionGroup>
+वैकल्पिक प्रति-आईडी त्रुटियाँ:
 
-## File-backed API keys
+```json
+{
+  "protocolVersion": 1,
+  "values": {},
+  "errors": { "providers/openai/apiKey": { "code": "NOT_FOUND" } }
+}
+```
 
-Config `env` block में `file:...` strings न डालें। `env` block
-literal और non-overriding है, इसलिए `file:...` resolve नहीं होता।
+`code` एक वैकल्पिक मशीन-पठनीय निदान है। OpenClaw मान्यता-प्राप्त
+कोड `NOT_FOUND` और `AMBIGUOUS_DUPLICATE_KEY` को प्रदाता और रेफ़रेंस आईडी के साथ प्रदर्शित करता है। अन्य
+कोड और `message` जैसे मुक्त-रूप फ़ील्ड protocol-v1 संगतता के लिए स्वीकार किए जाते हैं,
+लेकिन प्रदर्शित नहीं किए जाते, क्योंकि रिज़ॉल्वर आउटपुट में क्रेडेंशियल सामग्री हो सकती है।
 
-इसके बजाय supported credential field पर file SecretRef का उपयोग करें:
+</Accordion>
+
+## फ़ाइल-समर्थित API कुंजियाँ
+
+कॉन्फ़िगरेशन के `env` ब्लॉक में `file:...` स्ट्रिंग न रखें। वह ब्लॉक शाब्दिक और गैर-ओवरराइडिंग है, इसलिए वहाँ `file:...` कभी रिज़ॉल्व नहीं होता।
+
+इसके बजाय समर्थित क्रेडेंशियल फ़ील्ड पर फ़ाइल SecretRef का उपयोग करें:
 
 ```json5
 {
@@ -291,12 +282,13 @@ literal और non-overriding है, इसलिए `file:...` resolve नह�
 }
 ```
 
-`mode: "singleValue"` के लिए, SecretRef `id` `"value"` है। 
-`mode: "json"` के लिए, `"/providers/xai/apiKey"` जैसा absolute JSON pointer उपयोग करें।
+`mode: "singleValue"` के लिए, SecretRef `id`, `"value"` है। `mode: "json"` के लिए, `"/providers/xai/apiKey"` जैसे निरपेक्ष JSON पॉइंटर का उपयोग करें।
 
-SecretRefs accept करने वाले config fields के लिए [SecretRef credential surface](/hi/reference/secretref-credential-surface) देखें।
+SecretRefs स्वीकार करने वाले फ़ील्ड के लिए [SecretRef क्रेडेंशियल सतह](/hi/reference/secretref-credential-surface) देखें।
 
-## Exec integration examples
+## Exec इंटीग्रेशन के उदाहरण
+
+सेवा खातों, बंडल किए गए एजेंट Skill और समस्या निवारण को शामिल करने वाली समर्पित 1Password मार्गदर्शिका के लिए [1Password](/hi/gateway/1password) देखें।
 
 <AccordionGroup>
   <Accordion title="1Password CLI">
@@ -307,7 +299,7 @@ SecretRefs accept करने वाले config fields के लिए [Secr
           onepassword_openai: {
             source: "exec",
             command: "/opt/homebrew/bin/op",
-            allowSymlinkCommand: true, // required for Homebrew symlinked binaries
+            allowSymlinkCommand: true, // Homebrew की सिमलिंक की गई बाइनरी के लिए आवश्यक
             trustedDirs: ["/opt/homebrew"],
             args: ["read", "op://Personal/OpenClaw QA API Key/password"],
             passEnv: ["HOME"],
@@ -328,17 +320,14 @@ SecretRefs accept करने वाले config fields के लिए [Secr
     ```
   </Accordion>
   <Accordion title="Bitwarden Secrets Manager (`bws`)">
-    जब आप चाहते हैं कि SecretRef आईडी Bitwarden Secrets Manager आइटम कुंजियों से मैप हों, तो resolver wrapper का उपयोग करें। रिपॉज़िटरी में
-    `scripts/secrets/openclaw-bws-resolver.mjs` शामिल है; इसे उस होस्ट पर, जो Gateway चलाता है, किसी absolute
-    trusted path पर इंस्टॉल या कॉपी करें।
+    SecretRef आईडी को Bitwarden Secrets Manager आइटम कुंजियों से मैप करने के लिए रिज़ॉल्वर रैपर का उपयोग करें। रिपॉज़िटरी में `scripts/secrets/openclaw-bws-resolver.mjs` शामिल है; इसे उस होस्ट पर किसी निरपेक्ष विश्वसनीय पथ में इंस्टॉल या कॉपी करें जो Gateway चलाता है।
 
     आवश्यकताएँ:
 
     - Gateway होस्ट पर Bitwarden Secrets Manager CLI (`bws`) इंस्टॉल हो।
     - `BWS_ACCESS_TOKEN` Gateway सेवा के लिए उपलब्ध हो।
-    - resolver को `PATH` पास किया गया हो, या `BWS_BIN` absolute `bws`
-      बाइनरी पथ पर सेट हो।
-    - self-hosted Bitwarden instance का उपयोग करते समय environment में `BWS_SERVER_URL` सेट होना चाहिए।
+    - `PATH` रिज़ॉल्वर को पास किया गया हो, या `BWS_BIN` को निरपेक्ष `bws` बाइनरी पथ पर सेट किया गया हो।
+    - स्वयं-होस्ट किए गए Bitwarden इंस्टेंस का उपयोग करते समय परिवेश में `BWS_SERVER_URL` सेट हो।
 
     ```json5
     {
@@ -368,12 +357,7 @@ SecretRefs accept करने वाले config fields के लिए [Secr
     }
     ```
 
-    resolver अनुरोधित आईडी को batch करता है, `bws secret list` चलाता है, और matching secret `key` fields के लिए
-    values लौटाता है। ऐसी keys का उपयोग करें जो exec
-    SecretRef id contract को पूरा करती हों, जैसे `openclaw/providers/openai/apiKey`; underscore वाली env-var
-    style keys resolver चलने से पहले ही अस्वीकार कर दी जाती हैं। यदि एक से अधिक visible Bitwarden secret में वही requested key है, तो resolver
-    किसी एक को चुनने के बजाय उस id को ambiguous मानकर विफल करता है। config अपडेट करने के बाद,
-    resolver path सत्यापित करें:
+    रिज़ॉल्वर अनुरोधित आईडी को बैच करता है, `bws secret list` चलाता है और मेल खाने वाले सीक्रेट `key` फ़ील्ड के मान लौटाता है। ऐसी कुंजियों का उपयोग करें जो exec SecretRef आईडी अनुबंध को पूरा करती हों, जैसे `openclaw/providers/openai/apiKey`; अंडरस्कोर वाली env-var-शैली की कुंजियाँ रिज़ॉल्वर चलने से पहले ही अस्वीकार कर दी जाती हैं। यदि एक से अधिक दृश्यमान Bitwarden सीक्रेट में अनुरोधित कुंजी समान हो, तो रिज़ॉल्वर अनुमान लगाने के बजाय उस आईडी को अस्पष्ट मानकर विफल कर देता है। कॉन्फ़िगरेशन अपडेट करने के बाद रिज़ॉल्वर पथ सत्यापित करें:
 
     ```bash
     openclaw secrets audit --allow-exec
@@ -388,7 +372,7 @@ SecretRefs accept करने वाले config fields के लिए [Secr
           vault_openai: {
             source: "exec",
             command: "/opt/homebrew/bin/vault",
-            allowSymlinkCommand: true, // required for Homebrew symlinked binaries
+            allowSymlinkCommand: true, // Homebrew की सिमलिंक की गई बाइनरी के लिए आवश्यक
             trustedDirs: ["/opt/homebrew"],
             args: ["kv", "get", "-field=OPENAI_API_KEY", "secret/openclaw"],
             passEnv: ["VAULT_ADDR", "VAULT_TOKEN"],
@@ -409,13 +393,7 @@ SecretRefs accept करने वाले config fields के लिए [Secr
     ```
   </Accordion>
   <Accordion title="password-store (`pass`)">
-    जब आप चाहते हैं कि SecretRef ids सीधे
-    `pass` entries से मैप हों, तो एक छोटा resolver wrapper उपयोग करें। इसे ऐसे absolute path में executable के रूप में save करें जो
-    आपके exec-provider path checks पास करता हो, उदाहरण के लिए
-    `/usr/local/bin/openclaw-pass-resolver`। `#!/usr/bin/env node` shebang
-    resolver process `PATH` से `node` resolve करता है, इसलिए
-    `passEnv` में `PATH` शामिल करें। यदि `pass` उस `PATH` पर नहीं है, तो parent
-    environment में `PASS_BIN` सेट करें और उसे भी `passEnv` में शामिल करें:
+    SecretRef आईडी को सीधे `pass` प्रविष्टियों से मैप करने के लिए छोटे रिज़ॉल्वर रैपर का उपयोग करें। इसे ऐसे निरपेक्ष पथ पर निष्पादन योग्य फ़ाइल के रूप में सहेजें जो आपकी exec-प्रदाता पथ जाँचों में सफल हो, उदाहरण के लिए `/usr/local/bin/openclaw-pass-resolver`। `#!/usr/bin/env node` शेबैंग, रिज़ॉल्वर प्रक्रिया के `PATH` से `node` को रिज़ॉल्व करता है, इसलिए `passEnv` में `PATH` शामिल करें। यदि `pass` उस `PATH` पर नहीं है, तो पैरेंट परिवेश में `PASS_BIN` सेट करें और उसे भी `passEnv` में शामिल करें:
 
     ```js
     #!/usr/bin/env node
@@ -435,7 +413,7 @@ SecretRefs accept करने वाले config fields के लिए [Secr
       try {
         request = JSON.parse(stdin || "{}");
       } catch (err) {
-        process.stderr.write(`Failed to parse request: ${err.message}\n`);
+        process.stderr.write(`अनुरोध पार्स करने में विफल: ${err.message}\n`);
         process.exit(1);
       }
 
@@ -448,7 +426,7 @@ SecretRefs accept करने वाले config fields के लिए [Secr
         if (result.status === 0) {
           values[id] = result.stdout.split(/\r?\n/, 1)[0] ?? "";
         } else {
-          errors[id] = { message: (result.stderr || `pass exited ${result.status}`).trim() };
+          errors[id] = { message: (result.stderr || `pass ${result.status} स्थिति के साथ समाप्त हुआ`).trim() };
         }
       }
 
@@ -456,7 +434,7 @@ SecretRefs accept करने वाले config fields के लिए [Secr
     });
     ```
 
-    फिर exec provider configure करें और `apiKey` को `pass` entry path पर point करें:
+    फिर exec प्रदाता कॉन्फ़िगर करें और `apiKey` को `pass` प्रविष्टि पथ की ओर इंगित करें:
 
     ```json5
     {
@@ -486,8 +464,7 @@ SecretRefs accept करने वाले config fields के लिए [Secr
     }
     ```
 
-    secret को `pass` entry की पहली line पर रखें, या यदि आप इसके बजाय पूरा `pass show` output लौटाना चाहते हैं तो
-    wrapper को customize करें। config update करने के बाद, static audit और exec resolver path दोनों verify करें:
+    सीक्रेट को `pass` प्रविष्टि की पहली पंक्ति पर रखें, या इसके बजाय पूर्ण `pass show` आउटपुट लौटाने के लिए रैपर को अनुकूलित करें। कॉन्फ़िगरेशन अपडेट करने के बाद स्थैतिक ऑडिट और exec रिज़ॉल्वर पथ, दोनों सत्यापित करें:
 
     ```bash
     openclaw secrets audit --check
@@ -503,7 +480,7 @@ SecretRefs accept करने वाले config fields के लिए [Secr
           sops_openai: {
             source: "exec",
             command: "/opt/homebrew/bin/sops",
-            allowSymlinkCommand: true, // required for Homebrew symlinked binaries
+            allowSymlinkCommand: true, // Homebrew की सिमलिंक की गई बाइनरी के लिए आवश्यक
             trustedDirs: ["/opt/homebrew"],
             args: ["-d", "--extract", '["providers"]["openai"]["apiKey"]', "/path/to/secrets.enc.json"],
             passEnv: ["SOPS_AGE_KEY_FILE"],
@@ -525,9 +502,9 @@ SecretRefs accept करने वाले config fields के लिए [Secr
   </Accordion>
 </AccordionGroup>
 
-## MCP सर्वर environment variables
+## MCP सर्वर परिवेश चर
 
-`plugins.entries.acpx.config.mcpServers` के माध्यम से configured MCP सर्वर env vars SecretInput का समर्थन करते हैं। इससे API keys और tokens plaintext config से बाहर रहते हैं:
+`plugins.entries.acpx.config.mcpServers` के माध्यम से कॉन्फ़िगर किए गए MCP सर्वर env vars, SecretInput स्वीकार करते हैं, जिससे API कुंजियाँ और टोकन प्लेनटेक्स्ट कॉन्फ़िगरेशन से बाहर रहते हैं:
 
 ```json5
 {
@@ -556,11 +533,11 @@ SecretRefs accept करने वाले config fields के लिए [Secr
 }
 ```
 
-Plaintext string values अभी भी काम करते हैं। `${MCP_SERVER_API_KEY}` जैसे env-template refs और SecretRef objects, MCP सर्वर process spawn होने से पहले gateway activation के दौरान resolve किए जाते हैं। अन्य SecretRef surfaces की तरह, unresolved refs activation को केवल तब block करते हैं जब `acpx` plugin प्रभावी रूप से active हो।
+प्लेनटेक्स्ट स्ट्रिंग मान अब भी काम करते हैं। `${MCP_SERVER_API_KEY}` जैसे env-template रेफ़रेंस और SecretRef ऑब्जेक्ट, MCP सर्वर प्रक्रिया शुरू होने से पहले Gateway सक्रियण के दौरान रिज़ॉल्व होते हैं। अन्य SecretRef सतहों की तरह, अनरिज़ॉल्व्ड रेफ़रेंस केवल तभी सक्रियण रोकते हैं जब `acpx` Plugin प्रभावी रूप से सक्रिय हो।
 
-## Sandbox SSH auth material
+## Sandbox SSH प्रमाणीकरण सामग्री
 
-core `ssh` sandbox backend SSH auth material के लिए SecretRefs का भी समर्थन करता है:
+मुख्य `ssh` Sandbox बैकएंड SSH प्रमाणीकरण सामग्री के लिए भी SecretRefs का समर्थन करता है:
 
 ```json5
 {
@@ -581,104 +558,99 @@ core `ssh` sandbox backend SSH auth material के लिए SecretRefs का 
 }
 ```
 
-Runtime व्यवहार:
+रनटाइम व्यवहार:
 
-- OpenClaw इन refs को sandbox activation के दौरान resolve करता है, हर SSH call के दौरान lazily नहीं।
-- Resolved values restrictive permissions के साथ temp files में लिखे जाते हैं और generated SSH config में उपयोग होते हैं।
-- यदि effective sandbox backend `ssh` नहीं है, तो ये refs inactive रहते हैं और startup block नहीं करते।
+- OpenClaw इन संदर्भों को प्रत्येक SSH कॉल पर विलंबित रूप से नहीं, बल्कि सैंडबॉक्स सक्रियण के दौरान हल करता है।
+- हल किए गए मान प्रतिबंधात्मक फ़ाइल अनुमतियों (`0o600`) के साथ एक अस्थायी डायरेक्टरी में लिखे जाते हैं और जनरेट किए गए SSH कॉन्फ़िगरेशन में उपयोग होते हैं।
+- यदि प्रभावी सैंडबॉक्स बैकएंड `ssh` नहीं है (या सैंडबॉक्स मोड `off` है), तो ये संदर्भ निष्क्रिय रहते हैं और स्टार्टअप को अवरुद्ध नहीं करते।
 
-## समर्थित credential surface
+## समर्थित क्रेडेंशियल सतह
 
-Canonical supported और unsupported credentials यहां सूचीबद्ध हैं:
-
-- [SecretRef Credential Surface](/hi/reference/secretref-credential-surface)
+प्रामाणिक रूप से समर्थित और असमर्थित क्रेडेंशियल [SecretRef क्रेडेंशियल सतह](/hi/reference/secretref-credential-surface) में सूचीबद्ध हैं।
 
 <Note>
-Runtime-minted या rotating credentials और OAuth refresh material को read-only SecretRef resolution से जानबूझकर बाहर रखा गया है।
+रनटाइम में बनाए गए या बदलते रहने वाले क्रेडेंशियल और OAuth रीफ़्रेश सामग्री को केवल-पढ़ने योग्य SecretRef समाधान से जानबूझकर बाहर रखा गया है।
 </Note>
 
-## आवश्यक व्यवहार और precedence
+## आवश्यक व्यवहार और प्राथमिकता
 
-- ref के बिना field: unchanged।
-- ref वाला field: activation के दौरान active surfaces पर required।
-- यदि plaintext और ref दोनों मौजूद हैं, तो supported precedence paths पर ref precedence लेता है।
-- redaction sentinel `__OPENCLAW_REDACTED__` internal config redaction/restore के लिए reserved है और literal submitted config data के रूप में rejected है।
+- संदर्भ के बिना फ़ील्ड: अपरिवर्तित।
+- संदर्भ वाला फ़ील्ड: सक्रियण के दौरान सक्रिय सतहों पर आवश्यक।
+- यदि प्लेनटेक्स्ट और संदर्भ दोनों मौजूद हैं, तो समर्थित प्राथमिकता पथों पर संदर्भ को प्राथमिकता मिलती है।
+- रेडैक्शन सेंटिनल `__OPENCLAW_REDACTED__` आंतरिक कॉन्फ़िगरेशन रेडैक्शन/पुनर्स्थापन के लिए आरक्षित है और शाब्दिक रूप से सबमिट किए गए कॉन्फ़िगरेशन डेटा के रूप में अस्वीकार किया जाता है।
 
-Warning और audit signals:
+चेतावनी और ऑडिट संकेत:
 
-- `SECRETS_REF_OVERRIDES_PLAINTEXT` (runtime warning)
-- `REF_SHADOWED` (audit finding जब `auth-profiles.json` credentials `openclaw.json` refs पर precedence लेते हैं)
+- `SECRETS_REF_OVERRIDES_PLAINTEXT` (रनटाइम चेतावनी)
+- `REF_SHADOWED` (जब `auth-profiles.json` क्रेडेंशियल `openclaw.json` संदर्भों पर प्राथमिकता लेते हैं, तब ऑडिट निष्कर्ष)
 
-Google Chat compatibility behavior:
+Google Chat `serviceAccount` इनलाइन JSON या SecretRef स्वीकार करता है। Doctor, हटाए जा चुके सहोदर `serviceAccountRef` को इस प्रामाणिक फ़ील्ड में ले जाता है, जब यह सेट न हो।
 
-- `serviceAccountRef` plaintext `serviceAccount` पर precedence लेता है।
-- sibling ref set होने पर plaintext value ignored होती है।
+## सक्रियण ट्रिगर
 
-## Activation triggers
+Secret सक्रियण इन पर चलता है:
 
-Secret activation इन पर चलता है:
+- स्टार्टअप (प्रीफ़्लाइट और अंतिम सक्रियण)
+- कॉन्फ़िगरेशन रीलोड हॉट-अप्लाई पथ
+- कॉन्फ़िगरेशन रीलोड रीस्टार्ट-जाँच पथ
+- `secrets.reload` के माध्यम से मैन्युअल रीलोड
+- Gateway कॉन्फ़िगरेशन लेखन RPC प्रीफ़्लाइट (`config.set` / `config.apply` / `config.patch`), जो संपादनों को स्थायी करने से पहले सबमिट किए गए कॉन्फ़िगरेशन पेलोड में सक्रिय-सतह SecretRefs को सत्यापित करता है
 
-- Startup (preflight plus final activation)
-- Config reload hot-apply path
-- Config reload restart-check path
-- `secrets.reload` के माध्यम से manual reload
-- Gateway config write RPC preflight (`config.set` / `config.apply` / `config.patch`) submitted config payload के भीतर active-surface SecretRef resolvability के लिए, edits persist करने से पहले
+सक्रियण अनुबंध:
 
-Activation contract:
+- सफलता स्नैपशॉट को परमाण्विक रूप से बदल देती है।
+- सख्त स्टार्टअप विफलता Gateway स्टार्टअप को रोक देती है।
+- कोल्ड स्टार्टअप के दौरान, मैप किए गए और पृथक किए जा सकने वाले गैर-Gateway स्वामी की पुनःप्रयास-योग्य समाधान विफलता स्नैपशॉट को उस सटीक स्वामी के कॉन्फ़िगर-अनुपलब्ध होने के साथ प्रकाशित कर सकती है। उस स्वामी के अनुरोध `SECRET_SURFACE_UNAVAILABLE` के साथ विफल होते हैं; स्पष्ट संदर्भ विफल होने के बाद मॉडल-प्रदाता स्वामी एनवायरनमेंट या प्रमाणीकरण-प्रोफ़ाइल क्रेडेंशियल पर फ़ॉलबैक नहीं करते।
+- रीलोड और रीस्टार्ट-जाँच योग्य मैप किए गए स्वामियों को पृथक करते हैं। अपरिवर्तित प्रदाता परिभाषाओं और अपरिवर्तित पूर्ण गैर-गोपनीय स्वामी अनुबंध वाली अपरिवर्तित संदर्भ पहचानें अपने सटीक अंतिम-ज्ञात-सही मानों को स्टेल रूप में बनाए रखती हैं; बदले हुए या नए कॉन्फ़िगर किए गए अनसुलझे संदर्भ केवल उस स्वामी के लिए कोल्ड प्रकाशित होते हैं। सख्त रीलोड विफलता पहले से सक्रिय स्नैपशॉट को सुरक्षित रखती है।
+- `config.set`, `config.apply`, और `config.patch` पृथक किए जा सकने वाले स्वामियों के लिए वाक्य-विन्यास की दृष्टि से मान्य अनसुलझे संदर्भ स्वीकार करते हैं और रेडैक्ट की गई `degradedSecretOwners` रिपोर्ट लौटाते हैं। Gateway इनग्रेस प्रमाणीकरण, संरचनात्मक रूप से अमान्य कॉन्फ़िगरेशन या हल किए गए मान, नीति उल्लंघन और अज्ञात स्वामी अब भी डिस्क परिवर्तन से पहले अस्वीकार होते हैं।
+- किसी अन्य स्वामी के कोल्ड या स्टेल होने पर भी स्वस्थ सहोदर स्वामी सामान्य रूप से हल और प्रकाशित होते हैं।
+- आउटबाउंड सहायक/टूल कॉल को स्पष्ट प्रति-कॉल चैनल टोकन देने से SecretRef सक्रियण ट्रिगर नहीं होता; सक्रियण बिंदु स्टार्टअप, रीलोड और स्पष्ट `secrets.reload` ही रहते हैं।
 
-- Success snapshot को atomically swap करता है।
-- Startup failure gateway startup abort करता है।
-- Runtime reload failure last-known-good snapshot बनाए रखता है।
-- Write-RPC preflight failure submitted config को reject करता है और disk config तथा active runtime snapshot दोनों को unchanged रखता है।
-- outbound helper/tool call को explicit per-call channel token देने से SecretRef activation trigger नहीं होता; activation points startup, reload, और explicit `secrets.reload` ही रहते हैं।
+## अवनत और पुनर्प्राप्त संकेत
 
-## Degraded और recovered signals
-
-जब healthy state के बाद reload-time activation fail होता है, OpenClaw degraded secrets state में enter करता है।
-
-One-shot system event और log codes:
+स्वस्थ स्थिति के बाद रीलोड-समय सक्रियण विफल होने पर, OpenClaw अवनत secrets स्थिति में प्रवेश करता है और एक-बार के सिस्टम इवेंट तथा लॉग कोड उत्सर्जित करता है:
 
 - `SECRETS_RELOADER_DEGRADED`
 - `SECRETS_RELOADER_RECOVERED`
 
-Behavior:
+व्यवहार:
 
-- Degraded: runtime last-known-good snapshot बनाए रखता है।
-- Recovered: अगले successful activation के बाद एक बार emitted।
-- पहले से degraded रहते हुए repeated failures warnings log करते हैं, लेकिन events spam नहीं करते।
-- Startup fail-fast degraded events emit नहीं करता क्योंकि runtime कभी active हुआ ही नहीं।
+- अवनत: स्वस्थ स्वामी रीफ़्रेश होते हैं, स्टेल स्वामी अंतिम-ज्ञात-सही मान बनाए रखते हैं और कोल्ड स्वामी अनुपलब्ध रहते हैं।
+- पुनर्प्राप्त: अगले सफल सक्रियण के बाद एक बार उत्सर्जित होता है।
+- पहले से अवनत स्थिति में बार-बार होने वाली विफलताएँ चेतावनियाँ लॉग करती हैं, लेकिन इवेंट दोबारा उत्सर्जित नहीं करतीं।
+- सख्त स्टार्टअप विफलता कभी अवनत इवेंट उत्सर्जित नहीं करती, क्योंकि रनटाइम कभी सक्रिय नहीं हुआ। कोल्ड स्वामियों वाला सफल स्टार्टअप स्वामी के अवनत होने को लॉग करता है, लेकिन रीलोडर इवेंट उत्सर्जित नहीं करता।
+- संदर्भ-सीमित स्टार्टअप और रीलोड विफलताएँ प्रत्येक प्रभावित स्वामी के लिए संरचित `SECRETS_DEGRADED` चेतावनी उत्सर्जित करती हैं। प्रदाता-सीमित आउटेज प्रत्येक स्वामी के लिए प्रदाता विफलता दोहराने के बजाय प्रदाता और प्रभावित स्वामियों की पूर्ण सूची सहित एक `SECRETS_PROVIDER_DEGRADED` चेतावनी उत्सर्जित करते हैं। चेतावनियों में रेडैक्ट किया गया कारण, `cold` या `stale` स्वामी स्थिति और `openclaw secrets reload` पुनःप्रयास संकेत शामिल होते हैं। इनमें कभी हल किए गए मान या SecretRef आईडी शामिल नहीं होते।
+- `openclaw doctor` कोल्ड और स्टेल स्वामियों को उनके प्रभावित कॉन्फ़िगरेशन पथों, रेडैक्ट किए गए कारण और पुनःप्रयास मार्गदर्शन के साथ सूचीबद्ध करता है।
 
-## Command-path resolution
+## कमांड-पथ समाधान
 
-Command paths gateway snapshot RPC के माध्यम से supported SecretRef resolution में opt कर सकते हैं।
-
-दो broad behaviors हैं:
+कमांड पथ Gateway स्नैपशॉट RPC के माध्यम से समर्थित SecretRef समाधान का विकल्प चुन सकते हैं। दो व्यापक व्यवहार लागू होते हैं:
 
 <Tabs>
   <Tab title="सख्त कमांड पथ">
-    उदाहरण के लिए `openclaw memory` रिमोट-मेमोरी पथ और `openclaw qr --remote` जब उसे रिमोट साझा-सीक्रेट refs की आवश्यकता होती है। वे सक्रिय स्नैपशॉट से पढ़ते हैं और आवश्यक SecretRef उपलब्ध न होने पर तुरंत विफल हो जाते हैं।
+    उदाहरण के लिए `openclaw memory` रिमोट-मेमोरी पथ और `openclaw qr --remote`, जब इसे रिमोट साझा-सीक्रेट संदर्भों की आवश्यकता होती है। ये सक्रिय स्नैपशॉट से पढ़ते हैं और आवश्यक SecretRef अनुपलब्ध होने पर तुरंत विफल होते हैं।
   </Tab>
-  <Tab title="रीड-ओनली कमांड पथ">
-    उदाहरण के लिए `openclaw status`, `openclaw status --all`, `openclaw channels status`, `openclaw channels resolve`, `openclaw security audit`, और रीड-ओनली doctor/config मरम्मत फ़्लो। वे भी सक्रिय स्नैपशॉट को प्राथमिकता देते हैं, लेकिन उस कमांड पथ में लक्षित SecretRef उपलब्ध न होने पर रुकने के बजाय सीमित रूप से जारी रहते हैं।
+  <Tab title="केवल-पढ़ने योग्य कमांड पथ">
+    उदाहरण के लिए `openclaw status`, `openclaw status --all`, `openclaw channels status`, `openclaw channels resolve`, `openclaw security audit`, और केवल-पढ़ने योग्य Doctor/कॉन्फ़िगरेशन सुधार प्रवाह। ये भी सक्रिय स्नैपशॉट को प्राथमिकता देते हैं, लेकिन लक्षित SecretRef अनुपलब्ध होने पर रुकने के बजाय अवनत हो जाते हैं।
 
-    रीड-ओनली व्यवहार:
+    केवल-पढ़ने योग्य व्यवहार:
 
-    - जब Gateway चल रहा हो, ये कमांड पहले सक्रिय स्नैपशॉट से पढ़ते हैं।
-    - यदि Gateway resolution अधूरा है या Gateway उपलब्ध नहीं है, तो वे विशिष्ट कमांड सतह के लिए लक्षित स्थानीय fallback आज़माते हैं।
-    - यदि लक्षित SecretRef फिर भी उपलब्ध नहीं है, तो कमांड सीमित रीड-ओनली आउटपुट और स्पष्ट डायग्नॉस्टिक्स जैसे "configured but unavailable in this command path" के साथ जारी रहता है।
-    - यह सीमित व्यवहार केवल कमांड-स्थानीय है। यह रनटाइम startup, reload, या send/auth पथों को कमजोर नहीं करता।
+    - Gateway चल रहा होने पर, ये कमांड पहले सक्रिय स्नैपशॉट से पढ़ते हैं।
+    - यदि Gateway समाधान अधूरा है या Gateway अनुपलब्ध है, तो ये उस कमांड सतह के लिए लक्षित स्थानीय फ़ॉलबैक का प्रयास करते हैं।
+    - यदि लक्षित SecretRef अब भी अनुपलब्ध है, तो कमांड अवनत केवल-पढ़ने योग्य आउटपुट और स्पष्ट निदान के साथ जारी रहता है कि संदर्भ कॉन्फ़िगर है, लेकिन इस कमांड पथ में अनुपलब्ध है।
+    - यह अवनत व्यवहार केवल कमांड तक सीमित है; यह रनटाइम स्टार्टअप, रीलोड या प्रेषण/प्रमाणीकरण पथों को कमज़ोर नहीं करता।
 
   </Tab>
 </Tabs>
 
-अन्य नोट्स:
+अन्य टिप्पणियाँ:
 
-- backend secret rotation के बाद स्नैपशॉट refresh `openclaw secrets reload` द्वारा संभाला जाता है।
-- इन कमांड पथों द्वारा उपयोग की गई Gateway RPC विधि: `secrets.resolve`.
+- बैकएंड secret रोटेशन के बाद स्नैपशॉट रीफ़्रेश `openclaw secrets reload` द्वारा संभाला जाता है।
+- इन कमांड पथों द्वारा उपयोग की जाने वाली Gateway RPC विधि: `secrets.resolve`।
 
-## ऑडिट और कॉन्फ़िगर वर्कफ़्लो
+## ऑडिट और कॉन्फ़िगरेशन कार्यप्रवाह
 
-डिफ़ॉल्ट ऑपरेटर फ़्लो:
+डिफ़ॉल्ट ऑपरेटर प्रवाह:
 
 <Steps>
   <Step title="वर्तमान स्थिति का ऑडिट करें">
@@ -691,54 +663,42 @@ Command paths gateway snapshot RPC के माध्यम से supported Se
     openclaw secrets configure --apply
     ```
   </Step>
-  <Step title="दोबारा ऑडिट करें">
+  <Step title="पुनः ऑडिट करें">
     ```bash
     openclaw secrets audit --check
     ```
   </Step>
 </Steps>
 
-जब तक दोबारा ऑडिट साफ़ न हो, migration को पूरा न मानें। यदि ऑडिट
-अभी भी at rest plaintext values रिपोर्ट करता है, तो agent-access जोखिम अभी भी मौजूद है
-भले ही runtime APIs redacted values लौटाएँ।
+पुनः ऑडिट साफ़ होने तक माइग्रेशन को पूर्ण न मानें। यदि ऑडिट अब भी स्थायी रूप से संग्रहीत प्लेनटेक्स्ट मानों की रिपोर्ट करता है, तो एजेंट-पहुँच जोखिम बना रहता है, भले ही रनटाइम API रेडैक्ट किए गए मान लौटाएँ।
 
-यदि आप `configure` के दौरान apply करने के बजाय कोई योजना सहेजते हैं, तो दोबारा ऑडिट से पहले
-उस सहेजी गई योजना को `openclaw secrets apply --from <plan-path>` के साथ लागू करें।
+यदि आप `configure` के दौरान लागू करने के बजाय योजना सहेजते हैं, तो पुनः ऑडिट से पहले उस सहेजी गई योजना को `openclaw secrets apply --from <plan-path>` से लागू करें।
 
 <AccordionGroup>
   <Accordion title="secrets audit">
     निष्कर्षों में शामिल हैं:
 
-    - at rest plaintext values (`openclaw.json`, `auth-profiles.json`, `.env`, और generated `agents/*/agent/models.json`)
-    - generated `models.json` entries में plaintext sensitive provider header residues
-    - unresolved refs
-    - precedence shadowing (`auth-profiles.json` का `openclaw.json` refs पर प्राथमिकता लेना)
-    - legacy residues (`auth.json`, OAuth reminders)
+    - स्थायी रूप से संग्रहीत प्लेनटेक्स्ट मान (`openclaw.json`, `auth-profiles.json`, `.env`, और जनरेट किया गया `agents/*/agent/models.json`)।
+    - जनरेट की गई `models.json` प्रविष्टियों में प्लेनटेक्स्ट संवेदनशील प्रदाता हेडर अवशेष।
+    - अनसुलझे संदर्भ।
+    - प्राथमिकता शैडोइंग (`auth-profiles.json` का `openclaw.json` संदर्भों पर प्राथमिकता लेना)।
+    - लीगेसी अवशेष (`auth.json`, OAuth अनुस्मारक)।
 
-    Exec नोट:
+    Exec टिप्पणी: डिफ़ॉल्ट रूप से, कमांड के दुष्प्रभावों से बचने के लिए ऑडिट exec SecretRef समाधान-योग्यता जाँच छोड़ देता है। ऑडिट के दौरान exec प्रदाताओं को निष्पादित करने के लिए `openclaw secrets audit --allow-exec` का उपयोग करें।
 
-    - डिफ़ॉल्ट रूप से, audit command side effects से बचने के लिए exec SecretRef resolvability checks छोड़ देता है।
-    - audit के दौरान exec providers निष्पादित करने के लिए `openclaw secrets audit --allow-exec` का उपयोग करें।
-
-    Header residue नोट:
-
-    - Sensitive provider header detection नाम-heuristic आधारित है (सामान्य auth/credential header names और fragments जैसे `authorization`, `x-api-key`, `token`, `secret`, `password`, और `credential`)।
+    हेडर अवशेष टिप्पणी: संवेदनशील प्रदाता हेडर पहचान नाम-आधारित अनुमान पर आधारित है (सामान्य प्रमाणीकरण/क्रेडेंशियल हेडर नाम और `authorization`, `x-api-key`, `token`, `secret`, `password`, और `credential` जैसे अंश)।
 
   </Accordion>
   <Accordion title="secrets configure">
     इंटरैक्टिव सहायक जो:
 
-    - पहले `secrets.providers` कॉन्फ़िगर करता है (`env`/`file`/`exec`, add/edit/remove)
-    - आपको एक agent scope के लिए `openclaw.json` और `auth-profiles.json` में supported secret-bearing fields चुनने देता है
-    - target picker में सीधे नया `auth-profiles.json` mapping बना सकता है
-    - SecretRef विवरण (`source`, `provider`, `id`) कैप्चर करता है
-    - preflight resolution चलाता है
-    - तुरंत apply कर सकता है
+    - पहले `secrets.providers` कॉन्फ़िगर करता है (`env`/`file`/`exec`, जोड़ें/संपादित करें/हटाएँ)।
+    - आपको एक एजेंट स्कोप के लिए `openclaw.json` और `auth-profiles.json` में समर्थित secret-धारक फ़ील्ड चुनने देता है।
+    - लक्ष्य चयनकर्ता में सीधे नया `auth-profiles.json` मैपिंग बना सकता है।
+    - SecretRef विवरण (`source`, `provider`, `id`) कैप्चर करता है।
+    - प्रीफ़्लाइट समाधान चलाता है और तुरंत लागू कर सकता है।
 
-    Exec नोट:
-
-    - जब तक `--allow-exec` सेट न हो, preflight exec SecretRef checks छोड़ देता है।
-    - यदि आप सीधे `configure --apply` से apply करते हैं और plan में exec refs/providers शामिल हैं, तो apply चरण के लिए भी `--allow-exec` सेट रखें।
+    Exec टिप्पणी: जब तक `--allow-exec` सेट न हो, प्रीफ़्लाइट exec SecretRef जाँच छोड़ देता है। यदि आप सीधे `configure --apply` से लागू करते हैं और योजना में exec संदर्भ/प्रदाता शामिल हैं, तो लागू करने के चरण के लिए भी `--allow-exec` सेट रखें।
 
     उपयोगी मोड:
 
@@ -746,11 +706,11 @@ Command paths gateway snapshot RPC के माध्यम से supported Se
     - `openclaw secrets configure --skip-provider-setup`
     - `openclaw secrets configure --agent <id>`
 
-    `configure` apply defaults:
+    `configure` लागू करने के डिफ़ॉल्ट:
 
-    - targeted providers के लिए `auth-profiles.json` से matching static credentials scrub करें
-    - `auth.json` से legacy static `api_key` entries scrub करें
-    - `<config-dir>/.env` से matching known secret lines scrub करें
+    - लक्षित प्रदाताओं के लिए `auth-profiles.json` से मेल खाते स्थिर क्रेडेंशियल हटाएँ।
+    - `auth.json` से लीगेसी स्थिर `api_key` प्रविष्टियाँ हटाएँ।
+    - प्रभावी स्थिति और सक्रिय-कॉन्फ़िगरेशन `.env` फ़ाइलों से मेल खाने वाली ज्ञात secret पंक्तियाँ हटाएँ (जब दोनों पथ मेल खाते हों, तब डुप्लिकेट हटाकर)।
 
   </Accordion>
   <Accordion title="secrets apply">
@@ -763,45 +723,43 @@ Command paths gateway snapshot RPC के माध्यम से supported Se
     openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --dry-run --allow-exec
     ```
 
-    Exec नोट:
+    Exec टिप्पणी: जब तक `--allow-exec` सेट न हो, ड्राई-रन exec जाँच छोड़ देता है; लेखन मोड exec SecretRefs/प्रदाताओं वाली योजनाओं को तब तक अस्वीकार करता है, जब तक `--allow-exec` सेट न हो।
 
-    - जब तक `--allow-exec` सेट न हो, dry-run exec checks छोड़ देता है।
-    - write mode exec SecretRefs/providers वाली योजनाओं को तब तक अस्वीकार करता है जब तक `--allow-exec` सेट न हो।
-
-    strict target/path contract details और exact rejection rules के लिए, [Secrets Apply Plan Contract](/hi/gateway/secrets-plan-contract) देखें।
+    सख्त लक्ष्य/पथ अनुबंध विवरण और सटीक अस्वीकृति नियमों के लिए, [Secrets Apply योजना अनुबंध](/hi/gateway/secrets-plan-contract) देखें।
 
   </Accordion>
 </AccordionGroup>
 
-## वन-वे सुरक्षा नीति
+## एक-तरफ़ा सुरक्षा नीति
 
 <Warning>
-OpenClaw जानबूझकर historical plaintext secret values वाले rollback backups नहीं लिखता।
+OpenClaw जानबूझकर ऐसे रोलबैक बैकअप नहीं लिखता जिनमें पुराने प्लेनटेक्स्ट secret मान शामिल हों।
 </Warning>
 
 सुरक्षा मॉडल:
 
-- write mode से पहले preflight सफल होना चाहिए
-- commit से पहले runtime activation validate किया जाता है
-- apply atomic file replacement और failure पर best-effort restore का उपयोग करके files update करता है
+- लेखन मोड से पहले प्रीफ़्लाइट सफल होना आवश्यक है।
+- कमिट से पहले रनटाइम सक्रियण सत्यापित किया जाता है।
+- लागू करने की प्रक्रिया परमाण्विक फ़ाइल प्रतिस्थापन और विफलता पर सर्वोत्तम-प्रयास पुनर्स्थापन का उपयोग करके फ़ाइलें अपडेट करती है।
 
-## Legacy auth compatibility नोट्स
+## लीगेसी प्रमाणीकरण संगतता टिप्पणियाँ
 
-static credentials के लिए, runtime अब plaintext legacy auth storage पर निर्भर नहीं है।
+स्थिर क्रेडेंशियल के लिए रनटाइम अब प्लेनटेक्स्ट लीगेसी प्रमाणीकरण संग्रहण पर निर्भर नहीं है।
 
-- Runtime credential source resolved in-memory snapshot है।
-- Legacy static `api_key` entries मिलने पर scrub की जाती हैं।
-- OAuth-related compatibility behavior अलग रहता है।
+- रनटाइम क्रेडेंशियल स्रोत हल किया गया इन-मेमोरी स्नैपशॉट है।
+- लीगेसी स्थिर `api_key` प्रविष्टियाँ मिलने पर हटा दी जाती हैं।
+- OAuth-संबंधित संगतता व्यवहार अलग रहता है।
 
-## Web UI नोट
+## वेब UI टिप्पणी
 
-कुछ SecretInput unions को form mode की तुलना में raw editor mode में कॉन्फ़िगर करना आसान होता है।
+कुछ SecretInput यूनियनों को फ़ॉर्म मोड की तुलना में रॉ एडिटर मोड में कॉन्फ़िगर करना अधिक आसान है।
 
 ## संबंधित
 
-- [Authentication](/hi/gateway/authentication) — auth setup
-- [CLI: secrets](/hi/cli/secrets) — CLI commands
-- [Environment Variables](/hi/help/environment) — environment precedence
-- [SecretRef Credential Surface](/hi/reference/secretref-credential-surface) — credential surface
-- [Secrets Apply Plan Contract](/hi/gateway/secrets-plan-contract) — plan contract details
-- [Security](/hi/gateway/security) — security posture
+- [प्रमाणीकरण](/hi/gateway/authentication) - प्रमाणीकरण सेटअप
+- [CLI: सीक्रेट्स](/hi/cli/secrets) - CLI कमांड
+- [Vault SecretRefs](/hi/plugins/vault) - HashiCorp Vault प्रदाता सेटअप
+- [पर्यावरण चर](/hi/help/environment) - पर्यावरण वरीयता क्रम
+- [SecretRef क्रेडेंशियल सतह](/hi/reference/secretref-credential-surface) - क्रेडेंशियल सतह
+- [सीक्रेट्स लागू करने की योजना का अनुबंध](/hi/gateway/secrets-plan-contract) - योजना अनुबंध का विवरण
+- [सुरक्षा](/hi/gateway/security) - सुरक्षा स्थिति

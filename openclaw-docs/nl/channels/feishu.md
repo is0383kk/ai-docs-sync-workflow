@@ -5,55 +5,65 @@ read_when:
 summary: Overzicht, functies en configuratie van de Feishu-bot
 title: Feishu
 x-i18n:
-    generated_at: "2026-06-30T14:11:39Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T05:42:14Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 262dda9739de284e32b7e87edc336bdb5d16651dbf37148bad7593f3a6a6b951
+    source_hash: 5e7c4cbb704ce266b7c7b0f6e160c36c873050fee8d5808965e15b56ad637f28
     source_path: channels/feishu.md
     workflow: 16
 ---
 
-Feishu/Lark is een alles-in-één samenwerkingsplatform waar teams chatten, documenten delen, agenda's beheren en samen werk gedaan krijgen.
+OpenClaw maakt verbinding met Feishu/Lark (het alles-in-één-samenwerkingsplatform) via de officiële `@openclaw/feishu`-plugin: privéberichten met de bot, groepschats, streamende kaartantwoorden en tools voor Feishu-documenten, wiki's, Drive en Bitable.
 
-**Status:** productieklaar voor bot-DM's + groepschats. WebSocket is de standaardmodus; webhookmodus is optioneel.
+**Status:** productieklaar voor privéberichten met de bot en groepschats. WebSocket is het standaardeventtransport (geen openbare URL nodig); de webhookmodus is optioneel.
 
----
-
-## Snelstart
+## Snel aan de slag
 
 <Note>
 Vereist OpenClaw 2026.5.29 of hoger. Voer `openclaw --version` uit om dit te controleren. Upgrade met `openclaw update`.
 </Note>
 
 <Steps>
-  <Step title="Voer de installatiewizard voor het kanaal uit">
+  <Step title="Voer de configuratiewizard voor het kanaal uit">
   ```bash
   openclaw channels login --channel feishu
   ```
-  Kies handmatige configuratie om een App ID en App Secret van Feishu Open Platform te plakken, of kies QR-configuratie om automatisch een bot te maken. Als de binnenlandse mobiele Feishu-app niet reageert op de QR-code, voer de configuratie dan opnieuw uit en kies handmatige configuratie.
-  </Step>
-  
-  <Step title="Nadat de configuratie is voltooid, herstart je de gateway om de wijzigingen toe te passen">
+  Hiermee wordt de `@openclaw/feishu`-plugin geïnstalleerd als die ontbreekt, waarna je door de configuratie wordt geleid:
+
+- **Handmatige configuratie**: plak een App ID en App Secret van Feishu Open Platform (`https://open.feishu.cn`) of Lark Developer (`https://open.larksuite.com`).
+- **QR-configuratie**: scan een QR-code in de Feishu-app om automatisch een bot te maken. Deze procedure beperkt privéberichten tot je eigen account (`dmPolicy: "allowlist"` met je `open_id`).
+
+De wizard vraagt ook naar het API-domein (Feishu of Lark) en het groepsbeleid. Als de binnenlandse mobiele Feishu-app niet op de QR-code reageert, voer je de configuratie opnieuw uit en kies je handmatige configuratie.
+</Step>
+
+  <Step title="Start nadat de configuratie is voltooid de Gateway opnieuw om de wijzigingen toe te passen">
   ```bash
   openclaw gateway restart
   ```
   </Step>
 </Steps>
 
----
+## Duurzaamheid van inkomende events
+
+OpenClaw plaatst geverifieerde `im.message.receive_v1`- en `drive.notice.comment_add_v1`-enveloppen duurzaam in de wachtrij voordat ze naar de agent worden doorgestuurd. Openstaande events of events die opnieuw kunnen worden geprobeerd, overleven een herstart van de Gateway, blijven per chat of document geserialiseerd en gebruiken de event-ID van Feishu om dubbele wachtrij-items te onderdrukken zolang de actieve of bewaarde voltooiingsregistratie bestaat.
+
+Als een WebSocket-event na een begrensd aantal pogingen niet kan worden opgeslagen, sluit OpenClaw die socket en dwingt het een nieuwe geverifieerde verbinding af in plaats van door te gaan na een niet-vastgelegde beurt. Andere Feishu-eventtypen, waaronder reacties en uitnodigingen voor VC-vergaderingen, gebruiken hun normale eventpaden en vallen niet onder deze garantie voor duurzame wachtrijen.
 
 ## Toegangsbeheer
 
-### Directe berichten
+### Privéberichten
 
-Configureer `dmPolicy` om te bepalen wie de bot een DM kan sturen:
+Configureer `channels.feishu.dmPolicy` (standaard: `pairing`) om te bepalen wie privéberichten naar de bot kan sturen:
 
-- `"pairing"` - onbekende gebruikers ontvangen een koppelingscode; keur goed via de CLI
-- `"allowlist"` - alleen gebruikers die in `allowFrom` staan kunnen chatten
-- `"open"` - sta openbare DM's alleen toe wanneer `allowFrom` `"*"` bevat; met beperkende vermeldingen kunnen alleen overeenkomende gebruikers chatten
+| Waarde         | Gedrag                                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------- |
+| `"pairing"`   | Onbekende gebruikers ontvangen een koppelingscode; keur deze goed via de CLI                                                         |
+| `"allowlist"` | Alleen gebruikers die in `allowFrom` staan, kunnen chatten                                                                     |
+| `"open"`      | Openbare privéberichten; configuratievalidatie vereist dat `allowFrom` `"*"` bevat. Items zonder jokerteken beperken de toegang nog steeds |
 
-**Keur een koppelingsverzoek goed:**
+**Een koppelingsverzoek goedkeuren:**
 
 ```bash
 openclaw pairing list feishu
@@ -62,40 +72,35 @@ openclaw pairing approve feishu <CODE>
 
 ### Groepschats
 
-**Groepsbeleid** (`channels.feishu.groupPolicy`):
+**Groepsbeleid** (`channels.feishu.groupPolicy`, standaard: `allowlist`):
 
-| Waarde        | Gedrag                                                                                                  |
-| ------------- | ------------------------------------------------------------------------------------------------------- |
-| `"open"`      | Reageer op alle berichten in groepen                                                                    |
-| `"allowlist"` | Reageer alleen op groepen in `groupAllowFrom` of expliciet geconfigureerd onder `groups.<chat_id>`      |
-| `"disabled"`  | Schakel alle groepsberichten uit; expliciete `groups.<chat_id>`-vermeldingen overschrijven dit niet     |
+| Waarde         | Gedrag                                                                                     |
+| ------------- | -------------------------------------------------------------------------------------------- |
+| `"open"`      | Reageren op alle berichten in groepen                                                            |
+| `"allowlist"` | Alleen reageren op groepen in `groupAllowFrom` of groepen die expliciet onder `groups.<chat_id>` zijn geconfigureerd |
+| `"disabled"`  | Alle groepsberichten uitschakelen; expliciete `groups.<chat_id>`-items overschrijven dit niet         |
 
-Standaard: `allowlist`
+**Vermeldingsvereiste** (`channels.feishu.requireMention`):
 
-**Vereiste vermelding** (`channels.feishu.requireMention`):
-
-- `true` - vereis @mention (standaard)
-- `false` - reageer zonder @mention
-- Overschrijving per groep: `channels.feishu.groups.<chat_id>.requireMention`
-- Alleen-broadcast `@all` en `@_all` worden niet behandeld als botvermeldingen. Een bericht dat zowel `@all` als de bot direct vermeldt, telt nog steeds als een botvermelding.
-
----
+- Standaard is een @vermelding vereist, behalve wanneer het effectieve groepsbeleid `"open"` is; dan is de standaardwaarde `false`, zodat berichten die geen vermeldingen kunnen bevatten (bijvoorbeeld afbeeldingen) de agent toch bereiken.
+- Stel `true` of `false` expliciet in om dit te overschrijven; overschrijving per groep: `channels.feishu.groups.<chat_id>.requireMention`.
+- De uitsluitend voor uitzending bestemde `@all` en `@_all` worden niet als botvermeldingen beschouwd. Een bericht waarin zowel `@all` als de bot rechtstreeks wordt vermeld, telt nog steeds als een botvermelding.
 
 ## Voorbeelden van groepsconfiguratie
 
-### Alle groepen toestaan, geen @mention vereist
+### Alle groepen toestaan, geen @vermelding vereist
 
 ```json5
 {
   channels: {
     feishu: {
-      groupPolicy: "open",
+      groupPolicy: "open", // requireMention is standaard false bij "open"
     },
   },
 }
 ```
 
-### Alle groepen toestaan, nog steeds @mention vereisen
+### Alle groepen toestaan, maar nog steeds een @vermelding vereisen
 
 ```json5
 {
@@ -115,14 +120,14 @@ Standaard: `allowlist`
   channels: {
     feishu: {
       groupPolicy: "allowlist",
-      // Group IDs look like: oc_xxx
+      // Groeps-ID's zien eruit als: oc_xxx
       groupAllowFrom: ["oc_xxx", "oc_yyy"],
     },
   },
 }
 ```
 
-In `allowlist`-modus kun je ook een groep toelaten door een expliciete `groups.<chat_id>`-vermelding toe te voegen. Expliciete vermeldingen overschrijven `groupPolicy: "disabled"` niet. Jokertekenstandaarden onder `groups.*` configureren overeenkomende groepen, maar laten groepen niet zelfstandig toe.
+In de modus `allowlist` kun je een groep ook toelaten door een expliciet `groups.<chat_id>`-item toe te voegen. Expliciete items overschrijven `groupPolicy: "disabled"` niet. Standaardwaarden met jokertekens onder `groups.*` configureren overeenkomende groepen, maar laten zelf geen groepen toe.
 
 ```json5
 {
@@ -149,7 +154,7 @@ In `allowlist`-modus kun je ook een groep toelaten door een expliciete `groups.<
       groupAllowFrom: ["oc_xxx"],
       groups: {
         oc_xxx: {
-          // User open_ids look like: ou_xxx
+          // Open-ID's van gebruikers zien eruit als: ou_xxx
           allowFrom: ["ou_user1", "ou_user2"],
         },
       },
@@ -158,7 +163,23 @@ In `allowlist`-modus kun je ook een groep toelaten door een expliciete `groups.<
 }
 ```
 
----
+`channels.feishu.groupSenderAllowFrom` stelt voor alle groepen dezelfde toelatingslijst voor afzenders in; een `allowFrom` per groep heeft voorrang.
+
+### Door bots geschreven berichten
+
+Feishu negeert standaard berichten die door andere bots zijn geschreven. Om bot-naar-botgroepsgesprekken toe te staan, verleen je de app de scopes `im:message.group_at_msg.include_bot:readonly` en `im:message:readonly` en stel je vervolgens `allowBots` in:
+
+```json5
+{
+  channels: {
+    feishu: {
+      allowBots: true,
+    },
+  },
+}
+```
+
+Feishu levert door bots geschreven groepsevents alleen wanneer een andere bot deze bot vermeldt. Het bestaande groepsbeleid, de toelatingslijsten voor afzenders en de vermeldingsvereisten blijven van toepassing. OpenClaw verwijdert zelfgeschreven berichten, vermeldt de andere bot in elk tekst- of kaartantwoord en past de gedeelde beveiliging tegen [`channels.defaults.botLoopProtection`](/nl/channels/bot-loop-protection) toe.
 
 <a id="get-groupuser-ids"></a>
 
@@ -166,13 +187,13 @@ In `allowlist`-modus kun je ook een groep toelaten door een expliciete `groups.<
 
 ### Groeps-ID's (`chat_id`, indeling: `oc_xxx`)
 
-Open de groep in Feishu/Lark, klik op het menu-icoon in de rechterbovenhoek en ga naar **Instellingen**. Het groeps-ID (`chat_id`) staat op de instellingenpagina.
+Open de groep in Feishu/Lark, klik rechtsboven op het menupictogram en ga naar **Settings**. De groeps-ID (`chat_id`) wordt op de instellingenpagina vermeld.
 
 ![Groeps-ID ophalen](/images/feishu-get-group-id.png)
 
 ### Gebruikers-ID's (`open_id`, indeling: `ou_xxx`)
 
-Start de Gateway, stuur een DM naar de bot en controleer daarna de logs:
+Start de Gateway, stuur een privébericht naar de bot en controleer vervolgens de logboeken:
 
 ```bash
 openclaw logs --follow
@@ -184,54 +205,87 @@ Zoek naar `open_id` in de loguitvoer. Je kunt ook openstaande koppelingsverzoeke
 openclaw pairing list feishu
 ```
 
----
-
 ## Veelgebruikte opdrachten
 
-| Opdracht  | Beschrijving                    |
-| --------- | -------------------------------- |
-| `/status` | Toon botstatus                   |
-| `/reset`  | Reset de huidige sessie          |
-| `/model`  | Toon of wissel het AI-model      |
+| Opdracht   | Beschrijving                 |
+| --------- | --------------------------- |
+| `/status` | Botstatus weergeven             |
+| `/reset`  | De huidige sessie opnieuw instellen   |
+| `/model`  | Het AI-model weergeven of wijzigen |
 
 <Note>
-Feishu/Lark ondersteunt geen native slash-commandmenu's, dus stuur deze als platte tekstberichten.
+Feishu/Lark ondersteunt geen systeemeigen menu's voor slashopdrachten, dus stuur deze als gewone tekstberichten.
 </Note>
 
----
+## Problemen oplossen
 
-## Probleemoplossing
+### De bot reageert niet in groepschats
 
-### Bot reageert niet in groepschats
-
-1. Zorg ervoor dat de bot aan de groep is toegevoegd
-2. Zorg ervoor dat je de bot @mentiont (standaard vereist)
+1. Zorg dat de bot aan de groep is toegevoegd
+2. Zorg dat je de bot @vermeldt (standaard vereist)
 3. Controleer of `groupPolicy` niet `"disabled"` is
-4. Controleer logs: `openclaw logs --follow`
+4. Controleer de logboeken: `openclaw logs --follow`
 
-### Bot ontvangt geen berichten
+### De bot ontvangt geen berichten
 
-1. Zorg ervoor dat de bot is gepubliceerd en goedgekeurd in Feishu Open Platform / Lark Developer
-2. Zorg ervoor dat eventabonnement `im.message.receive_v1` bevat
-3. Zorg ervoor dat **persistente verbinding** (WebSocket) is geselecteerd
-4. Zorg ervoor dat alle vereiste machtigingsscopes zijn verleend
-5. Zorg ervoor dat de Gateway draait: `openclaw gateway status`
-6. Controleer logs: `openclaw logs --follow`
+1. Zorg dat de bot in Feishu Open Platform / Lark Developer is gepubliceerd en goedgekeurd
+2. Zorg dat het eventabonnement `im.message.receive_v1` bevat
+3. Abonneer je voor automatisch deelnemen aan vergaderuitnodigingen ook op `vc.bot.meeting_invited_v1`
+4. Zorg dat **persistent connection** (WebSocket) is geselecteerd
+5. Zorg dat alle vereiste machtigingsscopes zijn verleend
+6. Zorg dat de Gateway actief is: `openclaw gateway status`
+7. Controleer de logboeken: `openclaw logs --follow`
+
+Een abonnement op `vc.bot.meeting_invited_v1` levert alleen het event. Automatisch deelnemen is
+standaard uitgeschakeld. Om dit globaal in te schakelen:
+
+```json5
+{
+  channels: {
+    feishu: {
+      vcAutoJoin: true,
+    },
+  },
+}
+```
+
+Om dit voor slechts één account in te schakelen, laat je de schakelaar op het hoogste niveau weg en stel je de overschrijving voor het account in:
+
+```json5
+{
+  channels: {
+    feishu: {
+      accounts: {
+        meetings: { vcAutoJoin: true },
+      },
+    },
+  },
+}
+```
+
+Uitnodigers doorlopen nog steeds het normale Feishu-beleid voor privéberichten, de toelatingslijst/koppeling, de sessie en de routering van antwoorden
+voordat de agent een beurt voor deelname ontvangt. Voor deelname is ook een beschikbare Feishu VC-deelnametool
+vereist die is geconfigureerd voor de app-identiteit met de scope
+`vc:meeting.bot.join:write`. De officiële
+[`lark-cli` VC-agent-Skill](https://github.com/larksuite/cli/tree/main/skills/lark-vc-agent)
+biedt bijvoorbeeld `vc +meeting-join`.
+
+<Warning>
+De officiële `lark-cli` VC-agent-Skill markeert acties voor vergaderbots momenteel als een beperkte bèta. Als de tool `ErrNotInGray` of foutcode `20017` retourneert, is de app of tenant niet voor die bèta ingeschakeld; gebruik de richtlijnen voor vroege toegang in de gekoppelde Skill voordat je problemen met gewone scopetoekenningen oplost.
+</Warning>
 
 ### QR-configuratie reageert niet in de mobiele Feishu-app
 
 1. Voer de configuratie opnieuw uit: `openclaw channels login --channel feishu`
 2. Kies handmatige configuratie
 3. Maak in Feishu Open Platform een zelfgebouwde app en kopieer de App ID en App Secret
-4. Plak die referenties in de installatiewizard
+4. Plak die aanmeldgegevens in de configuratiewizard
 
-### App Secret gelekt
+### App Secret is gelekt
 
-1. Reset de App Secret in Feishu Open Platform / Lark Developer
+1. Stel de App Secret opnieuw in via Feishu Open Platform / Lark Developer
 2. Werk de waarde in je configuratie bij
-3. Herstart de Gateway: `openclaw gateway restart`
-
----
+3. Start de Gateway opnieuw: `openclaw gateway restart`
 
 ## Geavanceerde configuratie
 
@@ -246,7 +300,7 @@ Feishu/Lark ondersteunt geen native slash-commandmenu's, dus stuur deze als plat
         main: {
           appId: "cli_xxx",
           appSecret: "xxx",
-          name: "Primary bot",
+          name: "Primaire bot",
           tts: {
             providers: {
               openai: { voice: "shimmer" },
@@ -256,7 +310,7 @@ Feishu/Lark ondersteunt geen native slash-commandmenu's, dus stuur deze als plat
         backup: {
           appId: "cli_yyy",
           appSecret: "yyy",
-          name: "Backup bot",
+          name: "Reservebot",
           enabled: false,
         },
       },
@@ -265,40 +319,40 @@ Feishu/Lark ondersteunt geen native slash-commandmenu's, dus stuur deze als plat
 }
 ```
 
-`defaultAccount` bepaalt welk account wordt gebruikt wanneer outbound API's geen `accountId` opgeven.
-`accounts.<id>.tts` gebruikt dezelfde vorm als `messages.tts` en deep-merget over
-de globale TTS-configuratie, zodat Feishu-configuraties met meerdere bots gedeelde providerreferenties
-globaal kunnen behouden terwijl alleen stem, model, persona of automatische modus
-per account wordt overschreven.
+`defaultAccount` bepaalt welk account wordt gebruikt wanneer uitgaande API's geen `accountId` opgeven. Accountitems nemen instellingen op het hoogste niveau over; de meeste sleutels op het hoogste niveau kunnen per account worden overschreven.
+`accounts.<id>.tts` gebruikt dezelfde structuur als `tts` en wordt diep samengevoegd over de globale TTS-configuratie, zodat Feishu-configuraties met meerdere bots gedeelde providerreferenties globaal kunnen behouden en per account alleen de stem, het model, de persona of de automatische modus hoeven te overschrijven.
 
 ### Berichtlimieten
 
-- `textChunkLimit` - chunkgrootte voor uitgaande tekst (standaard: `2000` tekens)
-- `mediaMaxMb` - limiet voor media-upload/download (standaard: `30` MB)
+- `textChunkLimit` - segmentgrootte voor uitgaande tekst (standaard: `4000` tekens)
+- `streaming.chunkMode` - `"length"` (standaard) splitst bij de limiet; `"newline"` geeft de voorkeur aan regeleinden
+- `mediaMaxMb` - limiet voor het uploaden/downloaden van media (standaard: `30` MB)
 
 ### Streaming
 
-Feishu/Lark ondersteunt streamingantwoorden via interactieve kaarten. Wanneer dit is ingeschakeld, werkt de bot de kaart in realtime bij terwijl tekst wordt gegenereerd.
+Feishu/Lark ondersteunt streamende antwoorden via interactieve kaarten (Card Kit-streaming-API). Wanneer dit is ingeschakeld, werkt de bot de kaart in realtime bij terwijl de tekst wordt gegenereerd.
 
 ```json5
 {
   channels: {
     feishu: {
-      streaming: true, // enable streaming card output (default: true)
-      blockStreaming: true, // opt into completed-block streaming
+      streaming: {
+        mode: "partial", // streamende kaartuitvoer (standaard: "partial")
+        block: { enabled: true }, // voltooide-blokstreaming inschakelen
+      },
     },
   },
 }
 ```
 
-Stel `streaming: false` in om het volledige antwoord in één bericht te verzenden. `blockStreaming` is standaard uitgeschakeld; schakel dit alleen in wanneer je voltooide assistentblokken wilt doorspoelen vóór het uiteindelijke antwoord.
+Stel `streaming.mode: "off"` in om het volledige antwoord in één bericht te verzenden; `renderMode: "raw"` (platte tekst in plaats van kaarten) schakelt streamingkaarten eveneens uit. `streaming.block.enabled` is standaard uitgeschakeld; schakel dit alleen in als je voltooide assistentblokken vóór het definitieve antwoord wilt laten verzenden. De verouderde booleaanse waarde `streaming` en de platte sleutels `blockStreaming` / `blockStreamingCoalesce` / `chunkMode` worden via `openclaw doctor --fix` naar deze geneste structuur gemigreerd.
 
-### Quota-optimalisatie
+### Quotaoptimalisatie
 
 Verminder het aantal Feishu/Lark-API-aanroepen met twee optionele vlaggen:
 
-- `typingIndicator` (standaard `true`): stel in op `false` om aanroepen voor typreacties over te slaan
-- `resolveSenderNames` (standaard `true`): stel in op `false` om het opzoeken van afzenderprofielen over te slaan
+- `typingIndicator` (standaard `true`): stel `false` in om aanroepen voor typreacties over te slaan
+- `resolveSenderNames` (standaard `true`): stel `false` in om het opzoeken van afzenderprofielen over te slaan
 
 ```json5
 {
@@ -311,11 +365,46 @@ Verminder het aantal Feishu/Lark-API-aanroepen met twee optionele vlaggen:
 }
 ```
 
+### Bereik van groepssessies en onderwerpthreads
+
+`channels.feishu.groupSessionScope` (op het hoogste niveau, per account of per groep) bepaalt hoe groepsberichten aan agentsessies worden gekoppeld:
+
+| Waarde                  | Sessie                                                          |
+| ---------------------- | ---------------------------------------------------------------- |
+| `"group"` (standaard)    | Eén sessie per groepschat                                       |
+| `"group_sender"`       | Eén sessie per (groep + afzender)                                 |
+| `"group_topic"`        | Eén sessie per onderwerpthread; valt terug op de groepssessie    |
+| `"group_topic_sender"` | Eén sessie per (onderwerp + afzender); valt terug op (groep + afzender) |
+
+Voor de onderwerpbereiken gebruiken systeemeigen Feishu/Lark-onderwerpgroepen de gebeurtenis `thread_id` (`omt_*`) als canonieke sleutel voor de onderwerpsessie. Als bij een systeemeigen startgebeurtenis van een onderwerp `thread_id` ontbreekt, haalt OpenClaw deze vóór het routeren van de beurt op uit Feishu. Normale groepsantwoorden die OpenClaw omzet in threads, blijven de bericht-ID van het hoofdantwoord (`om_*`) gebruiken, zodat de eerste beurt en vervolgbeurten in dezelfde sessie blijven.
+
+Stel `replyInThread: "enabled"` in (op het hoogste niveau of per groep) om botantwoorden een Feishu-onderwerpthread te laten maken of voortzetten in plaats van inline te antwoorden. `topicSessionMode` is de verouderde voorganger van `groupSessionScope`; geef de voorkeur aan `groupSessionScope`.
+
+### Feishu-werkruimtetools
+
+De Plugin bevat agenttools voor Feishu-documenten, chats, de kennisbank, cloudopslag, machtigingen en Bitable, plus bijbehorende Skills (`feishu-doc`, `feishu-drive`, `feishu-perm`, `feishu-wiki`). Toolfamilies worden beheerd via `channels.feishu.tools`:
+
+| Sleutel             | Tools                                         | Standaard             |
+| --------------- | --------------------------------------------- | ------------------- |
+| `tools.doc`     | `feishu_doc` documentbewerkingen              | `true`              |
+| `tools.chat`    | `feishu_chat` chatinformatie + ledenquery's      | `true`              |
+| `tools.wiki`    | `feishu_wiki` kennisbank (vereist `doc`) | `true`              |
+| `tools.drive`   | `feishu_drive` cloudopslag                  | `true`              |
+| `tools.perm`    | `feishu_perm` machtigingenbeheer           | `false` (gevoelig) |
+| `tools.scopes`  | `feishu_app_scopes` diagnostiek van appbereiken     | `true`              |
+| `tools.bitable` | `feishu_bitable_*` Bitable/Base-bewerkingen    | `true`              |
+
+`tools.base` is een alias voor `tools.bitable`; de expliciete waarde `bitable` heeft voorrang wanneer beide zijn ingesteld. Instellingen per account staan onder `accounts.<id>.tools`.
+
+Verleen `drive:drive.metadata:readonly` voor rechtstreekse `feishu_drive info`-zoekopdrachten buiten de hoofdmap,
+tenzij de app al het volledige bereik `drive:drive` heeft. Zonder een van beide bereiken houdt `info`
+de verouderde zoekopdracht in de hoofdmap beschikbaar via `drive:drive:readonly`.
+
 ### ACP-sessies
 
-Feishu/Lark ondersteunt ACP voor DM's en groeps-threadberichten. Feishu/Lark ACP wordt aangestuurd met tekstopdrachten - er zijn geen native slash-commandmenu's, dus gebruik `/acp ...`-berichten direct in het gesprek.
+Feishu/Lark ondersteunt ACP voor privéberichten en berichten in groepsthreads. Feishu/Lark-ACP wordt aangestuurd met tekstopdrachten — er zijn geen systeemeigen menu's voor slash-opdrachten, dus gebruik `/acp ...`-berichten rechtstreeks in het gesprek.
 
-#### Persistente ACP-binding
+#### Permanente ACP-koppeling
 
 ```json5
 {
@@ -359,19 +448,19 @@ Feishu/Lark ondersteunt ACP voor DM's en groeps-threadberichten. Feishu/Lark ACP
 }
 ```
 
-#### ACP vanuit chat starten
+#### ACP starten vanuit een chat
 
-In een Feishu/Lark-DM of thread:
+In een Feishu/Lark-privébericht of -thread:
 
 ```text
 /acp spawn codex --thread here
 ```
 
-`--thread here` werkt voor DM's en Feishu/Lark-threadberichten. Vervolgberichten in het gebonden gesprek worden direct naar die ACP-sessie gerouteerd.
+`--thread here` werkt voor privéberichten en Feishu/Lark-threadberichten. Vervolgberichten in het gekoppelde gesprek worden rechtstreeks naar die ACP-sessie gerouteerd.
 
-### Multi-agentroutering
+### Routering met meerdere agents
 
-Gebruik `bindings` om Feishu/Lark-DM's of groepen naar verschillende agents te routeren.
+Gebruik `bindings` om Feishu/Lark-privéberichten of -groepen naar verschillende agents te routeren.
 
 ```json5
 {
@@ -404,31 +493,29 @@ Gebruik `bindings` om Feishu/Lark-DM's of groepen naar verschillende agents te r
 Routeringsvelden:
 
 - `match.channel`: `"feishu"`
-- `match.peer.kind`: `"direct"` (DM) of `"group"` (groepschat)
-- `match.peer.id`: gebruikers-Open ID (`ou_xxx`) of groeps-ID (`oc_xxx`)
+- `match.peer.kind`: `"direct"` (privébericht) of `"group"` (groepschat)
+- `match.peer.id`: Open ID van de gebruiker (`ou_xxx`) of groeps-ID (`oc_xxx`)
 
-Zie [Groeps-/gebruikers-ID's ophalen](#get-groupuser-ids) voor opzoektips.
+Zie [Groeps-/gebruikers-ID's ophalen](#get-groupuser-ids) voor zoektips.
 
----
+## Agentisolatie per gebruiker (dynamische agentaanmaak)
 
-## Agentisolatie per gebruiker (Dynamic Agent Creation)
-
-Schakel `dynamicAgentCreation` in om automatisch **geïsoleerde agentinstanties** te maken voor elke DM-gebruiker. Elke gebruiker krijgt een eigen:
+Schakel `dynamicAgentCreation` in om automatisch **geïsoleerde agentinstanties** te maken voor elke gebruiker van privéberichten. Elke gebruiker krijgt een eigen:
 
 - Onafhankelijke werkruimtemap
 - Afzonderlijke `USER.md` / `SOUL.md` / `MEMORY.md`
 - Privégespreksgeschiedenis
-- Geïsoleerde skills en status
+- Geïsoleerde Skills en status
 
-Dit is essentieel voor openbare bots waarbij je elke gebruiker een eigen privéervaring met een AI-assistent wilt geven.
+Dit is essentieel voor openbare bots waarbij je elke gebruiker een eigen privé-ervaring met een AI-assistent wilt bieden.
 
 <Note>
-Dynamische bindingen bevatten het genormaliseerde Feishu-`accountId`, zodat standaardaccounts en benoemde accounts elke afzender naar de juiste dynamische agent routeren.
+Dynamische koppelingen bevatten de genormaliseerde Feishu-`accountId`, zodat standaardaccounts en benoemde accounts elke afzender naar de juiste dynamische agent routeren.
 
-Als een benoemd account een ongescopete dynamische agent op een oudere release heeft gemaakt, telt die legacy-agent nog steeds mee voor `maxAgents`. Bevestig dat deze niet door het standaardaccount wordt gebruikt voordat je hem verwijdert, of verhoog tijdelijk `maxAgents`; OpenClaw kan niet veilig afleiden welk account eigenaar is van ambigue legacy-status.
+Als een benoemd account in een oudere versie een dynamische agent zonder bereik heeft gemaakt, telt die verouderde agent nog steeds mee voor `maxAgents`. Controleer of deze niet door het standaardaccount wordt gebruikt voordat je deze verwijdert, of verhoog `maxAgents` tijdelijk; OpenClaw kan niet veilig afleiden welk account eigenaar is van een dubbelzinnige verouderde status.
 </Note>
 
-### Snelle configuratie
+### Snelle installatie
 
 ```json5
 {
@@ -444,67 +531,56 @@ Als een benoemd account een ongescopete dynamische agent op een oudere release h
     },
   },
   session: {
-    // Critical: makes each user's DM their "main session"
-    // Automatically loads USER.md / SOUL.md / MEMORY.md
-    // For stronger isolation, use "per-channel-peer" instead
+    // Cruciaal: maakt van het privébericht van elke gebruiker diens "hoofdsessie"
+    // Laadt automatisch USER.md / SOUL.md / MEMORY.md
+    // Gebruik voor sterkere isolatie in plaats daarvan "per-channel-peer"
     dmScope: "main",
   },
 }
 ```
 
-### Hoe het werkt
+### Werking
 
-Wanneer een nieuwe gebruiker zijn eerste DM stuurt:
+Wanneer een nieuwe gebruiker het eerste privébericht verzendt:
 
-1. Het kanaal genereert een unieke `agentId`: `feishu-{user_open_id}` voor het standaardaccount, of een begrensde identiteitsdigest met accountprefix voor een benoemd account
-2. Maakt een nieuwe werkruimte aan op het `workspaceTemplate`-pad
-3. Registreert de agent en maakt een binding voor deze gebruiker
-4. De werkruimtehelper zorgt bij eerste toegang voor bootstrapbestanden (`AGENTS.md`, `SOUL.md`, `USER.md`, enz.)
-5. Routeert alle toekomstige berichten van deze gebruiker naar hun toegewezen agent
+1. Het kanaal genereert een unieke `agentId`: `feishu-{user_open_id}` voor het standaardaccount, of een begrensde identiteitsdigest met accountvoorvoegsel voor een benoemd account
+2. Maakt een nieuwe werkruimte op het pad `workspaceTemplate`
+3. Registreert de agent en maakt een koppeling voor deze gebruiker
+4. De werkruimtehelper zorgt bij de eerste toegang voor bootstrapbestanden (`AGENTS.md`, `SOUL.md`, `USER.md`, enzovoort)
+5. Routeert alle toekomstige berichten van deze gebruiker naar diens toegewezen agent
 
 ### Configuratieopties
 
-| Instelling                                                | Beschrijving                                      | Standaard                            |
-| -------------------------------------------------------- | ------------------------------------------------- | ------------------------------------ |
-| `channels.feishu.dynamicAgentCreation.enabled`           | Automatische agentcreatie per gebruiker inschakelen | `false`                              |
-| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | Padsjabloon voor dynamische agentwerkruimten      | `~/.openclaw/workspace-{agentId}`    |
-| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | Sjabloon voor agentdirectorynaam                  | `~/.openclaw/agents/{agentId}/agent` |
-| `channels.feishu.dynamicAgentCreation.maxAgents`         | Maximumaantal dynamische agents om te maken       | onbeperkt                            |
+| Instelling                                                  | Beschrijving                                | Standaard                              |
+| -------------------------------------------------------- | ------------------------------------------ | ------------------------------------ |
+| `channels.feishu.dynamicAgentCreation.enabled`           | Automatische agentaanmaak per gebruiker inschakelen   | `false`                              |
+| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | Padsjabloon voor dynamische agentwerkruimten | `~/.openclaw/workspace-{agentId}`    |
+| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | Naamsjabloon voor de agentmap              | `~/.openclaw/agents/{agentId}/agent` |
+| `channels.feishu.dynamicAgentCreation.maxAgents`         | Maximumaantal dynamische agents dat kan worden gemaakt | onbeperkt                            |
 
 Sjabloonvariabelen:
 
-- `{agentId}` - de gegenereerde agent-ID (bijv. `feishu-ou_xxxxxx` of `feishu-support-<identity_digest>`)
-- `{userId}` - de Feishu open_id van de afzender (bijv. `ou_xxxxxx`)
+- `{agentId}` - de gegenereerde agent-ID (bijvoorbeeld `feishu-ou_xxxxxx` of `feishu-support-<identity_digest>`)
+- `{userId}` - de Feishu-open_id van de afzender (bijvoorbeeld `ou_xxxxxx`)
 
 ### Sessiebereik
 
-`session.dmScope` bepaalt hoe directe berichten aan agentsessies worden gekoppeld. Dit is een **globale instelling** die alle kanalen beïnvloedt.
+`session.dmScope` bepaalt hoe privéberichten aan agentsessies worden gekoppeld. Dit is een **globale instelling** die alle kanalen beïnvloedt.
 
-| Waarde                       | Gedrag                                                              | Het meest geschikt voor                                             |
+| Waarde                        | Gedrag                                                            | Het meest geschikt voor                                                           |
 | ---------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `"main"`                     | De DM van elke gebruiker wordt gekoppeld aan de hoofdsessie van diens agent | Bots voor één gebruiker waarbij je wilt dat `USER.md` / `SOUL.md` automatisch worden geladen |
-| `"per-channel-peer"`         | Elke combinatie van (kanaal + gebruiker) krijgt een afzonderlijke sessie | Publieke multi-user bots die sterkere isolatie nodig hebben        |
-| `"per-account-channel-peer"` | Elke combinatie van (account + kanaal + gebruiker) krijgt een afzonderlijke sessie | Multi-account bots die sessie-isolatie op accountniveau nodig hebben |
+| `"main"`                     | Het privébericht van elke gebruiker wordt aan de hoofdsessie van diens agent gekoppeld                   | Bots voor één gebruiker waarbij je `USER.md` / `SOUL.md` automatisch wilt laden |
+| `"per-peer"`                 | Elke gesprekspartner krijgt een afzonderlijke sessie (ongeacht het kanaal)           | Isolatie uitsluitend op basis van de identiteit van de afzender                            |
+| `"per-channel-peer"`         | Elke combinatie van (kanaal + gebruiker) krijgt een afzonderlijke sessie           | Openbare bots voor meerdere gebruikers die sterkere isolatie nodig hebben                  |
+| `"per-account-channel-peer"` | Elke combinatie van (account + kanaal + gebruiker) krijgt een afzonderlijke sessie | Bots met meerdere accounts die sessie-isolatie op accountniveau nodig hebben         |
 
-**Afweging**: Het gebruik van `"main"` maakt automatisch laden van bootstrapbestanden (`USER.md`, `SOUL.md`, `MEMORY.md`) mogelijk, maar betekent dat alle DM's over alle kanalen hetzelfde patroon voor sessiesleutels delen. Overweeg voor publieke multi-user bots waarbij isolatie belangrijker is dan automatisch laden bij bootstrap `"per-channel-peer"` en beheer bootstrapbestanden handmatig.
+**Afweging**: met `"main"` worden bootstrapbestanden automatisch geladen (`USER.md`, `SOUL.md`, `MEMORY.md`), maar gebruiken alle privéberichten in alle kanalen hetzelfde patroon voor sessiesleutels. Overweeg voor openbare bots met meerdere gebruikers, waarbij isolatie belangrijker is dan het automatisch laden van bootstrapbestanden, `"per-channel-peer"` en beheer de bootstrapbestanden handmatig.
 
 <Note>
 Gebruik `"per-account-channel-peer"` wanneer benoemde Feishu-accounts afzonderlijke sessies voor dezelfde afzender moeten behouden. Dynamische koppelingen behouden het accountbereik.
 </Note>
 
-```json5
-{
-  session: {
-    // Voor persoonlijke bots voor één gebruiker: schakelt automatisch laden bij bootstrap in
-    dmScope: "main",
-
-    // Voor publieke multi-user bots: sterkere isolatie
-    // dmScope: "per-channel-peer",
-  },
-}
-```
-
-### Typische multi-user implementatie
+### Gebruikelijke implementatie voor meerdere gebruikers
 
 ```json5
 {
@@ -525,24 +601,24 @@ Gebruik `"per-account-channel-peer"` wanneer benoemde Feishu-accounts afzonderli
   },
   session: {
     // Kies dmScope op basis van je isolatiebehoeften:
-    // "main" voor automatisch laden bij bootstrap, "per-channel-peer" voor sterkere isolatie
+    // "main" voor automatisch laden van bootstrapbestanden, "per-channel-peer" voor sterkere isolatie
     dmScope: "main",
   },
-  bindings: [], // Leeg - dynamische agents koppelen automatisch
+  bindings: [], // Leeg - dynamische agents worden automatisch gekoppeld
 }
 ```
 
 ### Verificatie
 
-Controleer Gateway-logboeken om te bevestigen dat dynamische creatie werkt:
+Controleer de Gateway-logboeken om te bevestigen dat dynamische aanmaak werkt:
 
-```
-feishu: creating dynamic agent "feishu-ou_xxxxxx" for user ou_xxxxxx
-workspace: /Users/you/.openclaw/workspace-feishu-ou_xxxxxx
-feishu: dynamic agent created, new route: agent:feishu-ou_xxxxxx:main
+```text
+feishu: dynamische agent "feishu-ou_xxxxxx" aanmaken voor gebruiker ou_xxxxxx
+  werkruimte: /home/user/.openclaw/workspace-feishu-ou_xxxxxx
+  agentmap: /home/user/.openclaw/agents/feishu-ou_xxxxxx/agent
 ```
 
-Alle gemaakte werkruimten weergeven:
+Alle aangemaakte werkruimten weergeven:
 
 ```bash
 ls -la ~/.openclaw/workspace-*
@@ -550,77 +626,90 @@ ls -la ~/.openclaw/workspace-*
 
 ### Opmerkingen
 
-- **Werkruimte-isolatie**: Elke gebruiker krijgt een eigen werkruimtedirectory en agentinstantie. Gebruikers kunnen elkaars gespreksgeschiedenis of bestanden binnen de normale berichtstroom niet zien.
-- **Beveiligingsgrens**: Dit is een isolatiemechanisme voor berichtcontexten, geen beveiligingsgrens voor vijandige co-tenants. Het agentproces en de hostomgeving worden gedeeld.
-- **`bindings` moet leeg zijn**: Dynamische agents registreren automatisch hun eigen koppelingen
-- **Upgradepad**: Bestaande handmatige koppelingen blijven naast dynamische agents werken
-- **`session.dmScope` is globaal**: Dit beïnvloedt alle kanalen, niet alleen Feishu
-
----
+- **Werkruimte-isolatie**: Elke gebruiker krijgt een eigen werkruimtemap en agentinstantie. Gebruikers kunnen binnen de normale berichtenstroom elkaars gespreksgeschiedenis of bestanden niet zien.
+- **Beveiligingsgrens**: Dit is een isolatiemechanisme voor de berichtencontext, geen beveiligingsgrens tegen vijandige medegebruikers. Het agentproces en de hostomgeving worden gedeeld.
+- **Configuratieschrijfbewerkingen moeten ingeschakeld blijven**: Bij het dynamisch aanmaken van agents worden agents en bindingen naar de configuratie geschreven; dit wordt overgeslagen wanneer `channels.feishu.configWrites` `false` is (standaard: ingeschakeld).
+- **`bindings` moet leeg zijn**: Dynamische agents registreren automatisch hun eigen bindingen
+- **Upgradepad**: Bestaande handmatige bindingen blijven naast dynamische agents werken
+- **`session.dmScope` is globaal**: Dit is van invloed op alle kanalen, niet alleen Feishu
 
 ## Configuratiereferentie
 
 Volledige configuratie: [Gateway-configuratie](/nl/gateway/configuration)
 
-| Instelling                                                | Beschrijving                                                                    | Standaard                            |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------ |
-| `channels.feishu.enabled`                                | Het kanaal in-/uitschakelen                                                     | `true`                               |
-| `channels.feishu.domain`                                 | API-domein (`feishu` of `lark`)                                                  | `feishu`                             |
-| `channels.feishu.connectionMode`                         | Eventtransport (`websocket` of `webhook`)                                       | `websocket`                          |
-| `channels.feishu.defaultAccount`                         | Standaardaccount voor uitgaande routering                                       | `default`                            |
-| `channels.feishu.verificationToken`                      | Vereist voor webhookmodus                                                        | -                                    |
-| `channels.feishu.encryptKey`                             | Vereist voor webhookmodus                                                        | -                                    |
-| `channels.feishu.webhookPath`                            | Webhook-routepad                                                                 | `/feishu/events`                     |
-| `channels.feishu.webhookHost`                            | Webhook-bindhost                                                                 | `127.0.0.1`                          |
-| `channels.feishu.webhookPort`                            | Webhook-bindpoort                                                                | `3000`                               |
-| `channels.feishu.accounts.<id>.appId`                    | App-ID                                                                           | -                                    |
-| `channels.feishu.accounts.<id>.appSecret`                | App Secret                                                                       | -                                    |
-| `channels.feishu.accounts.<id>.domain`                   | Domeinoverschrijving per account                                                | `feishu`                             |
-| `channels.feishu.accounts.<id>.tts`                      | TTS-overschrijving per account                                                  | `messages.tts`                       |
-| `channels.feishu.dmPolicy`                               | DM-beleid                                                                        | `pairing`                            |
-| `channels.feishu.allowFrom`                              | DM-toestaanlijst (open_id-lijst)                                                | -                                    |
-| `channels.feishu.groupPolicy`                            | Groepsbeleid                                                                     | `allowlist`                          |
-| `channels.feishu.groupAllowFrom`                         | Groepstoestaanlijst                                                              | -                                    |
-| `channels.feishu.requireMention`                         | @vermelding in groepen vereisen                                                 | `true`                               |
-| `channels.feishu.groups.<chat_id>.requireMention`        | Overschrijving per groep voor @vermelding; expliciete ID's laten de groep ook toe in allowlist-modus | overgenomen                          |
-| `channels.feishu.groups.<chat_id>.enabled`               | Een specifieke groep in-/uitschakelen                                           | `true`                               |
-| `channels.feishu.dynamicAgentCreation.enabled`           | Automatische agentcreatie per gebruiker inschakelen                             | `false`                              |
-| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | Padsjabloon voor dynamische agentwerkruimten                                    | `~/.openclaw/workspace-{agentId}`    |
-| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | Sjabloon voor agentdirectorynaam                                                | `~/.openclaw/agents/{agentId}/agent` |
-| `channels.feishu.dynamicAgentCreation.maxAgents`         | Maximumaantal dynamische agents om te maken                                     | onbeperkt                            |
-| `channels.feishu.textChunkLimit`                         | Grootte van berichtdeel                                                         | `2000`                               |
-| `channels.feishu.mediaMaxMb`                             | Limiet voor mediagrootte                                                        | `30`                                 |
-| `channels.feishu.streaming`                              | Streaming-kaartuitvoer                                                          | `true`                               |
-| `channels.feishu.blockStreaming`                         | Reply-streaming voor voltooid blok                                              | `false`                              |
-| `channels.feishu.typingIndicator`                        | Typreacties verzenden                                                            | `true`                               |
-| `channels.feishu.resolveSenderNames`                     | Weergavenamen van afzenders oplossen                                            | `true`                               |
-| `channels.feishu.tools.bitable`                          | Bitable/Base-tools inschakelen                                                  | `true`                               |
-| `channels.feishu.tools.base`                             | Alias voor `channels.feishu.tools.bitable`; expliciete `bitable` wint wanneer beide zijn ingesteld | `true`                               |
-| `channels.feishu.accounts.<id>.tools.bitable`            | Bitable/Base-toolpoort per account                                              | overgenomen                          |
-| `channels.feishu.accounts.<id>.tools.base`               | Alias per account voor `tools.bitable`                                          | overgenomen                          |
-
----
+| Instelling                                               | Beschrijving                                                                         | Standaard                            |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------ |
+| `channels.feishu.enabled`                                | Het kanaal in-/uitschakelen                                                          | `true`                               |
+| `channels.feishu.domain`                                 | API-domein (`feishu`, `lark` of een `https://`-basis-URL)                              | `feishu`                             |
+| `channels.feishu.connectionMode`                         | Gebeurtenistransport (`websocket` of `webhook`)                                      | `websocket`                          |
+| `channels.feishu.defaultAccount`                         | Standaardaccount voor uitgaande routering                                            | `default`                            |
+| `channels.feishu.verificationToken`                      | Vereist voor Webhook-modus                                                           | -                                    |
+| `channels.feishu.encryptKey`                             | Vereist voor Webhook-modus                                                           | -                                    |
+| `channels.feishu.webhookPath`                            | Routepad van Webhook                                                                 | `/feishu/events`                     |
+| `channels.feishu.webhookHost`                            | Bindingshost van Webhook                                                             | `127.0.0.1`                          |
+| `channels.feishu.webhookPort`                            | Bindingspoort van Webhook                                                            | `3000`                               |
+| `channels.feishu.accounts.<id>.appId`                    | App-ID                                                                               | -                                    |
+| `channels.feishu.accounts.<id>.appSecret`                | App-geheim                                                                           | -                                    |
+| `channels.feishu.accounts.<id>.domain`                   | Domeinoverschrijving per account                                                     | `feishu`                             |
+| `channels.feishu.accounts.<id>.tts`                      | TTS-overschrijving per account                                                       | `tts`                                |
+| `channels.feishu.dmPolicy`                               | DM-beleid (`pairing`, `allowlist`, `open`)                                       | `pairing`                            |
+| `channels.feishu.allowFrom`                              | DM-toelatingslijst (lijst met open_id's)                                             | -                                    |
+| `channels.feishu.groupPolicy`                            | Groepsbeleid (`open`, `allowlist`, `disabled`)                                  | `allowlist`                          |
+| `channels.feishu.groupAllowFrom`                         | Groepstoelatingslijst                                                                | -                                    |
+| `channels.feishu.groupSenderAllowFrom`                   | Toelatingslijst voor afzenders die op alle groepen wordt toegepast                   | -                                    |
+| `channels.feishu.requireMention`                         | @vermelding in groepen vereisen                                                      | `true` (`false` wanneer beleid `open` is)  |
+| `channels.feishu.allowBots`                              | Andere bots accepteren die deze bot vermelden, met bescherming tegen botlussen       | `false`                              |
+| `channels.feishu.groups.<chat_id>.requireMention`        | Overschrijving van @vermelding per groep; expliciete ID's laten de groep ook toe in de toelatingslijstmodus | overgenomen                           |
+| `channels.feishu.groups.<chat_id>.enabled`               | Een specifieke groep in-/uitschakelen                                                | `true`                               |
+| `channels.feishu.groups.<chat_id>.allowFrom`             | Toelatingslijst voor afzenders per groep (overschrijft `groupSenderAllowFrom`)       | -                                    |
+| `channels.feishu.groupSessionScope`                      | Toewijzing van groepssessies (`group`, `group_sender`, `group_topic`, `group_topic_sender`) | `group`                              |
+| `channels.feishu.replyInThread`                          | Botantwoorden maken onderwerpthreads aan of zetten deze voort (`disabled`, `enabled`) | `disabled`                           |
+| `channels.feishu.reactionNotifications`                  | Inkomende reactiegebeurtenissen (`off`, `own`, `all`)                           | `own`                                |
+| `channels.feishu.vcAutoJoin`                             | Deelnemen aan VC-vergaderingen waarvoor de bot is uitgenodigd, na normale DM-autorisatie | `false`                              |
+| `channels.feishu.dynamicAgentCreation.enabled`           | Automatisch agents per gebruiker aanmaken inschakelen                                | `false`                              |
+| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | Padsjabloon voor dynamische agentwerkruimten                                          | `~/.openclaw/workspace-{agentId}`    |
+| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | Naamsjabloon voor agentmappen                                                        | `~/.openclaw/agents/{agentId}/agent` |
+| `channels.feishu.dynamicAgentCreation.maxAgents`         | Maximaal aantal aan te maken dynamische agents                                       | onbeperkt                            |
+| `channels.feishu.textChunkLimit`                         | Grootte van berichtsegmenten                                                         | `4000`                               |
+| `channels.feishu.streaming.chunkMode`                    | Segmentopsplitsing (`length` of `newline`)                                         | `length`                             |
+| `channels.feishu.mediaMaxMb`                             | Limiet voor mediagrootte                                                             | `30`                                 |
+| `channels.feishu.renderMode`                             | Weergave van antwoorden (`auto`, `raw`, `card`)                                    | `auto`                               |
+| `channels.feishu.streaming.mode`                         | Uitvoer van streamingkaarten (`partial` of `off`)                              | `partial`                            |
+| `channels.feishu.streaming.block.enabled`                | Antwoordstreaming per voltooid blok                                                  | `false`                              |
+| `channels.feishu.typingIndicator`                        | Typreacties verzenden                                                                | `true`                               |
+| `channels.feishu.resolveSenderNames`                     | Weergavenamen van afzenders opzoeken                                                 | `true`                               |
+| `channels.feishu.configWrites`                           | Door het kanaal geïnitieerde configuratieschrijfbewerkingen toestaan (nodig voor dynamische agents) | `true`                               |
+| `channels.feishu.tools.doc`                              | Documenthulpmiddelen inschakelen                                                     | `true`                               |
+| `channels.feishu.tools.chat`                             | Hulpmiddelen voor chatinformatie inschakelen                                         | `true`                               |
+| `channels.feishu.tools.wiki`                             | Kennisbankhulpmiddelen inschakelen (vereist `doc`)                                  | `true`                               |
+| `channels.feishu.tools.drive`                            | Hulpmiddelen voor cloudopslag inschakelen                                            | `true`                               |
+| `channels.feishu.tools.perm`                             | Hulpmiddelen voor machtigingsbeheer inschakelen                                      | `false`                              |
+| `channels.feishu.tools.scopes`                           | Diagnostisch hulpmiddel voor app-scopes inschakelen                                  | `true`                               |
+| `channels.feishu.tools.bitable`                          | Bitable/Base-hulpmiddelen inschakelen                                                | `true`                               |
+| `channels.feishu.tools.base`                             | Alias voor `channels.feishu.tools.bitable`; expliciete `bitable` heeft voorrang wanneer beide zijn ingesteld | `true`                               |
+| `channels.feishu.accounts.<id>.tools.bitable`            | Poortwachter voor Bitable/Base-hulpmiddelen per account                              | overgenomen                           |
+| `channels.feishu.accounts.<id>.tools.base`               | Alias per account voor `tools.bitable`                                               | overgenomen                           |
 
 ## Ondersteunde berichttypen
 
 ### Ontvangen
 
 - ✅ Tekst
-- ✅ Rich text (post)
+- ✅ Rijke tekst (bericht)
 - ✅ Afbeeldingen
 - ✅ Bestanden
 - ✅ Audio
 - ✅ Video/media
 - ✅ Stickers
 
-Binnenkomende Feishu/Lark-audioberichten worden genormaliseerd als mediaplaceholders in plaats
-van ruwe `file_key`-JSON. Wanneer `tools.media.audio` is geconfigureerd, downloadt OpenClaw
-de voice-note-resource en voert gedeelde audiotranscriptie uit vóór de
-agentbeurt, zodat de agent het gesproken transcript ontvangt. Als Feishu
-transcripttekst rechtstreeks in de audiopayload opneemt, wordt die tekst gebruikt zonder nog een
+Inkomende Feishu/Lark-audioberichten worden genormaliseerd als mediaplaatsaanduidingen in plaats
+van onbewerkte `file_key`-JSON. Wanneer `tools.media.audio` is geconfigureerd, downloadt OpenClaw
+de spraaknotitiebron en voert het vóór de agentbeurt gedeelde audiotranscriptie uit,
+zodat de agent het gesproken transcript ontvangt. Als Feishu transcriptietekst
+rechtstreeks in de audiopayload opneemt, wordt die tekst gebruikt zonder een extra
 ASR-aanroep. Zonder provider voor audiotranscriptie ontvangt de agent nog steeds een
-`<media:audio>`-placeholder plus de opgeslagen bijlage, niet de ruwe Feishu-
-resourcepayload.
+`<media:audio>`-plaatsaanduiding plus de opgeslagen bijlage, niet de onbewerkte
+Feishu-bronpayload.
 
 ### Verzenden
 
@@ -629,36 +718,30 @@ resourcepayload.
 - ✅ Bestanden
 - ✅ Audio
 - ✅ Video/media
-- ✅ Interactieve kaarten (inclusief streaming-updates)
-- ⚠️ Rich text (opmaak in berichtstijl; ondersteunt niet de volledige Feishu/Lark-authoringmogelijkheden)
+- ✅ Interactieve kaarten (inclusief streamingupdates)
+- ⚠️ Rijke tekst (berichtopmaak; ondersteunt niet alle auteursmogelijkheden van Feishu/Lark)
 
 Native Feishu/Lark-audiobubbels gebruiken het Feishu-berichttype `audio` en vereisen
 Ogg/Opus-uploadmedia (`file_type: "opus"`). Bestaande `.opus`- en `.ogg`-media
-worden direct als native audio verzonden. MP3/WAV/M4A en andere waarschijnlijke audioformaten worden
-alleen naar 48 kHz Ogg/Opus getranscodeerd met `ffmpeg` wanneer het antwoord om spraakbezorging vraagt
-(`audioAsVoice` / berichttool `asVoice`, inclusief TTS-spraaknotitieantwoorden).
-Gewone MP3-bijlagen blijven gewone bestanden. Als `ffmpeg` ontbreekt of
-conversie mislukt, valt OpenClaw terug op een bestandsbijlage en logt de reden.
+worden rechtstreeks als native audio verzonden. MP3/WAV/M4A en andere waarschijnlijke audioformaten worden
+alleen met `ffmpeg` getranscodeerd naar 48kHz Ogg/Opus wanneer het antwoord om
+spraakbezorging vraagt (`audioAsVoice` / berichttool `asVoice`, inclusief antwoorden
+met TTS-spraaknotities). Gewone MP3-bijlagen blijven reguliere bestanden. Als `ffmpeg` ontbreekt of
+de conversie mislukt, valt OpenClaw terug op een bestandsbijlage en wordt de reden gelogd.
 
 ### Threads en antwoorden
 
 - ✅ Inline antwoorden
-- ✅ Thread-antwoorden
-- ✅ Media-antwoorden blijven thread-bewust bij het antwoorden op een thread-bericht
+- ✅ Antwoorden in threads
+- ✅ Media-antwoorden blijven rekening houden met de thread wanneer op een threadbericht wordt geantwoord
 
-Voor `groupSessionScope: "group_topic"` en `"group_topic_sender"` gebruiken native
-Feishu/Lark-onderwerpgroepen de gebeurtenis `thread_id` (`omt_*`) als de canonieke
-onderwerpssessiesleutel. Als een native onderwerpstartergebeurtenis `thread_id` weglaat, hydrateert OpenClaw
-deze vanuit Feishu voordat de beurt wordt gerouteerd. Normale groepsantwoorden die
-OpenClaw omzet in threads blijven de bericht-ID van de antwoordroot (`om_*`) gebruiken, zodat de
-eerste beurt en vervolgbeurt in dezelfde sessie blijven.
-
----
+Sessieroutering voor onderwerpgroepen wordt behandeld onder
+[Sessiebereik van groepen en onderwerpthreads](#group-session-scope-and-topic-threads).
 
 ## Gerelateerd
 
-- [Kanalenoverzicht](/nl/channels) - alle ondersteunde kanalen
-- [Koppelen](/nl/channels/pairing) - DM-authenticatie en koppelingsflow
-- [Groepen](/nl/channels/groups) - groepschatgedrag en vermeldingsgating
+- [Overzicht van kanalen](/nl/channels) - alle ondersteunde kanalen
+- [Koppeling](/nl/channels/pairing) - DM-authenticatie en koppelingsflow
+- [Groepen](/nl/channels/groups) - gedrag van groepschats en toegangscontrole via vermeldingen
 - [Kanaalroutering](/nl/channels/channel-routing) - sessieroutering voor berichten
-- [Beveiliging](/nl/gateway/security) - toegangsmodel en hardening
+- [Beveiliging](/nl/gateway/security) - toegangsmodel en beveiligingsversterking

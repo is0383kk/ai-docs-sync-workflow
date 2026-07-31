@@ -1,13 +1,14 @@
 ---
 read_when:
     - Je wilt Featherless AI gebruiken met OpenClaw
-    - Je hebt de omgevingsvariabele voor de Featherless API-sleutel of de indeling voor de modelreferentie nodig
-summary: Featherless AI instellen, modellen selecteren en tools aanroepen
+    - Je hebt de omgevingsvariabele voor de Featherless-API-sleutel of de indeling voor de modelreferentie nodig
+summary: Featherless AI-configuratie, modelselectie en toolaanroepen
 title: Featherless AI
 x-i18n:
-    generated_at: "2026-07-12T09:18:57Z"
+    generated_at: "2026-07-27T05:19:20Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 9112f7e65b4089bf96933c632d0b62f7fb87d42998d985ca85eb92dc392636b6
     source_path: providers/featherless.md
@@ -19,18 +20,18 @@ OpenAI-compatibele API. OpenClaw installeert Featherless als een officiële exte
 providerplugin en houdt de ingebouwde catalogus klein, terwijl tijdens runtime exacte
 model-id's van Featherless worden geaccepteerd.
 
-| Eigenschap              | Waarde                                   |
-| ----------------------- | ---------------------------------------- |
-| Provider-id             | `featherless`                            |
-| Pakket                  | `@openclaw/featherless-provider`         |
-| Omgevingsvariabele voor authenticatie | `FEATHERLESS_API_KEY`        |
-| Onboardingvlag          | `--auth-choice featherless-api-key`      |
-| Directe CLI-vlag        | `--featherless-api-key <key>`            |
-| API                     | OpenAI-compatibel (`openai-completions`) |
-| Basis-URL               | `https://api.featherless.ai/v1`          |
-| Standaardmodel          | `featherless/Qwen/Qwen3-32B`             |
+| Eigenschap      | Waarde                                   |
+| --------------- | ---------------------------------------- |
+| Provider-id     | `featherless`                            |
+| Pakket          | `@openclaw/featherless-provider`         |
+| Auth-omgevingsvariabele | `FEATHERLESS_API_KEY`                    |
+| Onboardingvlag  | `--auth-choice featherless-api-key`      |
+| Directe CLI-vlag | `--featherless-api-key <key>`            |
+| API             | OpenAI-compatibel (`openai-completions`) |
+| Basis-URL       | `https://api.featherless.ai/v1`          |
+| Standaardmodel  | `featherless/Qwen/Qwen3-32B`             |
 
-## Configuratie
+## Installatie
 
 Installeer de plugin en start de Gateway opnieuw:
 
@@ -45,7 +46,7 @@ Voer de onboarding uit:
 openclaw onboard --auth-choice featherless-api-key
 ```
 
-Voor niet-interactieve configuratie:
+Voor niet-interactieve installatie:
 
 ```bash
 openclaw onboard --non-interactive \
@@ -68,18 +69,18 @@ openclaw models list --provider featherless
 
 ## Standaardmodel
 
-De plugin gebruikt `Qwen/Qwen3-32B` als standaardmodel voor de configuratie, omdat Featherless
+De plugin gebruikt `Qwen/Qwen3-32B` als standaard voor de installatie, omdat Featherless
 native toolaanroepen voor de Qwen 3-familie documenteert. OpenClaw configureert het
 contextvenster van 32.768 tokens, een conservatieve uitvoerlimiet van 4.096 tokens en
-de denkbesturing van de Qwen-chatsjabloon.
+denkbesturing voor de Qwen-chatsjabloon.
 
 De kostenvelden in de catalogus zijn nul, omdat Featherless meerdere factureringsmodi
-ondersteunt en OpenClaw geen accountspecifieke abonnements- of tariefgegevens
-per aanvraag insluit.
+ondersteunt en OpenClaw geen accountspecifieke abonnements- of aanvraagtarieven
+opneemt.
 
 ## Andere Featherless-modellen
 
-Gebruik de exacte model-id van Featherless na het providerprefix `featherless/`:
+Gebruik de exacte Featherless-model-id na het providerprefix `featherless/`:
 
 ```json5
 {
@@ -94,13 +95,13 @@ Gebruik de exacte model-id van Featherless na het providerprefix `featherless/`:
 ```
 
 OpenClaw kopieert bewust niet de volledige openbare modelindex van Featherless naar
-de keuzelijst. De index is groot en bevat onvoldoende gestructureerde metadata over
-mogelijkheden om elk tekst-, visie-, embedding- en redeneermodel veilig te classificeren.
-Onbekende id's worden daarom verwerkt met conservatieve standaardinstellingen voor
-alleen tekst, zonder redeneren: een contextvenster van 4.096 tokens en een uitvoerlimiet
-van 1.024 tokens.
+de kiezer. De index is groot en bevat onvoldoende gestructureerde metadata over
+mogelijkheden om elk tekst-, visie-, embedding- en redeneermodel veilig te
+classificeren. Onbekende id's worden daarom verwerkt met conservatieve standaardwaarden
+voor alleen tekst, zonder redeneren: een contextvenster van 4.096 tokens en een
+uitvoerlimiet van 1.024 tokens.
 
-Voeg een expliciete modelvermelding voor de provider toe wanneer een model andere metadata nodig heeft:
+Voeg een expliciete providermodelvermelding toe wanneer een model andere metadata nodig heeft:
 
 ```json5
 {
@@ -127,19 +128,19 @@ Voeg een expliciete modelvermelding voor de provider toe wanneer een model ander
 }
 ```
 
-Controleer de modelcatalogus van Featherless op de actuele beschikbaarheid van modellen en
-mogelijkheidslabels voordat u aangepaste metadata toevoegt.
+Controleer de modelcatalogus van Featherless op de huidige beschikbaarheid van modellen en
+mogelijkheidslabels voordat je aangepaste metadata toevoegt.
 
 ## Probleemoplossing
 
-- `401` of `403`: controleer of `FEATHERLESS_API_KEY` zichtbaar is voor het Gateway-proces
-  of voer de onboarding opnieuw uit.
-- Onbekend model: gebruik na het prefix `featherless/` de exacte hoofdlettergevoelige id
-  van Featherless.
+- `401` of `403`: controleer of `FEATHERLESS_API_KEY` zichtbaar is voor het Gateway-
+  proces, of voer de onboarding opnieuw uit.
+- Onbekend model: gebruik na het prefix
+  `featherless/` de exacte hoofdlettergevoelige id van Featherless.
 - Toolaanroepen worden als tekst geretourneerd: kies een modelfamilie waarvoor Featherless
   native functieaanroepen documenteert, zoals Qwen 3.
 - Beheerde Gateway kan de sleutel niet zien: plaats deze in `~/.openclaw/.env` of een andere
-  omgevingsbron die door de service wordt geladen en start vervolgens de Gateway opnieuw.
+  omgevingsbron die door de service wordt geladen en start daarna de Gateway opnieuw.
 
 ## Gerelateerd
 

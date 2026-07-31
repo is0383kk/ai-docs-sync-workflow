@@ -1,95 +1,150 @@
 ---
 read_when:
-    - Bạn muốn cấu hình các nhà cung cấp tìm kiếm bộ nhớ hoặc các mô hình embedding
+    - Bạn muốn cấu hình nhà cung cấp tìm kiếm bộ nhớ hoặc mô hình embedding
     - Bạn muốn thiết lập backend QMD
-    - Bạn muốn tinh chỉnh tìm kiếm lai, MMR hoặc cơ chế suy giảm theo thời gian
+    - Bạn muốn bật tìm kiếm kết hợp, MMR hoặc suy giảm theo thời gian
     - Bạn muốn bật tính năng lập chỉ mục bộ nhớ đa phương thức
 sidebarTitle: Memory config
-summary: Tất cả tùy chọn cấu hình cho tìm kiếm bộ nhớ, nhà cung cấp embedding, QMD, tìm kiếm kết hợp và lập chỉ mục đa phương thức
-title: Tham chiếu cấu hình bộ nhớ
+summary: Nhà cung cấp tìm kiếm bộ nhớ, chế độ truy xuất, QMD và lập chỉ mục đa phương thức
+title: Tài liệu tham khảo về cấu hình bộ nhớ
 x-i18n:
-    generated_at: "2026-07-12T08:23:38Z"
+    generated_at: "2026-07-20T04:48:37Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 558995797a5e217e57245e1d5ff90124fca67b6eb4767d97a3ea26a4ca013d06
+    source_hash: 11d9e7e5feed39280a4210cfb9cc245422949d3559fcad4450028943b4dc907f
     source_path: reference/memory-config.md
     workflow: 16
 ---
 
-Trang này liệt kê mọi tùy chọn cấu hình cho chức năng tìm kiếm bộ nhớ của OpenClaw. Để xem tổng quan về khái niệm, hãy tham khảo:
+Trang này liệt kê mọi tùy chọn cấu hình cho tìm kiếm bộ nhớ của OpenClaw. Để xem tổng quan về khái niệm, hãy xem:
 
 <CardGroup cols={2}>
   <Card title="Tổng quan về bộ nhớ" href="/vi/concepts/memory">
     Cách bộ nhớ hoạt động.
   </Card>
   <Card title="Công cụ tích hợp sẵn" href="/vi/concepts/memory-builtin">
-    Phần phụ trợ SQLite mặc định.
+    Backend SQLite mặc định.
   </Card>
   <Card title="Công cụ QMD" href="/vi/concepts/memory-qmd">
-    Tiến trình phụ ưu tiên cục bộ.
+    Sidecar ưu tiên cục bộ.
   </Card>
   <Card title="Tìm kiếm bộ nhớ" href="/vi/concepts/memory-search">
-    Quy trình tìm kiếm và tinh chỉnh.
+    Pipeline tìm kiếm và tinh chỉnh.
   </Card>
   <Card title="Active Memory" href="/vi/concepts/active-memory">
-    Tác tử phụ bộ nhớ cho các phiên tương tác.
+    Tác nhân phụ bộ nhớ cho các phiên tương tác.
   </Card>
 </CardGroup>
 
-Tất cả cài đặt tìm kiếm bộ nhớ đều nằm trong `agents.defaults.memorySearch` của `openclaw.json` (hoặc phần ghi đè `agents.list[].memorySearch` cho từng tác tử), trừ khi có ghi chú khác.
+Mọi cài đặt tìm kiếm bộ nhớ đều nằm trong `agents.defaults.memorySearch` tại `openclaw.json` (hoặc một giá trị ghi đè `agents.list[].memorySearch` theo từng tác nhân), trừ khi có ghi chú khác.
 
 <Note>
-Nếu bạn đang tìm nút bật/tắt tính năng **Active Memory** và cấu hình tác tử phụ, chúng nằm trong `plugins.entries.active-memory` thay vì `memorySearch`.
+Đối với quy trình làm việc được đề xuất cho tác nhân cá nhân, hãy sử dụng
+`memorySearch.rememberAcrossConversations`. Các điều khiển nâng cao về đích nhắm,
+mô hình, prompt và độ trễ của Active Memory nằm trong `plugins.entries.active-memory`.
 
-Active Memory sử dụng mô hình hai cổng:
-
-1. Plugin phải được bật và nhắm đến mã định danh tác tử hiện tại
-2. yêu cầu phải là một phiên trò chuyện tương tác lâu dài đủ điều kiện
-
-Hãy xem [Active Memory](/vi/concepts/active-memory) để biết mô hình kích hoạt, cấu hình do Plugin sở hữu, khả năng lưu giữ bản chép lời và quy trình triển khai an toàn.
+Xem [Active Memory](/vi/concepts/active-memory) để biết cả hai cách kích hoạt,
+cơ chế lưu bền bản chép lời và hướng dẫn triển khai an toàn.
 </Note>
+
+---
+
+## Ghi nhớ giữa các cuộc trò chuyện
+
+| Khóa                           | Kiểu      | Mặc định                                                    | Mô tả                                                                    |
+| ----------------------------- | --------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `rememberAcrossConversations` | `boolean` | Bật cho bản cài đặt cá nhân; tắt khi đã cấu hình cô lập DM | Sử dụng ngữ cảnh liên quan từ các cuộc trò chuyện riêng tư được nhận diện khác của tác nhân này. |
+
+Hãy cấu hình theo từng tác nhân khi chỉ một tác nhân cá nhân đáng tin cậy được phép sử dụng
+khả năng truy hồi bản chép lời xuyên cuộc trò chuyện:
+
+```json5
+{
+  agents: {
+    list: [
+      {
+        id: "personal",
+        memorySearch: {
+          rememberAcrossConversations: true,
+        },
+      },
+    ],
+  },
+}
+```
+
+Giá trị tuân theo cơ chế kế thừa `agents.defaults.memorySearch` thông thường với một
+giá trị ghi đè theo từng tác nhân. Khi chưa đặt, giá trị này chỉ mặc định bật nếu
+`session.dmScope` toàn cục chưa được đặt hoặc là `"main"` và không liên kết nào có giá trị ghi đè
+`session.dmScope`. Mọi cấu hình cô lập DM đều khiến giá trị này mặc định tắt. Giá trị `true` hoặc
+`false` được đặt rõ ràng luôn được ưu tiên. Việc bật tính năng này ngụ ý lập chỉ mục bản chép lời phiên và
+thêm `sessions` vào các nguồn bộ nhớ đã phân giải của tác nhân. Với QMD, tính năng này cũng
+bật xuất phiên của tác nhân đó; chế độ này không yêu cầu cài đặt
+`memory.qmd.sessions.enabled` riêng.
+
+Nhà cung cấp bộ nhớ tích hợp sẵn của OpenClaw hỗ trợ đường dẫn được bảo vệ này với cả
+backend tích hợp sẵn và QMD. Các nhà cung cấp bộ nhớ thay thế vẫn có thể tiếp tục sử dụng
+hook truy hồi riêng và các công cụ Active Memory nâng cao, nhưng cài đặt này sẽ bị bỏ qua
+trừ khi nhà cung cấp hiện tại hỗ trợ truy hồi bản chép lời riêng tư được bảo vệ.
+`openclaw doctor` báo cáo nhà cung cấp không được hỗ trợ hoặc danh sách Active Memory
+`toolsAllow` được đặt rõ ràng nhưng không bao gồm `memory_search`.
+
+Ranh giới truy xuất hẹp hơn so với tìm kiếm phiên thông thường:
+
+- chỉ các cuộc trò chuyện riêng tư được nhận diện của cùng tác nhân mới đủ điều kiện
+- cuộc trò chuyện đang được trả lời bị loại trừ
+- các nhóm và kênh bị loại khỏi cả nguồn lẫn đích
+- các loại cuộc trò chuyện không xác định sẽ từ chối theo nguyên tắc an toàn
+- khả năng truy hồi trong sandbox không thể sử dụng quyền đặc biệt xuyên cuộc trò chuyện
+
+Cài đặt này không thay đổi `tools.sessions.visibility`, khóa phiên,
+cơ chế lưu trữ bản chép lời, định tuyến phân phối hoặc quyền của `sessions_list`,
+`sessions_history` và `sessions_send`. Active Memory thực hiện một lượt
+truy xuất chỉ đọc có giới hạn; việc truy xuất không khả dụng hoặc hết thời gian không chặn
+phản hồi.
 
 ---
 
 ## Lựa chọn nhà cung cấp
 
-| Khóa       | Kiểu      | Mặc định                | Mô tả                                                                                                                                                                                                                                                                                                                                                           |
-| ---------- | --------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `enabled`  | `boolean` | `true`                  | Bật hoặc tắt chức năng tìm kiếm bộ nhớ                                                                                                                                                                                                                                                                                                                           |
-| `provider` | `string`  | `"openai"`              | Mã định danh bộ điều hợp nhúng như `bedrock`, `deepinfra`, `gemini`, `github-copilot`, `local`, `mistral`, `ollama`, `openai`, `openai-compatible` hoặc `voyage`; cũng có thể là `models.providers.<id>` đã cấu hình với `api` trỏ đến bộ điều hợp nhúng bộ nhớ hoặc API mô hình tương thích với OpenAI |
-| `model`    | `string`  | mặc định của nhà cung cấp | Tên mô hình nhúng                                                                                                                                                                                                                                                                                                                                                |
-| `fallback` | `string`  | `"none"`                | Mã định danh bộ điều hợp dự phòng khi bộ điều hợp chính gặp lỗi                                                                                                                                                                                                                                                                                                  |
+| Khóa        | Kiểu      | Mặc định          | Mô tả                                                                                                                                                                                                                                                                                 |
+| ---------- | --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `enabled`  | `boolean` | `true`           | Bật hoặc tắt tìm kiếm bộ nhớ                                                                                                                                                                                                                                                             |
+| `provider` | `string`  | `"openai"`       | ID bộ điều hợp embedding như `bedrock`, `deepinfra`, `gemini`, `github-copilot`, `local`, `mistral`, `ollama`, `openai`, `openai-compatible` hoặc `voyage`; cũng có thể là một `models.providers.<id>` đã cấu hình, trong đó `api` trỏ đến bộ điều hợp embedding bộ nhớ hoặc API mô hình tương thích với OpenAI |
+| `model`    | `string`  | mặc định của nhà cung cấp | Tên mô hình embedding                                                                                                                                                                                                                                                                        |
+| `fallback` | `string`  | `"none"`         | ID bộ điều hợp dự phòng khi bộ điều hợp chính gặp lỗi                                                                                                                                                                                                                                                  |
 
-Khi chưa đặt `provider`, OpenClaw sử dụng tính năng nhúng của OpenAI. Hãy đặt rõ `provider`
-để sử dụng Bedrock, DeepInfra, Gemini, GitHub Copilot, Mistral, Ollama,
-Voyage, mô hình GGUF cục bộ hoặc điểm cuối `/v1/embeddings` tương thích với OpenAI.
-Các cấu hình cũ vẫn có `provider: "auto"` sẽ được phân giải thành `openai`.
+Khi `provider` chưa được đặt, OpenClaw sử dụng embedding của OpenAI. Hãy đặt `provider`
+một cách rõ ràng để sử dụng Bedrock, DeepInfra, Gemini, GitHub Copilot, Mistral, Ollama,
+Voyage, mô hình GGUF cục bộ hoặc endpoint `/v1/embeddings` tương thích với OpenAI.
+Các cấu hình cũ vẫn ghi `provider: "auto"` sẽ được phân giải thành `openai`.
 
 <Warning>
-Việc thay đổi nhà cung cấp nhúng, mô hình, cài đặt nhà cung cấp, nguồn, phạm vi,
-cách chia đoạn hoặc bộ tách từ có thể khiến chỉ mục vectơ SQLite hiện có không tương thích.
-OpenClaw tạm dừng tìm kiếm vectơ và báo cảnh báo về danh tính chỉ mục thay vì
-tự động nhúng lại mọi thứ. Khi đã sẵn sàng, hãy xây dựng lại bằng
+Việc thay đổi nhà cung cấp embedding, mô hình, cài đặt nhà cung cấp, nguồn, phạm vi,
+cách chia đoạn hoặc tokenizer có thể khiến chỉ mục vector SQLite hiện có không tương thích.
+OpenClaw tạm dừng tìm kiếm vector và báo cáo cảnh báo về danh tính chỉ mục thay vì
+tự động tạo lại embedding cho mọi thứ. Hãy xây dựng lại khi bạn sẵn sàng bằng
 `openclaw memory status --index --agent <id>` hoặc
 `openclaw memory index --force --agent <id>`.
 </Warning>
 
-Khi `provider` chưa được đặt, có cấu hình cũ `provider: "auto"` hoặc
-`provider: "none"` được dùng để chủ ý chọn chế độ chỉ dùng FTS, việc truy hồi bộ nhớ vẫn có thể
-sử dụng xếp hạng FTS theo từ vựng khi tính năng nhúng không khả dụng.
+Khi `provider` chưa được đặt, `provider: "auto"` cũ vẫn tồn tại hoặc
+`provider: "none"` chủ ý chọn chế độ chỉ dùng FTS, việc truy hồi bộ nhớ vẫn có thể
+sử dụng xếp hạng FTS từ vựng khi embedding không khả dụng.
 
-Các nhà cung cấp không cục bộ được chỉ định rõ sẽ đóng khi gặp lỗi. Nếu bạn đặt `memorySearch.provider` thành
+Các nhà cung cấp không cục bộ được chỉ định rõ ràng sẽ từ chối theo nguyên tắc an toàn. Nếu bạn đặt `memorySearch.provider` thành
 một nhà cung cấp cụ thể dựa trên dịch vụ từ xa như Bedrock, DeepInfra, Gemini, GitHub
 Copilot, LM Studio, Mistral, Ollama, OpenAI, Voyage hoặc một nhà cung cấp tùy chỉnh
-tương thích với OpenAI và nhà cung cấp đó không khả dụng trong thời gian chạy, `memory_search`
+tương thích với OpenAI, và nhà cung cấp đó không khả dụng khi chạy, `memory_search`
 sẽ trả về kết quả không khả dụng thay vì âm thầm sử dụng truy hồi chỉ bằng FTS. Hãy sửa
 cấu hình nhà cung cấp/xác thực, chuyển sang một nhà cung cấp có thể truy cập hoặc đặt
 `provider: "none"` nếu bạn chủ ý muốn truy hồi chỉ bằng FTS.
 
-### Mã định danh nhà cung cấp tùy chỉnh
+### ID nhà cung cấp tùy chỉnh
 
-`memorySearch.provider` có thể trỏ đến một mục `models.providers.<id>` tùy chỉnh dành cho các bộ điều hợp nhà cung cấp chuyên biệt cho bộ nhớ như `ollama`, hoặc dành cho các API mô hình tương thích với OpenAI như `openai-responses` / `openai-completions`. OpenClaw phân giải bên sở hữu `api` của nhà cung cấp đó cho bộ điều hợp nhúng, đồng thời giữ nguyên mã định danh nhà cung cấp tùy chỉnh để xử lý điểm cuối, xác thực và tiền tố mô hình. Điều này cho phép các thiết lập nhiều GPU hoặc nhiều máy chủ dành riêng việc nhúng bộ nhớ cho một điểm cuối cục bộ cụ thể:
+`memorySearch.provider` có thể trỏ đến một mục `models.providers.<id>` tùy chỉnh dành cho các bộ điều hợp nhà cung cấp dành riêng cho bộ nhớ như `ollama`, hoặc cho các API mô hình tương thích với OpenAI như `openai-responses` / `openai-completions`. OpenClaw phân giải chủ sở hữu `api` của nhà cung cấp đó cho bộ điều hợp embedding, đồng thời giữ nguyên ID nhà cung cấp tùy chỉnh để xử lý endpoint, xác thực và tiền tố mô hình. Điều này cho phép các thiết lập nhiều GPU hoặc nhiều máy chủ dành riêng embedding bộ nhớ cho một endpoint cục bộ cụ thể:
 
 ```json5
 {
@@ -116,29 +171,29 @@ cấu hình nhà cung cấp/xác thực, chuyển sang một nhà cung cấp có
 
 ### Phân giải khóa API
 
-Tính năng nhúng từ xa yêu cầu khóa API. Thay vào đó, Bedrock sử dụng chuỗi thông tin xác thực mặc định của AWS SDK (vai trò phiên bản máy, SSO, khóa truy cập hoặc khóa API Bedrock).
+Embedding từ xa yêu cầu khóa API. Thay vào đó, Bedrock sử dụng chuỗi thông tin xác thực mặc định của AWS SDK (vai trò phiên bản, SSO, khóa truy cập hoặc khóa API Bedrock).
 
-| Nhà cung cấp  | Biến môi trường                                     | Khóa cấu hình                        |
-| ------------- | --------------------------------------------------- | ------------------------------------ |
-| Bedrock       | Chuỗi thông tin xác thực AWS hoặc `AWS_BEARER_TOKEN_BEDROCK` | Không cần khóa API          |
-| DeepInfra     | `DEEPINFRA_API_KEY`                                 | `models.providers.deepinfra.apiKey`  |
-| Gemini        | `GEMINI_API_KEY`                                    | `models.providers.google.apiKey`     |
-| GitHub Copilot | `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN` | Hồ sơ xác thực qua đăng nhập thiết bị |
-| Mistral       | `MISTRAL_API_KEY`                                   | `models.providers.mistral.apiKey`    |
-| Ollama        | `OLLAMA_API_KEY` (giá trị giữ chỗ)                  | --                                   |
-| OpenAI        | `OPENAI_API_KEY`                                    | `models.providers.openai.apiKey`     |
-| Voyage        | `VOYAGE_API_KEY`                                    | `models.providers.voyage.apiKey`     |
+| Nhà cung cấp       | Biến môi trường                                             | Khóa cấu hình                          |
+| -------------- | --------------------------------------------------- | ----------------------------------- |
+| Bedrock        | Chuỗi thông tin xác thực AWS hoặc `AWS_BEARER_TOKEN_BEDROCK` | Không cần khóa API                   |
+| DeepInfra      | `DEEPINFRA_API_KEY`                                 | `models.providers.deepinfra.apiKey` |
+| Gemini         | `GEMINI_API_KEY`                                    | `models.providers.google.apiKey`    |
+| GitHub Copilot | `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`  | Hồ sơ xác thực qua đăng nhập thiết bị       |
+| Mistral        | `MISTRAL_API_KEY`                                   | `models.providers.mistral.apiKey`   |
+| Ollama         | `OLLAMA_API_KEY` (phần giữ chỗ)                      | --                                  |
+| OpenAI         | `OPENAI_API_KEY`                                    | `models.providers.openai.apiKey`    |
+| Voyage         | `VOYAGE_API_KEY`                                    | `models.providers.voyage.apiKey`    |
 
 <Note>
-OAuth của Codex chỉ áp dụng cho trò chuyện/hoàn thành và không đáp ứng các yêu cầu nhúng.
+Codex OAuth chỉ áp dụng cho trò chuyện/hoàn thành và không đáp ứng các yêu cầu embedding.
 </Note>
 
 ---
 
-## Cấu hình điểm cuối từ xa
+## Cấu hình endpoint từ xa
 
-Sử dụng `provider: "openai-compatible"` cho máy chủ `/v1/embeddings`
-tương thích chung với OpenAI nhưng không được kế thừa thông tin xác thực trò chuyện OpenAI toàn cục.
+Sử dụng `provider: "openai-compatible"` cho một máy chủ `/v1/embeddings` chung tương thích với OpenAI
+không được kế thừa thông tin xác thực trò chuyện OpenAI toàn cục.
 
 <ParamField path="remote.baseUrl" type="string">
   URL cơ sở API tùy chỉnh.
@@ -173,25 +228,25 @@ tương thích chung với OpenAI nhưng không được kế thừa thông tin 
 
 <AccordionGroup>
   <Accordion title="Gemini">
-    | Khóa                   | Kiểu     | Mặc định               | Mô tả                                      |
-    | ---------------------- | -------- | ---------------------- | ------------------------------------------ |
-    | `model`                | `string` | `gemini-embedding-001` | Cũng hỗ trợ `gemini-embedding-2-preview`   |
-    | `outputDimensionality` | `number` | `3072`                 | Đối với Embedding 2: 768, 1536 hoặc 3072   |
+    | Khóa                    | Kiểu     | Mặc định                | Mô tả                                |
+    | ---------------------- | -------- | ---------------------- | ------------------------------------------- |
+    | `model`                | `string` | `gemini-embedding-001` | Cũng hỗ trợ `gemini-embedding-2-preview` |
+    | `outputDimensionality` | `number` | `3072`                 | Đối với Embedding 2: 768, 1536 hoặc 3072        |
 
     <Warning>
     Việc thay đổi mô hình hoặc `outputDimensionality` sẽ thay đổi danh tính chỉ mục. OpenClaw
-    tạm dừng tìm kiếm vectơ cho đến khi bạn chủ động xây dựng lại chỉ mục bộ nhớ.
+    tạm dừng tìm kiếm vector cho đến khi bạn xây dựng lại chỉ mục bộ nhớ một cách rõ ràng.
     </Warning>
 
   </Accordion>
   <Accordion title="Kiểu đầu vào tương thích với OpenAI">
-    Các điểm cuối nhúng tương thích với OpenAI có thể chọn sử dụng các trường yêu cầu `input_type` dành riêng cho nhà cung cấp. Điều này hữu ích cho các mô hình nhúng bất đối xứng yêu cầu nhãn khác nhau cho phần nhúng truy vấn và tài liệu.
+    Các endpoint embedding tương thích với OpenAI có thể chủ động sử dụng các trường yêu cầu `input_type` dành riêng cho nhà cung cấp. Điều này hữu ích cho các mô hình embedding bất đối xứng yêu cầu nhãn khác nhau cho embedding truy vấn và tài liệu.
 
-    | Khóa                | Kiểu     | Mặc định  | Mô tả                                                          |
-    | ------------------- | -------- | --------- | -------------------------------------------------------------- |
-    | `inputType`         | `string` | chưa đặt  | `input_type` dùng chung cho phần nhúng truy vấn và tài liệu     |
-    | `queryInputType`    | `string` | chưa đặt  | `input_type` tại thời điểm truy vấn; ghi đè `inputType`         |
-    | `documentInputType` | `string` | chưa đặt  | `input_type` cho chỉ mục/tài liệu; ghi đè `inputType`           |
+    | Khóa                 | Kiểu     | Mặc định | Mô tả                                             |
+    | ------------------- | -------- | ------- | -------------------------------------------------------- |
+    | `inputType`         | `string` | chưa đặt   | `input_type` dùng chung cho embedding truy vấn và tài liệu   |
+    | `queryInputType`    | `string` | chưa đặt   | `input_type` tại thời điểm truy vấn; ghi đè `inputType`          |
+    | `documentInputType` | `string` | chưa đặt   | `input_type` của chỉ mục/tài liệu; ghi đè `inputType`      |
 
     ```json5
     {
@@ -212,13 +267,13 @@ tương thích chung với OpenAI nhưng không được kế thừa thông tin 
     }
     ```
 
-    Việc thay đổi các giá trị này ảnh hưởng đến danh tính bộ nhớ đệm nhúng khi lập chỉ mục theo lô của nhà cung cấp và cần được tiếp nối bằng việc lập lại chỉ mục bộ nhớ nếu mô hình thượng nguồn xử lý các nhãn theo cách khác nhau.
+    Việc thay đổi các giá trị này ảnh hưởng đến định danh bộ nhớ đệm embedding cho quá trình lập chỉ mục hàng loạt của nhà cung cấp và sau đó cần lập lại chỉ mục bộ nhớ nếu mô hình thượng nguồn xử lý các nhãn theo cách khác nhau.
 
   </Accordion>
   <Accordion title="Bedrock">
-    ### Cấu hình nhúng Bedrock
+    ### Cấu hình embedding Bedrock
 
-    Bedrock sử dụng chuỗi thông tin xác thực mặc định của AWS SDK cùng với mã thông báo mang do OpenClaw kiểm tra, vì vậy không có khóa API nào được lưu trong cấu hình. Nếu OpenClaw chạy trên EC2 với một vai trò phiên bản máy đã bật Bedrock, chỉ cần đặt nhà cung cấp và mô hình:
+    Bedrock sử dụng chuỗi thông tin xác thực mặc định của AWS SDK cùng với token mang được OpenClaw kiểm tra, vì vậy không có khóa API nào được lưu trong cấu hình. Nếu OpenClaw chạy trên EC2 với vai trò phiên bản đã bật Bedrock, chỉ cần đặt nhà cung cấp và mô hình:
 
     ```json5
     {
@@ -233,38 +288,38 @@ tương thích chung với OpenAI nhưng không được kế thừa thông tin 
     }
     ```
 
-    | Khóa                   | Kiểu     | Mặc định                       | Mô tả                               |
-    | ---------------------- | -------- | ------------------------------ | ----------------------------------- |
-    | `model`                | `string` | `amazon.titan-embed-text-v2:0` | Mã định danh mô hình nhúng Bedrock bất kỳ |
-    | `outputDimensionality` | `number` | mặc định của mô hình           | Đối với Titan V2: 256, 512 hoặc 1024 |
+    | Khóa                    | Kiểu     | Mặc định                        | Mô tả                     |
+    | ---------------------- | -------- | ------------------------------- | -------------------------------- |
+    | `model`                | `string` | `amazon.titan-embed-text-v2:0` | ID mô hình embedding Bedrock bất kỳ  |
+    | `outputDimensionality` | `number` | mặc định của mô hình                  | Với Titan V2: 256, 512 hoặc 1024 |
 
-    **Các mô hình được hỗ trợ** (có tính năng phát hiện họ mô hình và giá trị kích thước mặc định):
+    **Các mô hình được hỗ trợ** (có tính năng phát hiện họ mô hình và kích thước mặc định):
 
-    | ID mô hình                                   | Nhà cung cấp | Số chiều mặc định | Số chiều có thể cấu hình     |
-    | ------------------------------------------- | ------------ | ----------------- | ---------------------------- |
-    | `amazon.titan-embed-text-v2:0`             | Amazon       | 1024              | 256, 512, 1024               |
-    | `amazon.titan-embed-text-v1`               | Amazon       | 1536              | --                           |
-    | `amazon.titan-embed-g1-text-02`            | Amazon       | 1536              | --                           |
-    | `amazon.titan-embed-image-v1`              | Amazon       | 1024              | --                           |
-    | `amazon.nova-2-multimodal-embeddings-v1:0` | Amazon       | 1024              | 256, 384, 1024, 3072         |
-    | `cohere.embed-english-v3`                  | Cohere       | 1024              | --                           |
-    | `cohere.embed-multilingual-v3`             | Cohere       | 1024              | --                           |
-    | `cohere.embed-v4:0`                        | Cohere       | 1536              | 256, 384, 512, 768, 1024, 1536 |
-    | `twelvelabs.marengo-embed-3-0-v1:0`        | TwelveLabs   | 512               | --                           |
-    | `twelvelabs.marengo-embed-2-7-v1:0`        | TwelveLabs   | 1024              | --                           |
+    | ID mô hình                                   | Nhà cung cấp   | Kích thước mặc định | Kích thước có thể cấu hình          |
+    | ------------------------------------------- | ---------- | ------------- | -------------------------- |
+    | `amazon.titan-embed-text-v2:0`             | Amazon     | 1024         | 256, 512, 1024             |
+    | `amazon.titan-embed-text-v1`               | Amazon     | 1536         | --                          |
+    | `amazon.titan-embed-g1-text-02`            | Amazon     | 1536         | --                          |
+    | `amazon.titan-embed-image-v1`              | Amazon     | 1024         | --                          |
+    | `amazon.nova-2-multimodal-embeddings-v1:0` | Amazon     | 1024         | 256, 384, 1024, 3072       |
+    | `cohere.embed-english-v3`                  | Cohere     | 1024         | --                          |
+    | `cohere.embed-multilingual-v3`             | Cohere     | 1024         | --                          |
+    | `cohere.embed-v4:0`                        | Cohere     | 1536         | 256, 384, 512, 768, 1024, 1536 |
+    | `twelvelabs.marengo-embed-3-0-v1:0`        | TwelveLabs | 512          | --                          |
+    | `twelvelabs.marengo-embed-2-7-v1:0`        | TwelveLabs | 1024         | --                          |
 
     Các biến thể có hậu tố thông lượng (ví dụ: `amazon.titan-embed-text-v1:2:8k`) và ID hồ sơ suy luận có tiền tố vùng (ví dụ: `us.amazon.titan-embed-text-v2:0`) kế thừa cấu hình của mô hình cơ sở.
 
-    **Vùng:** được xác định theo thứ tự sau: giá trị ghi đè `memorySearch.remote.baseUrl`, cấu hình `models.providers.amazon-bedrock.baseUrl`, `AWS_REGION`, `AWS_DEFAULT_REGION`, sau đó là giá trị mặc định `us-east-1`.
+    **Vùng:** được phân giải theo thứ tự sau: giá trị ghi đè `memorySearch.remote.baseUrl`, cấu hình `models.providers.amazon-bedrock.baseUrl`, `AWS_REGION`, `AWS_DEFAULT_REGION`, rồi đến giá trị mặc định là `us-east-1`.
 
-    **Xác thực:** trước tiên OpenClaw kiểm tra `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` hoặc `AWS_BEARER_TOKEN_BEDROCK`, sau đó chuyển sang chuỗi nhà cung cấp thông tin xác thực mặc định tiêu chuẩn của AWS SDK:
+    **Xác thực:** Trước tiên, OpenClaw kiểm tra `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` hoặc `AWS_BEARER_TOKEN_BEDROCK`, sau đó chuyển sang chuỗi nhà cung cấp thông tin xác thực mặc định tiêu chuẩn của AWS SDK:
 
     1. Biến môi trường (`AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`), trừ khi `AWS_PROFILE` cũng được đặt
     2. SSO (chỉ khi các trường SSO được cấu hình)
     3. Tệp thông tin xác thực và cấu hình dùng chung (`fromIni`, bao gồm `AWS_PROFILE`)
-    4. Tiến trình thông tin xác thực (`credential_process` trong tệp cấu hình AWS)
-    5. Thông tin xác thực bằng mã thông báo danh tính web
-    6. Thông tin xác thực từ siêu dữ liệu phiên bản ECS hoặc EC2
+    4. Quy trình thông tin xác thực (`credential_process` trong tệp cấu hình AWS)
+    5. Thông tin xác thực bằng token danh tính web
+    6. Thông tin xác thực siêu dữ liệu phiên bản ECS hoặc EC2
 
     **Quyền IAM:** vai trò hoặc người dùng IAM cần:
 
@@ -276,7 +331,7 @@ tương thích chung với OpenAI nhưng không được kế thừa thông tin 
     }
     ```
 
-    Để áp dụng đặc quyền tối thiểu, giới hạn phạm vi `InvokeModel` cho mô hình cụ thể:
+    Để áp dụng đặc quyền tối thiểu, hãy giới hạn phạm vi `InvokeModel` ở mô hình cụ thể:
 
     ```text
     arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v2:0
@@ -284,14 +339,14 @@ tương thích chung với OpenAI nhưng không được kế thừa thông tin 
 
   </Accordion>
   <Accordion title="Cục bộ (GGUF + llama.cpp)">
-    | Khóa                  | Kiểu               | Mặc định                 | Mô tả                                                                                                                                                                                                                                                                                                                        |
-    | --------------------- | ------------------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `local.modelPath`     | `string`           | tự động tải xuống        | Đường dẫn đến tệp mô hình GGUF                                                                                                                                                                                                                                                                                               |
-    | `local.modelCacheDir` | `string`           | mặc định của node-llama-cpp | Thư mục bộ nhớ đệm cho các mô hình đã tải xuống                                                                                                                                                                                                                                                                              |
-    | `local.contextSize`   | `number \| "auto"` | `4096`                   | Kích thước cửa sổ ngữ cảnh cho ngữ cảnh nhúng. 4096 đáp ứng các đoạn điển hình (128-512 token) đồng thời giới hạn VRAM không dùng cho trọng số. Giảm xuống 1024-2048 trên các máy chủ bị hạn chế tài nguyên. `"auto"` sử dụng mức tối đa mà mô hình được huấn luyện -- không khuyến nghị cho các mô hình từ 8B trở lên (Qwen3-Embedding-8B: tối đa 40 960 token có thể đẩy mức sử dụng VRAM lên khoảng 32 GB). |
+    | Khóa                   | Kiểu               | Mặc định                | Mô tả                                                                                                                                                                                                                                                                                                          |
+    | --------------------- | ------------------ | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `local.modelPath`     | `string`           | tự động tải xuống        | Đường dẫn đến tệp mô hình GGUF                                                                                                                                                                                                                                                                                              |
+    | `local.modelCacheDir` | `string`           | mặc định của node-llama-cpp | Thư mục bộ nhớ đệm cho các mô hình đã tải xuống                                                                                                                                                                                                                                                                                      |
+    | `local.contextSize`   | `number \| "auto"` | `4096`                 | Kích thước cửa sổ ngữ cảnh cho ngữ cảnh embedding. 4096 đáp ứng các phân đoạn thông thường (128-512 token) đồng thời giới hạn VRAM không dành cho trọng số. Giảm xuống 1024-2048 trên các máy chủ hạn chế tài nguyên. `"auto"` sử dụng mức tối đa đã huấn luyện của mô hình -- không khuyến nghị cho các mô hình 8B+ (Qwen3-Embedding-8B: tối đa 40 960 token có thể đẩy mức sử dụng VRAM lên ~32 GB). |
 
     Trước tiên, hãy cài đặt nhà cung cấp llama.cpp chính thức: `openclaw plugins install @openclaw/llama-cpp-provider`.
-    Mô hình mặc định: `embeddinggemma-300m-qat-Q8_0.gguf` (khoảng 0,6 GB, được tự động tải xuống). Các bản sao mã nguồn vẫn yêu cầu phê duyệt bản dựng gốc: `pnpm approve-builds`, sau đó chạy `pnpm rebuild node-llama-cpp`.
+    Mô hình mặc định: `embeddinggemma-300m-qat-Q8_0.gguf` (~0.6 GB, tự động tải xuống). Các bản checkout mã nguồn vẫn yêu cầu phê duyệt bản dựng gốc: `pnpm approve-builds` rồi `pnpm rebuild node-llama-cpp`.
 
     Sử dụng CLI độc lập để xác minh cùng đường dẫn nhà cung cấp mà Gateway sử dụng:
 
@@ -300,9 +355,9 @@ tương thích chung với OpenAI nhưng không được kế thừa thông tin 
     openclaw memory index --force --agent main
     ```
 
-    Các giá trị số của `local.contextSize` cũng cung cấp thông tin cho cơ chế tự động bố trí lớp GPU của node-llama-cpp, để trọng số mô hình và ngữ cảnh nhúng được yêu cầu được bố trí phù hợp cùng nhau. Sau khi môi trường chạy đã tải xong, `openclaw memory status --deep` báo cáo backend llama.cpp, thiết bị, trạng thái giảm tải, ngữ cảnh được yêu cầu và thông tin bộ nhớ có dấu thời gian đã biết gần nhất; trạng thái thụ động không tải mô hình.
+    Các giá trị `local.contextSize` dạng số cũng cung cấp thông tin cho cơ chế tự động bố trí lớp GPU của node-llama-cpp để trọng số mô hình và ngữ cảnh embedding được yêu cầu được bố trí phù hợp cùng nhau. `openclaw memory status --deep` báo cáo backend llama.cpp, thiết bị, mức giảm tải, ngữ cảnh được yêu cầu và thông tin bộ nhớ có dấu thời gian đã biết gần nhất sau khi runtime đã tải; trạng thái thụ động không tải mô hình.
 
-    Đặt rõ ràng `provider: "local"` cho các embedding GGUF cục bộ. Tham chiếu mô hình `hf:` và HTTP(S) được hỗ trợ cho cấu hình cục bộ tường minh (thông qua cơ chế phân giải mô hình của node-llama-cpp), nhưng chúng không thay đổi nhà cung cấp mặc định.
+    Đặt `provider: "local"` một cách rõ ràng cho embedding GGUF cục bộ. `hf:` và các tham chiếu mô hình HTTP(S) được hỗ trợ cho cấu hình cục bộ rõ ràng (thông qua cơ chế phân giải mô hình của node-llama-cpp), nhưng chúng không thay đổi nhà cung cấp mặc định.
 
   </Accordion>
 </AccordionGroup>
@@ -312,69 +367,51 @@ tương thích chung với OpenAI nhưng không được kế thừa thông tin 
 <ParamField path="sync.embeddingBatchTimeoutSeconds" type="number">
   Ghi đè thời gian chờ cho các lô embedding nội tuyến trong quá trình lập chỉ mục bộ nhớ.
 
-Khi không đặt, hệ thống sử dụng giá trị mặc định của nhà cung cấp: 600 giây đối với các nhà cung cấp cục bộ/tự lưu trữ như `local`, `ollama` và `lmstudio`, và 120 giây đối với các nhà cung cấp được lưu trữ. Hãy tăng giá trị này khi các lô embedding cục bộ phụ thuộc vào CPU vẫn hoạt động bình thường nhưng chậm.
+Khi chưa đặt, hệ thống sử dụng giá trị mặc định của nhà cung cấp: 600 giây đối với các nhà cung cấp cục bộ/tự lưu trữ như `local`, `ollama` và `lmstudio`, và 120 giây đối với các nhà cung cấp được lưu trữ. Tăng giá trị này khi các lô embedding cục bộ phụ thuộc CPU hoạt động bình thường nhưng chậm.
 </ParamField>
 
 ---
 
 ## Hành vi lập chỉ mục
 
-Tất cả đều thuộc `memorySearch.sync`, trừ khi có ghi chú khác:
+Tất cả nằm trong `memorySearch.sync`, trừ khi có ghi chú khác:
 
-| Khóa                           | Kiểu      | Mặc định | Mô tả                                                                                  |
-| ------------------------------ | --------- | -------- | -------------------------------------------------------------------------------------- |
-| `onSessionStart`               | `boolean` | `true`   | Đồng bộ chỉ mục bộ nhớ khi một phiên bắt đầu                                           |
-| `onSearch`                     | `boolean` | `true`   | Đồng bộ trì hoãn khi tìm kiếm sau khi phát hiện nội dung thay đổi                      |
-| `watch`                        | `boolean` | `true`   | Theo dõi các tệp bộ nhớ (chokidar) và lên lịch lập lại chỉ mục khi có thay đổi          |
-| `watchDebounceMs`              | `number`  | `1500`   | Khoảng trì hoãn để hợp nhất các sự kiện theo dõi tệp diễn ra liên tiếp nhanh chóng     |
-| `intervalMinutes`              | `number`  | `0`      | Khoảng thời gian lập lại chỉ mục định kỳ tính bằng phút (`0` để tắt)                   |
-| `sessions.postCompactionForce` | `boolean` | `true`   | Buộc lập lại chỉ mục phiên sau khi Compaction kích hoạt cập nhật bản ghi hội thoại     |
-
-<ParamField path="chunking.tokens" type="number">
-  Kích thước đoạn tính theo token được dùng khi chia nguồn bộ nhớ trước khi nhúng (mặc định: 400).
-</ParamField>
-<ParamField path="chunking.overlap" type="number">
-  Số token chồng lấn giữa các đoạn liền kề để giữ nguyên ngữ cảnh gần ranh giới phân chia (mặc định: 80).
-</ParamField>
-
-<Note>
-Việc thay đổi `chunking.tokens` hoặc `chunking.overlap` sẽ làm thay đổi ranh giới đoạn và vô hiệu hóa định danh chỉ mục hiện có (xem phần Cảnh báo trong mục Lựa chọn nhà cung cấp).
-</Note>
+| Khóa                            | Kiểu      | Mặc định | Mô tả                                                           |
+| ------------------------------ | --------- | ------- | --------------------------------------------------------------------- |
+| `onSessionStart`               | `boolean` | `true`  | Đồng bộ chỉ mục bộ nhớ khi phiên bắt đầu                           |
+| `onSearch`                     | `boolean` | `true`  | Đồng bộ trì hoãn khi tìm kiếm sau khi phát hiện thay đổi nội dung                 |
+| `watch`                        | `boolean` | `true`  | Theo dõi các tệp bộ nhớ (chokidar) và lên lịch lập lại chỉ mục khi có thay đổi         |
+| `sessions.postCompactionForce` | `boolean` | `true`  | Buộc lập lại chỉ mục phiên sau khi bản chép lời được cập nhật do Compaction kích hoạt |
 
 ---
 
 ## Cấu hình tìm kiếm kết hợp
 
-Tất cả đều nằm trong `memorySearch.query`:
+Tất cả nằm trong `memorySearch.query`:
 
-| Khóa         | Kiểu     | Mặc định | Mô tả                                               |
-| ------------ | -------- | -------- | --------------------------------------------------- |
-| `maxResults` | `number` | `6`      | Số kết quả bộ nhớ tối đa được trả về trước khi chèn |
-| `minScore`   | `number` | `0.35`   | Điểm liên quan tối thiểu để đưa kết quả vào          |
+| Khóa          | Kiểu     | Mặc định | Mô tả                               |
+| ------------ | -------- | ------- | ----------------------------------------- |
+| `maxResults` | `number` | `6`     | Số kết quả khớp bộ nhớ tối đa được trả về trước khi chèn |
+| `minScore`   | `number` | `0.35`  | Điểm liên quan tối thiểu để đưa một kết quả khớp vào  |
 
 Và trong `memorySearch.query.hybrid`:
 
-| Khóa                  | Kiểu      | Mặc định | Mô tả                                      |
-| --------------------- | --------- | -------- | ------------------------------------------ |
-| `enabled`             | `boolean` | `true`   | Bật tìm kiếm kết hợp BM25 + vectơ          |
-| `vectorWeight`        | `number`  | `0.7`    | Trọng số cho điểm vectơ (0-1)              |
-| `textWeight`          | `number`  | `0.3`    | Trọng số cho điểm BM25 (0-1)               |
-| `candidateMultiplier` | `number`  | `4`      | Hệ số nhân kích thước tập ứng viên         |
+| Khóa       | Kiểu      | Mặc định | Mô tả                        |
+| --------- | --------- | ------- | ---------------------------------- |
+| `enabled` | `boolean` | `true`  | Bật tìm kiếm kết hợp BM25 + vectơ |
 
 <Tabs>
   <Tab title="MMR (đa dạng)">
-    | Khóa          | Kiểu      | Mặc định | Mô tả                                        |
-    | ------------- | --------- | -------- | -------------------------------------------- |
-    | `mmr.enabled` | `boolean` | `false`  | Bật xếp hạng lại bằng MMR                    |
-    | `mmr.lambda`  | `number`  | `0.7`    | 0 = đa dạng tối đa, 1 = liên quan tối đa     |
+    | Khóa           | Kiểu      | Mặc định | Mô tả           |
+    | ------------- | --------- | ------- | --------------------- |
+    | `mmr.enabled` | `boolean` | `false` | Bật xếp hạng lại bằng MMR |
   </Tab>
   <Tab title="Suy giảm theo thời gian (độ mới)">
-    | Khóa                         | Kiểu      | Mặc định | Mô tả                              |
-    | ---------------------------- | --------- | -------- | ---------------------------------- |
-    | `temporalDecay.enabled`      | `boolean` | `false`  | Bật tăng điểm theo độ mới          |
-    | `temporalDecay.halfLifeDays` | `number`  | `30`     | Điểm giảm một nửa sau mỗi N ngày   |
+    | Khóa                     | Kiểu      | Mặc định | Mô tả          |
+    | ----------------------- | --------- | ------- | -------------------- |
+    | `temporalDecay.enabled` | `boolean` | `false` | Bật tăng hạng theo độ mới |
 
-    Các tệp thường xanh (`MEMORY.md`, các tệp không ghi ngày trong `memory/`) không bao giờ bị suy giảm.
+    Các tệp thường xanh (`MEMORY.md`, các tệp không ghi ngày tháng trong `memory/`) không bao giờ bị suy giảm.
 
   </Tab>
 </Tabs>
@@ -390,10 +427,8 @@ Và trong `memorySearch.query.hybrid`:
           maxResults: 6,
           minScore: 0.35,
           hybrid: {
-            vectorWeight: 0.7,
-            textWeight: 0.3,
-            mmr: { enabled: true, lambda: 0.7 },
-            temporalDecay: { enabled: true, halfLifeDays: 30 },
+            mmr: { enabled: true },
+            temporalDecay: { enabled: true },
           },
         },
       },
@@ -406,8 +441,8 @@ Và trong `memorySearch.query.hybrid`:
 
 ## Đường dẫn bộ nhớ bổ sung
 
-| Khóa         | Kiểu       | Mô tả                                      |
-| ------------ | ---------- | ------------------------------------------ |
+| Khóa          | Kiểu       | Mô tả                              |
+| ------------ | ---------- | ---------------------------------------- |
 | `extraPaths` | `string[]` | Các thư mục hoặc tệp bổ sung cần lập chỉ mục |
 
 ```json5
@@ -422,9 +457,9 @@ Và trong `memorySearch.query.hybrid`:
 }
 ```
 
-Đường dẫn có thể là tuyệt đối hoặc tương đối với không gian làm việc. Các thư mục được quét đệ quy để tìm tệp `.md`. Cách xử lý liên kết tượng trưng phụ thuộc vào phần phụ trợ đang hoạt động: công cụ tích hợp sẵn bỏ qua liên kết tượng trưng, còn QMD tuân theo hành vi của trình quét QMD nền tảng.
+Đường dẫn có thể là tuyệt đối hoặc tương đối với không gian làm việc. Các thư mục được quét đệ quy để tìm tệp `.md`. Cách xử lý liên kết tượng trưng phụ thuộc vào backend đang hoạt động: công cụ tích hợp bỏ qua liên kết tượng trưng, còn QMD tuân theo hành vi của trình quét QMD nền tảng.
 
-Để tìm kiếm bản chép lời giữa các tác nhân trong phạm vi tác nhân, hãy dùng `agents.list[].memorySearch.qmd.extraCollections` thay cho `memory.qmd.paths`. Các bộ sưu tập bổ sung đó có cùng cấu trúc `{ path, name, pattern? }`, nhưng được hợp nhất theo từng tác nhân và có thể giữ nguyên tên dùng chung được chỉ định rõ khi đường dẫn trỏ ra ngoài không gian làm việc hiện tại. Nếu cùng một đường dẫn đã phân giải xuất hiện trong cả `memory.qmd.paths` và `memorySearch.qmd.extraCollections`, QMD giữ mục đầu tiên và bỏ qua mục trùng lặp.
+Đối với tìm kiếm bản ghi hội thoại giữa các agent trong phạm vi agent, hãy dùng `agents.list[].memorySearch.qmd.extraCollections` thay cho `memory.qmd.paths`. Các bộ sưu tập bổ sung đó tuân theo cùng cấu trúc `{ path, name, pattern? }`, nhưng được hợp nhất theo từng agent và có thể giữ nguyên tên dùng chung được chỉ định rõ khi đường dẫn trỏ ra ngoài workspace hiện tại. Nếu cùng một đường dẫn đã phân giải xuất hiện trong cả `memory.qmd.paths` và `memorySearch.qmd.extraCollections`, QMD giữ mục đầu tiên và bỏ qua mục trùng lặp.
 
 ---
 
@@ -432,11 +467,11 @@ Và trong `memorySearch.query.hybrid`:
 
 Lập chỉ mục hình ảnh và âm thanh cùng với Markdown bằng Gemini Embedding 2:
 
-| Khóa                      | Kiểu       | Mặc định   | Mô tả                                           |
-| ------------------------- | ---------- | ---------- | ----------------------------------------------- |
-| `multimodal.enabled`      | `boolean`  | `false`    | Bật lập chỉ mục đa phương thức                  |
-| `multimodal.modalities`   | `string[]` | --         | `["image"]`, `["audio"]` hoặc `["all"]`         |
-| `multimodal.maxFileBytes` | `number`   | `10485760` | Kích thước tệp tối đa để lập chỉ mục (10 MiB)   |
+| Khóa                       | Kiểu       | Mặc định    | Mô tả                            |
+| ------------------------- | ---------- | ---------- | -------------------------------------- |
+| `multimodal.enabled`      | `boolean`  | `false`    | Bật lập chỉ mục đa phương thức             |
+| `multimodal.modalities`   | `string[]` | --         | `["image"]`, `["audio"]`, hoặc `["all"]` |
+| `multimodal.maxFileBytes` | `number`   | `10485760` | Kích thước tệp tối đa để lập chỉ mục (10 MiB)    |
 
 <Note>
 Chỉ áp dụng cho các tệp trong `extraPaths`. Các thư mục gốc bộ nhớ mặc định vẫn chỉ hỗ trợ Markdown. Yêu cầu `gemini-embedding-2-preview`. `fallback` phải là `"none"`.
@@ -448,64 +483,67 @@ Các định dạng được hỗ trợ: `.jpg`, `.jpeg`, `.png`, `.webp`, `.gif
 
 ## Bộ nhớ đệm embedding
 
-| Khóa               | Kiểu      | Mặc định     | Mô tả                                            |
-| ------------------ | --------- | ------------ | ------------------------------------------------ |
-| `cache.enabled`    | `boolean` | `true`       | Lưu embedding của các phân đoạn vào SQLite       |
-| `cache.maxEntries` | `number`  | chưa thiết lập | Giới hạn trên theo nỗ lực tối đa cho embedding được lưu đệm |
+| Khóa             | Kiểu      | Mặc định | Mô tả                      |
+| --------------- | --------- | ------- | -------------------------------- |
+| `cache.enabled` | `boolean` | `true`  | Lưu embedding của các đoạn vào bộ nhớ đệm trong SQLite |
 
-Ngăn việc tạo lại embedding cho văn bản không thay đổi trong quá trình lập chỉ mục lại hoặc cập nhật bản chép lời. Để `maxEntries` ở trạng thái chưa thiết lập nếu muốn bộ nhớ đệm không giới hạn; hãy thiết lập giá trị này khi mức tăng dung lượng ổ đĩa quan trọng hơn tốc độ lập chỉ mục lại tối đa. Khi được thiết lập, các mục cũ nhất (theo thời gian cập nhật gần nhất) sẽ bị loại bỏ trước khi bộ nhớ đệm vượt quá giới hạn.
+Ngăn việc tạo lại embedding cho văn bản không thay đổi khi lập lại chỉ mục hoặc cập nhật bản ghi hội thoại.
 
 ---
 
 ## Lập chỉ mục theo lô
 
-| Khóa                          | Kiểu      | Mặc định | Mô tả                              |
-| ----------------------------- | --------- | -------- | ---------------------------------- |
-| `remote.nonBatchConcurrency`  | `number`  | `4`      | Các embedding trực tiếp song song  |
-| `remote.batch.enabled`        | `boolean` | `false`  | Bật API embedding theo lô           |
-| `remote.batch.concurrency`    | `number`  | `2`      | Các tác vụ theo lô song song        |
-| `remote.batch.wait`           | `boolean` | `true`   | Chờ hoàn tất lô                     |
-| `remote.batch.pollIntervalMs` | `number`  | `2000`   | Khoảng thời gian thăm dò            |
-| `remote.batch.timeoutMinutes` | `number`  | `60`     | Thời gian chờ tối đa của lô         |
+| Khóa                           | Kiểu      | Mặc định | Mô tả                |
+| ----------------------------- | --------- | ------- | -------------------------- |
+| `remote.nonBatchConcurrency`  | `number`  | `4`     | Các embedding nội tuyến song song |
+| `remote.batch.enabled`        | `boolean` | `false` | Bật API embedding theo lô |
+| `remote.batch.concurrency`    | `number`  | `2`     | Các tác vụ theo lô song song        |
+| `remote.batch.wait`           | `boolean` | `true`  | Chờ lô hoàn tất  |
+| `remote.batch.pollIntervalMs` | `number`  | `2000`  | Khoảng thời gian thăm dò              |
+| `remote.batch.timeoutMinutes` | `number`  | `60`    | Thời gian chờ của lô              |
 
-Khả dụng cho `gemini`, `openai` và `voyage`. Chế độ theo lô của OpenAI thường nhanh nhất và rẻ nhất khi bổ sung lượng lớn dữ liệu cũ.
+Khả dụng cho `gemini`, `openai` và `voyage`. Tác vụ theo lô của OpenAI thường nhanh nhất và tiết kiệm chi phí nhất khi điền bù dữ liệu quy mô lớn.
 
-`remote.nonBatchConcurrency` kiểm soát các lệnh gọi embedding trực tiếp được dùng bởi các nhà cung cấp cục bộ/tự lưu trữ và các nhà cung cấp được lưu trữ khi API theo lô của nhà cung cấp không hoạt động. Ollama mặc định là `1` đối với việc lập chỉ mục không theo lô để tránh làm quá tải các máy chủ cục bộ nhỏ hơn; hãy đặt giá trị cao hơn trên các máy có cấu hình mạnh hơn.
+`remote.nonBatchConcurrency` kiểm soát các lệnh gọi embedding nội tuyến được dùng bởi nhà cung cấp cục bộ/tự lưu trữ và nhà cung cấp được lưu trữ khi API theo lô của nhà cung cấp không hoạt động. Ollama mặc định dùng `1` cho việc lập chỉ mục không theo lô để tránh gây quá tải cho các máy chủ cục bộ nhỏ hơn; hãy đặt giá trị cao hơn trên các máy lớn hơn.
 
-Thiết lập này tách biệt với `sync.embeddingBatchTimeoutSeconds`, vốn kiểm soát thời gian chờ tối đa cho các lệnh gọi embedding trực tiếp.
+Thiết lập này tách biệt với `sync.embeddingBatchTimeoutSeconds`, thiết lập kiểm soát thời gian chờ cho các lệnh gọi embedding nội tuyến.
 
 ---
 
 ## Tìm kiếm bộ nhớ phiên (thử nghiệm)
 
-Lập chỉ mục bản chép lời phiên và cung cấp chúng qua `memory_search`:
+Lập chỉ mục bản ghi hội thoại phiên và hiển thị chúng qua `memory_search`:
 
-| Khóa                          | Kiểu       | Mặc định      | Mô tả                                              |
-| ----------------------------- | ---------- | ------------- | -------------------------------------------------- |
-| `experimental.sessionMemory`  | `boolean`  | `false`       | Bật lập chỉ mục phiên                              |
-| `sources`                     | `string[]` | `["memory"]`  | Thêm `"sessions"` để bao gồm bản chép lời          |
-| `sync.sessions.deltaBytes`    | `number`   | `100000`      | Ngưỡng byte để lập chỉ mục lại                     |
-| `sync.sessions.deltaMessages` | `number`   | `50`          | Ngưỡng số tin nhắn để lập chỉ mục lại              |
+| Khóa                           | Kiểu       | Mặc định      | Mô tả                             |
+| ----------------------------- | ---------- | ------------ | --------------------------------------- |
+| `experimental.sessionMemory`  | `boolean`  | `false`      | Bật lập chỉ mục phiên                 |
+| `sources`                     | `string[]` | `["memory"]` | Thêm `"sessions"` để bao gồm bản ghi hội thoại |
+| `sync.sessions.deltaBytes`    | `number`   | `100000`     | Ngưỡng byte để lập lại chỉ mục              |
+| `sync.sessions.deltaMessages` | `number`   | `50`         | Ngưỡng tin nhắn để lập lại chỉ mục           |
 
 <Warning>
-Việc lập chỉ mục phiên phải được chủ động bật và chạy bất đồng bộ. Kết quả có thể hơi lỗi thời. Nhật ký phiên nằm trên ổ đĩa, vì vậy hãy coi quyền truy cập hệ thống tệp là ranh giới tin cậy.
+Lập chỉ mục phiên là tính năng phải chủ động bật và chạy bất đồng bộ. Kết quả có thể hơi lỗi thời. Nhật ký phiên nằm trên đĩa, vì vậy hãy coi quyền truy cập hệ thống tệp là ranh giới tin cậy.
 </Warning>
 
-Các kết quả khớp từ bản chép lời phiên cũng tuân theo
-[`tools.sessions.visibility`](/vi/gateway/config-tools#toolssessions). Chế độ hiển thị mặc định
-`tree` chỉ cho phép truy cập phiên hiện tại và các phiên do phiên đó tạo ra. Để
-truy xuất một phiên không liên quan của cùng tác nhân, được Gateway điều phối từ một
-phiên khác, chẳng hạn như tin nhắn trực tiếp, hãy chủ động mở rộng chế độ hiển thị thành `agent` (hoặc chỉ dùng `all`
-khi cũng cần truy xuất giữa các tác nhân và chính sách giữa tác nhân với tác nhân cho phép).
+Tìm kiếm bản ghi hội thoại phiên thông thường do mô hình gọi tuân theo
+[`tools.sessions.visibility`](/vi/gateway/config-tools#toolssessions). Phạm vi hiển thị
+`tree` mặc định cho phép truy cập phiên hiện tại, các phiên do phiên đó tạo ra và
+các phiên nhóm của cùng agent được theo dõi thông qua nhận biết nhóm ngầm định. Các
+phiên không liên quan khác yêu cầu phạm vi hiển thị `agent` (hoặc `all` chỉ khi cũng
+cần truy hồi giữa các agent và chính sách agent-với-agent cho phép).
+
+`rememberAcrossConversations` không mở rộng thiết lập đó. Nó cung cấp một
+quyền riêng biệt chỉ dành cho thời gian chạy, giới hạn ở các bản ghi hội thoại riêng tư của cùng agent
+trong lượt Active Memory có giới hạn.
 
 Các ví dụ bên dưới đặt những thiết lập này trong `agents.defaults`. Bạn cũng có thể
-áp dụng các thiết lập `memorySearch` tương đương trong phần ghi đè theo từng tác nhân khi chỉ một
-tác nhân cần lập chỉ mục và tìm kiếm bản chép lời phiên.
+áp dụng các thiết lập `memorySearch` tương đương trong phần ghi đè theo từng agent khi chỉ một
+agent cần lập chỉ mục và tìm kiếm bản ghi hội thoại phiên.
 
-Để truy xuất từ Gateway sang tin nhắn trực tiếp trong cùng tác nhân:
+Để truy hồi từ gateway đến DM trong cùng agent:
 
 <Tabs>
-  <Tab title="Phần phụ trợ tích hợp sẵn">
+  <Tab title="Backend tích hợp sẵn">
     ```json5
     {
       agents: {
@@ -522,7 +560,7 @@ tác nhân cần lập chỉ mục và tìm kiếm bản chép lời phiên.
     }
     ```
   </Tab>
-  <Tab title="Phần phụ trợ QMD">
+  <Tab title="Backend QMD">
     ```json5
     {
       agents: {
@@ -547,96 +585,104 @@ tác nhân cần lập chỉ mục và tìm kiếm bản chép lời phiên.
   </Tab>
 </Tabs>
 
-Khi sử dụng QMD, riêng `agents.defaults.memorySearch.experimental.sessionMemory` và
-`sources: ["sessions"]` không xuất bản chép lời vào QMD. Đồng thời hãy đặt
-`memory.qmd.sessions.enabled: true`.
+Khi dùng QMD, bản thân `agents.defaults.memorySearch.experimental.sessionMemory` và
+`sources: ["sessions"]` không xuất bản ghi hội thoại vào QMD. Hãy đặt cả
+`memory.qmd.sessions.enabled: true`. Thiết lập cấp cao hơn
+`rememberAcrossConversations: true` là ngoại lệ: nó ngầm bật việc
+xuất phiên QMD bắt buộc cho agent đó. Các bản xuất ngầm định vẫn ở chế độ riêng tư:
+chúng luôn dùng vị trí xuất nội bộ mặc định (cấu hình
+`sessions.exportDir` chỉ áp dụng cho các bản xuất tường minh), chỉ được tìm kiếm
+trong quá trình truy hồi giữa các cuộc hội thoại của agent đó, và `memory_get`
+thông thường không thể đọc chúng. Việc đặt tường minh
+`memory.qmd.sessions.enabled: true` giữ nguyên hành vi hiện có và biến
+các bản ghi hội thoại đã xuất thành một phần của kho ngữ liệu bộ nhớ thông thường.
 
 ---
 
-  ## Tăng tốc vectơ SQLite (sqlite-vec)
+## Tăng tốc vectơ SQLite (sqlite-vec)
 
-  | Khóa                         | Kiểu      | Mặc định | Mô tả                                  |
-  | ---------------------------- | --------- | -------- | -------------------------------------- |
-  | `store.vector.enabled`       | `boolean` | `true`   | Sử dụng sqlite-vec cho truy vấn vectơ  |
-  | `store.vector.extensionPath` | `string`  | đi kèm   | Ghi đè đường dẫn sqlite-vec             |
+| Khóa                          | Kiểu      | Mặc định | Mô tả                       |
+| ---------------------------- | --------- | ------- | --------------------------------- |
+| `store.vector.enabled`       | `boolean` | `true`  | Dùng sqlite-vec cho truy vấn vectơ |
+| `store.vector.extensionPath` | `string`  | đi kèm | Ghi đè đường dẫn sqlite-vec          |
 
-  Khi sqlite-vec không khả dụng, OpenClaw tự động chuyển sang sử dụng độ tương đồng cosin trong tiến trình.
+Khi sqlite-vec không khả dụng, OpenClaw tự động chuyển sang độ tương đồng cosine trong tiến trình.
 
-  ---
+---
 
-  ## Lưu trữ chỉ mục
+## Lưu trữ chỉ mục
 
-  Các chỉ mục bộ nhớ tích hợp nằm trong cơ sở dữ liệu SQLite OpenClaw của từng tác nhân tại
-  `agents/<agentId>/agent/openclaw-agent.sqlite`.
+Các chỉ mục bộ nhớ tích hợp sẵn nằm trong cơ sở dữ liệu SQLite của OpenClaw dành cho từng agent tại
+`agents/<agentId>/agent/openclaw-agent.sqlite`.
 
-  | Khóa                  | Kiểu     | Mặc định   | Mô tả                                      |
-  | --------------------- | -------- | ---------- | ------------------------------------------ |
-  | `store.fts.tokenizer` | `string` | `unicode61` | Bộ tách từ FTS5 (`unicode61` hoặc `trigram`) |
+| Khóa                   | Kiểu     | Mặc định     | Mô tả                               |
+| --------------------- | -------- | ----------- | ----------------------------------------- |
+| `store.fts.tokenizer` | `string` | `unicode61` | Bộ tách từ FTS5 (`unicode61` hoặc `trigram`) |
 
-  ---
+---
 
-  ## Cấu hình backend QMD
+## Cấu hình backend QMD
 
-  Đặt `memory.backend = "qmd"` để bật. Tất cả cài đặt QMD nằm trong `memory.qmd`:
+Đặt `memory.backend = "qmd"` để bật. Tất cả thiết lập QMD nằm trong `memory.qmd`:
 
-  | Khóa                     | Kiểu      | Mặc định | Mô tả                                                                                                   |
-  | ------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
-  | `command`                | `string`  | `qmd`    | Đường dẫn tệp thực thi QMD; đặt đường dẫn tuyệt đối khi `PATH` của dịch vụ khác với shell của bạn       |
-  | `searchMode`             | `string`  | `search` | Lệnh tìm kiếm: `search`, `vsearch`, `query`                                                             |
-  | `rerank`                 | `boolean` | --       | Đặt thành `false` với `searchMode: "query"` và QMD 2.1+ để bỏ qua việc xếp hạng lại của QMD             |
-  | `includeDefaultMemory`   | `boolean` | `true`   | Tự động lập chỉ mục `MEMORY.md` + `memory/**/*.md`                                                      |
-  | `paths[]`                | `array`   | --       | Các đường dẫn bổ sung: `{ name, path, pattern? }`                                                       |
-  | `sessions.enabled`       | `boolean` | `false`  | Xuất bản ghi phiên vào QMD                                                                               |
-  | `sessions.retentionDays` | `number`  | --       | Thời gian lưu giữ bản ghi                                                                                |
-  | `sessions.exportDir`     | `string`  | --       | Thư mục xuất                                                                                             |
+| Khóa                      | Kiểu      | Mặc định  | Mô tả                                                                           |
+| ------------------------ | --------- | -------- | ------------------------------------------------------------------------------------- |
+| `command`                | `string`  | `qmd`    | Đường dẫn tệp thực thi QMD; đặt đường dẫn tuyệt đối khi `PATH` của dịch vụ khác với shell của bạn |
+| `searchMode`             | `string`  | `search` | Lệnh tìm kiếm: `search`, `vsearch`, `query`                                          |
+| `rerank`                 | `boolean` | --       | Đặt thành `false` với `searchMode: "query"` và QMD 2.1+ để bỏ qua việc xếp hạng lại của QMD          |
+| `includeDefaultMemory`   | `boolean` | `true`   | Tự động lập chỉ mục `MEMORY.md` + `memory/**/*.md`                                             |
+| `paths[]`                | `array`   | --       | Đường dẫn bổ sung: `{ name, path, pattern? }`                                               |
+| `sessions.enabled`       | `boolean` | `false`  | Xuất bản ghi hội thoại phiên vào QMD                                                   |
+| `sessions.retentionDays` | `number`  | --       | Thời gian lưu giữ bản ghi hội thoại                                                                  |
+| `sessions.exportDir`     | `string`  | --       | Thư mục xuất                                                                      |
 
-  `searchMode: "search"` chỉ sử dụng tìm kiếm từ vựng/BM25. OpenClaw không chạy các phép kiểm tra mức độ sẵn sàng của vectơ ngữ nghĩa hoặc bảo trì embedding QMD cho chế độ đó, kể cả trong `memory status --deep`; `vsearch` và `query` vẫn yêu cầu vectơ QMD sẵn sàng và có embedding.
+`searchMode: "search"` chỉ dùng tìm kiếm từ vựng/BM25. OpenClaw không chạy các bước thăm dò mức sẵn sàng của vectơ ngữ nghĩa hoặc bảo trì embedding QMD cho chế độ đó, kể cả trong `memory status --deep`; `vsearch` và `query` vẫn yêu cầu QMD sẵn sàng xử lý vectơ và có embedding.
 
-  `rerank: false` chỉ thay đổi chế độ `query` của QMD và yêu cầu QMD 2.1 trở lên. Trong chế độ CLI trực tiếp, OpenClaw truyền `--no-rerank`; trong chế độ MCP dựa trên mcporter, OpenClaw truyền `rerank: false` đến công cụ truy vấn hợp nhất của QMD. Không đặt giá trị này để sử dụng hành vi xếp hạng lại truy vấn mặc định của QMD.
+`rerank: false` chỉ thay đổi chế độ `query` của QMD và yêu cầu QMD 2.1 trở lên. Trong chế độ CLI trực tiếp, OpenClaw truyền `--no-rerank`; trong chế độ MCP dựa trên mcporter, OpenClaw truyền `rerank: false` cho công cụ truy vấn hợp nhất của QMD. Để trống thiết lập này để sử dụng hành vi xếp hạng lại truy vấn mặc định của QMD.
 
-  OpenClaw ưu tiên các dạng truy vấn MCP và bộ sưu tập QMD hiện tại, nhưng vẫn duy trì khả năng hoạt động với các bản phát hành QMD cũ hơn bằng cách thử các cờ mẫu bộ sưu tập tương thích và tên công cụ MCP cũ hơn khi cần. Khi QMD thông báo hỗ trợ nhiều bộ lọc bộ sưu tập, các bộ sưu tập cùng nguồn được tìm kiếm bằng một tiến trình QMD; các bản dựng QMD cũ hơn tiếp tục dùng đường dẫn tương thích riêng cho từng bộ sưu tập. Cùng nguồn có nghĩa là các bộ sưu tập bộ nhớ bền vững (các tệp bộ nhớ mặc định cùng với đường dẫn tùy chỉnh) được nhóm lại với nhau, trong khi các bộ sưu tập bản ghi phiên vẫn là một nhóm riêng để việc đa dạng hóa nguồn vẫn có cả hai đầu vào.
+OpenClaw ưu tiên các cấu trúc truy vấn MCP và bộ sưu tập QMD hiện tại, nhưng vẫn duy trì khả năng hoạt động của các bản phát hành QMD cũ bằng cách thử các cờ mẫu bộ sưu tập tương thích và tên công cụ MCP cũ hơn khi cần. Khi QMD công bố hỗ trợ nhiều bộ lọc bộ sưu tập, các bộ sưu tập cùng nguồn được tìm kiếm bằng một tiến trình QMD; các bản dựng QMD cũ hơn tiếp tục dùng đường dẫn tương thích theo từng bộ sưu tập. Cùng nguồn nghĩa là các bộ sưu tập bộ nhớ bền vững (các tệp bộ nhớ mặc định cùng với đường dẫn tùy chỉnh) được nhóm lại, trong khi các bộ sưu tập bản ghi hội thoại phiên vẫn là một nhóm riêng để quá trình đa dạng hóa nguồn vẫn có cả hai đầu vào.
 
-  <Note>
-  Các ghi đè mô hình QMD nằm ở phía QMD, không nằm trong cấu hình OpenClaw. Nếu cần ghi đè toàn cục các mô hình của QMD, hãy đặt các biến môi trường như `QMD_EMBED_MODEL`, `QMD_RERANK_MODEL` và `QMD_GENERATE_MODEL` trong môi trường thời gian chạy của Gateway.
-  </Note>
+<Note>
+Các thiết lập ghi đè mô hình QMD nằm ở phía QMD, không nằm trong cấu hình OpenClaw. Nếu cần ghi đè mô hình của QMD trên toàn hệ thống, hãy đặt các biến môi trường như `QMD_EMBED_MODEL`, `QMD_RERANK_MODEL` và `QMD_GENERATE_MODEL` trong môi trường thời gian chạy của gateway.
+</Note>
 
-  ### Tích hợp mcporter
+### Tích hợp mcporter
 
-  Tất cả nằm trong `memory.qmd.mcporter`. Định tuyến các lượt tìm kiếm QMD qua một trình nền MCP `mcporter` chạy lâu dài thay vì tạo `qmd` cho mỗi truy vấn, giúp giảm chi phí khởi động nguội đối với các mô hình lớn hơn.
+Tất cả nằm trong `memory.qmd.mcporter`. Định tuyến các tìm kiếm QMD qua daemon MCP `mcporter` hoạt động lâu dài thay vì khởi chạy `qmd` cho mỗi truy vấn, giúp giảm chi phí khởi động nguội đối với các mô hình lớn hơn.
 
-  | Khóa          | Kiểu      | Mặc định | Mô tả                                                                            |
-  | ------------- | --------- | -------- | -------------------------------------------------------------------------------- |
-  | `enabled`     | `boolean` | `false`  | Định tuyến các lệnh gọi QMD qua mcporter thay vì tạo `qmd` cho mỗi yêu cầu       |
-  | `serverName`  | `string`  | `qmd`    | Tên máy chủ mcporter chạy `qmd mcp` với `lifecycle: keep-alive`                  |
-  | `startDaemon` | `boolean` | `true`   | Tự động khởi động trình nền mcporter khi `enabled` là true                       |
+| Khóa           | Kiểu      | Mặc định | Mô tả                                                            |
+| ------------- | --------- | ------- | ---------------------------------------------------------------------- |
+| `enabled`     | `boolean` | `false` | Định tuyến các lệnh gọi QMD qua mcporter thay vì khởi chạy `qmd` cho mỗi yêu cầu |
+| `serverName`  | `string`  | `qmd`   | Tên máy chủ mcporter chạy `qmd mcp` với `lifecycle: keep-alive`  |
+| `startDaemon` | `boolean` | `true`  | Tự động khởi động daemon mcporter khi `enabled` là true         |
 
-  Yêu cầu cài đặt `mcporter` và có trong PATH, cùng với một máy chủ mcporter đã cấu hình để chạy `qmd mcp`. Giữ trạng thái tắt đối với các thiết lập cục bộ đơn giản hơn, nơi chi phí tạo tiến trình cho từng truy vấn ở mức chấp nhận được.
+Yêu cầu đã cài đặt `mcporter` và có trong PATH, cùng với một máy chủ mcporter được cấu hình để chạy `qmd mcp`. Giữ trạng thái tắt cho các thiết lập cục bộ đơn giản hơn, nơi chi phí khởi chạy tiến trình cho mỗi truy vấn là chấp nhận được.
 
-  <AccordionGroup>
+<AccordionGroup>
   <Accordion title="Lịch cập nhật">
-    | Khóa                      | Kiểu      | Mặc định | Mô tả                                                                                                 |
-    | ------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------- |
-    | `update.interval`         | `string`  | `5m`     | Khoảng thời gian làm mới                                                                              |
-    | `update.debounceMs`       | `number`  | `15000`  | Chống dội các thay đổi tệp                                                                            |
-    | `update.onBoot`           | `boolean` | `true`   | Làm mới khi trình quản lý QMD chạy lâu dài mở; đặt thành false để bỏ qua lần cập nhật ngay khi khởi động |
-    | `update.startup`          | `string`  | `off`    | Khởi tạo QMD tùy chọn khi Gateway khởi động: `off`, `idle` hoặc `immediate`                            |
-    | `update.startupDelayMs`   | `number`  | `120000` | Độ trễ trước khi lần làm mới `startup: "idle"` chạy                                                    |
-    | `update.waitForBootSync`  | `boolean` | `false`  | Chặn việc mở trình quản lý cho đến khi lần làm mới ban đầu hoàn tất                                   |
-    | `update.embedInterval`    | `string`  | `60m`    | Nhịp tạo embedding riêng                                                                              |
-    | `update.commandTimeoutMs` | `number`  | `30000`  | Thời gian chờ cho các lệnh bảo trì QMD (liệt kê/thêm bộ sưu tập)                                      |
-    | `update.updateTimeoutMs`  | `number`  | `120000` | Thời gian chờ cho mỗi chu kỳ `qmd update`                                                             |
-    | `update.embedTimeoutMs`   | `number`  | `120000` | Thời gian chờ cho mỗi chu kỳ `qmd embed`                                                              |
+    | Khóa                       | Kiểu      | Mặc định | Mô tả                           |
+    | --------------------------- | --------- | -------- | ---------------------------------------- |
+    | `update.interval`         | `string`  | `5m`    | Khoảng thời gian làm mới                      |
+    | `update.debounceMs`       | `number`  | `15000` | Chống dội các thay đổi tệp                 |
+    | `update.onBoot`           | `boolean` | `true`  | Làm mới khi trình quản lý QMD dài hạn mở; đặt thành false để bỏ qua lần cập nhật ngay khi khởi động |
+    | `update.startup`          | `string`  | `off`   | Khởi tạo QMD tùy chọn khi Gateway khởi động: `off`, `idle` hoặc `immediate` |
+    | `update.startupDelayMs`   | `number`  | `120000` | Độ trễ trước khi lần làm mới `startup: "idle"` chạy |
+    | `update.waitForBootSync`  | `boolean` | `false` | Chặn việc mở trình quản lý cho đến khi lần làm mới ban đầu hoàn tất |
+    | `update.embedInterval`    | `string`  | `60m`   | Nhịp tạo embedding riêng                |
+    | `update.commandTimeoutMs` | `number`  | `30000` | Thời gian chờ cho các lệnh bảo trì QMD (liệt kê/thêm bộ sưu tập) |
+    | `update.updateTimeoutMs`  | `number`  | `120000` | Thời gian chờ cho mỗi chu kỳ `qmd update`   |
+    | `update.embedTimeoutMs`   | `number`  | `120000` | Thời gian chờ cho mỗi chu kỳ `qmd embed`    |
   </Accordion>
   <Accordion title="Giới hạn">
-    | Khóa                      | Kiểu     | Mặc định | Mô tả                                |
-    | ------------------------- | -------- | -------- | ------------------------------------ |
-    | `limits.maxResults`       | `number` | `4`      | Số kết quả tìm kiếm tối đa           |
-    | `limits.maxSnippetChars`  | `number` | `450`    | Giới hạn độ dài đoạn trích           |
-    | `limits.maxInjectedChars` | `number` | `2200`   | Giới hạn tổng số ký tự được chèn     |
-    | `limits.timeoutMs`        | `number` | `4000`   | Thời gian chờ tìm kiếm               |
+    | Khóa                       | Kiểu     | Mặc định | Mô tả                |
+    | --------------------------- | -------- | ------- | ------------------------------ |
+    | `limits.maxResults`       | `number` | `4`     | Số kết quả tìm kiếm tối đa         |
+    | `limits.maxSnippetChars`  | `number` | `450`   | Giới hạn độ dài đoạn trích       |
+    | `limits.maxInjectedChars` | `number` | `2200`  | Giới hạn tổng số ký tự được chèn |
+    | `limits.timeoutMs`        | `number` | `4000`  | Thời gian chờ lệnh QMD trong quá trình tìm kiếm dựa trên QMD, bao gồm `memory_search`; công việc thiết lập, đồng bộ, dự phòng tích hợp sẵn và bổ sung vẫn giữ thời hạn mặc định của công cụ |
   </Accordion>
   <Accordion title="Phạm vi">
-    Kiểm soát những phiên nào có thể nhận kết quả tìm kiếm QMD. Có cùng lược đồ với [`session.sendPolicy`](/vi/gateway/config-agents#session):
+    Kiểm soát những phiên nào có thể nhận kết quả tìm kiếm QMD. Có cùng schema với [`session.sendPolicy`](/vi/gateway/config-agents#session):
 
     ```json5
     {
@@ -651,22 +697,22 @@ Khi sử dụng QMD, riêng `agents.defaults.memorySearch.experimental.sessionMe
     }
     ```
 
-    Giá trị mặc định được phân phối chỉ cho phép tin nhắn trực tiếp/trò chuyện trực tiếp, từ chối các nhóm và những loại kênh khác. `match.keyPrefix` khớp với khóa phiên đã chuẩn hóa; `match.rawKeyPrefix` khớp với khóa thô bao gồm `agent:<id>:`.
+    Mặc định được phát hành chỉ dành cho DM/trực tiếp, từ chối các nhóm và loại kênh khác. `match.keyPrefix` khớp với khóa phiên đã chuẩn hóa; `match.rawKeyPrefix` khớp với khóa thô bao gồm `agent:<id>:`.
 
   </Accordion>
   <Accordion title="Trích dẫn">
-    `memory.citations` áp dụng cho tất cả các backend:
+    `memory.citations` áp dụng cho mọi backend:
 
-    | Giá trị          | Hành vi                                                       |
-    | ------------------ | -------------------------------------------------------------- |
-    | `auto` (mặc định) | Bao gồm phần chân trang `Source: <path#line>` trong các đoạn trích |
-    | `on`             | Luôn bao gồm phần chân trang                                   |
+    | Giá trị            | Hành vi                                            |
+    | ------------------ | ------------------------------------------------------ |
+    | `auto` (mặc định) | Bao gồm phần chân trang `Source: <path#line>` trong các đoạn trích    |
+    | `on`             | Luôn bao gồm phần chân trang                               |
     | `off`            | Bỏ phần chân trang (đường dẫn vẫn được truyền nội bộ cho tác tử) |
 
   </Accordion>
 </AccordionGroup>
 
-Khi tính năng khởi tạo QMD lúc Gateway khởi động được bật, OpenClaw chỉ khởi động QMD cho các tác tử đủ điều kiện. Nếu `update.onBoot` là true và không cấu hình bảo trì theo khoảng thời gian/nhúng, quá trình khởi động sử dụng một trình quản lý chạy một lần để làm mới khi khởi động rồi đóng trình quản lý đó. Nếu cấu hình khoảng thời gian cập nhật hoặc nhúng, quá trình khởi động sẽ mở trình quản lý QMD dài hạn để quản lý trình theo dõi và các bộ hẹn giờ theo khoảng thời gian; `update.onBoot: false` chỉ bỏ qua lần làm mới ngay khi khởi động.
+Khi bật khởi tạo QMD lúc Gateway khởi động, OpenClaw chỉ khởi động QMD cho các tác tử đủ điều kiện. Nếu `update.onBoot` là true và không cấu hình bảo trì theo khoảng thời gian/tạo embedding, quá trình khởi động sẽ dùng trình quản lý dùng một lần để làm mới khi khởi động rồi đóng lại. Nếu cấu hình khoảng thời gian cập nhật hoặc tạo embedding, quá trình khởi động sẽ mở trình quản lý QMD dài hạn để trình này quản lý bộ theo dõi và các bộ hẹn giờ theo khoảng thời gian; `update.onBoot: false` chỉ bỏ qua lần làm mới ngay khi khởi động.
 
 ### Ví dụ QMD đầy đủ
 
@@ -695,18 +741,18 @@ Khi tính năng khởi tạo QMD lúc Gateway khởi động được bật, Ope
 
 Dreaming được cấu hình trong `plugins.entries.memory-core.config.dreaming`, không phải trong `agents.defaults.memorySearch`.
 
-Dreaming chạy dưới dạng một lượt quét theo lịch duy nhất và sử dụng các giai đoạn nội bộ nhẹ/sâu/REM như một chi tiết triển khai.
+Dreaming chạy dưới dạng một lượt quét theo lịch duy nhất và sử dụng các giai đoạn nhẹ/sâu/REM nội bộ như một chi tiết triển khai.
 
 Để tìm hiểu hành vi khái niệm và các lệnh gạch chéo, hãy xem [Dreaming](/vi/concepts/dreaming).
 
 ### Cài đặt người dùng
 
-| Khóa                                   | Kiểu      | Mặc định      | Mô tả                                                                                                                                       |
-| -------------------------------------- | --------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `enabled`                              | `boolean` | `false`       | Bật hoặc tắt hoàn toàn Dreaming                                                                                                             |
-| `frequency`                            | `string`  | `0 3 * * *`   | Nhịp Cron tùy chọn cho toàn bộ lượt quét Dreaming                                                                                           |
-| `model`                                | `string`  | mô hình mặc định | Tùy chọn ghi đè mô hình tác tử phụ Dream Diary                                                                                              |
-| `phases.deep.maxPromotedSnippetTokens` | `number`  | `160`         | Số token ước tính tối đa được giữ lại từ mỗi đoạn trích truy hồi ngắn hạn được đưa vào `MEMORY.md`; siêu dữ liệu nguồn gốc vẫn hiển thị |
+| Khóa                                    | Kiểu      | Mặc định       | Mô tả                                                                                                                      |
+| -------------------------------------- | --------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `enabled`                              | `boolean` | `false`       | Bật hoặc tắt hoàn toàn Dreaming                                                                                              |
+| `frequency`                            | `string`  | `0 3 * * *`   | Nhịp Cron tùy chọn cho lượt quét Dreaming đầy đủ                                                                                |
+| `model`                                | `string`  | mô hình mặc định | Ghi đè mô hình tác tử phụ Dream Diary tùy chọn                                                                                     |
+| `phases.deep.maxPromotedSnippetTokens` | `number`  | `160`         | Số token ước tính tối đa được giữ lại từ mỗi đoạn trích hồi tưởng ngắn hạn được đưa vào `MEMORY.md`; siêu dữ liệu nguồn gốc vẫn hiển thị |
 
 ### Ví dụ
 
@@ -734,10 +780,10 @@ Dreaming chạy dưới dạng một lượt quét theo lịch duy nhất và s�
 
 <Note>
 - Dreaming ghi trạng thái máy vào `memory/.dreams/`.
-- Dreaming ghi đầu ra tường thuật mà con người có thể đọc vào `DREAMS.md` (hoặc tệp `dreams.md` hiện có).
-- `dreaming.model` sử dụng cổng tin cậy tác tử phụ hiện có của plugin; hãy đặt `plugins.entries.memory-core.subagent.allowModelOverride: true` trước khi bật.
+- Dreaming ghi đầu ra tường thuật mà con người có thể đọc vào `DREAMS.md` (hoặc `dreams.md` hiện có).
+- `dreaming.model` sử dụng cổng tin cậy tác tử phụ hiện có của Plugin; hãy đặt `plugins.entries.memory-core.subagent.allowModelOverride: true` trước khi bật.
 - Dream Diary thử lại một lần bằng mô hình mặc định của phiên khi mô hình đã cấu hình không khả dụng. Các lỗi về độ tin cậy hoặc danh sách cho phép được ghi nhật ký và không được âm thầm thử lại.
-- Chính sách và các ngưỡng của giai đoạn nhẹ/sâu/REM là hành vi nội bộ, không phải cấu hình dành cho người dùng.
+- Chính sách và ngưỡng của các giai đoạn nhẹ/sâu/REM là hành vi nội bộ, không phải cấu hình dành cho người dùng.
 
 </Note>
 

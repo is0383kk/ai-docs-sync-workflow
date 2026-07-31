@@ -1,14 +1,15 @@
 ---
 read_when:
-    - copilot-proxy Pluginをインストール、設定、または監査しています
+    - copilot-proxy Plugin のインストール、設定、または監査を行っている場合
 summary: OpenClaw に Copilot Proxy モデルプロバイダーのサポートを追加します。
 title: Copilot Proxy Plugin
 x-i18n:
-    generated_at: "2026-07-11T22:28:44Z"
+    generated_at: "2026-07-26T09:52:25Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 454c4a36d606ce1e07c3801a3dede590c4033e80051d5c2e5a20f0767ca2573e
+    source_hash: 4f5f18ba0291906bdce6c1a104705d7d38d59645a0b006be9bce65553aae2f44
     source_path: plugins/reference/copilot-proxy.md
     workflow: 16
 ---
@@ -22,6 +23,6 @@ OpenClaw に Copilot Proxy モデルプロバイダーのサポートを追加�
 - パッケージ: `@openclaw/copilot-proxy`
 - インストール方法: OpenClaw に同梱
 
-## 公開機能
+## 提供機能
 
-プロバイダー: copilot-proxy
+プロバイダー: `copilot-proxy`

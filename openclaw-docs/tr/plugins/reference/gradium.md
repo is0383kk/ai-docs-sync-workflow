@@ -4,16 +4,17 @@ read_when:
 summary: Metinden konuşmaya sağlayıcı desteği ekler.
 title: Gradium Plugin'i
 x-i18n:
-    generated_at: "2026-07-12T12:33:14Z"
+    generated_at: "2026-07-26T23:28:21Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 4ae70f3e901d44c238d6e1abcec13f67c0d19df6f82d92e365c3ddf0355ea23d
+    source_hash: 745da84ab0ca6af245437febb4edb23a24ad3e302724c18ec477899f011d20c0
     source_path: plugins/reference/gradium.md
     workflow: 16
 ---
 
-# Gradium Plugin'i
+# Gradium plugin'i
 
 Metinden konuşmaya sağlayıcı desteği ekler.
 
@@ -24,7 +25,7 @@ Metinden konuşmaya sağlayıcı desteği ekler.
 
 ## Yüzey
 
-sözleşmeler: speechProviders
+sözleşmeler: `speechProviders`
 
 ## İlgili belgeler
 

@@ -1,14 +1,14 @@
 ---
 read_when:
-    - ¿Busca compatibilidad con sistemas operativos o rutas de instalación?
+    - Buscando compatibilidad con sistemas operativos o rutas de instalación
     - Decidir dónde ejecutar el Gateway
-summary: Descripción general de la compatibilidad con plataformas (Gateway + aplicaciones complementarias)
+summary: Resumen de compatibilidad con plataformas (Gateway + aplicaciones complementarias)
 title: Plataformas
 x-i18n:
-    generated_at: "2026-07-14T13:52:39Z"
+    generated_at: "2026-07-26T05:46:10Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 25
+    prompt_version: 32
     provider: openai
     source_hash: 40494f8567c0159d9b6024c174cf0f316a45b46c633a578efaf2388f679a88f2
     source_path: platforms/index.md
@@ -16,14 +16,14 @@ x-i18n:
 ---
 
 El núcleo de OpenClaw está escrito en TypeScript. **Node es el entorno de ejecución requerido** porque
-el almacén de estado canónico utiliza `node:sqlite`. Bun sigue estando disponible para
+el almacén de estado canónico usa `node:sqlite`. Bun sigue estando disponible para
 la instalación de dependencias y los scripts de paquetes; consulte [Bun](/es/install/bun).
 
 Existen aplicaciones complementarias para Windows Hub, macOS (aplicación de la barra de menús) y nodos móviles
-(iOS/Android). Está previsto desarrollar aplicaciones complementarias para Linux, pero el Gateway ya
-es totalmente compatible. En Windows, elija Windows Hub como aplicación de escritorio, la instalación nativa
-mediante PowerShell para un uso centrado en la terminal o WSL2 para disponer del entorno de ejecución del Gateway
-con mayor compatibilidad con Linux.
+(iOS/Android). Se prevén aplicaciones complementarias para Linux, pero el Gateway es totalmente
+compatible actualmente. En Windows, elija Windows Hub para la aplicación de escritorio, la instalación nativa
+de PowerShell para un uso centrado en la terminal o WSL2 para obtener el entorno de ejecución del Gateway
+más compatible con Linux.
 
 ## Elija su sistema operativo
 
@@ -35,7 +35,7 @@ con mayor compatibilidad con Linux.
 
 ## VPS y alojamiento
 
-- Concentrador VPS: [Alojamiento VPS](/es/vps)
+- Hub VPS: [Alojamiento en VPS](/es/vps)
 - Fly.io: [Fly.io](/es/install/fly)
 - Hetzner (Docker): [Hetzner](/es/install/hetzner)
 - GCP (Compute Engine): [GCP](/es/install/gcp)
@@ -53,20 +53,20 @@ con mayor compatibilidad con Linux.
 
 ## Instalación del servicio Gateway (CLI)
 
-Utilice una de estas opciones (todas son compatibles):
+Use una de estas opciones (todas compatibles):
 
 - Asistente (recomendado): `openclaw onboard --install-daemon`
 - Directa: `openclaw gateway install`
-- Flujo de configuración: `openclaw configure` → seleccione **Servicio Gateway**
+- Flujo de configuración: `openclaw configure` → seleccione **Gateway service**
 - Reparación/migración: `openclaw doctor` (ofrece instalar o corregir el servicio)
 
 El destino del servicio depende del sistema operativo:
 
-- macOS: LaunchAgent (`ai.openclaw.gateway` o `ai.openclaw.<profile>` para un perfil con nombre)
+- macOS: LaunchAgent (`ai.openclaw.gateway`, o `ai.openclaw.<profile>` para un perfil con nombre)
 - Linux/WSL2: servicio de usuario de systemd (`openclaw-gateway[-<profile>].service`)
 - Windows nativo: tarea programada (`OpenClaw Gateway` o `OpenClaw Gateway (<profile>)`), con un elemento de inicio de sesión por usuario en la carpeta Inicio como alternativa si se deniega la creación de la tarea
 
-## Temas relacionados
+## Contenido relacionado
 
 - [Descripción general de la instalación](/es/install)
 - [Windows Hub](/es/platforms/windows)

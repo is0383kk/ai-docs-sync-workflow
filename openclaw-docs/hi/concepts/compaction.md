@@ -1,76 +1,81 @@
 ---
 read_when:
-    - आप स्वतः-Compaction और /compact को समझना चाहते हैं
-    - आप संदर्भ सीमाओं तक पहुँचने वाले लंबे सत्रों को डीबग कर रहे हैं
-summary: OpenClaw लंबी बातचीतों को मॉडल सीमाओं के भीतर रहने के लिए कैसे सारांशित करता है
+    - आप ऑटो-Compaction और /compact को समझना चाहते हैं
+    - आप लंबी अवधि के सत्रों में कॉन्टेक्स्ट सीमा तक पहुँचने की समस्या डीबग कर रहे हैं
+summary: मॉडल की सीमाओं के भीतर बने रहने के लिए OpenClaw लंबी बातचीतों का सारांश कैसे बनाता है
 title: Compaction
 x-i18n:
-    generated_at: "2026-06-28T22:57:13Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:09:22Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 71c1665055574622926a4f13ee82b97f1c45e679a895db78da983919c0a5458f
+    source_hash: eb1f794fa60affd602378bcff8b07786bfeca55ab3fa09d5fa7214a05fa48806
     source_path: concepts/compaction.md
     workflow: 16
 ---
 
-हर मॉडल की एक संदर्भ विंडो होती है: टोकन की अधिकतम संख्या जिसे वह संसाधित कर सकता है। जब कोई बातचीत उस सीमा के करीब पहुंचती है, तो OpenClaw पुराने संदेशों को एक सारांश में **compact** करता है ताकि चैट जारी रह सके।
+हर मॉडल की एक संदर्भ विंडो होती है: उसके द्वारा संसाधित किए जा सकने वाले टोकन की अधिकतम संख्या। जब कोई वार्तालाप उस सीमा के पास पहुँचता है, तो OpenClaw पुराने संदेशों को एक सारांश में **संक्षिप्त** करता है, ताकि चैट जारी रह सके।
 
 ## यह कैसे काम करता है
 
-1. पुराने बातचीत टर्न को एक compact प्रविष्टि में सारांशित किया जाता है।
-2. सारांश को सत्र ट्रांसक्रिप्ट में सहेजा जाता है।
-3. हाल के संदेशों को जस का तस रखा जाता है।
+1. वार्तालाप के पुराने चरणों को एक संक्षिप्त प्रविष्टि में सारांशित किया जाता है।
+2. सारांश को सत्र ट्रांस्क्रिप्ट में सहेजा जाता है।
+3. हाल के संदेशों को ज्यों का त्यों रखा जाता है।
 
-जब OpenClaw इतिहास को Compaction खंडों में विभाजित करता है, तो यह असिस्टेंट टूल कॉल को उनकी मेल खाती `toolResult` प्रविष्टियों के साथ जोड़े रखता है। यदि कोई विभाजन बिंदु किसी टूल ब्लॉक के भीतर आता है, तो OpenClaw सीमा को खिसका देता है ताकि जोड़ा साथ रहे और वर्तमान असारांशित अंतिम भाग सुरक्षित रहे।
+Compaction विभाजन बिंदु चुनते समय OpenClaw सहायक के टूल कॉल को उनकी संगत `toolResult` प्रविष्टियों के साथ जोड़े रखता है। यदि बिंदु किसी टूल ब्लॉक के भीतर पड़ता है, तो OpenClaw सीमा को खिसका देता है, ताकि जोड़ी साथ रहे और वर्तमान असारांशित अंतिम भाग सुरक्षित रहे।
 
-पूरे बातचीत इतिहास को डिस्क पर रखा जाता है। Compaction केवल यह बदलता है कि अगले टर्न में मॉडल क्या देखता है।
+वार्तालाप का पूरा इतिहास डिस्क पर रहता है। Compaction केवल यह बदलता है कि मॉडल अगले चरण में क्या देखता है।
+
+<Note>
+नई कॉन्फ़िगरेशन में `agents.defaults.compaction.mode` का डिफ़ॉल्ट मान `"safeguard"` होता है (अधिक सख्त सुरक्षा सीमाएँ, सारांश गुणवत्ता ऑडिट)। इससे बाहर निकलने के लिए `mode: "default"` को स्पष्ट रूप से सेट करें।
+</Note>
 
 ## स्वचालित Compaction
 
-स्वचालित Compaction डिफ़ॉल्ट रूप से चालू होता है। यह तब चलता है जब सत्र संदर्भ सीमा के करीब पहुंचता है, या जब मॉडल context-overflow त्रुटि लौटाता है (ऐसी स्थिति में OpenClaw compact करता है और पुनः प्रयास करता है)।
+स्वचालित Compaction डिफ़ॉल्ट रूप से चालू होता है। यह तब चलता है, जब सत्र संदर्भ सीमा के पास पहुँचता है या मॉडल संदर्भ-ओवरफ़्लो त्रुटि लौटाता है (इस स्थिति में OpenClaw Compaction करके दोबारा प्रयास करता है)।
 
-आप देखेंगे:
+आपको यह दिखाई देगा:
 
 - सामान्य Gateway लॉग में `embedded run auto-compaction start` / `complete`।
-- verbose मोड में `🧹 Auto-compaction complete`।
-- `/status` में `🧹 Compactions: <count>`।
+- विस्तृत मोड में `🧹 Auto-compaction complete`।
+- `🧹 Compactions: <count>` दिखाता हुआ `/status`।
 
 <Info>
-compact करने से पहले, OpenClaw एजेंट को महत्वपूर्ण नोट्स [memory](/hi/concepts/memory) फ़ाइलों में सहेजने की याद अपने आप दिलाता है। इससे संदर्भ हानि रुकती है।
+Compaction से पहले, OpenClaw महत्वपूर्ण नोट्स को [मेमोरी](/hi/concepts/memory) फ़ाइलों में सहेजने के लिए एजेंट को स्वतः याद दिलाता है। इससे संदर्भ की हानि रुकती है।
 </Info>
 
 <AccordionGroup>
-  <Accordion title="पहचाने गए overflow signatures">
-    OpenClaw इन प्रदाता त्रुटि पैटर्न से context overflow पहचानता है:
+  <Accordion title="OpenClaw द्वारा पहचाने जाने वाले ओवरफ़्लो त्रुटि पैटर्न">
+    OpenClaw दर्जनों प्रदाता-विशिष्ट ओवरफ़्लो त्रुटि स्ट्रिंग से मिलान करता है (Anthropic, OpenAI, Bedrock, Gemini, Ollama, OpenRouter और अन्य)। सामान्य उदाहरण:
 
     - `request_too_large`
     - `context length exceeded`
     - `input exceeds the maximum number of tokens`
-    - `input token count exceeds the maximum number of input tokens`
+    - `input token count exceeds the maximum number of input tokens` (Bedrock)
     - `input is too long for the model`
     - `ollama error: context length exceeded`
 
   </Accordion>
 </AccordionGroup>
 
-## मैनुअल Compaction
+## मैन्युअल Compaction
 
-किसी भी चैट में Compaction को बाध्य करने के लिए `/compact` टाइप करें। सारांश को निर्देशित करने के लिए निर्देश जोड़ें:
+Compaction को बाध्य करने के लिए किसी भी चैट में `/compact` टाइप करें। सारांश का मार्गदर्शन करने के लिए निर्देश जोड़ें:
 
+```text
+/compact API डिज़ाइन संबंधी निर्णयों पर ध्यान दें
 ```
-/compact Focus on the API design decisions
-```
 
-जब `agents.defaults.compaction.keepRecentTokens` सेट हो, तो मैनुअल Compaction उस OpenClaw cut-point का सम्मान करता है और rebuilt संदर्भ में हाल का अंतिम भाग रखता है। स्पष्ट keep budget के बिना, मैनुअल Compaction एक hard checkpoint की तरह व्यवहार करता है और केवल नए सारांश से जारी रहता है।
+जब `agents.defaults.compaction.keepRecentTokens` सेट हो (डिफ़ॉल्ट: 20,000), तो मैन्युअल Compaction उस कट-पॉइंट का पालन करता है और पुनर्निर्मित संदर्भ में हाल के अंतिम भाग को बनाए रखता है। स्पष्ट रखरखाव बजट के बिना, मैन्युअल Compaction एक कठोर चेकपॉइंट की तरह व्यवहार करता है और केवल नए सारांश से आगे बढ़ता है।
 
 ## कॉन्फ़िगरेशन
 
-अपने `openclaw.json` में `agents.defaults.compaction` के अंतर्गत Compaction कॉन्फ़िगर करें। सबसे सामान्य knobs नीचे सूचीबद्ध हैं; पूरी reference के लिए, [Session management deep dive](/hi/reference/session-management-compaction) देखें।
+अपने `openclaw.json` में `agents.defaults.compaction` के अंतर्गत Compaction कॉन्फ़िगर करें। सबसे सामान्य विकल्प नीचे सूचीबद्ध हैं; पूरे संदर्भ के लिए [सत्र प्रबंधन का विस्तृत विवरण](/hi/reference/session-management-compaction) देखें।
 
-### अलग मॉडल का उपयोग करना
+### किसी भिन्न मॉडल का उपयोग
 
-डिफ़ॉल्ट रूप से, Compaction एजेंट के प्राथमिक मॉडल का उपयोग करता है। सारांशण को किसी अधिक सक्षम या विशिष्ट मॉडल को सौंपने के लिए `agents.defaults.compaction.model` सेट करें। override एक `provider/model-id` स्ट्रिंग या `agents.defaults.models` के अंतर्गत कॉन्फ़िगर किया गया bare alias स्वीकार करता है:
+डिफ़ॉल्ट रूप से, Compaction एजेंट के प्राथमिक मॉडल का उपयोग करता है। सारांशीकरण को किसी अधिक सक्षम या विशिष्ट मॉडल को सौंपने के लिए `agents.defaults.compaction.model` सेट करें। ओवरराइड एक `provider/model-id` स्ट्रिंग या `agents.defaults.models` के अंतर्गत कॉन्फ़िगर किया गया सामान्य उपनाम स्वीकार करता है:
 
 ```json
 {
@@ -84,9 +89,9 @@ compact करने से पहले, OpenClaw एजेंट को मह
 }
 ```
 
-Bare configured aliases Compaction शुरू होने से पहले अपने canonical provider और model में resolve होते हैं। यदि कोई bare value किसी alias और configured literal model ID दोनों से मेल खाती है, तो literal model ID जीतता है। unmatched bare value active provider पर model ID बनी रहती है।
+Compaction शुरू होने से पहले कॉन्फ़िगर किए गए सामान्य उपनाम उनके कैनोनिकल प्रदाता और मॉडल में समाधान किए जाते हैं। यदि कोई सामान्य मान उपनाम और कॉन्फ़िगर किए गए शाब्दिक मॉडल ID—दोनों से मेल खाता है, तो शाब्दिक मॉडल ID को प्राथमिकता मिलती है। मेल न खाने वाला सामान्य मान सक्रिय प्रदाता पर मॉडल ID बना रहता है।
 
-यह local models के साथ भी काम करता है, उदाहरण के लिए सारांशण को समर्पित दूसरा Ollama मॉडल:
+यह स्थानीय मॉडल के साथ भी काम करता है, उदाहरण के लिए सारांशीकरण के लिए समर्पित दूसरा Ollama मॉडल:
 
 ```json
 {
@@ -100,30 +105,40 @@ Bare configured aliases Compaction शुरू होने से पहले
 }
 ```
 
-unset होने पर, Compaction सक्रिय सत्र मॉडल से शुरू होता है। यदि सारांशण model-fallback-eligible provider error के साथ विफल होता है, तो OpenClaw उस Compaction प्रयास को सत्र की मौजूदा model fallback chain के माध्यम से फिर से आज़माता है। fallback choice अस्थायी होती है और session state में वापस नहीं लिखी जाती। स्पष्ट `agents.defaults.compaction.model` override exact रहता है और session fallback chain को inherit नहीं करता।
+सेट न होने पर, Compaction सक्रिय सत्र मॉडल से शुरू होता है। यदि सारांशीकरण किसी ऐसे प्रदाता त्रुटि के कारण विफल होता है जो मॉडल फ़ॉलबैक के योग्य है, तो OpenClaw सत्र की मौजूदा मॉडल फ़ॉलबैक शृंखला के माध्यम से उस Compaction प्रयास को दोहराता है। फ़ॉलबैक चयन अस्थायी होता है और सत्र स्थिति में वापस नहीं लिखा जाता। स्पष्ट `agents.defaults.compaction.model` ओवरराइड सटीक रहता है और सत्र की फ़ॉलबैक शृंखला प्राप्त नहीं करता।
 
-### Identifier संरक्षण
+### पहचानकर्ता संरक्षण
 
-Compaction सारांशण opaque identifiers को डिफ़ॉल्ट रूप से सुरक्षित रखता है (`identifierPolicy: "strict"`). अक्षम करने के लिए `identifierPolicy: "off"` से override करें, या custom guidance के लिए `identifierPolicy: "custom"` के साथ `identifierInstructions` का उपयोग करें।
+Compaction सारांशीकरण डिफ़ॉल्ट रूप से अपारदर्शी पहचानकर्ताओं को सुरक्षित रखता है (`identifierPolicy: "strict"`)। अक्षम करने के लिए `identifierPolicy: "off"` से ओवरराइड करें। कस्टम मार्गदर्शन Compaction प्रदाता के `summarize()` कार्यान्वयन में होना चाहिए।
 
-### Active transcript byte guard
+### सक्रिय ट्रांस्क्रिप्ट बाइट सुरक्षा सीमा
 
-जब `agents.defaults.compaction.maxActiveTranscriptBytes` सेट हो, तो OpenClaw run से पहले सामान्य local Compaction trigger करता है यदि active JSONL उस आकार तक पहुंच जाता है। यह लंबे समय तक चलने वाले सत्रों के लिए उपयोगी है, जहां provider-side context management मॉडल संदर्भ को स्वस्थ रख सकता है जबकि local transcript बढ़ता रहता है। यह raw JSONL bytes को split नहीं करता; यह सामान्य Compaction pipeline से semantic summary बनाने को कहता है।
+जब `agents.defaults.compaction.maxActiveTranscriptBytes` सेट हो, तो ट्रांस्क्रिप्ट इतिहास के
+उस आकार तक पहुँचने पर OpenClaw रन से पहले सामान्य स्थानीय Compaction
+ट्रिगर करता है। यह लंबे समय तक चलने वाले उन सत्रों के लिए उपयोगी है, जहाँ प्रदाता-पक्षीय संदर्भ
+प्रबंधन मॉडल संदर्भ को स्वस्थ बनाए रख सकता है, जबकि स्थायी ट्रांस्क्रिप्ट इतिहास
+बढ़ता रहता है। यह अपरिष्कृत बाइट को विभाजित नहीं करता; यह सामान्य Compaction
+पाइपलाइन से एक अर्थपूर्ण सारांश बनाने के लिए कहता है।
 
 <Warning>
-byte guard के लिए `truncateAfterCompaction: true` आवश्यक है। transcript rotation के बिना, active file छोटी नहीं होगी और guard inactive रहेगा।
+बाइट सुरक्षा सीमा सक्रिय SQLite ट्रांस्क्रिप्ट इतिहास पर लागू होती है। पुराने JSONL
+चेकपॉइंट आर्टिफ़ैक्ट सक्रिय Compaction लक्ष्य नहीं हैं।
 </Warning>
 
-### Successor transcripts
+### उत्तराधिकारी ट्रांस्क्रिप्ट
 
-जब `agents.defaults.compaction.truncateAfterCompaction` enabled हो, तो OpenClaw मौजूदा transcript को उसी जगह rewrite नहीं करता। यह Compaction summary, preserved state, और unsummarized tail से नया active successor transcript बनाता है, फिर checkpoint metadata record करता है जो branch/restore flows को उस compacted successor की ओर point करता है।
-Successor transcripts छोटे retry window के भीतर आने वाले exact duplicate long user turns को भी drop करते हैं, ताकि channel retry storms को Compaction के बाद अगले active transcript में न ले जाया जाए।
+जब `agents.defaults.compaction.truncateAfterCompaction` सक्षम हो, तो OpenClaw मौजूदा ट्रांस्क्रिप्ट को उसी स्थान पर दोबारा नहीं लिखता। यह Compaction सारांश, सुरक्षित स्थिति और असारांशित अंतिम भाग से एक नया सक्रिय उत्तराधिकारी ट्रांस्क्रिप्ट बनाता है, फिर वह चेकपॉइंट मेटाडेटा दर्ज करता है जो शाखा/पुनर्स्थापना प्रवाहों को उस संक्षिप्त उत्तराधिकारी की ओर इंगित करता है।
+उत्तराधिकारी ट्रांस्क्रिप्ट कम समय की पुनर्प्रयास विंडो के भीतर आने वाले
+लंबे उपयोगकर्ता चरणों की हूबहू डुप्लिकेट प्रतियाँ भी हटा देते हैं, ताकि चैनल पुनर्प्रयासों की बाढ़
+Compaction के बाद अगले सक्रिय ट्रांस्क्रिप्ट में न पहुँचे।
 
-OpenClaw नए Compactions के लिए अब अलग `.checkpoint.*.jsonl` copies नहीं लिखता। मौजूदा legacy checkpoint files referenced होने तक अब भी उपयोग की जा सकती हैं और normal session cleanup द्वारा prune की जाती हैं।
+OpenClaw अब नए Compaction के लिए अलग `.checkpoint.*.jsonl` प्रतियाँ नहीं
+लिखता। मौजूदा पुराने चेकपॉइंट फ़ाइलों को संदर्भित रहने तक उपयोग किया जा सकता है
+और सामान्य सत्र सफ़ाई द्वारा हटाया जाता है।
 
-### Compaction notices
+### Compaction सूचनाएँ
 
-डिफ़ॉल्ट रूप से, Compaction चुपचाप चलता है। Compaction शुरू और पूरा होने पर संक्षिप्त status messages दिखाने के लिए `notifyUser` सेट करें:
+डिफ़ॉल्ट रूप से, Compaction बिना सूचना के चलता है। Compaction शुरू और पूरा होने पर संक्षिप्त स्थिति संदेश दिखाने तथा Compaction-पूर्व मेमोरी फ़्लश समाप्त हो जाने पर, लेकिन उत्तर फिर भी जारी रहने की स्थिति में, सीमित क्षमता की सूचना प्रदर्शित करने के लिए `notifyUser` सेट करें:
 
 ```json5
 {
@@ -137,9 +152,9 @@ OpenClaw नए Compactions के लिए अब अलग `.checkpoint.*.jso
 }
 ```
 
-### Memory flush
+### मेमोरी फ़्लश
 
-Compaction से पहले, OpenClaw durable notes को disk पर store करने के लिए एक **silent memory flush** turn चला सकता है। जब यह housekeeping turn active conversation model के बजाय local model का उपयोग करे, तब `agents.defaults.compaction.memoryFlush.model` सेट करें:
+Compaction से पहले, OpenClaw स्थायी नोट्स को डिस्क पर संग्रहीत करने के लिए एक **मौन मेमोरी फ़्लश** चरण चला सकता है। जब इस रखरखाव चरण को सक्रिय वार्तालाप मॉडल के बजाय स्थानीय मॉडल का उपयोग करना चाहिए, तब `agents.defaults.compaction.memoryFlush.model` सेट करें:
 
 ```json
 {
@@ -155,13 +170,13 @@ Compaction से पहले, OpenClaw durable notes को disk पर store 
 }
 ```
 
-memory-flush model override exact होता है और active session fallback chain को inherit नहीं करता। विवरण और config के लिए [Memory](/hi/concepts/memory) देखें।
+मेमोरी-फ़्लश मॉडल ओवरराइड सटीक होता है और सक्रिय सत्र की फ़ॉलबैक शृंखला प्राप्त नहीं करता। विवरण और कॉन्फ़िगरेशन के लिए [मेमोरी](/hi/concepts/memory) देखें।
 
-## Pluggable Compaction providers
+## प्लग करने योग्य Compaction प्रदाता
 
-Plugins, Plugin API पर `registerCompactionProvider()` के माध्यम से custom Compaction provider register कर सकते हैं। जब कोई provider registered और configured हो, तो OpenClaw built-in LLM pipeline के बजाय सारांशण उसे delegate करता है।
+Plugins, Plugin API पर `registerCompactionProvider()` के माध्यम से कस्टम Compaction प्रदाता पंजीकृत कर सकते हैं। जब कोई प्रदाता पंजीकृत और कॉन्फ़िगर किया जाता है, तो OpenClaw अंतर्निहित LLM पाइपलाइन के बजाय उसे सारांशीकरण सौंपता है।
 
-registered provider का उपयोग करने के लिए, अपने config में उसका id सेट करें:
+पंजीकृत प्रदाता का उपयोग करने के लिए, अपनी कॉन्फ़िगरेशन में उसकी ID सेट करें:
 
 ```json
 {
@@ -175,35 +190,35 @@ registered provider का उपयोग करने के लिए, अप
 }
 ```
 
-`provider` सेट करना अपने आप `mode: "safeguard"` को force करता है। Providers को built-in path जैसे ही Compaction instructions और identifier-preservation policy मिलती है, और OpenClaw provider output के बाद भी recent-turn और split-turn suffix context को preserve करता है।
+`provider` सेट करने पर `mode: "safeguard"` स्वतः बाध्य हो जाता है। प्रदाताओं को अंतर्निहित पथ के समान Compaction निर्देश और पहचानकर्ता-संरक्षण नीति मिलती है, और प्रदाता आउटपुट के बाद भी OpenClaw हाल के चरण और विभाजित चरण के प्रत्यय संदर्भ को सुरक्षित रखता है।
 
 <Note>
-यदि provider विफल होता है या empty result लौटाता है, तो OpenClaw built-in LLM summarization पर fallback करता है।
+यदि प्रदाता विफल होता है या खाली परिणाम लौटाता है, तो OpenClaw अंतर्निहित LLM सारांशीकरण पर फ़ॉलबैक करता है।
 </Note>
 
-## Compaction बनाम pruning
+## Compaction बनाम प्रूनिंग
 
-|                  | Compaction                    | Pruning                          |
-| ---------------- | ----------------------------- | -------------------------------- |
-| **यह क्या करता है** | पुरानी बातचीत को सारांशित करता है | पुराने tool results को trim करता है |
-| **सहेजा गया?**       | हां (session transcript में)   | नहीं (केवल in-memory, प्रति request) |
-| **Scope**        | पूरी बातचीत           | केवल tool results                |
+|                  | Compaction                         | प्रूनिंग                              |
+| ---------------- | ---------------------------------- | ------------------------------------- |
+| **यह क्या करता है** | पुराने वार्तालाप का सारांश बनाता है | पुराने टूल परिणामों को छोटा करता है |
+| **सहेजा जाता है?**       | हाँ (सत्र ट्रांस्क्रिप्ट में)          | नहीं (केवल मेमोरी में, प्रति अनुरोध) |
+| **दायरा**        | पूरा वार्तालाप                    | केवल टूल परिणाम                      |
 
-[Session pruning](/hi/concepts/session-pruning) एक हल्का complement है जो सारांशित किए बिना tool output को trim करता है।
+[सत्र प्रूनिंग](/hi/concepts/session-pruning) एक हल्का पूरक है, जो सारांश बनाए बिना टूल आउटपुट को छोटा करता है।
 
-## Troubleshooting
+## समस्या निवारण
 
-**बहुत बार compact हो रहा है?** मॉडल की context window छोटी हो सकती है, या tool outputs बड़े हो सकते हैं। [session pruning](/hi/concepts/session-pruning) enabled करने का प्रयास करें।
+**Compaction बहुत बार हो रहा है?** मॉडल की संदर्भ विंडो छोटी हो सकती है या टूल आउटपुट बड़े हो सकते हैं। [सत्र प्रूनिंग](/hi/concepts/session-pruning) सक्षम करने का प्रयास करें।
 
-**Compaction के बाद context stale लगता है?** सारांश को guide करने के लिए `/compact Focus on <topic>` का उपयोग करें, या [memory flush](/hi/concepts/memory) enabled करें ताकि notes बने रहें।
+**Compaction के बाद संदर्भ पुराना लग रहा है?** सारांश का मार्गदर्शन करने के लिए `/compact Focus on <topic>` का उपयोग करें या [मेमोरी फ़्लश](/hi/concepts/memory) सक्षम करें, ताकि नोट्स सुरक्षित रहें।
 
-**clean slate चाहिए?** `/new` compact किए बिना fresh session शुरू करता है।
+**नई शुरुआत चाहिए?** `/new` Compaction किए बिना नया सत्र शुरू करता है।
 
-advanced configuration (reserve tokens, identifier preservation, custom context engines, OpenAI server-side compaction) के लिए, [Session management deep dive](/hi/reference/session-management-compaction) देखें।
+उन्नत कॉन्फ़िगरेशन (आरक्षित टोकन, पहचानकर्ता संरक्षण, कस्टम संदर्भ इंजन, OpenAI सर्वर-पक्षीय Compaction) के लिए [सत्र प्रबंधन का विस्तृत विवरण](/hi/reference/session-management-compaction) देखें।
 
 ## संबंधित
 
-- [Session](/hi/concepts/session): session management और lifecycle।
-- [Session pruning](/hi/concepts/session-pruning): tool results को trim करना।
-- [Context](/hi/concepts/context): agent turns के लिए context कैसे बनाया जाता है।
-- [Hooks](/hi/automation/hooks): Compaction lifecycle hooks (`before_compaction`, `after_compaction`)।
+- [सत्र](/hi/concepts/session): सत्र प्रबंधन और जीवनचक्र।
+- [सत्र प्रूनिंग](/hi/concepts/session-pruning): टूल परिणामों को छोटा करना।
+- [संदर्भ](/hi/concepts/context): एजेंट चरणों के लिए संदर्भ कैसे बनाया जाता है।
+- [हुक](/hi/automation/hooks): Compaction जीवनचक्र हुक (`before_compaction`, `after_compaction`)।

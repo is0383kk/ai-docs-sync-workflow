@@ -1,13 +1,14 @@
 ---
 read_when:
-    - Debes iniciar sesión en sitios web para la automatización del navegador
+    - Necesita iniciar sesión en sitios web para la automatización del navegador
     - Quieres publicar actualizaciones en X/Twitter
 summary: Inicios de sesión manuales para la automatización del navegador y la publicación en X/Twitter
 title: Inicio de sesión en el navegador
 x-i18n:
-    generated_at: "2026-07-11T23:33:26Z"
+    generated_at: "2026-07-26T04:54:37Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: bccd363cf7c9611f4687d50a92f7fb3e2fd1c1d67bb27a80c892f7ac58ae1f8f
     source_path: tools/browser-login.md
@@ -20,24 +21,24 @@ Cuando un sitio requiera iniciar sesión, hágalo manualmente en el perfil `open
 del navegador del host. No proporcione sus credenciales al modelo: los inicios de sesión automatizados suelen
 activar las defensas contra bots y pueden bloquear la cuenta.
 
-Use el navegador del host (inicio de sesión manual) tanto para leer (búsquedas/hilos) como para
-publicar en X/Twitter y otros sitios sensibles a los bots. Las sesiones de navegador aisladas
+Utilice el navegador del host (inicio de sesión manual) tanto para leer (búsquedas/hilos) como para
+publicar en X/Twitter y otros sitios sensibles a los bots. Las sesiones de navegador en entornos aislados
 tienen más probabilidades de activar la detección de bots.
 
 Volver a la documentación principal del navegador: [Navegador](/es/tools/browser).
 
 ## ¿Qué perfil de Chrome se utiliza?
 
-OpenClaw controla un perfil de Chrome dedicado llamado `openclaw` (interfaz
-con tonalidad naranja), separado de su perfil de navegador habitual.
+OpenClaw controla un perfil dedicado de Chrome llamado `openclaw` (interfaz
+con tonos anaranjados), independiente de su perfil de navegador habitual.
 
-Para las llamadas del agente a la herramienta del navegador:
+Para las llamadas a herramientas de navegador del agente:
 
 - Opción predeterminada: el agente utiliza su navegador `openclaw` aislado.
-- Use `profile="user"` únicamente cuando sean necesarias las sesiones existentes con la sesión iniciada y usted
+- Utilice `profile="user"` solo cuando sean importantes las sesiones existentes con la sesión iniciada y usted
   esté frente al equipo para hacer clic o aprobar cualquier solicitud de conexión.
-- Si tiene varios perfiles de usuario del navegador, especifique el perfil explícitamente
-  en lugar de elegir uno al azar.
+- Si tiene varios perfiles de navegador de usuario, especifique el perfil explícitamente
+  en lugar de intentar adivinarlo.
 
 Hay dos formas de acceder al perfil `openclaw`:
 
@@ -56,9 +57,9 @@ subcomando (el valor predeterminado es `openclaw`):
 openclaw browser --browser-profile <name> open https://x.com
 ```
 
-## Aislamiento: permitir el acceso al navegador del host
+## Entorno aislado: permitir el acceso al navegador del host
 
-Si el agente está aislado, sus llamadas a la herramienta `browser` utilizan de forma predeterminada el navegador
+Si el agente se ejecuta en un entorno aislado, sus llamadas a la herramienta `browser` utilizan de forma predeterminada el navegador
 del entorno aislado, no el del host. Para permitir que el agente utilice en su lugar el navegador del host:
 
 ```json5
@@ -83,11 +84,11 @@ abrir usted mismo el navegador del host independientemente de esta configuració
 openclaw browser --browser-profile openclaw open https://x.com
 ```
 
-Una vez establecido `sandbox.browser.allowHostControl: true`, las llamadas del agente a la herramienta `browser`
-también pueden utilizar el host. Como alternativa, desactive el aislamiento para el
-agente que publica las actualizaciones.
+Una vez establecido `sandbox.browser.allowHostControl: true`, las llamadas a la herramienta `browser`
+del agente también pueden utilizar el host. Como alternativa, desactive el entorno aislado para el
+agente que publica actualizaciones.
 
-## Temas relacionados
+## Contenido relacionado
 
 - [Navegador](/es/tools/browser)
 - [Solución de problemas del navegador en Linux](/es/tools/browser-linux-troubleshooting)

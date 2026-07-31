@@ -2,28 +2,27 @@
 read_when:
     - आप Feishu/Lark बॉट कनेक्ट करना चाहते हैं
     - आप Feishu चैनल कॉन्फ़िगर कर रहे हैं
-summary: Feishu बॉट का अवलोकन, सुविधाएँ, और कॉन्फ़िगरेशन
+summary: Feishu बॉट का अवलोकन, सुविधाएँ और कॉन्फ़िगरेशन
 title: Feishu
 x-i18n:
-    generated_at: "2026-06-30T14:00:21Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:19:24Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 262dda9739de284e32b7e87edc336bdb5d16651dbf37148bad7593f3a6a6b951
+    source_hash: 5e7c4cbb704ce266b7c7b0f6e160c36c873050fee8d5808965e15b56ad637f28
     source_path: channels/feishu.md
     workflow: 16
 ---
 
-Feishu/Lark एक ऑल-इन-वन सहयोग प्लेटफ़ॉर्म है जहाँ टीमें चैट करती हैं, दस्तावेज़ साझा करती हैं, कैलेंडर प्रबंधित करती हैं, और साथ मिलकर काम पूरा करती हैं।
+OpenClaw आधिकारिक `@openclaw/feishu` plugin के माध्यम से Feishu/Lark (सर्व-समावेशी सहयोग प्लेटफ़ॉर्म) से जुड़ता है: बॉट DM, समूह चैट, स्ट्रीमिंग कार्ड उत्तर, और Feishu दस्तावेज़/wiki/drive/Bitable टूल।
 
-**स्थिति:** bot DMs + समूह चैट के लिए उत्पादन-तैयार। WebSocket डिफ़ॉल्ट मोड है; webhook मोड वैकल्पिक है।
-
----
+**स्थिति:** बॉट DM + समूह चैट के लिए प्रोडक्शन-तैयार। WebSocket डिफ़ॉल्ट इवेंट ट्रांसपोर्ट है (किसी सार्वजनिक URL की आवश्यकता नहीं); webhook मोड वैकल्पिक है।
 
 ## त्वरित शुरुआत
 
 <Note>
-OpenClaw 2026.5.29 या उससे ऊपर आवश्यक है। जाँचने के लिए `openclaw --version` चलाएँ। `openclaw update` से अपग्रेड करें।
+OpenClaw 2026.5.29 या उसके बाद का संस्करण आवश्यक है। जाँचने के लिए `openclaw --version` चलाएँ। `openclaw update` से अपग्रेड करें।
 </Note>
 
 <Steps>
@@ -31,29 +30,40 @@ OpenClaw 2026.5.29 या उससे ऊपर आवश्यक है। �
   ```bash
   openclaw channels login --channel feishu
   ```
-  Feishu Open Platform से App ID और App Secret चिपकाने के लिए मैनुअल सेटअप चुनें, या अपने-आप bot बनाने के लिए QR सेटअप चुनें। यदि घरेलू Feishu मोबाइल ऐप QR कोड पर प्रतिक्रिया नहीं देता है, तो सेटअप फिर से चलाएँ और मैनुअल सेटअप चुनें।
-  </Step>
-  
-  <Step title="सेटअप पूरा होने के बाद, बदलाव लागू करने के लिए gateway को पुनः आरंभ करें">
+  यदि `@openclaw/feishu` plugin मौजूद नहीं है, तो यह उसे इंस्टॉल करता है और फिर सेटअप के चरणों में आपका मार्गदर्शन करता है:
+
+- **मैन्युअल सेटअप**: Feishu Open Platform (`https://open.feishu.cn`) या Lark Developer (`https://open.larksuite.com`) से App ID और App Secret पेस्ट करें।
+- **QR सेटअप**: स्वचालित रूप से बॉट बनाने के लिए Feishu ऐप में QR कोड स्कैन करें। यह प्रवाह DM को केवल आपके अपने खाते तक सीमित करता है (आपके `open_id` के साथ `dmPolicy: "allowlist"`)।
+
+विज़ार्ड API डोमेन (Feishu या Lark) और समूह नीति भी पूछता है। यदि घरेलू Feishu मोबाइल ऐप QR कोड पर प्रतिक्रिया नहीं देता, तो सेटअप दोबारा चलाएँ और मैन्युअल सेटअप चुनें।
+</Step>
+
+  <Step title="सेटअप पूरा होने के बाद, बदलाव लागू करने के लिए Gateway पुनः आरंभ करें">
   ```bash
   openclaw gateway restart
   ```
   </Step>
 </Steps>
 
----
+## इनबाउंड स्थायित्व
 
-## एक्सेस नियंत्रण
+OpenClaw एजेंट को भेजने से पहले प्रमाणित `im.message.receive_v1` और `drive.notice.comment_add_v1` एनवेलप को टिकाऊ रूप से कतारबद्ध करता है। लंबित या पुनः प्रयास योग्य इवेंट Gateway के पुनः आरंभ होने के बाद भी बने रहते हैं, प्रत्येक चैट या दस्तावेज़ के अनुसार क्रमबद्ध रहते हैं, और सक्रिय या संरक्षित पूर्णता रिकॉर्ड मौजूद रहने तक डुप्लिकेट कतार प्रविष्टियों को रोकने के लिए Feishu के इवेंट ID का उपयोग करते हैं।
 
-### प्रत्यक्ष संदेश
+यदि सीमित पुनः प्रयासों के बाद किसी WebSocket इवेंट को स्थायी रूप से सहेजा नहीं जा सकता, तो OpenClaw असंपादित टर्न से आगे बढ़ने के बजाय उस सॉकेट को बंद करता है और नया प्रमाणित कनेक्शन स्थापित करने के लिए बाध्य करता है। प्रतिक्रियाओं और VC मीटिंग आमंत्रणों सहित अन्य Feishu इवेंट प्रकार अपने सामान्य इवेंट पथों का उपयोग करते हैं और उन्हें यह टिकाऊ-कतार गारंटी नहीं मिलती।
 
-कौन bot को DM कर सकता है, इसे नियंत्रित करने के लिए `dmPolicy` कॉन्फ़िगर करें:
+## अभिगम नियंत्रण
 
-- `"pairing"` - अज्ञात उपयोगकर्ताओं को pairing कोड मिलता है; CLI के ज़रिए मंज़ूरी दें
-- `"allowlist"` - केवल `allowFrom` में सूचीबद्ध उपयोगकर्ता चैट कर सकते हैं
-- `"open"` - सार्वजनिक DMs की अनुमति केवल तब दें जब `allowFrom` में `"*"` शामिल हो; प्रतिबंधात्मक प्रविष्टियों के साथ, केवल मेल खाने वाले उपयोगकर्ता चैट कर सकते हैं
+### सीधे संदेश
 
-**pairing अनुरोध मंज़ूर करें:**
+कौन बॉट को DM कर सकता है, इसे नियंत्रित करने के लिए `channels.feishu.dmPolicy` (डिफ़ॉल्ट: `pairing`) कॉन्फ़िगर करें:
+
+| मान         | व्यवहार                                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------- |
+| `"pairing"`   | अज्ञात उपयोगकर्ताओं को पेयरिंग कोड मिलता है; CLI से स्वीकृत करें                                                         |
+| `"allowlist"` | केवल `allowFrom` में सूचीबद्ध उपयोगकर्ता चैट कर सकते हैं                                                                     |
+| `"open"`      | सार्वजनिक DM; कॉन्फ़िग सत्यापन के लिए `allowFrom` में `"*"` शामिल होना आवश्यक है। गैर-वाइल्डकार्ड प्रविष्टियाँ अभी भी अभिगम सीमित करती हैं |
+
+**पेयरिंग अनुरोध स्वीकृत करें:**
 
 ```bash
 openclaw pairing list feishu
@@ -62,40 +72,35 @@ openclaw pairing approve feishu <CODE>
 
 ### समूह चैट
 
-**समूह नीति** (`channels.feishu.groupPolicy`):
+**समूह नीति** (`channels.feishu.groupPolicy`, डिफ़ॉल्ट: `allowlist`):
 
-| मान           | व्यवहार                                                                                               |
-| ------------- | ------------------------------------------------------------------------------------------------------ |
-| `"open"`      | समूहों में सभी संदेशों का जवाब दें                                                                     |
-| `"allowlist"` | केवल `groupAllowFrom` में या `groups.<chat_id>` के अंतर्गत स्पष्ट रूप से कॉन्फ़िगर किए गए समूहों को जवाब दें |
-| `"disabled"`  | सभी समूह संदेश अक्षम करें; स्पष्ट `groups.<chat_id>` प्रविष्टियाँ इसे ओवरराइड नहीं करतीं              |
+| मान         | व्यवहार                                                                                     |
+| ------------- | -------------------------------------------------------------------------------------------- |
+| `"open"`      | समूहों के सभी संदेशों का उत्तर दें                                                            |
+| `"allowlist"` | केवल `groupAllowFrom` में या `groups.<chat_id>` के अंतर्गत स्पष्ट रूप से कॉन्फ़िगर किए गए समूहों को उत्तर दें |
+| `"disabled"`  | सभी समूह संदेश अक्षम करें; स्पष्ट `groups.<chat_id>` प्रविष्टियाँ इसे ओवरराइड नहीं करतीं         |
 
-डिफ़ॉल्ट: `allowlist`
+**उल्लेख की आवश्यकता** (`channels.feishu.requireMention`):
 
-**मेंशन आवश्यकता** (`channels.feishu.requireMention`):
+- डिफ़ॉल्ट: @उल्लेख आवश्यक है, सिवाय इसके कि प्रभावी समूह नीति `"open"` हो; वहाँ यह डिफ़ॉल्ट रूप से `false` होती है, ताकि ऐसे संदेश जिनमें उल्लेख नहीं हो सकता (उदाहरण के लिए चित्र) फिर भी एजेंट तक पहुँचें।
+- ओवरराइड करने के लिए स्पष्ट रूप से `true` या `false` सेट करें; प्रति-समूह ओवरराइड: `channels.feishu.groups.<chat_id>.requireMention`।
+- केवल-प्रसारण `@all` और `@_all` को बॉट उल्लेख नहीं माना जाता। ऐसा संदेश जिसमें `@all` और सीधे बॉट, दोनों का उल्लेख हो, फिर भी बॉट उल्लेख माना जाता है।
 
-- `true` - @mention आवश्यक है (डिफ़ॉल्ट)
-- `false` - @mention के बिना जवाब दें
-- प्रति-समूह ओवरराइड: `channels.feishu.groups.<chat_id>.requireMention`
-- केवल-ब्रॉडकास्ट `@all` और `@_all` को bot मेंशन नहीं माना जाता। ऐसा संदेश जिसमें `@all` और सीधे bot दोनों का मेंशन हो, फिर भी bot मेंशन के रूप में गिना जाता है।
+## समूह कॉन्फ़िगरेशन के उदाहरण
 
----
-
-## समूह कॉन्फ़िगरेशन उदाहरण
-
-### सभी समूहों की अनुमति दें, @mention आवश्यक नहीं
+### सभी समूहों को अनुमति दें, @उल्लेख आवश्यक नहीं
 
 ```json5
 {
   channels: {
     feishu: {
-      groupPolicy: "open",
+      groupPolicy: "open", // "open" में requireMention डिफ़ॉल्ट रूप से false होता है
     },
   },
 }
 ```
 
-### सभी समूहों की अनुमति दें, फिर भी @mention आवश्यक हो
+### सभी समूहों को अनुमति दें, फिर भी @उल्लेख आवश्यक हो
 
 ```json5
 {
@@ -108,21 +113,21 @@ openclaw pairing approve feishu <CODE>
 }
 ```
 
-### केवल विशिष्ट समूहों की अनुमति दें
+### केवल विशिष्ट समूहों को अनुमति दें
 
 ```json5
 {
   channels: {
     feishu: {
       groupPolicy: "allowlist",
-      // Group IDs look like: oc_xxx
+      // समूह ID ऐसे दिखाई देते हैं: oc_xxx
       groupAllowFrom: ["oc_xxx", "oc_yyy"],
     },
   },
 }
 ```
 
-`allowlist` मोड में, आप स्पष्ट `groups.<chat_id>` प्रविष्टि जोड़कर भी किसी समूह को अनुमति दे सकते हैं। स्पष्ट प्रविष्टियाँ `groupPolicy: "disabled"` को ओवरराइड नहीं करतीं। `groups.*` के अंतर्गत वाइल्डकार्ड डिफ़ॉल्ट मेल खाने वाले समूहों को कॉन्फ़िगर करते हैं, लेकिन वे अपने-आप समूहों को अनुमति नहीं देते।
+`allowlist` मोड में, आप स्पष्ट `groups.<chat_id>` प्रविष्टि जोड़कर भी किसी समूह को अनुमति दे सकते हैं। स्पष्ट प्रविष्टियाँ `groupPolicy: "disabled"` को ओवरराइड नहीं करतीं। `groups.*` के अंतर्गत वाइल्डकार्ड डिफ़ॉल्ट मेल खाने वाले समूहों को कॉन्फ़िगर करते हैं, लेकिन वे स्वयं समूहों को अनुमति नहीं देते।
 
 ```json5
 {
@@ -139,7 +144,7 @@ openclaw pairing approve feishu <CODE>
 }
 ```
 
-### समूह के भीतर भेजने वालों को सीमित करें
+### समूह के भीतर प्रेषकों को सीमित करें
 
 ```json5
 {
@@ -149,7 +154,7 @@ openclaw pairing approve feishu <CODE>
       groupAllowFrom: ["oc_xxx"],
       groups: {
         oc_xxx: {
-          // User open_ids look like: ou_xxx
+          // उपयोगकर्ता open_id ऐसे दिखाई देते हैं: ou_xxx
           allowFrom: ["ou_user1", "ou_user2"],
         },
       },
@@ -158,84 +163,133 @@ openclaw pairing approve feishu <CODE>
 }
 ```
 
----
+`channels.feishu.groupSenderAllowFrom` सभी समूहों के लिए समान प्रेषक अनुमति-सूची सेट करता है; प्रति-समूह `allowFrom` को प्राथमिकता मिलती है।
+
+### बॉट द्वारा लिखे गए संदेश
+
+Feishu डिफ़ॉल्ट रूप से अन्य बॉट द्वारा लिखे गए संदेशों की अनदेखी करता है। बॉट-से-बॉट समूह वार्तालापों को अनुमति देने के लिए, ऐप को `im:message.group_at_msg.include_bot:readonly` और `im:message:readonly` स्कोप प्रदान करें, फिर `allowBots` सेट करें:
+
+```json5
+{
+  channels: {
+    feishu: {
+      allowBots: true,
+    },
+  },
+}
+```
+
+Feishu बॉट द्वारा लिखे गए समूह इवेंट केवल तभी वितरित करता है जब कोई अन्य बॉट इस बॉट का उल्लेख करे। मौजूदा समूह नीति, प्रेषक अनुमति-सूचियाँ और उल्लेख आवश्यकताएँ अभी भी लागू होती हैं। OpenClaw स्वयं द्वारा लिखे गए संदेश छोड़ देता है, प्रत्येक टेक्स्ट या कार्ड उत्तर में समकक्ष बॉट का उल्लेख करता है, और साझा [`channels.defaults.botLoopProtection`](/hi/channels/bot-loop-protection) सुरक्षा लागू करता है।
 
 <a id="get-groupuser-ids"></a>
 
-## समूह/उपयोगकर्ता IDs प्राप्त करें
+## समूह/उपयोगकर्ता ID प्राप्त करें
 
-### समूह IDs (`chat_id`, फ़ॉर्मैट: `oc_xxx`)
+### समूह ID (`chat_id`, प्रारूप: `oc_xxx`)
 
-Feishu/Lark में समूह खोलें, ऊपर-दाएँ कोने में मेन्यू आइकन पर क्लिक करें, और **Settings** पर जाएँ। समूह ID (`chat_id`) सेटिंग पेज पर सूचीबद्ध होती है।
+Feishu/Lark में समूह खोलें, ऊपरी-दाएँ कोने में मेनू आइकन पर क्लिक करें और **Settings** पर जाएँ। समूह ID (`chat_id`) सेटिंग पृष्ठ पर सूचीबद्ध है।
 
 ![समूह ID प्राप्त करें](/images/feishu-get-group-id.png)
 
-### उपयोगकर्ता IDs (`open_id`, फ़ॉर्मैट: `ou_xxx`)
+### उपयोगकर्ता ID (`open_id`, प्रारूप: `ou_xxx`)
 
-gateway शुरू करें, bot को DM भेजें, फिर लॉग जाँचें:
+Gateway शुरू करें, बॉट को DM भेजें, फिर लॉग जाँचें:
 
 ```bash
 openclaw logs --follow
 ```
 
-लॉग आउटपुट में `open_id` खोजें। आप लंबित pairing अनुरोध भी जाँच सकते हैं:
+लॉग आउटपुट में `open_id` खोजें। आप लंबित पेयरिंग अनुरोध भी जाँच सकते हैं:
 
 ```bash
 openclaw pairing list feishu
 ```
 
----
-
 ## सामान्य कमांड
 
-| कमांड    | विवरण                    |
-| -------- | ------------------------ |
-| `/status` | bot की स्थिति दिखाएँ     |
-| `/reset`  | वर्तमान सत्र रीसेट करें  |
+| कमांड   | विवरण                 |
+| --------- | --------------------------- |
+| `/status` | बॉट की स्थिति दिखाएँ             |
+| `/reset`  | वर्तमान सत्र रीसेट करें   |
 | `/model`  | AI मॉडल दिखाएँ या बदलें |
 
 <Note>
-Feishu/Lark मूल slash-command मेन्यू का समर्थन नहीं करता, इसलिए इन्हें सादे टेक्स्ट संदेशों के रूप में भेजें।
+Feishu/Lark नेटिव स्लैश-कमांड मेनू का समर्थन नहीं करता, इसलिए इन्हें सादे टेक्स्ट संदेशों के रूप में भेजें।
 </Note>
-
----
 
 ## समस्या निवारण
 
-### bot समूह चैट में जवाब नहीं देता
+### बॉट समूह चैट में उत्तर नहीं देता
 
-1. सुनिश्चित करें कि bot समूह में जोड़ा गया है
-2. सुनिश्चित करें कि आप bot को @mention करते हैं (डिफ़ॉल्ट रूप से आवश्यक)
-3. सत्यापित करें कि `groupPolicy` `"disabled"` नहीं है
+1. सुनिश्चित करें कि बॉट समूह में जोड़ा गया है
+2. सुनिश्चित करें कि आप बॉट का @उल्लेख करते हैं (डिफ़ॉल्ट रूप से आवश्यक)
+3. सत्यापित करें कि `groupPolicy`, `"disabled"` नहीं है
 4. लॉग जाँचें: `openclaw logs --follow`
 
-### bot को संदेश प्राप्त नहीं होते
+### बॉट को संदेश प्राप्त नहीं होते
 
-1. सुनिश्चित करें कि bot Feishu Open Platform / Lark Developer में प्रकाशित और स्वीकृत है
-2. सुनिश्चित करें कि इवेंट सब्सक्रिप्शन में `im.message.receive_v1` शामिल है
-3. सुनिश्चित करें कि **persistent connection** (WebSocket) चुना गया है
-4. सुनिश्चित करें कि सभी आवश्यक permission scopes दिए गए हैं
-5. सुनिश्चित करें कि gateway चल रहा है: `openclaw gateway status`
-6. लॉग जाँचें: `openclaw logs --follow`
+1. सुनिश्चित करें कि बॉट Feishu Open Platform / Lark Developer में प्रकाशित और स्वीकृत है
+2. सुनिश्चित करें कि इवेंट सदस्यता में `im.message.receive_v1` शामिल है
+3. मीटिंग आमंत्रण पर स्वतः जुड़ने के लिए, `vc.bot.meeting_invited_v1` की सदस्यता भी लें
+4. सुनिश्चित करें कि **persistent connection** (WebSocket) चुना गया है
+5. सुनिश्चित करें कि सभी आवश्यक अनुमति स्कोप प्रदान किए गए हैं
+6. सुनिश्चित करें कि Gateway चल रहा है: `openclaw gateway status`
+7. लॉग जाँचें: `openclaw logs --follow`
 
-### QR सेटअप Feishu मोबाइल ऐप में प्रतिक्रिया नहीं देता
+`vc.bot.meeting_invited_v1` की सदस्यता लेने से केवल इवेंट वितरित होता है। स्वचालित रूप से जुड़ना
+डिफ़ॉल्ट रूप से बंद है। इसे वैश्विक रूप से सक्षम करने के लिए:
 
-1. सेटअप फिर से चलाएँ: `openclaw channels login --channel feishu`
-2. मैनुअल सेटअप चुनें
-3. Feishu Open Platform में, self-built ऐप बनाएँ और उसका App ID और App Secret कॉपी करें
-4. वे credentials सेटअप विज़ार्ड में चिपकाएँ
+```json5
+{
+  channels: {
+    feishu: {
+      vcAutoJoin: true,
+    },
+  },
+}
+```
+
+केवल एक खाते के लिए सक्षम करने हेतु, शीर्ष-स्तरीय स्विच छोड़ दें और खाता ओवरराइड सेट करें:
+
+```json5
+{
+  channels: {
+    feishu: {
+      accounts: {
+        meetings: { vcAutoJoin: true },
+      },
+    },
+  },
+}
+```
+
+एजेंट को जुड़ने का टर्न मिलने से पहले भी आमंत्रणकर्ता सामान्य Feishu DM नीति, अनुमति-सूची/पेयरिंग, सत्र और उत्तर
+रूटिंग से गुजरते हैं। जुड़ने के लिए ऐप पहचान के साथ कॉन्फ़िगर किया गया उपलब्ध Feishu VC जॉइन
+टूल और
+`vc:meeting.bot.join:write` स्कोप भी आवश्यक है। उदाहरण के लिए, आधिकारिक
+[`lark-cli` VC एजेंट skill](https://github.com/larksuite/cli/tree/main/skills/lark-vc-agent)
+`vc +meeting-join` प्रदान करता है।
+
+<Warning>
+आधिकारिक `lark-cli` VC एजेंट skill वर्तमान में मीटिंग-बॉट क्रियाओं को सीमित बीटा के रूप में चिह्नित करता है। यदि टूल `ErrNotInGray` या त्रुटि कोड `20017` लौटाता है, तो ऐप या टेनेंट को उस बीटा के लिए सक्षम नहीं किया गया है; सामान्य स्कोप प्रदान करने से जुड़ी समस्या का निवारण करने से पहले लिंक किए गए skill में प्रारंभिक-अभिगम मार्गदर्शन का उपयोग करें।
+</Warning>
+
+### Feishu मोबाइल ऐप में QR सेटअप प्रतिक्रिया नहीं देता
+
+1. सेटअप दोबारा चलाएँ: `openclaw channels login --channel feishu`
+2. मैन्युअल सेटअप चुनें
+3. Feishu Open Platform में स्वयं-निर्मित ऐप बनाएँ और उसका App ID तथा App Secret कॉपी करें
+4. उन क्रेडेंशियल को सेटअप विज़ार्ड में पेस्ट करें
 
 ### App Secret लीक हो गया
 
 1. Feishu Open Platform / Lark Developer में App Secret रीसेट करें
-2. अपनी config में मान अपडेट करें
-3. gateway पुनः आरंभ करें: `openclaw gateway restart`
-
----
+2. अपने कॉन्फ़िग में मान अपडेट करें
+3. Gateway पुनः आरंभ करें: `openclaw gateway restart`
 
 ## उन्नत कॉन्फ़िगरेशन
 
-### कई खाते
+### एकाधिक खाते
 
 ```json5
 {
@@ -246,7 +300,7 @@ Feishu/Lark मूल slash-command मेन्यू का समर्थन
         main: {
           appId: "cli_xxx",
           appSecret: "xxx",
-          name: "Primary bot",
+          name: "प्राथमिक बॉट",
           tts: {
             providers: {
               openai: { voice: "shimmer" },
@@ -256,7 +310,7 @@ Feishu/Lark मूल slash-command मेन्यू का समर्थन
         backup: {
           appId: "cli_yyy",
           appSecret: "yyy",
-          name: "Backup bot",
+          name: "बैकअप बॉट",
           enabled: false,
         },
       },
@@ -265,37 +319,40 @@ Feishu/Lark मूल slash-command मेन्यू का समर्थन
 }
 ```
 
-`defaultAccount` नियंत्रित करता है कि outbound APIs जब कोई `accountId` निर्दिष्ट नहीं करते, तब कौन सा खाता उपयोग हो।
-`accounts.<id>.tts` `messages.tts` जैसी ही आकृति का उपयोग करता है और वैश्विक TTS config पर deep-merge होता है, इसलिए multi-bot Feishu सेटअप shared provider credentials को वैश्विक रूप से रख सकते हैं जबकि प्रति खाते केवल voice, model, persona, या auto mode को ओवरराइड कर सकते हैं।
+`defaultAccount` नियंत्रित करता है कि जब आउटबाउंड API कोई `accountId` निर्दिष्ट नहीं करते, तब किस खाते का उपयोग किया जाए। खाता प्रविष्टियाँ शीर्ष-स्तरीय सेटिंग प्राप्त करती हैं; अधिकांश शीर्ष-स्तरीय कुंजियाँ प्रति खाते ओवरराइड की जा सकती हैं।
+`accounts.<id>.tts`, `tts` जैसी ही संरचना का उपयोग करता है और वैश्विक TTS कॉन्फ़िग पर डीप-मर्ज होता है, ताकि बहु-बॉट Feishu सेटअप साझा प्रदाता क्रेडेंशियल को वैश्विक रूप से रख सकें और प्रति खाते केवल वॉइस, मॉडल, पर्सोना या ऑटो मोड को ओवरराइड कर सकें।
 
 ### संदेश सीमाएँ
 
-- `textChunkLimit` - outbound टेक्स्ट chunk आकार (डिफ़ॉल्ट: `2000` अक्षर)
-- `mediaMaxMb` - मीडिया upload/download सीमा (डिफ़ॉल्ट: `30` MB)
+- `textChunkLimit` - आउटबाउंड टेक्स्ट खंड का आकार (डिफ़ॉल्ट: `4000` वर्ण)
+- `streaming.chunkMode` - `"length"` (डिफ़ॉल्ट) सीमा पर विभाजित करता है; `"newline"` नई पंक्ति की सीमाओं को प्राथमिकता देता है
+- `mediaMaxMb` - मीडिया अपलोड/डाउनलोड सीमा (डिफ़ॉल्ट: `30` MB)
 
-### Streaming
+### स्ट्रीमिंग
 
-Feishu/Lark interactive cards के ज़रिए streaming replies का समर्थन करता है। सक्षम होने पर, bot टेक्स्ट जनरेट करते समय card को वास्तविक समय में अपडेट करता है।
+Feishu/Lark इंटरैक्टिव कार्ड (Card Kit स्ट्रीमिंग API) के माध्यम से स्ट्रीमिंग उत्तरों का समर्थन करता है। सक्षम होने पर, बॉट टेक्स्ट जनरेट करते समय कार्ड को रीयल टाइम में अपडेट करता है।
 
 ```json5
 {
   channels: {
     feishu: {
-      streaming: true, // enable streaming card output (default: true)
-      blockStreaming: true, // opt into completed-block streaming
+      streaming: {
+        mode: "partial", // स्ट्रीमिंग कार्ड आउटपुट (डिफ़ॉल्ट: "partial")
+        block: { enabled: true }, // पूर्ण-ब्लॉक स्ट्रीमिंग के लिए विकल्प चुनें
+      },
     },
   },
 }
 ```
 
-पूरा जवाब एक संदेश में भेजने के लिए `streaming: false` सेट करें। `blockStreaming` डिफ़ॉल्ट रूप से बंद है; इसे केवल तब सक्षम करें जब आप अंतिम जवाब से पहले पूर्ण assistant blocks को flush करना चाहते हों।
+पूर्ण उत्तर को एक संदेश में भेजने के लिए `streaming.mode: "off"` सेट करें; `renderMode: "raw"` (कार्ड के बजाय सादा टेक्स्ट) भी स्ट्रीमिंग कार्ड अक्षम कर देता है। `streaming.block.enabled` डिफ़ॉल्ट रूप से बंद है; इसे केवल तब सक्षम करें जब आप अंतिम उत्तर से पहले पूर्ण हो चुके सहायक ब्लॉक भेजना चाहते हों। पुराना बूलियन `streaming` और समतल `blockStreaming` / `blockStreamingCoalesce` / `chunkMode` कुंजियाँ `openclaw doctor --fix` के माध्यम से इस नेस्टेड संरचना में माइग्रेट होती हैं।
 
 ### कोटा अनुकूलन
 
-दो वैकल्पिक flags के साथ Feishu/Lark API calls की संख्या घटाएँ:
+दो वैकल्पिक फ़्लैग के साथ Feishu/Lark API कॉल की संख्या कम करें:
 
-- `typingIndicator` (डिफ़ॉल्ट `true`): typing reaction calls छोड़ने के लिए `false` सेट करें
-- `resolveSenderNames` (डिफ़ॉल्ट `true`): sender profile lookups छोड़ने के लिए `false` सेट करें
+- `typingIndicator` (डिफ़ॉल्ट `true`): टाइपिंग प्रतिक्रिया कॉल छोड़ने के लिए `false` सेट करें
+- `resolveSenderNames` (डिफ़ॉल्ट `true`): प्रेषक प्रोफ़ाइल लुकअप छोड़ने के लिए `false` सेट करें
 
 ```json5
 {
@@ -308,11 +365,46 @@ Feishu/Lark interactive cards के ज़रिए streaming replies का �
 }
 ```
 
+### समूह सत्र का दायरा और विषय थ्रेड
+
+`channels.feishu.groupSessionScope` (शीर्ष-स्तर पर, प्रति खाता या प्रति समूह) नियंत्रित करता है कि समूह संदेश एजेंट सत्रों से कैसे मैप होते हैं:
+
+| मान                    | सत्र                                                              |
+| ---------------------- | ---------------------------------------------------------------- |
+| `"group"` (डिफ़ॉल्ट)    | प्रत्येक समूह चैट के लिए एक सत्र                                  |
+| `"group_sender"`       | प्रत्येक (समूह + प्रेषक) के लिए एक सत्र                           |
+| `"group_topic"`        | प्रत्येक विषय थ्रेड के लिए एक सत्र; उपलब्ध न होने पर समूह सत्र का उपयोग |
+| `"group_topic_sender"` | प्रत्येक (विषय + प्रेषक) के लिए एक सत्र; उपलब्ध न होने पर (समूह + प्रेषक) का उपयोग |
+
+विषय दायरों के लिए, नेटिव Feishu/Lark विषय समूह इवेंट `thread_id` (`omt_*`) को प्रामाणिक विषय सत्र कुंजी के रूप में उपयोग करते हैं। यदि किसी नेटिव विषय आरंभकर्ता इवेंट में `thread_id` न हो, तो OpenClaw टर्न को रूट करने से पहले इसे Feishu से प्राप्त करता है। सामान्य समूह उत्तर, जिन्हें OpenClaw थ्रेड में बदलता है, उत्तर के मूल संदेश ID (`om_*`) का उपयोग जारी रखते हैं, ताकि पहला टर्न और बाद के टर्न एक ही सत्र में रहें।
+
+बॉट के उत्तरों द्वारा इनलाइन उत्तर देने के बजाय Feishu विषय थ्रेड बनाने या जारी रखने के लिए `replyInThread: "enabled"` (शीर्ष-स्तर पर या प्रति समूह) सेट करें। `topicSessionMode`, `groupSessionScope` का अप्रचलित पूर्ववर्ती है; `groupSessionScope` को प्राथमिकता दें।
+
+### Feishu कार्यस्थान टूल
+
+Plugin में Feishu दस्तावेज़ों, चैट, ज्ञान-भंडार, क्लाउड स्टोरेज, अनुमतियों और Bitable के लिए एजेंट टूल के साथ उनसे मेल खाने वाली Skills (`feishu-doc`, `feishu-drive`, `feishu-perm`, `feishu-wiki`) शामिल हैं। टूल परिवारों को `channels.feishu.tools` द्वारा नियंत्रित किया जाता है:
+
+| कुंजी            | टूल                                          | डिफ़ॉल्ट             |
+| --------------- | --------------------------------------------- | ------------------- |
+| `tools.doc`     | `feishu_doc` दस्तावेज़ संचालन              | `true`              |
+| `tools.chat`    | `feishu_chat` चैट जानकारी + सदस्य क्वेरी      | `true`              |
+| `tools.wiki`    | `feishu_wiki` ज्ञान-भंडार (`doc` आवश्यक) | `true`              |
+| `tools.drive`   | `feishu_drive` क्लाउड स्टोरेज                  | `true`              |
+| `tools.perm`    | `feishu_perm` अनुमति प्रबंधन                 | `false` (संवेदनशील) |
+| `tools.scopes`  | `feishu_app_scopes` ऐप दायरा निदान             | `true`              |
+| `tools.bitable` | `feishu_bitable_*` Bitable/Base संचालन       | `true`              |
+
+`tools.base`, `tools.bitable` का उपनाम है; दोनों सेट होने पर स्पष्ट `bitable` मान को प्राथमिकता मिलती है। प्रति-खाता नियंत्रण `accounts.<id>.tools` के अंतर्गत होते हैं।
+
+रूट डायरेक्टरी के बाहर सीधे `feishu_drive info` लुकअप के लिए `drive:drive.metadata:readonly` प्रदान करें,
+जब तक ऐप के पास पहले से पूर्ण `drive:drive` दायरा न हो। दोनों में से कोई भी दायरा न होने पर, `info`
+`drive:drive:readonly` के माध्यम से पुराना रूट-डायरेक्टरी लुकअप उपलब्ध रखता है।
+
 ### ACP सत्र
 
-Feishu/Lark DMs और समूह thread संदेशों के लिए ACP का समर्थन करता है। Feishu/Lark ACP text-command driven है - कोई मूल slash-command मेन्यू नहीं हैं, इसलिए बातचीत में सीधे `/acp ...` संदेशों का उपयोग करें।
+Feishu/Lark, DM और समूह थ्रेड संदेशों के लिए ACP का समर्थन करता है। Feishu/Lark ACP टेक्स्ट कमांड द्वारा संचालित होता है—कोई नेटिव स्लैश-कमांड मेनू नहीं है, इसलिए वार्तालाप में सीधे `/acp ...` संदेशों का उपयोग करें।
 
-#### Persistent ACP binding
+#### स्थायी ACP बाइंडिंग
 
 ```json5
 {
@@ -356,19 +448,19 @@ Feishu/Lark DMs और समूह thread संदेशों के लि�
 }
 ```
 
-#### चैट से ACP spawn करें
+#### चैट से ACP आरंभ करना
 
-Feishu/Lark DM या thread में:
+किसी Feishu/Lark DM या थ्रेड में:
 
 ```text
 /acp spawn codex --thread here
 ```
 
-`--thread here` DMs और Feishu/Lark thread संदेशों के लिए काम करता है। bound बातचीत में follow-up संदेश सीधे उस ACP सत्र को route होते हैं।
+`--thread here`, DM और Feishu/Lark थ्रेड संदेशों के लिए काम करता है। बाउंड वार्तालाप में बाद के संदेश सीधे उस ACP सत्र में रूट होते हैं।
 
-### Multi-agent routing
+### बहु-एजेंट रूटिंग
 
-Feishu/Lark DMs या समूहों को अलग-अलग agents तक route करने के लिए `bindings` का उपयोग करें।
+Feishu/Lark DM या समूहों को अलग-अलग एजेंटों तक रूट करने के लिए `bindings` का उपयोग करें।
 
 ```json5
 {
@@ -398,31 +490,29 @@ Feishu/Lark DMs या समूहों को अलग-अलग agents त�
 }
 ```
 
-Routing फ़ील्ड:
+रूटिंग फ़ील्ड:
 
 - `match.channel`: `"feishu"`
 - `match.peer.kind`: `"direct"` (DM) या `"group"` (समूह चैट)
 - `match.peer.id`: उपयोगकर्ता Open ID (`ou_xxx`) या समूह ID (`oc_xxx`)
 
-lookup सुझावों के लिए [समूह/उपयोगकर्ता IDs प्राप्त करें](#get-groupuser-ids) देखें।
+लुकअप सुझावों के लिए [समूह/उपयोगकर्ता ID प्राप्त करें](#get-groupuser-ids) देखें।
 
----
+## प्रति-उपयोगकर्ता एजेंट पृथक्करण (डायनेमिक एजेंट निर्माण)
 
-## प्रति-उपयोगकर्ता agent isolation (Dynamic Agent Creation)
+प्रत्येक DM उपयोगकर्ता के लिए स्वचालित रूप से **पृथक एजेंट इंस्टेंस** बनाने हेतु `dynamicAgentCreation` सक्षम करें। प्रत्येक उपयोगकर्ता को अपना अलग मिलता है:
 
-प्रत्येक DM उपयोगकर्ता के लिए अपने-आप **isolated agent instances** बनाने के लिए `dynamicAgentCreation` सक्षम करें। प्रत्येक उपयोगकर्ता को अपना मिलता है:
-
-- स्वतंत्र workspace directory
+- स्वतंत्र कार्यस्थान डायरेक्टरी
 - अलग `USER.md` / `SOUL.md` / `MEMORY.md`
-- निजी conversation history
-- अलग-थलग skills और state
+- निजी वार्तालाप इतिहास
+- पृथक Skills और स्थिति
 
-यह सार्वजनिक bots के लिए आवश्यक है जहाँ आप चाहते हैं कि प्रत्येक उपयोगकर्ता को अपना निजी AI assistant अनुभव मिले।
+यह उन सार्वजनिक बॉट के लिए आवश्यक है जहाँ आप चाहते हैं कि प्रत्येक उपयोगकर्ता को अपना निजी AI सहायक अनुभव मिले।
 
 <Note>
-Dynamic bindings में normalized Feishu `accountId` शामिल होता है, इसलिए default और named accounts प्रत्येक sender को सही dynamic agent तक route करते हैं।
+डायनेमिक बाइंडिंग में सामान्यीकृत Feishu `accountId` शामिल होता है, इसलिए डिफ़ॉल्ट और नामित खाते प्रत्येक प्रेषक को सही डायनेमिक एजेंट तक रूट करते हैं।
 
-यदि किसी named account ने पुराने release पर unscoped dynamic agent बनाया था, तो वह legacy agent अभी भी `maxAgents` में गिना जाता है। उसे हटाने से पहले पुष्टि करें कि default account उसका उपयोग नहीं कर रहा है, या अस्थायी रूप से `maxAgents` बढ़ाएँ; OpenClaw सुरक्षित रूप से यह अनुमान नहीं लगा सकता कि ambiguous legacy state किस account की है।
+यदि किसी नामित खाते ने पुराने रिलीज़ में बिना दायरे वाला डायनेमिक एजेंट बनाया था, तो वह पुराना एजेंट अभी भी `maxAgents` की सीमा में गिना जाता है। उसे हटाने से पहले पुष्टि करें कि डिफ़ॉल्ट खाता उसका उपयोग नहीं करता, या अस्थायी रूप से `maxAgents` बढ़ाएँ; OpenClaw सुरक्षित रूप से यह निर्धारित नहीं कर सकता कि अस्पष्ट पुरानी स्थिति का स्वामी कौन-सा खाता है।
 </Note>
 
 ### त्वरित सेटअप
@@ -441,9 +531,9 @@ Dynamic bindings में normalized Feishu `accountId` शामिल हो�
     },
   },
   session: {
-    // Critical: makes each user's DM their "main session"
-    // Automatically loads USER.md / SOUL.md / MEMORY.md
-    // For stronger isolation, use "per-channel-peer" instead
+    // महत्वपूर्ण: प्रत्येक उपयोगकर्ता के DM को उसका "मुख्य सत्र" बनाता है
+    // USER.md / SOUL.md / MEMORY.md को स्वचालित रूप से लोड करता है
+    // अधिक सुदृढ़ पृथक्करण के लिए इसके बजाय "per-channel-peer" का उपयोग करें
     dmScope: "main",
   },
 }
@@ -453,55 +543,44 @@ Dynamic bindings में normalized Feishu `accountId` शामिल हो�
 
 जब कोई नया उपयोगकर्ता अपना पहला DM भेजता है:
 
-1. चैनल एक unique `agentId` जनरेट करता है: डिफ़ॉल्ट account के लिए `feishu-{user_open_id}`, या named account के लिए bounded account-prefixed identity digest
-2. `workspaceTemplate` path पर नया workspace बनाता है
-3. agent को register करता है और इस उपयोगकर्ता के लिए binding बनाता है
-4. workspace helper पहली access पर bootstrap files (`AGENTS.md`, `SOUL.md`, `USER.md`, आदि) सुनिश्चित करता है
-5. इस उपयोगकर्ता के सभी भविष्य के संदेश उनके dedicated agent तक route करता है
+1. चैनल एक अद्वितीय `agentId` उत्पन्न करता है: डिफ़ॉल्ट खाते के लिए `feishu-{user_open_id}`, या नामित खाते के लिए सीमित खाता-उपसर्गित पहचान डाइजेस्ट
+2. `workspaceTemplate` पथ पर नया कार्यस्थान बनाता है
+3. एजेंट पंजीकृत करता है और इस उपयोगकर्ता के लिए बाइंडिंग बनाता है
+4. कार्यस्थान सहायक पहली पहुँच पर बूटस्ट्रैप फ़ाइलें (`AGENTS.md`, `SOUL.md`, `USER.md`, आदि) सुनिश्चित करता है
+5. इस उपयोगकर्ता के सभी भावी संदेश उसके समर्पित एजेंट तक रूट करता है
 
 ### कॉन्फ़िगरेशन विकल्प
 
-| सेटिंग                                                  | विवरण                                | डिफ़ॉल्ट                              |
+| सेटिंग                                                   | विवरण                                      | डिफ़ॉल्ट                              |
 | -------------------------------------------------------- | ------------------------------------------ | ------------------------------------ |
-| `channels.feishu.dynamicAgentCreation.enabled`           | प्रति-उपयोगकर्ता agent का स्वचालित निर्माण सक्षम करें   | `false`                              |
-| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | डायनामिक agent workspace के लिए पाथ टेम्पलेट | `~/.openclaw/workspace-{agentId}`    |
-| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | Agent डायरेक्टरी नाम टेम्पलेट              | `~/.openclaw/agents/{agentId}/agent` |
-| `channels.feishu.dynamicAgentCreation.maxAgents`         | बनाए जाने वाले डायनामिक agents की अधिकतम संख्या | असीमित                            |
+| `channels.feishu.dynamicAgentCreation.enabled`           | स्वचालित प्रति-उपयोगकर्ता एजेंट निर्माण सक्षम करें | `false`                              |
+| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | डायनेमिक एजेंट कार्यस्थानों के लिए पथ टेम्पलेट | `~/.openclaw/workspace-{agentId}`    |
+| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | एजेंट डायरेक्टरी नाम का टेम्पलेट              | `~/.openclaw/agents/{agentId}/agent` |
+| `channels.feishu.dynamicAgentCreation.maxAgents`         | बनाए जाने वाले डायनेमिक एजेंटों की अधिकतम संख्या | असीमित                              |
 
-टेम्पलेट वैरिएबल:
+टेम्पलेट चर:
 
-- `{agentId}` - जनरेट किया गया agent ID (उदाहरण, `feishu-ou_xxxxxx` या `feishu-support-<identity_digest>`)
-- `{userId}` - भेजने वाले का Feishu open_id (उदाहरण, `ou_xxxxxx`)
+- `{agentId}` - उत्पन्न एजेंट ID (उदाहरण: `feishu-ou_xxxxxx` या `feishu-support-<identity_digest>`)
+- `{userId}` - प्रेषक का Feishu open_id (उदाहरण: `ou_xxxxxx`)
 
-### सेशन स्कोप
+### सत्र का दायरा
 
-`session.dmScope` नियंत्रित करता है कि direct messages को agent sessions से कैसे मैप किया जाता है। यह एक **ग्लोबल सेटिंग** है जो सभी channels को प्रभावित करती है।
+`session.dmScope` नियंत्रित करता है कि सीधे संदेश एजेंट सत्रों से कैसे मैप होते हैं। यह एक **वैश्विक सेटिंग** है जो सभी चैनलों को प्रभावित करती है।
 
-| मान                        | व्यवहार                                                            | इनके लिए सर्वोत्तम                                                           |
+| मान                          | व्यवहार                                                              | सर्वाधिक उपयुक्त                                                     |
 | ---------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `"main"`                     | प्रत्येक उपयोगकर्ता का DM उनके agent के main session से मैप होता है                   | एकल-उपयोगकर्ता bots जहां आप चाहते हैं कि `USER.md` / `SOUL.md` अपने-आप लोड हों |
-| `"per-channel-peer"`         | प्रत्येक (channel + user) संयोजन को एक अलग session मिलता है           | सार्वजनिक multi-user bots जिन्हें अधिक मजबूत isolation चाहिए                  |
-| `"per-account-channel-peer"` | प्रत्येक (account + channel + user) संयोजन को एक अलग session मिलता है | Multi-account bots जिन्हें account-level session isolation चाहिए         |
+| `"main"`                     | प्रत्येक उपयोगकर्ता का DM उसके एजेंट के मुख्य सत्र से मैप होता है       | एकल-उपयोगकर्ता बॉट, जहाँ आप `USER.md` / `SOUL.md` को स्वतः लोड करना चाहते हैं |
+| `"per-peer"`                 | प्रत्येक पीयर को अलग सत्र मिलता है (चैनल से निरपेक्ष)                   | केवल प्रेषक पहचान पर आधारित पृथक्करण                                  |
+| `"per-channel-peer"`         | प्रत्येक (चैनल + उपयोगकर्ता) संयोजन को अलग सत्र मिलता है                | अधिक सुदृढ़ पृथक्करण की आवश्यकता वाले सार्वजनिक बहु-उपयोगकर्ता बॉट       |
+| `"per-account-channel-peer"` | प्रत्येक (खाता + चैनल + उपयोगकर्ता) संयोजन को अलग सत्र मिलता है          | खाता-स्तरीय सत्र पृथक्करण की आवश्यकता वाले बहु-खाता बॉट                   |
 
-**ट्रेडऑफ़**: `"main"` का उपयोग automatic bootstrap file loading (`USER.md`, `SOUL.md`, `MEMORY.md`) सक्षम करता है, लेकिन इसका मतलब है कि सभी channels में सभी DMs समान session key pattern साझा करते हैं। सार्वजनिक multi-user bots के लिए, जहां isolation bootstrap auto-loading से अधिक महत्वपूर्ण है, `"per-channel-peer"` पर विचार करें और bootstrap files को मैन्युअली प्रबंधित करें।
+**समझौता**: `"main"` का उपयोग स्वचालित बूटस्ट्रैप फ़ाइल लोडिंग (`USER.md`, `SOUL.md`, `MEMORY.md`) सक्षम करता है, लेकिन इसका अर्थ है कि सभी चैनलों के सभी DM एक ही सत्र कुंजी पैटर्न साझा करते हैं। उन सार्वजनिक बहु-उपयोगकर्ता बॉट के लिए, जहाँ पृथक्करण बूटस्ट्रैप स्वतः-लोडिंग से अधिक महत्वपूर्ण है, `"per-channel-peer"` पर विचार करें और बूटस्ट्रैप फ़ाइलें मैन्युअल रूप से प्रबंधित करें।
 
 <Note>
-जब named Feishu accounts को उसी sender के लिए अलग sessions रखने चाहिए, तो `"per-account-channel-peer"` का उपयोग करें। Dynamic bindings account scope को सुरक्षित रखते हैं।
+जब नामित Feishu खातों को एक ही प्रेषक के लिए अलग-अलग सत्र रखने हों, तो `"per-account-channel-peer"` का उपयोग करें। डायनेमिक बाइंडिंग खाते का दायरा बनाए रखती हैं।
 </Note>
 
-```json5
-{
-  session: {
-    // For single-user personal bots: enables auto bootstrap loading
-    dmScope: "main",
-
-    // For public multi-user bots: stronger isolation
-    // dmScope: "per-channel-peer",
-  },
-}
-```
-
-### सामान्य multi-user deployment
+### सामान्य बहु-उपयोगकर्ता परिनियोजन
 
 ```json5
 {
@@ -521,134 +600,148 @@ Dynamic bindings में normalized Feishu `accountId` शामिल हो�
     },
   },
   session: {
-    // Choose dmScope based on your isolation needs:
-    // "main" for bootstrap auto-loading, "per-channel-peer" for stronger isolation
+    // अपनी पृथक्करण आवश्यकताओं के आधार पर dmScope चुनें:
+    // बूटस्ट्रैप स्वतः-लोडिंग के लिए "main", अधिक सुदृढ़ पृथक्करण के लिए "per-channel-peer"
     dmScope: "main",
   },
-  bindings: [], // Empty - dynamic agents auto-bind
+  bindings: [], // खाली—डायनेमिक एजेंट स्वचालित रूप से बाइंड होते हैं
 }
 ```
 
 ### सत्यापन
 
-यह पुष्टि करने के लिए gateway logs जांचें कि dynamic creation काम कर रहा है:
+डायनेमिक निर्माण के काम करने की पुष्टि के लिए Gateway लॉग जाँचें:
 
-```
-feishu: creating dynamic agent "feishu-ou_xxxxxx" for user ou_xxxxxx
-workspace: /Users/you/.openclaw/workspace-feishu-ou_xxxxxx
-feishu: dynamic agent created, new route: agent:feishu-ou_xxxxxx:main
+```text
+feishu: उपयोगकर्ता ou_xxxxxx के लिए डायनेमिक एजेंट "feishu-ou_xxxxxx" बनाया जा रहा है
+  कार्यस्थान: /home/user/.openclaw/workspace-feishu-ou_xxxxxx
+  एजेंट डायरेक्टरी: /home/user/.openclaw/agents/feishu-ou_xxxxxx/agent
 ```
 
-बनाए गए सभी workspaces की सूची देखें:
+बनाए गए सभी वर्कस्पेस सूचीबद्ध करें:
 
 ```bash
 ls -la ~/.openclaw/workspace-*
 ```
 
-### नोट्स
+### टिप्पणियाँ
 
-- **Workspace isolation**: प्रत्येक उपयोगकर्ता को अपनी workspace directory और agent instance मिलता है। सामान्य messaging flow में उपयोगकर्ता एक-दूसरे का conversation history या files नहीं देख सकते।
-- **Security boundary**: यह एक messaging-context isolation mechanism है, hostile co-tenant security boundary नहीं। Agent process और host environment साझा होते हैं।
-- **`bindings` खाली होना चाहिए**: Dynamic agents अपने bindings अपने-आप register करते हैं
-- **Upgrade path**: मौजूदा manual bindings, dynamic agents के साथ काम करना जारी रखते हैं
-- **`session.dmScope` ग्लोबल है**: यह केवल Feishu नहीं, सभी channels को प्रभावित करता है
-
----
+- **वर्कस्पेस पृथक्करण**: प्रत्येक उपयोगकर्ता को अपनी वर्कस्पेस डायरेक्टरी और एजेंट इंस्टेंस मिलता है। सामान्य संदेश प्रवाह में उपयोगकर्ता एक-दूसरे का वार्तालाप इतिहास या फ़ाइलें नहीं देख सकते।
+- **सुरक्षा सीमा**: यह संदेश-संदर्भ पृथक्करण तंत्र है, दुर्भावनापूर्ण सह-किरायेदारों के विरुद्ध सुरक्षा सीमा नहीं। एजेंट प्रक्रिया और होस्ट परिवेश साझा होते हैं।
+- **कॉन्फ़िगरेशन लेखन सक्षम रहना चाहिए**: डायनेमिक एजेंट निर्माण, एजेंट और बाइंडिंग को कॉन्फ़िगरेशन में लिखता है; जब `channels.feishu.configWrites`, `false` होता है, तो इसे छोड़ दिया जाता है (डिफ़ॉल्ट: सक्षम)।
+- **`bindings` खाली होना चाहिए**: डायनेमिक एजेंट अपनी बाइंडिंग स्वतः पंजीकृत करते हैं
+- **अपग्रेड पथ**: मौजूदा मैन्युअल बाइंडिंग डायनेमिक एजेंटों के साथ काम करती रहती हैं
+- **`session.dmScope` वैश्विक है**: यह केवल Feishu ही नहीं, सभी चैनलों को प्रभावित करता है
 
 ## कॉन्फ़िगरेशन संदर्भ
 
 पूर्ण कॉन्फ़िगरेशन: [Gateway कॉन्फ़िगरेशन](/hi/gateway/configuration)
 
-| सेटिंग                                                  | विवरण                                                                      | डिफ़ॉल्ट                              |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------ |
-| `channels.feishu.enabled`                                | Channel सक्षम/अक्षम करें                                                       | `true`                               |
-| `channels.feishu.domain`                                 | API domain (`feishu` या `lark`)                                                  | `feishu`                             |
-| `channels.feishu.connectionMode`                         | Event transport (`websocket` या `webhook`)                                       | `websocket`                          |
-| `channels.feishu.defaultAccount`                         | Outbound routing के लिए default account                                             | `default`                            |
-| `channels.feishu.verificationToken`                      | Webhook mode के लिए आवश्यक                                                        | -                                    |
-| `channels.feishu.encryptKey`                             | Webhook mode के लिए आवश्यक                                                        | -                                    |
-| `channels.feishu.webhookPath`                            | Webhook route path                                                               | `/feishu/events`                     |
-| `channels.feishu.webhookHost`                            | Webhook bind host                                                                | `127.0.0.1`                          |
-| `channels.feishu.webhookPort`                            | Webhook bind port                                                                | `3000`                               |
-| `channels.feishu.accounts.<id>.appId`                    | App ID                                                                           | -                                    |
-| `channels.feishu.accounts.<id>.appSecret`                | App Secret                                                                       | -                                    |
-| `channels.feishu.accounts.<id>.domain`                   | प्रति-account domain override                                                      | `feishu`                             |
-| `channels.feishu.accounts.<id>.tts`                      | प्रति-account TTS override                                                         | `messages.tts`                       |
-| `channels.feishu.dmPolicy`                               | DM policy                                                                        | `pairing`                            |
-| `channels.feishu.allowFrom`                              | DM allowlist (open_id सूची)                                                      | -                                    |
-| `channels.feishu.groupPolicy`                            | Group policy                                                                     | `allowlist`                          |
-| `channels.feishu.groupAllowFrom`                         | Group allowlist                                                                  | -                                    |
-| `channels.feishu.requireMention`                         | Groups में @mention आवश्यक करें                                                       | `true`                               |
-| `channels.feishu.groups.<chat_id>.requireMention`        | प्रति-group @mention override; explicit IDs allowlist mode में group को भी अनुमति देते हैं | विरासत में मिला                            |
-| `channels.feishu.groups.<chat_id>.enabled`               | किसी विशिष्ट group को सक्षम/अक्षम करें                                                  | `true`                               |
-| `channels.feishu.dynamicAgentCreation.enabled`           | प्रति-उपयोगकर्ता agent का स्वचालित निर्माण सक्षम करें                                         | `false`                              |
-| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | डायनामिक agent workspaces के लिए पाथ टेम्पलेट                                       | `~/.openclaw/workspace-{agentId}`    |
-| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | Agent directory name template                                                    | `~/.openclaw/agents/{agentId}/agent` |
-| `channels.feishu.dynamicAgentCreation.maxAgents`         | बनाए जाने वाले dynamic agents की अधिकतम संख्या                                       | असीमित                            |
-| `channels.feishu.textChunkLimit`                         | Message chunk size                                                               | `2000`                               |
-| `channels.feishu.mediaMaxMb`                             | Media size limit                                                                 | `30`                                 |
-| `channels.feishu.streaming`                              | Streaming card output                                                            | `true`                               |
-| `channels.feishu.blockStreaming`                         | Completed-block reply streaming                                                  | `false`                              |
-| `channels.feishu.typingIndicator`                        | Typing reactions भेजें                                                            | `true`                               |
-| `channels.feishu.resolveSenderNames`                     | Sender display names resolve करें                                                     | `true`                               |
-| `channels.feishu.tools.bitable`                          | Bitable/Base tools सक्षम करें                                                        | `true`                               |
-| `channels.feishu.tools.base`                             | `channels.feishu.tools.bitable` के लिए alias; दोनों set होने पर explicit `bitable` जीतता है | `true`                               |
-| `channels.feishu.accounts.<id>.tools.bitable`            | प्रति-account Bitable/Base tool gate                                               | विरासत में मिला                            |
-| `channels.feishu.accounts.<id>.tools.base`               | `tools.bitable` के लिए प्रति-account alias                                            | विरासत में मिला                            |
+| सेटिंग                                                  | विवरण                                                                          | डिफ़ॉल्ट                              |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------ |
+| `channels.feishu.enabled`                                | चैनल को सक्षम/अक्षम करें                                                           | `true`                               |
+| `channels.feishu.domain`                                 | API डोमेन (`feishu`, `lark`, या कोई `https://` आधार URL)                             | `feishu`                             |
+| `channels.feishu.connectionMode`                         | इवेंट ट्रांसपोर्ट (`websocket` या `webhook`)                                           | `websocket`                          |
+| `channels.feishu.defaultAccount`                         | आउटबाउंड रूटिंग के लिए डिफ़ॉल्ट खाता                                                 | `default`                            |
+| `channels.feishu.verificationToken`                      | Webhook मोड के लिए आवश्यक                                                            | -                                    |
+| `channels.feishu.encryptKey`                             | Webhook मोड के लिए आवश्यक                                                            | -                                    |
+| `channels.feishu.webhookPath`                            | Webhook रूट पथ                                                                   | `/feishu/events`                     |
+| `channels.feishu.webhookHost`                            | Webhook बाइंड होस्ट                                                                    | `127.0.0.1`                          |
+| `channels.feishu.webhookPort`                            | Webhook बाइंड पोर्ट                                                                    | `3000`                               |
+| `channels.feishu.accounts.<id>.appId`                    | ऐप ID                                                                               | -                                    |
+| `channels.feishu.accounts.<id>.appSecret`                | ऐप सीक्रेट                                                                           | -                                    |
+| `channels.feishu.accounts.<id>.domain`                   | प्रति-खाता डोमेन ओवरराइड                                                          | `feishu`                             |
+| `channels.feishu.accounts.<id>.tts`                      | प्रति-खाता TTS ओवरराइड                                                             | `tts`                                |
+| `channels.feishu.dmPolicy`                               | DM नीति (`pairing`, `allowlist`, `open`)                                           | `pairing`                            |
+| `channels.feishu.allowFrom`                              | DM अनुमति-सूची (open_id सूची)                                                          | -                                    |
+| `channels.feishu.groupPolicy`                            | समूह नीति (`open`, `allowlist`, `disabled`)                                       | `allowlist`                          |
+| `channels.feishu.groupAllowFrom`                         | समूह अनुमति-सूची                                                                      | -                                    |
+| `channels.feishu.groupSenderAllowFrom`                   | सभी समूहों पर लागू प्रेषक अनुमति-सूची                                               | -                                    |
+| `channels.feishu.requireMention`                         | समूहों में @mention आवश्यक करें                                                           | `true` (जब नीति `open` हो, तब `false`)  |
+| `channels.feishu.allowBots`                              | बॉट-लूप सुरक्षा के साथ इस बॉट का उल्लेख करने वाले अन्य बॉट स्वीकार करें                    | `false`                              |
+| `channels.feishu.groups.<chat_id>.requireMention`        | प्रति-समूह @mention ओवरराइड; स्पष्ट ID अनुमति-सूची मोड में समूह को भी प्रवेश देते हैं     | इनहेरिट किया गया                            |
+| `channels.feishu.groups.<chat_id>.enabled`               | किसी विशिष्ट समूह को सक्षम/अक्षम करें                                                      | `true`                               |
+| `channels.feishu.groups.<chat_id>.allowFrom`             | प्रति-समूह प्रेषक अनुमति-सूची (`groupSenderAllowFrom` को ओवरराइड करती है)                        | -                                    |
+| `channels.feishu.groupSessionScope`                      | समूह सत्र मैपिंग (`group`, `group_sender`, `group_topic`, `group_topic_sender`) | `group`                              |
+| `channels.feishu.replyInThread`                          | बॉट के उत्तर विषय थ्रेड बनाते/जारी रखते हैं (`disabled`, `enabled`)                    | `disabled`                           |
+| `channels.feishu.reactionNotifications`                  | इनबाउंड प्रतिक्रिया इवेंट (`off`, `own`, `all`)                                        | `own`                                |
+| `channels.feishu.vcAutoJoin`                             | सामान्य DM प्राधिकरण के बाद आमंत्रित VC बैठकों में शामिल हों                               | `false`                              |
+| `channels.feishu.dynamicAgentCreation.enabled`           | प्रति-उपयोगकर्ता स्वचालित एजेंट निर्माण सक्षम करें                                             | `false`                              |
+| `channels.feishu.dynamicAgentCreation.workspaceTemplate` | डायनेमिक एजेंट वर्कस्पेस के लिए पथ टेम्पलेट                                           | `~/.openclaw/workspace-{agentId}`    |
+| `channels.feishu.dynamicAgentCreation.agentDirTemplate`  | एजेंट डायरेक्टरी नाम टेम्पलेट                                                        | `~/.openclaw/agents/{agentId}/agent` |
+| `channels.feishu.dynamicAgentCreation.maxAgents`         | बनाए जाने वाले डायनेमिक एजेंटों की अधिकतम संख्या                                           | असीमित                            |
+| `channels.feishu.textChunkLimit`                         | संदेश खंड का आकार                                                                   | `4000`                               |
+| `channels.feishu.streaming.chunkMode`                    | खंड विभाजन (`length` या `newline`)                                              | `length`                             |
+| `channels.feishu.mediaMaxMb`                             | मीडिया आकार सीमा                                                                     | `30`                                 |
+| `channels.feishu.renderMode`                             | उत्तर रेंडरिंग (`auto`, `raw`, `card`)                                              | `auto`                               |
+| `channels.feishu.streaming.mode`                         | स्ट्रीमिंग कार्ड आउटपुट (`partial` या `off`)                                           | `partial`                            |
+| `channels.feishu.streaming.block.enabled`                | पूर्ण हुए ब्लॉक के उत्तरों की स्ट्रीमिंग                                                      | `false`                              |
+| `channels.feishu.typingIndicator`                        | टाइपिंग प्रतिक्रियाएँ भेजें                                                                | `true`                               |
+| `channels.feishu.resolveSenderNames`                     | प्रेषक के प्रदर्शन नाम निर्धारित करें                                                         | `true`                               |
+| `channels.feishu.configWrites`                           | चैनल द्वारा आरंभ किए गए कॉन्फ़िगरेशन लेखन की अनुमति दें (डायनेमिक एजेंटों के लिए आवश्यक)                     | `true`                               |
+| `channels.feishu.tools.doc`                              | दस्तावेज़ टूल सक्षम करें                                                                | `true`                               |
+| `channels.feishu.tools.chat`                             | चैट जानकारी टूल सक्षम करें                                                               | `true`                               |
+| `channels.feishu.tools.wiki`                             | ज्ञान आधार टूल सक्षम करें (`doc` आवश्यक है)                                         | `true`                               |
+| `channels.feishu.tools.drive`                            | क्लाउड स्टोरेज टूल सक्षम करें                                                           | `true`                               |
+| `channels.feishu.tools.perm`                             | अनुमति प्रबंधन टूल सक्षम करें                                                   | `false`                              |
+| `channels.feishu.tools.scopes`                           | ऐप स्कोप डायग्नोस्टिक टूल सक्षम करें                                                    | `true`                               |
+| `channels.feishu.tools.bitable`                          | Bitable/Base टूल सक्षम करें                                                            | `true`                               |
+| `channels.feishu.tools.base`                             | `channels.feishu.tools.bitable` का उपनाम; दोनों सेट होने पर स्पष्ट `bitable` प्रभावी होता है     | `true`                               |
+| `channels.feishu.accounts.<id>.tools.bitable`            | प्रति-खाता Bitable/Base टूल गेट                                                   | इनहेरिट किया गया                            |
+| `channels.feishu.accounts.<id>.tools.base`               | `tools.bitable` का प्रति-खाता उपनाम                                                | इनहेरिट किया गया                            |
 
----
+## समर्थित संदेश प्रकार
 
-## समर्थित message types
-
-### प्राप्त करें
+### प्राप्त करना
 
 - ✅ टेक्स्ट
-- ✅ Rich text (post)
+- ✅ रिच टेक्स्ट (पोस्ट)
 - ✅ चित्र
 - ✅ फ़ाइलें
 - ✅ ऑडियो
-- ✅ वीडियो/media
-- ✅ Stickers
+- ✅ वीडियो/मीडिया
+- ✅ स्टिकर
 
-Inbound Feishu/Lark audio messages को raw `file_key` JSON के बजाय media placeholders के रूप में normalize किया जाता है। जब `tools.media.audio` configured होता है, OpenClaw voice-note resource डाउनलोड करता है और agent turn से पहले shared audio transcription चलाता है, ताकि agent को बोले गए शब्दों का transcript मिले। यदि Feishu audio payload में सीधे transcript text शामिल करता है, तो वही text किसी दूसरी ASR call के बिना उपयोग किया जाता है। Audio transcription provider के बिना भी, agent को raw Feishu resource payload नहीं, बल्कि `<media:audio>` placeholder और saved attachment मिलता है।
+इनबाउंड Feishu/Lark ऑडियो संदेशों को अपरिष्कृत `file_key` JSON के बजाय
+मीडिया प्लेसहोल्डर के रूप में सामान्यीकृत किया जाता है। जब `tools.media.audio` कॉन्फ़िगर हो, तब OpenClaw
+वॉइस-नोट संसाधन डाउनलोड करता है और एजेंट टर्न से पहले साझा ऑडियो ट्रांसक्रिप्शन चलाता है,
+जिससे एजेंट को बोले गए शब्दों का ट्रांसक्रिप्ट मिलता है। यदि Feishu ऑडियो पेलोड में
+ट्रांसक्रिप्ट टेक्स्ट सीधे शामिल करता है, तो उस टेक्स्ट का उपयोग किसी अन्य
+ASR कॉल के बिना किया जाता है। ऑडियो ट्रांसक्रिप्शन प्रदाता के बिना भी एजेंट को
+सहेजे गए अटैचमेंट के साथ `<media:audio>` प्लेसहोल्डर मिलता है, अपरिष्कृत Feishu
+संसाधन पेलोड नहीं।
 
-### भेजें
+### भेजना
 
 - ✅ टेक्स्ट
-- ✅ इमेज
+- ✅ चित्र
 - ✅ फ़ाइलें
 - ✅ ऑडियो
 - ✅ वीडियो/मीडिया
 - ✅ इंटरैक्टिव कार्ड (स्ट्रीमिंग अपडेट सहित)
-- ⚠️ रिच टेक्स्ट (पोस्ट-शैली फ़ॉर्मैटिंग; पूरी Feishu/Lark लेखन क्षमताओं का समर्थन नहीं करता)
+- ⚠️ रिच टेक्स्ट (पोस्ट-शैली फ़ॉर्मेटिंग; पूर्ण Feishu/Lark लेखन क्षमताओं का समर्थन नहीं करता)
 
-नेटिव Feishu/Lark ऑडियो बबल Feishu `audio` संदेश प्रकार का उपयोग करते हैं और
-Ogg/Opus अपलोड मीडिया (`file_type: "opus"`) की आवश्यकता होती है। मौजूदा `.opus` और `.ogg` मीडिया
-सीधे नेटिव ऑडियो के रूप में भेजा जाता है। MP3/WAV/M4A और अन्य संभावित ऑडियो फ़ॉर्मैट केवल तब
-`ffmpeg` के साथ 48kHz Ogg/Opus में ट्रांसकोड किए जाते हैं जब उत्तर वॉयस
-डिलीवरी (`audioAsVoice` / संदेश टूल `asVoice`, TTS वॉइस-नोट
-उत्तर सहित) का अनुरोध करता है। सामान्य MP3 अटैचमेंट नियमित फ़ाइलें ही रहते हैं। यदि `ffmpeg` अनुपस्थित है या
-कन्वर्ज़न विफल हो जाता है, तो OpenClaw फ़ाइल अटैचमेंट पर वापस चला जाता है और कारण लॉग करता है।
+मूल Feishu/Lark ऑडियो बबल Feishu `audio` संदेश प्रकार का उपयोग करते हैं और इनके लिए
+Ogg/Opus अपलोड मीडिया (`file_type: "opus"`) आवश्यक है। मौजूदा `.opus` और `.ogg` मीडिया
+सीधे मूल ऑडियो के रूप में भेजा जाता है। MP3/WAV/M4A और अन्य संभावित ऑडियो प्रारूपों को
+`ffmpeg` के साथ 48kHz Ogg/Opus में केवल तभी ट्रांसकोड किया जाता है, जब उत्तर में ध्वनि
+डिलीवरी का अनुरोध हो (`audioAsVoice` / संदेश टूल `asVoice`, जिसमें TTS वॉइस-नोट
+उत्तर शामिल हैं)। सामान्य MP3 अटैचमेंट नियमित फ़ाइलें ही रहते हैं। यदि `ffmpeg` उपलब्ध नहीं है या
+रूपांतरण विफल हो जाता है, तो OpenClaw फ़ाइल अटैचमेंट का उपयोग करता है और कारण लॉग करता है।
 
 ### थ्रेड और उत्तर
 
 - ✅ इनलाइन उत्तर
 - ✅ थ्रेड उत्तर
-- ✅ किसी थ्रेड संदेश का उत्तर देते समय मीडिया उत्तर थ्रेड-अवेयर रहते हैं
+- ✅ किसी थ्रेड संदेश का उत्तर देते समय मीडिया उत्तर थ्रेड से संबद्ध रहते हैं
 
-`groupSessionScope: "group_topic"` और `"group_topic_sender"` के लिए, नेटिव
-Feishu/Lark टॉपिक समूह इवेंट `thread_id` (`omt_*`) को कैनोनिकल
-टॉपिक सेशन कुंजी के रूप में उपयोग करते हैं। यदि कोई नेटिव टॉपिक स्टार्टर इवेंट `thread_id` छोड़ देता है, तो OpenClaw
-टर्न रूट करने से पहले इसे Feishu से हाइड्रेट करता है। सामान्य समूह उत्तर जिन्हें
-OpenClaw थ्रेड में बदलता है, वे रिप्लाई रूट संदेश ID (`om_*`) का उपयोग करते रहते हैं ताकि
-पहला टर्न और फ़ॉलो-अप टर्न उसी सेशन में रहें।
-
----
+विषय-समूह सत्र रूटिंग का विवरण
+[समूह सत्र का दायरा और विषय थ्रेड](#group-session-scope-and-topic-threads) में दिया गया है।
 
 ## संबंधित
 
 - [चैनल अवलोकन](/hi/channels) - सभी समर्थित चैनल
-- [पेयरिंग](/hi/channels/pairing) - DM प्रमाणीकरण और पेयरिंग फ़्लो
-- [समूह](/hi/channels/groups) - समूह चैट व्यवहार और मेंशन गेटिंग
-- [चैनल रूटिंग](/hi/channels/channel-routing) - संदेशों के लिए सेशन रूटिंग
-- [सुरक्षा](/hi/gateway/security) - एक्सेस मॉडल और हार्डनिंग
+- [पेयरिंग](/hi/channels/pairing) - DM प्रमाणीकरण और पेयरिंग प्रवाह
+- [समूह](/hi/channels/groups) - समूह चैट का व्यवहार और उल्लेख गेटिंग
+- [चैनल रूटिंग](/hi/channels/channel-routing) - संदेशों के लिए सत्र रूटिंग
+- [सुरक्षा](/hi/gateway/security) - एक्सेस मॉडल और सुदृढ़ीकरण

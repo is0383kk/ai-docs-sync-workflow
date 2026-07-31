@@ -5,29 +5,30 @@ read_when:
 summary: Jalankan OpenClaw dengan LM Studio
 title: LM Studio
 x-i18n:
-    generated_at: "2026-07-12T14:37:09Z"
+    generated_at: "2026-07-21T12:36:07Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b4223f90e786e285651fc889985dd61124c60758b4e9c3599d76201d9ac20b46
+    source_hash: f43b4d04aad6e5edfdf224747083834ebd441aa7f91ccbf2d61de990443fc414
     source_path: providers/lmstudio.md
     workflow: 16
 ---
 
 LM Studio menjalankan model llama.cpp (GGUF) atau MLX secara lokal, sebagai aplikasi GUI atau daemon `llmster`
-tanpa antarmuka grafis. Untuk dokumentasi instalasi dan produk, lihat [lmstudio.ai](https://lmstudio.ai/).
+tanpa antarmuka. Untuk dokumentasi instalasi dan produk, lihat [lmstudio.ai](https://lmstudio.ai/).
 
 ## Mulai cepat
 
 <Steps>
-  <Step title="Instal dan jalankan server">
-    Instal LM Studio (desktop) atau `llmster` (tanpa antarmuka grafis), lalu jalankan server:
+  <Step title="Instal dan mulai server">
+    Instal LM Studio (desktop) atau `llmster` (tanpa antarmuka), lalu mulai server:
 
     ```bash
     lms server start --port 1234
     ```
 
-    Atau jalankan daemon tanpa antarmuka grafis:
+    Atau jalankan daemon tanpa antarmuka:
 
     ```bash
     lms daemon up
@@ -51,12 +52,20 @@ tanpa antarmuka grafis. Untuk dokumentasi instalasi dan produk, lihat [lmstudio.
     openclaw onboard
     ```
 
-    Pilih `LM Studio`, lalu pilih model pada permintaan `Default model`.
+    Pilih `LM Studio`, lalu pilih model pada prompt `Default model`.
+
+    Pada penyiapan terpandu baru, OpenClaw terlebih dahulu melakukan kueri ke `/api/v1/models` pada
+    host LM Studio bawaan atau yang dikonfigurasi. LLM yang sudah ada ditawarkan secara otomatis
+    hanya ketika LM Studio melaporkan pelatihan penggunaan alat dan setidaknya 16K konteks
+    efektif. Untuk model yang dimuat, konteks instans yang dimuat lebih diutamakan daripada
+    nilai maksimum lebih besar yang diumumkan. Urutan penyiapan CLI/macOS yang sama memverifikasi
+    rute dengan penyelesaian nyata sebelum menyimpannya. Pemeriksaan otomatis tidak pernah
+    mengunduh model dan mengabaikan entri katalog khusus embedding.
 
   </Step>
 </Steps>
 
-Ubah model default nanti:
+Ubah model bawaan nanti:
 
 ```bash
 openclaw models set lmstudio/qwen/qwen3.5-9b
@@ -88,35 +97,35 @@ openclaw onboard \
   --custom-model-id qwen/qwen3.5-9b
 ```
 
-`--custom-model-id` menerima kunci model yang dikembalikan oleh LM Studio (misalnya `qwen/qwen3.5-9b`), tanpa
-awalan penyedia `lmstudio/`. Berikan `--lmstudio-api-key` (atau tetapkan `LM_API_TOKEN`) untuk server yang menggunakan
-autentikasi; abaikan untuk server tanpa autentikasi dan OpenClaw akan menyimpan penanda lokal nonrahasia sebagai gantinya.
-`--custom-api-key` masih diterima demi kompatibilitas, tetapi `--lmstudio-api-key` lebih disarankan.
+`--custom-model-id` menerima kunci model sebagaimana dikembalikan oleh LM Studio (misalnya `qwen/qwen3.5-9b`), tanpa
+prefiks penyedia `lmstudio/`. Teruskan `--lmstudio-api-key` (atau tetapkan `LM_API_TOKEN`) untuk server yang
+diautentikasi; hilangkan untuk server tanpa autentikasi, dan OpenClaw akan menyimpan penanda lokal nonrahasia sebagai gantinya.
+`--custom-api-key` masih diterima untuk kompatibilitas, tetapi `--lmstudio-api-key` lebih disarankan.
 
-Ini menulis `models.providers.lmstudio` dan menetapkan model default ke `lmstudio/<custom-model-id>`.
-Memberikan kunci API juga akan menulis profil autentikasi `lmstudio:default`.
+Tindakan ini menulis `models.providers.lmstudio` dan menetapkan model bawaan ke `lmstudio/<custom-model-id>`.
+Memberikan kunci API juga menulis profil autentikasi `lmstudio:default`.
 
 Penyiapan interaktif juga dapat meminta panjang konteks pemuatan yang diinginkan dan menerapkannya ke seluruh
-model yang ditemukan dan disimpan ke konfigurasi.
+model yang ditemukan serta disimpan ke konfigurasi.
 
 ## Konfigurasi
 
 ### Kompatibilitas penggunaan streaming
 
-LM Studio tidak selalu menghasilkan objek `usage` berbentuk OpenAI pada respons yang dialirkan. OpenClaw
+LM Studio tidak selalu memancarkan objek `usage` berbentuk OpenAI pada respons streaming. OpenClaw
 memulihkan jumlah token dari metadata bergaya llama.cpp `timings.prompt_n` / `timings.predicted_n`
-sebagai gantinya. Setiap titik akhir yang kompatibel dengan OpenAI dan ditetapkan sebagai titik akhir lokal (host local loopback) memperoleh
-mekanisme cadangan yang sama, yang mencakup backend lokal lain seperti vLLM, SGLang, llama.cpp, LocalAI, Jan, TabbyAPI,
+sebagai gantinya. Setiap endpoint yang kompatibel dengan OpenAI dan diidentifikasi sebagai endpoint lokal (host loopback) mendapatkan
+fallback yang sama, yang mencakup backend lokal lain seperti vLLM, SGLang, llama.cpp, LocalAI, Jan, TabbyAPI,
 dan text-generation-webui.
 
-### Kompatibilitas penalaran
+### Kompatibilitas pemikiran
 
-Saat penemuan `/api/v1/models` LM Studio melaporkan opsi penalaran khusus model, OpenClaw
-menyediakan nilai `reasoning_effort` yang sesuai (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`) dalam
-metadata kompatibilitas model. Beberapa versi LM Studio menampilkan opsi UI biner (`allowed_options: ["off",
+Ketika penemuan `/api/v1/models` LM Studio melaporkan opsi penalaran khusus model, OpenClaw
+menampilkan nilai `reasoning_effort` yang sesuai (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`) dalam
+metadata kompatibilitas model. Beberapa build LM Studio mengumumkan opsi UI biner (`allowed_options: ["off",
 "on"]`) tetapi menolak nilai literal tersebut pada `/v1/chat/completions`; OpenClaw menormalkan
-bentuk biner tersebut ke skala enam tingkat sebelum mengirim permintaan, termasuk untuk konfigurasi lama tersimpan yang
-masih memiliki pemetaan penalaran `off`/`on`.
+bentuk biner itu menjadi skala enam tingkat sebelum mengirim permintaan, termasuk untuk konfigurasi tersimpan lama yang
+masih memiliki peta penalaran `off`/`on`.
 
 ### Konfigurasi eksplisit
 
@@ -147,9 +156,9 @@ masih memiliki pemetaan penalaran `off`/`on`.
 
 ### Menonaktifkan pramuat
 
-LM Studio mendukung pemuatan model tepat waktu (JIT), yaitu memuat model pada permintaan pertama. Secara default, OpenClaw
-memuat model terlebih dahulu melalui titik akhir pemuatan native LM Studio, yang membantu saat JIT
-dinonaktifkan. Agar JIT, TTL saat tidak aktif, dan perilaku pengeluaran otomatis LM Studio yang mengelola siklus hidup model,
+LM Studio mendukung pemuatan model just-in-time (JIT), yaitu memuat model pada permintaan pertama. Secara bawaan, OpenClaw
+melakukan pramuat model melalui endpoint pemuatan native LM Studio, yang membantu ketika JIT
+dinonaktifkan. Agar JIT, TTL saat tidak aktif, dan perilaku pengeluaran otomatis LM Studio mengelola siklus hidup model,
 nonaktifkan langkah pramuat OpenClaw:
 
 ```json5
@@ -187,11 +196,11 @@ loopback pada mesin tersebut:
 }
 ```
 
-`lmstudio` secara otomatis memercayai titik akhir yang dikonfigurasi untuk permintaan model, termasuk host loopback,
+`lmstudio` secara otomatis memercayai endpoint yang dikonfigurasi untuk permintaan model, termasuk host loopback,
 LAN, dan tailnet (kecuali asal metadata/link-local). Setiap entri penyedia kustom/lokal yang kompatibel dengan OpenAI
-mendapatkan kepercayaan asal-persis yang sama. Permintaan ke host privat atau porta yang berbeda tetap
-memerlukan `models.providers.<id>.request.allowPrivateNetwork: true`; tetapkan ke `false` untuk menolak
-kepercayaan default.
+mendapatkan kepercayaan asal-persis yang sama. Permintaan ke host atau port privat lain tetap
+memerlukan `models.providers.<id>.request.allowPrivateNetwork: true`; tetapkan ke `false` untuk menonaktifkan
+kepercayaan bawaan.
 
 ## Pemecahan masalah
 
@@ -211,7 +220,7 @@ curl http://localhost:1234/api/v1/models
 
 ### Kesalahan autentikasi (HTTP 401)
 
-- Periksa bahwa `LM_API_TOKEN` cocok dengan kunci yang dikonfigurasi di LM Studio.
+- Pastikan `LM_API_TOKEN` cocok dengan kunci yang dikonfigurasi di LM Studio.
 - Lihat [Autentikasi LM Studio](https://lmstudio.ai/docs/developer/core/authentication).
 - Jika server tidak memerlukan autentikasi, biarkan kunci kosong selama penyiapan.
 

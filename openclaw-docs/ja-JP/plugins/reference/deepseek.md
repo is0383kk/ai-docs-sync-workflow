@@ -1,14 +1,15 @@
 ---
 read_when:
-    - deepseek Pluginをインストール、設定、または監査しています
+    - deepseek Plugin のインストール、設定、または監査を行っている場合
 summary: OpenClaw に DeepSeek モデルプロバイダーのサポートを追加します。
 title: DeepSeek Plugin
 x-i18n:
-    generated_at: "2026-07-11T22:29:36Z"
+    generated_at: "2026-07-26T09:43:07Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: e2e7de36581db36818f63f754da829d91163c0ae3eaab9a087da087d3c681538
+    source_hash: 9fba8a1a64bc216923b4ea893cf89f7c13874afaa54fed024ccd281c26cb3d02
     source_path: plugins/reference/deepseek.md
     workflow: 16
 ---
@@ -22,9 +23,9 @@ OpenClaw に DeepSeek モデルプロバイダーのサポートを追加しま�
 - パッケージ: `@openclaw/deepseek-provider`
 - インストール経路: npm、ClawHub: `clawhub:@openclaw/deepseek-provider`
 
-## 対応範囲
+## 提供機能
 
-プロバイダー: deepseek、コントラクト: usageProviders
+プロバイダー: `deepseek`、コントラクト: `usageProviders`
 
 ## 関連ドキュメント
 

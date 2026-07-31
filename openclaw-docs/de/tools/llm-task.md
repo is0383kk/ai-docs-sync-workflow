@@ -1,14 +1,14 @@
 ---
 read_when:
-    - Sie möchten einen LLM-Schritt ausschließlich mit JSON innerhalb von Workflows
-    - Sie benötigen eine schemavalidierte LLM-Ausgabe für die Automatisierung
+    - Sie möchten einen LLM-Schritt mit reiner JSON-Ausgabe innerhalb von Workflows
+    - Sie benötigen schemavalidierte LLM-Ausgaben für die Automatisierung
 summary: Reine JSON-LLM-Aufgaben für Workflows (optionales Plugin-Tool)
 title: LLM-Aufgabe
 x-i18n:
-    generated_at: "2026-07-12T15:57:54Z"
+    generated_at: "2026-07-26T18:40:53Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 15
+    prompt_version: 32
     provider: openai
     source_hash: 78ea533f43546fbdd66c7f7138b8dea0b12b02d38925689324b390a12d0c4c5a
     source_path: tools/llm-task.md
@@ -16,8 +16,8 @@ x-i18n:
 ---
 
 `llm-task` ist ein gebündeltes **optionales Plugin-Tool**, das einen einzelnen reinen JSON-
-LLM-Aufruf ausführt und strukturierte Ausgaben zurückgibt, die optional anhand eines JSON-
-Schemas validiert werden. Es stellt Workflow-Engines wie Lobster einen LLM-Schritt bereit, ohne dass
+LLM-Aufruf ausführt und eine strukturierte Ausgabe zurückgibt, die optional anhand eines JSON-
+Schemas validiert wird. Es stellt Workflow-Engines wie Lobster einen LLM-Schritt bereit, ohne dass
 für jeden Workflow eigener OpenClaw-Code erforderlich ist.
 
 ## Aktivieren
@@ -34,7 +34,7 @@ für jeden Workflow eigener OpenClaw-Code erforderlich ist.
 }
 ```
 
-2. Erlauben Sie das Tool:
+2. Lassen Sie das Tool zu:
 
 ```json
 {
@@ -45,8 +45,8 @@ für jeden Workflow eigener OpenClaw-Code erforderlich ist.
 ```
 
 `alsoAllow` fügt `llm-task` zusätzlich zum aktiven Tool-Profil hinzu, ohne
-andere Kern-Tools einzuschränken. Verwenden Sie stattdessen `tools.allow` nur, wenn Sie einen restriktiven
-Allowlist-Modus wünschen.
+andere Kern-Tools einzuschränken. Verwenden Sie stattdessen `tools.allow` nur, wenn Sie einen
+restriktiven Zulassungslistenmodus wünschen.
 
 ## Konfiguration (optional)
 
@@ -70,36 +70,36 @@ Allowlist-Modus wünschen.
 }
 ```
 
-`allowedModels` ist eine Allowlist aus `provider/model`-Zeichenfolgen; eine Anfrage für ein
-anderes Modell wird abgelehnt. Alle anderen Schlüssel dienen als aufrufspezifische Fallbacks, wenn beim
-Tool-Aufruf der jeweilige Parameter fehlt.
+`allowedModels` ist eine Zulassungsliste von `provider/model`-Zeichenfolgen; eine Anfrage für ein
+anderes Modell wird abgelehnt. Alle anderen Schlüssel sind Rückfallwerte pro Aufruf, die verwendet
+werden, wenn der Tool-Aufruf den jeweiligen Parameter auslässt.
 
 ## Tool-Parameter
 
-| Parameter       | Typ    | Hinweise                                                                                                                                                                   |
-| --------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prompt`        | string | Erforderlich. Aufgabenanweisung für das LLM.                                                                                                                               |
-| `input`         | any    | Optionale Nutzdaten; werden als JSON serialisiert und an den Prompt angehängt.                                                                                             |
-| `schema`        | object | Optionales JSON-Schema, anhand dessen die geparste Ausgabe validiert werden muss.                                                                                          |
-| `provider`      | string | Überschreibt `defaultProvider` bzw. den Standard-Provider des Agenten.                                                                                                     |
-| `model`         | string | Überschreibt `defaultModel`; akzeptiert reine Modell-IDs, Aliase oder eine `provider/model`-Referenz (ein doppeltes Provider-Präfix wird automatisch entfernt).             |
-| `thinking`      | string | Reasoning-Stufe (z. B. `low`, `medium`); muss vom aufgelösten Modell unterstützt werden.                                                                                   |
-| `authProfileId` | string | Überschreibt `defaultAuthProfileId`.                                                                                                                                       |
-| `temperature`   | number | Nach bestem Bemühen; nicht alle Provider berücksichtigen diesen Wert.                                                                                                     |
-| `maxTokens`     | number | Obergrenze für Ausgabe-Token nach bestem Bemühen.                                                                                                                         |
-| `timeoutMs`     | number | Zeitüberschreitung für die Ausführung; Standardwert `30000`.                                                                                                              |
+| Parameter       | Typ    | Hinweise                                                                                                                                      |
+| --------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prompt`        | string | Erforderlich. Aufgabenanweisung für das LLM.                                                                                                  |
+| `input`         | any    | Optionale Nutzlast; wird als JSON serialisiert und an den Prompt angehängt.                                                                   |
+| `schema`        | object | Optionales JSON-Schema, anhand dessen die geparste Ausgabe validiert werden muss.                                                             |
+| `provider`      | string | Überschreibt `defaultProvider` / den Standard-Provider des Agenten.                                                                          |
+| `model`         | string | Überschreibt `defaultModel`; akzeptiert reine Modell-IDs, Aliasse oder eine `provider/model`-Referenz (ein doppeltes Provider-Präfix wird automatisch entfernt). |
+| `thinking`      | string | Reasoning-Stufe (z. B. `low`, `medium`); muss vom aufgelösten Modell unterstützt werden.                                |
+| `authProfileId` | string | Überschreibt `defaultAuthProfileId`.                                                                                                              |
+| `temperature`   | number | Bestmögliche Umsetzung; nicht alle Provider berücksichtigen den Wert.                                                                         |
+| `maxTokens`     | number | Bestmögliche Obergrenze für Ausgabetoken.                                                                                                     |
+| `timeoutMs`     | number | Zeitlimit für die Ausführung; Standardwert `30000`.                                                                                |
 
 ## Ausgabe
 
-Gibt `details.json` (das geparste, anhand des Schemas validierte JSON) sowie
-`details.provider` und `details.model` zurück, die angeben, was tatsächlich ausgeführt wurde.
+Gibt `details.json` (das geparste, anhand des Schemas validierte JSON) sowie `details.provider`
+und `details.model` zurück, die angeben, was tatsächlich ausgeführt wurde.
 
 ## Beispiel: Lobster-Workflow-Schritt
 
 ### Wichtige Einschränkung
 
-Das folgende Beispiel setzt voraus, dass die **eigenständige Lobster-CLI** in einer Umgebung ausgeführt wird,
-in der `openclaw.invoke` bereits über den richtigen Gateway-URL-/Authentifizierungskontext verfügt.
+Das folgende Beispiel setzt voraus, dass die **eigenständige Lobster-CLI** dort ausgeführt wird, wo
+`openclaw.invoke` bereits über den korrekten Gateway-URL-/Authentifizierungskontext verfügt.
 
 Für den gebündelten **eingebetteten** Lobster-Runner innerhalb von OpenClaw ist dieses verschachtelte CLI-
 Muster **derzeit nicht zuverlässig**:
@@ -108,16 +108,16 @@ Muster **derzeit nicht zuverlässig**:
 openclaw.invoke --tool llm-task --action json --args-json '{ ... }'
 ```
 
-Bis eingebettetes Lobster über eine unterstützte Brücke für diesen Ablauf verfügt, verwenden Sie vorzugsweise entweder:
+Bis eingebettetes Lobster eine unterstützte Brücke für diesen Ablauf bietet, verwenden Sie vorzugsweise entweder:
 
 - direkte Aufrufe des Tools `llm-task` außerhalb von Lobster oder
-- Lobster-Schritte, die nicht auf verschachtelten Aufrufen von `openclaw.invoke` basieren.
+- Lobster-Schritte, die nicht auf verschachtelten `openclaw.invoke`-Aufrufen beruhen.
 
 Beispiel für die eigenständige Lobster-CLI:
 
 ```lobster
 openclaw.invoke --tool llm-task --action json --args-json '{
-  "prompt": "Ermitteln Sie anhand der eingegebenen E-Mail die Absicht und geben Sie einen Entwurf zurück.",
+  "prompt": "Gib anhand der eingegebenen E-Mail die Absicht und einen Entwurf zurück.",
   "thinking": "low",
   "input": {
     "subject": "Hallo",
@@ -139,14 +139,14 @@ openclaw.invoke --tool llm-task --action json --args-json '{
 
 - **Nur JSON**: Das Modell wird angewiesen, ausschließlich einen JSON-Wert zurückzugeben, ohne Code-
   Blöcke und ohne Kommentare.
-- **Keine Tools**: Bei der zugrunde liegenden Ausführung sind Tools deaktiviert, sodass das Modell
-  während der Aufgabe keine externen Aufrufe durchführen kann.
+- **Keine Tools**: Für die zugrunde liegende Ausführung sind Tools deaktiviert, sodass das Modell
+  während der Aufgabe keine externen Aufrufe tätigen kann.
 - Behandeln Sie die Ausgabe als nicht vertrauenswürdig, sofern Sie sie nicht mit `schema` validieren.
-- Platzieren Sie Genehmigungen vor jedem Schritt mit Seiteneffekten (Senden, Veröffentlichen, Ausführen), der
-  diese Ausgabe verwendet.
+- Fügen Sie vor jedem Schritt mit Nebenwirkungen (Senden, Veröffentlichen, Ausführen), der diese
+  Ausgabe verwendet, eine Genehmigung ein.
 
 ## Verwandte Themen
 
-- [Thinking-Stufen](/de/tools/thinking)
+- [Reasoning-Stufen](/de/tools/thinking)
 - [Sub-Agenten](/de/tools/subagents)
 - [Slash-Befehle](/de/tools/slash-commands)

@@ -1,32 +1,40 @@
 ---
 read_when:
-    - Mantis Slack masaüstü kalite güvencesini GitHub üzerinden veya yerel olarak çalıştırma
+    - Mantis Slack masaüstü QA'sını GitHub'dan veya yerel olarak çalıştırma
     - Yavaş Mantis Slack masaüstü çalıştırmalarında hata ayıklama
     - Kaynak, önceden hazırlanmış veya sıcak kiralama modunu seçme
-    - Ekran görüntüsü ve video kanıtlarını bir PR'ye gönderme
-summary: 'Mantis Slack masaüstü kalite güvencesi için operatör çalışma kılavuzu: GitHub tetikleme, yerel CLI, hazır VNC kiralamaları, hazırlama modları, zamanlama yorumlama, yapıtlar ve hata yönetimi.'
+    - Bir PR'a ekran görüntüsü ve video kanıtı gönderme
+summary: 'Mantis Slack masaüstü QA için operatör çalışma kılavuzu: GitHub tetikleme, yerel CLI, hazır VNC kiralamaları, hydrate modları, zamanlama yorumlama, yapıtlar ve hata yönetimi.'
 title: Mantis Slack masaüstü çalışma kılavuzu
 x-i18n:
-    generated_at: "2026-07-12T12:13:18Z"
+    generated_at: "2026-07-26T23:54:31Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: b3e956d99fc43a7b6fe65e2e820812b0e0e8b9e32badd25be27c74d302ab30dc
     source_path: concepts/mantis-slack-desktop-runbook.md
     workflow: 16
 ---
 
-Mantis Slack masaüstü QA, Linux masaüstü, VNC ile kurtarma, Slack Web, gerçek bir OpenClaw gateway'i, ekran görüntüleri, videolar ve PR kanıt yorumu gerektiren Slack sınıfı hatalar için gerçek kullanıcı arayüzü hattıdır. Birim testleri veya başsız Slack canlı hattı hatayı kanıtlayamadığında bunu kullanın.
+Mantis Slack masaüstü QA, Linux masaüstü, VNC ile kurtarma, Slack Web, gerçek bir OpenClaw gateway, ekran görüntüleri, videolar ve PR kanıt yorumu gerektiren Slack sınıfı hatalar için gerçek kullanıcı arayüzü hattıdır. Birim testleri veya başsız Slack canlı hattı hatayı kanıtlayamadığında bunu kullanın.
 
 ## Depolama modeli
 
 Mantis üç depolama katmanı kullanır:
 
-- **Sağlayıcı imajı** - Crabbox'a aittir ve bulut sağlayıcısı hesabında depolanır. Makine yeteneklerini (Chrome/Chromium, ffmpeg, scrot, Node/corepack/pnpm, yerel derleme araçları) ve boş önbellek dizinlerini içerir.
-- **Sıcak kiralama durumu** - geçerli operatör oturumuna aittir. Kiralama etkin olduğu sürece oturum açılmış bir tarayıcı profilini, `/var/cache/crabbox/pnpm` dizinini ve hazırlanmış bir kaynak deposu çalışma kopyasını barındırabilir.
-- **Mantis yapıtları** - OpenClaw çalıştırmasına aittir. `.artifacts/qa-e2e/mantis/...` altında bulunur; GitHub Actions bunları yükler ve Mantis GitHub App, PR'a satır içi kanıt yorumu ekler.
+- **Sağlayıcı imajı** - Crabbox'a aittir ve bulut sağlayıcısı hesabında depolanır.
+  Makine yeteneklerini (Chrome/Chromium, ffmpeg, scrot,
+  Node/corepack/pnpm, yerel derleme araçları) ve boş önbellek dizinlerini içerir.
+- **Sıcak kiralama durumu** - mevcut operatör oturumuna aittir. Kiralama etkin olduğu sürece
+  oturum açılmış bir tarayıcı profili, `/var/cache/crabbox/pnpm` ve hazırlanmış bir kaynak
+  çalışma kopyası içerebilir.
+- **Mantis yapıtları** - OpenClaw çalıştırmasına aittir.
+  `.artifacts/qa-e2e/mantis/...` altında bulunur; GitHub Actions bunları yükler ve Mantis
+  GitHub App, PR üzerinde satır içi kanıt yorumu yapar.
 
-Gizli bilgileri, tarayıcı çerezlerini, Slack oturum açma durumunu, depo çalışma kopyalarını, `node_modules` veya `dist/` dizinlerini hiçbir zaman sağlayıcı imajına gömmeyin.
+Gizli bilgileri, tarayıcı çerezlerini, Slack oturum açma durumunu, depo çalışma kopyalarını,
+`node_modules` veya `dist/` değerlerini asla bir sağlayıcı imajına yerleştirmeyin.
 
 ## GitHub tetikleme
 
@@ -43,12 +51,13 @@ gh workflow run mantis-slack-desktop-smoke.yml \
   -f hydrate_mode=source
 ```
 
-İş akışı canlı kimlik bilgileri kullandığından `candidate_ref` kısıtlanmıştır: geçerli `main` geçmişine, bir sürüm etiketine veya `openclaw/openclaw` içindeki açık bir PR'ın başına çözümlenmelidir.
+İş akışı canlı kimlik bilgilerini kullandığından `candidate_ref` kısıtlanmıştır: geçerli `main` üst soyuna, bir sürüm etiketine veya
+`openclaw/openclaw` içindeki açık bir PR başına çözümlenmelidir.
 
 İş akışı şunları üretir:
 
-- yüklenen `mantis-slack-desktop-smoke-<run-id>-<attempt>` yapıtı
-- Mantis GitHub App tarafından eklenen satır içi PR yorumu
+- yüklenen yapıt `mantis-slack-desktop-smoke-<run-id>-<attempt>`
+- Mantis GitHub App tarafından oluşturulan satır içi PR yorumu
 - `slack-desktop-smoke.png`, `slack-desktop-smoke.mp4`
 - `slack-desktop-smoke-preview.gif`, `slack-desktop-smoke-change.mp4`
 - `mantis-slack-desktop-smoke-summary.json`, `mantis-slack-desktop-smoke-report.md`
@@ -74,7 +83,7 @@ pnpm openclaw qa mantis slack-desktop-smoke \
   --hydrate-mode source
 ```
 
-VNC ile kurtarma için sanal makineyi koruyun:
+VNC ile kurtarma için VM'yi koruyun:
 
 ```bash
 pnpm openclaw qa mantis slack-desktop-smoke \
@@ -102,7 +111,8 @@ pnpm openclaw qa mantis slack-desktop-smoke \
   --hydrate-mode source
 ```
 
-`--hydrate-mode prehydrated` seçeneğini yalnızca yeniden kullanılan uzak çalışma alanında zaten `node_modules` ve derlenmiş bir `dist/` bulunduğunda kullanın; aksi takdirde Mantis güvenli biçimde başarısız olur.
+`--hydrate-mode prehydrated` seçeneğini yalnızca yeniden kullanılan uzak çalışma alanında zaten
+`node_modules` ve derlenmiş bir `dist/` bulunduğunda kullanın; aksi takdirde Mantis güvenli biçimde başarısız olur.
 
 Yerel Slack onay kullanıcı arayüzünü kanıtlayın:
 
@@ -116,56 +126,79 @@ pnpm openclaw qa mantis slack-desktop-smoke \
   --hydrate-mode source
 ```
 
-`--approval-checkpoints` ile `--gateway-setup` birlikte kullanılamaz. Açık bir onay denetim noktası `--scenario` değeri vermediğiniz sürece isteğe bağlı `slack-approval-exec-native` ve `slack-approval-plugin-native` senaryolarını çalıştırır; diğer Slack senaryoları sanal makine başlamadan önce reddedilir. Slack QA çalıştırıcısı, gözlemlediği gerçek Slack API mesajından her denetim noktası JSON dosyasını yazar; ardından uzak izleyici bu mesajı `approval-checkpoints/<scenario>-pending.png` ve `approval-checkpoints/<scenario>-resolved.png` dosyalarına işler. Herhangi bir denetim noktası JSON'u, mesaj kanıtı, alındı JSON'u veya işlenmiş ekran görüntüsü eksik ya da boşsa çalıştırma başarısız olur.
+`--approval-checkpoints` ile `--gateway-setup` birbirini dışlar. Açık bir onay kontrol noktası `--scenario` iletmediğiniz sürece
+isteğe bağlı `slack-approval-exec-native` ve `slack-approval-plugin-native`
+senaryolarını çalıştırır; diğer Slack senaryoları VM başlamadan önce reddedilir. Slack QA çalıştırıcısı,
+gözlemlediği gerçek Slack API mesajından her kontrol noktası JSON dosyasını yazar; ardından
+uzak izleyici bu mesajı
+`approval-checkpoints/<scenario>-pending.png` ve
+`approval-checkpoints/<scenario>-resolved.png` içine işler. Herhangi bir
+kontrol noktası JSON'u, mesaj kanıtı, onay JSON'u veya işlenmiş ekran görüntüsü eksik
+ya da boşsa çalıştırma başarısız olur.
 
-Soğuk GitHub Actions kiralamalarında Slack Web çerezleri bulunmadığından tarayıcı yakalaması Slack oturum açma ekranına ulaşabilir. Onay denetim noktası kanıtı için `slack-desktop-smoke.png` yerine işlenmiş denetim noktası görüntülerine ve Slack QA yapıtlarına güvenin. Tarayıcı ekran görüntüsünün bizzat Slack Web'i göstermesi gerektiğinde yalnızca Slack Web profilinde elle oturum açılmış ve korunan sıcak bir kiralama kullanın.
+Soğuk GitHub Actions kiralamalarında Slack Web çerezleri bulunmaz; bu nedenle tarayıcı yakalamaları
+Slack oturum açma ekranına ulaşabilir. Onay kontrol noktası kanıtı için
+`slack-desktop-smoke.png` yerine işlenmiş kontrol noktası görüntülerine ve Slack QA yapıtlarına güvenin. Yalnızca tarayıcı ekran görüntüsünün
+Slack Web'i göstermesi gerektiğinde, Slack Web'de elle oturum açılmış bir profile sahip ve korunan sıcak bir kiralama kullanın.
 
 ## Hazırlama modları
 
-| Mod           | Kullanım durumu                            | Uzak davranış                                                                          | Ödünleşim                                                     |
-| ------------- | ------------------------------------------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `source`      | Normal PR kanıtı, soğuk makineler, CI      | Sanal makine içinde `pnpm install --frozen-lockfile --prefer-offline` ve `pnpm build` çalıştırır | En yavaş, en güçlü kaynak çalışma kopyası kanıtı               |
-| `prehydrated` | Yeniden kullanılan bir kiralamayı bilerek hazırladığınızda | Mevcut `node_modules` ve `dist/` gerektirir; kurulumu/derlemeyi atlar                   | Hızlıdır, ancak yalnızca operatör denetimindeki sıcak kiralamalar için geçerlidir |
+| Mod          | Kullanım durumu                                  | Uzak davranış                                                                       | Ödünleşim                                                 |
+| ------------- | ----------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `source`      | Normal PR kanıtı, soğuk makineler, CI        | VM içinde `pnpm install --frozen-lockfile --prefer-offline` ve `pnpm build` çalıştırır | En yavaş, en güçlü kaynak çalışma kopyası kanıtı                 |
+| `prehydrated` | Yeniden kullanılan bir kiralamayı bilinçli olarak hazırladığınızda | Mevcut `node_modules` ve `dist/` gerektirir; kurulum/derlemeyi atlar                     | Hızlıdır, ancak yalnızca operatör denetimindeki sıcak kiralamalar için geçerlidir |
 
-GitHub Actions, sanal makine çalıştırmasından önce aday çalışma kopyasını her zaman hazırlar. pnpm deposu işletim sistemine, Node sürümüne ve kilit dosyasına göre önbelleğe alınır. Sanal makinedeki `source` çalıştırması da mevcut olduğunda `/var/cache/crabbox/pnpm` dizinini yeniden kullanır.
+GitHub Actions, VM çalıştırmasından önce her zaman aday çalışma kopyasını hazırlar.
+pnpm deposu; işletim sistemi, Node sürümü ve kilit dosyasına göre önbelleğe alınır. VM'deki `source` çalıştırması da
+mevcut olduğunda `/var/cache/crabbox/pnpm` değerini yeniden kullanır.
 
 ## Zamanlama yorumu
 
-`mantis-slack-desktop-smoke-report.md` aşama sürelerini içerir:
+`mantis-slack-desktop-smoke-report.md` aşama zamanlamalarını içerir:
 
-- `crabbox.warmup` - bulut sağlayıcısının başlatılması, masaüstü/tarayıcı hazırlığı, SSH.
-- `crabbox.inspect` - kiralama meta verisi sorgulaması.
-- `credentials.prepare` - Convex kimlik bilgisi kiralamasının edinilmesi.
-- `crabbox.remote_run` - eşitleme, tarayıcının başlatılması, OpenClaw kurulumu/derlemesi veya hazırlama doğrulaması, gateway'in başlatılması, ekran görüntüsü ve video yakalama.
-- `artifacts.copy` - sanal makineden rsync ile geri kopyalama.
+- `crabbox.warmup` - bulut sağlayıcısının önyüklenmesi, masaüstü/tarayıcı hazırlığı, SSH.
+- `crabbox.inspect` - kiralama meta verisi araması.
+- `credentials.prepare` - Convex kimlik bilgisi kiralamasının alınması.
+- `crabbox.remote_run` - eşitleme, tarayıcının başlatılması, OpenClaw kurulumu/derlemesi veya
+  hazırlama doğrulaması, gateway başlatma, ekran görüntüsü ve video yakalama.
+- `artifacts.copy` - VM'den geri rsync aktarımı.
 
-Crabbox sıfır olmayan bir uzak durum döndürdüğünde ancak Mantis, OpenClaw gateway kurulumunun tamamlandığını veya Slack QA komutunun başarıyla çıktığını kanıtlayan meta verileri kopyaladığında `crabbox.remote_run`, `accepted` gösterebilir. `accepted` durumunu başarısız bir senaryo olarak değil, açıklamalı geçiş olarak değerlendirin.
+Crabbox sıfır olmayan bir uzak durum döndürdüğünde, ancak Mantis OpenClaw gateway
+kurulumunun tamamlandığını veya Slack QA komutunun başarıyla çıktığını kanıtlayan meta verileri kopyaladığında,
+`crabbox.remote_run` içinde `accepted` gösterilebilir.
+`accepted` değerini başarısız bir senaryo olarak değil, açıklamalı başarı olarak değerlendirin.
 
 Bir çalıştırma yavaşsa:
 
-- Hazırlık baskınsa: daha iyi bir Crabbox sağlayıcı imajını önceden oluşturun veya yükseltin.
-- `source` modunda `remote_run` baskınsa: sıcak bir kiralama kullanın, pnpm deposunun yeniden kullanımını iyileştirin veya makine ön koşullarını sağlayıcı imajına taşıyın.
-- `prehydrated` modunda `remote_run` baskınsa: uzak çalışma alanı gerçekte hazır değildir ya da gateway/tarayıcı/Slack kurulumu yavaştır.
+- Isınma baskınsa: daha iyi bir Crabbox sağlayıcı imajını önceden oluşturun veya terfi ettirin.
+- `source` içinde `remote_run` baskınsa: sıcak bir kiralama kullanın, pnpm deposunun
+  yeniden kullanımını iyileştirin veya makine ön koşullarını sağlayıcı imajına taşıyın.
+- `prehydrated` içinde `remote_run` baskınsa: uzak çalışma alanı gerçekte
+  hazır değildir veya gateway/tarayıcı/Slack kurulumu yavaştır.
 - Yapıt kopyalama baskınsa: video boyutunu ve yapıt dizininin içeriğini inceleyin.
 
-## Kanıt denetim listesi
+## Kanıt kontrol listesi
 
 İyi bir PR yorumu şunları gösterir:
 
 - senaryo kimliği ve aday SHA
 - GitHub Actions çalıştırma URL'si ve yapıt URL'si
-- satır içi onay denetim noktası ekran görüntüsü veya oturum açılmış sıcak kiralamadan alınan bir Slack Web ekran görüntüsü
-- varsa satır içi animasyonlu önizleme
+- satır içi onay kontrol noktası ekran görüntüsü veya oturum açılmış
+  sıcak bir kiralamadan alınan Slack Web ekran görüntüsü
+- mevcut olduğunda satır içi animasyonlu önizleme
 - tam MP4 ve kırpılmış MP4 bağlantıları
-- başarılı/başarısız durumu ve raporun zamanlama özeti
+- başarı/başarısızlık durumu ve raporun zamanlama özeti
 
-Ekran görüntülerini veya videoları depoya işlemeyin. Bunları GitHub Actions yapıtlarında veya PR yorumunda tutun.
+Ekran görüntülerini veya videoları depoya işlemeyin. Bunları GitHub
+Actions yapıtlarında veya PR yorumunda tutun.
 
-## Hata işleme
+## Hata yönetimi
 
-İş akışı sanal makine çalıştırmasından önce başarısız olursa önce Actions işini inceleyin. Yaygın nedenler: güvenilmeyen `candidate_ref`, eksik ortam gizli bilgileri veya adayın kurulum/derleme hatası.
+İş akışı VM çalıştırmasından önce başarısız olursa önce Actions işini inceleyin.
+Tipik nedenler: güvenilmeyen `candidate_ref`, eksik ortam gizli bilgileri veya
+aday kurulum/derleme hatası.
 
-Sanal makine çalıştırması başarısız olur ancak ekran görüntüleri geri kopyalanırsa şunları inceleyin:
+VM çalıştırması başarısız olur ancak ekran görüntüleri geri kopyalanırsa şunları inceleyin:
 
 ```bash
 cat mantis-slack-desktop-smoke-report.md
@@ -176,16 +209,18 @@ cat chrome.log
 cat ffmpeg.log
 ```
 
-Çalıştırma kiralamayı koruduysa rapordaki `crabbox vnc ...` komutuyla VNC'yi açın, ardından işiniz bittiğinde kiralamayı durdurun:
+Çalıştırma kiralamayı koruduysa rapordaki `crabbox vnc ...`
+komutuyla VNC'yi açın, ardından işiniz bittiğinde kiralamayı durdurun:
 
 ```bash
 crabbox stop --provider aws <cbx_id-or-slug>
 ```
 
-Slack oturumu sona erdiyse korunan bir kiralamada VNC üzerinden düzeltin ve `--lease-id` ile yeniden çalıştırın. Bu tarayıcı profilini sağlayıcı imajına gömmeyin.
+Slack oturumunun süresi dolduysa korunan bir kiralamada VNC üzerinden oturumu düzeltin ve
+`--lease-id` ile yeniden çalıştırın. Bu tarayıcı profilini bir sağlayıcı imajına yerleştirmeyin.
 
 ## İlgili
 
-- [QA genel bakışı](/tr/concepts/qa-e2e-automation)
+- [QA'ya genel bakış](/tr/concepts/qa-e2e-automation)
 - [Slack kanalı](/tr/channels/slack)
-- [Test etme](/tr/help/testing)
+- [Test](/tr/help/testing)

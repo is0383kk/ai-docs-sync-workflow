@@ -1,27 +1,28 @@
 ---
 read_when:
-    - ClawHub CLI'ı Kullanma
-    - Kurulum, güncelleme veya yayımlama hata ayıklaması
-summary: 'CLI referansı: komutlar, bayraklar, yapılandırma ve kilit dosyası davranışı.'
+    - ClawHub CLI'yi Kullanma
+    - Yükleme, güncelleme veya yayımlama sorunlarını ayıklama
+summary: 'CLI başvurusu: komutlar, bayraklar, yapılandırma ve kilit dosyası davranışı.'
 x-i18n:
-    generated_at: "2026-07-03T17:38:18Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T23:33:36Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 23065775d74e7b52ed250051b8724b780c28dfdfc0adf9b8f115f7133fbdd77b
+    source_hash: eba91a83c5542c4b570bd22a526911633e43d0b4e921c013e6fd29451193f2a7
     source_path: clawhub/cli.md
     workflow: 16
 ---
 
 # CLI
 
-CLI paketi: `clawhub`, bin: `clawhub`.
+CLI paketi: `clawhub`, ikili dosya: `clawhub`.
 
-npm veya pnpm ile global olarak kurun:
+npm veya pnpm ile genel olarak yükleyin:
 
 ```bash
 npm i -g clawhub
-# or
+# veya
 pnpm add -g clawhub
 ```
 
@@ -33,21 +34,21 @@ clawhub login
 clawhub whoami
 ```
 
-## Global bayraklar
+## Genel bayraklar
 
 - `--workdir <dir>`: çalışma dizini (varsayılan: cwd; yapılandırılmışsa Clawdbot çalışma alanına geri döner)
-- `--dir <dir>`: workdir altında kurulum dizini (varsayılan: `skills`)
-- `--site <url>`: tarayıcı girişi için temel URL (varsayılan: `https://clawhub.ai`)
-- `--registry <url>`: API temel URL'si (varsayılan: keşfedilen, aksi halde `https://clawhub.ai`)
-- `--no-input`: istemleri devre dışı bırak
+- `--dir <dir>`: workdir altındaki yükleme dizini (varsayılan: `skills`)
+- `--site <url>`: tarayıcı oturum açma işleminin temel URL'si (varsayılan: `https://clawhub.ai`)
+- `--registry <url>`: API temel URL'si (varsayılan: keşfedilen, aksi hâlde `https://clawhub.ai`)
+- `--no-input`: istemleri devre dışı bırakır
 
-Env eşdeğerleri:
+Eşdeğer ortam değişkenleri:
 
 - `CLAWHUB_SITE` (eski `CLAWDHUB_SITE`)
 - `CLAWHUB_REGISTRY` (eski `CLAWDHUB_REGISTRY`)
 - `CLAWHUB_WORKDIR` (eski `CLAWDHUB_WORKDIR`)
 
-### HTTP proxy
+### HTTP proxy'si
 
 CLI, kurumsal proxy'lerin veya kısıtlı ağların arkasındaki sistemler için
 standart HTTP proxy ortam değişkenlerine uyar:
@@ -58,11 +59,11 @@ standart HTTP proxy ortam değişkenlerine uyar:
 
 Bu değişkenlerden herhangi biri ayarlandığında CLI, giden istekleri belirtilen
 proxy üzerinden yönlendirir. HTTPS istekleri için `HTTPS_PROXY`, düz HTTP için
-`HTTP_PROXY` kullanılır. Belirli ana makineler veya alan adları için proxy'yi
-atlamak üzere `NO_PROXY` / `no_proxy` dikkate alınır.
+`HTTP_PROXY` kullanılır. Belirli ana makineler veya etki alanları için proxy'yi
+atlamak üzere `NO_PROXY` / `no_proxy` değerine uyulur.
 
-Bu, doğrudan giden bağlantıların engellendiği sistemlerde gereklidir
-(ör. Docker konteynerleri, yalnızca proxy üzerinden internete sahip Hetzner VPS,
+Doğrudan giden bağlantıların engellendiği sistemlerde bu gereklidir
+(ör. Docker kapsayıcıları, yalnızca proxy üzerinden internete erişebilen Hetzner VPS,
 kurumsal güvenlik duvarları).
 
 Örnek:
@@ -77,127 +78,130 @@ Hiçbir proxy değişkeni ayarlanmadığında davranış değişmez (doğrudan b
 
 ## Yapılandırma dosyası
 
-API token'ınızı + önbelleğe alınmış registry URL'sini saklar.
+API belirtecinizi ve önbelleğe alınmış kayıt defteri URL'sini saklar.
 
 - macOS: `~/Library/Application Support/clawhub/config.json`
 - Linux/XDG: `$XDG_CONFIG_HOME/clawhub/config.json` veya `~/.config/clawhub/config.json`
 - Windows: `%APPDATA%\\clawhub\\config.json`
-- Eski geri dönüş: `clawhub/config.json` henüz yoksa ancak `clawdhub/config.json` varsa, CLI eski yolu yeniden kullanır
+- Eski geri dönüş: `clawhub/config.json` henüz mevcut değil ancak `clawdhub/config.json` mevcutsa CLI eski yolu yeniden kullanır
 - geçersiz kılma: `CLAWHUB_CONFIG_PATH` (eski `CLAWDHUB_CONFIG_PATH`)
 
 ## Komutlar
 
 ### `login` / `auth login`
 
-- Varsayılan: tarayıcıyı `<site>/cli/auth` adresine açar ve loopback callback üzerinden tamamlar.
-- Headless: `clawhub login --token clh_...`
-- Uzak/headless etkileşimli: `clawhub login --device` bir kod yazdırır ve siz `<site>/cli/device` adresinde yetkilendirirken bekler.
+- Varsayılan: tarayıcıyı `<site>/cli/auth` adresinde açar ve geri döngü geri çağrısı aracılığıyla tamamlar.
+- Başsız: `clawhub login --token clh_...`
+- Uzak/başsız etkileşimli: `clawhub login --device` bir kod yazdırır ve siz `<site>/cli/device` adresinde yetkilendirirken bekler.
 
 ### `whoami`
 
-- Saklanan token'ı `/api/v1/whoami` üzerinden doğrular.
+- Saklanan belirteci `/api/v1/whoami` aracılığıyla doğrular.
 
 ### `token`
 
-- Saklanan API token'ını stdout'a yazdırır.
-- Yerel giriş token'ını CI secret kurulum komutlarına pipe etmek için kullanışlıdır.
+- Saklanan API belirtecini stdout'a yazdırır.
+- Yerel oturum açma belirtecini CI gizli dizi kurulum komutlarına aktarmak için kullanışlıdır.
 
 ### `star <skill>` / `unstar <skill>`
 
-- Öne çıkanlarınıza bir beceri ekler/kaldırır.
+- Yer İmlerinize bir skill ekler veya kaldırır. Komut adları uyumluluk için
+  `star` ve `unstar` olarak kalır.
 - `POST /api/v1/stars/<slug>` ve `DELETE /api/v1/stars/<slug>` çağrılarını yapar.
 - `--yes` onayı atlar.
 
 ### `search <query...>`
 
 - `/api/v1/search?q=...` çağrısını yapar.
-- Çıktı beceri slug'ını, sahip handle'ını, görünen adı ve alaka puanını içerir.
-- Arama, indirme popülerliğinden önce tam slug/ad token eşleşmelerini tercih eder. `map` gibi bağımsız bir slug token'ı, `amap` içindeki alt dizeden daha güçlü biçimde `personal-map` ile eşleşir.
-- Popülerlik küçük bir sıralama önceliğidir, en üstte yer alma garantisi değildir.
-- Bir beceri görünmesi gerekirken görünmüyorsa, metadata'yı yeniden adlandırmadan önce sahip tarafından görülebilen moderasyon tanılarını kontrol etmek için oturum açıkken `clawhub inspect @owner/slug` çalıştırın.
+- Çıktı; skill kısa adını, sahip kullanıcı adını, görünen adı ve alaka puanını içerir.
+- Arama, indirme popülerliğinden önce kısa ad/ad belirteçlerinin tam eşleşmelerini tercih eder. `map` gibi bağımsız bir kısa ad belirteci, `amap` içindeki alt diziye kıyasla `personal-map` ile daha güçlü eşleşir.
+- Popülerlik küçük bir sıralama önceliğidir; en üstte yer alma garantisi değildir.
+- Bir skill görünmesi gerektiği hâlde görünmüyorsa meta veriyi yeniden adlandırmadan önce, sahip tarafından görülebilen moderasyon tanılamalarını denetlemek için oturum açmış durumdayken `clawhub inspect @owner/slug` komutunu çalıştırın.
 
 ### `explore`
 
-- En yeni Skills listesini `/api/v1/skills?limit=...&sort=createdAt` üzerinden listeler (`createdAt` desc olarak sıralanır).
+- En yeni skill'leri `/api/v1/skills?limit=...&sort=createdAt` aracılığıyla listeler (`createdAt` azalan düzende sıralanır).
 - Bayraklar:
   - `--limit <n>` (1-200, varsayılan: 25)
-  - `--sort newest|updated|rating|downloads|trending` (varsayılan: newest). Eski install sort alias'ları uyumluluk için hâlâ çalışır.
+  - `--sort newest|updated|rating|downloads|trending` (varsayılan: en yeni). Eski yükleme sıralama diğer adları uyumluluk için çalışmaya devam eder.
   - `--json` (makine tarafından okunabilir çıktı)
 - Çıktı: `<slug>  v<version>  <age>  <summary>` (özet 50 karaktere kısaltılır).
 
 ### `inspect @owner/slug`
 
-- Kurulum yapmadan beceri metadata'sını ve sürüm dosyalarını getirir.
-- `--version <version>`: belirli bir sürümü incele (varsayılan: latest).
-- `--tag <tag>`: etiketli bir sürümü incele (ör. `latest`).
-- `--versions`: sürüm geçmişini listele (ilk sayfa).
-- `--limit <n>`: listelenecek en fazla sürüm (1-200).
-- `--files`: seçilen sürümün dosyalarını listele.
-- `--file <path>`: ham dosya içeriğini getir (yalnızca metin dosyaları; 200KB sınırı).
-- `--json`: makine tarafından okunabilir çıktı.
+- Yüklemeden skill meta verilerini ve sürüm dosyalarını getirir.
+- `--version <version>`: belirli bir sürümü inceleyin (varsayılan: en son).
+- `--tag <tag>`: etiketlenmiş bir sürümü inceleyin (ör. `latest`).
+- `--versions`: sürüm geçmişini listeleyin (ilk sayfa).
+- `--limit <n>`: listelenecek azami sürüm sayısı (1-200).
+- `--files`: seçilen sürümün dosyalarını listeleyin.
+- `--file <path>`: ham dosya baytlarını getirin (10MB sınırı).
+- `--json`: makine tarafından okunabilir çıktı; `--file`, kullanılabilir olduğunda tam baytları base64 ve UTF-8 metni olarak içerir.
 
 ### `install @owner/slug`
 
-- Adlandırılan sahip ve beceri için en son sürümü çözer.
-- Zip'i `/api/v1/download` üzerinden indirir.
-- `<workdir>/<dir>/<slug>` içine çıkarır.
-- Pinlenmiş Skills üzerine yazmayı reddeder; önce `clawhub unpin <skill>` çalıştırın.
+- Adlandırılan sahip ve skill için en son sürümü çözümler.
+- Zip dosyasını `/api/v1/download` aracılığıyla indirir.
+- `<workdir>/<dir>/<slug>` içine ayıklar.
+- Sabitlenmiş skill'lerin üzerine yazmayı reddeder; önce `clawhub unpin <skill>` komutunu çalıştırın.
 - Şunları yazar:
   - `<workdir>/.clawhub/lock.json` (eski `.clawdhub`)
   - `<skill>/.clawhub/origin.json` (eski `.clawdhub`)
 
 ### `uninstall <skill>`
 
-- `<workdir>/<dir>/<slug>` öğesini kaldırır ve lockfile girdisini siler.
-- Oturum açıkken, mevcut kurulum sayılarının devre dışı bırakılabilmesi için
-  en iyi çabayla telemetri gönderir.
+- `<workdir>/<dir>/<slug>` öğesini kaldırır ve kilit dosyası girdisini siler.
+- Geçerli yükleme sayılarının devre dışı bırakılabilmesi için oturum açıkken
+  mümkün olan en iyi şekilde telemetri gönderir.
 - Etkileşimli: onay ister.
 - Etkileşimsiz (`--no-input`): `--yes` gerektirir.
 
 ### `list`
 
 - `<workdir>/.clawhub/lock.json` dosyasını okur (eski `.clawdhub`).
-- `clawhub pin` ile dondurulmuş Skills yanında, isteğe bağlı neden dahil olmak üzere `pinned` gösterir.
+- `clawhub pin` ile dondurulan skill'lerin yanında, isteğe bağlı neden dâhil olmak üzere `pinned` gösterir.
 
 ### `pin <skill>`
 
-- Kurulu bir beceriyi lockfile içinde pinlenmiş olarak işaretler.
-- `--reason <text>` becerinin neden dondurulduğunu kaydeder.
-- Pinlenmiş Skills `update --all` tarafından atlanır ve doğrudan `update <skill>` tarafından reddedilir.
-- Yerel baytların yanlışlıkla değiştirilememesi için pinlenmiş Skills ayrıca `install --force` komutunu reddeder.
+- Yüklü bir skill'i kilit dosyasında sabitlenmiş olarak işaretler.
+- `--reason <text>`, skill'in neden dondurulduğunu kaydeder.
+- Sabitlenmiş skill'ler `update --all` tarafından atlanır ve doğrudan `update <skill>` tarafından reddedilir.
+- Yerel baytların yanlışlıkla değiştirilememesi için sabitlenmiş skill'ler `install --force` işlemini de reddeder.
 
 ### `unpin <skill>`
 
-- Gelecekteki güncellemelerin onu değiştirebilmesi için kurulu bir beceriden lockfile pin'ini kaldırır.
+- Gelecekteki güncellemelerin skill'i değiştirebilmesi için yüklü bir skill'in kilit dosyası sabitlemesini kaldırır.
 
 ### `update [@owner/slug]` / `update --all`
 
 - Yerel dosyalardan parmak izi hesaplar.
-- Parmak izi bilinen bir sürümle eşleşirse: istem yok.
+- Parmak izi bilinen bir sürümle eşleşirse istem gösterilmez.
 - Parmak izi eşleşmezse:
   - varsayılan olarak reddeder
-  - `--force` ile üzerine yazar (veya etkileşimliyse istemle)
-- Pinlenmiş Skills hiçbir zaman `--force` tarafından güncellenmez.
-- `update <skill>` pinlenmiş Skills için hızlıca başarısız olur ve önce `clawhub unpin <skill>` çalıştırmanızı söyler.
-- `update --all` pinlenmiş slug'ları atlar ve nelerin dondurulmuş kaldığının bir özetini yazdırır.
+  - `--force` ile üzerine yazar (veya etkileşimliyse istem gösterir)
+- Sabitlenmiş skill'ler `--force` tarafından hiçbir zaman güncellenmez.
+- `update <skill>`, sabitlenmiş skill'ler için hemen başarısız olur ve önce `clawhub unpin <skill>` komutunu çalıştırmanızı söyler.
+- `update --all`, sabitlenmiş kısa adları atlar ve nelerin donmuş kaldığının özetini yazdırır.
 
 ### `skill publish <path>`
 
-- Yerel paket parmak izini ClawHub ile karşılaştırır ve içerik zaten yayımlanmışsa
-  başarıyla çıkar.
-- Yeni Skills varsayılan olarak `1.0.0` olur; değiştirilmiş Skills varsayılan olarak sonraki patch
-  sürümü olur.
+- Yerel paket parmak izini ClawHub ile karşılaştırır ve içerik zaten
+  yayımlanmışsa başarıyla çıkar.
+- Yeni skill'ler varsayılan olarak `1.0.0`; değiştirilmiş skill'ler ise varsayılan olarak sonraki yama
+  sürümünü kullanır.
 - `--version <version>` açıkça bir sürüm seçer ve içerik mevcut bir sürümle
   eşleşse bile yayımlar.
-- `--dry-run` yayımlamayı yükleme yapmadan çözer; `--json` makine tarafından
-  okunabilir bir sonuç yazdırır.
-- Aktör publisher erişimine sahipse `--owner <handle>` bir org/kullanıcı publisher handle'ı altında yayımlar.
-- `--migrate-owner`, yeni bir sürüm yayımlarken mevcut bir beceriyi `--owner` değerine taşır. Her iki publisher üzerinde admin/owner erişimi gerektirir.
-- Sahip ve inceleme davranışı `docs/publishing.md` içinde açıklanır.
-- Bir beceriyi yayımlamak, onun ClawHub üzerinde `MIT-0` altında yayımlandığı anlamına gelir.
-- Yayımlanmış Skills atıf olmadan kullanmak, değiştirmek ve yeniden dağıtmak için ücretsizdir.
-- ClawHub ücretli Skills veya beceri başına fiyatlandırmayı desteklemez.
-- Eski alias: `publish <path>`.
+- `--dry-run`, yüklemeden yayımlama işlemini çözümler; `--json`
+  makine tarafından okunabilir bir sonuç yazdırır.
+- `--owner <handle>`, aktörün yayımcı erişimi olduğunda bir kuruluş/kullanıcı
+  yayımcı kullanıcı adı altında yayımlar.
+- `--migrate-owner`, yeni bir sürüm yayımlarken mevcut bir skill'i
+  `--owner` konumuna taşır. Her iki yayımcı için de yönetici/sahip erişimi gerektirir.
+- Sahip ve inceleme davranışı `docs/publishing.md` içinde açıklanmaktadır.
+- Bir skill'i yayımlamak, onun ClawHub üzerinde `MIT-0` kapsamında kullanıma sunulması anlamına gelir.
+- Yayımlanan skill'ler atıf gerektirmeden ücretsiz olarak kullanılabilir, değiştirilebilir ve yeniden dağıtılabilir.
+- ClawHub ücretli skill'leri veya skill başına fiyatlandırmayı desteklemez.
+- Eski diğer ad: `publish <path>`.
 
 ```bash
 clawhub skill publish ./my-skill --dry-run
@@ -209,30 +213,31 @@ clawhub skill publish ./my-skill --version 2.0.0
 
 ClawHub'ın yeniden kullanılabilir
 [`skill-publish.yml`](https://github.com/openclaw/clawhub/blob/main/.github/workflows/skill-publish.yml)
-workflow'u, bir `skill_path` için veya `root` altındaki her doğrudan beceri
-klasörü için `skill publish` çağrısı yapar (varsayılan: `skills`). Değişmemiş Skills atlar ve
-aynı otomatik patch-version davranışını kullanır.
+iş akışı, bir `skill_path` için veya `root` altındaki her doğrudan skill
+klasörü için (varsayılan: `skills`) `skill publish` çağrısını yapar. Değişmeyen skill'leri atlar ve
+aynı otomatik yama sürümü davranışını kullanır.
 
-Token olmadan önizleme yapmak için `dry_run: true` ayarlayın. Gerçek yayımlamalar
-`clawhub_token` secret'ını gerektirir.
+Belirteç olmadan önizleme yapmak için `dry_run: true` ayarlayın. Gerçek yayımlama işlemleri
+`clawhub_token` gizli dizisini gerektirir.
 
 ### `sync`
 
-- Geçerli workdir'i, yapılandırılmış Skills dizinini ve `SKILL.md` veya
-  `skill.md` içeren yerel beceri klasörleri için tüm `--root <dir>` klasörlerini
-  tarar.
-- Her yerel beceri parmak izini ClawHub ile karşılaştırır ve yalnızca yeni veya
-  değiştirilmiş Skills yayımlar.
-- Yeni Skills `1.0.0` olarak yayımlanır; değiştirilmiş Skills varsayılan olarak
-  sonraki patch sürümünü yayımlar. Daha büyük bir semver adımıyla ilerlemesi
-  gereken güncelleme toplu işleri için `--bump minor|major` kullanın.
-- `--dry-run` yayımlama planını yükleme yapmadan gösterir; `--json` makine tarafından
-  okunabilir bir plan yazdırır.
-- `--all` her yeni veya değiştirilmiş beceriyi istem göstermeden yayımlar. `--all`
-  olmadan etkileşimli terminaller yayımlanacak Skills seçmenize izin verir.
-- Aktör publisher erişimine sahipse `--owner <handle>` bir org/kullanıcı publisher handle'ı altında yayımlar.
-- `sync` yalnızca tek yönlü yayımlamadır. Kurmaz, güncellemez, indirmez veya
-  kurulum/indirme telemetrisi raporlamaz.
+- Geçerli workdir'i, yapılandırılmış skills dizinini ve `SKILL.md` veya
+  `skill.md` içeren yerel skill klasörleri için tüm `--root <dir>`
+  klasörlerini tarar.
+- Her yerel skill parmak izini ClawHub ile karşılaştırır ve yalnızca yeni veya
+  değiştirilmiş skill'leri yayımlar.
+- Yeni skill'ler `1.0.0` olarak yayımlanır; değiştirilmiş skill'ler varsayılan olarak sonraki yama sürümünü
+  yayımlar. Daha büyük bir semver adımıyla ilerlemesi gereken güncelleme grupları için
+  `--bump minor|major` kullanın.
+- `--dry-run`, yüklemeden yayımlama planını gösterir; `--json`
+  makine tarafından okunabilir bir plan yazdırır.
+- `--all`, her yeni veya değiştirilmiş skill'i istem göstermeden yayımlar.
+  `--all` olmadan etkileşimli terminaller, yayımlanacak skill'leri seçmenize olanak tanır.
+- `--owner <handle>`, aktörün yayımcı erişimi olduğunda bir kuruluş/kullanıcı
+  yayımcı kullanıcı adı altında yayımlar.
+- `sync` yalnızca tek yönlü yayımlama yapar. Yüklemez, güncellemez, indirmez
+  veya yükleme/indirme telemetrisi bildirmez.
 
 ```bash
 clawhub sync --all --dry-run
@@ -243,13 +248,13 @@ clawhub sync --root ./skills --owner openclaw --bump minor
 ### `scan --slug <slug>`
 
 - `clawhub login` gerektirir.
-- ClawHub ClawScan'i `POST /api/v1/skills/-/scan` üzerinden çalıştırır, ardından tarama terminal duruma gelene kadar yoklar.
-- Taramalar asenkrondur ve tamamlanması zaman alabilir. Kuyruktayken terminal spinner'ı geçerli öncelikli tarama konumunu ve önde kaç tarama olduğunu gösterir.
-- Yayımlanmış taramalar sahiplik veya publisher yönetim erişimi gerektirir. Moderatörler/adminler aynı backend'i `clawhub-admin` üzerinden kullanabilir.
+- `POST /api/v1/skills/-/scan` aracılığıyla ClawHub ClawScan'i çalıştırır, ardından tarama son duruma ulaşana kadar yoklar.
+- Taramalar eşzamansızdır ve tamamlanması zaman alabilir. Kuyruktayken terminal döndürücüsü, geçerli öncelikli tarama konumunu ve önde kaç tarama olduğunu gösterir.
+- Yayımlanmış taramalar sahiplik veya yayımcı yönetim erişimi gerektirir. Moderatörler/yöneticiler aynı arka ucu `clawhub-admin` aracılığıyla kullanabilir.
 - `--update` yalnızca `--slug` ile geçerlidir; başarılı yayımlanmış tarama sonuçlarını seçilen sürüme geri yazar.
-- `--output <file.zip>` tam rapor arşivini `manifest.json`, `clawscan.json`, `skillspector.json`, `static-analysis.json`, `virustotal.json` ve `README.md` ile indirir.
-- `--json` otomasyon için tam yoklama yanıtını yazdırır.
-- Yerel path taramaları artık desteklenmez. Yeni bir sürüm yükleyin, ardından gönderilen o sürüm için saklanan tarama sonuçlarını almak üzere `scan download` kullanın.
+- `--output <file.zip>`, tam rapor arşivini `manifest.json`, `clawscan.json`, `skillspector.json`, `static-analysis.json`, `virustotal.json` ve `README.md` ile indirir.
+- `--json`, otomasyon için tam yoklama yanıtını yazdırır.
+- Yerel yol taramaları artık desteklenmemektedir. Yeni bir sürüm yükleyin, ardından gönderilen bu sürümün saklanan tarama sonuçlarını almak için `scan download` kullanın.
 
 ```bash
 clawhub scan --slug gifgrep
@@ -260,10 +265,10 @@ clawhub scan --slug gifgrep --update --output report.zip
 ### `scan download <name>`
 
 - `clawhub login` gerektirir.
-- ClawHub güvenlik kontrolleri tarafından engellenen veya gizlenen sürümler dahil olmak üzere, gönderilmiş bir beceri veya Plugin sürümü için saklanan tarama raporu ZIP'ini indirir.
-- Beceri indirmeleri beceri slug'ını kullanır ve varsayılan olarak `--kind skill` olur.
+- ClawHub güvenlik denetimleri tarafından engellenen veya gizlenen sürümler dâhil, gönderilmiş bir skill veya Plugin sürümü için saklanan tarama raporu ZIP dosyasını indirir.
+- Skill indirmeleri skill kısa adını kullanır ve varsayılan olarak `--kind skill` değerini alır.
 - Plugin indirmeleri paket adını kullanır ve `--kind plugin` gerektirir.
-- Yazarların ClawHub tarafından engellenen tam gönderilmiş sürümü incelemesi için `--version` gereklidir.
+- Yazarların ClawHub tarafından engellenen gönderimin tam sürümünü incelemesi için `--version` gereklidir.
 - `--output <file.zip>` hedef yolu seçer.
 
 ```bash
@@ -273,9 +278,9 @@ clawhub scan download @scope/demo --version 2.0.0 --kind plugin --output report.
 
 #### GitHub Actions
 
-ClawHub, beceri depoları ve katalog depoları için
-[`/.github/workflows/skill-publish.yml`](https://github.com/openclaw/clawhub/blob/76b4f36bb0f7409ed7cb9c6fd6f1ccf81396ee88/.github/workflows/skill-publish.yml)
-adresinde resmi yeniden kullanılabilir bir workflow sağlar.
+ClawHub, skill depoları ve katalog depoları için
+[`/.github/workflows/skill-publish.yml`](https://github.com/openclaw/clawhub/blob/62a697ef1e1b623afd71cf8813b545487a17354f/.github/workflows/skill-publish.yml)
+adresinde resmî, yeniden kullanılabilir bir iş akışı sunar.
 
 Tipik katalog kurulumu:
 
@@ -306,62 +311,59 @@ jobs:
 
 Notlar:
 
-- `root`, katalog depoları için varsayılan olarak `skills` olur.
-- Bir beceri klasörünü işlemek için `skill_path: skills/review-helper` geçirin.
-- `owner`, CLI `--owner` bayrağına eşlenir; kimliği doğrulanmış kullanıcı olarak yayımlamak için bunu atlayın.
-- V1 beceri yayımlama `clawhub_token` kullanır; GitHub OIDC güvenilir yayımlama şimdilik yalnızca paket içindir.
+- Katalog depolarında `root` varsayılan olarak `skills` değerini alır.
+- Tek bir skill klasörünü işlemek için `skill_path: skills/review-helper` iletin.
+- `owner`, CLI `--owner` bayrağına karşılık gelir; kimliği doğrulanmış kullanıcı olarak yayımlamak için bunu atlayın.
+- V1 skill yayımlama `clawhub_token` kullanır; GitHub OIDC güvenilir yayımlama şimdilik yalnızca paketler içindir.
 
 ### `delete <skill>`
 
-- `--version` olmadan, bir beceriyi geçici olarak siler (sahip, moderatör veya yönetici).
-- `DELETE /api/v1/skills/{slug}` çağrısı yapar.
-- Sahip tarafından başlatılan geçici silmeler, slug'ı 30 gün boyunca ayırır; komut sona erme zamanını yazdırır.
-- `--version <version>`, sahip olunan en son olmayan tek bir sürümü fail-closed,
-  sürüme özgü bir rota üzerinden kalıcı olarak siler.
-  Silinen sürümler geri yüklenemez veya yeniden yayımlanamaz. Geçerli en son sürümü silmeden önce
-  bir yedek yayımlayın. Platform personeli bu yalnızca sürüm akışı için sahipliği atlayamaz.
-- `--reason <text>`, tüm beceri geçici silmesi ve denetim günlüğü için bir moderasyon notu kaydeder.
-- `--note <text>`, `--reason` için bir takma addır.
-- `--yes`, onayı atlar.
+- `--version` olmadan bir skill'i geçici olarak siler (sahip, moderatör veya yönetici).
+- `DELETE /api/v1/skills/{slug}` çağrısını yapar.
+- Sahibin başlattığı geçici silme işlemleri kısa adı 30 gün boyunca rezerve eder; komut sona erme zamanını yazdırır.
+- `--version <version>`, sahip olunan ve en son olmayan tek bir sürümü, hata durumunda kapalı davranan sürüme özgü bir rota üzerinden geri çeker. Sürüm numarası rezerve kalır ve farklı içerikle yeniden yayımlanamaz. Geçerli en son sürümü silmeden önce yerine geçecek bir sürüm yayımlayın. Platform personeli yalnızca bu sürüme yönelik akışta sahiplik denetimini atlayamaz.
+- `--reason <text>`, skill'in tamamının geçici olarak silinmesine ve denetim günlüğüne bir moderasyon notu kaydeder.
+- `--note <text>`, `--reason` için bir diğer addır.
+- `--yes` onayı atlar.
 
 ### `undelete <skill>`
 
-- Gizli bir beceriyi geri yükler (sahip, moderatör veya yönetici).
-- Sürüm geri alma yoktur; kalıcı olarak silinen sürümler geri yüklenemez.
-- `POST /api/v1/skills/{slug}/undelete` çağrısı yapar.
-- `--reason <text>`, beceri ve denetim günlüğü için bir moderasyon notu kaydeder.
-- `--note <text>`, `--reason` için bir takma addır.
-- `--yes`, onayı atlar.
+- Gizli bir skill'i geri yükler (sahip, moderatör veya yönetici).
+- `POST /api/v1/skills/{slug}/undelete` çağrısını yapar.
+- `--version <version>`, yalnızca aynı sahip aktör tarafından daha önce geri çekilmiş ve saklanmış olan tam yapıyı geri yükler. Geri yüklenen sürümü en son sürüm yapmaz veya kaldırılan etiketleri yeniden oluşturmaz.
+- Sürüm geri yükleme, `POST /api/v1/skills/{slug}/versions/{version}/restore` çağrısını yapar.
+- `--reason <text>`, skill'e ve denetim günlüğüne bir moderasyon notu kaydeder.
+- `--note <text>`, `--reason` için bir diğer addır.
+- `--yes` onayı atlar.
 
 ### `hide <skill>`
 
-- Bir beceriyi gizler (sahip, moderatör veya yönetici).
-- `delete` için takma addır.
+- Bir skill'i gizler (sahip, moderatör veya yönetici).
+- `delete` için diğer ad.
 
 ### `unhide <skill>`
 
-- Bir beceriyi görünür yapar (sahip, moderatör veya yönetici).
-- `undelete` için takma addır.
+- Bir skill'in gizliliğini kaldırır (sahip, moderatör veya yönetici).
+- `undelete` için diğer ad.
 
 ### `skill rename <skill> <new-name>`
 
-- Sahip olunan bir beceriyi yeniden adlandırır ve önceki slug'ı bir yönlendirme takma adı olarak tutar.
-- `POST /api/v1/skills/{slug}/rename` çağrısı yapar.
-- `--yes`, onayı atlar.
+- Sahip olunan bir skill'i yeniden adlandırır ve önceki kısa adı yönlendirme diğer adı olarak tutar.
+- `POST /api/v1/skills/{slug}/rename` çağrısını yapar.
+- `--yes` onayı atlar.
 
 ### `skill merge <source> <target>`
 
-- Sahip olunan bir beceriyi sahip olunan başka bir beceriyle birleştirir.
-- Kaynak slug herkese açık listelenmeyi durdurur ve hedefe yönlendiren bir takma ad olur.
-- `POST /api/v1/skills/{sourceSlug}/merge` çağrısı yapar.
-- `--yes`, onayı atlar.
+- Sahip olunan bir skill'i, sahip olunan başka bir skill ile birleştirir.
+- Kaynak kısa ad artık herkese açık olarak listelenmez ve hedefe yönlendiren bir diğer ada dönüşür.
+- `POST /api/v1/skills/{sourceSlug}/merge` çağrısını yapar.
+- `--yes` onayı atlar.
 
 ### `transfer`
 
 - Sahiplik aktarımı iş akışı.
-- Kullanıcı handle'larına aktarımlar, alıcının kabul ettiği bekleyen bir istek oluşturur.
-- Org/yayıncı handle'larına aktarımlar, yalnızca aktörün hem mevcut sahibe hem de hedef yayıncıya
-  yönetici erişimi olduğunda hemen uygulanır.
+- Kullanıcı tanıtıcılarına yapılan aktarımlar, alıcının kabul edeceği bekleyen bir istek oluşturur.
+- Kuruluş/yayımcı tanıtıcılarına yapılan aktarımlar, yalnızca aktör hem mevcut sahibin hem de hedef yayımcının yönetici erişimine sahip olduğunda hemen uygulanır.
 - Alt komutlar:
   - `transfer request <skill> <handle> [--message "..."] [--yes]`
   - `transfer list [--outgoing]`
@@ -378,8 +380,8 @@ Notlar:
 
 ### `package explore [query...]`
 
-- Birleşik paket kataloğuna `GET /api/v1/packages` ve `GET /api/v1/packages/search` üzerinden göz atar veya arama yapar.
-- Bunu plugins ve diğer paket ailesi girdileri için kullanın; üst düzey `search`, beceri arama yüzeyi olarak kalır.
+- `GET /api/v1/packages` ve `GET /api/v1/packages/search` aracılığıyla birleşik paket kataloğuna göz atar veya katalogda arama yapar.
+- Bunu Plugin'ler ve diğer paket ailesi girdileri için kullanın; üst düzey `search` skill arama yüzeyi olarak kalır.
 - Bayraklar:
   - `--family skill|code-plugin|bundle-plugin`
   - `--official`
@@ -405,30 +407,28 @@ clawhub package explore episodic-claw --family code-plugin
 
 ### `package inspect <name>`
 
-- Paketi yüklemeden paket meta verilerini getirir.
+- Kurulum yapmadan paket meta verilerini getirir.
 - Bunu Plugin meta verileri, uyumluluk, doğrulama, kaynak ve sürüm/dosya incelemesi için kullanın.
-- `--version <version>`: belirli bir sürümü incele (varsayılan: en son).
-- `--tag <tag>`: etiketlenmiş bir sürümü incele (örn. `latest`).
-- `--versions`: sürüm geçmişini listele (ilk sayfa).
-- `--limit <n>`: listelenecek en fazla sürüm sayısı (1-100).
-- `--files`: seçilen sürüm için dosyaları listele.
-- `--file <path>`: ham dosya içeriğini getir (yalnızca metin dosyaları; 200KB sınırı).
+- `--version <version>`: belirli bir sürümü inceler (varsayılan: en son).
+- `--tag <tag>`: etiketli bir sürümü inceler (ör. `latest`).
+- `--versions`: sürüm geçmişini listeler (ilk sayfa).
+- `--limit <n>`: listelenecek azami sürüm sayısı (1-100).
+- `--files`: seçilen sürümün dosyalarını listeler.
+- `--file <path>`: sınırlı bir UTF-8 metin önizlemesi getirir (200KB sınırı).
 - `--json`: makine tarafından okunabilir çıktı.
 
 ### `package download <name>`
 
-- Bir paket sürümünü
-  `GET /api/v1/packages/{name}/versions/{version}/artifact` üzerinden çözer.
-- Yapıtı çözümleyicinin `downloadUrl` değerinden indirir.
-- Tüm yapıtlar için ClawHub SHA-256 değerini doğrular.
-- ClawPack npm-pack yapıtları için ayrıca npm `sha512` bütünlüğünü,
-  npm shasum değerini ve tarball içindeki `package.json` adını/sürümünü doğrular.
+- Bir paket sürümünü `GET /api/v1/packages/{name}/versions/{version}/artifact` üzerinden çözümler.
+- Yapıyı çözümleyicinin `downloadUrl` konumundan indirir.
+- Tüm yapılar için ClawHub SHA-256 değerini doğrular.
+- ClawPack npm-pack yapıları için ayrıca npm `sha512` bütünlüğünü, npm shasum değerini ve tarball dosyasının `package.json` adını/sürümünü doğrular.
 - Eski ZIP sürümleri, eski ZIP rotası üzerinden indirilir.
 - Bayraklar:
-  - `--version <version>`: belirli bir sürümü indir.
-  - `--tag <tag>`: etiketlenmiş bir sürümü indir (varsayılan: `latest`).
+  - `--version <version>`: belirli bir sürümü indirir.
+  - `--tag <tag>`: etiketli bir sürümü indirir (varsayılan: `latest`).
   - `-o, --output <path>`: çıktı dosyası veya dizini.
-  - `--force`: mevcut bir çıktı dosyasının üzerine yaz.
+  - `--force`: mevcut bir çıktı dosyasının üzerine yazar.
   - `--json`: makine tarafından okunabilir çıktı.
 
 Örnekler:
@@ -440,13 +440,11 @@ clawhub package download @openclaw/example-plugin --version 1.2.3 -o artifacts/
 
 ### `package verify <file>`
 
-- Yerel bir yapıt için ClawHub SHA-256, npm `sha512` bütünlüğü ve npm shasum
-  değerini hesaplar.
-- `--package` ile beklenen meta verileri ClawHub'dan çözer ve
-  yerel dosyayı yayımlanmış yapıt meta verileriyle karşılaştırır.
-- Doğrudan özet bayraklarıyla, ağ araması yapmadan doğrular.
+- Yerel bir yapı için ClawHub SHA-256, npm `sha512` bütünlüğü ve npm shasum değerini hesaplar.
+- `--package` ile beklenen meta verileri ClawHub'dan çözümler ve yerel dosyayı yayımlanmış yapı meta verileriyle karşılaştırır.
+- Doğrudan özet bayraklarıyla ağ sorgusu yapmadan doğrulama gerçekleştirir.
 - Bayraklar:
-  - `--package <name>`: beklenen yapıt meta verilerini çözmek için paket adı.
+  - `--package <name>`: beklenen yapı meta verilerinin çözümleneceği paket adı.
   - `--version <version>` veya `--tag <tag>`: beklenen paket sürümü.
   - `--sha256 <hex>`: beklenen ClawHub SHA-256.
   - `--npm-integrity <sri>`: beklenen npm bütünlüğü.
@@ -462,18 +460,15 @@ clawhub package verify ./example-plugin-1.2.3.tgz --sha256 <hex>
 
 ### `package validate <source>`
 
-- ClawHub CLI'nin paketli Plugin Inspector aracını yerel bir plugin paketi
-  klasörüne karşı çalıştırır.
-- Yerel bir OpenClaw checkout konumunu bulmadan veya içe aktarmadan, varsayılan olarak
-  çevrimdışı/statik doğrulama yapar.
-- Sert uyumluluk hataları sıfır olmayan kodla çıkar. Yalnızca uyarı bulguları yazdırılır ancak
-  sıfır koduyla çıkar.
+- ClawHub CLI ile birlikte sunulan Plugin Inspector'ı yerel bir Plugin paket klasöründe çalıştırır.
+- Yerel bir OpenClaw çalışma kopyasını bulmadan veya içe aktarmadan varsayılan olarak çevrimdışı/statik doğrulama yapar.
+- Kritik uyumluluk hataları sıfırdan farklı bir kodla çıkar. Yalnızca uyarı niteliğindeki bulgular yazdırılır ancak sıfır koduyla çıkılır.
 - Bayraklar:
-  - `--out <dir>`: Plugin Inspector raporlarını bu dizine yaz.
-  - `--openclaw <path>`: açıkça belirtilen yerel OpenClaw checkout'ına karşı incele.
-  - `--runtime`: çalışma zamanı yakalamayı etkinleştir; plugin kodunu içe aktarır.
-  - `--allow-execute`: yalıtılmış bir çalışma alanında çalışma zamanı yakalamaya izin ver.
-  - `--no-mock-sdk`: çalışma zamanı yakalama sırasında taklit OpenClaw SDK'sını devre dışı bırak.
+  - `--out <dir>`: Plugin Inspector raporlarını bu dizine yazar.
+  - `--openclaw <path>`: açıkça belirtilen yerel bir OpenClaw çalışma kopyasına göre inceleme yapar.
+  - `--runtime`: çalışma zamanı yakalamayı etkinleştirir; Plugin kodunu içe aktarır.
+  - `--allow-execute`: yalıtılmış bir çalışma alanında çalışma zamanı yakalamaya izin verir.
+  - `--no-mock-sdk`: çalışma zamanı yakalama sırasında taklit OpenClaw SDK'sını devre dışı bırakır.
   - `--json`: makine tarafından okunabilir çıktı.
 
 Örnek:
@@ -482,22 +477,16 @@ clawhub package verify ./example-plugin-1.2.3.tgz --sha256 <hex>
 clawhub package validate ./example-plugin
 ```
 
-Doğrulama bir paket, manifest, SDK içe aktarma veya yapıt bulgusu bildirirse
-[Plugin doğrulama düzeltmeleri](/clawhub/plugin-validation-fixes) sayfasına bakın, ardından komutu yeniden çalıştırın.
+Doğrulama bir paket, bildirim, SDK içe aktarma veya yapı bulgusu bildirirse [Plugin doğrulama düzeltmeleri](/tr/clawhub/plugin-validation-fixes) bölümüne bakın ve ardından komutu yeniden çalıştırın.
 
 ### `package delete <name>`
 
-- `--version` olmadan, bir paketi ve tüm sürümleri geçici olarak siler.
-- `--version <version>`, sahip olunan en son olmayan tek bir sürümü fail-closed,
-  sürüme özgü bir rota üzerinden kalıcı olarak siler.
-  Silinen sürümler geri yüklenemez veya yeniden yayımlanamaz. Geçerli en son sürümü silmeden önce
-  bir yedek yayımlayın. Bu yalnızca sürüm akışı paket sahibini veya bir org yayıncı
-  yöneticisini gerektirir; platform personeli paket sahipliğini atlayamaz.
-- Tüm paket geçici silmesi paket sahibini, bir org yayıncı sahibi/yöneticisini, platform
-  moderatörünü veya platform yöneticisini gerektirir.
+- `--version` olmadan bir paketi ve tüm sürümlerini geçici olarak siler.
+- `--version <version>`, sahip olunan ve en son olmayan tek bir sürümü, hata durumunda kapalı davranan sürüme özgü bir rota üzerinden geri çeker. Sürüm numarası rezerve kalır ve farklı içerikle yeniden yayımlanamaz. Geçerli en son sürümü silmeden önce yerine geçecek bir sürüm yayımlayın. Yalnızca bu sürüme yönelik akış, paket sahibini veya kuruluş yayımcısının yöneticisini gerektirir; platform personeli paket sahipliğini atlayamaz.
+- Paketin tamamının geçici olarak silinmesi paket sahibini, kuruluş yayımcısının sahibini/yöneticisini, platform moderatörünü veya platform yöneticisini gerektirir.
 - Bayraklar:
-  - `--version <version>`: en son olmayan tek bir sürümü kalıcı olarak sil.
-  - `--yes`: onayı atla.
+  - `--version <version>`: en son olmayan tek bir sürümü geri çeker.
+  - `--yes`: onayı atlar.
   - `--json`: makine tarafından okunabilir çıktı.
 
 Örnek:
@@ -510,12 +499,13 @@ clawhub package delete @openclaw/example-plugin --version 1.2.3 --yes
 ### `package undelete <name>`
 
 - Geçici olarak silinmiş bir paketi ve sürümlerini geri yükler.
-- Sürüm geri alma yoktur; kalıcı olarak silinen sürümler geri yüklenemez.
-- Paket sahibini, bir org yayıncı sahibi/yöneticisini, platform moderatörünü
-  veya platform yöneticisini gerektirir.
-- `POST /api/v1/packages/{name}/undelete` çağrısı yapar.
+- Paket sahibini, kuruluş yayımcısının sahibini/yöneticisini, platform moderatörünü veya platform yöneticisini gerektirir.
+- `POST /api/v1/packages/{name}/undelete` çağrısını yapar.
+- `--version <version>`, yalnızca aynı sahip aktör tarafından daha önce geri çekilmiş ve saklanmış olan tam sürümü geri yükler. Sürümü en son sürüm yapmaz veya kaldırılan paket etiketlerini/dist-tag'leri yeniden oluşturmaz.
+- Sürüm geri yükleme, `POST /api/v1/packages/{name}/versions/{version}/restore` çağrısını yapar.
 - Bayraklar:
-  - `--yes`: onayı atla.
+  - `--version <version>`: sahibi tarafından geri çekilmiş tek bir sürümü geri yükler.
+  - `--yes`: onayı atlar.
   - `--json`: makine tarafından okunabilir çıktı.
 
 Örnek:
@@ -527,12 +517,12 @@ clawhub package undelete @openclaw/example-plugin --yes
 ### `package transfer <name>`
 
 - Bir paketi başka bir yayıncıya aktarır.
-- Platform yöneticisi tarafından yapılmadığı sürece, hem mevcut paket sahibine hem de hedef
+- Bir platform yöneticisi tarafından gerçekleştirilmediği sürece hem mevcut paket sahibine hem de hedef
   yayıncıya yönetici erişimi gerektirir.
-- Kapsamlı paket adları eşleşen kapsam sahibine aktarılmalıdır.
-- `POST /api/v1/packages/{name}/transfer` çağrısı yapar.
+- Kapsamlı paket adları, eşleşen kapsam sahibine aktarılmalıdır.
+- `POST /api/v1/packages/{name}/transfer` çağrısını yapar.
 - Bayraklar:
-  - `--to <owner>`: hedef yayıncı handle'ı.
+  - `--to <owner>`: hedef yayıncı tanıtıcısı.
   - `--reason <text>`: isteğe bağlı denetim gerekçesi.
   - `--json`: makine tarafından okunabilir çıktı.
 
@@ -545,27 +535,27 @@ clawhub package transfer @openclaw/example-plugin --to openclaw
 ### `package report`
 
 - Bir paketi moderatörlere bildirmek için kimliği doğrulanmış komut.
-- `POST /api/v1/packages/{name}/report` çağrısı yapar.
-- Raporlar paket düzeyindedir, isteğe bağlı olarak bir sürüme bağlanır ve inceleme için
-  moderatörlere görünür hale gelir.
-- Raporlar tek başına paketleri otomatik gizlemez veya indirmeleri engellemez.
+- `POST /api/v1/packages/{name}/report` çağrısını yapar.
+- Bildirimler paket düzeyindedir, isteğe bağlı olarak bir sürümle ilişkilendirilebilir ve incelenmek üzere
+  moderatörlere görünür hâle gelir.
+- Bildirimler tek başına paketleri otomatik olarak gizlemez veya indirmeleri engellemez.
 - Bayraklar:
-  - `--version <version>`: rapora eklenecek isteğe bağlı paket sürümü.
-  - `--reason <text>`: gerekli rapor gerekçesi.
+  - `--version <version>`: bildirime eklenecek isteğe bağlı paket sürümü.
+  - `--reason <text>`: gerekli bildirim gerekçesi.
   - `--json`: makine tarafından okunabilir çıktı.
 
 Örnek:
 
 ```bash
-clawhub package report @openclaw/example-plugin --version 1.2.3 --reason "suspicious native payload"
+clawhub package report @openclaw/example-plugin --version 1.2.3 --reason "şüpheli yerel yük"
 ```
 
 ### `package moderation-status`
 
 - Paket moderasyon görünürlüğünü kontrol etmek için sahip komutu.
-- `GET /api/v1/packages/{name}/moderation` çağrısı yapar.
-- Geçerli paket tarama durumunu, açık rapor sayısını, en son sürüm manuel
-  moderasyon durumunu, indirme engelleme durumunu ve moderasyon gerekçelerini gösterir.
+- `GET /api/v1/packages/{name}/moderation` çağrısını yapar.
+- Mevcut paket tarama durumunu, açık bildirim sayısını, en son sürümün manuel
+  moderasyon durumunu, indirme engeli durumunu ve moderasyon gerekçelerini gösterir.
 - Bayraklar:
   - `--json`: makine tarafından okunabilir çıktı.
 
@@ -577,11 +567,11 @@ clawhub package moderation-status @openclaw/example-plugin
 
 ### `package readiness <name>`
 
-- Bir paketin gelecekteki OpenClaw tüketimi için hazır olup olmadığını kontrol eder.
-- `GET /api/v1/packages/{name}/readiness` çağrısı yapar.
-- Resmi durum, ClawPack kullanılabilirliği, yapıt özeti,
+- Bir paketin OpenClaw tarafından gelecekte kullanılmaya hazır olup olmadığını kontrol eder.
+- `GET /api/v1/packages/{name}/readiness` çağrısını yapar.
+- Resmî durum, ClawPack kullanılabilirliği, yapıt özeti,
   kaynak kökeni, OpenClaw uyumluluğu, ana makine hedefleri, ortam meta verileri
-  ve tarama durumu için engelleyicileri raporlar.
+  ve tarama durumuna ilişkin engelleri bildirir.
 - Bayraklar:
   - `--json`: makine tarafından okunabilir çıktı.
 
@@ -593,11 +583,11 @@ clawhub package readiness @openclaw/example-plugin
 
 ### `package migration-status <name>`
 
-- Paketli bir OpenClaw plugin yerine geçebilecek bir paket için operatör odaklı
-  geçiş durumunu gösterir.
-- `package readiness` ile aynı hesaplanan hazır olma uç noktasını çağırır, ancak
-  geçiş odaklı durum, en son sürüm, resmi paket durumu, kontroller ve
-  engelleyicileri yazdırır.
+- Paketle birlikte sunulan bir OpenClaw plugin'inin yerini alabilecek bir paket için
+  operatör odaklı geçiş durumunu gösterir.
+- `package readiness` ile aynı hesaplanan hazırlık uç noktasını çağırır ancak
+  geçiş odaklı durumu, en son sürümü, resmî paket durumunu, kontrolleri ve
+  engelleri yazdırır.
 - Bayraklar:
   - `--json`: makine tarafından okunabilir çıktı.
 
@@ -609,10 +599,10 @@ clawhub package migration-status @openclaw/example-plugin
 
 ### `publisher create <handle>`
 
-- Kimliği doğrulanmış kullanıcının sahip olduğu bir org yayıncısı oluşturur.
-- Handle küçük harfe normalize edilir ve `@` ile veya olmadan geçirilebilir.
-- Yeni oluşturulan org yayıncıları varsayılan olarak güvenilir/resmi değildir.
-- Handle mevcut bir yayıncı, kullanıcı veya ayrılmış rota tarafından zaten kullanılıyorsa başarısız olur.
+- Kimliği doğrulanmış kullanıcının sahip olduğu bir kuruluş yayıncısı oluşturur.
+- Tanıtıcı küçük harfe dönüştürülerek normalleştirilir ve `@` ile veya onsuz iletilebilir.
+- Yeni oluşturulan kuruluş yayıncıları varsayılan olarak güvenilir/resmî değildir.
+- Tanıtıcı mevcut bir yayıncı, kullanıcı veya ayrılmış rota tarafından zaten kullanılıyorsa başarısız olur.
 
 ```bash
 clawhub publisher create opik --display-name "Opik"
@@ -620,31 +610,31 @@ clawhub publisher create opik --display-name "Opik"
 
 ### `package publish <source>`
 
-- Bir kod Plugin'i veya bundle Plugin'i `POST /api/v1/packages` üzerinden yayımlar.
+- `POST /api/v1/packages` aracılığıyla bir kod plugin'i veya paket plugin'i yayımlar.
 - `<source>` şunları kabul eder:
   - Yerel klasör yolu: `./my-plugin`
-  - Yerel ClawPack npm-pack tarball'ı: `./my-plugin-1.2.3.tgz`
+  - Yerel ClawPack npm-pack tarball dosyası: `./my-plugin-1.2.3.tgz`
   - GitHub deposu: `owner/repo` veya `owner/repo@ref`
   - GitHub URL'si: `https://github.com/owner/repo`
-- Metadata, `package.json`, `openclaw.plugin.json` ve
-  `.codex-plugin/plugin.json`, `.claude-plugin/plugin.json` ve
-  `.cursor-plugin/plugin.json` gibi gerçek OpenClaw bundle işaretçilerinden otomatik algılanır.
-- `.tgz` kaynakları ClawPack olarak ele alınır. CLI, tam npm-pack
-  baytlarını yükler ve çıkarılan `package/` içeriğini yalnızca doğrulama ve
-  metadata ön doldurması için kullanır.
-- Kod Plugin'i klasörleri, yükleme öncesinde ClawPack npm tarball'ı olarak paketlenir; böylece
-  OpenClaw kurulumları tam artifact'i doğrulayabilir. Bundle Plugin'i klasörleri ise hâlâ
-  çıkarılmış dosya yayımlama yolunu kullanır.
-- GitHub kaynakları için kaynak atfı depo, çözümlenen commit, ref ve alt yoldan otomatik doldurulur.
-- Yerel klasörler için origin remote GitHub'ı gösterdiğinde kaynak atfı yerel git'ten otomatik algılanır.
-- Harici kod Plugin'leri `openclaw.compat.pluginApi` ve
+- Meta veriler `package.json`, `openclaw.plugin.json` ve
+  `.codex-plugin/plugin.json`, `.claude-plugin/plugin.json` ve `.cursor-plugin/plugin.json`
+  gibi gerçek OpenClaw paket işaretçilerinden otomatik olarak algılanır.
+- `.tgz` kaynakları ClawPack olarak değerlendirilir. CLI, tam npm-pack
+  baytlarını yükler ve ayıklanan `package/` içeriğini yalnızca doğrulama ve
+  meta verileri önceden doldurmak için kullanır.
+- Kod plugin'i klasörleri yüklemeden önce bir ClawPack npm tarball dosyası olarak paketlenir; böylece
+  OpenClaw kurulumları tam yapıtı doğrulayabilir. Paket plugin'i klasörleri ise
+  ayıklanan dosyalarla yayımlama yolunu kullanmaya devam eder.
+- GitHub kaynaklarında kaynak atfı; depo, çözümlenen commit, ref ve alt yoldan otomatik olarak doldurulur.
+- Yerel klasörlerde, origin uzak deposu GitHub'a işaret ettiğinde kaynak atfı yerel git'ten otomatik olarak algılanır.
+- Harici kod plugin'leri `openclaw.compat.pluginApi` ve
   `openclaw.build.openclawVersion` değerlerini açıkça bildirmelidir.
-  Üst düzey `package.json.version`, yayımlama doğrulaması için fallback olarak kullanılmaz.
-- `--dry-run`, yükleme yapmadan çözümlenen yayımlama payload'unu önizler.
+  Üst düzey `package.json.version`, yayımlama doğrulaması için yedek olarak kullanılmaz.
+- `--dry-run`, yükleme yapmadan çözümlenen yayımlama yükünün önizlemesini gösterir.
 - `--json`, CI için makine tarafından okunabilir çıktı üretir.
-- `--owner <handle>`, aktörün publisher erişimi olduğunda bir kullanıcı veya kuruluş publisher handle'ı altında yayımlar.
-- Scoped paket adları seçilen owner ile eşleşmelidir. Bkz. `docs/publishing.md`.
-- Mevcut bayraklar (`--family`, `--name`, `--version`, `--source-repo`, `--source-commit`, `--source-ref`, `--source-path`) override olarak çalışmaya devam eder.
+- `--owner <handle>`, aktörün yayıncı erişimi olduğunda bir kullanıcı veya kuruluş yayıncı tanıtıcısı altında yayımlar.
+- Kapsamlı paket adları seçilen sahiple eşleşmelidir. Bkz. `docs/publishing.md`.
+- Mevcut bayraklar (`--family`, `--name`, `--version`, `--source-repo`, `--source-commit`, `--source-ref`, `--source-path`) geçersiz kılma olarak çalışmaya devam eder.
 - Özel GitHub depoları `GITHUB_TOKEN` gerektirir.
 
 ```bash
@@ -653,8 +643,8 @@ clawhub package publish ./plugin.tgz --owner openclaw
 
 #### Önerilen yerel akış
 
-Canlı bir release oluşturmadan önce çözümlenen paket metadatasını ve
-kaynak atfını doğrulayabilmeniz için önce `--dry-run` kullanın:
+Canlı bir sürüm oluşturmadan önce çözümlenen paket meta verilerini ve
+kaynak atfını doğrulayabilmek için önce `--dry-run` kullanın:
 
 ```bash
 npm pack
@@ -664,17 +654,18 @@ clawhub package publish ./my-plugin-1.2.3.tgz --family code-plugin
 
 #### Yerel klasör akışı
 
-Kod Plugin'leri için klasör yayımlama, paket klasöründen bir ClawPack artifact'i oluşturur ve yükler:
+Kod plugin'lerinde klasörden yayımlama, paket klasöründen bir ClawPack yapıtı
+oluşturup yükler:
 
 ```bash
 clawhub package publish ./my-plugin --family code-plugin --dry-run
 clawhub package publish ./my-plugin --family code-plugin
 ```
 
-#### `--family code-plugin` için minimal `package.json`
+#### `--family code-plugin` için minimum `package.json`
 
-Harici kod Plugin'leri `package.json` içinde az miktarda OpenClaw metadatasına ihtiyaç duyar.
-Bu minimal manifest başarılı bir yayımlama için yeterlidir:
+Harici kod plugin'leri `package.json` içinde az miktarda OpenClaw
+meta verisine ihtiyaç duyar. Bu minimum bildirim başarılı bir yayımlama için yeterlidir:
 
 ```json
 {
@@ -693,35 +684,35 @@ Bu minimal manifest başarılı bir yayımlama için yeterlidir:
 }
 ```
 
-Zorunlu alanlar:
+Gerekli alanlar:
 
 - `openclaw.compat.pluginApi`
 - `openclaw.build.openclawVersion`
 
 Notlar:
 
-- `package.json.version`, paket release sürümünüzdür; ancak OpenClaw uyumluluk/build
-  doğrulaması için fallback olarak kullanılmaz.
-- `openclaw.hostTargets` ve `openclaw.environment` isteğe bağlı metadatadır.
-  ClawHub bunlar mevcut olduğunda gösterebilir, ancak yayımlama için zorunlu değildir.
-- Daha ayrıntılı uyumluluk metadatası yayımlamak istiyorsanız
-  `openclaw.compat.minGatewayVersion` ve
-  `openclaw.build.pluginSdkVersion` isteğe bağlı ek alanlardır.
-- Daha eski bir `clawhub` CLI release'i kullanıyorsanız, yayımlamadan önce yükseltin; böylece
-  yerel ön kontroller yüklemeden önce çalışır.
-- Doğrulama bir düzeltme kodu bildirirse, bkz.
-  [Plugin doğrulama düzeltmeleri](/clawhub/plugin-validation-fixes).
+- `package.json.version` paket sürümünüzdür ancak OpenClaw
+  uyumluluk/derleme doğrulaması için yedek olarak kullanılmaz.
+- `openclaw.hostTargets` ve `openclaw.environment` isteğe bağlı meta verilerdir.
+  ClawHub mevcut olduklarında bunları gösterebilir ancak yayımlama için gerekli değildir.
+- `openclaw.compat.minGatewayVersion` ve
+  `openclaw.build.pluginSdkVersion`, daha ayrıntılı uyumluluk meta verileri yayımlamak
+  isterseniz kullanabileceğiniz isteğe bağlı ek alanlardır.
+- Daha eski bir `clawhub` CLI sürümü kullanıyorsanız yükleme öncesinde
+  yerel ön kontrollerin çalışması için yayımlamadan önce yükseltin.
+- Doğrulama bir düzeltme kodu bildirirse
+  [Plugin doğrulama düzeltmeleri](/tr/clawhub/plugin-validation-fixes) bölümüne bakın.
 
 #### GitHub Actions
 
-ClawHub ayrıca Plugin depoları için
-[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/76b4f36bb0f7409ed7cb9c6fd6f1ccf81396ee88/.github/workflows/package-publish.yml)
-konumunda resmi bir yeniden kullanılabilir workflow sağlar.
+ClawHub ayrıca plugin depoları için
+[`/.github/workflows/package-publish.yml`](https://github.com/openclaw/clawhub/blob/62a697ef1e1b623afd71cf8813b545487a17354f/.github/workflows/package-publish.yml)
+adresinde resmî, yeniden kullanılabilir bir iş akışı sunar.
 
-Tipik çağıran kurulumu:
+Tipik çağıran yapılandırması:
 
 ```yaml
-name: Package Publish
+name: Paket Yayımlama
 
 on:
   pull_request:
@@ -751,21 +742,21 @@ jobs:
 
 Notlar:
 
-- Yeniden kullanılabilir workflow, `source` değerini varsayılan olarak çağıran depoya ayarlar.
-- Monorepo'lar için `source_path` geçin; böylece workflow Plugin
-  paket klasörünü yayımlar, örneğin `source_path: extensions/codex`.
-- Yeniden kullanılabilir workflow'u kararlı bir etikete veya tam commit SHA'sına sabitleyin. Release yayımlamayı `@main` üzerinden çalıştırmayın.
-- `pull_request`, CI'ın kirlenmemesi için `dry_run: true` kullanmalıdır.
-- Gerçek yayımlamalar `workflow_dispatch` veya tag push'ları gibi güvenilir olaylarla sınırlandırılmalıdır.
-- Secret olmadan güvenilir yayımlama yalnızca `workflow_dispatch` üzerinde çalışır; tag push'ları hâlâ `clawhub_token` gerektirir.
-- İlk yayımlama, güvenilmeyen paketler veya acil durum yayımlamaları için `clawhub_token` erişilebilir tutun.
-- Workflow, JSON sonucunu artifact olarak yükler ve workflow çıktıları olarak sunar.
+- Yeniden kullanılabilir iş akışı, `source` için varsayılan olarak çağıran depoyu kullanır.
+- Tek depolu çoklu projelerde, iş akışının plugin paket klasörünü yayımlaması için
+  `source_path` iletin; örneğin `source_path: extensions/codex`.
+- Yeniden kullanılabilir iş akışını kararlı bir etikete veya tam commit SHA'sına sabitleyin. Sürüm yayımlamayı `@main` üzerinden çalıştırmayın.
+- CI'ın değişiklik oluşturmaması için `pull_request`, `dry_run: true` kullanmalıdır.
+- Gerçek yayımlamalar `workflow_dispatch` veya etiket gönderimleri gibi güvenilir olaylarla sınırlandırılmalıdır.
+- Gizli anahtar olmadan güvenilir yayımlama yalnızca `workflow_dispatch` üzerinde çalışır; etiket gönderimleri yine de `clawhub_token` gerektirir.
+- İlk yayımlama, güvenilmeyen paketler veya acil durum yayımlamaları için `clawhub_token` kullanılabilir durumda tutulmalıdır.
+- İş akışı JSON sonucunu bir yapıt olarak yükler ve iş akışı çıktıları olarak sunar.
 
 ### `package trusted-publisher get <name>`
 
-- Bir paket için GitHub Actions güvenilir publisher yapılandırmasını gösterir.
-- Yapılandırmayı ayarladıktan sonra repository'yi, workflow dosya adını
-  ve isteğe bağlı environment pin'ini doğrulamak için bunu kullanın.
+- Bir paket için GitHub Actions güvenilir yayıncı yapılandırmasını gösterir.
+- Depoyu, iş akışı dosya adını ve isteğe bağlı ortam sabitlemesini
+  doğrulamak için yapılandırmayı ayarladıktan sonra bunu kullanın.
 - Bayraklar:
   - `--json`: makine tarafından okunabilir çıktı.
 
@@ -777,23 +768,26 @@ clawhub package trusted-publisher get @openclaw/example-plugin
 
 ### `package trusted-publisher set <name>`
 
-- Mevcut bir paket için GitHub Actions güvenilir publisher yapılandırması ekler veya değiştirir.
-- Paket önce normal manuel veya token ile kimlik doğrulamalı
-  `clawhub package publish` üzerinden oluşturulmuş olmalıdır.
-- Yapılandırma ayarlandıktan sonra, gelecekte desteklenen GitHub Actions yayımlamaları
-  uzun ömürlü ClawHub token'ı olmadan OIDC/güvenilir yayımlama kullanabilir.
-- `--repository <repo>` değeri `owner/repo` olmalıdır.
-- `--workflow-filename <file>`, `.github/workflows/` içindeki workflow dosya adıyla eşleşmelidir.
-- `--environment <name>` isteğe bağlıdır. Yapılandırıldığında, OIDC claim'indeki GitHub Actions
-  environment değeri tam olarak eşleşmelidir.
-- ClawHub, bu komut çalıştığında yapılandırılan GitHub repository'sini doğrular.
-  Public repository'ler public GitHub metadatası üzerinden doğrulanabilir. Private
-  repository'ler, örneğin gelecekteki bir ClawHub GitHub App kurulumu veya başka bir yetkili
-  GitHub entegrasyonu yoluyla ClawHub'ın ilgili repository'ye GitHub erişimi olmasını gerektirir.
+- Mevcut bir pakete GitHub Actions güvenilir yayıncı yapılandırması ekler
+  veya mevcut yapılandırmayı değiştirir.
+- Paket önce normal manuel veya token ile kimliği doğrulanmış
+  `clawhub package publish` aracılığıyla oluşturulmalıdır.
+- Yapılandırma ayarlandıktan sonra gelecekte desteklenen GitHub Actions yayımlamaları,
+  uzun ömürlü bir ClawHub token'ı olmadan OIDC/güvenilir yayımlamayı kullanabilir.
+- `--repository <repo>`, `owner/repo` olmalıdır.
+- `--workflow-filename <file>`, `.github/workflows/` içindeki iş akışı
+  dosya adıyla eşleşmelidir.
+- `--environment <name>` isteğe bağlıdır. Yapılandırıldığında OIDC talebindeki
+  GitHub Actions ortamı tam olarak eşleşmelidir.
+- ClawHub, bu komut çalıştırıldığında yapılandırılan GitHub deposunu doğrular.
+  Herkese açık depolar, herkese açık GitHub meta verileri aracılığıyla doğrulanabilir. Özel
+  depolar için ClawHub'ın söz konusu depoya GitHub erişimi olması gerekir;
+  örneğin gelecekteki bir ClawHub GitHub App kurulumu veya başka bir yetkilendirilmiş
+  GitHub entegrasyonu aracılığıyla.
 - Bayraklar:
-  - `--repository <repo>`: GitHub repository'si, örneğin `openclaw/example-plugin`.
-  - `--workflow-filename <file>`: workflow dosya adı, örneğin `package-publish.yml`.
-  - `--environment <name>`: isteğe bağlı tam eşleşen GitHub Actions environment'ı.
+  - `--repository <repo>`: GitHub deposu, örneğin `openclaw/example-plugin`.
+  - `--workflow-filename <file>`: iş akışı dosya adı, örneğin `package-publish.yml`.
+  - `--environment <name>`: isteğe bağlı, tam eşleşmeli GitHub Actions ortamı.
   - `--json`: makine tarafından okunabilir çıktı.
 
 Örnek:
@@ -807,10 +801,11 @@ clawhub package trusted-publisher set @openclaw/example-plugin \
 
 ### `package trusted-publisher delete <name>`
 
-- Güvenilir publisher yapılandırmasını bir paketten kaldırır.
-- Workflow, repository veya environment pin'inin devre dışı bırakılması ya da yeniden oluşturulması gerektiğinde
-  bunu rollback olarak kullanın.
-- Gelecekteki gerçek yayımlamalar, yapılandırma yeniden ayarlanana kadar normal kimlik doğrulamalı yayımlamayı kullanmalıdır.
+- Bir paketten güvenilir yayıncı yapılandırmasını kaldırır.
+- İş akışı, depo veya ortam sabitlemesinin devre dışı bırakılması ya da yeniden
+  oluşturulması gerekiyorsa bunu geri alma işlemi olarak kullanın.
+- Yapılandırma yeniden ayarlanana kadar gelecekteki gerçek yayımlamalar normal kimliği
+  doğrulanmış yayımlamayı kullanmalıdır.
 - Bayraklar:
   - `--json`: makine tarafından okunabilir çıktı.
 
@@ -822,7 +817,8 @@ clawhub package trusted-publisher delete @openclaw/example-plugin
 
 ### Kurulum telemetrisi
 
-- Oturum açılmışken `clawhub install <slug>` sonrasında gönderilir; ancak
-  `CLAWHUB_DISABLE_TELEMETRY=1` ayarlıysa gönderilmez.
-- Raporlama best-effort yapılır. Telemetri kullanılamıyorsa install komutları başarısız olmaz.
+- Oturum açıldığında, `CLAWHUB_DISABLE_TELEMETRY=1` ayarlanmadığı sürece
+  `clawhub install <slug>` sonrasında gönderilir.
+- Bildirim en iyi çaba esasına dayanır. Telemetri kullanılamıyorsa kurulum
+  komutları başarısız olmaz.
 - Ayrıntılar: `docs/telemetry.md`.

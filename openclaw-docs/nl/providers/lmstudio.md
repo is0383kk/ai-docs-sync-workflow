@@ -5,16 +5,17 @@ read_when:
 summary: Voer OpenClaw uit met LM Studio
 title: LM Studio
 x-i18n:
-    generated_at: "2026-07-12T09:19:09Z"
+    generated_at: "2026-07-27T05:14:02Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b4223f90e786e285651fc889985dd61124c60758b4e9c3599d76201d9ac20b46
+    source_hash: f43b4d04aad6e5edfdf224747083834ebd441aa7f91ccbf2d61de990443fc414
     source_path: providers/lmstudio.md
     workflow: 16
 ---
 
-LM Studio voert llama.cpp- (GGUF) of MLX-modellen lokaal uit, als GUI-app of als headless `llmster`-daemon. Zie [lmstudio.ai](https://lmstudio.ai/) voor installatie- en productdocumentatie.
+LM Studio voert llama.cpp- (GGUF) of MLX-modellen lokaal uit, als GUI-app of de headless `llmster`-daemon. Raadpleeg [lmstudio.ai](https://lmstudio.ai/) voor installatie- en productdocumentatie.
 
 ## Snel aan de slag
 
@@ -32,7 +33,7 @@ LM Studio voert llama.cpp- (GGUF) of MLX-modellen lokaal uit, als GUI-app of als
     lms daemon up
     ```
 
-    Als je de desktop-app gebruikt, schakel dan JIT in om modellen soepel te laden; zie de
+    Als je de desktop-app gebruikt, schakel je JIT in om modellen soepel te laden; raadpleeg de
     [LM Studio-handleiding voor JIT en TTL](https://lmstudio.ai/docs/developer/core/ttl-and-auto-evict).
 
   </Step>
@@ -41,7 +42,7 @@ LM Studio voert llama.cpp- (GGUF) of MLX-modellen lokaal uit, als GUI-app of als
     export LM_API_TOKEN="your-lm-studio-api-token"
     ```
 
-    Als LM Studio-authenticatie is uitgeschakeld, laat je de API-sleutel tijdens de configuratie leeg. Zie
+    Als LM Studio-authenticatie is uitgeschakeld, laat je de API-sleutel tijdens de configuratie leeg. Raadpleeg
     [LM Studio-authenticatie](https://lmstudio.ai/docs/developer/core/authentication).
 
   </Step>
@@ -52,6 +53,14 @@ LM Studio voert llama.cpp- (GGUF) of MLX-modellen lokaal uit, als GUI-app of als
 
     Kies `LM Studio` en selecteer vervolgens een model bij de prompt `Default model`.
 
+    Bij een nieuwe begeleide configuratie bevraagt OpenClaw eerst `/api/v1/models` op de
+    standaard of geconfigureerde LM Studio-host. Een bestaand LLM wordt alleen automatisch aangeboden
+    wanneer LM Studio training voor tools en ten minste 16K effectieve context rapporteert.
+    Voor geladen modellen heeft de context van de geladen instantie voorrang op
+    het grotere geadverteerde maximum. Dezelfde configuratieladder voor CLI/macOS verifieert de
+    route met een echte voltooiing voordat deze wordt opgeslagen. De automatische controle
+    downloadt nooit een model en negeert catalogusitems die uitsluitend voor embeddings zijn bedoeld.
+
   </Step>
 </Steps>
 
@@ -61,9 +70,9 @@ Wijzig het standaardmodel later:
 openclaw models set lmstudio/qwen/qwen3.5-9b
 ```
 
-LM Studio-modelsleutels gebruiken de notatie `author/model-name` (bijvoorbeeld `qwen/qwen3.5-9b`); OpenClaw-modelreferenties
-voegen de provider vooraan toe: `lmstudio/qwen/qwen3.5-9b`. Vind de exacte sleutel voor een model door de
-onderstaande opdracht uit te voeren en het veld `key` te bekijken:
+LM Studio-modelsleutels gebruiken de indeling `author/model-name` (bijv. `qwen/qwen3.5-9b`); OpenClaw-modelverwijzingen
+voegen de provider ervoor: `lmstudio/qwen/qwen3.5-9b`. Vind de exacte sleutel voor een model door de
+onderstaande opdracht uit te voeren en naar het veld `key` te kijken:
 
 ```bash
 curl http://localhost:1234/api/v1/models
@@ -87,35 +96,35 @@ openclaw onboard \
   --custom-model-id qwen/qwen3.5-9b
 ```
 
-`--custom-model-id` verwacht de modelsleutel zoals die door LM Studio wordt geretourneerd (bijvoorbeeld `qwen/qwen3.5-9b`), zonder
+`--custom-model-id` gebruikt de modelsleutel zoals die door LM Studio wordt geretourneerd (bijv. `qwen/qwen3.5-9b`), zonder
 het providerprefix `lmstudio/`. Geef `--lmstudio-api-key` door (of stel `LM_API_TOKEN` in) voor geauthenticeerde
-servers; laat deze weg voor niet-geauthenticeerde servers, waarna OpenClaw in plaats daarvan een lokale, niet-geheime markering opslaat.
-`--custom-api-key` wordt om compatibiliteitsredenen nog steeds geaccepteerd, maar `--lmstudio-api-key` heeft de voorkeur.
+servers; laat dit weg voor niet-geauthenticeerde servers, waarna OpenClaw in plaats daarvan een lokale, niet-geheime markering opslaat.
+`--custom-api-key` wordt voor compatibiliteit nog steeds geaccepteerd, maar `--lmstudio-api-key` heeft de voorkeur.
 
-Dit schrijft `models.providers.lmstudio` en stelt het standaardmodel in op `lmstudio/<custom-model-id>`.
+Hiermee wordt `models.providers.lmstudio` geschreven en wordt het standaardmodel ingesteld op `lmstudio/<custom-model-id>`.
 Als je een API-sleutel opgeeft, wordt ook het authenticatieprofiel `lmstudio:default` geschreven.
 
-De interactieve configuratie kan daarnaast vragen naar een gewenste lengte van de laadcontext en past deze toe op
-de gevonden modellen die in de configuratie worden opgeslagen.
+Bij interactieve configuratie kan bovendien om een gewenste contextlengte voor het laden worden gevraagd; deze wordt toegepast op
+alle gedetecteerde modellen die in de configuratie worden opgeslagen.
 
 ## Configuratie
 
 ### Compatibiliteit van gebruiksgegevens bij streaming
 
-LM Studio levert bij gestreamde reacties niet altijd een `usage`-object in OpenAI-indeling. OpenClaw
-herstelt in plaats daarvan de aantallen tokens uit metadata in llama.cpp-stijl: `timings.prompt_n` / `timings.predicted_n`.
+LM Studio geeft bij gestreamde reacties niet altijd een OpenAI-vormig `usage`-object terug. OpenClaw
+herstelt de tokenaantallen in plaats daarvan uit metadata in llama.cpp-stijl: `timings.prompt_n` / `timings.predicted_n`.
 Elk OpenAI-compatibel eindpunt dat als lokaal eindpunt wordt herkend (loopback-host), krijgt dezelfde
-fallback. Dit geldt ook voor andere lokale backends, zoals vLLM, SGLang, llama.cpp, LocalAI, Jan, TabbyAPI
+fallback. Dit omvat andere lokale backends, zoals vLLM, SGLang, llama.cpp, LocalAI, Jan, TabbyAPI
 en text-generation-webui.
 
-### Compatibiliteit met denkprocessen
+### Compatibiliteit voor denkprocessen
 
 Wanneer de detectie via `/api/v1/models` van LM Studio modelspecifieke redeneeropties rapporteert, stelt OpenClaw
-overeenkomende waarden voor `reasoning_effort` (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`) beschikbaar in
-de compatibiliteitsmetadata van het model. Sommige LM Studio-builds bieden een binaire UI-optie (`allowed_options: ["off",
-"on"]`) aan, maar weigeren die letterlijke waarden op `/v1/chat/completions`; OpenClaw normaliseert die
+overeenkomende `reasoning_effort`-waarden (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`) beschikbaar in
+de compatibiliteitsmetadata van het model. Sommige LM Studio-builds adverteren een binaire UI-optie (`allowed_options: ["off",
+"on"]`), maar weigeren die letterlijke waarden op `/v1/chat/completions`; OpenClaw normaliseert die
 binaire vorm naar de schaal met zes niveaus voordat verzoeken worden verzonden, ook voor oudere opgeslagen configuraties die
-nog redeneertoewijzingen met `off`/`on` bevatten.
+nog steeds redeneertoewijzingen met `off`/`on` bevatten.
 
 ### Expliciete configuratie
 
@@ -147,8 +156,8 @@ nog redeneertoewijzingen met `off`/`on` bevatten.
 ### Vooraf laden uitschakelen
 
 LM Studio ondersteunt just-in-time (JIT) laden van modellen, waarbij modellen bij het eerste verzoek worden geladen. OpenClaw
-laadt modellen standaard vooraf via het native laadeindpunt van LM Studio, wat helpt wanneer JIT is
-uitgeschakeld. Als je in plaats daarvan JIT, de TTL bij inactiviteit en het automatisch verwijderen van LM Studio de levenscyclus van modellen wilt laten beheren,
+laadt modellen standaard vooraf via het ingebouwde laadeindpunt van LM Studio, wat helpt wanneer JIT is
+uitgeschakeld. Als je in plaats daarvan LM Studio's JIT, TTL bij inactiviteit en automatische verwijdering de levenscyclus van modellen wilt laten beheren,
 schakel je de stap voor vooraf laden van OpenClaw uit:
 
 ```json5
@@ -187,12 +196,12 @@ niet alleen aan loopback is gebonden:
 ```
 
 `lmstudio` vertrouwt automatisch het geconfigureerde eindpunt voor modelverzoeken, waaronder loopback-,
-LAN- en tailnet-hosts (met uitzondering van metadata- en link-local-herkomsten). Elke aangepaste/lokale OpenAI-compatibele
-providervermelding krijgt hetzelfde vertrouwen voor exact dezelfde herkomst. Voor verzoeken aan een andere privéhost of -poort blijft
-`models.providers.<id>.request.allowPrivateNetwork: true` vereist; stel dit in op `false` om het
-standaardvertrouwen uit te schakelen.
+LAN- en tailnet-hosts (met uitzondering van metadata-/link-local-oorsprongen). Elke aangepaste/lokale OpenAI-compatibele
+providervermelding krijgt hetzelfde vertrouwen voor de exacte oorsprong. Voor verzoeken naar een andere privéhost of -poort
+blijft `models.providers.<id>.request.allowPrivateNetwork: true` vereist; stel dit in op `false` om
+het standaardvertrouwen uit te schakelen.
 
-## Probleemoplossing
+## Problemen oplossen
 
 ### LM Studio niet gedetecteerd
 
@@ -202,7 +211,7 @@ Controleer of LM Studio actief is:
 lms server start --port 1234
 ```
 
-Als authenticatie is ingeschakeld, stel dan ook `LM_API_TOKEN` in. Controleer of de API bereikbaar is:
+Als authenticatie is ingeschakeld, stel je ook `LM_API_TOKEN` in. Controleer of de API bereikbaar is:
 
 ```bash
 curl http://localhost:1234/api/v1/models
@@ -211,7 +220,7 @@ curl http://localhost:1234/api/v1/models
 ### Authenticatiefouten (HTTP 401)
 
 - Controleer of `LM_API_TOKEN` overeenkomt met de sleutel die in LM Studio is geconfigureerd.
-- Zie [LM Studio-authenticatie](https://lmstudio.ai/docs/developer/core/authentication).
+- Raadpleeg [LM Studio-authenticatie](https://lmstudio.ai/docs/developer/core/authentication).
 - Als de server geen authenticatie vereist, laat je de sleutel tijdens de configuratie leeg.
 
 ## Gerelateerd

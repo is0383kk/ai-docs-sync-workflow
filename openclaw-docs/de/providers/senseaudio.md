@@ -1,15 +1,16 @@
 ---
 read_when:
-    - Sie möchten die Spracherkennung von SenseAudio für Audioanhänge verwenden.
+    - Sie möchten SenseAudio für die Spracherkennung bei Audioanhängen verwenden
     - Sie benötigen die Umgebungsvariable für den SenseAudio-API-Schlüssel oder den Pfad zur Audiokonfiguration.
 summary: SenseAudio-Batch-Spracherkennung für eingehende Sprachnachrichten
 title: SenseAudio
 x-i18n:
-    generated_at: "2026-07-12T02:06:36Z"
+    generated_at: "2026-07-26T19:12:47Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2d2b310982a9e0f1afe2f95ae92d1516d490314f40b4b0e4eded25c72dfca586
+    source_hash: c0ca4a31a32eed85c1d9dcd13ebc2eaea94be370d2b1013ae8b4677949bea91d
     source_path: providers/senseaudio.md
     workflow: 16
 ---
@@ -18,12 +19,12 @@ SenseAudio transkribiert eingehende Audio- und Sprachnotizanhänge über die gem
 
 | Eigenschaft   | Wert                                             |
 | ------------- | ------------------------------------------------ |
-| Provider-ID   | `senseaudio`                                     |
-| Plugin        | gebündelt, `enabledByDefault: true`              |
-| Vertrag       | `mediaUnderstandingProviders` (Audio)            |
-| Auth.-Umgebungsvariable | `SENSEAUDIO_API_KEY`                   |
-| Standardmodell | `senseaudio-asr-pro-1.5-260319`                 |
-| Standard-URL  | `https://api.senseaudio.cn/v1`                   |
+| Provider-ID   | `senseaudio`                               |
+| Plugin        | gebündelt, `enabledByDefault: true`                    |
+| Vertrag       | `mediaUnderstandingProviders` (Audio)                       |
+| Auth-Umgebungsvariable | `SENSEAUDIO_API_KEY`                      |
+| Standardmodell | `senseaudio-asr-pro-1.5-260319`                              |
+| Standard-URL  | `https://api.senseaudio.cn/v1`                               |
 | Website       | [senseaudio.cn](https://senseaudio.cn)           |
 | Dokumentation | [senseaudio.cn/docs](https://senseaudio.cn/docs) |
 
@@ -57,16 +58,16 @@ SenseAudio transkribiert eingehende Audio- und Sprachnotizanhänge über die gem
 
 ## Optionen
 
-| Option     | Pfad                                  | Beschreibung                              |
-| ---------- | ------------------------------------- | ----------------------------------------- |
-| `model`    | `tools.media.audio.models[].model`    | ID des SenseAudio-ASR-Modells             |
-| `language` | `tools.media.audio.models[].language` | Optionaler Hinweis zur Sprache            |
-| `prompt`   | `tools.media.audio.prompt`            | Optionaler Transkriptions-Prompt          |
-| `baseUrl`  | `tools.media.audio.baseUrl` oder Modell | OpenAI-kompatible Basis-URL überschreiben |
-| `headers`  | `tools.media.audio.request.headers`   | Zusätzliche Anfrage-Header                |
+| Option     | Pfad                            | Beschreibung                        |
+| ---------- | ------------------------------- | ----------------------------------- |
+| `model`    | `tools.media.models[].model`    | SenseAudio-ASR-Modell-ID            |
+| `language` | `tools.media.models[].language` | Optionaler Sprachhinweis             |
+| `prompt`   | `tools.media.models[].prompt`   | Optionale Transkriptionsanweisung    |
+| `baseUrl`  | `tools.media.models[].baseUrl`  | OpenAI-kompatible Basis überschreiben |
+| `headers`  | `tools.media.models[].headers`  | Zusätzliche Anfrage-Header           |
 
 <Note>
-SenseAudio unterstützt in OpenClaw nur Batch-STT. Die Echtzeittranskription für Sprachanrufe
+SenseAudio unterstützt in OpenClaw ausschließlich Batch-STT. Die Echtzeittranskription für Sprachanrufe
 verwendet weiterhin Provider mit Unterstützung für Streaming-STT.
 </Note>
 

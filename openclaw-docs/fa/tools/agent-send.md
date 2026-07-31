@@ -1,20 +1,21 @@
 ---
 read_when:
-    - می‌خواهید اجرای عامل را از طریق اسکریپت‌ها یا خط فرمان آغاز کنید
-    - باید پاسخ‌های عامل را به‌صورت برنامه‌نویسی‌شده به یک کانال چت ارسال کنید
-summary: نوبت‌های عامل را از CLI اجرا کنید و در صورت تمایل، پاسخ‌ها را به کانال‌ها ارسال کنید
+    - می‌خواهید اجرای عامل را از اسکریپت‌ها یا خط فرمان آغاز کنید
+    - باید پاسخ‌های عامل را به‌صورت برنامه‌نویسی‌شده به یک کانال گفت‌وگو ارسال کنید
+summary: نوبت‌های عامل را از CLI اجرا کنید و در صورت تمایل پاسخ‌ها را به کانال‌ها ارسال کنید
 title: ارسال عامل
 x-i18n:
-    generated_at: "2026-07-12T10:58:44Z"
+    generated_at: "2026-07-27T14:42:50Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 23ad57735bd43a2bba5add571e9572da0fbe7b516a70515c674e1ababaab081a
+    source_hash: ad3da0feea102725ebb5555e0dd375ed6f3a0396d8ffd0ab916ced303201eabc
     source_path: tools/agent-send.md
     workflow: 16
 ---
 
-`openclaw agent` یک نوبت منفرد عامل را بدون پیام ورودیِ گفتگو از خط فرمان اجرا می‌کند. از آن برای گردش‌کارهای اسکریپتی، آزمایش و تحویل برنامه‌نویسی‌شده استفاده کنید. مرجع کامل پرچم‌ها و رفتار:
+`openclaw agent` یک نوبت منفرد عامل را از خط فرمان و بدون پیام گفت‌وگوی ورودی اجرا می‌کند. از آن برای گردش‌کارهای اسکریپتی، آزمایش و تحویل برنامه‌نویسی‌شده استفاده کنید. مرجع کامل پرچم‌ها و رفتار:
 [مرجع CLI عامل](/fa/cli/agent).
 
 ## شروع سریع
@@ -22,10 +23,10 @@ x-i18n:
 <Steps>
   <Step title="اجرای یک نوبت ساده عامل">
     ```bash
-    openclaw agent --agent main --message "What is the weather today?"
+    openclaw agent --agent main --message "آب‌وهوای امروز چگونه است؟"
     ```
 
-    پیام را از طریق Gateway ارسال می‌کند و پاسخ را چاپ می‌کند.
+    پیام را از طریق Gateway ارسال می‌کند و پاسخ را نمایش می‌دهد.
 
   </Step>
 
@@ -34,34 +35,34 @@ x-i18n:
     openclaw agent --agent ops --message-file ./task.md
     ```
 
-    یک فایل معتبر UTF-8 را به‌عنوان بدنه پیام عامل می‌خواند.
+    یک فایل UTF-8 معتبر را به‌عنوان بدنه پیام عامل می‌خواند.
 
   </Step>
 
   <Step title="هدف‌گیری یک عامل یا نشست مشخص">
     ```bash
-    # Target a specific agent
-    openclaw agent --agent ops --message "Summarize logs"
+    # هدف‌گیری یک عامل مشخص
+    openclaw agent --agent ops --message "گزارش‌ها را خلاصه کن"
 
-    # Target a phone number (derives session key)
-    openclaw agent --to +15555550123 --message "Status update"
+    # هدف‌گیری یک شماره تلفن (کلید نشست را استخراج می‌کند)
+    openclaw agent --to +15555550123 --message "به‌روزرسانی وضعیت"
 
-    # Reuse an existing session
-    openclaw agent --session-id abc123 --message "Continue the task"
+    # استفاده مجدد از یک نشست موجود
+    openclaw agent --session-id abc123 --message "کار را ادامه بده"
 
-    # Target an exact session key
-    openclaw agent --session-key agent:ops:incident-42 --message "Summarize status"
+    # هدف‌گیری یک کلید نشست دقیق
+    openclaw agent --session-key agent:ops:incident-42 --message "وضعیت را خلاصه کن"
     ```
 
   </Step>
 
   <Step title="تحویل پاسخ به یک کانال">
     ```bash
-    # Deliver to WhatsApp (default channel)
-    openclaw agent --to +15555550123 --message "Report ready" --deliver
+    # تحویل به WhatsApp (کانال پیش‌فرض)
+    openclaw agent --to +15555550123 --message "گزارش آماده است" --deliver
 
-    # Deliver to Slack
-    openclaw agent --agent ops --message "Generate report" \
+    # تحویل به Slack
+    openclaw agent --agent ops --message "گزارش را تولید کن" \
       --deliver --reply-channel slack --reply-to "#reports"
     ```
 
@@ -70,61 +71,79 @@ x-i18n:
 
 ## پرچم‌ها
 
-| پرچم                       | توضیحات                                                               |
+| پرچم                        | توضیحات                                                          |
 | --------------------------- | -------------------------------------------------------------------- |
 | `--message <text>`          | پیام درون‌خطی برای ارسال                                               |
-| `--message-file <path>`     | خواندن پیام از یک فایل معتبر UTF-8                                    |
-| `--to <dest>`               | استخراج کلید نشست از یک مقصد (تلفن، شناسه گفتگو)                       |
-| `--session-key <key>`       | استفاده از یک کلید نشست صریح                                           |
-| `--agent <id>`              | هدف‌گیری یک عامل پیکربندی‌شده (از نشست `main` آن استفاده می‌کند)         |
-| `--session-id <id>`         | استفاده مجدد از یک نشست موجود بر اساس شناسه                            |
-| `--model <id>`              | بازنویسی مدل برای این اجرا (`provider/model` یا شناسه مدل)              |
-| `--local`                   | اجبار به اجرای محلیِ تعبیه‌شده (عبور نکردن از Gateway)                   |
-| `--deliver`                 | ارسال پاسخ به یک کانال گفتگو                                           |
-| `--channel <name>`          | کانال تحویل؛ همراه با `--agent` و `--to`، بر دامنه پیام مستقیم نیز اعمال می‌شود |
-| `--reply-to <target>`       | بازنویسی مقصد تحویل                                                    |
-| `--reply-channel <name>`    | بازنویسی کانال تحویل                                                   |
-| `--reply-account <id>`      | بازنویسی شناسه حساب تحویل                                              |
-| `--thinking <level>`        | تنظیم سطح تفکر برای نمایه مدل انتخاب‌شده                                |
-| `--verbose <on\|full\|off>` | ذخیره پایدار سطح جزئیات برای نشست (`full` خروجی ابزار را نیز ثبت می‌کند) |
-| `--timeout <seconds>`       | بازنویسی مهلت زمانی عامل (پیش‌فرض ۶۰۰ یا مقدار پیکربندی)                  |
-| `--json`                    | خروجی JSON ساخت‌یافته                                                  |
+| `--message-file <path>`     | خواندن پیام از یک فایل UTF-8 معتبر (حداکثر 4 MiB)                 |
+| `--to <dest>`               | استخراج کلید نشست از یک هدف (تلفن، شناسه گفت‌وگو)                    |
+| `--session-key <key>`       | استفاده از یک کلید نشست صریح                                          |
+| `--agent <id>`              | هدف‌گیری یک عامل پیکربندی‌شده (از نشست `main` آن استفاده می‌کند)                  |
+| `--session-id <id>`         | استفاده مجدد از یک نشست موجود بر اساس شناسه                                      |
+| `--model <id>`              | بازنویسی مدل برای این اجرا (`provider/model` یا شناسه مدل)           |
+| `--local`                   | اجبار به استفاده از زمان‌اجرای تعبیه‌شده محلی (عبور نکردن از Gateway)                          |
+| `--deliver`                 | ارسال پاسخ به یک کانال گفت‌وگو                                     |
+| `--channel <name>`          | کانال تحویل؛ همراه با `--agent` + `--to`، بر دامنه پیام مستقیم نیز اعمال می‌شود     |
+| `--reply-to <target>`       | بازنویسی هدف تحویل                                             |
+| `--reply-channel <name>`    | بازنویسی کانال تحویل                                            |
+| `--reply-account <id>`      | بازنویسی شناسه حساب تحویل                                         |
+| `--thinking <level>`        | تنظیم سطح تفکر برای نمایه مدل انتخاب‌شده                    |
+| `--verbose <on\|full\|off>` | ماندگار کردن سطح جزئیات برای نشست (`full` خروجی ابزار را نیز ثبت می‌کند) |
+| `--timeout <seconds>`       | بازنویسی مهلت زمانی عامل (پیش‌فرض 600 یا مقدار پیکربندی)                |
+| `--json`                    | خروجی JSON ساخت‌یافته                                               |
 
 ## رفتار
 
-- به‌طور پیش‌فرض، CLI **از طریق Gateway** اجرا می‌شود. برای اجبار به استفاده از زمان‌اجرای تعبیه‌شده روی دستگاه فعلی، `--local` را اضافه کنید.
-- دقیقاً یکی از `--message` یا `--message-file` را ارائه دهید. پیام‌های فایل پس از حذف BOM اختیاری UTF-8، محتوای چندخطی را حفظ می‌کنند.
-- اگر درخواست Gateway ناموفق باشد، CLI به اجرای تعبیه‌شده محلی **بازمی‌گردد**؛ پایان مهلت Gateway به‌جای رقابت با رونوشت اصلی، با یک نشست تازه به اجرای جایگزین بازمی‌گردد.
-- انتخاب نشست: `--to` کلید نشست را استخراج می‌کند (مقصدهای گروه/کانال جداسازی را حفظ می‌کنند؛ گفتگوهای مستقیم به `main` فروکاسته می‌شوند). هنگام استفاده هم‌زمان از `--agent`، `--channel` و `--to`، مسیریابی از گیرنده متعارف کانال و `session.dmScope` پیروی می‌کند. هویت‌های پایدارِ صرفاً خروجی از نشستی متعلق به ارائه‌دهنده استفاده می‌کنند که از نشست اصلی عامل جدا است.
-- `--session-key` یک کلید صریح را انتخاب می‌کند. کلیدهای دارای پیشوند عامل باید از قالب `agent:<agent-id>:<session-key>` استفاده کنند و اگر `--agent` نیز ارائه شده باشد، باید با شناسه همان عامل مطابقت داشته باشد. کلیدهای ساده غیرنشانگر، در صورت ارائه `--agent`، در دامنه آن قرار می‌گیرند؛ برای مثال، `--agent ops --session-key incident-42` به `agent:ops:incident-42` مسیریابی می‌شود. بدون `--agent`، کلیدهای ساده غیرنشانگر در دامنه عامل پیش‌فرض پیکربندی‌شده قرار می‌گیرند. مقادیر لفظی `global` و `unknown` فقط هنگامی بدون دامنه باقی می‌مانند که `--agent` ارائه نشده باشد؛ مسیر اجرای جایگزین تعبیه‌شده، این نشست‌های نشانگر را به عامل پیش‌فرض پیکربندی‌شده نگاشت می‌کند.
+- به‌طور پیش‌فرض، CLI **از طریق Gateway** عمل می‌کند. برای اجبار به استفاده از
+  زمان‌اجرای تعبیه‌شده روی دستگاه فعلی، `--local` را اضافه کنید.
+- دقیقاً یکی از `--message` یا `--message-file` را ارائه کنید. پیام‌های فایل پس از حذف
+  BOM اختیاری UTF-8، محتوای چندخطی را حفظ می‌کنند. فایل‌های بزرگ‌تر از
+  4 MiB پیش از ارسال رد می‌شوند.
+- پس از تلاش‌های مجدد موقت برای دست‌دهی، پایان مهلت Gateway یا بسته‌شدن اتصال
+  باعث شکست فرمان همراه با یک راهنما در stderr می‌شود؛ CLI هرگز نوبت را بی‌سروصدا به‌صورت
+  تعبیه‌شده دوباره اجرا نمی‌کند. ممکن است Gateway همچنان نوبت پذیرفته‌شده را تکمیل کند، بنابراین پیش از تلاش مجدد
+  یا اجرای دوباره با `--local`، وضعیت Gateway و نشست را بررسی کنید.
+- انتخاب نشست: `--to` کلید نشست را استخراج می‌کند (اهداف گروه/کانال
+  جداسازی را حفظ می‌کنند؛ گفت‌وگوهای مستقیم به `main` تقلیل می‌یابند). وقتی `--agent`،
+  `--channel` و `--to` با هم استفاده شوند، مسیریابی از گیرنده متعارف کانال
+  و `session.dmScope` پیروی می‌کند. هویت‌های پایدارِ صرفاً خروجی از یک نشست
+  تحت مالکیت ارائه‌دهنده استفاده می‌کنند که از نشست اصلی عامل جداست.
+- `--session-key` یک کلید صریح را انتخاب می‌کند. کلیدهای دارای پیشوند عامل باید از
+  `agent:<agent-id>:<session-key>` استفاده کنند و اگر هر دو ارائه شوند، `--agent` باید با شناسه آن عامل
+  مطابقت داشته باشد. کلیدهای ساده غیرنگهبان، در صورت ارائه `--agent`، در دامنه آن قرار می‌گیرند؛
+  برای مثال، `--agent ops --session-key incident-42` به
+  `agent:ops:incident-42` مسیریابی می‌شود. بدون `--agent`، کلیدهای ساده غیرنگهبان در دامنه
+  عامل پیش‌فرض پیکربندی‌شده قرار می‌گیرند. مقادیر لفظی `global` و `unknown` تنها
+  زمانی بدون دامنه باقی می‌مانند که `--agent` ارائه نشده باشد.
 - `--reply-channel` و `--reply-account` فقط بر تحویل اثر می‌گذارند.
-- پرچم‌های تفکر و جزئیات در مخزن نشست ذخیره می‌شوند.
-- خروجی: به‌طور پیش‌فرض متن ساده، یا با `--json` محتوای ساخت‌یافته به‌همراه فراداده.
-- با `--json --deliver`، خروجی JSON شامل وضعیت تحویل برای ارسال‌های انجام‌شده، سرکوب‌شده، جزئی و ناموفق است. به [وضعیت تحویل JSON](/fa/cli/agent#json-delivery-status) مراجعه کنید.
+- پرچم‌های تفکر و جزئیات در مخزن نشست ماندگار می‌شوند.
+- خروجی: به‌طور پیش‌فرض متن ساده، یا با `--json` محموله ساخت‌یافته + فراداده.
+- با `--json --deliver`، JSON شامل وضعیت تحویل برای ارسال‌های
+  انجام‌شده، سرکوب‌شده، جزئی و ناموفق است. به
+  [وضعیت تحویل JSON](/fa/cli/agent#json-delivery-status) مراجعه کنید.
 
-## نمونه‌ها
+## مثال‌ها
 
 ```bash
-# Simple turn with JSON output
-openclaw agent --to +15555550123 --message "Trace logs" --verbose on --json
+# نوبت ساده با خروجی JSON
+openclaw agent --to +15555550123 --message "گزارش‌ها را ردیابی کن" --verbose on --json
 
-# Turn with a model override
-openclaw agent --agent ops --model openai/gpt-5.4 --message "Summarize logs"
+# نوبت با بازنویسی مدل
+openclaw agent --agent ops --model openai/gpt-5.4 --message "گزارش‌ها را خلاصه کن"
 
-# Turn with thinking level
-openclaw agent --session-id 1234 --message "Summarize inbox" --thinking medium
+# نوبت با سطح تفکر
+openclaw agent --session-id 1234 --message "صندوق ورودی را خلاصه کن" --thinking medium
 
-# Multiline prompt from a file
+# درخواست چندخطی از فایل
 openclaw agent --agent ops --message-file ./task.md
 
-# Exact session key
-openclaw agent --session-key agent:ops:incident-42 --message "Summarize status"
+# کلید نشست دقیق
+openclaw agent --session-key agent:ops:incident-42 --message "وضعیت را خلاصه کن"
 
-# Legacy key scoped to an agent
-openclaw agent --agent ops --session-key incident-42 --message "Summarize status"
+# کلید قدیمی در دامنه یک عامل
+openclaw agent --agent ops --session-key incident-42 --message "وضعیت را خلاصه کن"
 
-# Deliver to a different channel than the session
-openclaw agent --agent ops --message "Alert" --deliver --reply-channel telegram --reply-to "@admin"
+# تحویل به کانالی متفاوت از نشست
+openclaw agent --agent ops --message "هشدار" --deliver --reply-channel telegram --reply-to "@admin"
 ```
 
 ## مرتبط
@@ -133,13 +152,13 @@ openclaw agent --agent ops --message "Alert" --deliver --reply-channel telegram 
   <Card title="مرجع CLI عامل" href="/fa/cli/agent" icon="terminal">
     مرجع کامل پرچم‌ها و گزینه‌های `openclaw agent`.
   </Card>
-  <Card title="عامل‌های فرعی" href="/fa/tools/subagents" icon="users">
-    ایجاد عامل فرعی در پس‌زمینه.
+  <Card title="زیرعامل‌ها" href="/fa/tools/subagents" icon="users">
+    ایجاد زیرعامل در پس‌زمینه.
   </Card>
   <Card title="نشست‌ها" href="/fa/concepts/session" icon="comments">
-    نحوه کار کلیدهای نشست و چگونگی نگاشت آن‌ها توسط `--to`، `--agent` و `--session-id`.
+    نحوه کار کلیدهای نشست و چگونگی تفکیک آن‌ها توسط `--to`، `--agent` و `--session-id`.
   </Card>
   <Card title="فرمان‌های اسلش" href="/fa/tools/slash-commands" icon="slash">
-    فهرست فرمان‌های بومی مورد استفاده در نشست‌های عامل.
+    کاتالوگ فرمان‌های بومی مورد استفاده در نشست‌های عامل.
   </Card>
 </CardGroup>

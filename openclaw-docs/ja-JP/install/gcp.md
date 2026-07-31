@@ -1,50 +1,51 @@
 ---
 read_when:
     - GCP 上で OpenClaw を 24 時間 365 日稼働させたい場合
-    - 自分の VM 上で、本番環境向けの常時稼働する Gateway を運用したい場合
+    - 自分の VM 上で本番環境向けの常時稼働 Gateway を運用したい場合
     - 永続化、バイナリ、再起動時の動作を完全に制御したい場合
-summary: 耐久性のある状態を保持し、GCP Compute Engine VM（Docker）上で OpenClaw Gateway を 24 時間 365 日稼働させる
+summary: 永続的な状態を保持しながら、GCP Compute Engine VM（Docker）で OpenClaw Gateway を 24 時間 365 日稼働させる
 title: GCP
 x-i18n:
-    generated_at: "2026-07-11T22:20:58Z"
+    generated_at: "2026-07-26T09:38:16Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 6ca46b2ee78731162261cae6ea5a26b718be6035b998fa92e4ee5c9ea2e7ae07
     source_path: install/gcp.md
     workflow: 16
 ---
 
-Docker を使用して GCP Compute Engine VM 上で永続的な OpenClaw Gateway を実行します。永続化された状態、イメージに組み込まれたバイナリ、安全な再起動動作を備えます。
+  永続的な OpenClaw Gateway を GCP Compute Engine VM 上で Docker を使用して実行します。永続化された状態、組み込み済みバイナリ、安全な再起動動作を備えます。
 
-料金はマシンタイプとリージョンによって異なります。ワークロードに適合する最小の VM を選び、OOM が発生した場合はスケールアップしてください。
+  料金はマシンタイプとリージョンによって異なります。ワークロードに適した最小の VM を選択し、OOM が発生した場合はスケールアップしてください。
 
-Gateway には、ノートパソコンから SSH ポートフォワーディング経由でアクセスできます。また、ファイアウォールとトークンを自身で管理する場合は、ポートを直接公開してアクセスすることもできます。
+  Gateway には、ノート PC から SSH ポートフォワーディング経由でアクセスできます。また、ファイアウォールとトークンを自身で管理する場合は、ポートを直接公開してアクセスすることもできます。
 
-このガイドでは GCP Compute Engine 上の Debian を使用します。Ubuntu も使用できますが、パッケージは適宜読み替えてください。汎用的な Docker の手順については、[Docker](/ja-JP/install/docker)を参照してください。
+  このガイドでは、GCP Compute Engine 上の Debian を使用します。Ubuntu も利用できますが、パッケージは適宜読み替えてください。一般的な Docker の手順については、[Docker](/ja-JP/install/docker)を参照してください。
 
-## 必要なもの
+  ## 必要なもの
 
 - GCP アカウント（`e2-micro` は無料枠の対象）
 - `gcloud` CLI、または [Cloud Console](https://console.cloud.google.com)
-- ノートパソコンからの SSH アクセス
+- ノート PC からの SSH アクセス
 - Docker と Docker Compose
-- モデルの認証情報
+- モデル認証情報
 - 任意のプロバイダー認証情報（WhatsApp QR、Telegram ボットトークン、Gmail OAuth）
-- 約 20～30 分
+- 約20～30分
 
-## 簡単な手順
+  ## クイック手順
 
-1. GCP プロジェクトを作成し、請求先設定と Compute Engine API を有効にする
-2. Compute Engine VM（`e2-small`、Debian 12、20GB）を作成する
-3. VM に SSH 接続し、Docker をインストールする
-4. OpenClaw リポジトリをクローンする
-5. 永続化するホストディレクトリを作成する
-6. `.env` と `docker-compose.yml` を設定する
-7. 必要なバイナリをイメージに組み込み、ビルドして起動する
+1. GCP プロジェクトを作成し、課金と Compute Engine API を有効化
+2. Compute Engine VM（`e2-small`、Debian 12、20GB）を作成
+3. VM に SSH 接続し、Docker をインストール
+4. OpenClaw リポジトリをクローン
+5. 永続化するホストディレクトリを作成
+6. `.env` と `docker-compose.yml` を設定
+7. 必要なバイナリを組み込み、ビルドして起動
 
-<Steps>
-  <Step title="gcloud CLI をインストールする（または Console を使用する）">
+  <Steps>
+  <Step title="gcloud CLI をインストール（または Console を使用）">
     [cloud.google.com/sdk/docs/install](https://cloud.google.com/sdk/docs/install)からインストールし、次を実行します。
 
     ```bash
@@ -52,29 +53,29 @@ Gateway には、ノートパソコンから SSH ポートフォワーディン�
     gcloud auth login
     ```
 
-    または、以下のすべての手順を [Cloud Console](https://console.cloud.google.com) のウェブ UI から実行します。
+    または、以下のすべての手順を [Cloud Console](https://console.cloud.google.com) の Web UI から実行します。
 
   </Step>
 
-  <Step title="GCP プロジェクトを作成する">
+  <Step title="GCP プロジェクトを作成">
     ```bash
     gcloud projects create my-openclaw-project --name="OpenClaw Gateway"
     gcloud config set project my-openclaw-project
     gcloud services enable compute.googleapis.com
     ```
 
-    [console.cloud.google.com/billing](https://console.cloud.google.com/billing) で請求先設定を有効にします（Compute Engine に必要です）。
+    [console.cloud.google.com/billing](https://console.cloud.google.com/billing) で課金を有効にします（Compute Engine に必要です）。
 
-    Console での同等の操作：IAM & Admin > Create Project でプロジェクトを作成して請求先設定を有効にし、次に APIs & Services > Enable APIs > "Compute Engine API" > Enable を選択します。
+    Console での同等の操作: IAM & Admin > Create Project でプロジェクトと課金を有効にし、APIs & Services > Enable APIs > "Compute Engine API" > Enable の順に操作します。
 
   </Step>
 
-  <Step title="VM を作成する">
-    | タイプ    | 仕様                     | コスト             | 備考                                          |
+  <Step title="VM を作成">
+    | タイプ    | スペック                 | 料金               | 備考                                          |
     | --------- | ------------------------ | ------------------ | --------------------------------------------- |
-    | e2-medium | 2 vCPU、4GB RAM          | 約 $25/月          | ローカルでの Docker ビルドに最も確実          |
-    | e2-small  | 2 vCPU、2GB RAM          | 約 $12/月          | Docker ビルドに推奨される最小構成             |
-    | e2-micro  | 2 vCPU（共有）、1GB RAM  | 無料枠の対象       | Docker ビルドが OOM（終了コード 137）で失敗しやすい |
+    | e2-medium | 2 vCPU、4GB RAM          | 月額約$25          | ローカル Docker ビルドで最も安定              |
+    | e2-small  | 2 vCPU、2GB RAM          | 月額約$12          | Docker ビルドに推奨される最小構成             |
+    | e2-micro  | 2 vCPU（共有）、1GB RAM  | 無料枠の対象       | Docker ビルドで OOM（終了コード 137）が頻発  |
 
     ```bash
     gcloud compute instances create openclaw-gateway \
@@ -87,18 +88,18 @@ Gateway には、ノートパソコンから SSH ポートフォワーディン�
 
   </Step>
 
-  <Step title="VM に SSH 接続する">
+  <Step title="VM に SSH 接続">
     ```bash
     gcloud compute ssh openclaw-gateway --zone=us-central1-a
     ```
 
-    Console：Compute Engine ダッシュボードで VM の横にある "SSH" をクリックします。
+    Console: Compute Engine ダッシュボードで VM の横にある "SSH" をクリックします。
 
-    VM の作成後、SSH 鍵の反映には 1～2 分かかることがあります。接続を拒否された場合は、待ってから再試行してください。
+    VM 作成後、SSH 鍵の反映には1～2分かかる場合があります。接続が拒否された場合は、しばらく待ってから再試行してください。
 
   </Step>
 
-  <Step title="Docker をインストールする（VM 上）">
+  <Step title="Docker をインストール（VM 上）">
     ```bash
     sudo apt-get update
     sudo apt-get install -y git curl ca-certificates
@@ -125,7 +126,7 @@ Gateway には、ノートパソコンから SSH ポートフォワーディン�
 
   </Step>
 
-  <Step title="OpenClaw リポジトリをクローンする">
+  <Step title="OpenClaw リポジトリをクローン">
     ```bash
     git clone https://github.com/openclaw/openclaw.git
     cd openclaw
@@ -135,8 +136,8 @@ Gateway には、ノートパソコンから SSH ポートフォワーディン�
 
   </Step>
 
-  <Step title="永続化するホストディレクトリを作成する">
-    Docker コンテナは一時的なものです。長期間保持するすべての状態はホスト上に配置する必要があります。
+  <Step title="永続化するホストディレクトリを作成">
+    Docker コンテナは一時的なものです。長期間保持するすべての状態は、ホスト上に保存する必要があります。
 
     ```bash
     mkdir -p ~/.openclaw
@@ -145,7 +146,7 @@ Gateway には、ノートパソコンから SSH ポートフォワーディン�
 
   </Step>
 
-  <Step title="環境変数を設定する">
+  <Step title="環境変数を設定">
     リポジトリのルートに `.env` を作成します。
 
     ```bash
@@ -161,7 +162,7 @@ Gateway には、ノートパソコンから SSH ポートフォワーディン�
     XDG_CONFIG_HOME=/home/node/.openclaw
     ```
 
-    安定した Gateway トークンを `.env` で管理するには、`OPENCLAW_GATEWAY_TOKEN` を設定します。それ以外の場合は、再起動をまたいでクライアントから利用する前に `gateway.auth.token` を設定してください。どちらも設定されていない場合、OpenClaw はその起動時のみ有効なランタイムトークンを使用します。`GOG_KEYRING_PASSWORD` 用のキーリングパスワードを生成します。
+    `.env` を通じて安定した Gateway トークンを管理するには、`OPENCLAW_GATEWAY_TOKEN` を設定します。それ以外の場合は、再起動をまたいでクライアントを利用する前に `gateway.auth.token` を設定してください。どちらも設定されていない場合、OpenClaw はその起動時にのみ有効なランタイムトークンを使用します。`GOG_KEYRING_PASSWORD` 用のキーリングパスワードを生成します。
 
     ```bash
     openssl rand -hex 32
@@ -171,7 +172,7 @@ Gateway には、ノートパソコンから SSH ポートフォワーディン�
 
   </Step>
 
-  <Step title="Docker Compose を設定する">
+  <Step title="Docker Compose の設定">
     `docker-compose.yml` を作成または更新します。
 
     ```yaml
@@ -196,7 +197,7 @@ Gateway には、ノートパソコンから SSH ポートフォワーディン�
           - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
           - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
         ports:
-          # 推奨：VM 上では Gateway をループバックのみに維持し、SSH トンネル経由でアクセスします。
+          # 推奨: VM 上の Gateway はループバックのみに制限し、SSH トンネル経由でアクセスします。
           # 公開するには、`127.0.0.1:` プレフィックスを削除し、それに応じてファイアウォールを設定します。
           - "127.0.0.1:${OPENCLAW_GATEWAY_PORT}:18789"
         command:
@@ -212,58 +213,61 @@ Gateway には、ノートパソコンから SSH ポートフォワーディン�
           ]
     ```
 
-    `--allow-unconfigured` は初期セットアップを簡単にするためだけのものであり、実際の Gateway 設定の代わりにはなりません。デプロイ環境に合わせて、認証（`gateway.auth.token` またはパスワード）と安全なバインドモードを設定してください。
+    `--allow-unconfigured` はブートストラップを簡単にするためだけのものであり、実際の Gateway 設定の代わりにはなりません。デプロイ環境に合わせて、認証（`gateway.auth.token` またはパスワード）と安全なバインドモードも設定してください。
 
   </Step>
 
-  <Step title="共通の Docker VM ランタイム手順">
-    共通の Docker ホスト手順については、共有ランタイムガイドに従ってください。
+  <Step title="共有 Docker VM ランタイムの手順">
+    一般的な Docker ホストのフローについては、共有ランタイムガイドに従ってください。
 
     - [必要なバイナリをイメージに組み込む](/ja-JP/install/docker-vm-runtime#bake-required-binaries-into-the-image)
     - [ビルドして起動する](/ja-JP/install/docker-vm-runtime#build-and-launch)
-    - [何がどこに永続化されるか](/ja-JP/install/docker-vm-runtime#what-persists-where)
+    - [永続化される場所](/ja-JP/install/docker-vm-runtime#what-persists-where)
     - [更新](/ja-JP/install/docker-vm-runtime#updates)
 
   </Step>
 
   <Step title="GCP 固有の起動時の注意事項">
-    `pnpm install --frozen-lockfile` の実行中に `Killed` または `exit code 137` が発生してビルドが失敗した場合、VM のメモリが不足しています。最低でも `e2-small` を使用し、初回ビルドの確実性を高めるには `e2-medium` を使用してください。
+    `pnpm install --frozen-lockfile` 中に `Killed` または `exit code 137` が発生してビルドに失敗した場合、VM のメモリが不足しています。最低でも `e2-small`、初回ビルドをより確実にするには `e2-medium` を使用してください。
 
-    LAN にバインドする場合（`OPENCLAW_GATEWAY_BIND=lan`）、続行する前に信頼できるブラウザーオリジンを設定します。
+    LAN（`OPENCLAW_GATEWAY_BIND=lan`）にバインドする場合は、続行する前に信頼できるブラウザオリジンを設定します。
 
     ```bash
     docker compose run --rm openclaw-cli config set gateway.controlUi.allowedOrigins '["http://127.0.0.1:18789"]' --strict-json
     ```
 
-    ポートを変更した場合は、`18789` を設定済みのポートに置き換えてください。
+    ポートを変更した場合は、`18789` を設定したポートに置き換えてください。
 
   </Step>
 
-  <Step title="ノートパソコンからアクセスする">
+  <Step title="ノート PC からアクセスする">
     Gateway ポートを転送する SSH トンネルを作成します。
 
     ```bash
     gcloud compute ssh openclaw-gateway --zone=us-central1-a -- -L 18789:127.0.0.1:18789
     ```
 
-    ブラウザーで `http://127.0.0.1:18789/` を開きます。
+    ブラウザで `http://127.0.0.1:18789/` を開きます。
 
-    余分な情報を含まないダッシュボードリンクを再表示します。
+    不要な情報を含まないダッシュボードリンクを再表示します。
 
     ```bash
     docker compose run --rm openclaw-cli dashboard --no-open
     ```
 
-    UI で共有シークレット認証を求められた場合は、設定したトークンまたはパスワードを Control UI の設定に貼り付けます（この Docker 手順ではデフォルトでトークンが書き込まれます。パスワード認証に切り替えた場合は、設定したパスワードを使用してください）。
+    UI で共有シークレット認証を求められた場合は、設定したトークンまたは
+    パスワードを Control UI 設定に貼り付けます（この Docker フローでは
+    デフォルトでトークンが書き込まれます。パスワード認証に切り替えた場合は、
+    代わりに設定したパスワードを使用してください）。
 
-    Control UI に `unauthorized` または `disconnected (1008): pairing required` と表示された場合は、ブラウザーデバイスを承認します。
+    Control UI に `unauthorized` または `disconnected (1008): pairing required` が表示された場合は、ブラウザデバイスを承認します。
 
     ```bash
     docker compose run --rm openclaw-cli devices list
     docker compose run --rm openclaw-cli devices approve <requestId>
     ```
 
-    共通の永続化マップについては [Docker VM ランタイム](/ja-JP/install/docker-vm-runtime#what-persists-where)、[更新手順](/ja-JP/install/docker-vm-runtime#updates)も参照してください。
+    共有の永続化マップについては [Docker VM ランタイム](/ja-JP/install/docker-vm-runtime#what-persists-where)、[更新フロー](/ja-JP/install/docker-vm-runtime#updates)を参照してください。
 
   </Step>
 </Steps>
@@ -272,7 +276,7 @@ Gateway には、ノートパソコンから SSH ポートフォワーディン�
 
 **SSH 接続が拒否される**
 
-VM の作成後、SSH 鍵の反映には 1～2 分かかることがあります。待ってから再試行してください。
+VM の作成後、SSH 鍵の反映には 1～2 分かかる場合があります。しばらく待ってから再試行してください。
 
 **OS Login の問題**
 
@@ -282,11 +286,11 @@ OS Login プロファイルを確認します。
 gcloud compute os-login describe-profile
 ```
 
-アカウントに必要な IAM 権限（Compute OS Login または Compute OS Admin Login）があることを確認してください。
+アカウントに必要な IAM 権限（Compute OS Login または Compute OS Admin Login）が付与されていることを確認してください。
 
 **メモリ不足（OOM）**
 
-Docker ビルドが `Killed` と `exit code 137` で失敗した場合、VM は OOM によって強制終了されています。
+Docker のビルドが `Killed` と `exit code 137` で失敗した場合、VM は OOM によって強制終了されています。
 
 ```bash
 # 最初に VM を停止する
@@ -303,7 +307,7 @@ gcloud compute instances start openclaw-gateway --zone=us-central1-a
 
 ## サービスアカウント（セキュリティのベストプラクティス）
 
-個人利用では、デフォルトのユーザーアカウントで問題ありません。自動化や CI/CD では、最小限の権限を持つ専用サービスアカウントを作成します。
+個人利用では、デフォルトのユーザーアカウントで問題ありません。自動化または CI/CD では、最小限の権限を持つ専用のサービスアカウントを作成します。
 
 ```bash
 gcloud iam service-accounts create openclaw-deploy \
@@ -314,13 +318,13 @@ gcloud projects add-iam-policy-binding my-openclaw-project \
   --role="roles/compute.instanceAdmin.v1"
 ```
 
-自動化には Owner ロールを使用せず、動作に必要な最小限のロールを使用してください。[ロールについて](https://cloud.google.com/iam/docs/understanding-roles)を参照してください。
+自動化には Owner ロールを使用せず、機能する範囲で最も限定的なロールを使用してください。[ロールについて](https://cloud.google.com/iam/docs/understanding-roles)を参照してください。
 
 ## 次のステップ
 
-- メッセージングチャネルを設定する：[チャネル](/ja-JP/channels)
-- ローカルデバイスを Node としてペアリングする：[Node](/ja-JP/nodes)
-- Gateway を設定する：[Gateway の設定](/ja-JP/gateway/configuration)
+- メッセージングチャネルを設定する: [チャネル](/ja-JP/channels)
+- ローカルデバイスを Node としてペアリングする: [Node](/ja-JP/nodes)
+- Gateway を設定する: [Gateway の設定](/ja-JP/gateway/configuration)
 
 ## 関連項目
 

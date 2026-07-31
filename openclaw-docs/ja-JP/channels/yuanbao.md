@@ -1,22 +1,23 @@
 ---
 read_when:
-    - Yuanbaoボットに接続する場合
+    - Yuanbao ボットに接続したい場合
     - Yuanbao チャンネルを設定しています
 summary: Yuanbao bot の概要、機能、設定
-title: 元宝
+title: Yuanbao
 x-i18n:
-    generated_at: "2026-07-11T22:04:08Z"
+    generated_at: "2026-07-26T09:27:32Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 43488834f588530206b290cb0fb185fd1fe2e1f214ab4a4ccccc49b9b549b6ac
     source_path: channels/yuanbao.md
     workflow: 16
 ---
 
-Tencent Yuanbao は Tencent の AI アシスタントプラットフォームです。コミュニティによって保守されている `openclaw-plugin-yuanbao` Plugin は、Yuanbao ボットを WebSocket 経由で OpenClaw に接続し、ダイレクトメッセージとグループチャットを利用できるようにします。
+Tencent Yuanbao は Tencent の AI アシスタントプラットフォームです。コミュニティによってメンテナンスされている `openclaw-plugin-yuanbao` Plugin は、Yuanbao ボットを WebSocket 経由で OpenClaw に接続し、ダイレクトメッセージとグループチャットを利用できるようにします。
 
-**ステータス:** ボットの DM とグループチャットで本番利用可能です。サポートされる接続モードは WebSocket のみです。この Plugin は OpenClaw コアではなく Tencent Yuanbao チームによって外部カタログエントリとして保守されています。以下の設定と動作の詳細（インストールと汎用 CLI インターフェースを除く）は Plugin 独自のドキュメントに基づいており、OpenClaw コアのソースに照らして検証されていません。
+**ステータス:** ボットの DM とグループチャットで本番利用可能です。サポートされる接続モードは WebSocket のみです。この Plugin は OpenClaw コアではなく Tencent Yuanbao チームによって外部カタログエントリとしてメンテナンスされています。以下の設定と動作の詳細（インストールと汎用 CLI サーフェスを除く）は Plugin 独自のドキュメントに基づいており、OpenClaw コアのソースに対する検証は行われていません。
 
 ## クイックスタート
 
@@ -27,7 +28,7 @@ OpenClaw 2026.4.10 以降が必要です。`openclaw --version` で確認し、`
   ```bash
   openclaw channels add --channel yuanbao --token "appKey:appSecret"
   ```
-  `--token` には、コロンで区切った `appKey:appSecret` を使用します。Yuanbao アプリのアプリケーション設定でボットを作成し、これらを取得してください。
+  `--token` には、コロンで区切った `appKey:appSecret` を使用します。アプリケーション設定でボットを作成し、Yuanbao アプリからこれらを取得してください。
   </Step>
 
   <Step title="変更を適用するために Gateway を再起動する">
@@ -43,7 +44,7 @@ OpenClaw 2026.4.10 以降が必要です。`openclaw --version` で確認し、`
 openclaw channels login --channel yuanbao
 ```
 
-プロンプトに従って App ID と App Secret を入力してください。
+プロンプトに従って App ID と App Secret を入力します。
 
 ## アクセス制御
 
@@ -51,12 +52,12 @@ openclaw channels login --channel yuanbao
 
 `channels.yuanbao.dm.policy`:
 
-| 値               | 動作                                                    |
-| ---------------- | ------------------------------------------------------- |
-| `open`（デフォルト） | すべてのユーザーを許可                                  |
-| `pairing`        | 未知のユーザーにペアリングコードを発行し、CLI で承認する |
-| `allowlist`      | `allowFrom` 内のユーザーのみチャット可能                |
-| `disabled`       | すべての DM を無効化                                    |
+| 値               | 動作                                              |
+| ---------------- | ------------------------------------------------- |
+| `open`（デフォルト） | すべてのユーザーを許可                            |
+| `pairing`        | 不明なユーザーにペアリングコードを発行し、CLI で承認 |
+| `allowlist`      | `allowFrom` のユーザーのみチャット可能            |
+| `disabled`       | すべての DM を無効化                              |
 
 ペアリング要求を承認します。
 
@@ -67,7 +68,7 @@ openclaw pairing approve yuanbao <CODE>
 
 ### グループチャット
 
-`channels.yuanbao.requireMention`（デフォルトは `true`）: グループ内でボットが応答する前に @メンションを必須にします。ボット自身のメッセージへの返信は、暗黙のメンションとして扱われます。
+`channels.yuanbao.requireMention`（デフォルト `true`）: グループ内でボットが応答する前に @メンションを必須にします。ボット自身のメッセージへの返信は、暗黙のメンションとして扱われます。
 
 ## 設定例
 
@@ -123,35 +124,35 @@ DM を特定のユーザーに制限します。
   channels: {
     yuanbao: {
       outboundQueueStrategy: "merge-text",
-      minChars: 2800, // この文字数に達するまでバッファリング
-      maxChars: 3000, // この上限を超えたら強制的に分割
-      idleMs: 5000, // アイドルタイムアウト（ミリ秒）後に自動フラッシュ
+      minChars: 2800, // この文字数までバッファリング
+      maxChars: 3000, // この上限を超えた場合は強制的に分割
+      idleMs: 5000, // アイドルタイムアウト後に自動フラッシュ（ms）
     },
   },
 }
 ```
 
-バッファリングせずに各チャンクを送信するには、`outboundQueueStrategy: "immediate"` を設定します。
+バッファリングせず各チャンクを送信するには、`outboundQueueStrategy: "immediate"` を設定します。
 
-## よく使うコマンド
+## 一般的なコマンド
 
 | コマンド   | 説明                         |
 | ---------- | ---------------------------- |
-| `/help`    | 使用可能なコマンドを表示     |
+| `/help`    | 利用可能なコマンドを表示     |
 | `/status`  | ボットのステータスを表示     |
 | `/new`     | 新しいセッションを開始       |
 | `/stop`    | 現在の実行を停止             |
 | `/restart` | OpenClaw を再起動             |
 | `/compact` | セッションコンテキストを圧縮 |
 
-Yuanbao はネイティブのスラッシュコマンドメニューをサポートしています。Gateway の起動時に、コマンドがプラットフォームへ自動的に同期されます。
+Yuanbao はネイティブのスラッシュコマンドメニューをサポートしています。Gateway の起動時にコマンドがプラットフォームへ自動的に同期されます。
 
 ## トラブルシューティング
 
-**グループチャットでボットが応答しない場合:**
+**ボットがグループチャットで応答しない場合:**
 
 1. ボットがグループに追加されていることを確認します
-2. ボットを @メンションしていることを確認します（デフォルトでは必須）
+2. ボットを @メンションしていることを確認します（デフォルトで必須）
 3. ログを確認します: `openclaw logs --follow`
 
 **ボットがメッセージを受信しない場合:**
@@ -200,17 +201,17 @@ Yuanbao はネイティブのスラッシュコマンドメニューをサポー
 }
 ```
 
-送信 API で `accountId` が指定されていない場合に使用するアカウントは、`defaultAccount` で制御します。
+送信 API で `accountId` が指定されていない場合、`defaultAccount` によって使用するアカウントが決まります。
 
 ### メッセージ制限
 
-- `maxChars`: 1 メッセージあたりの最大文字数（デフォルトは `3000`）
-- `mediaMaxMb`: メディアのアップロード／ダウンロード上限（デフォルトは `20` MB）
+- `maxChars`: 1 件のメッセージの最大文字数（デフォルト `3000`）
+- `mediaMaxMb`: メディアのアップロード／ダウンロード制限（デフォルト `20` MB）
 - `overflowPolicy`: メッセージが上限を超えた場合の動作。`"split"`（デフォルト）または `"stop"`
 
 ### ストリーミング
 
-Yuanbao はブロック単位のストリーミング出力をサポートしており、ボットは生成しながらテキストをチャンク単位で送信します。
+Yuanbao はブロック単位のストリーミング出力をサポートしています。ボットは生成しながらテキストをチャンク単位で送信します。
 
 ```json5
 {
@@ -222,9 +223,9 @@ Yuanbao はブロック単位のストリーミング出力をサポートして
 }
 ```
 
-完全な応答を 1 件のメッセージとして送信するには、`disableBlockStreaming: true` を設定します。
+完全な応答を 1 件のメッセージで送信するには、`disableBlockStreaming: true` を設定します。
 
-### グループチャット履歴のコンテキスト
+### グループチャットの履歴コンテキスト
 
 ```json5
 {
@@ -236,7 +237,7 @@ Yuanbao はブロック単位のストリーミング出力をサポートして
 }
 ```
 
-グループチャットの AI コンテキストに含める履歴メッセージ数を制御します。
+グループチャットの AI コンテキストに含める過去のメッセージ数を制御します。
 
 ### 返信先モード
 
@@ -250,11 +251,11 @@ Yuanbao はブロック単位のストリーミング出力をサポートして
 }
 ```
 
-| 値      | 動作                                                     |
-| ------- | -------------------------------------------------------- |
-| `off`   | 引用返信を行わない                                       |
-| `first` | 受信メッセージごとに最初の返信のみ引用する（デフォルト） |
-| `all`   | すべての返信を引用する                                   |
+| 値      | 動作                                                   |
+| ------- | ------------------------------------------------------ |
+| `off`   | 引用返信なし                                           |
+| `first` | 受信メッセージごとに最初の返信のみ引用（デフォルト）   |
+| `all`   | すべての返信を引用                                     |
 
 ### Markdown ヒントの挿入
 
@@ -286,7 +287,7 @@ Yuanbao はブロック単位のストリーミング出力をサポートして
 
 ### マルチエージェントルーティング
 
-`bindings` を使用して、Yuanbao の DM またはグループを異なるエージェントにルーティングします。
+Yuanbao の DM またはグループを異なるエージェントへルーティングするには、`bindings` を使用します。
 
 ```json5
 {
@@ -324,30 +325,30 @@ Yuanbao はブロック単位のストリーミング出力をサポートして
 
 完全な設定: [Gateway の設定](/ja-JP/gateway/configuration)
 
-| 設定                                       | 説明                                                    | デフォルト                             |
-| ------------------------------------------ | ------------------------------------------------------- | -------------------------------------- |
-| `channels.yuanbao.enabled`                 | チャンネルを有効化／無効化                              | `true`                                 |
-| `channels.yuanbao.defaultAccount`          | 送信ルーティングのデフォルトアカウント                  | `default`                              |
-| `channels.yuanbao.accounts.<id>.appKey`    | App Key（署名とチケット生成）                           | -                                      |
-| `channels.yuanbao.accounts.<id>.appSecret` | App Secret（署名）                                      | -                                      |
-| `channels.yuanbao.accounts.<id>.token`     | 事前署名済みトークン（チケットの自動署名を省略）        | -                                      |
-| `channels.yuanbao.accounts.<id>.name`      | アカウントの表示名                                      | -                                      |
-| `channels.yuanbao.accounts.<id>.enabled`   | 特定のアカウントを有効化／無効化                        | `true`                                 |
-| `channels.yuanbao.dm.policy`               | DM ポリシー                                             | `open`                                 |
-| `channels.yuanbao.dm.allowFrom`            | DM 許可リスト（ユーザー ID の一覧）                     | -                                      |
-| `channels.yuanbao.requireMention`          | グループで @メンションを必須にする                      | `true`                                 |
-| `channels.yuanbao.overflowPolicy`          | 長いメッセージの処理（`split` または `stop`）           | `split`                                |
-| `channels.yuanbao.replyToMode`             | グループの返信先戦略（`off`、`first`、`all`）           | `first`                                |
-| `channels.yuanbao.outboundQueueStrategy`   | 送信戦略（`merge-text` または `immediate`）             | `merge-text`                           |
-| `channels.yuanbao.minChars`                | テキスト結合: 送信を開始する最小文字数                  | `2800`                                 |
-| `channels.yuanbao.maxChars`                | テキスト結合: 1 メッセージあたりの最大文字数            | `3000`                                 |
-| `channels.yuanbao.idleMs`                  | テキスト結合: 自動フラッシュまでのアイドル時間（ミリ秒） | `5000`                                 |
-| `channels.yuanbao.mediaMaxMb`              | メディアサイズの上限（MB）                              | `20`                                   |
-| `channels.yuanbao.historyLimit`            | グループチャット履歴のコンテキスト項目数                | `100`                                  |
-| `channels.yuanbao.disableBlockStreaming`   | ブロック単位のストリーミング出力を無効化                | `false`                                |
-| `channels.yuanbao.fallbackReply`           | モデルがコンテンツを返さない場合のフォールバック応答    | `暂时无法解答，你可以换个问题问问我哦` |
-| `channels.yuanbao.markdownHintEnabled`     | Markdown の全体囲みを防ぐ指示を挿入                     | `true`                                 |
-| `channels.yuanbao.debugBotIds`             | デバッグ許可リストのボット ID（未サニタイズのログ）     | `[]`                                   |
+| 設定                                       | 説明                                              | デフォルト                             |
+| ------------------------------------------ | ------------------------------------------------- | -------------------------------------- |
+| `channels.yuanbao.enabled`                 | チャンネルを有効化／無効化                        | `true`                                 |
+| `channels.yuanbao.defaultAccount`          | 送信ルーティングのデフォルトアカウント            | `default`                              |
+| `channels.yuanbao.accounts.<id>.appKey`    | App Key（署名とチケット生成）                     | -                                      |
+| `channels.yuanbao.accounts.<id>.appSecret` | App Secret（署名）                                | -                                      |
+| `channels.yuanbao.accounts.<id>.token`     | 署名済みトークン（自動チケット署名を省略）        | -                                      |
+| `channels.yuanbao.accounts.<id>.name`      | アカウント表示名                                  | -                                      |
+| `channels.yuanbao.accounts.<id>.enabled`   | 特定のアカウントを有効化／無効化                  | `true`                                 |
+| `channels.yuanbao.dm.policy`               | DM ポリシー                                       | `open`                                 |
+| `channels.yuanbao.dm.allowFrom`            | DM 許可リスト（ユーザー ID の一覧）               | -                                      |
+| `channels.yuanbao.requireMention`          | グループで @メンションを必須にする                | `true`                                 |
+| `channels.yuanbao.overflowPolicy`          | 長いメッセージの処理（`split` または `stop`） | `split`                       |
+| `channels.yuanbao.replyToMode`             | グループの返信先戦略（`off`、`first`、`all`） | `first`              |
+| `channels.yuanbao.outboundQueueStrategy`   | 送信戦略（`merge-text` または `immediate`） | `merge-text`                           |
+| `channels.yuanbao.minChars`                | テキスト結合: 送信を開始する最小文字数            | `2800`                                 |
+| `channels.yuanbao.maxChars`                | テキスト結合: メッセージごとの最大文字数          | `3000`                                 |
+| `channels.yuanbao.idleMs`                  | テキスト結合: 自動フラッシュまでのアイドルタイムアウト（ms） | `5000`                    |
+| `channels.yuanbao.mediaMaxMb`              | メディアサイズの上限（MB）                        | `20`                                   |
+| `channels.yuanbao.historyLimit`            | グループチャット履歴のコンテキスト件数            | `100`                                  |
+| `channels.yuanbao.disableBlockStreaming`   | ブロック単位のストリーミング出力を無効化          | `false`                                |
+| `channels.yuanbao.fallbackReply`           | モデルがコンテンツを返さない場合のフォールバック応答 | `暂时无法解答，你可以换个问题问问我哦` |
+| `channels.yuanbao.markdownHintEnabled`     | Markdown の全体囲みを防ぐ指示を挿入               | `true`                                 |
+| `channels.yuanbao.debugBotIds`             | デバッグ許可リストのボット ID（サニタイズされていないログ） | `[]`                         |
 
 ## サポートされるメッセージタイプ
 
@@ -359,8 +360,8 @@ Yuanbao はブロック単位のストリーミング出力をサポートして
 
 ## 関連項目
 
-- [チャンネルの概要](/ja-JP/channels) - サポートされているすべてのチャンネル
-- [ペアリング](/ja-JP/channels/pairing) - DM の認証とペアリングフロー
-- [グループ](/ja-JP/channels/groups) - グループチャットの動作とメンション制御
+- [チャンネル概要](/ja-JP/channels) - サポートされているすべてのチャンネル
+- [ペアリング](/ja-JP/channels/pairing) - DM 認証とペアリングの流れ
+- [グループ](/ja-JP/channels/groups) - グループチャットの動作とメンションによる制御
 - [チャンネルルーティング](/ja-JP/channels/channel-routing) - メッセージのセッションルーティング
 - [セキュリティ](/ja-JP/gateway/security) - アクセスモデルと堅牢化

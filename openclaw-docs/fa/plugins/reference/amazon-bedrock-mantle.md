@@ -1,21 +1,22 @@
 ---
 read_when:
-    - شما در حال نصب، پیکربندی یا ممیزی Plugin amazon-bedrock-mantle هستید
-summary: Plugin ارائه‌دهندهٔ Amazon Bedrock Mantle برای OpenClaw جهت مسیریابی مدل‌های سازگار با OpenAI.
-title: Plugin مانتل Amazon Bedrock
+    - در حال نصب، پیکربندی یا ممیزی Plugin‏ amazon-bedrock-mantle هستید
+summary: Plugin ارائه‌دهنده Amazon Bedrock Mantle برای OpenClaw جهت مسیریابی مدل‌های سازگار با OpenAI.
+title: Plugin منتل Amazon Bedrock
 x-i18n:
-    generated_at: "2026-07-12T10:27:56Z"
+    generated_at: "2026-07-27T16:49:46Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 18725aa4678f967a5d34a2c951c11cc371e934abe62fde7616124157ebdb3799
+    source_hash: a12f8acda947e8b80053229a8b842560d087e2b7944d9092a3c3d250343cccbc
     source_path: plugins/reference/amazon-bedrock-mantle.md
     workflow: 16
 ---
 
-# Plugin آمازون Bedrock Mantle
+# Plugin Amazon Bedrock Mantle
 
-Plugin ارائه‌دهنده آمازون Bedrock Mantle برای OpenClaw جهت مسیریابی مدل‌های سازگار با OpenAI.
+Plugin ارائه‌دهنده Amazon Bedrock Mantle در OpenClaw برای مسیریابی مدل سازگار با OpenAI.
 
 ## توزیع
 
@@ -24,7 +25,7 @@ Plugin ارائه‌دهنده آمازون Bedrock Mantle برای OpenClaw ج�
 
 ## سطح
 
-ارائه‌دهندگان: amazon-bedrock-mantle
+ارائه‌دهندگان: `amazon-bedrock-mantle`
 
 ## مستندات مرتبط
 

@@ -1,48 +1,47 @@
 ---
 read_when:
     - आप OpenClaw के साथ Cerebras का उपयोग करना चाहते हैं
-    - आपको Cerebras API कुंजी env var या CLI प्रमाणीकरण विकल्प चाहिए
+    - आपको Cerebras API कुंजी के एनवायरनमेंट वेरिएबल या CLI प्रमाणीकरण विकल्प की आवश्यकता है
 summary: Cerebras सेटअप (प्रमाणीकरण + मॉडल चयन)
 title: Cerebras
 x-i18n:
-    generated_at: "2026-06-28T23:56:59Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:52:49Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: cd21756ac521c7b60ca6d3dfbef8665574dca52d1a25e6293169b24f4af6273e
+    source_hash: 716eef83155ef80d9aa61bd55ed83e3e38ad22720ae055bce7eb9c2cbfb6cf41
     source_path: providers/cerebras.md
     workflow: 16
 ---
 
-[Cerebras](https://www.cerebras.ai) कस्टम इन्फ़रेंस हार्डवेयर पर उच्च-गति OpenAI-संगत इन्फ़रेंस प्रदान करता है। Cerebras प्रदाता Plugin में चार मॉडलों की स्थिर कैटलॉग शामिल है।
+[Cerebras](https://www.cerebras.ai) कस्टम इन्फ़रेंस हार्डवेयर पर उच्च-गति वाला OpenAI-संगत इन्फ़रेंस प्रदान करता है। Plugin में दो मॉडलों का स्थिर कैटलॉग शामिल है (कोई लाइव खोज नहीं)।
 
-| गुण             | मान                                      |
-| --------------- | ---------------------------------------- |
-| प्रदाता id      | `cerebras`                               |
-| Plugin          | आधिकारिक बाहरी पैकेज                    |
-| Auth env var    | `CEREBRAS_API_KEY`                       |
-| ऑनबोर्डिंग फ़्लैग | `--auth-choice cerebras-api-key`         |
-| प्रत्यक्ष CLI फ़्लैग | `--cerebras-api-key <key>`               |
-| API             | OpenAI-संगत (`openai-completions`)       |
-| बेस URL         | `https://api.cerebras.ai/v1`             |
-| डिफ़ॉल्ट मॉडल   | `cerebras/zai-glm-4.7`                   |
+| गुण              | मान                                                       |
+| ---------------- | --------------------------------------------------------- |
+| प्रदाता आईडी     | `cerebras`                                        |
+| Plugin           | आधिकारिक बाहरी पैकेज (`@openclaw/cerebras-provider`)                |
+| प्रमाणीकरण एनवायरनमेंट वेरिएबल | `CEREBRAS_API_KEY`                       |
+| ऑनबोर्डिंग फ़्लैग | `--auth-choice cerebras-api-key`                                       |
+| प्रत्यक्ष CLI फ़्लैग | `--cerebras-api-key <key>`                                     |
+| API              | OpenAI-संगत (`openai-completions`)                          |
+| बेस URL          | `https://api.cerebras.ai/v1`                                        |
+| डिफ़ॉल्ट मॉडल    | `cerebras/zai-glm-4.7`                                        |
 
 ## Plugin इंस्टॉल करें
-
-आधिकारिक Plugin इंस्टॉल करें, फिर Gateway रीस्टार्ट करें:
 
 ```bash
 openclaw plugins install @openclaw/cerebras-provider
 openclaw gateway restart
 ```
 
-## शुरुआत करना
+## आरंभ करना
 
 <Steps>
   <Step title="API कुंजी प्राप्त करें">
-    [Cerebras Cloud Console](https://cloud.cerebras.ai) में API कुंजी बनाएं।
+    [Cerebras Cloud Console](https://cloud.cerebras.ai) में एक API कुंजी बनाएँ।
   </Step>
-  <Step title="ऑनबोर्डिंग चलाएं">
+  <Step title="ऑनबोर्डिंग चलाएँ">
     <CodeGroup>
 
 ```bash ऑनबोर्डिंग
@@ -55,7 +54,7 @@ openclaw onboard --non-interactive \
   --cerebras-api-key "$CEREBRAS_API_KEY"
 ```
 
-```bash केवल Env
+```bash केवल एनवायरनमेंट
 export CEREBRAS_API_KEY=csk-...
 ```
 
@@ -67,12 +66,12 @@ export CEREBRAS_API_KEY=csk-...
     openclaw models list --provider cerebras
     ```
 
-    सूची में सभी चार स्थिर मॉडल शामिल होने चाहिए। यदि `CEREBRAS_API_KEY` हल नहीं होता है, तो `openclaw models status --json` अनुपस्थित क्रेडेंशियल को `auth.unusableProfiles` के अंतर्गत रिपोर्ट करता है।
+    दोनों स्थिर मॉडलों को सूचीबद्ध करता है। यदि `CEREBRAS_API_KEY` का समाधान नहीं हुआ है, तो `openclaw models status --json`, `auth.unusableProfiles` के अंतर्गत अनुपलब्ध क्रेडेंशियल की सूचना देता है।
 
   </Step>
 </Steps>
 
-## नॉन-इंटरैक्टिव सेटअप
+## गैर-संवादात्मक सेटअप
 
 ```bash
 openclaw onboard --non-interactive \
@@ -81,24 +80,18 @@ openclaw onboard --non-interactive \
   --cerebras-api-key "$CEREBRAS_API_KEY"
 ```
 
-## बिल्ट-इन कैटलॉग
+## अंतर्निहित कैटलॉग
 
-OpenClaw एक स्थिर Cerebras कैटलॉग शिप करता है जो सार्वजनिक OpenAI-संगत एंडपॉइंट को मिरर करती है। सभी चार मॉडल 128k संदर्भ और 8,192 अधिकतम-आउटपुट टोकन साझा करते हैं।
+दोनों मॉडलों में 128k की कॉन्टेक्स्ट विंडो और अधिकतम 8,192 आउटपुट टोकन समान हैं।
 
-| मॉडल ref                                  | नाम                  | रीजनिंग | नोट्स                                  |
-| ----------------------------------------- | -------------------- | ------- | -------------------------------------- |
-| `cerebras/zai-glm-4.7`                    | Z.ai GLM 4.7         | हाँ     | डिफ़ॉल्ट मॉडल; प्रीव्यू रीजनिंग मॉडल |
-| `cerebras/gpt-oss-120b`                   | GPT OSS 120B         | हाँ     | प्रोडक्शन रीजनिंग मॉडल                |
-| `cerebras/qwen-3-235b-a22b-instruct-2507` | Qwen 3 235B Instruct | नहीं    | प्रीव्यू नॉन-रीजनिंग मॉडल            |
-| `cerebras/llama3.1-8b`                    | Llama 3.1 8B         | नहीं    | प्रोडक्शन गति-केंद्रित मॉडल          |
+| मॉडल संदर्भ             | नाम          | रीजनिंग | टिप्पणियाँ                             |
+| ----------------------- | ------------ | ------- | -------------------------------------- |
+| `cerebras/zai-glm-4.7`      | Z.ai GLM 4.7 | हाँ     | डिफ़ॉल्ट मॉडल; पूर्वावलोकन रीजनिंग मॉडल |
+| `cerebras/gpt-oss-120b`      | GPT OSS 120B | हाँ     | प्रोडक्शन रीजनिंग मॉडल                 |
 
-<Warning>
-  Cerebras `zai-glm-4.7` और `qwen-3-235b-a22b-instruct-2507` को प्रीव्यू मॉडल के रूप में चिह्नित करता है, और `llama3.1-8b` के साथ `qwen-3-235b-a22b-instruct-2507` को 27 मई 2026 को डिप्रिकेशन के लिए दस्तावेज़ित किया गया है। प्रोडक्शन वर्कलोड के लिए इन पर निर्भर होने से पहले Cerebras का समर्थित-मॉडल पेज देखें।
-</Warning>
+## मैन्युअल कॉन्फ़िगरेशन
 
-## मैनुअल कॉन्फ़िगरेशन
-
-Plugin का सामान्यतः अर्थ है कि आपको केवल API कुंजी चाहिए। जब आप मॉडल मेटाडेटा ओवरराइड करना चाहते हैं या स्थिर कैटलॉग के विरुद्ध `mode: "merge"` में चलाना चाहते हैं, तो स्पष्ट `models.providers.cerebras` कॉन्फ़िगरेशन का उपयोग करें:
+अधिकांश सेटअप में केवल API कुंजी की आवश्यकता होती है। मॉडल मेटाडेटा को ओवरराइड करने या स्थिर कैटलॉग के विरुद्ध `mode: "merge"` में चलाने के लिए स्पष्ट `models.providers.cerebras` कॉन्फ़िगरेशन का उपयोग करें:
 
 ```json5
 {
@@ -126,22 +119,22 @@ Plugin का सामान्यतः अर्थ है कि आपक�
 ```
 
 <Note>
-  यदि Gateway एक daemon के रूप में चलता है (launchd, systemd, Docker), तो सुनिश्चित करें कि `CEREBRAS_API_KEY` उस प्रक्रिया के लिए उपलब्ध है — उदाहरण के लिए `~/.openclaw/.env` में या `env.shellEnv` के माध्यम से। केवल इंटरैक्टिव shell में निर्यात की गई कुंजी किसी managed service की मदद नहीं करेगी, जब तक env को अलग से import न किया जाए।
+यदि Gateway डेमन (launchd, systemd, Docker) के रूप में चलता है, तो सुनिश्चित करें कि `CEREBRAS_API_KEY` उस प्रक्रिया के लिए उपलब्ध हो—उदाहरण के लिए `~/.openclaw/.env` में या `env.shellEnv` के माध्यम से। केवल इंटरैक्टिव शेल में एक्सपोर्ट की गई कुंजी किसी प्रबंधित सेवा के लिए तब तक उपयोगी नहीं होगी, जब तक एनवायरनमेंट को अलग से इम्पोर्ट न किया जाए।
 </Note>
 
 ## संबंधित
 
 <CardGroup cols={2}>
   <Card title="मॉडल प्रदाता" href="/hi/concepts/model-providers" icon="layers">
-    प्रदाताओं, मॉडल refs, और failover व्यवहार का चयन।
+    प्रदाताओं, मॉडल संदर्भों और फ़ेलओवर व्यवहार का चयन।
   </Card>
-  <Card title="सोचने के मोड" href="/hi/tools/thinking" icon="brain">
-    दो रीजनिंग-सक्षम Cerebras मॉडलों के लिए रीजनिंग प्रयास स्तर।
+  <Card title="थिंकिंग मोड" href="/hi/tools/thinking" icon="brain">
+    रीजनिंग में सक्षम दो Cerebras मॉडलों के लिए रीजनिंग प्रयास के स्तर।
   </Card>
   <Card title="कॉन्फ़िगरेशन संदर्भ" href="/hi/gateway/config-agents#agent-defaults" icon="gear">
-    Agent डिफ़ॉल्ट और मॉडल कॉन्फ़िगरेशन।
+    एजेंट के डिफ़ॉल्ट मान और मॉडल कॉन्फ़िगरेशन।
   </Card>
-  <Card title="मॉडल FAQ" href="/hi/help/faq-models" icon="circle-question">
-    Auth profiles, मॉडल बदलना, और "no profile" त्रुटियों को हल करना।
+  <Card title="मॉडल संबंधी अक्सर पूछे जाने वाले प्रश्न" href="/hi/help/faq-models" icon="circle-question">
+    प्रमाणीकरण प्रोफ़ाइल, मॉडल बदलना और "no profile" त्रुटियों का समाधान करना।
   </Card>
 </CardGroup>

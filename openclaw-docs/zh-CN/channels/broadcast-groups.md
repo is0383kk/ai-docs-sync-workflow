@@ -4,29 +4,30 @@ read_when:
     - 调试 WhatsApp 中的多 Agent 回复
 sidebarTitle: Broadcast groups
 status: experimental
-summary: 向多个智能体广播一条 WhatsApp 消息
+summary: 向多个智能体广播 WhatsApp 消息
 title: 广播群组
 x-i18n:
-    generated_at: "2026-07-11T20:19:17Z"
+    generated_at: "2026-07-26T05:38:51Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2771c15b31592f11293385498b9c89decf84747a9172caafb994a5dca4bbdc06
+    source_hash: a468e4c65d2cc89bda24e8e599f8a45015e3f77f1073612b105daed8877c0ff9
     source_path: channels/broadcast-groups.md
     workflow: 16
 ---
 
 <Note>
-**状态：** 实验性功能。于 2026.1.9 添加。仅支持 WhatsApp（Web 渠道）。
+**状态：** 实验性功能。于 2026.1.9 中添加。仅支持 WhatsApp（Web 渠道）。
 </Note>
 
 ## 概览
 
-广播群组会针对同一条入站消息运行**多个智能体**。每个智能体都在各自隔离的会话中处理消息并发送自己的回复，因此一个 WhatsApp 号码可以在单个群聊或私信中承载一支由专业智能体组成的团队。
+广播群组会针对同一条入站消息运行**多个智能体**。每个智能体都在各自隔离的会话中处理消息并发布自己的回复，因此，一个 WhatsApp 号码可以在单个群聊或私信中承载一组专业化智能体。
 
-广播群组在渠道允许列表和群组激活规则之后求值。在 WhatsApp 群组中，当 OpenClaw 通常会回复时（例如：被提及时，具体取决于你的群组设置），就会进行广播。广播只会改变**运行哪些智能体**，绝不会改变消息是否符合处理条件。
+广播群组会在渠道允许列表和群组激活规则之后进行评估。在 WhatsApp 群组中，当 OpenClaw 通常会回复时（例如：被提及时，具体取决于你的群组设置），广播就会发生。它们只会改变**运行哪些智能体**，绝不会改变消息是否符合处理条件。
 
-WhatsApp 实时 QA 测试通道包含 `whatsapp-broadcast-group-fanout`，用于验证一条提及智能体的群组消息能够让两个已配置的智能体分别生成不同的可见回复。
+实时 WhatsApp QA 通道包含 `whatsapp-broadcast-group-fanout`，用于验证一条提及智能体的群组消息可以让两个已配置的智能体分别生成不同的可见回复。
 
 ## 配置
 
@@ -45,18 +46,18 @@ WhatsApp 实时 QA 测试通道包含 `whatsapp-broadcast-group-fanout`，用于
 }
 ```
 
-**结果：** 当 OpenClaw 通常会在此聊天中回复时，它会运行全部三个智能体。
+**结果：** 当 OpenClaw 要在此聊天中回复时，它会运行全部三个智能体。
 
-列出的每个智能体 ID 都必须存在于 `agents.list` 中：配置验证会报告未知 ID，而运行时会跳过它们并显示 `Broadcast agent <id> not found in agents.list; skipping` 警告。
+列出的每个智能体 ID 都必须存在于 `agents.entries` 中：配置验证会报告未知 ID，运行时则会跳过它们并发出 `Broadcast agent <id> not found in agents.entries; skipping` 警告。
 
 ### 处理策略
 
 `broadcast.strategy` 设置智能体处理消息的方式：
 
-| 策略                 | 行为                                                       |
-| -------------------- | ---------------------------------------------------------- |
-| `parallel`（默认）   | 所有智能体同时处理；回复可以按任意顺序到达。               |
-| `sequential`         | 智能体按数组顺序处理；每个智能体等待前一个智能体完成。     |
+| 策略                 | 行为                                                                  |
+| -------------------- | --------------------------------------------------------------------- |
+| `parallel`（默认） | 所有智能体同时处理；回复可以按任意顺序到达。                          |
+| `sequential`         | 智能体按数组顺序处理；每个智能体都会等待前一个处理完成。              |
 
 ```json
 {
@@ -107,24 +108,24 @@ WhatsApp 实时 QA 测试通道包含 `whatsapp-broadcast-group-fanout`，用于
 ### 消息流
 
 <Steps>
-  <Step title="入站消息到达">
-    一条 WhatsApp 群组或私信消息到达。
+  <Step title="收到入站消息">
+    收到一条 WhatsApp 群组或私信消息。
   </Step>
   <Step title="路由和准入">
-    OpenClaw 应用渠道允许列表、群组激活规则以及已配置 ACP 绑定的所有权规则。
+    OpenClaw 应用渠道允许列表、群组激活规则以及已配置的 ACP 绑定所有权。
   </Step>
   <Step title="广播检查">
     如果没有已配置的 ACP 绑定拥有该路由，OpenClaw 会检查对端 ID 是否位于 `broadcast` 中。
   </Step>
-  <Step title="如果广播适用">
+  <Step title="如果应用广播">
     - 所有列出的智能体都会处理该消息。
     - 每个智能体都有自己的会话键和隔离上下文。
-    - 智能体采用并行（默认）或顺序方式处理。
-    - 音频附件会在扇出前仅转录一次，因此智能体会共享同一份转录文本，而不会分别发起 STT 调用。
+    - 智能体以并行（默认）或顺序方式处理。
+    - 音频附件会在扇出前仅转录一次，因此智能体会共享同一份转录文本，而不是分别发起 STT 调用。
 
   </Step>
-  <Step title="如果广播不适用">
-    OpenClaw 会分派普通路由，或分派路由期间选定的已配置 ACP 会话路由。
+  <Step title="如果不应用广播">
+    OpenClaw 会分派普通路由，或分派在路由期间选定的已配置 ACP 会话路由。
   </Step>
 </Steps>
 
@@ -138,17 +139,17 @@ WhatsApp 实时 QA 测试通道包含 `whatsapp-broadcast-group-fanout`，用于
 
 - **会话键**（`agent:alfred:whatsapp:group:120363...` 与 `agent:baerbel:whatsapp:group:120363...`）
 - **对话历史记录**（智能体看不到其他智能体的回复）
-- **工作区**（如果已配置，则使用不同的沙箱）
+- **工作区**（如果已配置，则使用单独的沙箱）
 - **工具访问权限**（不同的允许/拒绝列表）
-- **记忆/上下文**（独立的 `IDENTITY.md`、`SOUL.md` 等）
+- **记忆/上下文**（单独的 `IDENTITY.md`、`SOUL.md` 等）
 
-有一个有意共享的例外：**群组上下文缓冲区**（用于提供上下文的近期群组消息）按对端共享，因此触发时所有广播智能体都会看到相同的上下文。扇出完成后，该缓冲区会统一清除一次。
+有一个特意共享的例外：**群组上下文缓冲区**（用于提供上下文的近期群组消息）按对端共享，因此所有广播智能体在触发时都会看到相同的上下文。扇出完成后，该缓冲区会统一清除一次。
 
-这使每个智能体都可以拥有不同的个性、模型、Skills 和工具访问权限（例如只读与读写）。
+这样一来，每个智能体都可以拥有不同的个性、模型、Skills 和工具访问权限（例如只读与读写）。
 
 ### 示例：隔离的会话
 
-在群组 `120363403215116621@g.us` 中配置智能体 `["alfred", "baerbel"]`：
+在包含智能体 `["alfred", "baerbel"]` 的群组 `120363403215116621@g.us` 中：
 
 <Tabs>
   <Tab title="Alfred 的上下文">
@@ -171,16 +172,16 @@ WhatsApp 实时 QA 测试通道包含 `whatsapp-broadcast-group-fanout`，用于
 
 ## 使用场景
 
-- **专业智能体团队**：在一个开发群组中，`code-reviewer`、`security-auditor`、`test-generator` 和 `docs-checker` 分别从各自角度回答同一条消息。
-- **多语言支持**：在一个支持聊天中，由 `support-en`、`support-de`、`support-es` 使用各自的语言回复。
-- **质量保证**：`support-agent` 负责回答，`qa-agent` 负责审查，并且仅在发现问题时回复。
-- **任务自动化**：`task-tracker`、`time-logger` 和 `report-generator` 共同处理同一条状态更新。
+- **专业化智能体团队**：在开发群组中，`code-reviewer`、`security-auditor`、`test-generator` 和 `docs-checker` 分别从各自角度回答同一条消息。
+- **多语言支持**：在同一个支持聊天中，`support-en`、`support-de` 和 `support-es` 分别使用各自的语言回复。
+- **质量保证**：`support-agent` 负责回答，而 `qa-agent` 负责审查，并且仅在发现问题时回复。
+- **任务自动化**：`task-tracker`、`time-logger` 和 `report-generator` 都会处理同一条状态更新。
 
 ## 最佳实践
 
 <AccordionGroup>
-  <Accordion title="1. 让智能体专注于单一职责">
-    为每个智能体分配一个明确的职责（`formatter`、`linter`、`tester`），而不是使用一个通用的“开发辅助”智能体。
+  <Accordion title="1. 让智能体保持专注">
+    为每个智能体分配单一且明确的职责（`formatter`、`linter`、`tester`），而不是使用一个通用的“开发助手”智能体。
   </Accordion>
   <Accordion title="2. 使用描述性 ID 和名称">
     ```json
@@ -207,14 +208,14 @@ WhatsApp 实时 QA 测试通道包含 `whatsapp-broadcast-group-fanout`，用于
     }
     ```
 
-    `reviewer` 为只读。`fixer` 可以读取和写入。
+    `reviewer` 是只读的。`fixer` 可以读取和写入。
 
   </Accordion>
   <Accordion title="4. 监控性能">
-    使用多个智能体时，优先选择 `"strategy": "parallel"`（默认），将广播群组限制为少量智能体，并为较简单的智能体使用速度更快的模型。
+    使用多个智能体时，优先选择 `"strategy": "parallel"`（默认），将广播群组限制在少量智能体，并为较简单的智能体使用速度更快的模型。
   </Accordion>
   <Accordion title="5. 故障保持隔离">
-    智能体之间的故障互不影响。单个智能体的错误会被记录（`Broadcast agent <id> failed: ...`），且不会阻塞其他智能体。
+    智能体之间的故障相互独立。一个智能体的错误会被记录（`Broadcast agent <id> failed: ...`），且不会阻塞其他智能体。
   </Accordion>
 </AccordionGroup>
 
@@ -222,11 +223,11 @@ WhatsApp 实时 QA 测试通道包含 `whatsapp-broadcast-group-fanout`，用于
 
 ### 提供商
 
-广播群组目前仅为 WhatsApp（Web 渠道）实现。其他渠道会忽略 `broadcast` 配置。
+广播群组目前仅针对 WhatsApp（Web 渠道）实现。其他渠道会忽略 `broadcast` 配置。
 
 ### 路由
 
-广播群组可与现有路由配合使用：
+广播群组可以与现有路由配合使用：
 
 ```json
 {
@@ -246,7 +247,7 @@ WhatsApp 实时 QA 测试通道包含 `whatsapp-broadcast-group-fanout`，用于
 - `GROUP_B`：agent1 和 agent2 都会回复（广播）。
 
 <Note>
-**优先级：** `broadcast` 的优先级高于普通路由绑定。已配置的 ACP 绑定（`bindings[].type="acp"`）具有独占性：匹配时，OpenClaw 会分派到已配置的 ACP 会话，而不是进行扇出广播。
+**优先级：** `broadcast` 的优先级高于普通路由绑定。已配置的 ACP 绑定（`bindings[].type="acp"`）具有排他性：当其中一个匹配时，OpenClaw 会分派到已配置的 ACP 会话，而不是进行扇出广播。
 </Note>
 
 ## 故障排查
@@ -255,9 +256,9 @@ WhatsApp 实时 QA 测试通道包含 `whatsapp-broadcast-group-fanout`，用于
   <Accordion title="智能体未响应">
     **检查：**
 
-    1. 智能体 ID 存在于 `agents.list` 中（配置验证会拒绝未知 ID）。
-    2. 对端 ID 格式正确（群组 JID，例如 `120363403215116621@g.us`；私信使用 E.164 格式，例如 `+15551234567`）。
-    3. 消息通过了常规门控（提及/激活规则仍然适用）。
+    1. 智能体 ID 存在于 `agents.entries` 中（配置验证会拒绝未知 ID）。
+    2. 对端 ID 格式正确（群组 JID，例如 `120363403215116621@g.us`；私信使用 E.164，例如 `+15551234567`）。
+    3. 消息通过了普通准入检查（提及/激活规则仍然适用）。
 
     **调试：**
 
@@ -265,17 +266,17 @@ WhatsApp 实时 QA 测试通道包含 `whatsapp-broadcast-group-fanout`，用于
     openclaw logs --follow | grep -i broadcast
     ```
 
-    成功扇出时会记录 `Broadcasting message to <n> agents (<strategy>)`。
+    成功的扇出会记录 `Broadcasting message to <n> agents (<strategy>)`。
 
   </Accordion>
   <Accordion title="只有一个智能体响应">
-    **原因：** 对端 ID 可能位于普通路由绑定中，但不在 `broadcast` 中；或者它可能匹配了具有独占性的已配置 ACP 绑定。
+    **原因：** 对端 ID 可能位于普通路由绑定中，但不在 `broadcast` 中；或者，它可能匹配了一个排他的已配置 ACP 绑定。
 
-    **解决方法：** 将普通路由绑定的对端添加到广播配置中；如果需要扇出广播，则移除或更改已配置的 ACP 绑定。
+    **修复：** 将绑定了普通路由的对端添加到广播配置；如果需要扇出广播，则移除或更改已配置的 ACP 绑定。
 
   </Accordion>
   <Accordion title="性能问题">
-    如果使用多个智能体时速度较慢：减少每个群组中的智能体数量、使用更轻量的模型，并检查沙箱启动时间。
+    如果智能体较多时速度缓慢：减少每个群组中的智能体数量、使用更轻量的模型，并检查沙箱启动时间。
   </Accordion>
 </AccordionGroup>
 
@@ -317,7 +318,7 @@ WhatsApp 实时 QA 测试通道包含 `whatsapp-broadcast-group-fanout`，用于
     }
     ```
 
-    群组中的一个代码片段会产生四条回复：格式修复、安全问题、覆盖率缺口和文档细节问题。
+    群组中的一段代码会产生四条回复：格式修复、安全发现、覆盖率缺口和文档小问题。
 
   </Accordion>
   <Accordion title="示例 2：多语言流水线">
@@ -355,7 +356,7 @@ interface OpenClawConfig {
 ### 字段
 
 <ParamField path="strategy" type='"parallel" | "sequential"' default='"parallel"'>
-  智能体的处理方式。`parallel` 同时运行所有智能体；`sequential` 按数组顺序运行智能体。
+  智能体的处理方式。`parallel` 会同时运行所有智能体；`sequential` 会按数组顺序运行它们。
 </ParamField>
 <ParamField path="[peerId]" type="string[]">
   WhatsApp 群组 JID 或 E.164 电话号码。值为智能体 ID 数组，其中所有智能体都应处理来自该对端的消息。
@@ -363,10 +364,10 @@ interface OpenClawConfig {
 
 ## 限制
 
-1. **智能体数量上限：** 没有硬性限制，但智能体数量较多（10 个以上）时可能会变慢。
-2. **共享上下文：** 智能体看不到彼此的回复（这是有意设计的行为）。
-3. **消息顺序：** 并行回复可能按任意顺序到达。
-4. **速率限制：** 所有回复都来自同一个 WhatsApp 账户，因此每个智能体的回复都会计入同一组 WhatsApp 速率限制。
+1. **最大智能体数：**没有硬性限制，但智能体数量较多（10 个以上）时速度可能会变慢。
+2. **共享上下文：**智能体无法看到彼此的响应（这是有意设计的）。
+3. **消息顺序：**并行响应可能以任意顺序到达。
+4. **速率限制：**所有回复都来自同一个 WhatsApp 账号，因此每个智能体的回复都会计入同一 WhatsApp 速率限制。
 
 ## 相关内容
 

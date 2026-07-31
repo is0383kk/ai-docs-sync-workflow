@@ -1,172 +1,181 @@
 ---
 doc-schema-version: 1
 read_when:
-    - Plugin इंस्टॉल या कॉन्फ़िगर करना
+    - Plugins इंस्टॉल या कॉन्फ़िगर करना
     - Plugin खोज और लोड नियमों को समझना
-    - Codex/Claude-संगत Plugin बंडल के साथ काम करना
+    - Codex/Claude-संगत Plugin बंडलों के साथ काम करना
 sidebarTitle: Getting Started
-summary: OpenClaw Plugins इंस्टॉल, कॉन्फ़िगर और प्रबंधित करें
+summary: OpenClaw plugins इंस्टॉल, कॉन्फ़िगर और प्रबंधित करें
 title: Plugins
 x-i18n:
-    generated_at: "2026-06-29T00:23:30Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:48:38Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c61e0ddb164baba368fbf57883e7a72eddadc28cb100ed6c4f11977c55576513
+    source_hash: f210dccab059527192eeb0aa2e780dcea243959273938ffaacc867ec96f5085e
     source_path: tools/plugin.md
     workflow: 16
 ---
 
-Plugins OpenClaw को channels, model providers, agent harnesses, tools,
-skills, speech, realtime transcription, voice, media understanding, generation,
-web fetch, web search, और अन्य runtime क्षमताओं से विस्तारित करते हैं।
+Plugins, OpenClaw में चैनल, मॉडल प्रदाता, एजेंट हार्नेस, टूल,
+स्किल, स्पीच, रियलटाइम ट्रांसक्रिप्शन, वॉइस, मीडिया की समझ, जनरेशन,
+वेब फ़ेच, वेब सर्च और अन्य रनटाइम क्षमताएँ जोड़कर उसका विस्तार करते हैं।
 
-इस पृष्ठ का उपयोग तब करें जब आप कोई Plugin इंस्टॉल करना चाहते हों, Gateway को restart करना चाहते हों, यह सत्यापित करना चाहते हों
-कि runtime ने उसे load किया है, और सामान्य setup विफलताओं को route करना चाहते हों। केवल-command
-उदाहरणों के लिए, [Plugins प्रबंधित करें](/hi/plugins/manage-plugins) देखें। bundled, official external, और source-only plugins की पूरी generated
-inventory के लिए,
-[Plugin inventory](/hi/plugins/plugin-inventory) देखें।
+Plugin इंस्टॉल करने, Gateway पुनः आरंभ करने, रनटाइम द्वारा उसे लोड किए जाने की
+पुष्टि करने और सामान्य सेटअप विफलताओं का समाधान खोजने के लिए इस पृष्ठ का उपयोग करें।
+केवल कमांड वाले उदाहरणों के लिए [Plugins प्रबंधित करें](/hi/plugins/manage-plugins) देखें।
+बंडल किए गए, आधिकारिक बाहरी और केवल-स्रोत Plugins की जनरेट की गई सूची के लिए
+[Plugin सूची](/hi/plugins/plugin-inventory) देखें।
 
 ## आवश्यकताएँ
 
-Plugin इंस्टॉल करने से पहले, सुनिश्चित करें कि आपके पास:
-
-- `openclaw` CLI उपलब्ध होने के साथ OpenClaw checkout या installation हो
-- चयनित source तक network access हो, जैसे ClawHub, npm, या git host
-- उस plugin के setup docs में बताए गए plugin-specific credentials, config keys, या operating-system tools हों
-- आपके channels को serve करने वाले Gateway को reload या restart करने की अनुमति हो
+- एक OpenClaw चेकआउट या इंस्टॉलेशन, जिसमें `openclaw` CLI उपलब्ध हो
+- चुने गए स्रोत (ClawHub, npm या किसी git होस्ट) तक नेटवर्क पहुँच
+- उस Plugin के सेटअप दस्तावेज़ों में बताए गए सभी Plugin-विशिष्ट क्रेडेंशियल,
+  कॉन्फ़िगरेशन कुंजियाँ या OS टूल
+- आपके चैनलों को सेवा देने वाले Gateway को पुनः लोड या पुनः आरंभ करने की अनुमति
 
 ## त्वरित शुरुआत
 
 <Steps>
   <Step title="Plugin खोजें">
-    public plugin packages के लिए [ClawHub](/hi/clawhub) खोजें:
+    सार्वजनिक Plugin पैकेजों के लिए [ClawHub](/hi/clawhub) में खोजें:
 
     ```bash
     openclaw plugins search "calendar"
     ```
 
-    ClawHub community plugins के लिए प्राथमिक discovery surface है। launch cutover के दौरान,
-    ordinary bare package specs अब भी npm से install होते हैं, जब तक
-    वे किसी official plugin id से match न करें। Raw `@openclaw/*` package specs जो
-    bundled plugins से match करते हैं, current OpenClaw build से bundled copy का उपयोग करते हैं। जब आपको एक
-    source चाहिए तो explicit prefix का उपयोग करें।
+    सामुदायिक Plugins खोजने के लिए ClawHub प्राथमिक माध्यम है। लॉन्च बदलाव के
+    दौरान, सामान्य बिना-उपसर्ग वाले पैकेज स्पेक तब तक npm से इंस्टॉल होते हैं,
+    जब तक वे किसी आधिकारिक Plugin आईडी से मेल न खाएँ। किसी बंडल किए गए Plugin
+    से मेल खाने वाले कच्चे `@openclaw/*` स्पेक उस बंडल की गई प्रति में
+    रिज़ॉल्व होते हैं। किसी स्रोत की विशेष रूप से आवश्यकता होने पर स्पष्ट स्रोत
+    उपसर्ग का उपयोग करें।
 
   </Step>
 
   <Step title="Plugin इंस्टॉल करें">
     ```bash
-    # From ClawHub.
+    # ClawHub से।
     openclaw plugins install clawhub:<package>
 
-    # From npm.
+    # npm से।
     openclaw plugins install npm:<package>
 
-    # From git.
+    # git से।
     openclaw plugins install git:github.com/<owner>/<repo>@<ref>
 
-    # From a local development checkout.
+    # किसी स्थानीय डेवलपमेंट चेकआउट से।
     openclaw plugins install ./my-plugin
     openclaw plugins install --link ./my-plugin
     ```
 
-    plugin installs को code चलाने जैसा मानें। जब आपको reproducible production installs चाहिए हों,
-    pinned versions को प्राथमिकता दें।
+    Plugin इंस्टॉलेशन को कोड चलाने जैसा मानें। पुनरुत्पाद्य प्रोडक्शन
+    इंस्टॉलेशन के लिए पिन किए गए संस्करणों को प्राथमिकता दें। ClawHub पैकेज
+    और OpenClaw की बंडल/आधिकारिक सूची विश्वसनीय स्रोत हैं। नए मनमाने npm, git,
+    स्थानीय पाथ/आर्काइव, `npm-pack:` या मार्केटप्लेस स्रोतों के लिए,
+    स्रोत की समीक्षा करके उस पर भरोसा करने के बाद, गैर-इंटरैक्टिव इंस्टॉलेशन में
+    `--force` आवश्यक है।
 
   </Step>
 
-  <Step title="Configure और enable करें">
-    `plugins.entries.<id>.config` के अंतर्गत plugin-specific settings configure करें।
-    Plugin को enable करें जब वह पहले से enabled न हो:
+  <Step title="इसे कॉन्फ़िगर और सक्षम करें">
+    Plugin-विशिष्ट सेटिंग्स को `plugins.entries.<id>.config` के अंतर्गत कॉन्फ़िगर करें।
+    यदि Plugin पहले से सक्षम नहीं है, तो उसे सक्षम करें:
 
     ```bash
     openclaw plugins enable <plugin-id>
     ```
 
-    यदि आपका config restrictive `plugins.allow` list का उपयोग करता है, तो installed plugin
-    id plugin load होने से पहले वहाँ मौजूद होना चाहिए।
-    `openclaw plugins install` installed id को मौजूदा
-    `plugins.allow` list में जोड़ता है और वही id `plugins.deny` से हटाता है ताकि
-    explicit install restart के बाद load हो सके।
+    यदि `plugins.allow` सेट है, तो Plugin के लोड होने से पहले इंस्टॉल किए गए
+    Plugin की आईडी उस सूची में होनी चाहिए। `openclaw plugins install` इंस्टॉल की गई
+    आईडी को मौजूदा `plugins.allow` सूची में जोड़ता है और उसी आईडी को
+    `plugins.deny` से हटाता है, ताकि स्पष्ट रूप से इंस्टॉल किया गया Plugin
+    पुनः आरंभ होने के बाद लोड हो सके।
 
   </Step>
 
-  <Step title="Gateway को reload होने दें">
-    Plugin code install, update, या uninstall करने के लिए Gateway
-    restart आवश्यक है। जब managed Gateway पहले से config reload
-    enabled के साथ running हो, OpenClaw बदले हुए plugin install record का पता लगाता है और
-    Gateway को automatically restart करता है। यदि Gateway managed नहीं है या reload disabled है,
-    तो उसे स्वयं restart करें:
+  <Step title="Gateway को पुनः लोड होने दें">
+    Plugin कोड इंस्टॉल, अपडेट या अनइंस्टॉल करने के लिए Gateway को पुनः आरंभ
+    करना आवश्यक है। कॉन्फ़िगरेशन पुनः लोड सक्षम होने वाला प्रबंधित Gateway,
+    बदले हुए Plugin इंस्टॉलेशन रिकॉर्ड का पता लगाकर अपने-आप पुनः आरंभ हो जाता
+    है। अन्यथा, इसे स्वयं पुनः आरंभ करें:
 
     ```bash
     openclaw gateway restart
     ```
 
-    Enable और disable operations config update करते हैं और cold registry refresh करते हैं।
-    live runtime surfaces के लिए runtime inspect अब भी सबसे स्पष्ट verification path है।
+    सक्षम/अक्षम करने पर कॉन्फ़िगरेशन और कोल्ड रजिस्ट्री अपडेट होते हैं। सक्रिय
+    रनटाइम सतहों का सबसे स्पष्ट प्रमाण अब भी रनटाइम निरीक्षण है।
 
   </Step>
 
-  <Step title="Runtime registration सत्यापित करें">
+  <Step title="रनटाइम पंजीकरण सत्यापित करें">
     ```bash
     openclaw plugins inspect <plugin-id> --runtime --json
     ```
 
-    जब आपको registered tools, hooks, services,
-    Gateway methods, या plugin-owned CLI commands साबित करने हों, तो `--runtime` का उपयोग करें। Plain `inspect` cold
-    manifest और registry check है।
+    पंजीकृत टूल, हुक, सेवाओं, Gateway विधियों या Plugin के स्वामित्व वाले CLI
+    कमांड की पुष्टि के लिए `--runtime` का उपयोग करें। साधारण
+    `inspect` केवल कोल्ड मैनिफ़ेस्ट और रजिस्ट्री जाँच है।
 
   </Step>
 </Steps>
 
-## Configuration
+## कॉन्फ़िगरेशन
 
-### Install source चुनें
+### इंस्टॉलेशन स्रोत चुनें
 
-| Source      | कब उपयोग करें                                                                       | Example                                                        |
+| स्रोत       | कब उपयोग करें                                                                  | उदाहरण                                                        |
 | ----------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| ClawHub     | आप OpenClaw-native discovery, scans, version metadata, और install hints चाहते हैं | `openclaw plugins install clawhub:<package>`                   |
-| npm         | आपको direct npm registry या dist-tag workflows चाहिए                             | `openclaw plugins install npm:<package>`                       |
-| git         | आपको repository से branch, tag, या commit चाहिए                            | `openclaw plugins install git:github.com/<owner>/<repo>@<ref>` |
-| local path  | आप उसी machine पर plugin develop या test कर रहे हैं                     | `openclaw plugins install --link ./my-plugin`                  |
-| marketplace | आप Claude-compatible marketplace plugin install कर रहे हैं                      | `openclaw plugins install <plugin> --marketplace <source>`     |
+| ClawHub     | जब आपको OpenClaw-मूल खोज, स्कैन, संस्करण मेटाडेटा और इंस्टॉलेशन संकेत चाहिए   | `openclaw plugins install clawhub:<package>`                   |
+| npm         | जब आपको सीधे npm रजिस्ट्री या dist-tag कार्यप्रवाह चाहिए                       | `openclaw plugins install npm:<package>`                       |
+| git         | जब आपको किसी रिपॉज़िटरी से ब्रांच, टैग या कमिट चाहिए                           | `openclaw plugins install git:github.com/<owner>/<repo>@<ref>` |
+| स्थानीय पाथ | जब आप उसी मशीन पर किसी Plugin को विकसित या परीक्षण कर रहे हों                  | `openclaw plugins install --link ./my-plugin`                  |
+| मार्केटप्लेस | जब आप Claude-संगत मार्केटप्लेस Plugin इंस्टॉल कर रहे हों                       | `openclaw plugins install <plugin> --marketplace <source>`     |
 
-Bare package specs में special compatibility behavior होता है। यदि bare name
-bundled plugin id से match करता है, OpenClaw उस bundled source का उपयोग करता है। यदि यह
-official external plugin id से match करता है, OpenClaw official package catalog का उपयोग करता है। अन्य
-ordinary bare package specs launch cutover के दौरान npm के माध्यम से install होते हैं। Raw
-`@openclaw/*` package specs जो bundled plugins से match करते हैं, वे भी
-npm fallback से पहले bundled copy पर resolve होते हैं। जब
-आप सचमुच image-owned bundled copy के बजाय external npm package चाहते हों, तो `npm:@openclaw/<plugin>@<version>` का उपयोग करें।
-जब आपको deterministic source selection चाहिए हो, तो `clawhub:`, `npm:`, `git:`, या `npm-pack:` का उपयोग करें।
-पूर्ण command contract के लिए [`openclaw plugins`](/hi/cli/plugins#install)
+बिना-उपसर्ग वाले पैकेज स्पेक का विशेष संगतता व्यवहार होता है: बंडल किए गए
+Plugin की आईडी से मेल खाने वाला बिना-उपसर्ग नाम उस बंडल स्रोत का उपयोग करता है;
+आधिकारिक बाहरी Plugin की आईडी से मेल खाने वाला नाम आधिकारिक पैकेज सूची का उपयोग
+करता है; लॉन्च बदलाव के दौरान अन्य सभी बिना-उपसर्ग स्पेक npm के माध्यम से
+इंस्टॉल होते हैं। बंडल किए गए Plugins से मेल खाने वाले कच्चे
+`@openclaw/*` स्पेक भी npm फ़ॉलबैक से पहले बंडल की गई प्रति में रिज़ॉल्व
+होते हैं। बंडल की गई प्रति के बजाय जानबूझकर बाहरी npm पैकेज इंस्टॉल करने के लिए
+`npm:@openclaw/<plugin>@<version>` का उपयोग करें। नियतात्मक स्रोत चयन के लिए
+`clawhub:`, `npm:`, `git:` या
+`npm-pack:` का उपयोग करें। पूर्ण कमांड अनुबंध के लिए
+[`openclaw plugins`](/hi/cli/plugins#install) देखें।
+
+npm इंस्टॉलेशन के लिए, बिना पिन किए गए स्पेक और `@latest` इस OpenClaw
+बिल्ड के साथ संगतता दर्शाने वाला नवीनतम स्थिर पैकेज चुनते हैं। यदि npm की
+वर्तमान नवीनतम रिलीज़ इस बिल्ड द्वारा समर्थित संस्करण से नया
+`openclaw.compat.pluginApi` या `openclaw.install.minHostVersion` घोषित करती है, तो OpenClaw पुराने
+स्थिर संस्करणों को स्कैन करता है और उपयुक्त नवीनतम संस्करण इंस्टॉल करता है।
+सटीक संस्करण और `@beta` जैसे स्पष्ट चैनल टैग चुने गए पैकेज पर पिन
+रहते हैं और असंगत होने पर विफल होते हैं।
+
+### ऑपरेटर इंस्टॉलेशन नीति
+
+किसी Plugin का इंस्टॉलेशन या अपडेट आगे बढ़ने से पहले विश्वसनीय स्थानीय नीति
+कमांड चलाने के लिए `security.installPolicy` कॉन्फ़िगर करें। नीति को मेटाडेटा के साथ
+स्टेज किया गया स्रोत पाथ मिलता है और वह इंस्टॉलेशन की अनुमति दे सकती है या उसे
+रोक सकती है। यह CLI और Gateway-समर्थित, दोनों इंस्टॉलेशन/अपडेट पाथ को कवर करती
+है। Plugin के `before_install` हुक बाद में और केवल उन OpenClaw प्रक्रियाओं
+में चलते हैं जहाँ Plugin हुक लोड किए गए हों, इसलिए ऑपरेटर के स्वामित्व वाले
+इंस्टॉलेशन निर्णयों के लिए इसके बजाय `security.installPolicy` का उपयोग करें।
+बहिष्कृत `--dangerously-force-unsafe-install` फ़्लैग संगतता के लिए स्वीकार किया जाता है, लेकिन
+कुछ नहीं करता: यह इंस्टॉलेशन नीति या OpenClaw की अंतर्निर्मित Plugin निर्भरता
+प्रतिबंध-सूची को बायपास नहीं करता।
+
+Skills और Plugins, दोनों द्वारा उपयोग किए जाने वाले साझा
+`security.installPolicy` निष्पादन स्कीमा के लिए
+[Skills कॉन्फ़िगरेशन](/hi/tools/skills-config#operator-install-policy-securityinstallpolicy)
 देखें।
 
-npm installs के लिए, unpinned package specs और `@latest` सबसे नया stable
-package चुनते हैं जो इस OpenClaw build के साथ compatibility advertise करता है। यदि npm की
-current latest release नया `openclaw.compat.pluginApi` या
-`openclaw.install.minHostVersion` declare करती है, OpenClaw पुराने stable package versions scan करता है
-और सबसे नया उपयुक्त version install करता है। Exact versions और explicit channel tags
-जैसे `@beta` selected package पर pinned रहते हैं और incompatible होने पर fail होते हैं।
+### Plugin नीति कॉन्फ़िगर करें
 
-### Operator install policy
-
-Plugin install या update आगे बढ़ने से पहले trusted local policy command चलाने के लिए
-`security.installPolicy` configure करें। Policy metadata और staged
-source path receive करती है और install को allow या block कर सकती है। यह CLI और Gateway-backed
-plugin install/update paths को cover करती है। Plugin `before_install` hooks बाद में केवल उन
-OpenClaw processes में run होते हैं जहाँ plugin hooks loaded हैं, इसलिए operator-owned install decisions के लिए `security.installPolicy`
-का उपयोग करें। Deprecated
-`--dangerously-force-unsafe-install` flag compatibility के लिए accepted है लेकिन
-install policy या OpenClaw की built-in plugin dependency denylist को bypass नहीं करता।
-
-Skills और
-plugins दोनों द्वारा उपयोग किए जाने वाले shared `security.installPolicy` exec schema के लिए [Skills config](/hi/tools/skills-config#operator-install-policy-securityinstallpolicy)
-देखें।
-
-### Plugin policy configure करें
-
-सामान्य plugin config shape है:
+सामान्य Plugin कॉन्फ़िगरेशन संरचना यह है:
 
 ```json5
 {
@@ -183,95 +192,98 @@ plugins दोनों द्वारा उपयोग किए जान�
 }
 ```
 
-मुख्य policy rules:
+मुख्य नीति नियम:
 
-- `plugins.enabled: false` सभी plugins को disable करता है और plugin discovery/load
-  work skip करता है। जब यह active हो, stale plugin references inert रहते हैं; stale ids हटवाने के लिए doctor cleanup चलाने से पहले
-  plugins को re-enable करें।
-- `plugins.deny` allow और per-plugin enablement पर प्राथमिकता रखता है।
-- `plugins.allow` एक exclusive allowlist है। Allowlist के बाहर plugin-owned tools
-  unavailable रहते हैं, भले ही `tools.allow` में `"*"` शामिल हो।
-- `plugins.entries.<id>.enabled: false` एक plugin को disable करता है और उसका
-  config preserve रखता है।
-- `plugins.load.paths` explicit local plugin files या directories जोड़ता है। Managed
-  `plugins install` local paths plugin directories या archives होने चाहिए; standalone plugin files के लिए
+- `plugins.enabled: false` सभी Plugins को अक्षम करता है और खोज/लोड
+  कार्य छोड़ देता है। इसके सक्रिय रहने के दौरान पुराने Plugin संदर्भ निष्क्रिय
+  रहते हैं; यदि आप पुरानी आईडी हटाना चाहते हैं, तो डॉक्टर क्लीनअप चलाने से पहले
+  Plugins को फिर से सक्षम करें।
+- `plugins.deny`, अनुमति और प्रति-Plugin सक्षमता पर प्रभावी
+  होता है।
+- `plugins.allow` एक विशिष्ट अनुमति-सूची है। अनुमति-सूची
+  से बाहर के Plugin-स्वामित्व वाले टूल तब भी अनुपलब्ध रहते हैं, जब
+  `tools.allow` में `"*"` शामिल हो।
+- `plugins.entries.<id>.enabled: false` किसी एक Plugin के कॉन्फ़िगरेशन को रखते हुए
+  उसे अक्षम करता है।
+- `plugins.load.paths` स्पष्ट स्थानीय Plugin फ़ाइलें या
+  डायरेक्टरियाँ जोड़ता है। प्रबंधित `plugins install` स्थानीय पाथ Plugin
+  डायरेक्टरियाँ या आर्काइव होने चाहिए; स्वतंत्र Plugin फ़ाइलों के लिए
   `plugins.load.paths` का उपयोग करें।
-- Workspace-origin plugins default रूप से disabled होते हैं; local workspace code का उपयोग करने से पहले उन्हें explicitly enable या
-  allowlist करें।
-- Bundled plugins अपने built-in default-on/default-off metadata का पालन करते हैं, जब तक
-  config उन्हें explicitly override न करे।
-- `plugins.slots.<slot>` memory और context engines जैसी exclusive categories के लिए
-  एक plugin चुनता है। Slot selection selected plugin को उस slot के लिए explicit activation के रूप में count करके force-enable करता है; वह तब भी load हो सकता है जब वह
-  otherwise opt-in होता। `plugins.deny` और
-  `plugins.entries.<id>.enabled: false` फिर भी उसे block करते हैं।
-- Bundled opt-in plugins तब auto-activate हो सकते हैं जब config उनकी owned
-  surfaces में से किसी एक का नाम देता है, जैसे provider/model ref, channel config, CLI backend, या agent
-  harness runtime।
-- OpenAI-family Codex routing provider और runtime plugin boundaries को
-  अलग रखती है: legacy Codex model refs legacy config हैं जिन्हें doctor repair करता है, जबकि bundled
-  `codex` plugin canonical `openai/*` agent
-  refs, explicit `agentRuntime.id: "codex"`, और legacy `codex/*` refs के लिए Codex app-server runtime own करता है।
+- वर्कस्पेस-मूल Plugins डिफ़ॉल्ट रूप से अक्षम रहते हैं; स्थानीय
+  वर्कस्पेस कोड उपयोग करने से पहले उन्हें स्पष्ट रूप से सक्षम करें या
+  अनुमति-सूची में जोड़ें।
+- बंडल किए गए Plugins अपने अंतर्निर्मित डिफ़ॉल्ट-चालू/डिफ़ॉल्ट-बंद
+  मेटाडेटा का पालन करते हैं, जब तक कॉन्फ़िगरेशन उसे स्पष्ट रूप से ओवरराइड न करे।
+- `plugins.slots.<slot>` (`memory` या
+  `contextEngine`) किसी विशिष्ट श्रेणी के लिए एक Plugin चुनता है। स्लॉट चयन
+  को स्पष्ट सक्रियण माना जाता है और वह उस स्लॉट के लिए चुने गए Plugin को बलपूर्वक
+  सक्षम करता है, भले ही वह अन्यथा ऑप्ट-इन हो। `plugins.deny` और
+  `plugins.entries.<id>.enabled: false` अब भी उसे रोकते हैं।
+- बंडल किए गए ऑप्ट-इन Plugins तब अपने-आप सक्रिय हो सकते हैं,
+  जब कॉन्फ़िगरेशन उनके स्वामित्व वाली किसी सतह का नाम दे, जैसे प्रदाता/मॉडल
+  संदर्भ, चैनल कॉन्फ़िगरेशन, CLI बैकएंड या एजेंट हार्नेस रनटाइम।
+- OpenAI-परिवार की Codex रूटिंग प्रदाता और रनटाइम Plugin की
+  सीमाओं को अलग रखती है: पुराने Codex मॉडल संदर्भ पुराने कॉन्फ़िगरेशन हैं जिन्हें
+  डॉक्टर सुधारता है, जबकि बंडल किया गया `codex` Plugin मानक
+  `openai/*` एजेंट संदर्भों, स्पष्ट `agentRuntime.id: "codex"` और पुराने
+  `codex/*` संदर्भों के लिए Codex ऐप-सर्वर रनटाइम का स्वामी है।
 
-जब `plugins.allow` unset हो और non-bundled plugins workspace या global plugin roots से auto-discovered हों,
-startup logs
-`plugins.allow is empty; discovered non-bundled plugins may auto-load: ...` दिखाते हैं।
-Warning में discovered plugin ids शामिल होते हैं और, short lists के लिए, minimal
-`plugins.allow` snippet भी। Trusted plugins को `openclaw.json` में copy करने से पहले
-listed plugin id के साथ
+जब `plugins.allow` सेट न हो और गैर-बंडल Plugins वर्कस्पेस या वैश्विक Plugin
+रूट से अपने-आप खोजे जाएँ, तो स्टार्टअप खोजे गए Plugin आईडी और छोटी सूचियों के
+लिए एक न्यूनतम `plugins.allow` स्निपेट के साथ
+`plugins.allow is empty; discovered non-bundled plugins may auto-load: ...` लॉग करता है। विश्वसनीय Plugins को
+`openclaw.json` में कॉपी करने से पहले सूचीबद्ध Plugin आईडी पर
 [`openclaw plugins list --enabled --verbose`](/hi/cli/plugins#list) या
-[`openclaw plugins inspect <id>`](/hi/cli/plugins#inspect) run करें। वही trust-pinning
-guidance तब लागू होती है जब diagnostics कहें कि कोई plugin
-`without install/load-path provenance` loaded हुआ: उस plugin id को inspect करें, फिर
-trusted id को `plugins.allow` में pin करें या trusted source से reinstall करें ताकि OpenClaw
-install provenance record करे।
+[`openclaw plugins inspect <id>`](/hi/cli/plugins#inspect) चलाएँ। यही विश्वास-पिनिंग तब भी लागू
+होती है जब निदान बताता है कि कोई Plugin `without install/load-path provenance` लोड हुआ: उस Plugin
+आईडी का निरीक्षण करें, फिर उसे `plugins.allow` में पिन करें या विश्वसनीय
+स्रोत से पुनः इंस्टॉल करें, ताकि OpenClaw इंस्टॉलेशन उद्गम रिकॉर्ड कर सके।
 
-जब config validation stale plugin ids, allowlist/tool mismatches, या legacy bundled plugin paths report करे,
-तो `openclaw doctor` या `openclaw doctor --fix` run करें।
+जब कॉन्फ़िगरेशन सत्यापन पुरानी Plugin आईडी, अनुमति-सूची/टूल बेमेल या पुराने
+बंडल Plugin पाथ की रिपोर्ट करे, तब `openclaw doctor` या
+`openclaw doctor --fix` चलाएँ।
 
-## Plugin formats समझें
+## Plugin प्रारूप समझें
 
-OpenClaw दो plugin formats पहचानता है:
+OpenClaw दो Plugin प्रारूपों को पहचानता है:
 
-| Format                 | कैसे load होता है                                                                 | कब उपयोग करें                                                               |
-| ---------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Native OpenClaw plugin | `openclaw.plugin.json` plus process में loaded runtime module               | आप OpenClaw-specific runtime capabilities install या build कर रहे हैं  |
-| Compatible bundle      | Codex, Claude, या Cursor plugin layout OpenClaw plugin inventory में mapped | आप compatible skills, commands, hooks, या bundle metadata reuse कर रहे हैं |
+| प्रारूप                | यह कैसे लोड होता है                                                          | कब उपयोग करें                                                            |
+| ---------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| मूल OpenClaw Plugin    | `openclaw.plugin.json` और प्रक्रिया में लोड किया गया रनटाइम मॉड्यूल          | जब आप OpenClaw-विशिष्ट रनटाइम क्षमताएँ इंस्टॉल या निर्मित कर रहे हों      |
+| संगत बंडल              | OpenClaw Plugin सूची में मैप किया गया Codex, Claude या Cursor Plugin लेआउट | जब आप संगत स्किल, कमांड, हुक या बंडल मेटाडेटा का पुनः उपयोग कर रहे हों    |
 
-दोनों formats `openclaw plugins list`, `openclaw plugins inspect`,
-`openclaw plugins enable`, और `openclaw plugins disable` में दिखाई देते हैं। Bundle compatibility boundary के लिए
-[Plugin bundles](/hi/plugins/bundles) और native plugin authoring के लिए
-[Building plugins](/hi/plugins/building-plugins) देखें।
+दोनों प्रारूप `openclaw plugins list`, `openclaw plugins inspect`,
+`openclaw plugins enable` और `openclaw plugins disable` में दिखाई देते हैं। बंडल संगतता सीमा
+के लिए [Plugin बंडल](/hi/plugins/bundles) और मूल Plugin लेखन के लिए
+[Plugins बनाना](/hi/plugins/building-plugins) देखें।
 
-## Plugin hooks
+## Plugin हुक
 
-Plugins runtime पर hooks register कर सकते हैं, लेकिन अलग-अलग jobs वाली दो अलग APIs हैं।
+Plugins रनटाइम पर दो अलग-अलग API के माध्यम से हुक पंजीकृत कर सकते हैं:
 
-- Runtime lifecycle hooks के लिए `api.on(...)` के माध्यम से typed hooks का उपयोग करें। यह
-  middleware, policy, message rewriting, prompt shaping,
-  और tool control के लिए preferred surface है।
-- `api.registerHook(...)` का उपयोग केवल तब करें जब आप [Hooks](/hi/automation/hooks) में वर्णित internal
-  hook system में participate करना चाहते हों। यह मुख्य रूप से coarse
-  command/lifecycle side effects और existing HOOK-style
-  automation के साथ compatibility के लिए है।
+- `api.on(...)` रनटाइम जीवनचक्र घटनाओं के लिए टाइप किए गए
+  हुक हैं। मिडलवेयर, नीति, संदेश पुनर्लेखन, प्रॉम्प्ट का आकार तय करने और टूल
+  नियंत्रण के लिए यह पसंदीदा सतह है।
+- `api.registerHook(...)`, [हुक](/hi/automation/hooks) में वर्णित आंतरिक
+  हुक सिस्टम के लिए है। यह मुख्यतः व्यापक कमांड/जीवनचक्र सह-प्रभावों और मौजूदा
+  HOOK-शैली स्वचालन के साथ संगतता के लिए है।
 
-त्वरित rule:
+त्वरित नियम: यदि हैंडलर को प्राथमिकता, मर्ज अर्थविज्ञान या ब्लॉक/रद्द व्यवहार की
+आवश्यकता हो, तो टाइप किए गए हुक का उपयोग करें। यदि वह केवल
+`command:new`, `command:reset`, `message:sent` या ऐसी ही व्यापक
+घटनाओं पर प्रतिक्रिया करता है, तो `api.registerHook` पर्याप्त है।
 
-- यदि handler को priority, merge semantics, या block/cancel behavior चाहिए, तो
-  typed plugin hooks का उपयोग करें।
-- यदि handler केवल `command:new`, `command:reset`, `message:sent`,
-  या समान coarse events पर react करता है, तो `api.registerHook(...)` ठीक है।
+Plugin द्वारा प्रबंधित आंतरिक हुक `openclaw hooks list` में
+`plugin:<id>` के साथ दिखाई देते हैं। आप उन्हें `openclaw hooks` के
+माध्यम से सक्षम या अक्षम नहीं कर सकते; इसके बजाय Plugin को सक्षम या अक्षम करें।
 
-Plugin-managed internal hooks `openclaw hooks list` में
-`plugin:<id>` के साथ दिखाई देते हैं। आप उन्हें `openclaw hooks` के माध्यम से enable या disable नहीं कर सकते;
-इसके बजाय plugin को enable या disable करें।
+## सक्रिय Gateway सत्यापित करें
 
-## Active Gateway सत्यापित करें
+`openclaw plugins list` और सामान्य `openclaw plugins inspect` कोल्ड कॉन्फ़िगरेशन,
+मैनिफ़ेस्ट और रजिस्ट्री स्थिति पढ़ते हैं। वे यह साबित नहीं करते कि पहले से चल रहे
+Gateway ने उसी Plugin कोड को आयात किया है।
 
-`openclaw plugins list` और साधारण `openclaw plugins inspect` कोल्ड कॉन्फ़िगरेशन,
-मैनिफ़ेस्ट, और रजिस्ट्री स्थिति पढ़ते हैं। वे यह सिद्ध नहीं करते कि पहले से चल रहे Gateway
-ने वही Plugin कोड आयात किया है।
-
-जब कोई Plugin इंस्टॉल दिखता है लेकिन लाइव चैट ट्रैफ़िक उसका उपयोग नहीं करता:
+जब कोई Plugin इंस्टॉल किया हुआ दिखाई दे, लेकिन लाइव चैट ट्रैफ़िक उसका उपयोग न करे:
 
 ```bash
 openclaw gateway status --deep --require-rpc
@@ -279,114 +291,133 @@ openclaw plugins inspect <plugin-id> --runtime --json
 openclaw gateway restart
 ```
 
-प्रबंधित Gateway, Plugin इंस्टॉल, अपडेट, और अनइंस्टॉल में हुए ऐसे बदलावों के बाद
-अपने-आप रीस्टार्ट होते हैं जो Plugin स्रोत बदलते हैं। VPS या कंटेनर इंस्टॉल पर, सुनिश्चित करें
-कि कोई भी मैन्युअल रीस्टार्ट उस वास्तविक `openclaw gateway run` चाइल्ड को लक्षित करे जो
-आपके चैनलों को सेवा देता है, केवल किसी wrapper या supervisor को नहीं।
+Plugin के इंस्टॉल, अपडेट और अनइंस्टॉल से Plugin स्रोत में बदलाव होने पर प्रबंधित
+Gateway अपने-आप पुनः आरंभ होते हैं। VPS या कंटेनर इंस्टॉलेशन में सुनिश्चित करें
+कि कोई भी मैन्युअल पुनः आरंभ केवल रैपर या सुपरवाइज़र को नहीं, बल्कि आपके चैनलों
+को सेवा देने वाले वास्तविक `openclaw gateway run` चाइल्ड को लक्षित करे।
 
 ## समस्या निवारण
 
-| लक्षण                                                        | जांच                                                                                                                                      | समाधान                                                                                                     |
+| लक्षण                                                        | जाँच                                                                                                                                      | समाधान                                                                                                     |
 | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| Plugin `plugins list` में दिखता है लेकिन रनटाइम हुक नहीं चलते  | `openclaw plugins inspect <id> --runtime --json` का उपयोग करें और `gateway status --deep --require-rpc` से सक्रिय Gateway की पुष्टि करें             | इंस्टॉल, अपडेट, कॉन्फ़िगरेशन, या स्रोत बदलावों के बाद लाइव Gateway रीस्टार्ट करें                               |
-| डुप्लिकेट चैनल या टूल स्वामित्व डायग्नॉस्टिक दिखाई देते हैं         | `openclaw plugins list --enabled --verbose` चलाएं, प्रत्येक संदिग्ध Plugin को `--runtime --json` से देखें, और चैनल/टूल स्वामित्व की तुलना करें | एक स्वामी अक्षम करें, पुराने इंस्टॉल हटाएं, या जानबूझकर प्रतिस्थापन के लिए मैनिफ़ेस्ट `preferOver` का उपयोग करें      |
-| कॉन्फ़िगरेशन कहता है कि कोई Plugin गुम है                                | [Plugin इन्वेंटरी](/hi/plugins/plugin-inventory) देखें कि वह bundled, आधिकारिक external, या केवल स्रोत वाला है या नहीं                           | external पैकेज इंस्टॉल करें, bundled Plugin सक्षम करें, या पुराना कॉन्फ़िगरेशन हटाएं                         |
-| इंस्टॉल के दौरान कॉन्फ़िगरेशन अमान्य है                               | वैलिडेशन संदेश पढ़ें और जब वह पुराने Plugin state की ओर संकेत करे तो `openclaw doctor --fix` चलाएं                                           | Doctor entry को अक्षम करके और अमान्य payload हटाकर अमान्य Plugin कॉन्फ़िगरेशन को quarantine कर सकता है     |
-| संदिग्ध स्वामित्व या permissions के लिए Plugin path ब्लॉक है | कॉन्फ़िगरेशन त्रुटि से पहले डायग्नॉस्टिक देखें                                                                                             | फ़ाइल-सिस्टम स्वामित्व/permissions ठीक करें, फिर `openclaw plugins registry --refresh` चलाएं                    |
-| `OPENCLAW_NIX_MODE=1` lifecycle commands को ब्लॉक करता है                | पुष्टि करें कि इंस्टॉल Nix द्वारा प्रबंधित है                                                                                                      | Plugin mutator commands का उपयोग करने के बजाय Nix स्रोत में Plugin चयन बदलें                      |
-| रनटाइम पर dependency import विफल होता है                             | जांचें कि Plugin npm/git/ClawHub के ज़रिए इंस्टॉल किया गया था या local path से लोड हुआ था                                                 | `openclaw plugins update <id>` चलाएं, स्रोत फिर से इंस्टॉल करें, या local Plugin dependencies स्वयं इंस्टॉल करें |
+| Plugin `plugins list` में दिखाई देता है, लेकिन रनटाइम हुक नहीं चलते  | `openclaw plugins inspect <id> --runtime --json` का उपयोग करें और `gateway status --deep --require-rpc` से सक्रिय Gateway की पुष्टि करें             | इंस्टॉल, अपडेट, कॉन्फ़िगरेशन या स्रोत में बदलाव के बाद लाइव Gateway को पुनः आरंभ करें                               |
+| डुप्लिकेट चैनल या टूल स्वामित्व निदान दिखाई देते हैं         | `openclaw plugins list --enabled --verbose` चलाएँ, प्रत्येक संदिग्ध Plugin की `--runtime --json` से जाँच करें और चैनल/टूल स्वामित्व की तुलना करें | एक स्वामी को अक्षम करें, पुराने इंस्टॉल हटाएँ या जानबूझकर प्रतिस्थापन के लिए मैनिफ़ेस्ट `preferOver` का उपयोग करें      |
+| कॉन्फ़िगरेशन बताता है कि कोई Plugin अनुपलब्ध है                                | यह जानने के लिए [Plugin इन्वेंट्री](/hi/plugins/plugin-inventory) देखें कि वह बंडल किया हुआ, आधिकारिक बाहरी या केवल-स्रोत है                           | बाहरी पैकेज इंस्टॉल करें, बंडल किए गए Plugin को सक्षम करें या पुराना कॉन्फ़िगरेशन हटाएँ                         |
+| इंस्टॉल के दौरान कॉन्फ़िगरेशन अमान्य है                               | सत्यापन संदेश पढ़ें और यदि वह पुराने Plugin की स्थिति की ओर संकेत करता है, तो `openclaw doctor --fix` चलाएँ                                             | Doctor प्रविष्टि को अक्षम करके और अमान्य पेलोड हटाकर अमान्य Plugin कॉन्फ़िगरेशन को क्वारंटीन कर सकता है     |
+| संदिग्ध स्वामित्व या अनुमतियों के कारण Plugin पथ अवरुद्ध है | कॉन्फ़िगरेशन त्रुटि से पहले का निदान देखें                                                                                             | फ़ाइल सिस्टम का स्वामित्व/अनुमतियाँ ठीक करें, फिर `openclaw plugins registry --refresh` चलाएँ                    |
+| `OPENCLAW_NIX_MODE=1` लाइफ़साइकल कमांड को अवरुद्ध करता है                | पुष्टि करें कि इंस्टॉल Nix द्वारा प्रबंधित है                                                                                                      | Plugin म्यूटेटर कमांड का उपयोग करने के बजाय Nix स्रोत में Plugin चयन बदलें                      |
+| रनटाइम पर निर्भरता आयात विफल होता है                             | जाँचें कि Plugin npm/git/ClawHub के माध्यम से इंस्टॉल किया गया था या स्थानीय पथ से लोड किया गया था                                                 | `openclaw plugins update <id>` चलाएँ, स्रोत को फिर से इंस्टॉल करें या स्थानीय Plugin निर्भरताएँ स्वयं इंस्टॉल करें |
 
-जब पुराना Plugin कॉन्फ़िगरेशन अब खोज में न आने वाले चैनल Plugin का नाम अब भी रखता है,
-तो Gateway startup हर दूसरे चैनल को ब्लॉक करने के बजाय उस Plugin-backed चैनल को छोड़ देता है।
-पुरानी Plugin और चैनल entries हटाने के लिए `openclaw doctor --fix` चलाएं। पुराने-Plugin प्रमाण के बिना
-अज्ञात चैनल keys अब भी वैलिडेशन विफल करते हैं ताकि typos दिखाई देते रहें।
+जब कोई सक्षम प्रबंधित Plugin, Gateway के स्टार्टअप के दौरान पेलोड सत्यापन में
+विफल होता है, तो OpenClaw उस बूट के लिए ठीक उसी इंस्टॉल किए गए Plugin रूट को
+क्वारंटीन करता है और अन्य Plugin को सेवा देना जारी रखता है। `openclaw status --all`,
+`openclaw health` और `openclaw doctor` इसे `configured-unavailable` के रूप में
+रिपोर्ट करते हैं। Plugin को ठीक करें या फिर से इंस्टॉल करें, फिर Gateway को पुनः
+आरंभ करें। समान Plugin आईडी वाला एक स्वस्थ स्पष्ट `plugins.load.paths`
+ओवरराइड किसी पुराने खराब इंस्टॉल के कारण क्वारंटीन नहीं किया जाता।
 
-जानबूझकर चैनल प्रतिस्थापन के लिए, पसंदीदा Plugin को legacy या कम-priority
-Plugin id के साथ `channelConfigs.<channel-id>.preferOver` घोषित करना चाहिए। यदि दोनों Plugin स्पष्ट रूप से
-सक्षम हैं, तो OpenClaw उस अनुरोध को रखता है और चुपचाप एक स्वामी चुनने के बजाय
-डुप्लिकेट चैनल या टूल डायग्नॉस्टिक रिपोर्ट करता है।
+जब पुराना Plugin कॉन्फ़िगरेशन अब खोजे न जा सकने वाले चैनल Plugin का नाम अभी
+भी रखता है, तो कॉन्फ़िगरेशन सत्यापन उस चैनल कुंजी को गंभीर विफलता के बजाय
+चेतावनी में बदल देता है, जिससे Gateway का स्टार्टअप अन्य सभी चैनलों को सेवा
+देना जारी रख सकता है। पुराने Plugin और चैनल प्रविष्टियाँ हटाने के लिए
+`openclaw doctor --fix` चलाएँ। पुराने Plugin के प्रमाण के बिना अज्ञात चैनल कुंजियाँ
+अब भी सत्यापन में विफल होती हैं, ताकि टाइपो दिखाई देते रहें।
 
-यदि कोई इंस्टॉल किया गया पैकेज बताता है कि उसे `requires compiled runtime output for
-TypeScript entry ...`, तो पैकेज OpenClaw को रनटाइम पर चाहिए JavaScript फ़ाइलों के बिना प्रकाशित हुआ था।
-publisher द्वारा compiled JavaScript भेजने के बाद अपडेट या फिर से इंस्टॉल करें, या तब तक Plugin को अक्षम/अनइंस्टॉल करें।
+जानबूझकर चैनल प्रतिस्थापन के लिए, पसंदीदा Plugin को पुराने या कम-प्राथमिकता वाले
+Plugin आईडी के साथ `channelConfigs.<channel-id>.preferOver` घोषित करना चाहिए। यदि दोनों Plugin
+स्पष्ट रूप से सक्षम हैं, तो OpenClaw उस अनुरोध को बनाए रखता है और चुपचाप एक
+स्वामी चुनने के बजाय डुप्लिकेट चैनल/टूल निदान रिपोर्ट करता है।
 
-### ब्लॉक किया गया Plugin path ownership
+यदि कोई इंस्टॉल किया गया पैकेज रिपोर्ट करता है कि वह `requires compiled runtime output for
+TypeScript entry ...`, तो
+पैकेज को उन JavaScript फ़ाइलों के बिना प्रकाशित किया गया था जिनकी OpenClaw को
+रनटाइम पर आवश्यकता होती है। प्रकाशक द्वारा कंपाइल किया हुआ JavaScript जारी
+करने के बाद अपडेट करें या फिर से इंस्टॉल करें, अथवा तब तक Plugin को
+अक्षम/अनइंस्टॉल करें।
 
-यदि Plugin डायग्नॉस्टिक कहता है
+### अवरुद्ध Plugin पथ स्वामित्व
+
+यदि निदान में
 `blocked plugin candidate: suspicious ownership (... uid=1000, expected uid=0 or root)`
-और कॉन्फ़िगरेशन वैलिडेशन में `plugin present but blocked` आता है, तो OpenClaw को
-ऐसी Plugin फ़ाइलें मिलीं जिनका स्वामी उस प्रक्रिया से अलग Unix user है जो उन्हें लोड कर रही है।
-Plugin कॉन्फ़िगरेशन को यथास्थान रखें; फ़ाइल-सिस्टम स्वामित्व ठीक करें या
-OpenClaw को उसी user के रूप में चलाएं जिसके पास state directory का स्वामित्व है।
+दिखाई देता है और उसके बाद सत्यापन में `plugin present but blocked` आता है, तो OpenClaw
+को ऐसी Plugin फ़ाइलें मिली हैं जिनका स्वामी उन्हें लोड करने वाली प्रक्रिया से
+अलग Unix उपयोगकर्ता है। Plugin कॉन्फ़िगरेशन को यथावत रखें; फ़ाइल सिस्टम का
+स्वामित्व ठीक करें या OpenClaw को उसी उपयोगकर्ता के रूप में चलाएँ जिसके पास
+स्थिति निर्देशिका का स्वामित्व है।
 
-Docker इंस्टॉल के लिए, आधिकारिक image `node` (uid `1000`) के रूप में चलती है, इसलिए
-host bind-mounted OpenClaw कॉन्फ़िगरेशन और workspace directories सामान्यतः
-uid `1000` के स्वामित्व में होनी चाहिए:
+Docker इंस्टॉलेशन के लिए, आधिकारिक इमेज `node` (uid `1000`)
+के रूप में चलती है, इसलिए होस्ट पर बाइंड-माउंट की गई OpenClaw कॉन्फ़िगरेशन और
+वर्कस्पेस निर्देशिकाएँ सामान्यतः uid `1000` के स्वामित्व में होनी
+चाहिए:
 
 ```bash
 sudo chown -R 1000:1000 /path/to/openclaw-config /path/to/openclaw-workspace
 ```
 
-यदि आप जानबूझकर OpenClaw को root के रूप में चलाते हैं, तो managed Plugin root को
-इसके बजाय root स्वामित्व में सुधारें:
+यदि आप जानबूझकर OpenClaw को रूट के रूप में चलाते हैं, तो इसके बजाय प्रबंधित
+Plugin रूट का स्वामित्व रूट पर ठीक करें:
 
 ```bash
 sudo chown -R root:root /path/to/openclaw-config/npm
 ```
 
-स्वामित्व ठीक करने के बाद, `openclaw doctor --fix` या
-`openclaw plugins registry --refresh` फिर से चलाएं ताकि persisted Plugin registry
-सुधारी गई फ़ाइलों से मेल खाए।
+स्वामित्व ठीक करने के बाद `openclaw doctor --fix` या
+`openclaw plugins registry --refresh` फिर से चलाएँ, ताकि स्थायी Plugin रजिस्ट्री
+ठीक की गई फ़ाइलों से मेल खाए।
 
-### धीमा Plugin tool setup
+### धीमा Plugin टूल सेटअप
 
-यदि agent turns tools तैयार करते समय रुकते हुए दिखते हैं, तो trace logging सक्षम करें और
-Plugin tool factory timing lines जांचें:
+यदि टूल तैयार करते समय एजेंट टर्न रुके हुए दिखाई दें, तो ट्रेस लॉगिंग सक्षम
+करें और Plugin टूल फ़ैक्टरी की टाइमिंग पंक्तियाँ जाँचें:
 
 ```bash
 openclaw config set logging.level trace
 openclaw logs --follow
 ```
 
-यह खोजें:
+इसे खोजें:
 
 ```text
-[trace:plugin-tools] factory timings ...
+[trace:plugin-tools] फ़ैक्टरी टाइमिंग ...
 ```
 
-सारांश कुल factory समय और सबसे धीमी Plugin tool factories सूचीबद्ध करता है,
-जिसमें Plugin id, घोषित tool names, result shape, और tool optional है या नहीं शामिल होते हैं।
-जब एक factory कम से कम 1s लेती है या कुल Plugin tool factory prep कम से कम 5s लेता है,
-तो धीमी lines को warnings में promote किया जाता है।
+सारांश में कुल फ़ैक्टरी समय और सबसे धीमी Plugin टूल फ़ैक्टरियाँ सूचीबद्ध होती
+हैं, जिनमें Plugin आईडी, घोषित टूल नाम, परिणाम का आकार और यह जानकारी शामिल होती
+है कि टूल वैकल्पिक है या नहीं। जब किसी एक फ़ैक्टरी को कम-से-कम 1s लगता है या
+Plugin टूल फ़ैक्टरी की कुल तैयारी में कम-से-कम 5s लगते हैं, तो धीमी पंक्तियों
+को चेतावनियों के रूप में दिखाया जाता है।
 
-OpenClaw समान effective request context के साथ दोहराए गए resolutions के लिए सफल
-Plugin tool factory results को cache करता है। cache key में effective runtime config,
-workspace, agent/session ids, sandbox policy, browser settings, delivery context,
-requester identity, और ownership state शामिल होते हैं, इसलिए उन trusted fields पर निर्भर factories
-context बदलने पर फिर से चलाई जाती हैं। यदि timings ऊंची रहती हैं, तो Plugin अपने tool
-definitions लौटाने से पहले महंगा काम कर रहा हो सकता है।
+OpenClaw समान प्रभावी अनुरोध संदर्भ के साथ बार-बार होने वाले रिज़ॉल्यूशन के लिए
+सफल Plugin टूल फ़ैक्टरी परिणामों को कैश करता है। कैश कुंजी में प्रभावी रनटाइम
+कॉन्फ़िगरेशन, वर्कस्पेस और एजेंट आईडी, सैंडबॉक्स नीति, ब्राउज़र सेटिंग्स,
+डिलीवरी संदर्भ, अनुरोधकर्ता की पहचान और स्वामित्व की स्थिति शामिल होती है, इसलिए
+उन विश्वसनीय फ़ील्ड पर निर्भर फ़ैक्टरियाँ संदर्भ बदलने पर फिर से चलती हैं। यदि
+टाइमिंग अधिक बनी रहे, तो संभव है कि Plugin अपनी टूल परिभाषाएँ लौटाने से पहले
+महँगा कार्य कर रहा हो।
 
-यदि एक Plugin timing पर हावी है, तो उसके runtime registrations देखें:
+यदि कोई एक Plugin टाइमिंग में सबसे अधिक समय लेता है, तो उसके रनटाइम पंजीकरणों
+की जाँच करें:
 
 ```bash
 openclaw plugins inspect <plugin-id> --runtime --json
 ```
 
-फिर उस Plugin को अपडेट, फिर से इंस्टॉल, या अक्षम करें। Plugin authors को expensive dependency loading
-को tool factory के अंदर करने के बजाय tool execution path के पीछे ले जाना चाहिए।
+फिर उस Plugin को अपडेट करें, फिर से इंस्टॉल करें या अक्षम करें। Plugin लेखकों
+को महँगी निर्भरता लोडिंग टूल फ़ैक्टरी के भीतर करने के बजाय टूल निष्पादन पथ के
+पीछे ले जानी चाहिए।
 
-dependency roots, package metadata validation, registry records, startup
-reload behavior, और legacy cleanup के लिए,
-[Plugin dependency resolution](/hi/plugins/dependency-resolution) देखें।
+निर्भरता रूट, पैकेज मेटाडेटा सत्यापन, रजिस्ट्री रिकॉर्ड, स्टार्टअप रीलोड व्यवहार
+और पुराने डेटा की सफ़ाई के लिए
+[Plugin निर्भरता रिज़ॉल्यूशन](/hi/plugins/dependency-resolution) देखें।
 
 ## संबंधित
 
-- [Plugins प्रबंधित करें](/hi/plugins/manage-plugins) - list, install, update, uninstall, और publish के लिए command examples
-- [`openclaw plugins`](/hi/cli/plugins) - पूरा CLI reference
-- [Plugin इन्वेंटरी](/hi/plugins/plugin-inventory) - generated bundled और external Plugin सूची
-- [Plugin reference](/hi/plugins/reference) - generated per-Plugin reference pages
-- [Community plugins](/hi/plugins/community) - ClawHub discovery और docs PR policy
-- [Plugin dependency resolution](/hi/plugins/dependency-resolution) - install roots, registry records, और runtime boundaries
-- [Building plugins](/hi/plugins/building-plugins) - native Plugin authoring guide
-- [Plugin SDK overview](/hi/plugins/sdk-overview) - runtime registration, hooks, और API fields
-- [Plugin manifest](/hi/plugins/manifest) - manifest और package metadata
+- [Plugin प्रबंधित करें](/hi/plugins/manage-plugins) - सूची बनाने, इंस्टॉल करने, अपडेट करने, अनइंस्टॉल करने और प्रकाशित करने के कमांड उदाहरण
+- [`openclaw plugins`](/hi/cli/plugins) - संपूर्ण CLI संदर्भ
+- [Plugin इन्वेंट्री](/hi/plugins/plugin-inventory) - जनरेट की गई बंडल और बाहरी Plugin सूची
+- [Plugin संदर्भ](/hi/plugins/reference) - प्रत्येक Plugin के लिए जनरेट किए गए संदर्भ पृष्ठ
+- [सामुदायिक Plugin](/hi/plugins/community) - ClawHub खोज और दस्तावेज़ PR नीति
+- [Plugin निर्भरता रिज़ॉल्यूशन](/hi/plugins/dependency-resolution) - इंस्टॉल रूट, रजिस्ट्री रिकॉर्ड और रनटाइम सीमाएँ
+- [Plugin बनाना](/hi/plugins/building-plugins) - नेटिव Plugin लेखन मार्गदर्शिका
+- [Plugin SDK अवलोकन](/hi/plugins/sdk-overview) - रनटाइम पंजीकरण, हुक और API फ़ील्ड
+- [Plugin मैनिफ़ेस्ट](/hi/plugins/manifest) - मैनिफ़ेस्ट और पैकेज मेटाडेटा

@@ -1,44 +1,53 @@
 ---
 read_when:
-    - Je wilt blijvende kennis die verder gaat dan gewone MEMORY.md-notities
+    - Je wilt permanente kennis die verder gaat dan gewone MEMORY.md-notities
     - Je configureert de meegeleverde memory-wiki-Plugin
-    - Je hebt afzonderlijke wikikluisjes nodig voor agents in één Gateway
-    - U wilt wiki_search, wiki_get of de bridge-modus begrijpen
-summary: 'memory-wiki: gecompileerde kennisbank met herkomst, beweringen, dashboards en bridge-modus'
+    - Je hebt afzonderlijke wiki-kluizen nodig voor agents in één Gateway
+    - Je wilt wiki_search, wiki_get of de bridge-modus begrijpen
+summary: 'memory-wiki: gecompileerde kennisopslag met herkomst, beweringen, dashboards en bridge-modus'
 title: Geheugenwiki
 x-i18n:
-    generated_at: "2026-07-12T09:10:21Z"
+    generated_at: "2026-07-27T05:40:50Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: cf6c046bfa062b9df6deaa0753d992f9dbc45e2506d6ed4fb1a2836141a901c7
+    source_hash: fda3c801ae39b529a3f1fcaf8791b6dcb1d8116ba2e73e99cca62dca6c64140a
     source_path: plugins/memory-wiki.md
     workflow: 16
 ---
 
-`memory-wiki` is een gebundelde plugin die duurzame kennis compileert tot een
-navigeerbare wiki: deterministische pagina's, gestructureerde beweringen met bewijs,
+`memory-wiki` is een gebundelde plugin die duurzame kennis omzet in een
+navigeerbare wiki: deterministische pagina's, gestructureerde claims met bewijs,
 herkomst, dashboards en machineleesbare samenvattingen.
 
-Deze vervangt de Active Memory-plugin niet. Herinnering, promotie, indexering en
-Dreaming blijven de verantwoordelijkheid van de geconfigureerde geheugenbackend
-(`memory-core`, QMD, Honcho enzovoort). `memory-wiki` bevindt zich ernaast en compileert
-kennis tot een onderhouden wikilaag.
+Deze vervangt de Active Memory-plugin niet. Ophalen, promoveren, indexeren en
+Dreaming blijven onder beheer van de geconfigureerde geheugenbackend
+(`memory-core`, QMD, Honcho enzovoort). `memory-wiki` staat ernaast en zet
+kennis om in een onderhouden wikilaag.
 
-| Laag                 | Verantwoordelijk voor                                                               |
-| -------------------- | ----------------------------------------------------------------------------------- |
-| Active Memory-plugin | Herinnering, semantisch zoeken, promotie, Dreaming, geheugenruntime                  |
-| `memory-wiki`        | Gecompileerde wikipagina's, herkomstrijke syntheses, dashboards, wiki zoeken/ophalen/toepassen |
+Schakel de plugin in voordat je de CLI, tools of runtime-integratie ervan gebruikt:
+
+```bash
+openclaw plugins enable memory-wiki
+openclaw gateway restart
+```
+
+| Laag                 | Beheert                                                                           |
+| -------------------- | --------------------------------------------------------------------------------- |
+| Active Memory-plugin | Ophalen, semantisch zoeken, promoveren, Dreaming, geheugenruntime                  |
+| `memory-wiki`        | Samengestelde wikipagina's, syntheses met rijke herkomst, dashboards, wiki zoeken/ophalen/toepassen |
 
 Praktische regel:
 
-- `memory_search` voor één brede herinneringsronde in alle geconfigureerde corpora
+- `memory_search` voor één brede ophaalronde over alle geconfigureerde corpora
 - `wiki_search` / `wiki_get` wanneer je wikispecifieke rangschikking, herkomst of een geloofsstructuur op paginaniveau wilt
 - `memory_search corpus=all` om beide lagen in één aanroep te doorzoeken, wanneer de Active Memory-plugin corpusselectie ondersteunt
 
-Een gebruikelijke local-first-configuratie: QMD als de Active Memory-backend voor herinnering en
-`memory-wiki` in de modus `bridge` voor duurzame gesynthetiseerde pagina's. Zie het
-voorbeeld voor QMD + bridge-modus onder [Configuratie](#configuration).
+Een gebruikelijke local-first-configuratie: QMD als de actieve geheugenbackend
+voor het ophalen en `memory-wiki` in de modus `bridge` voor duurzame
+gesynthetiseerde pagina's. Zie het voorbeeld voor QMD + bridge-modus onder
+[Configuratie](#configuration).
 
 Als de bridge-modus nul geëxporteerde artefacten meldt, stelt de Active Memory-plugin
 momenteel geen openbare bridge-invoer beschikbaar. Voer eerst `openclaw wiki doctor` uit
@@ -47,33 +56,35 @@ en controleer vervolgens of de Active Memory-plugin openbare artefacten onderste
 ## Kluismodi
 
 - `isolated` (standaard): eigen kluis, eigen bronnen, geen afhankelijkheid van de Active Memory-plugin. Gebruik dit voor een zelfstandige, gecureerde kennisopslag.
-- `bridge`: leest openbare geheugenartefacten en gebeurtenislogboeken van de Active Memory-plugin via openbare plugin-SDK-koppelingen. Gebruik dit om de geëxporteerde artefacten van de geheugenplugin te compileren zonder toegang tot interne privéonderdelen van de plugin.
-- `unsafe-local`: expliciete ontsnappingsroute voor privépaden op dezelfde machine. Bewust experimenteel en niet-overdraagbaar; gebruik dit alleen wanneer je de vertrouwensgrens begrijpt en specifiek toegang tot het lokale bestandssysteem nodig hebt die de bridge-modus niet kan bieden.
+- `bridge`: leest openbare geheugenartefacten en gebeurtenislogboeken uit de Active Memory-plugin via openbare plugin-SDK-koppelingen. Gebruik dit om de geëxporteerde artefacten van de geheugenplugin samen te stellen zonder toegang tot interne privéonderdelen van de plugin.
+- `unsafe-local`: expliciete nooduitgang voor lokale privépaden op dezelfde machine. Bewust experimenteel en niet-portabel; gebruik dit alleen als je de vertrouwensgrens begrijpt en specifiek lokale bestandssysteemtoegang nodig hebt die de bridge-modus niet kan bieden.
 
 Kluismodus en kluisbereik zijn afzonderlijke keuzes:
 
 - `vaultMode` bepaalt waar wiki-invoer vandaan komt.
 - `vault.scope` bepaalt of alle agents één kluis gebruiken of elke agent een onderliggende kluis krijgt.
 
-`vault.scope: "global"` is de standaardinstelling en behoudt het bestaande gedrag met één kluis.
+`vault.scope: "global"` is de standaard en behoudt het bestaande gedrag met één kluis.
 Gebruik `vault.scope: "agent"` met de modus `isolated` of `bridge` wanneer
-agents geen wikipagina's, gecompileerde samenvattingen, zoekresultaten of schrijfbewerkingen
-mogen delen. Agentbereik kan niet worden gecombineerd met de modus `unsafe-local`, omdat die
-geconfigureerde privépaden geen invoer zijn waarvan de agent eigenaar is. Configuratievalidatie
-wijst deze combinatie af.
+agents geen wikipagina's, samengestelde samenvattingen, zoekresultaten of
+schrijfbewerkingen mogen delen. Agentbereik kan niet worden gecombineerd met
+de modus `unsafe-local`, omdat die geconfigureerde privépaden geen invoer
+zijn die eigendom is van agents. Configuratievalidatie wijst deze combinatie af.
 
-De bridge-modus kan, afhankelijk van de schakelopties in de `bridge.*`-configuratie, het volgende indexeren:
+De bridge-modus kan, afhankelijk van de configuratieschakelaar `bridge.*`,
+het volgende indexeren:
 
 - geëxporteerde geheugenartefacten (`indexMemoryRoot`)
 - dagelijkse notities (`indexDailyNotes`)
 - Dreaming-rapporten (`indexDreamReports`)
 - geheugengebeurtenislogboeken (`followMemoryEvents`)
 
-Wanneer de bridge-modus actief is en `bridge.readMemoryArtifacts` is ingeschakeld,
-worden `openclaw wiki status`, `openclaw wiki doctor` en `openclaw wiki bridge
-import` via de actieve Gateway geleid, zodat ze dezelfde context van de Active Memory-
-plugin zien als het geheugen van agents en de runtime. Als bridge is uitgeschakeld of het
-lezen van artefacten is uitgeschakeld, behouden deze opdrachten hun lokale/offlinegedrag.
+Wanneer de bridge-modus actief is en `bridge.readMemoryArtifacts` is ingeschakeld, worden
+`openclaw wiki status`, `openclaw wiki doctor` en `openclaw wiki bridge
+import` via de actieve Gateway
+gerouteerd, zodat ze dezelfde context van de Active Memory-plugin zien als het
+agent-/runtimegeheugen. Als bridge is uitgeschakeld of het lezen van artefacten
+uitstaat, behouden deze opdrachten hun lokale/offlinegedrag.
 
 ## Kluisindeling
 
@@ -93,65 +104,72 @@ lezen van artefacten is uitgeschakeld, behouden deze opdrachten hun lokale/offli
   .openclaw-wiki/
 ```
 
-Beheerde inhoud blijft binnen gegenereerde blokken; blokken met menselijke notities
+Beheerde inhoud blijft binnen gegenereerde blokken; menselijke notitieblokken
 blijven bij regeneratie behouden.
 
-- `sources/`: geïmporteerd bronmateriaal en pagina's die door bridge/unsafe-local worden ondersteund
+- `sources/`: geïmporteerd bronmateriaal en pagina's op basis van bridge/unsafe-local
 - `entities/`: duurzame zaken, personen, systemen, projecten, objecten
-- `concepts/`: ideeën, abstracties, patronen, beleid (ook de bestemming voor OKF-importen)
-- `syntheses/`: gecompileerde samenvattingen en onderhouden totalen
+- `concepts/`: ideeën, abstracties, patronen, beleidsregels (ook de bestemming voor OKF-imports)
+- `syntheses/`: samengestelde samenvattingen en onderhouden totalen
 - `reports/`: gegenereerde dashboards
 
-## Importen in Open Knowledge Format
+## Imports van Open Knowledge Format
 
 ```bash
 openclaw wiki okf import ./bundles/ga4
 ```
 
-Importeer een uitgepakte Open Knowledge Format-bundel in wiki-conceptpagina's. Dit is
-geschikt wanneer een gegevenscatalogus, documentatiecrawler of verrijkingsagent al
-OKF produceert: behoud OKF als het overdraagbare uitwisselingsartefact en laat `memory-wiki`
-dit omzetten in systeemeigen OpenClaw-conceptpagina's en gecompileerde samenvattingen.
+Importeer een uitgepakte Open Knowledge Format-bundel in conceptpagina's van de
+wiki. Dit is geschikt wanneer een gegevenscatalogus, documentatiecrawler of
+verrijkingsagent al OKF produceert: behoud OKF als het draagbare
+uitwisselingsartefact en laat `memory-wiki` dit omzetten in OpenClaw-eigen
+conceptpagina's en samengestelde samenvattingen.
 
 - niet-gereserveerde `.md`-bestanden zijn conceptdocumenten
-- elk geïmporteerd concept vereist een niet-leeg frontmatter-veld `type`; een ontbrekend `type` veroorzaakt een waarschuwing `missing-type` en het bestand wordt overgeslagen
+- elk geïmporteerd concept vereist een niet-leeg frontmatter-veld `type`; ontbrekende `type` levert een waarschuwing `missing-type` op en het bestand wordt overgeslagen
 - onbekende waarden voor `type` worden geaccepteerd als generieke concepten
 - `index.md` en `log.md` zijn gereserveerd en worden nooit als concepten geïmporteerd
-- defecte of externe Markdown-koppelingen blijven ongewijzigd
+- defecte of externe Markdown-links blijven ongewijzigd
 
-Geïmporteerde pagina's worden rechtstreeks onder `concepts/` geplaatst, zodat bestaande processen
-voor compileren, zoeken, ophalen en dashboards ze zonder een tweede wikiboom kunnen gebruiken.
-Elke pagina behoudt de oorspronkelijke OKF-concept-ID, het bronpad, `type`, `resource`, `tags`, het
-tijdstempel en de volledige frontmatter van de producent. Interne OKF-koppelingen worden herschreven
-naar de gegenereerde wiki-conceptpagina's en leveren ook gestructureerde `relationships`-vermeldingen
-op met `kind: okf-link`.
+Geïmporteerde pagina's worden plat onder `concepts/` geplaatst, zodat
+bestaande processen voor samenstellen, zoeken, ophalen en dashboards ze zonder
+een tweede wikiboom kunnen gebruiken. Elke pagina behoudt de oorspronkelijke
+OKF-concept-ID, het bronpad, `type`, `resource`,
+`tags`, het tijdstempel en de volledige frontmatter van de producent.
+Interne OKF-links worden herschreven naar de gegenereerde conceptpagina's van
+de wiki en leveren ook gestructureerde `relationships`-vermeldingen met
+`kind: okf-link` op.
 
-## Gestructureerde beweringen en bewijs
+## Gestructureerde claims en bewijs
 
-Pagina's bevatten gestructureerde `claims`-frontmatter, niet alleen vrije tekst. Elke
-bewering kan `id`, `text`, `status`, `confidence`, `evidence[]` en
-`updatedAt` bevatten. Elke bewijsvermelding kan `kind`, `sourceId`, `path`,
-`lines`, `weight`, `confidence`, `privacyTier`, `note` en `updatedAt` bevatten.
+Pagina's bevatten gestructureerde `claims`-frontmatter, niet alleen
+vrije tekst. Elke claim kan `id`, `text`,
+`status`, `confidence`, `evidence[]` en
+`updatedAt` bevatten. Elke bewijsvermelding kan `kind`,
+`sourceId`, `path`, `lines`,
+`weight`, `confidence`, `privacyTier`,
+`note` en `updatedAt` bevatten.
 
-Hierdoor gedraagt de wiki zich als een geloofslaag en niet als een passieve verzameling notities.
-Beweringen kunnen worden gevolgd, beoordeeld, betwist en teruggeleid naar bronnen.
+Hierdoor gedraagt de wiki zich als een geloofslaag en niet als een passieve
+verzameling notities. Claims kunnen worden gevolgd, beoordeeld, betwist en
+naar bronnen worden herleid.
 
 ## Entiteitsmetadata voor agents
 
-Entiteitspagina's bevatten generieke routeringsmetadata die bruikbaar zijn voor personen, teams,
-systemen, projecten of elk ander entiteitstype:
+Entiteitspagina's bevatten generieke routeringsmetadata die bruikbaar zijn
+voor personen, teams, systemen, projecten of elk ander entiteitstype:
 
 - `entityType`: bijvoorbeeld `person`, `team`, `system`, `project`
-- `canonicalId`: stabiele identiteitssleutel voor aliassen en importen
-- `aliases`: namen, gebruikersnamen of labels die naar dezelfde pagina verwijzen
-- `privacyTier`: vrije tekenreeks; `public` wordt behandeld als geen beoordeling nodig, elke andere waarde (bijvoorbeeld `local-private`, `sensitive`, `confirm-before-use`) wordt gemarkeerd in `reports/privacy-review.md`
+- `canonicalId`: stabiele identiteitssleutel voor aliassen en imports
+- `aliases`: namen, handles of labels die naar dezelfde pagina verwijzen
+- `privacyTier`: vrije tekenreeks; `public` wordt behandeld als geen beoordeling vereist, elke andere waarde (bijvoorbeeld `local-private`, `sensitive`, `confirm-before-use`) wordt gemarkeerd in `reports/privacy-review.md`
 - `bestUsedFor` / `notEnoughFor`: compacte routeringsaanwijzingen
-- `lastRefreshedAt`: tijdstempel van bronvernieuwing, los van de bewerkingstijd van de pagina
-- `personCard`: optionele persoonsgerichte routeringskaart (gebruikersnamen, sociale profielen, e-mailadressen, tijdzone, werkgebied, waarvoor te benaderen, waarvoor niet te benaderen, betrouwbaarheid, privacyniveau)
+- `lastRefreshedAt`: tijdstempel voor bronvernieuwing, los van de bewerkingstijd van de pagina
+- `personCard`: optionele persoonsgebonden routeringskaart (handles, sociale profielen, e-mailadressen, tijdzone, werkgebied, waarvoor te benaderen, waarvoor niet te benaderen, betrouwbaarheid, privacyniveau)
 - `relationships`: getypeerde verbindingen naar gerelateerde pagina's (doel, soort, gewicht, betrouwbaarheid, bewijssoort, privacyniveau, notitie)
 
-Begin voor een personenwiki met `reports/person-agent-directory.md` en open vervolgens
-de persoonspagina met `wiki_get` voordat je contactgegevens of afgeleide
+Begin voor een personenwiki met `reports/person-agent-directory.md` en open daarna de
+persoonspagina met `wiki_get` voordat je contactgegevens of afgeleide
 feiten gebruikt.
 
 <Accordion title="Voorbeeld van een entiteitspagina">
@@ -165,7 +183,7 @@ aliases:
   - example-handle
 privacyTier: local-private
 bestUsedFor:
-  - Voorbeeldroutering voor ecosysteem
+  - Routering binnen het voorbeeldecosysteem
 notEnoughFor:
   - juridische goedkeuring
 lastRefreshedAt: "2026-04-29T00:00:00.000Z"
@@ -179,7 +197,7 @@ personCard:
   timezone: America/Chicago
   lane: Voorbeeldecosysteem
   askFor:
-    - Vragen over voorbeelduitrol
+    - Vragen over de voorbeelduitrol
   avoidAskingFor:
     - niet-gerelateerde factureringsbeslissingen
   confidence: 0.8
@@ -202,86 +220,100 @@ claims:
 ```
 </Accordion>
 
-## Compilatiepijplijn
+## Samenstelpijplijn
 
-Compile leest wikipagina's, normaliseert samenvattingen en genereert stabiele
-machinegerichte artefacten onder:
+Bij het samenstellen worden wikipagina's gelezen, samenvattingen genormaliseerd
+en wordt een machinegerichte momentopname opgeslagen in de gedeelde
+SQLite-pluginstatus van OpenClaw. Runtimecode gebruikt de door de levenscyclus
+beheerde eigenaarsmomentopname om SQLite te laden tijdens asynchrone
+promptvoorbereiding; synchrone promptopbouw doorzoekt nooit Markdown en leest
+geen cachebestanden. Samengestelde uitvoer ondersteunt ook de eerste
+wiki-indexering voor zoeken/ophalen, het terugkoppelen van claim-ID's naar de
+bijbehorende pagina's, compacte promptaanvullingen en rapportgeneratie.
 
-- `.openclaw-wiki/cache/agent-digest.json`
-- `.openclaw-wiki/cache/claims.jsonl`
-
-Agents en runtimecode lezen deze samenvattingen in plaats van Markdown uit te lezen.
-Gecompileerde uitvoer ondersteunt ook de eerste fase van wiki-indexering voor zoeken/ophalen,
-het terugleiden van bewering-ID's naar de bijbehorende pagina's, compacte promptaanvullingen
-en het genereren van rapporten.
+Bronbewerkingen en herstelbewerkingen van de kluis worden pas na de volgende
+samenstelling machinegericht beschikbaar. Bij het herstarten of vernieuwen van
+de levenscyclus van de plugin wordt de causaal gekoppelde
+samenstellingspublicatie van de kluis vergeleken met SQLite en wordt een
+momentopname uit een nieuwere, teruggedraaide status geweigerd. Een compiler
+die vóór het terugdraaien is gestart, kan niet publiceren ten opzichte van de
+herstelde voorganger. Promptvoorbereiding peilt de kluis niet en installeert
+geen bestandswatchers.
+Na quarantaine vanwege een terugdraaiing wist een samenstelling in het actieve
+proces de eigenaar onmiddellijk; een afzonderlijk compilerproces vereist
+vernieuwing van de pluginlevenscyclus, zodat de daemon de nieuwe duurzame
+publicatie kan bevestigen.
+Samengestelde caches kunnen opnieuw worden opgebouwd: cacherijen van vóór
+publicatie-epochs worden als missers behandeld en door de volgende
+samenstelling vervangen; ze worden niet gemigreerd.
 
 ## Dashboards en statusrapporten
 
-Wanneer `render.createDashboards` is ingeschakeld, onderhoudt Compile dashboards onder
-`reports/`:
+Wanneer `render.createDashboards` is ingeschakeld, onderhoudt de samenstelling
+dashboards onder `reports/`:
 
-| Rapport                             | Volgt                                              |
+| Rapport                             | Houdt bij                                          |
 | ----------------------------------- | -------------------------------------------------- |
 | `reports/open-questions.md`         | pagina's met onopgeloste vragen                    |
 | `reports/contradictions.md`         | clusters van notities over tegenstrijdigheden      |
-| `reports/low-confidence.md`         | pagina's en beweringen met lage betrouwbaarheid    |
-| `reports/claim-health.md`           | beweringen zonder gestructureerd bewijs            |
-| `reports/stale-pages.md`            | verouderde of onbekende actualiteit                 |
-| `reports/person-agent-directory.md` | routeringskaarten voor personen/entiteiten          |
-| `reports/relationship-graph.md`     | gestructureerde relatieverbindingen                 |
-| `reports/provenance-coverage.md`    | dekking van bewijsklassen                           |
+| `reports/low-confidence.md`         | pagina's en claims met lage betrouwbaarheid        |
+| `reports/claim-health.md`           | claims zonder gestructureerd bewijs                |
+| `reports/stale-pages.md`            | verouderde of onbekende actualiteit                |
+| `reports/person-agent-directory.md` | routeringskaarten voor personen/entiteiten         |
+| `reports/relationship-graph.md`     | gestructureerde relatieverbindingen                |
+| `reports/provenance-coverage.md`    | dekking per bewijsklasse                           |
 | `reports/privacy-review.md`         | niet-openbare privacyniveaus die vóór gebruik moeten worden beoordeeld |
 
 ## Zoeken en ophalen
 
 Twee zoekbackends:
 
-- `shared`: gebruik de gedeelde geheugenzoekstroom wanneer deze beschikbaar is
+- `shared`: gebruik indien beschikbaar de gedeelde geheugenzoekstroom
 - `local`: doorzoek de wiki lokaal
 
 Drie corpora: `wiki`, `memory`, `all`.
 
-- `wiki_search` / `wiki_get` gebruiken waar mogelijk gecompileerde samenvattingen als eerste fase
-- bewering-ID's verwijzen terug naar de bijbehorende pagina
-- betwiste/verouderde/actuele beweringen beïnvloeden de rangschikking
-- herkomstlabels blijven behouden in resultaten
+- `wiki_search` / `wiki_get` gebruiken waar mogelijk samengestelde samenvattingen als eerste zoekronde
+- claim-ID's verwijzen terug naar de bijbehorende pagina
+- betwiste/verouderde/actuele claims beïnvloeden de rangschikking
+- herkomstlabels blijven in de resultaten behouden
 
-Zoekmodi (`--mode` / toolparameter `mode`):
+Zoekmodi (parameter `--mode` / tool `mode`):
 
-| Modus             | Geeft voorrang aan                                              |
+| Modus             | Versterkt                                                      |
 | ----------------- | -------------------------------------------------------------- |
-| `auto`            | evenwichtige standaard                                         |
+| `auto`            | evenwichtige standaardinstelling                               |
 | `find-person`     | persoonsachtige entiteiten, aliassen, gebruikersnamen, sociale profielen, canonieke ID's |
-| `route-question`  | agentkaarten, aanwijzingen voor waarvoor te benaderen/waarvoor het best te gebruiken, relatiecontext |
-| `source-evidence` | bronpagina's en gestructureerde bewijsmetadata                 |
-| `raw-claim`       | overeenkomende gestructureerde beweringen; retourneert metadata van beweringen/bewijs |
+| `route-question`  | agentkaarten, hints voor waarvoor te vragen/waarvoor het meest geschikt, relatiecontext |
+| `source-evidence` | bronpagina's en gestructureerde metagegevens voor bewijs       |
+| `raw-claim`       | overeenkomende gestructureerde claims; retourneert metagegevens van claims/bewijs |
 
-Wanneer een resultaat overeenkomt met een gestructureerde bewering, retourneert `wiki_search`
+Wanneer een resultaat overeenkomt met een gestructureerde claim, retourneert `wiki_search`
 `matchedClaimId`, `matchedClaimStatus`, `matchedClaimConfidence`,
 `evidenceKinds` en `evidenceSourceIds` in de detailpayload. Tekstuitvoer
-bevat waar beschikbaar compacte regels `Bewering:` en `Bewijs:`.
+bevat compacte regels voor `Claim:` en `Evidence:` wanneer beschikbaar.
 
 ## Agenttools
 
-| Tool          | Doel                                                                                                                                                                  |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `wiki_status` | huidige kluismodus en bereik, herleide agent, status, beschikbaarheid van de Obsidian-CLI                                                                              |
-| `wiki_search` | doorzoekt wikipagina's en, indien geconfigureerd, het gedeelde geheugencorpus; accepteert `mode` voor het opzoeken van personen, routeren van vragen, bronbewijs of gedetailleerde analyse van ruwe beweringen |
-| `wiki_get`    | leest een wikipagina op id/pad, met terugval op het gedeelde geheugencorpus wanneer gedeeld zoeken is ingeschakeld en de zoekopdracht niets oplevert                    |
-| `wiki_apply`  | gerichte wijzigingen aan syntheses/metagegevens zonder vrijevormbewerking van pagina's                                                                                 |
-| `wiki_lint`   | structurele controles, hiaten in herkomstgegevens, tegenstrijdigheden, openstaande vragen                                                                              |
+| Tool          | Doel                                                                                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `wiki_status` | huidige kluismodus en huidig bereik, herleide agent, status, beschikbaarheid van de Obsidian-CLI                                                              |
+| `wiki_search` | wikipagina's doorzoeken en, indien geconfigureerd, het gedeelde geheugencorpus; accepteert `mode` voor het opzoeken van personen, routeren van vragen, bronbewijs of gedetailleerde inspectie van onbewerkte claims |
+| `wiki_get`    | een wikipagina lezen op ID/pad, met terugval op het gedeelde geheugencorpus wanneer gedeeld zoeken is ingeschakeld en de zoekopdracht niets oplevert           |
+| `wiki_apply`  | gerichte wijzigingen aan synthese/metagegevens zonder vrije paginabewerking                                                                                   |
+| `wiki_lint`   | structurele controles, hiaten in herkomstgegevens, tegenstrijdigheden, openstaande vragen                                                                     |
 
-De plugin registreert ook een niet-exclusieve aanvulling op het geheugencorpus, zodat gedeelde
+De Plugin registreert ook een niet-exclusieve aanvulling op het geheugencorpus, zodat gedeelde
 `memory_search` en `memory_get` de wiki kunnen bereiken wanneer de actieve geheugenplugin
 corpusselectie ondersteunt.
 
 ## Gedrag van prompts en context
 
 Wanneer `context.includeCompiledDigestPrompt` is ingeschakeld, voegen geheugenpromptsecties
-een compacte gecompileerde momentopname uit `agent-digest.json` toe: alleen de belangrijkste pagina's,
-alleen de belangrijkste beweringen, het aantal tegenstrijdigheden, het aantal vragen en kwalificaties
-voor betrouwbaarheid/actualiteit. Dit is optioneel omdat het de promptstructuur wijzigt; het is vooral relevant
-voor contextengines of promptassemblage die expliciet geheugenaanvullingen
+een compacte, gecompileerde momentopname uit de pluginstatus toe: alleen toppagina's,
+alleen topclaims, aantal tegenstrijdigheden, aantal vragen en kwalificaties voor
+betrouwbaarheid/actualiteit. Dit is opt-in omdat het de promptvorm wijzigt; het is vooral relevant
+voor contextengines of promptsamenstelling die expliciet geheugenaanvullingen
 gebruiken.
 
 ## Configuratie
@@ -345,27 +377,27 @@ Plaats de configuratie onder `plugins.entries.memory-wiki.config`:
 
 Belangrijkste schakelaars:
 
-| Sleutel                                    | Waarden / standaardwaarde                       | Opmerkingen                                                                                       |
-| ------------------------------------------ | ---------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `vaultMode`                                | `isolated` (standaard), `bridge`, `unsafe-local` | kiest het invoer- en integratiegedrag                                                             |
-| `vault.scope`                              | `global` (standaard), `agent`                  | één gedeelde kluis of één onderliggende kluis per agent                                           |
-| `vault.path`                               | globale standaardwaarde `~/.openclaw/wiki/main` | exact globaal kluispad; bovenliggende map voor agentbereik is standaard `~/.openclaw/wiki`         |
-| `vault.renderMode`                         | `native` (standaard), `obsidian`               |                                                                                                   |
-| `bridge.readMemoryArtifacts`               | standaard `true`                               | importeert openbare artefacten van de actieve geheugenplugin                                      |
-| `bridge.followMemoryEvents`                | standaard `true`                               | neemt gebeurtenislogboeken op in brugmodus                                                        |
-| `unsafeLocal.allowPrivateMemoryCoreAccess` | standaard `false`                              | vereist om imports in `unsafe-local` uit te voeren                                                |
-| `unsafeLocal.paths`                        | standaard `[]`                                 | expliciete lokale paden om in de modus `unsafe-local` te importeren                               |
-| `search.backend`                           | `shared` (standaard), `local`                  |                                                                                                   |
-| `search.corpus`                            | `wiki` (standaard), `memory`, `all`            |                                                                                                   |
-| `context.includeCompiledDigestPrompt`      | standaard `false`                              | voegt de compacte digestmomentopname van de geselecteerde agent toe aan geheugenpromptsecties     |
-| `render.createBacklinks`                   | standaard `true`                               | genereert deterministische blokken met gerelateerde inhoud                                        |
-| `render.createDashboards`                  | standaard `true`                               | genereert dashboardpagina's                                                                      |
+| Sleutel                                    | Waarden / standaardwaarde                       | Opmerkingen                                                                   |
+| ------------------------------------------ | ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| `vaultMode`                                | `isolated` (standaard), `bridge`, `unsafe-local` | bepaalt invoer- en integratiegedrag                                            |
+| `vault.scope`                              | `global` (standaard), `agent`                    | één gedeelde kluis of één onderliggende kluis per agent                       |
+| `vault.path`                               | globale standaardwaarde `~/.openclaw/wiki/main` | exacte kluis voor globaal bereik; bovenliggende map voor agentbereik is standaard `~/.openclaw/wiki` |
+| `vault.renderMode`                         | `native` (standaard), `obsidian`                 |                                                                               |
+| `bridge.readMemoryArtifacts`               | standaard `true`                                 | openbare artefacten van de actieve geheugenplugin importeren                  |
+| `bridge.followMemoryEvents`                | standaard `true`                                 | gebeurtenislogboeken opnemen in brugmodus                                     |
+| `unsafeLocal.allowPrivateMemoryCoreAccess` | standaard `false`                                | vereist om `unsafe-local`-imports uit te voeren                           |
+| `unsafeLocal.paths`                        | standaard `[]`                                   | expliciete lokale paden om te importeren in de modus `unsafe-local`       |
+| `search.backend`                           | `shared` (standaard), `local`                    |                                                                               |
+| `search.corpus`                            | `wiki` (standaard), `memory`, `all`              |                                                                               |
+| `context.includeCompiledDigestPrompt`      | standaard `false`                                | compacte samenvattingsmomentopname van de geselecteerde agent toevoegen aan geheugenpromptsecties |
+| `render.createBacklinks`                   | standaard `true`                                 | deterministische gerelateerde blokken genereren                               |
+| `render.createDashboards`                  | standaard `true`                                 | dashboardpagina's genereren                                                   |
 
 ### Kluizen per agent
 
 Stel `vault.scope` in op `agent` om elke geconfigureerde agent een afzonderlijke wiki te geven.
-Binnen dit bereik is `vault.path` een bovenliggende map en voegt OpenClaw de
-genormaliseerde agent-id toe:
+In dit bereik is `vault.path` een bovenliggende map en voegt OpenClaw de
+genormaliseerde agent-ID toe:
 
 ```json5
 {
@@ -398,26 +430,26 @@ Dit wordt herleid tot `~/.openclaw/wiki/support` en
 bovenliggende map standaard `~/.openclaw/wiki`. De standaardagent `main` behoudt daardoor
 het bestaande pad `~/.openclaw/wiki/main`.
 
-Agenttools, gecompileerde promptdigests en de wiki-aanvulling die via
-`memory_search` / `memory_get` beschikbaar wordt gesteld, herleiden de kluis vanuit de context van de actieve agent.
-Geef voor CLI- en Gateway-aanroepen in een configuratie met meerdere geconfigureerde agents
-de agent expliciet op met `openclaw wiki --agent <agentId> ...` of via `agentId`
-in de Gateway-aanvraag. Eén geconfigureerde agent blijft de standaard wanneer geen id wordt
-opgegeven.
+Agenttools, gecompileerde promptoverzichten en de wiki-aanvulling die via
+`memory_search` / `memory_get` beschikbaar wordt gesteld, herleiden de kluis vanuit de actieve agentcontext.
+Geef bij CLI- en Gateway-aanroepen in een configuratie met meerdere geconfigureerde agents
+de agent expliciet op met `openclaw wiki --agent <agentId> ...` of met
+`agentId` van het Gateway-verzoek. Eén geconfigureerde agent blijft de standaard wanneer geen ID
+wordt opgegeven.
 
 In brugmodus accepteren imports met agentbereik een openbaar geheugenartefact alleen wanneer
-de geselecteerde agent in de bijbehorende `agentIds` staat. Artefacten die eigendom zijn van een andere agent,
+`agentIds` daarvan de geselecteerde agent bevat. Artefacten die eigendom zijn van een andere agent,
 geen eigendomsmetagegevens hebben of een onbekende eigenaar hebben, worden overgeslagen. Globaal bereik
 behoudt het bestaande gedrag voor gedeelde artefacten.
 
 <Warning>
-Het wijzigen van `vault.scope` kopieert of splitst een bestaande kluis niet. Binnen agentbereik
-wordt een expliciet geconfigureerd `vault.path` een bovenliggende map; verplaats of
-importeer bestaande pagina's daarom doelbewust voordat je productieagents omschakelt. Maak eerst
-een back-up van de kluis.
+Het wijzigen van `vault.scope` kopieert of splitst een bestaande kluis niet. In agentbereik
+wordt een expliciet geconfigureerde `vault.path` een bovenliggende map; verplaats of
+importeer bestaande pagina's daarom bewust voordat je productieagents omschakelt. Maak eerst een
+back-up van de kluis.
 
-Kluizen per agent vormen een kennisgrens binnen hetzelfde proces, geen beveiligingsgrens
-van het besturingssysteem. Plugins en tools zonder sandbox met toegang tot het bestandssysteem van de host kunnen
+Kluizen per agent vormen een kennisgrens binnen hetzelfde proces, geen beveiligingsgrens van het
+besturingssysteem. Plugins en niet-gesandboxte tools met toegang tot het hostbestandssysteem kunnen
 nog steeds de map van een andere agent lezen. Gebruik [sandboxing](/nl/gateway/sandboxing) of
 [afzonderlijke Gateway-profielen](/nl/gateway/multiple-gateways) wanneer agents elkaar niet
 vertrouwen.
@@ -425,10 +457,10 @@ vertrouwen.
 
 ### Voorbeeld: QMD + brugmodus
 
-Gebruik dit wanneer je QMD wilt gebruiken voor het terughalen van informatie en `memory-wiki` voor een beheerde
-kennislaag. Elke laag houdt een eigen focus: QMD houdt ruwe notities, sessie-exports
-en aanvullende verzamelingen doorzoekbaar, terwijl `memory-wiki`
-stabiele entiteiten, beweringen, dashboards en bronpagina's compileert.
+Gebruik dit wanneer je QMD wilt gebruiken voor het terughalen van informatie en `memory-wiki` voor een onderhouden
+kennislaag. Elke laag blijft gericht: QMD houdt onbewerkte notities, sessie-
+exports en extra verzamelingen doorzoekbaar, terwijl `memory-wiki`
+stabiele entiteiten, claims, dashboards en bronpagina's compileert.
 
 ```json5
 {
@@ -464,8 +496,8 @@ stabiele entiteiten, beweringen, dashboards en bronpagina's compileert.
 ```
 
 Hierdoor blijft QMD verantwoordelijk voor het terughalen uit het actieve geheugen, blijft `memory-wiki` gericht op
-gecompileerde pagina's en dashboards en blijft de promptstructuur ongewijzigd totdat je
-gecompileerde digestprompts bewust inschakelt.
+gecompileerde pagina's en dashboards en blijft de promptvorm ongewijzigd totdat je
+bewust gecompileerde overzichtsprompts inschakelt.
 
 ## CLI
 
@@ -483,43 +515,44 @@ openclaw wiki bridge import
 openclaw wiki obsidian status
 ```
 
-Zie [CLI: wiki](/nl/cli/wiki) voor de volledige opdrachtreferentie, waaronder
+Zie [CLI: wiki](/nl/cli/wiki) voor de volledige opdrachtreferentie, inclusief
 `wiki okf import`, `wiki apply metadata`, `wiki unsafe-local import`,
-`wiki chatgpt import` / `wiki chatgpt rollback` en de volledige reeks subopdrachten van `wiki obsidian`.
+`wiki chatgpt import` / `wiki chatgpt rollback` en de volledige reeks `wiki obsidian`-
+subopdrachten.
 
 ## Ondersteuning voor Obsidian
 
-Wanneer `vault.renderMode` is ingesteld op `obsidian`, schrijft de plugin voor Obsidian geschikte
-Markdown en kan deze optioneel de officiële `obsidian`-CLI gebruiken voor het
-controleren van de status, doorzoeken van de kluis, openen van een pagina, aanroepen van een opdracht en navigeren naar de
-dagelijkse notitie. Dit is optioneel; de wiki werkt ook zonder
-Obsidian in de native modus.
+Wanneer `vault.renderMode` is ingesteld op `obsidian`, schrijft de Plugin Markdown
+dat geschikt is voor Obsidian en kan deze optioneel de officiële `obsidian`-CLI gebruiken voor
+statuscontroles, zoeken in de kluis, het openen van een pagina, het aanroepen van een opdracht en het navigeren naar de
+dagelijkse notitie. Dit is optioneel; de wiki werkt zonder Obsidian nog steeds in de
+native modus.
 
-Kluizen met agentbereik kunnen nog steeds voor Obsidian geschikte Markdown gebruiken, maar de configuratievalidatie
-weigert `obsidian.useOfficialCli: true` in combinatie met `vault.scope: "agent"`.
+Kluizen met agentbereik kunnen nog steeds Markdown gebruiken dat geschikt is voor Obsidian, maar de configuratie-
+validatie wijst `obsidian.useOfficialCli: true` met `vault.scope: "agent"` af.
 De huidige instelling `obsidian.vaultName` is globaal en kan niet voor elke agent een afzonderlijke
 Obsidian-kluis selecteren. Gebruik in plaats daarvan de wikitools en CLI-bewerkingen,
 of houd een door Obsidian beheerde wiki binnen globaal bereik.
 
-## Aanbevolen werkwijze
+## Aanbevolen workflow
 
 <Steps>
-<Step title="Behoud de actieve geheugenplugin voor het terughalen van informatie">
-Het terughalen, promoveren en dromen blijven de verantwoordelijkheid van de geconfigureerde geheugenbackend.
+<Step title="Behoud de Active Memory-plugin voor herinneringen">
+Herinneringen, promotie en Dreaming blijven onder beheer van de geconfigureerde geheugenbackend.
 </Step>
 <Step title="Schakel memory-wiki in">
-Begin met de modus `isolated`, tenzij je expliciet de brugmodus wilt gebruiken.
+Begin met de modus `isolated`, tenzij je expliciet de bridge-modus wilt.
 </Step>
-<Step title="Gebruik wiki_search / wiki_get wanneer herkomst belangrijk is">
-Geef hieraan de voorkeur boven `memory_search` wanneer je wikispecifieke rangschikking of een geloofsstructuur op paginaniveau wilt.
+<Step title="Gebruik wiki_search / wiki_get wanneer herkomst van belang is">
+Geef hieraan de voorkeur boven `memory_search` wanneer je wiki-specifieke rangschikking of een geloofsstructuur op paginaniveau wilt.
 </Step>
-<Step title="Gebruik wiki_apply voor gerichte syntheses of updates van metagegevens">
+<Step title="Gebruik wiki_apply voor beperkte syntheses of metadata-updates">
 Vermijd het handmatig bewerken van beheerde, gegenereerde blokken.
 </Step>
 <Step title="Voer wiki_lint uit na betekenisvolle wijzigingen">
-Detecteert tegenstrijdigheden, openstaande vragen en hiaten in herkomstgegevens.
+Detecteert tegenstrijdigheden, open vragen en hiaten in de herkomst.
 </Step>
-<Step title="Schakel dashboards in om verouderde gegevens en tegenstrijdigheden zichtbaar te maken">
+<Step title="Schakel dashboards in voor inzicht in verouderde gegevens en tegenstrijdigheden">
 Stel `render.createDashboards: true` in (standaard).
 </Step>
 </Steps>

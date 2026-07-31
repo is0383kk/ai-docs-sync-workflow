@@ -1,78 +1,76 @@
 ---
 read_when:
-    - Đang làm việc trên các tính năng kênh Microsoft Teams
+    - Phát triển các tính năng của kênh Microsoft Teams
 summary: Trạng thái hỗ trợ, khả năng và cấu hình bot Microsoft Teams
 title: Microsoft Teams
 x-i18n:
-    generated_at: "2026-06-27T17:11:29Z"
-    model: gpt-5.5
+    generated_at: "2026-07-19T05:34:27Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: cad5dc92b3a70e85412cbf34c926d7211dce7534c31387744e6f085bcfe23f08
+    source_hash: 5a4cf686da27e28b58f7afaad8cc837dbddb93219cde0c37285f9f6895f6fb8c
     source_path: channels/msteams.md
     workflow: 16
 ---
 
-Trạng thái: hỗ trợ văn bản + tệp đính kèm DM; gửi tệp trong kênh/nhóm yêu cầu `sharePointSiteId` + quyền Graph (xem [Gửi tệp trong cuộc trò chuyện nhóm](#sending-files-in-group-chats)). Poll được gửi qua Adaptive Cards. Thao tác tin nhắn hiển thị rõ `upload-file` cho các lượt gửi ưu tiên tệp.
+Trạng thái: hỗ trợ văn bản + tệp đính kèm trong DM; gửi tệp trong kênh/nhóm yêu cầu `sharePointSiteId` + quyền Graph (xem [Gửi tệp trong cuộc trò chuyện nhóm](#sending-files-in-group-chats)). Cuộc thăm dò được gửi qua Adaptive Cards. Các hành động tin nhắn cung cấp `upload-file` rõ ràng cho các lượt gửi ưu tiên tệp.
 
 ## Plugin đi kèm
 
-Microsoft Teams được phát hành dưới dạng Plugin đi kèm trong các bản phát hành OpenClaw hiện tại, nên không cần
-cài đặt riêng trong bản dựng đóng gói thông thường.
+Microsoft Teams được cung cấp dưới dạng Plugin đi kèm trong các bản phát hành OpenClaw hiện tại; bản dựng đóng gói thông thường không yêu cầu cài đặt riêng.
 
-Nếu bạn đang dùng bản dựng cũ hơn hoặc bản cài đặt tùy chỉnh loại trừ Teams đi kèm,
-hãy cài đặt trực tiếp gói npm:
+Trên bản dựng cũ hơn hoặc bản cài đặt tùy chỉnh không bao gồm Teams đi kèm, hãy cài đặt trực tiếp gói npm:
 
 ```bash
 openclaw plugins install @openclaw/msteams
 ```
 
-Dùng gói trần để theo dõi thẻ phát hành chính thức hiện tại. Chỉ ghim một
-phiên bản chính xác khi bạn cần bản cài đặt có thể tái lập.
+Sử dụng gói không chỉ định phiên bản để theo thẻ phát hành chính thức hiện tại. Chỉ ghim một phiên bản chính xác khi cần bản cài đặt có thể tái lập.
 
-Checkout cục bộ (khi chạy từ repo git):
+Bản checkout cục bộ (chạy từ kho git):
 
 ```bash
 openclaw plugins install ./path/to/local/msteams-plugin
 ```
 
-Chi tiết: [Plugins](/vi/tools/plugin)
+Chi tiết: [Plugin](/vi/tools/plugin)
 
 ## Thiết lập nhanh
 
-[`@microsoft/teams.cli`](https://www.npmjs.com/package/@microsoft/teams.cli) xử lý đăng ký bot, tạo manifest và tạo thông tin xác thực trong một lệnh duy nhất.
+[`@microsoft/teams.cli`](https://www.npmjs.com/package/@microsoft/teams.cli) xử lý việc đăng ký bot, tạo manifest và tạo thông tin xác thực bằng một lệnh.
 
 **1. Cài đặt và đăng nhập**
 
 ```bash
 npm install -g @microsoft/teams.cli@preview
 teams login
-teams status   # verify you're logged in and see your tenant info
+teams status   # xác minh bạn đã đăng nhập và xem thông tin tenant
 ```
 
 <Note>
-Teams CLI hiện đang ở bản xem trước. Lệnh và cờ có thể thay đổi giữa các bản phát hành.
+Teams CLI hiện đang ở giai đoạn xem trước. Các lệnh và cờ có thể thay đổi giữa các bản phát hành.
 </Note>
 
-**2. Khởi động tunnel** (Teams không thể truy cập localhost)
+**2. Khởi động đường hầm** (Teams không thể truy cập localhost)
 
-Cài đặt và xác thực devtunnel CLI nếu bạn chưa làm ([hướng dẫn bắt đầu](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/get-started)).
+Cài đặt và xác thực devtunnel CLI nếu cần ([hướng dẫn bắt đầu](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/get-started)).
 
 ```bash
-# One-time setup (persistent URL across sessions):
+# Thiết lập một lần (URL duy trì qua các phiên):
 devtunnel create my-openclaw-bot --allow-anonymous
 devtunnel port create my-openclaw-bot -p 3978 --protocol auto
 
-# Each dev session:
+# Mỗi phiên phát triển:
 devtunnel host my-openclaw-bot
-# Your endpoint: https://<tunnel-id>.devtunnels.ms/api/messages
+# Điểm cuối của bạn: https://<tunnel-id>.devtunnels.ms/api/messages
 ```
 
 <Note>
-`--allow-anonymous` là bắt buộc vì Teams không thể xác thực với devtunnels. Mỗi yêu cầu bot đến vẫn được Teams SDK tự động xác thực.
+`--allow-anonymous` là bắt buộc vì Teams không thể xác thực với devtunnels. Mỗi yêu cầu bot đến vẫn được Teams SDK xác thực.
 </Note>
 
-Các lựa chọn thay thế: `ngrok http 3978` hoặc `tailscale funnel 3978` (nhưng các lựa chọn này có thể thay đổi URL ở mỗi phiên).
+Các lựa chọn thay thế: `ngrok http 3978` hoặc `tailscale funnel 3978` (URL có thể thay đổi trong mỗi phiên).
 
 **3. Tạo ứng dụng**
 
@@ -82,14 +80,7 @@ teams app create \
   --endpoint "https://<your-tunnel-url>/api/messages"
 ```
 
-Lệnh duy nhất này:
-
-- Tạo ứng dụng Entra ID (Azure AD)
-- Tạo client secret
-- Xây dựng và tải lên manifest ứng dụng Teams (kèm biểu tượng)
-- Đăng ký bot (mặc định do Teams quản lý - không cần gói đăng ký Azure)
-
-Đầu ra sẽ hiển thị `CLIENT_ID`, `CLIENT_SECRET`, `TENANT_ID` và **Teams App ID** - hãy ghi lại những giá trị này cho các bước tiếp theo. Nó cũng đề nghị cài đặt ứng dụng trực tiếp trong Teams.
+Thao tác này tạo một ứng dụng Entra ID (Azure AD), tạo khóa bí mật máy khách, xây dựng và tải lên manifest ứng dụng Teams (kèm biểu tượng), đồng thời đăng ký một bot do Teams quản lý (không cần gói đăng ký Azure). Đầu ra bao gồm `CLIENT_ID`, `CLIENT_SECRET`, `TENANT_ID` và **Teams App ID**; đồng thời cung cấp tùy chọn cài đặt ứng dụng trực tiếp trong Teams.
 
 **4. Cấu hình OpenClaw** bằng thông tin xác thực từ đầu ra:
 
@@ -107,11 +98,11 @@ Lệnh duy nhất này:
 }
 ```
 
-Hoặc dùng trực tiếp biến môi trường: `MSTEAMS_APP_ID`, `MSTEAMS_APP_PASSWORD`, `MSTEAMS_TENANT_ID`.
+Hoặc sử dụng trực tiếp các biến môi trường: `MSTEAMS_APP_ID`, `MSTEAMS_APP_PASSWORD`, `MSTEAMS_TENANT_ID`.
 
 **5. Cài đặt ứng dụng trong Teams**
 
-`teams app create` sẽ nhắc bạn cài đặt ứng dụng - chọn "Cài đặt trong Teams". Nếu bạn đã bỏ qua, bạn có thể lấy liên kết sau:
+`teams app create` nhắc bạn cài đặt ứng dụng; chọn "Install in Teams". Để lấy liên kết cài đặt sau:
 
 ```bash
 teams app get <teamsAppId> --install-link
@@ -123,25 +114,25 @@ teams app get <teamsAppId> --install-link
 teams app doctor <teamsAppId>
 ```
 
-Lệnh này chạy chẩn đoán trên đăng ký bot, cấu hình ứng dụng AAD, tính hợp lệ của manifest và thiết lập SSO.
+Chạy chẩn đoán cho việc đăng ký bot, cấu hình ứng dụng AAD, tính hợp lệ của manifest và thiết lập SSO.
 
-Đối với triển khai production, hãy cân nhắc dùng [xác thực liên kết](/vi/channels/msteams#federated-authentication-certificate-plus-managed-identity) (chứng chỉ hoặc managed identity) thay cho client secret.
+Đối với môi trường production, hãy cân nhắc [xác thực liên kết](#federated-authentication-certificate-plus-managed-identity) (chứng chỉ hoặc danh tính được quản lý) thay cho khóa bí mật máy khách.
 
 <Note>
-Cuộc trò chuyện nhóm bị chặn theo mặc định (`channels.msteams.groupPolicy: "allowlist"`). Để cho phép trả lời nhóm, đặt `channels.msteams.groupAllowFrom`, hoặc dùng `groupPolicy: "open"` để cho phép bất kỳ thành viên nào (có kiểm soát bằng mention).
+Cuộc trò chuyện nhóm bị chặn theo mặc định (`channels.msteams.groupPolicy: "allowlist"`). Để cho phép trả lời trong nhóm, hãy đặt `channels.msteams.groupAllowFrom`, hoặc sử dụng `groupPolicy: "open"` để cho phép bất kỳ thành viên nào (vẫn yêu cầu đề cập).
 </Note>
 
 ## Mục tiêu
 
-- Trò chuyện với OpenClaw qua DM, cuộc trò chuyện nhóm hoặc kênh của Teams.
-- Giữ định tuyến xác định: phản hồi luôn quay lại kênh nơi chúng đến.
-- Mặc định dùng hành vi kênh an toàn (yêu cầu mention trừ khi được cấu hình khác).
+- Trò chuyện với OpenClaw qua DM, cuộc trò chuyện nhóm hoặc kênh Teams.
+- Duy trì định tuyến xác định: câu trả lời luôn quay về kênh nơi chúng được nhận.
+- Mặc định sử dụng hành vi kênh an toàn (yêu cầu đề cập trừ khi được cấu hình khác).
 
 ## Ghi cấu hình
 
-Theo mặc định, Microsoft Teams được phép ghi các cập nhật cấu hình được kích hoạt bởi `/config set|unset` (yêu cầu `commands.config: true`).
+Theo mặc định, Microsoft Teams có thể ghi các cập nhật cấu hình do `/config set|unset` kích hoạt (yêu cầu `commands.config: true`).
 
-Tắt bằng:
+Vô hiệu hóa bằng:
 
 ```json5
 {
@@ -149,21 +140,21 @@ Tắt bằng:
 }
 ```
 
-## Kiểm soát truy cập (DM + nhóm)
+## Kiểm soát quyền truy cập (DM + nhóm)
 
-**Truy cập DM**
+**Quyền truy cập DM**
 
 - Mặc định: `channels.msteams.dmPolicy = "pairing"`. Người gửi không xác định bị bỏ qua cho đến khi được phê duyệt.
-- `channels.msteams.allowFrom` nên dùng AAD object ID ổn định hoặc nhóm truy cập người gửi tĩnh như `accessGroup:core-team`.
-- Không dựa vào khớp UPN/tên hiển thị cho allowlist - chúng có thể thay đổi. OpenClaw tắt khớp tên trực tiếp theo mặc định; bật rõ ràng bằng `channels.msteams.dangerouslyAllowNameMatching: true`.
-- Wizard có thể phân giải tên thành ID qua Microsoft Graph khi thông tin xác thực cho phép.
+- `channels.msteams.allowFrom` nên sử dụng ID đối tượng AAD ổn định hoặc các nhóm truy cập người gửi tĩnh như `accessGroup:core-team`.
+- Không dựa vào việc khớp UPN/tên hiển thị cho danh sách cho phép; chúng có thể thay đổi. OpenClaw vô hiệu hóa tính năng khớp tên trực tiếp theo mặc định; bật tính năng này bằng `channels.msteams.dangerouslyAllowNameMatching: true`.
+- Trình hướng dẫn có thể phân giải tên thành ID qua Microsoft Graph khi thông tin xác thực cho phép.
 
-**Truy cập nhóm**
+**Quyền truy cập nhóm**
 
-- Mặc định: `channels.msteams.groupPolicy = "allowlist"` (bị chặn trừ khi bạn thêm `groupAllowFrom`). Dùng `channels.defaults.groupPolicy` để ghi đè mặc định khi chưa đặt.
-- `channels.msteams.groupAllowFrom` kiểm soát người gửi hoặc nhóm truy cập người gửi tĩnh nào có thể kích hoạt trong cuộc trò chuyện nhóm/kênh (fallback về `channels.msteams.allowFrom`).
-- Đặt `groupPolicy: "open"` để cho phép bất kỳ thành viên nào (theo mặc định vẫn có kiểm soát bằng mention).
-- Để không cho phép **kênh nào**, đặt `channels.msteams.groupPolicy: "disabled"`.
+- Mặc định: `channels.msteams.groupPolicy = "allowlist"` (bị chặn trừ khi bạn thêm `groupAllowFrom`). `channels.defaults.groupPolicy` có thể ghi đè mặc định dùng chung khi chưa đặt `channels.msteams.groupPolicy`.
+- `channels.msteams.groupAllowFrom` kiểm soát người gửi hoặc nhóm truy cập người gửi tĩnh nào có thể kích hoạt trong cuộc trò chuyện nhóm/kênh (nếu không có thì dùng `channels.msteams.allowFrom`).
+- Đặt `groupPolicy: "open"` để cho phép bất kỳ thành viên nào (theo mặc định vẫn yêu cầu đề cập).
+- Để chặn **tất cả** các kênh, hãy đặt `channels.msteams.groupPolicy: "disabled"`.
 
 Ví dụ:
 
@@ -178,14 +169,13 @@ Ví dụ:
 }
 ```
 
-**Teams + allowlist kênh**
+**Danh sách cho phép nhóm + kênh**
 
-- Giới hạn phạm vi trả lời nhóm/kênh bằng cách liệt kê team và kênh trong `channels.msteams.teams`.
-- Khóa nên dùng Teams conversation ID ổn định từ liên kết Teams, không dùng tên hiển thị có thể thay đổi.
-- Khi `groupPolicy="allowlist"` và có allowlist team, chỉ các team/kênh được liệt kê mới được chấp nhận (có kiểm soát bằng mention).
-- Wizard cấu hình chấp nhận mục nhập `Team/Channel` và lưu chúng cho bạn.
-- Khi khởi động, OpenClaw phân giải tên team/kênh và tên trong allowlist người dùng thành ID (khi quyền Graph cho phép)
-  và ghi log ánh xạ; tên team/kênh chưa phân giải được giữ nguyên như đã nhập nhưng mặc định bị bỏ qua khi định tuyến trừ khi bật `channels.msteams.dangerouslyAllowNameMatching: true`.
+- Giới hạn phạm vi trả lời nhóm/kênh bằng cách liệt kê các nhóm và kênh trong `channels.msteams.teams`.
+- Sử dụng ID cuộc hội thoại Teams ổn định từ các liên kết Teams làm khóa, không dùng tên hiển thị có thể thay đổi (xem [ID nhóm và kênh](#team-and-channel-ids-common-gotcha)).
+- Khi có `groupPolicy="allowlist"` và danh sách cho phép nhóm, chỉ các nhóm/kênh được liệt kê mới được chấp nhận (yêu cầu đề cập).
+- Trình hướng dẫn cấu hình chấp nhận các mục `Team/Channel` và lưu chúng cho bạn.
+- Khi khởi động, OpenClaw phân giải tên nhóm/kênh và tên trong danh sách cho phép người dùng thành ID (khi quyền Graph cho phép) và ghi ánh xạ vào nhật ký. Các tên không phân giải được vẫn được giữ nguyên như đã nhập nhưng bị bỏ qua khi định tuyến trừ khi đặt `channels.msteams.dangerouslyAllowNameMatching: true`.
 
 Ví dụ:
 
@@ -209,66 +199,62 @@ Ví dụ:
 <details>
 <summary><strong>Thiết lập thủ công (không dùng Teams CLI)</strong></summary>
 
-Nếu bạn không thể dùng Teams CLI, bạn có thể thiết lập bot thủ công qua Azure Portal.
-
 ### Cách hoạt động
 
-1. Đảm bảo Plugin Microsoft Teams có sẵn (đi kèm trong các bản phát hành hiện tại).
-2. Tạo **Azure Bot** (App ID + secret + tenant ID).
-3. Xây dựng **gói ứng dụng Teams** tham chiếu bot và bao gồm các quyền RSC bên dưới.
-4. Tải lên/cài đặt ứng dụng Teams vào một team (hoặc phạm vi cá nhân cho DM).
-5. Cấu hình `msteams` trong `~/.openclaw/openclaw.json` (hoặc biến môi trường) và khởi động gateway.
-6. Gateway mặc định lắng nghe lưu lượng Webhook Bot Framework trên `/api/messages`.
+1. Đảm bảo Plugin Microsoft Teams khả dụng (đi kèm trong các bản phát hành hiện tại).
+2. Tạo một **Azure Bot** (App ID + khóa bí mật + tenant ID).
+3. Xây dựng một **gói ứng dụng Teams** tham chiếu đến bot, bao gồm các quyền RSC bên dưới.
+4. Tải lên/cài đặt ứng dụng Teams vào một nhóm (hoặc phạm vi cá nhân cho DM).
+5. Cấu hình `msteams` trong `~/.openclaw/openclaw.json` (hoặc các biến môi trường) và khởi động Gateway.
+6. Gateway lắng nghe lưu lượng Webhook Bot Framework trên `/api/messages` theo mặc định.
 
 ### Bước 1: Tạo Azure Bot
 
-1. Đi tới [Tạo Azure Bot](https://portal.azure.com/#create/Microsoft.AzureBot)
-2. Điền vào thẻ **Cơ bản**:
+1. Đi tới [Create Azure Bot](https://portal.azure.com/#create/Microsoft.AzureBot)
+2. Điền vào thẻ **Basics**:
 
-   | Trường             | Giá trị                                                 |
-   | ------------------ | ------------------------------------------------------- |
-   | **Bot handle**     | Tên bot của bạn, ví dụ `openclaw-msteams` (phải là duy nhất) |
-   | **Subscription**   | Chọn gói đăng ký Azure của bạn                          |
-   | **Resource group** | Tạo mới hoặc dùng nhóm hiện có                          |
-   | **Pricing tier**   | **Free** cho phát triển/kiểm thử                        |
-   | **Type of App**    | **Single Tenant** (khuyến nghị - xem ghi chú bên dưới)  |
-   | **Creation type**  | **Create new Microsoft App ID**                         |
+   | Trường             | Giá trị                                                    |
+   | ------------------ | ---------------------------------------------------------- |
+   | **Bot handle**     | Tên bot của bạn, ví dụ: `openclaw-msteams` (phải là duy nhất) |
+   | **Subscription**   | Chọn gói đăng ký Azure của bạn                              |
+   | **Resource group** | Tạo mới hoặc sử dụng nhóm hiện có                           |
+   | **Pricing tier**   | **Free** cho phát triển/kiểm thử                            |
+   | **Type of App**    | **Single Tenant** (khuyến nghị; xem ghi chú bên dưới)       |
+   | **Creation type**  | **Create new Microsoft App ID**                             |
 
 <Warning>
-Việc tạo bot đa tenant mới đã bị ngừng hỗ trợ sau 2025-07-31. Dùng **Single Tenant** cho bot mới.
+Việc tạo bot đa tenant mới đã ngừng được hỗ trợ sau 2025-07-31. Sử dụng **Single Tenant** cho bot mới.
 </Warning>
 
-3. Nhấp **Review + create** → **Create** (chờ khoảng 1-2 phút)
+3. Nhấp vào **Review + create**, sau đó nhấp vào **Create** (~1-2 phút).
 
 ### Bước 2: Lấy thông tin xác thực
 
-1. Đi tới tài nguyên Azure Bot của bạn → **Configuration**
-2. Sao chép **Microsoft App ID** → đây là `appId` của bạn
-3. Nhấp **Manage Password** → đi tới App Registration
-4. Trong **Certificates & secrets** → **New client secret** → sao chép **Value** → đây là `appPassword` của bạn
-5. Đi tới **Overview** → sao chép **Directory (tenant) ID** → đây là `tenantId` của bạn
+1. Tài nguyên Azure Bot → **Configuration** → sao chép **Microsoft App ID** (`appId` của bạn).
+2. **Manage Password** → App Registration → **Certificates & secrets** → **New client secret** → sao chép **Value** (`appPassword` của bạn).
+3. **Overview** → sao chép **Directory (tenant) ID** (`tenantId` của bạn).
 
-### Bước 3: Cấu hình Messaging Endpoint
+### Bước 3: Cấu hình điểm cuối nhắn tin
 
-1. Trong Azure Bot → **Configuration**
-2. Đặt **Messaging endpoint** thành URL Webhook của bạn:
+1. Azure Bot → **Configuration**.
+2. Đặt **Messaging endpoint**:
    - Production: `https://your-domain.com/api/messages`
-   - Phát triển cục bộ: Dùng tunnel (xem [Phát triển cục bộ](#local-development-tunneling) bên dưới)
+   - Phát triển cục bộ: sử dụng đường hầm (xem [Phát triển cục bộ](#local-development-tunneling))
 
 ### Bước 4: Bật kênh Teams
 
-1. Trong Azure Bot → **Channels**
-2. Nhấp **Microsoft Teams** → Configure → Save
-3. Chấp nhận Terms of Service
+1. Azure Bot → **Channels**.
+2. Nhấp vào **Microsoft Teams** → Configure → Save.
+3. Chấp nhận Điều khoản dịch vụ.
 
 ### Bước 5: Xây dựng manifest ứng dụng Teams
 
-- Bao gồm mục `bot` với `botId = <App ID>`.
+- Bao gồm một mục `bot` với `botId = <App ID>`.
 - Phạm vi: `personal`, `team`, `groupChat`.
 - `supportsFiles: true` (bắt buộc để xử lý tệp trong phạm vi cá nhân).
 - Thêm quyền RSC (xem [Quyền RSC](#current-teams-rsc-permissions-manifest)).
 - Tạo biểu tượng: `outline.png` (32x32) và `color.png` (192x192).
-- Nén cả ba tệp lại với nhau: `manifest.json`, `outline.png`, `color.png`.
+- Nén `manifest.json`, `outline.png` và `color.png` cùng nhau.
 
 ### Bước 6: Cấu hình OpenClaw
 
@@ -290,24 +276,22 @@ Biến môi trường: `MSTEAMS_APP_ID`, `MSTEAMS_APP_PASSWORD`, `MSTEAMS_TENANT
 
 ### Bước 7: Chạy Gateway
 
-Kênh Teams tự động khởi động khi Plugin có sẵn và cấu hình `msteams` tồn tại cùng thông tin xác thực.
+Kênh Teams tự động khởi động khi Plugin khả dụng và cấu hình `msteams` có thông tin xác thực.
 
 </details>
 
-## Xác thực liên kết (chứng chỉ cộng managed identity)
+## Xác thực liên kết (chứng chỉ kết hợp danh tính được quản lý)
 
-> Được thêm vào 2026.4.11
-
-Đối với triển khai production, OpenClaw hỗ trợ **xác thực liên kết** như một lựa chọn thay thế an toàn hơn cho client secret. Có hai phương thức:
+Đối với môi trường production, OpenClaw hỗ trợ **xác thực liên kết** qua `channels.msteams.authType: "federated"` như một lựa chọn thay thế cho khóa bí mật máy khách. Có hai phương thức:
 
 ### Tùy chọn A: Xác thực dựa trên chứng chỉ
 
-Dùng chứng chỉ PEM đã đăng ký với app registration Entra ID của bạn.
+Sử dụng chứng chỉ PEM đã đăng ký với bản đăng ký ứng dụng Entra ID của bạn.
 
 **Thiết lập:**
 
-1. Tạo hoặc lấy chứng chỉ (định dạng PEM kèm khóa riêng).
-2. Trong Entra ID → App Registration → **Certificates & secrets** → **Certificates** → Tải lên chứng chỉ công khai.
+1. Tạo hoặc lấy chứng chỉ (định dạng PEM kèm khóa riêng tư).
+2. Entra ID → App Registration → **Certificates & secrets** → **Certificates** → tải chứng chỉ công khai lên.
 
 **Cấu hình:**
 
@@ -333,22 +317,22 @@ Dùng chứng chỉ PEM đã đăng ký với app registration Entra ID của b�
 
 ### Tùy chọn B: Azure Managed Identity
 
-Dùng Azure Managed Identity để xác thực không mật khẩu. Cách này lý tưởng cho triển khai trên hạ tầng Azure (AKS, App Service, Azure VM) nơi có managed identity.
+Sử dụng Azure Managed Identity để xác thực không cần mật khẩu trên cơ sở hạ tầng Azure (AKS, App Service, máy ảo Azure).
 
 **Cách hoạt động:**
 
-1. Pod/VM bot có managed identity (do hệ thống gán hoặc do người dùng gán).
-2. **Thông tin xác thực danh tính liên kết** liên kết managed identity với app registration Entra ID.
-3. Khi chạy, OpenClaw dùng `@azure/identity` để lấy token từ endpoint Azure IMDS (`169.254.169.254`).
+1. Pod/VM của bot có một danh tính được quản lý (do hệ thống hoặc người dùng gán).
+2. Thông tin xác thực danh tính liên kết kết nối danh tính được quản lý với bản đăng ký ứng dụng Entra ID.
+3. Trong thời gian chạy, OpenClaw sử dụng `@azure/identity` để lấy token từ điểm cuối Azure IMDS.
 4. Token được chuyển cho Teams SDK để xác thực bot.
 
 **Điều kiện tiên quyết:**
 
-- Hạ tầng Azure đã bật managed identity (AKS workload identity, App Service, VM)
-- Thông tin xác thực danh tính liên kết được tạo trên app registration Entra ID
-- Truy cập mạng đến IMDS (`169.254.169.254:80`) từ pod/VM
+- Hạ tầng Azure đã bật danh tính được quản lý (danh tính khối lượng công việc AKS, App Service, VM).
+- Thông tin xác thực danh tính liên kết đã được tạo trên đăng ký ứng dụng Entra ID.
+- Quyền truy cập mạng tới IMDS (`169.254.169.254:80`) từ pod/VM.
 
-**Cấu hình (managed identity do hệ thống gán):**
+**Cấu hình (danh tính được quản lý do hệ thống gán):**
 
 ```json5
 {
@@ -365,23 +349,7 @@ Dùng Azure Managed Identity để xác thực không mật khẩu. Cách này l
 }
 ```
 
-**Cấu hình (danh tính được quản lý do người dùng gán):**
-
-```json5
-{
-  channels: {
-    msteams: {
-      enabled: true,
-      appId: "<APP_ID>",
-      tenantId: "<TENANT_ID>",
-      authType: "federated",
-      useManagedIdentity: true,
-      managedIdentityClientId: "<MI_CLIENT_ID>",
-      webhook: { port: 3978, path: "/api/messages" },
-    },
-  },
-}
-```
+**Cấu hình (danh tính được quản lý do người dùng gán):** thêm `managedIdentityClientId: "<MI_CLIENT_ID>"` vào khối trên.
 
 **Biến môi trường:**
 
@@ -389,11 +357,11 @@ Dùng Azure Managed Identity để xác thực không mật khẩu. Cách này l
 - `MSTEAMS_USE_MANAGED_IDENTITY=true`
 - `MSTEAMS_MANAGED_IDENTITY_CLIENT_ID=<client-id>` (chỉ dành cho danh tính do người dùng gán)
 
-### Thiết lập AKS Workload Identity
+### Thiết lập danh tính khối lượng công việc AKS
 
-Đối với các triển khai AKS dùng workload identity:
+Đối với các bản triển khai AKS sử dụng danh tính khối lượng công việc:
 
-1. **Bật workload identity** trên cụm AKS của bạn.
+1. **Bật danh tính khối lượng công việc** trên cụm AKS.
 2. **Tạo thông tin xác thực danh tính liên kết** trên đăng ký ứng dụng Entra ID:
 
    ```bash
@@ -416,7 +384,7 @@ Dùng Azure Managed Identity để xác thực không mật khẩu. Cách này l
        azure.workload.identity/client-id: "<APP_CLIENT_ID>"
    ```
 
-4. **Gắn nhãn pod** để tiêm workload identity:
+4. **Gắn nhãn pod** để chèn danh tính khối lượng công việc:
 
    ```yaml
    metadata:
@@ -424,21 +392,23 @@ Dùng Azure Managed Identity để xác thực không mật khẩu. Cách này l
        azure.workload.identity/use: "true"
    ```
 
-5. **Đảm bảo quyền truy cập mạng** tới IMDS (`169.254.169.254`) - nếu dùng NetworkPolicy, hãy thêm quy tắc đi ra cho phép lưu lượng tới `169.254.169.254/32` trên cổng 80.
+5. **Cho phép truy cập mạng** tới IMDS (`169.254.169.254`): nếu sử dụng NetworkPolicy, hãy thêm quy tắc lưu lượng đi ra cho `169.254.169.254/32` trên cổng 80.
 
 ### So sánh loại xác thực
 
-| Phương thức              | Cấu hình                                       | Ưu điểm                              | Nhược điểm                                      |
-| ------------------------ | --------------------------------------------- | ------------------------------------ | ----------------------------------------------- |
-| **Bí mật máy khách**     | `appPassword`                                 | Thiết lập đơn giản                   | Cần xoay vòng bí mật, kém an toàn hơn           |
-| **Chứng chỉ**            | `authType: "federated"` + `certificatePath`   | Không có bí mật dùng chung qua mạng  | Tốn công quản lý chứng chỉ                      |
-| **Managed Identity**     | `authType: "federated"` + `useManagedIdentity` | Không cần mật khẩu, không cần quản lý bí mật | Cần hạ tầng Azure                               |
+| Phương thức                    | Cấu hình                                       | Ưu điểm                                  | Nhược điểm                                      |
+| ----------------------------- | ---------------------------------------------- | ---------------------------------------- | ----------------------------------------------- |
+| **Bí mật máy khách**          | `appPassword`                             | Thiết lập đơn giản                       | Phải xoay vòng bí mật, kém an toàn hơn           |
+| **Chứng chỉ**                 | `authType: "federated"` + `certificatePath`        | Không truyền bí mật dùng chung qua mạng  | Tốn công quản lý chứng chỉ                       |
+| **Danh tính được quản lý**    | `authType: "federated"` + `useManagedIdentity`        | Không mật khẩu, không cần quản lý bí mật | Yêu cầu hạ tầng Azure                            |
 
-**Hành vi mặc định:** Khi `authType` không được đặt, OpenClaw mặc định dùng xác thực bí mật máy khách. Các cấu hình hiện có tiếp tục hoạt động mà không cần thay đổi.
+Có thể đặt `certificateThumbprint` cùng với `certificatePath`, nhưng hiện tại đường dẫn xác thực không đọc giá trị này; giá trị chỉ được chấp nhận để đảm bảo khả năng tương thích trong tương lai.
 
-## Phát triển cục bộ (đường hầm)
+**Mặc định:** khi chưa đặt `authType`, OpenClaw sử dụng xác thực bằng bí mật máy khách (`appPassword`). Các cấu hình hiện có tiếp tục hoạt động mà không cần thay đổi.
 
-Teams không thể truy cập `localhost`. Hãy dùng đường hầm phát triển cố định để URL của bạn giữ nguyên giữa các phiên:
+## Phát triển cục bộ (tạo đường hầm)
+
+Teams không thể truy cập `localhost`. Hãy sử dụng đường hầm phát triển cố định để URL duy trì ổn định giữa các phiên:
 
 ```bash
 # Thiết lập một lần:
@@ -449,15 +419,15 @@ devtunnel port create my-openclaw-bot -p 3978 --protocol auto
 devtunnel host my-openclaw-bot
 ```
 
-Các lựa chọn thay thế: `ngrok http 3978` hoặc `tailscale funnel 3978` (URL có thể thay đổi mỗi phiên).
+Các lựa chọn thay thế: `ngrok http 3978` hoặc `tailscale funnel 3978` (URL có thể thay đổi sau mỗi phiên).
 
-Nếu URL đường hầm của bạn thay đổi, hãy cập nhật endpoint:
+Nếu URL đường hầm thay đổi, hãy cập nhật điểm cuối:
 
 ```bash
 teams app update <teamsAppId> --endpoint "https://<new-url>/api/messages"
 ```
 
-## Kiểm thử Bot
+## Kiểm thử bot
 
 **Chạy chẩn đoán:**
 
@@ -465,72 +435,75 @@ teams app update <teamsAppId> --endpoint "https://<new-url>/api/messages"
 teams app doctor <teamsAppId>
 ```
 
-Kiểm tra đăng ký bot, ứng dụng AAD, manifest và cấu hình SSO trong một lượt.
+Kiểm tra đăng ký bot, ứng dụng AAD, tệp kê khai và cấu hình SSO trong một lượt.
 
 **Gửi tin nhắn kiểm thử:**
 
-1. Cài đặt ứng dụng Teams (dùng liên kết cài đặt từ `teams app get <id> --install-link`)
-2. Tìm bot trong Teams và gửi DM
-3. Kiểm tra nhật ký Gateway để xem hoạt động đến
+1. Cài đặt ứng dụng Teams (liên kết cài đặt từ `teams app get <id> --install-link`).
+2. Tìm bot trong Teams và gửi tin nhắn trực tiếp.
+3. Kiểm tra nhật ký Gateway để xem hoạt động đến.
 
 ## Biến môi trường
 
-Tất cả khóa cấu hình có thể được đặt qua biến môi trường thay thế:
+Có thể đặt các khóa cấu hình liên quan đến xác thực này qua biến môi trường thay vì `openclaw.json` (các khóa cấu hình khác, chẳng hạn như `groupPolicy` hoặc `historyLimit`, chỉ có thể đặt trong cấu hình):
 
-- `MSTEAMS_APP_ID`
-- `MSTEAMS_APP_PASSWORD`
-- `MSTEAMS_TENANT_ID`
-- `MSTEAMS_AUTH_TYPE` (tùy chọn: `"secret"` hoặc `"federated"`)
-- `MSTEAMS_CERTIFICATE_PATH` (liên kết + chứng chỉ)
-- `MSTEAMS_CERTIFICATE_THUMBPRINT` (tùy chọn, không bắt buộc cho xác thực)
-- `MSTEAMS_USE_MANAGED_IDENTITY` (liên kết + Managed Identity)
-- `MSTEAMS_MANAGED_IDENTITY_CLIENT_ID` (chỉ MI do người dùng gán)
+| Biến môi trường                      | Khóa cấu hình              | Ghi chú                                      |
+| ------------------------------------ | ------------------------- | -------------------------------------------- |
+| `MSTEAMS_APP_ID`                   | `appId`        |                                              |
+| `MSTEAMS_APP_PASSWORD`                   | `appPassword`        |                                              |
+| `MSTEAMS_TENANT_ID`                   | `tenantId`        |                                              |
+| `MSTEAMS_AUTH_TYPE`                   | `authType`        | `"secret"` hoặc `"federated"`   |
+| `MSTEAMS_CERTIFICATE_PATH`                   | `certificatePath`        | liên kết + chứng chỉ                          |
+| `MSTEAMS_CERTIFICATE_THUMBPRINT`                   | `certificateThumbprint`        | được chấp nhận, không bắt buộc để xác thực    |
+| `MSTEAMS_USE_MANAGED_IDENTITY`                   | `useManagedIdentity`        | liên kết + danh tính được quản lý             |
+| `MSTEAMS_MANAGED_IDENTITY_CLIENT_ID`                   | `managedIdentityClientId`        | chỉ dành cho danh tính do người dùng gán      |
 
-## Hành động thông tin thành viên
+## Thao tác thông tin thành viên
 
-OpenClaw cung cấp hành động `member-info` dựa trên Graph cho Microsoft Teams để các agent và tự động hóa có thể phân giải chi tiết thành viên kênh (tên hiển thị, email, vai trò) trực tiếp từ Microsoft Graph.
+OpenClaw cung cấp thao tác `member-info` dựa trên Graph cho Microsoft Teams, để các tác nhân và quy trình tự động hóa có thể phân giải thông tin danh sách thành viên đã xác minh cho một cuộc hội thoại được cấu hình.
 
 Yêu cầu:
 
-- Quyền RSC `Member.Read.Group` (đã có trong manifest được khuyến nghị)
-- Cho tra cứu chéo nhóm: quyền Ứng dụng Graph `User.Read.All` với sự đồng ý của quản trị viên
+- Quyền RSC `ChannelSettings.Read.Group` và `TeamMember.Read.Group` (đã có trong tệp kê khai được khuyến nghị).
 
-Hành động này được kiểm soát bởi `channels.msteams.actions.memberInfo` (mặc định: bật khi có thông tin xác thực Graph).
+Thao tác này khả dụng bất cứ khi nào thông tin xác thực Graph được cấu hình; không có nút bật/tắt `channels.msteams.actions.memberInfo` riêng.
+Tra cứu kênh tiêu chuẩn trả về danh tính tương ứng trong danh sách thành viên nhóm, tên hiển thị, email và vai trò.
+Trong tin nhắn trực tiếp hoặc cuộc trò chuyện nhóm hiện tại, thao tác có thể trả về ID người dùng ổn định của người gửi đáng tin cậy.
+Tra cứu thành viên trong kênh riêng tư/dùng chung và cuộc trò chuyện không phải hiện tại yêu cầu thêm quyền truy cập danh sách thành viên
+và bị đường cơ sở quyền mặc định từ chối.
 
 ## Ngữ cảnh lịch sử
 
-- `channels.msteams.historyLimit` kiểm soát số lượng tin nhắn kênh/nhóm gần đây được gói vào prompt.
-- Dự phòng về `messages.groupChat.historyLimit`. Đặt `0` để tắt (mặc định 50).
-- Lịch sử thread được lấy sẽ được lọc theo danh sách cho phép người gửi (`allowFrom` / `groupAllowFrom`), vì vậy việc gieo ngữ cảnh thread chỉ bao gồm tin nhắn từ người gửi được phép.
-- Ngữ cảnh tệp đính kèm được trích dẫn (`ReplyTo*` bắt nguồn từ HTML trả lời của Teams) hiện được chuyển tiếp như đã nhận.
-- Nói cách khác, danh sách cho phép kiểm soát ai có thể kích hoạt agent; hiện chỉ các đường dẫn ngữ cảnh bổ sung cụ thể được lọc.
-- Lịch sử DM có thể được giới hạn bằng `channels.msteams.dmHistoryLimit` (lượt người dùng). Ghi đè theo người dùng: `channels.msteams.dms["<user_id>"].historyLimit`.
+- `channels.msteams.historyLimit` kiểm soát số lượng tin nhắn kênh/nhóm gần đây được đưa vào lời nhắc. Giá trị dự phòng là `messages.groupChat.historyLimit`, sau đó mặc định là 50. Đặt `0` để tắt.
+- Lịch sử luồng đã tìm nạp được lọc theo danh sách người gửi được phép (`allowFrom` / `groupAllowFrom`), vì vậy việc khởi tạo ngữ cảnh luồng chỉ bao gồm tin nhắn từ những người gửi được phép.
+- Ngữ cảnh tệp đính kèm được trích dẫn (được phân tích từ HTML theo lược đồ Skype Reply trong chính các tệp đính kèm của thư trả lời) được truyền qua mà không lọc; hiện tại chỉ việc khởi tạo lịch sử luồng áp dụng bộ lọc danh sách người gửi được phép.
+- Có thể giới hạn lịch sử tin nhắn trực tiếp bằng `channels.msteams.dmHistoryLimit` (lượt của người dùng). Ghi đè theo từng người dùng: `channels.msteams.dms["<user_id>"].historyLimit`.
 
-## Quyền Teams RSC hiện tại (manifest)
+## Quyền RSC Teams hiện tại (tệp kê khai)
 
-Đây là các **quyền resourceSpecific hiện có** trong manifest ứng dụng Teams của chúng ta. Chúng chỉ áp dụng bên trong nhóm/cuộc trò chuyện nơi ứng dụng được cài đặt.
+Đây là các **quyền resourceSpecific hiện có** trong tệp kê khai ứng dụng Teams. Chúng chỉ áp dụng trong nhóm/cuộc trò chuyện nơi ứng dụng được cài đặt.
 
 **Đối với kênh (phạm vi nhóm):**
 
-- `ChannelMessage.Read.Group` (Application) - nhận tất cả tin nhắn kênh mà không cần @mention
-- `ChannelMessage.Send.Group` (Application)
-- `Member.Read.Group` (Application)
-- `Owner.Read.Group` (Application)
-- `ChannelSettings.Read.Group` (Application)
-- `TeamMember.Read.Group` (Application)
-- `TeamSettings.Read.Group` (Application)
+- `ChannelMessage.Read.Group` (Ứng dụng) - nhận tất cả tin nhắn kênh mà không cần @đề cập
+- `ChannelMessage.Send.Group` (Ứng dụng)
+- `Member.Read.Group` (Ứng dụng)
+- `Owner.Read.Group` (Ứng dụng)
+- `ChannelSettings.Read.Group` (Ứng dụng)
+- `TeamMember.Read.Group` (Ứng dụng)
+- `TeamSettings.Read.Group` (Ứng dụng)
 
 **Đối với cuộc trò chuyện nhóm:**
 
-- `ChatMessage.Read.Chat` (Application) - nhận tất cả tin nhắn trò chuyện nhóm mà không cần @mention
+- `ChatMessage.Read.Chat` (Ứng dụng) - nhận tất cả tin nhắn trò chuyện nhóm mà không cần @đề cập
 
-Để thêm quyền RSC qua Teams CLI:
+Thêm quyền RSC qua CLI Teams:
 
 ```bash
 teams app rsc add <teamsAppId> ChannelMessage.Read.Group --type Application
 ```
 
-## Manifest Teams ví dụ (đã biên tập)
+## Tệp kê khai Teams mẫu (đã biên tập)
 
 Ví dụ tối thiểu, hợp lệ với các trường bắt buộc. Thay thế ID và URL.
 
@@ -542,12 +515,12 @@ Ví dụ tối thiểu, hợp lệ với các trường bắt buộc. Thay thế
   id: "00000000-0000-0000-0000-000000000000",
   name: { short: "OpenClaw" },
   developer: {
-    name: "Your Org",
+    name: "Tổ chức của bạn",
     websiteUrl: "https://example.com",
     privacyUrl: "https://example.com/privacy",
     termsOfUseUrl: "https://example.com/terms",
   },
-  description: { short: "OpenClaw in Teams", full: "OpenClaw in Teams" },
+  description: { short: "OpenClaw trong Teams", full: "OpenClaw trong Teams" },
   icons: { outline: "outline.png", color: "color.png" },
   accentColor: "#5B6DEF",
   bots: [
@@ -580,37 +553,35 @@ Ví dụ tối thiểu, hợp lệ với các trường bắt buộc. Thay thế
 }
 ```
 
-### Lưu ý về manifest (các trường bắt buộc)
+### Lưu ý về tệp kê khai (các trường bắt buộc)
 
-- `bots[].botId` **phải** khớp với Azure Bot App ID.
-- `webApplicationInfo.id` **phải** khớp với Azure Bot App ID.
-- `bots[].scopes` phải bao gồm các bề mặt bạn dự định dùng (`personal`, `team`, `groupChat`).
+- `bots[].botId` **phải** khớp với ID ứng dụng Azure Bot.
+- `webApplicationInfo.id` **phải** khớp với ID ứng dụng Azure Bot.
+- `bots[].scopes` phải bao gồm các bề mặt bạn dự định sử dụng (`personal`, `team`, `groupChat`).
 - `bots[].supportsFiles: true` là bắt buộc để xử lý tệp trong phạm vi cá nhân.
-- `authorization.permissions.resourceSpecific` phải bao gồm đọc/gửi kênh nếu bạn muốn lưu lượng kênh.
+- `authorization.permissions.resourceSpecific` phải bao gồm quyền đọc/gửi kênh cho lưu lượng kênh.
 
 ### Cập nhật ứng dụng hiện có
 
-Để cập nhật ứng dụng Teams đã được cài đặt (ví dụ: để thêm quyền RSC):
-
 ```bash
-# Tải xuống, chỉnh sửa và tải lại manifest
+# Tải xuống, chỉnh sửa và tải lại tệp kê khai
 teams app manifest download <teamsAppId> manifest.json
 # Chỉnh sửa manifest.json cục bộ...
 teams app manifest upload manifest.json <teamsAppId>
 # Phiên bản được tự động tăng nếu nội dung thay đổi
 ```
 
-Sau khi cập nhật, hãy cài đặt lại ứng dụng trong từng nhóm để quyền mới có hiệu lực, và **thoát hoàn toàn rồi khởi chạy lại Teams** (không chỉ đóng cửa sổ) để xóa siêu dữ liệu ứng dụng đã lưu trong bộ nhớ đệm.
+Sau khi cập nhật, hãy cài đặt lại ứng dụng trong từng nhóm và **thoát hoàn toàn rồi khởi chạy lại Teams** (không chỉ đóng cửa sổ) để xóa siêu dữ liệu ứng dụng đã lưu vào bộ nhớ đệm.
 
 <details>
-<summary>Cập nhật manifest thủ công (không dùng CLI)</summary>
+<summary>Cập nhật tệp kê khai thủ công (không dùng CLI)</summary>
 
-1. Cập nhật `manifest.json` của bạn với các thiết lập mới
-2. **Tăng trường `version`** (ví dụ: `1.0.0` → `1.1.0`)
-3. **Nén lại** manifest cùng biểu tượng (`manifest.json`, `outline.png`, `color.png`)
-4. Tải lên tệp zip mới:
-   - **Teams Admin Center:** Ứng dụng Teams → Quản lý ứng dụng → tìm ứng dụng của bạn → Tải lên phiên bản mới
-   - **Sideload:** Trong Teams → Ứng dụng → Quản lý ứng dụng của bạn → Tải lên ứng dụng tùy chỉnh
+1. Cập nhật `manifest.json` với các thiết lập mới.
+2. **Tăng trường `version`** (ví dụ: `1.0.0` → `1.1.0`).
+3. **Nén lại thành tệp zip** tệp kê khai cùng các biểu tượng (`manifest.json`, `outline.png`, `color.png`).
+4. Tải tệp zip mới lên:
+   - **Teams Admin Center:** Teams apps → Manage apps → tìm ứng dụng của bạn → Upload new version.
+   - **Sideload:** Teams → Apps → Manage your apps → Upload a custom app.
 
 </details>
 
@@ -622,82 +593,101 @@ Hoạt động:
 
 - Đọc nội dung **văn bản** của tin nhắn kênh.
 - Gửi nội dung **văn bản** của tin nhắn kênh.
-- Nhận tệp đính kèm **cá nhân (DM)**.
+- Nhận tệp đính kèm trong phạm vi **cá nhân (tin nhắn trực tiếp)**.
 
-Không hoạt động:
+KHÔNG hoạt động:
 
-- **Nội dung hình ảnh hoặc tệp** trong kênh/nhóm (payload chỉ bao gồm HTML stub).
-- Tải xuống tệp đính kèm được lưu trong SharePoint/OneDrive.
-- Đọc lịch sử tin nhắn (ngoài sự kiện Webhook trực tiếp).
+- **Nội dung hình ảnh hoặc tệp** của kênh/nhóm (tải trọng chỉ bao gồm một đoạn HTML giữ chỗ).
+- Tải xuống tệp đính kèm được lưu trữ trong SharePoint/OneDrive.
+- Đọc lịch sử tin nhắn ngoài sự kiện Webhook trực tiếp.
 
-### Với **Teams RSC + quyền Ứng dụng Microsoft Graph**
+### Với **Teams RSC + quyền ứng dụng Microsoft Graph**
 
 Bổ sung:
 
-- Tải xuống nội dung được lưu trữ (hình ảnh dán vào tin nhắn).
-- Tải xuống tệp đính kèm được lưu trong SharePoint/OneDrive.
-- Đọc lịch sử tin nhắn kênh/trò chuyện qua Graph.
+- Tải xuống nội dung được lưu trữ (hình ảnh được dán vào tin nhắn).
+- Tải xuống tệp đính kèm được lưu trữ trong SharePoint/OneDrive.
+- Đọc lịch sử tin nhắn kênh/cuộc trò chuyện qua Graph.
 
 ### RSC so với Graph API
 
-| Khả năng                | Quyền RSC            | Graph API                           |
-| ----------------------- | -------------------- | ----------------------------------- |
-| **Tin nhắn thời gian thực** | Có (qua Webhook)     | Không (chỉ polling)                 |
-| **Tin nhắn lịch sử**    | Không                | Có (có thể truy vấn lịch sử)        |
-| **Độ phức tạp thiết lập** | Chỉ manifest ứng dụng | Cần sự đồng ý của quản trị viên + luồng token |
-| **Hoạt động ngoại tuyến** | Không (phải đang chạy) | Có (truy vấn bất kỳ lúc nào)        |
+| Khả năng                 | Quyền RSC               | Graph API                                      |
+| ------------------------ | ----------------------- | ---------------------------------------------- |
+| **Tin nhắn theo thời gian thực** | Có (qua webhook)        | Không (chỉ thăm dò)                            |
+| **Tin nhắn lịch sử**     | Không                   | Có (có thể truy vấn lịch sử)                   |
+| **Độ phức tạp khi thiết lập** | Chỉ cần manifest ứng dụng | Yêu cầu sự đồng ý của quản trị viên + luồng token |
+| **Hoạt động khi ngoại tuyến** | Không (phải đang chạy)  | Có (truy vấn bất cứ lúc nào)                   |
 
-**Tóm lại:** RSC dành cho lắng nghe thời gian thực; Graph API dành cho truy cập lịch sử. Để bắt kịp tin nhắn bị bỏ lỡ khi ngoại tuyến, bạn cần Graph API với `ChannelMessage.Read.All` (cần sự đồng ý của quản trị viên).
+**Kết luận:** RSC dùng để lắng nghe theo thời gian thực; Graph API dùng để truy cập lịch sử. Để truy xuất các tin nhắn bị bỏ lỡ khi ngoại tuyến, bạn cần Graph API với `ChannelMessage.Read.All` (yêu cầu sự đồng ý của quản trị viên).
 
-## Phương tiện + lịch sử có Graph (bắt buộc cho kênh)
+## Phương tiện + lịch sử hỗ trợ Graph
 
-Nếu bạn cần hình ảnh/tệp trong **kênh** hoặc muốn lấy **lịch sử tin nhắn**, bạn phải bật quyền Microsoft Graph và cấp sự đồng ý của quản trị viên.
+Chỉ bật các quyền ứng dụng Microsoft Graph cần thiết cho phạm vi Teams và dữ liệu bạn sử dụng:
 
-1. Trong **Đăng ký ứng dụng** Entra ID (Azure AD), thêm **quyền Ứng dụng** Microsoft Graph:
-   - `ChannelMessage.Read.All` (tệp đính kèm kênh + lịch sử)
-   - `Chat.Read.All` hoặc `ChatMessage.Read.All` (trò chuyện nhóm)
-2. **Cấp sự đồng ý của quản trị viên** cho tenant.
-3. Tăng **phiên bản manifest** của ứng dụng Teams, tải lên lại và **cài đặt lại ứng dụng trong Teams**.
-4. **Thoát hoàn toàn rồi khởi chạy lại Teams** để xóa siêu dữ liệu ứng dụng đã lưu trong bộ nhớ đệm.
+1. Entra ID (Azure AD) **App Registration** → thêm **Application permissions** của Graph:
+   - `ChannelMessage.Read.All` cho tệp đính kèm và lịch sử kênh.
+   - `Chat.Read.All` cho tệp đính kèm và lịch sử trò chuyện nhóm.
+   - `Files.Read.All` khi phải tải byte của tệp đính kèm xuống từ bộ nhớ SharePoint/OneDrive; các thiết lập chỉ dùng lịch sử không cần quyền này.
+2. **Grant admin consent** cho đối tượng thuê.
+3. Tăng **manifest version** của ứng dụng Teams, tải lên lại và **cài đặt lại ứng dụng trong Teams**.
+4. **Thoát hoàn toàn và khởi chạy lại Teams** để xóa siêu dữ liệu ứng dụng đã lưu trong bộ nhớ đệm.
 
-**Quyền bổ sung cho đề cập người dùng:** @mention người dùng hoạt động ngay cho người dùng trong cuộc trò chuyện. Tuy nhiên, nếu bạn muốn tìm kiếm động và đề cập người dùng **không ở trong cuộc trò chuyện hiện tại**, hãy thêm quyền `User.Read.All` (Application) và cấp sự đồng ý của quản trị viên.
+### Khôi phục tệp kênh/nhóm (`graphMediaFallback`)
 
-## Giới hạn đã biết
+Teams có thể xóa các dấu hiệu tệp khỏi hoạt động HTML được gửi đến bot. Trong trường hợp đó, hoạt động Bot Framework không thể phân biệt với một tin nhắn HTML thông thường; tham chiếu tệp đính kèm đầy đủ chỉ tồn tại trong bản sao tin nhắn trên Graph.
 
-### Thời gian chờ Webhook
+Bật phương án dự phòng sau khi cấp các quyền ở trên:
 
-Teams gửi tin nhắn qua HTTP Webhook. Nếu xử lý mất quá lâu (ví dụ: phản hồi LLM chậm), bạn có thể thấy:
+```json5
+{
+  channels: {
+    msteams: {
+      graphMediaFallback: true,
+    },
+  },
+}
+```
 
-- Gateway hết thời gian chờ
-- Teams thử gửi lại tin nhắn (gây trùng lặp)
-- Phản hồi bị bỏ
+Điều này chỉ áp dụng cho các kênh và cuộc trò chuyện nhóm. Nó thêm một lần tra cứu tin nhắn Graph mỗi khi một hoạt động HTML không tạo ra phương tiện có thể tải xuống trực tiếp, bao gồm cả tin nhắn thông thường hoặc tin nhắn chỉ chứa lượt đề cập. Giá trị mặc định là `false` để các bản cài đặt hiện có không tự động phát sinh thêm lưu lượng Graph hoặc lỗi quyền.
 
-OpenClaw xử lý việc này bằng cách trả về nhanh và chủ động gửi phản hồi, nhưng các phản hồi rất chậm vẫn có thể gây ra vấn đề.
+**Đề cập người dùng:** @mentions hoạt động ngay lập tức với những người dùng đã có trong cuộc trò chuyện. Để tự động tìm kiếm và đề cập những người dùng **không có trong cuộc trò chuyện hiện tại**, hãy thêm quyền `User.Read.All` (Application) và cấp sự đồng ý của quản trị viên.
+
+## Các hạn chế đã biết
+
+### Thời gian chờ webhook
+
+Teams gửi tin nhắn qua webhook HTTP. OpenClaw áp dụng thời gian chờ máy chủ HTTP
+cố định cho trình lắng nghe webhook đó: 30 giây không hoạt động, tổng thời gian yêu cầu là 30 giây và 15 giây
+để nhận tiêu đề. Việc làm giàu ngữ cảnh và phương tiện đầu vào tùy chọn dùng chung
+ngân sách 10 giây. SDK trả về sau khi hoạt động thô được nối thêm một cách bền vững;
+lượt chạy của tác nhân được xử lý độc lập và chủ động gửi phản hồi. Nếu quá trình
+xử lý yêu cầu hoặc tiếp nhận bền vững vượt quá cửa sổ vận chuyển, Teams có thể thử gửi lại
+hoạt động và dấu mốc loại bỏ ở đầu vào sẽ từ chối ID sự kiện bị lặp lại.
 
 ### Hỗ trợ đám mây Teams và URL dịch vụ
 
-Đường dẫn Teams dựa trên SDK này đã được xác thực trực tiếp cho đám mây công cộng Microsoft Teams.
+Đường dẫn Teams dựa trên SDK này được xác thực trực tiếp cho đám mây công cộng Microsoft Teams.
 
-Các phản hồi đến sử dụng ngữ cảnh lượt Teams SDK đến. Các thao tác chủ động ngoài ngữ cảnh - gửi, chỉnh sửa, xóa, thẻ, cuộc thăm dò, thông báo chấp thuận tệp và các phản hồi chạy lâu được đưa vào hàng đợi - sử dụng `serviceUrl` của tham chiếu cuộc trò chuyện đã lưu. Đám mây công cộng mặc định dùng môi trường đám mây công cộng Teams SDK và cho phép các tham chiếu đã lưu trên máy chủ Teams Connector công cộng: `https://smba.trafficmanager.net/`.
+Các phản hồi đầu vào sử dụng ngữ cảnh lượt chạy SDK Teams của tin nhắn đến. Các thao tác chủ động ngoài ngữ cảnh — gửi, chỉnh sửa, xóa, thẻ, cuộc thăm dò, tin nhắn đồng ý nhận tệp và phản hồi chạy dài trong hàng đợi — sử dụng tham chiếu cuộc trò chuyện đã lưu `serviceUrl`. Đám mây công cộng mặc định dùng môi trường đám mây công cộng của SDK Teams và cho phép các tham chiếu đã lưu trên máy chủ Teams Connector công cộng: `https://smba.trafficmanager.net/`.
 
-Đám mây công cộng là mặc định. Bạn không cần đặt `channels.msteams.cloud` hoặc `channels.msteams.serviceUrl` cho bot đám mây công cộng thông thường.
+Đám mây công cộng là mặc định. Bạn không cần đặt `channels.msteams.cloud` hoặc `channels.msteams.serviceUrl` cho các bot đám mây công cộng thông thường.
 
-Đối với các đám mây Teams không công cộng, hãy đặt `cloud` và ranh giới chủ động tương ứng khi Microsoft công bố:
+Đối với các đám mây Teams không công khai, hãy đặt `cloud` và ranh giới chủ động tương ứng khi Microsoft công bố:
 
-- `channels.msteams.cloud` chọn preset đám mây Teams SDK cho xác thực, xác thực JWT, dịch vụ token và phạm vi Graph.
-- `channels.msteams.serviceUrl` chọn ranh giới endpoint Bot Connector được dùng để xác thực các tham chiếu cuộc trò chuyện đã lưu trước khi gửi, chỉnh sửa, xóa, thẻ, cuộc thăm dò, thông báo chấp thuận tệp và phản hồi chạy lâu được đưa vào hàng đợi theo cách chủ động. Trường này là bắt buộc cho các đám mây SDK USGov và DoD. Với China/21Vianet, OpenClaw dùng preset SDK `China` và chỉ chấp nhận URL dịch vụ đã lưu/đã cấu hình trên các máy chủ kênh Azure China Bot Framework.
+- `channels.msteams.cloud` chọn cấu hình đặt sẵn đám mây SDK Teams cho việc xác thực, xác thực JWT, dịch vụ token và phạm vi Graph.
+- `channels.msteams.serviceUrl` chọn ranh giới điểm cuối Bot Connector dùng để xác thực các tham chiếu cuộc trò chuyện đã lưu trước khi thực hiện các thao tác chủ động như gửi, chỉnh sửa, xóa, thẻ, cuộc thăm dò, tin nhắn đồng ý nhận tệp và phản hồi chạy dài trong hàng đợi. Thiết lập này là bắt buộc đối với các đám mây SDK USGov và DoD. Đối với China/21Vianet, OpenClaw sử dụng cấu hình đặt sẵn `China` của SDK và chỉ chấp nhận URL dịch vụ đã lưu/được cấu hình trên các máy chủ kênh Azure China Bot Framework.
 
-Microsoft công bố các endpoint Bot Connector chủ động toàn cầu trong phần [Tạo cuộc trò chuyện](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/send-proactive-messages?tabs=dotnet#create-the-conversation) của tài liệu nhắn tin chủ động Teams. Hãy dùng `serviceUrl` của hoạt động đến khi có sẵn; nếu bạn cần một endpoint chủ động toàn cầu, hãy dùng bảng của Microsoft.
+Microsoft công bố các điểm cuối Bot Connector chủ động toàn cầu trong phần [Tạo cuộc trò chuyện](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/send-proactive-messages?tabs=dotnet#create-the-conversation) của tài liệu nhắn tin chủ động Teams. Sử dụng `serviceUrl` của hoạt động đến khi có; nếu không, hãy sử dụng bảng của Microsoft bên dưới.
 
-| Môi trường Teams | Cấu hình OpenClaw                                         | `serviceUrl` chủ động                            |
-| ----------------- | ----------------------------------------------------------- | -------------------------------------------------- |
-| Công cộng            | không cần cấu hình cloud/serviceUrl                           | `https://smba.trafficmanager.net/teams`            |
-| GCC               | đặt `serviceUrl`; không có preset đám mây Teams SDK riêng | `https://smba.infra.gcc.teams.microsoft.com/teams` |
-| GCC High          | `cloud: "USGov"` + `serviceUrl`                             | `https://smba.infra.gov.teams.microsoft.us/teams`  |
-| DoD               | `cloud: "USGovDoD"` + `serviceUrl`                          | `https://smba.infra.dod.teams.microsoft.us/teams`  |
-| China/21Vianet    | `cloud: "China"`                                            | dùng `serviceUrl` của hoạt động đến           |
+| Môi trường Teams | Cấu hình OpenClaw                                             | `serviceUrl` chủ động                             |
+| ---------------- | ------------------------------------------------------------- | ------------------------------------------------------- |
+| Công cộng        | không cần cấu hình cloud/serviceUrl                           | `https://smba.trafficmanager.net/teams`                                      |
+| GCC              | đặt `serviceUrl`; không có cấu hình đặt sẵn đám mây SDK Teams riêng | `https://smba.infra.gcc.teams.microsoft.com/teams` |
+| GCC High         | `cloud: "USGov"` + `serviceUrl`                      | `https://smba.infra.gov.teams.microsoft.us/teams`                                      |
+| DoD              | `cloud: "USGovDoD"` + `serviceUrl`                      | `https://smba.infra.dod.teams.microsoft.us/teams`                                      |
+| China/21Vianet   | `cloud: "China"`                                            | sử dụng `serviceUrl` của hoạt động đến            |
 
-Ví dụ cho GCC, nơi Microsoft tài liệu hóa một URL dịch vụ chủ động riêng nhưng Teams SDK không cung cấp preset đám mây GCC riêng:
+Ví dụ cho GCC, nơi Microsoft ghi nhận một URL dịch vụ chủ động riêng nhưng SDK Teams không cung cấp cấu hình đặt sẵn đám mây GCC riêng:
 
 ```json
 {
@@ -722,78 +712,82 @@ Ví dụ cho GCC High:
 }
 ```
 
-`channels.msteams.serviceUrl` bị giới hạn ở các máy chủ Microsoft Teams Bot Connector được hỗ trợ. Khi một URL dịch vụ được cấu hình, OpenClaw kiểm tra rằng `serviceUrl` của cuộc trò chuyện đã lưu sử dụng cùng máy chủ trước khi các thao tác gửi, chỉnh sửa, xóa, thẻ, cuộc thăm dò hoặc phản hồi chạy lâu được đưa vào hàng đợi theo cách chủ động chạy. Với cấu hình đám mây công cộng mặc định, OpenClaw đóng theo hướng an toàn nếu một cuộc trò chuyện đã lưu trỏ ra ngoài máy chủ Teams Connector công cộng. Hãy nhận một tin nhắn mới từ cuộc trò chuyện sau khi thay đổi thiết lập đám mây/URL dịch vụ để tham chiếu cuộc trò chuyện đã lưu được cập nhật.
+`channels.msteams.serviceUrl` bị giới hạn ở các máy chủ Microsoft Teams Bot Connector được hỗ trợ. Khi URL dịch vụ được cấu hình, OpenClaw kiểm tra rằng `serviceUrl` của cuộc trò chuyện đã lưu sử dụng cùng một máy chủ trước khi thực hiện các thao tác chủ động như gửi, chỉnh sửa, xóa, thẻ, cuộc thăm dò hoặc phản hồi chạy dài trong hàng đợi. Với cấu hình đám mây công cộng mặc định, OpenClaw sẽ đóng an toàn nếu một cuộc trò chuyện đã lưu trỏ ra ngoài máy chủ Teams Connector công cộng. Hãy nhận một tin nhắn mới từ cuộc trò chuyện sau khi thay đổi cài đặt đám mây/URL dịch vụ để tham chiếu cuộc trò chuyện đã lưu được cập nhật.
 
-China/21Vianet không có URL `smba` chủ động toàn cầu riêng trong bảng endpoint chủ động Teams của Microsoft. Hãy cấu hình `cloud: "China"` để Teams SDK dùng các endpoint xác thực, token và JWT của Azure China. Khi đó, gửi chủ động yêu cầu một tham chiếu cuộc trò chuyện đã lưu từ một hoạt động Teams China đến, hoặc một URL dịch vụ được cấu hình rõ ràng, trên ranh giới kênh Azure China Bot Framework (`*.botframework.azure.cn`). Các trình trợ giúp Teams dựa trên Graph hiện bị tắt cho `cloud: "China"` cho đến khi OpenClaw định tuyến yêu cầu Graph qua endpoint Azure China Graph.
+China/21Vianet không có URL `smba` chủ động toàn cầu riêng trong bảng điểm cuối chủ động Teams của Microsoft. Cấu hình `cloud: "China"` để SDK Teams sử dụng các điểm cuối xác thực, token và JWT của Azure China. Sau đó, các thao tác gửi chủ động yêu cầu một tham chiếu cuộc trò chuyện đã lưu từ hoạt động China Teams đến hoặc một URL dịch vụ được cấu hình rõ ràng trên ranh giới kênh Azure China Bot Framework (`*.botframework.azure.cn`). Các trình trợ giúp Teams dựa trên Graph bị vô hiệu hóa đối với `cloud: "China"` cho đến khi OpenClaw định tuyến các yêu cầu Graph qua điểm cuối Azure China Graph.
 
 ### Định dạng
 
-Markdown của Teams bị giới hạn hơn Slack hoặc Discord:
+Markdown của Teams bị hạn chế hơn Slack hoặc Discord:
 
-- Định dạng cơ bản hoạt động: **đậm**, _nghiêng_, `code`, liên kết
-- Markdown phức tạp (bảng, danh sách lồng nhau) có thể không hiển thị đúng
-- Adaptive Cards được hỗ trợ cho cuộc thăm dò và gửi bản trình bày ngữ nghĩa (xem bên dưới)
+- Định dạng cơ bản hoạt động: **in đậm**, _in nghiêng_, `code`, liên kết.
+- Markdown phức tạp (bảng, danh sách lồng nhau) có thể không hiển thị chính xác.
+- Adaptive Cards được hỗ trợ cho các cuộc thăm dò và thao tác gửi trình bày ngữ nghĩa (xem bên dưới).
 
 ## Cấu hình
 
-Các thiết lập chính (xem `/gateway/configuration` để biết các mẫu kênh dùng chung):
+Các cài đặt chính (xem [/gateway/configuration](/vi/gateway/configuration) để biết các mẫu kênh dùng chung):
 
 - `channels.msteams.enabled`: bật/tắt kênh.
-- `channels.msteams.appId`, `channels.msteams.appPassword`, `channels.msteams.tenantId`: thông tin xác thực bot.
-- `channels.msteams.cloud`: môi trường đám mây Teams SDK (`Public`, `USGov`, `USGovDoD` hoặc `China`; mặc định `Public`). Đặt trường này cùng `serviceUrl` cho các đám mây SDK USGov/DoD; China dùng preset SDK và các tham chiếu cuộc trò chuyện Azure China Bot Framework đã lưu, với các trình trợ giúp dựa trên Graph bị tắt cho đến khi định tuyến Azure China Graph được triển khai.
-- `channels.msteams.serviceUrl`: ranh giới URL dịch vụ Bot Connector cho các thao tác chủ động SDK. Đám mây công cộng dùng mặc định SDK; đặt trường này cho GCC (`https://smba.infra.gcc.teams.microsoft.com/teams`), GCC High hoặc DoD. China chấp nhận máy chủ kênh Azure China Bot Framework khi tham chiếu cuộc trò chuyện đã lưu đến từ Teams do 21Vianet vận hành.
-- `channels.msteams.webhook.port` (mặc định `3978`)
-- `channels.msteams.webhook.path` (mặc định `/api/messages`)
-- `channels.msteams.dmPolicy`: `pairing | allowlist | open | disabled` (mặc định: pairing)
+- `channels.msteams.appId`, `channels.msteams.appPassword`, `channels.msteams.tenantId`: thông tin xác thực của bot.
+- `channels.msteams.cloud`: môi trường đám mây của Teams SDK (`Public`, `USGov`, `USGovDoD` hoặc `China`; mặc định `Public`). Đặt bằng `serviceUrl` cho các đám mây SDK USGov/DoD; Trung Quốc sử dụng cấu hình đặt sẵn của SDK và các tham chiếu hội thoại Azure China Bot Framework đã lưu, trong đó các trình trợ giúp dựa trên Graph bị tắt cho đến khi tính năng định tuyến Azure China Graph được phát hành.
+- `channels.msteams.serviceUrl`: ranh giới URL dịch vụ Bot Connector cho các thao tác chủ động của SDK. Đám mây công cộng sử dụng giá trị mặc định của SDK; hãy đặt cho GCC (`https://smba.infra.gcc.teams.microsoft.com/teams`), GCC High hoặc DoD. Trung Quốc chấp nhận các máy chủ kênh Azure China Bot Framework khi tham chiếu hội thoại đã lưu đến từ Teams do 21Vianet vận hành.
+- `channels.msteams.webhook.port` (mặc định `3978`).
+- `channels.msteams.webhook.path` (mặc định `/api/messages`).
+- `channels.msteams.dmPolicy`: `pairing | allowlist | open | disabled` (mặc định `pairing`).
 - `channels.msteams.allowFrom`: danh sách cho phép DM (khuyến nghị dùng ID đối tượng AAD). Trình hướng dẫn phân giải tên thành ID trong quá trình thiết lập khi có quyền truy cập Graph.
-- `channels.msteams.dangerouslyAllowNameMatching`: công tắc phá kính để bật lại việc khớp UPN/tên hiển thị có thể thay đổi và định tuyến trực tiếp theo tên nhóm/kênh.
-- `channels.msteams.textChunkLimit`: kích thước đoạn văn bản gửi đi.
-- `channels.msteams.chunkMode`: `length` (mặc định) hoặc `newline` để chia theo dòng trống (ranh giới đoạn văn) trước khi chia theo độ dài.
-- `channels.msteams.mediaAllowHosts`: danh sách cho phép cho máy chủ tệp đính kèm đến (mặc định là các miền Microsoft/Teams).
-- `channels.msteams.mediaAuthAllowHosts`: danh sách cho phép để gắn tiêu đề Authorization khi thử lại media (mặc định là máy chủ Graph + Bot Framework).
-- `channels.msteams.requireMention`: yêu cầu @mention trong kênh/nhóm (mặc định true).
-- `channels.msteams.replyStyle`: `thread | top-level` (xem [Kiểu phản hồi](#reply-style-threads-vs-posts)).
+- `channels.msteams.dangerouslyAllowNameMatching`: nút chuyển khẩn cấp để bật lại việc đối sánh UPN/tên hiển thị có thể thay đổi và định tuyến trực tiếp theo tên nhóm/kênh.
+- `channels.msteams.textChunkLimit`: kích thước đoạn văn bản gửi đi tính bằng ký tự (mặc định `4000` và bị giới hạn cứng ở `4000` bất kể giá trị cấu hình cao hơn).
+- `channels.msteams.streaming.chunkMode`: `length` (mặc định) hoặc `newline` để tách tại các dòng trống (ranh giới đoạn văn) trước khi chia đoạn theo độ dài.
+- `channels.msteams.mediaAllowHosts`: danh sách cho phép các máy chủ tệp đính kèm gửi đến (mặc định là các miền Microsoft/Teams: Graph, SharePoint/OneDrive, Teams CDN, Bot Framework, Azure Media Services).
+- `channels.msteams.mediaAuthAllowHosts`: danh sách cho phép đính kèm tiêu đề Authorization khi thử tải lại phương tiện (mặc định là các máy chủ Graph + Bot Framework).
+- `channels.msteams.graphMediaFallback`: chọn sử dụng tính năng tra cứu tin nhắn Graph khi HTML của kênh/nhóm không có dấu tệp (mặc định `false`; xem [Khôi phục tệp của kênh/nhóm](#channelgroup-file-recovery-graphmediafallback)).
+- `channels.msteams.mediaMaxMb`: ghi đè giới hạn kích thước phương tiện theo từng kênh, tính bằng MB. Dùng giá trị dự phòng `agents.defaults.mediaMaxMb` khi chưa đặt.
+- `channels.msteams.requireMention`: yêu cầu @đề cập trong kênh/nhóm (mặc định `true`).
+- `channels.msteams.replyStyle`: `thread | top-level` (xem [Kiểu trả lời](#reply-style-threads-vs-posts)).
 - `channels.msteams.teams.<teamId>.replyStyle`: ghi đè theo từng nhóm.
 - `channels.msteams.teams.<teamId>.requireMention`: ghi đè theo từng nhóm.
-- `channels.msteams.teams.<teamId>.tools`: các ghi đè chính sách công cụ mặc định theo từng nhóm (`allow`/`deny`/`alsoAllow`) được dùng khi thiếu ghi đè kênh.
-- `channels.msteams.teams.<teamId>.toolsBySender`: các ghi đè chính sách công cụ mặc định theo từng người gửi trong từng nhóm (hỗ trợ wildcard `"*"`).
+- `channels.msteams.teams.<teamId>.tools`: các ghi đè chính sách công cụ mặc định theo từng nhóm (`allow`/`deny`/`alsoAllow`) được dùng khi thiếu ghi đè cho kênh.
+- `channels.msteams.teams.<teamId>.toolsBySender`: các ghi đè chính sách công cụ mặc định theo từng nhóm và từng người gửi (hỗ trợ ký tự đại diện `"*"`).
 - `channels.msteams.teams.<teamId>.channels.<conversationId>.replyStyle`: ghi đè theo từng kênh.
 - `channels.msteams.teams.<teamId>.channels.<conversationId>.requireMention`: ghi đè theo từng kênh.
 - `channels.msteams.teams.<teamId>.channels.<conversationId>.tools`: các ghi đè chính sách công cụ theo từng kênh (`allow`/`deny`/`alsoAllow`).
-- `channels.msteams.teams.<teamId>.channels.<conversationId>.toolsBySender`: các ghi đè chính sách công cụ theo từng người gửi trong từng kênh (hỗ trợ wildcard `"*"`).
-- Khóa `toolsBySender` nên dùng tiền tố rõ ràng:
-  `channel:`, `id:`, `e164:`, `username:`, `name:` (các khóa cũ không có tiền tố vẫn chỉ ánh xạ tới `id:`).
-- `channels.msteams.actions.memberInfo`: bật hoặc tắt hành động thông tin thành viên dựa trên Graph (mặc định: bật khi có thông tin xác thực Graph).
+- `channels.msteams.teams.<teamId>.channels.<conversationId>.toolsBySender`: các ghi đè chính sách công cụ theo từng kênh và từng người gửi (hỗ trợ ký tự đại diện `"*"`).
+- `toolsBySender` nên sử dụng các tiền tố rõ ràng cho khóa: `channel:`, `id:`, `e164:`, `username:`, `name:` (các khóa cũ không có tiền tố vẫn chỉ ánh xạ tới `id:`).
 - `channels.msteams.authType`: loại xác thực - `"secret"` (mặc định) hoặc `"federated"`.
-- `channels.msteams.certificatePath`: đường dẫn đến tệp chứng chỉ PEM (xác thực liên kết + chứng chỉ).
-- `channels.msteams.certificateThumbprint`: dấu vân tay chứng chỉ (tùy chọn, không bắt buộc cho xác thực).
+- `channels.msteams.certificatePath`: đường dẫn tới tệp chứng chỉ PEM (xác thực liên kết + chứng chỉ).
+- `channels.msteams.certificateThumbprint`: dấu vân tay chứng chỉ; được chấp nhận nhưng không bắt buộc để xác thực.
 - `channels.msteams.useManagedIdentity`: bật xác thực danh tính được quản lý (chế độ liên kết).
 - `channels.msteams.managedIdentityClientId`: ID máy khách cho danh tính được quản lý do người dùng gán.
 - `channels.msteams.sharePointSiteId`: ID site SharePoint để tải tệp lên trong cuộc trò chuyện nhóm/kênh (xem [Gửi tệp trong cuộc trò chuyện nhóm](#sending-files-in-group-chats)).
+- `channels.msteams.welcomeCard`, `channels.msteams.groupWelcomeCard`, `channels.msteams.promptStarters`: Adaptive Card chào mừng được hiển thị trong lần liên hệ DM/nhóm đầu tiên và các nút lời nhắc đề xuất của thẻ.
+- `channels.msteams.responsePrefix`: văn bản được thêm vào đầu các câu trả lời gửi đi.
+- `channels.msteams.feedbackEnabled` (mặc định `true`), `channels.msteams.feedbackReflection` (mặc định `true`), `channels.msteams.feedbackReflectionCooldownMs`: phản hồi thích/không thích đối với câu trả lời và bước tiếp nối tự đánh giá khi nhận phản hồi tiêu cực.
+- `channels.msteams.sso`, `channels.msteams.delegatedAuth`: kết nối OAuth của Bot Framework và các phạm vi Graph được ủy quyền cho luồng dựa trên SSO; `sso.enabled: true` yêu cầu `sso.connectionName`.
 
 ## Định tuyến và phiên
 
 - Khóa phiên tuân theo định dạng tác nhân tiêu chuẩn (xem [/concepts/session](/vi/concepts/session)):
   - Tin nhắn trực tiếp dùng chung phiên chính (`agent:<agentId>:<mainKey>`).
-  - Tin nhắn kênh/nhóm dùng id cuộc trò chuyện:
+  - Tin nhắn kênh/nhóm sử dụng ID hội thoại:
     - `agent:<agentId>:msteams:channel:<conversationId>`
     - `agent:<agentId>:msteams:group:<conversationId>`
 
-## Kiểu phản hồi: luồng so với bài đăng
+## Kiểu trả lời: luồng so với bài đăng
 
-Teams gần đây đã giới thiệu hai kiểu giao diện kênh trên cùng một mô hình dữ liệu bên dưới:
+Teams có hai kiểu giao diện người dùng cho kênh trên cùng một mô hình dữ liệu nền tảng:
 
-| Kiểu                    | Mô tả                                               | `replyStyle` khuyến nghị |
-| ------------------------ | --------------------------------------------------------- | ------------------------ |
-| **Bài đăng** (cổ điển)      | Tin nhắn xuất hiện dưới dạng thẻ với phản hồi theo luồng bên dưới | `thread` (mặc định)       |
-| **Luồng** (giống Slack) | Tin nhắn chảy tuyến tính, giống Slack hơn                   | `top-level`              |
+| Kiểu                     | Mô tả                                                      | `replyStyle` được khuyến nghị |
+| ------------------------ | ---------------------------------------------------------- | ------------------------ |
+| **Bài đăng** (cổ điển)   | Tin nhắn xuất hiện dưới dạng thẻ với các câu trả lời theo luồng bên dưới | `thread` (mặc định)       |
+| **Luồng** (giống Slack)  | Tin nhắn chạy tuyến tính, tương tự Slack hơn                | `top-level`              |
 
-**Vấn đề:** API Teams không cho biết kênh đang dùng kiểu giao diện nào. Nếu bạn dùng sai `replyStyle`:
+**Vấn đề:** API Teams không cho biết kênh sử dụng kiểu giao diện người dùng nào. Nếu sử dụng sai `replyStyle`:
 
-- `thread` trong kênh kiểu Luồng → phản hồi xuất hiện lồng nhau một cách khó nhìn
-- `top-level` trong kênh kiểu Bài đăng → phản hồi xuất hiện dưới dạng các bài đăng cấp cao riêng biệt thay vì trong luồng
+- `thread` trong kênh kiểu Luồng → câu trả lời bị lồng vào nhau một cách vụng về.
+- `top-level` trong kênh kiểu Bài đăng → câu trả lời xuất hiện dưới dạng các bài đăng cấp cao nhất riêng biệt thay vì nằm trong luồng.
 
-**Giải pháp:** Cấu hình `replyStyle` theo từng kênh dựa trên cách kênh được thiết lập:
+**Giải pháp:** cấu hình `replyStyle` theo từng kênh dựa trên cách thiết lập kênh:
 
 ```json5
 {
@@ -816,71 +810,71 @@ Teams gần đây đã giới thiệu hai kiểu giao diện kênh trên cùng m
 
 ### Thứ tự ưu tiên phân giải
 
-Khi bot gửi phản hồi vào một kênh, `replyStyle` được phân giải từ ghi đè cụ thể nhất xuống mặc định. Giá trị đầu tiên không phải `undefined` sẽ thắng:
+Khi bot gửi câu trả lời vào một kênh, `replyStyle` được phân giải từ ghi đè cụ thể nhất xuống giá trị mặc định. Giá trị đầu tiên không phải `undefined` sẽ được sử dụng:
 
-1. **Theo từng kênh** — `channels.msteams.teams.<teamId>.channels.<conversationId>.replyStyle`
-2. **Theo từng nhóm** — `channels.msteams.teams.<teamId>.replyStyle`
-3. **Toàn cục** — `channels.msteams.replyStyle`
-4. **Mặc định ngầm định** — suy ra từ `requireMention`:
+1. **Theo từng kênh** - `channels.msteams.teams.<teamId>.channels.<conversationId>.replyStyle`
+2. **Theo từng nhóm** - `channels.msteams.teams.<teamId>.replyStyle`
+3. **Toàn cục** - `channels.msteams.replyStyle`
+4. **Mặc định ngầm định** - được suy ra từ `requireMention`:
    - `requireMention: true` → `thread`
    - `requireMention: false` → `top-level`
 
-Nếu bạn đặt `requireMention: false` toàn cục mà không có `replyStyle` rõ ràng, các lượt nhắc trong kênh kiểu Bài đăng sẽ hiển thị dưới dạng bài đăng cấp cao ngay cả khi tin nhắn đến là phản hồi trong luồng. Ghim `replyStyle: "thread"` ở cấp toàn cục, nhóm hoặc kênh để tránh bất ngờ.
+Nếu đặt `requireMention: false` toàn cục mà không có `replyStyle` rõ ràng, các lượt đề cập trong kênh kiểu Bài đăng sẽ xuất hiện dưới dạng bài đăng cấp cao nhất ngay cả khi tin nhắn gửi đến là câu trả lời trong luồng. Cố định `replyStyle: "thread"` ở cấp toàn cục, nhóm hoặc kênh để tránh kết quả ngoài dự kiến.
 
-### Giữ nguyên ngữ cảnh luồng
+Đối với lượt gửi chủ động vào hội thoại kênh đã lưu (câu trả lời cho lệnh gọi công cụ trong hàng đợi, tác nhân chạy lâu), quy tắc phân giải nhóm/kênh tương tự được áp dụng; các cuộc trò chuyện nhóm và hội thoại cá nhân (DM) luôn được phân giải thành `top-level` cho lượt gửi chủ động, bất kể `replyStyle`.
 
-Khi `replyStyle: "thread"` có hiệu lực và bot được @mentioned từ bên trong một luồng kênh, OpenClaw gắn lại gốc luồng ban đầu vào tham chiếu cuộc trò chuyện gửi đi (`19:…@thread.tacv2;messageid=<root>`) để phản hồi rơi vào cùng luồng. Điều này áp dụng cho cả gửi trực tiếp (trong lượt) và gửi chủ động sau khi ngữ cảnh lượt Bot Framework đã hết hạn (ví dụ: tác nhân chạy lâu, phản hồi lệnh gọi công cụ được đưa vào hàng đợi qua `mcp__openclaw__message`).
+### Bảo toàn ngữ cảnh luồng
 
-Gốc luồng được lấy từ `threadId` đã lưu trên tham chiếu cuộc trò chuyện. Các tham chiếu đã lưu cũ hơn, có trước `threadId`, sẽ quay về `activityId` (bất kỳ hoạt động đến nào gần nhất đã khởi tạo cuộc trò chuyện), vì vậy các triển khai hiện có tiếp tục hoạt động mà không cần khởi tạo lại.
+Khi `replyStyle: "thread"` có hiệu lực và bot được @đề cập từ bên trong một luồng của kênh, OpenClaw gắn lại gốc luồng ban đầu vào tham chiếu hội thoại gửi đi (`19:...@thread.tacv2;messageid=<root>`) để câu trả lời được đưa vào cùng luồng. Điều này áp dụng cho cả lượt gửi trực tiếp (trong lượt) và lượt gửi chủ động được thực hiện sau khi ngữ cảnh lượt của Bot Framework đã hết hạn (ví dụ: tác nhân chạy lâu, câu trả lời cho lệnh gọi công cụ trong hàng đợi qua `mcp__openclaw__message`).
 
-Khi `replyStyle: "top-level"` có hiệu lực, các inbound dạng luồng trong kênh sẽ cố ý được trả lời dưới dạng bài đăng cấp cao nhất mới — không gắn hậu tố luồng. Đây là hành vi đúng cho các kênh kiểu Threads; nếu bạn thấy bài đăng cấp cao nhất trong khi mong đợi câu trả lời theo luồng, `replyStyle` của bạn đang được đặt sai cho kênh đó.
+Gốc luồng được lấy từ `threadId` đã lưu trên tham chiếu hội thoại. Các tham chiếu cũ được lưu trước khi có `threadId` sẽ dùng giá trị dự phòng `activityId` (hoạt động gửi đến gần nhất đã khởi tạo hội thoại), nhờ đó các bản triển khai hiện có tiếp tục hoạt động mà không cần khởi tạo lại.
+
+Khi `replyStyle: "top-level"` có hiệu lực, các tin nhắn gửi đến trong luồng của kênh được chủ ý trả lời dưới dạng bài đăng cấp cao nhất mới; không có hậu tố luồng nào được đính kèm. Đây là hành vi chính xác đối với kênh kiểu Luồng; nếu xuất hiện bài đăng cấp cao nhất trong khi mong đợi câu trả lời theo luồng, thì `replyStyle` đã được đặt không chính xác cho kênh đó.
 
 ## Tệp đính kèm và hình ảnh
 
-**Giới hạn hiện tại:**
+**Các hạn chế hiện tại:**
 
-- **DM:** Hình ảnh và tệp đính kèm hoạt động thông qua API tệp của bot Teams.
-- **Kênh/nhóm:** Tệp đính kèm nằm trong bộ nhớ M365 (SharePoint/OneDrive). Payload Webhook chỉ bao gồm một stub HTML, không phải byte tệp thực tế. **Cần quyền Graph API** để tải xuống tệp đính kèm trong kênh.
-- Với các lượt gửi ưu tiên tệp rõ ràng, dùng `action=upload-file` với `media` / `filePath` / `path`; `message` tùy chọn trở thành văn bản/bình luận đi kèm, và `filename` ghi đè tên đã tải lên.
+- **DM:** hình ảnh và tệp đính kèm hoạt động thông qua API tệp bot của Teams.
+- **Kênh/nhóm:** tệp đính kèm nằm trong bộ nhớ M365 (SharePoint/OneDrive). Tải trọng Webhook chỉ chứa một phần giữ chỗ HTML, không chứa byte thực tế của tệp. **Cần có quyền API Graph** để tải tệp đính kèm của kênh xuống.
+- Đối với lượt gửi ưu tiên tệp một cách rõ ràng, hãy sử dụng `action=upload-file` với `media` / `filePath` / `path`; `message` tùy chọn trở thành văn bản/nhận xét đi kèm và `filename` (hoặc `title`) ghi đè tên tệp đã tải lên.
 
-Không có quyền Graph, tin nhắn kênh có hình ảnh sẽ được nhận dưới dạng chỉ văn bản (bot không thể truy cập nội dung hình ảnh).
-Theo mặc định, OpenClaw chỉ tải xuống media từ các hostname Microsoft/Teams. Ghi đè bằng `channels.msteams.mediaAllowHosts` (dùng `["*"]` để cho phép bất kỳ host nào).
-Header ủy quyền chỉ được gắn cho các host trong `channels.msteams.mediaAuthAllowHosts` (mặc định là các host Graph + Bot Framework). Giữ danh sách này nghiêm ngặt (tránh hậu tố đa tenant).
+Nếu không có quyền Graph, tin nhắn kênh chứa hình ảnh sẽ chỉ đến dưới dạng văn bản (bot không thể truy cập nội dung hình ảnh).
+Theo mặc định, OpenClaw chỉ tải phương tiện xuống từ tên máy chủ Microsoft/Teams. Ghi đè bằng `channels.msteams.mediaAllowHosts` (sử dụng `["*"]` để cho phép mọi máy chủ).
+Tiêu đề Authorization chỉ được đính kèm cho các máy chủ trong `channels.msteams.mediaAuthAllowHosts` (mặc định là các máy chủ Graph + Bot Framework). Giữ danh sách này nghiêm ngặt (tránh các hậu tố đa đối tượng thuê).
 
 ## Gửi tệp trong cuộc trò chuyện nhóm
 
-Bot có thể gửi tệp trong DM bằng luồng FileConsentCard (tích hợp sẵn). Tuy nhiên, **gửi tệp trong cuộc trò chuyện nhóm/kênh** cần thiết lập bổ sung:
+Bot có thể gửi tệp trong DM bằng luồng FileConsentCard tích hợp sẵn. **Gửi tệp trong cuộc trò chuyện nhóm/kênh** yêu cầu thiết lập bổ sung:
 
-| Ngữ cảnh                 | Cách tệp được gửi                             | Thiết lập cần thiết                              |
-| ------------------------ | -------------------------------------------- | ----------------------------------------------- |
-| **DM**                   | FileConsentCard → người dùng chấp nhận → bot tải lên | Hoạt động ngay                                  |
-| **Cuộc trò chuyện nhóm/kênh** | Tải lên SharePoint → chia sẻ liên kết      | Cần `sharePointSiteId` + quyền Graph            |
-| **Hình ảnh (mọi ngữ cảnh)** | Inline mã hóa Base64                       | Hoạt động ngay                                  |
+| Ngữ cảnh                 | Cách gửi tệp                                  | Thiết lập cần thiết                              |
+| ------------------------ | --------------------------------------------- | ------------------------------------------------ |
+| **DM**                   | FileConsentCard → người dùng chấp nhận → bot tải lên | Hoạt động ngay mà không cần thiết lập thêm       |
+| **Cuộc trò chuyện nhóm/kênh** | Tải lên SharePoint → thẻ tệp gốc          | Yêu cầu `sharePointSiteId` + quyền Graph         |
+| **Hình ảnh (mọi ngữ cảnh)** | Nội tuyến được mã hóa Base64                | Hoạt động ngay mà không cần thiết lập thêm       |
 
-### Vì sao cuộc trò chuyện nhóm cần SharePoint
+### Tại sao cuộc trò chuyện nhóm cần SharePoint
 
-Bot không có ổ OneDrive cá nhân (endpoint Graph API `/me/drive` không hoạt động với danh tính ứng dụng). Để gửi tệp trong cuộc trò chuyện nhóm/kênh, bot tải lên một **site SharePoint** và tạo liên kết chia sẻ.
+Bot sử dụng danh tính ứng dụng, trong khi tài nguyên `/me` của Microsoft Graph [yêu cầu người dùng đã đăng nhập](https://learn.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0). Để gửi tệp trong cuộc trò chuyện nhóm/kênh, bot tải tệp lên một **site SharePoint** và tạo liên kết chia sẻ.
 
 ### Thiết lập
 
-1. **Thêm quyền Graph API** trong Entra ID (Azure AD) → App Registration:
-   - `Sites.ReadWrite.All` (Application) - tải tệp lên SharePoint
-   - `Chat.Read.All` (Application) - tùy chọn, bật liên kết chia sẻ theo từng người dùng
-
-2. **Cấp chấp thuận quản trị viên** cho tenant.
-
-3. **Lấy ID site SharePoint của bạn:**
+1. **Thêm quyền API Graph** trong Entra ID (Azure AD) → App Registration:
+   - `Sites.ReadWrite.All` (Application) - tải tệp lên SharePoint.
+   - `ChatMember.Read.All` (Application) - quyền tối thiểu trên toàn đối tượng thuê để gửi tệp trong cuộc trò chuyện nhóm. `Chat.Read.All` cũng hoạt động và đã bao gồm chức năng này khi lịch sử trò chuyện nhóm được bật. Để thay thế theo từng cuộc trò chuyện, hãy sử dụng [quyền chấp thuận dành riêng cho tài nguyên](https://learn.microsoft.com/en-us/microsoftteams/platform/graph-api/rsc/resource-specific-consent) `ChatMember.Read.Chat`.
+2. **Cấp sự chấp thuận của quản trị viên** cho đối tượng thuê.
+3. **Lấy ID site SharePoint:**
 
    ```bash
-   # Via Graph Explorer or curl with a valid token:
+   # Qua Graph Explorer hoặc curl với token hợp lệ:
    curl -H "Authorization: Bearer $TOKEN" \
      "https://graph.microsoft.com/v1.0/sites/{hostname}:/{site-path}"
 
-   # Example: for a site at "contoso.sharepoint.com/sites/BotFiles"
+   # Ví dụ: đối với một site tại "contoso.sharepoint.com/sites/BotFiles"
    curl -H "Authorization: Bearer $TOKEN" \
      "https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com:/sites/BotFiles"
 
-   # Response includes: "id": "contoso.sharepoint.com,guid1,guid2"
+   # Phản hồi bao gồm: "id": "contoso.sharepoint.com,guid1,guid2"
    ```
 
 4. **Cấu hình OpenClaw:**
@@ -889,7 +883,7 @@ Bot không có ổ OneDrive cá nhân (endpoint Graph API `/me/drive` không ho�
    {
      channels: {
        msteams: {
-         // ... other config ...
+         // ... cấu hình khác ...
          sharePointSiteId: "contoso.sharepoint.com,guid1,guid2",
        },
      },
@@ -898,41 +892,43 @@ Bot không có ổ OneDrive cá nhân (endpoint Graph API `/me/drive` không ho�
 
 ### Hành vi chia sẻ
 
-| Quyền                                   | Hành vi chia sẻ                                           |
-| --------------------------------------- | --------------------------------------------------------- |
-| Chỉ `Sites.ReadWrite.All`               | Liên kết chia sẻ toàn tổ chức (bất kỳ ai trong tổ chức đều truy cập được) |
-| `Sites.ReadWrite.All` + `Chat.Read.All` | Liên kết chia sẻ theo từng người dùng (chỉ thành viên trò chuyện truy cập được) |
+| Ngữ cảnh và quyền                                                        | Hành vi chia sẻ                                                   |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Kênh + `Sites.ReadWrite.All`                                              | Liên kết chia sẻ trong toàn tổ chức (mọi người trong tổ chức đều có thể truy cập) |
+| Trò chuyện nhóm + `Sites.ReadWrite.All` + quyền đọc thành viên trò chuyện được hỗ trợ | Liên kết chia sẻ theo người dùng (chỉ thành viên trò chuyện có thể truy cập) |
+| Trò chuyện nhóm không có quyền đọc thành viên trò chuyện được hỗ trợ     | Gửi thất bại theo cơ chế đóng an toàn                             |
 
-Chia sẻ theo từng người dùng an toàn hơn vì chỉ người tham gia trò chuyện mới có thể truy cập tệp. Nếu thiếu quyền `Chat.Read.All`, bot sẽ fallback về chia sẻ toàn tổ chức.
+Chia sẻ theo người dùng an toàn hơn vì chỉ những người tham gia trò chuyện mới có thể truy cập tệp. OpenClaw yêu cầu tra cứu thành viên thành công đối với trò chuyện nhóm; khi hết thời gian chờ, xảy ra lỗi truyền tải, kết quả trống hoặc Graph API từ chối, thao tác gửi sẽ thất bại thay vì mở rộng quyền truy cập cho toàn tổ chức.
 
-### Hành vi fallback
+### Hành vi dự phòng
 
-| Kịch bản                                          | Kết quả                                             |
-| ------------------------------------------------- | -------------------------------------------------- |
-| Cuộc trò chuyện nhóm + tệp + đã cấu hình `sharePointSiteId` | Tải lên SharePoint, gửi liên kết chia sẻ            |
-| Cuộc trò chuyện nhóm + tệp + không có `sharePointSiteId` | Thử tải lên OneDrive (có thể thất bại), chỉ gửi văn bản |
-| Trò chuyện cá nhân + tệp                          | Luồng FileConsentCard (hoạt động không cần SharePoint) |
-| Mọi ngữ cảnh + hình ảnh                           | Inline mã hóa Base64 (hoạt động không cần SharePoint) |
+| Tình huống                                                       | Kết quả                                          |
+| ---------------------------------------------------------------- | ------------------------------------------------ |
+| Trò chuyện nhóm + tệp + đã cấu hình quyền SharePoint và thành viên | Tải lên SharePoint, gửi thẻ tệp gốc              |
+| Trò chuyện nhóm + tệp + thiếu quyền SharePoint hoặc thành viên   | Thất bại với lỗi cấu hình có hướng dẫn xử lý     |
+| Kênh + tệp + đã cấu hình `sharePointSiteId`                      | Tải lên SharePoint, gửi thẻ tệp gốc              |
+| Trò chuyện cá nhân + tệp                                         | Luồng FileConsentCard (hoạt động không cần SharePoint) |
+| Mọi ngữ cảnh + hình ảnh                                          | Nội tuyến được mã hóa Base64 (hoạt động không cần SharePoint) |
 
-### Vị trí lưu tệp
+### Vị trí lưu trữ tệp
 
-Các tệp đã tải lên được lưu trong thư mục `/OpenClawShared/` trong thư viện tài liệu mặc định của site SharePoint đã cấu hình.
+Các tệp đã tải lên được lưu trong thư mục `/OpenClawShared/` thuộc thư viện tài liệu mặc định của site SharePoint đã cấu hình.
 
-## Bình chọn (Adaptive Cards)
+## Cuộc thăm dò ý kiến (Adaptive Cards)
 
-OpenClaw gửi bình chọn Teams dưới dạng Adaptive Cards (không có API bình chọn Teams gốc).
+OpenClaw gửi các cuộc thăm dò ý kiến trên Teams dưới dạng Adaptive Cards (Teams không có API thăm dò ý kiến gốc).
 
-- CLI: `openclaw message poll --channel msteams --target conversation:<id> ...`
-- Phiếu bầu được Gateway ghi lại trong SQLite trạng thái Plugin OpenClaw tại `state/openclaw.sqlite`.
+- CLI: `openclaw message poll --channel msteams --target conversation:<id> --poll-question "..." --poll-option "..." --poll-option "..."`.
+- Gateway ghi nhận phiếu bầu trong SQLite trạng thái Plugin của OpenClaw tại `state/openclaw.sqlite`.
 - Các tệp `msteams-polls.json` hiện có được nhập bởi `openclaw doctor --fix`, không phải bởi Plugin đang chạy.
-- Gateway phải luôn online để ghi lại phiếu bầu.
-- Bình chọn chưa tự động đăng tóm tắt kết quả, và hiện chưa có CLI kết quả bình chọn được hỗ trợ.
+- Gateway phải duy trì trực tuyến để ghi nhận phiếu bầu.
+- Các cuộc thăm dò ý kiến không tự động đăng bản tóm tắt kết quả và hiện chưa có CLI kết quả thăm dò ý kiến.
 
 ## Thẻ trình bày
 
-Gửi payload trình bày ngữ nghĩa tới người dùng hoặc cuộc trò chuyện Teams bằng công cụ `message`, CLI, hoặc cơ chế gửi trả lời thông thường. OpenClaw render chúng thành Teams Adaptive Cards từ hợp đồng trình bày chung.
+Gửi payload trình bày ngữ nghĩa đến người dùng hoặc cuộc trò chuyện Teams bằng công cụ `message`, CLI hoặc cơ chế gửi phản hồi thông thường. OpenClaw kết xuất chúng thành Teams Adaptive Cards từ hợp đồng trình bày chung.
 
-Tham số `presentation` chấp nhận các khối ngữ nghĩa. Khi cung cấp `presentation`, văn bản tin nhắn là tùy chọn. Nút được render thành hành động gửi Adaptive Card hoặc hành động URL. Menu chọn chưa phải native trong bộ render Teams, nên OpenClaw hạ cấp chúng thành văn bản dễ đọc trước khi gửi.
+Tham số `presentation` chấp nhận các khối ngữ nghĩa. Khi cung cấp `presentation`, văn bản tin nhắn là tùy chọn. Các nút được kết xuất thành hành động gửi hoặc URL của Adaptive Card. Menu chọn không phải thành phần gốc trong bộ kết xuất Teams, vì vậy OpenClaw chuyển chúng thành văn bản dễ đọc trước khi gửi.
 
 **Công cụ agent:**
 
@@ -942,8 +938,8 @@ Tham số `presentation` chấp nhận các khối ngữ nghĩa. Khi cung cấp 
   channel: "msteams",
   target: "user:<id>",
   presentation: {
-    title: "Hello",
-    blocks: [{ type: "text", text: "Hello!" }],
+    title: "Xin chào",
+    blocks: [{ type: "text", text: "Xin chào!" }],
   },
 }
 ```
@@ -953,37 +949,37 @@ Tham số `presentation` chấp nhận các khối ngữ nghĩa. Khi cung cấp 
 ```bash
 openclaw message send --channel msteams \
   --target "conversation:19:abc...@thread.tacv2" \
-  --presentation '{"title":"Hello","blocks":[{"type":"text","text":"Hello!"}]}'
+  --presentation '{"title":"Xin chào","blocks":[{"type":"text","text":"Xin chào!"}]}'
 ```
 
-Để biết chi tiết định dạng target, xem [Định dạng target](#target-formats) bên dưới.
+Để biết chi tiết về định dạng đích, xem [Định dạng đích](#target-formats) bên dưới.
 
-## Định dạng target
+## Định dạng đích
 
-Target MSTeams dùng tiền tố để phân biệt người dùng và cuộc trò chuyện:
+Các đích MSTeams sử dụng tiền tố để phân biệt người dùng và cuộc trò chuyện:
 
-| Loại target        | Định dạng                        | Ví dụ                                               |
-| ------------------- | -------------------------------- | --------------------------------------------------- |
-| Người dùng (theo ID) | `user:<aad-object-id>`           | `user:40a1a0ed-4ff2-4164-a219-55518990c197`         |
-| Người dùng (theo tên) | `user:<display-name>`          | `user:John Smith` (cần Graph API)                   |
-| Nhóm/kênh           | `conversation:<conversation-id>` | `conversation:19:abc123...@thread.tacv2`            |
-| Nhóm/kênh (thô)     | `<conversation-id>`              | `19:abc123...@thread.tacv2` (nếu chứa `@thread`)    |
+| Loại đích           | Định dạng                        | Ví dụ                                                                                                  |
+| ------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Người dùng (theo ID) | `user:<aad-object-id>`              | `user:40a1a0ed-4ff2-4164-a219-55518990c197`                                                                                     |
+| Người dùng (theo tên) | `user:<display-name>`             | `user:John Smith` (yêu cầu Graph API)                                                                 |
+| Nhóm/kênh           | `conversation:<conversation-id>`               | `conversation:19:abc123...@thread.tacv2`                                                                                     |
+| Nhóm/kênh (thô)     | `<conversation-id>`               | `19:abc123...@thread.tacv2`, `19:...@unq.gbl.spaces`, hoặc một id Bot Framework `a:`/`8:orgid:`/`29:` thuần túy |
 
 **Ví dụ CLI:**
 
 ```bash
-# Send to a user by ID
-openclaw message send --channel msteams --target "user:40a1a0ed-..." --message "Hello"
+# Gửi đến người dùng theo ID
+openclaw message send --channel msteams --target "user:40a1a0ed-..." --message "Xin chào"
 
-# Send to a user by display name (triggers Graph API lookup)
-openclaw message send --channel msteams --target "user:John Smith" --message "Hello"
+# Gửi đến người dùng theo tên hiển thị (kích hoạt tra cứu Graph API)
+openclaw message send --channel msteams --target "user:John Smith" --message "Xin chào"
 
-# Send to a group chat or channel
-openclaw message send --channel msteams --target "conversation:19:abc...@thread.tacv2" --message "Hello"
+# Gửi đến trò chuyện nhóm hoặc kênh
+openclaw message send --channel msteams --target "conversation:19:abc...@thread.tacv2" --message "Xin chào"
 
-# Send a presentation card to a conversation
+# Gửi thẻ trình bày đến một cuộc trò chuyện
 openclaw message send --channel msteams --target "conversation:19:abc...@thread.tacv2" \
-  --presentation '{"title":"Hello","blocks":[{"type":"text","text":"Hello"}]}'
+  --presentation '{"title":"Xin chào","blocks":[{"type":"text","text":"Xin chào"}]}'
 ```
 
 **Ví dụ công cụ agent:**
@@ -993,7 +989,7 @@ openclaw message send --channel msteams --target "conversation:19:abc...@thread.
   action: "send",
   channel: "msteams",
   target: "user:John Smith",
-  message: "Hello!",
+  message: "Xin chào!",
 }
 ```
 
@@ -1003,103 +999,103 @@ openclaw message send --channel msteams --target "conversation:19:abc...@thread.
   channel: "msteams",
   target: "conversation:19:abc...@thread.tacv2",
   presentation: {
-    title: "Hello",
-    blocks: [{ type: "text", text: "Hello" }],
+    title: "Xin chào",
+    blocks: [{ type: "text", text: "Xin chào" }],
   },
 }
 ```
 
 <Note>
-Không có tiền tố `user:`, tên mặc định sẽ được phân giải dưới dạng nhóm hoặc team. Luôn dùng `user:` khi target người theo tên hiển thị.
+Nếu không có tiền tố `user:`, tên sẽ mặc định được phân giải thành nhóm hoặc nhóm Teams. Luôn sử dụng `user:` khi nhắm đến người dùng theo tên hiển thị.
 </Note>
 
 ## Nhắn tin chủ động
 
-- Tin nhắn chủ động chỉ có thể thực hiện **sau khi** người dùng đã tương tác, vì chúng tôi lưu tham chiếu cuộc trò chuyện tại thời điểm đó.
-- Xem `/gateway/configuration` để biết `dmPolicy` và kiểm soát allowlist.
+- Chỉ có thể gửi tin nhắn chủ động **sau khi** người dùng đã tương tác, vì OpenClaw lưu tham chiếu cuộc trò chuyện tại thời điểm đó.
+- Xem [/gateway/configuration](/vi/gateway/configuration) để biết `dmPolicy` và cơ chế kiểm soát bằng danh sách cho phép.
 
-## ID Team và Channel (Lỗi thường gặp)
+## ID nhóm Teams và kênh (Lỗi thường gặp)
 
-Tham số truy vấn `groupId` trong URL Teams **KHÔNG PHẢI** là team ID dùng cho cấu hình. Thay vào đó, hãy trích xuất ID từ đường dẫn URL:
+Tham số truy vấn `groupId` trong URL Teams **KHÔNG** phải là ID nhóm Teams dùng để cấu hình. Thay vào đó, hãy trích xuất ID từ đường dẫn URL:
 
-**URL Team:**
+**URL nhóm Teams:**
 
-```
+```text
 https://teams.microsoft.com/l/team/19%3ABk4j...%40thread.tacv2/conversations?groupId=...
                                     └────────────────────────────┘
-                                    Team conversation ID (URL-decode this)
+                                    ID cuộc trò chuyện nhóm Teams (giải mã URL giá trị này)
 ```
 
-**URL Channel:**
+**URL kênh:**
 
-```
+```text
 https://teams.microsoft.com/l/channel/19%3A15bc...%40thread.tacv2/ChannelName?groupId=...
                                       └─────────────────────────┘
-                                      Channel ID (URL-decode this)
+                                      ID kênh (giải mã URL giá trị này)
 ```
 
-**Cho cấu hình:**
+**Đối với cấu hình:**
 
-- Khóa team = đoạn đường dẫn sau `/team/` (đã URL-decode, ví dụ `19:Bk4j...@thread.tacv2`; tenant cũ hơn có thể hiển thị `@thread.skype`, cũng hợp lệ)
-- Khóa channel = đoạn đường dẫn sau `/channel/` (đã URL-decode)
-- **Bỏ qua** tham số truy vấn `groupId` cho định tuyến OpenClaw. Đó là Microsoft Entra group ID, không phải Bot Framework conversation ID được dùng trong hoạt động Teams gửi đến.
+- Khóa nhóm Teams = phân đoạn đường dẫn sau `/team/` (đã giải mã URL, ví dụ: `19:Bk4j...@thread.tacv2`; các tenant cũ hơn có thể hiển thị `@thread.skype`, giá trị này cũng hợp lệ).
+- Khóa kênh = phân đoạn đường dẫn sau `/channel/` (đã giải mã URL).
+- **Bỏ qua** tham số truy vấn `groupId` khi định tuyến OpenClaw. Đây là ID nhóm Microsoft Entra, không phải ID cuộc trò chuyện Bot Framework được sử dụng trong các hoạt động Teams đến.
 
 ## Kênh riêng tư
 
-Bot có hỗ trợ giới hạn trong kênh riêng tư:
+Bot chỉ được hỗ trợ hạn chế trong các kênh riêng tư:
 
-| Tính năng                    | Kênh tiêu chuẩn | Kênh riêng tư          |
-| ---------------------------- | ----------------- | ---------------------- |
-| Cài đặt bot                  | Có                | Giới hạn               |
-| Tin nhắn thời gian thực (Webhook) | Có           | Có thể không hoạt động |
-| Quyền RSC                    | Có                | Có thể hành xử khác    |
-| @mentions                    | Có                | Nếu bot có thể truy cập |
-| Lịch sử Graph API            | Có                | Có (với quyền phù hợp) |
+| Tính năng                    | Kênh tiêu chuẩn     | Kênh riêng tư          |
+| ---------------------------- | ------------------- | ---------------------- |
+| Cài đặt bot                  | Có                  | Hạn chế                |
+| Tin nhắn thời gian thực (webhook) | Có             | Có thể không hoạt động |
+| Quyền RSC                    | Có                  | Có thể hoạt động khác  |
+| @lượt đề cập                 | Có                  | Nếu có thể truy cập bot |
+| Lịch sử Graph API            | Có                  | Có (khi có quyền)      |
 
-**Cách khắc phục nếu kênh riêng tư không hoạt động:**
+**Giải pháp thay thế nếu kênh riêng tư không hoạt động:**
 
-1. Dùng kênh tiêu chuẩn cho tương tác với bot
-2. Dùng DM - người dùng luôn có thể nhắn trực tiếp cho bot
-3. Dùng Graph API để truy cập lịch sử (cần `ChannelMessage.Read.All`)
+1. Sử dụng kênh tiêu chuẩn để tương tác với bot.
+2. Sử dụng tin nhắn trực tiếp; người dùng luôn có thể nhắn tin trực tiếp cho bot.
+3. Sử dụng Graph API để truy cập lịch sử (yêu cầu `ChannelMessage.Read.All`).
 
 ## Khắc phục sự cố
 
-### Vấn đề thường gặp
+### Các sự cố thường gặp
 
-- **Hình ảnh không hiển thị trong kênh:** Thiếu quyền Graph hoặc chấp thuận quản trị viên. Cài đặt lại ứng dụng Teams và thoát hoàn toàn/mở lại Teams.
-- **Không có phản hồi trong kênh:** Theo mặc định cần mention; đặt `channels.msteams.requireMention=false` hoặc cấu hình theo từng team/channel.
-- **Không khớp phiên bản (Teams vẫn hiển thị manifest cũ):** gỡ bỏ + thêm lại ứng dụng và thoát hoàn toàn Teams để làm mới.
-- **401 Unauthorized từ Webhook:** Dự kiến xảy ra khi kiểm thử thủ công không có Azure JWT - nghĩa là endpoint có thể truy cập được nhưng xác thực thất bại. Dùng Azure Web Chat để kiểm thử đúng cách.
+- **Hình ảnh không hiển thị trong kênh:** thiếu quyền Graph hoặc sự đồng ý của quản trị viên. Cài đặt lại ứng dụng Teams, sau đó thoát hoàn toàn và mở lại Teams.
+- **Không có phản hồi trong kênh:** theo mặc định, bắt buộc phải đề cập; đặt `channels.msteams.requireMention=false` hoặc cấu hình theo từng nhóm Teams/kênh.
+- **Phiên bản không khớp (Teams vẫn hiển thị manifest cũ):** xóa rồi thêm lại ứng dụng và thoát hoàn toàn khỏi Teams để làm mới.
+- **Webhook trả về 401 Unauthorized:** đây là hành vi dự kiến khi kiểm thử thủ công mà không có Azure JWT; điều đó có nghĩa là có thể truy cập endpoint nhưng xác thực thất bại. Sử dụng Azure Web Chat để kiểm thử đúng cách.
 
-### Lỗi tải lên manifest
+### Lỗi tải manifest lên
 
-- **"Icon file cannot be empty":** Manifest tham chiếu các tệp biểu tượng có kích thước 0 byte. Tạo biểu tượng PNG hợp lệ (32x32 cho `outline.png`, 192x192 cho `color.png`).
-- **"webApplicationInfo.Id already in use":** Ứng dụng vẫn được cài trong team/cuộc trò chuyện khác. Tìm và gỡ cài đặt trước, hoặc chờ 5-10 phút để đồng bộ.
-- **"Something went wrong" khi tải lên:** Thay vào đó hãy tải lên qua [https://admin.teams.microsoft.com](https://admin.teams.microsoft.com), mở DevTools trình duyệt (F12) → tab Network, và kiểm tra phần thân phản hồi để xem lỗi thực tế.
-- **Sideload thất bại:** Thử "Upload an app to your org's app catalog" thay vì "Upload a custom app" - cách này thường vượt qua hạn chế sideload.
+- **"Icon file cannot be empty":** manifest tham chiếu đến các tệp biểu tượng có kích thước 0 byte. Tạo các biểu tượng PNG hợp lệ (32x32 cho `outline.png`, 192x192 cho `color.png`).
+- **"webApplicationInfo.Id already in use":** ứng dụng vẫn được cài đặt trong một nhóm Teams/cuộc trò chuyện khác. Trước tiên, hãy tìm và gỡ cài đặt ứng dụng đó hoặc chờ 5-10 phút để thay đổi được truyền bá.
+- **"Something went wrong" khi tải lên:** thay vào đó, hãy tải lên qua [https://admin.teams.microsoft.com](https://admin.teams.microsoft.com), mở DevTools của trình duyệt (F12) → thẻ Network và kiểm tra nội dung phản hồi để xem lỗi thực tế.
+- **Tải ngoài thất bại:** thử "Upload an app to your org's app catalog" thay vì "Upload a custom app"; cách này thường bỏ qua các hạn chế tải ngoài.
 
 ### Quyền RSC không hoạt động
 
-1. Xác minh `webApplicationInfo.id` khớp chính xác với App ID của bot của bạn
-2. Tải lại ứng dụng lên và cài đặt lại trong team/chat
-3. Kiểm tra xem quản trị viên tổ chức của bạn có chặn quyền RSC không
-4. Xác nhận bạn đang dùng đúng phạm vi: `ChannelMessage.Read.Group` cho teams, `ChatMessage.Read.Chat` cho group chats
+1. Xác minh `webApplicationInfo.id` khớp chính xác với App ID của bot.
+2. Tải lại ứng dụng lên và cài đặt lại trong nhóm Teams/cuộc trò chuyện.
+3. Kiểm tra xem quản trị viên tổ chức có chặn quyền RSC hay không.
+4. Xác nhận bạn đang sử dụng đúng phạm vi: `ChannelMessage.Read.Group` cho nhóm Teams, `ChatMessage.Read.Chat` cho trò chuyện nhóm.
 
 ## Tài liệu tham khảo
 
-- [Tạo Azure Bot](https://learn.microsoft.com/en-us/azure/bot-service/bot-service-quickstart-registration) - Hướng dẫn thiết lập Azure Bot
+- [Tạo Azure Bot](https://learn.microsoft.com/en-us/azure/bot-service/bot-service-quickstart-registration) - hướng dẫn thiết lập Azure Bot
 - [Teams Developer Portal](https://dev.teams.microsoft.com/apps) - tạo/quản lý ứng dụng Teams
-- [Teams app manifest schema](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema)
+- [Lược đồ manifest ứng dụng Teams](https://learn.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema)
 - [Nhận tin nhắn kênh bằng RSC](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/channel-messages-with-rsc)
-- [Tài liệu tham khảo quyền RSC](https://learn.microsoft.com/en-us/microsoftteams/platform/graph-api/rsc/resource-specific-consent)
+- [Tài liệu tham khảo về quyền RSC](https://learn.microsoft.com/en-us/microsoftteams/platform/graph-api/rsc/resource-specific-consent)
 - [Xử lý tệp của bot Teams](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/bots-filesv4) (kênh/nhóm yêu cầu Graph)
 - [Nhắn tin chủ động](https://learn.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/send-proactive-messages)
-- [@microsoft/teams.cli](https://www.npmjs.com/package/@microsoft/teams.cli) - Teams CLI để quản lý bot
+- [@microsoft/teams.cli](https://www.npmjs.com/package/@microsoft/teams.cli) - CLI Teams để quản lý bot
 
 ## Liên quan
 
-- [Tổng quan về kênh](/vi/channels) - tất cả kênh được hỗ trợ
+- [Tổng quan về kênh](/vi/channels) - tất cả các kênh được hỗ trợ
 - [Ghép nối](/vi/channels/pairing) - xác thực DM và luồng ghép nối
-- [Nhóm](/vi/channels/groups) - hành vi group chat và cổng mention
+- [Nhóm](/vi/channels/groups) - hành vi trò chuyện nhóm và cơ chế kiểm soát bằng lượt đề cập
 - [Định tuyến kênh](/vi/channels/channel-routing) - định tuyến phiên cho tin nhắn
 - [Bảo mật](/vi/gateway/security) - mô hình truy cập và tăng cường bảo mật

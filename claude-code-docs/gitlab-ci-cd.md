@@ -13,7 +13,7 @@
 </Info>
 
 <Note>
-  This integration is built on top of the [Claude Code CLI and Agent SDK](/en/agent-sdk/overview), enabling programmatic use of Claude in your CI/CD jobs and custom automation workflows.
+  This integration is built on top of the [Claude Code CLI and Agent SDK](/docs/en/agent-sdk/overview), enabling programmatic use of Claude in your CI/CD jobs and custom automation workflows.
 </Note>
 
 ## Why use Claude Code with GitLab?
@@ -126,7 +126,7 @@ If you prefer a more controlled setup or need enterprise providers:
 
 In an issue comment:
 
-```text theme={null}
+```text wrap theme={null}
 @claude implement this feature based on the issue description
 ```
 
@@ -136,7 +136,7 @@ Claude analyzes the issue and codebase, writes changes in a branch, and opens an
 
 In an MR discussion:
 
-```text theme={null}
+```text wrap theme={null}
 @claude suggest a concrete approach to cache the results of this API call
 ```
 
@@ -146,7 +146,7 @@ Claude proposes changes, adds code with appropriate caching, and updates the MR.
 
 In an issue or MR comment:
 
-```text theme={null}
+```text wrap theme={null}
 @claude fix the TypeError in the user dashboard component
 ```
 

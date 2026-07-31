@@ -2,47 +2,47 @@
 read_when:
     - आप OpenClaw में Xiaomi MiMo मॉडल चाहते हैं
     - आपको Xiaomi MiMo प्रमाणीकरण या Token Plan सेटअप की आवश्यकता है
-summary: OpenClaw के साथ Xiaomi MiMo पे-ऐज़-यू-गो और Token Plan मॉडल का उपयोग करें
+summary: OpenClaw के साथ Xiaomi MiMo के उपयोग के अनुसार भुगतान और Token Plan मॉडल का उपयोग करें
 title: Xiaomi MiMo
 x-i18n:
-    generated_at: "2026-06-29T00:04:29Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:27:06Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 171c4b95c6ff12d4b8d75747d35fcad19c6173d670a3af65fe0a286e04199751
+    source_hash: ef79dea8332903c726f076c91b3b458e2d98534d402a412e7c156c06b2912a69
     source_path: providers/xiaomi.md
     workflow: 16
 ---
 
-Xiaomi MiMo **MiMo** मॉडलों के लिए API प्लेटफ़ॉर्म है। OpenClaw में दो टेक्स्ट-प्रदाता प्रीसेट वाला बंडल किया गया Xiaomi Plugin शामिल है:
+Xiaomi MiMo, **MiMo** मॉडल के लिए API प्लेटफ़ॉर्म है। बंडल किया गया `xiaomi`
+Plugin (`enabledByDefault: true`, इंस्टॉल करने का कोई चरण नहीं) दो टेक्स्ट
+प्रोवाइडर और एक स्पीच (TTS) प्रोवाइडर पंजीकृत करता है:
 
-- पे-ऐज़-यू-गो कुंजियों (`sk-...`) के लिए `xiaomi`
-- क्षेत्रीय endpoint प्रीसेट वाली Token Plan कुंजियों (`tp-...`) के लिए `xiaomi-token-plan`
+- `xiaomi` - उपयोग के अनुसार भुगतान वाली कुंजियाँ (`sk-...`)
+- `xiaomi-token-plan` - क्षेत्रीय एंडपॉइंट प्रीसेट वाली Token Plan कुंजियाँ (`tp-...`)
 
-यही Plugin `xiaomi` speech (TTS) प्रदाता भी पंजीकृत करता है।
-
-| गुण              | मान                                                                                                                                                |
+| प्रॉपर्टी         | मान                                                                                                                                              |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| प्रदाता ids      | `xiaomi` (पे-ऐज़-यू-गो), `xiaomi-token-plan` (Token Plan)                                                                                          |
-| Plugin           | बंडल किया गया, `enabledByDefault: true`                                                                                                            |
-| Auth env vars    | `XIAOMI_API_KEY`, `XIAOMI_TOKEN_PLAN_API_KEY`                                                                                                      |
-| Onboarding flags | `--auth-choice xiaomi-api-key`, `--auth-choice xiaomi-token-plan-cn`, `--auth-choice xiaomi-token-plan-sgp`, `--auth-choice xiaomi-token-plan-ams` |
-| प्रत्यक्ष CLI flags | `--xiaomi-api-key <key>`, `--xiaomi-token-plan-api-key <key>`                                                                                      |
-| अनुबंध           | chat completions + `speechProviders`                                                                                                               |
-| API              | OpenAI-संगत (`openai-completions`)                                                                                                                 |
-| आधार URLs        | पे-ऐज़-यू-गो: `https://api.xiaomimimo.com/v1`; Token Plan प्रीसेट: `token-plan-{cn,sgp,ams}...`                                                    |
-| डिफ़ॉल्ट मॉडल    | `xiaomi/mimo-v2-flash`, `xiaomi-token-plan/mimo-v2.5-pro`                                                                                          |
-| TTS डिफ़ॉल्ट     | `mimo-v2.5-tts`, voice `mimo_default`; voicedesign मॉडल `mimo-v2.5-tts-voicedesign`                                                                |
+| प्रोवाइडर आईडी     | `xiaomi` (उपयोग के अनुसार भुगतान), `xiaomi-token-plan` (Token Plan)                                                                                         |
+| प्रमाणीकरण एनवायरनमेंट वेरिएबल    | `XIAOMI_API_KEY`, `XIAOMI_TOKEN_PLAN_API_KEY`                                                                                                      |
+| ऑनबोर्डिंग फ़्लैग | `--auth-choice xiaomi-api-key`, `--auth-choice xiaomi-token-plan-cn`, `--auth-choice xiaomi-token-plan-sgp`, `--auth-choice xiaomi-token-plan-ams` |
+| प्रत्यक्ष CLI फ़्लैग | `--xiaomi-api-key <key>`, `--xiaomi-token-plan-api-key <key>`                                                                                      |
+| API              | OpenAI-संगत चैट कम्प्लीशन (`openai-completions`)                                                                                          |
+| स्पीच अनुबंध  | `speechProviders: ["xiaomi"]`                                                                                                                      |
+| बेस URL        | उपयोग के अनुसार भुगतान: `https://api.xiaomimimo.com/v1`; Token Plan: `token-plan-{cn,sgp,ams}.xiaomimimo.com/v1`                                            |
+| डिफ़ॉल्ट मॉडल   | `xiaomi/mimo-v2.5`, `xiaomi-token-plan/mimo-v2.5-pro`                                                                                              |
+| TTS डिफ़ॉल्ट      | `mimo-v2.5-tts`, वॉइस `mimo_default`; वॉइसडिज़ाइन मॉडल `mimo-v2.5-tts-voicedesign`                                                               |
 
 ## शुरू करना
 
 <Steps>
-  <Step title="Get the right key">
-    [Xiaomi MiMo console](https://platform.xiaomimimo.com/#/console/api-keys) में पे-ऐज़-यू-गो कुंजी बनाएं, या अपना Token Plan सदस्यता पृष्ठ खोलें और क्षेत्रीय OpenAI-संगत आधार URL तथा मेल खाने वाली `tp-...` कुंजी कॉपी करें।
+  <Step title="सही कुंजी प्राप्त करें">
+    [Xiaomi MiMo कंसोल](https://platform.xiaomimimo.com/#/console/api-keys) में उपयोग के अनुसार भुगतान वाली कुंजी बनाएँ, या अपना Token Plan सदस्यता पेज खोलकर क्षेत्रीय OpenAI-संगत बेस URL और उससे मेल खाने वाली `tp-...` कुंजी कॉपी करें।
   </Step>
 
-  <Step title="Run onboarding">
-    पे-ऐज़-यू-गो:
+  <Step title="ऑनबोर्डिंग चलाएँ">
+    उपयोग के अनुसार भुगतान:
 
     ```bash
     openclaw onboard --auth-choice xiaomi-api-key
@@ -54,7 +54,7 @@ Xiaomi MiMo **MiMo** मॉडलों के लिए API प्लेटफ�
     openclaw onboard --auth-choice xiaomi-token-plan-sgp
     ```
 
-    या कुंजियां सीधे पास करें:
+    या कुंजियाँ सीधे दें:
 
     ```bash
     openclaw onboard --auth-choice xiaomi-api-key --xiaomi-api-key "$XIAOMI_API_KEY"
@@ -62,7 +62,7 @@ Xiaomi MiMo **MiMo** मॉडलों के लिए API प्लेटफ�
     ```
 
   </Step>
-  <Step title="Verify the model is available">
+  <Step title="सत्यापित करें कि मॉडल उपलब्ध है">
     ```bash
     openclaw models list --provider xiaomi
     openclaw models list --provider xiaomi-token-plan
@@ -70,96 +70,110 @@ Xiaomi MiMo **MiMo** मॉडलों के लिए API प्लेटफ�
   </Step>
 </Steps>
 
-## पे-ऐज़-यू-गो कैटलॉग
-
-| मॉडल ref              | इनपुट      | Context   | अधिकतम आउटपुट | Reasoning | नोट्स          |
-| ---------------------- | ----------- | --------- | -------------- | --------- | -------------- |
-| `xiaomi/mimo-v2-flash` | text        | 262,144   | 8,192          | नहीं      | डिफ़ॉल्ट मॉडल |
-| `xiaomi/mimo-v2-pro`   | text        | 1,048,576 | 32,000         | हां       | बड़ा context  |
-| `xiaomi/mimo-v2-omni`  | text, image | 262,144   | 32,000         | हां       | मल्टीमॉडल     |
-
 <Tip>
-डिफ़ॉल्ट मॉडल ref `xiaomi/mimo-v2-flash` है। `XIAOMI_API_KEY` सेट होने या auth profile मौजूद होने पर प्रदाता अपने आप inject हो जाता है।
+ऑनबोर्डिंग कुंजी के प्रारूप को सत्यापित करती है और तब चेतावनी देती है जब उपयोग के अनुसार भुगतान वाले पथ में `tp-...` कुंजी दर्ज की जाती है, या Token Plan पथ में `sk-...` कुंजी दर्ज की जाती है।
 </Tip>
+
+## उपयोग के अनुसार भुगतान कैटलॉग
+
+| मॉडल रेफ़रेंस              | इनपुट       | कॉन्टेक्स्ट   | अधिकतम आउटपुट | रीजनिंग | टिप्पणियाँ         |
+| ---------------------- | ----------- | --------- | ---------- | --------- | ------------- |
+| `xiaomi/mimo-v2.5`     | टेक्स्ट, इमेज | 1,048,576 | 131,072    | हाँ       | डिफ़ॉल्ट मॉडल |
+| `xiaomi/mimo-v2.5-pro` | टेक्स्ट        | 1,048,576 | 131,072    | हाँ       | फ़्लैगशिप      |
 
 ## Token Plan कैटलॉग
 
-Xiaomi के subscription UI में दिखाए गए क्षेत्रीय आधार URL से मेल खाने वाला Token Plan auth विकल्प चुनें:
+Xiaomi के सदस्यता UI में दिखाए गए क्षेत्रीय बेस URL से मेल खाने वाला Token Plan प्रमाणीकरण विकल्प चुनें:
 
-- `xiaomi-token-plan-cn` -> `https://token-plan-cn.xiaomimimo.com/v1`
-- `xiaomi-token-plan-sgp` -> `https://token-plan-sgp.xiaomimimo.com/v1`
-- `xiaomi-token-plan-ams` -> `https://token-plan-ams.xiaomimimo.com/v1`
+| प्रमाणीकरण विकल्प             | बेस URL                                   |
+| ----------------------- | ------------------------------------------ |
+| `xiaomi-token-plan-cn`  | `https://token-plan-cn.xiaomimimo.com/v1`  |
+| `xiaomi-token-plan-sgp` | `https://token-plan-sgp.xiaomimimo.com/v1` |
+| `xiaomi-token-plan-ams` | `https://token-plan-ams.xiaomimimo.com/v1` |
 
-| मॉडल ref                         | इनपुट      | Context   | अधिकतम आउटपुट | Reasoning | नोट्स          |
-| --------------------------------- | ----------- | --------- | -------------- | --------- | -------------- |
-| `xiaomi-token-plan/mimo-v2.5-pro` | text        | 1,048,576 | 131,072        | हां       | डिफ़ॉल्ट मॉडल |
-| `xiaomi-token-plan/mimo-v2.5`     | text, image | 1,048,576 | 131,072        | हां       | मल्टीमॉडल     |
+| मॉडल रेफ़रेंस                         | इनपुट       | कॉन्टेक्स्ट   | अधिकतम आउटपुट | रीजनिंग | टिप्पणियाँ         |
+| --------------------------------- | ----------- | --------- | ---------- | --------- | ------------- |
+| `xiaomi-token-plan/mimo-v2.5-pro` | टेक्स्ट        | 1,048,576 | 131,072    | हाँ       | डिफ़ॉल्ट मॉडल |
+| `xiaomi-token-plan/mimo-v2.5`     | टेक्स्ट, इमेज | 1,048,576 | 131,072    | हाँ       | मल्टीमॉडल    |
 
-<Tip>
-Token Plan onboarding कुंजी के आकार को सत्यापित करता है और चेतावनी देता है जब कोई `tp-...` कुंजी पे-ऐज़-यू-गो पथ में दर्ज की जाती है, या कोई `sk-...` कुंजी Token Plan पथ में दर्ज की जाती है।
-</Tip>
+`xiaomi-token-plan` को रिज़ॉल्व होने के लिए क्षेत्रीय बेस URL की आवश्यकता होती है। समर्थित पथ
+बंडल किया गया Token Plan ऑनबोर्डिंग विकल्प या ऐसा स्पष्ट
+`models.providers.xiaomi-token-plan` कॉन्फ़िग ब्लॉक है जिसमें `baseUrl` सेट हो; इनमें से
+किसी एक के बिना प्रोवाइडर उपलब्ध नहीं कराया जाता।
 
-## टेक्स्ट-से-स्पीच
+## रीजनिंग मॉडल
 
-बंडल किया गया `xiaomi` Plugin Xiaomi MiMo को `messages.tts` के लिए speech provider के रूप में भी पंजीकृत करता है। यह Xiaomi के chat-completions TTS अनुबंध को text को `assistant` संदेश के रूप में और वैकल्पिक style guidance को `user` संदेश के रूप में भेजकर कॉल करता है।
+`mimo-v2.5` और `mimo-v2.5-pro`
+OpenClaw के [`/think` निर्देश](/hi/tools/thinking) को `off`,
+`minimal`, `low`, `medium`, `high`, `xhigh`, और `max` स्तरों के साथ समर्थित करते हैं (डिफ़ॉल्ट `high`)।
 
-| गुण      | मान                                      |
+## टेक्स्ट-टू-स्पीच
+
+बंडल किया गया `xiaomi` Plugin, Xiaomi MiMo को
+`tts` के लिए स्पीच प्रोवाइडर के रूप में भी पंजीकृत करता है। यह टेक्स्ट को `assistant` संदेश
+और वैकल्पिक शैली मार्गदर्शन को `user` संदेश के रूप में रखकर Xiaomi के चैट-कम्प्लीशन TTS अनुबंध को कॉल करता है।
+
+| प्रॉपर्टी | मान                                    |
 | -------- | ---------------------------------------- |
-| TTS id   | `xiaomi` (`mimo` alias)                  |
-| Auth     | `XIAOMI_API_KEY`                         |
-| API      | `audio` के साथ `POST /v1/chat/completions` |
-| डिफ़ॉल्ट | `mimo-v2.5-tts`, voice `mimo_default`    |
-| आउटपुट  | डिफ़ॉल्ट रूप से MP3; कॉन्फ़िगर होने पर WAV |
+| TTS आईडी   | `xiaomi` (`mimo` उपनाम)                  |
+| प्रमाणीकरण     | `XIAOMI_API_KEY`                         |
+| API      | `POST /v1/chat/completions` के साथ `audio` |
+| डिफ़ॉल्ट  | `mimo-v2.5-tts`, वॉइस `mimo_default`    |
+| आउटपुट   | डिफ़ॉल्ट रूप से MP3; कॉन्फ़िगर करने पर WAV      |
 
 ```json5
 {
-  messages: {
-    tts: {
-      auto: "always",
-      provider: "xiaomi",
-      providers: {
-        xiaomi: {
-          apiKey: "xiaomi_api_key",
-          model: "mimo-v2.5-tts",
-          speakerVoice: "mimo_default",
-          format: "mp3",
-          style: "Bright, natural, conversational tone.",
-        },
+  tts: {
+    auto: "always",
+    provider: "xiaomi",
+    providers: {
+      xiaomi: {
+        apiKey: "xiaomi_api_key",
+        model: "mimo-v2.5-tts",
+        speakerVoice: "mimo_default",
+        format: "mp3",
+        style: "उज्ज्वल, स्वाभाविक, संवादात्मक लहजा।",
       },
     },
   },
 }
 ```
 
-समर्थित built-in voices में `mimo_default`, `default_zh`, `default_en`, `Mia`, `Chloe`, `Milo`, और `Dean` शामिल हैं। Preset-voice मॉडल `audio.voice` का उपयोग करते हैं, इसलिए OpenClaw `mimo-v2.5-tts` और `mimo-v2-tts` के लिए `speakerVoice` भेजता है।
+अंतर्निहित वॉइस: `mimo_default`, `default_zh`, `default_en`, `Mia`, `Chloe`,
+`Milo`, `Dean`। प्रीसेट-वॉइस मॉडल `mimo-v2.5-tts`, `audio.voice` का उपयोग करता है, इसलिए
+OpenClaw उस मॉडल के लिए `speakerVoice` भेजता है।
 
-Xiaomi का voicedesign मॉडल, `mimo-v2.5-tts-voicedesign`, preset voice id के बजाय natural-language style prompt से आवाज़ बनाता है। इच्छित आवाज़ के विवरण के साथ `style` कॉन्फ़िगर करें; OpenClaw इसे `user` संदेश के रूप में भेजता है, बोले जाने वाले text को `assistant` संदेश के रूप में भेजता है, और इस मॉडल के लिए `audio.voice` छोड़ देता है।
+वॉइसडिज़ाइन मॉडल `mimo-v2.5-tts-voicedesign`, प्रीसेट वॉइस आईडी के बजाय
+प्राकृतिक-भाषा शैली प्रॉम्प्ट से वॉइस उत्पन्न करता है। `style` को
+वांछित वॉइस विवरण पर सेट करें; OpenClaw इसे `user` संदेश के रूप में भेजता है,
+बोले जाने वाले टेक्स्ट को `assistant` संदेश के रूप में भेजता है और इस मॉडल के लिए `audio.voice` को
+हटा देता है।
 
 ```json5
 {
-  messages: {
-    tts: {
-      provider: "xiaomi",
-      providers: {
-        xiaomi: {
-          model: "mimo-v2.5-tts-voicedesign",
-          format: "wav",
-          style: "Warm, natural female voice with clear pronunciation.",
-        },
+  tts: {
+    provider: "xiaomi",
+    providers: {
+      xiaomi: {
+        model: "mimo-v2.5-tts-voicedesign",
+        format: "wav",
+        style: "स्पष्ट उच्चारण वाली गर्मजोशी भरी, स्वाभाविक महिला वॉइस।",
       },
     },
   },
 }
 ```
 
-Feishu और Telegram जैसे voice-note लक्ष्यों के लिए, OpenClaw delivery से पहले Xiaomi आउटपुट को `ffmpeg` के साथ 48kHz Opus में transcode करता है।
+वॉइस-नोट सिंथेसिस लक्ष्य का अनुरोध करने वाले चैनलों (Discord, Feishu,
+Matrix, Telegram और WhatsApp) के लिए, OpenClaw डिलीवरी से पहले Xiaomi आउटपुट को `ffmpeg` के साथ
+48kHz मोनो Opus में ट्रांसकोड करता है।
 
-## Config उदाहरण
+## कॉन्फ़िग उदाहरण
 
 ```json5
 {
   env: { XIAOMI_API_KEY: "your-key" },
-  agents: { defaults: { model: { primary: "xiaomi/mimo-v2-flash" } } },
+  agents: { defaults: { model: { primary: "xiaomi/mimo-v2.5" } } },
   models: {
     mode: "merge",
     providers: {
@@ -169,28 +183,20 @@ Feishu और Telegram जैसे voice-note लक्ष्यों के �
         apiKey: "XIAOMI_API_KEY",
         models: [
           {
-            id: "mimo-v2-flash",
-            name: "Xiaomi MiMo V2 Flash",
-            reasoning: false,
-            input: ["text"],
-            contextWindow: 262144,
-            maxTokens: 8192,
+            id: "mimo-v2.5",
+            name: "Xiaomi MiMo V2.5",
+            reasoning: true,
+            input: ["text", "image"],
+            contextWindow: 1048576,
+            maxTokens: 131072,
           },
           {
-            id: "mimo-v2-pro",
-            name: "Xiaomi MiMo V2 Pro",
+            id: "mimo-v2.5-pro",
+            name: "Xiaomi MiMo V2.5 Pro",
             reasoning: true,
             input: ["text"],
             contextWindow: 1048576,
-            maxTokens: 32000,
-          },
-          {
-            id: "mimo-v2-omni",
-            name: "Xiaomi MiMo V2 Omni",
-            reasoning: true,
-            input: ["text", "image"],
-            contextWindow: 262144,
-            maxTokens: 32000,
+            maxTokens: 131072,
           },
         ],
       },
@@ -199,7 +205,7 @@ Feishu और Telegram जैसे voice-note लक्ष्यों के �
 }
 ```
 
-Pricing और compat flags बंडल किए गए Plugin manifest से आते हैं, इसलिए config उदाहरण runtime व्यवहार से अलगाव से बचने के लिए `cost` और `compat` छोड़ देता है।
+मूल्य निर्धारण और संगतता फ़्लैग बंडल किए गए Plugin मैनिफ़ेस्ट से आते हैं, इसलिए रनटाइम व्यवहार से अंतर से बचने के लिए कॉन्फ़िग उदाहरण में `cost` और `compat` शामिल नहीं हैं।
 
 Token Plan:
 
@@ -238,33 +244,30 @@ Token Plan:
 }
 ```
 
-Pricing बंडल किए गए manifest से आती है (Token Plan मॉडल में tiered cache-read pricing शामिल है), इसलिए config उदाहरण `cost` छोड़ देता है।
+मूल्य निर्धारण बंडल किए गए मैनिफ़ेस्ट से आता है (Token Plan मॉडल में स्तरीय कैश-रीड मूल्य निर्धारण शामिल है), इसलिए कॉन्फ़िग उदाहरण में `cost` शामिल नहीं है।
 
 <AccordionGroup>
-  <Accordion title="Auto-injection behavior">
-    आपके environment में `XIAOMI_API_KEY` सेट होने या auth profile मौजूद होने पर `xiaomi` प्रदाता अपने आप inject हो जाता है। `xiaomi-token-plan` को क्षेत्रीय आधार URL चाहिए, इसलिए समर्थित पथ बंडल किया गया Token Plan onboarding विकल्प या स्पष्ट `models.providers.xiaomi-token-plan` config block है।
+  <Accordion title="स्वतः इंजेक्शन व्यवहार">
+    जब आपके एनवायरनमेंट में `XIAOMI_API_KEY` सेट हो या कोई प्रमाणीकरण प्रोफ़ाइल मौजूद हो, तो `xiaomi` प्रोवाइडर स्वतः सक्षम हो जाता है। `xiaomi-token-plan` को क्षेत्रीय बेस URL की आवश्यकता होती है, इसलिए समर्थित पथ बंडल किया गया Token Plan ऑनबोर्डिंग विकल्प या एक स्पष्ट `models.providers.xiaomi-token-plan` कॉन्फ़िग ब्लॉक है।
   </Accordion>
 
-  <Accordion title="Model details">
-    - **mimo-v2-flash** — हल्का और तेज़, सामान्य-उद्देश्य text कार्यों के लिए आदर्श। Reasoning support नहीं है।
-    - **mimo-v2-pro** — लंबे-दस्तावेज़ workloads के लिए 1M token context window के साथ reasoning को support करता है।
-    - **mimo-v2-omni** — reasoning-enabled मल्टीमॉडल मॉडल जो text और image दोनों inputs स्वीकार करता है।
-    - **mimo-v2.5-pro** — Xiaomi के मौजूदा V2.5 reasoning stack के साथ Token Plan डिफ़ॉल्ट।
-    - **mimo-v2.5** — Token Plan मल्टीमॉडल V2.5 route।
+  <Accordion title="मॉडल विवरण">
+    - **mimo-v2.5** - उपयोग के अनुसार भुगतान वाला डिफ़ॉल्ट और Token Plan मल्टीमॉडल V2.5 रूट।
+    - **mimo-v2.5-pro** - फ़्लैगशिप रीजनिंग मॉडल और Token Plan डिफ़ॉल्ट।
 
     <Note>
-    पे-ऐज़-यू-गो मॉडल `xiaomi/` prefix का उपयोग करते हैं। Token Plan मॉडल `xiaomi-token-plan/` prefix का उपयोग करते हैं।
+    उपयोग के अनुसार भुगतान वाले मॉडल `xiaomi/` प्रीफ़िक्स का उपयोग करते हैं। Token Plan मॉडल `xiaomi-token-plan/` प्रीफ़िक्स का उपयोग करते हैं।
     </Note>
 
   </Accordion>
 
-  <Accordion title="Troubleshooting">
-    - अगर मॉडल दिखाई नहीं देते, तो पुष्टि करें कि संबंधित key env var या auth profile मौजूद और मान्य है।
-    - Token Plan के लिए, पुष्टि करें कि चुना गया onboarding region subscription page base URL से मेल खाता है और कुंजी `tp-` से शुरू होती है।
-    - जब Gateway daemon के रूप में चलता है, तो सुनिश्चित करें कि कुंजी उस process के लिए उपलब्ध है (उदाहरण के लिए `~/.openclaw/.env` में या `env.shellEnv` के माध्यम से)।
+  <Accordion title="समस्या निवारण">
+    - यदि मॉडल दिखाई नहीं देते हैं, तो पुष्टि करें कि संबंधित कुंजी एनवायरनमेंट वेरिएबल या प्रमाणीकरण प्रोफ़ाइल मौजूद और मान्य है।
+    - Token Plan के लिए, पुष्टि करें कि चुना गया ऑनबोर्डिंग क्षेत्र सदस्यता पेज के बेस URL से मेल खाता है और कुंजी `tp-` से शुरू होती है।
+    - जब Gateway डेमन के रूप में चलता है, तो सुनिश्चित करें कि कुंजी उस प्रोसेस के लिए उपलब्ध है (उदाहरण के लिए `~/.openclaw/.env` में या `env.shellEnv` के माध्यम से)।
 
     <Warning>
-    केवल आपके interactive shell में सेट की गई कुंजियां daemon-managed gateway processes को दिखाई नहीं देतीं। स्थायी उपलब्धता के लिए `~/.openclaw/.env` या `env.shellEnv` config का उपयोग करें।
+    केवल आपके इंटरैक्टिव शेल में सेट की गई कुंजियाँ डेमन-प्रबंधित Gateway प्रोसेस को दिखाई नहीं देती हैं। स्थायी उपलब्धता के लिए `~/.openclaw/.env` या `env.shellEnv` कॉन्फ़िग का उपयोग करें।
     </Warning>
 
   </Accordion>
@@ -273,13 +276,16 @@ Pricing बंडल किए गए manifest से आती है (Token Pl
 ## संबंधित
 
 <CardGroup cols={2}>
-  <Card title="Model selection" href="/hi/concepts/model-providers" icon="layers">
-    प्रदाता, model refs, और failover व्यवहार चुनना।
+  <Card title="मॉडल चयन" href="/hi/concepts/model-providers" icon="layers">
+    प्रोवाइडर, मॉडल रेफ़रेंस और फ़ेलओवर व्यवहार चुनना।
   </Card>
-  <Card title="Configuration reference" href="/hi/gateway/configuration-reference" icon="gear">
-    पूर्ण OpenClaw configuration reference।
+  <Card title="थिंकिंग स्तर" href="/hi/tools/thinking" icon="brain">
+    `/think` निर्देश सिंटैक्स और स्तर मैपिंग।
   </Card>
-  <Card title="Xiaomi MiMo console" href="https://platform.xiaomimimo.com" icon="arrow-up-right-from-square">
-    Xiaomi MiMo dashboard और API key management।
+  <Card title="कॉन्फ़िगरेशन संदर्भ" href="/hi/gateway/configuration-reference" icon="gear">
+    संपूर्ण OpenClaw कॉन्फ़िगरेशन संदर्भ।
+  </Card>
+  <Card title="Xiaomi MiMo कंसोल" href="https://platform.xiaomimimo.com" icon="arrow-up-right-from-square">
+    Xiaomi MiMo डैशबोर्ड और API कुंजी प्रबंधन।
   </Card>
 </CardGroup>

@@ -2,12 +2,13 @@
 read_when:
     - می‌خواهید OpenClaw را از یک دستگاه حذف کنید
     - سرویس Gateway پس از حذف نصب همچنان در حال اجرا است
-summary: OpenClaw را به‌طور کامل حذف کنید (CLI، سرویس، وضعیت، فضای کاری)
+summary: حذف کامل OpenClaw (CLI، سرویس، وضعیت، فضای کاری)
 title: حذف نصب
 x-i18n:
-    generated_at: "2026-07-12T10:19:29Z"
+    generated_at: "2026-07-27T14:14:11Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 84f01dc11defe6f19c89232375e48bad383b2e71379f47f43e759d3d7bb908b5
     source_path: install/uninstall.md
@@ -16,8 +17,8 @@ x-i18n:
 
 دو مسیر:
 
-- **مسیر آسان** اگر `openclaw` همچنان نصب است.
-- **حذف دستی سرویس** اگر CLI حذف شده اما سرویس همچنان در حال اجرا است.
+- اگر `openclaw` همچنان نصب است، **مسیر آسان**.
+- اگر CLI حذف شده اما سرویس همچنان در حال اجرا است، **حذف دستی سرویس**.
 
 ## مسیر آسان (CLI همچنان نصب است)
 
@@ -35,14 +36,14 @@ openclaw uninstall
 openclaw uninstall --dry-run --all
 ```
 
-حالت غیرتعاملی (خودکارسازی / npx). با احتیاط و فقط پس از تأیید دامنه‌ها استفاده کنید:
+حالت غیرتعاملی (اتوماسیون / npx). با احتیاط و فقط پس از تأیید دامنه‌ها استفاده کنید:
 
 ```bash
 openclaw uninstall --all --yes --non-interactive
 npx -y openclaw uninstall --all --yes --non-interactive
 ```
 
-پرچم‌های `--service`، `--state`، `--workspace` و `--app` هرکدام دامنه‌ای جداگانه را انتخاب می‌کنند؛ `--all` هر چهار دامنه را انتخاب می‌کند.
+پرچم‌های `--service`، `--state`، `--workspace` و `--app` دامنه‌های جداگانه را انتخاب می‌کنند؛ `--all` هر چهار مورد را انتخاب می‌کند.
 
 مراحل دستی (با همان نتیجه):
 
@@ -65,7 +66,7 @@ rm -rf "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
 ```
 
 اگر `OPENCLAW_CONFIG_PATH` را روی مکانی سفارشی خارج از دایرکتوری وضعیت تنظیم کرده‌اید، آن فایل را نیز حذف کنید.
-اگر می‌خواهید فضای کاری داخل دایرکتوری وضعیت، مانند `~/.openclaw/workspace`، حفظ شود، پیش از اجرای `rm -rf` آن را به محل دیگری منتقل کنید یا محتویات وضعیت را به‌صورت انتخابی حذف کنید.
+اگر می‌خواهید یک فضای کاری داخل دایرکتوری وضعیت، مانند `~/.openclaw/workspace`، حفظ شود، پیش از اجرای `rm -rf` آن را به محل دیگری منتقل کنید یا محتوای وضعیت را به‌صورت انتخابی حذف کنید.
 
 4. فضای کاری خود را حذف کنید (اختیاری، فایل‌های عامل را حذف می‌کند):
 
@@ -73,7 +74,7 @@ rm -rf "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
 rm -rf ~/.openclaw/workspace
 ```
 
-5. نصب CLI را حذف کنید (موردی را انتخاب کنید که برای نصب استفاده کرده‌اید):
+5. نصب CLI را حذف کنید (موردی را انتخاب کنید که استفاده کرده‌اید):
 
 ```bash
 npm rm -g openclaw
@@ -89,8 +90,8 @@ rm -rf /Applications/OpenClaw.app
 
 نکات:
 
-- اگر از پروفایل‌ها (`--profile` / `OPENCLAW_PROFILE`) استفاده کرده‌اید، مرحلهٔ ۳ را برای دایرکتوری وضعیت هر پروفایل تکرار کنید (مقدار پیش‌فرض `~/.openclaw-<profile>` است).
-- در حالت راه دور، دایرکتوری وضعیت روی **میزبان Gateway** قرار دارد؛ بنابراین مراحل ۱ تا ۴ را در آنجا نیز اجرا کنید.
+- اگر از پروفایل‌ها (`--profile` / `OPENCLAW_PROFILE`) استفاده کرده‌اید، مرحلهٔ 3 را برای هر دایرکتوری وضعیت تکرار کنید (مقادیر پیش‌فرض `~/.openclaw-<profile>` هستند).
+- در حالت راه‌دور، دایرکتوری وضعیت روی **میزبان Gateway** قرار دارد؛ بنابراین مراحل 1 تا 4 را آنجا نیز اجرا کنید.
 
 ## حذف دستی سرویس (CLI نصب نیست)
 
@@ -98,18 +99,18 @@ rm -rf /Applications/OpenClaw.app
 
 ### macOS (launchd)
 
-برچسب پیش‌فرض `ai.openclaw.gateway` است (یا در صورت استفاده از پروفایل، `ai.openclaw.<profile>`):
+برچسب پیش‌فرض `ai.openclaw.gateway` است (یا همراه با پروفایل، `ai.openclaw.<profile>`):
 
 ```bash
 launchctl bootout gui/$UID/ai.openclaw.gateway
 rm -f ~/Library/LaunchAgents/ai.openclaw.gateway.plist
 ```
 
-اگر از پروفایل استفاده کرده‌اید، برچسب و نام فایل plist را با `ai.openclaw.<profile>` جایگزین کنید.
+اگر از پروفایل استفاده کرده‌اید، برچسب و نام plist را با `ai.openclaw.<profile>` جایگزین کنید.
 
 ### Linux (واحد کاربری systemd)
 
-نام پیش‌فرض واحد `openclaw-gateway.service` است (یا `openclaw-gateway-<profile>.service`). ممکن است واحد قدیمیِ پیش از تغییر نام، یعنی `clawdbot-gateway.service`، همچنان روی دستگاه‌هایی که از نصب‌های بسیار قدیمی ارتقا یافته‌اند وجود داشته باشد؛ `openclaw uninstall` / `openclaw gateway uninstall` آن را به‌طور خودکار شناسایی و حذف می‌کند.
+نام واحد پیش‌فرض `openclaw-gateway.service` است (یا `openclaw-gateway-<profile>.service`). ممکن است یک واحد قدیمیِ پیش از تغییر نام با نام `clawdbot-gateway.service` همچنان روی دستگاه‌هایی که از نصب‌های بسیار قدیمی ارتقا یافته‌اند وجود داشته باشد؛ `openclaw uninstall` / `openclaw gateway uninstall` آن را به‌طور خودکار شناسایی و حذف می‌کند.
 
 ```bash
 systemctl --user disable --now openclaw-gateway.service
@@ -120,7 +121,7 @@ systemctl --user daemon-reload
 ### Windows (وظیفهٔ زمان‌بندی‌شده)
 
 نام پیش‌فرض وظیفه `OpenClaw Gateway` است (یا `OpenClaw Gateway (<profile>)`).
-این وظیفه، اسکریپت بدون پنجرهٔ `gateway.vbs` را از دایرکتوری وضعیت شما اجرا می‌کند که آن نیز
+این وظیفه یک اسکریپت بدون پنجرهٔ `gateway.vbs` را در دایرکتوری وضعیت شما راه‌اندازی می‌کند که به‌نوبهٔ خود
 `gateway.cmd` را اجرا می‌کند؛ هر دو را حذف کنید.
 
 ```powershell
@@ -132,16 +133,16 @@ Remove-Item -Force "$env:USERPROFILE\.openclaw\gateway.vbs" -ErrorAction Silentl
 اگر از پروفایل استفاده کرده‌اید، نام وظیفهٔ منطبق و فایل‌های `gateway.cmd` /
 `gateway.vbs` را در `~\.openclaw-<profile>` حذف کنید.
 
-## نصب عادی در برابر دریافت کد منبع
+## نصب عادی در برابر نسخهٔ دریافت‌شده از منبع
 
 ### نصب عادی (install.sh / npm / pnpm / bun)
 
 اگر از `https://openclaw.ai/install.sh` یا `install.ps1` استفاده کرده‌اید، CLI با `npm install -g openclaw@latest` نصب شده است.
-آن را با `npm rm -g openclaw` حذف کنید (یا اگر با روش دیگری نصب کرده‌اید، از `pnpm remove -g` / `bun remove -g` استفاده کنید).
+آن را با `npm rm -g openclaw` حذف کنید (یا اگر به آن روش نصب کرده‌اید، با `pnpm remove -g` / `bun remove -g`).
 
-### دریافت کد منبع (git clone)
+### نسخهٔ دریافت‌شده از منبع (git clone)
 
-اگر از نسخهٔ دریافت‌شدهٔ مخزن اجرا می‌کنید (`git clone` + `openclaw ...` / `bun run openclaw ...`):
+اگر از نسخهٔ دریافت‌شده از مخزن اجرا می‌کنید (`git clone` + `openclaw ...` / `bun run openclaw ...`):
 
 1. سرویس Gateway را **پیش از** حذف مخزن، حذف نصب کنید (از مسیر آسان بالا یا حذف دستی سرویس استفاده کنید).
 2. دایرکتوری مخزن را حذف کنید.

@@ -1,28 +1,29 @@
 ---
 read_when:
     - チャットコマンドの使用または設定
-    - コマンドのルーティングまたは権限のデバッグ
-    - スキルコマンドがどのように登録されるかを理解する
+    - コマンドルーティングまたは権限のデバッグ
+    - スキルコマンドの登録方法を理解する
 sidebarTitle: Slash commands
-summary: 利用可能なすべてのスラッシュコマンド、ディレクティブ、インラインショートカット — 設定、ルーティング、各サーフェスでの動作。
+summary: 利用可能なすべてのスラッシュコマンド、ディレクティブ、インラインショートカット — 設定、ルーティング、各サーフェス固有の動作。
 title: スラッシュコマンド
 x-i18n:
-    generated_at: "2026-07-11T22:46:11Z"
+    generated_at: "2026-07-26T09:55:49Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 0017f229610ff5b1f4ff4a11a77814575835cfd07c7d4dbcce8b0d51ed4f4dd1
+    source_hash: ee5ee5e46d632a54ea92dea7ca61046288bf1998d05b08396107bec90e646fff
     source_path: tools/slash-commands.md
     workflow: 16
 ---
 
 Gateway は、`/` で始まる単独メッセージとして送信されたコマンドを処理します。
-ホスト専用の bash コマンドは `! <cmd>` を使用します（`/bash <cmd>` はエイリアスです）。
+ホスト専用の bash コマンドでは `! <cmd>` を使用します（`/bash <cmd>` はエイリアスです）。
 
 会話が ACP セッションにバインドされている場合、通常のテキストは ACP
-ハーネスにルーティングされます。Gateway 管理コマンドはローカルに留まります。`/acp ...` は常に
-OpenClaw コマンドハンドラーに到達し、対象サーフェスでコマンド処理が有効な場合は
-`/status` と `/unfocus` もローカルに留まります。
+ハーネスにルーティングされます。Gateway 管理コマンドはローカルに残ります。`/acp ...` は常に
+OpenClaw コマンドハンドラーに到達し、`/status` と `/unfocus` は、そのサーフェスで
+コマンド処理が有効な場合は常にローカルに残ります。
 
 ## 3 種類のコマンド
 
@@ -33,13 +34,13 @@ OpenClaw コマンドハンドラーに到達し、対象サーフェスでコ�
   </Card>
   <Card title="ディレクティブ" icon="sliders">
     `/think`、`/fast`、`/verbose`、`/trace`、`/reasoning`、`/elevated`、
-    `/exec`、`/model`、`/queue` — モデルがメッセージを認識する前に
-    取り除かれます。単独で送信するとセッション設定を保持し、他のテキストと
-    一緒に送信するとインラインヒントとして機能します。
+    `/exec`、`/model`、`/queue` — モデルがメッセージを
+    認識する前に取り除かれます。単独で送信した場合はセッション設定を永続化し、他のテキストと
+    一緒に送信した場合はインラインヒントとして機能します。
   </Card>
   <Card title="インラインショートカット" icon="bolt">
     `/help`、`/commands`、`/status`、`/whoami` — 即座に実行され、
-    モデルが残りのテキストを認識する前に取り除かれます。認可された送信者のみ使用できます。
+    モデルが残りのテキストを認識する前に取り除かれます。許可された送信者のみ使用できます。
   </Card>
 </CardGroup>
 
@@ -47,13 +48,13 @@ OpenClaw コマンドハンドラーに到達し、対象サーフェスでコ�
   <Accordion title="ディレクティブの動作の詳細">
     - ディレクティブは、モデルがメッセージを認識する前に取り除かれます。
     - **ディレクティブのみ**のメッセージ（メッセージの内容がディレクティブのみ）では、
-      セッションに保持され、確認応答が返されます。
+      セッションに永続化され、確認応答が返されます。
     - 他のテキストを含む**通常のチャット**メッセージでは、インラインヒントとして機能し、
-      セッション設定は保持され**ません**。
-    - ディレクティブは**認可された送信者**にのみ適用されます。`commands.allowFrom`
-      が設定されている場合、それだけが許可リストとして使用されます。それ以外の場合、認可は
-      チャンネルの許可リスト／ペアリングと `commands.useAccessGroups` に基づきます。認可されていない
-      送信者のディレクティブはプレーンテキストとして扱われます。
+      セッション設定は永続化**されません**。
+    - ディレクティブは**許可された送信者**にのみ適用されます。`commands.allowFrom` が
+      設定されている場合、それが使用される唯一の許可リストです。それ以外の場合、認可は
+      チャンネルの許可リスト、ペアリング、および常時有効なアクセスグループの適用によって決まります。許可されていない
+      送信者からのディレクティブはプレーンテキストとして扱われます。
   </Accordion>
 </AccordionGroup>
 
@@ -85,111 +86,116 @@ OpenClaw コマンドハンドラーに到達し、対象サーフェスでコ�
 ```
 
 <ParamField path="commands.text" type="boolean" default="true">
-  チャットメッセージ内の `/...` の解析を有効にします。ネイティブコマンドがない
-  サーフェス（WhatsApp、WebChat、Signal、iMessage、Google Chat、Microsoft Teams）では、
-  `false` に設定されていてもテキストコマンドが機能します。
+  チャットメッセージ内の `/...` の解析を有効にします。ネイティブコマンドがないサーフェス
+  （WhatsApp、WebChat、Signal、iMessage、Google Chat、Microsoft Teams）では、`false` に
+  設定されている場合でもテキストコマンドが機能します。
 </ParamField>
 
 <ParamField path="commands.native" type='boolean | "auto"' default='"auto"'>
-  ネイティブコマンドを登録します。自動設定では Discord／Telegram で有効、Slack で無効になり、
+  ネイティブコマンドを登録します。自動設定では Discord/Telegram で有効、Slack で無効となり、
   ネイティブ対応のないプロバイダーでは無視されます。チャンネルごとに
-  `channels.<provider>.commands.native` で上書きできます。Discord では、`false` にするとスラッシュコマンドの
-  登録を省略します。以前に登録されたコマンドは、削除されるまで表示され続ける場合があります。
+  `channels.<provider>.commands.native` で上書きできます。Discord では、`false` によってスラッシュコマンドの
+  登録がスキップされます。以前に登録されたコマンドは、削除されるまで表示され続ける場合があります。
 </ParamField>
 
 <ParamField path="commands.nativeSkills" type='boolean | "auto"' default='"auto"'>
   対応している場合、スキルコマンドをネイティブに登録します。自動設定では
-  Discord／Telegram で有効、Slack で無効になります。
+  Discord/Telegram で有効、Slack で無効となります。
   `channels.<provider>.commands.nativeSkills` で上書きできます。
 </ParamField>
 
 <ParamField path="commands.bash" type="boolean" default="false">
-  `! <cmd>` によるホストシェルコマンドの実行を有効にします（`/bash <cmd>` はエイリアスです）。
+  `! <cmd>` によるホストのシェルコマンド実行を有効にします（`/bash <cmd>` はエイリアスです）。
   `tools.elevated` の許可リストが必要です。
 </ParamField>
 
 <ParamField path="commands.bashForegroundMs" type="number" default="2000">
-  bash がバックグラウンドモードに切り替わるまで待機する時間です（`0` の場合は
-  即座にバックグラウンドへ移行します）。
+  bash がバックグラウンドモードへ切り替わるまで待機する時間です（`0` は
+  即座にバックグラウンド化します）。
 </ParamField>
 
 <ParamField path="commands.config" type="boolean" default="false">
-  `/config`（`openclaw.json` の読み書き）を有効にします。所有者のみ使用できます。
+  `/config` を有効にします（`openclaw.json` を読み書きします）。オーナーのみ使用できます。
 </ParamField>
 
 <ParamField path="commands.mcp" type="boolean" default="false">
-  `/mcp`（`mcp.servers` 配下の OpenClaw 管理 MCP 設定の読み書き）を有効にします。所有者のみ使用できます。
+  `/mcp` を有効にします（`mcp.servers` 配下にある OpenClaw 管理の MCP 設定を読み書きします）。オーナーのみ使用できます。
 </ParamField>
 
 <ParamField path="commands.plugins" type="boolean" default="false">
-  `/plugins`（Plugin の検出／状態確認、およびインストール、有効化／無効化）を有効にします。書き込みは所有者のみ実行できます。
+  `/plugins` を有効にします（Plugin の検出とステータス、およびインストールと有効化／無効化）。書き込みはオーナーのみ実行できます。
 </ParamField>
 
 <ParamField path="commands.debug" type="boolean" default="false">
-  `/debug`（ランタイム限定の設定上書き）を有効にします。所有者のみ使用できます。
+  `/debug` を有効にします（実行時のみの設定上書き）。オーナーのみ使用できます。
 </ParamField>
 
 <ParamField path="commands.restart" type="boolean" default="true">
-  `/restart` と Gateway 再起動ツールのアクションを有効にします。
+  `/restart` および外部からの `SIGUSR1` 再起動リクエストを有効にします。
 </ParamField>
 
 <ParamField path="commands.ownerAllowFrom" type="string[]">
-  所有者専用コマンドサーフェス用の明示的な所有者許可リストです。
+  オーナー専用コマンドサーフェスに対する明示的なオーナー許可リストです。
   `commands.allowFrom` および DM ペアリングアクセスとは別です。
 </ParamField>
 
 <ParamField path="channels.<channel>.commands.enforceOwnerForCommands" type="boolean" default="false">
-  チャンネル単位で、所有者専用コマンドに所有者 ID を要求します。`true` の場合、
-  送信者は `commands.ownerAllowFrom` に一致するか、内部の `operator.admin`
-  スコープを保持している必要があります。`allowFrom` のワイルドカードエントリだけでは**不十分**です。
+  チャンネルごとの設定です。オーナー専用コマンドにオーナー ID を要求します。`true` の場合、
+  送信者は `commands.ownerAllowFrom` と一致するか、内部の `operator.admin`
+  スコープを保持している必要があります。ワイルドカードの `allowFrom` エントリだけでは**不十分**です。
 </ParamField>
 
 <ParamField path="commands.ownerDisplay" type='"raw" | "hash"'>
-  システムプロンプトで所有者 ID をどのように表示するかを制御します。
+  システムプロンプトでのオーナー ID の表示方法を制御します。
 </ParamField>
 
 <ParamField path="commands.ownerDisplaySecret" type="string">
-  `commands.ownerDisplay: "hash"` の場合に使用する HMAC シークレットです。
+  `commands.ownerDisplay: "hash"` の場合に使用される HMAC シークレットです。
 </ParamField>
 
 <ParamField path="commands.allowFrom" type="object">
-  コマンド認可用のプロバイダー別許可リストです。設定した場合、コマンドとディレクティブに対する
-  **唯一の**認可元になります。グローバルなデフォルトには `"*"` を使用します。プロバイダー固有のキーがこれを上書きします。
-</ParamField>
-
-<ParamField path="commands.useAccessGroups" type="boolean" default="true">
-  `commands.allowFrom` が設定されていない場合、コマンドに許可リストとポリシーを適用します。
+  コマンド認可のためのプロバイダーごとの許可リストです。設定されている場合、これが
+  コマンドとディレクティブに対する**唯一の**認可ソースになります。グローバルなデフォルトには
+  `"*"` を使用します。プロバイダー固有のキーはこれを上書きします。
 </ParamField>
 
 ## コマンド一覧
 
 コマンドは次の 3 つのソースから提供されます。
 
-- **コア組み込みコマンド:** `src/auto-reply/commands-registry.shared.ts`
-- **生成された dock コマンド:** `src/auto-reply/commands-registry.data.ts`
-- **Plugin コマンド:** Plugin による `registerCommand()` 呼び出し
+- **コア組み込み:** `src/auto-reply/commands-registry.shared.ts`
+- **生成されたドックコマンド:** `src/auto-reply/commands-registry.data.ts`
+- **Plugin コマンド:** Plugin の `registerCommand()` 呼び出し
 
-利用可否は、設定フラグ、チャンネルサーフェス、およびインストール済みで有効化されている
-Plugin によって異なります。
+利用可否は、設定フラグ、チャンネルサーフェス、およびインストール済みで有効な
+Plugin によって決まります。
 
 ### コアコマンド
 
-  <AccordionGroup>
+<AccordionGroup>
   <Accordion title="セッションと実行">
     | コマンド | 説明 |
     | --- | --- |
     | `/new [model]` | 現在のセッションをアーカイブし、新しいセッションを開始します |
-    | `/reset [soft [message]]` | 現在のセッションをその場でリセットします。`soft` はトランスクリプトを維持し、再利用されている CLI バックエンドのセッション ID を破棄して、起動処理を再実行します |
+    | `/reset [soft [message]]` | 現在のセッションをその場でリセットします。`soft` はトランスクリプトを保持し、再利用された CLI バックエンドのセッション ID を破棄して、起動処理を再実行します |
     | `/name <title>` | 現在のセッションに名前を付けるか、名前を変更します。タイトルを省略すると、現在の名前と候補が表示されます |
-    | `/compact [instructions]` | セッションのコンテキストを圧縮します。[Compaction](/ja-JP/concepts/compaction)を参照してください |
+    | `/compact [instructions]` | セッションコンテキストを圧縮します。[Compaction](/ja-JP/concepts/compaction) を参照してください |
     | `/stop` | 現在の実行を中止します |
     | `/session idle <duration\|off>` | スレッドバインディングのアイドル有効期限を管理します |
-    | `/session max-age <duration\|off>` | スレッドバインディングの最大経過時間による有効期限を管理します |
-    | `/export-session [path]` | 現在のセッションを HTML にエクスポートします。エイリアス: `/export` |
+    | `/session max-age <duration\|off>` | スレッドバインディングの最大期間による有効期限を管理します |
+    | `/export-session [path]` | オーナーのみ使用できます。現在のセッションをワークスペース内の HTML にエクスポートします。エイリアス: `/export` |
     | `/export-trajectory [path]` | 現在のセッションの JSONL 軌跡バンドルをエクスポートします。エイリアス: `/trajectory` |
 
+    明示的な `/export-session` パスを指定すると、ワークスペース内の既存ファイルが
+    置き換えられます。パスを省略すると、名前の衝突を回避したファイル名が生成されます。
+
     <Note>
-      Control UI は入力された `/new` をインターセプトし、新しいダッシュボードセッションを作成して切り替えます。ただし、`session.dmScope: "main"` が設定され、現在の親がエージェントのメインセッションである場合、`/new` はメインセッションをその場でリセットします。入力された `/reset` は引き続き Gateway のインプレースリセットを実行します。固定されたセッションのモデル選択を解除する場合は、`/model default` を使用してください。
+      Control UI は、入力された `/new` をインターセプトし、新しい
+      ダッシュボードセッションを作成して切り替えます。ただし、`session.dmScope: "main"` が設定されていて、
+      現在の親がエージェントのメインセッションである場合は、`/new` が
+      メインセッションをその場でリセットします。入力された `/reset` は引き続き Gateway の
+      インプレースリセットを実行します。固定されたセッションのモデル選択をクリアする場合は
+      `/model default` を使用します。
     </Note>
 
   </Accordion>
@@ -197,32 +203,32 @@ Plugin によって異なります。
   <Accordion title="モデルと実行の制御">
     | コマンド | 説明 |
     | --- | --- |
-    | `/think <level\|default>` | 思考レベルを設定するか、セッションのオーバーライドを解除します。エイリアス: `/thinking`、`/t` |
+    | `/think <level\|default>` | 思考レベルを設定するか、セッションの上書きを解除します。エイリアス: `/thinking`、`/t` |
     | `/verbose on\|off\|full` | 詳細出力を切り替えます。エイリアス: `/v` |
     | `/trace on\|off` | 現在のセッションの Plugin トレース出力を切り替えます |
     | `/fast [status\|auto\|on\|off\|default]` | 高速モードを表示、設定、または解除します |
-    | `/reasoning [on\|off\|stream]` | 推論の表示を切り替えます。エイリアス: `/reason` |
+    | `/reasoning [on\|off\|stream]` | 推論の表示／非表示を切り替えます。エイリアス: `/reason` |
     | `/elevated [on\|off\|ask\|full]` | 昇格モードを切り替えます。エイリアス: `/elev` |
-    | `/exec host=<auto\|sandbox\|gateway\|node> security=<deny\|allowlist\|full> ask=<off\|on-miss\|always> node=<id>` | exec のデフォルト設定を表示または設定します |
-    | `/login [codex\|openai\|openai-codex]` | プライベートチャットまたは Web UI セッションから Codex/OpenAI ログインをペアリングします。所有者または管理者のみ |
+    | `/exec host=<auto\|sandbox\|gateway\|node> security=<deny\|allowlist\|full> ask=<off\|on-miss\|always> node=<id>` | exec のデフォルトを表示または設定します |
+    | `/login [codex\|openai\|openai-codex]` | プライベートチャットまたは Web UI セッションから Codex/OpenAI ログインをペアリングします。オーナーまたは管理者のみ使用できます |
     | `/model [name\|#\|status]` | モデルを表示または設定します |
-    | `/models [provider] [page] [limit=<n>\|all]` | 設定済み、または認証で利用可能なプロバイダーやモデルを一覧表示します |
-    | `/queue <mode>` | アクティブな実行キューの動作を管理します。[キュー](/ja-JP/concepts/queue)および[キューの方向付け](/ja-JP/concepts/queue-steering)を参照してください |
-    | `/steer <message>` | アクティブな実行に指示を挿入します。エイリアス: `/tell`。[方向付け](/ja-JP/tools/steer)を参照してください |
+    | `/models [provider] [page] [limit=<n>\|all]` | 設定済み、または認証により利用可能なプロバイダーやモデルを一覧表示します |
+    | `/queue <mode>` | アクティブな実行キューの動作を管理します。[キュー](/ja-JP/concepts/queue) および [キューステアリング](/ja-JP/concepts/queue-steering) を参照してください |
+    | `/steer <message>` | アクティブな実行に指示を挿入します。エイリアス: `/tell`。[ステアリング](/ja-JP/tools/steer) を参照してください |
 
     <AccordionGroup>
       <Accordion title="verbose / trace / fast / reasoning の安全性">
-        - `/verbose` はデバッグ用です。通常の使用では **オフ** にしてください。
-        - `/trace` が表示するのは Plugin が所有するトレース行とデバッグ行だけです。通常の詳細メッセージはオフのままです。
-        - `/fast auto|on|off` はセッションのオーバーライドを保持します。解除するには Sessions UI の `inherit` オプションを使用してください。
-        - `/fast` はプロバイダー固有です。OpenAI/Codex では `service_tier=priority` に対応し、Anthropic への直接リクエストでは `service_tier=auto` または `standard_only` に対応します。
-        - `/reasoning`、`/verbose`、`/trace` はグループ環境では危険です。内部の推論や Plugin の診断情報が公開される可能性があります。グループチャットではオフにしてください。
+        - `/verbose` はデバッグ用です。通常の使用時は**オフ**にしてください。
+        - `/trace` は Plugin が所有するトレース／デバッグ行のみを表示します。通常の詳細メッセージはオフのままです。
+        - `/fast auto|on|off` はセッションの上書きを永続化します。解除するには Sessions UI の `inherit` オプションを使用します。
+        - `/fast` はプロバイダー固有です。OpenAI/Codex では `service_tier=priority` に、Anthropic への直接リクエストでは `service_tier=auto` または `standard_only` にマッピングされます。
+        - `/reasoning`、`/verbose`、`/trace` はグループ環境では危険です。内部推論や Plugin の診断情報が公開される可能性があります。グループチャットではオフにしてください。
 
       </Accordion>
       <Accordion title="モデル切り替えの詳細">
-        - `/model` は新しいモデルをセッションに即座に保存します。
-        - エージェントがアイドル状態の場合、次回の実行からすぐに使用されます。
-        - 実行中の場合、切り替えは保留として記録され、次の正常な再試行時点で適用されます。
+        - `/model` は新しいモデルを即座にセッションへ永続化します。
+        - エージェントがアイドル状態の場合、次回の実行から直ちに使用されます。
+        - 実行中の場合、切り替えは保留としてマークされ、次の正常な再試行ポイントで適用されます。
 
       </Accordion>
     </AccordionGroup>
@@ -232,66 +238,66 @@ Plugin によって異なります。
   <Accordion title="検出とステータス">
     | コマンド | 説明 |
     | --- | --- |
-    | `/help` | 簡潔なヘルプの概要を表示します |
+    | `/help` | 短いヘルプ概要を表示します |
     | `/commands` | 生成されたコマンドカタログを表示します |
-    | `/tools [compact\|verbose]` | 現在のエージェントが今すぐ使用できるものを表示します |
-    | `/status` | 実行およびランタイムのステータス、Gateway とシステムの稼働時間、Plugin の健全性、プロバイダーの使用量とクォータを表示します |
-    | `/status plugins` | Plugin の詳細な健全性（読み込みエラー、隔離、チャンネル Plugin の障害、依存関係の問題、互換性に関する通知）を表示します。`commands.plugins: true` が必要です |
+    | `/tools [compact\|verbose]` | 現在のエージェントが現時点で使用できるものを表示します |
+    | `/status` | 実行／ランタイムのステータス、Gateway とシステムの稼働時間、Plugin の健全性、およびプロバイダーの使用量／クォータを表示します |
+    | `/status plugins` | Plugin の詳細な健全性を表示します。読み込みエラー、隔離、チャンネル Plugin の障害、依存関係の問題、互換性に関する通知が含まれます。`commands.plugins: true` が必要です |
     | `/goal [status\|start\|edit\|pause\|resume\|complete\|block\|clear] ...` | 現在のセッションの永続的な[目標](/ja-JP/tools/goal)を管理します |
-    | `/diagnostics [note]` | オーナー専用のサポートレポートフローです。毎回、実行の承認を求めます |
-    | `/crestodian <request>` | オーナーの DM から Crestodian のセットアップおよび修復ヘルパーを実行します |
-    | `/tasks` | 現在のセッションの実行中および最近のバックグラウンドタスクを一覧表示します |
+    | `/diagnostics [note]` | オーナー専用のサポートレポートフローです。毎回 exec の承認を求めます |
+    | `/openclaw <request>` | オーナーの DM から OpenClaw のセットアップおよび修復ヘルパーを実行します |
+    | `/tasks` | 現在のセッションのアクティブまたは最近のバックグラウンドタスクを一覧表示します |
     | `/context [list\|detail\|map\|json]` | コンテキストがどのように構成されるかを説明します |
     | `/whoami` | 送信者 ID を表示します。エイリアス: `/id` |
-    | `/usage off\|tokens\|full\|reset\|cost` | 応答ごとの使用量フッターを制御するか（`reset`/`inherit`/`clear`/`default` はセッションの上書きを解除し、設定済みのデフォルトを再継承します）、ローカルのコスト概要を表示します |
+    | `/usage off\|tokens\|full\|reset\|cost` | 応答ごとの使用量フッターを制御するか（`reset`/`inherit`/`clear`/`default` はセッションの上書きを解除し、設定済みのデフォルトを再継承します）、ローカルのコスト概要を出力します |
   </Accordion>
 
   <Accordion title="Skills、許可リスト、承認">
     | コマンド | 説明 |
     | --- | --- |
-    | `/skill <name> [input]` | 名前を指定して Skill を実行します |
-    | `/learn [request]` | 現在の会話または指定したソースから、[Skill Workshop](/ja-JP/tools/skill-workshop)を通じてレビュー可能な Skill を1つ作成します |
-    | `/allowlist [list\|add\|remove] ...` | 許可リストのエントリを管理します。テキストのみ |
-    | `/approve <id> <decision>` | 実行または Plugin の承認プロンプトに応答します |
-    | `/btw <question>` | セッションのコンテキストを変更せずに補足的な質問をします。エイリアス: `/side`。[BTW](/ja-JP/tools/btw)を参照してください |
+    | `/skill <name> [input]` | 名前を指定してスキルを実行 |
+    | `/learn [request]` | 現在の会話または指定したソースから、レビュー可能なスキルを1つ[スキルワークショップ](/ja-JP/tools/skill-workshop)で下書き |
+    | `/allowlist [list\|add\|remove] ...` | 許可リストのエントリを管理。テキストのみ |
+    | `/approve <id> <decision>` | exec または Plugin の承認プロンプトを処理 |
+    | `/btw <question>` | セッションコンテキストを変更せずに補足質問をする。エイリアス: `/side`。[BTW](/ja-JP/tools/btw)を参照 |
   </Accordion>
 
   <Accordion title="サブエージェントと ACP">
     | コマンド | 説明 |
     | --- | --- |
-    | `/subagents list\|log\|info` | 現在のセッションのサブエージェント実行を確認する |
-    | `/acp spawn\|cancel\|steer\|close\|sessions\|status\|set-mode\|set\|cwd\|permissions\|timeout\|model\|reset-options\|doctor\|install\|help` | ACP セッションとランタイムオプションを管理する。ランタイム制御には、外部オーナーまたは内部 Gateway 管理者のアイデンティティが必要 |
-    | `/focus <target>` | 現在の Discord スレッドまたは Telegram トピックをセッションターゲットに関連付ける |
-    | `/unfocus` | 現在のスレッドの関連付けを解除する |
-    | `/agents` | 現在のセッションでスレッドに関連付けられたエージェントを一覧表示する |
+    | `/subagents list\|log\|info` | 現在のセッションのサブエージェント実行を確認 |
+    | `/acp spawn\|cancel\|steer\|close\|sessions\|status\|set-mode\|set\|cwd\|permissions\|timeout\|model\|reset-options\|doctor\|install\|help` | ACP セッションとランタイムオプションを管理。ランタイム制御には外部オーナーまたは内部 Gateway 管理者のアイデンティティが必要 |
+    | `/focus <target>` | 現在の Discord スレッドまたは Telegram トピックをセッションターゲットにバインド |
+    | `/unfocus` | 現在のスレッドのバインドを解除 |
+    | `/agents` | 現在のセッションでスレッドにバインドされているエージェントを一覧表示 |
   </Accordion>
 
   <Accordion title="オーナー限定の書き込みと管理">
-    | コマンド | 必要条件 | 説明 |
+    | コマンド | 要件 | 説明 |
     | --- | --- | --- |
-    | `/config show\|get\|set\|unset` | `commands.config: true` | `openclaw.json`を読み書きする。オーナー限定 |
-    | `/mcp show\|get\|set\|unset` | `commands.mcp: true` | OpenClaw が管理する MCP サーバー設定を読み書きする。オーナー限定 |
-    | `/plugins list\|inspect\|show\|get\|install\|enable\|disable` | `commands.plugins: true` | Plugin の状態を確認または変更する。書き込みはオーナー限定。エイリアス: `/plugin` |
+    | `/config show\|get\|set\|unset` | `commands.config: true` | `openclaw.json` を読み書き。オーナー限定 |
+    | `/mcp show\|get\|set\|unset` | `commands.mcp: true` | OpenClaw が管理する MCP サーバー設定を読み書き。オーナー限定 |
+    | `/plugins list\|inspect\|show\|get\|install\|enable\|disable` | `commands.plugins: true` | Plugin の状態を確認または変更。書き込みはオーナー限定。エイリアス: `/plugin` |
     | `/debug show\|set\|unset\|reset` | `commands.debug: true` | ランタイム限定の設定オーバーライド。オーナー限定 |
-    | `/restart` | `commands.restart: true`（デフォルト） | OpenClaw を再起動する |
-    | `/send on\|off\|inherit` | オーナー | 送信ポリシーを設定する |
+    | `/restart` | `commands.restart: true`（デフォルト） | OpenClaw を再起動 |
+    | `/send on\|off\|inherit` | オーナー | 送信ポリシーを設定 |
   </Accordion>
 
   <Accordion title="音声、TTS、チャンネル制御">
     | コマンド | 説明 |
     | --- | --- |
-    | `/tts on\|off\|status\|chat\|latest\|provider\|limit\|summary\|audio\|help` | TTS を制御する。[TTS](/ja-JP/tools/tts)を参照 |
-    | `/activation mention\|always` | グループのアクティベーションモードを設定する |
-    | `/bash <command>` | ホストのシェルコマンドを実行する。エイリアス: `! <command>`。`commands.bash: true`が必要 |
-    | `!poll [sessionId]` | バックグラウンドの bash ジョブを確認する |
-    | `!stop [sessionId]` | バックグラウンドの bash ジョブを停止する |
+    | `/tts on\|off\|status\|chat\|latest\|provider\|limit\|summary\|audio\|help` | TTS を制御。[TTS](/ja-JP/tools/tts)を参照 |
+    | `/activation mention\|always` | グループのアクティベーションモードを設定 |
+    | `/bash <command>` | ホストのシェルコマンドを実行。エイリアス: `! <command>`。`commands.bash: true` が必要 |
+    | `!poll [sessionId]` | バックグラウンドの bash ジョブを確認 |
+    | `!stop [sessionId]` | バックグラウンドの bash ジョブを停止 |
   </Accordion>
 </AccordionGroup>
 
 ### ドックコマンド
 
-ドックコマンドは、アクティブなセッションの応答経路を、リンク済みの別チャンネルへ切り替えます。
-設定とトラブルシューティングについては、[チャンネルのドッキング](/ja-JP/concepts/channel-docking)を参照してください。
+ドックコマンドは、アクティブなセッションの返信経路を、リンク済みの別のチャンネルへ切り替えます。
+セットアップとトラブルシューティングについては、[チャンネルのドッキング](/ja-JP/concepts/channel-docking)を参照してください。
 
 ネイティブコマンドをサポートするチャンネル Plugin から生成されます。
 
@@ -300,100 +306,102 @@ Plugin によって異なります。
 - `/dock-slack`（エイリアス: `/dock_slack`）
 - `/dock-telegram`（エイリアス: `/dock_telegram`）
 
-ドックコマンドには`session.identityLinks`が必要です。送信元の送信者と対象の相手は、
+ドックコマンドには `session.identityLinks` が必要です。送信元の送信者とターゲットのピアは、
 同じアイデンティティグループに属している必要があります。
 
-### バンドル済み Plugin のコマンド
+### バンドルされた Plugin のコマンド
 
-| コマンド                                                | 説明                                                                                                                                                                                                      |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/dreaming [on\|off\|status\|help]`                     | メモリの Dreaming を切り替える（オーナーまたは Gateway 管理者）。[Dreaming](/ja-JP/concepts/dreaming)を参照                                                                                                    |
-| `/pair [qr\|status\|pending\|approve\|cleanup\|notify]` | デバイスのペアリングを管理する。[ペアリング](/ja-JP/channels/pairing)を参照                                                                                                                                    |
-| `/phone status\|arm ...\|disarm`                        | リスクの高い Node コマンド（カメラ、画面、コンピューター、書き込み）を一時的に有効化する。[コンピューターの使用](/ja-JP/nodes/computer-use)を参照                                                               |
-| `/voice status\|list\|set <voiceId>`                    | Talk の音声設定を管理する。Discord でのネイティブ名: `/talkvoice`                                                                                                                                         |
-| `/card ...`                                             | LINE のリッチカードプリセットを送信する。[LINE](/ja-JP/channels/line)を参照                                                                                                                                    |
-| `/codex <action> ...`                                   | Codex app-server ハーネスを関連付け、操作し、確認する（ステータス、スレッド、再開、モデル、高速化、権限、圧縮、レビュー、MCP、Skills など）。[Codex ハーネス](/ja-JP/plugins/codex-harness)を参照 |
+| コマンド                                                 | 説明                                                                                                                                                                                    |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/dreaming [on\|off\|status\|help]`                     | メモリの Dreaming を切り替え（オーナーまたは Gateway 管理者）。[Dreaming](/ja-JP/concepts/dreaming)を参照                                                                                                            |
+| `/pair [qr\|status\|pending\|approve\|cleanup\|notify]` | デバイスのペアリングを管理。[ペアリング](/ja-JP/channels/pairing)を参照                                                                                                                                        |
+| `/phone status\|arm ...\|disarm`                        | リスクの高い Node コマンド（カメラ／画面／コンピューター／書き込み）を一時的に許可。[コンピューター操作](/ja-JP/nodes/computer-use)を参照                                                                               |
+| `/voice status\|list\|set <voiceId>`                    | Talk の音声設定を管理。Discord でのネイティブ名: `/talkvoice`                                                                                                                                    |
+| `/card ...`                                             | LINE のリッチカードプリセットを送信。[LINE](/ja-JP/channels/line)を参照                                                                                                                                        |
+| `/codex <action> ...`                                   | Codex app-server ハーネスのバインド、制御、確認（ステータス、スレッド、再開、モデル、高速化、権限、コンパクト化、レビュー、mcp、Skills など）。[Codex ハーネス](/ja-JP/plugins/codex-harness)を参照 |
 
 QQBot 限定: `/bot-ping`、`/bot-version`、`/bot-help`、`/bot-upgrade`、`/bot-logs`
 
-### Skill コマンド
+### スキルコマンド
 
-ユーザーが呼び出せる Skills は、スラッシュコマンドとして公開されます。
+ユーザーが呼び出せるスキルは、スラッシュコマンドとして公開されます。
 
-- `/skill <name> [input]`は汎用エントリーポイントとして常に機能します。
-- Skills は直接コマンドとして登録できます（例: OpenProse の`/prose`）。
-- ネイティブ Skill コマンドの登録は、`commands.nativeSkills`と
-  `channels.<provider>.commands.nativeSkills`で制御されます。
-- 名前は`a-z0-9_`に正規化されます（最大 32 文字）。重複した場合は数字の接尾辞が付加されます。
+- `/skill <name> [input]` は汎用エントリポイントとして常に使用できます。
+- Skills は直接コマンドとして登録できます（例: OpenProse の `/prose`）。
+- ネイティブのスキルコマンド登録は `commands.nativeSkills` と
+  `channels.<provider>.commands.nativeSkills` で制御されます。
+- 名前は `a-z0-9_` にサニタイズされ（最大32文字）、重複時には数字のサフィックスが付きます。
 
 <AccordionGroup>
-  <Accordion title="Skill コマンドのディスパッチ">
-    デフォルトでは、Skill コマンドは通常のリクエストとしてモデルにルーティングされます。
+  <Accordion title="スキルコマンドのディスパッチ">
+    デフォルトでは、スキルコマンドは通常のリクエストとしてモデルにルーティングされます。
 
-    Skills は`command-dispatch: tool`を宣言することで、ツールへ直接
-    ルーティングできます（決定的で、モデルは関与しません）。例: `/prose`（OpenProse Plugin）
+    Skills は `command-dispatch: tool` を宣言することで、ツールへ直接ルーティングできます
+    （決定論的で、モデルは関与しません）。例: `/prose`（OpenProse Plugin）
     — [OpenProse](/ja-JP/prose)を参照してください。
 
   </Accordion>
   <Accordion title="ネイティブコマンドの引数">
-    Discord では、必須引数が省略された場合、動的オプションにはオートコンプリートを、
-    必要に応じてボタンメニューを使用します。Telegram と Slack では、選択肢を持つ
-    コマンドにボタンメニューを表示します。動的な選択肢は対象セッションのモデルに基づいて解決されるため、
-    `/think`のレベルなどのモデル固有オプションは、セッションの`/model`オーバーライドに従います。
+    Discord は、必須の引数が省略された場合、動的オプションにはオートコンプリートを、
+    ボタンメニューには必要に応じてボタンを使用します。Telegram と Slack は、選択肢のある
+    コマンドにボタンメニューを表示します。動的な選択肢はターゲットセッションのモデルに
+    基づいて解決されるため、`/think` レベルのようなモデル固有のオプションは、
+    セッションの `/model` オーバーライドに従います。
   </Accordion>
 </AccordionGroup>
 
 ## `/tools`: エージェントが現在使用できるもの
 
-`/tools`はランタイムに関する質問、つまり**この会話で、このエージェントが今すぐ使用できるもの**
-に回答します。静的な設定カタログではありません。
+`/tools` は、ランタイムに関する質問、つまり**この会話でこのエージェントが今すぐ
+使用できるもの**に答えます。静的な設定カタログではありません。
 
 ```text
-/tools         # compact view
-/tools verbose # with short descriptions
+/tools         # コンパクト表示
+/tools verbose # 短い説明付き
 ```
 
 結果はセッション単位です。エージェント、チャンネル、スレッド、送信者の
-認可、またはモデルを変更すると、出力が変わる場合があります。プロファイルやオーバーライドを編集するには、
-Control UI のツールパネルまたは設定インターフェースを使用してください。
+認可、またはモデルを変更すると、出力が変わる場合があります。プロファイルとオーバーライドを編集するには、
+Control UI の Tools パネルまたは設定サーフェスを使用してください。
 
 ## `/model`: モデルの選択
 
 ```text
-/model             # show model picker
-/model list        # same
-/model 3           # select by number from picker
+/model             # モデルピッカーを表示
+/model list        # 同上
+/model 3           # ピッカーの番号で選択
 /model openai/gpt-5.4
 /model opus@anthropic:default
-/model default     # clear the session model selection
-/model status      # detailed view with endpoint and API mode
+/model default     # セッションのモデル選択をクリア
+/model status      # エンドポイントと API モードを含む詳細表示
 ```
 
-Discord では、`/model`と`/models`で、プロバイダーと
+Discord では、`/model` と `/models` を使用すると、プロバイダーと
 モデルのドロップダウンを備えた対話型ピッカーが開きます。ピッカーは
-`provider/*`エントリを含む`agents.defaults.models`に従います。
+`provider/*` エントリを含む `agents.defaults.modelPolicy.allow` に従います。明示的な許可リストがない場合、
+モデルエントリとエイリアスによって選択が制限されることはありません。
 
 ## `/config`: ディスク上の設定への書き込み
 
 <Note>
-  オーナー限定。デフォルトでは無効です。`commands.config: true`で有効にしてください。
+  オーナー限定。デフォルトでは無効です。`commands.config: true` で有効にしてください。
 </Note>
 
 ```text
 /config show
-/config show messages.responsePrefix
-/config get messages.responsePrefix
-/config set messages.responsePrefix="[openclaw]"
-/config unset messages.responsePrefix
+/config show channels.whatsapp.responsePrefix
+/config get channels.whatsapp.responsePrefix
+/config set channels.whatsapp.responsePrefix="[openclaw]"
+/config unset channels.whatsapp.responsePrefix
 ```
 
-設定は書き込み前に検証されます。無効な変更は拒否されます。`/config`の
+設定は書き込み前に検証されます。無効な変更は拒否されます。`/config` の
 更新内容は再起動後も保持されます。
 
 ## `/mcp`: MCP サーバー設定
 
 <Note>
-  オーナー限定。デフォルトでは無効です。`commands.mcp: true`で有効にしてください。
+  オーナー限定。デフォルトでは無効です。`commands.mcp: true` で有効にしてください。
 </Note>
 
 ```text
@@ -403,32 +411,31 @@ Discord では、`/model`と`/models`で、プロバイダーと
 /mcp unset context7
 ```
 
-`/mcp`は設定を埋め込みエージェントのプロジェクト設定ではなく、OpenClaw の設定に保存します。
-`/mcp show`は、認証情報を含むフィールド、認識された認証情報フラグの
-値、および既知のシークレット形式の引数を秘匿します。グループから実行した場合、
-設定はオーナーへ非公開で送信されます。オーナーへの非公開経路が
-利用できない場合、コマンドは安全側に失敗し、オーナーにダイレクト
-チャットから再試行するよう求めます。
+`/mcp` は、組み込みエージェントのプロジェクト設定ではなく、OpenClaw の設定に保存されます。
+`/mcp show` は、認証情報を含むフィールド、認識された認証情報フラグの値、
+および既知のシークレット形式の引数をマスキングします。グループから実行した場合、
+設定はオーナーへ非公開で送信されます。オーナーへの非公開経路が利用できない場合、
+コマンドはフェイルクローズし、ダイレクトチャットから再試行するようオーナーに求めます。
 
 ## `/debug`: ランタイム限定のオーバーライド
 
 <Note>
-  オーナー限定。デフォルトでは無効です。`commands.debug: true`で有効にしてください。
+  オーナー限定。デフォルトでは無効です。`commands.debug: true` で有効にしてください。
   オーバーライドは新しい設定の読み取りに即座に適用されますが、ディスクには**書き込まれません**。
 </Note>
 
 ```text
 /debug show
-/debug set messages.responsePrefix="[openclaw]"
+/debug set channels.whatsapp.responsePrefix="[openclaw]"
 /debug set channels.whatsapp.allowFrom=["+1555","+4477"]
-/debug unset messages.responsePrefix
+/debug unset channels.whatsapp.responsePrefix
 /debug reset
 ```
 
 ## `/plugins`: Plugin の管理
 
 <Note>
-  書き込みはオーナー限定。デフォルトでは無効です。`commands.plugins: true`で有効にしてください。
+  書き込みはオーナー限定。デフォルトでは無効です。`commands.plugins: true` で有効にしてください。
 </Note>
 
 ```text
@@ -437,96 +444,107 @@ Discord では、`/model`と`/models`で、プロバイダーと
 /plugin show context7
 /plugins enable context7
 /plugins disable context7
-/plugins install ./path/to/plugin
+/plugins install clawhub:<package>
+/plugins install npm:@openclaw/<official-package>
+/plugins install npm:<package> --force
+/plugins install git:<repository>@<ref> --force
 ```
 
-`/plugins enable|disable`は Plugin の設定を更新し、新しいエージェントターン向けに
-Gateway の Plugin ランタイムをホットリロードします。`/plugins install`は Plugin の
-ソースモジュールが変更されるため、管理対象の Gateway を自動的に再起動します。
+`/plugins enable|disable` は Plugin の設定を更新し、新しいエージェントターンに向けて Gateway の
+Plugin ランタイムをホットリロードします。`/plugins install` は Plugin のソースモジュールが
+変更されたため、管理対象の Gateway を自動的に再起動します。信頼済みの ClawHub および
+公式カタログからのインストールには、追加の確認は不要です。任意の npm、git、アーカイブ、
+`npm-pack:`、ローカルパスのソースでは、来歴に関する警告が表示され、
+ソースを確認した後、末尾に `--force` を付ける必要があります。このフラグは
+ソースを確認したことを示し、既存のインストールの置き換えを許可しますが、
+`security.installPolicy` やインストーラーのセキュリティチェックを回避するものではありません。
+リスク警告がある ClawHub リリースでは、引き続きシェル限定の別フラグ
+`--acknowledge-clawhub-risk` が必要です。マーケットプレイス、リンク済み、固定済みの
+インストールも、引き続きシェル限定です。
 
 ## `/trace`: Plugin のトレース出力
 
 ```text
-/trace          # show current trace state
+/trace          # 現在のトレース状態を表示
 /trace on
 /trace off
 ```
 
-`/trace`は、完全な詳細モードを有効にせず、セッション単位の Plugin のトレース行や
-デバッグ行を表示します。これは`/debug`（ランタイムオーバーライド）や`/verbose`（通常の
+`/trace` は、完全な詳細モードを使わずに、セッション単位の Plugin のトレース／デバッグ行を
+表示します。`/debug`（ランタイムオーバーライド）や `/verbose`（通常の
 ツール出力）の代わりにはなりません。
 
-## `/btw`: 補足的な質問
+## `/btw`: 補足質問
 
-`/btw`は、現在のセッションコンテキストについて手早く補足質問するためのコマンドです。エイリアス: `/side`。
+`/btw` は、現在のセッションコンテキストに関する簡単な補足質問です。エイリアス: `/side`。
 
 ```text
-/btw what are we doing right now?
-/side what changed while the main run continued?
+/btw 今、何をしているのですか？
+/side メインの実行が続いている間に何が変わりましたか？
 ```
 
 通常のメッセージとは異なり、次のように動作します。
 
 - 現在のセッションを背景コンテキストとして使用します。
-- Codex ハーネスセッションでは、一時的な Codex のサイドスレッドとして実行されます。
-- 以降のセッションコンテキストを変更**しません**。
+- Codex ハーネスのセッションでは、一時的な Codex サイドスレッドとして実行されます。
+- 今後のセッションコンテキストは**変更しません**。
 - トランスクリプト履歴には書き込まれません。
 
 完全な動作については、[BTW の補足質問](/ja-JP/tools/btw)を参照してください。
 
-## インターフェースに関する注意事項
+## サーフェスに関する注記
 
 <AccordionGroup>
-  <Accordion title="インターフェースごとのセッションスコープ">
-    - **テキストコマンド:** 通常のチャットセッションで実行されます（DM は`main`を共有し、グループにはそれぞれ独自のセッションがあります）。
+  <Accordion title="サーフェスごとのセッションスコープ">
+    - **テキストコマンド:** 通常のチャットセッションで実行されます（DM は `main` を共有し、グループには独自のセッションがあります）。
     - **Discord のネイティブコマンド:** `agent:<agentId>:discord:slash:<userId>`
-    - **Slack のネイティブコマンド:** `agent:<agentId>:slack:slash:<userId>`（接頭辞は`channels.slack.slashCommand.sessionPrefix`で設定可能）
-    - **Telegram のネイティブコマンド:** `telegram:slash:<userId>`（`CommandTargetSessionKey`を介してチャットセッションを対象にします）
-    - **`/login codex`**は、デバイスのペアリングコードを非公開チャットまたは Web UI の応答経路からのみ送信します。Telegram のグループやトピックから呼び出した場合、代わりにオーナーへボットに DM するよう求めます。
-    - **`/stop`**は、アクティブなチャットセッションを対象にして、現在の実行を中止します。
+    - **Slack のネイティブコマンド:** `agent:<agentId>:slack:slash:<userId>`（プレフィックスは `channels.slack.slashCommand.sessionPrefix` で設定可能）
+    - **Telegram のネイティブコマンド:** `telegram:slash:<userId>`（`CommandTargetSessionKey` を介してチャットセッションをターゲットにします）
+    - **`/login codex`** は、プライベートチャットまたは Web UI の応答経路を通じてのみデバイスのペアリングコードを送信します。Telegram のグループ／トピックから呼び出した場合、代わりにボットへ DM するようオーナーに求めます。
+    - **`/stop`** は、現在の実行を中止するため、アクティブなチャットセッションをターゲットにします。
 
   </Accordion>
   <Accordion title="Slack 固有の事項">
-    `channels.slack.slashCommand`は、単一の`/openclaw`形式のコマンドをサポートします。
-    `commands.native: true`の場合は、組み込みコマンドごとに Slack のスラッシュコマンドを
-    1 つ作成してください。Slack は`/status`を予約しているため、`/status`ではなく
-    `/agentstatus`を登録してください。テキストの`/status`は Slack のメッセージ内でも引き続き機能します。
+    `channels.slack.slashCommand` は単一の `/openclaw` 形式のコマンドをサポートします。
+    `commands.native: true` を使用する場合は、組み込みコマンドごとに Slack スラッシュコマンドを1つ作成します。
+    Slack が `/status` を予約しているため、`/status` ではなく `/agentstatus` を登録してください。
+    Slack メッセージ内では、テキスト `/status` も引き続き機能します。
   </Accordion>
-  <Accordion title="高速処理経路とインラインショートカット">
-    - 許可リストに登録された送信者からのコマンドのみのメッセージは、即座に処理されます（キューとモデルを迂回します）。
-    - インラインショートカット（`/help`、`/commands`、`/status`、`/whoami`）は通常のメッセージ内に埋め込んでも機能し、残りのテキストがモデルに渡される前に除去されます。
-    - 認可されていないコマンドのみのメッセージは通知なく無視されます。インラインの`/...`トークンはプレーンテキストとして扱われます。
+  <Accordion title="高速処理とインラインショートカット">
+    - 許可リストに登録された送信者からのコマンドのみのメッセージは、即座に処理されます（キューとモデルをバイパスします）。
+    - インラインショートカット（`/help`、`/commands`、`/status`、`/whoami`）は通常のメッセージ内に埋め込んでも機能し、残りのテキストがモデルに渡される前に取り除かれます。
+    - 未承認のコマンドのみのメッセージは通知なく無視されます。インラインの `/...` トークンはプレーンテキストとして扱われます。
 
   </Accordion>
   <Accordion title="引数に関する注意事項">
-    - コマンドと引数の間には、任意で`:`を指定できます（`/think: high`、`/send: on`）。
-    - `/new <model>`は、モデルのエイリアス、`provider/model`、またはプロバイダー名（あいまい一致）を受け付けます。一致しない場合、そのテキストはメッセージ本文として扱われます。
-    - `/allowlist add|remove`には`commands.config: true`が必要で、チャンネルの`configWrites`に従います。
+    - コマンドと引数の間には、任意で `:` を指定できます（`/think: high`、`/send: on`）。
+    - `/new <model>` には、モデルのエイリアス、`provider/model`、またはプロバイダー名（あいまい一致）を指定できます。一致するものがない場合、そのテキストはメッセージ本文として扱われます。
+    - `/allowlist add|remove` には `commands.config: true` が必要であり、チャンネルの `configWrites` に従います。
 
   </Accordion>
 </AccordionGroup>
 
-## プロバイダーの使用状況とステータス
+## プロバイダーの使用量とステータス
 
-- **プロバイダーの使用量/クォータ**（例: 「Claude 残り 80%」）は、使用量追跡が有効な場合、現在のモデルプロバイダーについて `/status` に表示されます。
-- `/status` の**トークン/キャッシュ行**は、ライブセッションのスナップショットに十分な情報がない場合、最新のトランスクリプト使用量エントリにフォールバックできます。
-- **実行環境とランタイム:** `/status` は、実効サンドボックスパスを `Execution` として、セッションを実行している主体を `Runtime` として報告します。実行主体は `OpenClaw Default`、`OpenAI Codex`、CLI バックエンド、または ACP バックエンドです。
-- **応答ごとのトークン数/コスト:** `/usage off|tokens|full` で制御します。
-- `/model status` はモデル/認証/エンドポイントに関するものであり、使用量に関するものではありません。
+- **プロバイダーの使用量／割り当て**（例：「Claude の残り 80%」）は、使用量追跡が有効な場合、現在のモデルプロバイダーについて `/status` に表示されます。
+- `/status` の**トークン／キャッシュ行**は、ライブセッションのスナップショットに十分な情報がない場合、最新のトランスクリプト使用量エントリにフォールバックできます。
+- **実行とランタイムの違い：** `/status` は、有効なサンドボックスパスを `Execution` として、セッションの実行主体を `Runtime` として報告します。実行主体は、`OpenClaw Default`、`OpenAI Codex`、CLI バックエンド、または ACP バックエンドのいずれかです。
+- **応答ごとのトークン数／コスト：** `/usage off|tokens|full` で制御します。
+- `/model status` は使用量ではなく、モデル／認証／エンドポイントに関するものです。
 
 ## 関連項目
 
 <CardGroup cols={2}>
   <Card title="Skills" href="/ja-JP/tools/skills" icon="puzzle-piece">
-    Skills のスラッシュコマンドが登録され、利用可否を制御される仕組み。
+    skill のスラッシュコマンドが登録され、利用を制御される仕組み。
   </Card>
-  <Card title="Skills の作成" href="/ja-JP/tools/creating-skills" icon="hammer">
-    独自のスラッシュコマンドを登録する Skills を作成します。
+  <Card title="skill の作成" href="/ja-JP/tools/creating-skills" icon="hammer">
+    独自のスラッシュコマンドを登録する skill を構築します。
   </Card>
   <Card title="BTW" href="/ja-JP/tools/btw" icon="comments">
     セッションコンテキストを変更せずに補足的な質問をします。
   </Card>
-  <Card title="Steer" href="/ja-JP/tools/steer" icon="compass">
-    実行中に `/steer` でエージェントを誘導します。
+  <Card title="ステアリング" href="/ja-JP/tools/steer" icon="compass">
+    実行中に `/steer` を使用してエージェントを誘導します。
   </Card>
 </CardGroup>

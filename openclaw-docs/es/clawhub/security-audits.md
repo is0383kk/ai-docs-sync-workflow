@@ -1,15 +1,16 @@
 ---
 read_when:
-    - Entender los resultados de la auditoría de seguridad de ClawHub
+    - Interpretación de los resultados de la auditoría de seguridad de ClawHub
     - Decidir si instalar una skill o un plugin
-    - Explicación del estado de auditoría de ClawHub, el nivel de riesgo o los hallazgos
+    - Explicación del estado de auditoría, el nivel de riesgo o los hallazgos de ClawHub
 sidebarTitle: Security Audits
-summary: Cómo entender los resultados de auditoría de seguridad de ClawHub antes de instalar una skill o un plugin.
+summary: Cómo interpretar los resultados de la auditoría de seguridad de ClawHub antes de instalar una skill o un plugin.
 title: Auditorías de seguridad
 x-i18n:
-    generated_at: "2026-07-04T20:23:55Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T04:32:44Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: c4178a568c9b8e202da666ed95d2200ad73f931a22c7e473aeaba84545e8bb25
     source_path: clawhub/security-audits.md
@@ -18,100 +19,99 @@ x-i18n:
 
 # Auditorías de seguridad
 
-Las auditorías de seguridad de ClawHub te ayudan a decidir si una habilidad o Plugin es lo bastante seguro
+Las auditorías de seguridad de ClawHub ayudan a decidir si una skill o un plugin es lo bastante seguro
 para instalarlo. Muestran qué hace una versión, qué autoridad solicita y
-si algo merece atención adicional antes de que pueda acceder a archivos, cuentas,
+si hay algo que merezca atención adicional antes de que pueda acceder a archivos, cuentas,
 credenciales, código o servicios externos.
 
-Las auditorías son señales de seguridad sólidas, pero no garantizan que una versión esté
-libre de riesgos. Usa siempre tu criterio antes de conceder acceso sensible.
+Las auditorías son indicadores de seguridad sólidos, pero no garantizan que una versión esté
+libre de riesgos. Se debe actuar siempre con criterio antes de conceder acceso confidencial.
 
-Consulta también [Seguridad](/clawhub/security), [Uso aceptable](/clawhub/acceptable-usage)
-y [Moderación y seguridad de la cuenta](/clawhub/moderation).
+Véanse también [Seguridad](/es/clawhub/security), [Uso aceptable](/es/clawhub/acceptable-usage)
+y [Moderación y seguridad de las cuentas](/es/clawhub/moderation).
 
-## Qué revisar antes de instalar
+## Qué comprobar antes de instalar
 
-Antes de instalar, revisa:
+Antes de instalar, se debe revisar:
 
 - el estado general de la auditoría
 - el nivel de riesgo
-- cualquier hallazgo indicado
-- las credenciales, permisos o variables de entorno requeridos
-- el propietario, origen, versión, registro de cambios, descargas, estrellas y otras señales de confianza
+- todos los hallazgos indicados
+- las credenciales, los permisos o las variables de entorno requeridos
+- el propietario, el origen, la versión, el registro de cambios, las descargas, las estrellas y otros indicadores de confianza
 
-Instala solo contenido que entiendas y en el que confíes.
+Se debe instalar únicamente contenido que se comprenda y en el que se confíe.
 
 ## Estado de la auditoría
 
-El estado de la auditoría te indica cómo reaccionar ante el resultado de la auditoría:
+El estado de la auditoría indica cómo reaccionar ante su resultado:
 
 | Estado      | Significado                                                                   |
-| ----------- | ----------------------------------------------------------------------------- |
-| `Pass`      | No se encontró ningún problema visible por encima de riesgo bajo.             |
-| `Review`    | Lee los hallazgos antes de instalar. La versión aún puede ser legítima.       |
-| `Warn`      | Ten especial cautela. ClawHub encontró una inquietud de alto impacto o una señal de advertencia. |
-| `Malicious` | No lo instales.                                                               |
-| `Pending`   | Las auditorías aún no han terminado.                                          |
-| `Error`     | No se pudo completar la auditoría.                                            |
+| ----------- | ------------------------------------------------------------------------- |
+| `Pass`      | No se encontró ningún problema visible por encima del riesgo bajo.                                |
+| `Review`    | Se deben leer los hallazgos antes de instalar. La versión aún puede ser legítima. |
+| `Warn`      | Se debe extremar la precaución. ClawHub encontró un problema de gran impacto o un indicio de advertencia. |
+| `Malicious` | No se debe instalar.                                                           |
+| `Pending`   | Las auditorías aún no han finalizado.                                             |
+| `Error`     | No se pudo completar la auditoría.                                         |
 
-Un `Pass` es tranquilizador, pero no sustituye tu propio criterio. Esto importa
-más en herramientas que pueden publicar contenido, editar datos, ejecutar comandos, leer archivos o
+Un resultado `Pass` es tranquilizador, pero no sustituye el criterio propio. Esto es especialmente importante
+en el caso de herramientas que pueden publicar contenido, editar datos, ejecutar comandos, leer archivos o
 acceder a sistemas de producción.
 
 ## Nivel de riesgo
 
 El nivel de riesgo describe el radio de impacto: cuánto poder parece tener la versión si
-la usas según lo previsto.
+se usa según lo previsto.
 
 | Nivel de riesgo | Significado                                                                       |
-| ---------------- | --------------------------------------------------------------------------------- |
-| `Low`            | Se encontró poca autoridad sensible o poco impacto para el usuario.               |
-| `Medium`         | La versión tiene autoridad significativa, como acceso a cuentas o cambios de datos. |
-| `High`           | La versión tiene autoridad de alto impacto, hallazgos graves o señales maliciosas. |
+| ---------- | ----------------------------------------------------------------------------- |
+| `Low`      | Se encontró poca autoridad confidencial o poco impacto para el usuario.                          |
+| `Medium`   | La versión tiene una autoridad significativa, como acceso a cuentas o capacidad para modificar datos. |
+| `High`     | La versión tiene una autoridad de gran impacto, hallazgos graves o indicios maliciosos. |
 
-El nivel de riesgo y el estado de la auditoría responden a preguntas distintas:
+El nivel de riesgo y el estado de la auditoría responden a preguntas diferentes:
 
-- El nivel de riesgo pregunta: "¿Cuánto poder hay aquí?"
-- El estado de la auditoría pregunta: "¿Qué debo hacer con este resultado?"
+- El nivel de riesgo pregunta: «¿Cuánto poder hay aquí?»
+- El estado de la auditoría pregunta: «¿Qué se debe hacer con este resultado?»
 
-Por ejemplo, una habilidad de publicación puede mostrar `Review` con riesgo `Medium`. Eso
-no significa que sea maliciosa. Significa que la habilidad parece alineada con su propósito, pero puede
-actuar con autoridad significativa sobre la cuenta.
+Por ejemplo, una skill de publicación puede mostrar `Review` con un riesgo `Medium`. Esto no
+significa que sea maliciosa. Significa que la skill parece estar alineada con su propósito, pero puede
+actuar con una autoridad significativa sobre la cuenta.
 
 ## Hallazgos
 
 Los hallazgos explican por qué se mostró un resultado de auditoría. Cada hallazgo suele incluir:
 
 - qué significa
-- por qué se marcó
-- el contenido relevante de la habilidad o Plugin
+- por qué se señaló
+- el contenido pertinente de la skill o del plugin
 - una recomendación
 
-Los hallazgos pueden etiquetarse como `Info`, `Low`, `Medium`, `High` o `Critical`. Los hallazgos de mayor
-gravedad contribuyen con más fuerza al nivel de riesgo y al estado de la auditoría.
+Los hallazgos pueden estar etiquetados como `Info`, `Low`, `Medium`, `High` o `Critical`. Los hallazgos de mayor
+gravedad contribuyen en mayor medida al nivel de riesgo y al estado de la auditoría.
 
-Los hallazgos de baja confianza se ocultan del resumen público de auditoría para que la página
-se mantenga centrada en evidencia útil.
+Los hallazgos de baja confianza se ocultan del resumen público de la auditoría para que la página
+se centre en pruebas útiles.
 
 ## Qué comprueba ClawHub
 
-ClawHub audita los artefactos de lanzamiento enviados, incluidos:
+ClawHub audita los artefactos de las versiones enviadas, incluidos:
 
-- instrucciones de Skills o metadatos de Plugin
-- variables de entorno y permisos declarados
-- instrucciones de instalación y metadatos del paquete
-- archivos incluidos y manifiestos de archivos
-- metadatos de compatibilidad y capacidades
+- las instrucciones de la skill o los metadatos del plugin
+- las variables de entorno y los permisos declarados
+- las instrucciones de instalación y los metadatos del paquete
+- los archivos incluidos y los manifiestos de archivos
+- los metadatos de compatibilidad y capacidades
 
-La pregunta principal es la coherencia: ¿el nombre, el resumen, los metadatos, la
-autoridad solicitada y el contenido real se alinean con lo que los usuarios
-esperarían razonablemente?
+La cuestión principal es la coherencia: ¿coinciden el nombre, el resumen, los metadatos, la autoridad
+solicitada y el contenido real con lo que los usuarios esperarían razonablemente?
 
-El comportamiento potente no es automáticamente malo. Muchas herramientas útiles necesitan credenciales,
+Un comportamiento potente no es malo de forma automática. Muchas herramientas útiles necesitan credenciales,
 comandos locales, API de proveedores o instalaciones de paquetes. La auditoría comprueba si ese
-poder es esperado, está divulgado y es proporcional.
+poder es esperado, se ha comunicado y es proporcionado.
 
-Las páginas de artefactos enlazan a la auditoría completa en:
+Las páginas de los artefactos enlazan a la auditoría completa en:
 
 ```text
 /<owner>/skills/<slug>/security-audit
@@ -125,48 +125,48 @@ La página de auditoría combina:
 
 ## VirusTotal
 
-ClawHub usa VirusTotal como telemetría de malware en la pila de auditoría. VirusTotal es un
-estándar de confianza en el sector para la reputación de archivos y el escaneo de malware, y nuestra
-colaboración permite que ClawHub añada inteligencia de seguridad más amplia a la revisión de Skills y Plugins.
+ClawHub utiliza VirusTotal como telemetría de malware en la pila de auditoría. VirusTotal es un
+estándar fiable del sector para la reputación de archivos y el análisis de malware, y nuestra
+colaboración permite que ClawHub aporte inteligencia de seguridad más amplia a la revisión de skills y plugins.
 
-VirusTotal es especialmente útil para artefactos maliciosos conocidos, coincidencias de motores y
-señales de reputación que complementan la revisión de ClawHub consciente de agentes. Cuando los
-recuentos de motores de proveedores están disponibles, la auditoría los resume en lenguaje claro, por
+VirusTotal resulta especialmente útil para artefactos maliciosos conocidos, detecciones de motores e
+indicadores de reputación que complementan la revisión de ClawHub orientada a agentes. Cuando están disponibles
+los recuentos de los motores de proveedores, la auditoría los resume en lenguaje sencillo, por
 ejemplo:
 
 ```text
-62/62 vendors flagged this skill as clean.
+62/62 proveedores marcaron esta skill como limpia.
 ```
 
 o:
 
 ```text
-2/64 vendors flagged this skill as malicious, 1/64 flagged it as suspicious, and 61/64 flagged it as clean.
+2/64 proveedores marcaron esta skill como maliciosa, 1/64 la marcaron como sospechosa y 61/64 la marcaron como limpia.
 ```
 
-Cuando ClawHub no tiene telemetría de recuento de proveedores que resumir, la auditoría dice:
+Cuando ClawHub no dispone de telemetría de recuentos de proveedores que resumir, la auditoría indica:
 
 ```text
-No VirusTotal findings
+Ningún hallazgo de VirusTotal
 ```
 
-VirusTotal sigue siendo telemetría. No sustituye el análisis de riesgos propio de ClawHub
-consciente de los artefactos.
+VirusTotal sigue siendo telemetría. No sustituye el análisis de riesgos de ClawHub
+basado en los propios artefactos.
 
 ## Análisis de riesgos
 
-El análisis de riesgos funciona internamente con ClawScan, el sistema propio de auditoría de seguridad de
-ClawHub. Revisa cada lanzamiento como un artefacto orientado a agentes: instrucciones,
-metadatos, permisos declarados, archivos, señales de capacidades, señales de escaneo estático,
+El análisis de riesgos funciona internamente mediante ClawScan, el sistema de auditorías de seguridad
+propio de ClawHub. Revisa cada versión como un artefacto destinado a agentes: instrucciones,
+metadatos, permisos declarados, archivos, indicadores de capacidades, indicadores de análisis estático,
 hallazgos de SkillSpector, telemetría de VirusTotal y contexto proporcionado por el editor.
-Las señales de escaneo estático son contexto interno para esta revisión; no son una
-sección independiente de auditoría pública ni un veredicto que bloquee la instalación.
+Los indicadores de análisis estático constituyen contexto interno para esta revisión; no son una
+sección pública independiente de la auditoría ni un veredicto que bloquee la instalación.
 
-El análisis de riesgos usa el
-[OWASP Agentic Skills Top 10](https://owasp.org/www-project-agentic-skills-top-10/)
-como lente para riesgos como inyección de prompts, uso indebido de herramientas, exposición de credenciales,
-ejecución no segura, envenenamiento de memoria o contexto y autonomía excesiva.
+El análisis de riesgos utiliza el
+[Top 10 de skills agénticas de OWASP](https://owasp.org/www-project-agentic-skills-top-10/)
+como marco para riesgos como la inyección de prompts, el uso indebido de herramientas, la exposición de credenciales,
+la ejecución no segura, el envenenamiento de la memoria o del contexto y la autonomía excesiva.
 
-ClawScan no trata una capacidad de aspecto alarmante como automáticamente maliciosa.
-Pregunta si la capacidad está divulgada, alineada con su propósito y respaldada por
-el caso de uso declarado del lanzamiento.
+ClawScan no considera que una capacidad de aspecto alarmante sea maliciosa de forma automática.
+Comprueba si la capacidad se ha comunicado, está alineada con el propósito y es compatible con
+el caso de uso declarado de la versión.

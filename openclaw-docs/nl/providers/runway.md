@@ -1,31 +1,32 @@
 ---
 read_when:
     - Je wilt Runway-videogeneratie gebruiken in OpenClaw
-    - Je moet de Runway API-sleutel/omgevingsvariabele instellen
+    - Je hebt de Runway-API-sleutel/-omgevingsconfiguratie nodig
     - Je wilt Runway instellen als de standaardvideoprovider
-summary: Runway-videogeneratie instellen in OpenClaw
-title: Startbaan
+summary: Instellen van Runway-videogeneratie in OpenClaw
+title: Runway
 x-i18n:
-    generated_at: "2026-07-12T09:20:57Z"
+    generated_at: "2026-07-27T06:10:15Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 7aa2a802323857bf7c839ebfab56853dc79d656a25bbc194a431959a48bbd64b
+    source_hash: 6a56e768893e327b56d70e8b8c2d426123a861b3cf05c0107d98104e2cee856c
     source_path: providers/runway.md
     workflow: 16
 ---
 
-OpenClaw wordt geleverd met een gebundelde `runway`-provider voor gehoste videogeneratie, die standaard is ingeschakeld en is geregistreerd voor het contract `videoGenerationProviders`.
+OpenClaw wordt geleverd met een gebundelde `runway`-provider voor gehoste videogeneratie, die standaard is ingeschakeld en is geregistreerd voor het `videoGenerationProviders`-contract.
 
-| Eigenschap              | Waarde                                                                  |
-| ----------------------- | ----------------------------------------------------------------------- |
-| Provider-id             | `runway`                                                                |
-| Plugin                  | gebundeld, `enabledByDefault: true`                                      |
-| Omgevingsvariabelen voor authenticatie | `RUNWAYML_API_SECRET` (canoniek) of `RUNWAY_API_KEY`       |
-| Onboarding-vlag         | `--auth-choice runway-api-key`                                          |
-| Rechtstreekse CLI-vlag  | `--runway-api-key <key>`                                                 |
-| API                     | Taakgebaseerde videogeneratie van Runway (polling via `GET /v1/tasks/{id}`) |
-| Standaardmodel          | `runway/gen4.5`                                                         |
+| Eigenschap            | Waarde                                                            |
+| --------------------- | ----------------------------------------------------------------- |
+| Provider-id           | `runway`                                                |
+| Plugin                | gebundeld, `enabledByDefault: true`                                     |
+| Omgevingsvariabelen voor authenticatie | `RUNWAYML_API_SECRET` (canoniek) of `RUNWAY_API_KEY` |
+| Onboarding-vlag       | `--auth-choice runway-api-key`                                                |
+| Directe CLI-vlag      | `--runway-api-key <key>`                                                |
+| API                   | Runway-taakgebaseerde videogeneratie (`GET /v1/tasks/{id}`-polling) |
+| Standaardmodel        | `runway/gen4.5`                                                |
 
 ## Aan de slag
 
@@ -37,7 +38,7 @@ OpenClaw wordt geleverd met een gebundelde `runway`-provider voor gehoste videog
   </Step>
   <Step title="Stel Runway in als de standaardprovider voor video">
     ```bash
-    openclaw config set agents.defaults.videoGenerationModel.primary "runway/gen4.5"
+    openclaw config set agents.defaults.mediaModels.video.primary "runway/gen4.5"
     ```
   </Step>
   <Step title="Genereer een video">
@@ -47,27 +48,27 @@ OpenClaw wordt geleverd met een gebundelde `runway`-provider voor gehoste videog
 
 ## Ondersteunde modi en modellen
 
-De provider biedt zeven Runway-modellen, verdeeld over drie modi. Dezelfde model-id kan voor meerdere modi dienen (zo werkt `gen4.5` bijvoorbeeld voor zowel tekst-naar-video als afbeelding-naar-video).
+De provider biedt zeven Runway-modellen, verdeeld over drie modi. Dezelfde model-id kan voor meer dan één modus dienen (zo werkt `gen4.5` voor zowel tekst-naar-video als afbeelding-naar-video).
 
-| Modus                  | Modellen                                                               | Referentie-invoer                  |
-| ---------------------- | ---------------------------------------------------------------------- | ---------------------------------- |
-| Tekst-naar-video       | `gen4.5` (standaard), `veo3.1`, `veo3.1_fast`, `veo3`                  | Geen                               |
-| Afbeelding-naar-video  | `gen4.5`, `gen4_turbo`, `gen3a_turbo`, `veo3.1`, `veo3.1_fast`, `veo3` | 1 lokale of externe afbeelding     |
-| Video-naar-video       | `gen4_aleph`                                                           | 1 lokale of externe video          |
+| Modus                  | Modellen                                                               | Referentie-invoer                 |
+| ---------------------- | ---------------------------------------------------------------------- | --------------------------------- |
+| Tekst-naar-video       | `gen4.5` (standaard), `veo3.1`, `veo3.1_fast`, `veo3` | Geen                              |
+| Afbeelding-naar-video  | `gen4.5`, `gen4_turbo`, `gen3a_turbo`, `veo3.1`, `veo3.1_fast`, `veo3` | 1 lokale of externe afbeelding   |
+| Video-naar-video       | `gen4_aleph`                                                    | 1 lokale of externe video        |
 
-Lokale verwijzingen naar afbeeldingen en video's worden ondersteund via data-URI's.
+Lokale afbeeldings- en videoverwijzingen worden ondersteund via data-URI's.
 
-| Beeldverhoudingen                | Toegestane waarden                           |
-| -------------------------------- | -------------------------------------------- |
-| Tekst-naar-video                 | `16:9`, `9:16`                               |
-| Bewerkingen van afbeeldingen en video's | `1:1`, `16:9`, `9:16`, `3:4`, `4:3`, `21:9` |
+| Beeldverhoudingen             | Toegestane waarden                           |
+| ----------------------------- | -------------------------------------------- |
+| Tekst-naar-video              | `16:9`, `9:16`       |
+| Afbeeldings- en videobewerkingen | `1:1`, `16:9`, `9:16`, `3:4`, `4:3`, `21:9` |
 
 <Warning>
-  Voor video-naar-video is momenteel `runway/gen4_aleph` vereist. Andere Runway-model-id's weigeren videoverwijzingen als invoer.
+  Video-naar-video vereist momenteel `runway/gen4_aleph`. Andere Runway-model-id's weigeren videoverwijzingen als invoer.
 </Warning>
 
 <Note>
-  Als u een Runway-model-id uit de verkeerde kolom kiest, treedt er een expliciete fout op voordat het API-verzoek OpenClaw verlaat. De provider valideert `model` aan de hand van de toegestane lijst van de modus (`TEXT_ONLY_MODELS`, `IMAGE_MODELS`, `VIDEO_MODELS`) in `extensions/runway/video-generation-provider.ts`.
+  Als je een Runway-model-id uit de verkeerde kolom kiest, treedt er een expliciete fout op voordat het API-verzoek OpenClaw verlaat. De provider valideert `model` aan de hand van de lijst met toegestane waarden voor de modus (`TEXT_ONLY_MODELS`, `IMAGE_MODELS`, `VIDEO_MODELS`) in `extensions/runway/video-generation-provider.ts`.
 </Note>
 
 ## Configuratie
@@ -89,12 +90,12 @@ Lokale verwijzingen naar afbeeldingen en video's worden ondersteund via data-URI
 <AccordionGroup>
   <Accordion title="Aliassen voor omgevingsvariabelen">
     OpenClaw herkent zowel `RUNWAYML_API_SECRET` (canoniek) als `RUNWAY_API_KEY`.
-    Met beide variabelen kan de Runway-provider worden geauthenticeerd.
+    Beide variabelen authenticeren de Runway-provider.
   </Accordion>
 
   <Accordion title="Taakpolling">
-    Runway gebruikt een taakgebaseerde API. Nadat een generatieverzoek is ingediend, pollt OpenClaw
-    `GET /v1/tasks/{id}` totdat de video gereed is. Voor dit
+    Runway gebruikt een taakgebaseerde API. Nadat een genereringsverzoek is ingediend, pollt OpenClaw
+    `GET /v1/tasks/{id}` totdat de video gereed is. Voor het
     pollinggedrag is geen aanvullende configuratie nodig.
   </Accordion>
 </AccordionGroup>

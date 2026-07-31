@@ -5,11 +5,12 @@ read_when:
 summary: Usar Z.AI (modelos GLM) con OpenClaw
 title: Z.AI
 x-i18n:
-    generated_at: "2026-07-11T23:29:08Z"
+    generated_at: "2026-07-26T05:28:04Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: ab29149da39cbf82fe041ea5932a860c461320e14bf26f83f69060d7ae0ae00a
+    source_hash: 0ca3e7ef743e908550f4d96ba6f78167e38cabd15b14044683b02493ebbf3025
     source_path: providers/zai.md
     workflow: 16
 ---
@@ -19,27 +20,27 @@ utiliza claves de API para la autenticación. Cree su clave de API en la consola
 OpenClaw utiliza el proveedor `zai` con una clave de API de Z.AI.
 
 | Propiedad | Valor                                        |
-| --------- | -------------------------------------------- |
+| -------- | -------------------------------------------- |
 | Proveedor | `zai`                                        |
-| Paquete   | `@openclaw/zai-provider`                     |
-| Autenticación | `ZAI_API_KEY` (alias heredado: `Z_AI_API_KEY`) |
-| API       | Finalizaciones de chat de Z.AI (autenticación Bearer) |
+| Paquete  | `@openclaw/zai-provider`                     |
+| Autenticación     | `ZAI_API_KEY` (alias heredado: `Z_AI_API_KEY`) |
+| API      | Finalizaciones de chat de Z.AI (autenticación Bearer)          |
 
 ## Modelos GLM
 
 GLM es una familia de modelos, no un proveedor independiente. En OpenClaw, los modelos GLM utilizan
-referencias como `zai/glm-5.2`: proveedor `zai`, identificador de modelo `glm-5.2`.
+referencias como `zai/glm-5.2`: proveedor `zai`, id. de modelo `glm-5.2`.
 
 ## Primeros pasos
 
-Instale primero el Plugin del proveedor:
+Instale primero el plugin del proveedor:
 
 ```bash
 openclaw plugins install @openclaw/zai-provider
 ```
 
 <Tabs>
-  <Tab title="Detección automática del endpoint">
+  <Tab title="Detectar automáticamente el endpoint">
     **Recomendado para:** la mayoría de los usuarios. OpenClaw prueba los endpoints compatibles de Z.AI con su clave de API y aplica automáticamente la URL base correcta.
 
     <Steps>
@@ -48,7 +49,7 @@ openclaw plugins install @openclaw/zai-provider
         openclaw onboard --auth-choice zai-api-key
         ```
       </Step>
-      <Step title="Verificar que el modelo aparece en la lista">
+      <Step title="Verificar que el modelo aparezca en la lista">
         ```bash
         openclaw models list --all --provider zai
         ```
@@ -58,7 +59,7 @@ openclaw plugins install @openclaw/zai-provider
   </Tab>
 
   <Tab title="Endpoint regional explícito">
-    **Recomendado para:** usuarios que deseen forzar un Coding Plan específico o la API general.
+    **Recomendado para:** usuarios que deseen forzar un Coding Plan específico o una superficie de API general.
 
     <Steps>
       <Step title="Elegir la opción de incorporación correcta">
@@ -76,7 +77,7 @@ openclaw plugins install @openclaw/zai-provider
         openclaw onboard --auth-choice zai-cn
         ```
       </Step>
-      <Step title="Verificar que el modelo aparece en la lista">
+      <Step title="Verificar que el modelo aparezca en la lista">
         ```bash
         openclaw models list --all --provider zai
         ```
@@ -88,26 +89,63 @@ openclaw plugins install @openclaw/zai-provider
 
 ### Endpoints
 
-| Opción de incorporación | URL base                                      | Modelo predeterminado |
-| ----------------------- | --------------------------------------------- | --------------------- |
-| `zai-global`            | `https://api.z.ai/api/paas/v4`                | `glm-5.1`             |
-| `zai-cn`                | `https://open.bigmodel.cn/api/paas/v4`        | `glm-5.1`             |
-| `zai-coding-global`     | `https://api.z.ai/api/coding/paas/v4`         | `glm-5.2`             |
-| `zai-coding-cn`         | `https://open.bigmodel.cn/api/coding/paas/v4` | `glm-5.2`             |
+| Opción de incorporación   | URL base                                      | Modelo predeterminado |
+| ------------------- | --------------------------------------------- | ------------- |
+| `zai-global`        | `https://api.z.ai/api/paas/v4`                | `glm-5.1`     |
+| `zai-cn`            | `https://open.bigmodel.cn/api/paas/v4`        | `glm-5.1`     |
+| `zai-coding-global` | `https://api.z.ai/api/coding/paas/v4`         | `glm-5.2`     |
+| `zai-coding-cn`     | `https://open.bigmodel.cn/api/coding/paas/v4` | `glm-5.2`     |
 
-`zai-api-key` detecta automáticamente uno de estos cuatro endpoints probando su clave con la
-API de finalizaciones de chat de cada endpoint. Comprueba primero los endpoints generales
-(`zai-global`, seguido de `zai-cn`) y después los endpoints de Coding Plan
-(`zai-coding-global`, seguido de `zai-coding-cn`), y se detiene en el primer endpoint
-que acepta una solicitud. Utilice una opción `--auth-choice` explícita para forzar un
-endpoint de Coding Plan si su clave funciona en ambos.
+Z.AI también publica la URL base de Coding Plan compatible con Anthropic
+`https://api.z.ai/api/anthropic`. Las opciones de Z.AI de OpenClaw utilizan los endpoints documentados
+de finalizaciones de chat de OpenAI anteriores; la URL de Anthropic es para clientes que
+se comunican directamente mediante Anthropic Messages.
+
+`zai-api-key` detecta automáticamente uno de estos cuatro al probar su clave con la API
+de finalizaciones de chat de cada endpoint; comprueba los endpoints generales (`zai-global`,
+y después `zai-cn`) antes que los endpoints de Coding Plan (`zai-coding-global`, y después
+`zai-coding-cn`) y se detiene en el primer endpoint que acepta una solicitud.
+Utilice un `--auth-choice` explícito para forzar un endpoint de Coding Plan si su clave
+funciona en ambos.
+
+## Límites de frecuencia y sobrecargas
+
+Z.AI documenta Coding Plan y las herramientas de agente de uso general como servicios
+con capacidad administrada. Según la propia documentación de Z.AI:
+
+- Las [herramientas de agente de uso general](https://docs.z.ai/devpack/tool/others),
+  incluido OpenClaw, se proporcionan según la disponibilidad. Durante una carga de inferencia
+  elevada, normalmente entre las 2 y las 6 p. m., hora de Singapur, algunas solicitudes pueden
+  estar sujetas a límites de frecuencia temporales.
+- Los [límites de frecuencia y concurrencia de Coding Plan](https://docs.z.ai/devpack/usage-policy)
+  están vinculados al nivel del plan y pueden ajustarse dinámicamente según la disponibilidad
+  de recursos. Las horas de menor demanda pueden ofrecer una concurrencia mayor.
+- El [código de error de la API `1302`](https://docs.z.ai/api-reference/api-code) significa «Se
+  alcanzó el límite de frecuencia de solicitudes». El código de error de la API `1305` significa «El servicio puede estar
+  temporalmente sobrecargado; inténtelo de nuevo más tarde».
+
+Si aparece una respuesta temporal `429` o `1305` durante un periodo de alta demanda, espere y
+vuelva a intentar la solicitud. Si los fallos se repiten fuera de los periodos de máxima demanda o solo
+se producen con un endpoint, modelo o formato de solicitud, compruebe primero el endpoint
+y el modelo configurados:
+
+```bash
+openclaw models list --all --provider zai
+openclaw config get models.providers.zai.baseUrl
+```
+
+Las claves de Coding Plan deben utilizar un endpoint de Coding Plan como
+`https://api.z.ai/api/coding/paas/v4`; las claves de la API general deben utilizar un endpoint de la API general
+como `https://api.z.ai/api/paas/v4`. Los fallos persistentes con la
+misma clave y el mismo endpoint pueden indicar un rechazo del proveedor o una limitación del plan,
+no una limitación normal por carga máxima.
 
 ## Ejemplo de configuración
 
 <Tip>
-`zai-api-key` permite que OpenClaw detecte mediante la clave el endpoint de Z.AI correspondiente y
+`zai-api-key` permite que OpenClaw detecte el endpoint de Z.AI correspondiente a partir de la clave y
 aplique automáticamente la URL base correcta. Utilice las opciones regionales explícitas cuando
-desee forzar un Coding Plan específico o la API general.
+desee forzar un Coding Plan específico o una superficie de API general.
 </Tip>
 
 ```json5
@@ -127,8 +165,8 @@ desee forzar un Coding Plan específico o la API general.
 
 ## Catálogo integrado
 
-El Plugin del proveedor `zai` incluye su catálogo en el manifiesto del Plugin, por lo que el listado
-de solo lectura puede mostrar las filas de GLM conocidas sin cargar el entorno de ejecución del proveedor:
+El plugin del proveedor `zai` incluye su catálogo en el manifiesto del plugin, por lo que el listado
+de solo lectura puede mostrar las filas conocidas de GLM sin cargar el entorno de ejecución del proveedor:
 
 ```bash
 openclaw models list --all --provider zai
@@ -136,31 +174,36 @@ openclaw models list --all --provider zai
 
 El catálogo respaldado por el manifiesto incluye actualmente:
 
-| Referencia del modelo   | Notas                              |
-| ----------------------- | ---------------------------------- |
-| `zai/glm-5.2`           | Predeterminado de Coding Plan; contexto de 1 M |
-| `zai/glm-5.1`           | Predeterminado de la API general   |
-| `zai/glm-5`             |                                    |
-| `zai/glm-5-turbo`       |                                    |
-| `zai/glm-5v-turbo`      |                                    |
-| `zai/glm-4.7`           |                                    |
-| `zai/glm-4.7-flash`     |                                    |
-| `zai/glm-4.7-flashx`    |                                    |
-| `zai/glm-4.6`           |                                    |
-| `zai/glm-4.6v`          |                                    |
-| `zai/glm-4.5`           |                                    |
-| `zai/glm-4.5-air`       |                                    |
-| `zai/glm-4.5-flash`     |                                    |
-| `zai/glm-4.5v`          |                                    |
+| Referencia del modelo            | Notas                           |
+| -------------------- | ------------------------------- |
+| `zai/glm-5.2`        | Valor predeterminado de Coding Plan; contexto de 1M |
+| `zai/glm-5.1`        | Valor predeterminado de la API general             |
+| `zai/glm-5`          |                                 |
+| `zai/glm-5-turbo`    |                                 |
+| `zai/glm-5v-turbo`   |                                 |
+| `zai/glm-4.7`        |                                 |
+| `zai/glm-4.7-flash`  |                                 |
+| `zai/glm-4.7-flashx` |                                 |
+| `zai/glm-4.6`        |                                 |
+| `zai/glm-4.6v`       |                                 |
+| `zai/glm-4.5`        |                                 |
+| `zai/glm-4.5-air`    |                                 |
+| `zai/glm-4.5-flash`  |                                 |
+| `zai/glm-4.5v`       |                                 |
+
+Los metadatos de coste por token del catálogo siguen los
+[precios actuales de pago por uso](https://docs.z.ai/guides/overview/pricing) de Z.AI. Las suscripciones de Coding Plan
+utilizan la cuota del plan en lugar de la facturación por token; consulte la
+[página de suscripción](https://z.ai/subscribe) activa para conocer los precios y la disponibilidad de los planes.
 
 <Tip>
 Los modelos GLM están disponibles como `zai/<model>` (ejemplo: `zai/glm-5`).
 </Tip>
 
 <Note>
-La configuración de Coding Plan utiliza `zai/glm-5.2` de forma predeterminada; la configuración de la
-API general mantiene `zai/glm-5.1`. En los endpoints de Coding Plan, la detección automática recurre
-a `glm-5.1` y después a `glm-4.7` cuando la clave o el plan no permiten acceder a GLM-5.2. Las versiones
+La configuración de Coding Plan utiliza de forma predeterminada `zai/glm-5.2`; la configuración de la API general mantiene
+`zai/glm-5.1`. En los endpoints de Coding Plan, la detección automática recurre a
+`glm-5.1` y después a `glm-4.7` cuando la clave o el plan no ofrecen GLM-5.2. Las versiones
 y la disponibilidad de GLM pueden cambiar; ejecute `openclaw models list --all --provider zai`
 para consultar el catálogo conocido por la versión instalada.
 </Note>
@@ -170,12 +213,12 @@ para consultar el catálogo conocido por la versión instalada.
 <Tabs>
   <Tab title="GLM-5.2">
     Intervalo completo: `off`, `low`, `high`, `max` (valor predeterminado: `off`). OpenClaw asigna
-    `low` y `high` al esfuerzo de razonamiento `high` de Z.AI, y `max` al esfuerzo
-    `max` de Z.AI, mediante `reasoning_effort` en la carga útil de la solicitud.
+    `low` y `high` al esfuerzo de razonamiento `high` de Z.AI, y `max` al
+    esfuerzo `max` de Z.AI, mediante `reasoning_effort` en la carga útil de la solicitud.
   </Tab>
   <Tab title="Otros modelos GLM">
-    Solo conmutación binaria: `off` y `low` (se muestra como `on` en los selectores); el valor
-    predeterminado es `off`. Establecer el razonamiento en `off` envía `thinking: { type: "disabled" }`;
+    Solo conmutador binario: `off` y `low` (se muestra como `on` en los selectores), con valor predeterminado
+    `off`. Establecer el razonamiento en `off` envía `thinking: { type: "disabled" }`;
     cualquier otro nivel deja intacta la carga útil de la solicitud (se aplica el comportamiento
     de razonamiento predeterminado de Z.AI).
   </Tab>
@@ -188,13 +231,13 @@ Establecer el razonamiento en `off` evita respuestas que consuman el presupuesto
 
 <AccordionGroup>
   <Accordion title="Resolución anticipada de modelos GLM-5 desconocidos">
-    Los identificadores `glm-5*` desconocidos también se resuelven de forma anticipada en la ruta del
-    proveedor mediante la síntesis de metadatos propiedad del proveedor a partir de la plantilla
-    `glm-4.7` cuando el identificador coincide con la estructura actual de la familia GLM-5.
+    Los identificadores `glm-5*` desconocidos siguen resolviéndose de forma anticipada en la ruta del proveedor
+    mediante la síntesis de metadatos propiedad del proveedor a partir de la plantilla `glm-4.7` cuando el identificador
+    coincide con el formato actual de la familia GLM-5.
   </Accordion>
 
   <Accordion title="Transmisión de llamadas a herramientas">
-    `tool_stream` está activado de forma predeterminada para la transmisión de llamadas a herramientas de Z.AI. Para desactivarlo:
+    `tool_stream` está habilitado de forma predeterminada para la transmisión de llamadas a herramientas de Z.AI. Para deshabilitarlo:
 
     ```json5
     {
@@ -213,8 +256,8 @@ Establecer el razonamiento en `off` evita respuestas que consuman el presupuesto
   </Accordion>
 
   <Accordion title="Razonamiento conservado">
-    El razonamiento conservado debe activarse explícitamente porque Z.AI requiere que se reproduzca todo
-    el `reasoning_content` histórico, lo que aumenta los tokens del prompt. Actívelo
+    El razonamiento conservado es opcional porque Z.AI exige que se reproduzca el
+    `reasoning_content` histórico completo, lo que aumenta los tokens del prompt. Habilítelo
     para cada modelo:
 
     ```json5
@@ -231,44 +274,44 @@ Establecer el razonamiento en `off` evita respuestas que consuman el presupuesto
     }
     ```
 
-    Cuando está activado y el razonamiento está habilitado, OpenClaw envía
-    `thinking: { type: "enabled", clear_thinking: false }` y reproduce el
-    `reasoning_content` anterior para la misma transcripción compatible con OpenAI. La clave de
-    parámetro en snake_case `preserve_thinking` funciona como alias.
+    Cuando está habilitado y el razonamiento está activado, OpenClaw envía
+    `thinking: { type: "enabled", clear_thinking: false }` y reproduce los
+    `reasoning_content` anteriores para la misma transcripción compatible con OpenAI. La clave de parámetro en snake_case
+    `preserve_thinking` funciona como alias.
 
-    Los usuarios avanzados también pueden sobrescribir la carga útil exacta del proveedor mediante
+    Los usuarios avanzados aún pueden sustituir la carga útil exacta del proveedor mediante
     `params.extra_body.thinking`.
 
   </Accordion>
 
   <Accordion title="Comprensión de imágenes">
-    El Plugin de Z.AI registra la comprensión de imágenes.
+    El plugin de Z.AI registra la comprensión de imágenes.
 
     | Propiedad      | Valor       |
-    | -------------- | ----------- |
+    | ------------- | ----------- |
     | Modelo         | `glm-4.6v`  |
 
-    La comprensión de imágenes se resuelve automáticamente a partir de la autenticación configurada de Z.AI;
-    no se necesita ninguna configuración adicional.
+    La comprensión de imágenes se resuelve automáticamente a partir de la autenticación configurada de Z.AI; no
+    se necesita ninguna configuración adicional.
 
   </Accordion>
 
   <Accordion title="Detalles de autenticación">
     - Z.AI utiliza autenticación Bearer con su clave de API.
-    - La opción de incorporación `zai-api-key` detecta automáticamente el endpoint de Z.AI correspondiente probando los endpoints compatibles con su clave.
-    - Utilice las opciones regionales explícitas (`zai-coding-global`, `zai-coding-cn`, `zai-global`, `zai-cn`) cuando desee forzar una API específica.
-    - La variable de entorno heredada `Z_AI_API_KEY` sigue siendo compatible; OpenClaw la copia a `ZAI_API_KEY` al iniciarse si `ZAI_API_KEY` no está definida.
+    - La opción de incorporación `zai-api-key` detecta automáticamente el endpoint de Z.AI correspondiente al probar los endpoints compatibles con su clave.
+    - Utilice las opciones regionales explícitas (`zai-coding-global`, `zai-coding-cn`, `zai-global`, `zai-cn`) cuando desee forzar una superficie de API específica.
+    - La variable de entorno heredada `Z_AI_API_KEY` todavía se acepta; OpenClaw la copia a `ZAI_API_KEY` al iniciarse si `ZAI_API_KEY` no está definida.
 
   </Accordion>
 </AccordionGroup>
 
-## Temas relacionados
+## Contenido relacionado
 
 <CardGroup cols={2}>
   <Card title="Selección de modelos" href="/es/concepts/model-providers" icon="layers">
-    Elección de proveedores, referencias de modelos y comportamiento de conmutación por error.
+    Selección de proveedores, referencias de modelos y comportamiento de conmutación por error.
   </Card>
   <Card title="Referencia de configuración" href="/es/gateway/configuration-reference" icon="gear">
-    Esquema de configuración completo de OpenClaw, incluidos los ajustes de proveedores y modelos.
+    Esquema completo de configuración de OpenClaw, incluidos los ajustes de proveedores y modelos.
   </Card>
 </CardGroup>

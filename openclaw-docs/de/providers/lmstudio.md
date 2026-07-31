@@ -5,36 +5,37 @@ read_when:
 summary: OpenClaw mit LM Studio ausführen
 title: LM Studio
 x-i18n:
-    generated_at: "2026-07-12T02:05:29Z"
+    generated_at: "2026-07-26T18:03:32Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b4223f90e786e285651fc889985dd61124c60758b4e9c3599d76201d9ac20b46
+    source_hash: f43b4d04aad6e5edfdf224747083834ebd441aa7f91ccbf2d61de990443fc414
     source_path: providers/lmstudio.md
     workflow: 16
 ---
 
-LM Studio führt llama.cpp- (GGUF) oder MLX-Modelle lokal aus, entweder als GUI-App oder als Headless-Daemon `llmster`.
+LM Studio führt llama.cpp- (GGUF) oder MLX-Modelle lokal aus, entweder als GUI-App oder als monitorlosen `llmster`-Daemon.
 Installations- und Produktdokumentation finden Sie unter [lmstudio.ai](https://lmstudio.ai/).
 
 ## Schnellstart
 
 <Steps>
   <Step title="Server installieren und starten">
-    Installieren Sie LM Studio (Desktop) oder `llmster` (Headless) und starten Sie anschließend den Server:
+    Installieren Sie LM Studio (Desktop) oder `llmster` (monitorlos) und starten Sie anschließend den Server:
 
     ```bash
     lms server start --port 1234
     ```
 
-    Alternativ können Sie den Headless-Daemon ausführen:
+    Oder führen Sie den monitorlosen Daemon aus:
 
     ```bash
     lms daemon up
     ```
 
-    Wenn Sie die Desktop-App verwenden, aktivieren Sie JIT für ein reibungsloses Laden von Modellen; siehe
-    [LM-Studio-Leitfaden zu JIT und TTL](https://lmstudio.ai/docs/developer/core/ttl-and-auto-evict).
+    Wenn Sie die Desktop-App verwenden, aktivieren Sie JIT, um Modelle reibungslos zu laden; weitere Informationen finden Sie im
+    [Leitfaden zu JIT und TTL in LM Studio](https://lmstudio.ai/docs/developer/core/ttl-and-auto-evict).
 
   </Step>
   <Step title="API-Schlüssel festlegen, wenn die Authentifizierung aktiviert ist">
@@ -42,16 +43,24 @@ Installations- und Produktdokumentation finden Sie unter [lmstudio.ai](https://l
     export LM_API_TOKEN="your-lm-studio-api-token"
     ```
 
-    Wenn die LM-Studio-Authentifizierung deaktiviert ist, lassen Sie den API-Schlüssel während der Einrichtung leer. Siehe
+    Wenn die LM-Studio-Authentifizierung deaktiviert ist, lassen Sie den API-Schlüssel während der Einrichtung leer. Weitere Informationen finden Sie unter
     [LM-Studio-Authentifizierung](https://lmstudio.ai/docs/developer/core/authentication).
 
   </Step>
-  <Step title="Ersteinrichtung ausführen">
+  <Step title="Onboarding ausführen">
     ```bash
     openclaw onboard
     ```
 
     Wählen Sie `LM Studio` und anschließend bei der Eingabeaufforderung `Default model` ein Modell aus.
+
+    Bei einer neuen geführten Einrichtung fragt OpenClaw zunächst `/api/v1/models` auf dem
+    standardmäßigen oder konfigurierten LM-Studio-Host ab. Ein vorhandenes LLM wird nur dann automatisch
+    angeboten, wenn LM Studio Tool-Training und einen effektiven Kontext von mindestens 16K meldet.
+    Bei geladenen Modellen hat der Kontext der geladenen Instanz Vorrang vor dem
+    größeren angegebenen Maximum. Dieselbe Einrichtungsabfolge für CLI/macOS überprüft die
+    Route mit einer echten Vervollständigung, bevor sie gespeichert wird. Die automatische Prüfung lädt niemals
+    ein Modell herunter und ignoriert Katalogeinträge, die ausschließlich für Embeddings vorgesehen sind.
 
   </Step>
 </Steps>
@@ -62,15 +71,15 @@ Installations- und Produktdokumentation finden Sie unter [lmstudio.ai](https://l
 openclaw models set lmstudio/qwen/qwen3.5-9b
 ```
 
-LM-Studio-Modellschlüssel verwenden das Format `author/model-name` (z. B. `qwen/qwen3.5-9b`); bei OpenClaw-Modellreferenzen
-wird der Provider vorangestellt: `lmstudio/qwen/qwen3.5-9b`. Ermitteln Sie den genauen Schlüssel eines Modells, indem Sie den
+LM-Studio-Modellschlüssel verwenden das Format `author/model-name` (z. B. `qwen/qwen3.5-9b`); OpenClaw-Modellreferenzen
+stellen den Provider voran: `lmstudio/qwen/qwen3.5-9b`. Den genauen Schlüssel eines Modells finden Sie, indem Sie den
 folgenden Befehl ausführen und das Feld `key` prüfen:
 
 ```bash
 curl http://localhost:1234/api/v1/models
 ```
 
-## Nicht interaktive Ersteinrichtung
+## Nicht interaktives Onboarding
 
 ```bash
 openclaw onboard --non-interactive --accept-risk --auth-choice lmstudio
@@ -88,35 +97,36 @@ openclaw onboard \
   --custom-model-id qwen/qwen3.5-9b
 ```
 
-`--custom-model-id` erwartet den von LM Studio zurückgegebenen Modellschlüssel (z. B. `qwen/qwen3.5-9b`) ohne
-das Provider-Präfix `lmstudio/`. Übergeben Sie für authentifizierte Server `--lmstudio-api-key` (oder setzen Sie `LM_API_TOKEN`);
-lassen Sie die Option für nicht authentifizierte Server weg. OpenClaw speichert stattdessen eine lokale, nicht geheime Markierung.
+`--custom-model-id` übernimmt den von LM Studio zurückgegebenen Modellschlüssel (z. B. `qwen/qwen3.5-9b`) ohne
+das Provider-Präfix `lmstudio/`. Übergeben Sie `--lmstudio-api-key` (oder legen Sie `LM_API_TOKEN` fest) für authentifizierte
+Server; lassen Sie die Angabe bei nicht authentifizierten Servern weg. OpenClaw speichert stattdessen eine lokale, nicht geheime Markierung.
 `--custom-api-key` wird aus Kompatibilitätsgründen weiterhin akzeptiert, `--lmstudio-api-key` wird jedoch bevorzugt.
 
-Dadurch wird `models.providers.lmstudio` geschrieben und das Standardmodell auf `lmstudio/<custom-model-id>` gesetzt.
+Dadurch wird `models.providers.lmstudio` geschrieben und das Standardmodell auf `lmstudio/<custom-model-id>` festgelegt.
 Wenn Sie einen API-Schlüssel angeben, wird außerdem das Authentifizierungsprofil `lmstudio:default` geschrieben.
 
-Bei der interaktiven Einrichtung kann zusätzlich eine bevorzugte Kontextlänge für das Laden abgefragt werden. Diese wird auf
-alle erkannten Modelle angewendet, die in der Konfiguration gespeichert werden.
+Bei der interaktiven Einrichtung kann zusätzlich eine bevorzugte Ladekontextlänge abgefragt werden, die dann auf alle
+erkannten Modelle angewendet wird, die in der Konfiguration gespeichert werden.
 
 ## Konfiguration
 
 ### Kompatibilität der Streaming-Nutzungsdaten
 
 LM Studio gibt bei gestreamten Antworten nicht immer ein OpenAI-konformes `usage`-Objekt aus. OpenClaw
-ermittelt die Token-Anzahl stattdessen aus Metadaten im llama.cpp-Stil unter `timings.prompt_n` / `timings.predicted_n`.
-Jeder OpenAI-kompatible Endpunkt, der als lokaler Endpunkt aufgelöst wird (Loopback-Host), erhält denselben
-Fallback. Dies umfasst weitere lokale Backends wie vLLM, SGLang, llama.cpp, LocalAI, Jan, TabbyAPI
+ermittelt die Token-Anzahlen stattdessen aus Metadaten im llama.cpp-Stil (`timings.prompt_n` / `timings.predicted_n`).
+Jeder OpenAI-kompatible Endpunkt, der als lokaler Endpunkt aufgelöst wird (Loopback-Host), verwendet denselben
+Fallback. Dies gilt auch für andere lokale Backends wie vLLM, SGLang, llama.cpp, LocalAI, Jan, TabbyAPI
 und text-generation-webui.
 
 ### Kompatibilität des Denkmodus
 
-Wenn die Erkennung über `/api/v1/models` von LM Studio modellspezifische Schlussfolgerungsoptionen meldet, stellt OpenClaw
+Wenn die `/api/v1/models`-Erkennung von LM Studio modellspezifische Reasoning-Optionen meldet, stellt OpenClaw
 entsprechende `reasoning_effort`-Werte (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`) in den
 Modellkompatibilitätsmetadaten bereit. Einige LM-Studio-Builds geben eine binäre UI-Option (`allowed_options: ["off",
-"on"]`) an, lehnen diese wörtlichen Werte jedoch bei `/v1/chat/completions` ab; OpenClaw normalisiert diese
-binäre Form vor dem Senden von Anfragen auf die sechsstufige Skala. Dies gilt auch für ältere gespeicherte Konfigurationen,
-die noch Schlussfolgerungszuordnungen mit `off`/`on` enthalten.
+"on"]`) an, lehnen diese
+Literalwerte bei `/v1/chat/completions` jedoch ab; OpenClaw normalisiert diese binäre Form
+vor dem Senden von Anfragen auf die sechsstufige Skala. Dies gilt auch für ältere gespeicherte Konfigurationen, die
+noch `off`-/`on`-Reasoning-Zuordnungen enthalten.
 
 ### Explizite Konfiguration
 
@@ -148,9 +158,9 @@ die noch Schlussfolgerungszuordnungen mit `off`/`on` enthalten.
 ### Vorabladen deaktivieren
 
 LM Studio unterstützt das Just-in-Time-Laden (JIT) von Modellen, bei dem Modelle bei der ersten Anfrage geladen werden. OpenClaw
-lädt Modelle standardmäßig über den nativen Ladeendpunkt von LM Studio vorab, was hilfreich ist, wenn JIT
-deaktiviert ist. Wenn stattdessen JIT, die Leerlauf-TTL und die automatische Entfernung von LM Studio den Modelllebenszyklus steuern sollen,
-deaktivieren Sie den Vorabladeschritt von OpenClaw:
+lädt Modelle standardmäßig über den nativen Ladeendpunkt von LM Studio vor, was hilfreich ist, wenn JIT
+deaktiviert ist. Damit stattdessen JIT, die Leerlauf-TTL und das automatische Entfernen von LM Studio den Modelllebenszyklus
+steuern, deaktivieren Sie den Vorabladeschritt von OpenClaw:
 
 ```json5
 {
@@ -170,7 +180,7 @@ deaktivieren Sie den Vorabladeschritt von OpenClaw:
 ### LAN- oder Tailnet-Host
 
 Verwenden Sie die erreichbare Adresse des LM-Studio-Hosts, behalten Sie `/v1` bei und stellen Sie sicher, dass LM Studio auf diesem
-Rechner nicht ausschließlich an die Loopback-Adresse gebunden ist:
+Computer nicht nur an die Loopback-Schnittstelle gebunden ist:
 
 ```json5
 {
@@ -187,11 +197,11 @@ Rechner nicht ausschließlich an die Loopback-Adresse gebunden ist:
 }
 ```
 
-`lmstudio` vertraut seinem konfigurierten Endpunkt automatisch für Modellanfragen, einschließlich Loopback-,
-LAN- und Tailnet-Hosts (mit Ausnahme von Metadaten- und Link-Local-Ursprüngen). Jeder benutzerdefinierte/lokale OpenAI-kompatible
-Provider-Eintrag erhält dasselbe Vertrauen für den exakten Ursprung. Anfragen an einen anderen privaten Host oder Port erfordern weiterhin
-`models.providers.<id>.request.allowPrivateNetwork: true`; setzen Sie den Wert auf `false`, um das
-standardmäßige Vertrauen zu deaktivieren.
+`lmstudio` vertraut seinem konfigurierten Endpunkt automatisch bei Modellanfragen, einschließlich Loopback-,
+LAN- und Tailnet-Hosts (mit Ausnahme von Metadaten-/Link-Local-Ursprüngen). Jeder benutzerdefinierte/lokale OpenAI-kompatible
+Provider-Eintrag erhält dasselbe Vertrauen in den exakten Ursprung. Anfragen an einen anderen privaten Host oder Port
+erfordern weiterhin `models.providers.<id>.request.allowPrivateNetwork: true`; setzen Sie den Wert auf `false`, um
+das standardmäßige Vertrauen zu deaktivieren.
 
 ## Fehlerbehebung
 
@@ -203,7 +213,7 @@ Stellen Sie sicher, dass LM Studio ausgeführt wird:
 lms server start --port 1234
 ```
 
-Wenn die Authentifizierung aktiviert ist, setzen Sie außerdem `LM_API_TOKEN`. Prüfen Sie, ob die API erreichbar ist:
+Wenn die Authentifizierung aktiviert ist, legen Sie außerdem `LM_API_TOKEN` fest. Prüfen Sie, ob die API erreichbar ist:
 
 ```bash
 curl http://localhost:1234/api/v1/models
@@ -212,7 +222,7 @@ curl http://localhost:1234/api/v1/models
 ### Authentifizierungsfehler (HTTP 401)
 
 - Prüfen Sie, ob `LM_API_TOKEN` mit dem in LM Studio konfigurierten Schlüssel übereinstimmt.
-- Siehe [LM-Studio-Authentifizierung](https://lmstudio.ai/docs/developer/core/authentication).
+- Weitere Informationen finden Sie unter [LM-Studio-Authentifizierung](https://lmstudio.ai/docs/developer/core/authentication).
 - Wenn der Server keine Authentifizierung erfordert, lassen Sie den Schlüssel während der Einrichtung leer.
 
 ## Verwandte Themen

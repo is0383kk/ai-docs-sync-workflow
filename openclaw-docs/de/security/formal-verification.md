@@ -3,45 +3,45 @@ permalink: /security/formal-verification/
 read_when:
     - Überprüfung formaler Garantien oder Einschränkungen des Sicherheitsmodells
     - TLA+/TLC-Sicherheitsmodellprüfungen reproduzieren oder aktualisieren
-summary: Maschinell geprüfte Sicherheitsmodelle für die Pfade mit dem höchsten Risiko in OpenClaw.
+summary: Maschinell geprüfte Sicherheitsmodelle für die risikoreichsten Pfade von OpenClaw.
 title: Formale Verifikation (Sicherheitsmodelle)
 x-i18n:
-    generated_at: "2026-07-12T15:53:25Z"
+    generated_at: "2026-07-26T18:04:36Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 15
+    prompt_version: 32
     provider: openai
-    source_hash: 86342f6e2f54c08d5e0f8a08d0d488459650a6ace35e985ff886f847540202c9
+    source_hash: 185ee5c1cff7325f10827330c0c7e55ddc3ca40caf6088d4c930ae5e090d6b27
     source_path: security/formal-verification.md
     workflow: 16
 ---
 
-Die formalen Sicherheitsmodelle von OpenClaw (derzeit TLA+/TLC) liefern ein maschinell geprüftes Argument dafür, dass bestimmte Pfade mit dem höchsten Risiko — Autorisierung, Sitzungsisolation, Tool-Zugriffskontrolle und Sicherheit bei Fehlkonfigurationen — unter ausdrücklich genannten Annahmen die vorgesehenen Richtlinien durchsetzen.
+Die formalen Sicherheitsmodelle von OpenClaw (derzeit TLA+/TLC) liefern ein maschinell geprüftes Argument dafür, dass bestimmte Pfade mit dem höchsten Risiko – Autorisierung, Sitzungsisolation, Tool-Zugriffskontrolle und Sicherheit bei Fehlkonfigurationen – unter ausdrücklich genannten Annahmen die vorgesehene Richtlinie durchsetzen.
 
 > Hinweis: Einige ältere Links verweisen möglicherweise auf den früheren Projektnamen.
 
-## Was dies ist
+## Worum es sich handelt
 
-Eine ausführbare, angriffsorientierte Suite für Sicherheitsregressionstests:
+Eine ausführbare, angreifergesteuerte Suite für Sicherheitsregressionen:
 
-- Für jede Aussage gibt es eine ausführbare Modellprüfung über einen endlichen Zustandsraum.
-- Für viele Aussagen gibt es ein zugehöriges Negativmodell, das für eine realistische Fehlerklasse eine Gegenbeispielspur erzeugt.
+- Jede Behauptung verfügt über eine ausführbare Modellprüfung in einem endlichen Zustandsraum.
+- Viele Behauptungen verfügen über ein zugehöriges negatives Modell, das für eine realistische Fehlerklasse eine Gegenbeispielspur erzeugt.
 
-Dies ist **kein** Beweis dafür, dass OpenClaw in jeder Hinsicht sicher ist, und es überprüft nicht die vollständige TypeScript-Implementierung.
+Dies ist **kein** Beweis dafür, dass OpenClaw in jeder Hinsicht sicher ist, und es verifiziert nicht die vollständige TypeScript-Implementierung.
 
 ## Speicherort der Modelle
 
 Die Modelle werden in einem separaten Repository gepflegt: [vignesh07/openclaw-formal-models](https://github.com/vignesh07/openclaw-formal-models).
 
 <Note>
-Dieses Repository ist derzeit nicht erreichbar (GitHub gibt zum Zeitpunkt der Erstellung „Repository not found“ zurück). Falls es für Sie weiterhin nicht erreichbar ist, fragen Sie in den Maintainer-Kanälen von OpenClaw nach dem aktuellen Speicherort, bevor Sie annehmen, dass die Modelle entfernt wurden.
+Dieses Repository ist derzeit nicht erreichbar (GitHub gibt zum Zeitpunkt der Erstellung dieses Textes „Repository not found“ zurück). Falls es für Sie weiterhin nicht erreichbar ist, fragen Sie in den OpenClaw-Maintainer-Kanälen nach dem aktuellen Speicherort, bevor Sie davon ausgehen, dass die Modelle entfernt wurden.
 </Note>
 
 ## Einschränkungen
 
-- Es handelt sich um Modelle, nicht um die vollständige TypeScript-Implementierung — Abweichungen zwischen Modell und Code sind möglich.
-- Die Ergebnisse sind durch den von TLC untersuchten Zustandsraum begrenzt. Ein grünes Ergebnis bedeutet keine Sicherheit über die modellierten Annahmen und Grenzen hinaus.
-- Einige Aussagen beruhen auf ausdrücklichen Annahmen zur Umgebung (beispielsweise eine korrekte Bereitstellung und korrekte Konfigurationseingaben).
+- Dies sind Modelle, nicht die vollständige TypeScript-Implementierung – Abweichungen zwischen Modell und Code sind möglich.
+- Die Ergebnisse sind durch den von TLC untersuchten Zustandsraum begrenzt. Grün bedeutet keine Sicherheit über die modellierten Annahmen und Grenzen hinaus.
+- Einige Behauptungen beruhen auf ausdrücklichen Annahmen zur Umgebung (beispielsweise einer korrekten Bereitstellung und korrekten Konfigurationseingaben).
 
 ## Ergebnisse reproduzieren
 
@@ -52,18 +52,18 @@ git clone https://github.com/vignesh07/openclaw-formal-models
 cd openclaw-formal-models
 
 # Java 11+ erforderlich (TLC wird auf der JVM ausgeführt).
-# Das Repository enthält eine festgelegte Version von tla2tools.jar und stellt bin/tlc sowie Make-Ziele bereit.
+# Das Repository enthält eine angeheftete tla2tools.jar und stellt bin/tlc sowie Make-Ziele bereit.
 
 make <target>
 ```
 
-Eine CI-Integration zurück in dieses Repository gibt es noch nicht. Eine zukünftige Version könnte über CI ausgeführte Modelle mit öffentlichen Artefakten (Gegenbeispielspuren, Ausführungsprotokolle) oder einen gehosteten „Dieses Modell ausführen“-Workflow für kleine, begrenzte Prüfungen ergänzen.
+Eine CI-Integration zurück in dieses Repository besteht noch nicht; eine zukünftige Iteration könnte in der CI ausgeführte Modelle mit öffentlichen Artefakten (Gegenbeispielspuren, Ausführungsprotokolle) oder einen gehosteten Workflow „Dieses Modell ausführen“ für kleine begrenzte Prüfungen hinzufügen.
 
-## Aussagen und Ziele
+## Behauptungen und Ziele
 
 ### Gateway-Exposition und Fehlkonfiguration eines offenen Gateways
 
-**Aussage:** Eine Bindung außerhalb der Loopback-Schnittstelle ohne Authentifizierung kann eine Kompromittierung aus der Ferne ermöglichen und erhöht die Exposition. Ein Token oder Passwort blockiert gemäß den Annahmen des Modells nicht authentifizierte Angreifer.
+**Behauptung:** Eine Bindung außerhalb der Loopback-Schnittstelle ohne Authentifizierung kann eine Remote-Kompromittierung ermöglichen und erhöht die Exposition; gemäß den Annahmen des Modells blockiert ein Token/Passwort nicht authentifizierte Angreifer.
 
 | Ergebnis       | Ziele                                                            |
 | -------------- | ---------------------------------------------------------------- |
@@ -74,7 +74,7 @@ Siehe auch `docs/gateway-exposure-matrix.md` im Modell-Repository.
 
 ### Node-Ausführungspipeline (Funktion mit dem höchsten Risiko)
 
-**Aussage:** `exec host=node` erfordert (a) eine Positivliste für Node-Befehle sowie deklarierte Befehle und (b) eine aktuelle Genehmigung, sofern diese konfiguriert ist. Im Modell werden Genehmigungen mit Token versehen, um eine erneute Verwendung zu verhindern.
+**Behauptung:** `exec host=node` erfordert im Modell (a) eine Zulassungsliste für Node-Befehle sowie deklarierte Befehle und (b) eine direkte Genehmigung, sofern diese konfiguriert ist; Genehmigungen werden tokenisiert, um eine Wiederverwendung zu verhindern.
 
 | Ergebnis       | Ziele                                                           |
 | -------------- | --------------------------------------------------------------- |
@@ -83,7 +83,7 @@ Siehe auch `docs/gateway-exposure-matrix.md` im Modell-Repository.
 
 ### Kopplungsspeicher (DM-Zugriffskontrolle)
 
-**Aussage:** Kopplungsanfragen berücksichtigen die TTL und Obergrenzen für ausstehende Anfragen.
+**Behauptung:** Kopplungsanfragen halten TTL und Obergrenzen für ausstehende Anfragen ein.
 
 | Ergebnis       | Ziele                                                |
 | -------------- | ---------------------------------------------------- |
@@ -92,7 +92,7 @@ Siehe auch `docs/gateway-exposure-matrix.md` im Modell-Repository.
 
 ### Eingangs-Zugriffskontrolle (Erwähnungen und Umgehung durch Steuerbefehle)
 
-**Aussage:** In Gruppenkontexten, die eine Erwähnung erfordern, kann ein nicht autorisierter Steuerbefehl die Zugriffskontrolle für Erwähnungen nicht umgehen.
+**Behauptung:** In Gruppenkontexten, die eine Erwähnung erfordern, kann ein nicht autorisierter Steuerbefehl die Erwähnungs-Zugriffskontrolle nicht umgehen.
 
 | Ergebnis       | Ziele                          |
 | -------------- | ------------------------------ |
@@ -101,7 +101,7 @@ Siehe auch `docs/gateway-exposure-matrix.md` im Modell-Repository.
 
 ### Routing und Isolation von Sitzungsschlüsseln
 
-**Aussage:** DMs von unterschiedlichen Kommunikationspartnern werden nicht in derselben Sitzung zusammengeführt, sofern sie nicht ausdrücklich verknüpft oder entsprechend konfiguriert sind.
+**Behauptung:** DMs verschiedener Gegenstellen werden nicht in derselben Sitzung zusammengeführt, sofern sie nicht ausdrücklich verknüpft oder entsprechend konfiguriert sind.
 
 | Ergebnis       | Ziele                             |
 | -------------- | --------------------------------- |
@@ -110,20 +110,20 @@ Siehe auch `docs/gateway-exposure-matrix.md` im Modell-Repository.
 
 ## v1++-Modelle: Nebenläufigkeit, Wiederholungsversuche und Korrektheit von Spuren
 
-Weiterführende Modelle, die die Übereinstimmung mit realen Fehlermodi verbessern: nicht atomare Aktualisierungen, Wiederholungsversuche und Nachrichten-Fan-out.
+Nachfolgemodelle, die die Realitätsnähe für Fehlerarten aus der Praxis erhöhen: nicht atomare Aktualisierungen, Wiederholungsversuche und Nachrichtenverteilung.
 
 ### Nebenläufigkeit und Idempotenz des Kopplungsspeichers
 
-**Aussage:** Der Kopplungsspeicher erzwingt `MaxPending` und Idempotenz auch bei verzahnten Abläufen — Prüfung und anschließendes Schreiben müssen atomar beziehungsweise gesperrt erfolgen, und eine Aktualisierung darf keine Duplikate erzeugen. Konkret gilt: Gleichzeitige Anfragen dürfen `MaxPending` für einen Kanal nicht überschreiten, und wiederholte Anfragen oder Aktualisierungen für dasselbe `(channel, sender)` erzeugen keine doppelten aktiven ausstehenden Zeilen.
+**Behauptung:** Der Kopplungsspeicher erzwingt `MaxPending` und Idempotenz auch bei verzahnten Abläufen – Prüfen und anschließendes Schreiben müssen atomar/gesperrt erfolgen, und eine Aktualisierung darf keine Duplikate erzeugen. Konkret: Gleichzeitige Anfragen dürfen `MaxPending` für einen Kanal nicht überschreiten, und wiederholte Anfragen/Aktualisierungen für dieselbe `(channel, sender)` erzeugen keine doppelten aktiven ausstehenden Zeilen.
 
 | Ergebnis       | Ziele                                                                                                                                                                       |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Grün           | `make pairing-race` (atomare/gesperrte Prüfung der Obergrenze), `make pairing-idempotency`, `make pairing-refresh`, `make pairing-refresh-race`                             |
-| Rot (erwartet) | `make pairing-race-negative` (nicht atomare Begin-/Commit-Konkurrenzsituation bei der Obergrenze), `make pairing-idempotency-negative`, `make pairing-refresh-negative`, `make pairing-refresh-race-negative` |
+| Grün           | `make pairing-race` (atomare/gesperrte Prüfung der Obergrenze), `make pairing-idempotency`, `make pairing-refresh`, `make pairing-refresh-race`                                              |
+| Rot (erwartet) | `make pairing-race-negative` (nicht atomares Wettlaufproblem zwischen Beginn und Commit bei der Obergrenze), `make pairing-idempotency-negative`, `make pairing-refresh-negative`, `make pairing-refresh-race-negative` |
 
 ### Korrelation und Idempotenz von Eingangsspuren
 
-**Aussage:** Die Aufnahme erhält die Spurenkorrelation über Fan-out hinweg und ist bei Wiederholungsversuchen des Providers idempotent. Wenn ein externes Ereignis in mehrere interne Nachrichten aufgeteilt wird, behält jeder Teil dieselbe Spuren-/Ereignisidentität. Wiederholungsversuche führen nicht zu einer doppelten Verarbeitung. Wenn Ereignis-IDs des Providers fehlen, greift die Deduplizierung auf einen sicheren Schlüssel zurück (beispielsweise die Spuren-ID), damit unterschiedliche Ereignisse nicht verworfen werden.
+**Behauptung:** Die Aufnahme bewahrt die Spurenkorrelation über die Nachrichtenverteilung hinweg und ist bei Wiederholungsversuchen des Providers idempotent. Wenn aus einem externen Ereignis mehrere interne Nachrichten entstehen, behält jeder Teil dieselbe Spuren-/Ereignisidentität; Wiederholungsversuche führen nicht zu einer doppelten Verarbeitung; fehlen Ereignis-IDs des Providers, verwendet die Deduplizierung ersatzweise einen sicheren Schlüssel (beispielsweise die Spuren-ID), damit unterschiedliche Ereignisse nicht verworfen werden.
 
 | Ergebnis       | Ziele                                                                                                                                       |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -132,7 +132,7 @@ Weiterführende Modelle, die die Übereinstimmung mit realen Fehlermodi verbesse
 
 ### Routing-Priorität von dmScope und identityLinks
 
-**Aussage:** Das Routing hält DM-Sitzungen standardmäßig isoliert und führt Sitzungen nur dann zusammen, wenn dies über die Kanalpriorität und Identitätsverknüpfungen ausdrücklich konfiguriert ist. Kanalspezifische Überschreibungen von `dmScope` haben Vorrang vor globalen Standardwerten. `identityLinks` führen Sitzungen nur innerhalb ausdrücklich verknüpfter Gruppen zusammen, nicht über voneinander unabhängige Kommunikationspartner hinweg.
+**Behauptung:** Die Priorität von `dmScope` und Identitätsverknüpfungen verhalten sich deterministisch: Der standardmäßige Gültigkeitsbereich `main` verwendet für die DMs eines einzelnen Eigentümers eine gemeinsame fortlaufende Sitzung (der Standard für persönliche Agenten), während jeder konfigurierte isolierende Gültigkeitsbereich (`per-peer`, `per-channel-peer`, `per-account-channel-peer`) DM-Sitzungen strikt getrennt hält. Kanalspezifische `dmScope` haben Vorrang vor globalen Standardwerten; `identityLinks` führen Sitzungen nur innerhalb ausdrücklich verknüpfter Gruppen zusammen, nicht über voneinander unabhängige Gegenstellen hinweg. Bei Posteingängen mit mehreren Benutzern wird erwartet, dass ein isolierender Gültigkeitsbereich aktiviert wird (die Laufzeit-Sicherheitsprüfung empfiehlt dies, wenn sie DM-Datenverkehr von mehreren Benutzern erkennt).
 
 | Ergebnis       | Ziele                                                                     |
 | -------------- | ------------------------------------------------------------------------- |

@@ -1,21 +1,22 @@
 ---
 read_when:
-    - Je installeert, configureert of controleert de qwen-Plugin
-summary: Voegt ondersteuning voor de modelproviders Qwen, Qwen Cloud, Model Studio, DashScope, Qwen Oauth, Qwen Portal, Qwen CLI, Qwen Token Plan en Bailian Token Plan toe aan OpenClaw.
+    - Je installeert, configureert of controleert de qwen-plugin
+summary: Voegt ondersteuning voor de modelproviders Qwen, Qwen Cloud, Model Studio, DashScope, Qwen Token Plan en Bailian Token Plan toe aan OpenClaw.
 title: Qwen-plugin
 x-i18n:
-    generated_at: "2026-07-12T09:14:38Z"
+    generated_at: "2026-07-27T05:10:04Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 3d3c529b0b98f0c7b2137754264e9acfddd90a245418ee105b9efc9541b1911b
+    source_hash: dc2c9ed659b0cb1f1ff6b882ba89b3310b04f0d4b7be90e64835a0635b806f95
     source_path: plugins/reference/qwen.md
     workflow: 16
 ---
 
 # Qwen-plugin
 
-Voegt ondersteuning toe aan OpenClaw voor de modelproviders Qwen, Qwen Cloud, Model Studio, DashScope, Qwen Oauth, Qwen Portal, Qwen CLI, Qwen Token Plan en Bailian Token Plan.
+Voegt ondersteuning voor Qwen, Qwen Cloud, Model Studio, DashScope, Qwen Token Plan en Bailian Token Plan als modelproviders toe aan OpenClaw.
 
 ## Distributie
 
@@ -24,9 +25,8 @@ Voegt ondersteuning toe aan OpenClaw voor de modelproviders Qwen, Qwen Cloud, Mo
 
 ## Oppervlak
 
-providers: qwen, qwencloud, modelstudio, dashscope, qwen-oauth, qwen-portal, qwen-cli, qwen-token-plan, bailian-token-plan; contracten: mediaUnderstandingProviders, videoGenerationProviders
+providers: `qwen`, `qwencloud`, `modelstudio`, `dashscope`, `qwen-token-plan`, `bailian-token-plan`; contracten: `mediaUnderstandingProviders`, `videoGenerationProviders`
 
 ## Gerelateerde documentatie
 
 - [qwen](/nl/providers/qwen)
-- [qwen-oauth](/nl/providers/qwen-oauth)

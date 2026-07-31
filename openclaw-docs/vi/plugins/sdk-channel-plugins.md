@@ -1,321 +1,574 @@
 ---
 read_when:
-    - Bạn đang xây dựng một Plugin kênh nhắn tin mới
+    - Bạn đang xây dựng một plugin kênh nhắn tin mới
     - Bạn muốn kết nối OpenClaw với một nền tảng nhắn tin
-    - Bạn cần hiểu bề mặt bộ điều hợp ChannelPlugin
+    - Bạn cần hiểu bề mặt bộ điều hợp `ChannelPlugin`
 sidebarTitle: Channel Plugins
-summary: Hướng dẫn từng bước để xây dựng Plugin kênh nhắn tin cho OpenClaw
+summary: Hướng dẫn từng bước xây dựng Plugin kênh nhắn tin cho OpenClaw
 title: Xây dựng Plugin kênh
 x-i18n:
-    generated_at: "2026-07-02T22:37:44Z"
-    model: gpt-5.5
+    generated_at: "2026-07-20T04:29:56Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 84490ebdd482d1f09827af38274d06beea6d7fd72071e66beb79fcc12c86656a
+    source_hash: f287892d3354362d1770e0a70f79f61b812ee6ad213ca5d82f9764e441eff130
     source_path: plugins/sdk-channel-plugins.md
     workflow: 16
 ---
 
-Hướng dẫn này trình bày cách xây dựng một channel plugin kết nối OpenClaw với một
-nền tảng nhắn tin. Đến cuối hướng dẫn, bạn sẽ có một channel hoạt động với bảo mật DM,
-ghép cặp, phân luồng trả lời và nhắn tin đi.
+Hướng dẫn này xây dựng một plugin kênh kết nối OpenClaw với một nền tảng
+nhắn tin: bảo mật tin nhắn trực tiếp, ghép nối, phân luồng trả lời và nhắn tin đi.
 
 <Info>
-  Nếu bạn chưa từng xây dựng Plugin OpenClaw nào, hãy đọc
-  [Bắt đầu](/vi/plugins/building-plugins) trước để nắm cấu trúc gói
-  cơ bản và thiết lập manifest.
+  Bạn mới làm quen với các plugin OpenClaw? Trước tiên, hãy đọc [Bắt đầu](/vi/plugins/building-plugins)
+  để tìm hiểu cấu trúc gói và cách thiết lập manifest.
 </Info>
 
-## Cách channel plugin hoạt động
+## Những gì plugin của bạn phụ trách
 
-Channel plugin không cần công cụ gửi/chỉnh sửa/phản ứng riêng. OpenClaw giữ một
-công cụ `message` dùng chung trong core. Plugin của bạn sở hữu:
+Plugin kênh không triển khai các công cụ gửi/chỉnh sửa/phản ứng; phần lõi cung cấp một
+công cụ `message` dùng chung. Plugin của bạn phụ trách:
 
 - **Cấu hình** - phân giải tài khoản và trình hướng dẫn thiết lập
-- **Bảo mật** - chính sách DM và danh sách cho phép
-- **Ghép cặp** - luồng phê duyệt DM
-- **Ngữ pháp phiên** - cách các id cuộc trò chuyện riêng theo provider ánh xạ tới chat cơ sở, id luồng và fallback cha
-- **Gửi đi** - gửi văn bản, media và bình chọn tới nền tảng
-- **Phân luồng** - cách các trả lời được phân luồng
-- **Heartbeat typing** - tín hiệu đang nhập/bận tùy chọn cho các đích gửi Heartbeat
+- **Bảo mật** - chính sách tin nhắn trực tiếp và danh sách cho phép
+- **Ghép nối** - luồng phê duyệt tin nhắn trực tiếp
+- **Ngữ pháp phiên** - cách mã định danh cuộc trò chuyện riêng của nhà cung cấp ánh xạ tới các cuộc
+  trò chuyện cơ sở, mã định danh luồng và phương án dự phòng về luồng cha
+- **Gửi đi** - gửi văn bản, phương tiện và cuộc thăm dò tới nền tảng
+- **Phân luồng** - cách các câu trả lời được phân luồng
+- **Trạng thái nhập cho Heartbeat** - tín hiệu đang nhập/đang bận tùy chọn cho các đích
+  phân phối Heartbeat
 
-Core sở hữu công cụ message dùng chung, nối dây prompt, dạng khóa phiên bên ngoài,
-sổ sách `:thread:` chung và dispatch.
+Phần lõi phụ trách công cụ tin nhắn dùng chung, nối kết prompt, hình dạng bên ngoài của khóa phiên,
+việc ghi nhận `:thread:` chung và điều phối.
 
-Các channel plugin mới cũng nên phơi bày một adapter `message` bằng
-`defineChannelMessageAdapter` từ `openclaw/plugin-sdk/channel-outbound`. Adapter
-khai báo những năng lực gửi cuối bền vững mà native transport thực sự hỗ trợ
-và trỏ các lần gửi văn bản/media tới cùng các hàm transport như adapter
-`outbound` cũ. Chỉ khai báo một năng lực khi contract test chứng minh side effect
-native và receipt được trả về.
-Để xem đầy đủ hợp đồng API, ví dụ, ma trận năng lực, quy tắc receipt, hoàn tất
-bản xem trước trực tiếp, chính sách receive ack, kiểm thử và bảng migration, xem
-[API gửi đi của channel](/vi/plugins/sdk-channel-outbound).
-Nếu adapter `outbound` hiện có đã có các phương thức gửi và metadata năng lực
-phù hợp, hãy dùng `createChannelMessageAdapterFromOutbound(...)` để dẫn xuất
-adapter `message` thay vì viết tay một bridge khác.
-Các lần gửi của adapter nên trả về giá trị `MessageReceipt`. Khi mã tương thích
-vẫn cần id cũ, hãy dẫn xuất chúng bằng `listMessageReceiptPlatformIds(...)`
-hoặc `resolveMessageReceiptPrimaryId(...)` thay vì giữ các trường
-`messageIds` song song trong mã vòng đời mới.
-Các channel hỗ trợ xem trước cũng nên khai báo `message.live.capabilities` với
-vòng đời trực tiếp chính xác mà chúng sở hữu, chẳng hạn như `draftPreview`,
-`previewFinalization`, `progressUpdates`, `nativeStreaming`, hoặc
-`quietFinalization`. Các channel hoàn tất bản xem trước nháp tại chỗ cũng nên
-khai báo `message.live.finalizer.capabilities`, chẳng hạn như `finalEdit`,
-`normalFallback`, `discardPending`, `previewReceipt`, và
-`retainOnAmbiguousFailure`, đồng thời định tuyến logic runtime qua
-`defineFinalizableLivePreviewAdapter(...)` cùng
-`deliverWithFinalizableLivePreviewAdapter(...)`. Giữ các năng lực đó được bảo
-chứng bằng kiểm thử `verifyChannelMessageLiveCapabilityAdapterProofs(...)` và
-`verifyChannelMessageLiveFinalizerProofs(...)` để hành vi xem trước native,
-tiến độ, chỉnh sửa, fallback/giữ lại, dọn dẹp và receipt không thể âm thầm lệch đi.
-Các bộ nhận inbound trì hoãn acknowledgement của nền tảng nên khai báo
-`message.receive.defaultAckPolicy` và `supportedAckPolicies` thay vì ẩn thời điểm
-ack trong trạng thái cục bộ của monitor. Bao phủ mọi chính sách đã khai báo bằng
+## Bộ điều hợp tin nhắn
+
+Cung cấp một bộ điều hợp `message` với `defineChannelMessageAdapter` từ
+`openclaw/plugin-sdk/channel-outbound`. Chỉ khai báo các khả năng gửi cuối cùng bền vững
+mà phương thức truyền tải gốc của bạn thực sự hỗ trợ, kèm theo một kiểm thử hợp đồng
+chứng minh hiệu ứng phụ gốc và biên nhận được trả về. Hướng các thao tác gửi văn bản/phương tiện
+tới cùng các hàm truyền tải mà bộ điều hợp `outbound` cũ sử dụng. Để biết
+đầy đủ hợp đồng API, ma trận khả năng, quy tắc biên nhận, quá trình hoàn tất bản xem trước
+trực tiếp, chính sách xác nhận khi nhận, kiểm thử và bảng di chuyển, hãy xem
+[API gửi đi của kênh](/vi/plugins/sdk-channel-outbound).
+
+Nếu bộ điều hợp `outbound` hiện có của bạn đã có đúng các phương thức gửi và
+siêu dữ liệu khả năng, hãy tạo bộ điều hợp `message` bằng
+`createChannelMessageAdapterFromOutbound(...)` thay vì tự viết một
+cầu nối khác. Các thao tác gửi của bộ điều hợp trả về các giá trị `MessageReceipt`. Đối với mã định danh cũ, hãy tạo
+chúng bằng `listMessageReceiptPlatformIds(...)` hoặc
+`resolveMessageReceiptPrimaryId(...)` thay vì duy trì song song các trường `messageIds`.
+
+Khai báo chính xác các khả năng trực tiếp và hoàn tất - phần lõi dùng chúng để quyết định
+một kênh có thể làm gì, và sự sai lệch giữa hành vi được khai báo với hành vi thực tế là một
+lỗi kiểm thử hợp đồng:
+
+| Bề mặt                               | Giá trị                                                                                           |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `message.live.capabilities`           | `draftPreview`, `previewFinalization`, `progressUpdates`, `nativeStreaming`, `quietFinalization` |
+| `message.live.finalizer.capabilities` | `finalEdit`, `normalFallback`, `discardPending`, `previewReceipt`, `retainOnAmbiguousFailure`    |
+
+Các kênh hoàn tất bản xem trước nháp tại chỗ nên định tuyến logic thời gian chạy
+qua `defineFinalizableLivePreviewAdapter(...)` cùng với
+`deliverWithFinalizableLivePreviewAdapter(...)`, đồng thời duy trì các khả năng đã khai báo
+bằng các kiểm thử `verifyChannelMessageLiveCapabilityAdapterProofs(...)`
+và `verifyChannelMessageLiveFinalizerProofs(...)` để hành vi xem trước gốc,
+tiến trình, chỉnh sửa, dự phòng/lưu giữ, dọn dẹp và biên nhận không thể âm thầm
+sai lệch.
+
+Các bộ nhận đầu vào trì hoãn xác nhận của nền tảng nên khai báo
+`message.receive.defaultAckPolicy` và `supportedAckPolicies` thay vì che giấu
+thời điểm xác nhận trong trạng thái cục bộ của trình giám sát. Bao phủ mọi chính sách đã khai báo bằng
 `verifyChannelMessageReceiveAckPolicyAdapterProofs(...)`.
 
-Các helper trả lời cũ như `createChannelTurnReplyPipeline`,
-`dispatchInboundReplyWithBase`, và `recordInboundSessionAndDispatchReply`
-vẫn có sẵn cho các dispatcher tương thích. Không dùng các tên đó cho mã channel
-mới; Plugin mới nên bắt đầu với adapter `message`, receipt và các helper vòng đời
-nhận/gửi trên `openclaw/plugin-sdk/channel-outbound`.
+Các trình trợ giúp trả lời cũ như `dispatchInboundReplyWithBase` và
+`recordInboundSessionAndDispatchReply` vẫn khả dụng cho các trình điều phối
+tương thích. Không sử dụng chúng cho mã kênh mới; thay vào đó, hãy bắt đầu với bộ điều hợp `message`,
+các biên nhận và trình trợ giúp vòng đời nhận/gửi trên
+`openclaw/plugin-sdk/channel-outbound`.
 
-Các channel đang migration ủy quyền inbound có thể dùng subpath thử nghiệm
-`openclaw/plugin-sdk/channel-ingress-runtime` từ các đường dẫn nhận runtime.
-Subpath này giữ việc tra cứu nền tảng và side effect trong Plugin, đồng thời
-chia sẻ phân giải trạng thái danh sách cho phép, quyết định route/sender/command/event/activation,
-chẩn đoán đã biên tập và ánh xạ nhận lượt. Giữ việc chuẩn hóa danh tính Plugin
-trong descriptor bạn truyền cho resolver; không serialize các giá trị khớp thô
-từ trạng thái hoặc quyết định đã phân giải. Xem
-[API ingress của channel](/vi/plugins/sdk-channel-ingress) để biết thiết kế API,
+### Tiếp nhận đầu vào (thử nghiệm)
+
+Các kênh đang di chuyển cơ chế ủy quyền đầu vào có thể sử dụng đường dẫn con thử nghiệm
+`openclaw/plugin-sdk/channel-ingress-runtime` từ các đường dẫn nhận khi chạy.
+Nó chấp nhận dữ kiện nền tảng, danh sách cho phép thô, bộ mô tả định tuyến, dữ kiện lệnh
+và cấu hình nhóm truy cập, sau đó trả về các phép chiếu người gửi/định tuyến/lệnh/kích hoạt
+cùng đồ thị tiếp nhận có thứ tự, trong khi việc tra cứu nền tảng và các hiệu ứng phụ
+vẫn nằm trong plugin. Hãy giữ việc chuẩn hóa danh tính plugin trong
+bộ mô tả được truyền cho trình phân giải; không tuần tự hóa các giá trị khớp thô từ
+trạng thái hoặc quyết định đã phân giải. Xem
+[API tiếp nhận của kênh](/vi/plugins/sdk-channel-ingress) để biết thiết kế API,
 ranh giới sở hữu và kỳ vọng kiểm thử.
 
-Nếu channel của bạn hỗ trợ chỉ báo đang nhập ngoài các trả lời inbound, hãy phơi bày
-`heartbeat.sendTyping(...)` trên channel plugin. Core gọi nó với đích gửi Heartbeat
-đã phân giải trước khi lần chạy mô hình Heartbeat bắt đầu và dùng vòng đời
-keepalive/dọn dẹp typing dùng chung. Thêm `heartbeat.clearTyping(...)`
-khi nền tảng cần tín hiệu dừng rõ ràng.
+### Tiếp nhận bền vững và chống trùng lặp khi phát lại
 
-Nếu channel của bạn thêm các tham số message-tool mang nguồn media, hãy phơi bày
-tên các tham số đó qua `describeMessageTool(...).mediaSourceParams`. Core dùng
-danh sách rõ ràng đó cho chuẩn hóa đường dẫn sandbox và chính sách truy cập media
-gửi đi, nên Plugin không cần các trường hợp đặc biệt trong shared-core cho những
-tham số avatar, tệp đính kèm hoặc ảnh bìa riêng theo provider.
-Ưu tiên trả về một map theo khóa hành động như
-`{ "set-profile": ["avatarUrl", "avatarPath"] }` để các hành động không liên quan
-không kế thừa đối số media của hành động khác. Một mảng phẳng vẫn hoạt động với
-các tham số được chủ ý chia sẻ trên mọi hành động được phơi bày.
-Các channel phải phơi bày một URL công khai tạm thời để nền tảng fetch media
+Các kênh áp dụng tiếp nhận bền vững nên sử dụng `createChannelIngressMonitor`
+từ `openclaw/plugin-sdk/channel-outbound` trừ khi cần một hợp đồng
+tiếp nhận hoặc bơm khác biệt đáng kể. Đưa phong bì truyền tải thô vào hàng đợi tại một
+điểm nghẽn nhận duy nhất (không chuẩn hóa tại thời điểm nhận), chỉ xác nhận
+truyền tải sau khi nối thêm bền vững đối với các phương thức truyền tải Webhook, tạo một
+làn tuần tự hóa cho mỗi cuộc trò chuyện và đánh dấu sự kiện hoàn tất khi được
+điều phối tiếp nhận. Khóa chính của hàng đợi là `(queue_name, event_id)` và việc hoàn tất
+tạo dấu mộ cho hàng thay vì xóa nó, vì vậy việc nền tảng phân phối lại muộn
+cùng `event_id` sẽ bị từ chối bền vững trong khoảng thời gian lưu giữ dấu mộ.
+Xem [API gửi đi của kênh](/vi/plugins/sdk-channel-outbound#durable-ingress-monitors)
+để biết API trình giám sát và hợp đồng tắt.
+
+Dấu mộ đó là quy tắc phân lớp cho các cơ chế bảo vệ chống phát lại
+(`openclaw/plugin-sdk/persistent-dedupe`): một kênh đã xả chỉ duy trì một
+cơ chế bảo vệ chống phát lại riêng khi danh tính hoặc thời gian lưu giữ của cơ chế đó vượt quá hàng đợi
+— một khóa tin nhắn logic khác với mã định danh phân phối truyền tải (Telegram
+loại bỏ trùng lặp `chat_id:message_id` vì việc gộp chống dội có thể làm một tin nhắn xuất hiện lại
+dưới một `update_id` mới), hoặc một khoảng thời gian dài hơn thời gian lưu giữ dấu mộ
+của kênh. Nếu khóa bảo vệ của bạn bằng `event_id` của quá trình xả, hãy xóa
+cơ chế bảo vệ khi áp dụng quá trình xả và điều chỉnh `completedTtlMs`/`completedMaxEntries`
+để thay thế việc bao phủ khoảng thời gian bảo vệ cũ. Các biện pháp bảo vệ không nhằm loại bỏ trùng lặp, chẳng hạn như
+hàng rào tuổi, không liên quan đến quy tắc này. Mã định danh tin nhắn đi ổn định sử dụng
+sổ đăng ký phản hồi gửi đi dùng chung từ `openclaw/plugin-sdk/channel-outbound` thay vì
+bộ nhớ đệm TTL cục bộ của kênh.
+
+#### Các lớp truyền tải và lưu giữ
+
+Phân loại phương thức truyền tải theo mức bảo đảm phục hồi tại ranh giới nhận của nó:
+
+- **Phân phối Webhook hoặc sự kiện có chặn xác nhận:** chỉ xác nhận hoặc trả về thành công
+  sau khi nối thêm bền vững. Lỗi nối thêm phải khiến phân phối vẫn đủ điều kiện
+  để thử lại hoặc làm ranh giới nhận thất bại. Lớp này bao gồm Slack, SMS, Zalo,
+  Microsoft Teams, Google Chat, LINE và Synology Chat.
+- **Phân phối thăm dò hoặc luồng có chờ:** chỉ tiến con trỏ từ xa hoặc gửi
+  xác nhận truyền tải sau khi nối thêm. Khi không có con trỏ tường minh, hãy giữ
+  callback nhận được tuần tự hóa và chờ hoàn tất để lỗi nối thêm không thể khiến
+  vòng lặp nhận chạy vượt lên trước. Thăm dò Telegram, Signal và Tlon sử dụng lớp này;
+  phân phối Webhook Telegram tuân theo quy tắc có chặn xác nhận ở trên.
+- **Socket không thể phát lại:** IRC, Mattermost, Twitch và Zalo Personal không thể yêu cầu
+  nền tảng phân phối lại một sự kiện đã được chấp nhận. Hàng đợi bền vững của chúng bảo vệ
+  khoảng thời gian lỗi tiến trình và hỗ trợ phục hồi khi khởi động lại cục bộ; các dấu mộ
+  hoàn tất gần như không có tác dụng chống lại việc phát lại từ nền tảng.
+
+Sử dụng 30 ngày làm quy ước TTL dấu mộ cho toàn bộ hệ thống, không phải làm giá trị mặc định của SDK. Một
+khoảng thời gian phân phối lại có lưu lượng lớn thường sử dụng giới hạn 20,000 mục đã hoàn tất;
+các phương thức truyền tải có chờ và không thể phát lại với lưu lượng thấp hơn thường sử dụng 1,000-2,000.
+Các ngoại lệ hiện tại bao gồm giới hạn 4,096 mục của LINE, TTL hoàn tất 24 giờ
+của SMS và chế độ lưu giữ hoàn tất chỉ theo giới hạn của Tlon. Giới hạn hàng thất bại cũng có thể thấp hơn
+giới hạn đã hoàn tất. Cả TTL và giới hạn đều cắt tỉa các hàng, vì vậy thời gian lưu giữ hiệu lực kết thúc
+khi đạt giới hạn đầu tiên. Chỉ sai khác vì thời hạn thử lại của nền tảng đã được ghi lại,
+khoảng thời gian bảo vệ chống phát lại đã phát hành cần được giữ nguyên, lưu lượng dự kiến hoặc ngân sách đĩa,
+hay phương thức truyền tải không thể phát lại, và bao phủ hợp đồng lưu giữ bằng các kiểm thử.
+
+#### Hiệu ứng phụ ít nhất một lần
+
+Quá trình điều phối xả chạy các hiệu ứng phụ của lệnh trước khi hàng tiếp nhận đạt tới
+dấu mộ hoàn tất. Tiến trình gặp sự cố giữa hai bước này sẽ phát lại hàng và
+có thể thực thi hiệu ứng phụ lần nữa. Khoảng thời gian sự cố ít nhất một lần này là
+hợp đồng mặc định. Đối với công việc không lũy đẳng như ghi cấu hình, xóa
+bộ nhớ hoặc các xác nhận hiển thị bên ngoài làn trả lời, hãy sử dụng
+`createIngressEffectOnce(...)` từ
+`openclaw/plugin-sdk/ingress-effect-once`. Cung cấp cho mỗi lệnh gọi `eventId` tiếp nhận ổn định
+cùng tên hiệu ứng. Tạo một trình trợ giúp cho mỗi hàng đợi/tài khoản tiếp nhận và
+sử dụng một `namespacePrefix` ổn định, duy nhất cho phạm vi đó vì các mã định danh sự kiện truyền tải
+có thể chỉ duy nhất trong phạm vi hàng đợi. Trình trợ giúp chỉ cam kết yêu cầu bền vững sau khi
+hiệu ứng thành công; hiệu ứng ném lỗi sẽ giải phóng yêu cầu để lần thử lại xả
+có thể thực thi lại, trong khi các bên gọi đồng thời chờ yêu cầu đang hoạt động. Các
+lỗi trạng thái bền vững gọi `onDiskError` khi được cung cấp và từ chối thay vì
+dự phòng về bộ nhớ tiến trình.
+
+Đặt `ttlMs` của trình trợ giúp ít nhất bằng thời gian lưu giữ dấu mộ tiếp nhận của kênh
+cộng với độ trễ tối đa giữa lúc cam kết hiệu ứng và lúc hoàn tất hàng, bao gồm
+thời gian ngừng hoạt động có giới hạn và các lần thử lại xả. TTL của bản ghi hiệu ứng bắt đầu khi cam kết,
+trong khi thời gian lưu giữ dấu mộ bắt đầu muộn hơn khi hoàn tất; nếu vòng đời hàng đang chờ
+không bị giới hạn, không TTL hữu hạn nào có thể bao phủ thời gian ngừng hoạt động tùy ý. Sau khi dấu mộ không còn
+có thể phát lại hàng, các bản ghi hiệu ứng cũ trở thành dữ liệu thừa. Điều chỉnh
+`stateMaxEntries` cho mọi khóa sự kiện/hiệu ứng riêng biệt có thể tồn tại trong
+khoảng thời gian lưu giữ đó, có tính đến giới hạn mục đã hoàn tất của hàng đợi và
+số hiệu ứng tối đa trên mỗi sự kiện. Giới hạn thấp hơn sẽ loại bỏ bản ghi cũ nhất trước TTL
+và cho phép hiệu ứng đó thực thi lại. Các khoảng thời gian ít nhất một lần còn lại vẫn tồn tại
+nếu tiến trình dừng hoặc việc lưu trữ thất bại sau khi hiệu ứng thành công nhưng trước khi
+yêu cầu được cam kết, hoặc nếu bản ghi hết hạn trong khi hàng tiếp nhận của nó vẫn
+đang chờ.
+
+#### Hợp đồng khởi động lại theo phạm vi tài khoản
+
+Theo mặc định, thay đổi cấu hình kênh sẽ khởi động lại toàn bộ kênh. Một kênh nhiều tài khoản
+chỉ có thể đặt `reload.accountScopedRestart: true` khi quá trình phân giải
+cấu hình đọc các trường dùng chung toàn kênh cùng tài khoản đã chọn, tuyệt đối không đọc
+tài khoản đồng cấp, và Gateway có thể dừng rồi khởi động một thời gian chạy `(channel, accountId)`
+mà không thay thế các thời gian chạy đồng cấp.
+
+Đường dẫn theo phạm vi chỉ áp dụng cho các thay đổi bên dưới
+`channels.<channel>.accounts.<non-default-id>.*`. Các thay đổi đối với trường kênh
+dùng chung, `accounts.default`, các tài khoản đã bị xóa hoặc không thể phân giải, và các thay đổi hỗn hợp
+có thể ảnh hưởng đến kế thừa sẽ được nâng cấp thành khởi động lại toàn bộ kênh. Các plugin
+không chọn tham gia luôn sử dụng đường dẫn toàn kênh.
+
+Đối với các kênh sử dụng quá trình xả tiếp nhận bền vững, đường dẫn dừng của trình giám sát tài khoản
+trước tiên phải hoàn tất tất cả lần tiếp nhận truyền tải đã chấp nhận, sau đó hủy và chờ
+quá trình xả của nó. Việc khởi động tài khoản mở cùng hàng đợi theo khóa tài khoản, và lần xả
+ban đầu sẽ phục hồi các hàng bền vững chưa được điều phối. Không thêm một lượt phát lại thứ hai
+riêng cho việc tải lại; phục hồi hàng đợi là đường dẫn khởi động lại chuẩn tắc.
+
+Hãy coi cờ này là một tuyên bố khả năng, không phải tùy chọn hiệu năng. Các kiểm thử hợp đồng
+nên chứng minh rằng việc thêm và chỉnh sửa một tài khoản có tên không làm thay đổi cấu hình đã phân giải
+của tài khoản đồng cấp, việc dừng một tài khoản chỉ hoàn tất trình giám sát và quá trình xả
+của tài khoản đó, và một trình giám sát mới phục hồi các hàng của tài khoản đó chính xác
+một lần. Nếu không thể chứng minh bất kỳ bảo đảm nào, hãy bỏ qua cờ này.
+
+### Chỉ báo đang nhập
+
+Nếu kênh của bạn hỗ trợ chỉ báo đang nhập bên ngoài các câu trả lời đầu vào, hãy cung cấp
+`heartbeat.sendTyping(...)` trên plugin kênh. Phần lõi gọi nó với
+đích phân phối Heartbeat đã phân giải trước khi lượt chạy mô hình Heartbeat bắt đầu và
+sử dụng vòng đời duy trì/dọn dẹp trạng thái đang nhập dùng chung. Thêm
+`heartbeat.clearTyping(...)` khi nền tảng cần một tín hiệu dừng tường minh.
+
+### Tham số nguồn phương tiện
+
+Nếu kênh của bạn thêm các tham số công cụ tin nhắn mang nguồn phương tiện, hãy cung cấp
+tên của các tham số đó thông qua `plugin.actions.describeMessageTool(...).mediaSourceParams`.
+Phần lõi sử dụng danh sách tường minh này cho việc chuẩn hóa đường dẫn sandbox và chính sách
+truy cập phương tiện gửi đi, nhờ đó các plugin không cần trường hợp đặc biệt trong phần lõi dùng chung cho
+các tham số ảnh đại diện, tệp đính kèm hoặc ảnh bìa riêng của nhà cung cấp.
+
+Ưu tiên một ánh xạ theo khóa hành động như `{ "set-profile": ["avatarUrl", "avatarPath"] }`
+để các hành động không liên quan không kế thừa các đối số phương tiện của hành động khác. Một mảng phẳng
+vẫn dùng được cho các tham số được chủ ý chia sẻ giữa mọi hành động được công khai.
+
+Các kênh phải công khai một URL công khai tạm thời để nền tảng tìm nạp phương tiện
 có thể dùng `createHostedOutboundMediaStore(...)` từ
-`openclaw/plugin-sdk/outbound-media` với kho trạng thái Plugin. Giữ phân tích
-route nền tảng và thực thi token trong channel plugin; helper dùng chung chỉ sở hữu
-việc tải media, metadata hết hạn, các hàng chunk và dọn dẹp.
+`openclaw/plugin-sdk/outbound-media` cùng với kho trạng thái Plugin. Giữ việc
+phân tích tuyến của nền tảng và thực thi token trong Plugin kênh; trình trợ giúp dùng chung
+chỉ sở hữu việc tải phương tiện, siêu dữ liệu hết hạn, các hàng phân đoạn và dọn dẹp.
 
-Nếu channel của bạn cần định dạng riêng theo provider cho `message(action="send")`,
-hãy ưu tiên `actions.prepareSendPayload(...)`. Đặt native cards, blocks, embeds
-hoặc dữ liệu bền vững khác dưới `payload.channelData.<channel>` và để core thực hiện
-việc gửi thực tế qua adapter outbound/message. Chỉ dùng `actions.handleAction(...)`
-cho gửi như một fallback tương thích đối với payload không thể serialize và thử lại.
+### Định hình payload gốc
 
-Nếu nền tảng của bạn lưu scope bổ sung bên trong id cuộc trò chuyện, hãy giữ việc
-phân tích đó trong Plugin bằng `messaging.resolveSessionConversation(...)`. Đó là
-hook canonical để ánh xạ `rawId` tới id cuộc trò chuyện cơ sở, id luồng tùy chọn,
-`baseConversationId` rõ ràng và bất kỳ `parentConversationCandidates` nào.
-Khi trả về `parentConversationCandidates`, hãy giữ chúng được sắp xếp từ cha
-hẹp nhất tới cuộc trò chuyện rộng nhất/cơ sở.
+Nếu kênh cần định hình riêng theo nhà cung cấp cho `message(action="send")`,
+hãy ưu tiên `actions.prepareSendPayload(...)`. Đặt các thẻ, khối, nội dung nhúng gốc hoặc
+dữ liệu lâu bền khác dưới `payload.channelData.<channel>` và để lõi gửi
+qua bộ điều hợp gửi đi/tin nhắn. Chỉ dùng `actions.handleAction(...)` để gửi
+như một phương án dự phòng tương thích cho các payload không thể tuần tự hóa và
+thử lại.
 
-Dùng `openclaw/plugin-sdk/channel-route` khi mã Plugin cần chuẩn hóa các trường
-giống route, so sánh một luồng con với route cha của nó, hoặc xây dựng khóa khử
-trùng lặp ổn định từ `{ channel, to, accountId, threadId }`. Helper chuẩn hóa
-id luồng dạng số giống như core, nên Plugin nên ưu tiên dùng nó thay cho các phép
-so sánh tùy tiện `String(threadId)`.
-Các Plugin có ngữ pháp đích riêng theo provider nên phơi bày
-`messaging.resolveOutboundSessionRoute(...)` để core nhận được danh tính phiên
-và luồng native theo provider mà không dùng parser shim.
+### Ngữ pháp hội thoại phiên
 
-Các Plugin đi kèm cần cùng cách phân tích trước khi channel registry khởi động
-cũng có thể phơi bày một tệp cấp cao nhất `session-key-api.ts` với export
-`resolveSessionConversation(...)` tương ứng. Core chỉ dùng bề mặt an toàn cho
-bootstrap đó khi runtime plugin registry chưa khả dụng.
+Nếu nền tảng lưu phạm vi bổ sung trong ID hội thoại, hãy giữ việc phân tích đó
+trong Plugin bằng `messaging.resolveSessionConversation(...)`. Đây là
+hook chuẩn để ánh xạ `rawId` tới ID hội thoại cơ sở, ID
+luồng tùy chọn, `baseConversationId` tường minh và mọi
+`parentConversationCandidates`. Khi trả về `parentConversationCandidates`,
+hãy sắp xếp chúng từ phần tử cha hẹp nhất đến hội thoại rộng nhất/cơ sở.
 
-`messaging.resolveParentConversationCandidates(...)` vẫn có sẵn như một fallback
-tương thích cũ khi Plugin chỉ cần fallback cha bên trên id chung/thô. Nếu cả hai
-hook đều tồn tại, core dùng `resolveSessionConversation(...).parentConversationCandidates`
-trước và chỉ fallback sang `resolveParentConversationCandidates(...)` khi hook
-canonical bỏ qua chúng.
+`messaging.resolveParentConversationCandidates(...)` là một
+phương án dự phòng tương thích đã lỗi thời dành cho các Plugin chỉ cần các phương án dự phòng cha nằm trên
+ID chung/thô. Nếu cả hai hook đều tồn tại, lõi dùng
+`resolveSessionConversation(...).parentConversationCandidates` trước và chỉ
+chuyển sang `resolveParentConversationCandidates(...)` khi hook chuẩn
+bỏ qua chúng.
 
-## Phê duyệt và năng lực của channel
+Các Plugin đi kèm cần cùng cách phân tích trước khi sổ đăng ký kênh khởi động
+có thể công khai tệp `session-key-api.ts` cấp cao nhất với phần xuất
+`resolveSessionConversation(...)` tương ứng (xem các Plugin Feishu và Telegram).
+Lõi chỉ dùng bề mặt an toàn cho bootstrap đó khi sổ đăng ký Plugin thời gian chạy
+chưa khả dụng.
 
-Hầu hết channel plugin không cần mã riêng cho phê duyệt.
+Dùng `openclaw/plugin-sdk/channel-route` khi mã Plugin cần chuẩn hóa
+các trường giống tuyến, so sánh luồng con với tuyến cha của nó hoặc tạo
+khóa chống trùng lặp ổn định từ `{ channel, to, accountId, threadId }`. Trình trợ giúp
+chuẩn hóa ID luồng dạng số theo cùng cách với lõi, vì vậy hãy ưu tiên nó thay cho các phép
+so sánh `String(threadId)` tùy tiện. Các Plugin có ngữ pháp đích riêng theo nhà cung cấp
+nên công khai `messaging.resolveOutboundSessionRoute(...)` để lõi nhận được
+danh tính phiên và luồng gốc của nhà cung cấp mà không cần shim trình phân tích.
 
-- Lõi sở hữu `/approve` trong cùng cuộc trò chuyện, payload nút phê duyệt dùng chung và phân phối dự phòng chung.
-- Ưu tiên một đối tượng `approvalCapability` trên Plugin kênh khi kênh cần hành vi riêng cho phê duyệt.
-- `ChannelPlugin.approvals` đã bị loại bỏ. Đặt các dữ kiện phân phối/native/render/auth của phê duyệt trên `approvalCapability`.
-- `plugin.auth` chỉ dành cho đăng nhập/đăng xuất; lõi không còn đọc các hook auth phê duyệt từ đối tượng đó.
-- `approvalCapability.authorizeActorAction` và `approvalCapability.getActionAvailabilityState` là điểm nối auth phê duyệt chuẩn.
-- Dùng `approvalCapability.getActionAvailabilityState` cho khả năng auth phê duyệt trong cùng cuộc trò chuyện. Giữ các approver đã cấu hình khả dụng cho `/approve` ngay cả khi phân phối native bị tắt; thay vào đó dùng trạng thái bề mặt khởi tạo native cho hướng dẫn phân phối/thiết lập.
-- Nếu kênh của bạn cung cấp phê duyệt exec native, dùng `approvalCapability.getExecInitiatingSurfaceState` cho trạng thái bề mặt khởi tạo/máy khách native khi trạng thái đó khác với auth phê duyệt trong cùng cuộc trò chuyện. Lõi dùng hook riêng cho exec đó để phân biệt `enabled` với `disabled`, quyết định kênh khởi tạo có hỗ trợ phê duyệt exec native hay không, và đưa kênh vào hướng dẫn dự phòng máy khách native. `createApproverRestrictedNativeApprovalCapability(...)` điền phần này cho trường hợp phổ biến.
-- Dùng `outbound.shouldSuppressLocalPayloadPrompt` hoặc `outbound.beforeDeliverPayload` cho hành vi vòng đời payload riêng theo kênh, chẳng hạn ẩn lời nhắc phê duyệt cục bộ trùng lặp hoặc gửi chỉ báo đang nhập trước khi phân phối.
-- Chỉ dùng `approvalCapability.delivery` cho định tuyến phê duyệt native hoặc chặn dự phòng.
-- Dùng `approvalCapability.nativeRuntime` cho các dữ kiện phê duyệt native do kênh sở hữu. Giữ nó lazy trên các điểm vào kênh nóng bằng `createLazyChannelApprovalNativeRuntimeAdapter(...)`, cho phép import mô-đun runtime của bạn theo nhu cầu trong khi vẫn để lõi lắp ráp vòng đời phê duyệt.
-- Chỉ dùng `approvalCapability.render` khi một kênh thực sự cần payload phê duyệt tùy chỉnh thay vì renderer dùng chung.
-- Dùng `approvalCapability.describeExecApprovalSetup` khi kênh muốn phản hồi ở đường dẫn bị tắt giải thích chính xác các núm cấu hình cần thiết để bật phê duyệt exec native. Hook nhận `{ channel, channelLabel, accountId }`; các kênh theo tài khoản được đặt tên nên render đường dẫn theo phạm vi tài khoản như `channels.<channel>.accounts.<id>.execApprovals.*` thay vì các mặc định cấp cao nhất.
-- Dùng `approvalCapability.describePluginApprovalSetup` khi hướng dẫn lỗi phê duyệt Plugin an toàn để hiển thị cho các lỗi phê duyệt Plugin không có tuyến và hết thời gian chờ. `createApproverRestrictedNativeApprovalCapability(...)` không suy ra điều này từ `describeExecApprovalSetup`; chỉ truyền cùng helper một cách tường minh khi phê duyệt Plugin và exec thực sự dùng cùng thiết lập native.
-- Nếu một kênh có thể suy ra danh tính DM ổn định giống chủ sở hữu từ cấu hình hiện có, dùng `createResolvedApproverActionAuthAdapter` từ `openclaw/plugin-sdk/approval-runtime` để hạn chế `/approve` trong cùng cuộc trò chuyện mà không thêm logic lõi riêng cho phê duyệt.
-- Nếu auth phê duyệt tùy chỉnh cố ý chỉ cho phép dự phòng trong cùng cuộc trò chuyện, trả về `markImplicitSameChatApprovalAuthorization({ authorized: true })` từ `openclaw/plugin-sdk/approval-auth-runtime`; nếu không, lõi xem kết quả là ủy quyền approver tường minh.
-- Nếu callback native do kênh sở hữu giải quyết phê duyệt trực tiếp, dùng `isImplicitSameChatApprovalAuthorization(...)` trước khi giải quyết để dự phòng ngầm định vẫn đi qua auth actor thông thường của kênh.
-- Nếu một kênh cần phân phối phê duyệt native, giữ mã kênh tập trung vào chuẩn hóa đích cùng các dữ kiện transport/presentation. Dùng `createChannelExecApprovalProfile`, `createChannelNativeOriginTargetResolver`, `createChannelApproverDmTargetResolver`, và `createApproverRestrictedNativeApprovalCapability` từ `openclaw/plugin-sdk/approval-runtime`. Đặt các dữ kiện riêng theo kênh phía sau `approvalCapability.nativeRuntime`, lý tưởng là qua `createChannelApprovalNativeRuntimeAdapter(...)` hoặc `createLazyChannelApprovalNativeRuntimeAdapter(...)`, để lõi có thể lắp ráp handler và sở hữu việc lọc yêu cầu, định tuyến, khử trùng lặp, hết hạn, đăng ký Gateway, và thông báo đã định tuyến nơi khác. `nativeRuntime` được tách thành vài điểm nối nhỏ hơn:
-- Dùng `createNativeApprovalChannelRouteGates` từ `openclaw/plugin-sdk/approval-native-runtime` khi một kênh hỗ trợ cả phân phối native từ nguồn phiên và các đích chuyển tiếp phê duyệt tường minh. Helper này tập trung hóa lựa chọn cấu hình phê duyệt, xử lý `mode`, bộ lọc agent/phiên, ràng buộc tài khoản, khớp đích phiên, và khớp danh sách đích, trong khi caller vẫn sở hữu id kênh, chế độ chuyển tiếp mặc định, tra cứu tài khoản, kiểm tra transport đã bật, chuẩn hóa đích, và giải quyết đích nguồn lượt. Không dùng nó để tạo mặc định chính sách kênh do lõi sở hữu; hãy truyền tường minh chế độ mặc định đã được tài liệu hóa của kênh.
-- `createChannelNativeOriginTargetResolver` mặc định dùng trình khớp tuyến kênh dùng chung cho các đích `{ to, accountId, threadId }`. Chỉ truyền `targetsMatch` khi một kênh có quy tắc tương đương riêng theo provider, chẳng hạn khớp tiền tố timestamp của Slack.
-- Truyền `normalizeTargetForMatch` vào `createChannelNativeOriginTargetResolver` khi kênh cần chuẩn hóa id provider trước khi trình khớp tuyến mặc định hoặc callback `targetsMatch` tùy chỉnh chạy, trong khi vẫn giữ đích gốc để phân phối. Chỉ dùng `normalizeTarget` khi chính đích phân phối đã giải quyết cần được chuẩn hóa.
-- `availability` - tài khoản có được cấu hình hay không và một yêu cầu có nên được xử lý hay không
-- `presentation` - ánh xạ view model phê duyệt dùng chung thành payload native đang chờ/đã giải quyết/đã hết hạn hoặc hành động cuối
-- `transport` - chuẩn bị đích và gửi/cập nhật/xóa tin nhắn phê duyệt native
-- `interactions` - các hook tùy chọn bind/unbind/clear-action cho nút hoặc reaction native, cộng với hook `cancelDelivered` tùy chọn. Triển khai `cancelDelivered` khi `deliverPending` đăng ký trạng thái trong tiến trình hoặc bền vững (chẳng hạn kho đích reaction) để trạng thái đó có thể được giải phóng nếu việc dừng handler hủy phân phối trước khi `bindPending` chạy hoặc khi `bindPending` không trả về handle
-- `observe` - các hook chẩn đoán phân phối tùy chọn
-- Nếu kênh cần các đối tượng do runtime sở hữu như client, token, ứng dụng Bolt, hoặc bộ nhận Webhook, đăng ký chúng qua `openclaw/plugin-sdk/channel-runtime-context`. Registry runtime-context chung cho phép lõi bootstrap các handler dựa trên capability từ trạng thái khởi động kênh mà không thêm keo wrapper riêng cho phê duyệt.
-- Chỉ dùng `createChannelApprovalHandler` hoặc `createChannelNativeApprovalRuntime` cấp thấp hơn khi điểm nối dựa trên capability chưa đủ biểu đạt.
-- Các kênh phê duyệt native phải định tuyến cả `accountId` và `approvalKind` qua các helper đó. `accountId` giữ chính sách phê duyệt đa tài khoản trong phạm vi đúng tài khoản bot, và `approvalKind` giữ hành vi phê duyệt exec so với Plugin khả dụng cho kênh mà không cần các nhánh hardcoded trong lõi.
-- Lõi hiện cũng sở hữu thông báo định tuyến lại phê duyệt. Plugin kênh không nên tự gửi tin nhắn theo sau kiểu "phê duyệt đã chuyển đến DM / kênh khác" từ `createChannelNativeApprovalRuntime`; thay vào đó, hãy phơi bày định tuyến nguồn + DM approver chính xác qua các helper capability phê duyệt dùng chung và để lõi tổng hợp các lần phân phối thực tế trước khi đăng bất kỳ thông báo nào trở lại cuộc trò chuyện khởi tạo.
-- Giữ nguyên loại id phê duyệt đã phân phối từ đầu đến cuối. Máy khách native không nên
-  đoán hoặc viết lại định tuyến phê duyệt exec so với Plugin từ trạng thái cục bộ của kênh.
-- Các loại phê duyệt khác nhau có thể cố ý phơi bày các bề mặt native khác nhau.
-  Các ví dụ bundled hiện tại:
-  - Slack giữ định tuyến phê duyệt native khả dụng cho cả id exec và Plugin.
-  - Matrix giữ cùng định tuyến DM/kênh native và UX reaction cho phê duyệt exec
-    và Plugin, trong khi vẫn cho phép auth khác nhau theo loại phê duyệt.
-- `createApproverRestrictedNativeApprovalAdapter` vẫn tồn tại như một wrapper tương thích, nhưng mã mới nên ưu tiên builder capability và phơi bày `approvalCapability` trên Plugin.
+### Hỗ trợ liên kết hội thoại theo phạm vi tài khoản
 
-Đối với các điểm vào kênh nóng, ưu tiên các đường dẫn con runtime hẹp hơn khi bạn chỉ
-cần một phần của nhóm đó:
+Đặt `conversationBindings.supportsCurrentConversationBinding` khi kênh
+hỗ trợ các liên kết hội thoại hiện tại dùng chung. `createChatChannelPlugin(...)`
+đặt khả năng tĩnh này thành `true` theo mặc định.
+
+Nếu mức hỗ trợ khác nhau tùy theo tài khoản đã cấu hình, hãy triển khai thêm
+`conversationBindings.isCurrentConversationBindingSupported({ accountId })`.
+Lõi chỉ đánh giá hook đồng bộ này sau khi khả năng tĩnh
+được bật. Việc trả về `false` khiến các thao tác dùng chung về khả năng,
+liên kết, tra cứu, liệt kê, cập nhật thời điểm truy cập và hủy liên kết hội thoại hiện tại không khả dụng cho tài khoản đó.
+Nếu bỏ qua hook, khả năng tĩnh sẽ áp dụng cho mọi tài khoản.
+
+Hãy phân giải câu trả lời từ cấu hình tài khoản hoặc trạng thái thời gian chạy đã được tải. Hook này
+chỉ kiểm soát các liên kết hội thoại hiện tại dùng chung; nó không thay thế
+các quy tắc liên kết đã cấu hình hoặc định tuyến phiên do Plugin sở hữu. Các kiểm thử hợp đồng
+nên bao phủ ít nhất một tài khoản được hỗ trợ và một tài khoản không được hỗ trợ thông qua
+hợp đồng `ChannelPlugin["conversationBindings"]` được xuất bởi
+`openclaw/plugin-sdk/channel-core`.
+
+## Phê duyệt và khả năng của kênh
+
+Hầu hết Plugin kênh không cần mã dành riêng cho phê duyệt. Lõi sở hữu
+`/approve` trong cùng cuộc trò chuyện, payload nút phê duyệt dùng chung và cơ chế gửi dự phòng dùng chung.
+`ChannelPlugin.approvals` đã bị xóa; thay vào đó, hãy đặt các thông tin về gửi/phần gốc/kết xuất/xác thực
+phê duyệt trên một đối tượng `approvalCapability`. `plugin.auth` chỉ dành cho
+đăng nhập/đăng xuất - lõi không còn đọc các hook xác thực phê duyệt từ đối tượng đó.
+
+Chỉ dùng `approvalCapability.delivery` cho định tuyến phê duyệt gốc hoặc ngăn
+phương án dự phòng, và chỉ dùng `approvalCapability.render` khi kênh thực sự cần
+payload phê duyệt tùy chỉnh thay vì trình kết xuất dùng chung.
+
+### Xác thực phê duyệt
+
+- `approvalCapability.authorizeActorAction` và
+  `approvalCapability.getActionAvailabilityState` là điểm nối
+  xác thực phê duyệt chuẩn.
+- Dùng `getActionAvailabilityState` để xác định khả năng xác thực phê duyệt trong cùng cuộc trò chuyện.
+  Giữ các bên phê duyệt đã cấu hình khả dụng cho `/approve` ngay cả khi việc gửi gốc
+  bị tắt; thay vào đó, hãy dùng trạng thái bề mặt khởi tạo gốc để hướng dẫn gửi/thiết lập.
+- Nếu kênh công khai phê duyệt thực thi gốc, hãy dùng
+  `approvalCapability.getExecInitiatingSurfaceState` cho
+  trạng thái bề mặt khởi tạo/ứng dụng khách gốc khi trạng thái này khác với xác thực phê duyệt
+  trong cùng cuộc trò chuyện. Lõi dùng hook dành riêng cho thực thi đó để phân biệt `enabled` với
+  `disabled`, quyết định liệu kênh khởi tạo có hỗ trợ phê duyệt thực thi gốc hay không
+  và đưa kênh vào hướng dẫn dự phòng cho ứng dụng khách gốc.
+  `createApproverRestrictedNativeApprovalCapability(...)` điền giá trị này cho
+  trường hợp phổ biến.
+- Nếu một kênh có thể suy ra các danh tính tin nhắn trực tiếp ổn định giống chủ sở hữu từ cấu hình hiện có,
+  hãy dùng `createResolvedApproverActionAuthAdapter` từ
+  `openclaw/plugin-sdk/approval-runtime` để giới hạn `/approve` trong cùng cuộc trò chuyện
+  mà không thêm logic lõi dành riêng cho phê duyệt.
+- Nếu xác thực phê duyệt tùy chỉnh chủ ý chỉ cho phép phương án dự phòng trong cùng cuộc trò chuyện, hãy trả về
+  `markImplicitSameChatApprovalAuthorization({ authorized: true })` từ
+  `openclaw/plugin-sdk/approval-auth-runtime`; nếu không, lõi coi kết quả là
+  quyền phê duyệt tường minh.
+- Nếu callback gốc do kênh sở hữu trực tiếp phân giải phê duyệt, hãy dùng
+  `isImplicitSameChatApprovalAuthorization(...)` trước khi phân giải để phương án
+  dự phòng ngầm định vẫn đi qua cơ chế ủy quyền tác nhân thông thường của kênh.
+
+### Vòng đời payload và hướng dẫn thiết lập
+
+- Dùng `outbound.shouldSuppressLocalPayloadPrompt` hoặc
+  `outbound.beforeDeliverPayload` cho hành vi vòng đời payload riêng của kênh,
+  chẳng hạn như ẩn các lời nhắc phê duyệt cục bộ trùng lặp hoặc gửi chỉ báo đang nhập
+  trước khi gửi.
+- Dùng `approvalCapability.describeExecApprovalSetup` khi kênh muốn
+  phản hồi trên đường dẫn bị tắt giải thích chính xác các tùy chọn cấu hình cần thiết để bật
+  phê duyệt thực thi gốc. Hook nhận `{ channel, channelLabel, accountId }`;
+  các kênh có tài khoản được đặt tên nên kết xuất các đường dẫn theo phạm vi tài khoản như
+  `channels.<channel>.accounts.<id>.execApprovals.*` thay vì các giá trị
+  mặc định cấp cao nhất.
+- Dùng `approvalCapability.describePluginApprovalSetup` khi hướng dẫn về lỗi phê duyệt
+  Plugin có thể được hiển thị an toàn cho các lỗi không có tuyến và hết thời gian chờ của phê duyệt Plugin.
+  `createApproverRestrictedNativeApprovalCapability(...)` không
+  suy ra điều này từ `describeExecApprovalSetup`; chỉ truyền cùng trình trợ giúp một cách tường minh
+  khi phê duyệt Plugin và phê duyệt thực thi thực sự dùng cùng một thiết lập gốc.
+
+### Gửi phê duyệt gốc
+
+Nếu kênh cần gửi phê duyệt gốc, hãy giữ mã kênh tập trung vào
+việc chuẩn hóa đích cùng các thông tin về truyền tải/trình bày. Dùng
+`createChannelExecApprovalProfile`, `createChannelNativeOriginTargetResolver`,
+`createChannelApproverDmTargetResolver` và
+`createApproverRestrictedNativeApprovalCapability` từ
+`openclaw/plugin-sdk/approval-runtime`. Đặt các thông tin riêng của kênh phía sau
+`approvalCapability.nativeRuntime`, lý tưởng nhất là thông qua
+`createChannelApprovalNativeRuntimeAdapter(...)` hoặc
+`createLazyChannelApprovalNativeRuntimeAdapter(...)`, để lõi có thể lắp ráp
+trình xử lý và sở hữu việc lọc yêu cầu, định tuyến, chống trùng lặp, hết hạn, đăng ký Gateway
+và thông báo đã được định tuyến sang nơi khác.
+
+`nativeRuntime` được chia thành một số điểm nối nhỏ hơn:
+
+- `availability` - tài khoản có được cấu hình hay không và yêu cầu có
+  nên được xử lý hay không
+- `presentation` - ánh xạ mô hình khung nhìn phê duyệt dùng chung thành
+  các payload gốc đang chờ/đã phân giải/đã hết hạn hoặc các hành động cuối cùng
+- `transport` - chuẩn bị đích và gửi/cập nhật/xóa các tin nhắn phê duyệt
+  gốc
+- `interactions` - các hook liên kết/hủy liên kết/xóa hành động tùy chọn cho các nút
+  hoặc phản ứng gốc, cùng một hook `cancelDelivered` tùy chọn. Triển khai
+  `cancelDelivered` khi `deliverPending` đăng ký trạng thái trong tiến trình hoặc bền vững
+  (chẳng hạn như kho đích phản ứng) để trạng thái đó có thể được giải phóng nếu việc
+  dừng trình xử lý hủy quá trình gửi trước khi `bindPending` chạy, hoặc khi
+  `bindPending` không trả về handle
+- `observe` - các hook chẩn đoán gửi tùy chọn
+
+Các trình trợ giúp phê duyệt khác:
+
+- Dùng `createNativeApprovalChannelRouteGates` từ
+  `openclaw/plugin-sdk/approval-native-runtime` khi một kênh hỗ trợ cả
+  việc gửi gốc bắt nguồn từ phiên và các đích chuyển tiếp phê duyệt tường minh. Trình
+  trợ giúp tập trung hóa việc chọn cấu hình phê duyệt, xử lý `mode`, bộ lọc
+  tác nhân/phiên, liên kết tài khoản, khớp đích phiên và khớp danh sách đích,
+  trong khi bên gọi vẫn sở hữu ID kênh, chế độ chuyển tiếp mặc định, việc tra cứu
+  tài khoản, kiểm tra truyền tải đã bật, chuẩn hóa đích và phân giải đích từ
+  nguồn lượt. Không dùng nó để tạo các giá trị mặc định về chính sách kênh do lõi sở hữu;
+  hãy truyền tường minh chế độ mặc định được tài liệu của kênh quy định.
+- `createChannelNativeOriginTargetResolver` mặc định dùng bộ so khớp tuyến kênh
+  dùng chung cho các đích `{ to, accountId, threadId }`. Chỉ truyền
+  `targetsMatch` khi kênh có các quy tắc tương đương riêng theo nhà cung cấp,
+  chẳng hạn như khớp tiền tố dấu thời gian của Slack. Truyền `normalizeTargetForMatch` khi
+  kênh cần chuẩn hóa ID nhà cung cấp trước khi bộ so khớp tuyến mặc định
+  hoặc callback `targetsMatch` tùy chỉnh chạy, đồng thời vẫn giữ nguyên
+  đích ban đầu để gửi. Chỉ dùng `normalizeTarget` khi chính đích gửi đã phân giải
+  cần được chuẩn hóa.
+- Nếu kênh cần các đối tượng do thời gian chạy sở hữu như ứng dụng khách, token, ứng dụng Bolt
+  hoặc bộ nhận webhook, hãy đăng ký chúng thông qua
+  `openclaw/plugin-sdk/channel-runtime-context`. Sổ đăng ký ngữ cảnh thời gian chạy
+  dùng chung cho phép lõi bootstrap các trình xử lý dựa trên khả năng từ trạng thái
+  khởi động kênh mà không thêm mã kết nối trình bao dành riêng cho phê duyệt.
+- Chỉ dùng `createChannelApprovalHandler` hoặc
+  `createChannelNativeApprovalRuntime` cấp thấp hơn khi điểm nối dựa trên khả năng
+  chưa đủ khả năng biểu đạt.
+- Các kênh phê duyệt gốc phải định tuyến cả `accountId` và `approvalKind`
+  thông qua các trình trợ giúp đó. `accountId` giữ chính sách phê duyệt nhiều tài khoản
+  trong phạm vi tài khoản bot phù hợp, còn `approvalKind` giữ hành vi phê duyệt thực thi so với Plugin
+  khả dụng cho kênh mà không cần các nhánh được mã hóa cứng trong lõi.
+- Lõi cũng sở hữu các thông báo định tuyến lại phê duyệt. Plugin kênh không nên gửi
+  các tin nhắn tiếp theo riêng kiểu "phê duyệt đã được chuyển đến tin nhắn trực tiếp / kênh khác" từ
+  `createChannelNativeApprovalRuntime`; thay vào đó, hãy công khai chính xác định tuyến nguồn +
+  tin nhắn trực tiếp của bên phê duyệt thông qua các trình trợ giúp khả năng phê duyệt dùng chung và để
+  lõi tổng hợp các lần gửi thực tế trước khi đăng bất kỳ thông báo nào trở lại
+  cuộc trò chuyện khởi tạo.
+- Giữ nguyên loại ID phê duyệt đã gửi xuyên suốt từ đầu đến cuối. Ứng dụng khách gốc không nên
+  đoán hoặc viết lại định tuyến phê duyệt thực thi so với Plugin từ trạng thái cục bộ
+  của kênh.
+- Truyền `approvalKind` tường minh đó tới `resolveApprovalOverGateway`. Thao tác này dùng
+  dịch vụ `approval.resolve` chuẩn và trả về bên thắng đã ghi nhận khi
+  một bề mặt khác phản hồi trước. Đầu vào `resolveMethod` tường minh cũ hơn
+  vẫn được giữ cho các điều khiển dựa trên lệnh; các hành động gốc mới không được dùng nó hoặc
+  suy ra loại từ ID.
+- Các loại phê duyệt khác nhau có thể chủ ý công khai các bề mặt gốc
+  khác nhau. Các ví dụ đi kèm hiện tại: Matrix giữ nguyên định tuyến tin nhắn trực tiếp/kênh gốc
+  và trải nghiệm phản ứng cho phê duyệt thực thi và Plugin, trong khi vẫn cho phép
+  xác thực khác nhau theo loại phê duyệt; Slack duy trì định tuyến phê duyệt gốc khả dụng
+  cho cả ID thực thi và Plugin.
+- `createApproverRestrictedNativeApprovalAdapter` vẫn tồn tại dưới dạng
+  trình bao tương thích, nhưng mã mới nên ưu tiên trình dựng khả năng
+  và công khai `approvalCapability` trên Plugin.
+
+### Các đường dẫn con thời gian chạy phê duyệt hẹp hơn
+
+Đối với các điểm vào kênh thường xuyên được gọi, hãy ưu tiên các đường dẫn con hẹp hơn này thay cho barrel
+`approval-runtime` rộng hơn khi bạn chỉ cần một phần của nhóm đó:
 
 - `openclaw/plugin-sdk/approval-auth-runtime`
 - `openclaw/plugin-sdk/approval-client-runtime`
 - `openclaw/plugin-sdk/approval-delivery-runtime`
 - `openclaw/plugin-sdk/approval-gateway-runtime`
+- `openclaw/plugin-sdk/approval-reference-runtime`
 - `openclaw/plugin-sdk/approval-handler-adapter-runtime`
 - `openclaw/plugin-sdk/approval-handler-runtime`
 - `openclaw/plugin-sdk/approval-native-runtime`
 - `openclaw/plugin-sdk/approval-reply-runtime`
 - `openclaw/plugin-sdk/channel-runtime-context`
 
-Tương tự, ưu tiên `openclaw/plugin-sdk/setup-runtime`,
-`openclaw/plugin-sdk/setup-runtime`,
-`openclaw/plugin-sdk/reply-runtime`,
+Tương tự, hãy ưu tiên `openclaw/plugin-sdk/reply-runtime`,
 `openclaw/plugin-sdk/reply-dispatch-runtime`,
-`openclaw/plugin-sdk/reply-reference`, và
-`openclaw/plugin-sdk/reply-chunking` khi bạn không cần bề mặt bao trùm rộng hơn.
+`openclaw/plugin-sdk/reply-reference` và
+`openclaw/plugin-sdk/reply-chunking` thay cho các bề mặt bao quát rộng hơn khi bạn
+không cần tất cả chúng.
 
-Riêng cho thiết lập:
+### Các đường dẫn con cho thiết lập
 
-- `openclaw/plugin-sdk/setup-runtime` bao phủ các helper thiết lập an toàn cho runtime:
-  `createSetupTranslator`, các adapter vá thiết lập an toàn khi import (`createPatchedAccountSetupAdapter`,
-  `createEnvPatchedAccountSetupAdapter`,
+- `openclaw/plugin-sdk/setup-runtime` bao gồm các trình trợ giúp thiết lập an toàn cho runtime:
+  `createSetupTranslator`, các adapter bản vá thiết lập an toàn khi nhập
+  (`createPatchedAccountSetupAdapter`, `createEnvPatchedAccountSetupAdapter`,
   `createSetupInputPresenceValidator`), đầu ra ghi chú tra cứu,
-  `promptResolvedAllowFrom`, `splitSetupEntries`, và các builder
-  setup-proxy được ủy quyền
-- `openclaw/plugin-sdk/setup-runtime` bao gồm điểm nối adapter có nhận biết env cho
-  `createEnvPatchedAccountSetupAdapter`
-- `openclaw/plugin-sdk/channel-setup` bao phủ các builder thiết lập cài đặt tùy chọn
-  cùng vài primitive an toàn cho thiết lập:
-  `createOptionalChannelSetupSurface`, `createOptionalChannelSetupAdapter`,
+  `promptResolvedAllowFrom`, `splitSetupEntries`, và các trình tạo
+  proxy thiết lập được ủy quyền.
+- `openclaw/plugin-sdk/channel-setup` bao gồm các trình tạo thiết lập
+  cài đặt tùy chọn cùng một số thành phần nguyên thủy an toàn cho thiết lập: `createOptionalChannelSetupSurface`,
+  `createOptionalChannelSetupAdapter`, `createOptionalChannelSetupWizard`,
+  `DEFAULT_ACCOUNT_ID`, `createTopLevelChannelDmPolicy`,
+  `setSetupChannelEnabled`, và `splitSetupEntries`.
+- Chỉ sử dụng seam `openclaw/plugin-sdk/setup` rộng hơn khi bạn cũng cần
+  các trình trợ giúp thiết lập/cấu hình dùng chung nặng hơn, chẳng hạn như
+  `moveSingleAccountChannelSectionToDefaultAccount(...)`.
 
-Nếu kênh của bạn hỗ trợ thiết lập hoặc auth dựa trên env và các luồng khởi động/cấu hình
-chung cần biết các tên env đó trước khi runtime tải, khai báo chúng trong
-manifest Plugin với `channelEnvVars`. Chỉ giữ `envVars` runtime kênh hoặc
-hằng cục bộ cho nội dung hướng đến operator.
+Nếu kênh của bạn chỉ muốn hiển thị thông báo "hãy cài đặt plugin này trước" trên các
+bề mặt thiết lập, hãy ưu tiên `createOptionalChannelSetupSurface(...)`. Adapter/trình hướng dẫn
+được tạo sẽ từ chối an toàn khi ghi cấu hình và hoàn tất, đồng thời tái sử dụng
+cùng một thông báo yêu cầu cài đặt trong quá trình xác thực, hoàn tất và sao chép
+liên kết tài liệu.
+
+Nếu kênh của bạn hỗ trợ thiết lập hoặc xác thực dựa trên biến môi trường, hãy cung cấp
+chức năng đó thông qua lược đồ cấu hình kênh và các bộ mô tả thiết lập. Chỉ giữ `envVars` của
+runtime kênh hoặc các hằng số cục bộ cho nội dung dành cho người vận hành.
 
 Nếu kênh của bạn có thể xuất hiện trong `status`, `channels list`, `channels status`, hoặc
-quét SecretRef trước khi runtime Plugin khởi động, thêm `openclaw.setupEntry` trong
-`package.json`. Điểm vào đó nên an toàn để import trong các đường dẫn lệnh
-chỉ đọc và nên trả về metadata kênh, adapter cấu hình an toàn cho thiết lập, adapter trạng thái,
-và metadata đích secret kênh cần thiết cho các bản tóm tắt đó. Không
-khởi động client, listener, hoặc runtime transport từ setup entry.
+các lượt quét SecretRef trước khi runtime plugin khởi động, hãy thêm `openclaw.setupEntry` trong
+`package.json`. Điểm vào đó phải an toàn để nhập trong các đường dẫn lệnh
+chỉ đọc và phải trả về siêu dữ liệu kênh, adapter cấu hình an toàn cho thiết lập,
+adapter trạng thái và siêu dữ liệu đích bí mật của kênh cần thiết cho các
+bản tóm tắt đó. Không khởi động máy khách, trình lắng nghe hoặc runtime truyền tải từ
+điểm vào thiết lập.
 
-Cũng giữ đường dẫn import điểm vào kênh chính thật hẹp. Discovery có thể đánh giá
-entry và mô-đun Plugin kênh để đăng ký capability mà không kích hoạt
-kênh. Các tệp như `channel-plugin-api.ts` nên export đối tượng Plugin kênh
-mà không import wizard thiết lập, client transport, listener socket,
-trình khởi chạy subprocess, hoặc mô-đun khởi động dịch vụ. Đặt các phần runtime
-đó trong các mô-đun được tải từ `registerFull(...)`, setter runtime, hoặc adapter
-capability lazy.
+Đồng thời giữ đường dẫn nhập của điểm vào kênh chính ở phạm vi hẹp. Quá trình khám phá có thể đánh giá
+điểm vào và mô-đun plugin kênh để đăng ký các khả năng mà không
+kích hoạt kênh. Các tệp như `channel-plugin-api.ts` nên xuất
+đối tượng plugin kênh mà không nhập trình hướng dẫn thiết lập, máy khách
+truyền tải, trình lắng nghe socket, trình khởi chạy tiến trình con hoặc các mô-đun khởi động dịch vụ.
+Đặt các thành phần runtime đó trong các mô-đun được tải từ `registerFull(...)`, các trình
+đặt runtime hoặc các adapter khả năng tải lười.
 
-`createOptionalChannelSetupWizard`, `DEFAULT_ACCOUNT_ID`,
-`createTopLevelChannelDmPolicy`, `setSetupChannelEnabled`, và
-`splitSetupEntries`
+### Các đường dẫn con hẹp khác của kênh
 
-- chỉ dùng điểm nối `openclaw/plugin-sdk/setup` rộng hơn khi bạn cũng cần các
-  helper thiết lập/cấu hình dùng chung nặng hơn như
-  `moveSingleAccountChannelSectionToDefaultAccount(...)`
+Đối với các đường dẫn nóng khác của kênh, hãy ưu tiên các trình trợ giúp hẹp thay vì các bề mặt
+cũ rộng hơn:
 
-Nếu kênh của bạn chỉ muốn quảng bá "cài Plugin này trước" trong các bề mặt
-thiết lập, ưu tiên `createOptionalChannelSetupSurface(...)`. Adapter/wizard
-được tạo sẽ fail closed khi ghi cấu hình và hoàn tất, đồng thời tái sử dụng
-cùng thông báo yêu cầu cài đặt trên bản sao validation, finalize, và docs-link.
-
-Đối với các đường dẫn kênh nóng khác, ưu tiên các helper hẹp thay vì các
-bề mặt legacy rộng hơn:
-
-- `openclaw/plugin-sdk/account-core`,
-  `openclaw/plugin-sdk/account-id`,
+- `openclaw/plugin-sdk/account-core`, `openclaw/plugin-sdk/account-id`,
   `openclaw/plugin-sdk/account-resolution`, và
   `openclaw/plugin-sdk/account-helpers` cho cấu hình nhiều tài khoản và
-  phương án dự phòng tài khoản mặc định
+  cơ chế dự phòng về tài khoản mặc định
 - `openclaw/plugin-sdk/inbound-envelope` và
-  `openclaw/plugin-sdk/channel-inbound` cho route/envelope đầu vào và
-  nối dây ghi-nhận-và-phân-phát
-- `openclaw/plugin-sdk/channel-targets` cho các helper phân tích cú pháp mục tiêu
-- `openclaw/plugin-sdk/outbound-media` cho việc tải media và
-  `openclaw/plugin-sdk/channel-outbound` cho các delegate định danh/gửi đầu ra
-  và lập kế hoạch payload
+  `openclaw/plugin-sdk/channel-inbound` cho định tuyến/phong bì đầu vào và
+  hệ thống dây ghi lại rồi điều phối
+- `openclaw/plugin-sdk/channel-targets` cho các trình trợ giúp phân tích cú pháp đích
+- `openclaw/plugin-sdk/channel-outbound` cho các delegate danh tính/gửi đầu ra
+  và lập kế hoạch payload có kiểu
 - `buildThreadAwareOutboundSessionRoute(...)` từ
-  `openclaw/plugin-sdk/channel-core` khi một route đầu ra cần giữ nguyên một
-  `replyToId`/`threadId` rõ ràng hoặc khôi phục phiên `:thread:` hiện tại
-  sau khi khóa phiên cơ sở vẫn khớp. Plugin nhà cung cấp có thể ghi đè
-  thứ tự ưu tiên, hành vi hậu tố và chuẩn hóa id luồng khi nền tảng của chúng
-  có ngữ nghĩa gửi theo luồng gốc.
-- `openclaw/plugin-sdk/thread-bindings-runtime` cho vòng đời thread-binding
+  `openclaw/plugin-sdk/channel-core` khi một tuyến đầu ra cần giữ nguyên
+  `replyToId`/`threadId` tường minh hoặc khôi phục phiên `:thread:`
+  hiện tại sau khi khóa phiên cơ sở vẫn khớp. Các plugin nhà cung cấp có thể
+  ghi đè mức độ ưu tiên, hành vi hậu tố và chuẩn hóa id luồng khi
+  nền tảng của chúng có ngữ nghĩa phân phối luồng nguyên bản.
+- `openclaw/plugin-sdk/thread-bindings-runtime` cho vòng đời liên kết luồng
   và đăng ký adapter
-- `openclaw/plugin-sdk/agent-media-payload` chỉ khi bố cục trường payload
-  tác tử/media cũ vẫn còn bắt buộc
-- `openclaw/plugin-sdk/telegram-command-config` cho việc chuẩn hóa lệnh tùy chỉnh
-  Telegram, xác thực trùng lặp/xung đột, và hợp đồng cấu hình lệnh ổn định khi dự phòng
 
-Các kênh chỉ dùng xác thực thường có thể dừng ở đường dẫn mặc định: core xử lý phê duyệt và Plugin chỉ cần cung cấp các capability đầu ra/xác thực. Các kênh phê duyệt gốc như Matrix, Slack, Telegram và các transport chat tùy chỉnh nên dùng helper gốc dùng chung thay vì tự triển khai vòng đời phê duyệt.
+Các kênh chỉ xác thực thường có thể dừng ở đường dẫn mặc định: lõi xử lý
+phê duyệt và plugin chỉ cung cấp các khả năng đầu ra/xác thực. Các kênh
+phê duyệt nguyên bản như Matrix, Slack, Telegram và các phương thức truyền tải trò chuyện tùy chỉnh
+nên sử dụng các trình trợ giúp nguyên bản dùng chung thay vì tự triển khai vòng đời
+phê duyệt riêng.
 
-## Chính sách nhắc đến đầu vào
+## Chính sách đề cập đầu vào
 
-Giữ việc xử lý nhắc đến đầu vào tách thành hai lớp:
+Giữ việc xử lý đề cập đầu vào tách thành hai lớp:
 
-- thu thập bằng chứng do Plugin sở hữu
+- thu thập bằng chứng do plugin sở hữu
 - đánh giá chính sách dùng chung
 
-Dùng `openclaw/plugin-sdk/channel-mention-gating` cho các quyết định chính sách nhắc đến.
-Chỉ dùng `openclaw/plugin-sdk/channel-inbound` khi bạn cần barrel helper đầu vào
-rộng hơn.
+Sử dụng `openclaw/plugin-sdk/channel-mention-gating` cho các quyết định về chính sách đề cập.
+Chỉ sử dụng `openclaw/plugin-sdk/channel-inbound` khi bạn cần barrel
+trình trợ giúp đầu vào rộng hơn.
 
-Phù hợp cho logic cục bộ của Plugin:
+Phù hợp cho logic cục bộ của plugin:
 
 - phát hiện trả lời bot
-- phát hiện trích dẫn bot
+- phát hiện bot được trích dẫn
 - kiểm tra tham gia luồng
-- loại trừ tin nhắn dịch vụ/hệ thống
-- cache gốc của nền tảng cần thiết để chứng minh bot đã tham gia
+- loại trừ thông báo dịch vụ/hệ thống
+- bộ nhớ đệm nguyên bản của nền tảng cần thiết để chứng minh bot tham gia
 
-Phù hợp cho helper dùng chung:
+Phù hợp cho trình trợ giúp dùng chung:
 
 - `requireMention`
-- kết quả nhắc đến rõ ràng
-- danh sách cho phép nhắc đến ngầm định
-- bỏ qua bằng lệnh
+- kết quả đề cập tường minh
+- danh sách cho phép đề cập ngầm định
+- bỏ qua cho lệnh
 - quyết định bỏ qua cuối cùng
 
 Luồng ưu tiên:
 
-1. Tính các dữ kiện nhắc đến cục bộ.
+1. Tính toán các dữ kiện đề cập cục bộ.
 2. Truyền các dữ kiện đó vào `resolveInboundMentionDecision({ facts, policy })`.
-3. Dùng `decision.effectiveWasMentioned`, `decision.shouldBypassMention`, và `decision.shouldSkip` trong cổng đầu vào của bạn.
+3. Sử dụng `decision.effectiveWasMentioned`, `decision.shouldBypassMention`, và
+   `decision.shouldSkip` trong cổng đầu vào của bạn.
 
 ```typescript
 import {
@@ -323,28 +576,40 @@ import {
   matchesMentionWithExplicit,
   resolveInboundMentionDecision,
 } from "openclaw/plugin-sdk/channel-inbound";
+import { resolveChannelImplicitMentions } from "openclaw/plugin-sdk/channel-ingress-runtime";
 
-const mentionMatch = matchesMentionWithExplicit(text, {
+const wasMentioned = matchesMentionWithExplicit({
+  text,
   mentionRegexes,
-  mentionPatterns,
+  explicit: {
+    hasAnyMention,
+    isExplicitlyMentioned,
+    canResolveExplicit,
+  },
 });
 
 const facts = {
   canDetectMention: true,
-  wasMentioned: mentionMatch.matched,
-  hasAnyMention: mentionMatch.hasExplicitMention,
+  wasMentioned,
+  hasAnyMention,
   implicitMentionKinds: [
     ...implicitMentionKindWhen("reply_to_bot", isReplyToBot),
     ...implicitMentionKindWhen("quoted_bot", isQuoteOfBot),
   ],
 };
 
+const implicitMentions = resolveChannelImplicitMentions({
+  cfg,
+  channel: channelId,
+  accountId,
+});
+
 const decision = resolveInboundMentionDecision({
   facts,
   policy: {
     isGroup,
     requireMention,
-    allowedImplicitMentionKinds: requireExplicitMention ? [] : ["reply_to_bot", "quoted_bot"],
+    implicitMentions,
     allowTextCommands,
     hasControlCommand,
     commandAuthorized,
@@ -354,30 +619,29 @@ const decision = resolveInboundMentionDecision({
 if (decision.shouldSkip) return;
 ```
 
-`api.runtime.channel.mentions` cung cấp cùng các helper nhắc đến dùng chung cho
-Plugin kênh được đóng gói đã phụ thuộc vào runtime injection:
+`matchesMentionWithExplicit(...)` trả về một giá trị boolean. `hasAnyMention`,
+`isExplicitlyMentioned`, và `canResolveExplicit` đến từ siêu dữ liệu đề cập
+nguyên bản của chính kênh (các thực thể thông báo, cờ trả lời bot và các dữ liệu tương tự);
+cung cấp các giá trị `false`/`undefined` khi nền tảng của bạn không thể phát hiện chúng.
 
-- `buildMentionRegexes`
-- `matchesMentionPatterns`
-- `matchesMentionWithExplicit`
-- `implicitMentionKindWhen`
-- `resolveInboundMentionDecision`
+`api.runtime.channel.mentions` cung cấp cùng các trình trợ giúp đề cập dùng chung cho
+các plugin kênh đi kèm vốn đã phụ thuộc vào việc tiêm runtime:
+`buildMentionRegexes`, `matchesMentionPatterns`, `matchesMentionWithExplicit`,
+`implicitMentionKindWhen`, `resolveInboundMentionDecision`.
 
-Nếu bạn chỉ cần `implicitMentionKindWhen` và
-`resolveInboundMentionDecision`, hãy import từ
-`openclaw/plugin-sdk/channel-mention-gating` để tránh tải các helper runtime
-đầu vào không liên quan.
-
-Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đến.
+Nếu bạn chỉ cần `implicitMentionKindWhen` và `resolveInboundMentionDecision`,
+hãy nhập từ `openclaw/plugin-sdk/channel-mention-gating` để tránh tải
+các trình trợ giúp runtime đầu vào không liên quan.
 
 ## Hướng dẫn từng bước
 
 <Steps>
   <a id="step-1-package-and-manifest"></a>
-  <Step title="Package and manifest">
-    Tạo các tệp Plugin tiêu chuẩn. Trường `channel` trong `package.json` là
-    thứ khiến đây trở thành Plugin kênh. Để xem toàn bộ bề mặt siêu dữ liệu gói,
-    xem [Thiết lập và cấu hình Plugin](/vi/plugins/sdk-setup#openclaw-channel):
+  <Step title="Gói và manifest">
+    Tạo các tệp plugin tiêu chuẩn. Trường `channels` trong
+    `openclaw.plugin.json` (không phải trường `kind`) là thành phần đánh dấu một manifest
+    sở hữu một kênh. Để xem đầy đủ bề mặt siêu dữ liệu gói, hãy tham khảo
+    [Thiết lập và cấu hình Plugin](/vi/plugins/sdk-setup#openclaw-channel):
 
     <CodeGroup>
     ```json package.json
@@ -391,7 +655,7 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
         "channel": {
           "id": "acme-chat",
           "label": "Acme Chat",
-          "blurb": "Connect OpenClaw to Acme Chat."
+          "blurb": "Kết nối OpenClaw với Acme Chat."
         }
       }
     }
@@ -400,10 +664,9 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
     ```json openclaw.plugin.json
     {
       "id": "acme-chat",
-      "kind": "channel",
       "channels": ["acme-chat"],
       "name": "Acme Chat",
-      "description": "Acme Chat channel plugin",
+      "description": "Plugin kênh Acme Chat",
       "configSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -424,7 +687,7 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
           },
           "uiHints": {
             "token": {
-              "label": "Bot token",
+              "label": "Token bot",
               "sensitive": true
             }
           }
@@ -434,16 +697,19 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
     ```
     </CodeGroup>
 
-    `configSchema` xác thực `plugins.entries.acme-chat.config`. Dùng nó cho
-    các thiết lập do Plugin sở hữu không phải là cấu hình tài khoản kênh. `channelConfigs`
-    xác thực `channels.acme-chat` và là nguồn đường dẫn lạnh được cấu hình
-    schema, thiết lập và các bề mặt UI dùng trước khi runtime Plugin tải.
+    `configSchema` xác thực `plugins.entries.acme-chat.config`. Sử dụng nó cho
+    các cài đặt do plugin sở hữu nhưng không thuộc cấu hình tài khoản kênh.
+    `channelConfigs.acme-chat.schema` xác thực `channels.acme-chat` và là
+    nguồn đường dẫn lạnh được lược đồ cấu hình, thiết lập và các bề mặt UI sử dụng trước khi
+    runtime plugin tải. Xem [Manifest plugin](/vi/plugins/manifest) để biết đầy đủ
+    tài liệu tham khảo về các trường cấp cao nhất.
 
   </Step>
 
-  <Step title="Build the channel plugin object">
-    Interface `ChannelPlugin` có nhiều bề mặt adapter tùy chọn. Bắt đầu với
-    mức tối thiểu - `id` và `setup` - rồi thêm adapter khi bạn cần.
+  <Step title="Xây dựng đối tượng plugin kênh">
+    Giao diện `ChannelPlugin` có nhiều bề mặt adapter tùy chọn. Bắt đầu với
+    mức tối thiểu - `id`, `config`, và `setup` - rồi thêm các adapter khi bạn
+    cần.
 
     Tạo `src/channel.ts`:
 
@@ -453,7 +719,7 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
       createChannelPluginBase,
     } from "openclaw/plugin-sdk/channel-core";
     import type { OpenClawConfig } from "openclaw/plugin-sdk/channel-core";
-    import { acmeChatApi } from "./client.js"; // your platform API client
+    import { acmeChatApi } from "./client.js"; // máy khách API nền tảng của bạn
 
     type ResolvedAccount = {
       accountId: string | null;
@@ -468,7 +734,7 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
     ): ResolvedAccount {
       const section = (cfg.channels as Record<string, any>)?.["acme-chat"];
       const token = section?.token;
-      if (!token) throw new Error("acme-chat: token is required");
+      if (!token) throw new Error("acme-chat: bắt buộc phải có token");
       return {
         accountId: accountId ?? null,
         token,
@@ -480,7 +746,10 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
     export const acmeChatPlugin = createChatChannelPlugin<ResolvedAccount>({
       base: createChannelPluginBase({
         id: "acme-chat",
-        setup: {
+        // Việc phân giải/kiểm tra tài khoản thuộc về `config`, không phải `setup`.
+        // `setup` bao gồm các thao tác ghi trong quá trình tiếp nhận (applyAccountConfig, validateInput).
+        config: {
+          listAccountIds: () => ["default"],
           resolveAccount,
           inspectAccount(cfg, accountId) {
             const section =
@@ -492,9 +761,18 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
             };
           },
         },
+        setup: {
+          applyAccountConfig: ({ cfg, input }) => ({
+            ...cfg,
+            channels: {
+              ...cfg.channels,
+              "acme-chat": { ...(cfg.channels as any)?.["acme-chat"], ...input },
+            },
+          }),
+        },
       }),
 
-      // DM security: who can message the bot
+      // Bảo mật DM: ai có thể nhắn tin cho bot
       security: {
         dm: {
           channelKey: "acme-chat",
@@ -504,23 +782,24 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
         },
       },
 
-      // Pairing: approval flow for new DM contacts
+      // Ghép đôi: luồng phê duyệt cho các liên hệ DM mới
       pairing: {
         text: {
-          idLabel: "Acme Chat username",
-          message: "Send this code to verify your identity:",
+          idLabel: "Tên người dùng Acme Chat",
+          message: "Gửi mã này để xác minh danh tính của bạn:",
           notify: async ({ target, code }) => {
-            await acmeChatApi.sendDm(target, `Pairing code: ${code}`);
+            await acmeChatApi.sendDm(target, `Mã ghép đôi: ${code}`);
           },
         },
       },
 
-      // Threading: how replies are delivered
+      // Phân luồng: cách phân phối các câu trả lời
       threading: { topLevelReplyToMode: "reply" },
 
-      // Outbound: send messages to the platform
+      // Đầu ra: gửi thông báo đến nền tảng
       outbound: {
         attachedResults: {
+          channel: "acme-chat",
           sendText: async (params) => {
             const result = await acmeChatApi.sendMessage(
               params.to,
@@ -538,34 +817,34 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
     });
     ```
 
-    Với các kênh chấp nhận cả khóa DM cấp cao nhất chuẩn và khóa lồng cũ, hãy dùng các helper từ `plugin-sdk/channel-config-helpers`: `resolveChannelDmAccess`, `resolveChannelDmPolicy`, `resolveChannelDmAllowFrom`, và `normalizeChannelDmPolicy` giữ các giá trị cục bộ của tài khoản đứng trước các giá trị root kế thừa. Ghép cùng resolver đó với sửa chữa doctor thông qua `normalizeLegacyDmAliases` để runtime và migration đọc cùng một hợp đồng.
+    Đối với các kênh chấp nhận cả khóa DM cấp cao nhất chuẩn tắc và khóa lồng nhau cũ, hãy sử dụng các trình trợ giúp từ `plugin-sdk/channel-config-helpers`: `resolveChannelDmAccess`, `resolveChannelDmPolicy`, `resolveChannelDmAllowFrom` và `normalizeChannelDmPolicy` giữ các giá trị cục bộ của tài khoản đứng trước các giá trị gốc được kế thừa. Ghép cùng trình phân giải đó với chức năng sửa chữa của doctor thông qua `normalizeLegacyDmAliases` để runtime và quá trình di chuyển đọc cùng một hợp đồng.
 
-    <Accordion title="What createChatChannelPlugin does for you">
-      Thay vì tự triển khai các interface adapter cấp thấp, bạn truyền
-      các tùy chọn khai báo và builder sẽ kết hợp chúng:
+    <Accordion title="createChatChannelPlugin làm gì cho bạn">
+      Thay vì triển khai thủ công các giao diện adapter cấp thấp, bạn truyền vào
+      các tùy chọn khai báo và trình dựng sẽ kết hợp chúng:
 
-      | Tùy chọn | Nó nối dây gì |
+      | Tùy chọn | Thành phần được kết nối |
       | --- | --- |
-      | `security.dm` | Resolver bảo mật DM theo phạm vi từ các trường cấu hình |
-      | `pairing.text` | Luồng ghép cặp DM dựa trên văn bản với trao đổi mã |
-      | `threading` | Resolver chế độ trả lời đến (cố định, theo phạm vi tài khoản, hoặc tùy chỉnh) |
-      | `outbound.attachedResults` | Các hàm gửi trả về siêu dữ liệu kết quả (ID tin nhắn) |
+      | `security.dm` | Trình phân giải bảo mật DM có phạm vi từ các trường cấu hình |
+      | `pairing.text` | Luồng ghép cặp DM dựa trên văn bản có trao đổi mã |
+      | `threading` | Trình phân giải chế độ trả lời (cố định, theo phạm vi tài khoản hoặc tùy chỉnh) |
+      | `outbound.attachedResults` | Các hàm gửi trả về siêu dữ liệu kết quả (ID tin nhắn); yêu cầu ID `channel` cùng cấp để lõi có thể đóng dấu kết quả gửi trả về |
 
-      Bạn cũng có thể truyền các đối tượng adapter thô thay vì các tùy chọn
-      khai báo nếu cần toàn quyền kiểm soát.
+      Bạn cũng có thể truyền trực tiếp các đối tượng adapter thô thay cho các tùy chọn khai báo
+      nếu cần toàn quyền kiểm soát.
 
-      Adapter đầu ra thô có thể định nghĩa hàm `chunker(text, limit, ctx)`.
+      Các adapter gửi đi thô có thể định nghĩa hàm `chunker(text, limit, ctx)`.
       `ctx.formatting` tùy chọn mang các quyết định định dạng tại thời điểm gửi
-      như `maxLinesPerMessage`; áp dụng nó trước khi gửi để threading trả lời
-      và ranh giới chunk được phân giải một lần bởi cơ chế gửi đầu ra dùng chung.
+      như `maxLinesPerMessage`; hãy áp dụng nó trước khi gửi để luồng trả lời
+      và ranh giới phân đoạn chỉ được phân giải một lần bởi cơ chế gửi đi dùng chung.
       Ngữ cảnh gửi cũng bao gồm `replyToIdSource` (`implicit` hoặc `explicit`)
-      khi một mục tiêu trả lời gốc đã được phân giải, để các helper payload có thể giữ nguyên
-      thẻ trả lời rõ ràng mà không tiêu thụ một slot trả lời ngầm định dùng một lần.
+      khi đã phân giải được đích trả lời gốc, để các trình trợ giúp payload có thể giữ nguyên
+      thẻ trả lời tường minh mà không tiêu thụ vị trí trả lời ngầm định chỉ dùng một lần.
     </Accordion>
 
   </Step>
 
-  <Step title="Wire the entry point">
+  <Step title="Kết nối điểm vào">
     Tạo `index.ts`:
 
     ```typescript index.ts
@@ -575,20 +854,20 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
     export default defineChannelPluginEntry({
       id: "acme-chat",
       name: "Acme Chat",
-      description: "Acme Chat channel plugin",
+      description: "Plugin kênh Acme Chat",
       plugin: acmeChatPlugin,
       registerCliMetadata(api) {
         api.registerCli(
           ({ program }) => {
             program
               .command("acme-chat")
-              .description("Acme Chat management");
+              .description("Quản lý Acme Chat");
           },
           {
             descriptors: [
               {
                 name: "acme-chat",
-                description: "Acme Chat management",
+                description: "Quản lý Acme Chat",
                 hasSubcommands: false,
               },
             ],
@@ -602,21 +881,21 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
     ```
 
     Đặt các bộ mô tả CLI do kênh sở hữu trong `registerCliMetadata(...)` để OpenClaw
-    có thể hiển thị chúng trong trợ giúp gốc mà không kích hoạt toàn bộ runtime
-    của kênh, trong khi các lần tải đầy đủ thông thường vẫn lấy cùng các bộ mô tả
-    đó để đăng ký lệnh thực tế. Giữ `registerFull(...)` cho công việc chỉ dành cho runtime.
-    Nếu `registerFull(...)` đăng ký các phương thức RPC của Gateway, hãy dùng tiền tố
-    dành riêng cho Plugin. Các namespace quản trị lõi (`config.*`,
-    `exec.approvals.*`, `wizard.*`, `update.*`) vẫn được giữ riêng và luôn
-    phân giải thành `operator.admin`.
-    `defineChannelPluginEntry` tự động xử lý việc tách chế độ đăng ký. Xem
+    có thể hiển thị chúng trong phần trợ giúp gốc mà không kích hoạt toàn bộ runtime của kênh,
+    trong khi các lần tải đầy đủ thông thường vẫn nhận cùng các bộ mô tả để đăng ký lệnh
+    thực tế. Dành `registerFull(...)` cho công việc chỉ dành cho runtime.
+    `defineChannelPluginEntry` tự động xử lý việc phân tách chế độ đăng ký.
+    Nếu `registerFull(...)` đăng ký các phương thức RPC của Gateway, hãy sử dụng
+    tiền tố dành riêng cho Plugin. Các không gian tên quản trị lõi (`config.*`,
+    `exec.approvals.*`, `wizard.*`, `update.*`) vẫn được dành riêng và luôn
+    phân giải thành `operator.admin`. Xem
     [Điểm vào](/vi/plugins/sdk-entrypoints#definechannelpluginentry) để biết tất cả
     tùy chọn.
 
   </Step>
 
-  <Step title="Add a setup entry">
-    Tạo `setup-entry.ts` để tải nhẹ trong quá trình onboarding:
+  <Step title="Thêm điểm vào thiết lập">
+    Tạo `setup-entry.ts` để tải nhẹ trong quá trình làm quen ban đầu:
 
     ```typescript setup-entry.ts
     import { defineSetupPluginEntry } from "openclaw/plugin-sdk/channel-core";
@@ -625,33 +904,33 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
     export default defineSetupPluginEntry(acmeChatPlugin);
     ```
 
-    OpenClaw tải tệp này thay vì điểm vào đầy đủ khi kênh bị tắt
-    hoặc chưa được cấu hình. Điều này tránh kéo vào mã runtime nặng trong các luồng thiết lập.
+    OpenClaw tải điểm vào này thay cho điểm vào đầy đủ khi kênh bị tắt
+    hoặc chưa được cấu hình. Điều này tránh tải mã runtime nặng trong các luồng thiết lập.
     Xem [Thiết lập và cấu hình](/vi/plugins/sdk-setup#setup-entry) để biết chi tiết.
 
-    Các kênh workspace được đóng gói tách các export an toàn cho thiết lập vào các mô-đun
-    sidecar có thể dùng `defineBundledChannelSetupEntry(...)` từ
+    Các kênh workspace được đóng gói tách những phần xuất an toàn cho thiết lập thành các mô-đun
+    sidecar có thể sử dụng `defineBundledChannelSetupEntry(...)` từ
     `openclaw/plugin-sdk/channel-entry-contract` khi chúng cũng cần một
-    bộ đặt runtime rõ ràng tại thời điểm thiết lập.
+    trình thiết lập runtime tường minh tại thời điểm thiết lập.
 
   </Step>
 
-  <Step title="Handle inbound messages">
+  <Step title="Xử lý tin nhắn đến">
     Plugin của bạn cần nhận tin nhắn từ nền tảng và chuyển tiếp chúng đến
     OpenClaw. Mẫu điển hình là một Webhook xác minh yêu cầu và
-    điều phối nó qua trình xử lý inbound của kênh:
+    điều phối yêu cầu đó qua trình xử lý đầu vào của kênh:
 
     ```typescript
     registerFull(api) {
       api.registerHttpRoute({
         path: "/acme-chat/webhook",
-        auth: "plugin", // plugin-managed auth (verify signatures yourself)
+        auth: "plugin", // xác thực do plugin quản lý (tự xác minh chữ ký)
         handler: async (req, res) => {
           const event = parseWebhookPayload(req);
 
-          // Your inbound handler dispatches the message to OpenClaw.
-          // The exact wiring depends on your platform SDK -
-          // see a real example in the bundled Microsoft Teams or Google Chat plugin package.
+          // Trình xử lý đầu vào của bạn điều phối tin nhắn đến OpenClaw.
+          // Cách kết nối chính xác phụ thuộc vào SDK nền tảng của bạn -
+          // xem ví dụ thực tế trong gói plugin Microsoft Teams hoặc Google Chat được đóng gói.
           await handleAcmeChatInbound(api, event);
 
           res.statusCode = 200;
@@ -663,111 +942,111 @@ Dùng `resolveInboundMentionDecision({ facts, policy })` cho cổng nhắc đế
     ```
 
     <Note>
-      Việc xử lý tin nhắn inbound là riêng theo từng kênh. Mỗi Plugin kênh sở hữu
-      pipeline inbound của riêng mình. Hãy xem các Plugin kênh được đóng gói
-      (ví dụ gói Plugin Microsoft Teams hoặc Google Chat) để thấy các mẫu thực tế.
+      Việc xử lý tin nhắn đến tùy thuộc vào từng kênh. Mỗi Plugin kênh sở hữu
+      pipeline đầu vào riêng. Hãy xem các Plugin kênh được đóng gói
+      (ví dụ gói Plugin Microsoft Teams hoặc Google Chat) để tham khảo các mẫu thực tế.
     </Note>
 
   </Step>
 
 <a id="step-6-test"></a>
-<Step title="Test">
-Viết các bài kiểm thử đặt cùng vị trí trong `src/channel.test.ts`:
+<Step title="Kiểm thử">
+Viết các kiểm thử cùng vị trí trong `src/channel.test.ts`:
 
     ```typescript src/channel.test.ts
     import { describe, it, expect } from "vitest";
     import { acmeChatPlugin } from "./channel.js";
 
-    describe("acme-chat plugin", () => {
-      it("resolves account from config", () => {
+    describe("plugin acme-chat", () => {
+      it("phân giải tài khoản từ cấu hình", () => {
         const cfg = {
           channels: {
             "acme-chat": { token: "test-token", allowFrom: ["user1"] },
           },
         } as any;
-        const account = acmeChatPlugin.setup!.resolveAccount(cfg, undefined);
+        const account = acmeChatPlugin.config.resolveAccount(cfg, undefined);
         expect(account.token).toBe("test-token");
       });
 
-      it("inspects account without materializing secrets", () => {
+      it("kiểm tra tài khoản mà không hiện thực hóa bí mật", () => {
         const cfg = {
           channels: { "acme-chat": { token: "test-token" } },
         } as any;
-        const result = acmeChatPlugin.setup!.inspectAccount!(cfg, undefined);
+        const result = acmeChatPlugin.config.inspectAccount!(cfg, undefined);
         expect(result.configured).toBe(true);
         expect(result.tokenStatus).toBe("available");
       });
 
-      it("reports missing config", () => {
+      it("báo cáo thiếu cấu hình", () => {
         const cfg = { channels: {} } as any;
-        const result = acmeChatPlugin.setup!.inspectAccount!(cfg, undefined);
+        const result = acmeChatPlugin.config.inspectAccount!(cfg, undefined);
         expect(result.configured).toBe(false);
       });
     });
     ```
 
     ```bash
-    pnpm test -- <bundled-plugin-root>/acme-chat/
+    pnpm test <bundled-plugin-root>/acme-chat/
     ```
 
-    Để dùng các helper kiểm thử dùng chung, xem [Kiểm thử](/vi/plugins/sdk-testing).
+    Đối với các trình trợ giúp kiểm thử dùng chung, hãy xem [Kiểm thử](/vi/plugins/sdk-testing).
 
 </Step>
 </Steps>
 
 ## Cấu trúc tệp
 
-```
+```text
 <bundled-plugin-root>/acme-chat/
-├── package.json              # openclaw.channel metadata
-├── openclaw.plugin.json      # Manifest with config schema
+├── package.json              # siêu dữ liệu openclaw.channel
+├── openclaw.plugin.json      # Manifest có lược đồ cấu hình
 ├── index.ts                  # defineChannelPluginEntry
 ├── setup-entry.ts            # defineSetupPluginEntry
-├── api.ts                    # Public exports (optional)
-├── runtime-api.ts            # Internal runtime exports (optional)
+├── api.ts                    # Các phần xuất công khai (tùy chọn)
+├── runtime-api.ts            # Các phần xuất runtime nội bộ (tùy chọn)
 └── src/
-    ├── channel.ts            # ChannelPlugin via createChatChannelPlugin
-    ├── channel.test.ts       # Tests
-    ├── client.ts             # Platform API client
-    └── runtime.ts            # Runtime store (if needed)
+    ├── channel.ts            # ChannelPlugin thông qua createChatChannelPlugin
+    ├── channel.test.ts       # Kiểm thử
+    ├── client.ts             # Máy khách API nền tảng
+    └── runtime.ts            # Kho lưu trữ runtime (nếu cần)
 ```
 
 ## Chủ đề nâng cao
 
 <CardGroup cols={2}>
-  <Card title="Threading options" icon="git-branch" href="/vi/plugins/sdk-entrypoints#registration-mode">
+  <Card title="Tùy chọn luồng hội thoại" icon="git-branch" href="/vi/plugins/sdk-entrypoints#registration-mode">
     Các chế độ trả lời cố định, theo phạm vi tài khoản hoặc tùy chỉnh
   </Card>
-  <Card title="Message tool integration" icon="puzzle" href="/vi/plugins/architecture#channel-plugins-and-the-shared-message-tool">
+  <Card title="Tích hợp công cụ tin nhắn" icon="puzzle" href="/vi/plugins/architecture#channel-plugins-and-the-shared-message-tool">
     describeMessageTool và khám phá hành động
   </Card>
-  <Card title="Target resolution" icon="crosshair" href="/vi/plugins/architecture-internals#channel-target-resolution">
+  <Card title="Phân giải đích" icon="crosshair" href="/vi/plugins/architecture-internals#channel-target-resolution">
     inferTargetChatType, looksLikeId, reservedLiterals, resolveTarget
   </Card>
-  <Card title="Runtime helpers" icon="settings" href="/vi/plugins/sdk-runtime">
-    TTS, STT, media, subagent qua api.runtime
+  <Card title="Trình trợ giúp runtime" icon="settings" href="/vi/plugins/sdk-runtime">
+    TTS, STT, phương tiện, tác tử con qua api.runtime
   </Card>
-  <Card title="Channel inbound API" icon="bolt" href="/vi/plugins/sdk-channel-inbound">
-    Vòng đời sự kiện inbound dùng chung: ingest, resolve, record, dispatch, finalize
+  <Card title="API đầu vào của kênh" icon="bolt" href="/vi/plugins/sdk-channel-inbound">
+    Vòng đời sự kiện đầu vào dùng chung: tiếp nhận, phân giải, ghi lại, điều phối, hoàn tất
   </Card>
 </CardGroup>
 
 <Note>
-Một số seam helper được đóng gói vẫn tồn tại để bảo trì và tương thích
-với bundled-plugin. Chúng không phải là mẫu được khuyến nghị cho các Plugin kênh mới;
-hãy ưu tiên các subpath channel/setup/reply/runtime chung từ bề mặt SDK
-phổ dụng, trừ khi bạn đang trực tiếp bảo trì họ Plugin được đóng gói đó.
+Một số điểm nối trợ giúp được đóng gói vẫn tồn tại để bảo trì Plugin được đóng gói và
+đảm bảo khả năng tương thích. Chúng không phải là mẫu được khuyến nghị cho các Plugin kênh mới;
+hãy ưu tiên các đường dẫn con chung về kênh/thiết lập/trả lời/runtime từ bề mặt SDK
+chung, trừ khi bạn đang trực tiếp bảo trì họ Plugin được đóng gói đó.
 </Note>
 
 ## Các bước tiếp theo
 
-- [Provider Plugins](/vi/plugins/sdk-provider-plugins) - nếu Plugin của bạn cũng cung cấp mô hình
-- [Tổng quan SDK](/vi/plugins/sdk-overview) - tham chiếu đầy đủ về import subpath
+- [Plugin nhà cung cấp](/vi/plugins/sdk-provider-plugins) - nếu Plugin của bạn cũng cung cấp mô hình
+- [Tổng quan SDK](/vi/plugins/sdk-overview) - tài liệu tham chiếu đầy đủ về nhập đường dẫn con
 - [Kiểm thử SDK](/vi/plugins/sdk-testing) - tiện ích kiểm thử và kiểm thử hợp đồng
-- [Manifest Plugin](/vi/plugins/manifest) - schema manifest đầy đủ
+- [Manifest Plugin](/vi/plugins/manifest) - lược đồ manifest đầy đủ
 
 ## Liên quan
 
-- [Thiết lập Plugin SDK](/vi/plugins/sdk-setup)
+- [Thiết lập SDK Plugin](/vi/plugins/sdk-setup)
 - [Xây dựng Plugin](/vi/plugins/building-plugins)
-- [Plugin harness agent](/vi/plugins/sdk-agent-harness)
+- [Plugin bộ khung tác tử](/vi/plugins/sdk-agent-harness)

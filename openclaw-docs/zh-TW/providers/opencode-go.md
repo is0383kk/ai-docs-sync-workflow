@@ -1,13 +1,14 @@
 ---
 read_when:
-    - 你想要 OpenCode Go 目錄
-    - 你需要 Go 託管模型的執行階段模型參照。
+    - 你需要 OpenCode Go 目錄
+    - 你需要 Go 託管模型的執行階段模型參照
 summary: 搭配共用的 OpenCode 設定使用 OpenCode Go 目錄
 title: OpenCode Go
 x-i18n:
-    generated_at: "2026-07-11T21:45:55Z"
+    generated_at: "2026-07-26T08:40:58Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: df647721e8966fd4fad3178550b071a2eb827148fe765bda53b3d7c97ceaadc2
     source_path: providers/opencode-go.md
@@ -15,14 +16,14 @@ x-i18n:
 ---
 
 OpenCode Go 是 [OpenCode](/zh-TW/providers/opencode) 內的 Go 目錄。它與 Zen 目錄共用
-`OPENCODE_API_KEY` 憑證，但保有自己的執行階段提供者 ID（`opencode-go`），
-以確保上游依模型進行的路由維持正確。
+`OPENCODE_API_KEY` 認證資訊，但保有自己的執行階段提供者 ID
+（`opencode-go`），以確保上游依模型路由保持正確。
 
-| 屬性           | 值                                                 |
-| -------------- | -------------------------------------------------- |
-| 執行階段提供者 | `opencode-go`                                      |
-| 驗證           | `OPENCODE_API_KEY`（別名：`OPENCODE_ZEN_API_KEY`） |
-| 上層設定       | [OpenCode](/zh-TW/providers/opencode)                    |
+| 屬性             | 值                                                 |
+| ---------------- | -------------------------------------------------- |
+| 執行階段提供者   | `opencode-go`                                 |
+| 驗證             | `OPENCODE_API_KEY`（別名：`OPENCODE_ZEN_API_KEY`）    |
+| 上層設定         | [OpenCode](/zh-TW/providers/opencode)                    |
 
 ## 開始使用
 
@@ -39,7 +40,7 @@ OpenCode Go 是 [OpenCode](/zh-TW/providers/opencode) 內的 Go 目錄。它與 
         openclaw config set agents.defaults.model.primary "opencode-go/kimi-k2.6"
         ```
       </Step>
-      <Step title="確認模型可用">
+      <Step title="確認模型可供使用">
         ```bash
         openclaw models list --provider opencode-go
         ```
@@ -54,7 +55,7 @@ OpenCode Go 是 [OpenCode](/zh-TW/providers/opencode) 內的 Go 目錄。它與 
         openclaw onboard --opencode-go-api-key "$OPENCODE_API_KEY"
         ```
       </Step>
-      <Step title="確認模型可用">
+      <Step title="確認模型可供使用">
         ```bash
         openclaw models list --provider opencode-go
         ```
@@ -77,26 +78,26 @@ OpenCode Go 是 [OpenCode](/zh-TW/providers/opencode) 內的 Go 目錄。它與 
 執行 `openclaw models list --provider opencode-go` 以取得目前的模型清單。
 隨附項目：
 
-| 模型參照                        | 名稱              | 上下文    | 最大輸出量 | 圖片輸入 |
+| 模型參照                        | 名稱              | 上下文    | 最大輸出   | 圖片輸入 |
 | ------------------------------- | ----------------- | --------- | ---------- | -------- |
-| `opencode-go/deepseek-v4-pro`   | DeepSeek V4 Pro   | 1M        | 384K       | 否       |
-| `opencode-go/deepseek-v4-flash` | DeepSeek V4 Flash | 1M        | 384K       | 否       |
-| `opencode-go/glm-5`             | GLM-5             | 202,752   | 32,768     | 否       |
-| `opencode-go/glm-5.1`           | GLM-5.1           | 202,752   | 32,768     | 否       |
-| `opencode-go/glm-5.2`           | GLM-5.2           | 1M        | 131,072    | 否       |
-| `opencode-go/hy3-preview`       | HY3 預覽版        | 262,144   | 32,768     | 否       |
-| `opencode-go/kimi-k2.5`         | Kimi K2.5         | 262,144   | 65,536     | 是       |
-| `opencode-go/kimi-k2.6`         | Kimi K2.6         | 262,144   | 65,536     | 是       |
-| `opencode-go/kimi-k2.7-code`    | Kimi K2.7 Code    | 262,144   | 262,144    | 是       |
-| `opencode-go/mimo-v2.5`         | MiMo V2.5         | 1M        | 128,000    | 是       |
-| `opencode-go/mimo-v2.5-pro`     | MiMo V2.5 Pro     | 1,048,576 | 128,000    | 否       |
-| `opencode-go/minimax-m2.5`      | MiniMax M2.5      | 204,800   | 65,536     | 否       |
-| `opencode-go/minimax-m2.7`      | MiniMax M2.7      | 204,800   | 131,072    | 否       |
-| `opencode-go/minimax-m3`        | MiniMax M3        | 204,800   | 131,072    | 否       |
-| `opencode-go/qwen3.5-plus`      | Qwen3.5 Plus      | 262,144   | 65,536     | 是       |
-| `opencode-go/qwen3.6-plus`      | Qwen3.6 Plus      | 262,144   | 65,536     | 是       |
-| `opencode-go/qwen3.7-max`       | Qwen3.7 Max       | 1M        | 65,536     | 否       |
-| `opencode-go/qwen3.7-plus`      | Qwen3.7 Plus      | 1M        | 65,536     | 是       |
+| `opencode-go/deepseek-v4-pro`              | DeepSeek V4 Pro   | 1M        | 384K       | 否       |
+| `opencode-go/deepseek-v4-flash`              | DeepSeek V4 Flash | 1M        | 384K       | 否       |
+| `opencode-go/glm-5`              | GLM-5             | 202,752   | 32,768     | 否       |
+| `opencode-go/glm-5.1`              | GLM-5.1           | 202,752   | 32,768     | 否       |
+| `opencode-go/glm-5.2`              | GLM-5.2           | 1M        | 131,072    | 否       |
+| `opencode-go/hy3-preview`              | HY3 Preview       | 262,144   | 32,768     | 否       |
+| `opencode-go/kimi-k2.5`              | Kimi K2.5         | 262,144   | 65,536     | 是       |
+| `opencode-go/kimi-k2.6`              | Kimi K2.6         | 262,144   | 65,536     | 是       |
+| `opencode-go/kimi-k2.7-code`              | Kimi K2.7 Code    | 262,144   | 262,144    | 是       |
+| `opencode-go/mimo-v2.5`              | MiMo V2.5         | 1M        | 128,000    | 是       |
+| `opencode-go/mimo-v2.5-pro`              | MiMo V2.5 Pro     | 1,048,576 | 128,000    | 否       |
+| `opencode-go/minimax-m2.5`              | MiniMax M2.5      | 204,800   | 65,536     | 否       |
+| `opencode-go/minimax-m2.7`              | MiniMax M2.7      | 204,800   | 131,072    | 否       |
+| `opencode-go/minimax-m3`              | MiniMax M3        | 204,800   | 131,072    | 否       |
+| `opencode-go/qwen3.5-plus`              | Qwen3.5 Plus      | 262,144   | 65,536     | 是       |
+| `opencode-go/qwen3.6-plus`              | Qwen3.6 Plus      | 262,144   | 65,536     | 是       |
+| `opencode-go/qwen3.7-max`              | Qwen3.7 Max       | 1M        | 65,536     | 否       |
+| `opencode-go/qwen3.7-plus`              | Qwen3.7 Plus      | 1M        | 65,536     | 是       |
 
 ## 進階設定
 
@@ -107,18 +108,18 @@ OpenCode Go 是 [OpenCode](/zh-TW/providers/opencode) 內的 Go 目錄。它與 
   </Accordion>
 
   <Accordion title="執行階段參照慣例">
-    執行階段參照會保持明確：Zen 使用 `opencode/...`，Go 使用
-    `opencode-go/...`。這能讓上游依模型進行的路由在兩個目錄中都維持正確。
+    執行階段參照保持明確：Zen 使用 `opencode/...`，Go 使用
+    `opencode-go/...`。這可確保兩個目錄的上游依模型路由保持正確。
   </Accordion>
 
-  <Accordion title="共用憑證">
-    一組 `OPENCODE_API_KEY` 即可涵蓋 Zen 與 Go 兩個目錄。在設定期間輸入
-    金鑰，會為兩個執行階段提供者儲存憑證。
+  <Accordion title="共用認證資訊">
+    一組 `OPENCODE_API_KEY` 即可涵蓋 Zen 與 Go 目錄。在設定期間輸入
+    金鑰，會為兩個執行階段提供者儲存認證資訊。
   </Accordion>
 </AccordionGroup>
 
 <Tip>
-請參閱 [OpenCode](/zh-TW/providers/opencode)，以瞭解共用初始設定概覽及完整的
+請參閱 [OpenCode](/zh-TW/providers/opencode)，以瞭解共用的初始設定概覽，以及完整的
 Zen + Go 目錄參考資料。
 </Tip>
 
@@ -126,7 +127,7 @@ Zen + Go 目錄參考資料。
 
 <CardGroup cols={2}>
   <Card title="OpenCode（上層）" href="/zh-TW/providers/opencode" icon="server">
-    共用初始設定、目錄概覽與進階說明。
+    共用初始設定、目錄概覽和進階說明。
   </Card>
   <Card title="模型選擇" href="/zh-TW/concepts/model-providers" icon="layers">
     選擇提供者、模型參照與容錯移轉行為。

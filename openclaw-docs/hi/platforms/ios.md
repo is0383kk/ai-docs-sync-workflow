@@ -1,74 +1,103 @@
 ---
 read_when:
     - iOS Node को पेयर करना या फिर से कनेक्ट करना
+    - सीधे Apple Watch Node को सक्षम करना या उसकी समस्या निवारण करना
     - स्रोत से iOS ऐप चलाना
-    - Gateway डिस्कवरी या कैनवास कमांड्स की डीबगिंग
-summary: 'iOS Node ऐप: Gateway से कनेक्ट करना, पेयरिंग, कैनवास, और समस्या निवारण'
+    - Gateway खोज या कैनवास कमांड की डीबगिंग
+summary: 'iOS Node ऐप: Gateway से कनेक्ट करना, पेयरिंग, कैनवास और समस्या निवारण'
 title: iOS ऐप
 x-i18n:
-    generated_at: "2026-07-04T18:00:29Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:05:04Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: ad6d272518b36564562256f55ffc320c0c4d2b954914ac73c23e450fa7acee0b
+    source_hash: 2b01a63fa1e2c445f7fb35843536f7f5918e94bfe885dac19c852d7d52d86342
     source_path: platforms/ios.md
     workflow: 16
 ---
 
-उपलब्धता: iPhone ऐप बिल्ड किसी रिलीज़ के लिए सक्षम होने पर Apple चैनलों के माध्यम से वितरित किए जाते हैं। स्थानीय डेवलपमेंट बिल्ड स्रोत से भी चल सकते हैं।
+उपलब्धता: किसी रिलीज़ के लिए सक्षम होने पर iPhone ऐप बिल्ड Apple चैनलों के माध्यम से वितरित किए जाते हैं। स्थानीय डेवलपमेंट बिल्ड स्रोत से भी चलाए जा सकते हैं।
 
 ## यह क्या करता है
 
-- WebSocket पर Gateway से कनेक्ट करता है (LAN या tailnet)।
-- नोड क्षमताएं उजागर करता है: Canvas, स्क्रीन स्नैपशॉट, Camera कैप्चर, Location, Talk मोड, Voice wake।
-- `node.invoke` कमांड प्राप्त करता है और नोड स्थिति इवेंट रिपोर्ट करता है।
+- WebSocket (LAN या tailnet) के माध्यम से Gateway से कनेक्ट करता है।
+- Node क्षमताएँ उपलब्ध कराता है: Canvas, स्क्रीन स्नैपशॉट, कैमरा कैप्चर, स्थान, Talk मोड, वॉइस वेक और ऑप्ट-इन स्वास्थ्य सारांश।
+- `node.invoke` कमांड प्राप्त करता है और Node स्थिति ईवेंट की रिपोर्ट करता है।
+- Agents सतह (Files) से चयनित एजेंट के वर्कस्पेस को केवल पढ़ने के लिए ब्राउज़ करता है: डायरेक्टरी में ड्रिल-डाउन, सिंटैक्स-हाइलाइट किए गए टेक्स्ट पूर्वावलोकन, इमेज पूर्वावलोकन और शेयर-शीट निर्यात। कोई लेखन कार्रवाई नहीं; पूर्वावलोकन का आकार Gateway द्वारा सीमित होता है।
+- प्रत्येक पेयर किए गए Gateway के लिए हाल के चैट सत्रों और ट्रांसक्रिप्ट का छोटा, केवल-पढ़ने योग्य ऑफ़लाइन कैश रखता है: कोल्ड ओपन पर अंतिम ज्ञात ट्रांसक्रिप्ट तुरंत दिखता है और Gateway के जवाब देते ही रीफ़्रेश होता है, डिस्कनेक्ट होने पर भी हाल की चैट ब्राउज़ की जा सकती हैं और रीसेट/फ़ॉरगेट संरक्षित स्थानीय कैश को मिटा देता है।
+- डिस्कनेक्ट रहते हुए भेजे गए टेक्स्ट संदेशों को टिकाऊ, प्रति-Gateway आउटबॉक्स (अधिकतम 50) में कतारबद्ध करता है: कतारबद्ध बबल ट्रांसक्रिप्ट में दिखते हैं, पुनः कनेक्ट होने पर आइडेम्पोटेंट पुनः प्रयासों के साथ क्रम से भेजे जाते हैं, कैनोनिकल इतिहास द्वारा भेजने की पुष्टि होने तक टिकाऊ रहते हैं, पुनः प्रयास/हटाने की कार्रवाई दिखाने से पहले बैकऑफ़ के साथ पुनः प्रयास करते हैं और 48 घंटे ऑफ़लाइन रहने के बाद भेजे जाने के बजाय समाप्त हो जाते हैं; रीसेट/फ़ॉरगेट कैश के साथ कतार भी साफ़ कर देता है।
+- Chat टेक्स्ट और वॉइस के लिए एकमात्र सतह है। Chat कार्रवाइयाँ Chat छोड़े बिना पूरी Sessions स्क्रीन खोल सकती हैं और सहायक के तर्क तथा टूल गतिविधि को दिखा या छिपा सकती हैं। ड्राफ़्ट डिक्टेशन के लिए माइक्रोफ़ोन पर टैप करें, वॉइस नोट रिकॉर्ड करने के लिए उसका मेनू खोलें या रियलटाइम वॉइस के लिए इनलाइन Talk नियंत्रण का उपयोग करें; सुनते या बोलते समय Talk नियंत्रण लाइव माइक्रोफ़ोन या प्लेबैक स्तर के अनुसार एनिमेट होता है।
+- **Settings -> OpenClaw** एक समर्पित Gateway सेटिंग सहायक खोलता है, जब ऑपरेटर कनेक्शन में `operator.admin` हो और Gateway `openclaw.chat` का समर्थन करता हो। इसकी सेटअप बातचीत सामान्य Chat से अलग रहती है, गुप्त जवाबों को स्थानीय रूप से छिपाती है और आपके **Open Chat** पर टैप करने के बाद ही Chat में जाती है।
+- माँग पर सहायक संदेशों को बोलकर सुनाता है: Chat में किसी संदेश को देर तक दबाएँ और **Listen** चुनें। ऐप कॉन्फ़िगर किए गए TTS प्रदाता के साथ समर्थित Gateway `tts.speak` क्लिप चलाता है और Gateway ऑडियो अनुपलब्ध या चलाने योग्य न होने पर डिवाइस पर उपलब्ध वाक् सुविधा का उपयोग करता है। सत्र बदलने या ऐप के बैकग्राउंड में जाने पर प्लेबैक रुक जाता है।
 
-## आवश्यकताएं
+## आवश्यकताएँ
 
-- किसी अन्य डिवाइस पर चल रहा Gateway (macOS, Linux, या WSL2 के माध्यम से Windows)।
+- किसी अन्य डिवाइस पर चल रहा Gateway (macOS, Linux या WSL2 के माध्यम से Windows)।
 - नेटवर्क पथ:
-  - Bonjour के माध्यम से वही LAN, **या**
-  - unicast DNS-SD के माध्यम से tailnet (उदाहरण डोमेन: `openclaw.internal.`), **या**
-  - मैनुअल होस्ट/पोर्ट (fallback)।
+  - Bonjour के माध्यम से समान LAN, **या**
+  - यूनिकास्ट DNS-SD के माध्यम से Tailnet (उदाहरण डोमेन: `openclaw.internal.`), **या**
+  - मैन्युअल होस्ट/पोर्ट (फ़ॉलबैक)।
 
-## त्वरित शुरुआत (पेयर + कनेक्ट)
+## त्वरित शुरुआत (पेयर करें + कनेक्ट करें)
 
-1. ऐसे रूट के साथ authenticated Gateway शुरू करें, जिस तक आपका फोन पहुंच सके। Tailscale
+पहली बार लॉन्च करने पर ऐप पेयरिंग की संक्षिप्त व्याख्या और
+अनुमतियों के पेज (सूचनाएँ, कैमरा, माइक्रोफ़ोन, फ़ोटो, संपर्क,
+कैलेंडर, रिमाइंडर, स्थान) के माध्यम से आपका मार्गदर्शन करता है। प्रत्येक अनुमति वैकल्पिक है और इसे
+बाद में **Settings** -> **Permissions** या iOS Settings ऐप में बदला जा सकता है।
+
+1. ऐसे रूट के साथ प्रमाणित Gateway शुरू करें जिस तक आपका फ़ोन पहुँच सके। Tailscale
    Serve अनुशंसित रिमोट पथ है:
 
 ```bash
 openclaw gateway --port 18789 --tailscale serve
 ```
 
-विश्वसनीय same-LAN सेटअप के लिए, इसके बजाय authenticated `gateway.bind: "lan"`
-का उपयोग करें। डिफ़ॉल्ट loopback bind फोन से पहुंच योग्य नहीं है। यदि
-Gateway अभी तक कॉन्फ़िगर नहीं किया गया है, तो पहले `openclaw onboard` चलाएं ताकि setup-code
-बनाने के लिए token या password auth पथ हो।
+विश्वसनीय समान-LAN सेटअप के लिए इसके बजाय प्रमाणित `gateway.bind: "lan"`
+का उपयोग करें। डिफ़ॉल्ट लूपबैक बाइंड तक फ़ोन से नहीं पहुँचा जा सकता। यदि
+Gateway अभी तक कॉन्फ़िगर नहीं किया गया है, तो पहले `openclaw onboard` चलाएँ, ताकि सेटअप-कोड
+बनाने के लिए टोकन या पासवर्ड प्रमाणीकरण पथ उपलब्ध हो।
 
-2. [Control UI](/hi/web/control-ui) खोलें, **नोड्स** चुनें, और
-   **डिवाइस** कार्ड में **मोबाइल डिवाइस पेयर करें** पर क्लिक करें।
+2. [Control UI](/hi/web/control-ui) खोलें, **Nodes** चुनें और
+   **Devices** पेज पर **Pair mobile device** क्लिक करें। पूर्ण पहुँच अनुशंसित है
+   और डिफ़ॉल्ट रूप से चयनित होती है; केवल तभी Limited access चुनें, जब आप
+   प्रशासनिक Gateway नियंत्रणों को छोड़ना चाहते हों, फिर **Create setup code** क्लिक करें।
 
-3. iOS ऐप में, **सेटिंग्स** → **Gateway** खोलें, QR कोड स्कैन करें (या
-   setup code पेस्ट करें), और कनेक्ट करें।
+3. iOS ऐप में **Settings** -> **Gateway** खोलें, QR कोड स्कैन करें (या
+   सेटअप कोड पेस्ट करें) और कनेक्ट करें।
 
-4. आधिकारिक ऐप अपने-आप कनेक्ट हो जाता है। यदि **डिवाइस** कोई pending
-   अनुरोध दिखाता है, तो उसे approve करने से पहले उसकी role और scopes की समीक्षा करें।
+   यदि सेटअप कोड में LAN और Tailscale Serve दोनों रूट हैं, तो ऐप
+   उन्हें क्रम से जाँचता है और पहुँच योग्य पहला एंडपॉइंट सहेजता है।
 
-Control UI बटन के लिए `operator.admin` के साथ पहले से paired session आवश्यक है।
-टर्मिनल fallback के रूप में, iOS ऐप में कोई discovered gateway चुनें (या
-Manual Host सक्षम करें और host/port दर्ज करें), फिर Gateway host पर अनुरोध approve करें:
+   पेयर किए गए Gateway **Gateways** सूची में बने रहते हैं। चेकमार्क
+   फ़ोकस किए गए Gateway की पहचान करता है; किसी अन्य पंक्ति पर बोल्ट नियंत्रण का उपयोग करके उसके
+   ऑपरेटर सत्र को भी उसी समय कनेक्ट रखें। फ़ोकस बदलने से
+   अन्य सक्षम Gateway डिस्कनेक्ट नहीं होते। केवल फ़ोकस किया गया Gateway
+   iPhone का क्षमता-युक्त Node सत्र प्राप्त करता है, इसलिए कैमरा, स्क्रीन, स्थान और
+   अन्य डिवाइस कमांड का हमेशा एक स्पष्ट स्वामी होता है। ऐप के बैकग्राउंड में
+   जाने के बाद iOS इन फ़ोरग्राउंड कनेक्शन को निलंबित कर सकता है।
+
+4. आधिकारिक ऐप स्वचालित रूप से कनेक्ट होता है। यदि **Pending approval** में कोई
+   अनुरोध दिखाई देता है, तो उसे अनुमोदित करने से पहले उसकी भूमिका और स्कोप की समीक्षा करें।
+
+   **Settings → Gateway** दिखाता है कि सहेजे गए ऑपरेटर कनेक्शन के पास
+   **Full** या **Limited** पहुँच है। प्लेनटेक्स्ट LAN `ws://` सेटअप को बेयरर-टोकन सुरक्षा के लिए स्वचालित रूप से
+   सीमित किया जाता है। यदि यह सीमित है, तो `wss://` या
+   Tailscale Serve कॉन्फ़िगर करें, Control UI या `openclaw qr` से नया पूर्ण-पहुँच कोड स्कैन करें,
+   फिर सेटिंग और अपग्रेड सक्षम करने के लिए पुनः कनेक्ट करें।
+
+Control UI बटन के लिए `operator.admin` वाला पहले से पेयर किया गया सत्र आवश्यक है।
+टर्मिनल फ़ॉलबैक के रूप में iOS ऐप में खोजा गया Gateway चुनें (या
+Manual Host सक्षम करके होस्ट/पोर्ट दर्ज करें), फिर Gateway होस्ट पर अनुरोध अनुमोदित करें:
 
 ```bash
 openclaw devices list
 openclaw devices approve <requestId>
 ```
 
-यदि ऐप बदली हुई auth जानकारी (role/scopes/public key) के साथ pairing फिर से प्रयास करता है,
-तो पिछला pending अनुरोध supersede हो जाता है और नया `requestId` बनाया जाता है।
-approval से पहले `openclaw devices list` फिर से चलाएं।
+यदि ऐप बदले हुए प्रमाणीकरण विवरण (भूमिका/स्कोप/सार्वजनिक कुंजी) के साथ पेयरिंग का पुनः प्रयास करता है, तो पिछला लंबित अनुरोध अधिक्रमित हो जाता है और नया `requestId` बनाया जाता है। अनुमोदन से पहले `openclaw devices list` फिर से चलाएँ।
 
-वैकल्पिक: यदि iOS नोड हमेशा कड़े नियंत्रण वाले subnet से कनेक्ट करता है, तो आप
-explicit CIDRs या exact IPs के साथ first-time node auto-approval में opt in कर सकते हैं:
+वैकल्पिक: यदि iOS Node हमेशा कड़ाई से नियंत्रित सबनेट से कनेक्ट होता है, तो आप स्पष्ट CIDR या सटीक IP के साथ पहली बार Node के स्वचालित अनुमोदन को ऑप्ट-इन कर सकते हैं:
 
 ```json5
 {
@@ -82,24 +111,69 @@ explicit CIDRs या exact IPs के साथ first-time node auto-approval �
 }
 ```
 
-यह डिफ़ॉल्ट रूप से disabled है। यह केवल बिना requested scopes वाली ताज़ा `role: node` pairing पर लागू होता है।
-Operator/browser pairing और किसी भी role, scope, metadata, या
-public-key बदलाव के लिए अभी भी manual approval आवश्यक है।
+यह डिफ़ॉल्ट रूप से अक्षम है। यह केवल बिना अनुरोधित स्कोप वाली नई `role: node` पेयरिंग पर लागू होता है। ऑपरेटर/ब्राउज़र पेयरिंग और भूमिका, स्कोप, मेटाडेटा या सार्वजनिक कुंजी में किसी भी बदलाव के लिए अब भी मैन्युअल अनुमोदन आवश्यक है।
 
-5. कनेक्शन verify करें:
+5. कनेक्शन सत्यापित करें:
 
 ```bash
 openclaw nodes status
 openclaw gateway call node.list --params "{}"
 ```
 
-## आधिकारिक बिल्ड के लिए relay-backed push
+## स्वास्थ्य सारांश
 
-आधिकारिक रूप से वितरित iOS बिल्ड raw APNs token को gateway पर प्रकाशित करने के बजाय external push relay का उपयोग करते हैं।
+iOS Node वर्तमान कैलेंडर दिन के लिए वैकल्पिक, केवल-पढ़ने योग्य HealthKit समग्र सारांश लौटा सकता है। iOS डिवाइस की सहमति और स्पष्ट Gateway कमांड प्राधिकरण स्वतंत्र नियंत्रण हैं। सेटअप, आह्वान, पेलोड फ़ील्ड, गोपनीयता व्यवहार और समस्या निवारण के लिए [HealthKit सारांश](/hi/platforms/ios-healthkit) देखें।
 
-public release lane से आने वाले आधिकारिक App Store बिल्ड `https://ios-push-relay.openclaw.ai` पर hosted relay का उपयोग करते हैं।
+डिफ़ॉल्ट रूप से, Apple Watch सहयोगी मौजूदा iPhone रिले का उपयोग जारी रखता है और उसे अलग Gateway पेयरिंग की आवश्यकता नहीं होती। Apple के Watch ऐप में Watch को iPhone से पेयर करें, **Watch app -> My Watch -> Available
+Apps** से OpenClaw इंस्टॉल करें, फिर दोनों डिवाइस पर OpenClaw को एक बार खोलें।
 
-Custom relay deployments के लिए जानबूझकर अलग iOS build/deployment पथ की आवश्यकता होती है, जिसकी relay URL gateway relay URL से मेल खाती हो। public App Store release lane custom relay URL overrides स्वीकार नहीं करता। यदि आप custom relay build का उपयोग कर रहे हैं, तो matching gateway relay URL सेट करें:
+## कमांड अनुमोदनों की समीक्षा
+
+`operator.admin` वाला ऑपरेटर कनेक्शन, या Gateway द्वारा स्पष्ट रूप से लक्षित पेयर किया गया
+`operator.approvals` कनेक्शन, iPhone पर लंबित exec अनुरोधों की समीक्षा कर सकता है। अनुमोदन कार्ड Gateway का साफ़ किया गया कमांड पूर्वावलोकन, चेतावनी, होस्ट संदर्भ, समाप्ति और केवल उस अनुरोध द्वारा प्रस्तुत निर्णय दिखाता है। पेयर की गई Apple Watch मौजूदा iPhone रिले के माध्यम से वही समीक्षक-सुरक्षित प्रॉम्प्ट प्राप्त करती है और संक्षिप्त एक-बार-अनुमति/अस्वीकार निर्णय उपसमुच्चय प्रस्तुत करती है। प्रत्यक्ष Watch Gateway मोड अनुमोदन प्रॉम्प्ट संचारित नहीं करता।
+
+अनुमोदन स्थिति Control UI और समर्थित चैट सतहों के साथ साझा होती है। पहले प्रतिबद्ध उत्तर को स्वीकार किया जाता है। किसी अन्य सतह द्वारा अनुरोध का समाधान किए जाने के बाद, दूरस्थ समाधान सूचना के बाद और जब भी समाधान की पावती खो जाने की संभावना हो, iPhone और Watch Gateway का प्रामाणिक अंतिम रिकॉर्ड प्राप्त करते हैं। जब तक वह पुनर्प्राप्ति यह पुष्टि नहीं करती कि अनुरोध अभी भी लंबित है या नहीं, कार्रवाइयाँ अनुपलब्ध रहती हैं।
+
+अनुमोदन का स्वामित्व चयनित Gateway से संबद्ध होता है। Gateway बदलने पर पुराने प्रॉम्प्ट को प्रतिस्थापन कनेक्शन पर लागू नहीं किया जा सकता। एकीकृत अनुमोदन विधियों से पुराने Gateway, जारी की गई exec-विशिष्ट विधियों पर वापस जाते हैं; सुरक्षित रखी गई अंतिम स्थिति और अधिक समृद्ध अंतर-सतह परिणामों के लिए अपडेट किया गया Gateway आवश्यक है।
+
+## एजेंट के प्रश्नों का उत्तर देना
+
+चैट, `operator.questions` (या `operator.admin`) वाले ऑपरेटर कनेक्शन के लिए लंबित Gateway प्रश्नों को नेटिव कार्ड के रूप में दिखाती है। कार्ड एकल और बहु-चयन विकल्पों, विकल्प विवरणों, मुक्त-पाठ **अन्य** उत्तरों और समाप्ति की उलटी गिनती का समर्थन करते हैं। पुनः कनेक्ट होने पर लंबित प्रश्न Gateway से फिर लोड किए जाते हैं। जब यह डिवाइस उत्तर देता है, कोई अन्य सतह पहले उत्तर देती है, या प्रश्न की अवधि समाप्त हो जाती है अथवा उसे रद्द कर दिया जाता है, तो कार्ड लॉक हो जाता है।
+
+## वैकल्पिक प्रत्यक्ष Apple Watch Node
+
+प्रत्यक्ष मोड Watch को उसकी अपनी हस्ताक्षरित Node पहचान और Gateway कनेक्शन देता है। OpenClaw के सक्रिय रहने पर समर्थित Node कमांड Watch के Wi-Fi या सेल्युलर कनेक्शन पर काम करना जारी रखते हैं, भले ही पेयर किया गया iPhone उपलब्ध न हो।
+
+आवश्यकताएँ:
+
+- iPhone, `operator.admin` स्कोप के साथ Gateway से कनेक्ट है।
+- सेटअप कोड ऐसे `wss://` Gateway एंडपॉइंट का विज्ञापन करता है जिसका प्रमाणपत्र watchOS द्वारा विश्वसनीय है; Watch संबंधित `https://` ऑरिजिन को पोल करती है। सादा HTTP और स्व-हस्ताक्षरित या केवल-फ़िंगरप्रिंट विश्वसनीयता समर्थित नहीं हैं। एंडपॉइंट कॉन्फ़िगरेशन के लिए [Gateway-स्वामित्व वाली पेयरिंग](/hi/gateway/pairing) देखें। लूपबैक, केवल-iPhone और केवल-tailnet रूट तक Watch स्वतंत्र रूप से नहीं पहुँच सकती।
+- सेल्युलर उपयोग के लिए सक्रिय सेवा वाली सेल्युलर-सक्षम Apple Watch आवश्यक है।
+- OpenClaw Watch पर सक्रिय है। Apple सामान्य watchOS ऐप्स को जेनेरिक WebSocket/TCP कनेक्शन बनाए रखने की अनुमति नहीं देता, इसलिए प्रत्यक्ष Node छोटे HTTPS पोल का उपयोग करता है और ऐप के फिर से अग्रभूमि में आने पर पुनः कनेक्ट होता है। Apple का [watchOS निम्न-स्तरीय नेटवर्किंग मार्गदर्शन](https://developer.apple.com/documentation/technotes/tn3135-low-level-networking-on-watchOS) देखें।
+
+सेटअप:
+
+1. iPhone पर **Settings -> Apple Watch** खोलें।
+2. **Enable Direct Gateway Connection** पर टैप करें।
+3. अल्पकालिक सेटअप कोड की अवधि समाप्त होने से पहले Watch पर OpenClaw खोलें।
+4. `openclaw nodes status` के साथ अलग Apple Watch पंक्ति सत्यापित करें।
+
+सेटअप कोड में अल्पकालिक, केवल-Node बूटस्ट्रैप क्रेडेंशियल होता है; अवधि समाप्त होने तक इसे पासवर्ड की तरह सुरक्षित रखें। इसमें कभी भी iPhone का सहेजा हुआ Gateway पासवर्ड या टोकन नहीं होता। पेयरिंग के बाद, Watch अपना डिवाइस टोकन संग्रहीत करती है और बूटस्ट्रैप क्रेडेंशियल हटा देती है। प्रत्यक्ष मोड केवल नीचे दिए गए कमांड को कवर करता है। चैट, Talk, अनुमोदन और मौजूदा `watch.*` सूचना प्रवाह iPhone-रिले सुविधाएँ बने रहते हैं और इनके लिए अब भी पेयर किया गया iPhone आवश्यक है।
+
+प्रत्यक्ष watchOS Node कमांड:
+
+| सतह          | कमांड                         | टिप्पणियाँ                                               |
+| ------------- | ------------------------------ | ------------------------------------------------------- |
+| डिवाइस        | `device.info`, `device.status` | Watch पहचान, बैटरी, तापीय स्थिति, स्टोरेज और नेटवर्क। |
+| सूचनाएँ       | `system.notify`                | ऐप के सक्रिय रहने के दौरान; Watch की अनुमति आवश्यक है। |
+
+watchOS तृतीय-पक्ष ऐप्स को WebKit उपलब्ध नहीं कराता, इसलिए प्रत्यक्ष Watch Node Canvas कमांड का विज्ञापन नहीं करता।
+
+## आधिकारिक बिल्ड के लिए रिले-समर्थित पुश
+
+आधिकारिक रूप से वितरित iOS बिल्ड कच्चे APNs टोकन को Gateway पर प्रकाशित करने के बजाय बाहरी पुश रिले का उपयोग करते हैं। सार्वजनिक रिलीज़ लेन के आधिकारिक App Store बिल्ड `https://ios-push-relay.openclaw.ai` पर होस्ट किए गए रिले का उपयोग करते हैं; यह आधार URL App Store वितरण के लिए हार्डकोड किया गया है और किसी ओवरराइड को नहीं पढ़ता।
+
+कस्टम रिले परिनियोजनों के लिए जानबूझकर अलग iOS बिल्ड/परिनियोजन पथ आवश्यक है, जिसका रिले URL Gateway के रिले URL से मेल खाता हो। App Store रिलीज़ लेन कभी भी कस्टम रिले URL स्वीकार नहीं करती। यदि आप कस्टम रिले बिल्ड का उपयोग कर रहे हैं, तो मेल खाने वाला Gateway रिले URL सेट करें:
 
 ```json5
 {
@@ -115,98 +189,54 @@ Custom relay deployments के लिए जानबूझकर अलग iOS
 }
 ```
 
-flow कैसे काम करता है:
+प्रवाह कैसे काम करता है:
 
-- iOS ऐप App Attest और StoreKit app transaction JWS का उपयोग करके relay के साथ register करता है।
-- relay एक opaque relay handle और registration-scoped send grant लौटाता है।
-- iOS ऐप paired gateway identity fetch करता है और उसे relay registration में शामिल करता है, इसलिए relay-backed registration उस विशिष्ट gateway को delegated होती है।
-- ऐप उस relay-backed registration को `push.apns.register` के साथ paired gateway को forward करता है।
-- gateway `push.test`, background wakes, और wake nudges के लिए उस stored relay handle का उपयोग करता है।
-- Custom gateway relay URLs को iOS build में baked relay URL से मेल खाना चाहिए।
-- यदि ऐप बाद में किसी अलग gateway या अलग relay base URL वाले build से कनेक्ट करता है, तो वह पुराने binding को reuse करने के बजाय relay registration refresh करता है।
+- iOS ऐप App Attest और StoreKit ऐप ट्रांज़ैक्शन JWS का उपयोग करके रिले के साथ पंजीकरण करता है।
+- रिले एक अपारदर्शी रिले हैंडल और पंजीकरण-स्कोप वाला भेजने का अनुदान लौटाता है।
+- iOS ऐप युग्मित Gateway पहचान (`gateway.identity.get`) प्राप्त करता है और उसे रिले पंजीकरण में शामिल करता है, ताकि रिले-समर्थित पंजीकरण उस विशिष्ट Gateway को प्रत्यायोजित हो।
+- ऐप उस रिले-समर्थित पंजीकरण को `push.apns.register` के साथ युग्मित Gateway को अग्रेषित करता है।
+- Gateway `push.test`, पृष्ठभूमि वेक और वेक संकेतों के लिए उस संग्रहीत रिले हैंडल का उपयोग करता है।
+- यदि ऐप बाद में किसी अलग Gateway या अलग रिले बेस URL वाले बिल्ड से कनेक्ट होता है, तो वह पुराने बाइंडिंग का पुनः उपयोग करने के बजाय रिले पंजीकरण को रीफ़्रेश करता है।
 
-इस पथ के लिए gateway को किन चीज़ों की **आवश्यकता नहीं** है:
+इस पथ के लिए Gateway को इनकी **आवश्यकता नहीं** है: कोई परिनियोजन-व्यापी रिले टोकन नहीं, आधिकारिक App Store रिले-समर्थित भेजने के लिए कोई प्रत्यक्ष APNs कुंजी नहीं।
 
-- कोई deployment-wide relay token नहीं।
-- आधिकारिक App Store relay-backed sends के लिए कोई direct APNs key नहीं।
+अपेक्षित ऑपरेटर प्रवाह:
 
-अपेक्षित operator flow:
+1. आधिकारिक iOS ऐप इंस्टॉल करें।
+2. वैकल्पिक: केवल जानबूझकर अलग कस्टम रिले बिल्ड का उपयोग करते समय Gateway पर `gateway.push.apns.relay.baseUrl` सेट करें।
+3. ऐप को Gateway के साथ युग्मित करें और उसे कनेक्शन पूरा करने दें।
+4. APNs टोकन मिलने, ऑपरेटर सत्र कनेक्ट होने और रिले पंजीकरण सफल होने के बाद ऐप `push.apns.register` प्रकाशित करता है।
+5. इसके बाद, `push.test`, पुनः कनेक्शन वेक और वेक संकेत संग्रहीत रिले-समर्थित पंजीकरण का उपयोग कर सकते हैं।
 
-1. आधिकारिक iOS ऐप install करें।
-2. वैकल्पिक: gateway पर `gateway.push.apns.relay.baseUrl` केवल तब सेट करें जब जानबूझकर अलग custom relay build का उपयोग कर रहे हों।
-3. ऐप को gateway से pair करें और उसे connecting पूरा करने दें।
-4. ऐप APNs token मिलने, operator session connected होने, और relay registration सफल होने के बाद अपने-आप `push.apns.register` publish करता है।
-5. इसके बाद, `push.test`, reconnect wakes, और wake nudges stored relay-backed registration का उपयोग कर सकते हैं।
+## पृष्ठभूमि सक्रियता बीकन
 
-## Background alive beacons
+जब iOS किसी मौन पुश, पृष्ठभूमि रीफ़्रेश या महत्वपूर्ण-स्थान घटना के लिए ऐप को जगाता है, तो ऐप संक्षिप्त Node पुनः कनेक्शन का प्रयास करता है और फिर `event: "node.presence.alive"` के साथ `node.event` को कॉल करता है। प्रमाणित Node डिवाइस पहचान ज्ञात होने के बाद ही Gateway इसे युग्मित Node/डिवाइस मेटाडेटा पर `lastSeenAtMs`/`lastSeenReason` के रूप में दर्ज करता है।
 
-जब iOS silent push, background refresh, या significant-location event के लिए ऐप को wake करता है, तो ऐप
-एक छोटा node reconnect प्रयास करता है और फिर `event: "node.presence.alive"` के साथ `node.event` call करता है।
-Gateway इसे paired node/device metadata पर `lastSeenAtMs`/`lastSeenReason` के रूप में केवल
-authenticated node device identity ज्ञात होने के बाद record करता है।
+ऐप पृष्ठभूमि वेक को सफलतापूर्वक दर्ज हुआ तभी मानता है, जब Gateway की प्रतिक्रिया में `handled: true` शामिल हो। पुराने Gateway `{ "ok": true }` के साथ `node.event` की अभिस्वीकृति दे सकते हैं; यह प्रतिक्रिया संगत है, लेकिन इसे स्थायी अंतिम-देखे-गए अपडेट के रूप में नहीं गिना जाता।
 
-ऐप background wake को सफलतापूर्वक recorded केवल तब मानता है जब gateway response में
-`handled: true` शामिल हो। पुराने gateways `{ "ok": true }` के साथ `node.event` acknowledge कर सकते हैं; वह response
-compatible है, लेकिन durable last-seen update के रूप में count नहीं होता।
+संगतता संबंधी टिप्पणी:
 
-Compatibility note:
+- `OPENCLAW_APNS_RELAY_BASE_URL` अभी भी Gateway के लिए अस्थायी env ओवरराइड के रूप में काम करता है (`gateway.push.apns.relay.baseUrl` कॉन्फ़िगरेशन-प्रथम पथ है)।
+- App Store रिलीज़ बिल्ड का पुश मोड होस्ट किए गए रिले होस्ट को हार्डकोड करता है और कभी भी रिले-URL ओवरराइड नहीं पढ़ता — बिल्ड-टाइम env var `OPENCLAW_PUSH_RELAY_BASE_URL` केवल स्थानीय/सैंडबॉक्स iOS बिल्ड मोड को प्रभावित करता है।
 
-- `OPENCLAW_APNS_RELAY_BASE_URL` अभी भी gateway के लिए temporary env override के रूप में काम करता है।
-- public App Store release lane iOS builds के लिए `OPENCLAW_PUSH_RELAY_BASE_URL` reject करता है।
+## प्रमाणीकरण और विश्वास प्रवाह
 
-## Authentication और trust flow
+रिले उन दो प्रतिबंधों को लागू करने के लिए मौजूद है, जिन्हें आधिकारिक iOS बिल्ड के लिए Gateway पर प्रत्यक्ष APNs उपलब्ध नहीं करा सकता:
 
-relay दो constraints enforce करने के लिए मौजूद है, जिन्हें direct APNs-on-gateway
-आधिकारिक iOS builds के लिए प्रदान नहीं कर सकता:
+- केवल Apple के माध्यम से वितरित वास्तविक OpenClaw iOS बिल्ड होस्ट किए गए रिले का उपयोग कर सकते हैं।
+- कोई Gateway केवल उन iOS डिवाइस के लिए रिले-समर्थित पुश भेज सकता है, जिन्हें उसी विशिष्ट Gateway के साथ युग्मित किया गया था।
 
-- केवल Apple के माध्यम से वितरित genuine OpenClaw iOS builds hosted relay का उपयोग कर सकते हैं।
-- gateway केवल उन iOS devices के लिए relay-backed pushes भेज सकता है जो उसी विशिष्ट
-  gateway के साथ paired हैं।
+हर चरण में:
 
-hop by hop:
+1. `iOS app -> gateway`: ऐप सामान्य Gateway प्रमाणीकरण प्रवाह के माध्यम से Gateway के साथ युग्मित होता है, जिससे उसे एक प्रमाणित Node सत्र और एक प्रमाणित ऑपरेटर सत्र मिलता है। ऑपरेटर सत्र `gateway.identity.get` को कॉल करता है।
+2. `iOS app -> relay`: ऐप App Attest प्रमाण और StoreKit ऐप ट्रांज़ैक्शन JWS के साथ HTTPS पर रिले पंजीकरण एंडपॉइंट को कॉल करता है। रिले बंडल ID, App Attest प्रमाण और Apple वितरण प्रमाण को सत्यापित करता है तथा आधिकारिक/प्रोडक्शन वितरण पथ की आवश्यकता रखता है — यही स्थानीय Xcode/डेवलपमेंट बिल्ड को होस्ट किए गए रिले का उपयोग करने से रोकता है, क्योंकि स्थानीय बिल्ड आधिकारिक Apple वितरण प्रमाण को पूरा नहीं कर सकता।
+3. `gateway identity delegation`: रिले पंजीकरण से पहले, ऐप `gateway.identity.get` से युग्मित Gateway पहचान प्राप्त करता है और उसे रिले पंजीकरण पेलोड में शामिल करता है। रिले उस Gateway पहचान को प्रत्यायोजित एक रिले हैंडल और पंजीकरण-स्कोप वाला भेजने का अनुदान लौटाता है।
+4. `gateway -> relay`: Gateway `push.apns.register` से रिले हैंडल और भेजने का अनुदान संग्रहीत करता है। `push.test`, पुनः कनेक्शन वेक और वेक संकेतों पर Gateway अपनी डिवाइस पहचान से भेजने के अनुरोध पर हस्ताक्षर करता है; रिले पंजीकरण से प्रत्यायोजित Gateway पहचान के विरुद्ध संग्रहीत भेजने के अनुदान और Gateway हस्ताक्षर, दोनों को सत्यापित करता है। कोई अन्य Gateway उस संग्रहीत पंजीकरण का पुनः उपयोग नहीं कर सकता, भले ही उसे किसी तरह हैंडल मिल जाए।
+5. `relay -> APNs`: आधिकारिक बिल्ड के प्रोडक्शन APNs क्रेडेंशियल और मूल APNs टोकन का स्वामित्व रिले के पास होता है। रिले-समर्थित आधिकारिक बिल्ड के लिए Gateway कभी भी मूल APNs टोकन संग्रहीत नहीं करता; रिले युग्मित Gateway की ओर से अंतिम पुश APNs को भेजता है।
 
-1. `iOS app -> gateway`
-   - ऐप पहले सामान्य Gateway auth flow के माध्यम से gateway के साथ pair करता है।
-   - इससे ऐप को authenticated node session और authenticated operator session मिलता है।
-   - operator session का उपयोग `gateway.identity.get` call करने के लिए किया जाता है।
+यह डिज़ाइन क्यों बनाया गया: प्रोडक्शन APNs क्रेडेंशियल को उपयोगकर्ता Gateway से बाहर रखने, Gateway पर आधिकारिक बिल्ड के मूल APNs टोकन संग्रहीत करने से बचने, केवल आधिकारिक OpenClaw iOS बिल्ड को होस्ट किए गए रिले के उपयोग की अनुमति देने और किसी Gateway को किसी दूसरे Gateway के स्वामित्व वाले iOS डिवाइस पर वेक पुश भेजने से रोकने के लिए।
 
-2. `iOS app -> relay`
-   - ऐप HTTPS पर relay registration endpoints call करता है।
-   - Registration में App Attest proof और StoreKit app transaction JWS शामिल होते हैं।
-   - relay bundle ID, App Attest proof, और Apple distribution proof validate करता है, और
-     official/production distribution path आवश्यक करता है।
-   - यही local Xcode/dev builds को hosted relay का उपयोग करने से रोकता है। local build
-     signed हो सकता है, लेकिन वह relay द्वारा अपेक्षित official Apple distribution proof satisfy नहीं करता।
-
-3. `gateway identity delegation`
-   - relay registration से पहले, ऐप paired gateway identity को
-     `gateway.identity.get` से fetch करता है।
-   - ऐप उस gateway identity को relay registration payload में शामिल करता है।
-   - relay एक relay handle और registration-scoped send grant लौटाता है, जो
-     उस gateway identity को delegated होते हैं।
-
-4. `gateway -> relay`
-   - gateway `push.apns.register` से relay handle और send grant store करता है।
-   - `push.test`, reconnect wakes, और wake nudges पर, gateway send request को अपनी
-     device identity से sign करता है।
-   - relay stored send grant और gateway signature, दोनों को registration से delegated
-     gateway identity के विरुद्ध verify करता है।
-   - कोई दूसरा gateway उस stored registration को reuse नहीं कर सकता, भले ही उसे handle किसी तरह मिल जाए।
-
-5. `relay -> APNs`
-   - relay production APNs credentials और official build के raw APNs token का owner होता है।
-   - gateway relay-backed official builds के लिए raw APNs token कभी store नहीं करता।
-   - relay paired gateway की ओर से APNs को final push भेजता है।
-
-यह design क्यों बनाया गया:
-
-- production APNs credentials को user gateways से बाहर रखने के लिए।
-- gateway पर raw official-build APNs tokens store करने से बचने के लिए।
-- hosted relay usage को केवल official OpenClaw iOS builds के लिए allow करने के लिए।
-- एक gateway को किसी अलग gateway के owned iOS devices पर wake pushes भेजने से रोकने के लिए।
-
-Local/manual builds direct APNs पर बने रहते हैं। यदि आप relay के बिना उन builds को test कर रहे हैं, तो
-gateway को अभी भी direct APNs credentials की आवश्यकता है:
+स्थानीय/मैन्युअल बिल्ड प्रत्यक्ष APNs पर बने रहते हैं। यदि रिले के बिना उन बिल्ड का परीक्षण किया जा रहा है, तो Gateway को अभी भी प्रत्यक्ष APNs क्रेडेंशियल चाहिए:
 
 ```bash
 export OPENCLAW_APNS_TEAM_ID="TEAMID"
@@ -214,11 +244,9 @@ export OPENCLAW_APNS_KEY_ID="KEYID"
 export OPENCLAW_APNS_PRIVATE_KEY_P8="$(cat /path/to/AuthKey_KEYID.p8)"
 ```
 
-ये gateway-host runtime env vars हैं, Fastlane settings नहीं। `apps/ios/fastlane/.env` केवल
-App Store Connect auth जैसे `APP_STORE_CONNECT_KEY_ID` और
-`APP_STORE_CONNECT_ISSUER_ID` store करता है; यह local iOS builds के लिए direct APNs delivery configure नहीं करता।
+ये Gateway होस्ट रनटाइम env var हैं, Fastlane सेटिंग नहीं। `apps/ios/fastlane/.env` केवल `APP_STORE_CONNECT_KEY_ID` और `APP_STORE_CONNECT_ISSUER_ID` जैसे App Store Connect प्रमाणीकरण को संग्रहीत करता है; यह स्थानीय iOS बिल्ड के लिए प्रत्यक्ष APNs डिलीवरी कॉन्फ़िगर नहीं करता।
 
-अनुशंसित gateway-host storage:
+`~/.openclaw/credentials/` के अंतर्गत अन्य प्रदाता क्रेडेंशियल के अनुरूप अनुशंसित Gateway होस्ट संग्रहण:
 
 ```bash
 mkdir -p ~/.openclaw/credentials/apns
@@ -228,53 +256,51 @@ chmod 600 ~/.openclaw/credentials/apns/AuthKey_KEYID.p8
 export OPENCLAW_APNS_PRIVATE_KEY_PATH="$HOME/.openclaw/credentials/apns/AuthKey_KEYID.p8"
 ```
 
-`.p8` file commit न करें या उसे repo checkout के अंदर न रखें।
+`.p8` फ़ाइल को कमिट न करें और न ही उसे रिपॉज़िटरी चेकआउट के अंतर्गत रखें।
 
-## Discovery paths
+## खोज पथ
 
 ### Bonjour (LAN)
 
-iOS ऐप `local.` पर `_openclaw-gw._tcp` browse करता है और, configure होने पर, वही
-wide-area DNS-SD discovery domain भी। Same-LAN gateways `local.` से अपने-आप दिखाई देते हैं;
-cross-network discovery beacon type बदले बिना configured wide-area domain का उपयोग कर सकती है।
+iOS ऐप `local.` पर `_openclaw-gw._tcp` ब्राउज़ करता है और कॉन्फ़िगर होने पर उसी विस्तृत-क्षेत्र DNS-SD खोज डोमेन को भी ब्राउज़ करता है। समान LAN वाले Gateway `local.` से स्वतः दिखाई देते हैं; क्रॉस-नेटवर्क खोज बीकन प्रकार बदले बिना कॉन्फ़िगर किए गए विस्तृत-क्षेत्र डोमेन का उपयोग कर सकती है।
 
-### Tailnet (cross-network)
+### Tailnet (क्रॉस-नेटवर्क)
 
-यदि mDNS blocked है, तो unicast DNS-SD zone (कोई domain चुनें; उदाहरण:
-`openclaw.internal.`) और Tailscale split DNS का उपयोग करें।
-CoreDNS example के लिए [Bonjour](/hi/gateway/bonjour) देखें।
+यदि mDNS अवरुद्ध है, तो यूनिकास्ट DNS-SD ज़ोन (कोई डोमेन चुनें; उदाहरण: `openclaw.internal.`) और Tailscale स्प्लिट DNS का उपयोग करें। CoreDNS उदाहरण के लिए [Bonjour](/hi/gateway/bonjour) देखें।
 
-### Manual host/port
+### मैन्युअल होस्ट/पोर्ट
 
-Settings में, **मैनुअल होस्ट** सक्षम करें और gateway host + port दर्ज करें (default `18789`)।
+Settings में **Manual Host** सक्षम करें और Gateway होस्ट + पोर्ट दर्ज करें (डिफ़ॉल्ट `18789`)।
+
+## एकाधिक Gateway
+
+ऐप अपने साथ युग्मित किए गए प्रत्येक Gateway की रजिस्ट्री रखता है, इसलिए आप दोबारा युग्मन किए बिना उनके बीच स्विच कर सकते हैं:
+
+- **Settings -> Gateway** सक्रिय Gateway को चिह्नित करते हुए **Paired Gateways** सूची दिखाता है। स्विच करने के लिए किसी प्रविष्टि पर टैप करें; ऐप वर्तमान सत्रों को समाप्त करता है और चयनित Gateway से पुनः कनेक्ट होता है। एक से अधिक Gateway युग्मित होने पर कनेक्शन पंक्ति के पास त्वरित-स्विच मेनू दिखाई देता है।
+- क्रेडेंशियल, TLS विश्वास निर्णय, प्रति-Gateway प्राथमिकताएँ और कैश किया गया चैट इतिहास प्रत्येक Gateway के लिए अलग-अलग संग्रहीत होते हैं। स्विच करने पर Gateway के बीच स्थिति कभी मिश्रित नहीं होती, और पुश पंजीकरण सक्रिय Gateway का अनुसरण करता है।
+- किसी युग्मित Gateway को स्वाइप करें (या उसके संदर्भ मेनू का उपयोग करें) और उसे **Forget** करें, जिससे उसके क्रेडेंशियल, डिवाइस टोकन, TLS पिन और कैश की गई चैट हट जाती हैं।
+- खोजे गए Gateway पर स्विच करने के लिए उनका नेटवर्क पर दिखाई देना आवश्यक है; मैन्युअल Gateway सहेजे गए होस्ट और पोर्ट द्वारा पुनः कनेक्ट होते हैं।
 
 ## Canvas + A2UI
 
-iOS node WKWebView canvas render करता है। इसे drive करने के लिए `node.invoke` का उपयोग करें:
+iOS Node एक WKWebView कैनवस रेंडर करता है। इसे संचालित करने के लिए `node.invoke` का उपयोग करें:
 
 ```bash
 openclaw nodes invoke --node "iOS Node" --command canvas.navigate --params '{"url":"http://<gateway-host>:18789/__openclaw__/canvas/"}'
 ```
 
-नोट्स:
+टिप्पणियाँ:
 
-- Gateway canvas host `/__openclaw__/canvas/` और `/__openclaw__/a2ui/` serve करता है।
-- यह Gateway HTTP server से serve किया जाता है (`gateway.port` के समान port, default `18789`)।
-- iOS node built-in scaffold को connected default view के रूप में रखता है। `canvas.a2ui.push` और `canvas.a2ui.reset` bundled app-owned A2UI page का उपयोग करते हैं।
-- Remote Gateway A2UI pages iOS पर render-only हैं; native A2UI button actions केवल bundled app-owned pages से accepted हैं।
-- `canvas.navigate` और `{"url":""}` के साथ built-in scaffold पर लौटें।
+- Gateway कैनवस होस्ट, Gateway HTTP सर्वर (वही पोर्ट जो `gateway.port` का है, डिफ़ॉल्ट `18789`) से `/__openclaw__/canvas/` और `/__openclaw__/a2ui/` प्रदान करता है।
+- iOS Node अंतर्निहित स्कैफ़ोल्ड को कनेक्टेड डिफ़ॉल्ट दृश्य के रूप में रखता है। `canvas.a2ui.push` और `canvas.a2ui.reset` बंडल किए गए ऐप-स्वामित्व वाले A2UI पृष्ठ का उपयोग करते हैं।
+- दूरस्थ Gateway A2UI पृष्ठ iOS पर केवल रेंडर किए जा सकते हैं; नेटिव A2UI बटन क्रियाएँ केवल बंडल किए गए ऐप-स्वामित्व वाले पृष्ठों से स्वीकार की जाती हैं।
+- `canvas.navigate` और `{"url":""}` के साथ अंतर्निहित स्कैफ़ोल्ड पर लौटें।
 
 ## Computer Use संबंध
 
-iOS ऐप एक mobile node surface है, Codex Computer Use backend नहीं। Codex
-Computer Use और `cua-driver mcp` MCP tools के माध्यम से local macOS desktop को control करते हैं;
-iOS ऐप OpenClaw node commands जैसे `canvas.*`, `camera.*`, `screen.*`, `location.*`, और `talk.*` के माध्यम से
-iPhone capabilities expose करता है।
+iOS ऐप एक मोबाइल Node सतह है, Codex Computer Use बैकएंड नहीं। Codex Computer Use और `cua-driver mcp` MCP टूल के माध्यम से स्थानीय macOS डेस्कटॉप को नियंत्रित करते हैं; iOS ऐप `canvas.*`, `camera.*`, `screen.*`, `location.*` और `talk.*` जैसे OpenClaw Node कमांड के माध्यम से iPhone क्षमताएँ उपलब्ध कराता है।
 
-Agents अब भी node commands invoke करके OpenClaw के माध्यम से iOS ऐप operate कर सकते हैं,
-लेकिन वे calls gateway node protocol से गुजरते हैं और iOS foreground/background limits का पालन करते हैं।
-local desktop control के लिए [Codex Computer Use](/hi/plugins/codex-computer-use)
-और iOS node capabilities के लिए इस page का उपयोग करें।
+एजेंट अभी भी Node कमांड लागू करके OpenClaw के माध्यम से iOS ऐप संचालित कर सकते हैं, लेकिन ये कॉल Gateway Node प्रोटोकॉल से होकर गुजरती हैं और iOS की अग्रभूमि/पृष्ठभूमि सीमाओं का पालन करती हैं। स्थानीय डेस्कटॉप नियंत्रण के लिए [Codex Computer Use](/hi/plugins/codex-computer-use) और iOS Node क्षमताओं के लिए इस पृष्ठ का उपयोग करें।
 
 ### Canvas eval / snapshot
 
@@ -286,24 +312,28 @@ openclaw nodes invoke --node "iOS Node" --command canvas.eval --params '{"javaSc
 openclaw nodes invoke --node "iOS Node" --command canvas.snapshot --params '{"maxWidth":900,"format":"jpeg"}'
 ```
 
-## Voice wake + talk mode
+## वॉइस वेक + टॉक मोड
 
-- वॉइस वेक और बातचीत मोड सेटिंग्स में उपलब्ध हैं।
-- OpenAI realtime बातचीत `talk.realtime.transport` के `webrtc` होने पर क्लाइंट-स्वामित्व वाले WebRTC का उपयोग करती है; स्पष्ट `gateway-relay` कॉन्फ़िगरेशन Gateway-स्वामित्व वाला बना रहता है। देखें [बातचीत मोड](/hi/nodes/talk)।
-- बातचीत-सक्षम iOS नोड `talk` क्षमता विज्ञापित करते हैं और
-  `talk.ptt.start`, `talk.ptt.stop`, `talk.ptt.cancel`, और `talk.ptt.once` घोषित कर सकते हैं;
-  Gateway भरोसेमंद बातचीत-सक्षम नोड के लिए उन push-to-talk कमांड को डिफ़ॉल्ट रूप से अनुमति देता है।
-- iOS बैकग्राउंड ऑडियो को निलंबित कर सकता है; ऐप सक्रिय न होने पर वॉइस सुविधाओं को सर्वोत्तम-प्रयास मानें।
+- वॉइस वेक और टॉक मोड Settings में उपलब्ध हैं।
+- जब `talk.realtime.transport`, `webrtc` हो, तब OpenAI रियलटाइम Talk क्लाइंट-स्वामित्व वाले WebRTC का उपयोग करता है; स्पष्ट `gateway-relay` कॉन्फ़िगरेशन का स्वामित्व Gateway के पास बना रहता है। [Talk मोड](/hi/nodes/talk) देखें।
+- Talk-सक्षम iOS Node `talk` क्षमता की घोषणा करते हैं और `talk.ptt.start`, `talk.ptt.stop`, `talk.ptt.cancel` और `talk.ptt.once` घोषित कर सकते हैं; Gateway विश्वसनीय Talk-सक्षम Node के लिए उन पुश-टू-टॉक कमांड की डिफ़ॉल्ट रूप से अनुमति देता है।
+- iOS पृष्ठभूमि ऑडियो को निलंबित कर सकता है; ऐप सक्रिय न होने पर वॉइस सुविधाओं को सर्वोत्तम-प्रयास के रूप में मानें।
 
-## सामान्य त्रुटियां
+## सामान्य त्रुटियाँ
 
-- `NODE_BACKGROUND_UNAVAILABLE`: iOS ऐप को अग्रभूमि में लाएं (कैनवास/कैमरा/स्क्रीन कमांड के लिए यह आवश्यक है)।
-- `A2UI_HOST_UNAVAILABLE`: बंडल किया गया A2UI पेज ऐप WebView में उपलब्ध नहीं था; ऐप को स्क्रीन टैब पर अग्रभूमि में रखें और फिर से प्रयास करें।
-- पेयरिंग प्रॉम्प्ट कभी दिखाई नहीं देता: `openclaw devices list` चलाएं और मैन्युअल रूप से स्वीकृत करें।
-- फिर से इंस्टॉल करने के बाद रीकनेक्ट विफल होता है: Keychain पेयरिंग टोकन साफ़ कर दिया गया था; नोड को फिर से पेयर करें।
+- `NODE_BACKGROUND_UNAVAILABLE`: iOS ऐप को अग्रभूमि में लाएँ (कैनवस/कैमरा/स्क्रीन कमांड के लिए यह आवश्यक है)।
+- `A2UI_HOST_UNAVAILABLE`: बंडल किया गया A2UI पृष्ठ ऐप WebView में उपलब्ध नहीं था; ऐप को Screen टैब पर अग्रभूमि में रखें और पुनः प्रयास करें।
+- युग्मन संकेत कभी दिखाई नहीं देता: `openclaw devices list` चलाएँ और मैन्युअल रूप से स्वीकृति दें।
+- Watch कोई iPhone स्थिति नहीं दिखाती: पुष्टि करें कि iPhone `watch.status` में `watchPaired: true`
+  और `watchAppInstalled: true` रिपोर्ट करता है। यदि युग्मन false है, तो Apple के Watch ऐप में
+  Watch को युग्मित करें। यदि इंस्टॉलेशन false है, तो सहयोगी ऐप को
+  **My Watch -> Available Apps** से इंस्टॉल करें। इनमें से किसी भी बदलाव के बाद, Watch पर OpenClaw
+  एक बार खोलें; तत्काल पहुँच के लिए अभी भी दोनों ऐप का चलना आवश्यक है,
+  जबकि कतारबद्ध अपडेट बाद में पृष्ठभूमि में पहुँच सकते हैं।
+- पुनः इंस्टॉल करने के बाद पुनः कनेक्शन विफल होता है: Keychain युग्मन टोकन साफ़ हो गया था; Node को फिर से युग्मित करें।
 
 ## संबंधित दस्तावेज़
 
-- [पेयरिंग](/hi/channels/pairing)
-- [डिस्कवरी](/hi/gateway/discovery)
+- [युग्मन](/hi/channels/pairing)
+- [खोज](/hi/gateway/discovery)
 - [Bonjour](/hi/gateway/bonjour)

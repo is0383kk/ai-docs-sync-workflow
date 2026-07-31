@@ -4,27 +4,28 @@ read_when:
 summary: Fügt Unterstützung für den Moonshot-Modell-Provider zu OpenClaw hinzu.
 title: Moonshot-Plugin
 x-i18n:
-    generated_at: "2026-07-12T01:57:38Z"
+    generated_at: "2026-07-26T18:38:26Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 477307769a710ac8d430a837d7b5ffda012a942f3b44f367bf4ea0770b87f48e
+    source_hash: 0e39089229bca657afa3e2c4285856701b05b73cd0d1b90e1ea3611d60bd3d13
     source_path: plugins/reference/moonshot.md
     workflow: 16
 ---
 
 # Moonshot-Plugin
 
-Fügt OpenClaw Unterstützung für den Moonshot-Modell-Provider hinzu.
+Fügt Unterstützung für den Moonshot-Modell-Provider zu OpenClaw hinzu.
 
 ## Distribution
 
 - Paket: `@openclaw/moonshot-provider`
 - Installationsweg: npm; ClawHub: `clawhub:@openclaw/moonshot-provider`
 
-## Schnittstelle
+## Oberfläche
 
-Provider: moonshot; Verträge: mediaUnderstandingProviders, webSearchProviders
+Provider: `moonshot`; Verträge: `mediaUnderstandingProviders`, `webSearchProviders`
 
 ## Zugehörige Dokumentation
 

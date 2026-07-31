@@ -2,26 +2,27 @@
 read_when:
     - Je hebt een referentiepagina nodig voor een specifieke OpenClaw-Plugin
     - Je controleert de dekking van de plugindocumentatie
-summary: Gegenereerde index van OpenClaw-referentiepagina's voor plugins
+summary: Gegenereerde index van OpenClaw Plugin-referentiepagina's
 title: Pluginreferentie
 x-i18n:
-    generated_at: "2026-07-12T09:11:16Z"
+    generated_at: "2026-07-27T06:02:27Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 03099acfb0bcbe9814fa53f5d2d893a08a39f42bf713ff140e9604783f9cef0e
+    source_hash: 2f8dfd157054a2af95c5e0a9406c471c9565e80d30e1472b6de6cb71cb6069fd
     source_path: plugins/reference.md
     workflow: 16
 ---
 
 # Pluginreferentie
 
-Deze pagina wordt gegenereerd op basis van `extensions/*/package.json` en
-`openclaw.plugin.json`. Genereer deze opnieuw met:
+Deze pagina is gegenereerd op basis van `extensions/*/package.json` en
+`openclaw.plugin.json`. Genereer de pagina opnieuw met:
 
 ```bash
 pnpm plugins:inventory:gen
 ```
 
-Gebruik de [Plugininventaris](/nl/plugins/plugin-inventory) om door alle 136
+Gebruik [Plugininventaris](/nl/plugins/plugin-inventory) om door alle 143
 gegenereerde Pluginreferentiepagina's te bladeren op distributie, pakket en beschrijving.

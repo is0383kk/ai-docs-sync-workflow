@@ -1,43 +1,43 @@
 ---
 read_when:
-    - आप ऐसा वेब खोज प्रदाता चाहते हैं जिसे किसी API कुंजी की आवश्यकता न हो
+    - आप ऐसा वेब खोज प्रदाता चाहते हैं जिसके लिए API कुंजी की आवश्यकता न हो
     - आप web_search के लिए DuckDuckGo का उपयोग करना चाहते हैं
-    - आप स्पष्ट रूप से चुना गया बिना-की वाला खोज प्रदाता चाहते हैं
-summary: DuckDuckGo वेब खोज -- कुंजी-मुक्त प्रदाता (प्रायोगिक, HTML-आधारित)
+    - आप स्पष्ट रूप से चुना गया कुंजी-मुक्त खोज प्रदाता चाहते हैं
+summary: DuckDuckGo वेब खोज -- बिना कुंजी वाला प्रदाता (प्रयोगात्मक, HTML-आधारित)
 title: DuckDuckGo खोज
 x-i18n:
-    generated_at: "2026-06-29T00:17:57Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:47:16Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c042a3cd4fa6f37cb42b88930b5fe0122a561a810e275f26d9c1eb56502495a7
+    source_hash: 84e90532de276dcb3f73c67015dffe5f5a62be673e44a19053b2b1dfcb0986ac
     source_path: tools/duckduckgo-search.md
     workflow: 16
 ---
 
-OpenClaw DuckDuckGo को **कुंजी-मुक्त** `web_search` प्रदाता के रूप में समर्थन करता है। किसी API
-कुंजी या खाते की आवश्यकता नहीं है।
+OpenClaw, DuckDuckGo को **कुंजी-मुक्त** `web_search` प्रदाता के रूप में समर्थित करता है। किसी API कुंजी या खाते की आवश्यकता नहीं है।
 
 <Warning>
-  DuckDuckGo एक **प्रयोगात्मक, अनौपचारिक** इंटीग्रेशन है जो परिणामों को
-  DuckDuckGo के गैर-JavaScript खोज पेजों से खींचता है - किसी आधिकारिक API से नहीं। बॉट-चैलेंज पेजों या HTML बदलावों से
-  कभी-कभी टूट-फूट की अपेक्षा करें।
+  DuckDuckGo एक **प्रायोगिक, अनौपचारिक** एकीकरण है, जो DuckDuckGo के गैर-JavaScript HTML खोज पृष्ठों को स्क्रैप करता है -- यह कोई आधिकारिक API नहीं है। बॉट-चुनौती पृष्ठों या HTML परिवर्तनों के कारण कभी-कभी इसके काम न करने की अपेक्षा रखें।
 </Warning>
 
 ## सेटअप
 
-किसी API कुंजी की आवश्यकता नहीं - बस DuckDuckGo को अपने प्रदाता के रूप में सेट करें:
+DuckDuckGo कभी भी स्वतः चयनित नहीं होता, क्योंकि स्वतः-पहचान केवल उपयोग योग्य क्रेडेंशियल वाले प्रदाताओं पर विचार करती है। इसे स्पष्ट रूप से सेट करें:
 
 <Steps>
   <Step title="कॉन्फ़िगर करें">
     ```bash
     openclaw configure --section web
-    # Select "duckduckgo" as the provider
+    # प्रदाता के रूप में "duckduckgo" चुनें
     ```
   </Step>
 </Steps>
 
-## कॉन्फ़िग
+## कॉन्फ़िगरेशन
+
+कॉन्फ़िगरेशन में प्रदाता को सीधे सेट करें:
 
 ```json5
 {
@@ -60,8 +60,8 @@ OpenClaw DuckDuckGo को **कुंजी-मुक्त** `web_search` प�
       duckduckgo: {
         config: {
           webSearch: {
-            region: "us-en", // DuckDuckGo region code
-            safeSearch: "moderate", // "strict", "moderate", or "off"
+            region: "us-en", // DuckDuckGo क्षेत्र कोड
+            safeSearch: "moderate", // "strict", "moderate", या "off"
           },
         },
       },
@@ -77,39 +77,33 @@ OpenClaw DuckDuckGo को **कुंजी-मुक्त** `web_search` प�
 </ParamField>
 
 <ParamField path="count" type="number" default="5">
-वापस किए जाने वाले परिणाम (1-10)।
+लौटाए जाने वाले परिणाम (1-10)।
 </ParamField>
 
 <ParamField path="region" type="string">
-DuckDuckGo क्षेत्र कोड (जैसे `us-en`, `uk-en`, `de-de`)।
+DuckDuckGo क्षेत्र कोड (उदा. `us-en`, `uk-en`, `de-de`)।
 </ParamField>
 
 <ParamField path="safeSearch" type="'strict' | 'moderate' | 'off'" default="moderate">
 SafeSearch स्तर।
 </ParamField>
 
-क्षेत्र और SafeSearch को Plugin कॉन्फ़िग में भी सेट किया जा सकता है (ऊपर देखें) - टूल
-पैरामीटर प्रति-क्वेरी कॉन्फ़िग मानों को ओवरराइड करते हैं।
+`region` और `safeSearch` टूल पैरामीटर प्रत्येक क्वेरी के आधार पर ऊपर दिए गए Plugin कॉन्फ़िगरेशन मानों को ओवरराइड करते हैं।
 
-## नोट्स
+## टिप्पणियाँ
 
-- **कोई API कुंजी नहीं** - DuckDuckGo को अपने `web_search`
-  प्रदाता के रूप में चुनने के बाद काम करता है
-- **प्रयोगात्मक** - परिणाम DuckDuckGo के गैर-JavaScript HTML
-  खोज पेजों से इकट्ठा करता है, किसी आधिकारिक API या SDK से नहीं
-- **बॉट-चैलेंज जोखिम** - भारी या स्वचालित उपयोग के तहत DuckDuckGo CAPTCHA दिखा सकता है या अनुरोधों को ब्लॉक कर सकता है
-- **HTML पार्सिंग** - परिणाम पेज संरचना पर निर्भर करते हैं, जो बिना
-  सूचना के बदल सकती है
-- **स्पष्ट चयन** - जब कोई API-समर्थित प्रदाता कॉन्फ़िग नहीं होता, OpenClaw DuckDuckGo को स्वचालित रूप से नहीं चुनता
-- **कॉन्फ़िग न होने पर SafeSearch डिफ़ॉल्ट रूप से moderate होता है**
+- **कोई API कुंजी नहीं** -- DuckDuckGo को `web_search` प्रदाता के रूप में चुनते ही काम करता है।
+- **प्रायोगिक** -- DuckDuckGo के गैर-JavaScript HTML खोज पृष्ठों को स्क्रैप करता है, यह कोई आधिकारिक API या SDK नहीं है। परिणाम पृष्ठ की संरचना पर निर्भर करते हैं, जो बिना सूचना के बदल सकती है।
+- **बॉट-चुनौती का जोखिम** -- भारी या स्वचालित उपयोग के दौरान DuckDuckGo CAPTCHA दिखा सकता है या अनुरोधों को अवरुद्ध कर सकता है।
+- **केवल स्पष्ट चयन** -- OpenClaw की स्वतः-पहचान केवल उपयोग योग्य क्रेडेंशियल वाले प्रदाताओं पर विचार करती है, इसलिए DuckDuckGo जैसा कुंजी-मुक्त प्रदाता कभी भी स्वचालित रूप से नहीं चुना जाता; आपको `provider: "duckduckgo"` सेट करना होगा।
+- कॉन्फ़िगर न किए जाने पर **SafeSearch का डिफ़ॉल्ट मान `moderate` होता है**।
 
 <Tip>
-  प्रोडक्शन उपयोग के लिए, [Brave Search](/hi/tools/brave-search) (नि:शुल्क स्तर
-  उपलब्ध) या किसी अन्य API-समर्थित प्रदाता पर विचार करें।
+  उत्पादन में उपयोग के लिए, [Brave Search](/hi/tools/brave-search) (निःशुल्क स्तर उपलब्ध है) या किसी अन्य API-समर्थित प्रदाता पर विचार करें।
 </Tip>
 
 ## संबंधित
 
-- [Web Search अवलोकन](/hi/tools/web) -- सभी प्रदाता और स्वतः-पहचान
-- [Brave Search](/hi/tools/brave-search) -- नि:शुल्क स्तर के साथ संरचित परिणाम
+- [वेब खोज का अवलोकन](/hi/tools/web) -- सभी प्रदाता और स्वतः-पहचान
+- [Brave Search](/hi/tools/brave-search) -- निःशुल्क स्तर के साथ संरचित परिणाम
 - [Exa Search](/hi/tools/exa-search) -- सामग्री निष्कर्षण के साथ न्यूरल खोज

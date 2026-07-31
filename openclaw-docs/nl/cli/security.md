@@ -1,71 +1,97 @@
 ---
 read_when:
     - Je wilt een snelle beveiligingsaudit uitvoeren op configuratie/status
-    - Je wilt veilige suggesties voor "fixes" toepassen (machtigingen, standaardinstellingen aanscherpen)
-summary: CLI-referentie voor `openclaw security` (veelvoorkomende beveiligingsvalkuilen auditen en oplossen)
+    - Je wilt veilige suggesties voor oplossingen toepassen (machtigingen, standaardinstellingen aanscherpen)
+summary: CLI-referentie voor `openclaw security` (veelvoorkomende beveiligingsvalkuilen controleren en oplossen)
 title: Beveiliging
 x-i18n:
-    generated_at: "2026-06-27T17:22:52Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T04:55:30Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 58876d7ab4dd3e5d3f5c915700b08ca234e5ccefdfc35a79e60a31e1fce21774
+    source_hash: 6b5f9ea5cb746bfd29ff4d096062e81595abe99a883fc3b1113b45a3527d42d9
     source_path: cli/security.md
     workflow: 16
 ---
 
 # `openclaw security`
 
-Beveiligingstools (audit + optionele fixes).
-
-Gerelateerd:
-
-- Beveiligingsgids: [Beveiliging](/nl/gateway/security)
-
-## Audit
+Beveiligingstools: audit plus optionele veilige oplossingen. Gerelateerd: [Beveiliging](/nl/gateway/security).
 
 ```bash
 openclaw security audit
 openclaw security audit --deep
 openclaw security audit --deep --password <password>
 openclaw security audit --deep --token <token>
+openclaw security audit --auth password --password <password>
 openclaw security audit --fix
 openclaw security audit --json
 ```
 
-Gewone `security audit` blijft op het koude config-/bestandssysteem-/alleen-lezen pad. Standaard worden er geen Plugin-runtimebeveiligingscollectors ontdekt, zodat routine-audits niet elke geinstalleerde Plugin-runtime laden. Gebruik `--deep` om best-effort live Gateway-probes en Plugin-eigen beveiligingsauditcollectors mee te nemen; expliciete interne aanroepers kunnen zich ook aanmelden voor die Plugin-eigen collectors wanneer ze al een geschikte runtime-scope hebben.
+## Auditmodi
 
-De audit waarschuwt wanneer meerdere DM-afzenders de hoofdsessie delen en raadt **beveiligde DM-modus** aan: `session.dmScope="per-channel-peer"` (of `per-account-channel-peer` voor kanalen met meerdere accounts) voor gedeelde inboxen.
-Dit is bedoeld voor hardening van cooperatieve/gedeelde inboxen. Een enkele Gateway die wordt gedeeld door operators die elkaar niet vertrouwen of vijandig zijn, is geen aanbevolen configuratie; splits vertrouwensgrenzen met afzonderlijke gateways (of afzonderlijke OS-gebruikers/hosts).
-De audit geeft ook `security.trust_model.multi_user_heuristic` wanneer de configuratie wijst op waarschijnlijk gedeelde-gebruiker-ingress (bijvoorbeeld open DM-/groepsbeleid, geconfigureerde groepsdoelen of wildcardregels voor afzenders), en herinnert je eraan dat OpenClaw standaard een vertrouwensmodel voor persoonlijke assistenten is.
-Voor opzettelijke configuraties met gedeelde gebruikers is het auditadvies om alle sessies te sandboxen, bestandssysteemtoegang tot de workspace te beperken en persoonlijke/prive-identiteiten of referenties buiten die runtime te houden.
-De audit waarschuwt ook wanneer kleine modellen (`<=300B`) zonder sandboxing worden gebruikt terwijl web-/browsertools zijn ingeschakeld.
-Voor Webhook-ingress logt startup een niet-fatale beveiligingswaarschuwing en markeert de audit hergebruik van `hooks.token` van actieve gedeelde-geheim-authenticatiewaarden van de Gateway, inclusief `gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN` en `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD`. De audit waarschuwt ook wanneer:
+Gewone `security audit` blijft op het koude pad voor configuratie/bestandssysteem/alleen-lezen: hiermee worden geen beveiligingscollectors van de Plugin-runtime gedetecteerd, zodat routinematige audits niet elke geïnstalleerde Plugin-runtime laden. `--deep` voegt naar beste vermogen live Gateway-controles en beveiligingsauditcollectors van Plugins toe (expliciete interne aanroepers kunnen die collectors ook gebruiken wanneer ze al een geschikt runtimebereik hebben).
+
+Als Gateway-wachtwoordauthenticatie alleen bij het opstarten wordt opgegeven, geef je dezelfde waarde door met `--auth password --password <password>`, zodat de audit deze kan vergelijken met `hooks.token`.
+
+## Wat wordt gecontroleerd
+
+**DM-/vertrouwensmodel**
+
+- Waarschuwt wanneer meerdere DM-afzenders de hoofdsessie delen en beveelt een veilige DM-modus aan: `session.dmScope="per-channel-peer"` (of `per-account-channel-peer` voor kanalen met meerdere accounts) voor gedeelde postvakken. Dit is beveiliging voor samenwerking/gedeelde postvakken, geen isolatie voor operators die elkaar niet vertrouwen; scheid vertrouwensgrenzen met afzonderlijke gateways (of afzonderlijke OS-gebruikers/hosts).
+- Genereert `security.trust_model.multi_user_heuristic` wanneer de configuratie wijst op waarschijnlijke toegang door meerdere gebruikers (bijvoorbeeld een open DM-/groepsbeleid, geconfigureerde groepsdoelen of wildcardregels voor afzenders) — het standaardvertrouwensmodel van OpenClaw is een persoonlijke assistent (één operator), geen vijandige isolatie tussen meerdere tenants. Voor opzettelijke configuraties met meerdere gebruikers: voer alle sessies uit in een sandbox, beperk bestandssysteemtoegang tot de werkruimte en houd persoonlijke/privé-identiteiten of referenties buiten die runtime.
+- Waarschuwt wanneer kleine modellen (`<=300B` parameters) zonder sandboxing en met ingeschakelde web-/browsertools worden gebruikt.
+
+**Webhook/hooks**
+
+Bij het opstarten wordt een niet-fatale beveiligingswaarschuwing gelogd en de audit markeert `hooks.token` hergebruik van actieve waarden voor Gateway-authenticatie met een gedeeld geheim (`gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN`, `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD`). Waarschuwt ook wanneer:
 
 - `hooks.token` kort is
 - `hooks.path="/"`
 - `hooks.defaultSessionKey` niet is ingesteld
 - `hooks.allowedAgentIds` onbeperkt is
-- request-overschrijvingen van `sessionKey` zijn ingeschakeld
+- overschrijvingen van `sessionKey` voor aanvragen zijn ingeschakeld
 - overschrijvingen zijn ingeschakeld zonder `hooks.allowedSessionKeyPrefixes`
 
-Als Gateway-wachtwoordauthenticatie alleen bij startup wordt opgegeven, geef dan dezelfde waarde door aan `openclaw security audit --auth password --password <password>` zodat de audit deze kan controleren tegen `hooks.token`.
-Voer `openclaw doctor --fix` uit om een persistent hergebruikt `hooks.token` te roteren, en werk daarna externe hook-afzenders bij zodat ze het nieuwe hook-token gebruiken.
+Voer `openclaw doctor --fix` uit om een permanent opgeslagen, hergebruikte `hooks.token` te roteren en werk vervolgens externe hook-afzenders bij om het nieuwe token te gebruiken.
 
-De audit waarschuwt ook wanneer sandbox-Docker-instellingen zijn geconfigureerd terwijl sandboxmodus uit staat, wanneer `gateway.nodes.denyCommands` ineffectieve patroonachtige/onbekende items gebruikt (alleen exacte matching op node-opdrachtnaam, geen shell-tekstfiltering), wanneer `gateway.nodes.allowCommands` expliciet gevaarlijke node-opdrachten inschakelt, wanneer globaal `tools.profile="minimal"` wordt overschreven door agent-toolprofielen, wanneer schrijf-/bewerkingstools zijn uitgeschakeld maar `exec` nog steeds beschikbaar is zonder beperkende sandbox-bestandssysteemgrens, wanneer open DM's of groepen runtime-/bestandssysteemtools blootstellen zonder sandbox-/workspace-bescherming, en wanneer geinstalleerde Plugin-tools bereikbaar kunnen zijn onder permissief toolbeleid.
-De audit markeert ook `gateway.allowRealIpFallback=true` (risico op header-spoofing als proxy's verkeerd zijn geconfigureerd) en `discovery.mdns.mode="full"` (metadatalek via mDNS TXT-records).
-De audit waarschuwt ook wanneer de sandboxbrowser het Docker-`bridge`-netwerk gebruikt zonder `sandbox.browser.cdpSourceRange`.
-De audit markeert ook gevaarlijke sandbox-Docker-netwerkmodi (inclusief `host` en `container:*` namespace-joins).
-De audit waarschuwt ook wanneer bestaande sandboxbrowser-Docker-containers ontbrekende/verouderde hashlabels hebben (bijvoorbeeld pre-migratiecontainers zonder `openclaw.browserConfigEpoch`) en raadt `openclaw sandbox recreate --browser --all` aan.
-De audit waarschuwt ook wanneer npm-gebaseerde Plugin-/hook-installatierecords niet gepind zijn, integriteitsmetadata missen of afwijken van de momenteel geinstalleerde pakketversies.
-De audit waarschuwt wanneer kanaal-allowlists vertrouwen op veranderlijke namen/e-mails/tags in plaats van stabiele ID's (Discord, Slack, Google Chat, Microsoft Teams, Mattermost, IRC-scopes waar van toepassing).
-De audit waarschuwt wanneer `gateway.auth.mode="none"` Gateway-HTTP-API's bereikbaar laat zonder gedeeld geheim (`/tools/invoke` plus elk ingeschakeld `/v1/*`-endpoint).
-Instellingen met het prefix `dangerous`/`dangerously` zijn expliciete nood-operatoroverschrijvingen; het inschakelen ervan is op zichzelf geen beveiligingskwetsbaarheidsrapport.
-Zie voor de volledige inventaris van gevaarlijke parameters de sectie "Samenvatting van onveilige of gevaarlijke vlaggen" in [Beveiliging](/nl/gateway/security).
+**Sandbox/tools**
 
-Opzettelijke blijvende bevindingen kunnen worden geaccepteerd met `security.audit.suppressions`.
-Elke suppressie matcht een exacte `checkId` en kan worden vernauwd met
-`titleIncludes` en/of `detailIncludes` hoofdletterongevoelige substrings:
+- Waarschuwt wanneer Docker-instellingen voor de sandbox zijn geconfigureerd terwijl de sandboxmodus is uitgeschakeld.
+- Waarschuwt wanneer `gateway.nodes.commands.deny` ineffectieve patroonachtige/onbekende vermeldingen gebruikt (overeenkomsten gelden uitsluitend voor de exacte naam van een Node-opdracht, niet voor het filteren van shelltekst).
+- Waarschuwt wanneer `gateway.nodes.commands.allow` expliciet gevaarlijke Node-opdrachten inschakelt.
+- Waarschuwt wanneer de algemene `tools.profile="minimal"` wordt overschreven door toolprofielen van agents.
+- Waarschuwt wanneer schrijf-/bewerkingstools zijn uitgeschakeld, maar `exec` nog steeds beschikbaar is zonder een beperkende bestandssysteemgrens van de sandbox.
+- Waarschuwt wanneer open DM's of groepen runtime-/bestandssysteemtools beschikbaar stellen zonder beveiliging door een sandbox/werkruimte.
+- Waarschuwt wanneer tools van geïnstalleerde Plugins mogelijk toegankelijk zijn onder een permissief toolbeleid.
+
+**Sandboxbrowser**
+
+- Waarschuwt wanneer de sandboxbrowser het Docker-netwerk `bridge` gebruikt zonder `sandbox.browser.cdpSourceRange`.
+- Markeert gevaarlijke netwerkmodi voor Docker-sandboxes, waaronder deelname aan naamruimten met `host` en `container:*`.
+- Waarschuwt wanneer bestaande Docker-containers van de sandboxbrowser ontbrekende/verouderde hashlabels hebben (bijvoorbeeld containers van vóór de migratie zonder `openclaw.browserConfigEpoch`) en beveelt `openclaw sandbox recreate --browser --all` aan.
+
+**Netwerk/detectie**
+
+- Markeert `gateway.allowRealIpFallback=true` (risico op headervervalsing als proxy's verkeerd zijn geconfigureerd).
+- Markeert `discovery.mdns.mode="full"` (lekken van metadata via mDNS TXT-records).
+- Waarschuwt wanneer `gateway.auth.mode="none"` Gateway-HTTP-API's bereikbaar laat zonder gedeeld geheim (`/tools/invoke` plus elk ingeschakeld `/v1/*`-eindpunt).
+
+**Plugins/kanalen**
+
+- Waarschuwt wanneer op npm gebaseerde installatiegegevens van Plugins/hooks niet aan een versie zijn vastgezet, integriteitsmetadata missen of afwijken van de momenteel geïnstalleerde pakketversies.
+- Waarschuwt wanneer allowlists van kanalen afhankelijk zijn van veranderlijke namen/e-mailadressen/tags in plaats van stabiele ID's (Discord, Slack, Google Chat, Microsoft Teams, Mattermost en IRC-bereiken waar van toepassing).
+
+Instellingen met het voorvoegsel `dangerous`/`dangerously` zijn expliciete noodoverschrijvingen voor operators; het inschakelen ervan is op zichzelf geen melding van een beveiligingskwetsbaarheid. Zie voor de volledige inventaris van gevaarlijke parameters 'Overzicht van onveilige of gevaarlijke vlaggen' in [Beveiliging](/nl/gateway/security).
+
+## SecretRef-gedrag
+
+`security audit` verwerkt ondersteunde SecretRefs in alleen-lezenmodus voor de betreffende paden. Als een SecretRef niet beschikbaar is in het huidige opdrachtpad, gaat de audit door en meldt deze `secretDiagnostics` in plaats van te crashen. `--token` en `--password` overschrijven alleen de authenticatie voor diepgaande controles voor die specifieke opdrachtaanroep; ze herschrijven geen configuratie of SecretRef-toewijzingen.
+
+## Onderdrukkingen
+
+Accepteer opzettelijke, permanente bevindingen met `security.audit.suppressions`. Elke onderdrukking komt overeen met een exacte `checkId` en kan worden beperkt met hoofdletterongevoelige substrings voor `titleIncludes` en/of `detailIncludes`:
 
 ```json
 {
@@ -83,33 +109,18 @@ Elke suppressie matcht een exacte `checkId` en kan worden vernauwd met
 }
 ```
 
-Onderdrukte bevindingen worden verwijderd uit de actieve lijst `summary` en `findings`.
-JSON-uitvoer bewaart ze onder `suppressedFindings` voor auditbaarheid.
-Wanneer suppressies zijn geconfigureerd, behoudt actieve uitvoer ook een niet-onderdrukbare
-`security.audit.suppressions.active` info-bevinding zodat lezers kunnen zien dat de audit
-is gefilterd. Gevaarlijke configuratievlaggen worden als een vlag per bevinding uitgegeven, zodat
-het accepteren van een gevaarlijke vlag geen andere ingeschakelde vlaggen verbergt die dezelfde
-`config.insecure_or_dangerous_flags` `checkId` delen.
-Omdat suppressies blijvend risico kunnen verbergen, vereist het toevoegen of verwijderen ervan via
-agent-run shell-opdrachten exec-goedkeuring, tenzij exec al draait
-met `security="full"` en `ask="off"` voor vertrouwde lokale automatisering.
+Onderdrukte bevindingen worden verwijderd uit de actieve lijsten `summary` en `findings`. JSON-uitvoer bewaart ze onder `suppressedFindings` voor controleerbaarheid. Wanneer onderdrukkingen zijn geconfigureerd, bevat de actieve uitvoer ook een niet-onderdrukbare informatieve bevinding `security.audit.suppressions.active`, zodat lezers kunnen zien dat de audit is gefilterd. Gevaarlijke configuratievlaggen worden als één bevinding per vlag gegenereerd, zodat het accepteren van één gevaarlijke vlag geen andere ingeschakelde vlaggen verbergt die dezelfde `config.insecure_or_dangerous_flags`-checkId delen.
 
-SecretRef-gedrag:
-
-- `security audit` lost ondersteunde SecretRefs in alleen-lezen modus op voor de beoogde paden.
-- Als een SecretRef niet beschikbaar is in het huidige opdrachtpad, gaat de audit door en rapporteert `secretDiagnostics` (in plaats van te crashen).
-- `--token` en `--password` overschrijven alleen deep-probe-authenticatie voor die opdrachtaanroep; ze herschrijven geen configuratie of SecretRef-mappings.
+Omdat onderdrukkingen permanente risico's kunnen verbergen, is voor het toevoegen of verwijderen ervan via door een agent uitgevoerde shellopdrachten uitvoeringsgoedkeuring vereist, tenzij de uitvoering al plaatsvindt met `security="full"` en `ask="off"` voor vertrouwde lokale automatisering.
 
 ## JSON-uitvoer
-
-Gebruik `--json` voor CI-/beleidscontroles:
 
 ```bash
 openclaw security audit --json | jq '.summary'
 openclaw security audit --deep --json | jq '.findings[] | select(.severity=="critical") | .checkId'
 ```
 
-Als `--fix` en `--json` worden gecombineerd, bevat de uitvoer zowel fix-acties als het eindrapport:
+Met `--fix --json` bevat de uitvoer zowel herstelacties als het eindrapport:
 
 ```bash
 openclaw security audit --fix --json | jq '{fix: .fix.ok, summary: .report.summary}'
@@ -117,24 +128,20 @@ openclaw security audit --fix --json | jq '{fix: .fix.ok, summary: .report.summa
 
 ## Wat `--fix` wijzigt
 
-`--fix` past veilige, deterministische remediaties toe:
+Past veilige, deterministische herstelmaatregelen toe:
 
-- zet gangbare `groupPolicy="open"` om naar `groupPolicy="allowlist"` (inclusief accountvarianten in ondersteunde kanalen)
-- wanneer WhatsApp-groepsbeleid naar `allowlist` wordt omgezet, vult het `groupAllowFrom` vanuit
-  het opgeslagen `allowFrom`-bestand wanneer die lijst bestaat en de configuratie nog geen
-  `allowFrom` definieert
-- zet `logging.redactSensitive` van `"off"` naar `"tools"`
-- verscherpt permissies voor state/config en gangbare gevoelige bestanden
-  (`credentials/*.json`, `auth-profiles.json`, `sessions.json`, sessie-
-  `*.jsonl`)
-- verscherpt ook config-include-bestanden waarnaar wordt verwezen vanuit `openclaw.json`
+- wijzigt veelvoorkomende `groupPolicy="open"` in `groupPolicy="allowlist"` (inclusief accountvarianten in ondersteunde kanalen)
+- wanneer het WhatsApp-groepsbeleid wordt gewijzigd in `allowlist`, wordt `groupAllowFrom` gevuld vanuit het opgeslagen `allowFrom`-bestand als die lijst bestaat en de configuratie nog geen `allowFrom` definieert
+- wijzigt `logging.redactSensitive` van `"off"` in `"tools"`
+- beperkt machtigingen voor status-/configuratiebestanden en veelvoorkomende gevoelige bestanden (`credentials/*.json`, `auth-profiles.json`, `openclaw-agent.sqlite` en verouderde sessieartefacten)
+- beperkt ook de machtigingen voor configuratie-invoegbestanden waarnaar vanuit `openclaw.json` wordt verwezen
 - gebruikt `chmod` op POSIX-hosts en `icacls`-resets op Windows
 
 `--fix` doet **niet** het volgende:
 
 - tokens/wachtwoorden/API-sleutels roteren
-- tools uitschakelen (`gateway`, `cron`, `exec`, enz.)
-- gateway-bind-/auth-/netwerkblootstellingskeuzes wijzigen
+- tools uitschakelen (`gateway`, `cron`, `exec`, enzovoort)
+- keuzes voor Gateway-binding/authenticatie/netwerkblootstelling wijzigen
 - Plugins/Skills verwijderen of herschrijven
 
 ## Gerelateerd

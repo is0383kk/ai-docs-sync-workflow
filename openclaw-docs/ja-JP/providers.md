@@ -1,20 +1,22 @@
 ---
 read_when:
-    - モデルプロバイダーを選択したい場合
+    - モデルプロバイダーを選択する場合
     - サポートされている LLM バックエンドの概要をすばやく確認したい場合
 summary: OpenClaw がサポートするモデルプロバイダー（LLM）
 title: プロバイダーディレクトリ
 x-i18n:
-    generated_at: "2026-07-11T22:37:23Z"
+    generated_at: "2026-07-26T09:41:45Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b59843b53265500866e87ee8d888892dacd6045bdb9401a1e7ec08ad4f364090
+    source_hash: e98910f016e461dedcd06e40a2933631bbd6ac09ceebd340bab82f14805e06a6
     source_path: providers/index.md
     workflow: 16
 ---
 
-OpenClaw は多くの LLM プロバイダーを利用できます。プロバイダーを選択して認証し、デフォルトモデルを `provider/model` として設定します。
+OpenClaw は多くの LLM プロバイダーを使用できます。プロバイダーを選択して認証し、
+デフォルトモデルを `provider/model` として設定します。
 
 チャットチャンネルのドキュメント（WhatsApp/Telegram/Discord/Slack/Mattermost（Plugin）など）をお探しですか？[チャンネル](/ja-JP/channels)を参照してください。
 
@@ -37,6 +39,7 @@ OpenClaw は多くの LLM プロバイダーを利用できます。プロバイ
 - [Anthropic（API + Claude CLI）](/ja-JP/providers/anthropic)
 - [Arcee AI（Trinity モデル）](/ja-JP/providers/arcee)
 - [Azure Speech](/ja-JP/providers/azure-speech)
+- [Baseten（Inkling + Model API）](/providers/baseten)
 - [BytePlus（国際版）](/ja-JP/concepts/model-providers#byteplus-international)
 - [Cerebras](/ja-JP/providers/cerebras)
 - [Chutes](/ja-JP/providers/chutes)
@@ -48,7 +51,7 @@ OpenClaw は多くの LLM プロバイダーを利用できます。プロバイ
 - [ds4（ローカル DeepSeek V4）](/ja-JP/providers/ds4)
 - [ElevenLabs](/ja-JP/providers/elevenlabs)
 - [fal](/ja-JP/providers/fal)
-- [Featherless AI](/providers/featherless)
+- [Featherless AI](/ja-JP/providers/featherless)
 - [Fireworks](/ja-JP/providers/fireworks)
 - [GitHub Copilot](/ja-JP/providers/github-copilot)
 - [GMI Cloud](/ja-JP/providers/gmi)
@@ -75,7 +78,6 @@ OpenClaw は多くの LLM プロバイダーを利用できます。プロバイ
 - [Perplexity（ウェブ検索）](/ja-JP/providers/perplexity-provider)
 - [Qianfan](/ja-JP/providers/qianfan)
 - [Qwen Cloud](/ja-JP/providers/qwen)
-- [Qwen OAuth / Portal](/ja-JP/providers/qwen-oauth)
 - [Runway](/ja-JP/providers/runway)
 - [SenseAudio](/ja-JP/providers/senseaudio)
 - [SGLang（ローカルモデル）](/ja-JP/providers/sglang)
@@ -83,7 +85,7 @@ OpenClaw は多くの LLM プロバイダーを利用できます。プロバイ
 - [Synthetic](/ja-JP/providers/synthetic)
 - [Tencent Cloud（TokenHub / TokenPlan）](/ja-JP/providers/tencent)
 - [Together AI](/ja-JP/providers/together)
-- [Venice（プライバシー重視の Venice AI）](/ja-JP/providers/venice)
+- [Venice（Venice AI、プライバシー重視）](/ja-JP/providers/venice)
 - [Vercel AI Gateway](/ja-JP/providers/vercel-ai-gateway)
 - [vLLM（ローカルモデル）](/ja-JP/providers/vllm)
 - [Volcengine（Doubao）](/ja-JP/providers/volcengine)
@@ -94,10 +96,10 @@ OpenClaw は多くの LLM プロバイダーを利用できます。プロバイ
 
 ## 共通の概要ページ
 
-- [その他のプロバイダーバリアント](/ja-JP/providers/models#additional-provider-variants) - Anthropic Vertex、Copilot Proxy、Gemini CLI OAuth
-- [画像生成](/ja-JP/tools/image-generation) - 共通の `image_generate` ツール、プロバイダーの選択、フェイルオーバー
-- [音楽生成](/ja-JP/tools/music-generation) - 共通の `music_generate` ツール、プロバイダーの選択、フェイルオーバー
-- [動画生成](/ja-JP/tools/video-generation) - 共通の `video_generate` ツール、プロバイダーの選択、フェイルオーバー
+- [その他のプロバイダーバリエーション](/ja-JP/providers/models#additional-provider-variants) - Anthropic Vertex、Copilot Proxy、Gemini CLI OAuth
+- [画像生成](/ja-JP/tools/image-generation) - 共通の `image_generate` ツール、プロバイダー選択、フェイルオーバー
+- [音楽生成](/ja-JP/tools/music-generation) - 共通の `music_generate` ツール、プロバイダー選択、フェイルオーバー
+- [動画生成](/ja-JP/tools/video-generation) - 共通の `video_generate` ツール、プロバイダー選択、フェイルオーバー
 
 ## 文字起こしプロバイダー
 
@@ -110,6 +112,7 @@ OpenClaw は多くの LLM プロバイダーを利用できます。プロバイ
 
 ## コミュニティツール
 
-- [Claude Max API Proxy](/ja-JP/providers/claude-max-api-proxy) - Claude サブスクリプションの認証情報を使用するコミュニティプロキシ（使用前に Anthropic のポリシーと利用規約を確認してください）
+- [Claude Max API Proxy](/ja-JP/providers/claude-max-api-proxy) - Claude サブスクリプション認証情報用のコミュニティプロキシ（使用前に Anthropic のポリシー／規約を確認してください）
 
-プロバイダーの完全なカタログ（xAI、Groq、Mistral など）と高度な設定については、[モデルプロバイダー](/ja-JP/concepts/model-providers)を参照してください。
+プロバイダーの完全なカタログ（xAI、Groq、Mistral など）と高度な設定については、
+[モデルプロバイダー](/ja-JP/concepts/model-providers)を参照してください。

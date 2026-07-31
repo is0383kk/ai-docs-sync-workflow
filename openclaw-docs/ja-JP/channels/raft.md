@@ -1,22 +1,23 @@
 ---
 read_when:
     - OpenClaw を Raft ワークスペースに接続する場合
-    - Raft 外部エージェントを設定しています
+    - Raft External Agent を設定しています
     - Raft のウェイク配信をデバッグしています
 sidebarTitle: Raft
 summary: Raft CLI ウェイクブリッジを介した Raft External Agent のサポート
 title: Raft
 x-i18n:
-    generated_at: "2026-07-11T22:02:02Z"
+    generated_at: "2026-07-26T09:53:53Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 454d92d764a4ec3b0ec52467cba254dcad795870e04d1d32d4cf65d8b451a0de
     source_path: channels/raft.md
     workflow: 16
 ---
 
-Raft は、ローカルの Raft CLI を介して OpenClaw エージェントを Raft External Agent に接続します。Raft は認証済みのウェイク通知を Gateway に送信します。その後、エージェントは Raft CLI を使用してメッセージを確認し、送信します。ダイレクトチャットのみに対応します（グループには対応しません）。
+Raft は、ローカルの Raft CLI を介して OpenClaw エージェントを Raft External Agent に接続します。Raft は認証済みのウェイクヒントを Gateway に送信し、その後エージェントが Raft CLI を使用してメッセージを確認および送信します。ダイレクトチャットのみ対応します（グループには対応しません）。
 
 ## インストール
 
@@ -31,8 +32,8 @@ openclaw gateway restart
 
 ## 前提条件
 
-- External Agent を含む Raft ワークスペース。
-- OpenClaw Gateway と同じホストに Raft CLI がインストールされ、サービスの `PATH` に含まれていること。
+- External Agent を備えた Raft ワークスペース。
+- OpenClaw Gateway と同じホストの、サービスの `PATH` にインストールされた Raft CLI。
 - すでにサインイン済みで、その External Agent に関連付けられている Raft CLI プロファイル。
 
 Plugin は Raft の認証情報を保存しません。Raft CLI がその認証情報を自身のプロファイルに保持します。
@@ -77,25 +78,25 @@ RAFT_PROFILE=openclaw
 }
 ```
 
-対話型セットアップでも同じプロファイルが記録されます。
+対話形式のセットアップでも同じプロファイルが記録されます。
 
 ```bash
 openclaw channels add --channel raft
 ```
 
-## 動作の仕組み
+## 仕組み
 
-Gateway が起動すると、Plugin は次の処理を行います。
+Gateway の起動時に、Plugin は次の処理を行います。
 
-1. 一時ポート上にループバック専用の HTTP ウェイクエンドポイントを開きます。
-2. そのエンドポイントとプロセスごとのトークンを指定して、`raft --profile <profile> agent bridge` を起動します。
-3. ローカルブリッジから送信された、リプレイ識別子を持つ認証済みかつコンテンツを含まないウェイク通知のみを受け入れます。
-4. すべてのウェイクペイロードに `eventId`、`attemptId`、`messageId`、`delivery_id`、`wake_id`、または `id` のいずれかが含まれていることを必須とします。
-5. 再試行されたウェイク配信をブリッジイベント ID に基づいて 24 時間重複排除します。この状態は Gateway の再起動後も維持されます。
-6. 現在のブリッジに対して安定したランタイムセッションを返し、Raft CLI プロトコルに対して空のアクティビティドレインバッチを返します。
-7. 受け入れたウェイクごとに、直列化された OpenClaw エージェントターンを 1 回開始します。
+1. 一時ポートで local loopback 専用の HTTP ウェイクエンドポイントを開きます。
+2. そのエンドポイントとプロセス単位のトークンを指定して `raft --profile <profile> agent bridge` を起動します。
+3. ローカルブリッジから送信された、リプレイ識別子を持つ認証済みかつコンテンツを含まないウェイクヒントのみを受け入れます。
+4. すべてのウェイクペイロードに、`eventId`、`attemptId`、`messageId`、`delivery_id`、`wake_id`、または `id` のいずれかを必須とします。
+5. ブリッジイベント ID に基づいて、再試行されたウェイク配信を 24 時間重複排除します。この処理は Gateway の再起動をまたぐ場合にも適用されます。
+6. 現在のブリッジ用の安定したランタイムセッションと、Raft CLI プロトコル用の空のアクティビティドレインバッチを返します。
+7. 受け入れたウェイクごとに、直列化された OpenClaw エージェントターンを 1 つ開始します。
 
-ブリッジが Raft の配信再試行と再接続を管理します。OpenClaw のターンが受け取るのはウェイク通知のみであり、コピーされた Raft メッセージ本文ではありません。保留中のメッセージの読み取りと応答の送信には CLI を使用します。
+ブリッジが Raft の配信再試行と再接続を担当します。OpenClaw のターンが受信するのはウェイク通知のみであり、コピーされた Raft メッセージ本文ではありません。保留中のメッセージの読み取りと応答の送信には CLI を使用します。
 
 ```bash
 raft --profile openclaw message check
@@ -103,7 +104,7 @@ raft --profile openclaw message send
 ```
 
 <Note>
-Raft はプッシュメッセージトランスポートではありません。OpenClaw はモデルの最終テキストをブリッジ経由で自動的に送り返さないため、エージェントはウェイクを処理した後に Raft CLI を使用する必要があります。
+Raft はプッシュメッセージのトランスポートではありません。OpenClaw はモデルの最終テキストをブリッジ経由で自動的に送り返さないため、エージェントはウェイクの処理後に Raft CLI を使用する必要があります。
 </Note>
 
 ## 確認
@@ -115,20 +116,20 @@ openclaw channels status --probe
 openclaw plugins inspect raft --runtime --json
 ```
 
-次に、Raft External Agent にメッセージを送信します。Gateway ログには Raft ブリッジの起動が表示され、その後に受信ウェイクが表示されます。エージェントは設定された Raft プロファイルを使用して、保留中のメッセージを確認します。
+次に、Raft External Agent にメッセージを送信します。Gateway のログには、Raft ブリッジの起動に続いて受信ウェイクが表示されます。エージェントは、設定された Raft プロファイルを使用して保留中のメッセージを確認します。
 
 ## トラブルシューティング
 
 <AccordionGroup>
   <Accordion title="Raft CLI が見つからない">
-    Gateway ホストに Raft CLI をインストールし、サービスの `PATH` から `raft` を利用できるようにします。`raft --help` で確認してから、Gateway を再起動します。
+    Gateway ホストに Raft CLI をインストールし、サービスの `PATH` で `raft` を使用可能にします。`raft --help` で確認してから、Gateway を再起動します。
   </Accordion>
-  <Accordion title="ブリッジがすぐに終了する">
-    設定されたプロファイルがサインイン済みであり、対象の Raft External Agent に属していることを確認します。CLI の診断情報を確認するには、`raft --profile <profile> agent bridge` を直接実行します。
+  <Accordion title="ブリッジが直ちに終了する">
+    設定されたプロファイルがサインイン済みであり、対象の Raft External Agent に属していることを確認します。CLI の診断を確認するには、`raft --profile <profile> agent bridge` を直接実行します。
   </Accordion>
   <Accordion title="ウェイクを受信しても Raft の応答が送信されない">
     エージェントが Raft CLI を呼び出さない場合、これは想定された動作です。ウェイクブリッジはメッセージ本文や自動的な最終応答を伝送しません。エージェントのツールポリシーを確認し、`raft --profile <profile>
-    message check` と `message send` を実行できるようにしてください。
+    message check` と `message send` を実行できることを確認します。
   </Accordion>
 </AccordionGroup>
 
@@ -136,4 +137,4 @@ openclaw plugins inspect raft --runtime --json
 
 - [Raft](https://raft.build/)
 - [Raft ドキュメント](https://docs.raft.build/welcome/)
-- [Hermes の Raft 統合](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/raft)
+- [Hermes の Raft 連携](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/raft)

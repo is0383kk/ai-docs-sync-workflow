@@ -1,80 +1,81 @@
 ---
 read_when:
-    - Raspberry Pi पर OpenClaw सेट करना
-    - ARM उपकरणों पर OpenClaw चलाना
-    - एक सस्ता हमेशा चालू रहने वाला व्यक्तिगत AI बनाना
-summary: हमेशा चालू स्व-होस्टिंग के लिए Raspberry Pi पर OpenClaw होस्ट करें
+    - Raspberry Pi पर OpenClaw सेट अप करना
+    - ARM डिवाइसों पर OpenClaw चलाना
+    - एक किफ़ायती, हमेशा चालू रहने वाला व्यक्तिगत AI बनाना
+summary: हमेशा चालू रहने वाली स्व-होस्टिंग के लिए OpenClaw को Raspberry Pi पर होस्ट करें
 title: Raspberry Pi
 x-i18n:
-    generated_at: "2026-06-28T23:23:37Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:02:43Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 9cd90b4cc70c8fe7eab2a0abadc0e2969c7dc1c09657a0819bc004280ec32ba3
+    source_hash: 60f8f3b23577155658d410993937ebe7c34c21f71c1bd7d9b0c453f15c4aa024
     source_path: install/raspberry-pi.md
     workflow: 16
 ---
 
-Raspberry Pi पर एक लगातार चलने वाला, हमेशा-ऑन OpenClaw Gateway चलाएं। चूंकि Pi सिर्फ Gateway है (मॉडल API के जरिए क्लाउड में चलते हैं), इसलिए साधारण Pi भी वर्कलोड अच्छी तरह संभाल लेता है — सामान्य हार्डवेयर लागत **$35–80 एक बार**, कोई मासिक शुल्क नहीं।
+Raspberry Pi पर एक स्थायी, हमेशा चालू रहने वाला OpenClaw Gateway चलाएँ। चूँकि Pi केवल Gateway है (मॉडल API के माध्यम से क्लाउड में चलते हैं), इसलिए सामान्य क्षमता वाला Pi भी कार्यभार को अच्छी तरह संभाल लेता है -- आम तौर पर हार्डवेयर की लागत **एक बार $35-80** होती है और कोई मासिक शुल्क नहीं होता।
 
 ## हार्डवेयर संगतता
 
-| Pi मॉडल     | RAM    | काम करता है? | टिप्पणियां                         |
-| ----------- | ------ | ------------- | ---------------------------------- |
-| Pi 5        | 4/8 GB | सबसे अच्छा    | सबसे तेज, अनुशंसित।               |
-| Pi 4        | 4 GB   | अच्छा         | अधिकांश उपयोगकर्ताओं के लिए सही।  |
-| Pi 4        | 2 GB   | ठीक           | swap जोड़ें।                      |
-| Pi 4        | 1 GB   | सीमित         | swap और न्यूनतम config के साथ संभव। |
-| Pi 3B+      | 1 GB   | धीमा          | काम करता है लेकिन सुस्त है।       |
-| Pi Zero 2 W | 512 MB | नहीं          | अनुशंसित नहीं।                    |
+| Pi मॉडल     | RAM    | काम करता है? | टिप्पणियाँ                              |
+| ----------- | ------ | ------------- | --------------------------------------- |
+| Pi 5        | 4/8 GB | सर्वोत्तम     | सबसे तेज़, अनुशंसित।                    |
+| Pi 4        | 4 GB   | अच्छा         | अधिकांश उपयोगकर्ताओं के लिए उपयुक्त।    |
+| Pi 4        | 2 GB   | ठीक           | स्वैप जोड़ें।                           |
+| Pi 4        | 1 GB   | सीमित         | स्वैप और न्यूनतम कॉन्फ़िगरेशन के साथ संभव। |
+| Pi 3B+      | 1 GB   | धीमा          | काम करता है, लेकिन सुस्त है।             |
+| Pi Zero 2 W | 512 MB | नहीं          | अनुशंसित नहीं।                          |
 
-**न्यूनतम:** 1 GB RAM, 1 core, 500 MB खाली disk, 64-bit OS।
-**अनुशंसित:** 2 GB+ RAM, 16 GB+ SD card (या USB SSD), Ethernet।
+**न्यूनतम:** 1 GB RAM, 1 कोर, 500 MB खाली डिस्क, 64-बिट OS।
+**अनुशंसित:** 2 GB+ RAM, 16 GB+ SD कार्ड (या USB SSD), Ethernet।
 
-## पूर्वापेक्षाएं
+## पूर्वापेक्षाएँ
 
 - 2 GB+ RAM वाला Raspberry Pi 4 या 5 (4 GB अनुशंसित)
-- MicroSD card (16 GB+) या USB SSD (बेहतर प्रदर्शन)
-- आधिकारिक Pi power supply
+- MicroSD कार्ड (16 GB+) या USB SSD (बेहतर प्रदर्शन)
+- आधिकारिक Pi पावर सप्लाई
 - नेटवर्क कनेक्शन (Ethernet या WiFi)
-- 64-bit Raspberry Pi OS (आवश्यक -- 32-bit का उपयोग न करें)
+- 64-बिट Raspberry Pi OS (आवश्यक -- 32-बिट का उपयोग न करें)
 - लगभग 30 मिनट
 
 ## सेटअप
 
 <Steps>
-  <Step title="OS फ्लैश करें">
-    headless server के लिए **Raspberry Pi OS Lite (64-bit)** का उपयोग करें -- desktop की जरूरत नहीं।
+  <Step title="OS फ़्लैश करें">
+    **Raspberry Pi OS Lite (64-bit)** का उपयोग करें -- हेडलेस सर्वर के लिए डेस्कटॉप की आवश्यकता नहीं है।
 
     1. [Raspberry Pi Imager](https://www.raspberrypi.com/software/) डाउनलोड करें।
     2. OS चुनें: **Raspberry Pi OS Lite (64-bit)**।
-    3. settings dialog में, पहले से config करें:
-       - Hostname: `gateway-host`
+    3. सेटिंग डायलॉग में पहले से कॉन्फ़िगर करें:
+       - होस्टनेम: `gateway-host`
        - SSH सक्षम करें
-       - username और password सेट करें
-       - WiFi config करें (यदि Ethernet का उपयोग नहीं कर रहे हैं)
-    4. अपने SD card या USB drive पर फ्लैश करें, उसे लगाएं, और Pi को boot करें।
+       - उपयोगकर्ता नाम और पासवर्ड सेट करें
+       - WiFi कॉन्फ़िगर करें (यदि Ethernet का उपयोग नहीं कर रहे हैं)
+    4. अपने SD कार्ड या USB ड्राइव पर फ़्लैश करें, उसे लगाएँ और Pi बूट करें।
 
   </Step>
 
-  <Step title="SSH के जरिए connect करें">
+  <Step title="SSH के माध्यम से कनेक्ट करें">
     ```bash
     ssh user@gateway-host
     ```
   </Step>
 
-  <Step title="system अपडेट करें">
+  <Step title="सिस्टम अपडेट करें">
     ```bash
     sudo apt update && sudo apt upgrade -y
     sudo apt install -y git curl build-essential
 
-    # Set timezone (important for cron and reminders)
+    # समय क्षेत्र सेट करें (Cron और रिमाइंडर के लिए महत्वपूर्ण)
     sudo timedatectl set-timezone America/Chicago
     ```
 
   </Step>
 
-  <Step title="Node.js 24 install करें">
+  <Step title="Node.js 24 इंस्टॉल करें">
     ```bash
     curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
     sudo apt install -y nodejs
@@ -82,7 +83,7 @@ Raspberry Pi पर एक लगातार चलने वाला, हम�
     ```
   </Step>
 
-  <Step title="swap जोड़ें (2 GB या उससे कम के लिए महत्वपूर्ण)">
+  <Step title="स्वैप जोड़ें (2 GB या कम के लिए महत्वपूर्ण)">
     ```bash
     sudo fallocate -l 2G /swapfile
     sudo chmod 600 /swapfile
@@ -90,25 +91,25 @@ Raspberry Pi पर एक लगातार चलने वाला, हम�
     sudo swapon /swapfile
     echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
-    # Reduce swappiness for low-RAM devices
+    # कम RAM वाले उपकरणों के लिए स्वैप प्रवृत्ति घटाएँ
     echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
     sudo sysctl -p
     ```
 
   </Step>
 
-  <Step title="OpenClaw install करें">
+  <Step title="OpenClaw इंस्टॉल करें">
     ```bash
     curl -fsSL https://openclaw.ai/install.sh | bash
     ```
   </Step>
 
-  <Step title="onboarding चलाएं">
+  <Step title="ऑनबोर्डिंग चलाएँ">
     ```bash
     openclaw onboard --install-daemon
     ```
 
-    wizard का पालन करें। headless devices के लिए OAuth की तुलना में API keys अनुशंसित हैं। शुरुआत के लिए Telegram सबसे आसान channel है।
+    विज़ार्ड के निर्देशों का पालन करें। हेडलेस उपकरणों के लिए OAuth की तुलना में API कुंजियाँ अनुशंसित हैं। शुरुआत करने के लिए Telegram सबसे आसान चैनल है।
 
   </Step>
 
@@ -120,29 +121,29 @@ Raspberry Pi पर एक लगातार चलने वाला, हम�
     ```
   </Step>
 
-  <Step title="Control UI तक पहुंचें">
-    अपने computer पर, Pi से dashboard URL प्राप्त करें:
+  <Step title="नियंत्रण UI तक पहुँचें">
+    अपने कंप्यूटर पर Pi से डैशबोर्ड URL प्राप्त करें:
 
     ```bash
     ssh user@gateway-host 'openclaw dashboard --no-open'
     ```
 
-    फिर दूसरे terminal में SSH tunnel बनाएं:
+    फिर दूसरे टर्मिनल में SSH टनल बनाएँ:
 
     ```bash
     ssh -N -L 18789:127.0.0.1:18789 user@gateway-host
     ```
 
-    प्रिंट किए गए URL को अपने local browser में खोलें। हमेशा-ऑन remote access के लिए, [Tailscale integration](/hi/gateway/tailscale) देखें।
+    प्रिंट किया गया URL अपने स्थानीय ब्राउज़र में खोलें। हमेशा चालू रहने वाली रिमोट पहुँच के लिए, [Tailscale एकीकरण](/hi/gateway/tailscale) देखें।
 
   </Step>
 </Steps>
 
-## प्रदर्शन टिप्स
+## प्रदर्शन संबंधी सुझाव
 
-**USB SSD का उपयोग करें** -- SD cards धीमे होते हैं और घिस जाते हैं। USB SSD प्रदर्शन को बहुत बेहतर बनाता है। [Pi USB boot guide](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#usb-mass-storage-boot) देखें।
+**USB SSD का उपयोग करें** -- SD कार्ड धीमे होते हैं और घिस जाते हैं। USB SSD प्रदर्शन में उल्लेखनीय सुधार करता है और अधिक लेखन चक्रों तक चलता है; यदि आप OS को SD पर रखते हैं, तो इसे `OPENCLAW_STATE_DIR` के लिए उपयोग करें। [Pi USB बूट गाइड](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#usb-mass-storage-boot) देखें।
 
-**module compile cache सक्षम करें** -- कम-power Pi hosts पर बार-बार CLI चलाने की गति बढ़ाता है:
+**मॉड्यूल कंपाइल कैश सक्षम करें** -- कम क्षमता वाले Pi होस्ट पर बार-बार किए जाने वाले CLI आह्वानों को तेज़ करता है। `OPENCLAW_NO_RESPAWN=1` नियमित Gateway पुनरारंभों को उसी प्रक्रिया में रखता है, जिससे अतिरिक्त प्रक्रिया हस्तांतरण से बचा जाता है और छोटे होस्ट पर PID ट्रैकिंग सरल रहती है:
 
 ```bash
 grep -q 'NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache' ~/.bashrc || cat >> ~/.bashrc <<'EOF' # pragma: allowlist secret
@@ -153,16 +154,16 @@ EOF
 source ~/.bashrc
 ```
 
-`OPENCLAW_NO_RESPAWN=1` नियमित Gateway restarts को in-process रखता है, जिससे अतिरिक्त process handoffs से बचा जाता है और छोटे hosts पर PID tracking सरल रहती है।
+`/tmp` के बजाय `/var/tmp` का उपयोग करें -- कुछ वितरण बूट होने पर `/tmp` साफ़ कर देते हैं, जिससे तैयार कैश हट जाता है।
 
-**memory usage घटाएं** -- headless setups के लिए, GPU memory खाली करें और unused services disable करें:
+**मेमोरी उपयोग घटाएँ** -- हेडलेस सेटअप के लिए GPU मेमोरी खाली करें और उपयोग न होने वाली सेवाएँ अक्षम करें:
 
 ```bash
 echo 'gpu_mem=16' | sudo tee -a /boot/config.txt
 sudo systemctl disable bluetooth
 ```
 
-**स्थिर restarts के लिए systemd drop-in** -- यदि यह Pi ज्यादातर OpenClaw चला रहा है, तो service drop-in जोड़ें:
+**स्थिर पुनरारंभों के लिए systemd ड्रॉप-इन** -- यदि यह Pi मुख्यतः OpenClaw चला रहा है, तो सर्विस ड्रॉप-इन जोड़ें:
 
 ```bash
 systemctl --user edit openclaw-gateway.service
@@ -177,11 +178,11 @@ RestartSec=2
 TimeoutStartSec=90
 ```
 
-फिर `systemctl --user daemon-reload && systemctl --user restart openclaw-gateway.service`। headless Pi पर, lingering भी एक बार enable करें ताकि user service logout के बाद भी चलती रहे: `sudo loginctl enable-linger "$(whoami)"`।
+फिर `systemctl --user daemon-reload && systemctl --user restart openclaw-gateway.service`। हेडलेस Pi पर लॉगआउट के बाद भी उपयोगकर्ता सेवा चलती रहे, इसके लिए एक बार लिंगरिंग भी सक्षम करें: `sudo loginctl enable-linger "$(whoami)"`।
 
-## अनुशंसित model setup
+## अनुशंसित मॉडल सेटअप
 
-चूंकि Pi केवल Gateway चलाता है, cloud-hosted API models का उपयोग करें:
+चूँकि Pi केवल Gateway चलाता है, इसलिए क्लाउड-होस्टेड API मॉडल का उपयोग करें -- Pi पर स्थानीय LLM न चलाएँ, छोटे मॉडल भी उपयोगी होने के लिए बहुत धीमे हैं:
 
 ```json
 {
@@ -196,47 +197,43 @@ TimeoutStartSec=90
 }
 ```
 
-Pi पर local LLMs न चलाएं — छोटे models भी उपयोगी होने के लिए बहुत धीमे हैं। model का काम Claude या GPT को करने दें।
+## ARM बाइनरी संबंधी टिप्पणियाँ
 
-## ARM binary notes
+OpenClaw की अधिकांश सुविधाएँ बिना किसी बदलाव के ARM64 पर काम करती हैं (Node.js, Telegram, WhatsApp/Baileys, Chromium)। जिन बाइनरी के ARM बिल्ड कभी-कभी उपलब्ध नहीं होते, वे आम तौर पर Skills द्वारा प्रदान किए गए वैकल्पिक Go/Rust CLI टूल होते हैं। `uname -m` से आर्किटेक्चर सत्यापित करें (इसमें `aarch64` दिखना चाहिए), फिर स्रोत से बिल्ड करने से पहले अनुपलब्ध बाइनरी के रिलीज़ पेज पर `linux-arm64` / `aarch64` आर्टिफ़ैक्ट देखें।
 
-अधिकांश OpenClaw features ARM64 पर बिना बदलाव के काम करते हैं (Node.js, Telegram, WhatsApp/Baileys, Chromium)। जिन binaries में कभी-कभी ARM builds नहीं होते, वे आमतौर पर Skills द्वारा भेजे गए वैकल्पिक Go/Rust CLI tools होते हैं। source से build करने से पहले missing binary के release page पर `linux-arm64` / `aarch64` artifacts सत्यापित करें।
+## स्थायित्व और बैकअप
 
-## Persistence और backups
+OpenClaw की स्थिति यहाँ संग्रहीत होती है:
 
-OpenClaw state यहां रहता है:
+- `~/.openclaw/` -- `openclaw.json`, प्रति-एजेंट `auth-profiles.json`, चैनल/प्रदाता की स्थिति, सत्र।
+- `~/.openclaw/workspace/` -- एजेंट कार्यक्षेत्र (SOUL.md, मेमोरी, आर्टिफ़ैक्ट)।
 
-- `~/.openclaw/` — `openclaw.json`, per-agent `auth-profiles.json`, channel/provider state, sessions।
-- `~/.openclaw/workspace/` — agent workspace (SOUL.md, memory, artifacts)।
-
-ये reboots के बाद भी बने रहते हैं। portable snapshot लें:
+ये रीबूट के बाद भी बने रहते हैं और प्रदर्शन तथा दीर्घायु, दोनों के लिए SD कार्ड के बजाय SSD से लाभान्वित होते हैं। इसका पोर्टेबल स्नैपशॉट लेने के लिए चलाएँ:
 
 ```bash
 openclaw backup create
 ```
 
-यदि आप इन्हें SSD पर रखते हैं, तो SD card की तुलना में performance और longevity दोनों बेहतर होते हैं।
+## समस्या निवारण
 
-## Troubleshooting
+**मेमोरी समाप्त होना** -- `free -h` से सत्यापित करें कि स्वैप सक्रिय है। उपयोग न होने वाली सेवाएँ अक्षम करें (`sudo systemctl disable cups bluetooth avahi-daemon`)। केवल API-आधारित मॉडल का उपयोग करें।
 
-**Memory खत्म होना** -- `free -h` से सत्यापित करें कि swap active है। unused services disable करें (`sudo systemctl disable cups bluetooth avahi-daemon`)। केवल API-based models का उपयोग करें।
+**धीमा प्रदर्शन** -- SD कार्ड के बजाय USB SSD का उपयोग करें। `vcgencmd get_throttled` से CPU थ्रॉटलिंग जाँचें (इससे `0x0` लौटना चाहिए)।
 
-**धीमा performance** -- SD card की जगह USB SSD का उपयोग करें। CPU throttling की जांच `vcgencmd get_throttled` से करें (इसे `0x0` लौटाना चाहिए)।
+**सेवा शुरू नहीं होती** -- `journalctl --user -u openclaw-gateway.service --no-pager -n 100` से लॉग जाँचें और `openclaw doctor --non-interactive` चलाएँ। यदि यह हेडलेस Pi है, तो यह भी सत्यापित करें कि लिंगरिंग सक्षम है: `sudo loginctl enable-linger "$(whoami)"`।
 
-**Service start नहीं होगी** -- logs को `journalctl --user -u openclaw-gateway.service --no-pager -n 100` से जांचें और `openclaw doctor --non-interactive` चलाएं। यदि यह headless Pi है, तो यह भी सत्यापित करें कि lingering enabled है: `sudo loginctl enable-linger "$(whoami)"`।
+**ARM बाइनरी संबंधी समस्याएँ** -- यदि कोई Skill "exec format error" के साथ विफल होती है, तो जाँचें कि बाइनरी का ARM64 बिल्ड उपलब्ध है या नहीं। `uname -m` से आर्किटेक्चर सत्यापित करें (इसमें `aarch64` दिखना चाहिए)।
 
-**ARM binary issues** -- यदि कोई skill "exec format error" के साथ विफल होती है, तो जांचें कि binary का ARM64 build है या नहीं। architecture को `uname -m` से सत्यापित करें (इसे `aarch64` दिखाना चाहिए)।
-
-**WiFi drops** -- WiFi power management disable करें: `sudo iwconfig wlan0 power off`।
+**WiFi कनेक्शन टूटना** -- WiFi पावर प्रबंधन अक्षम करें: `sudo iwconfig wlan0 power off`।
 
 ## अगले चरण
 
-- [Channels](/hi/channels) -- Telegram, WhatsApp, Discord और अधिक connect करें
-- [Gateway configuration](/hi/gateway/configuration) -- सभी config options
-- [Updating](/hi/install/updating) -- OpenClaw को up to date रखें
+- [चैनल](/hi/channels) -- Telegram, WhatsApp, Discord और अन्य को कनेक्ट करें
+- [Gateway कॉन्फ़िगरेशन](/hi/gateway/configuration) -- सभी कॉन्फ़िगरेशन विकल्प
+- [अपडेट करना](/hi/install/updating) -- OpenClaw को अद्यतित रखें
 
 ## संबंधित
 
-- [Install overview](/hi/install)
-- [Linux server](/hi/vps)
-- [Platforms](/hi/platforms)
+- [इंस्टॉलेशन का अवलोकन](/hi/install)
+- [Linux सर्वर](/hi/vps)
+- [प्लेटफ़ॉर्म](/hi/platforms)

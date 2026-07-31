@@ -1,31 +1,32 @@
 ---
 read_when:
-    - شما در حال نصب، پیکربندی یا ممیزی Plugin رفت هستید
-summary: Plugin کانال Raft در OpenClaw برای پل‌های امن بیدارسازی CLI.
-title: Plugin رَفت
+    - در حال نصب، پیکربندی یا ممیزی Plugin ‏Raft هستید
+summary: Plugin کانال Raft در OpenClaw برای پل‌های بیدارسازی امن CLI.
+title: Plugin Raft
 x-i18n:
-    generated_at: "2026-07-12T10:31:33Z"
+    generated_at: "2026-07-27T14:30:12Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: fea04ec6a2f3e08d69fd95c8a8e368fdbc8e179b243b8f6b41b5f8ef70039efc
+    source_hash: 80af90cdf83fedcba8082db15376049f485c4e4cfb82cd9eefb911b15f1c72c3
     source_path: plugins/reference/raft.md
     workflow: 16
 ---
 
 # Plugin Raft
 
-Plugin کانال Raft در OpenClaw برای پل‌های بیدارسازی امن CLI.
+Plugin کانال Raft برای OpenClaw جهت پل‌های بیدارسازی امن CLI.
 
 ## توزیع
 
 - بسته: `@openclaw/raft`
-- روش نصب: npm؛ ClawHub
+- مسیر نصب: npm؛ ClawHub
 
 ## سطح
 
-کانال‌ها: raft
+کانال‌ها: `raft`
 
 ## مستندات مرتبط
 
-- [raft](/fa/channels/raft)
+- [Raft](/fa/channels/raft)

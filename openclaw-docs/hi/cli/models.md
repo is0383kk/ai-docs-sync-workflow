@@ -1,28 +1,29 @@
 ---
 read_when:
-    - आप डिफ़ॉल्ट मॉडल बदलना चाहते हैं या provider auth स्थिति देखना चाहते हैं
-    - आप उपलब्ध मॉडलों/प्रदाताओं को स्कैन करना और auth प्रोफाइल डीबग करना चाहते हैं
-summary: '`openclaw models` के लिए CLI संदर्भ (status/list/set/scan, उपनाम, फ़ॉलबैक, प्रमाणीकरण)'
+    - आप डिफ़ॉल्ट मॉडल बदलना या प्रदाता प्रमाणीकरण की स्थिति देखना चाहते हैं
+    - आप उपलब्ध मॉडल/प्रोवाइडर स्कैन करना और प्रमाणीकरण प्रोफ़ाइल डीबग करना चाहते हैं
+summary: '`openclaw models` के लिए CLI संदर्भ (स्थिति/सूची/सेट/स्कैन, उपनाम, फ़ॉलबैक, प्रमाणीकरण)'
 title: मॉडल
 x-i18n:
-    generated_at: "2026-06-28T22:50:54Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:39:13Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 15d0a01e0f8f971996359413306a1c694e5a787eaef69b13eb8ac63c2a7c8990
+    source_hash: f7405c25694f04afe9c3029a8af64ae3ae7e1bdcf4c4ac31b8b84ff512d6a90e
     source_path: cli/models.md
     workflow: 16
 ---
 
 # `openclaw models`
 
-मॉडल खोज, स्कैनिंग, और कॉन्फ़िगरेशन (डिफ़ॉल्ट मॉडल, फॉलबैक, ऑथ प्रोफ़ाइलें)।
+मॉडल खोज, स्कैनिंग और कॉन्फ़िगरेशन (डिफ़ॉल्ट मॉडल, फ़ॉलबैक, प्रमाणीकरण प्रोफ़ाइलें)।
 
 संबंधित:
 
-- प्रोवाइडर + मॉडल: [मॉडल](/hi/providers/models)
+- प्रदाता + मॉडल: [मॉडल](/hi/providers/models)
 - मॉडल चयन की अवधारणाएँ + `/models` स्लैश कमांड: [मॉडल अवधारणा](/hi/concepts/models)
-- प्रोवाइडर ऑथ सेटअप: [शुरुआत करना](/hi/start/getting-started)
+- प्रदाता प्रमाणीकरण सेटअप: [आरंभ करना](/hi/start/getting-started)
 
 ## सामान्य कमांड
 
@@ -30,87 +31,86 @@ x-i18n:
 openclaw models status
 openclaw models list
 openclaw models set <model-or-alias>
+openclaw models set-image <model-or-alias>
 openclaw models scan
 ```
 
-`openclaw models status` हल किए गए डिफ़ॉल्ट/फॉलबैक के साथ ऑथ अवलोकन दिखाता है।
-जब प्रोवाइडर उपयोग स्नैपशॉट उपलब्ध होते हैं, तो OAuth/API-key स्थिति सेक्शन में
-प्रोवाइडर उपयोग विंडो और कोटा स्नैपशॉट शामिल होते हैं।
-वर्तमान उपयोग-विंडो प्रोवाइडर: Anthropic, GitHub Copilot, Gemini CLI, OpenAI,
-MiniMax, Xiaomi, और z.ai। उपयोग ऑथ उपलब्ध होने पर प्रोवाइडर-विशिष्ट हुक से आता है;
-अन्यथा OpenClaw ऑथ प्रोफ़ाइल, env, या कॉन्फ़िग से मेल खाते OAuth/API-key
-क्रेडेंशियल पर वापस जाता है।
-`--json` आउटपुट में, `auth.providers` env/config/store-जागरूक प्रोवाइडर
-अवलोकन है, जबकि `auth.oauth` केवल ऑथ-स्टोर प्रोफ़ाइल स्वास्थ्य है।
-हर कॉन्फ़िगर की गई प्रोवाइडर प्रोफ़ाइल के विरुद्ध लाइव ऑथ प्रोब चलाने के लिए `--probe` जोड़ें।
-प्रोब वास्तविक अनुरोध हैं (टोकन खर्च कर सकते हैं और रेट लिमिट ट्रिगर कर सकते हैं)।
-कॉन्फ़िगर किए गए एजेंट की मॉडल/ऑथ स्थिति देखने के लिए `--agent <id>` का उपयोग करें। जब छोड़ा जाता है,
-कमांड `OPENCLAW_AGENT_DIR` सेट होने पर उसका उपयोग करता है, अन्यथा
-कॉन्फ़िगर किए गए डिफ़ॉल्ट एजेंट का।
-प्रोब पंक्तियाँ ऑथ प्रोफ़ाइल, env क्रेडेंशियल, या `models.json` से आ सकती हैं।
-OpenAI ChatGPT/Codex OAuth समस्या निवारण के लिए, `openclaw models status`,
-`openclaw models auth list --provider openai`, और
-`openclaw config get agents.defaults.model --json` यह पुष्टि करने का सबसे तेज़ तरीका हैं
-कि किसी एजेंट के पास native Codex runtime के माध्यम से `openai/*` के लिए
-उपयोग योग्य `openai` OAuth प्रोफ़ाइल है या नहीं। [OpenAI प्रोवाइडर सेटअप](/hi/providers/openai#check-and-recover-codex-oauth-routing) देखें।
+`status` और `auth` उपकमांड किसी कॉन्फ़िगर किए गए एजेंट को लक्षित करने के लिए `--agent <id>` स्वीकार करते हैं; `list`, `scan`, `aliases`, और `fallbacks`/`image-fallbacks` हमेशा कॉन्फ़िगर किए गए डिफ़ॉल्ट एजेंट का उपयोग करते हैं, और `set`/`set-image` `--agent` को पूरी तरह अस्वीकार करते हैं। इसे छोड़ने पर, `--agent`-सक्षम कमांड, सेट होने पर `OPENCLAW_AGENT_DIR` का उपयोग करते हैं, अन्यथा कॉन्फ़िगर किए गए डिफ़ॉल्ट एजेंट का।
 
-नोट्स:
+### स्थिति
 
-- `models set <model-or-alias>` `provider/model` या alias स्वीकार करता है।
-- `models list` केवल-पढ़ने योग्य है: यह कॉन्फ़िग, ऑथ प्रोफ़ाइल, मौजूदा catalog
-  स्थिति, और प्रोवाइडर-स्वामित्व वाली catalog पंक्तियाँ पढ़ता है, लेकिन
-  `models.json` को दोबारा नहीं लिखता।
-- `Auth` कॉलम प्रोवाइडर-स्तर का और केवल-पढ़ने योग्य है। यह स्थानीय
-  ऑथ प्रोफ़ाइल मेटाडेटा, env markers, कॉन्फ़िगर की गई प्रोवाइडर keys, local-provider
-  markers, AWS Bedrock env/profile markers, और plugin synthetic-auth metadata से गणना किया जाता है;
-  यह प्रोवाइडर runtime लोड नहीं करता, keychain secrets नहीं पढ़ता, प्रोवाइडर
-  APIs कॉल नहीं करता, या प्रति-मॉडल सटीक execution readiness साबित नहीं करता।
-- `models list --all --provider <id>` plugin manifests या bundled provider catalog metadata से प्रोवाइडर-स्वामित्व वाली static catalog
-  पंक्तियाँ शामिल कर सकता है, भले ही आपने अभी तक उस प्रोवाइडर से
-  authenticate न किया हो। वे पंक्तियाँ तब भी unavailable दिखती हैं
-  जब तक matching auth कॉन्फ़िगर न हो।
-- `models list` प्रोवाइडर catalog discovery धीमी होने पर control plane को responsive रखता है।
-  default और configured views थोड़ी प्रतीक्षा के बाद configured या
-  synthetic model rows पर fallback करते हैं और discovery को
-  background में पूरा होने देते हैं। जब आपको exact full discovered catalog चाहिए और
-  आप provider discovery का इंतज़ार करने को तैयार हैं, तो `--all` उपयोग करें।
-- व्यापक `models list --all` provider runtime supplement hooks लोड किए बिना manifest catalog rows को registry rows पर merge करता है।
-  Provider-filtered manifest fast paths केवल `static` चिह्नित providers का उपयोग करते हैं; `refreshable`
-  चिह्नित providers registry/cache-backed रहते हैं और manifest rows को supplements के रूप में append करते हैं, जबकि
-  `runtime` चिह्नित providers registry/runtime discovery पर रहते हैं।
-- `models list` native model metadata और runtime caps को अलग रखता है। table
-  output में, `Ctx` `contextTokens/contextWindow` दिखाता है जब effective runtime
-  cap native context window से अलग होती है; JSON rows में `contextTokens`
-  शामिल होता है जब कोई provider वह cap expose करता है।
-- `models list --provider <id>` provider id से filter करता है, जैसे `moonshot` या
-  `openai`। यह interactive provider pickers से display labels स्वीकार नहीं करता,
-  जैसे `Moonshot AI`।
-- Model refs को **पहले** `/` पर split करके parse किया जाता है। अगर model ID में `/` शामिल है (OpenRouter-style), provider prefix शामिल करें (उदाहरण: `openrouter/moonshotai/kimi-k2`)।
-- अगर आप provider छोड़ देते हैं, तो OpenClaw पहले input को alias के रूप में resolve करता है, फिर
-  उसी exact model id के लिए unique configured-provider match के रूप में, और उसके बाद ही
-  deprecation warning के साथ configured default provider पर fallback करता है।
-  अगर वह provider अब configured default model expose नहीं करता, तो OpenClaw
-  stale removed-provider default दिखाने के बजाय पहले configured provider/model पर fallback करता है।
-- `models status` auth output में non-secret placeholders (उदाहरण `OPENAI_API_KEY`, `secretref-managed`, `minimax-oauth`, `oauth:chutes`, `ollama-local`) के लिए उन्हें secrets की तरह mask करने के बजाय `marker(<value>)` दिखा सकता है।
+`openclaw models status` निर्धारित डिफ़ॉल्ट/फ़ॉलबैक के साथ प्रमाणीकरण का अवलोकन दिखाता है। Codex जैसे Plugin-स्वामित्व वाले एजेंट रनटाइम के लिए, यह यह भी जाँचता है कि स्वामी Plugin सक्षम है और उसने स्टार्टअप पेलोड सत्यापन पास किया है। मान्य क्रेडेंशियल लेकिन अनुपलब्ध रनटाइम वाला रूट `usable` के बजाय `status: unavailable` रिपोर्ट करता है; JSON आउटपुट में अलग-अलग `authStatus`, `runtimeStatus`, और सीमित रनटाइम निदान शामिल होते हैं। प्रदाता उपयोग स्नैपशॉट उपलब्ध होने पर, OAuth/API-कुंजी स्थिति अनुभाग में प्रदाता उपयोग विंडो और कोटा स्नैपशॉट शामिल होते हैं। वर्तमान उपयोग-विंडो प्रदाता: Anthropic, GitHub Copilot, Gemini CLI, OpenAI, MiniMax, Xiaomi, और z.ai। उपलब्ध होने पर उपयोग प्रमाणीकरण प्रदाता-विशिष्ट हुक से आता है; अन्यथा OpenClaw प्रमाणीकरण प्रोफ़ाइलों, env या कॉन्फ़िगरेशन से मेल खाने वाले OAuth/API-कुंजी क्रेडेंशियल पर वापस जाता है।
 
-### मॉडल स्कैन
-
-`models scan` OpenRouter का public `:free` catalog पढ़ता है और fallback उपयोग के लिए
-candidates को rank करता है। catalog स्वयं public है, इसलिए metadata-only scans को
-OpenRouter key की आवश्यकता नहीं होती।
-
-डिफ़ॉल्ट रूप से OpenClaw live model calls के साथ tool और image support probe करने की कोशिश करता है।
-अगर कोई OpenRouter key कॉन्फ़िगर नहीं है, तो command metadata-only
-output पर fallback करता है और समझाता है कि `:free` models को probes और inference के लिए फिर भी `OPENROUTER_API_KEY` चाहिए।
+`--json` आउटपुट में, `auth.providers` env/कॉन्फ़िगरेशन/स्टोर-सक्षम प्रदाता अवलोकन है, जबकि `auth.oauth` केवल प्रमाणीकरण-स्टोर प्रोफ़ाइल स्वास्थ्य है।
 
 विकल्प:
 
-- `--no-probe` (केवल metadata; कोई config/secrets lookup नहीं)
+| फ़्लैग                      | प्रभाव                                                                                                                                   |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `--json`                  | JSON आउटपुट; प्रमाणीकरण-प्रोफ़ाइल, प्रदाता और स्टार्टअप निदान stderr पर जाते हैं, ताकि stdout को `jq` में पाइप किया जा सके।                            |
+| `--plain`                 | सादा टेक्स्ट आउटपुट।                                                                                                                       |
+| `--check`                 | यदि प्रमाणीकरण की अवधि समाप्त होने वाली/समाप्त हो गई है या चयनित एजेंट रनटाइम अनुपलब्ध है, तो शून्येतर स्थिति के साथ बाहर निकलें: `1` = अनुपलब्ध/समाप्त/अनुपस्थित, `2` = अवधि समाप्त होने वाली। |
+| `--probe`                 | कॉन्फ़िगर की गई प्रमाणीकरण प्रोफ़ाइलों की लाइव जाँच। वास्तविक अनुरोध; टोकन खर्च हो सकते हैं और दर सीमाएँ सक्रिय हो सकती हैं।                                       |
+| `--probe-provider <name>` | केवल एक प्रदाता की जाँच करें।                                                                                                                 |
+| `--probe-profile <id>`    | विशिष्ट प्रमाणीकरण प्रोफ़ाइल आईडी की जाँच करें (दोहराकर या अल्पविराम से अलग करके)।                                                                             |
+| `--probe-timeout <ms>`    | प्रति-जाँच समय-सीमा।                                                                                                                       |
+| `--probe-concurrency <n>` | समवर्ती जाँचें।                                                                                                                       |
+| `--probe-max-tokens <n>`  | जाँच के अधिकतम टोकन (सर्वोत्तम प्रयास)।                                                                                                          |
+| `--agent <id>`            | कॉन्फ़िगर किया गया एजेंट आईडी; `OPENCLAW_AGENT_DIR` को ओवरराइड करता है।                                                                                     |
+
+जाँच पंक्तियाँ प्रमाणीकरण प्रोफ़ाइलों, env क्रेडेंशियल या `models.json` से आ सकती हैं। जाँच स्थिति श्रेणियाँ: `ok`, `auth`, `rate_limit`, `billing`, `timeout`, `format`, `unknown`, `no_model`।
+
+जब कोई जाँच मॉडल कॉल तक कभी नहीं पहुँचती, तब अपेक्षित जाँच विवरण/कारण कोड:
+
+- `excluded_by_auth_order`: एक संग्रहीत प्रोफ़ाइल मौजूद है, लेकिन स्पष्ट `auth.order.<provider>` ने उसे छोड़ दिया है, इसलिए जाँच उसे आज़माने के बजाय उसके बहिष्करण की रिपोर्ट करती है।
+- `missing_credential`, `invalid_expires`, `expired`, `unresolved_ref`: प्रोफ़ाइल मौजूद है, लेकिन पात्र या समाधान योग्य नहीं है।
+- `ineligible_profile`: प्रोफ़ाइल किसी अन्य कारण से प्रदाता कॉन्फ़िगरेशन के साथ असंगत है।
+- `no_model`: प्रदाता प्रमाणीकरण मौजूद है, लेकिन OpenClaw उस प्रदाता के लिए जाँच योग्य मॉडल उम्मीदवार निर्धारित नहीं कर सका।
+
+OpenAI ChatGPT/Codex OAuth समस्या निवारण के लिए, `openclaw models status`, `openclaw models auth list --provider openai`, और `openclaw config get agents.defaults.model --json` यह पुष्टि करने के सबसे तेज़ तरीके हैं कि किसी एजेंट के पास नेटिव Codex रनटाइम के माध्यम से `openai/*` के लिए उपयोग योग्य `openai` OAuth प्रोफ़ाइल है या नहीं। [OpenAI प्रदाता सेटअप](/hi/providers/openai#check-and-recover-codex-oauth-routing) देखें।
+
+### सूची
+
+`openclaw models list` केवल-पढ़ने योग्य है: यह कॉन्फ़िगरेशन, प्रमाणीकरण प्रोफ़ाइलें, मौजूदा कैटलॉग स्थिति और प्रदाता-स्वामित्व वाली कैटलॉग पंक्तियाँ पढ़ता है, लेकिन `models.json` को कभी दोबारा नहीं लिखता।
+
+विकल्प: `--all` (पूरा कैटलॉग), `--local` (स्थानीय मॉडलों तक फ़िल्टर करें), `--provider <id>`, `--json`, `--plain`।
+
+टिप्पणियाँ:
+
+- `Auth` कॉलम केवल-पढ़ने योग्य है। OpenAI जैसे प्रदाता-स्वामित्व वाले मॉडल रूट के लिए, यह प्रत्येक पंक्ति के API/आधार-URL रूट का प्रभावी `auth.order` में पात्र प्रोफ़ाइलों, env/कॉन्फ़िगरेशन क्रेडेंशियल और निर्धारित कमांड-स्कोप वाले SecretRefs से मिलान करता है। किसी ठोस OpenAI पंक्ति की रूट नीति अनुपलब्ध होने पर, प्रदाता-स्तरीय प्रमाणीकरण उधार लेने के बजाय उसकी स्थिति अज्ञात रहती है; केवल-प्रदाता विरासती जाँचें और अन्य प्रदाता प्रदाता-स्तरीय व्यवहार बनाए रखते हैं। Plugin सिंथेटिक-प्रमाणीकरण मेटाडेटा केवल रनटाइम-क्षमता संकेत है, नेटिव खाता प्रमाणीकरण का प्रमाण नहीं, इसलिए सकारात्मक रजिस्ट्री प्रमाण के बिना खाता-निर्भर रूट अज्ञात रहते हैं। यह कमांड प्रदाता रनटाइम लोड नहीं करता, कीचेन सीक्रेट नहीं पढ़ता, प्रदाता API कॉल नहीं करता, या सटीक निष्पादन तत्परता प्रमाणित नहीं करता।
+- `models list --all --provider <id>` में Plugin मैनिफ़ेस्ट या बंडल किए गए प्रदाता कैटलॉग मेटाडेटा की प्रदाता-स्वामित्व वाली स्थिर कैटलॉग पंक्तियाँ शामिल हो सकती हैं, भले ही आपने अभी तक उस प्रदाता के साथ प्रमाणीकरण न किया हो। मेल खाता प्रमाणीकरण कॉन्फ़िगर होने तक वे पंक्तियाँ फिर भी अनुपलब्ध दिखाई देती हैं।
+- प्रदाता कैटलॉग खोज धीमी होने पर `models list` नियंत्रण तल को प्रतिक्रियाशील बनाए रखता है। डिफ़ॉल्ट और कॉन्फ़िगर किए गए दृश्य थोड़ी प्रतीक्षा के बाद कॉन्फ़िगर या सिंथेटिक मॉडल पंक्तियों पर वापस जाते हैं और खोज को पृष्ठभूमि में पूरा होने देते हैं। जब आपको सटीक पूर्ण खोजा गया कैटलॉग चाहिए और आप प्रदाता खोज की प्रतीक्षा करने को तैयार हों, तब `--all` का उपयोग करें।
+- व्यापक `models list --all`, प्रदाता रनटाइम पूरक हुक लोड किए बिना मैनिफ़ेस्ट कैटलॉग पंक्तियों को रजिस्ट्री पंक्तियों पर मर्ज करता है। प्रदाता-फ़िल्टर किए गए मैनिफ़ेस्ट तेज़ पथ केवल `static` चिह्नित प्रदाताओं का उपयोग करते हैं; `refreshable` चिह्नित प्रदाता रजिस्ट्री/कैश-समर्थित रहते हैं और मैनिफ़ेस्ट पंक्तियाँ पूरक के रूप में जोड़ते हैं, जबकि `runtime` चिह्नित प्रदाता रजिस्ट्री/रनटाइम खोज पर बने रहते हैं।
+- `models list` नेटिव मॉडल मेटाडेटा और रनटाइम सीमाओं को अलग रखता है। तालिका आउटपुट में, जब प्रभावी रनटाइम सीमा नेटिव कॉन्टेक्स्ट विंडो से अलग होती है, तब `Ctx`, `contextTokens/contextWindow` दिखाता है; प्रदाता द्वारा वह सीमा उपलब्ध कराए जाने पर JSON पंक्तियों में `contextTokens` शामिल होता है।
+- प्रदाता-स्वामित्व वाले रूट के लिए, `models list` एक तार्किक प्रदाता/मॉडल पंक्ति को चयनित रूट पर प्रक्षेपित करता है। `Input` और `Ctx` केवल सटीक भौतिक-रूट कैटलॉग पंक्ति से आते हैं, जिसमें स्पष्ट कॉन्फ़िगर किए गए तार्किक ओवरराइड अंत में लागू होते हैं; अनिर्धारित रूट चयन सहोदर-रूट मेटाडेटा उधार लेने के बजाय अज्ञात क्षमता फ़ील्ड दिखाता है।
+- `models list --provider <id>` प्रदाता आईडी द्वारा फ़िल्टर करता है, जैसे `moonshot` या `openai`। यह इंटरैक्टिव प्रदाता चयनकर्ताओं के प्रदर्शन लेबल, जैसे `Moonshot AI`, स्वीकार नहीं करता।
+- मॉडल संदर्भों को **पहले** `/` पर विभाजित करके पार्स किया जाता है। यदि मॉडल आईडी में `/` (OpenRouter-शैली) शामिल है, तो प्रदाता उपसर्ग शामिल करें (उदाहरण: `openrouter/moonshotai/kimi-k2`)।
+- यदि आप प्रदाता छोड़ देते हैं, तो OpenClaw इनपुट को पहले उपनाम के रूप में, फिर उस सटीक मॉडल आईडी के लिए अद्वितीय कॉन्फ़िगर-प्रदाता मिलान के रूप में निर्धारित करता है, और केवल उसके बाद बहिष्करण चेतावनी के साथ कॉन्फ़िगर किए गए डिफ़ॉल्ट प्रदाता पर वापस जाता है। यदि वह प्रदाता अब कॉन्फ़िगर किया गया डिफ़ॉल्ट मॉडल उपलब्ध नहीं कराता, तो OpenClaw किसी पुराने हटाए गए-प्रदाता डिफ़ॉल्ट को दिखाने के बजाय पहले कॉन्फ़िगर किए गए प्रदाता/मॉडल पर वापस जाता है।
+- `models status` गैर-सीक्रेट प्लेसहोल्डर (उदाहरण के लिए `OPENAI_API_KEY`, `secretref-managed`, `minimax-oauth`, `oauth:chutes`, `ollama-local`) के लिए प्रमाणीकरण आउटपुट में उन्हें सीक्रेट की तरह छिपाने के बजाय `marker(<value>)` दिखा सकता है।
+
+### डिफ़ॉल्ट / इमेज मॉडल सेट करें
+
+```bash
+openclaw models set <model-or-alias>
+openclaw models set-image <model-or-alias>
+```
+
+`set`, `agents.defaults.model.primary` लिखता है; `set-image`, `agents.defaults.imageModel.primary` लिखता है। दोनों `provider/model` या कॉन्फ़िगर किया गया उपनाम स्वीकार करते हैं। नए चयनित मॉडल को आवश्यकता होने पर `set` Codex/Copilot रनटाइम Plugin इंस्टॉल की मरम्मत भी करता है; `set-image` ऐसा नहीं करता। कोई भी कमांड `--agent` स्वीकार नहीं करता; वे हमेशा एजेंट डिफ़ॉल्ट लिखते हैं।
+
+### स्कैन
+
+`models scan`, OpenRouter का सार्वजनिक `:free` कैटलॉग पढ़ता है और फ़ॉलबैक उपयोग के लिए उम्मीदवारों को क्रम देता है। कैटलॉग स्वयं सार्वजनिक है, इसलिए केवल-मेटाडेटा स्कैन के लिए OpenRouter कुंजी की आवश्यकता नहीं होती।
+
+डिफ़ॉल्ट रूप से OpenClaw लाइव मॉडल कॉल के साथ टूल और इमेज समर्थन की जाँच करने का प्रयास करता है। यदि कोई OpenRouter कुंजी कॉन्फ़िगर नहीं है, तो कमांड केवल-मेटाडेटा आउटपुट पर वापस जाता है और बताता है कि `:free` मॉडलों को जाँच और अनुमान के लिए अभी भी `OPENROUTER_API_KEY` की आवश्यकता होती है।
+
+विकल्प:
+
+- `--no-probe` (केवल मेटाडेटा; कोई कॉन्फ़िगरेशन/सीक्रेट लुकअप नहीं)
 - `--min-params <b>`
 - `--max-age-days <days>`
 - `--provider <name>`
 - `--max-candidates <n>`
-- `--timeout <ms>` (catalog request और per-probe timeout)
+- `--timeout <ms>` (कैटलॉग अनुरोध और प्रति-जाँच समय-सीमा)
 - `--concurrency <n>`
 - `--yes`
 - `--no-input`
@@ -118,87 +118,57 @@ output पर fallback करता है और समझाता है क�
 - `--set-image`
 - `--json`
 
-`--set-default` और `--set-image` को live probes चाहिए; metadata-only scan
-results सूचनात्मक हैं और config पर apply नहीं किए जाते।
+`--set-default` और `--set-image` के लिए लाइव जाँच आवश्यक है; केवल-मेटाडेटा स्कैन परिणाम सूचनात्मक होते हैं और कॉन्फ़िगरेशन पर लागू नहीं किए जाते।
 
-### मॉडल स्थिति
-
-विकल्प:
-
-- `--json`
-- `--plain`
-- `--check` (exit 1=expired/missing, 2=expiring)
-- `--probe` (configured auth profiles का live probe)
-- `--probe-provider <name>` (एक provider probe करें)
-- `--probe-profile <id>` (repeat या comma-separated profile ids)
-- `--probe-timeout <ms>`
-- `--probe-concurrency <n>`
-- `--probe-max-tokens <n>`
-- `--agent <id>` (configured agent id; `OPENCLAW_AGENT_DIR` को override करता है)
-
-`--json` stdout को JSON payload के लिए reserved रखता है। Auth-profile, provider,
-और startup diagnostics stderr पर route किए जाते हैं ताकि scripts stdout को सीधे
-`jq` जैसे tools में pipe कर सकें।
-
-Probe status buckets:
-
-- `ok`
-- `auth`
-- `rate_limit`
-- `billing`
-- `timeout`
-- `format`
-- `unknown`
-- `no_model`
-
-अपेक्षित probe detail/reason-code cases:
-
-- `excluded_by_auth_order`: stored profile मौजूद है, लेकिन explicit
-  `auth.order.<provider>` ने उसे omit किया, इसलिए probe उसे try करने के बजाय
-  exclusion report करता है।
-- `missing_credential`, `invalid_expires`, `expired`, `unresolved_ref`:
-  profile मौजूद है लेकिन eligible/resolvable नहीं है।
-- `no_model`: provider auth मौजूद है, लेकिन OpenClaw उस provider के लिए probeable
-  model candidate resolve नहीं कर सका।
-
-## Aliases + fallbacks
+## उपनाम
 
 ```bash
-openclaw models aliases list
-openclaw models fallbacks list
+openclaw models aliases list [--json] [--plain]
+openclaw models aliases add <alias> <model-or-alias>
+openclaw models aliases remove <alias>
 ```
 
-## ऑथ प्रोफ़ाइलें
+उपनाम प्रत्येक मॉडल प्रविष्टि में `agents.defaults.models.<key>.alias` के रूप में संग्रहीत होते हैं। `add`, `<model-or-alias>` को पहले एक कैननिकल प्रदाता/मॉडल कुंजी में निर्धारित करता है, इसलिए किसी उपनाम को उपनाम देने पर शृंखला बनाने के बजाय वह पुनः इंगित हो जाता है।
+उपनाम जोड़ने से `agents.defaults.modelPolicy.allow` नहीं बदलता या मॉडल ओवरराइड सीमित नहीं होते।
+
+## फ़ॉलबैक
+
+```bash
+openclaw models fallbacks list [--json] [--plain]
+openclaw models fallbacks add <model-or-alias>
+openclaw models fallbacks remove <model-or-alias>
+openclaw models fallbacks clear
+```
+
+`agents.defaults.model.fallbacks` का प्रबंधन करता है। `openclaw models image-fallbacks list|add|remove|clear` समान उपकमांड संरचना वाली समानांतर `agents.defaults.imageModel.fallbacks` सूची का प्रबंधन करता है।
+
+## प्रमाणीकरण प्रोफ़ाइलें
 
 ```bash
 openclaw models auth add
 openclaw models auth list [--provider <id>] [--json]
 openclaw models auth login --provider <id>
 openclaw models auth login --provider openai --profile-id openai:work
+openclaw models auth login-github-copilot
 openclaw models auth paste-api-key --provider <id>
 openclaw models auth setup-token --provider <id>
-openclaw models auth paste-token
+openclaw models auth paste-token --provider <id>
+openclaw models auth order get --provider <id>
+openclaw models auth order set --provider <id> <profileIds...>
+openclaw models auth order clear --provider <id>
 ```
 
-`models auth add` interactive auth helper है। यह provider auth
-flow (OAuth/API key) launch कर सकता है या आपके चुने हुए
-provider के आधार पर manual token paste में guide कर सकता है।
+`models auth add` इंटरैक्टिव प्रमाणीकरण सहायक है। यह आपके चुने गए प्रदाता के आधार पर प्रदाता प्रमाणीकरण प्रवाह (OAuth/API कुंजी) शुरू कर सकता है या मैन्युअल रूप से टोकन पेस्ट करने में आपका मार्गदर्शन कर सकता है।
 
-`models auth list` selected agent के लिए saved auth profiles list करता है,
-token, API-key, या OAuth secret material print किए बिना। एक provider तक
-filter करने के लिए `--provider <id>` का उपयोग करें, जैसे `openai`, और scripting के लिए `--json`।
+`models auth list` टोकन, API कुंजी या OAuth गोपनीय सामग्री प्रिंट किए बिना चयनित एजेंट के लिए सहेजी गई प्रमाणीकरण प्रोफ़ाइल सूचीबद्ध करता है। किसी एक प्रदाता, जैसे `openai`, तक फ़िल्टर करने के लिए `--provider <id>` और स्क्रिप्टिंग के लिए `--json` का उपयोग करें।
 
-`models auth login` provider plugin का auth flow (OAuth/API key) चलाता है। कौन से providers installed हैं, यह देखने के लिए
-`openclaw plugins list` का उपयोग करें।
-किसी specific configured agent store में auth results लिखने के लिए
-`openclaw models auth --agent <id> <subcommand>` का उपयोग करें। parent `--agent` flag
-`add`, `list`, `login`, `paste-api-key`, `setup-token`, `paste-token`, और
-`login-github-copilot` द्वारा माना जाता है।
+`models auth login` प्रदाता Plugin का प्रमाणीकरण प्रवाह (OAuth/API कुंजी) चलाता है। कौन-से प्रदाता इंस्टॉल हैं, यह देखने के लिए `openclaw plugins list` का उपयोग करें। `login` उन प्रदाताओं के लिए `--profile-id <id>` स्वीकार करता है जो लॉगिन के दौरान नामित प्रोफ़ाइल का समर्थन करते हैं (एक ही प्रदाता के एकाधिक लॉगिन अलग रखने के लिए इसका उपयोग करें), किसी विशिष्ट प्रमाणीकरण विधि को चुनने के लिए `--method <id>`, `--method device-code` के शॉर्टकट के रूप में `--device-code`, प्रदाता का अनुशंसित डिफ़ॉल्ट मॉडल लागू करने के लिए `--set-default`, और उस प्रदाता की मौजूदा प्रोफ़ाइल पहले हटाने के लिए `--force` स्वीकार करता है (जब कैश की गई OAuth प्रोफ़ाइल अटक गई हो या आप खाते बदलना चाहते हों, तब इसका उपयोग करें)।
 
-OpenAI models के लिए, `--provider openai` default रूप से ChatGPT/Codex account login होता है।
-`--method api-key` केवल तब उपयोग करें जब आप OpenAI API-key profile जोड़ना चाहते हों,
-आमतौर पर Codex subscription limits के backup के रूप में। पुराने legacy OpenAI Codex prefix auth/profile state को `openai` में migrate करने के लिए `openclaw doctor --fix`
-चलाएँ।
+`models auth login-github-copilot`, `models auth login --provider github-copilot --method device` (GitHub डिवाइस प्रवाह) का शॉर्टकट है; यह बिना संकेत दिए किसी मौजूदा प्रोफ़ाइल को अधिलेखित करने के लिए `--yes` स्वीकार करता है।
+
+प्रमाणीकरण परिणामों को किसी विशिष्ट कॉन्फ़िगर किए गए एजेंट स्टोर में लिखने के लिए `openclaw models auth --agent <id> <subcommand>` का उपयोग करें। पैरेंट `--agent` फ़्लैग का पालन `add`, `list`, `login`, `paste-api-key`, `setup-token`, `paste-token`, `login-github-copilot`, और `order get`/`set`/`clear` द्वारा किया जाता है।
+
+OpenAI मॉडल के लिए, `--provider openai` डिफ़ॉल्ट रूप से ChatGPT/Codex खाता लॉगिन का उपयोग करता है। OpenAI API-कुंजी प्रोफ़ाइल जोड़ने के लिए केवल तभी `--method api-key` का उपयोग करें, जब आप आमतौर पर Codex सदस्यता सीमाओं के लिए बैकअप चाहते हों। पुराने विरासती OpenAI Codex उपसर्ग प्रमाणीकरण/प्रोफ़ाइल की स्थिति को `openai` में माइग्रेट करने के लिए `openclaw doctor --fix` चलाएँ।
 
 उदाहरण:
 
@@ -209,35 +179,19 @@ openclaw models auth paste-api-key --provider openai
 openclaw models auth list --provider openai
 ```
 
-नोट्स:
+टिप्पणियाँ:
 
-- `login` उन providers के लिए `--profile-id <id>` स्वीकार करता है जो login के दौरान named
-  profiles support करते हैं। इसे same
-  provider के multiple logins को अलग रखने के लिए उपयोग करें।
-- `paste-api-key` कहीं और generate की गई API keys स्वीकार करता है, key
-  value के लिए prompt करता है, और उसे default profile id `<provider>:manual` में लिखता है जब तक आप
-  `--profile-id` पास नहीं करते। automation में, key को stdin पर pipe करें, उदाहरण के लिए
-  `printf "%s\n" "$OPENAI_API_KEY" | openclaw models auth paste-api-key --provider openai`.
-- `setup-token` और `paste-token` उन providers के लिए generic token commands बने रहते हैं
-  जो token auth methods expose करते हैं।
-- `setup-token` को interactive TTY चाहिए और provider की token-auth
-  method चलाता है (जब वह कोई expose करता है तो उस provider की `setup-token` method पर default करता है)।
-- `paste-token` कहीं और या automation से generate की गई token string स्वीकार करता है।
-- `paste-token` को `--provider` चाहिए, default रूप से token value के लिए prompt करता है,
-  और उसे default profile id `<provider>:manual` में लिखता है जब तक आप
-  `--profile-id` पास नहीं करते।
-- automation में, token को argument के रूप में पास करने के बजाय stdin पर pipe करें ताकि
-  provider credentials shell history या process lists में न दिखें।
-- `paste-token --expires-in <duration>` `365d` या `12h` जैसी relative duration से
-  absolute token expiry store करता है।
-- `openai` के लिए, OpenAI API keys और ChatGPT/OAuth token material
-  अलग auth shapes हैं। `sk-...` OpenAI API keys के लिए `paste-api-key` और
-  केवल token auth material के लिए `paste-token` उपयोग करें।
-- Anthropic note: Anthropic staff ने हमें बताया कि OpenClaw-style Claude CLI usage फिर से allowed है, इसलिए OpenClaw Claude CLI reuse और `claude -p` usage को इस integration के लिए sanctioned मानता है जब तक Anthropic कोई नई policy publish नहीं करता।
-- Anthropic `setup-token` / `paste-token` supported OpenClaw token path के रूप में उपलब्ध रहते हैं, लेकिन OpenClaw अब उपलब्ध होने पर Claude CLI reuse और `claude -p` को prefer करता है।
+- `paste-api-key` कहीं और जनरेट की गई API कुंजियाँ स्वीकार करता है, कुंजी मान के लिए संकेत देता है, और जब तक आप `--profile-id` पास नहीं करते, इसे डिफ़ॉल्ट प्रोफ़ाइल आईडी `<provider>:manual` में लिखता है। स्वचालन में, कुंजी को stdin पर पाइप करें, उदाहरण के लिए `printf "%s\n" "$OPENAI_API_KEY" | openclaw models auth paste-api-key --provider openai`।
+- `setup-token` और `paste-token` टोकन प्रमाणीकरण विधियाँ उपलब्ध कराने वाले प्रदाताओं के लिए सामान्य टोकन कमांड बने रहते हैं।
+- `setup-token` के लिए इंटरैक्टिव TTY आवश्यक है और यह प्रदाता की टोकन-प्रमाणीकरण विधि चलाता है (यदि वह प्रदाता `setup-token` विधि उपलब्ध कराता है, तो डिफ़ॉल्ट रूप से उसका उपयोग करता है)।
+- `paste-token` के लिए `--provider` आवश्यक है, यह डिफ़ॉल्ट रूप से टोकन मान के लिए संकेत देता है, और जब तक आप `--profile-id` पास नहीं करते, इसे डिफ़ॉल्ट प्रोफ़ाइल आईडी `<provider>:manual` में लिखता है। स्वचालन में, टोकन को तर्क के रूप में पास करने के बजाय stdin पर पाइप करें, ताकि प्रदाता क्रेडेंशियल शेल इतिहास या प्रक्रिया सूचियों में दिखाई न दें।
+- `paste-token --expires-in <duration>`, `365d` या `12h` जैसी सापेक्ष अवधि से टोकन की पूर्ण समाप्ति संग्रहीत करता है।
+- `openai` के लिए, OpenAI API कुंजियाँ और ChatGPT/OAuth टोकन सामग्री अलग-अलग प्रमाणीकरण प्रारूप हैं। `sk-...` OpenAI API कुंजियों के लिए `paste-api-key` और केवल टोकन प्रमाणीकरण सामग्री के लिए `paste-token` का उपयोग करें।
+- Anthropic: `setup-token`/`paste-token`, `anthropic` के लिए समर्थित OpenClaw प्रमाणीकरण पथ हैं, लेकिन उपलब्ध होने पर OpenClaw होस्ट पर Claude CLI (`claude -p`) के पुनः उपयोग को प्राथमिकता देता है।
+- `auth order get/set/clear` एक प्रदाता के लिए प्रति-एजेंट प्रमाणीकरण प्रोफ़ाइल क्रम ओवरराइड प्रबंधित करता है, जो `auth-state.json` में संग्रहीत होता है (`auth.order.<provider>` कॉन्फ़िगरेशन कुंजी से अलग)। `set` प्राथमिकता क्रम में एक या अधिक प्रोफ़ाइल आईडी लेता है; `clear` कॉन्फ़िगरेशन/राउंड-रॉबिन क्रम पर वापस जाता है।
 
 ## संबंधित
 
-- [CLI reference](/hi/cli)
-- [Model selection](/hi/concepts/model-providers)
-- [Model failover](/hi/concepts/model-failover)
+- [CLI संदर्भ](/hi/cli)
+- [मॉडल चयन](/hi/concepts/model-providers)
+- [मॉडल फ़ेलओवर](/hi/concepts/model-failover)

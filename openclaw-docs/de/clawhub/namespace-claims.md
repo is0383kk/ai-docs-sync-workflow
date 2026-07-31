@@ -1,118 +1,106 @@
 ---
 read_when:
-    - Beanspruchen einer Organisation, Marke, eines Paket-Scopes, Owner-Handles, Skill-Slugs oder Paket-Namespace
-    - Einen Namespace auflösen, der bereits beansprucht oder reserviert ist
-    - Entscheiden, ob ein Bericht, Einspruch oder Namespace-Anspruch verwendet werden soll
+    - Beanspruchen einer Organisation, Marke, eines Paketbereichs, Eigentümer-Handles, Skill-Slugs oder Paket-Namensraums
+    - Auflösen eines bereits beanspruchten oder reservierten Namespace
+    - Entscheidung zwischen Meldung, Einspruch und Namespace-Anspruch
 sidebarTitle: Org and Namespace Claims
-summary: So fordern Sie eine ClawHub-Prüfung bei Streitfällen um Organisations-, Marken-, Owner-Handle-, Package-Scope-, Skill-Slug- oder Namespace-Eigentum an.
+summary: So beantragen Sie eine ClawHub-Prüfung bei Streitfällen über die Inhaberschaft von Organisationen, Marken, Inhaber-Handles, Paket-Scopes, Skill-Slugs oder Namespaces.
 title: Organisations- und Namespace-Ansprüche
 x-i18n:
-    generated_at: "2026-07-04T20:28:04Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T18:16:09Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 77a4d8090b55298c401154d116d93d4f8139d40983a45982288d8e48bcea40fb
     source_path: clawhub/namespace-claims.md
     workflow: 16
 ---
 
-# Organisations- und Namespace-Ansprüche
+# Ansprüche auf Organisationen und Namespaces
 
-ClawHub verwendet Owner-Handles, Org-Handles, Skill-Slugs, Plugin-Paketnamen und
-Paket-Scopes als öffentliche Namespaces. Wenn ein Namespace zu einem
-realen Projekt, einer Marke, einem Paket-Ökosystem oder einer Organisation zu
-gehören scheint, aber auf ClawHub bereits beansprucht, reserviert, irreführend
-oder umstritten ist, bitten Sie das Team, ihn mit dem
-[Org-/Namespace-Claim-Issue-Formular](https://github.com/openclaw/clawhub/issues/new?template=org-namespace-claim.yml)
-zu prüfen.
+ClawHub verwendet Inhaber-Handles, Organisations-Handles, Skill-Slugs, Plugin-Paketnamen und
+Paket-Scopes als öffentliche Namespaces. Wenn ein Namespace offenbar zu einem
+realen Projekt, einer Marke, einem Paket-Ökosystem oder einer Organisation gehört, auf
+ClawHub jedoch bereits beansprucht, reserviert, irreführend oder umstritten ist, bitten Sie das Personal um eine Überprüfung
+mithilfe des
+[Formulars für Ansprüche auf Organisationen/Namespaces](https://github.com/openclaw/clawhub/issues/new?template=org-namespace-claim.yml).
 
-Verwenden Sie diesen Weg für öffentliche, nicht sensible Ownership-Prüfungen.
-Verwenden Sie keine In-Product-Meldungen oder das Formular für Konto-Einsprüche
-für Namespace-Ansprüche.
+Verwenden Sie diesen Weg für öffentliche, nicht vertrauliche Überprüfungen der Inhaberschaft. Verwenden Sie für Namespace-Ansprüche weder produktinterne
+Meldungen noch das Einspruchsformular für Konten.
 
-## Wann Sie einen Anspruch eröffnen sollten
+## Wann Sie einen Anspruch einreichen sollten
 
-Eröffnen Sie einen Namespace-Anspruch, wenn Sie glauben, dass das ClawHub-Team
-prüfen sollte, ob ein Namespace aufgrund realer Ownership reserviert,
-übertragen, umbenannt, ausgeblendet, unter Quarantäne gestellt, aliasiert oder
-anderweitig geändert werden sollte.
+Reichen Sie einen Namespace-Anspruch ein, wenn ClawHub-Mitarbeiter Ihrer Ansicht nach prüfen sollten, ob ein
+Namespace aufgrund realer Inhaberschaft reserviert, übertragen, umbenannt, ausgeblendet, unter Quarantäne gestellt, mit einem Alias versehen
+oder anderweitig geändert werden sollte.
 
-Beispiele sind:
+Beispiele:
 
-- ein Org-Handle, das Ihrer GitHub-Organisation, Ihrem Projekt, Ihrem Unternehmen
-  oder Ihrer Community entspricht
-- ein Paket-Scope wie `@example-org/*`, unter dem nur der passende ClawHub-Owner
-  veröffentlichen sollte
-- ein Skill-Slug oder Plugin-Paketname, der ein Projekt zu imitieren scheint
-- eine Marke, ein Warenzeichen, eine Projektumbenennung oder ein Streit über die
-  Pakethistorie
-- ein gelöschter, inaktiver oder nicht erreichbarer Owner, der den rechtmäßigen
-  Namespace-Owner blockiert
+- ein Organisations-Handle, das Ihrer GitHub-Organisation, Ihrem Projekt, Ihrem Unternehmen oder Ihrer Community entspricht
+- ein Paket-Scope wie `@example-org/*`, unter dem ausschließlich der
+  entsprechende ClawHub-Inhaber veröffentlichen sollte
+- ein Skill-Slug oder Plugin-Paketname, der offenbar die Identität eines Projekts vortäuscht
+- eine Streitigkeit über eine Marke, ein Warenzeichen, die Umbenennung eines Projekts oder den Verlauf eines Pakets
+- ein gelöschter, inaktiver oder nicht erreichbarer Inhaber, der den rechtmäßigen Namespace-Inhaber
+  blockiert
 
-Wenn der Eintrag über den Ownership-Streit hinaus unsicher, bösartig oder
-irreführend ist, befolgen Sie zusätzlich die entsprechende Moderations- oder
-Sicherheitsanleitung. Das Namespace-Claim-Formular ist für Ownership-Prüfungen
-gedacht, nicht für die dringende Offenlegung von Schwachstellen.
+Wenn der Eintrag über die Inhaberschaftsstreitigkeit hinaus unsicher, bösartig oder irreführend ist,
+befolgen Sie außerdem die entsprechende Moderations- oder Sicherheitsanleitung. Das Formular für Namespace-Ansprüche
+dient der Überprüfung der Inhaberschaft, nicht der dringenden Offenlegung von Sicherheitslücken.
 
-## Bevor Sie einreichen
+## Vor dem Einreichen
 
-Bestätigen Sie zuerst, dass Sie mit dem Owner veröffentlichen, der zum Namespace
-passt. Für Plugin-Pakete müssen scoped Namen wie
-`@example-org/example-plugin` als passender Owner `example-org` veröffentlicht
-werden.
+Vergewissern Sie sich zunächst, dass Sie mit dem Inhaber veröffentlichen, der dem Namespace entspricht.
+Bei Plugin-Paketen müssen Scoped-Namen wie `@example-org/example-plugin`
+unter dem entsprechenden Inhaber `example-org` veröffentlicht werden.
 
-Wenn Sie den aktuellen Owner verwalten können, korrigieren Sie den Namespace
-direkt, indem Sie die betroffene Ressource veröffentlichen, umbenennen,
-übertragen, ausblenden oder löschen. Verwenden Sie einen Anspruch, wenn Sie den
-aktuellen Owner nicht verwalten können oder wenn das Team einen Streit klären
-muss.
+Wenn Sie den aktuellen Inhaber verwalten können, korrigieren Sie den Namespace direkt, indem Sie die betroffene Ressource veröffentlichen,
+umbenennen, übertragen, ausblenden oder löschen. Reichen Sie einen Anspruch ein,
+wenn Sie den aktuellen Inhaber nicht verwalten können oder Mitarbeiter eine
+Streitigkeit klären müssen.
 
-## Einzureichende Nachweise
+## Beizufügende Nachweise
 
-Verwenden Sie öffentliche, nicht sensible Nachweise. Hilfreiche Belege sind:
+Verwenden Sie öffentliche, nicht vertrauliche Nachweise. Hilfreiche Belege sind unter anderem:
 
-- GitHub-Org-, Repo-, Release- oder Maintainer-Historie
+- Verlauf der GitHub-Organisation, des Repositorys, der Releases oder der Maintainer
 - offizielle Projektdokumentation, die den Namespace nennt
-- Domain- oder offizieller E-Mail-Domain-Nachweis
-- Kontrolle über npm-, PyPI-, crates.io- oder andere Paket-Registry-Scopes
-- Nachweise zu Warenzeichen, Marke oder Projekt-Ownership, die öffentlich
+- Nachweis über eine Domain oder offizielle E-Mail-Domain
+- Kontrolle über den Scope bei npm, PyPI, crates.io oder einer anderen Paket-Registry
+- Nachweise über Warenzeichen, Marken- oder Projekteigentum, die öffentlich
   besprochen werden können
-- Quell-Repository-Historie, Pakethistorie oder öffentliche Hinweise auf
-  Umbenennungen
-- Links zum umstrittenen ClawHub-Owner, Skill, Plugin, Paket oder Issue
+- Verlauf des Quell-Repositorys, Paketverlauf oder öffentliche Hinweise zur Umbenennung
+- Links zum umstrittenen ClawHub-Inhaber, Skill, Plugin, Paket oder Issue
 
-Erklären Sie, was jeder Link belegt. Das Team sollte die Beziehung verstehen
-können, ohne private Zugangsdaten oder Geheimnisse zu benötigen.
+Erläutern Sie, was jeder Link belegt. Mitarbeiter sollten die
+Beziehung nachvollziehen können, ohne private Anmeldedaten oder Geheimnisse zu benötigen.
 
-## Was Sie nicht einreichen sollten
+## Was Sie nicht angeben sollten
 
-Veröffentlichen Sie keine Geheimnisse oder privaten Nachweise in einem
-öffentlichen GitHub-Issue. Fügen Sie nichts davon ein:
+Veröffentlichen Sie keine Geheimnisse oder privaten Nachweise in einem öffentlichen GitHub-Issue. Geben Sie Folgendes nicht an:
 
-- API-Tokens, Signaturschlüssel oder Zugangsdaten
-- DNS-Challenge-Tokens
-- private juristische Dateien oder Verträge
+- API-Token, Signaturschlüssel oder Anmeldedaten
+- DNS-Challenge-Token
+- private Rechtsunterlagen oder Verträge
 - persönliche Identitätsdokumente
 - private E-Mails, private Sicherheitsberichte oder vertrauliche Kundendaten
 
-Das Claim-Formular fragt, ob sensible Nachweise einen privaten Team-Kanal
-benötigen. Verwenden Sie diese Option, statt sensibles Material öffentlich zu
-posten.
+Im Anspruchsformular wird gefragt, ob vertrauliche Nachweise einen privaten Kanal zum Personal erfordern.
+Verwenden Sie diese Option, statt vertrauliches Material öffentlich zu veröffentlichen.
 
 ## Mögliche Ergebnisse
 
-Je nach Nachweisen und Risiko kann das ClawHub-Team einen Namespace reservieren,
-Ownership übertragen, eine Ressource umbenennen, einen bestehenden Eintrag
-ausblenden oder unter Quarantäne stellen, einen Alias oder eine Weiterleitung
-hinzufügen, weitere Nachweise anfordern oder die Anfrage ablehnen.
+Je nach Nachweisen und Risiko können ClawHub-Mitarbeiter einen Namespace reservieren,
+die Inhaberschaft übertragen, eine Ressource umbenennen, einen bestehenden Eintrag ausblenden oder unter Quarantäne stellen,
+einen Alias oder eine Weiterleitung hinzufügen, weitere Nachweise anfordern oder die Anfrage ablehnen.
 
-Die Namespace-Prüfung garantiert nicht, dass jeder passende Name übertragen
-wird. Das Team wägt öffentliche Nachweise, bestehende Nutzung, Sicherheitsrisiko
-und Auswirkungen auf Benutzer ab.
+Die Überprüfung eines Namespace garantiert nicht, dass jeder übereinstimmende Name übertragen wird.
+Das Personal wägt öffentliche Nachweise, bestehende Nutzung, Sicherheitsrisiken und Auswirkungen auf Benutzer ab.
 
 ## Verwandte Dokumentation
 
 - [Veröffentlichen](/de/clawhub/publishing)
-- [Fehlerbehebung](/clawhub/troubleshooting#publish-fails-because-a-namespace-is-claimed-or-reserved)
-- [Moderation und Kontosicherheit](/clawhub/moderation)
-- [Sicherheit](/clawhub/security)
+- [Fehlerbehebung](/de/clawhub/troubleshooting#publish-fails-because-a-namespace-is-claimed-or-reserved)
+- [Moderation und Kontosicherheit](/de/clawhub/moderation)
+- [Sicherheit](/de/clawhub/security)

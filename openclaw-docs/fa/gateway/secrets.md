@@ -1,111 +1,120 @@
 ---
 read_when:
-    - پیکربندی SecretRefs برای اعتبارنامه‌های ارائه‌دهنده و ارجاع‌های `auth-profiles.json`
-    - بارگذاری مجدد، حسابرسی، پیکربندی و اعمال امن اسرار عملیاتی در تولید
-    - درک شکست سریع در راه‌اندازی، فیلترکردن سطح‌های غیرفعال و رفتار آخرین وضعیت سالم شناخته‌شده
+    - پیکربندی SecretRefها برای اعتبارنامه‌های ارائه‌دهنده و ارجاع‌های `auth-profiles.json`
+    - بارگذاری مجدد، ممیزی، پیکربندی و اعمال امن اسرار عملیاتی در محیط تولید
+    - درک توقف سریع هنگام راه‌اندازی، پالایش سطوح غیرفعال و رفتار آخرین وضعیت سالم شناخته‌شده
 sidebarTitle: Secrets management
-summary: 'مدیریت اسرار: قرارداد SecretRef، رفتار اسنپ‌شات زمان اجرا، و پاک‌سازی یک‌طرفه امن'
+summary: 'مدیریت اسرار: قرارداد SecretRef، رفتار اسنپ‌شات زمان اجرا و پاک‌سازی امن یک‌طرفه'
 title: مدیریت اسرار
 x-i18n:
-    generated_at: "2026-06-27T17:49:48Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T16:32:14Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 6d90346b1e4abc39cf1ab314c242f0b976aa83ee06f6dfeb787aafb19fa90de9
+    source_hash: d10989ebbce367c68d28768244d4e3649028af5ab63c9523974352c270a3c55e
     source_path: gateway/secrets.md
     workflow: 16
 ---
 
-OpenClaw از SecretRefs افزایشی پشتیبانی می‌کند تا اعتبارنامه‌های پشتیبانی‌شده لازم نباشد به‌صورت متن ساده در پیکربندی ذخیره شوند.
+OpenClaw از SecretRefهای افزایشی پشتیبانی می‌کند تا اعتبارنامه‌های پشتیبانی‌شده نیازی به ذخیره‌شدن به‌صورت متن ساده در پیکربندی نداشته باشند.
 
 <Note>
-متن ساده همچنان کار می‌کند. SecretRefs برای هر اعتبارنامه به‌صورت اختیاری فعال می‌شوند.
+متن ساده همچنان کار می‌کند. استفاده از SecretRef برای هر اعتبارنامه اختیاری است.
 </Note>
 
 <Warning>
-اعتبارنامه‌های متن ساده اگر در فایل‌هایی ذخیره شوند که agent بتواند آن‌ها را بررسی کند، همچنان برای agent خواندنی می‌مانند؛ از جمله `openclaw.json`، `auth-profiles.json`، `.env`، یا فایل‌های تولیدشده‌ی `agents/*/agent/models.json`. SecretRefs این دامنه‌ی اثر محلی را فقط پس از مهاجرت همه‌ی اعتبارنامه‌های پشتیبانی‌شده و زمانی کاهش می‌دهد که `openclaw secrets audit --check` هیچ باقیمانده‌ای از secret متن ساده گزارش نکند.
+اگر اعتبارنامه‌های متن ساده در فایل‌هایی قرار داشته باشند که عامل بتواند آن‌ها را بررسی کند، همچنان برای عامل خواندنی خواهند بود؛ از جمله `openclaw.json`، `auth-profiles.json`، `.env` یا فایل‌های `agents/*/agent/models.json` تولیدشده. SecretRefها تنها زمانی دامنهٔ اثر محلی را کاهش می‌دهند که همهٔ اعتبارنامه‌های پشتیبانی‌شده مهاجرت کرده باشند و `openclaw secrets audit --check` هیچ باقی‌ماندهٔ متن ساده‌ای گزارش نکند.
 </Warning>
 
-## اهداف و مدل runtime
+## مدل زمان اجرا
 
-Secrets به یک snapshot runtime درون‌حافظه‌ای resolve می‌شوند.
+- رازها هنگام فعال‌سازی، به‌صورت فوری و نه با تأخیر در مسیرهای درخواست، در یک اسنپ‌شات درون‌حافظه‌ای زمان اجرا resolve می‌شوند.
+- راه‌اندازی سرد Gateway، خرابی قابل‌تلاش‌مجدد SecretRef را به یک مالک شناخته‌شدهٔ غیر Gateway محدود می‌کند، مشروط بر اینکه آن مالک از جداسازی پشتیبانی کند. کلاس‌های مالک نگاشت‌شده شامل ارائه‌دهندگان مدل و Skills، ارائه‌دهندگان رسانه/TTS/cron، پروفایل‌های احراز هویت واجد شرایط، حافظهٔ هر عامل، SSH سندباکس، حساب‌های کانال و مسیرهای Plugin اعلام‌شده در مانیفست هستند. Gateway راه‌اندازی می‌شود، مالک را به‌صورت پیکربندی‌شده اما در دسترس‌نبودنی ثبت می‌کند و یک هشدار افت عملکردِ سانسورشده منتشر می‌کند. احراز هویت ورودی Gateway، ارجاع‌ها یا مقادیر resolveشدهٔ دارای ساختار نامعتبر، مالکان fail-closed و ارجاع‌هایی که مالک زمان اجرای آن‌ها نگاشت نشده است، همچنان باعث شکست راه‌اندازی می‌شوند.
+- بارگذاری مجدد، هر مالک نگاشت‌شده را مستقل اعتبارسنجی می‌کند و سپس یک اسنپ‌شات اتمی منتشر می‌کند. مالکان سالم تازه‌سازی می‌شوند. یک مالک واجد شرایطِ ناموفق، تنها وقتی آخرین مقدار سالم شناخته‌شدهٔ خود را حفظ می‌کند و stale می‌شود که هویت ارجاع‌ها، تعریف ارائه‌دهندگان و قرارداد کامل و غیرمحرمانهٔ مالک بدون تغییر مانده باشند؛ مالک ناموفقِ تغییرکرده یا جدید cold می‌شود. یک خرابی سخت‌گیرانه، بارگذاری مجدد را رد و اسنپ‌شات فعال را حفظ می‌کند.
+- نقض خط‌مشی‌ها (برای مثال ترکیب پروفایل احراز هویت در حالت OAuth با ورودی SecretRef) پیش از تعویض زمان اجرا باعث شکست فعال‌سازی می‌شود.
+- درخواست‌های زمان اجرا فقط اسنپ‌شات فعال درون‌حافظه‌ای را می‌خوانند. اعتبارنامه‌های SecretRef ارائه‌دهندهٔ مدل، تا زمان خروج از فرایند به‌صورت sentinelهای محلیِ فرایند از ذخیره‌سازی احراز هویت و گزینه‌های استریم عبور می‌کنند. مسیرهای تحویل خروجی (تحویل پاسخ/رشته در Discord و ارسال کنش در Telegram) نیز همین اسنپ‌شات را می‌خوانند و برای هر ارسال، ارجاع‌ها را دوباره resolve نمی‌کنند.
 
-- Resolution در زمان activation با اشتیاق انجام می‌شود، نه به‌صورت lazy در مسیرهای درخواست.
-- Startup وقتی یک SecretRef عملا فعال resolve نشود، سریع fail می‌شود.
-- Reload از swap اتمیک استفاده می‌کند: موفقیت کامل، یا حفظ آخرین snapshot سالم شناخته‌شده.
-- نقض‌های policy مربوط به SecretRef (برای مثال auth profileهای حالت OAuth همراه با ورودی SecretRef) پیش از swap runtime باعث fail شدن activation می‌شوند.
-- درخواست‌های runtime فقط از snapshot فعال درون‌حافظه‌ای می‌خوانند.
-- پس از نخستین activation/load موفق پیکربندی، مسیرهای کد runtime تا زمانی که یک reload موفق آن را swap کند، همان snapshot فعال درون‌حافظه‌ای را می‌خوانند.
-- مسیرهای تحویل خروجی نیز از همان snapshot فعال می‌خوانند (برای مثال تحویل پاسخ/thread در Discord و ارسال action در Telegram)؛ آن‌ها SecretRefs را در هر ارسال دوباره resolve نمی‌کنند.
+این کار اختلال ارائه‌دهندهٔ راز را از مسیرهای داغ درخواست دور نگه می‌دارد.
 
-این کار قطعی‌های secret-provider را از مسیرهای داغ درخواست دور نگه می‌دارد.
+محافظت از ورودی Gateway، پیکربندی یا مقادیر resolveشدهٔ دارای ساختار نامعتبر، نقض خط‌مشی‌ها و مالکیت ناشناخته همچنان به‌صورت fail-closed عمل می‌کنند. مالکان جداشده هرگز به منبع اعتبارنامه‌ای با تقدم کمتر بازنمی‌گردند.
 
-## مرز دسترسی agent
+## تزریق هنگام خروج (sentinelها)
 
-SecretRefs از ماندگار شدن اعتبارنامه‌ها در پیکربندی پشتیبانی‌شده و سطح‌های model تولیدشده جلوگیری می‌کنند، اما مرز ایزولاسیون فرایند نیستند. اگر یک اعتبارنامه‌ی متن ساده روی دیسک در مسیری باقی بماند که agent بتواند آن را بخواند، agent می‌تواند با استفاده از ابزارهای file یا shell برای بررسی آن فایل، redaction سطح API را دور بزند.
+برای اعتبارنامه‌های ارائه‌دهندهٔ مدل که بر SecretRef متکی هستند، OpenClaw هنگام resolve احراز هویت مدل یک sentinel مات و محلیِ فرایند ایجاد می‌کند. بنابراین ذخیره‌سازی احراز هویت، گزینه‌های استریم، پیکربندی SDK، گزارش‌ها، اشیای خطا و بیشتر بررسی‌های درونی زمان اجرا مقداری مانند `oc-sent-v1-...` را می‌بینند، نه اعتبارنامهٔ ارائه‌دهنده را. واکشی محافظت‌شدهٔ مدل و کاوش‌های سلامت مدیریت‌شدهٔ ارائه‌دهندهٔ محلی، بلافاصله پیش از خروج هر درخواست از فرایند، sentinelهای شناخته‌شده را در مقادیر URL و سرآیند جایگزین می‌کنند.
 
-برای استقرارهای production که فایل‌های قابل‌دسترسی برای agent در scope هستند، مهاجرت SecretRef را فقط وقتی کامل بدانید که همه‌ی موارد زیر درست باشند:
+مقادیر ناشناخته با شکل sentinel پیش از هرگونه فعالیت شبکه‌ای به‌صورت fail-closed رد می‌شوند. OpenClaw به‌جای ارسال یک sentinel حل‌نشده به ارائه‌دهنده، از ارسال درخواست خودداری می‌کند. مقادیر راز resolveشده نیز به‌عنوان اقدامی دفاعی چندلایه، برای سانسور دقیق مقدار در گزارش‌ها ثبت می‌شوند.
 
-- اعتبارنامه‌های پشتیبانی‌شده به‌جای مقادیر متن ساده از SecretRefs استفاده می‌کنند
-- باقیمانده‌ی متن ساده‌ی legacy از `openclaw.json`، `auth-profiles.json`، `.env` و فایل‌های تولیدشده‌ی `models.json` پاک شده است
-- `openclaw secrets audit --check` پس از مهاجرت clean است
-- هر اعتبارنامه‌ی باقی‌مانده‌ی پشتیبانی‌نشده یا چرخشی با ایزولاسیون سیستم‌عامل، ایزولاسیون container، یا یک proxy اعتبارنامه‌ی خارجی محافظت می‌شود
+آداپتورهای ارائه‌دهنده از آخرین نقطهٔ تزریقی که SDK آن‌ها پشتیبانی می‌کند استفاده می‌کنند:
 
-به همین دلیل workflow مربوط به audit/configure/apply یک gate مهاجرت امنیتی است، نه فقط یک helper برای راحتی.
+- SDKهایی که گزینهٔ واکشی سفارشی دارند، واکشی محافظت‌شدهٔ OpenClaw را دریافت می‌کنند؛ بنابراین SDK، sentinel را حفظ می‌کند.
+- SDKهایی که گزینهٔ واکشی سفارشی ندارند، sentinel را بلافاصله پیش از ساخت کلاینت باز می‌کنند. استریم‌های ارائه‌دهندهٔ متعلق به Plugin و هارنس‌های عامل در آخرین نقطهٔ تحویل متعلق به هسته آن را باز می‌کنند، زیرا این انتقال‌دهنده‌ها از واکشی محافظت‌شدهٔ OpenClaw استفاده نمی‌کنند.
+
+sentinelها افشای متن ساده را در زنجیرهٔ فراخوانی مدل کاهش می‌دهند، اما جداسازی فرایند نیستند. مقدار واقعی همچنان در حافظهٔ همان فرایند وجود دارد و در مرز نهایی آداپتور ظاهر می‌شود. اعتبارنامه‌های محیطی ساده که از طریق SecretRef پیکربندی نشده‌اند، همچنان متن ساده هستند و خارج از این سازوکار قرار می‌گیرند.
+
+برای غیرفعال‌کردن ساخت sentinel هنگام پاسخ‌گویی به رخداد یا عیب‌یابی سازگاری، `OPENCLAW_SECRET_SENTINELS=off` را تنظیم کنید (`0` یا `false` نیز، بدون حساسیت به بزرگی و کوچکی حروف، پذیرفته می‌شوند). این کلید توقف، ثبت سانسور دقیق مقدار را غیرفعال نمی‌کند.
+
+## مرز دسترسی عامل
+
+SecretRefها از ماندگارشدن اعتبارنامه‌ها در پیکربندی و فایل‌های مدل تولیدشده جلوگیری می‌کنند، اما مرز جداسازی فرایند نیستند. اعتبارنامهٔ متن ساده‌ای که در مسیری خواندنی برای عامل روی دیسک باقی مانده باشد، همچنان از طریق ابزارهای فایل یا پوسته قابل‌خواندن است و سانسور در سطح API را دور می‌زند.
+
+برای استقرارهای عملیاتی که فایل‌های قابل‌دسترسی برای عامل در دامنه قرار دارند، مهاجرت را فقط زمانی کامل در نظر بگیرید که همهٔ موارد زیر برقرار باشند:
+
+- اعتبارنامه‌های پشتیبانی‌شده به‌جای مقادیر متن ساده از SecretRef استفاده کنند.
+- باقی‌ماندهٔ قدیمیِ متن ساده از `openclaw.json`، `auth-profiles.json`، `.env` و فایل‌های `models.json` تولیدشده پاک شده باشد.
+- `openclaw secrets audit --check` پس از مهاجرت پاک باشد.
+- هر اعتبارنامهٔ پشتیبانی‌نشده یا در حال چرخشِ باقی‌مانده با جداسازی سیستم‌عامل، جداسازی کانتینر یا یک پروکسی اعتبارنامهٔ خارجی محافظت شود.
+
+به همین دلیل، گردش‌کار ممیزی/پیکربندی/اعمال یک دروازهٔ مهاجرت امنیتی است، نه صرفاً یک ابزار کمکی برای سهولت کار.
 
 <Warning>
-SecretRefs فایل‌های دلخواه خواندنی را امن نمی‌کند. Backupها، configهای کپی‌شده، catalogهای model تولیدشده‌ی قدیمی، و کلاس‌های اعتبارنامه‌ی پشتیبانی‌نشده باید تا زمان حذف، انتقال به خارج از مرز اعتماد agent، یا محافظت با یک لایه‌ی ایزولاسیون جداگانه، به‌عنوان secrets تولیدی در نظر گرفته شوند.
+SecretRefها فایل‌های دلخواهِ خواندنی را ایمن نمی‌کنند. نسخه‌های پشتیبان، پیکربندی‌های کپی‌شده، کاتالوگ‌های قدیمی مدلِ تولیدشده و کلاس‌های اعتبارنامهٔ پشتیبانی‌نشده تا زمانی که حذف شوند، به خارج از مرز اعتماد عامل منتقل شوند یا جداگانه ایزوله شوند، رازهای محیط عملیاتی باقی می‌مانند.
 </Warning>
 
-## فیلتر کردن سطح فعال
+## پالایش سطح فعال
 
-SecretRefs فقط روی سطح‌های عملا فعال validate می‌شوند.
+SecretRefها فقط در سطح‌هایی که عملاً فعال هستند اعتبارسنجی می‌شوند:
 
-- سطح‌های enabled: refهای resolveنشده startup/reload را block می‌کنند.
-- سطح‌های inactive: refهای resolveنشده startup/reload را block نمی‌کنند.
-- refهای inactive diagnosticهای غیرکشنده با کد `SECRETS_REF_IGNORED_INACTIVE_SURFACE` منتشر می‌کنند.
+- **سطح‌های فعال‌شده**: خرابی‌های قابل‌تلاش‌مجدد برای مالکان نگاشت‌شده و قابل‌جداسازی، وارد وضعیت افت عملکرد cold یا stale می‌شوند. خرابی‌های سخت‌گیرانه، fail-closed، موردنیاز Gateway یا نگاشت‌نشده، راه‌اندازی/بارگذاری مجدد را مسدود می‌کنند.
+- **سطح‌های غیرفعال**: ارجاع‌های resolveنشده راه‌اندازی/بارگذاری مجدد را مسدود نمی‌کنند؛ آن‌ها یک عیب‌یابی غیرکشندهٔ `SECRETS_REF_IGNORED_INACTIVE_SURFACE` منتشر می‌کنند.
 
-<AccordionGroup>
-  <Accordion title="نمونه‌هایی از سطح‌های inactive">
-    - ورودی‌های channel/account غیرفعال.
-    - اعتبارنامه‌های channel سطح بالا که هیچ account فعالی از آن‌ها ارث‌بری نمی‌کند.
-    - سطح‌های tool/feature غیرفعال.
-    - کلیدهای اختصاصی web search provider که توسط `tools.web.search.provider` انتخاب نشده‌اند. در حالت auto (وقتی provider تنظیم نشده است)، کلیدها برای تشخیص خودکار provider بر اساس precedence بررسی می‌شوند تا یکی resolve شود. پس از انتخاب، کلیدهای provider انتخاب‌نشده تا زمان انتخاب شدن inactive در نظر گرفته می‌شوند.
-    - مواد auth مربوط به sandbox SSH (`agents.defaults.sandbox.ssh.identityData`، `certificateData`، `knownHostsData`، به‌علاوه‌ی overrideهای هر agent) فقط وقتی فعال هستند که backend موثر sandbox برای agent پیش‌فرض یا یک agent فعال، `ssh` باشد.
-    - SecretRefs مربوط به `gateway.remote.token` / `gateway.remote.password` اگر یکی از این موارد درست باشد فعال هستند:
-      - `gateway.mode=remote`
-      - `gateway.remote.url` پیکربندی شده است
-      - `gateway.tailscale.mode` برابر `serve` یا `funnel` است
-      - در حالت local بدون آن سطح‌های remote:
-        - `gateway.remote.token` وقتی فعال است که auth مبتنی بر token بتواند برنده شود و هیچ token مربوط به env/auth پیکربندی نشده باشد.
-        - `gateway.remote.password` فقط وقتی فعال است که auth مبتنی بر password بتواند برنده شود و هیچ password مربوط به env/auth پیکربندی نشده باشد.
-    - SecretRef مربوط به `gateway.auth.token` برای resolution auth در startup وقتی `OPENCLAW_GATEWAY_TOKEN` تنظیم شده باشد inactive است، چون ورودی token از env برای آن runtime برنده می‌شود.
+<Accordion title="نمونه‌هایی از سطح‌های غیرفعال">
+- ورودی‌های کانال/حساب غیرفعال‌شده.
+- اعتبارنامه‌های سطح‌بالای کانال که هیچ حساب فعالی آن‌ها را به ارث نمی‌برد.
+- سطح‌های ابزار/قابلیت غیرفعال‌شده.
+- کلیدهای مختص ارائه‌دهندهٔ جست‌وجوی وب که توسط `tools.web.search.provider` انتخاب نشده‌اند. در حالت خودکار (ارائه‌دهنده تنظیم نشده است)، کلیدها برای تشخیص خودکار بر اساس تقدم بررسی می‌شوند تا یکی resolve شود؛ پس از انتخاب، کلیدهای ارائه‌دهندگان انتخاب‌نشده غیرفعال هستند.
+- مادهٔ احراز هویت SSH سندباکس (`agents.defaults.sandbox.ssh.identityData`، `certificateData`، `knownHostsData`، به‌همراه بازنویسی‌های هر عامل) فقط زمانی فعال است که بک‌اند مؤثر سندباکس `ssh` باشد و حالت سندباکس برای عامل پیش‌فرض یا یک عامل فعال، `off` نباشد.
+- SecretRefهای `gateway.remote.token` / `gateway.remote.password` در صورت برقرار بودن هر یک از موارد زیر فعال هستند:
+  - `gateway.mode=remote`
+  - `gateway.remote.url` پیکربندی شده باشد
+  - `gateway.tailscale.mode` برابر `serve` یا `funnel` باشد
+  - در حالت محلی و بدون آن سطح‌های راه‌دور: `gateway.remote.token` زمانی فعال است که احراز هویت توکنی بتواند برنده شود و هیچ توکن محیطی/احراز هویتی پیکربندی نشده باشد؛ `gateway.remote.password` فقط زمانی فعال است که احراز هویت گذرواژه‌ای بتواند برنده شود و هیچ گذرواژهٔ محیطی/احراز هویتی پیکربندی نشده باشد.
+- SecretRef مربوط به `gateway.auth.token` برای resolve احراز هویت هنگام راه‌اندازی، زمانی غیرفعال است که `OPENCLAW_GATEWAY_TOKEN` تنظیم شده باشد، زیرا ورودی توکن محیطی برای آن زمان اجرا اولویت دارد.
 
-  </Accordion>
-</AccordionGroup>
+</Accordion>
 
-## Diagnosticهای سطح auth در Gateway
+## عیب‌یابی سطح احراز هویت Gateway
 
-وقتی یک SecretRef روی `gateway.auth.token`، `gateway.auth.password`، `gateway.remote.token`، یا `gateway.remote.password` پیکربندی شود، startup/reload مربوط به Gateway وضعیت سطح را صریحا log می‌کند:
+وقتی یک SecretRef روی `gateway.auth.token`، `gateway.auth.password`، `gateway.remote.token` یا `gateway.remote.password` تنظیم شده باشد، راه‌اندازی/بارگذاری مجدد Gateway وضعیت سطح را با کد `SECRETS_GATEWAY_AUTH_SURFACE` ثبت می‌کند:
 
-- `active`: SecretRef بخشی از سطح auth موثر است و باید resolve شود.
-- `inactive`: SecretRef برای این runtime نادیده گرفته می‌شود، چون سطح auth دیگری برنده می‌شود، یا چون auth مربوط به remote غیرفعال/فعال نیست.
+- `active`: این SecretRef بخشی از سطح مؤثر احراز هویت است و باید resolve شود.
+- `inactive`: سطح احراز هویت دیگری اولویت دارد، یا احراز هویت راه‌دور غیرفعال/فعال‌نشده است.
 
-این ورودی‌ها با `SECRETS_GATEWAY_AUTH_SURFACE` log می‌شوند و شامل دلیلی هستند که policy سطح فعال استفاده کرده است، تا بتوانید ببینید چرا یک اعتبارنامه active یا inactive در نظر گرفته شده است.
+ورودی گزارش شامل دلیلی است که خط‌مشی سطح فعال از آن استفاده کرده است.
 
-## Preflight مرجع onboarding
+## پیش‌بررسی ارجاع در راه‌اندازی اولیه
 
-وقتی onboarding در حالت تعاملی اجرا می‌شود و شما ذخیره‌سازی SecretRef را انتخاب می‌کنید، OpenClaw پیش از ذخیره‌سازی preflight validation اجرا می‌کند:
+در راه‌اندازی اولیهٔ تعاملی، انتخاب ذخیره‌سازی SecretRef پیش از ذخیره‌سازی، اعتبارسنجی پیش‌بررسی را اجرا می‌کند:
 
-- refهای env: نام env var را validate می‌کند و تایید می‌کند که یک مقدار غیرخالی هنگام setup قابل مشاهده است.
-- refهای provider (`file` یا `exec`): انتخاب provider را validate می‌کند، `id` را resolve می‌کند، و نوع مقدار resolveشده را بررسی می‌کند.
-- مسیر استفاده‌ی دوباره‌ی quickstart: وقتی `gateway.auth.token` از قبل SecretRef باشد، onboarding آن را پیش از probe/dashboard bootstrap (برای refهای `env`، `file`، و `exec`) با همان gate fail-fast resolve می‌کند.
+- ارجاع‌های محیطی: نام متغیر محیطی را اعتبارسنجی می‌کند و تأیید می‌کند که هنگام راه‌اندازی، مقداری غیرخالی قابل‌مشاهده است.
+- ارجاع‌های ارائه‌دهنده (`file` یا `exec`): انتخاب ارائه‌دهنده را اعتبارسنجی می‌کند، `id` را resolve می‌کند و نوع مقدار resolveشده را بررسی می‌کند.
+- گردش‌کار شروع سریع: وقتی `gateway.auth.token` از قبل یک SecretRef باشد، راه‌اندازی اولیه پیش از راه‌اندازی کاوش/داشبورد، با استفاده از همان دروازهٔ شکست سریع، آن را برای ارجاع‌های `env`، `file` و `exec` resolve می‌کند.
 
-اگر validation fail شود، onboarding خطا را نشان می‌دهد و اجازه می‌دهد دوباره تلاش کنید.
+شکست اعتبارسنجی، خطا را نمایش می‌دهد و امکان تلاش مجدد را فراهم می‌کند.
 
 ## قرارداد SecretRef
 
-همه‌جا از یک شکل object استفاده کنید:
+یک شکل شیء در همه‌جا:
 
 ```json5
 { source: "env" | "file" | "exec", provider: "default", id: "..." }
@@ -117,17 +126,17 @@ SecretRefs فقط روی سطح‌های عملا فعال validate می‌شو�
     { source: "env", provider: "default", id: "OPENAI_API_KEY" }
     ```
 
-    فیلدهای SecretInput پشتیبانی‌شده shorthandهای string دقیق را نیز می‌پذیرند:
+    رشته‌های کوتاه‌نویسی نیز در فیلدهای SecretInput پذیرفته می‌شوند:
 
     ```json5
     "${OPENAI_API_KEY}"
     "$OPENAI_API_KEY"
     ```
 
-    Validation:
+    اعتبارسنجی:
 
-    - `provider` باید با `^[a-z][a-z0-9_-]{0,63}$` match شود
-    - `id` باید با `^[A-Z][A-Z0-9_]{0,127}$` match شود
+    - `provider` باید با `^[a-z][a-z0-9_-]{0,63}$` مطابقت داشته باشد
+    - `id` باید با `^[A-Z][A-Z0-9_]{0,127}$` مطابقت داشته باشد
 
   </Tab>
   <Tab title="file">
@@ -135,11 +144,11 @@ SecretRefs فقط روی سطح‌های عملا فعال validate می‌شو�
     { source: "file", provider: "filemain", id: "/providers/openai/apiKey" }
     ```
 
-    Validation:
+    اعتبارسنجی:
 
-    - `provider` باید با `^[a-z][a-z0-9_-]{0,63}$` match شود
-    - `id` باید یک JSON pointer مطلق باشد (`/...`)
-    - escape کردن RFC6901 در segmentها: `~` => `~0`، `/` => `~1`
+    - `provider` باید با `^[a-z][a-z0-9_-]{0,63}$` مطابقت داشته باشد
+    - `id` باید یک اشاره‌گر مطلق JSON (`/...`) یا برای ارائه‌دهندگان `singleValue`، مقدار تحت‌اللفظی `value` باشد
+    - گریزگذاری RFC 6901 در بخش‌ها: `~` به `~0` و `/` به `~1` تبدیل می‌شود
 
   </Tab>
   <Tab title="exec">
@@ -147,18 +156,18 @@ SecretRefs فقط روی سطح‌های عملا فعال validate می‌شو�
     { source: "exec", provider: "vault", id: "providers/openai/apiKey#value" }
     ```
 
-    Validation:
+    اعتبارسنجی:
 
-    - `provider` باید با `^[a-z][a-z0-9_-]{0,63}$` match شود
-    - `id` باید با `^[A-Za-z0-9][A-Za-z0-9._:/#-]{0,255}$` match شود (از selectorهایی مانند `secret#json_key` پشتیبانی می‌کند)
-    - `id` نباید شامل `.` یا `..` به‌عنوان segmentهای مسیر جداشده با slash باشد (برای مثال `a/../b` رد می‌شود)
+    - `provider` باید با `^[a-z][a-z0-9_-]{0,63}$` مطابقت داشته باشد
+    - `id` باید با `^[A-Za-z0-9][A-Za-z0-9._:/#-]{0,255}$` مطابقت داشته باشد (از انتخابگرهایی مانند `secret#json_key` پشتیبانی می‌کند)
+    - `id` نباید شامل `.` یا `..` به‌عنوان بخش‌های مسیر جداشده با اسلش باشد (برای مثال `a/../b` رد می‌شود)
 
   </Tab>
 </Tabs>
 
-## پیکربندی provider
+## پیکربندی ارائه‌دهنده
 
-providerها را زیر `secrets.providers` تعریف کنید:
+ارائه‌دهندگان را زیر `secrets.providers` تعریف کنید:
 
 ```json5
 {
@@ -168,7 +177,7 @@ providerها را زیر `secrets.providers` تعریف کنید:
       filemain: {
         source: "file",
         path: "~/.openclaw/secrets.json",
-        mode: "json", // or "singleValue"
+        mode: "json", // یا "singleValue"
       },
       vault: {
         source: "exec",
@@ -190,68 +199,67 @@ providerها را زیر `secrets.providers` تعریف کنید:
       file: "filemain",
       exec: "vault",
     },
-    resolution: {
-      maxProviderConcurrency: 4,
-      maxRefsPerProvider: 512,
-      maxBatchBytes: 262144,
-    },
   },
 }
 ```
 
-<AccordionGroup>
-  <Accordion title="ارائه‌دهنده env">
-    - allowlist اختیاری از طریق `allowlist`.
-    - مقادیر env گم‌شده/خالی باعث fail شدن resolution می‌شوند.
+<Accordion title="ارائه‌دهندهٔ محیطی">
+- فهرست مجاز اختیاریِ نام‌های دقیق از طریق `allowlist`.
+- مقادیر محیطی مفقود یا خالی باعث شکست resolve می‌شوند.
 
-  </Accordion>
-  <Accordion title="ارائه‌دهنده file">
-    - فایل local را از `path` می‌خواند.
-    - `mode: "json"` انتظار payload از نوع JSON object دارد و `id` را به‌عنوان pointer resolve می‌کند.
-    - `mode: "singleValue"` انتظار ref id برابر `"value"` دارد و محتوای فایل را برمی‌گرداند.
-    - Path باید بررسی‌های ownership/permission را پاس کند.
-    - نکته‌ی fail-closed در Windows: اگر verification مربوط به ACL برای یک path در دسترس نباشد، resolution fail می‌شود. فقط برای pathهای مورداعتماد، روی آن provider مقدار `allowInsecurePath: true` را تنظیم کنید تا بررسی‌های امنیتی path دور زده شوند.
+</Accordion>
 
-  </Accordion>
-  <Accordion title="ارائه‌دهنده exec">
-    - مسیر binary مطلق پیکربندی‌شده را اجرا می‌کند، بدون shell.
-    - به‌صورت پیش‌فرض، `command` باید به یک فایل regular اشاره کند (نه symlink).
-    - برای مجاز کردن مسیرهای command از نوع symlink (برای مثال shimهای Homebrew)، `allowSymlinkCommand: true` را تنظیم کنید. OpenClaw مسیر target resolveشده را validate می‌کند.
-    - `allowSymlinkCommand` را برای مسیرهای package-manager (برای مثال `["/opt/homebrew"]`) با `trustedDirs` همراه کنید.
-    - از timeout، no-output timeout، محدودیت‌های byte خروجی، allowlist مربوط به env، و trusted dirs پشتیبانی می‌کند.
-    - نکته‌ی fail-closed در Windows: اگر verification مربوط به ACL برای مسیر command در دسترس نباشد، resolution fail می‌شود. فقط برای pathهای مورداعتماد، روی آن provider مقدار `allowInsecurePath: true` را تنظیم کنید تا بررسی‌های امنیتی path دور زده شوند.
-    - providerهای exec مدیریت‌شده توسط Plugin می‌توانند به‌جای `command`/`args` کپی‌شده از `pluginIntegration` استفاده کنند. OpenClaw جزئیات command فعلی را از manifest مربوط به Plugin نصب‌شده هنگام startup/reload resolve می‌کند. اگر Plugin غیرفعال، حذف‌شده، نامطمئن باشد، یا دیگر integration را declare نکند، SecretRefs فعال که از آن provider استفاده می‌کنند به‌صورت fail closed شکست می‌خورند.
+<Accordion title="ارائه‌دهندهٔ فایل">
+- فایل محلی در `path` را می‌خواند.
+- `mode: "json"` (پیش‌فرض) انتظار یک بار دادهٔ شیء JSON را دارد و `id` را به‌عنوان اشاره‌گر JSON resolve می‌کند.
+- `mode: "singleValue"` انتظار شناسهٔ ارجاع `"value"` را دارد و محتوای خام فایل را برمی‌گرداند (خط جدید انتهایی حذف می‌شود).
+- مسیر باید بررسی‌های مالکیت/مجوز را با موفقیت بگذراند؛ `timeoutMs` (پیش‌فرض 5000) و `maxBytes` (پیش‌فرض 1 MiB) خواندن را محدود می‌کنند.
+- حالت fail-closed در Windows: اگر تأیید ACL برای مسیر در دسترس نباشد، resolve شکست می‌خورد. فقط برای مسیرهای قابل‌اعتماد، `allowInsecurePath: true` را روی آن ارائه‌دهنده تنظیم کنید تا بررسی دور زده شود.
 
-    Payload درخواست (stdin):
+</Accordion>
 
-    ```json
-    { "protocolVersion": 1, "provider": "vault", "ids": ["providers/openai/apiKey"] }
-    ```
+<Accordion title="ارائه‌دهنده exec">
+- مسیر مطلق باینری پیکربندی‌شده را مستقیماً و بدون پوسته اجرا می‌کند.
+- به‌طور پیش‌فرض، `command` باید یک فایل معمولی باشد، نه پیوند نمادین. برای مجاز کردن مسیرهای فرمانِ پیوند نمادین (برای مثال واسط‌های Homebrew)، `allowSymlinkCommand: true` را تنظیم کنید و آن را با `trustedDirs` (برای مثال `["/opt/homebrew"]`) همراه کنید تا فقط مسیرهای مدیر بسته واجد شرایط باشند.
+- از `timeoutMs` (پیش‌فرض 5000)، `noOutputTimeoutMs` (پیش‌فرض برابر با `timeoutMs`)، `maxOutputBytes` (پیش‌فرض 1 MiB)، فهرست مجاز `env`/`passEnv` و `trustedDirs` پشتیبانی می‌کند.
+- `jsonOnly` به‌طور پیش‌فرض `true` است. با `jsonOnly: false` و یک شناسه درخواستی، خروجی استاندارد ساده و غیر JSON به‌عنوان مقدار آن شناسه پذیرفته می‌شود.
+- در Windows، رفتار به‌صورت بسته و ایمن است: اگر تأیید ACL برای مسیر فرمان در دسترس نباشد، تفکیک شکست می‌خورد. فقط برای مسیرهای مورد اعتماد، `allowInsecurePath: true` را روی آن ارائه‌دهنده تنظیم کنید تا این بررسی نادیده گرفته شود.
+- ارائه‌دهندگان exec تحت مدیریت Plugin می‌توانند به‌جای `command`/`args` کپی‌شده از `pluginIntegration` استفاده کنند. OpenClaw هنگام راه‌اندازی/بارگذاری مجدد، جزئیات فرمان فعلی را از مانیفست Plugin نصب‌شده تفکیک می‌کند؛ اگر Plugin غیرفعال، حذف یا نامعتبر شود، یا دیگر آن یکپارچه‌سازی را اعلام نکند، SecretRefهای فعال در آن ارائه‌دهنده به‌صورت بسته و ایمن شکست می‌خورند.
 
-    Payload پاسخ (stdout):
+بار درخواست (stdin):
 
-    ```jsonc
-    { "protocolVersion": 1, "values": { "providers/openai/apiKey": "<openai-api-key>" } } // pragma: allowlist secret
-    ```
+```json
+{ "protocolVersion": 1, "provider": "vault", "ids": ["providers/openai/apiKey"] }
+```
 
-    خطاهای اختیاری برای هر id:
+بار پاسخ (stdout):
 
-    ```json
-    {
-      "protocolVersion": 1,
-      "values": {},
-      "errors": { "providers/openai/apiKey": { "message": "not found" } }
-    }
-    ```
+```jsonc
+{ "protocolVersion": 1, "values": { "providers/openai/apiKey": "<openai-api-key>" } } // pragma: allowlist secret
+```
 
-  </Accordion>
-</AccordionGroup>
+خطاهای اختیاری برای هر شناسه:
+
+```json
+{
+  "protocolVersion": 1,
+  "values": {},
+  "errors": { "providers/openai/apiKey": { "code": "NOT_FOUND" } }
+}
+```
+
+`code` یک عیب‌یابی اختیاری و قابل‌خواندن برای ماشین است. OpenClaw کدهای شناخته‌شده
+`NOT_FOUND` و `AMBIGUOUS_DUPLICATE_KEY` را همراه با ارائه‌دهنده و شناسه مرجع نمایش می‌دهد. کدهای دیگر
+و فیلدهای آزاد مانند `message` برای سازگاری با نسخه 1 پروتکل پذیرفته می‌شوند،
+اما نمایش داده نمی‌شوند، زیرا خروجی تفکیک‌کننده ممکن است حاوی اطلاعات اعتبارنامه باشد.
+
+</Accordion>
 
 ## کلیدهای API مبتنی بر فایل
 
-stringهای `file:...` را در block `env` پیکربندی قرار ندهید. block `env` literal و non-overriding است، بنابراین `file:...` resolve نمی‌شود.
+رشته‌های `file:...` را در بلوک `env` پیکربندی قرار ندهید. آن بلوک تحت‌اللفظی و غیرقابل‌بازنویسی است، بنابراین `file:...` هرگز در آن تفکیک نمی‌شود.
 
-به‌جای آن، روی یک فیلد اعتبارنامه‌ی پشتیبانی‌شده از SecretRef مبتنی بر file استفاده کنید:
+در عوض، در یکی از فیلدهای اعتبارنامه پشتیبانی‌شده از SecretRef فایل استفاده کنید:
 
 ```json5
 {
@@ -274,14 +282,16 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
 }
 ```
 
-برای `mode: "singleValue"`، مقدار `id` در SecretRef برابر `"value"` است. برای `mode: "json"`، از یک JSON pointer مطلق مانند `"/providers/xai/apiKey"` استفاده کنید.
+برای `mode: "singleValue"`، مقدار `id` در SecretRef برابر با `"value"` است. برای `mode: "json"`، از یک اشاره‌گر مطلق JSON مانند `"/providers/xai/apiKey"` استفاده کنید.
 
-برای فیلدهای پیکربندی که SecretRefs را می‌پذیرند، [سطح اعتبارنامه‌ی SecretRef](/fa/reference/secretref-credential-surface) را ببینید.
+برای مشاهده فیلدهایی که SecretRef را می‌پذیرند، به [سطح اعتبارنامه SecretRef](/fa/reference/secretref-credential-surface) مراجعه کنید.
 
-## نمونه‌های integration مربوط به exec
+## نمونه‌های یکپارچه‌سازی exec
+
+برای راهنمای اختصاصی 1Password درباره حساب‌های سرویس، مهارت عامل همراه و عیب‌یابی، به [1Password](/fa/gateway/1password) مراجعه کنید.
 
 <AccordionGroup>
-  <Accordion title="1Password CLI">
+  <Accordion title="CLI ‏1Password">
     ```json5
     {
       secrets: {
@@ -289,7 +299,7 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
           onepassword_openai: {
             source: "exec",
             command: "/opt/homebrew/bin/op",
-            allowSymlinkCommand: true, // required for Homebrew symlinked binaries
+            allowSymlinkCommand: true, // برای باینری‌های دارای پیوند نمادین Homebrew الزامی است
             trustedDirs: ["/opt/homebrew"],
             args: ["read", "op://Personal/OpenClaw QA API Key/password"],
             passEnv: ["HOME"],
@@ -309,19 +319,15 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
     }
     ```
   </Accordion>
-  <Accordion title="Bitwarden Secrets Manager (`bws`)">
-    وقتی می‌خواهید شناسه‌های SecretRef به کلیدهای آیتم Bitwarden
-    Secrets Manager نگاشت شوند، از یک پوشش resolver استفاده کنید. این مخزن شامل
-    `scripts/secrets/openclaw-bws-resolver.mjs` است؛ آن را روی میزبان اجراکننده Gateway
-    در یک مسیر مطلق و مورداعتماد نصب یا کپی کنید.
+  <Accordion title="Bitwarden Secrets Manager ‏(`bws`)">
+    برای نگاشت شناسه‌های SecretRef به کلیدهای آیتم Bitwarden Secrets Manager از یک پوشش تفکیک‌کننده استفاده کنید. مخزن شامل `scripts/secrets/openclaw-bws-resolver.mjs` است؛ آن را در یک مسیر مطلق و مورد اعتماد روی میزبانی که Gateway را اجرا می‌کند نصب یا کپی کنید.
 
     الزامات:
 
-    - CLI مربوط به Bitwarden Secrets Manager (`bws`) روی میزبان Gateway نصب شده باشد.
-    - `BWS_ACCESS_TOKEN` برای سرویس Gateway در دسترس باشد.
-    - `PATH` به resolver پاس داده شود، یا `BWS_BIN` روی مسیر مطلق باینری `bws`
-      تنظیم شده باشد.
-    - هنگام استفاده از نمونه Bitwarden خودمیزبان، `BWS_SERVER_URL` باید در محیط تنظیم شده باشد.
+    - CLI ‏Bitwarden Secrets Manager ‏(`bws`) روی میزبان Gateway نصب شده باشد.
+    - `BWS_ACCESS_TOKEN` در دسترس سرویس Gateway باشد.
+    - `PATH` به تفکیک‌کننده ارسال شود، یا `BWS_BIN` روی مسیر مطلق باینری `bws` تنظیم شود.
+    - هنگام استفاده از نمونه Bitwarden خودمیزبان، `BWS_SERVER_URL` در محیط تنظیم شود.
 
     ```json5
     {
@@ -351,20 +357,14 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
     }
     ```
 
-    resolver شناسه‌های درخواستی را دسته‌بندی می‌کند، `bws secret list` را اجرا می‌کند، و
-    مقادیر را برای فیلدهای `key` رازهای منطبق برمی‌گرداند. از کلیدهایی استفاده کنید که قرارداد شناسه exec
-    SecretRef را برآورده می‌کنند، مانند `openclaw/providers/openai/apiKey`؛ کلیدهای
-    سبک متغیر محیطی با زیرخط پیش از اجرای resolver رد می‌شوند. اگر بیش از
-    یک راز قابل‌مشاهده Bitwarden کلید درخواستی یکسانی داشته باشد، resolver
-    به‌جای انتخاب یکی، آن شناسه را به‌عنوان مبهم ناموفق می‌کند. پس از به‌روزرسانی پیکربندی،
-    مسیر resolver را بررسی کنید:
+    تفکیک‌کننده شناسه‌های درخواستی را دسته‌بندی می‌کند، `bws secret list` را اجرا می‌کند و مقادیر فیلدهای `key` راز منطبق را برمی‌گرداند. از کلیدهایی استفاده کنید که با قرارداد شناسه SecretRef در exec سازگارند، مانند `openclaw/providers/openai/apiKey`؛ کلیدهای به‌سبک متغیر محیطی که دارای زیرخط هستند، پیش از اجرای تفکیک‌کننده رد می‌شوند. اگر بیش از یک راز قابل‌مشاهده Bitwarden کلید درخواستی یکسانی داشته باشد، تفکیک‌کننده به‌جای حدس زدن، آن شناسه را به‌دلیل ابهام ناموفق اعلام می‌کند. پس از به‌روزرسانی پیکربندی، مسیر تفکیک‌کننده را تأیید کنید:
 
     ```bash
     openclaw secrets audit --allow-exec
     ```
 
   </Accordion>
-  <Accordion title="HashiCorp Vault CLI">
+  <Accordion title="CLI ‏HashiCorp Vault">
     ```json5
     {
       secrets: {
@@ -372,7 +372,7 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
           vault_openai: {
             source: "exec",
             command: "/opt/homebrew/bin/vault",
-            allowSymlinkCommand: true, // required for Homebrew symlinked binaries
+            allowSymlinkCommand: true, // برای باینری‌های دارای پیوند نمادین Homebrew الزامی است
             trustedDirs: ["/opt/homebrew"],
             args: ["kv", "get", "-field=OPENAI_API_KEY", "secret/openclaw"],
             passEnv: ["VAULT_ADDR", "VAULT_TOKEN"],
@@ -392,14 +392,8 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
     }
     ```
   </Accordion>
-  <Accordion title="password-store (`pass`)">
-    وقتی می‌خواهید شناسه‌های SecretRef مستقیماً به ورودی‌های `pass` نگاشت شوند،
-    از یک پوشش resolver کوچک استفاده کنید. آن را به‌صورت یک فایل اجرایی در مسیری مطلق ذخیره کنید
-    که بررسی‌های مسیر exec-provider شما را پاس می‌کند، برای مثال
-    `/usr/local/bin/openclaw-pass-resolver`. شِبنگ `#!/usr/bin/env node`
-    مقدار `node` را از `PATH` فرایند resolver resolve می‌کند، بنابراین `PATH` را در
-    `passEnv` بگنجانید. اگر `pass` روی آن `PATH` نیست، `PASS_BIN` را در محیط والد
-    تنظیم کنید و آن را نیز در `passEnv` بگنجانید:
+  <Accordion title="password-store ‏(`pass`)">
+    برای نگاشت مستقیم شناسه‌های SecretRef به ورودی‌های `pass` از یک پوشش تفکیک‌کننده کوچک استفاده کنید. آن را به‌صورت فایل اجرایی در یک مسیر مطلق که بررسی‌های مسیر ارائه‌دهنده exec را می‌گذراند ذخیره کنید، برای مثال `/usr/local/bin/openclaw-pass-resolver`. خط shebang ‏`#!/usr/bin/env node`، مقدار `node` را از `PATH` فرایند تفکیک‌کننده پیدا می‌کند؛ بنابراین `PATH` را در `passEnv` قرار دهید. اگر `pass` در آن `PATH` نیست، `PASS_BIN` را در محیط والد تنظیم کنید و آن را نیز در `passEnv` قرار دهید:
 
     ```js
     #!/usr/bin/env node
@@ -419,7 +413,7 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
       try {
         request = JSON.parse(stdin || "{}");
       } catch (err) {
-        process.stderr.write(`Failed to parse request: ${err.message}\n`);
+        process.stderr.write(`تجزیه درخواست ناموفق بود: ${err.message}\n`);
         process.exit(1);
       }
 
@@ -432,7 +426,7 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
         if (result.status === 0) {
           values[id] = result.stdout.split(/\r?\n/, 1)[0] ?? "";
         } else {
-          errors[id] = { message: (result.stderr || `pass exited ${result.status}`).trim() };
+          errors[id] = { message: (result.stderr || `pass با وضعیت ${result.status} خارج شد`).trim() };
         }
       }
 
@@ -440,7 +434,7 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
     });
     ```
 
-    سپس provider نوع exec را پیکربندی کنید و `apiKey` را به مسیر ورودی `pass` اشاره دهید:
+    سپس ارائه‌دهنده exec را پیکربندی کنید و `apiKey` را به مسیر ورودی `pass` اشاره دهید:
 
     ```json5
     {
@@ -470,9 +464,7 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
     }
     ```
 
-    راز را در خط اول ورودی `pass` نگه دارید، یا اگر می‌خواهید خروجی کامل
-    `pass show` را برگردانید، پوشش را سفارشی کنید. پس از به‌روزرسانی پیکربندی،
-    هم audit ایستای و هم مسیر resolver نوع exec را بررسی کنید:
+    راز را در خط اول ورودی `pass` نگه دارید، یا پوشش را سفارشی کنید تا به‌جای آن خروجی کامل `pass show` را برگرداند. پس از به‌روزرسانی پیکربندی، هم ممیزی ایستا و هم مسیر تفکیک‌کننده exec را تأیید کنید:
 
     ```bash
     openclaw secrets audit --check
@@ -488,7 +480,7 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
           sops_openai: {
             source: "exec",
             command: "/opt/homebrew/bin/sops",
-            allowSymlinkCommand: true, // required for Homebrew symlinked binaries
+            allowSymlinkCommand: true, // برای باینری‌های دارای پیوند نمادین Homebrew الزامی است
             trustedDirs: ["/opt/homebrew"],
             args: ["-d", "--extract", '["providers"]["openai"]["apiKey"]', "/path/to/secrets.enc.json"],
             passEnv: ["SOPS_AGE_KEY_FILE"],
@@ -512,7 +504,7 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
 
 ## متغیرهای محیطی سرور MCP
 
-متغیرهای محیطی سرور MCP که از طریق `plugins.entries.acpx.config.mcpServers` پیکربندی می‌شوند از SecretInput پشتیبانی می‌کنند. این کار کلیدهای API و توکن‌ها را از پیکربندی متن ساده بیرون نگه می‌دارد:
+متغیرهای محیطی سرور MCP که از طریق `plugins.entries.acpx.config.mcpServers` پیکربندی می‌شوند، SecretInput را می‌پذیرند و کلیدهای API و توکن‌ها را از پیکربندی متن ساده دور نگه می‌دارند:
 
 ```json5
 {
@@ -541,11 +533,11 @@ stringهای `file:...` را در block `env` پیکربندی قرار ندهی
 }
 ```
 
-مقادیر رشته‌ای متن ساده همچنان کار می‌کنند. ارجاع‌های قالب محیطی مانند `${MCP_SERVER_API_KEY}` و شیءهای SecretRef هنگام فعال‌سازی Gateway، پیش از ایجاد فرایند سرور MCP، resolve می‌شوند. مانند دیگر سطوح SecretRef، ارجاع‌های resolveنشده فقط زمانی فعال‌سازی را مسدود می‌کنند که Plugin `acpx` عملاً فعال باشد.
+مقادیر رشته‌ای متن ساده همچنان کار می‌کنند. ارجاع‌های الگوی محیطی مانند `${MCP_SERVER_API_KEY}` و اشیای SecretRef هنگام فعال‌سازی Gateway و پیش از ایجاد فرایند سرور MCP تفکیک می‌شوند. همانند دیگر سطوح SecretRef، ارجاع‌های تفکیک‌نشده فقط زمانی فعال‌سازی را مسدود می‌کنند که Plugin ‏`acpx` عملاً فعال باشد.
 
-## مواد احراز هویت SSH برای sandbox
+## اطلاعات احراز هویت SSH در sandbox
 
-backend اصلی sandbox با نام `ssh` از SecretRefها برای مواد احراز هویت SSH نیز پشتیبانی می‌کند:
+بک‌اند اصلی sandbox ‏`ssh` نیز از SecretRef برای اطلاعات احراز هویت SSH پشتیبانی می‌کند:
 
 ```json5
 {
@@ -568,105 +560,100 @@ backend اصلی sandbox با نام `ssh` از SecretRefها برای مواد 
 
 رفتار زمان اجرا:
 
-- OpenClaw این ارجاع‌ها را هنگام فعال‌سازی sandbox resolve می‌کند، نه به‌صورت تنبل هنگام هر فراخوانی SSH.
-- مقادیر resolveشده در فایل‌های موقت با مجوزهای محدودکننده نوشته می‌شوند و در پیکربندی SSH تولیدشده استفاده می‌شوند.
-- اگر backend مؤثر sandbox برابر `ssh` نباشد، این ارجاع‌ها غیرفعال می‌مانند و راه‌اندازی را مسدود نمی‌کنند.
+- OpenClaw این ارجاع‌ها را هنگام فعال‌سازی سندباکس برطرف می‌کند، نه به‌صورت تنبل در هر فراخوانی SSH.
+- مقادیر برطرف‌شده با مجوزهای محدودکنندهٔ فایل (`0o600`) در یک پوشهٔ موقت نوشته می‌شوند و در پیکربندی SSH تولیدشده به‌کار می‌روند.
+- اگر بک‌اند مؤثر سندباکس `ssh` نباشد (یا حالت سندباکس `off` باشد)، این ارجاع‌ها غیرفعال می‌مانند و مانع راه‌اندازی نمی‌شوند.
 
-## سطح credential پشتیبانی‌شده
+## سطح اعتبارنامهٔ پشتیبانی‌شده
 
-credentialهای canonical پشتیبانی‌شده و پشتیبانی‌نشده در اینجا فهرست شده‌اند:
-
-- [سطح credential SecretRef](/fa/reference/secretref-credential-surface)
+اعتبارنامه‌های پشتیبانی‌شده و پشتیبانی‌نشدهٔ مرجع در [سطح اعتبارنامهٔ SecretRef](/fa/reference/secretref-credential-surface) فهرست شده‌اند.
 
 <Note>
-credentialهای ساخته‌شده در زمان اجرا یا چرخشی و مواد refresh مربوط به OAuth عمداً از resolution فقط‌خواندنی SecretRef کنار گذاشته شده‌اند.
+اعتبارنامه‌های ایجادشده در زمان اجرا یا چرخشی و داده‌های نوسازی OAuth عمداً از تفکیک فقط‌خواندنی SecretRef مستثنا شده‌اند.
 </Note>
 
-## رفتار و تقدم الزامی
+## رفتار الزامی و تقدم
 
 - فیلد بدون ارجاع: بدون تغییر.
-- فیلد دارای ارجاع: روی سطوح فعال هنگام فعال‌سازی الزامی است.
-- اگر هم متن ساده و هم ارجاع حاضر باشند، در مسیرهای تقدم پشتیبانی‌شده ارجاع تقدم دارد.
-- sentinel ویرایش‌پوشانی `__OPENCLAW_REDACTED__` برای ویرایش‌پوشانی/بازیابی داخلی پیکربندی رزرو شده است و به‌عنوان داده پیکربندی ارسالی literal رد می‌شود.
+- فیلد دارای ارجاع: هنگام فعال‌سازی در سطوح فعال الزامی است.
+- اگر هم متن ساده و هم ارجاع وجود داشته باشند، در مسیرهای تقدم پشتیبانی‌شده ارجاع مقدم است.
+- نشانگر ویرایش `__OPENCLAW_REDACTED__` برای ویرایش/بازیابی داخلی پیکربندی رزرو شده است و به‌عنوان دادهٔ پیکربندی صریح ارسالی رد می‌شود.
 
-سیگنال‌های هشدار و audit:
+سیگنال‌های هشدار و ممیزی:
 
 - `SECRETS_REF_OVERRIDES_PLAINTEXT` (هشدار زمان اجرا)
-- `REF_SHADOWED` (یافته audit وقتی credentialهای `auth-profiles.json` بر ارجاع‌های `openclaw.json` تقدم پیدا می‌کنند)
+- `REF_SHADOWED` (یافتهٔ ممیزی هنگامی که اعتبارنامه‌های `auth-profiles.json` بر ارجاع‌های `openclaw.json` مقدم باشند)
 
-رفتار سازگاری Google Chat:
+`serviceAccount` در Google Chat، JSON درون‌خطی یا یک SecretRef را می‌پذیرد. اگر فیلد مرجع تنظیم نشده باشد، Doctor فیلد هم‌سطح بازنشستهٔ `serviceAccountRef` را به این فیلد مرجع منتقل می‌کند.
 
-- `serviceAccountRef` بر `serviceAccount` متن ساده تقدم دارد.
-- وقتی ارجاع sibling تنظیم شده باشد، مقدار متن ساده نادیده گرفته می‌شود.
+## محرک‌های فعال‌سازی
 
-## triggerهای فعال‌سازی
+فعال‌سازی اسرار در موارد زیر اجرا می‌شود:
 
-فعال‌سازی راز روی موارد زیر اجرا می‌شود:
-
-- راه‌اندازی (preflight به‌علاوه فعال‌سازی نهایی)
-- مسیر اعمال داغ بازبارگذاری پیکربندی
-- مسیر بررسی restart بازبارگذاری پیکربندی
-- بازبارگذاری دستی از طریق `secrets.reload`
-- preflight مربوط به RPC نوشتن پیکربندی Gateway (`config.set` / `config.apply` / `config.patch`) برای resolveپذیری SecretRef سطح فعال در payload پیکربندی ارسالی، پیش از پایدارسازی ویرایش‌ها
+- راه‌اندازی (پیش‌بررسی به‌علاوهٔ فعال‌سازی نهایی)
+- مسیر اعمال داغ بارگذاری مجدد پیکربندی
+- مسیر بررسی راه‌اندازی مجدد در بارگذاری مجدد پیکربندی
+- بارگذاری مجدد دستی از طریق `secrets.reload`
+- پیش‌بررسی RPC نوشتن پیکربندی Gateway (`config.set` / `config.apply` / `config.patch`) که پیش از ماندگار کردن ویرایش‌ها، SecretRefهای سطح فعال را در محمولهٔ پیکربندی ارسالی اعتبارسنجی می‌کند
 
 قرارداد فعال‌سازی:
 
-- موفقیت snapshot را به‌صورت اتمی تعویض می‌کند.
-- شکست راه‌اندازی، راه‌اندازی Gateway را لغو می‌کند.
-- شکست بازبارگذاری زمان اجرا، آخرین snapshot خوب شناخته‌شده را نگه می‌دارد.
-- شکست preflight مربوط به Write-RPC، پیکربندی ارسالی را رد می‌کند و هم پیکربندی دیسک و هم snapshot فعال زمان اجرا را بدون تغییر نگه می‌دارد.
-- ارائه یک توکن کانال صریح برای هر فراخوانی به helper/tool خروجی، فعال‌سازی SecretRef را trigger نمی‌کند؛ نقاط فعال‌سازی همان راه‌اندازی، بازبارگذاری، و `secrets.reload` صریح باقی می‌مانند.
+- در صورت موفقیت، اسنپ‌شات به‌صورت اتمی جایگزین می‌شود.
+- شکست سخت‌گیرانهٔ راه‌اندازی، راه‌اندازی Gateway را متوقف می‌کند.
+- در راه‌اندازی سرد، شکست قابل‌تلاش‌مجدد در تفکیک برای یک مالک نگاشت‌شده، قابل‌جداسازی و غیر-Gateway ممکن است اسنپ‌شات را با همان مالک دقیقاً در وضعیت پیکربندی‌شده اما دردسترس‌نبودنی منتشر کند. درخواست‌ها برای آن مالک با `SECRET_SURFACE_UNAVAILABLE` شکست می‌خورند؛ پس از شکست یک ارجاع صریح، مالکان ارائه‌دهندهٔ مدل به اعتبارنامه‌های محیط یا نمایهٔ احراز هویت بازنمی‌گردند.
+- بارگذاری مجدد و بررسی راه‌اندازی مجدد، مالکان نگاشت‌شدهٔ واجد شرایط را جدا می‌کنند. هویت‌های ارجاع تغییریافته‌نبوده با تعریف‌های ارائه‌دهندهٔ تغییریافته‌نبوده و قرارداد کامل و غیرمحرمانهٔ مالکِ تغییریافته‌نبوده، مقادیر دقیق آخرین وضعیت سالم خود را به‌صورت کهنه حفظ می‌کنند؛ ارجاع‌های تفکیک‌نشدهٔ تغییرکرده یا تازه پیکربندی‌شده فقط برای همان مالک به‌صورت سرد منتشر می‌شوند. شکست سخت‌گیرانهٔ بارگذاری مجدد، اسنپ‌شات فعال قبلی را حفظ می‌کند.
+- `config.set`، `config.apply` و `config.patch` ارجاع‌های تفکیک‌نشدهٔ معتبر از نظر نحوی را برای مالکان قابل‌جداسازی می‌پذیرند و گزارش ویرایش‌شدهٔ `degradedSecretOwners` را بازمی‌گردانند. احراز هویت ورودی Gateway، پیکربندی یا مقادیر تفکیک‌شدهٔ نامعتبر از نظر ساختاری، نقض سیاست‌ها و مالکان ناشناخته همچنان پیش از تغییر دیسک رد می‌شوند.
+- مالکان هم‌سطح سالم، حتی هنگامی که مالک دیگری سرد یا کهنه است، به‌طور عادی تفکیک و منتشر می‌شوند.
+- ارائهٔ یک توکن صریح کانال برای هر فراخوانی به یک فراخوانی ابزار/تابع کمکی خروجی، فعال‌سازی SecretRef را تحریک نمی‌کند؛ نقاط فعال‌سازی همچنان راه‌اندازی، بارگذاری مجدد و `secrets.reload` صریح هستند.
 
-## سیگنال‌های degraded و recovered
+## سیگنال‌های تنزل و بازیابی
 
-وقتی فعال‌سازی هنگام بازبارگذاری پس از یک وضعیت سالم شکست بخورد، OpenClaw وارد وضعیت degraded secrets می‌شود.
-
-رویداد یک‌باره سیستم و کدهای لاگ:
+هنگامی که فعال‌سازی در زمان بارگذاری مجدد پس از یک وضعیت سالم شکست بخورد، OpenClaw وارد وضعیت تنزل‌یافتهٔ اسرار می‌شود و رویدادهای یک‌بارهٔ سیستمی و کدهای گزارش زیر را منتشر می‌کند:
 
 - `SECRETS_RELOADER_DEGRADED`
 - `SECRETS_RELOADER_RECOVERED`
 
 رفتار:
 
-- degraded: زمان اجرا آخرین snapshot خوب شناخته‌شده را نگه می‌دارد.
-- recovered: یک بار پس از فعال‌سازی موفق بعدی emit می‌شود.
-- شکست‌های تکراری در حالی که سیستم از قبل degraded است هشدارها را لاگ می‌کنند اما رویدادها را اسپم نمی‌کنند.
-- fail-fast راه‌اندازی رویدادهای degraded را emit نمی‌کند، چون زمان اجرا هرگز فعال نشده بود.
+- تنزل‌یافته: مالکان سالم تازه‌سازی می‌شوند، مالکان کهنه آخرین وضعیت سالم را نگه می‌دارند و مالکان سرد دردسترس‌ناپذیر می‌مانند.
+- بازیابی‌شده: پس از فعال‌سازی موفق بعدی یک بار منتشر می‌شود.
+- شکست‌های مکرر در حالی که وضعیت از قبل تنزل‌یافته است، هشدار ثبت می‌کنند اما رویداد را دوباره منتشر نمی‌کنند.
+- شکست سخت‌گیرانهٔ راه‌اندازی هرگز رویداد تنزل‌یافته منتشر نمی‌کند، زیرا زمان اجرا هیچ‌گاه فعال نشده است. راه‌اندازی موفق با مالکان سرد، تنزل مالک را ثبت می‌کند اما رویداد بارگذار مجدد منتشر نمی‌کند.
+- شکست‌های محدود به ارجاع در راه‌اندازی و بارگذاری مجدد، برای هر مالک متأثر یک هشدار ساخت‌یافتهٔ `SECRETS_DEGRADED` منتشر می‌کنند. قطعی‌های محدود به ارائه‌دهنده به‌جای تکرار شکست ارائه‌دهنده برای هر مالک، یک هشدار `SECRETS_PROVIDER_DEGRADED` همراه با ارائه‌دهنده و فهرست کامل مالکان متأثر منتشر می‌کنند. هشدارها شامل دلیل ویرایش‌شده، وضعیت مالک `cold` یا `stale` و راهنمای تلاش مجدد `openclaw secrets reload` هستند. آن‌ها هرگز مقادیر تفکیک‌شده یا شناسه‌های SecretRef را شامل نمی‌شوند.
+- `openclaw doctor` مالکان سرد و کهنه را همراه با مسیرهای پیکربندی متأثر، دلیل ویرایش‌شده و راهنمای تلاش مجدد فهرست می‌کند.
 
-## resolution مسیر فرمان
+## تفکیک مسیر فرمان
 
-مسیرهای فرمان می‌توانند از طریق RPC snapshot Gateway به resolution پشتیبانی‌شده SecretRef opt in کنند.
-
-دو رفتار کلی وجود دارد:
+مسیرهای فرمان می‌توانند از طریق یک RPC اسنپ‌شات Gateway، تفکیک SecretRef پشتیبانی‌شده را انتخاب کنند. دو رفتار کلی اعمال می‌شود:
 
 <Tabs>
-  <Tab title="مسیرهای سخت‌گیرانهٔ فرمان">
-    برای مثال مسیرهای حافظهٔ راه‌دور `openclaw memory` و `openclaw qr --remote` وقتی به ارجاع‌های secret مشترک راه‌دور نیاز دارد. آن‌ها از snapshot فعال می‌خوانند و وقتی یک SecretRef الزامی در دسترس نباشد سریع شکست می‌خورند.
+  <Tab title="مسیرهای فرمان سخت‌گیرانه">
+    برای مثال، مسیرهای حافظهٔ راه‌دور `openclaw memory` و `openclaw qr --remote` هنگامی که به ارجاع‌های راز مشترک راه‌دور نیاز دارد. آن‌ها از اسنپ‌شات فعال می‌خوانند و هنگامی که یک SecretRef الزامی دردسترس نباشد، سریعاً شکست می‌خورند.
   </Tab>
   <Tab title="مسیرهای فرمان فقط‌خواندنی">
-    برای مثال `openclaw status`، `openclaw status --all`، `openclaw channels status`، `openclaw channels resolve`، `openclaw security audit`، و جریان‌های فقط‌خواندنی ترمیم doctor/config. آن‌ها نیز snapshot فعال را ترجیح می‌دهند، اما وقتی یک SecretRef هدف‌گذاری‌شده در آن مسیر فرمان در دسترس نباشد، به‌جای توقف، با افت کیفیت ادامه می‌دهند.
+    برای مثال، `openclaw status`، `openclaw status --all`، `openclaw channels status`، `openclaw channels resolve`، `openclaw security audit` و جریان‌های فقط‌خواندنی تعمیر Doctor/پیکربندی. آن‌ها نیز اسنپ‌شات فعال را ترجیح می‌دهند، اما هنگامی که یک SecretRef هدف دردسترس نباشد، به‌جای توقف تنزل می‌یابند.
 
     رفتار فقط‌خواندنی:
 
-    - وقتی Gateway در حال اجرا است، این فرمان‌ها ابتدا از snapshot فعال می‌خوانند.
-    - اگر resolve کردن Gateway ناقص باشد یا Gateway در دسترس نباشد، برای سطح فرمان مشخص، fallback محلی هدف‌گذاری‌شده را امتحان می‌کنند.
-    - اگر یک SecretRef هدف‌گذاری‌شده همچنان در دسترس نباشد، فرمان با خروجی فقط‌خواندنی تنزل‌یافته و diagnostics صریح مثل «پیکربندی شده اما در این مسیر فرمان در دسترس نیست» ادامه می‌دهد.
-    - این رفتار تنزل‌یافته فقط محلیِ همان فرمان است. مسیرهای startup، reload، یا send/auth در runtime را تضعیف نمی‌کند.
+    - هنگامی که Gateway در حال اجراست، این فرمان‌ها ابتدا از اسنپ‌شات فعال می‌خوانند.
+    - اگر تفکیک Gateway ناقص باشد یا Gateway دردسترس نباشد، آن‌ها برای سطح همان فرمان یک مسیر جایگزین محلی هدفمند را امتحان می‌کنند.
+    - اگر یک SecretRef هدف همچنان دردسترس نباشد، فرمان با خروجی فقط‌خواندنی تنزل‌یافته و یک عیب‌یابی صریح ادامه می‌یابد که اعلام می‌کند ارجاع پیکربندی شده اما در این مسیر فرمان دردسترس نیست.
+    - این رفتار تنزل‌یافته فقط محلیِ فرمان است؛ راه‌اندازی زمان اجرا، بارگذاری مجدد یا مسیرهای ارسال/احراز هویت را تضعیف نمی‌کند.
 
   </Tab>
 </Tabs>
 
-نکته‌های دیگر:
+نکات دیگر:
 
-- تازه‌سازی snapshot پس از چرخش secret در backend با `openclaw secrets reload` انجام می‌شود.
-- متد RPC در Gateway که این مسیرهای فرمان استفاده می‌کنند: `secrets.resolve`.
+- تازه‌سازی اسنپ‌شات پس از چرخش راز بک‌اند توسط `openclaw secrets reload` مدیریت می‌شود.
+- روش RPC Gateway مورداستفادهٔ این مسیرهای فرمان: `secrets.resolve`.
 
-## جریان کاری audit و configure
+## جریان کاری ممیزی و پیکربندی
 
-جریان پیش‌فرض operator:
+جریان پیش‌فرض اپراتور:
 
 <Steps>
-  <Step title="Audit وضعیت فعلی">
+  <Step title="ممیزی وضعیت فعلی">
     ```bash
     openclaw secrets audit --check
     ```
@@ -676,54 +663,42 @@ credentialهای ساخته‌شده در زمان اجرا یا چرخشی و �
     openclaw secrets configure --apply
     ```
   </Step>
-  <Step title="Audit دوباره">
+  <Step title="ممیزی مجدد">
     ```bash
     openclaw secrets audit --check
     ```
   </Step>
 </Steps>
 
-مهاجرت را تا زمانی که re-audit پاک نیست کامل تلقی نکنید. اگر audit
-هنوز مقادیر plaintext در حالت ذخیره‌شده گزارش می‌کند، ریسک دسترسی agent همچنان وجود دارد
-حتی وقتی APIهای runtime مقادیر redacted برمی‌گردانند.
+تا زمانی که ممیزی مجدد پاک نشده است، مهاجرت را کامل تلقی نکنید. اگر ممیزی همچنان مقادیر متن سادهٔ ذخیره‌شده را گزارش کند، حتی هنگامی که APIهای زمان اجرا مقادیر ویرایش‌شده بازمی‌گردانند، خطر دسترسی عامل باقی می‌ماند.
 
-اگر هنگام `configure` به‌جای اعمال، یک plan ذخیره می‌کنید، آن plan ذخیره‌شده را
-پیش از re-audit با `openclaw secrets apply --from <plan-path>` اعمال کنید.
+اگر هنگام `configure` به‌جای اعمال، یک طرح را ذخیره می‌کنید، پیش از ممیزی مجدد آن طرح ذخیره‌شده را با `openclaw secrets apply --from <plan-path>` اعمال کنید.
 
 <AccordionGroup>
-  <Accordion title="secrets audit">
-    یافته‌ها شامل موارد زیر است:
+  <Accordion title="ممیزی اسرار">
+    یافته‌ها شامل موارد زیر هستند:
 
-    - مقادیر plaintext در حالت ذخیره‌شده (`openclaw.json`، `auth-profiles.json`، `.env`، و `agents/*/agent/models.json` تولیدشده)
-    - بقایای plaintext هدر حساس provider در ورودی‌های تولیدشدهٔ `models.json`
-    - refs resolveنشده
-    - precedence shadowing (`auth-profiles.json` که نسبت به refs در `openclaw.json` اولویت می‌گیرد)
-    - بقایای legacy (`auth.json`، یادآورها‌ی OAuth)
+    - مقادیر متن سادهٔ ذخیره‌شده (`openclaw.json`، `auth-profiles.json`، `.env` و `agents/*/agent/models.json` تولیدشده).
+    - باقی‌مانده‌های متن سادهٔ سرآیند حساس ارائه‌دهنده در ورودی‌های `models.json` تولیدشده.
+    - ارجاع‌های تفکیک‌نشده.
+    - سایه‌اندازی تقدم (`auth-profiles.json` که بر ارجاع‌های `openclaw.json` مقدم می‌شود).
+    - باقی‌مانده‌های قدیمی (`auth.json`، یادآوری‌های OAuth).
 
-    نکتهٔ exec:
+    نکتهٔ اجرا: به‌طور پیش‌فرض، ممیزی بررسی‌های قابلیت تفکیک SecretRef اجرایی را برای جلوگیری از عوارض جانبی فرمان رد می‌کند. برای اجرای ارائه‌دهندگان اجرایی هنگام ممیزی از `openclaw secrets audit --allow-exec` استفاده کنید.
 
-    - به‌صورت پیش‌فرض، audit بررسی‌های resolvability برای exec SecretRef را رد می‌کند تا از عوارض جانبی فرمان جلوگیری شود.
-    - برای اجرای providerهای exec هنگام audit از `openclaw secrets audit --allow-exec` استفاده کنید.
-
-    نکتهٔ بقایای هدر:
-
-    - تشخیص هدر حساس provider مبتنی بر heuristic نام است (نام‌ها و بخش‌های رایج هدرهای auth/credential مثل `authorization`، `x-api-key`، `token`، `secret`، `password`، و `credential`).
+    نکتهٔ باقی‌ماندهٔ سرآیند: تشخیص سرآیند حساس ارائه‌دهنده بر روش اکتشافی نام مبتنی است (نام‌های رایج سرآیند احراز هویت/اعتبارنامه و بخش‌هایی مانند `authorization`، `x-api-key`، `token`، `secret`، `password` و `credential`).
 
   </Accordion>
-  <Accordion title="secrets configure">
-    راهنمای تعاملی که:
+  <Accordion title="پیکربندی اسرار">
+    تابع کمکی تعاملی که:
 
-    - ابتدا `secrets.providers` را پیکربندی می‌کند (`env`/`file`/`exec`، افزودن/ویرایش/حذف)
-    - به شما اجازه می‌دهد فیلدهای پشتیبانی‌شدهٔ دارای secret را در `openclaw.json` به‌همراه `auth-profiles.json` برای یک scope عامل انتخاب کنید
-    - می‌تواند نگاشت جدید `auth-profiles.json` را مستقیماً در انتخابگر هدف ایجاد کند
-    - جزئیات SecretRef را ثبت می‌کند (`source`، `provider`، `id`)
-    - preflight resolution را اجرا می‌کند
-    - می‌تواند بلافاصله اعمال کند
+    - ابتدا `secrets.providers` را پیکربندی می‌کند (`env`/`file`/`exec`، افزودن/ویرایش/حذف).
+    - به شما امکان می‌دهد فیلدهای پشتیبانی‌شدهٔ حاوی راز را در `openclaw.json` به‌علاوهٔ `auth-profiles.json` برای یک محدودهٔ عامل انتخاب کنید.
+    - می‌تواند یک نگاشت `auth-profiles.json` جدید را مستقیماً در انتخابگر هدف ایجاد کند.
+    - جزئیات SecretRef را دریافت می‌کند (`source`، `provider`، `id`).
+    - تفکیک پیش‌بررسی را اجرا می‌کند و می‌تواند بلافاصله اعمال کند.
 
-    نکتهٔ exec:
-
-    - preflight بررسی‌های exec SecretRef را رد می‌کند مگر اینکه `--allow-exec` تنظیم شده باشد.
-    - اگر مستقیماً از `configure --apply` اعمال می‌کنید و plan شامل refs/providers از نوع exec است، برای گام apply نیز `--allow-exec` را تنظیم‌شده نگه دارید.
+    نکتهٔ اجرا: پیش‌بررسی، بررسی‌های SecretRef اجرایی را رد می‌کند مگر اینکه `--allow-exec` تنظیم شده باشد. اگر مستقیماً از `configure --apply` اعمال می‌کنید و طرح شامل ارجاع‌ها/ارائه‌دهندگان اجرایی است، برای مرحلهٔ اعمال نیز `--allow-exec` را تنظیم‌شده نگه دارید.
 
     حالت‌های مفید:
 
@@ -731,15 +706,15 @@ credentialهای ساخته‌شده در زمان اجرا یا چرخشی و �
     - `openclaw secrets configure --skip-provider-setup`
     - `openclaw secrets configure --agent <id>`
 
-    پیش‌فرض‌های apply در `configure`:
+    پیش‌فرض‌های اعمال `configure`:
 
-    - پاک‌سازی credentialهای static مطابق از `auth-profiles.json` برای providerهای هدف‌گذاری‌شده
-    - پاک‌سازی ورودی‌های static legacy از نوع `api_key` از `auth.json`
-    - پاک‌سازی خط‌های secret شناخته‌شدهٔ مطابق از `<config-dir>/.env`
+    - اعتبارنامه‌های ایستای منطبق را برای ارائه‌دهندگان هدف از `auth-profiles.json` پاک می‌کند.
+    - ورودی‌های ایستای قدیمی `api_key` را از `auth.json` پاک می‌کند.
+    - خطوط راز شناخته‌شدهٔ منطبق را از فایل‌های `.env` مربوط به وضعیت مؤثر و پیکربندی فعال پاک می‌کند (هنگامی که هر دو مسیر منطبق باشند، موارد تکراری حذف می‌شوند).
 
   </Accordion>
-  <Accordion title="secrets apply">
-    اعمال یک plan ذخیره‌شده:
+  <Accordion title="اعمال اسرار">
+    اعمال یک طرح ذخیره‌شده:
 
     ```bash
     openclaw secrets apply --from /tmp/openclaw-secrets-plan.json
@@ -748,12 +723,9 @@ credentialهای ساخته‌شده در زمان اجرا یا چرخشی و �
     openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --dry-run --allow-exec
     ```
 
-    نکتهٔ exec:
+    نکتهٔ اجرا: اجرای آزمایشی بررسی‌های اجرایی را رد می‌کند مگر اینکه `--allow-exec` تنظیم شده باشد؛ حالت نوشتن طرح‌های حاوی SecretRefها/ارائه‌دهندگان اجرایی را رد می‌کند مگر اینکه `--allow-exec` تنظیم شده باشد.
 
-    - dry-run بررسی‌های exec را رد می‌کند مگر اینکه `--allow-exec` تنظیم شده باشد.
-    - حالت write، planهایی را که شامل exec SecretRefs/providers هستند رد می‌کند مگر اینکه `--allow-exec` تنظیم شده باشد.
-
-    برای جزئیات قرارداد سخت‌گیرانهٔ target/path و قواعد دقیق رد شدن، [قرارداد Secrets Apply Plan](/fa/gateway/secrets-plan-contract) را ببینید.
+    برای جزئیات قرارداد سخت‌گیرانهٔ هدف/مسیر و قواعد دقیق رد، به [قرارداد طرح اعمال اسرار](/fa/gateway/secrets-plan-contract) مراجعه کنید.
 
   </Accordion>
 </AccordionGroup>
@@ -761,32 +733,33 @@ credentialهای ساخته‌شده در زمان اجرا یا چرخشی و �
 ## سیاست ایمنی یک‌طرفه
 
 <Warning>
-OpenClaw عمداً backup rollback حاوی مقادیر تاریخی plaintext secret نمی‌نویسد.
+OpenClaw عمداً نسخه‌های پشتیبان بازگشتی حاوی مقادیر تاریخی راز به‌صورت متن ساده را نمی‌نویسد.
 </Warning>
 
 مدل ایمنی:
 
-- preflight باید پیش از حالت write موفق شود
-- فعال‌سازی runtime پیش از commit اعتبارسنجی می‌شود
-- apply فایل‌ها را با جایگزینی اتمیک فایل و restore در حد best-effort هنگام شکست به‌روزرسانی می‌کند
+- پیش‌بررسی باید پیش از حالت نوشتن موفق شود.
+- فعال‌سازی زمان اجرا پیش از ثبت اعتبارسنجی می‌شود.
+- اعمال، فایل‌ها را با جایگزینی اتمی فایل به‌روزرسانی می‌کند و در صورت شکست، بازیابی را به‌صورت بهترین تلاش انجام می‌دهد.
 
-## نکته‌های سازگاری auth legacy
+## نکات سازگاری احراز هویت قدیمی
 
-برای credentialهای static، runtime دیگر به ذخیره‌سازی auth legacy به‌صورت plaintext وابسته نیست.
+برای اعتبارنامه‌های ایستا، زمان اجرا دیگر به ذخیره‌سازی قدیمی احراز هویت به‌صورت متن ساده وابسته نیست.
 
-- منبع credential در runtime همان snapshot درون‌حافظه‌ای resolveشده است.
-- ورودی‌های static legacy از نوع `api_key` هنگام کشف پاک‌سازی می‌شوند.
+- منبع اعتبارنامهٔ زمان اجرا، اسنپ‌شات درون‌حافظه‌ای تفکیک‌شده است.
+- ورودی‌های ایستای قدیمی `api_key` هنگام شناسایی پاک می‌شوند.
 - رفتار سازگاری مرتبط با OAuth جدا باقی می‌ماند.
 
-## نکتهٔ Web UI
+## نکتهٔ رابط کاربری وب
 
-برخی unionهای SecretInput در حالت ویرایشگر خام راحت‌تر از حالت فرم پیکربندی می‌شوند.
+پیکربندی برخی اجتماع‌های SecretInput در حالت ویرایشگر خام آسان‌تر از حالت فرم است.
 
 ## مرتبط
 
-- [احراز هویت](/fa/gateway/authentication) — راه‌اندازی auth
-- [CLI: secrets](/fa/cli/secrets) — فرمان‌های CLI
-- [متغیرهای محیطی](/fa/help/environment) — precedence محیط
-- [سطح credential در SecretRef](/fa/reference/secretref-credential-surface) — سطح credential
-- [قرارداد Secrets Apply Plan](/fa/gateway/secrets-plan-contract) — جزئیات قرارداد plan
-- [امنیت](/fa/gateway/security) — وضعیت امنیتی
+- [احراز هویت](/fa/gateway/authentication) - راه‌اندازی احراز هویت
+- [CLI: اسرار](/fa/cli/secrets) - فرمان‌های CLI
+- [Vault SecretRefs](/fa/plugins/vault) - راه‌اندازی ارائه‌دهنده HashiCorp Vault
+- [متغیرهای محیطی](/fa/help/environment) - تقدم متغیرهای محیطی
+- [سطح اعتبارنامه SecretRef](/fa/reference/secretref-credential-surface) - سطح اعتبارنامه
+- [قرارداد طرح اعمال اسرار](/fa/gateway/secrets-plan-contract) - جزئیات قرارداد طرح
+- [امنیت](/fa/gateway/security) - وضعیت امنیتی

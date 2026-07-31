@@ -1,22 +1,23 @@
 ---
 read_when:
     - OpenClaw'u Twilio aracılığıyla SMS'e bağlamak istiyorsunuz
-    - SMS webhook veya izin verilenler listesi yapılandırmasına ihtiyacınız var
-summary: Twilio SMS kanalı kurulumu, erişim denetimleri ve Webhook yapılandırması
+    - SMS webhook'u veya izin listesi kurulumu gerekiyor
+summary: Twilio SMS kanalı kurulumu, erişim denetimleri ve webhook yapılandırması
 title: SMS
 x-i18n:
-    generated_at: "2026-07-12T12:05:17Z"
+    generated_at: "2026-07-26T23:10:48Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 1ae0e0fee978a9837fc75ef7e9122bd06009df0d44de35fe9dff8aab120d5404
+    source_hash: 99a76b2f2d66858f8eb699939084104e620af9bc024053bbe1c1d7350530bff0
     source_path: channels/sms.md
     workflow: 16
 ---
 
-OpenClaw, bir Twilio telefon numarası veya Messaging Service üzerinden SMS alır ve gönderir. Gateway, gelen iletiler için bir Webhook rotası (varsayılan `/webhooks/sms`) kaydeder, varsayılan olarak Twilio istek imzalarını doğrular ve yanıtları Twilio'nun Messages API'si üzerinden geri gönderir.
+OpenClaw, bir Twilio telefon numarası veya Messaging Service aracılığıyla SMS alır ve gönderir. Gateway bir gelen Webhook rotası (varsayılan `/webhooks/sms`) kaydeder, varsayılan olarak Twilio istek imzalarını doğrular ve yanıtları Twilio'nun Messages API'si aracılığıyla geri gönderir.
 
-Durum: ayrı olarak yüklenen resmî Plugin. Yalnızca metin: MMS/medya yoktur, yalnızca doğrudan mesajlar desteklenir.
+Durum: resmî Plugin, ayrı olarak kurulur. Yalnızca metin: MMS/medya yoktur, yalnızca doğrudan mesajlar desteklenir.
 
 <CardGroup cols={3}>
   <Card title="Eşleştirme" icon="link" href="/tr/channels/pairing">
@@ -26,32 +27,32 @@ Durum: ayrı olarak yüklenen resmî Plugin. Yalnızca metin: MMS/medya yoktur, 
     Webhook erişimini ve gönderen erişim denetimlerini gözden geçirin.
   </Card>
   <Card title="Kanal sorunlarını giderme" icon="wrench" href="/tr/channels/troubleshooting">
-    Kanallar arası tanılama ve onarım kılavuzları.
+    Kanallar arası tanılama ve onarım çalışma planları.
   </Card>
 </CardGroup>
 
 ## Başlamadan önce
 
-Şunlara ihtiyacınız vardır:
+Gerekenler:
 
-- `openclaw plugins install @openclaw/sms` ile yüklenmiş resmî SMS Plugin'i.
+- `openclaw plugins install @openclaw/sms` ile kurulmuş resmî SMS Plugin'i.
 - SMS özellikli bir telefon numarasına veya Twilio Messaging Service'e sahip bir Twilio hesabı.
 - Twilio Account SID ve Auth Token.
-- OpenClaw Gateway'inize ulaşan, genel erişime açık bir HTTPS URL'si.
-- Bir gönderen ilkesi seçimi: özel kullanım için `pairing` (varsayılan), önceden onaylanmış telefon numaraları için `allowlist` veya yalnızca kasıtlı olarak herkese açık SMS erişimi için `open`.
+- OpenClaw Gateway'inize ulaşan herkese açık bir HTTPS URL'si.
+- Bir gönderen ilkesi seçimi: özel kullanım için `pairing` (varsayılan), önceden onaylanmış telefon numaraları için `allowlist` veya yalnızca bilerek herkese açık SMS erişimi sağlamak için `open`.
 
-Tek bir Twilio numarası, her iki özelliğe de sahipse hem SMS hem de [Sesli Arama](/tr/plugins/voice-call) için kullanılabilir. SMS Webhook'u ve Ses Webhook'u Twilio'da ayrı ayrı yapılandırılır ve farklı Gateway yolları kullanır; bu sayfa yalnızca SMS Webhook'unu kapsar.
+Tek bir Twilio numarası, her iki özelliğe de sahipse hem SMS hem de [Sesli Arama](/tr/plugins/voice-call) için kullanılabilir. SMS Webhook'u ve Ses Webhook'u Twilio'da ayrı ayrı yapılandırılır ve ayrı Gateway yolları kullanır; bu sayfa yalnızca SMS Webhook'unu kapsar.
 
 ## Hızlı Kurulum
 
 <Steps>
-  <Step title="Plugin'i yükleyin">
+  <Step title="Plugin'i kurun">
     ```bash
     openclaw plugins install @openclaw/sms
     ```
   </Step>
   <Step title="Bir Twilio göndereni oluşturun veya seçin">
-    Twilio'da **Phone Numbers > Manage > Active numbers** yolunu açın ve SMS özellikli bir numara seçin. Şunları kaydedin:
+    Twilio'da **Phone Numbers > Manage > Active numbers** bölümünü açın ve SMS özellikli bir numara seçin. Şunları kaydedin:
 
     - Account SID, örneğin `ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
     - Auth Token
@@ -96,19 +97,19 @@ openclaw config patch --file ./sms.patch.json5
 https://gateway.example.com/webhooks/sms
 ```
 
-    HTTP `POST` kullanın. Varsayılan yerel yol `/webhooks/sms` değeridir; farklı bir rotaya ihtiyacınız varsa `channels.sms.webhookPath` değerini değiştirin.
+    HTTP `POST` kullanın. Varsayılan yerel yol `/webhooks/sms` şeklindedir; farklı bir rota gerekiyorsa `channels.sms.webhookPath` değerini değiştirin.
 
   </Step>
 
-  <Step title="Tam SMS Webhook yolunu erişime açın">
-    Genel URL'niz, SMS yolunu Gateway işlemine (varsayılan port `18789`) yönlendirmelidir. Yerel test için Tailscale Funnel kullanıyorsanız `/webhooks/sms` yolunu açıkça erişime açın:
+  <Step title="Tam SMS Webhook yolunu kullanıma açın">
+    Herkese açık URL'niz, SMS yolunu Gateway işlemine yönlendirmelidir (varsayılan port `18789`). Yerel test için Tailscale Funnel kullanıyorsanız `/webhooks/sms` yolunu açıkça kullanıma açın:
 
 ```bash
 tailscale funnel --bg --set-path /webhooks/sms http://127.0.0.1:<gateway-port>/webhooks/sms
 tailscale funnel status
 ```
 
-    Sesli Arama ve SMS ayrı Webhook yolları kullanır. Aynı Twilio numarası her ikisini de işliyorsa her iki rotayı da Twilio'da ve tünelinizde yapılandırılmış durumda tutun.
+    Sesli Arama ve SMS ayrı Webhook yolları kullanır. Aynı Twilio numarası her ikisini de işliyorsa her iki rotayı da Twilio'da ve tünelinizde yapılandırılmış olarak tutun.
 
   </Step>
 
@@ -134,21 +135,21 @@ openclaw pairing approve sms <CODE>
 
 Tüm anahtarlar `channels.sms` altında (ve hesap başına `channels.sms.accounts.<id>` altında) bulunur:
 
-| Anahtar                                 | Varsayılan      | Amaç                                                                            |
-| --------------------------------------- | --------------- | ------------------------------------------------------------------------------- |
-| `enabled`                               | `true`          | Kanalı/hesabı etkinleştirir veya devre dışı bırakır.                            |
-| `accountSid`                            | —               | Twilio Account SID (`AC...`).                                                   |
-| `authToken`                             | —               | Twilio Auth Token; düz metin dizesi veya SecretRef.                             |
-| `fromNumber`                            | —               | E.164 biçimindeki gönderen numarası.                                            |
-| `messagingServiceSid`                   | —               | Bir `fromNumber` çözümlenmediğinde kullanılan Messaging Service SID (`MG...`).  |
-| `defaultTo`                             | —               | Gönderim akışında açık bir hedef belirtilmediğinde kullanılacak varsayılan hedef. |
-| `webhookPath`                           | `/webhooks/sms` | Gelen Twilio Webhook'ları için Gateway HTTP yolu.                               |
-| `publicWebhookUrl`                      | —               | Twilio'da yapılandırılan genel URL; imza doğrulaması için gereklidir.            |
-| `dangerouslyDisableSignatureValidation` | `false`         | `X-Twilio-Signature` denetimlerini atlar; yalnızca yerel tünel testleri içindir. |
-| `dmPolicy`                              | `"pairing"`     | `pairing`, `allowlist`, `open` veya `disabled`.                                 |
+| Anahtar                                 | Varsayılan      | Amaç                                                                |
+| --------------------------------------- | --------------- | ------------------------------------------------------------------- |
+| `enabled`                               | `true`          | Kanalı/hesabı etkinleştirin veya devre dışı bırakın.                 |
+| `accountSid`                            | —               | Twilio Account SID (`AC...`).                                       |
+| `authToken`                             | —               | Twilio Auth Token; düz metin dizesi veya SecretRef.                  |
+| `fromNumber`                            | —               | E.164 gönderen numarası.                                             |
+| `messagingServiceSid`                   | —               | Hiçbir `fromNumber` çözümlenmediğinde kullanılan Messaging Service SID (`MG...`). |
+| `defaultTo`                             | —               | Gönderme akışı açık bir hedef belirtmediğinde varsayılan hedef.      |
+| `webhookPath`                           | `/webhooks/sms` | Gelen Twilio Webhook'ları için Gateway HTTP yolu.                    |
+| `publicWebhookUrl`                      | —               | Twilio'da yapılandırılan herkese açık URL; imza doğrulaması için gereklidir. |
+| `dangerouslyDisableSignatureValidation` | `false`         | `X-Twilio-Signature` denetimlerini atlayın; yalnızca yerel tünel testi içindir. |
+| `dmPolicy`                              | `"pairing"`     | `pairing`, `allowlist`, `open` veya `disabled`.                      |
 | `allowFrom`                             | `[]`            | E.164 biçiminde izin verilen gönderen numaraları veya `dmPolicy: "open"` ile `"*"`. |
-| `textChunkLimit`                        | `1500`          | Giden her SMS parçasındaki azami karakter sayısı.                               |
-| `accounts`, `defaultAccount`            | —               | Çoklu hesap eşlemesi ve varsayılan hesap kimliği.                               |
+| `textChunkLimit`                        | `1500`          | Giden SMS parçası başına azami karakter sayısı.                      |
+| `accounts`, `defaultAccount`            | —               | Çok hesaplı eşleme ve varsayılan hesap kimliği.                      |
 
 ### Yapılandırma dosyası
 
@@ -171,19 +172,19 @@ Kanal tanımının Gateway yapılandırmasıyla birlikte taşınmasını istedi�
 
 ### Ortam değişkenleri
 
-Ortam değişkenleri yalnızca varsayılan hesaba uygulanır; yapılandırma değerleri ortam değişkeni değerlerinden önceliklidir.
+Ortam değişkenleri yalnızca varsayılan hesaba uygulanır; yapılandırma değerleri ortam değerlerinden önceliklidir.
 
-| Değişken                                        | Eşlendiği alan                                      |
-| ----------------------------------------------- | --------------------------------------------------- |
-| `TWILIO_ACCOUNT_SID`                            | `accountSid`                                        |
-| `TWILIO_AUTH_TOKEN`                             | `authToken`                                         |
-| `TWILIO_PHONE_NUMBER` (`TWILIO_SMS_FROM` diğer adı) | `fromNumber`                                    |
-| `TWILIO_MESSAGING_SERVICE_SID`                  | `messagingServiceSid`                               |
-| `SMS_PUBLIC_WEBHOOK_URL`                        | `publicWebhookUrl`                                  |
-| `SMS_WEBHOOK_PATH`                              | `webhookPath`                                       |
-| `SMS_ALLOWED_USERS`                             | `allowFrom` (virgülle ayrılmış)                     |
-| `SMS_TEXT_CHUNK_LIMIT`                          | `textChunkLimit`                                    |
-| `SMS_DANGEROUSLY_DISABLE_SIGNATURE_VALIDATION`  | `dangerouslyDisableSignatureValidation` (`"true"`)  |
+| Değişken                                        | Eşlendiği değer                                     |
+| ----------------------------------------------- | -------------------------------------------------- |
+| `TWILIO_ACCOUNT_SID`                            | `accountSid`                                       |
+| `TWILIO_AUTH_TOKEN`                             | `authToken`                                        |
+| `TWILIO_PHONE_NUMBER` (`TWILIO_SMS_FROM` diğer adıyla) | `fromNumber`                                       |
+| `TWILIO_MESSAGING_SERVICE_SID`                  | `messagingServiceSid`                              |
+| `SMS_PUBLIC_WEBHOOK_URL`                        | `publicWebhookUrl`                                 |
+| `SMS_WEBHOOK_PATH`                              | `webhookPath`                                      |
+| `SMS_ALLOWED_USERS`                             | `allowFrom` (virgülle ayrılmış)                      |
+| `SMS_TEXT_CHUNK_LIMIT`                          | `textChunkLimit`                                   |
+| `SMS_DANGEROUSLY_DISABLE_SIGNATURE_VALIDATION`  | `dangerouslyDisableSignatureValidation` (`"true"`) |
 
 ```bash
 export TWILIO_ACCOUNT_SID="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -192,7 +193,7 @@ export TWILIO_PHONE_NUMBER="+15551234567"
 export SMS_PUBLIC_WEBHOOK_URL="https://gateway.example.com/webhooks/sms"
 ```
 
-Ardından yapılandırmada kanalı etkinleştirin:
+Ardından kanalı yapılandırmada etkinleştirin:
 
 ```json5
 {
@@ -207,7 +208,7 @@ Ardından yapılandırmada kanalı etkinleştirin:
 
 ### SecretRef kimlik doğrulama belirteci
 
-`authToken` bir SecretRef (`source: "env" | "file" | "exec"`) olabilir. Gateway'in Twilio Auth Token'ı düz metin yapılandırmasında saklamak yerine OpenClaw gizli bilgiler çalışma zamanından çözümlemesi gerektiğinde bunu kullanın:
+`authToken` bir SecretRef (`source: "env" | "file" | "exec"`) olabilir. Gateway'in düz metin yapılandırmayı depolamak yerine Twilio Auth Token'ı OpenClaw gizli bilgiler çalışma zamanından çözümlemesi gerektiğinde bunu kullanın:
 
 ```json5
 {
@@ -228,7 +229,7 @@ Başvurulan ortam değişkeni veya gizli bilgi sağlayıcısı Gateway çalışm
 
 ### Messaging Service göndereni
 
-Twilio'nun göndereni Messaging Service üzerinden seçmesi gerektiğinde `fromNumber` yerine `messagingServiceSid` kullanın:
+Twilio'nun göndereni bir Messaging Service aracılığıyla seçmesi gerektiğinde `fromNumber` yerine `messagingServiceSid` kullanın:
 
 ```json5
 {
@@ -245,11 +246,11 @@ Twilio'nun göndereni Messaging Service üzerinden seçmesi gerektiğinde `fromN
 }
 ```
 
-Yapılandırma ve ortam değişkenleri çözümlendikten sonra hem `fromNumber` hem de `messagingServiceSid` mevcutsa `fromNumber` kullanılır.
+Yapılandırma ve ortam çözümlemesinden sonra hem `fromNumber` hem de `messagingServiceSid` mevcutsa `fromNumber` kullanılır.
 
 ### Varsayılan giden hedef
 
-Bir gönderim akışında açık bir hedef belirtilmediğinde otomasyon veya ajan tarafından başlatılan teslimatın varsayılan bir hedefi olması gerekiyorsa `defaultTo` değerini ayarlayın:
+Bir gönderme akışı açık bir hedef belirtmediğinde otomasyon veya aracı tarafından başlatılan teslimatın varsayılan bir hedefi olması gerekiyorsa `defaultTo` değerini ayarlayın:
 
 ```json5
 {
@@ -268,14 +269,14 @@ Bir gönderim akışında açık bir hedef belirtilmediğinde otomasyon veya aja
 
 ## Erişim denetimi
 
-`channels.sms.dmPolicy`, doğrudan SMS erişimini denetler:
+`channels.sms.dmPolicy` doğrudan SMS erişimini denetler:
 
 - `pairing` (varsayılan): bilinmeyen gönderenler bir eşleştirme kodu alır; `openclaw pairing approve sms <CODE>` ile onaylayın.
-- `allowlist`: yalnızca `allowFrom` içindeki gönderenler işlenir. Boş bir `allowFrom`, tüm gönderenleri reddeder (Gateway başlangıçta bir uyarı kaydeder).
+- `allowlist`: yalnızca `allowFrom` içindeki gönderenler işlenir. Boş bir `allowFrom` her göndereni reddeder (Gateway bir başlangıç uyarısı günlüğe kaydeder).
 - `open`: yapılandırma doğrulaması, `allowFrom` değerinin `"*"` içermesini gerektirir. Joker karakter olmadan yalnızca listelenen numaralar sohbet edebilir.
 - `disabled`: gelen tüm DM'ler bırakılır.
 
-`allowFrom` girdileri `+15551234567` gibi E.164 telefon numaraları olmalıdır. `sms:` ve `twilio-sms:` önekleri kabul edilir ve normalleştirilir. Özel bir asistan için açık telefon numaralarıyla `dmPolicy: "allowlist"` kullanımını tercih edin:
+`allowFrom` girdileri `+15551234567` gibi E.164 telefon numaraları olmalıdır. `sms:` ve `twilio-sms:` ön ekleri kabul edilir ve normalleştirilir. Özel bir asistan için açık telefon numaralarıyla `dmPolicy: "allowlist"` kullanmayı tercih edin:
 
 ```json5
 {
@@ -293,31 +294,31 @@ Bir gönderim akışında açık bir hedef belirtilmediğinde otomasyon veya aja
 }
 ```
 
-## SMS Gönderme
+## SMS gönderme
 
-SMS kanalı seçiliyken hedefler, yalın E.164 numaralarını veya `sms:` önekini kabul eder:
+SMS kanalı seçildiğinde hedefler, yalın E.164 numaralarını veya `sms:` ön ekini kabul eder:
 
 ```bash
 openclaw message send --channel sms --target sms:+15551234567 --message "hello"
 ```
 
-Kanal seçimi örtük olduğunda `twilio-sms:` öneki, iMessage'ın kendi hedefleri için operatör üzerinden SMS teslimatını seçmek amacıyla kullandığı `sms:` hizmet önekini devralmadan bu kanalı seçer:
+Kanal seçimi örtük olduğunda `twilio-sms:` ön eki, iMessage'ın kendi hedefleri için operatör SMS teslimatını seçmek üzere kullandığı `sms:` hizmet ön ekini devralmadan bu kanalı seçer:
 
 ```bash
 openclaw message send --target twilio-sms:+15551234567 --message "hello"
 ```
 
-CLI açık bir `--target` gerektirir. `defaultTo`, hedefin kanal yapılandırmasından çözümlenebildiği otomasyon ve ajan tarafından başlatılan teslimat yolları içindir.
+CLI açık bir `--target` gerektirir. `defaultTo`, hedefin kanal yapılandırmasından çözümlenebildiği otomasyon ve aracı tarafından başlatılan teslimat yolları içindir.
 
-Gelen SMS konuşmalarına verilen ajan yanıtları, yapılandırılmış Twilio göndereni üzerinden otomatik olarak gönderene geri iletilir.
+Gelen SMS görüşmelerine verilen aracı yanıtları, yapılandırılmış Twilio göndericisi üzerinden otomatik olarak gönderene geri iletilir.
 
-SMS çıktısı düz metindir. OpenClaw; Markdown biçimlendirmesini kaldırır, çitle çevrili kod bloklarını düzleştirir, bağlantıları `etiket (url)` biçiminde yeniden yazar ve uzun yanıtları Twilio üzerinden göndermeden önce en fazla `textChunkLimit` karakterlik parçalara böler (varsayılan 1500).
+SMS çıktısı düz metindir. OpenClaw; markdown biçimlendirmesini kaldırır, çitle çevrili kod bloklarını düzleştirir, bağlantıları `label (url)` olarak yeniden yazar ve uzun yanıtları Twilio üzerinden göndermeden önce en fazla `textChunkLimit` karakterlik (varsayılan 1500) parçalara böler.
 
 ## Kurulumu Doğrulama
 
 Gateway başladıktan sonra:
 
-1. Gateway günlüğünün SMS Webhook rotasını gösterdiğini doğrulayın.
+1. Gateway günlüğünde SMS Webhook yolunun gösterildiğini doğrulayın.
 2. Twilio tarafında bir yoklama çalıştırın (yapılandırılmış Twilio Webhook URL'sini/yöntemini ve son gelen ileti hatalarını denetler):
 
 ```bash
@@ -338,7 +339,7 @@ openclaw message send --channel sms --target sms:+15557654321 --message "OpenCla
 
 ### macOS iMessage/SMS üzerinden uçtan uca test
 
-Messages aracılığıyla operatör SMS'i gönderebilen bir Mac'te, telefonunuza dokunmadan gönderen tarafını yönetmek için `imsg` kullanabilirsiniz:
+Messages üzerinden operatör SMS'i gönderebilen bir Mac'te, telefonunuza dokunmadan gönderici tarafını yönetmek için `imsg` kullanabilirsiniz:
 
 ```bash
 imsg send --to "+15551234567" --service sms --text "OpenClaw SMS E2E $(date -u +%Y%m%dT%H%M%SZ)" --json
@@ -351,18 +352,20 @@ imsg send --to "+15551234567" --service sms --text "reply exactly SMS pong" --js
 
 ## Webhook güvenliği
 
-OpenClaw varsayılan olarak `X-Twilio-Signature` değerini `publicWebhookUrl` ve `authToken` kullanarak doğrular. `publicWebhookUrl` değerinin uç nokta bölümünü; şema, ana makine, yol ve sorgu dizesi dâhil olmak üzere Twilio'da yapılandırılmış URL ile baytı baytına aynı tutun. OpenClaw, Twilio'nun gerektirdiği şekilde Twilio [bağlantı geçersiz kılma](https://www.twilio.com/docs/usage/webhooks/webhooks-connection-overrides) parçalarını (`#...`) imza hesaplamasına dâhil etmez.
+OpenClaw varsayılan olarak `X-Twilio-Signature` değerini `publicWebhookUrl` ve `authToken` kullanarak doğrular. `publicWebhookUrl` değerinin uç nokta bölümünü; şema, ana bilgisayar, yol ve sorgu dizesi dâhil olmak üzere Twilio'da yapılandırılan URL ile bayt bayt aynı tutun. OpenClaw, Twilio'nun gerektirdiği şekilde Twilio [bağlantı geçersiz kılma](https://www.twilio.com/docs/usage/webhooks/webhooks-connection-overrides) parçalarını (`#...`) imza hesaplamasının dışında bırakır.
 
-Webhook rotası, imza doğrulamasından bağımsız olarak şunları da zorunlu kılar:
+Webhook yolu, imza doğrulamasından bağımsız olarak şunları da uygular:
 
 - Yalnızca `POST`.
-- Kaynak IP başına dakikada 30 istek hız sınırı (bunun üzerinde HTTP 429).
-- Yükteki `AccountSid`, yapılandırılmış `accountSid` ile eşleşmelidir (aksi hâlde HTTP 403).
-- Yeniden oynatılan `MessageSid` değerleri 10 dakika boyunca yinelenenlerden arındırılır.
-- Her SMS hesabının yeniden oynatma önbelleği en fazla 10.000 etkin ileti SID'sini tutar. Tüm yuvalar etkin olduğunda, o hesaba yönelik yeni Webhook'lar en eski yuvanın süresi dolana kadar HTTP 429 ve bir `Retry-After` üstbilgisiyle güvenli biçimde reddedilir.
-- 32 KB'ı aşan istek gövdeleri reddedilir.
+- SMS hesabı, Webhook yolu ve çözümlenmiş istemci adresi başına dakikada 300 istekten oluşan başarısız istek bütçesi. Tüm istekler bu bütçeye dâhildir ancak HTTP 429 yalnızca bir istek gövde ayrıştırma, Twilio doğrulaması veya AccountSid eşleştirmesinde başarısız olduktan sonra uygulanır.
+- Bu denetimler geçildikten sonra SMS hesabı, Webhook yolu ve çözümlenmiş istemci adresi başına dakikada 30 kabul edilmiş geri çağırmadan oluşan işlenebilir geri çağırma hız sınırı (bunun üzerinde HTTP 429). İmza doğrulaması devre dışıysa bu 30/dakika sınırı, kimliği doğrulanmamış işleme üst sınırıdır.
+- İstemci adresleri, paylaşılan Gateway güvenilir proxy kuralları üzerinden çözümlenir. `gateway.trustedProxies`, Twilio geri çağırmalarını ileten ters proxy'yi içeriyorsa OpenClaw bu sınırları iletilen istemci adresine göre belirler; aksi takdirde doğrudan soket adresine geri döner.
+- Yükteki `AccountSid`, yapılandırılmış `accountSid` ile eşleşmelidir (aksi takdirde HTTP 403).
+- Yeniden oynatılan `MessageSid` değerlerinin yinelenenleri 10 dakika boyunca ayıklanır.
+- Her SMS hesabının yeniden oynatma önbelleği en fazla 10.000 etkin ileti SID'sini saklar. Tüm yuvalar etkin olduğunda, o hesaba yönelik yeni Webhook'lar en eski yuvanın süresi dolana kadar HTTP 429 ve bir `Retry-After` üst bilgisiyle kapalı biçimde başarısız olur.
+- 32 KB üzerindeki istek gövdeleri reddedilir.
 
-Twilio varsayılan olarak HTTP 429'u yeniden denemez ve `Retry-After` desteğini belgelemez. `#rp=4xx` ve `#rp=all` bağlantı geçersiz kılmaları 4xx yeniden denemelerini etkinleştirir; ancak Twilio, tüm yeniden deneme işlemini 15 saniyeyle sınırlar. Bu nedenle yeniden denemeler, bir yeniden oynatma önbelleği yuvasının süresi dolmadan önce tamamlanabilir. Başarısız teslimatların başka bir işleyiciye ulaşması gerekiyorsa bir yedek URL yapılandırın; 429 yanıtını güvenilir geri basınç olarak değil, güvenli ret olarak değerlendirin.
+Twilio varsayılan olarak HTTP 429 isteklerini yeniden denemez ve `Retry-After` desteğini belgelememektedir. `#rp=4xx` ve `#rp=all` bağlantı geçersiz kılmaları 4xx yeniden denemelerini etkinleştirir ancak Twilio tüm yeniden deneme işlemini 15 saniyeyle sınırlar; bu nedenle yeniden denemeler, bir yeniden oynatma önbelleği yuvasının süresi dolmadan önce tamamlanabilir. Başarısız teslimatları başka bir işleyicinin alması gerekiyorsa bir yedek URL yapılandırın; 429 yanıtını güvenilir geri basınç olarak değil, kapalı biçimde başarısız olan bir ret olarak değerlendirin.
 
 Yalnızca yerel tünel testi için şunu ayarlayabilirsiniz:
 
@@ -376,7 +379,7 @@ Yalnızca yerel tünel testi için şunu ayarlayabilirsiniz:
 }
 ```
 
-Herkese açık bir Gateway üzerinde imza doğrulamasını devre dışı bırakmayın.
+Herkese açık bir Gateway'de devre dışı bırakılmış imza doğrulaması kullanmayın.
 
 ## Çok hesaplı yapılandırma
 
@@ -403,33 +406,33 @@ Birden fazla Twilio numarası işletiyorsanız `accounts` kullanın:
 }
 ```
 
-Her hesap farklı bir `webhookPath` kullanmalıdır; Gateway, yolu başka bir hesaba ait olan bir Webhook rotasını kaydetmeyi reddeder. `TWILIO_*`/`SMS_*` ortam değişkeni geri dönüşleri yalnızca varsayılan hesaba uygulanır; bu hesabı değiştirmek için `defaultAccount` ayarlayın.
+Her hesap ayrı bir `webhookPath` kullanmalıdır; Gateway, yolu zaten başka bir hesaba ait olan bir Webhook yolunu kaydetmeyi reddeder. `TWILIO_*`/`SMS_*` ortam değişkeni geri dönüşleri yalnızca varsayılan hesaba uygulanır; bunun hangi hesap olduğunu değiştirmek için `defaultAccount` ayarlayın.
 
-## Sorun giderme
+## Sorun Giderme
 
 ### Twilio 403 döndürüyor veya OpenClaw Webhook'u reddediyor
 
-`publicWebhookUrl` değerinin şema, ana makine, yol ve sorgu dizesi dâhil olmak üzere Twilio'da yapılandırılmış URL ile tam olarak eşleştiğini denetleyin. Twilio herkese açık URL dizesini imzaladığından, proxy yeniden yazımları ve alternatif ana makine adları imza doğrulamasını bozabilir.
+`publicWebhookUrl` değerinin şema, ana bilgisayar, yol ve sorgu dizesi dâhil olmak üzere Twilio'da yapılandırılan URL ile tam olarak eşleştiğini denetleyin. Twilio herkese açık URL dizesini imzalar; bu nedenle proxy yeniden yazımları ve alternatif ana bilgisayar adları imza doğrulamasını bozabilir.
 
-`Invalid account` yanıtıyla birlikte alınan 403, gelen yükün `AccountSid` değerinin yapılandırılmış `accountSid` ile eşleşmediği anlamına gelir; Webhook'un numaranın sahibi olan hesaba işaret ettiğini denetleyin.
+`Invalid account` içeren bir 403 yanıtı, gelen yükün `AccountSid` değerinin yapılandırılmış `accountSid` ile eşleşmediği anlamına gelir; Webhook'un numaranın sahibi olan hesaba yönlendirildiğini denetleyin.
 
 ### Eşleştirme isteği görünmüyor
 
-Twilio numarasının **Messaging** Webhook URL'sini ve yöntemini denetleyin. SMS Webhook URL'sine işaret etmeli ve `POST` kullanmalıdır. Ayrıca Gateway'e herkese açık internetten veya tüneliniz üzerinden erişilebildiğini doğrulayın.
+Twilio numarasının **Messaging** Webhook URL'sini ve yöntemini denetleyin. SMS Webhook URL'sine yönelmeli ve `POST` kullanmalıdır. Ayrıca Gateway'e herkese açık internetten veya tüneliniz üzerinden erişilebildiğini doğrulayın.
 
-Twilio ileti günlüğü `11200` hatasını gösteriyorsa Twilio gelen SMS'i kabul etmiş ancak Webhook'unuza ulaşamamıştır. Şunları denetleyin:
+Twilio ileti günlüğünde `11200` hatası gösteriliyorsa Twilio gelen SMS'i kabul etmiş ancak Webhook'unuza ulaşamamıştır. Şunları denetleyin:
 
-- Twilio **Messaging > A message comes in**, `publicWebhookUrl` değerine işaret eder.
-- Yöntem `POST` olmalıdır.
-- Tünel veya ters proxy tam `webhookPath` yolunu kullanıma sunar; Tailscale Funnel için `tailscale funnel status` komutunu çalıştırın ve `/webhooks/sms` yolunun listelendiğini doğrulayın.
-- İmza doğrulamasının imzalanmış URL'yi yeniden oluşturabilmesi için `publicWebhookUrl`, Twilio'nun gönderdiği şema, ana makine, yol ve sorgu dizesinin aynısını kullanır.
+- Twilio **Messaging > A message comes in**, `publicWebhookUrl` adresine yöneliyor.
+- Yöntem `POST`.
+- Tünel veya ters proxy tam `webhookPath` yolunu kullanıma açıyor; Tailscale Funnel için `tailscale funnel status` çalıştırın ve `/webhooks/sms` değerinin listelendiğini doğrulayın.
+- `publicWebhookUrl`, Twilio'nun gönderdiği şema, ana bilgisayar, yol ve sorgu dizesinin aynısını kullanıyor; böylece imza doğrulaması imzalanmış URL'yi yeniden oluşturabiliyor.
 
 `openclaw channels status --channel sms --probe`, hem eşleşmeyen Twilio Webhook ayarlarını hem de son `11200` hatalarını gösterir.
 
-### Giden gönderimler başarısız oluyor
+### Giden iletiler gönderilemiyor
 
-`accountSid`, `authToken` ve `fromNumber` ya da `messagingServiceSid` değerlerinden birinin çözümlendiğini doğrulayın. Deneme Twilio hesabı kullanıyorsanız giden SMS'in gönderilebilmesi için hedef numaranın önce Twilio'da doğrulanması gerekebilir.
+`accountSid`, `authToken` ve `fromNumber` ya da `messagingServiceSid` değerlerinden birinin çözümlendiğini doğrulayın. Deneme sürümü bir Twilio hesabı kullanıyorsanız giden SMS'in gönderilebilmesi için hedef numaranın önce Twilio'da doğrulanması gerekebilir.
 
 ### İletiler geliyor ancak aracı yanıt vermiyor
 
-`dmPolicy` ve `allowFrom` değerlerini denetleyin. Varsayılan `pairing` politikasıyla, normal aracı turları işlenmeden önce gönderenin onaylanması gerekir.
+`dmPolicy` ve `allowFrom` değerlerini denetleyin. Varsayılan `pairing` ilkesi kullanıldığında, normal aracı turlarının işlenebilmesi için gönderenin onaylanmış olması gerekir.

@@ -1,33 +1,34 @@
 ---
 read_when:
-    - OpenCode Go カタログを使用する場合
-    - Goでホストされるモデルのランタイムモデル参照が必要です
+    - OpenCode Go カタログが必要です
+    - Go でホストされるモデルのランタイムモデル参照が必要です
 summary: 共有の OpenCode セットアップで OpenCode Go カタログを使用する
 title: OpenCode Go
 x-i18n:
-    generated_at: "2026-07-11T22:38:25Z"
+    generated_at: "2026-07-26T10:18:20Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: df647721e8966fd4fad3178550b071a2eb827148fe765bda53b3d7c97ceaadc2
     source_path: providers/opencode-go.md
     workflow: 16
 ---
 
-OpenCode Go は、[OpenCode](/ja-JP/providers/opencode) 内の Go カタログです。Zen カタログと
+OpenCode Go は [OpenCode](/ja-JP/providers/opencode) 内の Go カタログです。Zen カタログと
 `OPENCODE_API_KEY` 認証情報を共有しますが、上流のモデルごとのルーティングを
-正しく保つため、独自のランタイムプロバイダー ID（`opencode-go`）を使用します。
+正しく維持するため、独自のランタイムプロバイダー ID（`opencode-go`）を使用します。
 
 | プロパティ             | 値                                                 |
 | ---------------------- | -------------------------------------------------- |
-| ランタイムプロバイダー | `opencode-go`                                      |
-| 認証                   | `OPENCODE_API_KEY`（別名: `OPENCODE_ZEN_API_KEY`） |
+| ランタイムプロバイダー | `opencode-go`                                 |
+| 認証                   | `OPENCODE_API_KEY`（エイリアス: `OPENCODE_ZEN_API_KEY`） |
 | 親セットアップ         | [OpenCode](/ja-JP/providers/opencode)                    |
 
 ## はじめに
 
 <Tabs>
-  <Tab title="対話型">
+  <Tab title="対話形式">
     <Steps>
       <Step title="オンボーディングを実行">
         ```bash
@@ -47,7 +48,7 @@ OpenCode Go は、[OpenCode](/ja-JP/providers/opencode) 内の Go カタログ�
     </Steps>
   </Tab>
 
-  <Tab title="非対話型">
+  <Tab title="非対話形式">
     <Steps>
       <Step title="キーを直接渡す">
         ```bash
@@ -74,51 +75,51 @@ OpenCode Go は、[OpenCode](/ja-JP/providers/opencode) 内の Go カタログ�
 
 ## 組み込みカタログ
 
-現在のモデル一覧を確認するには、`openclaw models list --provider opencode-go` を実行します。
-同梱されている項目は次のとおりです。
+現在のモデル一覧を確認するには `openclaw models list --provider opencode-go` を実行します。
+同梱されているエントリは次のとおりです。
 
 | モデル参照                      | 名前              | コンテキスト | 最大出力 | 画像入力 |
 | ------------------------------- | ----------------- | ------------ | -------- | -------- |
-| `opencode-go/deepseek-v4-pro`   | DeepSeek V4 Pro   | 1M           | 384K     | いいえ   |
-| `opencode-go/deepseek-v4-flash` | DeepSeek V4 Flash | 1M           | 384K     | いいえ   |
-| `opencode-go/glm-5`             | GLM-5             | 202,752      | 32,768   | いいえ   |
-| `opencode-go/glm-5.1`           | GLM-5.1           | 202,752      | 32,768   | いいえ   |
-| `opencode-go/glm-5.2`           | GLM-5.2           | 1M           | 131,072  | いいえ   |
-| `opencode-go/hy3-preview`       | HY3 Preview       | 262,144      | 32,768   | いいえ   |
-| `opencode-go/kimi-k2.5`         | Kimi K2.5         | 262,144      | 65,536   | はい     |
-| `opencode-go/kimi-k2.6`         | Kimi K2.6         | 262,144      | 65,536   | はい     |
-| `opencode-go/kimi-k2.7-code`    | Kimi K2.7 Code    | 262,144      | 262,144  | はい     |
-| `opencode-go/mimo-v2.5`         | MiMo V2.5         | 1M           | 128,000  | はい     |
-| `opencode-go/mimo-v2.5-pro`     | MiMo V2.5 Pro     | 1,048,576    | 128,000  | いいえ   |
-| `opencode-go/minimax-m2.5`      | MiniMax M2.5      | 204,800      | 65,536   | いいえ   |
-| `opencode-go/minimax-m2.7`      | MiniMax M2.7      | 204,800      | 131,072  | いいえ   |
-| `opencode-go/minimax-m3`        | MiniMax M3        | 204,800      | 131,072  | いいえ   |
-| `opencode-go/qwen3.5-plus`      | Qwen3.5 Plus      | 262,144      | 65,536   | はい     |
-| `opencode-go/qwen3.6-plus`      | Qwen3.6 Plus      | 262,144      | 65,536   | はい     |
-| `opencode-go/qwen3.7-max`       | Qwen3.7 Max       | 1M           | 65,536   | いいえ   |
-| `opencode-go/qwen3.7-plus`      | Qwen3.7 Plus      | 1M           | 65,536   | はい     |
+| `opencode-go/deepseek-v4-pro`              | DeepSeek V4 Pro   | 1M           | 384K     | いいえ   |
+| `opencode-go/deepseek-v4-flash`              | DeepSeek V4 Flash | 1M           | 384K     | いいえ   |
+| `opencode-go/glm-5`              | GLM-5             | 202,752      | 32,768   | いいえ   |
+| `opencode-go/glm-5.1`              | GLM-5.1           | 202,752      | 32,768   | いいえ   |
+| `opencode-go/glm-5.2`              | GLM-5.2           | 1M           | 131,072  | いいえ   |
+| `opencode-go/hy3-preview`              | HY3 Preview       | 262,144      | 32,768   | いいえ   |
+| `opencode-go/kimi-k2.5`              | Kimi K2.5         | 262,144      | 65,536   | はい     |
+| `opencode-go/kimi-k2.6`              | Kimi K2.6         | 262,144      | 65,536   | はい     |
+| `opencode-go/kimi-k2.7-code`              | Kimi K2.7 Code    | 262,144      | 262,144  | はい     |
+| `opencode-go/mimo-v2.5`              | MiMo V2.5         | 1M           | 128,000  | はい     |
+| `opencode-go/mimo-v2.5-pro`              | MiMo V2.5 Pro     | 1,048,576    | 128,000  | いいえ   |
+| `opencode-go/minimax-m2.5`              | MiniMax M2.5      | 204,800      | 65,536   | いいえ   |
+| `opencode-go/minimax-m2.7`              | MiniMax M2.7      | 204,800      | 131,072  | いいえ   |
+| `opencode-go/minimax-m3`              | MiniMax M3        | 204,800      | 131,072  | いいえ   |
+| `opencode-go/qwen3.5-plus`              | Qwen3.5 Plus      | 262,144      | 65,536   | はい     |
+| `opencode-go/qwen3.6-plus`              | Qwen3.6 Plus      | 262,144      | 65,536   | はい     |
+| `opencode-go/qwen3.7-max`              | Qwen3.7 Max       | 1M           | 65,536   | いいえ   |
+| `opencode-go/qwen3.7-plus`              | Qwen3.7 Plus      | 1M           | 65,536   | はい     |
 
 ## 高度な設定
 
 <AccordionGroup>
   <Accordion title="ルーティング動作">
-    OpenClaw は、すべての `opencode-go/...` モデル参照を自動的にルーティングします。追加の
-    プロバイダー設定は不要です。
+    OpenClaw は `opencode-go/...` のモデル参照をすべて自動的にルーティングします。追加の
+    プロバイダー設定は必要ありません。
   </Accordion>
 
   <Accordion title="ランタイム参照の規則">
-    ランタイム参照は明示的なままです。Zen には `opencode/...`、Go には `opencode-go/...` を
-    使用します。これにより、両方のカタログで上流のモデルごとのルーティングが正しく保たれます。
+    ランタイム参照は明示的な形式を維持します。Zen には `opencode/...`、Go には `opencode-go/...` を
+    使用します。これにより、両方のカタログで上流のモデルごとのルーティングが正しく維持されます。
   </Accordion>
 
   <Accordion title="共有認証情報">
-    1 つの `OPENCODE_API_KEY` で Zen と Go の両方のカタログを利用できます。セットアップ中に
+    1 つの `OPENCODE_API_KEY` で Zen と Go の両方のカタログを利用できます。セットアップ時に
     キーを入力すると、両方のランタイムプロバイダーの認証情報が保存されます。
   </Accordion>
 </AccordionGroup>
 
 <Tip>
-共有オンボーディングの概要と、Zen + Go の完全なカタログリファレンスについては、
+共有オンボーディングの概要と Zen + Go カタログの完全なリファレンスについては、
 [OpenCode](/ja-JP/providers/opencode) を参照してください。
 </Tip>
 

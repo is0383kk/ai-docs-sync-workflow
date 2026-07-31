@@ -1,21 +1,22 @@
 ---
 read_when:
-    - Leren hoe u OpenClaw configureert
+    - Leren hoe je OpenClaw configureert
     - Op zoek naar configuratievoorbeelden
     - OpenClaw voor het eerst instellen
-summary: Schemanauwkeurige configuratievoorbeelden voor veelvoorkomende OpenClaw-installaties
+summary: Schema-nauwkeurige configuratievoorbeelden voor veelvoorkomende OpenClaw-installaties
 title: Configuratievoorbeelden
 x-i18n:
-    generated_at: "2026-07-12T08:51:39Z"
+    generated_at: "2026-07-27T05:04:51Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c3ad82ccce62e0c8dbb72f81b0de62d60d8a6282f0a327ed1cbda7ffa3e47969
+    source_hash: ade743a23e24f2e927d1bb1e1828893e24d3d718ec321dd8fda3932830be8331
     source_path: gateway/configuration-examples.md
     workflow: 16
 ---
 
-De onderstaande voorbeelden zijn afgestemd op het huidige configuratieschema. Zie [Configuratie](/nl/gateway/configuration) voor het volledige naslagwerk en opmerkingen per veld.
+Voorbeelden hieronder zijn afgestemd op het huidige configuratieschema. Zie [Configuratie](/nl/gateway/configuration) voor de volledige referentie en opmerkingen per veld.
 
 ## Snel aan de slag
 
@@ -28,7 +29,7 @@ De onderstaande voorbeelden zijn afgestemd op het huidige configuratieschema. Zi
 }
 ```
 
-Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een privébericht naar de bot sturen.
+Sla dit op in `~/.openclaw/openclaw.json`; daarna kun je de bot vanaf dat nummer een privébericht sturen.
 
 ### Aanbevolen startconfiguratie
 
@@ -39,16 +40,15 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
       workspace: "~/.openclaw/workspace",
       model: { primary: "anthropic/claude-sonnet-4-6" },
     },
-    list: [
-      {
-        id: "main",
+    entries: {
+      main: {
         identity: {
           name: "Clawd",
-          theme: "helpful assistant",
+          theme: "behulpzame assistent",
           emoji: "🦞",
         },
       },
-    ],
+    },
   },
   channels: {
     whatsapp: {
@@ -59,7 +59,7 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
   messages: {
     visibleReplies: "automatic",
     groupChat: {
-      visibleReplies: "message_tool", // expliciete inschakeling; zichtbare uitvoer vereist message(action=send)
+      visibleReplies: "message_tool", // inschakelen; zichtbare uitvoer vereist message(action=send)
       unmentionedInbound: "room_event",
     },
   },
@@ -72,7 +72,7 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
 
 ```json5
 {
-  // Environment + shell
+  // Omgeving + shell
   env: {
     OPENROUTER_API_KEY: "sk-or-...",
     vars: {
@@ -84,7 +84,7 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
     },
   },
 
-  // Auth profile metadata (secrets live in auth-profiles.json)
+  // Metagegevens van authenticatieprofielen (geheimen staan in auth-profiles.json)
   auth: {
     profiles: {
       "anthropic:default": { provider: "anthropic", mode: "api_key" },
@@ -98,9 +98,9 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
     },
   },
 
-  // Identity is per agent — set it on agents.list[].identity below.
+  // De identiteit wordt per agent ingesteld — stel deze hieronder in bij agents.entries.<id>.identity.
 
-  // Logging
+  // Logboekregistratie
   logging: {
     level: "info",
     file: "/tmp/openclaw/openclaw.log",
@@ -109,21 +109,19 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
     redactSensitive: "tools",
   },
 
-  // Message formatting
+  // Berichtopmaak
   messages: {
-    messagePrefix: "[openclaw]",
     visibleReplies: "automatic",
     responsePrefix: ">",
     ackReaction: "👀",
     ackReactionScope: "group-mentions",
     groupChat: {
       historyLimit: 50,
-      visibleReplies: "message_tool", // opt in for shared rooms with tool-reliable models
+      visibleReplies: "message_tool", // inschakelen voor gedeelde ruimten met modellen die tools betrouwbaar gebruiken
       unmentionedInbound: "room_event",
     },
     queue: {
       mode: "followup",
-      debounceMs: 500,
       cap: 20,
       drop: "summarize",
       byChannel: {
@@ -138,31 +136,10 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
     },
   },
 
-  // Tooling
-  tools: {
-    media: {
-      audio: {
-        enabled: true,
-        maxBytes: 20971520,
-        models: [
-          { provider: "openai", model: "gpt-4o-transcribe" },
-          // Optional CLI fallback (Whisper binary):
-          // { type: "cli", command: "whisper", args: ["--model", "base", "{{MediaPath}}"] }
-        ],
-        timeoutSeconds: 120,
-      },
-      video: {
-        enabled: true,
-        maxBytes: 52428800,
-        models: [{ provider: "google", model: "gemini-3-flash-preview" }],
-      },
-    },
-  },
-
-  // Session behavior
+  // Sessiegedrag
   session: {
     scope: "per-sender",
-    dmScope: "per-channel-peer", // recommended for multi-user inboxes
+    dmScope: "per-channel-peer", // aanbevolen voor inboxen met meerdere gebruikers
     reset: {
       mode: "daily",
       atHour: 4,
@@ -177,18 +154,17 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
       mode: "warn",
       pruneAfter: "30d",
       maxEntries: 500,
-      resetArchiveRetention: "30d", // duration or false
-      maxDiskBytes: "500mb", // optional
-      highWaterBytes: "400mb", // optional (defaults to 80% of maxDiskBytes)
+      resetArchiveRetention: "30d", // duur of false
+      maxDiskBytes: "500mb", // optioneel
+      highWaterBytes: "400mb", // optioneel (standaard 80% van maxDiskBytes)
     },
-    typingIntervalSeconds: 5,
     sendPolicy: {
       default: "allow",
       rules: [{ action: "deny", match: { channel: "discord", chatType: "group" } }],
     },
   },
 
-  // Channels
+  // Kanalen
   channels: {
     whatsapp: {
       dmPolicy: "pairing",
@@ -210,7 +186,8 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
     discord: {
       enabled: true,
       token: "YOUR_DISCORD_BOT_TOKEN",
-      dm: { enabled: true, allowFrom: ["123456789012345678"] },
+      dmPolicy: "allowlist",
+      allowFrom: ["123456789012345678"],
       guilds: {
         "123456789012345678": {
           slug: "friends-of-openclaw",
@@ -230,7 +207,8 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
       channels: {
         "#general": { enabled: true, requireMention: true },
       },
-      dm: { enabled: true, allowFrom: ["U123"] },
+      dmPolicy: "allowlist",
+      allowFrom: ["U123"],
       slashCommand: {
         enabled: true,
         name: "openclaw",
@@ -240,7 +218,7 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
     },
   },
 
-  // Agent runtime
+  // Uitvoeringsomgeving van de agent
   agents: {
     defaults: {
       workspace: "~/.openclaw/workspace",
@@ -257,7 +235,7 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
         "anthropic/claude-sonnet-4-6": { alias: "sonnet" },
         "openai/gpt-5.4": { alias: "gpt" },
       },
-      skills: ["github", "weather"], // inherited by agents that omit list[].skills
+      skills: ["github", "weather"], // overgenomen door agents zonder list[].skills
       thinkingDefault: "low",
       verboseDefault: "off",
       toolProgressDetail: "explain",
@@ -284,22 +262,14 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
         every: "30m",
         model: "anthropic/claude-sonnet-4-6",
         target: "last",
-        directPolicy: "allow", // allow (default) | block
+        directPolicy: "allow", // allow (standaard) | block
         to: "+15555550123",
         prompt: "HEARTBEAT",
         ackMaxChars: 300,
       },
-      memorySearch: {
-        provider: "gemini",
-        model: "gemini-embedding-001",
-        remote: {
-          apiKey: "${GEMINI_API_KEY}",
-        },
-        extraPaths: ["../team-docs", "/srv/shared-notes"],
-      },
       sandbox: {
         mode: "non-main",
-        scope: "session", // preferred over legacy perSession: true
+        scope: "session", // heeft de voorkeur boven het verouderde perSession: true
         workspaceRoot: "~/.openclaw/sandboxes",
         docker: {
           image: "openclaw-sandbox:bookworm-slim",
@@ -314,38 +284,55 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
         },
       },
     },
-    list: [
-      {
-        id: "main",
+    entries: {
+      main: {
         default: true,
         identity: {
           name: "Samantha",
-          theme: "helpful sloth",
+          theme: "behulpzame luiaard",
           emoji: "🦥",
         },
-        // inherits defaults.skills -> github, weather
+        // neemt defaults.skills over -> github, weather
         groupChat: {
           mentionPatterns: ["@openclaw", "openclaw"],
         },
-        thinkingDefault: "high", // per-agent thinking override
-        reasoningDefault: "on", // per-agent reasoning visibility
-        fastModeDefault: false, // per-agent fast mode
+        thinkingDefault: "high", // overschrijving van denkniveau per agent
+        reasoningDefault: "on", // zichtbaarheid van redenering per agent
+        fastModeDefault: false, // snelle modus per agent
       },
-      {
-        id: "quick",
-        skills: [], // no skills for this agent
-        fastModeDefault: true, // this agent always runs fast
+      quick: {
+        skills: [], // geen Skills voor deze agent
+        fastModeDefault: true, // deze agent werkt altijd snel
         thinkingDefault: "off",
       },
-    ],
+    },
+  },
+
+  memory: {
+    search: {
+      provider: "gemini",
+      model: "gemini-embedding-001",
+      remote: {
+        apiKey: "${GEMINI_API_KEY}",
+      },
+      extraPaths: ["../team-docs", "/srv/shared-notes"],
+    },
   },
 
   tools: {
+    media: {
+      models: [
+        { provider: "openai", model: "gpt-4o-transcribe", capabilities: ["audio"] },
+        { provider: "google", model: "gemini-3-flash-preview", capabilities: ["video"] },
+      ],
+      audio: { enabled: true, maxBytes: 20971520, timeoutSeconds: 120 },
+      video: { enabled: true, maxBytes: 52428800 },
+    },
     allow: ["exec", "process", "read", "write", "edit", "apply_patch"],
     deny: ["browser", "canvas"],
     exec: {
       backgroundMs: 10000,
-      timeoutSec: 1800,
+      timeoutSeconds: 1800,
       cleanupMs: 1800000,
     },
     elevated: {
@@ -362,7 +349,7 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
     },
   },
 
-  // Custom model providers
+  // Aangepaste modelproviders
   models: {
     mode: "merge",
     providers: {
@@ -388,16 +375,11 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
     },
   },
 
-  // Cron jobs
+  // Cron-taken
   cron: {
     enabled: true,
     store: "~/.openclaw/cron/jobs.json",
-    maxConcurrentRuns: 8, // default; cron dispatch + isolated cron agent-turn execution
     sessionRetention: "24h",
-    runLog: {
-      maxBytes: "2mb",
-      keepLines: 2000,
-    },
   },
 
   // Webhooks
@@ -415,7 +397,7 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
         wakeMode: "now",
         name: "Gmail",
         sessionKey: "hook:gmail:{{messages[0].id}}",
-        messageTemplate: "From: {{messages[0].from}}\nSubject: {{messages[0].subject}}",
+        messageTemplate: "Van: {{messages[0].from}}\nOnderwerp: {{messages[0].subject}}",
         textTemplate: "{{messages[0].snippet}}",
         deliver: true,
         channel: "last",
@@ -443,7 +425,7 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
     },
   },
 
-  // Gateway + networking
+  // Gateway + netwerken
   gateway: {
     mode: "local",
     port: 18789,
@@ -456,7 +438,7 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
     },
     tailscale: { mode: "serve", resetOnExit: false },
     remote: { url: "ws://gateway-host.ts.net:18789", token: "remote-token" },
-    reload: { mode: "hybrid", debounceMs: 300 },
+    reload: { mode: "hybrid" },
   },
 
   skills: {
@@ -482,9 +464,9 @@ Sla dit op als `~/.openclaw/openclaw.json`; daarna kun je vanaf dat nummer een p
 }
 ```
 
-### Via een symbolische koppeling verbonden aangrenzende skill-repository
+### Via een symbolische koppeling gekoppelde aangrenzende skill-repository
 
-Gebruik dit wanneer de hoofdmap van een ingebouwde skill een symbolische koppeling naar een aangrenzende repository bevat, bijvoorbeeld `~/.agents/skills/manager -> ~/Projects/manager/skills`.
+Gebruik dit wanneer een ingebouwde hoofdmap voor een skill een symbolische koppeling bevat naar een aangrenzende repository, bijvoorbeeld `~/.agents/skills/manager -> ~/Projects/manager/skills`.
 
 ```json5
 {
@@ -497,13 +479,14 @@ Gebruik dit wanneer de hoofdmap van een ingebouwde skill een symbolische koppeli
 }
 ```
 
-- `extraDirs` scant de aangrenzende repository als een expliciete hoofdmap voor skills.
-- `allowSymlinkTargets` zorgt ervoor dat via symbolische koppelingen verbonden skill-mappen naar die vertrouwde echte doelhoofdmap kunnen verwijzen, zonder willekeurige ontsnappingen via symbolische koppelingen toe te staan.
-- Stel `skills.workshop.allowSymlinkTargetWrites: true` in om Skill Workshop via hetzelfde vertrouwde doel van de symbolische koppeling te laten schrijven.
+- `extraDirs` scant de naastgelegen repository als een expliciete hoofdmap voor Skills.
+- `allowSymlinkTargets` zorgt ervoor dat via symbolische koppelingen gekoppelde Skills-mappen naar die vertrouwde
+  echte doelhoofdmap kunnen worden omgezet, zonder willekeurige ontsnappingen via symbolische koppelingen toe te staan.
+- Stel `skills.workshop.allowSymlinkTargetWrites: true` in om Skill Workshop schrijftoegang via hetzelfde vertrouwde doel van de symbolische koppeling te geven.
 
 ## Veelvoorkomende patronen
 
-### Gedeelde basisconfiguratie voor skills met één overschrijving
+### Gedeelde Skills-basis met één overschrijving
 
 ```json5
 {
@@ -512,16 +495,16 @@ Gebruik dit wanneer de hoofdmap van een ingebouwde skill een symbolische koppeli
       workspace: "~/.openclaw/workspace",
       skills: ["github", "weather"],
     },
-    list: [
-      { id: "main", default: true },
-      { id: "docs", workspace: "~/.openclaw/workspace-docs", skills: ["docs-search"] },
-    ],
+    entries: {
+      main: { default: true },
+      docs: { workspace: "~/.openclaw/workspace-docs", skills: ["docs-search"] },
+    },
   },
 }
 ```
 
-- `agents.defaults.skills` is de gedeelde basisconfiguratie.
-- `agents.list[].skills` vervangt die basisconfiguratie voor één agent.
+- `agents.defaults.skills` is de gedeelde basis.
+- `agents.entries.*.skills` vervangt die basis voor één agent.
 - Gebruik `skills: []` wanneer een agent geen Skills mag zien.
 
 ### Installatie voor meerdere platforms
@@ -530,7 +513,7 @@ Gebruik dit wanneer de hoofdmap van een ingebouwde skill een symbolische koppeli
 {
   agents: { defaults: { workspace: "~/.openclaw/workspace" } },
   channels: {
-    whatsapp: { allowFrom: ["+15555550123"] },
+    whatsapp: { allowFrom: ["+15555550123"], responsePrefix: "[openclaw]" },
     telegram: {
       enabled: true,
       botToken: "YOUR_TOKEN",
@@ -539,7 +522,7 @@ Gebruik dit wanneer de hoofdmap van een ingebouwde skill een symbolische koppeli
     discord: {
       enabled: true,
       token: "YOUR_TOKEN",
-      dm: { allowFrom: ["123456789012345678"] },
+      allowFrom: ["123456789012345678"],
     },
   },
 }
@@ -547,8 +530,8 @@ Gebruik dit wanneer de hoofdmap van een ingebouwde skill een symbolische koppeli
 
 ### Automatische goedkeuring voor een vertrouwd Node-netwerk
 
-Houd het koppelen van apparaten handmatig, tenzij je het netwerkpad beheert. Voor een specifiek
-lab- of tailnet-subnet kun je automatische goedkeuring inschakelen wanneer een Node-apparaat voor het eerst wordt gekoppeld,
+Houd apparaatkoppeling handmatig, tenzij je het netwerkpad beheert. Voor een specifiek
+lab- of tailnet-subnet kun je automatische goedkeuring van een Node-apparaat bij de eerste koppeling inschakelen
 met exacte CIDR's of IP-adressen:
 
 ```json5
@@ -563,13 +546,13 @@ met exacte CIDR's of IP-adressen:
 }
 ```
 
-Dit blijft uitgeschakeld wanneer het niet is ingesteld. Het is alleen van toepassing op een nieuwe koppeling met `role: node`
-zonder aangevraagde scopes. Operator-/browserclients en upgrades van rol, scope, metagegevens of
+Dit blijft uitgeschakeld wanneer het niet is ingesteld. Het is alleen van toepassing op een nieuwe `role: node`-koppeling
+zonder aangevraagde bereiken. Operator-/browserclients en upgrades van rol, bereik, metagegevens of
 openbare sleutels vereisen nog steeds handmatige goedkeuring.
 
 ### Veilige DM-modus (gedeelde inbox / DM's met meerdere gebruikers)
 
-Als meer dan één persoon je bot een DM kan sturen (meerdere vermeldingen in `allowFrom`, goedgekeurde koppelingen voor meerdere personen of `dmPolicy: "open"`), schakel dan de **veilige DM-modus** in, zodat DM's van verschillende afzenders niet standaard dezelfde context delen:
+Als meer dan één persoon je bot een DM kan sturen (meerdere vermeldingen in `allowFrom`, koppelingsgoedkeuringen voor meerdere personen of `dmPolicy: "open"`), schakel dan de **veilige DM-modus** in, zodat DM's van verschillende afzenders standaard niet één context delen:
 
 ```json5
 {
@@ -587,16 +570,16 @@ Als meer dan één persoon je bot een DM kan sturen (meerdere vermeldingen in `a
     discord: {
       enabled: true,
       token: "YOUR_DISCORD_BOT_TOKEN",
-      dm: { enabled: true, allowFrom: ["123456789012345678", "987654321098765432"] },
+      allowFrom: ["123456789012345678", "987654321098765432"],
     },
   },
 }
 ```
 
-Voor Discord/Google Chat/IRC/Mattermost/Microsoft Teams/Slack is afzenderautorisatie standaard primair gebaseerd op ID's.
-Schakel directe overeenkomsten met veranderlijke namen, e-mailadressen of bijnamen via `dangerouslyAllowNameMatching: true` voor elk kanaal alleen in als je dat risico uitdrukkelijk aanvaardt.
+Voor Discord/Google Chat/IRC/Mattermost/Microsoft Teams/Slack is afzenderautorisatie standaard primair op ID gebaseerd.
+Schakel directe overeenkomsten op veranderlijke naam/e-mail/bijnaam met de `dangerouslyAllowNameMatching: true` van elk kanaal alleen in als je dat risico expliciet accepteert.
 
-### Anthropic-API-sleutel + MiniMax als terugvaloptie
+### Anthropic-API-sleutel + MiniMax als fallback
 
 ```json5
 {
@@ -641,15 +624,14 @@ Schakel directe overeenkomsten met veranderlijke namen, e-mailadressen of bijnam
       workspace: "~/work-openclaw",
       elevatedDefault: "off",
     },
-    list: [
-      {
-        id: "main",
+    entries: {
+      main: {
         identity: {
           name: "WorkBot",
           theme: "professional assistant",
         },
       },
-    ],
+    },
   },
   channels: {
     slack: {
@@ -700,8 +682,8 @@ Schakel directe overeenkomsten met veranderlijke namen, e-mailadressen of bijnam
 
 ## Tips
 
-- Als je `dmPolicy: "open"` instelt, moet de bijbehorende lijst `allowFrom` `"*"` bevatten.
-- Provider-ID's verschillen (telefoonnummers, gebruikers-ID's, kanaal-ID's). Raadpleeg de documentatie van de provider om de indeling te bevestigen.
+- Als je `dmPolicy: "open"` instelt, moet de overeenkomende lijst `allowFrom` ook `"*"` bevatten.
+- Provider-ID's verschillen (telefoonnummers, gebruikers-ID's, kanaal-ID's). Raadpleeg de providerdocumentatie om de indeling te bevestigen.
 - Optionele secties om later toe te voegen: `web`, `browser`, `ui`, `discovery`, `plugins`, `talk`, `signal`, `imessage`.
 - Zie [Providers](/nl/providers) en [Probleemoplossing](/nl/gateway/troubleshooting) voor uitgebreidere installatie-informatie.
 

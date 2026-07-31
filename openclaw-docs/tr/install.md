@@ -1,29 +1,30 @@
 ---
 read_when:
-    - Başlarken hızlı başlangıç yönteminden farklı bir kurulum yöntemine ihtiyacınız var
+    - Başlarken hızlı başlangıç kılavuzundan farklı bir kurulum yöntemine ihtiyacınız var
     - Bir bulut platformuna dağıtım yapmak istiyorsunuz
     - Güncellemeniz, taşımanız veya kaldırmanız gerekiyor
-summary: OpenClaw'u yükleyin - yükleyici betiği, npm/pnpm/bun, kaynak koddan, Docker ve daha fazlası
+summary: OpenClaw'u yükleme - yükleyici betiği, npm/pnpm/bun, kaynak koddan, Docker ve daha fazlası
 title: Yükle
 x-i18n:
-    generated_at: "2026-07-12T11:54:04Z"
+    generated_at: "2026-07-27T00:03:27Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: cc819cc6c1d57af0739a7d11f0f2834479ddabbca0571b105b8cb9325e87b145
+    source_hash: dc6c6c33294852c90d2d2904b78ff8b0483b8e72a380d5835c5bdda67547de0c
     source_path: install/index.md
     workflow: 16
 ---
 
 ## Sistem gereksinimleri
 
-- **Node 22.19+, 23.11+ veya 24+** - Varsayılan hedef Node 24'tür; yükleyici betiği bunu otomatik olarak yönetir.
-- **macOS, Linux veya Windows** - Windows kullanıcıları yerel Windows Hub uygulamasıyla, PowerShell CLI yükleyicisiyle veya bir WSL2 Gateway ile başlayabilir. Bkz. [Windows](/tr/platforms/windows).
+- **Node 22.22.3+, 24.15+ veya 25.9+** - Varsayılan hedef Node 24'tür; yükleyici betiği bunu otomatik olarak gerçekleştirir.
+- **macOS, Linux veya Windows** - Windows kullanıcıları yerel Windows Hub uygulaması, PowerShell CLI yükleyicisi veya bir WSL2 Gateway ile başlayabilir. Bkz. [Windows](/tr/platforms/windows).
 - `pnpm` yalnızca kaynaktan derleme yapıyorsanız gereklidir.
 
 ## Önerilen: yükleyici betiği
 
-En hızlı yükleme yöntemidir. İşletim sisteminizi algılar, gerekirse Node'u yükler, OpenClaw'u yükler ve ilk kurulumu başlatır.
+En hızlı yükleme yöntemidir. İşletim sisteminizi algılar, gerekirse Node'u yükler, OpenClaw'ı yükler ve ilk kurulumu başlatır.
 
 <Note>
 Windows masaüstü kullanıcıları; kurulum, sistem tepsisi durumu, sohbet, Node modu ve yerel MCP modunu içeren yerel [Windows Hub](/tr/platforms/windows#recommended-windows-hub) yardımcı uygulamasını da yükleyebilir.
@@ -63,18 +64,18 @@ Tüm bayraklar ve CI/otomasyon seçenekleri için [Yükleyicinin iç işleyişi]
 
 ### Yerel önek yükleyicisi (`install-cli.sh`)
 
-OpenClaw ve Node'u sistem genelindeki bir Node kurulumuna bağlı olmadan
+OpenClaw ve Node'u sistem genelindeki bir Node yüklemesine bağlı olmadan
 `~/.openclaw` gibi yerel bir önek altında tutmak istediğinizde bunu kullanın:
 
 ```bash
 curl -fsSL https://openclaw.ai/install-cli.sh | bash
 ```
 
-Varsayılan olarak npm yüklemelerini ve aynı önek akışı altında git çalışma
-kopyası yüklemelerini destekler. Tam başvuru: [Yükleyicinin iç işleyişi](/tr/install/installer#install-clish).
+Varsayılan olarak npm yüklemelerini ve aynı önek akışı altında git çalışma kopyası
+yüklemelerini destekler. Tam başvuru: [Yükleyicinin iç işleyişi](/tr/install/installer#install-clish).
 
-Zaten yüklü mü? `openclaw update --channel dev` ve
-`openclaw update --channel stable` komutlarıyla paket ve git yüklemeleri arasında geçiş yapın. Bkz.
+Zaten yüklü mü? `openclaw update --channel dev` ve `openclaw update --channel stable` ile paket ve git yüklemeleri
+arasında geçiş yapın. Bkz.
 [Güncelleme](/tr/install/updating#switch-between-npm-and-git-installs).
 
 ### npm, pnpm veya bun
@@ -89,9 +90,9 @@ Node'u zaten kendiniz yönetiyorsanız:
     ```
 
     <Note>
-    Barındırılan yükleyici, OpenClaw paketinin yüklenmesi için `min-release-age`
+    Barındırılan yükleyici, OpenClaw paket yüklemesi için `min-release-age`
     gibi npm güncellik filtrelerini temizler. npm ile elle yükleme yaparsanız kendi
-    npm politikanız geçerli olmaya devam eder.
+    npm politikanız geçerliliğini korur.
     </Note>
 
   </Tab>
@@ -114,7 +115,7 @@ Node'u zaten kendiniz yönetiyorsanız:
     ```
 
     <Note>
-    Bun, genel CLI yükleme yolu için desteklenir. Gateway çalışma zamanı için önerilen hizmet çalışma zamanı Node olmaya devam eder.
+    Bun genel paketi yükleyebilir, ancak ortaya çıkan `openclaw` yürütülebilir dosyası, OpenClaw durumu `node:sqlite` kullandığından desteklenen bir Node çalışma zamanı gerektirir.
     </Note>
 
   </Tab>
@@ -132,7 +133,7 @@ pnpm link --global
 openclaw onboard --install-daemon
 ```
 
-Alternatif olarak bağlantı adımını atlayıp depo içinden `pnpm openclaw ...` komutunu kullanabilirsiniz. Tüm geliştirme iş akışları için [Kurulum](/tr/start/setup) bölümüne bakın.
+Alternatif olarak bağlantı oluşturmayı atlayıp depo içinden `pnpm openclaw ...` kullanın. Eksiksiz geliştirme iş akışları için [Kurulum](/tr/start/setup) bölümüne bakın.
 
 ### GitHub ana dal çalışma kopyasından yükleme
 
@@ -144,19 +145,19 @@ curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -
 
 <CardGroup cols={2}>
   <Card title="Docker" href="/tr/install/docker" icon="container">
-    Kapsayıcı tabanlı veya ekransız dağıtımlar.
+    Kapsayıcı tabanlı veya grafik arayüzsüz dağıtımlar.
   </Card>
   <Card title="Podman" href="/tr/install/podman" icon="container">
-    Docker'a rootsuz kapsayıcı alternatifi.
+    Docker'a köksüz kapsayıcı alternatifi.
   </Card>
   <Card title="Nix" href="/tr/install/nix" icon="snowflake">
     Nix flake aracılığıyla bildirimsel yükleme.
   </Card>
   <Card title="Ansible" href="/tr/install/ansible" icon="server">
-    Otomatik filo hazırlama.
+    Otomatik filo sağlama.
   </Card>
   <Card title="Bun" href="/tr/install/bun" icon="zap">
-    Bun çalışma zamanı aracılığıyla yalnızca CLI kullanımı.
+    İsteğe bağlı bağımlılık yükleyicisi ve paket betiği çalıştırıcısı.
   </Card>
 </CardGroup>
 
@@ -168,18 +169,18 @@ openclaw doctor         # yapılandırma sorunlarını denetleyin
 openclaw gateway status # Gateway'in çalıştığını doğrulayın
 ```
 
-Yüklemeden sonra yönetilen başlangıç istiyorsanız:
+Yüklemeden sonra yönetilen başlatma istiyorsanız:
 
 - macOS: `openclaw onboard --install-daemon` veya `openclaw gateway install` aracılığıyla LaunchAgent
 - Linux/WSL2: aynı komutlar aracılığıyla systemd kullanıcı hizmeti
-- Yerel Windows: Önce Scheduled Task; görev oluşturma reddedilirse kullanıcı başına Startup klasörü oturum açma öğesi yedeği
+- Yerel Windows: önce Zamanlanmış Görev; görev oluşturma reddedilirse kullanıcı başına Başlangıç klasörü oturum açma öğesi yedeği
 
 ## Barındırma ve dağıtım
 
-OpenClaw'u bir bulut sunucusuna veya VPS'ye dağıtın. Sağlayıcıların tam listesi
-(DigitalOcean, Hetzner, Hostinger, Fly.io, GCP, Azure, Railway,
-Northflank, Oracle Cloud, Raspberry Pi ve diğerleri) için [Linux sunucusu](/tr/vps)
-bölümüne bakın veya [Render](/tr/install/render) üzerinde bildirimsel olarak dağıtın.
+OpenClaw'ı bir bulut sunucusuna veya VPS'e dağıtın. Sağlayıcıların tam seçimi
+(DigitalOcean, Hetzner, Hostinger, Fly.io, GCP, Azure, Railway, Northflank,
+Oracle Cloud, Raspberry Pi ve daha fazlası) için [Linux sunucusu](/tr/vps) bölümüne
+bakın veya [Render](/tr/install/render) üzerinde bildirimsel olarak dağıtın.
 
 <CardGroup cols={3}>
   <Card title="VPS" href="/tr/vps">
@@ -197,19 +198,19 @@ bölümüne bakın veya [Render](/tr/install/render) üzerinde bildirimsel olara
 
 <CardGroup cols={3}>
   <Card title="Güncelleme" href="/tr/install/updating" icon="refresh-cw">
-    OpenClaw'u güncel tutun.
+    OpenClaw'ı güncel tutun.
   </Card>
   <Card title="Taşıma" href="/tr/install/migrating" icon="arrow-right">
     Yeni bir makineye taşıyın.
   </Card>
   <Card title="Kaldırma" href="/tr/install/uninstall" icon="trash-2">
-    OpenClaw'u tamamen kaldırın.
+    OpenClaw'ı tamamen kaldırın.
   </Card>
 </CardGroup>
 
 ## Sorun giderme: `openclaw` bulunamadı
 
-Bu neredeyse her zaman bir PATH sorunudur: npm'in genel ikili dosya dizini kabuğunuzun `PATH` değişkeninde değildir. Windows yolu dâhil tam çözüm için [Node.js sorun giderme](/tr/install/node#troubleshooting) bölümüne bakın.
+Neredeyse her zaman bir PATH sorunudur: npm'in genel ikili dosya dizini kabuğunuzun `PATH` değişkeninde değildir. Windows yolu dâhil tam çözüm için [Node.js sorun giderme](/tr/install/node#troubleshooting) bölümüne bakın.
 
 ```bash
 node -v           # Node yüklü mü?

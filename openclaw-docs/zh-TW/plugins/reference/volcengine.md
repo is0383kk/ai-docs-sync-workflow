@@ -1,14 +1,15 @@
 ---
 read_when:
     - 你正在安裝、設定或稽核 volcengine 外掛
-summary: 為 OpenClaw 新增對火山引擎及火山引擎 Plan 模型供應商的支援。
-title: 火山引擎外掛
+summary: 新增 Volcengine 與 Volcengine Plan 模型供應商對 OpenClaw 的支援。
+title: Volcengine 外掛
 x-i18n:
-    generated_at: "2026-07-11T21:38:23Z"
+    generated_at: "2026-07-26T08:43:58Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 1b2b3e14d69cd0a8629d7c63c907efaba7fc71dbc1453d4bf92830b9b9a8ed7f
+    source_hash: 6e78d9277f1c37a799156b5acee0c07af17bf1695112dfb0cb50c730e0d53eeb
     source_path: plugins/reference/volcengine.md
     workflow: 16
 ---
@@ -17,14 +18,14 @@ x-i18n:
 
 為 OpenClaw 新增 Volcengine 與 Volcengine Plan 模型供應商支援。
 
-## 發行方式
+## 發布
 
 - 套件：`@openclaw/volcengine-provider`
-- 安裝方式：隨附於 OpenClaw
+- 安裝方式：已包含於 OpenClaw
 
 ## 介面
 
-供應商：volcengine、volcengine-plan；契約：speechProviders
+供應商：`volcengine`、`volcengine-plan`；合約：`speechProviders`
 
 ## 相關文件
 

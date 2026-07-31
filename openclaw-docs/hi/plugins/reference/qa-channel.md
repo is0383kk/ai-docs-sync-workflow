@@ -1,19 +1,20 @@
 ---
 read_when:
     - आप qa-channel Plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
-summary: OpenClaw संदेश भेजने और प्राप्त करने के लिए QA चैनल सतह जोड़ता है।
+summary: OpenClaw संदेश भेजने और प्राप्त करने के लिए QA Channel सतह जोड़ता है।
 title: QA चैनल Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:48:22Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:40:37Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 3c6f0aec62fb014895d11fa46b75626d929c326eb2ded463188e4338f0fdae5d
+    source_hash: 09d9255a5f9783bd3153b7e790428ccbae9d9383cacda36b796494b5651fe91a
     source_path: plugins/reference/qa-channel.md
     workflow: 16
 ---
 
-# QA Channel प्लगइन
+# QA Channel Plugin
 
 OpenClaw संदेश भेजने और प्राप्त करने के लिए QA Channel सतह जोड़ता है।
 
@@ -24,7 +25,7 @@ OpenClaw संदेश भेजने और प्राप्त करन�
 
 ## सतह
 
-channels: qa-channel
+चैनल: `qa-channel`
 
 ## संबंधित दस्तावेज़
 

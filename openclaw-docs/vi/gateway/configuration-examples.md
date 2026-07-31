@@ -1,21 +1,22 @@
 ---
 read_when:
     - Tìm hiểu cách cấu hình OpenClaw
-    - Tìm ví dụ cấu hình
+    - Đang tìm các ví dụ cấu hình
     - Thiết lập OpenClaw lần đầu tiên
-summary: Các ví dụ cấu hình đúng theo schema cho những cách thiết lập OpenClaw phổ biến
+summary: Các ví dụ cấu hình chính xác theo schema cho những thiết lập OpenClaw phổ biến
 title: Ví dụ cấu hình
 x-i18n:
-    generated_at: "2026-07-12T07:52:17Z"
+    generated_at: "2026-07-20T04:37:53Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c3ad82ccce62e0c8dbb72f81b0de62d60d8a6282f0a327ed1cbda7ffa3e47969
+    source_hash: 2796f28e33b631aff0f706e72e3c81072a57683c09d3bad1125c8f89cffb2ac4
     source_path: gateway/configuration-examples.md
     workflow: 16
 ---
 
-Các ví dụ dưới đây phù hợp với lược đồ cấu hình hiện tại. Để xem tài liệu tham chiếu đầy đủ và ghi chú cho từng trường, hãy xem [Cấu hình](/vi/gateway/configuration).
+Các ví dụ dưới đây phù hợp với lược đồ cấu hình hiện tại. Để xem tài liệu tham khảo đầy đủ và ghi chú cho từng trường, hãy xem [Cấu hình](/vi/gateway/configuration).
 
 ## Bắt đầu nhanh
 
@@ -28,7 +29,7 @@ Các ví dụ dưới đây phù hợp với lược đồ cấu hình hiện t�
 }
 ```
 
-Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn trực tiếp cho bot từ số điện thoại đó.
+Lưu vào `~/.openclaw/openclaw.json` và bạn có thể nhắn tin trực tiếp cho bot từ số đó.
 
 ### Cấu hình khởi đầu được đề xuất
 
@@ -44,7 +45,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
         id: "main",
         identity: {
           name: "Clawd",
-          theme: "helpful assistant",
+          theme: "trợ lý hữu ích",
           emoji: "🦞",
         },
       },
@@ -59,7 +60,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
   messages: {
     visibleReplies: "automatic",
     groupChat: {
-      visibleReplies: "message_tool", // bật theo lựa chọn; đầu ra hiển thị yêu cầu message(action=send)
+      visibleReplies: "message_tool", // phải chủ động bật; đầu ra hiển thị yêu cầu message(action=send)
       unmentionedInbound: "room_event",
     },
   },
@@ -68,11 +69,11 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
 
 ## Ví dụ mở rộng (các tùy chọn chính)
 
-> JSON5 cho phép bạn sử dụng chú thích và dấu phẩy ở cuối. JSON thông thường cũng hoạt động.
+> JSON5 cho phép sử dụng chú thích và dấu phẩy ở cuối. JSON thông thường cũng hoạt động.
 
 ```json5
 {
-  // Environment + shell
+  // Môi trường + shell
   env: {
     OPENROUTER_API_KEY: "sk-or-...",
     vars: {
@@ -84,7 +85,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
     },
   },
 
-  // Auth profile metadata (secrets live in auth-profiles.json)
+  // Siêu dữ liệu hồ sơ xác thực (thông tin bí mật nằm trong auth-profiles.json)
   auth: {
     profiles: {
       "anthropic:default": { provider: "anthropic", mode: "api_key" },
@@ -98,9 +99,9 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
     },
   },
 
-  // Identity is per agent — set it on agents.list[].identity below.
+  // Danh tính được đặt riêng cho từng tác nhân — hãy thiết lập tại agents.list[].identity bên dưới.
 
-  // Logging
+  // Ghi nhật ký
   logging: {
     level: "info",
     file: "/tmp/openclaw/openclaw.log",
@@ -109,7 +110,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
     redactSensitive: "tools",
   },
 
-  // Message formatting
+  // Định dạng tin nhắn
   messages: {
     messagePrefix: "[openclaw]",
     visibleReplies: "automatic",
@@ -118,7 +119,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
     ackReactionScope: "group-mentions",
     groupChat: {
       historyLimit: 50,
-      visibleReplies: "message_tool", // opt in for shared rooms with tool-reliable models
+      visibleReplies: "message_tool", // chủ động bật cho các phòng dùng chung với những mô hình sử dụng công cụ đáng tin cậy
       unmentionedInbound: "room_event",
     },
     queue: {
@@ -138,7 +139,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
     },
   },
 
-  // Tooling
+  // Công cụ
   tools: {
     media: {
       audio: {
@@ -146,7 +147,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
         maxBytes: 20971520,
         models: [
           { provider: "openai", model: "gpt-4o-transcribe" },
-          // Optional CLI fallback (Whisper binary):
+          // Phương án dự phòng CLI tùy chọn (tệp thực thi Whisper):
           // { type: "cli", command: "whisper", args: ["--model", "base", "{{MediaPath}}"] }
         ],
         timeoutSeconds: 120,
@@ -159,10 +160,10 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
     },
   },
 
-  // Session behavior
+  // Hành vi phiên
   session: {
     scope: "per-sender",
-    dmScope: "per-channel-peer", // recommended for multi-user inboxes
+    dmScope: "per-channel-peer", // được đề xuất cho hộp thư đến có nhiều người dùng
     reset: {
       mode: "daily",
       atHour: 4,
@@ -177,18 +178,17 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
       mode: "warn",
       pruneAfter: "30d",
       maxEntries: 500,
-      resetArchiveRetention: "30d", // duration or false
-      maxDiskBytes: "500mb", // optional
-      highWaterBytes: "400mb", // optional (defaults to 80% of maxDiskBytes)
+      resetArchiveRetention: "30d", // khoảng thời gian hoặc false
+      maxDiskBytes: "500mb", // tùy chọn
+      highWaterBytes: "400mb", // tùy chọn (mặc định là 80% của maxDiskBytes)
     },
-    typingIntervalSeconds: 5,
     sendPolicy: {
       default: "allow",
       rules: [{ action: "deny", match: { channel: "discord", chatType: "group" } }],
     },
   },
 
-  // Channels
+  // Kênh
   channels: {
     whatsapp: {
       dmPolicy: "pairing",
@@ -240,7 +240,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
     },
   },
 
-  // Agent runtime
+  // Môi trường chạy của tác nhân
   agents: {
     defaults: {
       workspace: "~/.openclaw/workspace",
@@ -257,7 +257,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
         "anthropic/claude-sonnet-4-6": { alias: "sonnet" },
         "openai/gpt-5.4": { alias: "gpt" },
       },
-      skills: ["github", "weather"], // inherited by agents that omit list[].skills
+      skills: ["github", "weather"], // được kế thừa bởi các tác nhân không đặt list[].skills
       thinkingDefault: "low",
       verboseDefault: "off",
       toolProgressDetail: "explain",
@@ -284,7 +284,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
         every: "30m",
         model: "anthropic/claude-sonnet-4-6",
         target: "last",
-        directPolicy: "allow", // allow (default) | block
+        directPolicy: "allow", // allow (mặc định) | block
         to: "+15555550123",
         prompt: "HEARTBEAT",
         ackMaxChars: 300,
@@ -299,7 +299,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
       },
       sandbox: {
         mode: "non-main",
-        scope: "session", // preferred over legacy perSession: true
+        scope: "session", // ưu tiên hơn perSession: true cũ
         workspaceRoot: "~/.openclaw/sandboxes",
         docker: {
           image: "openclaw-sandbox:bookworm-slim",
@@ -320,21 +320,21 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
         default: true,
         identity: {
           name: "Samantha",
-          theme: "helpful sloth",
+          theme: "chú lười hữu ích",
           emoji: "🦥",
         },
-        // inherits defaults.skills -> github, weather
+        // kế thừa defaults.skills -> github, weather
         groupChat: {
           mentionPatterns: ["@openclaw", "openclaw"],
         },
-        thinkingDefault: "high", // per-agent thinking override
-        reasoningDefault: "on", // per-agent reasoning visibility
-        fastModeDefault: false, // per-agent fast mode
+        thinkingDefault: "high", // ghi đè mức suy nghĩ cho từng tác nhân
+        reasoningDefault: "on", // khả năng hiển thị lập luận cho từng tác nhân
+        fastModeDefault: false, // chế độ nhanh cho từng tác nhân
       },
       {
         id: "quick",
-        skills: [], // no skills for this agent
-        fastModeDefault: true, // this agent always runs fast
+        skills: [], // tác nhân này không có Skills
+        fastModeDefault: true, // tác nhân này luôn chạy nhanh
         thinkingDefault: "off",
       },
     ],
@@ -362,7 +362,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
     },
   },
 
-  // Custom model providers
+  // Nhà cung cấp mô hình tùy chỉnh
   models: {
     mode: "merge",
     providers: {
@@ -388,19 +388,14 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
     },
   },
 
-  // Cron jobs
+  // Tác vụ Cron
   cron: {
     enabled: true,
     store: "~/.openclaw/cron/jobs.json",
-    maxConcurrentRuns: 8, // default; cron dispatch + isolated cron agent-turn execution
     sessionRetention: "24h",
-    runLog: {
-      maxBytes: "2mb",
-      keepLines: 2000,
-    },
   },
 
-  // Webhooks
+  // Webhook
   hooks: {
     enabled: true,
     path: "/hooks",
@@ -415,7 +410,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
         wakeMode: "now",
         name: "Gmail",
         sessionKey: "hook:gmail:{{messages[0].id}}",
-        messageTemplate: "From: {{messages[0].from}}\nSubject: {{messages[0].subject}}",
+        messageTemplate: "Từ: {{messages[0].from}}\nChủ đề: {{messages[0].subject}}",
         textTemplate: "{{messages[0].snippet}}",
         deliver: true,
         channel: "last",
@@ -443,7 +438,7 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
     },
   },
 
-  // Gateway + networking
+  // Gateway + mạng
   gateway: {
     mode: "local",
     port: 18789,
@@ -482,9 +477,10 @@ Lưu vào `~/.openclaw/openclaw.json`, sau đó bạn có thể gửi tin nhắn
 }
 ```
 
-### Kho Skills ngang hàng được liên kết tượng trưng
+### Kho lưu trữ Skills cùng cấp được liên kết tượng trưng
 
-Sử dụng cấu hình này khi thư mục gốc của Skills tích hợp sẵn chứa liên kết tượng trưng đến một kho ngang hàng, ví dụ `~/.agents/skills/manager -> ~/Projects/manager/skills`.
+Dùng cấu hình này khi thư mục gốc của skill tích hợp sẵn chứa một symlink trỏ vào repo cùng cấp, ví dụ
+`~/.agents/skills/manager -> ~/Projects/manager/skills`.
 
 ```json5
 {
@@ -497,13 +493,15 @@ Sử dụng cấu hình này khi thư mục gốc của Skills tích hợp sẵn
 }
 ```
 
-- `extraDirs` quét kho ngang hàng dưới dạng một thư mục gốc Skills được chỉ định rõ ràng.
-- `allowSymlinkTargets` cho phép các thư mục Skills được liên kết tượng trưng phân giải vào thư mục gốc đích thực, đáng tin cậy đó mà không cho phép liên kết tượng trưng thoát sang vị trí tùy ý.
-- Để cho phép Skill Workshop thực hiện thao tác ghi thông qua cùng một đích liên kết tượng trưng đáng tin cậy, hãy đặt `skills.workshop.allowSymlinkTargetWrites: true`.
+- `extraDirs` quét repo cùng cấp như một thư mục gốc skill được chỉ định rõ ràng.
+- `allowSymlinkTargets` cho phép các thư mục skill được liên kết bằng symlink phân giải vào thư mục gốc đích thực đáng tin cậy đó
+  mà không cho phép symlink thoát tùy ý.
+- Để cho phép Skill Workshop ghi thông qua cùng một đích symlink đáng tin cậy,
+  hãy đặt `skills.workshop.allowSymlinkTargetWrites: true`.
 
 ## Các mẫu phổ biến
 
-### Cấu hình Skills cơ sở dùng chung với một giá trị ghi đè
+### Đường cơ sở skill dùng chung với một ghi đè
 
 ```json5
 {
@@ -521,8 +519,8 @@ Sử dụng cấu hình này khi thư mục gốc của Skills tích hợp sẵn
 ```
 
 - `agents.defaults.skills` là đường cơ sở dùng chung.
-- `agents.list[].skills` thay thế đường cơ sở đó cho một tác tử.
-- Sử dụng `skills: []` khi một tác tử không nên thấy Skills nào.
+- `agents.list[].skills` thay thế đường cơ sở đó cho một agent.
+- Dùng `skills: []` khi một agent không được thấy skill nào.
 
 ### Thiết lập đa nền tảng
 
@@ -545,11 +543,11 @@ Sử dụng cấu hình này khi thư mục gốc của Skills tích hợp sẵn
 }
 ```
 
-### Tự động phê duyệt trong mạng Node đáng tin cậy
+### Tự động phê duyệt mạng node đáng tin cậy
 
-Duy trì việc ghép nối thiết bị theo cách thủ công trừ khi bạn kiểm soát đường truyền mạng. Đối với một phòng thí nghiệm chuyên dụng
-hoặc mạng con tailnet, bạn có thể chọn tự động phê duyệt thiết bị Node trong lần đầu
-bằng các CIDR hoặc địa chỉ IP chính xác:
+Duy trì ghép nối thiết bị theo cách thủ công trừ khi bạn kiểm soát đường truyền mạng. Với một
+mạng con phòng thí nghiệm hoặc tailnet chuyên dụng, bạn có thể chọn bật tự động phê duyệt
+thiết bị node lần đầu bằng các CIDR hoặc IP chính xác:
 
 ```json5
 {
@@ -563,27 +561,27 @@ bằng các CIDR hoặc địa chỉ IP chính xác:
 }
 ```
 
-Tính năng này vẫn tắt khi không được thiết lập. Nó chỉ áp dụng cho việc ghép nối `role: node` mới
-không yêu cầu phạm vi nào. Các máy khách của người vận hành/trình duyệt và việc nâng cấp vai trò, phạm vi, siêu dữ liệu hoặc
-khóa công khai vẫn yêu cầu phê duyệt thủ công.
+Tính năng này vẫn tắt khi chưa được đặt. Nó chỉ áp dụng cho hoạt động ghép nối `role: node` mới
+không yêu cầu scope nào. Các client của người vận hành/trình duyệt và việc nâng cấp vai trò, scope, siêu dữ liệu hoặc
+khóa công khai vẫn cần phê duyệt thủ công.
 
-### Chế độ tin nhắn trực tiếp an toàn (hộp thư đến dùng chung / tin nhắn trực tiếp nhiều người dùng)
+### Chế độ DM bảo mật (hộp thư dùng chung / DM đa người dùng)
 
-Nếu nhiều người có thể gửi tin nhắn trực tiếp cho bot của bạn (nhiều mục trong `allowFrom`, phê duyệt ghép nối cho nhiều người hoặc `dmPolicy: "open"`), hãy bật **chế độ tin nhắn trực tiếp an toàn** để tin nhắn trực tiếp từ những người gửi khác nhau không mặc định dùng chung một ngữ cảnh:
+Nếu nhiều người có thể gửi DM cho bot của bạn (nhiều mục trong `allowFrom`, phê duyệt ghép nối cho nhiều người hoặc `dmPolicy: "open"`), hãy bật **chế độ DM bảo mật** để DM từ những người gửi khác nhau mặc định không dùng chung một ngữ cảnh:
 
 ```json5
 {
-  // Secure DM mode (recommended for multi-user or sensitive DM agents)
+  // Chế độ DM bảo mật (khuyến nghị cho agent DM đa người dùng hoặc nhạy cảm)
   session: { dmScope: "per-channel-peer" },
 
   channels: {
-    // Example: WhatsApp multi-user inbox
+    // Ví dụ: hộp thư WhatsApp đa người dùng
     whatsapp: {
       dmPolicy: "allowlist",
       allowFrom: ["+15555550123", "+15555550124"],
     },
 
-    // Example: Discord multi-user inbox
+    // Ví dụ: hộp thư Discord đa người dùng
     discord: {
       enabled: true,
       token: "YOUR_DISCORD_BOT_TOKEN",
@@ -594,7 +592,7 @@ Nếu nhiều người có thể gửi tin nhắn trực tiếp cho bot của b�
 ```
 
 Đối với Discord/Google Chat/IRC/Mattermost/Microsoft Teams/Slack, việc cấp quyền cho người gửi mặc định ưu tiên ID.
-Chỉ bật đối sánh trực tiếp theo tên/email/biệt danh có thể thay đổi bằng `dangerouslyAllowNameMatching: true` của từng kênh nếu bạn chấp nhận rõ ràng rủi ro đó.
+Chỉ bật đối sánh trực tiếp tên/email/biệt danh có thể thay đổi bằng `dangerouslyAllowNameMatching: true` của từng kênh nếu bạn chấp nhận rõ ràng rủi ro đó.
 
 ### Khóa API Anthropic + phương án dự phòng MiniMax
 
@@ -664,7 +662,7 @@ Chỉ bật đối sánh trực tiếp theo tên/email/biệt danh có thể tha
 }
 ```
 
-### Chỉ sử dụng mô hình cục bộ
+### Chỉ dùng mô hình cục bộ
 
 ```json5
 {
@@ -701,11 +699,11 @@ Chỉ bật đối sánh trực tiếp theo tên/email/biệt danh có thể tha
 ## Mẹo
 
 - Nếu bạn đặt `dmPolicy: "open"`, danh sách `allowFrom` tương ứng phải bao gồm `"*"`.
-- ID của nhà cung cấp có định dạng khác nhau (số điện thoại, ID người dùng, ID kênh). Hãy tham khảo tài liệu của nhà cung cấp để xác nhận định dạng.
+- ID của nhà cung cấp có định dạng khác nhau (số điện thoại, ID người dùng, ID kênh). Hãy dùng tài liệu của nhà cung cấp để xác nhận định dạng.
 - Các phần tùy chọn có thể thêm sau: `web`, `browser`, `ui`, `discovery`, `plugins`, `talk`, `signal`, `imessage`.
-- Xem [Nhà cung cấp](/vi/providers) và [Khắc phục sự cố](/vi/gateway/troubleshooting) để biết thêm ghi chú chuyên sâu về thiết lập.
+- Xem [Nhà cung cấp](/vi/providers) và [Khắc phục sự cố](/vi/gateway/troubleshooting) để biết thêm ghi chú thiết lập chuyên sâu.
 
 ## Liên quan
 
-- [Tài liệu tham chiếu cấu hình](/vi/gateway/configuration-reference)
+- [Tham chiếu cấu hình](/vi/gateway/configuration-reference)
 - [Cấu hình](/vi/gateway/configuration)

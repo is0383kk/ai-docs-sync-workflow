@@ -1,32 +1,39 @@
 ---
 read_when:
-    - برای پیوست‌های صوتی به تبدیل گفتار به متن Deepgram نیاز دارید
-    - شما رونویسی جریانی Deepgram را برای تماس صوتی می‌خواهید
-    - به یک نمونهٔ سریع از پیکربندی Deepgram نیاز دارید
-summary: رونویسی Deepgram برای پیام‌های صوتی ورودی
+    - برای پیوست‌های صوتی، تبدیل گفتار به متن Deepgram را می‌خواهید
+    - برای تماس صوتی، رونویسی جریانی Deepgram می‌خواهید
+    - به یک نمونه پیکربندی سریع برای Deepgram نیاز دارید
+summary: رونویسی Deepgram برای یادداشت‌های صوتی ورودی
 title: Deepgram
 x-i18n:
-    generated_at: "2026-07-12T10:40:33Z"
+    generated_at: "2026-07-27T15:49:27Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 8b0f407829ba47344ad92c5fe63aacd0ce234909c439c96370e7bd900cadff8b
+    source_hash: c00473762c3bede1f6de9230043827d90daefd68d05e67ed4b3e3026b9d6ba4f
     source_path: providers/deepgram.md
     workflow: 16
 ---
 
-Deepgram یک API تبدیل گفتار به متن است. OpenClaw از آن برای رونویسی فایل‌های صوتی/یادداشت‌های صوتی ورودی از طریق `tools.media.audio` و برای تبدیل گفتار به متن جریانی تماس صوتی از طریق `plugins.entries.voice-call.config.streaming` استفاده می‌کند.
+Deepgram یک API تبدیل گفتار به متن است. OpenClaw از آن برای رونویسی صوت ورودی/یادداشت صوتی
+از طریق `tools.media.audio` و برای STT جریانی Voice Call
+از طریق `plugins.entries.voice-call.config.streaming` استفاده می‌کند.
 
-رونویسی دسته‌ای، فایل صوتی کامل را در Deepgram بارگذاری می‌کند و متن رونویسی‌شده را در خط لوله پاسخ (`{{Transcript}}` به‌همراه بلوک `[Audio]`) درج می‌کند. پخش جریانی تماس صوتی، فریم‌های زنده G.711 u-law را از طریق نقطه پایانی WebSocket با نام `listen` در Deepgram ارسال می‌کند و هم‌زمان با بازگرداندن نتایج توسط Deepgram، متن‌های رونویسی‌شده موقت/نهایی را منتشر می‌کند.
+رونویسی دسته‌ای، فایل صوتی کامل را در Deepgram بارگذاری می‌کند و
+رونوشت را به پایپ‌لاین پاسخ تزریق می‌کند (بلوک `{{Transcript}}` + `[Audio]`).
+جریان Voice Call فریم‌های زنده G.711 u-law را از طریق نقطه پایانی
+WebSocket `listen` در Deepgram ارسال می‌کند و هم‌زمان با بازگرداندن آن‌ها توسط Deepgram،
+رونوشت‌های جزئی/نهایی را منتشر می‌کند.
 
-| جزئیات       | مقدار                                                      |
+| جزئیات        | مقدار                                                      |
 | ------------- | ---------------------------------------------------------- |
 | وب‌سایت       | [deepgram.com](https://deepgram.com)                       |
 | مستندات       | [developers.deepgram.com](https://developers.deepgram.com) |
 | احراز هویت    | `DEEPGRAM_API_KEY`                                         |
-| مدل پیش‌فرض   | `nova-3`                                                   |
+| مدل پیش‌فرض | `nova-3`                                                   |
 
-## شروع کار
+## شروع به کار
 
 <Steps>
   <Step title="کلید API خود را تنظیم کنید">
@@ -50,20 +57,20 @@ Deepgram یک API تبدیل گفتار به متن است. OpenClaw از آن �
   </Step>
   <Step title="یک یادداشت صوتی ارسال کنید">
     یک پیام صوتی را از طریق هر کانال متصل ارسال کنید. OpenClaw آن را
-    با Deepgram رونویسی می‌کند و متن رونویسی‌شده را در خط لوله پاسخ درج می‌کند.
+    با Deepgram رونویسی می‌کند و رونوشت را به پایپ‌لاین پاسخ تزریق می‌کند.
   </Step>
 </Steps>
 
 ## گزینه‌های پیکربندی
 
-| گزینه      | مسیر                                  | توضیحات                                  |
-| ---------- | ------------------------------------- | ---------------------------------------- |
-| `model`    | `tools.media.audio.models[].model`    | شناسه مدل Deepgram (پیش‌فرض: `nova-3`)   |
-| `language` | `tools.media.audio.models[].language` | راهنمای زبان (اختیاری)                    |
+| گزینه     | مسیر                            | توضیحات                           |
+| ---------- | ------------------------------- | ------------------------------------- |
+| `model`    | `tools.media.models[].model`    | شناسه مدل Deepgram (پیش‌فرض: `nova-3`) |
+| `language` | `tools.media.models[].language` | راهنمای زبان (اختیاری)              |
 
-`providerOptions.deepgram` پارامترهای پرس‌وجوی اضافی را مستقیماً با درخواست
-`/listen` در Deepgram ادغام می‌کند؛ بنابراین می‌توان از هر نام پارامتری که
-Deepgram پشتیبانی می‌کند استفاده کرد (برای مثال `detect_language`، `punctuate` و `smart_format`):
+`providerOptions.deepgram` پارامترهای اضافی پرس‌وجو را مستقیماً با درخواست
+`/listen` در Deepgram ادغام می‌کند؛ بنابراین هر نام پارامتری که Deepgram پشتیبانی کند، قابل استفاده است
+(برای نمونه `detect_language`، `punctuate`، `smart_format`):
 
 <Tabs>
   <Tab title="با راهنمای زبان">
@@ -103,19 +110,21 @@ Deepgram پشتیبانی می‌کند استفاده کرد (برای مثال
   </Tab>
 </Tabs>
 
-## تبدیل گفتار به متن جریانی تماس صوتی
+## STT جریانی Voice Call
 
-Plugin همراه `deepgram` همچنین یک ارائه‌دهنده رونویسی بلادرنگ را برای Plugin تماس صوتی ثبت می‌کند.
+Plugin همراه `deepgram` همچنین یک ارائه‌دهنده رونویسی بلادرنگ
+برای Plugin مربوط به Voice Call ثبت می‌کند.
 
-| تنظیم                 | مسیر پیکربندی                                                           | پیش‌فرض                                  |
-| --------------------- | ----------------------------------------------------------------------- | ---------------------------------------- |
-| کلید API              | `plugins.entries.voice-call.config.streaming.providers.deepgram.apiKey` | در صورت نبود، از `DEEPGRAM_API_KEY` استفاده می‌کند |
-| مدل                   | `...deepgram.model`                                                     | `nova-3`                                 |
-| زبان                  | `...deepgram.language`                                                  | (تنظیم‌نشده)                              |
-| کدگذاری               | `...deepgram.encoding`                                                  | `mulaw`                                  |
-| نرخ نمونه‌برداری      | `...deepgram.sampleRate`                                                | `8000`                                   |
-| تشخیص پایان گفتار     | `...deepgram.endpointingMs`                                             | `800`                                    |
-| نتایج موقت            | `...deepgram.interimResults`                                            | `true`                                   |
+| تنظیم         | مسیر پیکربندی                                                             | پیش‌فرض                                      |
+| --------------- | ----------------------------------------------------------------------- | -------------------------------------------- |
+| کلید API         | `plugins.entries.voice-call.config.streaming.providers.deepgram.apiKey` | در صورت نبود، از `DEEPGRAM_API_KEY` استفاده می‌کند             |
+| URL پایه        | `...deepgram.baseUrl`                                                   | `DEEPGRAM_BASE_URL` یا API عمومی Deepgram |
+| مدل           | `...deepgram.model`                                                     | `nova-3`                                     |
+| زبان        | `...deepgram.language`                                                  | (تنظیم‌نشده)                                      |
+| کدگذاری        | `...deepgram.encoding`                                                  | `mulaw`                                      |
+| نرخ نمونه‌برداری     | `...deepgram.sampleRate`                                                | `8000`                                       |
+| تشخیص پایان گفتار     | `...deepgram.endpointingMs`                                             | `800`                                        |
+| نتایج میانی | `...deepgram.interimResults`                                            | `true`                                       |
 
 ```json5
 {
@@ -142,26 +151,31 @@ Plugin همراه `deepgram` همچنین یک ارائه‌دهنده رونو�
 }
 ```
 
+برای یک [نقطه پایانی سفارشی Deepgram](https://developers.deepgram.com/reference/custom-endpoints)،
+`baseUrl` را روی ریشه نقطه پایانی، شامل هر مسیر پایه اما بدون `/listen`، تنظیم کنید.
+نقاط پایانی بلادرنگ `http://`، `https://`، `ws://` و `wss://` را می‌پذیرند. HTTP
+به WS و HTTPS به WSS نگاشت می‌شود و طرح‌واره‌های صریح WebSocket بدون تغییر باقی می‌مانند.
+URLهای بدساخت و طرح‌واره‌های دیگر هنگام راه‌اندازی نشست با خطا مواجه می‌شوند.
+
 <Note>
-تماس صوتی، صوت تلفنی را با قالب G.711 u-law و نرخ ۸ کیلوهرتز دریافت می‌کند. ارائه‌دهنده
-پخش جریانی Deepgram به‌طور پیش‌فرض از `encoding: "mulaw"` و `sampleRate: 8000`
-استفاده می‌کند؛ بنابراین فریم‌های رسانه‌ای Twilio را می‌توان مستقیماً ارسال کرد.
+Voice Call صوت تلفنی را به‌صورت G.711 u-law با نرخ 8 kHz دریافت می‌کند. ارائه‌دهنده
+جریانی Deepgram به‌طور پیش‌فرض از `encoding: "mulaw"` و `sampleRate: 8000` استفاده می‌کند؛ بنابراین
+فریم‌های رسانه‌ای Twilio را می‌توان مستقیماً ارسال کرد.
 </Note>
 
-## یادداشت‌ها
+## نکات
 
 <AccordionGroup>
   <Accordion title="احراز هویت">
-    احراز هویت از ترتیب استاندارد احراز هویت ارائه‌دهندگان پیروی می‌کند.
-    `DEEPGRAM_API_KEY` ساده‌ترین روش است.
+    احراز هویت از ترتیب استاندارد احراز هویت ارائه‌دهنده پیروی می‌کند. `DEEPGRAM_API_KEY`
+    ساده‌ترین مسیر است.
   </Accordion>
   <Accordion title="پروکسی و نقاط پایانی سفارشی">
-    هنگام استفاده از پروکسی، نقاط پایانی یا سرآیندها را با
-    `tools.media.audio.baseUrl` و `tools.media.audio.headers` بازنویسی کنید.
+    هنگام استفاده از پروکسی، نقاط پایانی یا سرآیندها را در ورودی `tools.media.models[]` مربوط به Deepgram بازنویسی کنید.
   </Accordion>
   <Accordion title="رفتار خروجی">
-    خروجی از همان قواعد صوتی سایر ارائه‌دهندگان پیروی می‌کند (محدودیت اندازه،
-    مهلت‌های زمانی و درج متن رونویسی‌شده).
+    خروجی از همان قواعد صوتی سایر ارائه‌دهندگان پیروی می‌کند (محدودیت اندازه، مهلت‌های زمانی،
+    تزریق رونوشت).
   </Accordion>
 </AccordionGroup>
 
@@ -169,10 +183,10 @@ Plugin همراه `deepgram` همچنین یک ارائه‌دهنده رونو�
 
 <CardGroup cols={2}>
   <Card title="ابزارهای رسانه" href="/fa/tools/media-overview" icon="photo-film">
-    نمای کلی خط لوله پردازش صوت، تصویر و ویدئو.
+    نمای کلی پایپ‌لاین پردازش صوت، تصویر و ویدئو.
   </Card>
   <Card title="پیکربندی" href="/fa/gateway/configuration" icon="gear">
-    مرجع کامل پیکربندی، شامل تنظیمات ابزارهای رسانه.
+    مرجع کامل پیکربندی، شامل تنظیمات ابزار رسانه.
   </Card>
   <Card title="عیب‌یابی" href="/fa/help/troubleshooting" icon="wrench">
     مشکلات رایج و مراحل اشکال‌زدایی.

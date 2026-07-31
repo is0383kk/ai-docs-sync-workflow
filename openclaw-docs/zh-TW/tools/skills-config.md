@@ -1,22 +1,25 @@
 ---
 read_when:
-    - 設定 Skills 的載入、安裝或條件限制行為
-    - 設定每個代理程式的技能可見性
-    - 調整 Skills 工作坊限制或核准政策
+    - 設定 Skills 載入、安裝或門控行為
+    - 設定各代理程式的 Skills 可見性
+    - 調整 Skill Workshop 限制或核准政策
 sidebarTitle: Skills config
-summary: skills.* 設定結構描述、代理程式允許清單、工作坊設定及沙箱環境變數處理方式的完整參考。
+summary: skills.* 設定結構描述、代理程式允許清單、工作坊設定，以及沙箱環境變數處理的完整參考資料。
 title: Skills 設定
 x-i18n:
-    generated_at: "2026-07-11T21:55:22Z"
+    generated_at: "2026-07-26T08:02:16Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 0ed1ec20aa102b458a9485a1ada1bb7566c97d28b1f43caa28f52b3f5bdc381e
+    source_hash: bc154bdf8a8537095a4d39bc6e86ebfd716e6beacd45def9c8a1c15fcdc93698
     source_path: tools/skills-config.md
     workflow: 16
 ---
 
-大多數 Skills 設定都位於 `~/.openclaw/openclaw.json` 的 `skills` 下。代理程式專屬的可見性設定則位於 `agents.defaults.skills` 和 `agents.list[].skills` 下。
+大多數 Skills 設定都位於 `skills` 之下，並存放在
+`~/.openclaw/openclaw.json`。代理程式特定的可見性則位於
+`agents.defaults.skills` 和 `agents.entries.*.skills` 之下。
 
 ```json5
 {
@@ -26,7 +29,6 @@ x-i18n:
       extraDirs: ["~/Projects/agent-scripts/skills"],
       allowSymlinkTargets: ["~/Projects/manager/skills"],
       watch: true,
-      watchDebounceMs: 250,
     },
     install: {
       preferBrew: true,
@@ -36,7 +38,7 @@ x-i18n:
     workshop: {
       autonomous: { enabled: false },
       allowSymlinkTargetWrites: false,
-      approvalPolicy: "pending",
+      approvalPolicy: "auto",
       maxPending: 50,
       maxSkillBytes: 40000,
     },
@@ -54,25 +56,28 @@ x-i18n:
 ```
 
 <Note>
-  若要使用內建的圖片生成功能，請使用 `agents.defaults.imageGenerationModel` 搭配核心 `image_generate` 工具，而非 `skills.entries`。Skill 項目僅適用於自訂或第三方 Skill 工作流程。
+  若要使用內建的影像生成功能，請使用 `agents.defaults.mediaModels.image`
+  搭配核心 `image_generate` 工具，而不是 `skills.entries`。Skill
+  項目僅適用於自訂或第三方 Skill 工作流程。
 </Note>
 
 ## 載入（`skills.load`）
 
 <ParamField path="skills.load.extraDirs" type="string[]">
-  要掃描的其他 Skill 目錄，其優先順序最低（低於內建和外掛 Skills）。路徑支援展開 `~`。
+  要掃描的其他 Skill 目錄，其優先順序最低（低於
+  隨附及外掛的 Skills）。路徑展開支援 `~`。
 </ParamField>
 
 <ParamField path="skills.load.allowSymlinkTargets" type="string[]">
-  受信任的實際目標目錄；符號連結的 Skill 資料夾可以解析至這些目錄，即使符號連結位於設定的根目錄之外。此設定適用於刻意安排的同層儲存庫配置，例如 `<workspace>/skills/manager -> ~/Projects/manager/skills`。請嚴格限制此清單，不要指向 `~` 或 `~/Projects` 等廣泛的根目錄。
+  符號連結 Skill 資料夾可解析至的受信任實際目標目錄，即使符號連結位於
+  設定的根目錄之外亦然。此設定適用於刻意採用的同層儲存庫配置，例如
+  `<workspace>/skills/manager -> ~/Projects/manager/skills`。此清單應保持精簡，
+  請勿指向 `~` 或 `~/Projects` 等範圍廣泛的根目錄。
 </ParamField>
 
 <ParamField path="skills.load.watch" type="boolean" default="true">
-  監看 Skill 資料夾，並在 `SKILL.md` 檔案變更時重新整理 Skills 快照。涵蓋分組 Skill 根目錄下的巢狀檔案。
-</ParamField>
-
-<ParamField path="skills.load.watchDebounceMs" type="number" default="250">
-  Skill 監看器事件的防彈跳時間範圍，單位為毫秒。
+  監看 Skill 資料夾，並在 `SKILL.md` 檔案變更時
+  重新整理 Skills 快照。涵蓋分組 Skill 根目錄下的巢狀檔案。
 </ParamField>
 
 ## 安裝（`skills.install`）
@@ -82,23 +87,34 @@ x-i18n:
 </ParamField>
 
 <ParamField path="skills.install.nodeManager" type='"npm" | "pnpm" | "yarn" | "bun"' default='"npm"'>
-  安裝 Skill 時偏好的 Node 套件管理器。此設定僅影響 Skill 安裝；閘道執行階段仍應使用 Node（不建議將 Bun 用於 WhatsApp/Telegram）。`openclaw setup --node-manager` 和 `openclaw onboard --node-manager` 接受 `npm`、`pnpm` 或 `bun`；若要使用 Yarn 安裝 Skill，請直接在設定中指定 `"yarn"`。
+  安裝 Skill 時偏好的 Node 套件管理工具。這只會影響 Skill
+  安裝；OpenClaw 命令列介面與閘道執行階段需要 Node，因為
+  標準狀態儲存區使用 `node:sqlite`。`openclaw setup --node-manager` 和
+  `openclaw onboard --node-manager` 接受 `npm`、`pnpm` 或 `bun`；
+  若要使用由 Yarn 支援的 Skill 安裝，請直接在設定中設置
+  `"yarn"`。
 </ParamField>
 
 <ParamField path="skills.install.allowUploadedArchives" type="boolean" default="false">
-  允許受信任的 `operator.admin` 閘道用戶端安裝透過 `skills.upload.*` 暫存的私人 zip 封存檔。一般的 ClawHub 安裝不需要此設定。
+  允許受信任的 `operator.admin` 閘道用戶端安裝透過
+  `skills.upload.*` 暫存的私有 zip 封存檔。一般的 ClawHub 安裝
+  不需要此設定。
 </ParamField>
 
-## 操作者安裝政策（`security.installPolicy`）
+## 操作者安裝原則（`security.installPolicy`）
 
-當操作者需要透過受信任的本機命令，依據主機專屬政策核准或封鎖 Skill 與外掛安裝時，請使用 `security.installPolicy`。此政策會在 OpenClaw 暫存來源資料之後、繼續安裝或更新之前執行。它適用於 ClawHub Skills、上傳的 Skills、Git/本機 Skills、Skill 相依項目安裝程式，以及外掛安裝/更新來源。
+當操作者需要使用受信任的本機命令，依據主機特定原則核准或封鎖
+Skill 與外掛安裝時，請使用 `security.installPolicy`。此原則會在
+OpenClaw 暫存來源素材之後、安裝或更新繼續之前執行。它適用於
+ClawHub Skills、上傳的 Skills、Git／本機 Skills、Skill 相依項目安裝程式，
+以及外掛安裝／更新來源。
 
 ```json5
 {
   security: {
     installPolicy: {
       enabled: true,
-      // Omit targets to cover every supported target.
+      // 省略 targets 以涵蓋所有支援的目標。
       targets: ["skill", "plugin"],
       exec: {
         source: "exec",
@@ -117,60 +133,78 @@ x-i18n:
 ```
 
 <ParamField path="security.installPolicy.enabled" type="boolean" default="false">
-  啟用由操作者擁有的安裝政策。若啟用時未提供有效的 `exec` 命令，安裝將以封閉方式失敗。
+  啟用由操作者擁有的安裝原則。啟用後若沒有有效的 `exec`
+  命令，安裝將採取封閉式失敗。
 </ParamField>
 
 <ParamField path="security.installPolicy.targets" type='("skill" | "plugin")[]'>
-  選用的目標篩選器。若省略，政策會套用至所有支援的目標，確保新的安裝類型不會意外以開放方式失敗。
+  選用的目標篩選器。若省略，原則會套用至所有支援的
+  目標，避免新的安裝意外採取開放式失敗。
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.command" type="string">
-  受信任政策可執行檔的絕對路徑。OpenClaw 不透過殼層執行該檔案，並會在使用前驗證路徑。
+  受信任原則可執行檔的絕對路徑。OpenClaw 執行時不會使用
+  Shell，並會在使用前驗證路徑。
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.args" type="string[]">
-  在 `command` 之後傳入的靜態引數。
+  接在 `command` 後傳入的靜態引數。
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.timeoutMs" type="number" default="10000">
-  單次政策決策允許的最長實際執行時間。
+  單次原則決策允許的最長實際經過時間。
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.noOutputTimeoutMs" type="number" default="timeoutMs">
-  在政策以封閉方式失敗前，沒有標準輸出或標準錯誤輸出的最長允許時間。
+  在原則採取封閉式失敗之前，stdout 或 stderr 最長可無輸出的
+  時間。
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.maxOutputBytes" type="number" default="1048576">
-  接受政策程序所產生之標準輸出與標準錯誤輸出的合計位元組上限。
+  原則程序可接受的 stdout 與 stderr 位元組合計上限。
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.env" type="Record<string, string>">
-  提供給政策程序的常值環境變數。
+  提供給原則程序的常值環境變數。
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.passEnv" type="string[]">
-  從 OpenClaw 程序複製到政策程序的環境變數名稱。只會傳遞指定名稱的變數。
+  從 OpenClaw 程序複製到原則程序的環境變數名稱。只會傳遞
+  指定名稱的變數。
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.trustedDirs" type="string[]">
-  可以包含政策可執行檔的選用目錄允許清單。
+  可包含原則可執行檔之目錄的選用允許清單。
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.allowInsecurePath" type="boolean" default="false">
-  略過命令路徑的擁有權與權限檢查。僅在該路徑由其他機制保護時使用。
+  略過命令路徑擁有權與權限檢查。僅在路徑受到其他機制
+  保護時使用。
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.allowSymlinkCommand" type="boolean" default="false">
-  允許設定的命令路徑為符號連結。解析後的目標仍必須符合其他路徑檢查。直譯器指令碼引數必須是直接的一般檔案，不得為符號連結。
+  允許設定的命令路徑為符號連結。解析後的目標仍必須符合
+  其他路徑檢查。直譯器指令碼引數必須是直接的一般檔案，
+  不得為符號連結。
 </ParamField>
 
-政策會透過標準輸入接收一個 JSON 物件，其中包含 `protocolVersion: 1`、`openclawVersion`、`targetType`、`targetName`、`sourcePath`、`sourcePathKind`、選用的結構化 `source`、結構化 `origin`，以及 `request`。它必須將一個 JSON 物件寫入標準輸出：`{ "protocolVersion": 1, "decision": "allow" }` 或 `{ "protocolVersion": 1, "decision": "block", "reason": "..." }`。非零結束狀態、逾時、格式錯誤的 JSON、缺少欄位或不支援的通訊協定版本，都會以封閉方式失敗。
+原則會透過 stdin 接收一個 JSON 物件，其中包含 `protocolVersion: 1`、
+`openclawVersion`、`targetType`、`targetName`、`sourcePath`、`sourcePathKind`、
+選用的結構化 `source`、結構化 `origin`，以及 `request`。它必須
+向 stdout 寫入一個 JSON 物件：`{ "protocolVersion": 1, "decision": "allow" }`
+或 `{ "protocolVersion": 1, "decision": "block", "reason": "..." }`。非零結束狀態、
+逾時、格式錯誤的 JSON、缺少欄位或不支援的通訊協定版本，
+都會採取封閉式失敗。
 
-OpenClaw 不會在閘道正常啟動期間執行安裝政策。若政策已啟用但無法使用，安裝與更新會以封閉方式失敗。`openclaw doctor` 會執行靜態驗證；`openclaw doctor --deep` 則會針對設定的命令執行合成的安裝探測。
+OpenClaw 在閘道正常啟動期間不會執行安裝原則。
+若原則已啟用但無法使用，安裝與更新會採取封閉式失敗。
+`openclaw doctor` 會執行靜態驗證；`openclaw doctor --deep`
+則會針對設定的命令執行模擬安裝探測。
 
-大量更新會對每個目標分別套用政策：遭封鎖的 Skill 或外掛更新只會使該目標失敗，不會停用政策，也不會跳過批次中後續的目標。
+大量更新會針對每個目標套用原則：遭封鎖的 Skill 或外掛更新會讓
+該目標失敗，但不會停用原則，也不會略過批次中後續的目標。
 
-標準輸入範例：
+stdin 範例：
 
 ```json
 {
@@ -203,7 +237,7 @@ OpenClaw 不會在閘道正常啟動期間執行安裝政策。若政策已啟�
 }
 ```
 
-最小化政策命令：
+最小原則命令：
 
 ```js
 #!/usr/bin/env node
@@ -220,7 +254,7 @@ process.stdin.on("end", () => {
       JSON.stringify({
         protocolVersion: 1,
         decision: "block",
-        reason: "local plugin paths are not approved on this host",
+        reason: "此主機不允許本機外掛路徑",
       }),
     );
     return;
@@ -229,92 +263,126 @@ process.stdin.on("end", () => {
 });
 ```
 
-## 內建 Skill 允許清單
+## 隨附 Skill 允許清單
 
 <ParamField path="skills.allowBundled" type="string[]">
-  僅適用於**內建** Skills 的選用允許清單。設定後，只有清單中的內建 Skills 符合使用資格。受管理、代理程式層級和工作區的 Skills 不受影響。
+  僅適用於**隨附** Skills 的選用允許清單。設定後，只有清單中的
+  隨附 Skills 才符合使用資格。受管理、代理程式層級與工作區
+  Skills 不受影響。
 </ParamField>
 
 ## 各 Skill 項目（`skills.entries`）
 
-預設情況下，`entries` 下的鍵會與 Skill 的 `name` 相符。如果 Skill 定義了 `metadata.openclaw.skillKey`，請改用該鍵。含連字號的名稱必須加上引號（JSON5 允許加引號的鍵）。
+`entries` 下的鍵預設會比對 Skill 的 `name`。若 Skill 定義了
+`metadata.openclaw.skillKey`，請改用該鍵。含連字號的名稱需加上引號
+（JSON5 允許使用引號括住鍵）。
 
 <ParamField path="skills.entries.<key>.enabled" type="boolean">
-  即使 Skill 是內建或已安裝，`false` 仍會停用它。內建的 `coding-agent` Skill 必須選擇啟用；請將其設為 `true`，並確保已安裝且完成驗證 `claude`、`codex`、`opencode` 或其他受支援的命令列介面之一。
+  即使 Skill 是隨附或已安裝，`false` 也會停用它。
+  隨附的 `coding-agent` Skill 須選擇加入——請將其設為 `true`，並確保
+  已安裝且驗證 `claude`、`codex`、`opencode` 或其他受支援的命令列介面
+  之一。
 </ParamField>
 
 <ParamField path="skills.entries.<key>.apiKey" type='string | { source, provider, id }'>
-  適用於宣告 `metadata.openclaw.primaryEnv` 之 Skills 的便利欄位。支援純文字字串或 SecretRef：`{ source: "env", provider: "default", id: "VAR_NAME" }`。
+  適用於宣告 `metadata.openclaw.primaryEnv` 之 Skills 的便利欄位。
+  支援純文字字串或 SecretRef：`{ source: "env", provider: "default", id: "VAR_NAME" }`。
 </ParamField>
 
 <ParamField path="skills.entries.<key>.env" type="Record<string, string>">
-  為代理程式執行注入的環境變數。僅在程序中尚未設定該變數時注入。
+  為代理程式執行注入的環境變數。僅在程序中尚未設定該
+  變數時注入。
 </ParamField>
 
 <ParamField path="skills.entries.<key>.config" type="object">
-  用於自訂各 Skill 設定欄位的選用容器。
+  自訂各 Skill 設定欄位的選用集合。
 </ParamField>
 
 ## 代理程式允許清單（`agents`）
 
-如果你希望同一台機器/工作區使用相同的 Skill 根目錄，但每個代理程式可見的 Skill 集合不同，請使用代理程式設定。
+若希望使用相同的機器／工作區 Skill 根目錄，但讓每個代理程式看見
+不同的 Skill 集合，請使用代理程式設定。
 
 ```json5
 {
   agents: {
     defaults: {
-      skills: ["github", "weather"], // shared baseline
+      skills: ["github", "weather"], // 共用基準
     },
     list: [
-      { id: "writer" }, // inherits github, weather
-      { id: "docs", skills: ["docs-search"] }, // replaces defaults entirely
-      { id: "locked-down", skills: [] }, // no skills
+      { id: "writer" }, // 繼承 github、weather
+      { id: "docs", skills: ["docs-search"] }, // 完全取代預設值
+      { id: "locked-down", skills: [] }, // 沒有 Skills
     ],
   },
 }
 ```
 
 <ParamField path="agents.defaults.skills" type="string[]">
-  未設定 `agents.list[].skills` 的代理程式會繼承的共用基準允許清單。若完全省略，預設不會限制 Skills。
+  省略 `agents.entries.*.skills` 的代理程式會繼承的共用基準
+  允許清單。若要讓 Skills 預設不受限制，請完全省略。
 </ParamField>
 
-<ParamField path="agents.list[].skills" type="string[]">
-  該代理程式明確的最終 Skill 集合。明確清單會**取代**繼承的預設值，而不會合併。設為 `[]` 可讓該代理程式不顯示任何 Skills。
+<ParamField path="agents.entries.*.skills" type="string[]">
+  該代理程式的明確最終 Skill 集合。明確清單會**取代**
+  繼承的預設值，而不是合併。設為 `[]` 可讓該代理程式
+  不顯示任何 Skills。
 </ParamField>
 
 <Warning>
-  代理程式 Skill 允許清單是 OpenClaw Skill 探索、提示詞、斜線命令探索、沙箱同步及 Skill 快照的可見性與載入篩選器。它並非殼層執行階段的授權界線。如果代理程式可以執行主機上的 `exec`，該殼層仍可執行外部用戶端，或讀取執行使用者可見的主機檔案，包括 `~/.openclaw/skills/config/mcporter.json` 等 MCP 用戶端登錄。若要實現各代理程式的 MCP 隔離，請將 Skill 允許清單與沙箱/作業系統使用者隔離搭配使用，拒絕主機 `exec` 或嚴格限制其允許清單，並優先在 MCP 伺服器上使用各代理程式專屬的憑證。
+  代理程式 Skill 允許清單是 OpenClaw Skill 探索、提示詞、
+  斜線命令探索、沙箱同步與 Skill 快照的可見性及載入篩選器。
+  它們不是 Shell 執行階段的授權邊界。若代理程式可以執行主機
+  `exec`，該 Shell 仍可執行外部用戶端，或讀取執行使用者可見的
+  主機檔案，包括 `~/.openclaw/skills/config/mcporter.json` 等 MCP 用戶端
+  登錄。若要實現每個代理程式的 MCP 隔離，請將 Skill 允許清單與沙箱／作業系統使用者
+  隔離搭配使用，拒絕主機 exec 或採用嚴格的允許清單，並優先在 MCP 伺服器
+  使用每個代理程式各自的認證資訊。
 </Warning>
 
-## 工作坊（`skills.workshop`）
+## Workshop（`skills.workshop`）
 
 <ParamField path="skills.workshop.autonomous.enabled" type="boolean" default="false">
-  設為 `true` 時，代理程式可在成功完成回合後，根據持久的對話訊號建立待處理提案。無論此設定為何，由使用者提示觸發的技能建立一律會經由技能工作坊進行。
+  當 `true` 時，OpenClaw 可從持久保留的修正建立待處理提案，
+  並可在系統進入閒置後，審查已成功完成且具實質內容的工作。
+  這可能會在符合條件的輪次後新增一次背景模型執行。由使用者提示的
+  Skill 建立和 `/learn` 在此設定為 `false` 時仍可運作。
 </ParamField>
 
-<ParamField path="skills.workshop.approvalPolicy" type='"pending" | "auto"' default='"pending"'>
-  `pending` 要求代理程式發起套用、拒絕或隔離前，必須取得操作人員核准。`auto` 允許執行這些動作而無須核准。
+請參閱[自我學習](/zh-TW/tools/self-learning)，瞭解資格條件、隱私權、成本、
+僅限提案的權限和疑難排解。
+
+<ParamField path="skills.workshop.approvalPolicy" type='"pending" | "auto"' default='"auto"'>
+  `auto` 允許代理程式自行發起套用、拒絕或隔離，而不需
+  額外的核准提示。`pending` 則需要操作人員核准。
 </ParamField>
 
 <ParamField path="skills.workshop.allowSymlinkTargetWrites" type="boolean" default="false">
-  允許技能工作坊在套用時，透過工作區技能符號連結寫入其實際目標，前提是該目標已受 `skills.load.allowSymlinkTargets` 信任。除非產生的提案在套用時應修改該共用技能根目錄，否則請保持停用。
+  允許 Skill Workshop 在工作區 Skill 符號連結的實際目標已受
+  `skills.load.allowSymlinkTargets` 信任時，透過該連結寫入。除非套用產生的提案
+  應修改該共用 Skill 根目錄，否則請保持停用。
 </ParamField>
 
 <ParamField path="skills.workshop.maxPending" type="number" default="50">
-  每個工作區保留的待處理與已隔離提案數量上限（允許範圍：1–200）。
+  每個工作區保留的待處理與已隔離提案數量上限（允許範圍：
+  1-200）。
 </ParamField>
 
 <ParamField path="skills.workshop.maxSkillBytes" type="number" default="40000">
-  提案內文大小上限，以位元組計（允許範圍：1024–200000）。提案說明另有 160 位元組的硬性上限，因為它們會出現在探索與清單輸出中。
+  提案本文大小上限（位元組，允許範圍：1024-200000）。提案說明
+  另有 160 位元組的硬性上限，因為它們會出現在探索與清單輸出中。
 </ParamField>
 
-請參閱[技能工作坊](/zh-TW/tools/skill-workshop)，以瞭解此設定所控制的提案生命週期、命令列介面命令、代理程式工具參數與閘道方法。
+請參閱 [Skill Workshop](/zh-TW/tools/skill-workshop)，瞭解此設定所控制的提案生命週期、命令列介面
+命令、代理程式工具參數和閘道方法。
 
-## 使用符號連結的技能根目錄
+## 使用符號連結的 Skill 根目錄
 
-預設情況下，工作區、專案代理程式、額外目錄與內建技能根目錄都是包含範圍邊界。若 `<workspace>/skills` 下的技能資料夾是符號連結，且解析後指向根目錄外部，系統會略過該資料夾並記錄一則日誌訊息。
+依預設，工作區、專案代理程式、額外目錄和內建 Skill 根目錄都是
+範圍限制邊界。位於 `<workspace>/skills` 下、解析後指向根目錄外部的
+符號連結 Skill 資料夾會被略過，並記錄一則日誌訊息。
 
-若要允許刻意設計的符號連結配置，請宣告受信任的目標：
+若要允許刻意安排的符號連結配置，請宣告受信任的目標：
 
 ```json5
 {
@@ -327,9 +395,12 @@ process.stdin.on("end", () => {
 }
 ```
 
-使用此設定後，`<workspace>/skills/manager -> ~/Projects/manager/skills` 經實際路徑解析後會被接受。`extraDirs` 會直接掃描同層存放庫；`allowSymlinkTargets` 則會為現有配置保留使用符號連結的路徑。
+使用此設定後，`<workspace>/skills/manager -> ~/Projects/manager/skills`
+會在實際路徑解析後獲准。`extraDirs` 會直接掃描同層級的儲存庫；
+`allowSymlinkTargets` 則會保留現有配置所使用的符號連結路徑。
 
-技能工作坊預設不會在套用時透過這些符號連結寫入。若要允許工作坊在套用時修改已受信任之符號連結目標下的技能，請另行選擇啟用：
+Skill Workshop 預設不會透過這些符號連結寫入。若要讓 Workshop
+套用作業修改已受信任符號連結目標下的 Skill，請另行選擇啟用：
 
 ```json5
 {
@@ -344,15 +415,21 @@ process.stdin.on("end", () => {
 }
 ```
 
-受管理的 `~/.openclaw/skills` 與個人的 `~/.agents/skills` 目錄已無條件接受技能目錄符號連結（仍會套用各技能的 `SKILL.md` 包含範圍限制）——只有工作區、額外目錄與專案代理程式（`<workspace>/.agents/skills`）根目錄需要 `allowSymlinkTargets`。
+受管理的 `~/.openclaw/skills` 和個人的 `~/.agents/skills` 目錄
+已無條件允許 Skill 目錄符號連結（各 Skill 的
+`SKILL.md` 範圍限制仍適用）— `allowSymlinkTargets` 僅適用於
+工作區、額外目錄和專案代理程式（`<workspace>/.agents/skills`）
+根目錄。
 
-## 沙箱化技能與環境變數
+## 沙箱化 Skill 與環境變數
 
 <Warning>
-  `skills.entries.<skill>.env` 與 `apiKey` 僅套用於**主機**執行。在沙箱內它們不會生效——除非另外將變數提供給沙箱，否則依賴 `GEMINI_API_KEY` 的技能將因 `apiKey not configured` 而失敗。
+  `skills.entries.<skill>.env` 和 `apiKey` 僅適用於**主機**執行。
+  在沙箱內不會產生任何效果 — 依賴 `GEMINI_API_KEY` 的 Skill
+  會因 `apiKey not configured` 而失敗，除非另行將該變數提供給沙箱。
 </Warning>
 
-使用以下設定將機密資訊傳入 Docker 沙箱：
+使用以下設定將祕密傳入 Docker 沙箱：
 
 ```json5
 {
@@ -369,35 +446,41 @@ process.stdin.on("end", () => {
 ```
 
 <Note>
-  擁有 Docker 常駐程式存取權的使用者，可透過 Docker 中繼資料檢查 `sandbox.docker.env` 的值。若無法接受此類暴露風險，請使用掛載的機密檔案、自訂映像檔或其他傳遞途徑。
+  擁有 Docker 常駐程式存取權的使用者可透過 Docker 中繼資料檢查
+  `sandbox.docker.env` 值。若無法接受此種暴露，請使用掛載的祕密檔案、
+  自訂映像檔或其他傳遞途徑。
 </Note>
 
 ## 載入順序提醒
 
 ```text
-workspace/skills      (最高)
+workspace/skills      （最高）
 workspace/.agents/skills
 ~/.agents/skills
 ~/.openclaw/skills
-內建技能
-skills.load.extraDirs (最低)
+內建 Skill
+skills.load.extraDirs （最低）
 ```
 
-啟用監看程式時，技能與設定的變更會在下一個新工作階段生效；若監看程式偵測到變更，則會在代理程式的下一個回合生效。
+啟用監看器時，Skill 與設定的變更會在下一個新工作階段生效；若監看器
+偵測到變更，則會在代理程式的下一個輪次生效。
 
 ## 相關內容
 
 <CardGroup cols={2}>
-  <Card title="技能參考" href="/zh-TW/tools/skills" icon="puzzle-piece">
-    技能的定義、載入順序、條件限制與 SKILL.md 格式。
+  <Card title="Skill 參考資料" href="/zh-TW/tools/skills" icon="puzzle-piece">
+    Skill 的定義、載入順序、閘控機制和 SKILL.md 格式。
   </Card>
-  <Card title="建立技能" href="/zh-TW/tools/creating-skills" icon="hammer">
-    編寫自訂工作區技能。
+  <Card title="建立 Skill" href="/zh-TW/tools/creating-skills" icon="hammer">
+    編寫自訂工作區 Skill。
   </Card>
-  <Card title="技能工作坊" href="/zh-TW/tools/skill-workshop" icon="flask">
-    用於代理程式草擬技能的提案佇列。
+  <Card title="Skill Workshop" href="/zh-TW/tools/skill-workshop" icon="flask">
+    代理程式草擬 Skill 的提案佇列。
+  </Card>
+  <Card title="自我學習" href="/zh-TW/tools/self-learning" icon="brain">
+    根據已完成工作產生的保守選擇啟用提案。
   </Card>
   <Card title="斜線命令" href="/zh-TW/tools/slash-commands" icon="terminal">
-    原生斜線命令目錄與聊天指令。
+    原生斜線命令目錄和聊天指令。
   </Card>
 </CardGroup>

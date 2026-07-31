@@ -1,72 +1,73 @@
 ---
 read_when:
-    - شما می‌خواهید از مدل‌های StepFun در OpenClaw استفاده کنید
+    - مدل‌های StepFun را در OpenClaw می‌خواهید
     - به راهنمای راه‌اندازی StepFun نیاز دارید
-summary: از مدل‌های StepFun با OpenClaw استفاده کنید
+summary: استفاده از مدل‌های StepFun با OpenClaw
 title: StepFun
 x-i18n:
-    generated_at: "2026-07-12T10:44:00Z"
+    generated_at: "2026-07-27T14:37:02Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c65e6d395f4ea890efc0e4847ec21dc1c2796fa240d20ca3e6d40eea480ed9f4
+    source_hash: 462a2588f15e8d6188914e238a3e472052d0da1da151751adecdb63cf009fc64
     source_path: providers/stepfun.md
     workflow: 16
 ---
 
-StepFun به‌صورت یک Plugin رسمی خارجی (`@openclaw/stepfun-provider`) با دو شناسهٔ ارائه‌دهنده عرضه می‌شود:
+StepFun به‌صورت یک plugin رسمی خارجی (`@openclaw/stepfun-provider`) با دو شناسه ارائه‌دهنده عرضه می‌شود:
 
-- `stepfun` برای نقطهٔ پایانی استاندارد
-- `stepfun-plan` برای نقطهٔ پایانی Step Plan
+- `stepfun` برای نقطه پایانی استاندارد
+- `stepfun-plan` برای نقطه پایانی Step Plan
 
 <Warning>
-استاندارد و Step Plan **دو ارائه‌دهندهٔ جداگانه** با نقاط پایانی و پیشوندهای ارجاع مدل متفاوت هستند (`stepfun/...` در برابر `stepfun-plan/...`). برای نقاط پایانی `.com` از کلید چین و برای نقاط پایانی `.ai` از کلید جهانی استفاده کنید.
+Standard و Step Plan **ارائه‌دهندگانی مجزا** با نقاط پایانی و پیشوندهای ارجاع مدل متفاوت (`stepfun/...` در برابر `stepfun-plan/...`) هستند. برای نقاط پایانی `.com` از کلید چین و برای نقاط پایانی `.ai` از کلید جهانی استفاده کنید.
 </Warning>
 
-## نصب Plugin
+## نصب plugin
 
 ```bash
 openclaw plugins install @openclaw/stepfun-provider
 openclaw gateway restart
 ```
 
-## نمای کلی منطقه و نقطهٔ پایانی
+## نمای کلی منطقه و نقطه پایانی
 
-| نقطهٔ پایانی | چین (`.com`)                           | جهانی (`.ai`)                          |
-| ------------- | -------------------------------------- | -------------------------------------- |
-| استاندارد     | `https://api.stepfun.com/v1`           | `https://api.stepfun.ai/v1`            |
-| Step Plan     | `https://api.stepfun.com/step_plan/v1` | `https://api.stepfun.ai/step_plan/v1`  |
+| نقطه پایانی  | چین (`.com`)                         | جهانی (`.ai`)                        |
+| --------- | -------------------------------------- | ------------------------------------- |
+| استاندارد  | `https://api.stepfun.com/v1`           | `https://api.stepfun.ai/v1`           |
+| Step Plan | `https://api.stepfun.com/step_plan/v1` | `https://api.stepfun.ai/step_plan/v1` |
 
 متغیر محیطی احراز هویت: `STEPFUN_API_KEY`
 
-## فهرست داخلی
+## کاتالوگ داخلی
 
 استاندارد (`stepfun`):
 
-| ارجاع مدل                | زمینه   | حداکثر خروجی | توضیحات                         |
-| ------------------------ | ------- | ------------ | -------------------------------- |
-| `stepfun/step-3.5-flash` | 262,144 | 65,536       | مدل استاندارد پیش‌فرض           |
-| `stepfun/step-3.7-flash` | 262,144 | 262,144      | پشتیبانی از ورودی تصویر چندوجهی |
+| ارجاع مدل                | زمینه | حداکثر خروجی | توضیحات                          |
+| ------------------------ | ------- | ---------- | ------------------------------ |
+| `stepfun/step-3.5-flash` | 262,144 | 65,536     | مدل استاندارد پیش‌فرض         |
+| `stepfun/step-3.7-flash` | 262,144 | 262,144    | پشتیبانی از ورودی تصویر چندوجهی |
 
 Step Plan (`stepfun-plan`):
 
-| ارجاع مدل                          | زمینه   | حداکثر خروجی | توضیحات                         |
-| ---------------------------------- | ------- | ------------ | -------------------------------- |
-| `stepfun-plan/step-3.5-flash`      | 262,144 | 65,536       | مدل پیش‌فرض Step Plan            |
-| `stepfun-plan/step-3.7-flash`      | 262,144 | 262,144      | پشتیبانی از ورودی تصویر چندوجهی |
-| `stepfun-plan/step-3.5-flash-2603` | 262,144 | 65,536       | مدل اضافی Step Plan              |
+| ارجاع مدل                          | زمینه | حداکثر خروجی | توضیحات                          |
+| ---------------------------------- | ------- | ---------- | ------------------------------ |
+| `stepfun-plan/step-3.5-flash`      | 262,144 | 65,536     | مدل پیش‌فرض Step Plan        |
+| `stepfun-plan/step-3.7-flash`      | 262,144 | 262,144    | پشتیبانی از ورودی تصویر چندوجهی |
+| `stepfun-plan/step-3.5-flash-2603` | 262,144 | 65,536     | مدل اضافی Step Plan     |
 
 ## شروع به کار
 
 <Tabs>
   <Tab title="استاندارد">
-    مناسب‌ترین گزینه برای استفادهٔ عمومی از طریق نقطهٔ پایانی استاندارد StepFun.
+    بهترین گزینه برای استفاده عمومی از طریق نقطه پایانی استاندارد StepFun.
 
     <Steps>
-      <Step title="منطقهٔ نقطهٔ پایانی خود را انتخاب کنید">
-        | انتخاب احراز هویت              | نقطهٔ پایانی                 | منطقه       |
-        | -------------------------------- | ----------------------------- | ------------ |
-        | `stepfun-standard-api-key-intl` | `https://api.stepfun.ai/v1`  | بین‌المللی  |
+      <Step title="منطقه نقطه پایانی را انتخاب کنید">
+        | گزینه احراز هویت                    | نقطه پایانی                     | منطقه        |
+        | -------------------------------- | ----------------------------- | -------------- |
+        | `stepfun-standard-api-key-intl` | `https://api.stepfun.ai/v1`  | بین‌المللی |
         | `stepfun-standard-api-key-cn`   | `https://api.stepfun.com/v1` | چین          |
       </Step>
       <Step title="راه‌اندازی اولیه را اجرا کنید">
@@ -74,19 +75,19 @@ Step Plan (`stepfun-plan`):
         openclaw onboard --auth-choice stepfun-standard-api-key-intl
         ```
 
-        نقطهٔ پایانی چین:
+        نقطه پایانی چین:
 
         ```bash
         openclaw onboard --auth-choice stepfun-standard-api-key-cn
         ```
       </Step>
-      <Step title="روش جایگزین غیرتعاملی">
+      <Step title="جایگزین غیرتعاملی">
         ```bash
         openclaw onboard --auth-choice stepfun-standard-api-key-intl \
           --stepfun-api-key "$STEPFUN_API_KEY"
         ```
       </Step>
-      <Step title="در دسترس بودن مدل‌ها را تأیید کنید">
+      <Step title="در دسترس بودن مدل‌ها را بررسی کنید">
         ```bash
         openclaw models list --provider stepfun
         ```
@@ -99,13 +100,13 @@ Step Plan (`stepfun-plan`):
   </Tab>
 
   <Tab title="Step Plan">
-    مناسب‌ترین گزینه برای نقطهٔ پایانی استدلال Step Plan.
+    بهترین گزینه برای نقطه پایانی استدلال Step Plan.
 
     <Steps>
-      <Step title="منطقهٔ نقطهٔ پایانی خود را انتخاب کنید">
-        | انتخاب احراز هویت           | نقطهٔ پایانی                            | منطقه       |
-        | ------------------------------ | ------------------------------------------ | ------------ |
-        | `stepfun-plan-api-key-intl` | `https://api.stepfun.ai/step_plan/v1`  | بین‌المللی  |
+      <Step title="منطقه نقطه پایانی را انتخاب کنید">
+        | گزینه احراز هویت                 | نقطه پایانی                                | منطقه        |
+        | ------------------------------ | ------------------------------------------ | -------------- |
+        | `stepfun-plan-api-key-intl` | `https://api.stepfun.ai/step_plan/v1`  | بین‌المللی |
         | `stepfun-plan-api-key-cn`   | `https://api.stepfun.com/step_plan/v1` | چین          |
       </Step>
       <Step title="راه‌اندازی اولیه را اجرا کنید">
@@ -113,19 +114,19 @@ Step Plan (`stepfun-plan`):
         openclaw onboard --auth-choice stepfun-plan-api-key-intl
         ```
 
-        نقطهٔ پایانی چین:
+        نقطه پایانی چین:
 
         ```bash
         openclaw onboard --auth-choice stepfun-plan-api-key-cn
         ```
       </Step>
-      <Step title="روش جایگزین غیرتعاملی">
+      <Step title="جایگزین غیرتعاملی">
         ```bash
         openclaw onboard --auth-choice stepfun-plan-api-key-intl \
           --stepfun-api-key "$STEPFUN_API_KEY"
         ```
       </Step>
-      <Step title="در دسترس بودن مدل‌ها را تأیید کنید">
+      <Step title="در دسترس بودن مدل‌ها را بررسی کنید">
         ```bash
         openclaw models list --provider stepfun-plan
         ```
@@ -138,12 +139,12 @@ Step Plan (`stepfun-plan`):
   </Tab>
 </Tabs>
 
-یک جریان احراز هویت واحد، نمایه‌های منطبق با منطقه را برای هر دو ارائه‌دهندهٔ `stepfun` و `stepfun-plan` می‌نویسد؛ بنابراین پس از یک‌بار اجرای راه‌اندازی اولیه، هر دو سطح با هم شناسایی می‌شوند.
+یک جریان احراز هویت واحد، پروفایل‌های منطبق با منطقه را برای هر دو `stepfun` و `stepfun-plan` می‌نویسد؛ بنابراین پس از یک بار اجرای راه‌اندازی اولیه، هر دو سطح با هم شناسایی می‌شوند.
 
 ## پیکربندی پیشرفته
 
 <AccordionGroup>
-  <Accordion title="پیکربندی کامل: ارائه‌دهندهٔ استاندارد">
+  <Accordion title="پیکربندی کامل: ارائه‌دهنده استاندارد">
     ```json5
     {
       env: { STEPFUN_API_KEY: "your-key" },
@@ -165,26 +166,6 @@ Step Plan (`stepfun-plan`):
                 cost: { input: 0.2, output: 1.15, cacheRead: 0.04, cacheWrite: 0 },
                 contextWindow: 262144,
                 maxTokens: 262144,
-                compat: {
-                  supportsStore: false,
-                  supportsDeveloperRole: false,
-                  supportsUsageInStreaming: false,
-                  supportsReasoningEffort: true,
-                  supportsStrictMode: false,
-                  supportedReasoningEfforts: ["low", "medium", "high"],
-                  maxTokensField: "max_tokens",
-                  reasoningEffortMap: {
-                    off: "low",
-                    none: "low",
-                    minimal: "low",
-                    low: "low",
-                    medium: "medium",
-                    high: "high",
-                    xhigh: "high",
-                    adaptive: "high",
-                    max: "high",
-                  },
-                },
               },
               {
                 id: "step-3.5-flash",
@@ -203,7 +184,7 @@ Step Plan (`stepfun-plan`):
     ```
   </Accordion>
 
-  <Accordion title="پیکربندی کامل: ارائه‌دهندهٔ Step Plan">
+  <Accordion title="پیکربندی کامل: ارائه‌دهنده Step Plan">
     ```json5
     {
       env: { STEPFUN_API_KEY: "your-key" },
@@ -225,26 +206,6 @@ Step Plan (`stepfun-plan`):
                 cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
                 contextWindow: 262144,
                 maxTokens: 262144,
-                compat: {
-                  supportsStore: false,
-                  supportsDeveloperRole: false,
-                  supportsUsageInStreaming: false,
-                  supportsReasoningEffort: true,
-                  supportsStrictMode: false,
-                  supportedReasoningEfforts: ["low", "medium", "high"],
-                  maxTokensField: "max_tokens",
-                  reasoningEffortMap: {
-                    off: "low",
-                    none: "low",
-                    minimal: "low",
-                    low: "low",
-                    medium: "medium",
-                    high: "high",
-                    xhigh: "high",
-                    adaptive: "high",
-                    max: "high",
-                  },
-                },
               },
               {
                 id: "step-3.5-flash",
@@ -273,8 +234,8 @@ Step Plan (`stepfun-plan`):
   </Accordion>
 
   <Accordion title="نکات">
-    - `step-3.7-flash` از طریق OpenClaw ورودی متن و تصویر را می‌پذیرد. API متعلق به StepFun از ویدئو نیز پشتیبانی می‌کند، اما ویدئو هنوز یکی از شیوه‌های ورودی مدل در OpenClaw نیست.
-    - Step 3.7 از سطح تلاش استدلال `low`، `medium` و `high` پشتیبانی می‌کند. ازآنجاکه این مدل حالت بدون استدلال ندارد، `/think off` به `low` نگاشت می‌شود.
+    - `step-3.7-flash` از ورودی متن و تصویر از طریق OpenClaw پشتیبانی می‌کند. API متعلق به StepFun از ویدئو نیز پشتیبانی می‌کند، اما ویدئو هنوز یکی از حالت‌های ورودی مدل در OpenClaw نیست.
+    - Step 3.7 از تلاش استدلال `low`، `medium` و `high` پشتیبانی می‌کند. چون مدل حالت بدون استدلال ندارد، `/think off` به `low` نگاشت می‌شود.
     - `step-3.5-flash-2603` در حال حاضر فقط در `stepfun-plan` ارائه می‌شود.
     - برای بررسی یا تغییر مدل‌ها از `openclaw models list` و `openclaw models set <provider/model>` استفاده کنید.
 
@@ -285,13 +246,13 @@ Step Plan (`stepfun-plan`):
 
 <CardGroup cols={2}>
   <Card title="ارائه‌دهندگان مدل" href="/fa/concepts/model-providers" icon="layers">
-    نمای کلی همهٔ ارائه‌دهندگان، ارجاع‌های مدل و رفتار تغییر مسیر هنگام خرابی.
+    نمای کلی همه ارائه‌دهندگان، ارجاع‌های مدل و رفتار جابه‌جایی هنگام خرابی.
   </Card>
   <Card title="مرجع پیکربندی" href="/fa/gateway/configuration-reference" icon="gear">
-    طرح‌وارهٔ کامل پیکربندی برای ارائه‌دهندگان، مدل‌ها و Pluginها.
+    طرح‌واره کامل پیکربندی برای ارائه‌دهندگان، مدل‌ها و pluginها.
   </Card>
   <Card title="CLI مدل‌ها" href="/fa/concepts/models" icon="brain">
-    نحوهٔ انتخاب و پیکربندی مدل‌ها.
+    نحوه انتخاب و پیکربندی مدل‌ها.
   </Card>
   <Card title="پلتفرم StepFun" href="https://platform.stepfun.com" icon="globe">
     مدیریت کلید API و مستندات StepFun.

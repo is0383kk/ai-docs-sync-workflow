@@ -4,27 +4,28 @@ read_when:
 summary: OpenClaw'a SGLang model sağlayıcısı desteği ekler.
 title: SGLang Plugin'i
 x-i18n:
-    generated_at: "2026-07-12T12:03:25Z"
+    generated_at: "2026-07-27T00:12:31Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: e69fda19cbf93e1a1a1a6160419bc7296930a58813b5b443c4018db58df0a611
+    source_hash: bfb586c08e6729c6b8a3bcf2487ef614c8d428bf6cdd9ba4aa74285ba2d2099e
     source_path: plugins/reference/sglang.md
     workflow: 16
 ---
 
-# SGLang Plugin'i
+# SGLang plugin’i
 
-OpenClaw'a SGLang model sağlayıcısı desteği ekler.
+OpenClaw’a SGLang model sağlayıcısı desteği ekler.
 
 ## Dağıtım
 
 - Paket: `@openclaw/sglang-provider`
-- Kurulum yolu: OpenClaw'a dahildir
+- Kurulum yolu: OpenClaw’a dahildir
 
-## Kapsam
+## Yüzey
 
-sağlayıcılar: sglang
+sağlayıcılar: `sglang`
 
 ## İlgili belgeler
 

@@ -1,68 +1,66 @@
 ---
 read_when:
-    - Cấu hình một Plugin kênh (xác thực, kiểm soát truy cập, nhiều tài khoản)
-    - Khắc phục sự cố các khóa cấu hình theo từng kênh
-    - Kiểm tra chính sách DM, chính sách nhóm hoặc cơ chế kiểm soát lượt nhắc đến
-summary: 'Cấu hình kênh: kiểm soát truy cập, ghép nối, khóa theo từng kênh trên Slack, Discord, Telegram, WhatsApp, Matrix, iMessage và nhiều nền tảng khác'
-title: Cấu hình — kênh
+    - Cấu hình Plugin kênh (xác thực, kiểm soát truy cập, đa tài khoản)
+    - Khắc phục sự cố với các khóa cấu hình theo từng kênh
+    - Kiểm tra chính sách DM, chính sách nhóm hoặc cơ chế kiểm soát lượt đề cập
+summary: 'Cấu hình kênh: kiểm soát truy cập, ghép nối, khóa riêng cho từng kênh trên Slack, Discord, Telegram, WhatsApp, Matrix, iMessage và nhiều nền tảng khác'
+title: Cấu hình — các kênh
 x-i18n:
-    generated_at: "2026-07-01T13:10:45Z"
-    model: gpt-5.5
+    generated_at: "2026-07-20T04:25:21Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: ba84406a296db7a37ce44381b5a1ebccd7f4d3c32375b116f6da3da5def9340b
+    source_hash: e1c32077ec770c04bdf3c49aa187572a271a954bccec7b31fef776f768a6ed9b
     source_path: gateway/config-channels.md
     workflow: 16
 ---
 
-Các khóa cấu hình theo kênh bên dưới `channels.*`. Bao gồm quyền truy cập DM và nhóm,
-thiết lập nhiều tài khoản, kiểm soát bằng lượt nhắc, và các khóa theo kênh cho Slack, Discord,
-Telegram, WhatsApp, Matrix, iMessage, và các Plugin kênh đi kèm khác.
+Các khóa cấu hình theo từng kênh trong `channels.*`: quyền truy cập DM và nhóm, thiết lập nhiều tài khoản, kiểm soát bằng lượt nhắc đến và các khóa theo từng kênh cho Slack, Discord, Telegram, WhatsApp, Matrix, iMessage cùng các plugin kênh khác.
 
-Đối với tác nhân, công cụ, thời gian chạy Gateway và các khóa cấp cao khác, xem
-[Tham chiếu cấu hình](/vi/gateway/configuration-reference).
+Đối với agent, công cụ, runtime Gateway và các khóa cấp cao nhất khác, hãy xem [Tham chiếu cấu hình](/vi/gateway/configuration-reference).
 
 ## Kênh
 
-Mỗi kênh tự động khởi động khi phần cấu hình của kênh đó tồn tại (trừ khi `enabled: false`).
+Mỗi kênh tự động khởi động khi phần cấu hình của kênh đó tồn tại (trừ khi `enabled: false`). Telegram và iMessage được cung cấp trong gói `openclaw` cốt lõi. Các kênh chính thức khác (Discord, Slack, WhatsApp, Matrix, Microsoft Teams, IRC, Google Chat, Signal, Mattermost và nhiều kênh khác) được cài đặt dưới dạng các plugin riêng biệt bằng `openclaw plugins install <spec>`; xem [Kênh](/vi/channels) để biết danh sách đầy đủ và thông số cài đặt.
 
 ### Quyền truy cập DM và nhóm
 
-Tất cả kênh đều hỗ trợ chính sách DM và chính sách nhóm:
+Tất cả các kênh đều hỗ trợ chính sách DM và chính sách nhóm:
 
-| Chính sách DM        | Hành vi                                                        |
-| -------------------- | -------------------------------------------------------------- |
-| `pairing` (mặc định) | Người gửi lạ nhận mã ghép đôi một lần; chủ sở hữu phải phê duyệt |
-| `allowlist`          | Chỉ người gửi trong `allowFrom` (hoặc kho cho phép đã ghép đôi) |
-| `open`               | Cho phép mọi DM gửi đến (yêu cầu `allowFrom: ["*"]`)           |
-| `disabled`           | Bỏ qua mọi DM gửi đến                                          |
+| Chính sách DM           | Hành vi                                                        |
+| ------------------- | --------------------------------------------------------------- |
+| `pairing` (mặc định) | Người gửi không xác định nhận được mã ghép đôi dùng một lần; chủ sở hữu phải phê duyệt |
+| `allowlist`         | Chỉ những người gửi trong `allowFrom` (hoặc kho danh sách cho phép đã ghép đôi)             |
+| `open`              | Cho phép tất cả DM gửi đến (yêu cầu `allowFrom: ["*"]`)             |
+| `disabled`          | Bỏ qua tất cả DM gửi đến                                          |
 
-| Chính sách nhóm        | Hành vi                                                |
-| ---------------------- | ------------------------------------------------------ |
-| `allowlist` (mặc định) | Chỉ các nhóm khớp với danh sách cho phép đã cấu hình   |
-| `open`                 | Bỏ qua danh sách cho phép của nhóm (vẫn áp dụng kiểm soát bằng lượt nhắc) |
-| `disabled`             | Chặn mọi tin nhắn nhóm/phòng                           |
+| Chính sách nhóm          | Hành vi                                               |
+| --------------------- | ------------------------------------------------------ |
+| `allowlist` (mặc định) | Chỉ các nhóm khớp với danh sách cho phép đã cấu hình          |
+| `open`                | Bỏ qua danh sách cho phép của nhóm (kiểm soát bằng lượt nhắc đến vẫn được áp dụng) |
+| `disabled`            | Chặn tất cả tin nhắn nhóm/phòng                          |
 
 <Note>
 `channels.defaults.groupPolicy` đặt giá trị mặc định khi `groupPolicy` của nhà cung cấp chưa được đặt.
-Mã ghép đôi hết hạn sau 1 giờ. Các yêu cầu ghép đôi DM đang chờ được giới hạn ở **3 cho mỗi kênh**.
-Nếu toàn bộ khối nhà cung cấp bị thiếu (`channels.<provider>` không có), chính sách nhóm khi chạy sẽ quay về `allowlist` (đóng khi lỗi) kèm cảnh báo lúc khởi động.
+Mã ghép đôi hết hạn sau 1 giờ. Số yêu cầu ghép đôi đang chờ được giới hạn ở **3 yêu cầu cho mỗi tài khoản** (phạm vi theo kênh và mã định danh tài khoản).
+Nếu thiếu hoàn toàn khối nhà cung cấp (không có `channels.<provider>`), chính sách nhóm của runtime sẽ chuyển về `allowlist` (đóng khi lỗi) kèm cảnh báo khi khởi động.
 </Note>
 
 ### Ghi đè mô hình theo kênh
 
-Dùng `channels.modelByChannel` để ghim ID kênh cụ thể hoặc đối tác nhắn tin trực tiếp vào một mô hình. Giá trị chấp nhận `provider/model` hoặc bí danh mô hình đã cấu hình. Ánh xạ kênh áp dụng khi một phiên chưa có ghi đè mô hình (ví dụ, được đặt qua `/model`).
+Dùng `channels.modelByChannel` để ghim các mã định danh kênh cụ thể hoặc đối tác nhắn tin trực tiếp vào một mô hình. Giá trị chấp nhận `provider/model` hoặc bí danh mô hình đã cấu hình. Ánh xạ kênh chỉ áp dụng khi phiên chưa có ghi đè mô hình đang hoạt động (ví dụ: ghi đè được đặt qua `/model`).
 
-Đối với cuộc trò chuyện nhóm/luồng, khóa là ID nhóm, ID chủ đề, hoặc tên kênh theo từng kênh. Đối với cuộc trò chuyện nhắn tin trực tiếp (DM), khóa là định danh đối tác được dẫn xuất từ danh tính người gửi của kênh (`nativeDirectUserId`, `origin.from`, `origin.to`, `OriginatingTo`, `From`, hoặc `SenderId`). Dạng khóa chính xác phụ thuộc vào kênh:
+Đối với cuộc trò chuyện nhóm/luồng, các khóa là mã định danh nhóm, mã định danh chủ đề hoặc tên kênh dành riêng cho từng kênh. Đối với cuộc trò chuyện bằng tin nhắn trực tiếp (DM), các khóa là mã định danh đối tác được lấy từ danh tính người gửi của kênh (`nativeDirectUserId`, `origin.from`, `origin.to`, `OriginatingTo`, `From` hoặc `SenderId`). Dạng khóa chính xác phụ thuộc vào kênh:
 
-| Kênh     | Dạng khóa DM         | Ví dụ                                        |
-| -------- | -------------------- | -------------------------------------------- |
-| Slack    | `user:U...`          | `user:U12345`                                |
-| Telegram | ID người dùng thô    | `123456789`                                  |
-| Discord  | ID người dùng thô    | `987654321`                                  |
-| WhatsApp | số điện thoại hoặc JID | `15551234567`                              |
-| Matrix   | ID người dùng Matrix | `@user:matrix.org`                           |
-| Feishu   | `feishu:ou_...`      | `feishu:ou_a8b6cab7e945387de5f253775d9b4d85` |
+| Kênh  | Dạng khóa DM         | Ví dụ                                      |
+| -------- | ------------------- | -------------------------------------------- |
+| Discord  | mã định danh người dùng thô         | `987654321`                                  |
+| Feishu   | `feishu:ou_...`     | `feishu:ou_a8b6cab7e945387de5f253775d9b4d85` |
+| Matrix   | mã định danh người dùng Matrix      | `@user:matrix.org`                           |
+| Slack    | `user:U...`         | `user:U12345`                                |
+| Telegram | mã định danh người dùng thô         | `123456789`                                  |
+| WhatsApp | số điện thoại hoặc JID | `15551234567`                                |
 
 ```json5
 {
@@ -72,7 +70,7 @@ Dùng `channels.modelByChannel` để ghim ID kênh cụ thể hoặc đối tá
         "123456789012345678": "anthropic/claude-opus-4-6",
       },
       slack: {
-        C1234567890: "openai/gpt-5.5",
+        C1234567890: "openai/gpt-5.6-sol",
         "user:U12345": "openai/gpt-5.4-mini",
       },
       telegram: {
@@ -85,11 +83,11 @@ Dùng `channels.modelByChannel` để ghim ID kênh cụ thể hoặc đối tá
 }
 ```
 
-Khóa dành riêng cho DM chỉ khớp trong các cuộc trò chuyện nhắn tin trực tiếp; chúng không ảnh hưởng đến định tuyến nhóm/luồng.
+Các khóa dành riêng cho DM chỉ khớp trong cuộc trò chuyện bằng tin nhắn trực tiếp; chúng không ảnh hưởng đến việc định tuyến nhóm/luồng.
 
-### Mặc định kênh và Heartbeat
+### Giá trị mặc định của kênh và Heartbeat
 
-Dùng `channels.defaults` cho chính sách nhóm dùng chung và hành vi Heartbeat trên nhiều nhà cung cấp:
+Dùng `channels.defaults` cho chính sách nhóm, lượt nhắc đến ngầm định và hành vi Heartbeat dùng chung giữa các nhà cung cấp:
 
 ```json5
 {
@@ -97,6 +95,11 @@ Dùng `channels.defaults` cho chính sách nhóm dùng chung và hành vi Heartb
     defaults: {
       groupPolicy: "allowlist", // open | allowlist | disabled
       contextVisibility: "all", // all | allowlist | allowlist_quote
+      implicitMentions: {
+        replyToBot: true,
+        quotedBot: true,
+        threadParticipation: true,
+      },
       heartbeat: {
         showOk: false,
         showAlerts: true,
@@ -107,40 +110,28 @@ Dùng `channels.defaults` cho chính sách nhóm dùng chung và hành vi Heartb
 }
 ```
 
-- `channels.defaults.groupPolicy`: chính sách nhóm dự phòng khi `groupPolicy` cấp nhà cung cấp chưa được đặt.
-- `channels.defaults.contextVisibility`: chế độ hiển thị ngữ cảnh bổ sung mặc định cho tất cả kênh. Giá trị: `all` (mặc định, bao gồm mọi ngữ cảnh trích dẫn/luồng/lịch sử), `allowlist` (chỉ bao gồm ngữ cảnh từ người gửi trong danh sách cho phép), `allowlist_quote` (giống allowlist nhưng giữ ngữ cảnh trích dẫn/trả lời rõ ràng). Ghi đè theo kênh: `channels.<channel>.contextVisibility`.
-- `channels.defaults.heartbeat.showOk`: bao gồm trạng thái kênh khỏe mạnh trong đầu ra Heartbeat.
-- `channels.defaults.heartbeat.showAlerts`: bao gồm trạng thái suy giảm/lỗi trong đầu ra Heartbeat.
-- `channels.defaults.heartbeat.useIndicator`: hiển thị đầu ra Heartbeat kiểu chỉ báo gọn.
+- `channels.defaults.groupPolicy`: chính sách nhóm dự phòng khi `groupPolicy` ở cấp nhà cung cấp chưa được đặt.
+- `channels.defaults.contextVisibility`: chế độ hiển thị ngữ cảnh bổ sung mặc định cho tất cả các kênh. Giá trị: `all` (mặc định, bao gồm toàn bộ ngữ cảnh trích dẫn/luồng/lịch sử), `allowlist` (chỉ bao gồm ngữ cảnh từ người gửi trong danh sách cho phép), `allowlist_quote` (giống danh sách cho phép nhưng giữ lại ngữ cảnh trích dẫn/trả lời rõ ràng). Ghi đè theo từng kênh: `channels.<channel>.contextVisibility`.
+- `channels.defaults.implicitMentions`: kiểm soát những dữ kiện gửi đến được hỗ trợ nào được tính là lượt nhắc đến. `replyToBot`, `quotedBot` và `threadParticipation` đều mặc định là `true`, duy trì hành vi hiện tại. Ghi đè theo từng kênh bằng `channels.<channel>.implicitMentions` hoặc theo từng tài khoản bằng `channels.<channel>.accounts.<id>.implicitMentions`; mỗi cờ được phân giải độc lập theo thứ tự tài khoản -> kênh -> giá trị mặc định. Tên cờ mang nghĩa khẳng định: đặt cờ thành `false` để ngăn dữ kiện đó bỏ qua cơ chế kiểm soát bằng lượt nhắc đến. Các lượt nhắc đến tường minh nguyên bản luôn được cho phép và cờ không có tác dụng khi kênh không tạo ra dữ kiện đó. Xem [Kiểm soát bằng lượt nhắc đến](/vi/channels/groups#mention-gating-default) để biết ma trận nguồn tạo hiện tại. Các thiết lập này không thay đổi chế độ trả lời/luồng gửi đi hoặc việc xử lý lệnh được ủy quyền.
+- `channels.defaults.heartbeat.showOk`: bao gồm trạng thái kênh bình thường trong đầu ra Heartbeat (mặc định `false`).
+- `channels.defaults.heartbeat.showAlerts`: bao gồm trạng thái suy giảm/lỗi trong đầu ra Heartbeat (mặc định `true`).
+- `channels.defaults.heartbeat.useIndicator`: hiển thị đầu ra Heartbeat kiểu chỉ báo nhỏ gọn (mặc định `true`).
 
 ### WhatsApp
 
-WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động khởi động khi tồn tại một phiên đã liên kết.
+WhatsApp chạy qua kênh web của Gateway (Baileys Web). Kênh tự động khởi động khi tồn tại một phiên đã liên kết.
 
 ```json5
 {
   web: {
     enabled: true,
-    heartbeatSeconds: 60,
-    whatsapp: {
-      keepAliveIntervalMs: 25000,
-      connectTimeoutMs: 60000,
-      defaultQueryTimeoutMs: 60000,
-    },
-    reconnect: {
-      initialMs: 2000,
-      maxMs: 120000,
-      factor: 1.4,
-      jitter: 0.2,
-      maxAttempts: 0,
-    },
   },
   channels: {
     whatsapp: {
       dmPolicy: "pairing", // pairing | allowlist | open | disabled
       allowFrom: ["+15555550123", "+447700900123"],
       textChunkLimit: 4000,
-      chunkMode: "length", // length | newline
+      streaming: { chunkMode: "length" }, // length | newline
       mediaMaxMb: 50,
       sendReadReceipts: true, // blue ticks (false in self-chat mode)
       groups: {
@@ -153,7 +144,7 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
 }
 ```
 
-- Các mục `bindings[]` cấp cao nhất với `type: "acp"` cấu hình liên kết ACP bền vững cho DM và nhóm WhatsApp. Dùng số trực tiếp E.164 hoặc JID nhóm WhatsApp trong `match.peer.id`. Ngữ nghĩa trường được chia sẻ trong [Tác nhân ACP](/vi/tools/acp-agents#persistent-channel-bindings).
+- Các mục `bindings[]` cấp cao nhất có `type: "acp"` cấu hình liên kết ACP lâu dài cho DM và nhóm WhatsApp. Dùng số trực tiếp theo chuẩn E.164 hoặc JID nhóm WhatsApp trong `match.peer.id`. Ngữ nghĩa trường được dùng chung trong [Agent ACP](/vi/tools/acp-agents#persistent-channel-bindings).
 
 <Accordion title="WhatsApp nhiều tài khoản">
 
@@ -173,10 +164,10 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
 }
 ```
 
-- Lệnh gửi ra mặc định dùng tài khoản `default` nếu có; nếu không thì dùng id tài khoản đã cấu hình đầu tiên (đã sắp xếp).
-- `channels.whatsapp.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định dự phòng đó khi khớp với một id tài khoản đã cấu hình.
-- Thư mục xác thực Baileys một tài khoản cũ được `openclaw doctor` di chuyển vào `whatsapp/default`.
-- Ghi đè theo tài khoản: `channels.whatsapp.accounts.<id>.sendReadReceipts`, `channels.whatsapp.accounts.<id>.dmPolicy`, `channels.whatsapp.accounts.<id>.allowFrom`.
+- Các lệnh gửi đi mặc định dùng tài khoản `default` nếu có; nếu không, dùng mã định danh tài khoản được cấu hình đầu tiên (sau khi sắp xếp).
+- `channels.whatsapp.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định dự phòng đó khi khớp với một mã định danh tài khoản đã cấu hình.
+- Thư mục xác thực Baileys một tài khoản kiểu cũ được `openclaw doctor` di chuyển vào `whatsapp/default`.
+- Ghi đè theo từng tài khoản: `channels.whatsapp.accounts.<id>.sendReadReceipts`, `channels.whatsapp.accounts.<id>.dmPolicy`, `channels.whatsapp.accounts.<id>.allowFrom`.
 
 </Accordion>
 
@@ -211,7 +202,7 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
       historyLimit: 50,
       replyToMode: "first", // off | first | all | batched
       linkPreview: true,
-      streaming: "partial", // off | partial | block | progress (default: partial)
+      streaming: { mode: "partial" }, // off | partial | block | progress (default: partial)
       actions: { reactions: true, sendMessage: true },
       reactionNotifications: "own", // off | own | all
       mediaMaxMb: 100,
@@ -226,6 +217,7 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
         dnsResultOrder: "ipv4first",
       },
       apiRoot: "https://api.telegram.org",
+      trustedLocalFileRoots: ["/srv/telegram-bot-api-data"],
       proxy: "socks5://localhost:9050",
       webhookUrl: "https://example.com/telegram-webhook",
       webhookSecret: "secret",
@@ -235,13 +227,15 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
 }
 ```
 
-- Token bot: `channels.telegram.botToken` hoặc `channels.telegram.tokenFile` (chỉ tệp thông thường; từ chối symlink), với `TELEGRAM_BOT_TOKEN` làm dự phòng cho tài khoản mặc định.
-- `apiRoot` chỉ là gốc Telegram Bot API. Dùng `https://api.telegram.org` hoặc gốc tự lưu trữ/proxy của bạn, không dùng `https://api.telegram.org/bot<TOKEN>`; `openclaw doctor --fix` xóa hậu tố `/bot<TOKEN>` vô tình ở cuối.
-- `channels.telegram.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với một id tài khoản đã cấu hình.
-- Trong thiết lập nhiều tài khoản (từ 2 id tài khoản trở lên), đặt mặc định rõ ràng (`channels.telegram.defaultAccount` hoặc `channels.telegram.accounts.default`) để tránh định tuyến dự phòng; `openclaw doctor` cảnh báo khi mục này bị thiếu hoặc không hợp lệ.
-- `configWrites: false` chặn các thao tác ghi cấu hình do Telegram khởi tạo (di chuyển ID supergroup, `/config set|unset`).
-- Các mục `bindings[]` cấp cao nhất với `type: "acp"` cấu hình liên kết ACP bền vững cho chủ đề diễn đàn (dùng `chatId:topic:topicId` chuẩn trong `match.peer.id`). Ngữ nghĩa trường được chia sẻ trong [Tác nhân ACP](/vi/tools/acp-agents#persistent-channel-bindings).
+- Token bot: `channels.telegram.botToken` hoặc `channels.telegram.tokenFile` (chỉ tệp thông thường; liên kết tượng trưng bị từ chối), với `TELEGRAM_BOT_TOKEN` làm giá trị dự phòng cho tài khoản mặc định.
+- `apiRoot` chỉ là gốc Telegram Bot API. Dùng `https://api.telegram.org` hoặc gốc tự lưu trữ/proxy của bạn, không dùng `https://api.telegram.org/bot<TOKEN>`; `openclaw doctor --fix` loại bỏ hậu tố `/bot<TOKEN>` vô tình nằm ở cuối.
+- Đối với máy chủ Bot API tự lưu trữ ở chế độ `--local`, `trustedLocalFileRoots` liệt kê các đường dẫn máy chủ mà OpenClaw có thể đọc. Gắn volume dữ liệu máy chủ trên máy chủ OpenClaw và cấu hình thư mục gốc dữ liệu hoặc thư mục theo từng token; các đường dẫn container trong `/var/lib/telegram-bot-api` được ánh xạ vào các thư mục gốc đó. Các đường dẫn tuyệt đối khác vẫn bị từ chối.
+- `channels.telegram.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với một mã định danh tài khoản đã cấu hình.
+- Trong thiết lập nhiều tài khoản (từ 2 mã định danh tài khoản trở lên), hãy đặt rõ tài khoản mặc định (`channels.telegram.defaultAccount` hoặc `channels.telegram.accounts.default`) để tránh định tuyến dự phòng; `openclaw doctor` cảnh báo khi thiết lập này bị thiếu hoặc không hợp lệ.
+- `configWrites: false` chặn các thao tác ghi cấu hình do Telegram khởi tạo (di chuyển mã định danh siêu nhóm, `/config set|unset`).
+- Các mục `bindings[]` cấp cao nhất có `type: "acp"` cấu hình liên kết ACP lâu dài cho các chủ đề diễn đàn (dùng `chatId:topic:topicId` chuẩn trong `match.peer.id`). Ngữ nghĩa trường được dùng chung trong [Agent ACP](/vi/tools/acp-agents#persistent-channel-bindings).
 - Bản xem trước luồng Telegram dùng `sendMessage` + `editMessageText` (hoạt động trong cuộc trò chuyện trực tiếp và nhóm).
+- `network.dnsResultOrder` mặc định là `"ipv4first"` để tránh các lỗi truy xuất IPv6 thường gặp.
 - Chính sách thử lại: xem [Chính sách thử lại](/vi/concepts/retry).
 
 ### Discord
@@ -289,7 +283,7 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
               requireMention: true,
               users: ["987654321098765432"],
               skills: ["docs"],
-              systemPrompt: "Short answers only.",
+              systemPrompt: "Chỉ trả lời ngắn gọn.",
             },
           },
         },
@@ -297,9 +291,9 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
       historyLimit: 20,
       textChunkLimit: 2000,
       suppressEmbeds: true,
-      chunkMode: "length", // length | newline
       streaming: {
-        mode: "progress", // off | partial | block | progress (Discord default: progress)
+        mode: "progress", // off | partial | block | progress (mặc định của Discord: progress)
+        chunkMode: "length", // length | newline
         progress: {
           label: "auto",
           maxLines: 8,
@@ -357,44 +351,45 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
 ```
 
 - Token: `channels.discord.token`, với `DISCORD_BOT_TOKEN` làm phương án dự phòng cho tài khoản mặc định.
-- Các lệnh gọi đi trực tiếp cung cấp `token` Discord rõ ràng sẽ dùng token đó cho lệnh gọi; thiết lập thử lại/chính sách của tài khoản vẫn lấy từ tài khoản đã chọn trong ảnh chụp runtime đang hoạt động.
-- `channels.discord.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với một id tài khoản đã cấu hình.
-- Dùng `user:<id>` (DM) hoặc `channel:<id>` (kênh guild) cho mục tiêu gửi; ID số trần sẽ bị từ chối.
-- Slug guild dùng chữ thường và thay khoảng trắng bằng `-`; khóa kênh dùng tên đã slug hóa (không có `#`). Nên ưu tiên ID guild.
-- Tin nhắn do bot tạo bị bỏ qua theo mặc định. `allowBots: true` bật các tin nhắn đó; dùng `allowBots: "mentions"` để chỉ chấp nhận tin nhắn bot có nhắc đến bot (tin nhắn của chính bot vẫn bị lọc).
-- Các kênh hỗ trợ tin nhắn vào do bot tạo có thể dùng [bảo vệ vòng lặp bot](/vi/channels/bot-loop-protection) chung. Đặt `channels.defaults.botLoopProtection` cho ngân sách cặp nền tảng, rồi chỉ ghi đè kênh hoặc tài khoản khi một bề mặt cần giới hạn khác.
-- `channels.discord.guilds.<id>.ignoreOtherMentions` (và ghi đè kênh) loại bỏ tin nhắn có nhắc đến người dùng hoặc vai trò khác nhưng không nhắc đến bot (ngoại trừ @everyone/@here).
-- `channels.discord.mentionAliases` ánh xạ văn bản `@handle` gửi đi ổn định sang ID người dùng Discord trước khi gửi, để có thể nhắc đến đồng đội đã biết một cách xác định ngay cả khi bộ nhớ đệm thư mục tạm thời trống. Ghi đè theo tài khoản nằm dưới `channels.discord.accounts.<accountId>.mentionAliases`.
-- `maxLinesPerMessage` (mặc định 17) tách các tin nhắn cao ngay cả khi dưới 2000 ký tự.
-- `channels.discord.suppressEmbeds` mặc định là `true`, nên URL gửi đi sẽ không mở rộng thành bản xem trước liên kết Discord trừ khi bị tắt. Payload `embeds` rõ ràng vẫn gửi bình thường; lệnh gọi công cụ theo từng tin nhắn có thể ghi đè bằng `suppressEmbeds`.
-- `channels.discord.threadBindings` kiểm soát định tuyến gắn với thread của Discord:
-  - `enabled`: ghi đè Discord cho các tính năng phiên gắn với thread (`/focus`, `/unfocus`, `/agents`, `/session idle`, `/session max-age`, và gửi/định tuyến đã ràng buộc)
-  - `idleHours`: ghi đè Discord cho tự động bỏ focus do không hoạt động, tính bằng giờ (`0` sẽ tắt)
-  - `maxAgeHours`: ghi đè Discord cho tuổi tối đa cứng, tính bằng giờ (`0` sẽ tắt)
-  - `spawnSessions`: công tắc cho `sessions_spawn({ thread: true })` và tạo/ràng buộc thread tự động khi ACP spawn thread (mặc định: `true`)
-  - `defaultSpawnContext`: ngữ cảnh subagent gốc cho các spawn gắn với thread (mặc định là `"fork"`)
-- Các mục `bindings[]` cấp cao nhất với `type: "acp"` cấu hình các ràng buộc ACP bền vững cho kênh và thread (dùng id kênh/thread trong `match.peer.id`). Ngữ nghĩa trường được dùng chung trong [ACP Agents](/vi/tools/acp-agents#persistent-channel-bindings).
-- `channels.discord.ui.components.accentColor` đặt màu nhấn cho container thành phần Discord v2.
-- `channels.discord.agentComponents.ttlMs` kiểm soát thời gian các callback thành phần Discord đã gửi còn được đăng ký. Mặc định là `1800000` (30 phút), tối đa là `86400000` (24 giờ), và ghi đè theo tài khoản nằm dưới `channels.discord.accounts.<accountId>.agentComponents.ttlMs`. Giá trị dài hơn giữ cho các nút/chọn/biểu mẫu cũ dùng được lâu hơn, nên ưu tiên TTL ngắn nhất phù hợp với workflow.
-- `channels.discord.voice` bật hội thoại kênh thoại Discord và ghi đè tự động tham gia + LLM + TTS tùy chọn. Cấu hình Discord chỉ văn bản mặc định tắt thoại; đặt `channels.discord.voice.enabled=true` để chọn bật.
-- `channels.discord.voice.model` tùy chọn ghi đè mô hình LLM dùng cho phản hồi kênh thoại Discord.
-- `channels.discord.voice.daveEncryption` và `channels.discord.voice.decryptionFailureTolerance` được chuyển tiếp tới tùy chọn DAVE của `@discordjs/voice` (mặc định là `true` và `24`).
-- `channels.discord.voice.connectTimeoutMs` kiểm soát thời gian chờ Ready ban đầu của `@discordjs/voice` cho các lần thử `/vc join` và tự động tham gia (mặc định là `30000`).
-- `channels.discord.voice.reconnectGraceMs` kiểm soát khoảng thời gian một phiên thoại đã ngắt kết nối có thể dùng để vào tín hiệu kết nối lại trước khi OpenClaw hủy phiên đó (mặc định là `15000`).
-- Phát lại thoại Discord không bị ngắt bởi sự kiện bắt đầu nói của người dùng khác. Để tránh vòng lặp phản hồi âm thanh, OpenClaw bỏ qua thu thoại mới khi TTS đang phát.
-- OpenClaw cũng cố gắng khôi phục nhận thoại bằng cách rời/tham gia lại một phiên thoại sau các lỗi giải mã lặp lại.
-- `channels.discord.streaming` là khóa chế độ stream chính tắc. Discord mặc định là `streaming.mode: "progress"` để tiến độ công cụ/công việc xuất hiện trong một tin nhắn xem trước được chỉnh sửa; đặt `streaming.mode: "off"` để tắt. Các giá trị `streamMode` cũ và `streaming` kiểu boolean vẫn là bí danh runtime; chạy `openclaw doctor --fix` để viết lại cấu hình đã lưu.
-- `channels.discord.autoPresence` ánh xạ trạng thái sẵn sàng của runtime sang hiện diện bot (healthy => online, degraded => idle, exhausted => dnd) và cho phép ghi đè văn bản trạng thái tùy chọn.
-- `channels.discord.dangerouslyAllowNameMatching` bật lại khớp tên/thẻ có thể thay đổi (chế độ tương thích phá kính).
-- `channels.discord.execApprovals`: gửi phê duyệt exec kiểu gốc Discord và ủy quyền người phê duyệt.
-  - `enabled`: `true`, `false`, hoặc `"auto"` (mặc định). Ở chế độ tự động, phê duyệt exec kích hoạt khi có thể phân giải người phê duyệt từ `approvers` hoặc `commands.ownerAllowFrom`.
-  - `approvers`: ID người dùng Discord được phép phê duyệt yêu cầu exec. Dự phòng về `commands.ownerAllowFrom` khi bị bỏ qua.
-  - `agentFilter`: danh sách cho phép ID agent tùy chọn. Bỏ qua để chuyển tiếp phê duyệt cho mọi agent.
-  - `sessionFilter`: mẫu khóa phiên tùy chọn (chuỗi con hoặc regex).
-  - `target`: nơi gửi lời nhắc phê duyệt. `"dm"` (mặc định) gửi tới DM của người phê duyệt, `"channel"` gửi tới kênh khởi nguồn, `"both"` gửi tới cả hai. Khi target bao gồm `"channel"`, các nút chỉ dùng được bởi người phê duyệt đã phân giải.
-  - `cleanupAfterResolve`: khi `true`, xóa DM phê duyệt sau khi phê duyệt, từ chối hoặc hết thời gian chờ.
+- Các lệnh gọi đi trực tiếp cung cấp rõ ràng Discord `token` sẽ sử dụng token đó cho lệnh gọi; các thiết lập thử lại/chính sách của tài khoản vẫn lấy từ tài khoản được chọn trong ảnh chụp nhanh runtime đang hoạt động.
+- `channels.discord.defaultAccount` tùy chọn ghi đè việc chọn tài khoản mặc định khi khớp với một ID tài khoản đã cấu hình.
+- Sử dụng `user:<id>` (DM) hoặc `channel:<id>` (kênh guild) làm đích gửi; các ID chỉ gồm số sẽ bị từ chối.
+- Slug của guild dùng chữ thường và thay dấu cách bằng `-`; khóa kênh sử dụng tên đã được chuyển thành slug (không có `#`). Nên ưu tiên ID guild.
+- Theo mặc định, các tin nhắn do bot tạo sẽ bị bỏ qua. `allowBots: true` bật chúng; sử dụng `allowBots: "mentions"` để chỉ chấp nhận các tin nhắn của bot có đề cập đến bot (tin nhắn của chính bot vẫn bị lọc).
+- Các kênh hỗ trợ tin nhắn đến do bot tạo có thể sử dụng cơ chế [bảo vệ vòng lặp bot](/vi/channels/bot-loop-protection) dùng chung. Đặt `channels.defaults.botLoopProtection` cho ngân sách cặp cơ sở, sau đó chỉ ghi đè ở cấp kênh hoặc tài khoản khi một bề mặt cần giới hạn khác.
+- `channels.discord.guilds.<id>.ignoreOtherMentions` (và các ghi đè của kênh) loại bỏ những tin nhắn đề cập đến người dùng hoặc vai trò khác nhưng không đề cập đến bot (không bao gồm @everyone/@here).
+- `channels.discord.mentionAliases` ánh xạ văn bản `@handle` ổn định ở đầu ra sang ID người dùng Discord trước khi gửi, nhờ đó có thể đề cập đến các đồng đội đã biết một cách xác định ngay cả khi bộ nhớ đệm thư mục tạm thời trống. Các ghi đè theo tài khoản nằm trong `channels.discord.accounts.<accountId>.mentionAliases`.
+- `maxLinesPerMessage` (mặc định `17`) chia nhỏ các tin nhắn dài theo chiều dọc ngay cả khi dưới 2000 ký tự.
+- `channels.discord.suppressEmbeds` mặc định là `true`, vì vậy các URL gửi đi không mở rộng thành bản xem trước liên kết Discord trừ khi bị tắt. Các payload `embeds` được chỉ định rõ vẫn gửi bình thường; các lệnh gọi công cụ theo từng tin nhắn có thể ghi đè bằng `suppressEmbeds`.
+- `channels.discord.threadBindings` kiểm soát định tuyến gắn với luồng Discord:
+  - `enabled`: ghi đè Discord cho các tính năng phiên gắn với luồng (`/focus`, `/unfocus`, `/agents`, `/session idle`, `/session max-age`, cùng việc gửi/định tuyến đã liên kết)
+  - `idleHours`: ghi đè Discord cho thời gian không hoạt động trước khi tự động bỏ tập trung, tính bằng giờ (`0` sẽ vô hiệu hóa)
+  - `maxAgeHours`: ghi đè Discord cho tuổi tối đa tuyệt đối, tính bằng giờ (`0` sẽ vô hiệu hóa)
+  - `spawnSessions`: công tắc cho `sessions_spawn({ thread: true })` và việc tự động tạo/liên kết luồng khi ACP tạo luồng con (mặc định: `true`)
+  - `defaultSpawnContext`: ngữ cảnh subagent gốc cho các lần tạo gắn với luồng (mặc định là `"fork"`)
+- Các mục `bindings[]` cấp cao nhất có `type: "acp"` cấu hình các liên kết ACP lâu dài cho kênh và luồng (sử dụng ID kênh/luồng trong `match.peer.id`). Ngữ nghĩa của các trường được dùng chung trong [Tác tử ACP](/vi/tools/acp-agents#persistent-channel-bindings).
+- `channels.discord.ui.components.accentColor` đặt màu nhấn cho các vùng chứa thành phần Discord v2.
+- `channels.discord.agentComponents.ttlMs` kiểm soát thời gian các callback của thành phần Discord đã gửi tiếp tục được đăng ký. Mặc định `1800000` (30 phút), tối đa `86400000` (24 giờ). Các ghi đè theo tài khoản nằm trong `channels.discord.accounts.<accountId>.agentComponents.ttlMs`. Nên dùng TTL ngắn nhất phù hợp với quy trình.
+- `channels.discord.voice` bật hội thoại trong kênh thoại Discord và các ghi đè tùy chọn cho tự động tham gia + LLM + TTS. Các cấu hình Discord chỉ dùng văn bản mặc định tắt thoại; đặt `channels.discord.voice.enabled=true` để bật.
+- `channels.discord.voice.model` tùy chọn ghi đè mô hình LLM được sử dụng cho phản hồi trong kênh thoại Discord.
+- `channels.discord.voice.daveEncryption` (mặc định `true`) và `channels.discord.voice.decryptionFailureTolerance` (mặc định `24`) được chuyển tiếp đến các tùy chọn DAVE của `@discordjs/voice`.
+- `channels.discord.voice.connectTimeoutMs` kiểm soát khoảng chờ Ready ban đầu của `@discordjs/voice` cho `/vc join` và các lần thử tự động tham gia (mặc định `30000`).
+- `channels.discord.voice.reconnectGraceMs` kiểm soát thời gian một phiên thoại bị ngắt kết nối được phép dùng để chuyển sang phát tín hiệu kết nối lại trước khi OpenClaw hủy phiên đó (mặc định `15000`).
+- Việc phát âm thanh thoại Discord không bị gián đoạn bởi sự kiện người dùng khác bắt đầu nói. Để tránh vòng lặp phản hồi âm thanh, OpenClaw bỏ qua việc thu âm thoại mới trong khi TTS đang phát.
+- OpenClaw cũng cố gắng khôi phục việc nhận thoại bằng cách rời khỏi rồi tham gia lại phiên thoại sau nhiều lần giải mã thất bại.
+- `channels.discord.streaming` là khóa chế độ luồng chuẩn. Discord mặc định dùng `streaming.mode: "progress"` để tiến trình công cụ/công việc xuất hiện trong một tin nhắn xem trước được chỉnh sửa; đặt `streaming.mode: "off"` để vô hiệu hóa. Các khóa phẳng cũ (`streamMode`, `chunkMode`, `blockStreaming`, `draftChunk`, `blockStreamingCoalesce`) không còn được đọc trong runtime; chạy `openclaw doctor --fix` để di chuyển cấu hình đã lưu.
+- `channels.discord.autoPresence` ánh xạ mức độ sẵn sàng của runtime sang trạng thái hiện diện của bot (khỏe mạnh => trực tuyến, suy giảm => không hoạt động, cạn kiệt => không làm phiền) và cho phép ghi đè văn bản trạng thái tùy chọn.
+- `channels.discord.guilds.<id>.presenceEvents` định tuyến các lần người dùng chuyển sang trạng thái sẵn sàng vào một kênh Discord đã cấu hình dưới dạng sự kiện hệ thống của tác tử. Các thành viên đủ điều kiện phải có khả năng xem `channelId`; luồng công khai kế thừa khả năng hiển thị của luồng cha, còn luồng riêng tư cần thêm tư cách thành viên hoặc quyền Manage Threads. `users` có thể thu hẹp thêm đối tượng đó. Tính năng này khởi tạo các thành viên hiện đang trực tuyến từ ảnh chụp nhanh `GUILD_CREATE` hoàn chỉnh, định tuyến các chuyển đổi từ ngoại tuyến sang trực tuyến được quan sát và coi tín hiệu trực tuyến đầu tiên sau đó của một thành viên chưa từng thấy là mới sẵn sàng mà không khẳng định họ vừa trực tuyến hay vừa tham gia sau ảnh chụp nhanh. Các guild vượt quá giới hạn ảnh chụp nhanh 75,000 thành viên của Discord trước tiên cần một bản cập nhật ngoại tuyến rõ ràng. Các tùy chọn điều tiết: `reconnectSuppressSeconds` (khoảng lặng sau một phiên Gateway mới trong khi trạng thái hiện diện của guild được dựng lại, mặc định 300, `0` sẽ vô hiệu hóa) và `burstLimit`/`burstWindowSeconds` (giới hạn tốc độ sự kiện đã xếp hàng thành công theo từng guild, mặc định 8 sự kiện trong mỗi cửa sổ trượt 60 giây). Các phiên được tiếp tục không khởi động cửa sổ chặn khi kết nối lại. Thời gian hồi giữa các lần chào lại hiện có theo từng người dùng vẫn là tám giờ. Tính năng này yêu cầu `channels.discord.intents.presence=true`, Presence Intent đặc quyền trong Developer Portal của Discord và Heartbeat của tác tử đã được bật.
+- `channels.discord.dangerouslyAllowNameMatching` bật lại việc so khớp tên/thẻ có thể thay đổi (chế độ tương thích dùng trong tình huống khẩn cấp).
+- `channels.discord.execApprovals`: gửi phê duyệt thực thi và xác thực người phê duyệt theo cơ chế gốc của Discord.
+  - `enabled`: `true`, `false` hoặc `"auto"` (mặc định). Trong chế độ tự động, phê duyệt thực thi được kích hoạt khi có thể phân giải người phê duyệt từ `approvers` hoặc `commands.ownerAllowFrom`.
+  - `approvers`: các ID người dùng Discord được phép phê duyệt yêu cầu thực thi. Dùng `commands.ownerAllowFrom` làm phương án dự phòng khi bị bỏ qua.
+  - `agentFilter`: danh sách cho phép ID tác tử tùy chọn. Bỏ qua để chuyển tiếp phê duyệt cho tất cả tác tử.
+  - `sessionFilter`: các mẫu khóa phiên tùy chọn (chuỗi con hoặc biểu thức chính quy).
+  - `target`: nơi gửi lời nhắc phê duyệt. `"dm"` (mặc định) gửi đến DM của người phê duyệt, `"channel"` gửi đến kênh khởi nguồn, `"both"` gửi đến cả hai. Khi đích bao gồm `"channel"`, chỉ những người phê duyệt đã phân giải mới có thể sử dụng các nút.
+  - `cleanupAfterResolve`: khi `true`, xóa các DM phê duyệt sau khi được phê duyệt, bị từ chối hoặc hết thời gian chờ.
 
-**Chế độ thông báo reaction:** `off` (không có), `own` (tin nhắn của bot, mặc định), `all` (mọi tin nhắn), `allowlist` (từ `guilds.<id>.users` trên mọi tin nhắn).
+**Các chế độ thông báo phản ứng:** `off` (không có), `own` (tin nhắn của bot, mặc định), `all` (tất cả tin nhắn), `allowlist` (từ `guilds.<id>.users` trên tất cả tin nhắn).
 
 ### Google Chat
 
@@ -426,10 +421,10 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
 ```
 
 - JSON tài khoản dịch vụ: nội tuyến (`serviceAccount`) hoặc dựa trên tệp (`serviceAccountFile`).
-- SecretRef tài khoản dịch vụ cũng được hỗ trợ (`serviceAccountRef`).
-- Phương án dự phòng env: `GOOGLE_CHAT_SERVICE_ACCOUNT` hoặc `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE`.
-- Dùng `spaces/<spaceId>` hoặc `users/<userId>` cho mục tiêu gửi.
-- `channels.googlechat.dangerouslyAllowNameMatching` bật lại khớp principal email có thể thay đổi (chế độ tương thích phá kính).
+- SecretRef của tài khoản dịch vụ cũng được hỗ trợ (`serviceAccountRef`).
+- Các phương án dự phòng từ biến môi trường: `GOOGLE_CHAT_SERVICE_ACCOUNT` hoặc `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE` (chỉ tài khoản mặc định).
+- Sử dụng `spaces/<spaceId>` hoặc `users/<userId>` làm đích gửi.
+- `channels.googlechat.dangerouslyAllowNameMatching` bật lại việc so khớp định danh email có thể thay đổi (chế độ tương thích dùng trong tình huống khẩn cấp).
 
 ### Slack
 
@@ -449,14 +444,14 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
       allowFrom: ["U123", "U456", "*"],
       dm: { enabled: true, groupEnabled: false, groupChannels: ["G123"] },
       channels: {
-        C123: { allow: true, requireMention: true, allowBots: false },
+        C123: { enabled: true, requireMention: true, allowBots: false },
         "#general": {
-          allow: true,
+          enabled: true,
           requireMention: true,
           allowBots: false,
           users: ["U123"],
           skills: ["docs"],
-          systemPrompt: "Short answers only.",
+          systemPrompt: "Chỉ trả lời ngắn gọn.",
         },
       },
       historyLimit: 50,
@@ -467,6 +462,7 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
       thread: {
         historyScope: "thread", // thread | channel
         inheritParent: false,
+        initialHistoryLimit: 20,
       },
       actions: {
         reactions: true,
@@ -485,10 +481,10 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
       unfurlLinks: false,
       unfurlMedia: false,
       textChunkLimit: 4000,
-      chunkMode: "length",
       streaming: {
         mode: "partial", // off | partial | block | progress
-        nativeTransport: true, // use Slack native streaming API when mode=partial
+        chunkMode: "length", // length | newline
+        nativeTransport: true, // sử dụng API phát trực tiếp gốc của Slack khi mode=partial
       },
       mediaMaxMb: 20,
       execApprovals: {
@@ -503,45 +499,63 @@ WhatsApp chạy qua kênh web của Gateway (Baileys Web). Nó tự động kh�
 }
 ```
 
-- **Chế độ Socket** yêu cầu cả `botToken` và `appToken` (`SLACK_BOT_TOKEN` + `SLACK_APP_TOKEN` cho dự phòng env của tài khoản mặc định).
+- **Chế độ Socket** yêu cầu cả `botToken` và `appToken` (`SLACK_BOT_TOKEN` + `SLACK_APP_TOKEN` để dự phòng bằng biến môi trường của tài khoản mặc định).
 - **Chế độ HTTP** yêu cầu `botToken` cùng với `signingSecret` (ở cấp gốc hoặc theo từng tài khoản).
-- `socketMode` truyền phần tinh chỉnh transport Slack SDK Socket Mode sang API Bolt receiver công khai. Chỉ dùng khi điều tra timeout ping/pong hoặc hành vi websocket lỗi thời. `clientPingTimeout` mặc định là `15000`; `serverPingTimeout` và `pingPongLoggingEnabled` chỉ được truyền khi được cấu hình.
-- `botToken`, `appToken`, `signingSecret`, và `userToken` chấp nhận chuỗi
+- **Danh tính người dùng** (`identity: "user"`) đăng và đọc với tư cách người đã cấp quyền. Tính năng này yêu cầu `userToken` cùng với `appToken` trong Chế độ Socket, hoặc `userToken` cùng với `signingSecret` trong chế độ HTTP. Không yêu cầu token bot hoặc người dùng bot. Xem [Danh tính người dùng](/vi/channels/slack#user-identity-post-as-a-real-person) để biết các phạm vi người dùng và đăng ký sự kiện.
+- `enterpriseOrgInstall: true` cho phép một tài khoản sử dụng đường dẫn sự kiện
+  trên toàn tổ chức của Slack Enterprise Grid. Khi khởi động, hệ thống xác minh token bot bằng `auth.test` và
+  báo lỗi khi chế độ đã cấu hình không khớp với danh tính cài đặt của Slack.
+  DM doanh nghiệp phải bị vô hiệu hóa hoặc sử dụng `dmPolicy: "open"` với
+  `allowFrom: ["*"]` có hiệu lực. Chính sách kênh và người dùng phải sử dụng ID Slack ổn định;
+  tên có thể thay đổi và tiền tố kênh không được hỗ trợ sẽ khiến quá trình khởi động thất bại. V1 chỉ xử lý
+  trực tiếp các sự kiện Chế độ Socket hoặc HTTP `message` và `app_mention` với phản hồi
+  tức thì; chuyển tiếp, lệnh, tương tác, App Home, trình lắng nghe sự kiện phản ứng,
+  ghim, công cụ hành động, phê duyệt gốc, liên kết, phân phối trì hoãn và
+  gửi chủ động đều không khả dụng. Việc xác nhận, nhập liệu và
+  phản ứng trạng thái do trình lắng nghe quản lý vẫn khả dụng với `reactions:write`; thông báo
+  phản ứng đến và công cụ hành động phản ứng không khả dụng. Xem
+  [Cài đặt trên toàn tổ chức Enterprise Grid](/vi/channels/slack#enterprise-grid-org-wide-installs)
+  để biết manifest có đặc quyền tối thiểu, quy trình thiết lập và đầy đủ các hạn chế.
+- `socketMode` chuyển tiếp các tùy chỉnh truyền tải Chế độ Socket của Slack SDK đến API bộ nhận Bolt công khai. Chỉ sử dụng khi điều tra thời gian chờ ping/pong hoặc hành vi websocket cũ. `clientPingTimeout` mặc định là `15000`; `serverPingTimeout` và `pingPongLoggingEnabled` chỉ được chuyển tiếp khi đã cấu hình.
+- `botToken`, `appToken`, `signingSecret` và `userToken` chấp nhận chuỗi
   văn bản thuần hoặc đối tượng SecretRef.
-- Snapshot tài khoản Slack hiển thị các trường nguồn/trạng thái theo từng thông tin xác thực như
-  `botTokenSource`, `botTokenStatus`, `appTokenStatus`, và, trong chế độ HTTP,
-  `signingSecretStatus`. `configured_unavailable` nghĩa là tài khoản được
+- Ảnh chụp nhanh tài khoản Slack hiển thị các trường nguồn/trạng thái theo từng thông tin xác thực, chẳng hạn như
+  `botTokenSource`, `botTokenStatus`, `userTokenSource`, `userTokenStatus`,
+  `appTokenStatus` và, trong chế độ HTTP, `signingSecretStatus`.
+  `configured_unavailable` có nghĩa là tài khoản được
   cấu hình thông qua SecretRef nhưng đường dẫn lệnh/runtime hiện tại không thể
   phân giải giá trị bí mật.
-- `configWrites: false` chặn các lần ghi cấu hình do Slack khởi tạo.
-- `channels.slack.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với một ID tài khoản đã cấu hình.
-- `channels.slack.streaming.mode` là khóa chế độ stream Slack chuẩn. `channels.slack.streaming.nativeTransport` kiểm soát transport streaming gốc của Slack. Các giá trị legacy `streamMode`, boolean `streaming`, và `nativeStreaming` vẫn là alias runtime; chạy `openclaw doctor --fix` để ghi lại cấu hình đã lưu.
-- `unfurlLinks` và `unfurlMedia` truyền các boolean unfurl liên kết và media của `chat.postMessage` trong Slack cho phản hồi bot. `unfurlLinks` mặc định là `false` để liên kết bot gửi đi không mở rộng nội tuyến trừ khi được bật; `unfurlMedia` bị bỏ qua trừ khi được cấu hình. Đặt một trong hai giá trị tại `channels.slack.accounts.<accountId>` để ghi đè giá trị cấp cao nhất cho một tài khoản.
-- Dùng `user:<id>` (DM) hoặc `channel:<id>` cho đích gửi.
+- `configWrites: false` chặn các thao tác ghi cấu hình do Slack khởi tạo.
+- `channels.slack.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với ID tài khoản đã cấu hình.
+- `channels.slack.streaming.mode` là khóa chế độ luồng Slack chuẩn (mặc định `"partial"`). `channels.slack.streaming.nativeTransport` kiểm soát cơ chế truyền tải phát trực tiếp gốc của Slack (mặc định `true`). Các giá trị cũ `streamMode`, giá trị boolean `streaming`, `chunkMode`, `blockStreaming`, `blockStreamingCoalesce` và `nativeStreaming` không còn được đọc trong runtime; chạy `openclaw doctor --fix` để di chuyển cấu hình đã lưu sang `streaming.{mode,chunkMode,block.enabled,block.coalesce,nativeTransport}`.
+- `unfurlLinks` và `unfurlMedia` chuyển tiếp các giá trị boolean bung nội dung liên kết và phương tiện `chat.postMessage` của Slack cho phản hồi của bot. `unfurlLinks` mặc định là `false` để liên kết gửi đi của bot không mở rộng nội tuyến trừ khi được bật; `unfurlMedia` bị bỏ qua nếu chưa cấu hình. Đặt một trong hai giá trị tại `channels.slack.accounts.<accountId>` để ghi đè giá trị cấp cao nhất cho một tài khoản.
+- Sử dụng `user:<id>` (DM) hoặc `channel:<id>` làm đích phân phối.
 
-**Chế độ thông báo phản ứng:** `off`, `own` (mặc định), `all`, `allowlist` (từ `reactionAllowlist`).
+**Các chế độ thông báo phản ứng:** `off`, `own` (mặc định), `all`, `allowlist` (từ `reactionAllowlist`).
 
-**Cô lập phiên theo luồng:** `thread.historyScope` là theo từng luồng (mặc định) hoặc dùng chung trên toàn kênh. `thread.inheritParent` sao chép bản ghi hội thoại của kênh cha sang các luồng mới.
+**Cách ly phiên luồng:** `thread.historyScope` áp dụng theo từng luồng (mặc định) hoặc dùng chung trong toàn kênh. `thread.inheritParent` sao chép bản ghi hội thoại của kênh cha sang các luồng mới. `thread.initialHistoryLimit` (mặc định `20`) giới hạn số lượng tin nhắn hiện có trong luồng được tải khi một phiên luồng mới bắt đầu; `0` vô hiệu hóa việc tải lịch sử luồng.
 
-- Slack native streaming cùng trạng thái luồng kiểu trợ lý Slack "is typing..." yêu cầu đích là một luồng trả lời. DM cấp cao nhất mặc định vẫn nằm ngoài luồng, nên chúng vẫn có thể stream qua bản xem trước bài nháp đăng-và-sửa của Slack thay vì hiển thị bản xem trước native stream/trạng thái kiểu luồng.
-- `typingReaction` thêm một phản ứng tạm thời vào tin nhắn Slack đến trong khi phản hồi đang chạy, rồi gỡ bỏ khi hoàn tất. Dùng shortcode emoji Slack như `"hourglass_flowing_sand"`.
-- `channels.slack.execApprovals`: gửi approval-client gốc Slack và ủy quyền người phê duyệt exec. Cùng schema như Discord: `enabled` (`true`/`false`/`"auto"`), `approvers` (ID người dùng Slack), `agentFilter`, `sessionFilter`, và `target` (`"dm"`, `"channel"`, hoặc `"both"`). Phê duyệt Plugin có thể dùng đường dẫn native-client này cho yêu cầu bắt nguồn từ Slack khi người phê duyệt Plugin Slack phân giải được; gửi phê duyệt Plugin gốc Slack cũng có thể được bật thông qua `approvals.plugin` cho phiên bắt nguồn từ Slack hoặc đích Slack. Phê duyệt Plugin dùng người phê duyệt Plugin Slack từ `allowFrom` và định tuyến mặc định, không dùng người phê duyệt exec.
+- Tính năng phát trực tiếp gốc của Slack cùng trạng thái luồng kiểu trợ lý "đang nhập..." của Slack yêu cầu đích phản hồi là một luồng. DM cấp cao nhất mặc định vẫn nằm ngoài luồng, vì vậy chúng vẫn có thể phát trực tiếp thông qua bản xem trước đăng bản nháp rồi chỉnh sửa của Slack thay vì hiển thị bản xem trước luồng/trạng thái gốc kiểu luồng.
+- `typingReaction` thêm một phản ứng tạm thời vào tin nhắn Slack đến trong khi phản hồi đang chạy, rồi xóa phản ứng đó khi hoàn tất. Sử dụng mã viết tắt emoji Slack như `"hourglass_flowing_sand"`.
+- `channels.slack.execApprovals`: phân phối máy khách phê duyệt gốc của Slack và ủy quyền người phê duyệt thực thi. Cùng schema với Discord: `enabled` (`true`/`false`/`"auto"`), `approvers` (ID người dùng Slack), `agentFilter`, `sessionFilter` và `target` (`"dm"`, `"channel"` hoặc `"both"`). Phê duyệt Plugin có thể sử dụng đường dẫn máy khách gốc này cho các yêu cầu bắt nguồn từ Slack khi phân giải được người phê duyệt Plugin Slack; việc phân phối phê duyệt Plugin gốc của Slack cũng có thể được bật thông qua `approvals.plugin` cho các phiên bắt nguồn từ Slack hoặc đích Slack. Phê duyệt Plugin sử dụng người phê duyệt Plugin Slack từ `allowFrom` và định tuyến mặc định, không dùng người phê duyệt thực thi.
 
-| Nhóm hành động | Mặc định | Ghi chú                    |
-| -------------- | -------- | -------------------------- |
-| reactions      | bật      | Phản ứng + liệt kê phản ứng |
-| messages       | bật      | Đọc/gửi/sửa/xóa            |
-| pins           | bật      | Ghim/bỏ ghim/liệt kê       |
-| memberInfo     | bật      | Thông tin thành viên       |
-| emojiList      | bật      | Danh sách emoji tùy chỉnh  |
+| Nhóm hành động | Mặc định | Ghi chú                         |
+| -------------- | -------- | ------------------------------- |
+| reactions      | bật      | Phản ứng + liệt kê phản ứng     |
+| messages       | bật      | Đọc/gửi/chỉnh sửa/xóa           |
+| pins           | bật      | Ghim/bỏ ghim/liệt kê            |
+| memberInfo     | bật      | Thông tin thành viên            |
+| emojiList      | bật      | Danh sách emoji tùy chỉnh       |
 
 ### Mattermost
 
-Mattermost được phát hành như một Plugin đi kèm trong các bản phát hành OpenClaw hiện tại. Các bản dựng cũ hơn hoặc
-tùy chỉnh có thể cài một gói npm hiện tại bằng
-`openclaw plugins install @openclaw/mattermost`. Kiểm tra
-[npmjs.com/package/@openclaw/mattermost](https://www.npmjs.com/package/@openclaw/mattermost)
-để xem các dist-tag hiện tại trước khi ghim một phiên bản.
+Mattermost được cài đặt dưới dạng một Plugin riêng biệt, tương tự Discord, Slack và WhatsApp:
+
+```bash
+openclaw plugins install @openclaw/mattermost
+```
+
+Kiểm tra [npmjs.com/package/@openclaw/mattermost](https://www.npmjs.com/package/@openclaw/mattermost) để biết các dist-tag hiện tại trước khi ghim phiên bản.
 
 ```json5
 {
@@ -558,36 +572,36 @@ tùy chỉnh có thể cài một gói npm hiện tại bằng
         "team-channel-id": { requireMention: false },
       },
       commands: {
-        native: true, // opt-in
+        native: true, // cần chủ động bật
         nativeSkills: true,
         callbackPath: "/api/channels/mattermost/command",
-        // Optional explicit URL for reverse-proxy/public deployments
+        // URL tường minh tùy chọn cho các bản triển khai qua proxy ngược/công khai
         callbackUrl: "https://gateway.example.com/api/channels/mattermost/command",
       },
       textChunkLimit: 4000,
-      chunkMode: "length",
+      streaming: { chunkMode: "length" },
     },
   },
 }
 ```
 
-Chế độ trò chuyện: `oncall` (phản hồi khi được @-mention, mặc định), `onmessage` (mọi tin nhắn), `onchar` (tin nhắn bắt đầu bằng tiền tố kích hoạt).
+Các chế độ trò chuyện: `oncall` (phản hồi khi được @-đề cập, mặc định), `onmessage` (mọi tin nhắn), `onchar` (tin nhắn bắt đầu bằng tiền tố kích hoạt).
 
-Khi lệnh gốc Mattermost được bật:
+Khi các lệnh gốc của Mattermost được bật:
 
 - `commands.callbackPath` phải là một đường dẫn (ví dụ `/api/channels/mattermost/command`), không phải URL đầy đủ.
-- `commands.callbackUrl` phải phân giải tới endpoint Gateway OpenClaw và có thể truy cập được từ máy chủ Mattermost.
-- Callback slash gốc được xác thực bằng token theo từng lệnh do Mattermost trả về
-  trong quá trình đăng ký slash command. Nếu đăng ký thất bại hoặc không có
+- `commands.callbackUrl` phải phân giải đến điểm cuối Gateway OpenClaw và máy chủ Mattermost phải có thể truy cập được.
+- Các callback lệnh gạch chéo gốc được xác thực bằng token theo từng lệnh do
+  Mattermost trả về trong quá trình đăng ký lệnh gạch chéo. Nếu đăng ký thất bại hoặc không có
   lệnh nào được kích hoạt, OpenClaw từ chối callback với
   `Unauthorized: invalid command token.`
-- Với các máy chủ callback riêng tư/tailnet/nội bộ, Mattermost có thể yêu cầu
-  `ServiceSettings.AllowedUntrustedInternalConnections` bao gồm host/domain callback.
-  Dùng giá trị host/domain, không dùng URL đầy đủ.
-- `channels.mattermost.configWrites`: cho phép hoặc từ chối các lần ghi cấu hình do Mattermost khởi tạo.
-- `channels.mattermost.requireMention`: yêu cầu `@mention` trước khi trả lời trong kênh.
-- `channels.mattermost.groups.<channelId>.requireMention`: ghi đè kiểm soát mention theo từng kênh (`"*"` cho mặc định).
-- `channels.mattermost.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với một ID tài khoản đã cấu hình.
+- Đối với máy chủ callback riêng/tailnet/nội bộ, Mattermost có thể yêu cầu
+  `ServiceSettings.AllowedUntrustedInternalConnections` bao gồm máy chủ/tên miền callback.
+  Sử dụng giá trị máy chủ/tên miền, không sử dụng URL đầy đủ.
+- `channels.mattermost.configWrites`: cho phép hoặc từ chối các thao tác ghi cấu hình do Mattermost khởi tạo.
+- `channels.mattermost.requireMention`: yêu cầu `@mention` trước khi phản hồi trong các kênh.
+- `channels.mattermost.groups.<channelId>.requireMention`: ghi đè điều kiện đề cập theo từng kênh (`"*"` cho mặc định).
+- `channels.mattermost.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với ID tài khoản đã cấu hình.
 
 ### Signal
 
@@ -596,7 +610,7 @@ Khi lệnh gốc Mattermost được bật:
   channels: {
     signal: {
       enabled: true,
-      account: "+15555550123", // optional account binding
+      account: "+15555550123", // liên kết tài khoản tùy chọn
       dmPolicy: "pairing",
       allowFrom: ["+15551234567", "uuid:123e4567-e89b-12d3-a456-426614174000"],
       configWrites: true,
@@ -608,21 +622,21 @@ Khi lệnh gốc Mattermost được bật:
 }
 ```
 
-**Chế độ thông báo phản ứng:** `off`, `own` (mặc định), `all`, `allowlist` (từ `reactionAllowlist`).
+**Các chế độ thông báo phản ứng:** `off`, `own` (mặc định), `all`, `allowlist` (từ `reactionAllowlist`).
 
 - `channels.signal.account`: ghim quá trình khởi động kênh vào một danh tính tài khoản Signal cụ thể.
-- `channels.signal.configWrites`: cho phép hoặc từ chối các lần ghi cấu hình do Signal khởi tạo.
-- `channels.signal.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với một ID tài khoản đã cấu hình.
+- `channels.signal.configWrites`: cho phép hoặc từ chối các thao tác ghi cấu hình do Signal khởi tạo.
+- `channels.signal.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với ID tài khoản đã cấu hình.
 
 ### iMessage
 
-OpenClaw khởi chạy `imsg rpc` (JSON-RPC qua stdio). Không cần daemon hoặc cổng. Đây là đường dẫn được ưu tiên cho các thiết lập iMessage OpenClaw mới khi host có thể cấp quyền với cơ sở dữ liệu Messages và Automation.
+OpenClaw khởi chạy `imsg rpc` (JSON-RPC qua stdio). Không yêu cầu daemon hoặc cổng. Đây là đường dẫn được ưu tiên cho các thiết lập OpenClaw iMessage mới khi máy chủ có thể cấp quyền truy cập cơ sở dữ liệu Messages và quyền Automation.
 
-Hỗ trợ BlueBubbles đã bị gỡ bỏ. `channels.bluebubbles` không phải là bề mặt cấu hình runtime được hỗ trợ trên OpenClaw hiện tại. Di chuyển cấu hình cũ sang `channels.imessage`; dùng [Gỡ bỏ BlueBubbles và đường dẫn imsg iMessage](/vi/announcements/bluebubbles-imessage) cho bản ngắn và [Chuyển từ BlueBubbles](/vi/channels/imessage-from-bluebubbles) cho bảng chuyển đổi đầy đủ.
+Hỗ trợ BlueBubbles đã bị loại bỏ. `channels.bluebubbles` không phải là bề mặt cấu hình runtime được hỗ trợ trên OpenClaw hiện tại. Di chuyển cấu hình cũ sang `channels.imessage`; xem [Việc loại bỏ BlueBubbles và đường dẫn imsg iMessage](/vi/announcements/bluebubbles-imessage) để biết phiên bản ngắn và [Chuyển từ BlueBubbles](/vi/channels/imessage-from-bluebubbles) để xem bảng chuyển đổi đầy đủ.
 
-Nếu Gateway không chạy trên máy Mac Messages đã đăng nhập, giữ `channels.imessage.enabled=true` và đặt `channels.imessage.cliPath` thành một SSH wrapper chạy `imsg "$@"` trên máy Mac đó. Đường dẫn `imsg` cục bộ mặc định chỉ dành cho macOS.
+Nếu Gateway không chạy trên máy Mac đã đăng nhập Messages, hãy giữ `channels.imessage.enabled=true` và đặt `channels.imessage.cliPath` thành một trình bao bọc SSH chạy `imsg "$@"` trên máy Mac đó. Đường dẫn `imsg` cục bộ mặc định chỉ dành cho macOS.
 
-Trước khi dựa vào SSH wrapper để gửi trong production, hãy xác minh một lệnh `imsg send` gửi ra thông qua đúng wrapper đó. Một số trạng thái TCC của macOS gán Messages Automation cho `/usr/libexec/sshd-keygen-wrapper`, điều này có thể làm cho việc đọc và probe hoạt động trong khi gửi thất bại với AppleEvents `-1743`; xem [Gửi qua SSH wrapper thất bại với AppleEvents -1743](/vi/channels/imessage#ssh-wrapper-sends-fail-with-appleevents-1743).
+Trước khi dựa vào trình bao bọc SSH để gửi trong môi trường production, hãy xác minh một `imsg send` gửi đi thông qua chính trình bao bọc đó. Một số trạng thái TCC của macOS gán quyền Tự động hóa Messages cho `/usr/libexec/sshd-keygen-wrapper`, điều này có thể khiến thao tác đọc và thăm dò hoạt động trong khi thao tác gửi thất bại với AppleEvents `-1743`; xem phần khắc phục sự cố trình bao bọc SSH tại [iMessage](/vi/channels/imessage).
 
 ```json5
 {
@@ -655,22 +669,21 @@ Trước khi dựa vào SSH wrapper để gửi trong production, hãy xác minh
 }
 ```
 
-- `channels.imessage.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với một ID tài khoản đã cấu hình.
+- `channels.imessage.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với một id tài khoản đã cấu hình.
+- Yêu cầu quyền Full Disk Access đối với cơ sở dữ liệu Messages.
+- Ưu tiên các đích `chat_id:<id>`. Dùng `imsg chats --limit 20` để liệt kê các cuộc trò chuyện.
+- `cliPath` có thể trỏ đến một trình bao bọc SSH; đặt `remoteHost` (`host` hoặc `user@host`) để tìm nạp tệp đính kèm qua SCP.
+- `attachmentRoots` và `remoteAttachmentRoots` giới hạn các đường dẫn tệp đính kèm gửi đến (mặc định: `/Users/*/Library/Messages/Attachments`).
+- SCP sử dụng kiểm tra khóa máy chủ nghiêm ngặt, vì vậy hãy bảo đảm khóa của máy chủ chuyển tiếp đã tồn tại trong `~/.ssh/known_hosts`.
+- `channels.imessage.configWrites`: cho phép hoặc từ chối việc ghi cấu hình do iMessage khởi tạo.
+- `channels.imessage.sendTransport`: phương thức truyền gửi RPC `imsg` ưu tiên cho các phản hồi gửi đi thông thường. `auto` (mặc định) sử dụng cầu nối IMCore cho các cuộc trò chuyện hiện có khi cầu nối đang chạy, rồi chuyển sang AppleScript nếu không thành công; `bridge` yêu cầu phân phối qua API riêng tư; `applescript` buộc sử dụng đường dẫn tự động hóa Messages công khai.
+- `channels.imessage.actions.*`: bật các hành động API riêng tư cũng được kiểm soát bởi `imsg status` / `openclaw channels status --probe`.
+- `channels.imessage.includeAttachments` mặc định bị tắt; đặt thành `true` trước khi mong đợi phương tiện gửi đến xuất hiện trong các lượt của tác nhân.
+- Quá trình khôi phục dữ liệu gửi đến sau khi cầu nối/gateway khởi động lại diễn ra tự động (loại trùng lặp GUID cộng với hàng rào tuổi cho backlog cũ). Các cấu hình `channels.imessage.catchup.enabled: true` hiện có vẫn được hỗ trợ dưới dạng hồ sơ tương thích không còn được khuyến nghị; `catchup` mặc định bị tắt.
+- `channels.imessage.groups`: sổ đăng ký nhóm và các thiết lập cho từng nhóm. Với `groupPolicy: "allowlist"`, hãy cấu hình các khóa `chat_id` tường minh hoặc một mục ký tự đại diện `"*"` để tin nhắn nhóm có thể vượt qua cổng sổ đăng ký.
+- Các mục `bindings[]` cấp cao nhất có `type: "acp"` có thể liên kết các cuộc trò chuyện iMessage với các phiên ACP bền vững. Dùng một định danh liên hệ đã chuẩn hóa hoặc đích trò chuyện tường minh (`chat_id:*`, `chat_guid:*`, `chat_identifier:*`) trong `match.peer.id`. Ngữ nghĩa trường dùng chung: [Tác nhân ACP](/vi/tools/acp-agents#persistent-channel-bindings).
 
-- Yêu cầu Full Disk Access tới DB Messages.
-- Ưu tiên đích `chat_id:<id>`. Dùng `imsg chats --limit 20` để liệt kê các cuộc trò chuyện.
-- `cliPath` có thể trỏ tới một SSH wrapper; đặt `remoteHost` (`host` hoặc `user@host`) để lấy tệp đính kèm qua SCP.
-- `attachmentRoots` và `remoteAttachmentRoots` giới hạn đường dẫn tệp đính kèm đến (mặc định: `/Users/*/Library/Messages/Attachments`).
-- SCP dùng kiểm tra host-key nghiêm ngặt, vì vậy hãy đảm bảo host key của relay đã tồn tại trong `~/.ssh/known_hosts`.
-- `channels.imessage.configWrites`: cho phép hoặc từ chối các lần ghi cấu hình do iMessage khởi tạo.
-- `channels.imessage.sendTransport`: transport gửi RPC `imsg` ưu tiên cho phản hồi gửi ra thông thường. `auto` (mặc định) dùng cầu nối IMCore cho các cuộc trò chuyện hiện có khi nó đang chạy, rồi fallback sang AppleScript; `bridge` yêu cầu gửi qua private-API; `applescript` ép dùng đường dẫn tự động hóa Messages công khai.
-- `channels.imessage.actions.*`: bật các hành động private API cũng được kiểm soát bởi `imsg status` / `openclaw channels status --probe`.
-- `channels.imessage.includeAttachments` mặc định tắt; đặt thành `true` trước khi mong đợi media đến trong lượt tác nhân.
-- Khôi phục tin nhắn đến sau khi bridge/gateway khởi động lại là tự động (khử trùng lặp GUID cộng với hàng rào tuổi backlog lỗi thời). Các cấu hình `channels.imessage.catchup.enabled: true` hiện có vẫn được tôn trọng như một hồ sơ tương thích đã ngừng khuyến nghị.
-- `channels.imessage.groups`: registry nhóm và cài đặt theo từng nhóm. Với `groupPolicy: "allowlist"`, cấu hình khóa `chat_id` rõ ràng hoặc mục wildcard `"*"` để tin nhắn nhóm có thể vượt qua cổng registry.
-- Các mục `bindings[]` cấp cao nhất với `type: "acp"` có thể liên kết cuộc trò chuyện iMessage với phiên ACP bền vững. Dùng handle đã chuẩn hóa hoặc đích trò chuyện rõ ràng (`chat_id:*`, `chat_guid:*`, `chat_identifier:*`) trong `match.peer.id`. Ngữ nghĩa trường dùng chung: [Tác nhân ACP](/vi/tools/acp-agents#persistent-channel-bindings).
-
-<Accordion title="Ví dụ SSH wrapper iMessage">
+<Accordion title="Ví dụ về trình bao bọc SSH cho iMessage">
 
 ```bash
 #!/usr/bin/env bash
@@ -681,7 +694,7 @@ exec ssh -T gateway-host imsg "$@"
 
 ### Matrix
 
-Matrix được hỗ trợ bởi Plugin và được cấu hình dưới `channels.matrix`.
+Matrix được hỗ trợ bởi Plugin và được cấu hình trong `channels.matrix`.
 
 ```json5
 {
@@ -711,25 +724,25 @@ Matrix được hỗ trợ bởi Plugin và được cấu hình dưới `channe
 }
 ```
 
-- Xác thực bằng token dùng `accessToken`; xác thực bằng mật khẩu dùng `userId` + `password`.
-- `channels.matrix.proxy` định tuyến lưu lượng HTTP của Matrix qua một proxy HTTP(S) rõ ràng. Các tài khoản được đặt tên có thể ghi đè bằng `channels.matrix.accounts.<id>.proxy`.
-- `channels.matrix.network.dangerouslyAllowPrivateNetwork` cho phép homeserver riêng tư/nội bộ. `proxy` và tùy chọn tham gia mạng này là các điều khiển độc lập.
-- `channels.matrix.defaultAccount` chọn tài khoản ưu tiên trong thiết lập nhiều tài khoản.
-- `channels.matrix.autoJoin` mặc định là `off`, nên các phòng được mời và lời mời kiểu DM mới sẽ bị bỏ qua cho đến khi bạn đặt `autoJoin: "allowlist"` với `autoJoinAllowlist` hoặc `autoJoin: "always"`.
-- `channels.matrix.execApprovals`: phân phối phê duyệt exec gốc Matrix và ủy quyền người phê duyệt.
-  - `enabled`: `true`, `false`, hoặc `"auto"` (mặc định). Ở chế độ tự động, phê duyệt exec được kích hoạt khi có thể phân giải người phê duyệt từ `approvers` hoặc `commands.ownerAllowFrom`.
-  - `approvers`: ID người dùng Matrix (ví dụ `@owner:example.org`) được phép phê duyệt yêu cầu exec.
-  - `agentFilter`: allowlist ID agent tùy chọn. Bỏ qua để chuyển tiếp phê duyệt cho tất cả agent.
-  - `sessionFilter`: mẫu khóa phiên tùy chọn (chuỗi con hoặc regex).
-  - `target`: nơi gửi lời nhắc phê duyệt. `"dm"` (mặc định), `"channel"` (phòng khởi nguồn), hoặc `"both"`.
+- Xác thực bằng token sử dụng `accessToken`; xác thực bằng mật khẩu sử dụng `userId` + `password`.
+- `channels.matrix.proxy` định tuyến lưu lượng HTTP của Matrix qua một proxy HTTP(S) tường minh. Các tài khoản có tên có thể ghi đè bằng `channels.matrix.accounts.<id>.proxy`.
+- `channels.matrix.network.dangerouslyAllowPrivateNetwork` cho phép các homeserver riêng tư/nội bộ. `proxy` và tùy chọn tham gia mạng này là các biện pháp kiểm soát độc lập.
+- `channels.matrix.defaultAccount` chọn tài khoản ưu tiên trong cấu hình nhiều tài khoản.
+- `channels.matrix.autoJoin` mặc định là `"off"`, vì vậy các phòng được mời và lời mời mới theo kiểu DM bị bỏ qua cho đến khi bạn đặt `autoJoin: "allowlist"` bằng `autoJoinAllowlist` hoặc `autoJoin: "always"`.
+- `channels.matrix.execApprovals`: phân phối phê duyệt thực thi theo cơ chế gốc của Matrix và ủy quyền người phê duyệt.
+  - `enabled`: `true`, `false` hoặc `"auto"` (mặc định). Ở chế độ tự động, phê duyệt thực thi được kích hoạt khi có thể phân giải người phê duyệt từ `approvers` hoặc `commands.ownerAllowFrom`.
+  - `approvers`: các ID người dùng Matrix (ví dụ: `@owner:example.org`) được phép phê duyệt yêu cầu thực thi.
+  - `agentFilter`: danh sách cho phép ID tác nhân tùy chọn. Bỏ qua để chuyển tiếp phê duyệt cho tất cả tác nhân.
+  - `sessionFilter`: các mẫu khóa phiên tùy chọn (chuỗi con hoặc biểu thức chính quy).
+  - `target`: nơi gửi lời nhắc phê duyệt. `"dm"` (mặc định), `"channel"` (phòng khởi nguồn) hoặc `"both"`.
   - Ghi đè theo tài khoản: `channels.matrix.accounts.<id>.execApprovals`.
-- `channels.matrix.dm.sessionScope` kiểm soát cách các DM Matrix được nhóm thành phiên: `per-user` (mặc định) chia sẻ theo peer được định tuyến, còn `per-room` cô lập từng phòng DM.
-- Các phép thăm dò trạng thái Matrix và tra cứu thư mục trực tiếp dùng cùng chính sách proxy như lưu lượng runtime.
-- Cấu hình Matrix đầy đủ, quy tắc nhắm mục tiêu và ví dụ thiết lập được ghi lại trong [Matrix](/vi/channels/matrix).
+- `channels.matrix.dm.sessionScope` kiểm soát cách các DM của Matrix được nhóm thành phiên: `per-user` (mặc định) dùng chung theo đối tác được định tuyến, còn `per-room` cô lập từng phòng DM.
+- Các phép thăm dò trạng thái Matrix và tra cứu thư mục trực tiếp sử dụng cùng chính sách proxy như lưu lượng thời gian chạy.
+- Cấu hình Matrix đầy đủ, quy tắc nhắm đích và các ví dụ thiết lập được ghi lại trong [Matrix](/vi/channels/matrix).
 
 ### Microsoft Teams
 
-Microsoft Teams được hỗ trợ bằng Plugin và được cấu hình trong `channels.msteams`.
+Microsoft Teams được hỗ trợ bởi Plugin và được cấu hình trong `channels.msteams`.
 
 ```json5
 {
@@ -738,18 +751,18 @@ Microsoft Teams được hỗ trợ bằng Plugin và được cấu hình trong
       enabled: true,
       configWrites: true,
       // appId, appPassword, tenantId, webhook, team/channel policies:
-      // see /channels/msteams
+      // xem /channels/msteams
     },
   },
 }
 ```
 
-- Các đường dẫn khóa lõi được đề cập ở đây: `channels.msteams`, `channels.msteams.configWrites`.
-- Cấu hình Teams đầy đủ (thông tin xác thực, webhook, chính sách DM/nhóm, ghi đè theo team/theo kênh) được ghi lại trong [Microsoft Teams](/vi/channels/msteams).
+- Các đường dẫn khóa cốt lõi được đề cập tại đây: `channels.msteams`, `channels.msteams.configWrites`.
+- Cấu hình Teams đầy đủ (thông tin xác thực, webhook, chính sách DM/nhóm, ghi đè theo nhóm/kênh) được ghi lại trong [Microsoft Teams](/vi/channels/msteams).
 
 ### IRC
 
-IRC được hỗ trợ bằng Plugin và được cấu hình trong `channels.irc`.
+IRC được hỗ trợ bởi Plugin và được cấu hình trong `channels.irc`.
 
 ```json5
 {
@@ -770,13 +783,13 @@ IRC được hỗ trợ bằng Plugin và được cấu hình trong `channels.i
 }
 ```
 
-- Các đường dẫn khóa lõi được đề cập ở đây: `channels.irc`, `channels.irc.dmPolicy`, `channels.irc.configWrites`, `channels.irc.nickserv.*`.
-- `channels.irc.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi nó khớp với một ID tài khoản đã cấu hình.
-- Cấu hình kênh IRC đầy đủ (host/port/TLS/kênh/allowlist/chặn theo mention) được ghi lại trong [IRC](/vi/channels/irc).
+- Các đường dẫn khóa cốt lõi được đề cập tại đây: `channels.irc`, `channels.irc.dmPolicy`, `channels.irc.configWrites`, `channels.irc.nickserv.*`.
+- `channels.irc.defaultAccount` tùy chọn ghi đè lựa chọn tài khoản mặc định khi khớp với một id tài khoản đã cấu hình.
+- Cấu hình kênh IRC đầy đủ (máy chủ/cổng/TLS/kênh/danh sách cho phép/kiểm soát đề cập) được ghi lại trong [IRC](/vi/channels/irc).
 
-### Nhiều tài khoản (tất cả kênh)
+### Nhiều tài khoản (tất cả các kênh)
 
-Chạy nhiều tài khoản cho mỗi kênh (mỗi tài khoản có `accountId` riêng):
+Chạy nhiều tài khoản trên mỗi kênh (mỗi tài khoản có `accountId` riêng):
 
 ```json5
 {
@@ -797,53 +810,55 @@ Chạy nhiều tài khoản cho mỗi kênh (mỗi tài khoản có `accountId` 
 }
 ```
 
-- `default` được dùng khi bỏ qua `accountId` (CLI + định tuyến).
-- Token môi trường chỉ áp dụng cho tài khoản **default**.
-- Thiết lập kênh cơ sở áp dụng cho tất cả tài khoản trừ khi bị ghi đè theo tài khoản.
-- Dùng `bindings[].match.accountId` để định tuyến từng tài khoản đến một agent khác nhau.
-- Nếu bạn thêm một tài khoản không phải mặc định qua `openclaw channels add` (hoặc onboarding kênh) trong khi vẫn dùng cấu hình kênh cấp cao một tài khoản, OpenClaw sẽ nâng các giá trị một tài khoản cấp cao thuộc phạm vi tài khoản vào bản đồ tài khoản của kênh trước để tài khoản ban đầu tiếp tục hoạt động. Hầu hết kênh chuyển chúng vào `channels.<channel>.accounts.default`; Matrix có thể giữ lại một mục tiêu được đặt tên/mặc định hiện có nếu khớp.
-- Các binding chỉ theo kênh hiện có (không có `accountId`) tiếp tục khớp với tài khoản mặc định; binding theo phạm vi tài khoản vẫn là tùy chọn.
-- `openclaw doctor --fix` cũng sửa các hình dạng lẫn lộn bằng cách chuyển các giá trị một tài khoản cấp cao thuộc phạm vi tài khoản vào tài khoản đã nâng được chọn cho kênh đó. Hầu hết kênh dùng `accounts.default`; Matrix có thể giữ lại một mục tiêu được đặt tên/mặc định hiện có nếu khớp.
+- `default` được sử dụng khi `accountId` bị bỏ qua (CLI + định tuyến).
+- Token môi trường chỉ áp dụng cho tài khoản **mặc định**.
+- Các thiết lập kênh cơ sở áp dụng cho tất cả tài khoản trừ khi bị ghi đè theo từng tài khoản.
+- Dùng `bindings[].match.accountId` để định tuyến từng tài khoản đến một tác nhân khác nhau.
+- Nếu bạn thêm một tài khoản không mặc định qua `openclaw channels add` (hoặc quy trình tích hợp kênh) trong khi vẫn dùng cấu hình kênh một tài khoản cấp cao nhất, trước tiên OpenClaw đưa các giá trị cấp cao nhất dành cho một tài khoản và có phạm vi tài khoản vào bản đồ tài khoản của kênh để tài khoản ban đầu tiếp tục hoạt động. Hầu hết các kênh chuyển chúng vào `channels.<channel>.accounts.default`; thay vào đó, Matrix có thể giữ nguyên một đích có tên/mặc định hiện có và khớp.
+- Các liên kết chỉ dành cho kênh hiện có (không có `accountId`) tiếp tục khớp với tài khoản mặc định; các liên kết có phạm vi tài khoản vẫn là tùy chọn.
+- `openclaw doctor --fix` cũng sửa chữa các cấu trúc hỗn hợp bằng cách chuyển các giá trị cấp cao nhất dành cho một tài khoản và có phạm vi tài khoản vào tài khoản được nâng cấp đã chọn cho kênh đó. Hầu hết các kênh sử dụng `accounts.default`; thay vào đó, Matrix có thể giữ nguyên một đích có tên/mặc định hiện có và khớp.
 
-### Kênh Plugin khác
+### Các kênh Plugin khác
 
-Nhiều kênh Plugin được cấu hình dưới dạng `channels.<id>` và được ghi lại trong các trang kênh chuyên biệt của chúng (ví dụ Feishu, Matrix, LINE, Nostr, Zalo, Nextcloud Talk, Synology Chat và Twitch).
-Xem chỉ mục kênh đầy đủ: [Kênh](/vi/channels).
+Nhiều kênh Plugin được cấu hình dưới dạng `channels.<id>` và được ghi lại trong các trang kênh riêng (ví dụ: Feishu, LINE, Nextcloud Talk, Nostr, QQ Bot, Synology Chat, Twitch và Zalo).
+Xem chỉ mục kênh đầy đủ: [Các kênh](/vi/channels).
 
-### Chặn mention trong trò chuyện nhóm
+### Kiểm soát đề cập trong trò chuyện nhóm
 
-Tin nhắn nhóm mặc định là **yêu cầu mention** (mention metadata hoặc mẫu regex an toàn). Áp dụng cho các cuộc trò chuyện nhóm WhatsApp, Telegram, Discord, Google Chat và iMessage.
+Tin nhắn nhóm mặc định **yêu cầu đề cập** (đề cập trong siêu dữ liệu hoặc các mẫu biểu thức chính quy an toàn). Áp dụng cho các cuộc trò chuyện nhóm WhatsApp, Telegram, Discord, Google Chat và iMessage.
 
-Phản hồi hiển thị được kiểm soát riêng. Yêu cầu trực tiếp từ nhóm, kênh và WebChat nội bộ thông thường mặc định dùng phân phối cuối tự động: văn bản cuối của assistant được đăng qua đường dẫn phản hồi hiển thị cũ. Chọn `messages.visibleReplies: "message_tool"` hoặc `messages.groupChat.visibleReplies: "message_tool"` khi đầu ra hiển thị chỉ nên được đăng sau khi agent gọi `message(action=send)`. Nếu mô hình trả về văn bản cuối mà không gọi công cụ nhắn tin trong chế độ chỉ dùng công cụ đã chọn, văn bản cuối đó vẫn riêng tư và nhật ký chi tiết của gateway ghi lại metadata payload đã bị chặn.
+Các phản hồi hiển thị được kiểm soát riêng. Theo mặc định, các yêu cầu trực tiếp thông thường trong nhóm, kênh và WebChat nội bộ được phân phối kết quả cuối tự động: văn bản cuối cùng của trợ lý được đăng qua đường dẫn phản hồi hiển thị cũ. Chọn dùng `messages.visibleReplies: "message_tool"` hoặc `messages.groupChat.visibleReplies: "message_tool"` khi các phản hồi nguồn do mô hình tạo chỉ nên được đăng sau khi tác nhân gọi `message(action=send)`. Nếu mô hình trả về một câu trả lời cuối có nội dung đáng kể mà không gọi công cụ tin nhắn trong chế độ chỉ dùng công cụ đã được chọn, văn bản cuối đó vẫn ở chế độ riêng tư, nhật ký chi tiết của Gateway ghi lại siêu dữ liệu tải trọng bị chặn và OpenClaw đưa vào hàng đợi một lần thử lại khôi phục để yêu cầu mô hình phân phối cùng phản hồi đó qua `message(action=send)`.
 
-Phản hồi hiển thị chỉ dùng công cụ yêu cầu một mô hình/runtime gọi công cụ đáng tin cậy, và được khuyến nghị cho các phòng chia sẻ xung quanh trên các mô hình thế hệ mới nhất như GPT 5.5. Một số mô hình yếu hơn có thể trả lời văn bản cuối nhưng không hiểu rằng đầu ra hiển thị tại nguồn phải được gửi bằng `message(action=send)`. Với các mô hình đó, dùng `"automatic"` để lượt assistant cuối là đường dẫn phản hồi hiển thị. Nếu nhật ký phiên hiển thị văn bản assistant với `didSendViaMessagingTool: false`, mô hình đã tạo văn bản cuối riêng tư thay vì gọi công cụ nhắn tin. Chuyển sang mô hình gọi công cụ mạnh hơn cho kênh đó, kiểm tra nhật ký chi tiết gateway để xem tóm tắt payload bị chặn, hoặc đặt `messages.groupChat.visibleReplies: "automatic"` để dùng phản hồi cuối hiển thị cho mọi yêu cầu nhóm/kênh.
+Chính sách chỉ dùng công cụ chi phối các phản hồi nguồn của trợ lý và phương tiện công cụ chung. Chính sách này không chặn đầu ra đầu cuối do thời gian chạy sở hữu, chẳng hạn như phản hồi lệnh đã được ủy quyền, thông báo hoàn tất bền vững hoặc tạo phẩm gốc của nhà cung cấp mà bộ kiểm thử sở hữu xác định rõ là do máy chủ sở hữu. Các tạo phẩm do máy chủ sở hữu được phân phối qua đường dẫn điều phối kênh thông thường và vẫn tuân thủ việc từ chối `sendPolicy` gửi đi. Các lượt `room_event` xung quanh vẫn im lặng trừ khi chúng là lệnh tường minh, ngay cả khi đầu ra thời gian chạy được đánh dấu là do máy chủ sở hữu.
 
-Nếu công cụ nhắn tin không khả dụng theo chính sách công cụ đang hoạt động, OpenClaw sẽ quay về phản hồi hiển thị tự động thay vì âm thầm chặn phản hồi. `openclaw doctor` cảnh báo về sự không khớp này.
+Phản hồi hiển thị chỉ dùng công cụ yêu cầu một mô hình/thời gian chạy gọi công cụ đáng tin cậy và được khuyến nghị cho các phòng dùng chung xung quanh trên các mô hình thế hệ mới nhất như GPT-5.6 Sol. Một số mô hình yếu hơn có thể trả lời bằng văn bản cuối nhưng không hiểu rằng đầu ra hiển thị tại nguồn phải được gửi bằng `message(action=send)`. Theo mặc định, OpenClaw chỉ khôi phục trường hợp phổ biến khi câu trả lời cuối bị mắc kẹt nếu câu trả lời đó có nội dung đáng kể, lượt nguồn không phải là sự kiện phòng, chính sách gửi không từ chối phân phối và chưa có phản hồi nguồn nào được gửi. Quá trình khôi phục được giới hạn ở một lần thử lại; nó ngăn việc lưu lời nhắc thử lại tổng hợp và giữ lần thử lại đó ngoài quá trình gom lô để không thể hợp nhất với các lời nhắc không liên quan đang xếp hàng. Nếu lần thử lại cũng bị mắc kẹt hoặc không thể đưa vào hàng đợi, OpenClaw chỉ phân phối một thông báo chẩn đoán đã được làm sạch, chẳng hạn như "Tôi đã tạo phản hồi nhưng không thể gửi phản hồi đó đến cuộc trò chuyện này. Vui lòng thử lại." Văn bản cuối riêng tư ban đầu không bao giờ được đánh dấu để tự động phân phối đến nguồn. Đối với các mô hình liên tục làm mắc kẹt phản hồi, hãy dùng `"automatic"` để lượt trợ lý cuối cùng trở thành đường dẫn phản hồi hiển thị, chuyển sang một mô hình gọi công cụ mạnh hơn, kiểm tra nhật ký chi tiết của Gateway để xem bản tóm tắt tải trọng bị chặn hoặc đặt `messages.groupChat.visibleReplies: "automatic"` để sử dụng phản hồi cuối hiển thị cho mọi yêu cầu nhóm/kênh.
 
-Quy tắc này áp dụng cho văn bản cuối thông thường của agent. Binding hội thoại do Plugin sở hữu dùng phản hồi do Plugin sở hữu trả về làm phản hồi hiển thị cho các lượt bound-thread đã được nhận; Plugin không cần gọi `message(action=send)` cho các phản hồi binding đó.
+Nếu công cụ tin nhắn không khả dụng theo chính sách công cụ đang hoạt động, OpenClaw sẽ chuyển sang các phản hồi hiển thị tự động thay vì âm thầm chặn phản hồi. `openclaw doctor` cảnh báo về sự không khớp này.
 
-**Khắc phục sự cố: @mention nhóm kích hoạt đang nhập rồi im lặng (không có lỗi)**
+Quy tắc này áp dụng cho văn bản cuối thông thường của tác nhân. Các liên kết hội thoại do Plugin sở hữu sử dụng phản hồi do Plugin sở hữu trả về làm phản hồi hiển thị cho các lượt trong luồng đã liên kết mà Plugin xác nhận xử lý; Plugin không cần gọi `message(action=send)` cho các phản hồi liên kết đó.
 
-Triệu chứng: một @mention nhóm/kênh hiển thị chỉ báo đang nhập và nhật ký gateway báo `dispatch complete (queuedFinal=false, replies=0)`, nhưng không có tin nhắn nào xuất hiện trong phòng. DM đến cùng agent vẫn trả lời bình thường.
+**Khắc phục sự cố: @mention trong nhóm kích hoạt trạng thái đang nhập rồi im lặng (không có lỗi)**
 
-Nguyên nhân: chế độ phản hồi hiển thị của nhóm/kênh phân giải thành `"message_tool"`, nên OpenClaw chạy lượt nhưng chặn văn bản cuối của assistant trừ khi agent gọi `message(action=send)`. Không có hợp đồng `NO_REPLY` trong chế độ này; không có lệnh gọi công cụ nhắn tin nghĩa là không có phản hồi nguồn. Không có lỗi vì việc chặn là hành vi đã cấu hình. Các lượt nhóm và kênh thông thường mặc định là `"automatic"`, nên triệu chứng này chỉ xuất hiện khi `messages.groupChat.visibleReplies` (hoặc `messages.visibleReplies` toàn cục) được đặt rõ ràng thành `"message_tool"`. Harness `defaultVisibleReplies` không áp dụng ở đây — bộ phân giải nhóm/kênh bỏ qua nó; nó chỉ ảnh hưởng đến các cuộc trò chuyện trực tiếp/nguồn (harness Codex chặn các kết quả cuối của trò chuyện trực tiếp theo cách đó).
+Triệu chứng: một @mention trong nhóm/kênh hiển thị chỉ báo đang nhập và nhật ký Gateway báo `dispatch complete (queuedFinal=false, replies=0)`, nhưng không có tin nhắn nào xuất hiện trong phòng. Tin nhắn trực tiếp gửi đến cùng tác nhân vẫn được phản hồi bình thường.
 
-Cách sửa: chọn một mô hình gọi công cụ mạnh hơn, xóa ghi đè `"message_tool"` rõ ràng để quay về mặc định `"automatic"`, hoặc đặt `messages.groupChat.visibleReplies: "automatic"` để buộc phản hồi hiển thị cho mọi yêu cầu nhóm/kênh. Gateway tải nóng cấu hình `messages` sau khi tệp được lưu; chỉ khởi động lại gateway khi tính năng theo dõi tệp hoặc tải lại cấu hình bị tắt trong triển khai.
+Nguyên nhân: chế độ phản hồi hiển thị của nhóm/kênh được phân giải thành `"message_tool"`, vì vậy OpenClaw chạy lượt nhưng chặn văn bản cuối của trợ lý trừ khi tác nhân gọi `message(action=send)`. Không có hợp đồng `NO_REPLY` trong chế độ này; không gọi công cụ tin nhắn đồng nghĩa với việc văn bản cuối ban đầu là riêng tư. Đối với các lượt nguồn có nội dung thực chất, OpenClaw hiện thử lại một lần để khôi phục có bảo vệ; ghi chú ngắn, yêu cầu im lặng rõ ràng, sự kiện phòng, lượt bị chính sách gửi từ chối và lượt đã được gửi sẽ không được thử lại. Các lượt nhóm và kênh thông thường mặc định là `"automatic"`, vì vậy triệu chứng này chỉ xuất hiện khi `messages.groupChat.visibleReplies` (hoặc `messages.visibleReplies` toàn cục) được đặt rõ ràng thành `"message_tool"`. `defaultVisibleReplies` của harness không áp dụng ở đây — bộ phân giải nhóm/kênh bỏ qua tùy chọn này; nó chỉ ảnh hưởng đến các cuộc trò chuyện trực tiếp/nguồn (harness Codex chặn phần kết của cuộc trò chuyện trực tiếp theo cách đó).
 
-**Loại mention:**
+Cách khắc phục: chọn một mô hình gọi công cụ mạnh hơn, xóa ghi đè `"message_tool"` rõ ràng để quay về mặc định `"automatic"`, hoặc đặt `messages.groupChat.visibleReplies: "automatic"` để buộc hiển thị phản hồi cho mọi yêu cầu nhóm/kênh. Một văn bản cuối có nội dung thực chất bị mắc kẹt sẽ không còn kết thúc dưới dạng thành công trong im lặng; nó phải khôi phục qua một lần thử lại `message(action=send)` hoặc hiển thị thông báo chẩn đoán lỗi gửi đã được làm sạch. Gateway tự động tải lại nóng cấu hình `messages` sau khi tệp được lưu; chỉ khởi động lại Gateway khi tính năng theo dõi tệp hoặc tải lại cấu hình bị vô hiệu hóa trong môi trường triển khai.
 
-- **Mention metadata**: @-mention gốc của nền tảng. Bị bỏ qua trong chế độ tự trò chuyện của WhatsApp.
-- **Mẫu văn bản**: Mẫu regex an toàn trong `agents.list[].groupChat.mentionPatterns`. Mẫu không hợp lệ và lặp lồng nhau không an toàn bị bỏ qua.
-- Chặn mention chỉ được thực thi khi có thể phát hiện (mention gốc hoặc ít nhất một mẫu).
+**Các loại lượt đề cập:**
+
+- **Lượt đề cập trong siêu dữ liệu**: @-mention gốc của nền tảng. Bị bỏ qua trong chế độ tự trò chuyện của WhatsApp.
+- **Mẫu văn bản**: Các mẫu biểu thức chính quy an toàn trong `agents.list[].groupChat.mentionPatterns`. Các mẫu không hợp lệ và phép lặp lồng nhau không an toàn sẽ bị bỏ qua.
+- Cổng kiểm soát lượt đề cập chỉ được thực thi khi có thể phát hiện (lượt đề cập gốc hoặc ít nhất một mẫu).
 
 ```json5
 {
   messages: {
-    visibleReplies: "automatic", // force old automatic final replies for direct/source chats
+    visibleReplies: "automatic", // buộc dùng phản hồi cuối tự động cũ cho các cuộc trò chuyện trực tiếp/nguồn
     groupChat: {
       historyLimit: 50,
-      unmentionedInbound: "room_event", // always-on unmentioned room chatter becomes quiet context
-      visibleReplies: "message_tool", // opt-in; require message(action=send) for visible room replies
+      unmentionedInbound: "room_event", // hội thoại trong phòng luôn bật nhưng không có lượt đề cập trở thành ngữ cảnh yên lặng
+      visibleReplies: "message_tool", // tự nguyện bật; yêu cầu message(action=send) để phản hồi trong phòng được hiển thị
     },
   },
   agents: {
@@ -852,13 +867,13 @@ Cách sửa: chọn một mô hình gọi công cụ mạnh hơn, xóa ghi đè 
 }
 ```
 
-`messages.groupChat.historyLimit` đặt mặc định toàn cục. Các kênh có thể ghi đè bằng `channels.<channel>.historyLimit` (hoặc theo tài khoản). Đặt `0` để tắt.
+`messages.groupChat.historyLimit` đặt giá trị mặc định toàn cục. Các kênh có thể ghi đè bằng `channels.<channel>.historyLimit` (hoặc theo từng tài khoản). Đặt `0` để vô hiệu hóa.
 
-`messages.groupChat.unmentionedInbound: "room_event"` gửi tin nhắn nhóm/kênh luôn bật nhưng không được mention dưới dạng ngữ cảnh phòng yên lặng trên các kênh được hỗ trợ. Tin nhắn được mention, lệnh và tin nhắn trực tiếp vẫn là yêu cầu của người dùng. Xem [Sự kiện phòng xung quanh](/vi/channels/ambient-room-events) để có ví dụ Discord, Slack và Telegram đầy đủ.
+`messages.groupChat.unmentionedInbound: "room_event"` gửi các tin nhắn nhóm/kênh luôn bật nhưng không có lượt đề cập dưới dạng ngữ cảnh phòng yên lặng trên các kênh được hỗ trợ. Tin nhắn có lượt đề cập, lệnh và tin nhắn trực tiếp vẫn là yêu cầu của người dùng. Xem [Sự kiện phòng nền](/vi/channels/ambient-room-events) để biết các ví dụ đầy đủ về Discord, Slack và Telegram.
 
-`messages.visibleReplies` là mặc định sự kiện nguồn toàn cục; `messages.groupChat.visibleReplies` ghi đè nó cho sự kiện nguồn nhóm/kênh. Khi `messages.visibleReplies` chưa được đặt, trò chuyện trực tiếp/nguồn dùng mặc định runtime hoặc harness đã chọn, nhưng các lượt trực tiếp WebChat nội bộ dùng phân phối cuối tự động để giữ tương đương prompt Pi/Codex. Đặt `messages.visibleReplies: "message_tool"` để cố ý yêu cầu `message(action=send)` cho đầu ra hiển thị. Allowlist kênh và chặn mention vẫn quyết định một sự kiện có được xử lý hay không.
+`messages.visibleReplies` là giá trị mặc định toàn cục cho sự kiện nguồn; `messages.groupChat.visibleReplies` ghi đè giá trị này cho sự kiện nguồn của nhóm/kênh. Khi `messages.visibleReplies` chưa được đặt, các cuộc trò chuyện trực tiếp/nguồn sử dụng giá trị mặc định của runtime hoặc harness đã chọn, nhưng các lượt trực tiếp nội bộ của WebChat sử dụng tính năng gửi văn bản cuối tự động để bảo đảm tính tương đồng về prompt giữa Pi/Codex. Đặt `messages.visibleReplies: "message_tool"` để chủ ý yêu cầu `message(action=send)` cho đầu ra hiển thị. Danh sách cho phép của kênh và cổng kiểm soát lượt đề cập vẫn quyết định một sự kiện có được xử lý hay không.
 
-#### Giới hạn lịch sử DM
+#### Giới hạn lịch sử tin nhắn trực tiếp
 
 ```json5
 {
@@ -873,13 +888,13 @@ Cách sửa: chọn một mô hình gọi công cụ mạnh hơn, xóa ghi đè 
 }
 ```
 
-Thứ tự phân giải: ghi đè theo DM → mặc định nhà cung cấp → không giới hạn (giữ lại tất cả).
+Thứ tự phân giải: ghi đè theo từng tin nhắn trực tiếp → mặc định của nhà cung cấp → không giới hạn (giữ lại tất cả).
 
-Được hỗ trợ: `telegram`, `whatsapp`, `discord`, `slack`, `signal`, `imessage`, `msteams`.
+Bộ phân giải này đọc `channels.<provider>.dmHistoryLimit` và `channels.<provider>.dms.<id>.historyLimit` cho mọi kênh có khóa phiên tuân theo dạng `provider:direct:<id>` tiêu chuẩn (hoặc `provider:dm:<id>` cũ), vì vậy nó hoạt động trên cả các kênh đi kèm lẫn kênh Plugin, không chỉ một danh sách cố định.
 
 #### Chế độ tự trò chuyện
 
-Bao gồm số của chính bạn trong `allowFrom` để bật chế độ tự trò chuyện (bỏ qua @-mention gốc, chỉ phản hồi các mẫu văn bản):
+Thêm số của chính bạn vào `allowFrom` để bật chế độ tự trò chuyện (bỏ qua @-mention gốc, chỉ phản hồi các mẫu văn bản):
 
 ```json5
 {
@@ -905,16 +920,16 @@ Bao gồm số của chính bạn trong `allowFrom` để bật chế độ tự
 ```json5
 {
   commands: {
-    native: "auto", // register native commands when supported
-    nativeSkills: "auto", // register native skill commands when supported
-    text: true, // parse /commands in chat messages
-    bash: false, // allow ! (alias: /bash)
+    native: "auto", // đăng ký lệnh gốc khi được hỗ trợ
+    nativeSkills: "auto", // đăng ký lệnh Skills gốc khi được hỗ trợ
+    text: true, // phân tích /commands trong tin nhắn trò chuyện
+    bash: false, // cho phép ! (bí danh: /bash)
     bashForegroundMs: 2000,
-    config: false, // allow /config
-    mcp: false, // allow /mcp
-    plugins: false, // allow /plugins
-    debug: false, // allow /debug
-    restart: true, // allow /restart + gateway restart tool
+    config: false, // cho phép /config
+    mcp: false, // cho phép /mcp
+    plugins: false, // cho phép /plugins
+    debug: false, // cho phép /debug
+    restart: true, // cho phép /restart + yêu cầu khởi động lại SIGUSR1 bên ngoài
     ownerAllowFrom: ["discord:123456789012345678"],
     ownerDisplay: "raw", // raw | hash
     ownerDisplaySecret: "${OWNER_ID_HASH_SECRET}",
@@ -927,34 +942,34 @@ Bao gồm số của chính bạn trong `allowFrom` để bật chế độ tự
 }
 ```
 
-<Accordion title="Command details">
+<Accordion title="Chi tiết lệnh">
 
-- Khối này cấu hình các bề mặt lệnh. Để xem danh mục lệnh tích hợp sẵn + đi kèm hiện tại, xem [Lệnh Slash](/vi/tools/slash-commands).
-- Trang này là **tham chiếu khóa cấu hình**, không phải danh mục lệnh đầy đủ. Các lệnh do kênh/Plugin sở hữu như QQ Bot `/bot-ping` `/bot-help` `/bot-logs`, LINE `/card`, ghép đôi thiết bị `/pair`, bộ nhớ `/dreaming`, điều khiển điện thoại `/phone`, và Talk `/voice` được ghi trong tài liệu trang kênh/Plugin tương ứng cùng với [Lệnh Slash](/vi/tools/slash-commands).
-- Lệnh văn bản phải là thông điệp **độc lập** với `/` ở đầu.
-- `native: "auto"` bật lệnh gốc cho Discord/Telegram, để Slack tắt.
-- `nativeSkills: "auto"` bật lệnh kỹ năng gốc cho Discord/Telegram, để Slack tắt.
-- Ghi đè theo từng kênh: `channels.discord.commands.native` (bool hoặc `"auto"`). Với Discord, `false` bỏ qua đăng ký lệnh gốc và dọn dẹp trong khi khởi động.
-- Ghi đè đăng ký kỹ năng gốc theo từng kênh bằng `channels.<provider>.commands.nativeSkills`.
-- `channels.telegram.customCommands` thêm các mục menu bot Telegram bổ sung.
-- `bash: true` bật `! <cmd>` cho shell máy chủ. Yêu cầu `tools.elevated.enabled` và người gửi nằm trong `tools.elevated.allowFrom.<channel>`.
-- `config: true` bật `/config` (đọc/ghi `openclaw.json`). Với các ứng dụng khách `chat.send` của Gateway, các lượt ghi `/config set|unset` có lưu bền vững cũng yêu cầu `operator.admin`; `/config show` chỉ đọc vẫn khả dụng cho các ứng dụng khách operator thông thường có phạm vi ghi.
-- `mcp: true` bật `/mcp` cho cấu hình máy chủ MCP do OpenClaw quản lý dưới `mcp.servers`.
-- `plugins: true` bật `/plugins` cho các điều khiển khám phá, cài đặt, và bật/tắt Plugin.
+- Khối này cấu hình các bề mặt lệnh. Để xem danh mục lệnh tích hợp sẵn và đi kèm hiện tại, hãy xem [Lệnh dấu gạch chéo](/vi/tools/slash-commands).
+- Trang này là **tài liệu tham chiếu khóa cấu hình**, không phải toàn bộ danh mục lệnh. Các lệnh do kênh/Plugin sở hữu như QQ Bot `/bot-ping` `/bot-help` `/bot-logs`, LINE `/card`, ghép nối thiết bị `/pair`, bộ nhớ `/dreaming`, điều khiển điện thoại `/phone` và Talk `/voice` được ghi lại trên các trang kênh/Plugin tương ứng cùng với [Lệnh dấu gạch chéo](/vi/tools/slash-commands).
+- Các lệnh văn bản phải là tin nhắn **độc lập** với `/` đứng đầu.
+- `native: "auto"` bật các lệnh gốc cho Discord/Telegram và giữ chúng tắt trên Slack.
+- `nativeSkills: "auto"` bật các lệnh Skills gốc cho Discord/Telegram và giữ chúng tắt trên Slack.
+- Ghi đè theo từng kênh: `channels.discord.commands.native` (giá trị boolean hoặc `"auto"`). Đối với Discord, `false` bỏ qua việc đăng ký và dọn dẹp lệnh gốc trong quá trình khởi động.
+- Ghi đè việc đăng ký Skills gốc theo từng kênh bằng `channels.<provider>.commands.nativeSkills`.
+- `channels.telegram.customCommands` thêm các mục bổ sung vào menu bot Telegram.
+- `bash: true` bật `! <cmd>` cho shell của máy chủ. Yêu cầu `tools.elevated.enabled` và người gửi phải nằm trong `tools.elevated.allowFrom.<channel>`.
+- `config: true` bật `/config` (đọc/ghi `openclaw.json`). Đối với các máy khách `chat.send` của Gateway, các thao tác ghi `/config set|unset` được duy trì lâu dài cũng yêu cầu `operator.admin`; `/config show` chỉ đọc vẫn khả dụng cho các máy khách vận hành thông thường có phạm vi ghi.
+- `mcp: true` bật `/mcp` cho cấu hình máy chủ MCP do OpenClaw quản lý trong `mcp.servers`.
+- `plugins: true` bật `/plugins` cho các chức năng khám phá, cài đặt và bật/tắt Plugin.
 - `channels.<provider>.configWrites` kiểm soát các thay đổi cấu hình theo từng kênh (mặc định: true).
-- Với các kênh nhiều tài khoản, `channels.<provider>.accounts.<id>.configWrites` cũng kiểm soát các lượt ghi nhắm tới tài khoản đó (ví dụ `/allowlist --config --account <id>` hoặc `/config set channels.<provider>.accounts.<id>...`).
-- `restart: false` tắt `/restart` và các hành động công cụ khởi động lại Gateway. Mặc định: `true`.
-- `ownerAllowFrom` là allowlist chủ sở hữu tường minh cho các lệnh chỉ dành cho chủ sở hữu và các hành động kênh được giới hạn bởi chủ sở hữu. Nó tách biệt với `allowFrom`.
-- `ownerDisplay: "hash"` băm id chủ sở hữu trong prompt hệ thống. Đặt `ownerDisplaySecret` để kiểm soát việc băm.
-- `allowFrom` là theo từng provider. Khi được đặt, đây là nguồn ủy quyền **duy nhất** (allowlist/ghép đôi của kênh và `useAccessGroups` bị bỏ qua).
-- `useAccessGroups: false` cho phép lệnh bỏ qua các chính sách nhóm truy cập khi `allowFrom` chưa được đặt.
-- Sơ đồ tài liệu lệnh:
-  - danh mục tích hợp sẵn + đi kèm: [Lệnh Slash](/vi/tools/slash-commands)
-  - bề mặt lệnh dành riêng cho kênh: [Kênh](/vi/channels)
+- Đối với các kênh nhiều tài khoản, `channels.<provider>.accounts.<id>.configWrites` cũng kiểm soát các thao tác ghi nhắm đến tài khoản đó (ví dụ: `/allowlist --config --account <id>` hoặc `/config set channels.<provider>.accounts.<id>...`).
+- `restart: false` vô hiệu hóa `/restart` và các yêu cầu khởi động lại `SIGUSR1` bên ngoài. Mặc định: `true`.
+- `ownerAllowFrom` là danh sách chủ sở hữu được phép rõ ràng dành cho các lệnh chỉ dành cho chủ sở hữu và các thao tác kênh được kiểm soát theo chủ sở hữu. Danh sách này tách biệt với `allowFrom`.
+- `ownerDisplay: "hash"` băm mã định danh chủ sở hữu trong prompt hệ thống. Đặt `ownerDisplaySecret` để kiểm soát việc băm.
+- `allowFrom` áp dụng theo từng nhà cung cấp. Khi được đặt, đây là nguồn ủy quyền **duy nhất** (danh sách cho phép/ghép nối của kênh và `useAccessGroups` bị bỏ qua).
+- `useAccessGroups: false` cho phép các lệnh bỏ qua chính sách nhóm truy cập khi `allowFrom` chưa được đặt.
+- Bản đồ tài liệu lệnh:
+  - danh mục tích hợp sẵn và đi kèm: [Lệnh dấu gạch chéo](/vi/tools/slash-commands)
+  - bề mặt lệnh dành riêng cho từng kênh: [Kênh](/vi/channels)
   - lệnh QQ Bot: [QQ Bot](/vi/channels/qqbot)
-  - lệnh ghép đôi: [Ghép đôi](/vi/channels/pairing)
+  - lệnh ghép nối: [Ghép nối](/vi/channels/pairing)
   - lệnh thẻ LINE: [LINE](/vi/channels/line)
-  - memory dreaming: [Dreaming](/vi/concepts/dreaming)
+  - Dreaming của bộ nhớ: [Dreaming](/vi/concepts/dreaming)
 
 </Accordion>
 
@@ -962,6 +977,6 @@ Bao gồm số của chính bạn trong `allowFrom` để bật chế độ tự
 
 ## Liên quan
 
-- [Tham chiếu cấu hình](/vi/gateway/configuration-reference) — khóa cấp cao nhất
-- [Cấu hình — agent](/vi/gateway/config-agents)
+- [Tài liệu tham chiếu cấu hình](/vi/gateway/configuration-reference) — các khóa cấp cao nhất
+- [Cấu hình — tác nhân](/vi/gateway/config-agents)
 - [Tổng quan về kênh](/vi/channels)

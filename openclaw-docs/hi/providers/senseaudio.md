@@ -1,41 +1,42 @@
 ---
 read_when:
-    - आप ऑडियो संलग्नकों के लिए SenseAudio का वाक्-से-पाठ चाहते हैं
-    - आपको SenseAudio API कुंजी env var या ऑडियो config path की आवश्यकता है
-summary: आने वाले वॉइस नोट्स के लिए SenseAudio बैच वाक्-से-पाठ
+    - आप ऑडियो अटैचमेंट के लिए SenseAudio वाक्-से-पाठ चाहते हैं
+    - आपको SenseAudio API कुंजी का एनवायरनमेंट वेरिएबल या ऑडियो कॉन्फ़िगरेशन पथ चाहिए
+summary: इनबाउंड वॉइस नोट्स के लिए SenseAudio बैच स्पीच-टू-टेक्स्ट
 title: SenseAudio
 x-i18n:
-    generated_at: "2026-06-29T00:02:58Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T21:37:26Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f53af21c746cdd44c71485cbad669f4a01a6e5be956675c73831e7b5f15df8c4
+    source_hash: c0ca4a31a32eed85c1d9dcd13ebc2eaea94be370d2b1013ae8b4677949bea91d
     source_path: providers/senseaudio.md
     workflow: 16
 ---
 
-SenseAudio OpenClaw की साझा `tools.media.audio` पाइपलाइन के माध्यम से आने वाले ऑडियो और वॉइस-नोट अटैचमेंट को ट्रांसक्राइब कर सकता है। OpenClaw मल्टीपार्ट ऑडियो को OpenAI-संगत ट्रांसक्रिप्शन एंडपॉइंट पर पोस्ट करता है और लौटाए गए टेक्स्ट को `{{Transcript}}` के साथ एक `[Audio]` ब्लॉक के रूप में इंजेक्ट करता है।
+SenseAudio, OpenClaw की साझा `tools.media.audio` पाइपलाइन के माध्यम से आने वाले ऑडियो और वॉइस-नोट अटैचमेंट का लिप्यंतरण करता है। OpenClaw, OpenAI-संगत लिप्यंतरण एंडपॉइंट पर मल्टीपार्ट ऑडियो पोस्ट करता है और लौटाए गए टेक्स्ट को `{{Transcript}}` के रूप में तथा एक `[Audio]` ब्लॉक के साथ प्रविष्ट करता है।
 
-| प्रॉपर्टी       | मान                                              |
+| गुण           | मान                                              |
 | ------------- | ------------------------------------------------ |
-| प्रोवाइडर आईडी | `senseaudio`                                     |
-| Plugin        | बंडल किया गया, `enabledByDefault: true`          |
-| कॉन्ट्रैक्ट    | `mediaUnderstandingProviders` (ऑडियो)            |
-| Auth env var  | `SENSEAUDIO_API_KEY`                             |
-| डिफॉल्ट मॉडल   | `senseaudio-asr-pro-1.5-260319`                  |
-| डिफॉल्ट URL    | `https://api.senseaudio.cn/v1`                   |
-| वेबसाइट        | [senseaudio.cn](https://senseaudio.cn)           |
-| दस्तावेज़       | [senseaudio.cn/docs](https://senseaudio.cn/docs) |
+| प्रदाता आईडी  | `senseaudio`                               |
+| Plugin        | बंडल किया गया, `enabledByDefault: true`               |
+| अनुबंध        | `mediaUnderstandingProviders` (ऑडियो)                      |
+| प्रमाणीकरण एन्वायरनमेंट वेरिएबल | `SENSEAUDIO_API_KEY`               |
+| डिफ़ॉल्ट मॉडल | `senseaudio-asr-pro-1.5-260319`                               |
+| डिफ़ॉल्ट URL  | `https://api.senseaudio.cn/v1`                               |
+| वेबसाइट       | [senseaudio.cn](https://senseaudio.cn)           |
+| दस्तावेज़     | [senseaudio.cn/docs](https://senseaudio.cn/docs) |
 
 ## शुरू करना
 
 <Steps>
-  <Step title="Set your API key">
+  <Step title="अपनी API कुंजी सेट करें">
     ```bash
     export SENSEAUDIO_API_KEY="..."
     ```
   </Step>
-  <Step title="Enable the audio provider">
+  <Step title="ऑडियो प्रदाता सक्षम करें">
     ```json5
     {
       tools: {
@@ -49,28 +50,28 @@ SenseAudio OpenClaw की साझा `tools.media.audio` पाइपला�
     }
     ```
   </Step>
-  <Step title="Send a voice note">
-    किसी भी कनेक्टेड चैनल के माध्यम से ऑडियो संदेश भेजें। OpenClaw ऑडियो को
-    SenseAudio पर अपलोड करता है और जवाब पाइपलाइन में ट्रांसक्रिप्ट का उपयोग करता है।
+  <Step title="वॉइस नोट भेजें">
+    किसी भी कनेक्टेड चैनल के माध्यम से एक ऑडियो संदेश भेजें। OpenClaw ऑडियो को
+    SenseAudio पर अपलोड करता है और उत्तर पाइपलाइन में प्रतिलेख का उपयोग करता है।
   </Step>
 </Steps>
 
 ## विकल्प
 
-| विकल्प      | पाथ                                  | विवरण                                |
-| ---------- | ------------------------------------- | ----------------------------------- |
-| `model`    | `tools.media.audio.models[].model`    | SenseAudio ASR मॉडल आईडी             |
-| `language` | `tools.media.audio.models[].language` | वैकल्पिक भाषा संकेत                  |
-| `prompt`   | `tools.media.audio.prompt`            | वैकल्पिक ट्रांसक्रिप्शन प्रॉम्प्ट     |
-| `baseUrl`  | `tools.media.audio.baseUrl` या मॉडल   | OpenAI-संगत बेस को ओवरराइड करें     |
-| `headers`  | `tools.media.audio.request.headers`   | अतिरिक्त रिक्वेस्ट हेडर              |
+| विकल्प    | पथ                             | विवरण                              |
+| ---------- | ------------------------------- | ----------------------------------- |
+| `model`    | `tools.media.models[].model`    | SenseAudio ASR मॉडल आईडी            |
+| `language` | `tools.media.models[].language` | वैकल्पिक भाषा संकेत                 |
+| `prompt`   | `tools.media.models[].prompt`   | वैकल्पिक लिप्यंतरण प्रॉम्प्ट        |
+| `baseUrl`  | `tools.media.models[].baseUrl`  | OpenAI-संगत बेस को ओवरराइड करें     |
+| `headers`  | `tools.media.models[].headers`  | अतिरिक्त अनुरोध हेडर                |
 
 <Note>
-OpenClaw में SenseAudio केवल बैच STT है। Voice Call रियलटाइम ट्रांसक्रिप्शन
-स्ट्रीमिंग STT समर्थन वाले प्रोवाइडर का उपयोग जारी रखता है।
+OpenClaw में SenseAudio केवल बैच STT है। Voice Call का रियलटाइम लिप्यंतरण
+स्ट्रीमिंग STT समर्थन वाले प्रदाताओं का उपयोग करना जारी रखता है।
 </Note>
 
 ## संबंधित
 
-- [मीडिया अंडरस्टैंडिंग (ऑडियो)](/hi/nodes/audio)
-- [मॉडल प्रोवाइडर](/hi/concepts/model-providers)
+- [मीडिया की समझ (ऑडियो)](/hi/nodes/audio)
+- [मॉडल प्रदाता](/hi/concepts/model-providers)

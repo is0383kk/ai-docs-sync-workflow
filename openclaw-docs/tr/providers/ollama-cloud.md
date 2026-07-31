@@ -5,9 +5,10 @@ read_when:
 summary: Ollama Cloud'u doğrudan OpenClaw ile kullanın
 title: Ollama Cloud
 x-i18n:
-    generated_at: "2026-07-12T12:43:44Z"
+    generated_at: "2026-07-26T23:37:27Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 966e5237e37134cef109979079db390e9844714001e921e7976dc8ca7f58bcc4
     source_path: providers/ollama-cloud.md
@@ -15,16 +16,16 @@ x-i18n:
 ---
 
 Ollama Cloud, Ollama'nın barındırılan model API'sidir. `ollama-cloud` sağlayıcısı,
-yerel bir Ollama sunucusu veya bulut modunda oturum açmış yerel bir Ollama
-uygulaması olmadan, Ollama'nın yerel `/api/chat` API'si üzerinden doğrudan
+yerel bir Ollama sunucusu ve bulut modunda oturum açmış yerel bir Ollama uygulaması
+olmadan, Ollama'nın yerel `/api/chat` API'si üzerinden doğrudan
 `https://ollama.com` adresini çağırır. `ollama-cloud/kimi-k2.6` gibi model
 referansları kullanın.
 
-OpenClaw, yalnızca buluta özgü kimlik bilgilerinin, canlı katalog keşfinin ve
-model seçiminin yerel bir `ollama` ana makinesiyle karışmaması için
-`ollama-cloud` değerini ayrı bir sağlayıcı kimliği olarak kaydeder. Yerel
-Ollama, karma bulut ve yerel yönlendirme, gömmeler ve özel ana makine ayrıntıları
-için [Ollama](/tr/providers/ollama) sayfasına bakın.
+OpenClaw, yalnızca buluta ait kimlik bilgilerinin, canlı katalog keşfinin ve
+model seçiminin yerel bir `ollama` ana bilgisayarıyla karışmaması için
+`ollama-cloud` değerini kendi sağlayıcı kimliği olarak kaydeder. Yerel Ollama,
+hibrit bulut-artı-yerel yönlendirme, gömmeler ve özel ana bilgisayar ayrıntıları
+için [Ollama](/tr/providers/ollama) bölümüne bakın.
 
 ## Kurulum
 
@@ -37,16 +38,16 @@ openclaw onboard --auth-choice ollama-cloud
 Veya şunu ayarlayın:
 
 ```bash
-export OLLAMA_API_KEY="<your-ollama-cloud-api-key>" # pragma: allowlist secret
+export OLLAMA_API_KEY="<your-ollama-cloud-api-key>" # pragma: izin listesi gizli değeri
 ```
 
-Etkileşimsiz ilk kurulum, anahtarı doğrudan kabul eder:
+Etkileşimsiz ilk katılım, anahtarı doğrudan kabul eder:
 
 ```bash
 openclaw onboard --auth-choice ollama-cloud --ollama-cloud-api-key "<key>"
 ```
 
-İlk kurulum, varsayılan modeli `ollama-cloud/kimi-k2.5:cloud` olarak ayarlar.
+İlk katılım, varsayılan modeli `ollama-cloud/kimi-k2.5:cloud` olarak ayarlar.
 
 ## Varsayılanlar
 
@@ -54,49 +55,48 @@ openclaw onboard --auth-choice ollama-cloud --ollama-cloud-api-key "<key>"
 - Temel URL: `https://ollama.com`
 - Ortam değişkeni: `OLLAMA_API_KEY`
 - API biçimi: Ollama yerel `/api/chat`
-- İlk kurulumun varsayılan modeli: `ollama-cloud/kimi-k2.5:cloud`
+- İlk katılım varsayılan modeli: `ollama-cloud/kimi-k2.5:cloud`
 
 ## Ollama Cloud ne zaman seçilmeli?
 
 - Yerel olarak `ollama serve` çalıştırmadan barındırılan Ollama modellerini kullanmak istiyorsanız.
-- OpenClaw'ın yerel Ollama için kullandığı yerel Ollama sohbet API'si biçiminin aynısını, ancak `https://ollama.com` adresine yönlendirilmiş olarak kullanmak istiyorsanız.
+- OpenClaw'ın yerel Ollama için kullandığı yerel Ollama sohbet API'si biçiminin aynısını, ancak `https://ollama.com` adresine yönlendirilmiş olarak istiyorsanız.
 - Ollama'nın barındırılan kataloğunda zaten bulunan modeller için basit bir bulut yolu istiyorsanız.
 - Yerel model indirmelerine, yerel GPU denetimine veya yalnızca LAN üzerinden çıkarıma ihtiyacınız yoksa.
 
-Oturum açılmış bir Ollama ana makinesi üzerinden yalnızca yerel veya bulut ve
-yerel yönlendirme istediğinizde bunun yerine [Ollama](/tr/providers/ollama)
-kullanın. `/v1/chat/completions` semantiğine veya sağlayıcıya özgü OpenAI
-tarzı özelliklere ihtiyaç duyduğunuzda bunun yerine OpenAI uyumlu bir sağlayıcı
-kullanın.
+Oturum açılmış bir Ollama ana bilgisayarı üzerinden yalnızca yerel veya
+bulut-artı-yerel yönlendirme istediğinizde bunun yerine [Ollama](/tr/providers/ollama)
+kullanın. `/v1/chat/completions` semantiğine veya sağlayıcıya özgü OpenAI tarzı
+özelliklere ihtiyacınız olduğunda bunun yerine OpenAI uyumlu bir sağlayıcı kullanın.
 
 ## Modeller
 
-Sağlayıcı bir API anahtarı gerektirir; anahtar olmadan etkin kalmaz. Bir anahtar
-sağlandığında OpenClaw, Ollama Cloud modellerini barındırılan katalogdan canlı
-olarak keşfeder:
+Sağlayıcı bir API anahtarı gerektirir; anahtar olmadan etkin değildir. Bir anahtar
+olduğunda OpenClaw, Ollama Cloud modellerini barındırılan katalogdan canlı olarak keşfeder:
 
 ```bash
 openclaw models list --provider ollama-cloud
 openclaw models set ollama-cloud/kimi-k2.6
 ```
 
-Canlı katalogdaki barındırılan kimlikler arasında `deepseek-v4-flash`, `glm-5`,
-`gpt-oss:20b`, `kimi-k2.6` ve `minimax-m2.7` bulunur. Canlı keşif hiçbir sonuç
-döndürmediğinde OpenClaw, paketle birlikte gelen `kimi-k2.5:cloud`,
-`minimax-m2.7:cloud`, `glm-5.1:cloud` ve `glm-5.2:cloud` satırlarına geri döner.
+Canlı katalogdaki barındırılan kimlikler arasında `deepseek-v4-flash`,
+`glm-5`, `gpt-oss:20b`, `kimi-k2.6` ve
+`minimax-m2.7` bulunur. Canlı keşif hiçbir sonuç döndürmediğinde OpenClaw,
+paketle gelen `kimi-k2.5:cloud`, `minimax-m2.7:cloud`, `glm-5.1:cloud` ve
+`glm-5.2:cloud` satırlarına geri döner.
 
 Model kimlikleri yerel indirme adları değil, bulut kataloğu kimlikleridir. Bir
-model adı yerel bir Ollama ana makinesinde çalışıyor ancak barındırılan katalogda
-bulunmuyorsa bunun yerine söz konusu yerel ana makineyle `ollama` sağlayıcısını
-kullanın.
+model adı yerel bir Ollama ana bilgisayarında çalışıyor ancak barındırılan katalogda
+bulunmuyorsa bunun yerine söz konusu yerel ana bilgisayarla `ollama`
+sağlayıcısını kullanın.
 
 ## Canlı test
 
-Ollama Cloud API anahtarı duman testlerinde, Ollama canlı testini barındırılan
-uç noktaya yönlendirin ve geçerli kataloğunuzdan bir model seçin:
+Ollama Cloud API anahtarı duman testleri için Ollama canlı testini barındırılan
+uç noktaya yönlendirin ve mevcut kataloğunuzdan bir model seçin:
 
 ```bash
-export OLLAMA_API_KEY="<your-ollama-cloud-api-key>" # pragma: allowlist secret
+export OLLAMA_API_KEY="<your-ollama-cloud-api-key>" # pragma: izin listesi gizli değeri
 
 OPENCLAW_LIVE_TEST=1 \
 OPENCLAW_LIVE_OLLAMA=1 \
@@ -105,17 +105,22 @@ OPENCLAW_LIVE_OLLAMA_MODEL=kimi-k2.6 \
 pnpm test:live -- extensions/ollama/ollama.live.test.ts
 ```
 
-Bulut duman testi metin, yerel akış ve web aramasını çalıştırır; web aramasını
-atlamak için `OPENCLAW_LIVE_OLLAMA_WEB_SEARCH=0` ayarlayın. Ollama Cloud API
-anahtarları `/api/embed` için yetki vermeyebileceğinden,
-`https://ollama.com` için gömmeleri varsayılan olarak atlar; çalışmaya zorlamak
-için `OPENCLAW_LIVE_OLLAMA_EMBEDDINGS=1` ayarlayın.
+Bulut duman testi metin, yerel akış ve web araması çalıştırır; web aramasını
+atlamak için `OPENCLAW_LIVE_OLLAMA_WEB_SEARCH=0` değerini ayarlayın. Ollama Cloud API anahtarları
+`/api/embed` için yetki vermeyebileceğinden, `https://ollama.com` için
+gömmeleri varsayılan olarak atlar; bunları `OPENCLAW_LIVE_OLLAMA_EMBEDDINGS=1` ile zorlayın.
 
 ## Sorun giderme
 
-- `Ollama Cloud requires an API key` / `Set OLLAMA_API_KEY` hataları: gerçek bir bulut API anahtarı sağlayın. Yerel `ollama-local` işareti yalnızca yerel veya özel Ollama ana makineleri içindir.
-- Bilinmeyen model hataları: `openclaw models list --provider ollama-cloud` komutunu çalıştırın ve barındırılan model kimliğini tam olarak kopyalayın.
-- Özel Ollama ana makinelerinde araç çağrısı veya ham JSON sorunları: yanlışlıkla OpenAI uyumlu bir `/v1` URL'si kullanıp kullanmadığınızı kontrol edin. Ollama rotaları, `/v1` son eki olmadan yerel temel URL'yi kullanmalıdır.
+- `Ollama Cloud requires an API key` / `Set OLLAMA_API_KEY` hataları: gerçek bir
+  bulut API anahtarı sağlayın. Yerel `ollama-local` işaretçisi yalnızca yerel
+  veya özel Ollama ana bilgisayarları içindir.
+- Bilinmeyen model hataları: `openclaw models list --provider ollama-cloud` komutunu çalıştırın
+  ve barındırılan model kimliğini tam olarak kopyalayın.
+- Özel Ollama ana bilgisayarlarında araç çağrısı veya ham JSON
+  sorunları: yanlışlıkla OpenAI uyumlu bir `/v1` URL'si kullanıp
+  kullanmadığınızı kontrol edin. Ollama rotaları, `/v1` son eki
+  olmadan yerel temel URL'yi kullanmalıdır.
 
 ## İlgili
 

@@ -1,38 +1,43 @@
 ---
 read_when:
-    - 你希望由 Prometheus、Grafana、VictoriaMetrics 或其他抓取工具收集 OpenClaw Gateway 网关指标
+    - 你希望使用 Prometheus、Grafana、VictoriaMetrics 或其他抓取工具来收集 OpenClaw Gateway 网关指标
     - 你需要用于仪表板或告警的 Prometheus 指标名称和标签策略
     - 你希望无需运行 OpenTelemetry 收集器即可获取指标
 sidebarTitle: Prometheus
-summary: 通过 diagnostics-prometheus 插件将 OpenClaw 诊断信息公开为 Prometheus 文本指标
+summary: 通过 diagnostics-prometheus 插件将 OpenClaw 诊断数据公开为 Prometheus 文本指标
 title: Prometheus 指标
 x-i18n:
-    generated_at: "2026-07-11T20:32:28Z"
+    generated_at: "2026-07-26T06:42:59Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 8a3975a9a79f32f1e9731b819613fdf6b9ffeee20bc71c841b9a6d7a5e0052f4
+    source_hash: 9d04a46bdb401df3cdd2571b973f2a60f264862cf74da02c5a9cfa1de6ea9ffe
     source_path: gateway/prometheus.md
     workflow: 16
 ---
 
-  OpenClaw 可通过官方 `diagnostics-prometheus` 插件公开诊断指标。该插件监听可信诊断数据以及带内部标签、由调度器所有的诊断事件（队列、内存和会话恢复信号），并在以下地址呈现 Prometheus 文本端点：
+OpenClaw 可通过官方
+`diagnostics-prometheus` 插件公开诊断指标。它会监听可信诊断以及
+内部标记、由调度器负责的诊断事件（队列、内存和
+会话恢复信号），并在以下地址提供 Prometheus 文本端点：
 
-  ```text
-  GET /api/diagnostics/prometheus
-  ```
+```text
+GET /api/diagnostics/prometheus
+```
 
-  内容类型为 `text/plain; version=0.0.4; charset=utf-8`，即标准的 Prometheus 指标公开格式。
+内容类型为 `text/plain; version=0.0.4; charset=utf-8`，即标准的
+Prometheus 展示格式。
 
-  <Warning>
-  该路由使用 Gateway 网关身份验证（操作员权限范围、可信操作员接口）。不要将其作为公开且无需身份验证的 `/metrics` 端点暴露。请通过其他操作员 API 所使用的相同身份验证路径抓取该端点。
-  </Warning>
+<Warning>
+该路由使用 Gateway 网关身份验证（操作员权限范围、可信操作员接口）。不要将其作为公开且未经身份验证的 `/metrics` 端点暴露。请通过用于其他操作员 API 的同一身份验证路径抓取该端点。
+</Warning>
 
-  有关跟踪、日志、OTLP 推送和 OpenTelemetry GenAI 语义属性，请参阅 [OpenTelemetry 导出](/zh-CN/gateway/opentelemetry)。
+有关跟踪、日志、OTLP 推送和 OpenTelemetry GenAI 语义属性，请参阅 [OpenTelemetry 导出](/zh-CN/gateway/opentelemetry)。
 
-  ## 快速开始
+## 快速开始
 
-  <Steps>
+<Steps>
   <Step title="安装插件">
     ```bash
     openclaw plugins install clawhub:@openclaw/diagnostics-prometheus
@@ -63,10 +68,10 @@ x-i18n:
     </Tabs>
   </Step>
   <Step title="重启 Gateway 网关">
-    HTTP 路由在插件启动时注册，因此启用后需要重新加载。
+    HTTP 路由会在插件启动时注册，因此启用后需要重新加载。
   </Step>
   <Step title="抓取受保护的路由">
-    发送操作员客户端所使用的相同 Gateway 网关身份验证信息：
+    发送操作员客户端所使用的同一 Gateway 网关身份验证信息：
 
     ```bash
     curl -H "Authorization: Bearer $OPENCLAW_GATEWAY_TOKEN" \
@@ -90,7 +95,7 @@ x-i18n:
 </Steps>
 
 <Note>
-`diagnostics.enabled` 默认为 `true`；仅在严格受限的环境中将其设置为 `false`。如果它为 `false`，插件仍会注册 HTTP 路由，但不会有诊断事件流入导出器，因此响应为空。
+`diagnostics.enabled` 默认为 `true`；仅在受到严格约束的环境中将其设为 `false`。如果它为 `false`，插件仍会注册 HTTP 路由，但不会有诊断事件流入导出器，因此响应为空。
 </Note>
 
 ## 导出的指标
@@ -99,8 +104,8 @@ x-i18n:
 | ------------------------------------------------ | --------- | ----------------------------------------------------------------------------------------- |
 | `openclaw_run_completed_total`                   | 计数器    | `channel`, `model`, `outcome`, `provider`, `trigger`                                      |
 | `openclaw_run_duration_seconds`                  | 直方图    | `channel`, `model`, `outcome`, `provider`, `trigger`                                      |
-| `openclaw_model_call_total`                      | 计数器    | `api`, `error_category`, `model`, `outcome`, `provider`, `transport`                      |
-| `openclaw_model_call_duration_seconds`           | 直方图    | `api`, `error_category`, `model`, `outcome`, `provider`, `transport`                      |
+| `openclaw_model_call_total`                      | 计数器    | `api`, `error_category`, `model`, `observation_unit`, `outcome`, `provider`, `transport`  |
+| `openclaw_model_call_duration_seconds`           | 直方图    | `api`, `error_category`, `model`, `observation_unit`, `outcome`, `provider`, `transport`  |
 | `openclaw_model_failover_total`                  | 计数器    | `from_model`, `from_provider`, `lane`, `reason`, `suspended`, `to_model`, `to_provider`   |
 | `openclaw_model_tokens_total`                    | 计数器    | `agent`, `channel`, `model`, `provider`, `token_type`                                     |
 | `openclaw_gen_ai_client_token_usage`             | 直方图    | `model`, `provider`, `token_type`                                                         |
@@ -152,25 +157,30 @@ x-i18n:
 | `openclaw_diagnostic_async_queue_dropped_total`  | 计数器    | `drop_class`                                                                              |
 | `openclaw_diagnostic_async_queue_length`         | 仪表      | 无                                                                                        |
 
+对于模型调用指标，`observation_unit="request"` 衡量一次可观测的
+提供商请求。`observation_unit="turn"` 衡量一次合成的 Claude Code
+或 Codex CLI 智能体轮次，其中可能包含多个隐藏的提供商请求。
+比较延迟时，请将这些序列分开。
+
 ## 标签策略
 
 <AccordionGroup>
-  <Accordion title="有界的低基数标签">
-    Prometheus 标签保持有界且为低基数。导出器不会发出原始诊断标识符，例如 `runId`、`sessionKey`、`sessionId`、`callId`、`toolCallId`、消息 ID、聊天 ID 或提供商请求 ID。
+  <Accordion title="有界、低基数标签">
+    Prometheus 标签保持有界且低基数。导出器不会发出原始诊断标识符，例如 `runId`、`sessionKey`、`sessionId`、`callId`、`toolCallId`、消息 ID、聊天 ID 或提供商请求 ID。
 
-    标签值会经过脱敏，并且必须符合 OpenClaw 的低基数字符策略。未通过策略检查的值将根据指标替换为 `unknown`、`other` 或 `none`。看起来像带作用域的智能体会话键的标签也会替换为 `unknown`。
+    标签值会被脱敏，并且必须符合 OpenClaw 的低基数字符策略。不符合该策略的值将根据指标替换为 `unknown`、`other` 或 `none`。看起来像带作用域的智能体会话键的标签也会替换为 `unknown`。
 
   </Accordion>
   <Accordion title="序列上限和溢出计数">
-    导出器在内存中保留的时间序列总数上限为 **2048**，此上限涵盖计数器、仪表和直方图。超出上限的新序列会被丢弃，每次丢弃时，`openclaw_prometheus_series_dropped_total` 都会加一。
+    导出器将在内存中保留的时间序列总数限制为 **2048** 个，此限制涵盖计数器、仪表和直方图。超过此上限的新序列会被丢弃，并且每次都会使 `openclaw_prometheus_series_dropped_total` 增加 1。
 
-    请监控此计数器，将其视为上游某个属性正在泄漏高基数值的明确信号。导出器绝不会自动提高上限；如果该计数器持续增长，应修复源头，而不是禁用上限。
+    请监控此计数器；它是上游某个属性正在泄漏高基数值的明确信号。导出器绝不会自动提高上限；如果该值持续上升，应修复来源，而不是禁用上限。
 
   </Accordion>
   <Accordion title="Prometheus 输出中绝不会出现的内容">
-    - 提示文本、响应文本、工具输入、工具输出、系统提示
+    - 提示词文本、响应文本、工具输入、工具输出、系统提示词
     - Talk 转录文本、音频载荷、通话 ID、房间 ID、移交令牌、轮次 ID 和原始会话 ID
-    - 原始提供商请求 ID（仅在适用时以有界哈希形式出现在 span 中，绝不会出现在指标中）
+    - 原始提供商请求 ID（如适用，仅在 span 上使用有界哈希值——绝不会用于指标）
     - 会话键和会话 ID
     - 主机名、文件路径、密钥值
 
@@ -180,7 +190,7 @@ x-i18n:
 ## PromQL 配方
 
 ```promql
-# 每分钟的令牌数，按提供商拆分
+# 每分钟的 token 数，按提供商拆分
 sum by (provider) (rate(openclaw_model_tokens_total[1m]))
 
 # 过去一小时的支出（美元），按模型统计
@@ -199,7 +209,7 @@ histogram_quantile(
   sum by (le, lane) (rate(openclaw_queue_lane_wait_seconds_bucket[5m]))
 ) < 2
 
-# Skill 使用情况，按有界来源拆分
+# Skills 使用情况，按有界来源拆分
 sum by (skill, source) (increase(openclaw_skill_used_total[24h]))
 
 # 被丢弃的 Prometheus 序列（基数警报）
@@ -210,7 +220,7 @@ increase(openclaw_prometheus_series_dropped_total[15m]) > 0
 对于跨提供商仪表板，优先使用 `gen_ai_client_token_usage`：它遵循 OpenTelemetry GenAI 语义约定，并与非 OpenClaw GenAI 服务的指标保持一致。
 </Tip>
 
-## 在 Prometheus 和 OpenTelemetry 导出之间进行选择
+## 在 Prometheus 与 OpenTelemetry 导出之间进行选择
 
 OpenClaw 独立支持这两种接口。你可以运行其中任意一种、同时运行两种，或两种都不运行。
 
@@ -219,14 +229,14 @@ OpenClaw 独立支持这两种接口。你可以运行其中任意一种、同�
     - **拉取**模型：Prometheus 抓取 `/api/diagnostics/prometheus`。
     - 无需外部收集器。
     - 通过常规 Gateway 网关身份验证进行认证。
-    - 该接口仅包含指标（不包含跟踪或日志）。
-    - 最适合已经统一采用 Prometheus + Grafana 的技术栈。
+    - 该接口仅包含指标（不包含追踪或日志）。
+    - 最适合已标准化采用 Prometheus + Grafana 的技术栈。
 
   </Tab>
   <Tab title="diagnostics-otel">
     - **推送**模型：OpenClaw 通过 OTLP/HTTP 向收集器或兼容 OTLP 的后端发送数据。
-    - 该接口包含指标、跟踪和日志。
-    - 当你同时需要两者时，可通过 OpenTelemetry Collector（使用 `prometheus` 或 `prometheusremotewrite` 导出器）连接到 Prometheus。
+    - 该接口包含指标、追踪和日志。
+    - 需要同时使用两者时，可通过 OpenTelemetry Collector（`prometheus` 或 `prometheusremotewrite` 导出器）桥接到 Prometheus。
     - 完整目录请参阅 [OpenTelemetry 导出](/zh-CN/gateway/opentelemetry)。
 
   </Tab>
@@ -236,25 +246,25 @@ OpenClaw 独立支持这两种接口。你可以运行其中任意一种、同�
 
 <AccordionGroup>
   <Accordion title="响应正文为空">
-    - 检查配置中的 `diagnostics.enabled` 是否未设置为 `false`（默认为 `true`）。
+    - 检查配置中的 `diagnostics.enabled` 是否未设置为 `false`（其默认值为 `true`）。
     - 使用 `openclaw plugins list --enabled` 确认插件已启用并加载。
-    - 生成一些流量；计数器和直方图只有在至少发生一个事件后才会输出相应行。
+    - 生成一些流量；计数器和直方图只有在至少发生一个事件后才会输出行。
 
   </Accordion>
   <Accordion title="401 / 未授权">
-    该端点需要 Gateway 网关操作员权限范围（`auth: "gateway"`，且 `gatewayRuntimeScopeSurface: "trusted-operator"`）。请使用 Prometheus 访问任何其他 Gateway 网关操作员路由时所用的同一令牌或密码。不存在未经身份验证的公开模式。
+    该端点需要 Gateway 网关操作员权限范围（`auth: "gateway"` 和 `gatewayRuntimeScopeSurface: "trusted-operator"`）。请使用 Prometheus 访问任何其他 Gateway 网关操作员路由时所用的相同令牌或密码。不提供公开的未认证模式。
   </Accordion>
-  <Accordion title="`openclaw_prometheus_series_dropped_total` 持续增长">
-    某个新属性正在导致序列数超出 **2048** 的上限。检查近期指标，查找基数异常高的标签，并从源头修复。导出器会有意丢弃新序列，而不会静默改写标签。
+  <Accordion title="`openclaw_prometheus_series_dropped_total` 持续上升">
+    某个新属性正在导致序列数超过 **2048** 个的上限。检查最近的指标，查找基数异常高的标签，并从源头修复。导出器会有意丢弃新序列，而不是静默重写标签。
   </Accordion>
   <Accordion title="重启后 Prometheus 显示陈旧序列">
-    插件仅在内存中保存状态。Gateway 网关重启后，计数器会重置为零，仪表则从下一次报告的值重新开始。使用 PromQL 的 `rate()` 和 `increase()` 可以妥善处理重置。
+    该插件仅在内存中保存状态。Gateway 网关重启后，计数器会重置为零，仪表则从下一次报告的值重新开始。使用 PromQL `rate()` 和 `increase()` 可正确处理重置。
   </Accordion>
 </AccordionGroup>
 
 ## 相关内容
 
 - [诊断导出](/zh-CN/gateway/diagnostics) — 用于支持包的本地诊断 zip 文件
-- [健康和就绪状态](/zh-CN/gateway/health) — `/healthz` 和 `/readyz` 探针
-- [日志](/zh-CN/logging) — 基于文件的日志
-- [OpenTelemetry 导出](/zh-CN/gateway/opentelemetry) — 通过 OTLP 推送跟踪、指标和日志
+- [健康状态和就绪状态](/zh-CN/gateway/health) — `/healthz` 和 `/readyz` 探针
+- [日志](/zh-CN/logging) — 基于文件的日志记录
+- [OpenTelemetry 导出](/zh-CN/gateway/opentelemetry) — 通过 OTLP 推送追踪、指标和日志

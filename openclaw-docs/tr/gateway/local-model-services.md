@@ -3,35 +3,36 @@ read_when:
     - OpenClaw'ın yerel model sunucusunu yalnızca model veya gömme sağlayıcısı seçildiğinde başlatmasını istiyorsunuz
     - ds4, inferrs, vLLM, llama.cpp, MLX veya OpenAI ile uyumlu başka bir yerel sunucu çalıştırıyorsunuz
     - Yerel sağlayıcılar için soğuk başlatmayı, hazır olma durumunu ve boşta kapanmayı denetlemeniz gerekir
-summary: OpenClaw model ve embedding isteklerinden önce yerel model sunucularını isteğe bağlı olarak başlatın
+summary: OpenClaw model ve gömme isteklerinden önce yerel model sunucularını talep üzerine başlatın
 title: Yerel model hizmetleri
 x-i18n:
-    generated_at: "2026-07-12T12:17:45Z"
+    generated_at: "2026-07-26T23:59:27Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: a761113dd591fed0394379b2bad173165efc5e284565c652493e73d1e724529d
     source_path: gateway/local-model-services.md
     workflow: 16
 ---
 
-`models.providers.<id>.localService`, sağlayıcıya ait yerel model sunucusunu gerektiğinde başlatır. Bir model veya gömme isteği bu sağlayıcıyı seçtiğinde OpenClaw durum uç noktasını yoklar, çalışmıyorsa işlemi başlatır, hazır olmasını bekler ve ardından isteği gönderir. Maliyetli yerel sunucuları gün boyunca çalışır durumda tutmaktan kaçınmak için bunu kullanın.
+`models.providers.<id>.localService`, gerektiğinde sağlayıcının sahip olduğu yerel bir model sunucusunu başlatır. Bir model veya gömme isteği bu sağlayıcıyı seçtiğinde OpenClaw sağlık uç noktasını yoklar, çalışmıyorsa işlemi başlatır, hazır olmasını bekler ve ardından isteği gönderir. Maliyetli yerel sunucuları gün boyu çalışır durumda tutmaktan kaçınmak için bunu kullanın.
 
 ## Nasıl çalışır?
 
 1. Bir model veya gömme isteği, yapılandırılmış bir sağlayıcıya çözümlenir.
-2. Bu sağlayıcıda `localService` varsa OpenClaw, `healthUrl` adresini yoklar.
-3. Yoklama başarılı olursa OpenClaw zaten çalışan sunucuyu kullanır.
-4. Yoklama başarısız olursa OpenClaw, `command` komutunu `args` bağımsız değişkenleriyle başlatır.
-5. OpenClaw, `readyTimeoutMs` süresi dolana kadar durum uç noktasını düzenli olarak yoklar.
-6. İstek, normal model veya gömme aktarımı üzerinden ilerler.
-7. İşlemi OpenClaw başlattıysa ve `idleStopMs` ayarlanmışsa son devam eden istek belirtilen süre boyunca boşta kaldıktan sonra işlemi durdurur.
+2. Bu sağlayıcıda `localService` varsa OpenClaw, `healthUrl` değerini yoklar.
+3. Yoklama başarılı olursa OpenClaw, zaten çalışan sunucuyu kullanır.
+4. Yoklama başarısız olursa OpenClaw, `command` işlemini `args` ile başlatır.
+5. OpenClaw, `readyTimeoutMs` süresi dolana kadar sağlık uç noktasını düzenli olarak yoklar.
+6. İstek, normal model veya gömme aktarımı üzerinden geçer.
+7. OpenClaw işlemi başlattıysa ve `idleStopMs` ayarlanmışsa son devam eden istek bu süre boyunca boşta kaldıktan sonra işlemi durdurur.
 
-OpenClaw bunun için launchd, systemd, Docker veya herhangi bir art alan hizmeti kurmaz. Sunucu, kendisine ilk ihtiyaç duyan OpenClaw işleminin sıradan bir alt işlemidir.
+OpenClaw bunun için launchd, systemd, Docker veya herhangi bir daemon yüklemez. Sunucu, ona ilk ihtiyaç duyan OpenClaw işleminin sıradan bir alt işlemidir.
 
-Başlatma, yapılandırılmış sağlayıcı ve komut/bağımsız değişken/ortam kümesi başına sıralı olarak gerçekleştirilir; böylece aynı hizmete yönelik eşzamanlı sohbet ve gömme istekleri yinelenen sunucular başlatmaz. Her istek, yanıt işleme tamamlanana kadar kendi kiralamasını elinde tutar; dolayısıyla boşta kalma nedeniyle kapatma, devam eden tüm model ve gömme isteklerini bekler. Yapılandırılmış sağlayıcı takma adları birbirinden ayrı kalır: iki takma ad, aynı Ollama, LM Studio veya OpenAI uyumlu bağdaştırıcı kimliğinde birleştirilmeden farklı GPU ana makinelerine işaret edebilir.
+Başlatma, yapılandırılmış her sağlayıcı ve komut/bağımsız değişken/ortam kümesi için seri hâle getirilir; böylece aynı hizmete yönelik eşzamanlı sohbet ve gömme istekleri yinelenen sunucular başlatmaz. Her istek, yanıt işleme tamamlanana kadar kendi kiralamasını tutar; dolayısıyla boşta kapatma, devam eden tüm model ve gömme isteklerini bekler. Yapılandırılmış sağlayıcı takma adları ayrı kalır: iki takma ad, aynı Ollama, LM Studio veya OpenAI uyumlu bağdaştırıcı kimliğinde birleştirilmeden farklı GPU ana makinelerine işaret edebilir.
 
-Başka bir OpenClaw işleminin aynı `healthUrl` adresinde zaten sağlıklı bir sunucusu varsa bu işlem, sunucunun yönetimini devralmadan onu yeniden kullanır (her işlem yalnızca kendisinin başlattığı alt işlemi yönetir). Başlatma ve çıkış günlükleri; sınırlandırılmış, hassas bilgileri ayıklanmış alt işlem çıktı sonlarını, zamanlama ve çıkış ayrıntılarıyla birlikte içerir; yapılandırılmış ortam değerleri hiçbir zaman yayımlanmaz.
+Başka bir OpenClaw işleminin aynı `healthUrl` konumunda zaten sağlıklı bir sunucusu varsa bu işlem, sunucuyu sahiplenmeden yeniden kullanır (her işlem yalnızca bizzat başlattığı alt işlemi yönetir). Başlatma ve çıkış günlükleri; zamanlama ve çıkış ayrıntılarının yanı sıra sınırlı, hassas verileri çıkarılmış alt işlem çıktı kuyruklarını içerir; yapılandırılmış ortam değerleri hiçbir zaman yayımlanmaz.
 
 ## Yapılandırma biçimi
 
@@ -70,19 +71,19 @@ Başka bir OpenClaw işleminin aynı `healthUrl` adresinde zaten sağlıklı bir
 }
 ```
 
-Yavaş ilk başlatmaların ve uzun üretimlerin varsayılan model isteği zaman aşımına uğramaması için sağlayıcı girdisinde (`localService` içinde değil) `timeoutSeconds` değerini ayarlayın. Sunucunuz hazır olma durumunu temel URL'deki `/models` dışında bir yerde sunuyorsa açıkça bir `healthUrl` ayarlayın.
+Yavaş soğuk başlatmaların ve uzun üretimlerin varsayılan model isteği zaman aşımına uğramaması için sağlayıcı girdisinde (`localService` üzerinde değil) `timeoutSeconds` değerini ayarlayın. Sunucunuz hazır olma durumunu temel URL'deki `/models` dışında bir konumda sunduğunda açık bir `healthUrl` değeri ayarlayın.
 
 ## Alanlar
 
-| Alan             | Gerekli | Açıklama                                                                                                                                        |
-| ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `command`        | evet    | Mutlak yürütülebilir dosya yolu. Kabuk PATH araması yapılmaz.                                                                                   |
-| `args`           | hayır   | İşlem bağımsız değişkenleri. Kabuk genişletmesi, yöneltme, kalıp eşleştirme veya tırnak işleme yapılmaz.                                         |
-| `cwd`            | hayır   | İşlemin çalışma dizini.                                                                                                                         |
-| `env`            | hayır   | OpenClaw işlem ortamının üzerine birleştirilen ortam değişkenleri.                                                                               |
-| `healthUrl`      | hayır   | Hazır olma URL'si. Varsayılan olarak `baseUrl` sonuna `/models` eklenir (`http://127.0.0.1:8000/v1`, `http://127.0.0.1:8000/v1/models` olur). |
-| `readyTimeoutMs` | hayır   | Başlatma hazır olma son süresi. Varsayılan: `120000`.                                                                                           |
-| `idleStopMs`     | hayır   | OpenClaw tarafından başlatılan işlem için boşta kalma sonrası kapatma gecikmesi. `0` değeri veya belirtilmemesi, OpenClaw çıkana kadar işlemi çalışır durumda tutar. |
+| Alan             | Gerekli  | Açıklama                                                                                                                             |
+| ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `command`        | evet     | Mutlak yürütülebilir dosya yolu. Kabuk PATH araması yapılmaz.                                                                         |
+| `args`           | hayır    | İşlem bağımsız değişkenleri. Kabuk genişletmesi, kanallar, glob eşleştirmesi veya tırnak işleme yapılmaz.                              |
+| `cwd`            | hayır    | İşlemin çalışma dizini.                                                                                                               |
+| `env`            | hayır    | OpenClaw işlem ortamının üzerine birleştirilen ortam değişkenleri.                                                                    |
+| `healthUrl`      | hayır    | Hazır olma URL'si. Varsayılan olarak sonuna `/models` eklenmiş `baseUrl` kullanılır (`http://127.0.0.1:8000/v1`, `http://127.0.0.1:8000/v1/models` olur). |
+| `readyTimeoutMs` | hayır    | Başlatma hazır olma son süresi. Varsayılan: `120000`.                                                                       |
+| `idleStopMs`     | hayır    | OpenClaw tarafından başlatılan bir işlemin boşta kapatma gecikmesi. `0` değeri veya belirtilmemesi, OpenClaw kapanana kadar işlemi çalışır durumda tutar. |
 
 ## Inferrs örneği
 
@@ -137,7 +138,7 @@ Inferrs, özel bir OpenAI uyumlu `/v1` arka ucudur; dolayısıyla aynı `localSe
 }
 ```
 
-`command` değerini OpenClaw çalıştıran makinedeki `which inferrs` komutunun sonucuyla değiştirin. Eksiksiz inferrs kurulumu: [Inferrs](/tr/providers/inferrs).
+`command` değerini, OpenClaw'u çalıştıran makinedeki `which inferrs` sonucuyla değiştirin. Eksiksiz Inferrs kurulumu: [Inferrs](/tr/providers/inferrs).
 
 ## ds4 örneği
 
@@ -176,15 +177,15 @@ Inferrs, özel bir OpenAI uyumlu `/v1` arka ucudur; dolayısıyla aynı `localSe
 }
 ```
 
-Eksiksiz kurulum, bağlam boyutlandırma ve doğrulama komutları: [ds4](/tr/providers/ds4).
+Eksiksiz kurulum, bağlam boyutlandırması ve doğrulama komutları: [ds4](/tr/providers/ds4).
 
-## İlgili
+## İlgili içerikler
 
 <CardGroup cols={2}>
   <Card title="Yerel modeller" href="/tr/gateway/local-models" icon="server">
-    Yerel model kurulumu, sağlayıcı seçenekleri ve güvenlik yönergeleri.
+    Yerel model kurulumu, sağlayıcı seçenekleri ve güvenlik rehberliği.
   </Card>
   <Card title="Inferrs" href="/tr/providers/inferrs" icon="cpu">
-    OpenClaw'ı inferrs OpenAI uyumlu yerel sunucusu üzerinden çalıştırın.
+    OpenClaw'u Inferrs OpenAI uyumlu yerel sunucusu üzerinden çalıştırın.
   </Card>
 </CardGroup>

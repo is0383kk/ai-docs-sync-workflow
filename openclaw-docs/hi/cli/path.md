@@ -1,300 +1,318 @@
 ---
 read_when:
-    - आप टर्मिनल से किसी workspace फ़ाइल के भीतर एक leaf पढ़ना या लिखना चाहते हैं
-    - आप workspace स्थिति के विरुद्ध scripting कर रहे हैं और एक स्थिर, kind-agnostic addressing scheme चाहते हैं
-    - आप एक `oc://` पथ डीबग कर रहे हैं (सिंटैक्स सत्यापित करें, देखें कि यह किस पर रिज़ॉल्व होता है)
-summary: '`openclaw path` के लिए CLI संदर्भ (`oc://` addressing योजना के माध्यम से workspace फ़ाइलों का निरीक्षण और संपादन करें)'
+    - आप टर्मिनल से किसी वर्कस्पेस फ़ाइल के भीतर एक लीफ़ पढ़ना या लिखना चाहते हैं
+    - आप वर्कस्पेस स्थिति के लिए स्क्रिप्ट लिख रहे हैं और एक स्थिर, प्रकार-निरपेक्ष एड्रेसिंग योजना चाहते हैं
+    - आप एक `oc://` पथ को डीबग कर रहे हैं (सिंटैक्स सत्यापित करें, देखें कि यह किसमें रिज़ॉल्व होता है)
+summary: '`openclaw path` के लिए CLI संदर्भ (`oc://` एड्रेसिंग स्कीम के माध्यम से वर्कस्पेस फ़ाइलों का निरीक्षण और संपादन करें)'
 title: पथ
 x-i18n:
-    generated_at: "2026-06-28T22:51:49Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:31:48Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 88e560c19cf34851b0237986e15b48ad7d0e32699e2c12c559dfeecf6fcf761b
+    source_hash: 7afe5bd1c3a5fca8dd22c7d807e390e751ae7e895c54bf0e10e2734f3889436c
     source_path: cli/path.md
     workflow: 16
 ---
 
 # `openclaw path`
 
-Plugin द्वारा प्रदान किया गया shell access `oc://` addressing substrate तक: addressable workspace
-files (markdown, jsonc, jsonl, yaml/yml/lobster) का निरीक्षण और संपादन करने के लिए एक
-kind-dispatched path scheme. Self-hosters, plugin
-authors, और editor extensions इसका उपयोग बिना हर file के लिए parser हाथ से बनाए
-किसी संकीर्ण location को पढ़ने, खोजने, या update करने के लिए करते हैं।
+`oc://` एड्रेसिंग स्कीम तक शेल पहुँच: एड्रेस किए जा सकने वाले वर्कस्पेस फ़ाइलों (markdown, jsonc,
+jsonl, yaml/yml/lobster) का निरीक्षण और संपादन करने के लिए प्रकार के अनुसार डिस्पैच किया गया एक पथ सिंटैक्स।
+स्वयं होस्ट करने वाले उपयोगकर्ता, Plugin लेखक और एडिटर एक्सटेंशन इसका उपयोग किसी सीमित स्थान को पढ़ने,
+खोजने या अपडेट करने के लिए करते हैं, ताकि हर फ़ाइल के लिए अलग पार्सर स्वयं न बनाना पड़े।
 
-CLI substrate की public verbs को mirror करता है:
-
-- `resolve` ठोस और single-match है।
-- `find` wildcards, unions, predicates, और positional expansion के लिए multi-match verb है।
-- `set` केवल concrete paths या insertion markers स्वीकार करता है; wildcard patterns लिखने से पहले
-  reject कर दिए जाते हैं।
-
-`path` bundled optional `oc-path` plugin द्वारा प्रदान किया जाता है। पहली बार उपयोग से पहले
-इसे enable करें:
+`path` बंडल किए गए वैकल्पिक `oc-path` Plugin द्वारा प्रदान किया जाता है। पहले
+उपयोग से पहले इसे सक्षम करें:
 
 ```bash
 openclaw plugins enable oc-path
 ```
 
+CLI क्रियाएँ एड्रेसिंग मॉडल को प्रतिबिंबित करती हैं:
+
+- `resolve` ठोस है और केवल एक मिलान करता है।
+- `find` वाइल्डकार्ड, यूनियन, प्रेडिकेट और
+  स्थितिगत विस्तार के लिए बहु-मिलान क्रिया है।
+- `set` केवल ठोस पथ या प्रविष्टि मार्कर स्वीकार करता है; वाइल्डकार्ड पैटर्न
+  लिखने से पहले अस्वीकार कर दिए जाते हैं।
+- `validate` किसी फ़ाइल सिस्टम पहुँच के बिना पथ को पार्स करता है।
+- `emit` किसी फ़ाइल को पार्स + उत्सर्जन के माध्यम से राउंड-ट्रिप करता है (बाइट-निष्ठा निदान)।
+
 ## इसका उपयोग क्यों करें
 
-OpenClaw state human-edited markdown, commented JSONC config,
-append-only JSONL logs, और YAML workflow/spec files में फैली होती है। Shell scripts, hooks,
-और agents को अक्सर उन files से एक छोटा value चाहिए होता है: कोई frontmatter key, कोई
-plugin setting, कोई log record field, कोई YAML step, या named
-section के अंतर्गत कोई bullet item।
+OpenClaw की स्थिति मानव-संपादित markdown, टिप्पणियों वाली JSONC
+कॉन्फ़िगरेशन, केवल-परिशिष्ट JSONL लॉग और YAML वर्कफ़्लो/स्पेक फ़ाइलों में फैली होती है। स्क्रिप्ट, हुक
+और एजेंटों को अक्सर इन फ़ाइलों से केवल एक छोटा मान चाहिए होता है: कोई फ्रंटमैटर कुंजी, कोई
+Plugin सेटिंग, कोई लॉग रिकॉर्ड फ़ील्ड, कोई YAML चरण या किसी
+नामित अनुभाग के अंतर्गत कोई बुलेट आइटम।
 
-`openclaw path` ऐसे callers को हर file kind के लिए one-off grep,
-regex, या parser के बजाय एक stable address देता है। वही `oc://` path terminal से validate,
-resolve, search, dry-run, और write किया जा सकता है, जिससे संकीर्ण
-automation review करना आसान और replay करना सुरक्षित होता है। यह खास तौर पर तब उपयोगी है जब
-आप file की बाकी comments, line endings, और आसपास की formatting को preserve करते हुए
-एक leaf update करना चाहते हैं।
+`openclaw path` इन कॉलर को प्रत्येक फ़ाइल प्रकार के लिए एकबारगी
+grep, regex या पार्सर के बजाय एक स्थिर पता देता है। उसी `oc://` पथ को टर्मिनल से सत्यापित,
+रिज़ॉल्व, खोजा, ड्राई-रन और लिखा जा सकता है, जिससे सीमित
+ऑटोमेशन समीक्षायोग्य और पुनः चलाने योग्य बना रहता है। यह फ़ाइल के शेष भाग को सुरक्षित रखता है, इसलिए
+एक लीफ़ लिखने से उसकी टिप्पणियाँ, लाइन एंडिंग या आस-पास की
+फ़ॉर्मैटिंग प्रभावित नहीं होती।
 
-इसे तब उपयोग करें जब जिस चीज़ की आपको जरूरत है उसका logical address है, लेकिन physical file
-shape बदलती रहती है:
+इसका उपयोग तब करें जब इच्छित चीज़ का कोई तार्किक पता हो, लेकिन फ़ाइल का आकार-प्रकार
+अलग-अलग हो:
 
-- कोई hook commented JSONC से एक setting पढ़ना चाहता है और value वापस लिखते समय comments
-  खोना नहीं चाहता।
-- कोई maintenance script JSONL log में हर matching event field खोजना चाहती है
-  बिना पूरे log को custom parser में load किए।
-- कोई editor extension slug से markdown section या bullet item पर jump करना चाहता है,
-  फिर resolve हुई exact line render करना चाहता है।
-- कोई agent apply करने से पहले छोटा workspace edit dry-run करना चाहता है, जिसमें
-  changed bytes review में visible हों।
+- कोई हुक टिप्पणियों वाली JSONC से एक सेटिंग पढ़ता है और
+  मान वापस लिखते समय टिप्पणियाँ नहीं खोता।
+- कोई रखरखाव स्क्रिप्ट JSONL लॉग में हर मिलते-जुलते इवेंट फ़ील्ड को
+  पूरा लॉग किसी कस्टम पार्सर में लोड किए बिना खोजती है।
+- कोई एडिटर स्लग द्वारा markdown अनुभाग या बुलेट आइटम पर जाता है, फिर
+  रिज़ॉल्व की गई सटीक लाइन रेंडर करता है।
+- कोई एजेंट छोटा वर्कस्पेस संपादन लागू करने से पहले उसे ड्राई-रन करता है, जिसमें
+  बदले हुए बाइट समीक्षा में दिखाई देते हैं।
 
-साधारण whole-file edits, rich
-config migrations, या memory-specific writes के लिए शायद आपको `openclaw path` की जरूरत नहीं है। उन्हें owner
-command या plugin का उपयोग करना चाहिए। `path` छोटे, addressable file operations के लिए है जहाँ
-repeatable terminal command किसी और bespoke parser से अधिक स्पष्ट हो।
+सामान्य संपूर्ण-फ़ाइल संपादनों, समृद्ध कॉन्फ़िगरेशन माइग्रेशन या
+मेमोरी-विशिष्ट लेखन के लिए `openclaw path` का उपयोग न करें; इनके लिए स्वामी कमांड या Plugin का उपयोग करना चाहिए। `path`
+छोटे, एड्रेस किए जा सकने वाले फ़ाइल ऑपरेशनों के लिए है, जहाँ दोहराने योग्य टर्मिनल कमांड
+एक और विशिष्ट पार्सर से बेहतर होता है।
 
-## इसका उपयोग कैसे होता है
+## इसका उपयोग कैसे किया जाता है
 
-human-edited config file से एक value पढ़ें:
+मानव-संपादित कॉन्फ़िगरेशन फ़ाइल से एक मान पढ़ें:
 
 ```bash
 openclaw path resolve 'oc://config.jsonc/plugins/github/enabled'
 ```
 
-disk को छुए बिना write preview करें:
+डिस्क को छुए बिना लेखन का पूर्वावलोकन करें:
 
 ```bash
 openclaw path set 'oc://config.jsonc/plugins/github/enabled' 'true' --dry-run
 ```
 
-append-only JSONL log में matching records खोजें:
+केवल-परिशिष्ट JSONL लॉग में मिलते-जुलते रिकॉर्ड खोजें:
 
 ```bash
 openclaw path find 'oc://session.jsonl/[event=tool_call]/name'
 ```
 
-markdown में किसी instruction को line
-number के बजाय section और item से address करें:
+markdown में किसी निर्देश को लाइन नंबर के बजाय अनुभाग और आइटम द्वारा एड्रेस करें:
 
 ```bash
 openclaw path resolve 'oc://AGENTS.md/runtime-safety/openclaw-gateway'
 ```
 
-script के पढ़ने या लिखने से पहले CI या preflight script में path validate करें:
+CI या प्रीफ़्लाइट स्क्रिप्ट में, स्क्रिप्ट के पढ़ने या
+लिखने से पहले पथ सत्यापित करें:
 
 ```bash
 openclaw path validate 'oc://AGENTS.md/tools/$last/risk'
 ```
 
-ये commands shell scripts में copy किए जाने के लिए हैं। जब caller को structured output चाहिए तो `--json` उपयोग करें
-और जब कोई व्यक्ति result inspect कर रहा हो तो `--human` उपयोग करें।
+ये कमांड शेल स्क्रिप्ट में कॉपी किए जा सकने के लिए बनाए गए हैं। जब किसी
+कॉलर को संरचित आउटपुट चाहिए तब `--json` का और जब कोई व्यक्ति परिणाम का निरीक्षण कर रहा हो
+तब `--human` का उपयोग करें।
 
 ## यह कैसे काम करता है
 
-`openclaw path` चार चीज़ें करता है:
+1. `oc://` पते को स्लॉट में पार्स करता है: फ़ाइल, अनुभाग, आइटम, फ़ील्ड और
+   एक वैकल्पिक सत्र क्वेरी।
+2. लक्ष्य एक्सटेंशन से फ़ाइल-प्रकार अडैप्टर चुनता है (`.md`, `.jsonc`,
+   `.json`, `.jsonl`, `.ndjson`, `.yaml`, `.yml`, `.lobster`)।
+3. स्लॉट को उस फ़ाइल प्रकार की संरचना के अनुसार रिज़ॉल्व करता है: markdown
+   हेडिंग/आइटम, JSONC ऑब्जेक्ट कुंजियाँ/ऐरे इंडेक्स, JSONL लाइन रिकॉर्ड या
+   YAML मैप/सीक्वेंस Node।
+4. `set` के लिए, संपादित बाइट को उसी अडैप्टर के माध्यम से उत्सर्जित करता है, ताकि फ़ाइल के
+   अपरिवर्तित भाग अपनी टिप्पणियाँ, लाइन एंडिंग और आस-पास की फ़ॉर्मैटिंग बनाए रखें, जहाँ
+   संबंधित प्रकार इसका समर्थन करता है।
 
-1. `oc://` address को slots में parse करता है: file, section, item, field, और
-   optional session।
-2. target extension (`.md`, `.jsonc`,
-   `.jsonl`, `.yaml`, `.yml`, `.lobster`, और related aliases) से file-kind adapter चुनता है।
-3. slots को उस file kind के AST के against resolve करता है: markdown headings/items,
-   JSONC object keys/array indexes, JSONL line records, या YAML map/sequence
-   nodes।
-4. `set` के लिए, उसी adapter के through edited bytes emit करता है ताकि untouched
-   parts अपनी comments, line endings, और nearby formatting बनाए रखें
-   जहाँ kind इसका support करता है।
+`resolve` और `set` को एक ठोस लक्ष्य चाहिए। `find` अन्वेषणात्मक
+क्रिया है: यह वाइल्डकार्ड, यूनियन, प्रेडिकेट और क्रमसूचक को ठोस
+मिलानों में विस्तारित करती है, जिन्हें लिखने के लिए कोई एक चुनने से पहले देखा जा सकता है।
 
-`resolve` और `set` को एक concrete target चाहिए। `find` exploratory
-verb है: यह wildcards, unions, predicates, और ordinals को concrete
-matches में expand करता है जिन्हें आप write के लिए एक चुनने से पहले inspect कर सकते हैं।
+## उपकमांड
 
-## Subcommands
+| उपकमांड              | उद्देश्य                                                                     |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `resolve <oc-path>`     | पथ पर ठोस मिलान प्रिंट करें (या "नहीं मिला")।                      |
+| `find <pattern>`        | वाइल्डकार्ड / यूनियन / प्रेडिकेट पथ के मिलानों की गणना करें।                  |
+| `set <oc-path> <value>` | किसी ठोस पथ पर लीफ़ या प्रविष्टि लक्ष्य लिखें। `--dry-run` का समर्थन करता है।  |
+| `validate <oc-path>`    | केवल पार्स करें; संरचनात्मक विभाजन (फ़ाइल / अनुभाग / आइटम / फ़ील्ड) प्रिंट करें। |
+| `emit <file>`           | किसी फ़ाइल को पार्स + उत्सर्जन के माध्यम से राउंड-ट्रिप करें (बाइट-निष्ठा निदान)।          |
 
-| Subcommand              | उद्देश्य                                                                      |
-| ----------------------- | ---------------------------------------------------------------------------- |
-| `resolve <oc-path>`     | path पर concrete match print करें (या "नहीं मिला")।                       |
-| `find <pattern>`        | wildcard / union / predicate path के लिए matches enumerate करें।                   |
-| `set <oc-path> <value>` | concrete path पर leaf या insertion target लिखें। `--dry-run` support करता है।   |
-| `validate <oc-path>`    | केवल parse; structural breakdown print करें (file / section / item / field)।      |
-| `emit <file>`           | file को `parseXxx` + `emitXxx` के through round-trip करें (byte-fidelity diagnostic)। |
+## वैश्विक फ़्लैग
 
-## Global flags
+| फ़्लैग            | इन पर लागू                       | उद्देश्य                                                                  |
+| --------------- | -------------------------------- | ------------------------------------------------------------------------ |
+| `--cwd <dir>`   | `resolve`, `find`, `set`, `emit` | इस डायरेक्टरी के अनुसार फ़ाइल स्लॉट रिज़ॉल्व करें (डिफ़ॉल्ट: `process.cwd()`)। |
+| `--file <path>` | `resolve`, `find`, `set`, `emit` | फ़ाइल स्लॉट के रिज़ॉल्व किए गए पथ को ओवरराइड करें (निरपेक्ष पहुँच)।                |
+| `--json`        | सभी                              | JSON आउटपुट बाध्य करें (डिफ़ॉल्ट जब stdout TTY नहीं है)।                    |
+| `--human`       | सभी                              | मानव-पठनीय आउटपुट बाध्य करें (डिफ़ॉल्ट जब stdout TTY है)।                       |
+| `--value-json`  | `set`                            | JSON/JSONC/JSONL लीफ़ प्रतिस्थापन के लिए `<value>` को JSON के रूप में पार्स करें।           |
+| `--dry-run`     | `set`                            | वे बाइट प्रिंट करें जो बिना लिखे लिखे जाते।                   |
+| `--diff`        | `set` (`--dry-run` आवश्यक)     | पूर्ण बाइट के बजाय एकीकृत डिफ़ प्रिंट करें।                          |
 
-| Flag            | उद्देश्य                                                                  |
-| --------------- | ------------------------------------------------------------------------ |
-| `--cwd <dir>`   | file slot को इस directory के against resolve करें (default: `process.cwd()`)। |
-| `--file <path>` | file slot के resolved path को override करें (absolute access)।                |
-| `--json`        | JSON output force करें (default जब stdout TTY नहीं है)।                    |
-| `--human`       | human output force करें (default जब stdout TTY है)।                       |
-| `--dry-run`     | (केवल `set` पर) बिना लिखे वे bytes print करें जो लिखे जाते।   |
-| `--diff`        | (`set --dry-run` के साथ) full bytes के बजाय unified diff print करें।   |
+`validate` केवल `--json` / `--human` लेता है; यह फ़ाइल सिस्टम तक पहुँच नहीं करता, इसलिए
+`--cwd` और `--file` लागू नहीं होते।
 
-## `oc://` syntax
+## `oc://` सिंटैक्स
 
-```
+```text
 oc://FILE/SECTION/ITEM/FIELD?session=SCOPE
 ```
 
-Slot rules: `field` के लिए `item` जरूरी है, और `item` के लिए `section` जरूरी है। सभी
-चार slots में:
+स्लॉट नियम: `field` के लिए `item` आवश्यक है, और `item` के लिए `section` आवश्यक है। सभी
+चार स्लॉट में:
 
-- **Quoted segments** — `"a/b.c"` `/` और `.` separators से बचा रहता है।
-  Content byte-literal है; quotes के अंदर `"` और `\` allowed नहीं हैं।
-  file slot भी quote-aware है: `oc://"skills/email-drafter"/Tools/$last`
-  `skills/email-drafter` को single file path मानता है।
-- **Predicates** — `[k=v]`, `[k!=v]`, `[k<v]`, `[k<=v]`, `[k>v]`,
-  `[k>=v]`। Numeric ops में दोनों sides finite numbers में coerce होनी चाहिए।
-- **Unions** — `{a,b,c}` किसी भी alternative से match करता है।
-- **Wildcards** — `*` (single sub-segment) और `**` (zero-or-more,
-  recursive)। `find` इन्हें accept करता है; `resolve` और `set` इन्हें
-  ambiguous मानकर reject करते हैं।
-- **Positional** — `$first` / `$last` first / last index या
-  declared key में resolve होते हैं।
-- **Ordinal** — document order के अनुसार Nth match के लिए `#N`।
-- **Insertion markers** — keyed / indexed
-  insertion के लिए `+`, `+key`, `+nnn` (`set` के साथ उपयोग करें)।
-- **Session scope** — `?session=cron-daily` आदि। Slot
-  nesting से orthogonal। Session values raw हैं, percent-decoded नहीं; उनमें
-  control characters या reserved query delimiters (`?`, `&`, `%`) नहीं हो सकते।
+- **उद्धृत सेगमेंट** — `"a/b.c"`, `/` और `.` विभाजकों के बावजूद सुरक्षित रहता है। सामग्री
+  बाइट-लिटरल होती है; उद्धरणों के भीतर `"` और `\` की अनुमति नहीं है। फ़ाइल स्लॉट भी
+  उद्धरण-जागरूक है: `oc://"skills/email-drafter"/Tools/$last`,
+  `skills/email-drafter` को एकल फ़ाइल पथ मानता है।
+- **प्रेडिकेट** — `[k=v]`, `[k!=v]`, `[k<v]`, `[k<=v]`, `[k>v]`, `[k>=v]`।
+  सांख्यिक ऑपरेटरों के लिए दोनों पक्षों का सीमित संख्याओं में रूपांतरित होना आवश्यक है।
+- **यूनियन** — `{a,b,c}` किसी भी विकल्प से मेल खाता है।
+- **वाइल्डकार्ड** — `*` (एकल उप-सेगमेंट) और `**` (शून्य या अधिक,
+  पुनरावर्ती)। `find` इन्हें स्वीकार करता है; `resolve` और `set` इन्हें
+  अस्पष्ट मानकर अस्वीकार करते हैं।
+- **स्थितिगत** — `$first` / `$last` पहले / अंतिम इंडेक्स या
+  घोषित कुंजी में रिज़ॉल्व होते हैं।
+- **क्रमसूचक** — दस्तावेज़ क्रम के अनुसार Nवें मिलान के लिए `#N`।
+- **प्रविष्टि मार्कर** — कुंजीयुक्त / इंडेक्सयुक्त प्रविष्टि के लिए `+`, `+key`, `+nnn`
+  (`set` के साथ उपयोग करें)।
+- **सत्र स्कोप** — `?session=cron-daily` आदि। स्लॉट नेस्टिंग से स्वतंत्र।
+  सत्र मान रॉ होते हैं, प्रतिशत-डिकोड नहीं किए जाते; उनमें नियंत्रण
+  वर्ण या आरक्षित क्वेरी सीमांकक (`?`, `&`, `%`) नहीं हो सकते।
 
-quoted, predicate, या union
-segments के बाहर reserved characters (`?`, `&`, `%`) reject किए जाते हैं। Control characters (U+0000-U+001F, U+007F) कहीं भी reject किए जाते हैं,
-जिसमें `session` query value भी शामिल है।
+उद्धृत, प्रेडिकेट या यूनियन सेगमेंट के बाहर आरक्षित वर्ण (`?`, `&`, `%`)
+अस्वीकार किए जाते हैं। नियंत्रण वर्ण (U+0000-U+001F, U+007F)
+`session` क्वेरी मान सहित कहीं भी अस्वीकार किए जाते हैं।
 
-canonical paths के लिए `formatOcPath(parseOcPath(path)) === path` guaranteed है।
-Non-canonical query parameters को ignore किया जाता है, सिवाय पहले non-empty
-`session=` value के।
+कैनोनिकल पथों के लिए `formatOcPath(parseOcPath(path)) === path` की गारंटी है।
+पहले गैर-रिक्त `session=` मान को छोड़कर गैर-कैनोनिकल क्वेरी पैरामीटर
+अनदेखे किए जाते हैं।
 
-## file kind के अनुसार addressing
+कठोर सीमाएँ: पथ अधिकतम 4096 बाइट, अधिकतम 4 स्लॉट (फ़ाइल/अनुभाग/आइटम/
+फ़ील्ड), प्रति स्लॉट अधिकतम 64 डॉटयुक्त उप-सेगमेंट और गहरे JSON पथों के लिए अधिकतम 256 नेस्टेड
+ट्रैवर्सल स्तर तक सीमित है। अलग से, 16 MiB से बड़ी किसी भी JSONC/JSON फ़ाइल इनपुट को
+पार्स करने के बजाय पार्स निदान के साथ अस्वीकार किया जाता है,
+ऐसी फ़ाइल लोड करने वाली किसी भी क्रिया के लिए।
 
-| Kind              | Addressing model                                                                                    |
-| ----------------- | --------------------------------------------------------------------------------------------------- |
-| Markdown          | slug द्वारा H2 sections, slug या `#N` द्वारा bullet items, `[frontmatter]` के through frontmatter।                 |
-| JSONC/JSON        | Object keys और array indexes; quoted न होने पर dots nested sub-segments split करते हैं।                        |
-| JSONL             | Top-level line addresses (`L1`, `L2`, `$first`, `$last`), फिर line के अंदर JSONC-style descent। |
-| YAML/YML/.lobster | Map keys और sequence indexes; comments और flow style YAML document API द्वारा handle किए जाते हैं।        |
+## फ़ाइल प्रकार के अनुसार एड्रेसिंग
 
-`resolve` structured match return करता है: `root`, `node`, `leaf`, या
-`insertion-point`, 1-based line number के साथ। Leaf values text के रूप में surface होते हैं
-साथ में `leafType`, ताकि plugin authors per-kind AST shape पर depend किए बिना
-previews render कर सकें।
+| प्रकार          | फ़ाइल एक्सटेंशन             | एड्रेसिंग मॉडल                                                                                    |
+| ------------- | --------------------------- | --------------------------------------------------------------------------------------------------- |
+| Markdown      | `.md`                       | स्लग द्वारा H2 अनुभाग, स्लग या `#N` द्वारा बुलेट आइटम, `[frontmatter]` के माध्यम से फ्रंटमैटर।                 |
+| JSONC/JSON    | `.jsonc`, `.json`           | ऑब्जेक्ट कुंजियाँ और ऐरे इंडेक्स; उद्धृत न होने पर डॉट नेस्टेड उप-सेगमेंट विभाजित करते हैं।                        |
+| JSONL         | `.jsonl`, `.ndjson`         | शीर्ष-स्तरीय लाइन पते (`L1`, `L2`, `$first`, `$last`), फिर लाइन के भीतर JSONC-शैली अवरोहण। |
+| YAML/.lobster | `.yaml`, `.yml`, `.lobster` | मैप कुंजियाँ और सीक्वेंस इंडेक्स; टिप्पणियाँ और फ़्लो शैली YAML दस्तावेज़ API द्वारा संभाली जाती हैं।        |
 
-## Mutation contract
+`resolve` एक संरचित मिलान लौटाता है: `root`, `node`, `leaf` या
+`insertion-point`, साथ में 1-आधारित लाइन नंबर। लीफ़ मानों को पाठ और
+एक `leafType` के रूप में प्रस्तुत किया जाता है, ताकि Plugin लेखक प्रत्येक प्रकार के AST आकार पर निर्भर हुए बिना
+पूर्वावलोकन रेंडर कर सकें।
 
-`set` एक concrete target लिखता है:
+## म्यूटेशन अनुबंध
 
-- Markdown frontmatter values और `- key: value` item fields string leaves हैं।
-  Markdown insertions sections, frontmatter keys, या section items append करते हैं और
-  changed file के लिए canonical markdown shape render करते हैं।
-- JSONC leaf writes string value को existing leaf type में coerce करते हैं
-  (`string`, finite `number`, `true`/`false`, या `null`)। जब JSONC/JSON/JSONL leaf replacement को `<value>` को JSON के रूप में parse करना चाहिए और
-  shape बदल सकती है, जैसे string SecretRef shorthand को
-  object से replace करना, तब `--value-json` उपयोग करें। JSONC object और array insertions `<value>` को JSON के रूप में parse करते हैं और
-  ordinary leaf writes के लिए `jsonc-parser` edit path उपयोग करते हैं, comments और
-  nearby formatting preserve करते हुए।
-- JSONL leaf writes line के अंदर JSONC की तरह coerce करते हैं। Whole-line replacement और
-  append `<value>` को JSON के रूप में parse करते हैं। Rendered JSONL file की dominant
-  LF/CRLF line-ending convention preserve करता है।
-- YAML leaf writes existing scalar type (`string`, finite
-  `number`, `true`/`false`, या `null`) में coerce करते हैं। YAML insertions map/sequence updates के लिए bundled
-  `yaml` package की document API उपयोग करते हैं। Parser errors वाले malformed YAML
-  documents mutation से पहले `parse-error` के साथ refuse किए जाते हैं।
+`set` एक ठोस लक्ष्य लिखता है:
 
-जब exact bytes मायने रखते हों, user-visible writes से पहले `--dry-run` उपयोग करें। Substrate parse/emit round-trips के लिए byte-identical output preserve करता है, लेकिन
-mutation kind के आधार पर edited region या file को canonicalize कर सकता है।
-जब आपको full rendered file के बजाय focused before/after patch के रूप में preview चाहिए तो
-`--diff` जोड़ें।
+- Markdown फ्रंटमैटर मान और `- key: value` आइटम फ़ील्ड स्ट्रिंग
+  लीफ़ हैं। Markdown प्रविष्टियाँ अनुभाग, फ्रंटमैटर कुंजियाँ, या अनुभाग
+  आइटम जोड़ती हैं और बदली गई फ़ाइल के लिए एक कैनोनिकल Markdown स्वरूप रेंडर करती हैं। अनुभाग
+  बॉडी को `set` के माध्यम से समग्र रूप में लिखा नहीं जा सकता।
+- JSONC लीफ़ लेखन स्ट्रिंग मान को मौजूदा लीफ़ प्रकार में कोअर्स करता है
+  (`string`, परिमित `number`, `true`/`false`, या `null`)। जब JSONC/JSON/JSONL लीफ़ प्रतिस्थापन को `<value>` को JSON के रूप में पार्स करना चाहिए और
+  उसका स्वरूप बदल सकता है, जैसे किसी स्ट्रिंग secret-ref शॉर्टहैंड को
+  ऑब्जेक्ट से बदलना, तब `--value-json` का उपयोग करें। JSONC ऑब्जेक्ट और ऐरे प्रविष्टियाँ `<value>` को JSON के रूप में पार्स करती हैं और सामान्य लीफ़ लेखन के लिए
+  `jsonc-parser` संपादन पथ का उपयोग करती हैं, जिससे टिप्पणियाँ
+  और आस-पास का फ़ॉर्मैटिंग सुरक्षित रहता है।
+- JSONL लीफ़ लेखन किसी पंक्ति के भीतर JSONC की तरह कोअर्स करता है। पूरी पंक्ति का प्रतिस्थापन
+  और जोड़ना `<value>` को JSON के रूप में पार्स करता है। रेंडर किया गया JSONL फ़ाइल की
+  प्रमुख LF/CRLF पंक्ति-अंत परंपरा को बनाए रखता है (फ़ाइल की
+  नई पंक्तियों में बहुमत के आधार पर, इसलिए अधिकतर-CRLF वाली फ़ाइल कुछ इक्का-दुक्का LF होने पर भी CRLF ही रहती है)।
+- YAML लीफ़ लेखन मौजूदा स्केलर प्रकार में कोअर्स करता है (`string`, परिमित
+  `number`, `true`/`false`, या `null`)। YAML प्रविष्टियाँ मैप/सीक्वेंस अपडेट के लिए बंडल किए गए
+  `yaml` पैकेज के दस्तावेज़ API का उपयोग करती हैं। पार्सर त्रुटियों वाले विकृत YAML
+  दस्तावेज़ों में परिवर्तन करने से पहले
+  `parse-error` के साथ अस्वीकार कर दिया जाता है।
 
-## Examples
+जब सटीक बाइट मायने रखते हों, तो उपयोगकर्ता-दृश्य लेखन से पहले `--dry-run` का उपयोग करें। JSONC
+और YAML संपादन मौजूदा दस्तावेज़ को पैच करते हैं (`jsonc-parser` या `yaml`
+दस्तावेज़ API के माध्यम से), इसलिए अछूते बाइट सामान्यतः बने रहते हैं; किसी भी संपादन पर Markdown फ़ाइल को
+उसकी पार्स की गई संरचना से दोबारा बनाता है, जिससे बदले गए लीफ़ के बाहर का आनुषंगिक
+फ़ॉर्मैटिंग सामान्यीकृत हो सकता है। यदि आप पूर्ण रेंडर की गई फ़ाइल के बजाय
+केंद्रित पहले/बाद के पैच के रूप में पूर्वावलोकन चाहते हैं, तो `--diff` जोड़ें।
+
+## उदाहरण
 
 ```bash
-# Validate a path (no filesystem access)
+# पथ सत्यापित करें (फ़ाइल सिस्टम अभिगम नहीं)
 openclaw path validate 'oc://AGENTS.md/Tools/$last/risk'
 
-# Read a leaf
+# लीफ़ पढ़ें
 openclaw path resolve 'oc://gateway.jsonc/version'
 
-# Wildcard search
+# वाइल्डकार्ड खोज
 openclaw path find 'oc://session.jsonl/*/event' --file ./logs/session.jsonl
 
-# Dry-run a write
+# लेखन का ड्राई रन करें
 openclaw path set 'oc://gateway.jsonc/version' '2.0' --dry-run
 
-# Dry-run a write as a unified diff
+# यूनिफ़ाइड डिफ़ के रूप में लेखन का ड्राई रन करें
 openclaw path set 'oc://gateway.jsonc/version' '2.0' --dry-run --diff
 
-# Apply the write
+# लेखन लागू करें
 openclaw path set 'oc://gateway.jsonc/version' '2.0'
 
-# Byte-fidelity round-trip (diagnostic)
+# बाइट-निष्ठा राउंड-ट्रिप (निदान)
 openclaw path emit ./AGENTS.md
 ```
 
-और grammar examples:
+व्याकरण के और उदाहरण:
 
 ```bash
-# Quote keys containing / or .
+# / या . वाली कुंजियों को उद्धरण चिह्नों में रखें
 openclaw path resolve 'oc://config.jsonc/agents.defaults.models/"anthropic/claude-opus-4-7"/alias'
 
-# Deep JSON/JSONC paths can use slash segments; they normalize to dotted subsegments
+# गहरे JSON/JSONC पथ स्लैश खंडों का उपयोग कर सकते हैं; वे डॉट वाले उपखंडों में सामान्यीकृत होते हैं
 openclaw path set 'oc://openclaw.json/agents/list/0/tools/exec/security' 'allowlist' --dry-run
 
-# Replace a JSONC leaf with a parsed object
+# JSONC लीफ़ को पार्स किए गए ऑब्जेक्ट से बदलें
 openclaw path set 'oc://openclaw.json/gateway/auth/token' '{"source":"file","provider":"secrets","id":"/test"}' --value-json --dry-run
 
-# Predicate search over JSONC children
+# JSONC चाइल्ड पर प्रेडिकेट खोज
 openclaw path find 'oc://config.jsonc/plugins/[enabled=true]/id'
 
-# Insert into a JSONC array
+# JSONC ऐरे में प्रविष्ट करें
 openclaw path set 'oc://config.jsonc/items/+1' '{"id":"new","enabled":true}' --dry-run
 
-# Insert a JSONC object key
+# JSONC ऑब्जेक्ट कुंजी प्रविष्ट करें
 openclaw path set 'oc://config.jsonc/plugins/+github' '{"enabled":true}' --dry-run
 
-# Append a JSONL event
+# JSONL इवेंट जोड़ें
 openclaw path set 'oc://session.jsonl/+' '{"event":"checkpoint","ok":true}' --file ./logs/session.jsonl
 
-# Resolve the last JSONL value line
+# अंतिम JSONL मान पंक्ति रिज़ॉल्व करें
 openclaw path resolve 'oc://session.jsonl/$last/event' --file ./logs/session.jsonl
 
-# Resolve a YAML workflow step
+# YAML वर्कफ़्लो चरण रिज़ॉल्व करें
 openclaw path resolve 'oc://workflow.yaml/steps/0/id'
 
-# Update a YAML scalar
+# YAML स्केलर अपडेट करें
 openclaw path set 'oc://workflow.yaml/steps/$last/id' 'classify-renamed' --dry-run
 
-# Address markdown frontmatter
+# Markdown फ्रंटमैटर को संबोधित करें
 openclaw path resolve 'oc://AGENTS.md/[frontmatter]/name'
 
-# Insert markdown frontmatter
+# Markdown फ्रंटमैटर प्रविष्ट करें
 openclaw path set 'oc://AGENTS.md/[frontmatter]/+description' 'Agent instructions' --dry-run
 
-# Find markdown item fields
+# Markdown आइटम फ़ील्ड खोजें
 openclaw path find 'oc://SKILL.md/Tools/*/send_email'
 
-# Validate a session-scoped path
+# सत्र-स्कोप वाला पथ सत्यापित करें
 openclaw path validate 'oc://AGENTS.md/Tools/$last/risk?session=cron-daily'
 ```
 
-## फ़ाइल प्रकार के अनुसार रेसिपी
+## फ़ाइल प्रकार के अनुसार विधियाँ
 
-वही पाँच क्रियाएँ सभी प्रकारों में काम करती हैं; एड्रेसिंग योजना फ़ाइल एक्सटेंशन के आधार पर डिस्पैच करती है। नीचे दिए गए उदाहरण PR विवरण से fixtures का उपयोग करते हैं।
+सभी प्रकारों में वही पाँच क्रियाएँ काम करती हैं; संबोधन योजना
+फ़ाइल एक्सटेंशन के आधार पर प्रेषित करती है।
 
 ### Markdown
 
@@ -302,30 +320,32 @@ openclaw path validate 'oc://AGENTS.md/Tools/$last/risk?session=cron-daily'
 <!-- frontmatter.md -->
 ---
 name: drafter
-description: email drafting agent
+description: ईमेल ड्राफ़्टिंग एजेंट
 tier: core
 ---
-## Tools
+## उपकरण
 - gh: GitHub CLI
-- curl: HTTP client
-- send_email: enabled
+- curl: HTTP क्लाइंट
+- send_email: सक्षम
 ```
 
 ```bash
 $ openclaw path resolve 'oc://x.md/[frontmatter]/tier' --file frontmatter.md --human
-leaf @ L4: "core" (string)
+लीफ़ @ L4: "core" (स्ट्रिंग)
 
 $ openclaw path resolve 'oc://x.md/tools/gh/gh' --file frontmatter.md --human
-leaf @ L9: "GitHub CLI" (string)
+लीफ़ @ L9: "GitHub CLI" (स्ट्रिंग)
 
 $ openclaw path find 'oc://x.md/tools/*' --file frontmatter.md --human
-3 matches for oc://x.md/tools/*:
-  oc://x.md/tools/gh           →  node @ L9 [md-item]
-  oc://x.md/tools/curl         →  node @ L10 [md-item]
-  oc://x.md/tools/send-email   →  node @ L11 [md-item]
+oc://x.md/tools/* के लिए 3 मिलान:
+  oc://x.md/tools/gh           →  नोड @ L9 [md-item]
+  oc://x.md/tools/curl         →  नोड @ L10 [md-item]
+  oc://x.md/tools/send-email   →  नोड @ L11 [md-item]
 ```
 
-`[frontmatter]` प्रेडिकेट YAML frontmatter ब्लॉक को संबोधित करता है; `tools` slug के माध्यम से `## Tools` शीर्षक से मेल खाता है, और आइटम leaves अपना slug रूप बनाए रखते हैं, भले ही स्रोत underscores का उपयोग करता हो (`send_email` → `send-email`)।
+`[frontmatter]` प्रेडिकेट YAML फ्रंटमैटर ब्लॉक को संबोधित करता है; `tools`
+स्लग के माध्यम से `## Tools` शीर्षक से मेल खाता है, और स्रोत में अंडरस्कोर का उपयोग होने पर भी आइटम लीफ़ अपना स्लग स्वरूप
+बनाए रखते हैं (`send_email`, `send-email` बन जाता है)।
 
 ### JSONC
 
@@ -341,10 +361,10 @@ $ openclaw path find 'oc://x.md/tools/*' --file frontmatter.md --human
 
 ```bash
 $ openclaw path resolve 'oc://config.jsonc/plugins/github/enabled' --file config.jsonc --human
-leaf @ L4: "true" (boolean)
+लीफ़ @ L4: "true" (बूलियन)
 
 $ openclaw path set 'oc://config.jsonc/plugins/slack/enabled' 'true' --file config.jsonc --dry-run
---dry-run: would write 142 bytes to /…/config.jsonc
+--dry-run: /…/config.jsonc में 142 बाइट लिखे जाते
 {
   "plugins": {
     "github": {"enabled": true, "role": "vcs"},
@@ -353,7 +373,9 @@ $ openclaw path set 'oc://config.jsonc/plugins/slack/enabled' 'true' --file conf
 }
 ```
 
-JSONC संपादन `jsonc-parser` से होकर जाते हैं, इसलिए `set` के बाद टिप्पणियाँ और whitespace बचा रहता है। commit करने से पहले bytes की जाँच करने के लिए पहले `--dry-run` के साथ चलाएँ।
+JSONC संपादन `jsonc-parser` से होकर गुजरते हैं, इसलिए `set` के दौरान टिप्पणियाँ और रिक्त स्थान
+बने रहते हैं। कमिट करने से पहले बाइट का निरीक्षण करने के लिए इसे पहले `--dry-run` के साथ चलाएँ।
+`.json` फ़ाइलें `.jsonc` के समान एडाप्टर और संपादन पथ का उपयोग करती हैं।
 
 ### JSONL
 
@@ -365,14 +387,16 @@ JSONC संपादन `jsonc-parser` से होकर जाते है�
 
 ```bash
 $ openclaw path find 'oc://session.jsonl/[event=action]/userId' --file session.jsonl --human
-1 match for oc://session.jsonl/[event=action]/userId:
-  oc://session.jsonl/L2/userId  →  leaf @ L2: "u1" (string)
+oc://session.jsonl/[event=action]/userId के लिए 1 मिलान:
+  oc://session.jsonl/L2/userId  →  लीफ़ @ L2: "u1" (स्ट्रिंग)
 
 $ openclaw path resolve 'oc://session.jsonl/L2/ts' --file session.jsonl --human
-leaf @ L2: "2" (number)
+लीफ़ @ L2: "2" (संख्या)
 ```
 
-हर पंक्ति एक रिकॉर्ड है। जब आपको पंक्ति संख्या नहीं पता हो, तो predicate (`[event=action]`) से संबोधित करें, या जब पता हो तो canonical `LN` segment से करें।
+प्रत्येक पंक्ति एक रिकॉर्ड है। जब आपको पंक्ति संख्या ज्ञात न हो, तो प्रेडिकेट (`[event=action]`) से संबोधित करें,
+और ज्ञात होने पर कैनोनिकल `LN` खंड से।
+`.ndjson` फ़ाइलें `.jsonl` के समान एडाप्टर का उपयोग करती हैं।
 
 ### YAML
 
@@ -388,10 +412,10 @@ steps:
 
 ```bash
 $ openclaw path resolve 'oc://workflow.yaml/steps/0/id' --file workflow.yaml --human
-leaf @ L3: "fetch" (string)
+लीफ़ @ L3: "fetch" (स्ट्रिंग)
 
 $ openclaw path set 'oc://workflow.yaml/steps/$last/id' 'classify-renamed' --file workflow.yaml --dry-run
---dry-run: would write 99 bytes to /…/workflow.yaml
+--dry-run: /…/workflow.yaml में 99 बाइट लिखे जाते
 name: inbox-triage
 steps:
   - id: fetch
@@ -400,13 +424,18 @@ steps:
     command: openclaw.invoke
 ```
 
-YAML हाथ से बनाए गए parser के बजाय `yaml` package के `Document` API का उपयोग करता है, इसलिए सामान्य parse/emit round-trip टिप्पणियों और authoring shape को सुरक्षित रखते हैं, जबकि resolved paths JSONC जैसा ही map-key / sequence-index मॉडल उपयोग करते हैं। वही adapter `.yaml`, `.yml`, और `.lobster` फ़ाइलों को संभालता है।
+YAML हाथ से बनाए गए पार्सर के बजाय `yaml` पैकेज के `Document` API का उपयोग करता है,
+इसलिए सामान्य पार्स/एमिट राउंड-ट्रिप टिप्पणियों और लेखन
+स्वरूप को बनाए रखते हैं, जबकि रिज़ॉल्व किए गए पथ JSONC के समान मैप-कुंजी / सीक्वेंस-इंडेक्स मॉडल का उपयोग करते हैं।
+वही एडाप्टर `.yaml`, `.yml`, और `.lobster` फ़ाइलों को संभालता है।
 
-## Subcommand संदर्भ
+## सबकमांड संदर्भ
 
 ### `resolve <oc-path>`
 
-एक leaf या node पढ़ें। Wildcards अस्वीकार किए जाते हैं — उनके लिए `find` का उपयोग करें। match मिलने पर `0`, साफ miss पर `1`, parse error या refused pattern पर `2` के साथ exit करता है।
+एक लीफ़ या नोड पढ़ें। वाइल्डकार्ड अस्वीकार किए जाते हैं—उनके लिए `find` का उपयोग करें।
+मिलान पर `0`, साफ़ तौर पर कोई मिलान न होने पर `1`, और पार्स त्रुटि या अस्वीकृत
+पैटर्न पर `2` के साथ बाहर निकलता है।
 
 ```bash
 openclaw path resolve 'oc://AGENTS.md/tools/gh/risk' --human
@@ -415,7 +444,10 @@ openclaw path resolve 'oc://gateway.jsonc/server/port' --json
 
 ### `find <pattern>`
 
-wildcard / predicate / union pattern के लिए हर match को enumerate करें। कम से कम एक match पर `0`, शून्य पर `1` के साथ exit करता है। File-slot wildcards `OC_PATH_FILE_WILDCARD_UNSUPPORTED` के साथ अस्वीकार किए जाते हैं — कोई concrete file पास करें (multi-file globbing follow-up feature है)।
+वाइल्डकार्ड / प्रेडिकेट / यूनियन पैटर्न के प्रत्येक मिलान को सूचीबद्ध करें। कम-से-कम एक मिलान पर `0`,
+शून्य मिलान पर `1` के साथ बाहर निकलता है। फ़ाइल-स्लॉट वाइल्डकार्ड
+`OC_PATH_FILE_WILDCARD_UNSUPPORTED` के साथ अस्वीकार किए जाते हैं—एक ठोस फ़ाइल दें (बहु-फ़ाइल
+ग्लॉबिंग एक अनुवर्ती सुविधा है)।
 
 ```bash
 openclaw path find 'oc://AGENTS.md/tools/**/risk'
@@ -425,7 +457,10 @@ openclaw path find 'oc://config.jsonc/plugins/{github,slack}/enabled'
 
 ### `set <oc-path> <value>`
 
-एक leaf लिखें। फ़ाइल को छुए बिना लिखे जाने वाले bytes का preview करने के लिए `--dry-run` के साथ pair करें। unified diff preview के लिए `--diff` जोड़ें। सफल write पर `0`, substrate द्वारा refusal पर `1` (उदाहरण के लिए, sentinel guard hit), parse errors पर `2` के साथ exit करता है।
+एक लीफ़ लिखें। फ़ाइल को छुए बिना लिखे जाने वाले बाइट का पूर्वावलोकन करने के लिए इसे `--dry-run` के साथ
+जोड़ें। यूनिफ़ाइड डिफ़ पूर्वावलोकन के लिए `--diff` जोड़ें।
+सफल लेखन पर `0`, सब्सट्रेट द्वारा अस्वीकार किए जाने पर `1` (उदाहरण के लिए,
+सेंटिनल गार्ड सक्रिय होना), और पार्स त्रुटियों पर `2` के साथ बाहर निकलता है।
 
 ```bash
 openclaw path set 'oc://gateway.jsonc/version' '2.0' --dry-run
@@ -434,48 +469,64 @@ openclaw path set 'oc://gateway.jsonc/version' '2.0'
 openclaw path set 'oc://AGENTS.md/Tools/+gh/risk' 'low'
 ```
 
-`+key` insertion marker नामित child बनाता है, यदि वह पहले से मौजूद नहीं है; `+nnn` और bare `+` क्रमशः indexed और append insertion के लिए काम करते हैं।
+यदि नाम वाला चाइल्ड पहले से मौजूद न हो, तो `+key` प्रविष्टि मार्कर उसे बनाता है;
+क्रमशः इंडेक्स वाली और जोड़ने वाली प्रविष्टि के लिए `+nnn` और केवल `+` काम करते हैं।
 
 ### `validate <oc-path>`
 
-केवल parse जाँच। कोई filesystem access नहीं। यह तब उपयोगी है जब आप variables substitute करने से पहले पुष्टि करना चाहते हैं कि template path well-formed है, या जब आप debugging के लिए structural breakdown चाहते हैं:
+केवल पार्स जाँच। कोई फ़ाइल सिस्टम अभिगम नहीं। यह तब उपयोगी है, जब आप
+वेरिएबल प्रतिस्थापित करने से पहले पुष्टि करना चाहते हों कि टेम्पलेट पथ सुगठित है, या जब आप
+डीबगिंग के लिए संरचनात्मक विश्लेषण चाहते हों:
 
 ```bash
 $ openclaw path validate 'oc://AGENTS.md/tools/gh' --human
-valid: oc://AGENTS.md/tools/gh
-  file:    AGENTS.md
-  section: tools
-  item:    gh
+मान्य: oc://AGENTS.md/tools/gh
+  फ़ाइल:    AGENTS.md
+  अनुभाग: tools
+  आइटम:    gh
 ```
 
-valid होने पर `0`, invalid होने पर `1` (structured `code` और `message` के साथ), argument errors पर `2` के साथ exit करता है।
+मान्य होने पर `0`, अमान्य होने पर `1` (संरचित `code` और
+`message` के साथ), और आर्ग्युमेंट त्रुटियों पर `2` के साथ बाहर निकलता है।
 
 ### `emit <file>`
 
-किसी फ़ाइल को per-kind parser और emitter से round-trip करें। sound file पर output input के byte-identical होना चाहिए — divergence parser bug या sentinel hit को इंगित करता है। real-world inputs पर substrate behavior debug करने के लिए उपयोगी।
+प्रति-प्रकार पार्सर और एमिटर के माध्यम से फ़ाइल का राउंड-ट्रिप करें। सही फ़ाइल पर आउटपुट
+इनपुट के बाइट-समान होना चाहिए; विचलन पार्सर बग या सेंटिनल सक्रिय होने का संकेत देता है।
+वास्तविक इनपुट पर सब्सट्रेट व्यवहार को डीबग करने के लिए उपयोगी है।
 
 ```bash
 openclaw path emit ./AGENTS.md
 openclaw path emit ./gateway.jsonc --json
 ```
 
-## Exit codes
+## निकास कोड
 
-| Code | अर्थ                                                                    |
+| कोड | अर्थ                                                                    |
 | ---- | -------------------------------------------------------------------------- |
-| `0`  | सफलता। (`resolve` / `find`: कम से कम एक match. `set`: write सफल रहा.) |
-| `1`  | कोई match नहीं, या substrate ने `set` अस्वीकार किया (कोई system-level error नहीं)।      |
-| `2`  | Argument या parse error।                                                   |
+| `0`  | सफलता। (`resolve` / `find`: कम-से-कम एक मिलान। `set`: लेखन सफल रहा।) |
+| `1`  | कोई मिलान नहीं, या `set` को सब्सट्रेट ने अस्वीकार किया (कोई सिस्टम-स्तरीय त्रुटि नहीं)।      |
+| `2`  | आर्ग्युमेंट या पार्स त्रुटि।                                                   |
 
-## Output mode
+## आउटपुट मोड
 
-`openclaw path` TTY-aware है: terminal पर human-readable output, stdout pipe या redirect होने पर JSON। `--json` और `--human` auto-detection को override करते हैं।
+`openclaw path` TTY-जागरूक है: टर्मिनल पर मानव-पठनीय आउटपुट, और stdout को पाइप या रीडायरेक्ट
+करने पर JSON। `--json` और `--human` स्वतः-पहचान को ओवरराइड करते हैं।
 
-## नोट्स
+## टिप्पणियाँ
 
-- `set` substrate के emit path से bytes लिखता है, जो redaction-sentinel guard अपने-आप लागू करता है। `__OPENCLAW_REDACTED__` (verbatim या substring के रूप में) रखने वाला leaf write time पर अस्वीकार किया जाता है।
-- JSONC parsing और leaf edits plugin-local `jsonc-parser` dependency का उपयोग करते हैं, इसलिए सामान्य leaf writes पर टिप्पणियाँ और formatting hand-rolled parser/re-render path से गुज़रने के बजाय सुरक्षित रहती हैं।
-- `path` LKG के बारे में नहीं जानता। यदि फ़ाइल LKG-tracked है, तो अगला observe call तय करता है कि promote / recover करना है या नहीं। LKG promote/recover lifecycle के माध्यम से atomic multi-set के लिए `set --batch` LKG-recovery substrate के साथ planned है।
+- `set` सब्सट्रेट के emit पथ के माध्यम से बाइट्स लिखता है, जो
+  रिडैक्शन-सेंटिनल गार्ड को स्वचालित रूप से लागू करता है। ऐसा लीफ़ जिसमें
+  `__OPENCLAW_REDACTED__` मौजूद हो (यथावत या सबस्ट्रिंग के रूप में), लिखते
+  समय अस्वीकार कर दिया जाता है।
+- JSONC पार्सिंग और लीफ़ संपादन Plugin-स्थानीय `jsonc-parser`
+  निर्भरता का उपयोग करते हैं, इसलिए सामान्य लीफ़ लेखन में टिप्पणियाँ और फ़ॉर्मैटिंग
+  हस्तनिर्मित पार्सर/री-रेंडर पथ से गुज़रने के बजाय संरक्षित रहती हैं।
+- `path` अंतिम-ज्ञात-सही (LKG) कॉन्फ़िगरेशन ट्रैकिंग या पुनर्प्राप्ति से अवगत नहीं है;
+  उस जीवनचक्र का स्वामित्व कहीं और है। यदि `path` के माध्यम से संपादित की गई फ़ाइल
+  भी LKG-ट्रैक की जाती है, तो अगला कॉन्फ़िगरेशन पठन तय करता है कि उसे प्रोमोट किया जाए या
+  पुनर्प्राप्त किया जाए; `path` संपादन को उस फ़ाइल पर किसी भी अन्य प्रत्यक्ष लेखन
+  के समान मानें।
 
 ## संबंधित
 

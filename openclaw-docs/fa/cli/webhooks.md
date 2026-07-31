@@ -2,12 +2,13 @@
 read_when:
     - می‌خواهید رویدادهای Pub/Sub جیمیل را به OpenClaw متصل کنید
     - به فهرست کامل پرچم‌ها و مقادیر پیش‌فرض نیاز دارید
-summary: مرجع CLI برای `openclaw webhooks` (راه‌اندازی و اجراکنندهٔ Pub/Sub در Gmail)
-title: وب‌هوک‌ها
+summary: مرجع CLI برای `openclaw webhooks` (راه‌اندازی و اجراکننده Gmail Pub/Sub)
+title: Webhookها
 x-i18n:
-    generated_at: "2026-07-12T09:55:20Z"
+    generated_at: "2026-07-27T16:22:05Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 83fff0ac2ce247402f45523eda0b5cdd551bd65212636118698e45cb8740236c
     source_path: cli/webhooks.md
@@ -16,7 +17,7 @@ x-i18n:
 
 # `openclaw webhooks`
 
-ابزارهای کمکی و یکپارچه‌سازی‌های Webhook. در حال حاضر، دامنهٔ این بخش به جریان‌های Gmail Pub/Sub مبتنی بر پایشگر همراه `gog` محدود است.
+کمک‌ابزارها و یکپارچه‌سازی‌های Webhook. در حال حاضر، دامنه این سطح به جریان‌های Gmail Pub/Sub مبتنی بر ناظر همراه `gog` محدود است.
 
 ## زیرفرمان‌ها
 
@@ -25,13 +26,13 @@ openclaw webhooks gmail setup --account <email> [...]
 openclaw webhooks gmail run   [--account <email>] [...]
 ```
 
-| زیرفرمان     | توضیحات                                                                                   |
-| ------------- | ----------------------------------------------------------------------------------------- |
-| `gmail setup` | راه‌انداز یک‌باره: پایش Gmail، موضوع/اشتراک Pub/Sub و تحویل هوک به OpenClaw.              |
-| `gmail run`   | اجرای `gog watch serve` به‌همراه حلقهٔ تمدید خودکار پایش در پیش‌زمینه.                    |
+| زیرفرمان    | توضیحات                                                                           |
+| ------------- | ------------------------------------------------------------------------------------- |
+| `gmail setup` | راه‌انداز یک‌باره: نظارت Gmail، موضوع/اشتراک Pub/Sub و تحویل هوک OpenClaw. |
+| `gmail run`   | اجرای `gog watch serve` به‌همراه حلقه تمدید خودکار نظارت در پیش‌زمینه.               |
 
 <Note>
-پس از تنظیم `hooks.enabled=true` و `hooks.gmail.account` (که با `gmail setup` انجام می‌شود)، Gateway نیز هنگام راه‌اندازی، `gog gmail watch serve` را به‌طور خودکار اجرا می‌کند. `gmail run` همان منطق را در پیش‌زمینه اجرا می‌کند و برای اشکال‌زدایی یا زمانی که پایشگر Gateway غیرفعال است مفید است. برای جزئیات اجرای خودکار و انصراف با `OPENCLAW_SKIP_GMAIL_WATCHER`، به [یکپارچه‌سازی Gmail Pub/Sub](/fa/automation/cron-jobs#gmail-pubsub-integration) مراجعه کنید.
+پس از تنظیم `hooks.enabled=true` و `hooks.gmail.account` (توسط `gmail setup`) Gateway نیز هنگام راه‌اندازی، `gog gmail watch serve` را به‌طور خودکار اجرا می‌کند. `gmail run` همان منطق را در پیش‌زمینه اجرا می‌کند و برای اشکال‌زدایی یا زمانی که ناظر Gateway غیرفعال است مفید است. برای جزئیات شروع خودکار و انصراف با `OPENCLAW_SKIP_GMAIL_WATCHER`، به [یکپارچه‌سازی Gmail Pub/Sub](/fa/automation/cron-jobs#gmail-pubsub-integration) مراجعه کنید.
 </Note>
 
 ## `webhooks gmail setup`
@@ -42,56 +43,56 @@ openclaw webhooks gmail setup --account you@example.com --project my-gcp-project
 openclaw webhooks gmail setup --account you@example.com --hook-url https://gateway.example.com/hooks/gmail
 ```
 
-اگر `gcloud` و `gog` موجود نباشند، آن‌ها را نصب می‌کند، احراز هویت `gcloud` را انجام می‌دهد، موضوع و اشتراک Pub/Sub را ایجاد می‌کند، پایش Gmail را آغاز می‌کند و پیکربندی `hooks.gmail` را با `hooks.enabled=true` می‌نویسد. سپس `Next: openclaw webhooks gmail run` را نمایش می‌دهد.
+در صورت فقدان، `gcloud` و `gog` را نصب می‌کند، `gcloud` را احراز هویت می‌کند، موضوع و اشتراک Pub/Sub را می‌سازد، نظارت Gmail را آغاز می‌کند و پیکربندی `hooks.gmail` را با `hooks.enabled=true` می‌نویسد. `Next: openclaw webhooks gmail run` را چاپ می‌کند.
 
 ### الزامی
 
-| پرچم                | توضیحات                      |
-| ------------------- | ---------------------------- |
-| `--account <email>` | حساب Gmail موردنظر برای پایش. |
+| پرچم                | توضیحات             |
+| ------------------- | ----------------------- |
+| `--account <email>` | حساب Gmail برای نظارت. |
 
 ### گزینه‌های Pub/Sub
 
-| پرچم                    | پیش‌فرض               | توضیحات                                                                                                                                                       |
-| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--project <id>`        | (هیچ‌کدام)            | شناسهٔ پروژهٔ GCP (مالک کلاینت OAuth). در صورت نبود، ابتدا از شناسهٔ پروژهٔ خود موضوع و سپس از پروژهٔ استخراج‌شده از اطلاعات احراز هویت `gog` استفاده می‌شود. |
-| `--topic <name>`        | `gog-gmail-watch`      | نام موضوع Pub/Sub.                                                                                                                                            |
-| `--subscription <name>` | `gog-gmail-watch-push` | نام اشتراک Pub/Sub.                                                                                                                                           |
-| `--label <label>`       | `INBOX`                | برچسب Gmail موردنظر برای پایش.                                                                                                                                |
-| `--push-endpoint <url>` | (هیچ‌کدام)            | نقطهٔ پایانی صریح ارسال Pub/Sub. Tailscale را نادیده می‌گیرد.                                                                                                 |
+| پرچم                    | پیش‌فرض                | توضیحات                                                                                                                             |
+| ----------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `--project <id>`        | (هیچ‌کدام)                 | شناسه پروژه GCP (مالک کلاینت OAuth). ابتدا از شناسه پروژه خود موضوع و سپس از پروژه تعیین‌شده با اعتبارنامه‌های `gog` استفاده می‌کند. |
+| `--topic <name>`        | `gog-gmail-watch`      | نام موضوع Pub/Sub.                                                                                                                     |
+| `--subscription <name>` | `gog-gmail-watch-push` | نام اشتراک Pub/Sub.                                                                                                              |
+| `--label <label>`       | `INBOX`                | برچسب Gmail برای نظارت.                                                                                                                   |
+| `--push-endpoint <url>` | (هیچ‌کدام)                 | نقطه پایانی صریح push برای Pub/Sub. بر Tailscale اولویت دارد.                                                                                    |
 
 ### گزینه‌های تحویل OpenClaw
 
-| پرچم                   | پیش‌فرض                                       | توضیحات                     |
-| ---------------------- | --------------------------------------------- | --------------------------- |
-| `--hook-url <url>`     | ساخته‌شده از `hooks.path` و درگاه Gateway     | نشانی Webhook در OpenClaw.  |
-| `--hook-token <token>` | `hooks.token` یا یک توکن تولیدشده             | توکن Webhook در OpenClaw.   |
-| `--push-token <token>` | توکن تولیدشده                                 | توکن ارسال‌شده به `gog watch serve`. |
+| پرچم                   | پیش‌فرض                                      | توضیحات                                |
+| ---------------------- | -------------------------------------------- | ------------------------------------------ |
+| `--hook-url <url>`     | ساخته‌شده از `hooks.path` و درگاه Gateway | نشانی Webhook ‏OpenClaw.                      |
+| `--hook-token <token>` | `hooks.token` یا یک توکن تولیدشده          | توکن Webhook ‏OpenClaw.                    |
+| `--push-token <token>` | توکن تولیدشده                              | توکن push که به `gog watch serve` ارسال می‌شود. |
 
 ### گزینه‌های `gog watch serve`
 
-| پرچم                  | پیش‌فرض        | توضیحات                                                                                                                                                                                      |
-| --------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--bind <host>`       | `127.0.0.1`    | میزبان اتصال `gog watch serve`.                                                                                                                                                              |
-| `--port <port>`       | `8788`         | درگاه `gog watch serve`.                                                                                                                                                                     |
-| `--path <path>`       | `/gmail-pubsub` | مسیر `gog watch serve`. وقتی Tailscale بدون مقصد صریح فعال باشد، به‌اجبار `/` می‌شود، زیرا Tailscale پیش از پراکسی‌کردن مسیر را حذف می‌کند.                                                   |
-| `--include-body`      | `true`         | قطعه‌هایی از بدنهٔ ایمیل را شامل می‌شود. هیچ پرچم CLI برای غیرفعال‌کردن آن وجود ندارد؛ به‌جای آن `hooks.gmail.includeBody: false` را در پیکربندی تنظیم کنید.                                  |
-| `--max-bytes <n>`     | `20000`        | حداکثر تعداد بایت برای هر قطعه از بدنه.                                                                                                                                                      |
-| `--renew-minutes <n>` | `720` (۱۲ ساعت) | پایش Gmail را هر N دقیقه تمدید می‌کند.                                                                                                                                                        |
+| پرچم                  | پیش‌فرض         | توضیحات                                                                                                                                  |
+| --------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--bind <host>`       | `127.0.0.1`     | میزبان اتصال `gog watch serve`.                                                                                                                 |
+| `--port <port>`       | `8788`          | درگاه `gog watch serve`.                                                                                                                      |
+| `--path <path>`       | `/gmail-pubsub` | مسیر `gog watch serve`. وقتی Tailscale بدون مقصد صریح فعال باشد، به‌اجبار `/` می‌شود، زیرا Tailscale پیش از پروکسی‌کردن مسیر را حذف می‌کند. |
+| `--include-body`      | `true`          | قطعه‌هایی از بدنه ایمیل را شامل می‌شود. هیچ پرچم CLI برای غیرفعال‌کردن آن وجود ندارد؛ به‌جای آن `hooks.gmail.includeBody: false` را در پیکربندی تنظیم کنید.                  |
+| `--max-bytes <n>`     | `20000`         | حداکثر تعداد بایت برای هر قطعه بدنه.                                                                                                                  |
+| `--renew-minutes <n>` | `720` (12h)     | نظارت Gmail را هر N دقیقه تمدید می‌کند.                                                                                                           |
 
-### دسترسی از طریق Tailscale
+### در معرض دسترس قراردادن با Tailscale
 
-| پرچم                      | پیش‌فرض  | توضیحات                                                                 |
-| ------------------------- | -------- | ----------------------------------------------------------------------- |
-| `--tailscale <mode>`      | `funnel` | نقطهٔ پایانی ارسال را از طریق Tailscale در معرض دسترسی قرار می‌دهد: `funnel`، `serve` یا `off`. |
-| `--tailscale-path <path>` | (هیچ‌کدام) | مسیر برای سرویس‌دهی/تونل Tailscale.                                    |
-| `--tailscale-target <t>`  | (هیچ‌کدام) | مقصد سرویس‌دهی/تونل Tailscale (درگاه، `host:port` یا URL).              |
+| پرچم                      | پیش‌فرض  | توضیحات                                                      |
+| ------------------------- | -------- | ---------------------------------------------------------------- |
+| `--tailscale <mode>`      | `funnel` | نقطه پایانی push را از طریق tailscale در معرض دسترس قرار می‌دهد: `funnel`، `serve` یا `off`. |
+| `--tailscale-path <path>` | (هیچ‌کدام)   | مسیر برای tailscale serve/funnel.                                 |
+| `--tailscale-target <t>`  | (هیچ‌کدام)   | مقصد serve/funnel در Tailscale (درگاه، `host:port` یا URL).       |
 
 ### خروجی
 
-| پرچم     | توضیحات                                            |
-| -------- | -------------------------------------------------- |
-| `--json` | به‌جای متن، خلاصه‌ای قابل‌خواندن برای ماشین چاپ می‌کند. |
+| پرچم     | توضیحات                                       |
+| -------- | ------------------------------------------------- |
+| `--json` | به‌جای متن، خلاصه‌ای ماشین‌خوان چاپ می‌کند. |
 
 ## `webhooks gmail run`
 
@@ -99,20 +100,20 @@ openclaw webhooks gmail setup --account you@example.com --hook-url https://gatew
 openclaw webhooks gmail run --account you@example.com
 ```
 
-`gog watch serve` را به‌همراه حلقهٔ تمدید خودکار پایش در پیش‌زمینه اجرا می‌کند و اگر `gog watch serve` به‌طور غیرمنتظره خارج شود، پس از ۲ ثانیه آن را دوباره راه‌اندازی می‌کند.
+`gog watch serve` را به‌همراه حلقه تمدید خودکار نظارت در پیش‌زمینه اجرا می‌کند و اگر `gog watch serve` به‌طور غیرمنتظره خارج شود، آن را پس از تأخیر 2s دوباره راه‌اندازی می‌کند.
 
 `run` همان پرچم‌های Pub/Sub، تحویل OpenClaw، `gog watch serve` و Tailscale در `setup` را می‌پذیرد، به‌جز موارد زیر:
 
-- `--account` در `run` **اختیاری** است؛ در صورت نبود، از `hooks.gmail.account` استفاده می‌شود.
-- `run` پرچم‌های `--project`، `--push-endpoint` یا `--json` را نمی‌پذیرد.
-- هر پرچم ابتدا از مقدار پیکربندی متناظر `hooks.gmail.*` (نوشته‌شده توسط `setup`) و سپس از همان پیش‌فرض داخلی مورد استفادهٔ `setup` استفاده می‌کند، با یک استثنا: اگر نه پرچم و نه `hooks.gmail.tailscale.mode` تنظیم شده باشند، مقدار پیش‌فرض `--tailscale` در `run` برابر `off` است، نه `funnel`.
+- `--account` در `run` **اختیاری** است؛ مقدار جایگزین آن `hooks.gmail.account` است.
+- `run`، مقادیر `--project`، `--push-endpoint` یا `--json` را نمی‌پذیرد.
+- هر پرچم ابتدا از مقدار پیکربندی متناظر `hooks.gmail.*` (نوشته‌شده توسط `setup`) و سپس از همان پیش‌فرض داخلی مورد استفاده `setup` استفاده می‌کند، با یک استثنا: اگر نه پرچم و نه `hooks.gmail.tailscale.mode` تنظیم شده باشد، مقدار پیش‌فرض `--tailscale` در `run` برابر `off` است (نه `funnel`).
 
-| دسته‌بندی       | پرچم‌ها                                                                          |
-| ---------------- | -------------------------------------------------------------------------------- |
-| Pub/Sub          | `--account`، `--topic`، `--subscription`، `--label`                              |
-| تحویل OpenClaw   | `--hook-url`، `--hook-token`، `--push-token`                                     |
+| دسته          | پرچم‌ها                                                                            |
+| ----------------- | -------------------------------------------------------------------------------- |
+| Pub/Sub           | `--account`، `--topic`، `--subscription`، `--label`                              |
+| تحویل OpenClaw | `--hook-url`، `--hook-token`، `--push-token`                                     |
 | `gog watch serve` | `--bind`، `--port`، `--path`، `--include-body`، `--max-bytes`، `--renew-minutes` |
-| Tailscale        | `--tailscale`، `--tailscale-path`، `--tailscale-target`                          |
+| Tailscale         | `--tailscale`، `--tailscale-path`، `--tailscale-target`                          |
 
 <Note>
 برای `run`، مقدار `--topic` مسیر کامل موضوع Pub/Sub است (`projects/.../topics/...`)، نه فقط نام کوتاه موضوع.

@@ -1,173 +1,134 @@
 ---
 read_when:
-    - ตอบคำถามสนับสนุนทั่วไปเกี่ยวกับการตั้งค่า การติดตั้ง การเริ่มใช้งาน หรือการทำงานขณะรัน
-    - คัดแยกปัญหาที่ผู้ใช้รายงานก่อนการดีบักเชิงลึก
+    - การตอบคำถามสนับสนุนที่พบบ่อยเกี่ยวกับการตั้งค่า การติดตั้ง การเริ่มต้นใช้งาน หรือรันไทม์
+    - การคัดแยกปัญหาที่ผู้ใช้รายงานก่อนดำเนินการดีบักเชิงลึก
 summary: คำถามที่พบบ่อยเกี่ยวกับการตั้งค่า การกำหนดค่า และการใช้งาน OpenClaw
 title: คำถามที่พบบ่อย
 x-i18n:
-    generated_at: "2026-07-03T17:48:46Z"
-    model: gpt-5.5
+    generated_at: "2026-07-19T18:13:01Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 4d55385d187c20dfce05022b76fcaa054c19fc22e46da66d4a24e2538dd95708
+    source_hash: 610d4692196fe6915df32966f7c2878124d1070a9cfcb2b6e4703f7e1c31b199
     source_path: help/faq.md
     workflow: 16
 ---
 
-คำตอบด่วนพร้อมการแก้ปัญหาเชิงลึกสำหรับการตั้งค่าใช้งานจริง (การพัฒนาในเครื่อง, VPS, หลายเอเจนต์, OAuth/API keys, model failover) สำหรับการวินิจฉัยขณะรันไทม์ ดู [การแก้ปัญหา](/th/gateway/troubleshooting) สำหรับข้อมูลอ้างอิง config ฉบับเต็ม ดู [การกำหนดค่า](/th/gateway/configuration)
+คำตอบแบบรวดเร็วพร้อมการแก้ไขปัญหาเชิงลึกสำหรับการตั้งค่าใช้งานจริง (การพัฒนาในเครื่อง, VPS, หลายเอเจนต์, OAuth/คีย์ API, การสลับโมเดลเมื่อขัดข้อง) สำหรับการวินิจฉัยรันไทม์ โปรดดู [การแก้ไขปัญหา](/th/gateway/troubleshooting) สำหรับเอกสารอ้างอิงการกำหนดค่าฉบับเต็ม โปรดดู [การกำหนดค่า](/th/gateway/configuration)
 
-## 60 วินาทีแรกเมื่อมีบางอย่างเสีย
+## 60 วินาทีแรกเมื่อมีบางอย่างขัดข้อง
 
-1. **สถานะด่วน (ตรวจสอบก่อน)**
+<Steps>
+  <Step title="ตรวจสอบสถานะอย่างรวดเร็ว">
+    ```bash
+    openclaw status
+    ```
+    สรุปข้อมูลในเครื่องอย่างรวดเร็ว: ระบบปฏิบัติการ + การอัปเดต, การเข้าถึง Gateway/บริการ, เอเจนต์/เซสชัน, การกำหนดค่าผู้ให้บริการ + ปัญหารันไทม์ (เมื่อเข้าถึง Gateway ได้)
+  </Step>
+  <Step title="รายงานที่วางได้ทันที (แชร์ได้อย่างปลอดภัย)">
+    ```bash
+    openclaw status --all
+    ```
+    การวินิจฉัยแบบอ่านอย่างเดียวพร้อมส่วนท้ายของบันทึก (ปกปิดโทเค็นแล้ว)
+  </Step>
+  <Step title="สถานะดีมอน + พอร์ต">
+    ```bash
+    openclaw gateway status
+    ```
+    แสดงสถานะรันไทม์ของตัวควบคุมเทียบกับการเข้าถึง RPC, URL เป้าหมายของโพรบ และการกำหนดค่าที่บริการน่าจะใช้
+  </Step>
+  <Step title="โพรบเชิงลึก">
+    ```bash
+    openclaw status --deep
+    ```
+    โพรบตรวจสอบความพร้อมใช้งานของ Gateway แบบสด รวมถึงโพรบช่องทางเมื่อรองรับ (ต้องเข้าถึง Gateway ได้) โปรดดู [ความพร้อมใช้งาน](/th/gateway/health)
+  </Step>
+  <Step title="ติดตามบันทึกล่าสุด">
+    ```bash
+    openclaw logs --follow
+    ```
+    หาก RPC ใช้งานไม่ได้ ให้ใช้วิธีสำรอง:
+    ```bash
+    tail -f "$(ls -t /tmp/openclaw/openclaw-*.log | head -1)"
+    ```
+    บันทึกในไฟล์แยกจากบันทึกของบริการ โปรดดู [การบันทึก](/th/logging) และ [การแก้ไขปัญหา](/th/gateway/troubleshooting)
+  </Step>
+  <Step title="เรียกใช้เครื่องมือตรวจสอบ (ซ่อมแซม)">
+    ```bash
+    openclaw doctor
+    ```
+    ซ่อมแซม/ย้ายข้อมูลการกำหนดค่าและสถานะ จากนั้นเรียกใช้การตรวจสอบความพร้อมใช้งาน โปรดดู [เครื่องมือตรวจสอบ](/th/gateway/doctor)
+  </Step>
+  <Step title="สแนปช็อต Gateway (เฉพาะ WS)">
+    ```bash
+    openclaw health --json
+    openclaw health --verbose   # แสดง URL เป้าหมาย + พาธการกำหนดค่าเมื่อเกิดข้อผิดพลาด
+    ```
+    ขอรับสแนปช็อตฉบับเต็มจาก Gateway ที่กำลังทำงาน โปรดดู [ความพร้อมใช้งาน](/th/gateway/health)
+  </Step>
+</Steps>
 
-   ```bash
-   openclaw status
-   ```
+## การเริ่มต้นอย่างรวดเร็วและการตั้งค่าครั้งแรก
 
-   สรุปในเครื่องอย่างรวดเร็ว: OS + อัปเดต, การเข้าถึง gateway/service, agents/sessions, provider config + ปัญหารันไทม์ (เมื่อเข้าถึง gateway ได้)
+คำถามและคำตอบเกี่ยวกับการใช้งานครั้งแรก ได้แก่ การติดตั้ง การเริ่มต้นใช้งาน เส้นทางการยืนยันตัวตน การสมัครใช้บริการ และความล้มเหลวช่วงแรก อยู่ใน [คำถามที่พบบ่อยเกี่ยวกับการใช้งานครั้งแรก](/th/help/faq-first-run)
 
-2. **รายงานที่วางได้ทันที (ปลอดภัยสำหรับแชร์)**
-
-   ```bash
-   openclaw status --all
-   ```
-
-   การวินิจฉัยแบบอ่านอย่างเดียวพร้อม log tail (ปกปิด tokens แล้ว)
-
-3. **สถานะ Daemon + port**
-
-   ```bash
-   openclaw gateway status
-   ```
-
-   แสดง supervisor runtime เทียบกับการเข้าถึง RPC, URL เป้าหมายของ probe และ config ที่ service น่าจะใช้
-
-4. **Deep probes**
-
-   ```bash
-   openclaw status --deep
-   ```
-
-   รัน live gateway health probe รวมถึง channel probes เมื่อรองรับ
-   (ต้องมี gateway ที่เข้าถึงได้) ดู [Health](/th/gateway/health)
-
-5. **ดู log ล่าสุดต่อเนื่อง**
-
-   ```bash
-   openclaw logs --follow
-   ```
-
-   ถ้า RPC ใช้งานไม่ได้ ให้ fallback เป็น:
-
-   ```bash
-   tail -f "$(ls -t /tmp/openclaw/openclaw-*.log | head -1)"
-   ```
-
-   File logs แยกจาก service logs; ดู [Logging](/th/logging) และ [การแก้ปัญหา](/th/gateway/troubleshooting)
-
-6. **รัน doctor (การซ่อมแซม)**
-
-   ```bash
-   openclaw doctor
-   ```
-
-   ซ่อมแซม/ย้าย config/state + รัน health checks ดู [Doctor](/th/gateway/doctor)
-
-7. **Gateway snapshot**
-
-   ```bash
-   openclaw health --json
-   openclaw health --verbose   # แสดง target URL + config path เมื่อเกิดข้อผิดพลาด
-   ```
-
-   ขอ snapshot ฉบับเต็มจาก gateway ที่กำลังรันอยู่ (WS เท่านั้น) ดู [Health](/th/gateway/health)
-
-## Quick start และการตั้งค่าครั้งแรก
-
-Q&A สำหรับการรันครั้งแรก — การติดตั้ง, onboard, auth routes, subscriptions, ความล้มเหลวช่วงแรก —
-อยู่ที่ [คำถามที่พบบ่อยสำหรับการรันครั้งแรก](/th/help/faq-first-run)
-
-## OpenClaw คืออะไร
+## OpenClaw คืออะไร?
 
 <AccordionGroup>
-  <Accordion title="OpenClaw คืออะไรในหนึ่งย่อหน้า">
-    OpenClaw คือผู้ช่วย AI ส่วนตัวที่คุณรันบนอุปกรณ์ของคุณเอง มันตอบกลับบนพื้นผิวการส่งข้อความที่คุณใช้อยู่แล้ว (WhatsApp, Telegram, Slack, Mattermost, Discord, Google Chat, Signal, iMessage, WebChat และ channel plugins ที่รวมมาด้วย เช่น QQ Bot) และยังทำเสียง + live Canvas บนแพลตฟอร์มที่รองรับได้ด้วย **Gateway** คือ control plane ที่เปิดตลอดเวลา; assistant คือผลิตภัณฑ์
+  <Accordion title="OpenClaw คืออะไรในหนึ่งย่อหน้า?">
+    OpenClaw คือผู้ช่วย AI ส่วนตัวที่ใช้งานบนอุปกรณ์ของคุณเอง โดยตอบกลับผ่านช่องทางรับส่งข้อความที่คุณใช้อยู่แล้ว (Discord, Google Chat, iMessage, Mattermost, Signal, Slack, Telegram, WebChat, WhatsApp และ Plugin ช่องทางที่มาพร้อมกัน เช่น QQ Bot) และยังรองรับเสียงพร้อม Canvas แบบสดบนแพลตฟอร์มที่รองรับ **Gateway** คือระนาบควบคุมที่ทำงานตลอดเวลา ส่วนผู้ช่วยคือตัวผลิตภัณฑ์
   </Accordion>
 
-  <Accordion title="คุณค่าหลัก">
-    OpenClaw ไม่ใช่ "แค่ Claude wrapper" แต่เป็น **control plane แบบ local-first** ที่ให้คุณรัน
-    assistant ที่มีความสามารถบน **ฮาร์ดแวร์ของคุณเอง** เข้าถึงได้จากแอปแชตที่คุณใช้อยู่แล้ว พร้อม
-    sessions ที่มี state, memory และ tools - โดยไม่ต้องมอบการควบคุม workflow ของคุณให้ SaaS
-    ที่โฮสต์อยู่ที่อื่น
+  <Accordion title="คุณค่าที่นำเสนอ">
+    OpenClaw ไม่ใช่ "แค่ตัวห่อหุ้ม Claude" แต่เป็น **ระนาบควบคุมที่ให้ความสำคัญกับการทำงานในเครื่องเป็นหลัก** ซึ่งเรียกใช้ผู้ช่วยที่มีความสามารถบน **ฮาร์ดแวร์ของคุณเอง** เข้าถึงได้จากแอปแชตที่คุณใช้อยู่แล้ว พร้อมเซสชันที่เก็บสถานะ หน่วยความจำ และเครื่องมือ โดยไม่ต้องมอบเวิร์กโฟลว์ของคุณให้ SaaS ที่โฮสต์โดยผู้อื่น
 
-    จุดเด่น:
+    - **อุปกรณ์ของคุณ ข้อมูลของคุณ**: เรียกใช้ Gateway ที่ใดก็ได้ตามต้องการ (Mac, Linux, VPS) และเก็บพื้นที่ทำงานกับประวัติเซสชันไว้ในเครื่อง
+    - **ช่องทางจริง ไม่ใช่แซนด์บ็อกซ์บนเว็บ**: Discord/iMessage/Signal/Slack/Telegram/WhatsApp/ฯลฯ พร้อมเสียงบนมือถือและ Canvas บนแพลตฟอร์มที่รองรับ
+    - **ไม่ขึ้นกับโมเดลใดโมเดลหนึ่ง**: ใช้ Anthropic, MiniMax, OpenAI, OpenRouter ฯลฯ พร้อมการกำหนดเส้นทางและการสลับเมื่อขัดข้องแยกตามเอเจนต์
+    - **ตัวเลือกที่ทำงานเฉพาะในเครื่อง**: เรียกใช้โมเดลในเครื่องเพื่อให้ข้อมูลทั้งหมดคงอยู่บนอุปกรณ์ของคุณ
+    - **การกำหนดเส้นทางแบบหลายเอเจนต์**: แยกเอเจนต์ตามช่องทาง บัญชี หรืองาน โดยแต่ละเอเจนต์มีพื้นที่ทำงานและค่าเริ่มต้นของตนเอง
+    - **โอเพนซอร์สและปรับแต่งได้**: ตรวจสอบ ขยาย และโฮสต์ด้วยตนเองได้โดยไม่ติดอยู่กับผู้จำหน่ายรายใด
 
-    - **อุปกรณ์ของคุณ ข้อมูลของคุณ:** รัน Gateway ที่ใดก็ได้ตามต้องการ (Mac, Linux, VPS) และเก็บ
-      workspace + session history ไว้ในเครื่อง
-    - **ช่องทางจริง ไม่ใช่ web sandbox:** WhatsApp/Telegram/Slack/Discord/Signal/iMessage/etc,
-      พร้อมเสียงบนมือถือและ Canvas บนแพลตฟอร์มที่รองรับ
-    - **ไม่ผูกกับโมเดลใดโมเดลหนึ่ง:** ใช้ Anthropic, OpenAI, MiniMax, OpenRouter ฯลฯ พร้อมการกำหนดเส้นทาง
-      และ failover ต่อเอเจนต์
-    - **ตัวเลือกเฉพาะในเครื่อง:** รันโมเดลในเครื่องเพื่อให้ **ข้อมูลทั้งหมดอยู่บนอุปกรณ์ของคุณได้** หากต้องการ
-    - **การกำหนดเส้นทางหลายเอเจนต์:** แยก agents ตาม channel, account หรือ task โดยแต่ละตัวมี
-      workspace และค่าเริ่มต้นของตัวเอง
-    - **โอเพนซอร์สและปรับแต่งได้:** ตรวจสอบ ขยาย และ self-host ได้โดยไม่ถูกล็อกกับผู้ขายรายใด
-
-    เอกสาร: [Gateway](/th/gateway), [Channels](/th/channels), [หลายเอเจนต์](/th/concepts/multi-agent),
-    [Memory](/th/concepts/memory).
+    เอกสาร: [Gateway](/th/gateway), [ช่องทาง](/th/channels), [หลายเอเจนต์](/th/concepts/multi-agent), [หน่วยความจำ](/th/concepts/memory)
 
   </Accordion>
 
-  <Accordion title="ฉันเพิ่งตั้งค่าเสร็จ - ควรทำอะไรก่อน">
-    โปรเจกต์แรกที่เหมาะ:
+  <Accordion title="เพิ่งตั้งค่าเสร็จ ควรทำอะไรเป็นอย่างแรก?">
+    โปรเจกต์เริ่มต้นที่เหมาะสม: สร้างเว็บไซต์ (WordPress, Shopify หรือเว็บไซต์แบบสแตติก); สร้างต้นแบบแอปมือถือ (โครงร่าง หน้าจอ แผน API); จัดระเบียบไฟล์และโฟลเดอร์; เชื่อมต่อ Gmail และทำให้การสรุปหรือการติดตามผลเป็นอัตโนมัติ
 
-    - สร้างเว็บไซต์ (WordPress, Shopify หรือ static site แบบเรียบง่าย)
-    - ทำ prototype แอปมือถือ (outline, screens, API plan)
-    - จัดระเบียบไฟล์และโฟลเดอร์ (cleanup, naming, tagging)
-    - เชื่อมต่อ Gmail และทำ summaries หรือ follow ups อัตโนมัติ
-
-    มันรับมือกับงานขนาดใหญ่ได้ แต่ทำงานได้ดีที่สุดเมื่อคุณแบ่งงานเป็นเฟสและ
-    ใช้ sub agents สำหรับงานแบบขนาน
+    ระบบจัดการงานขนาดใหญ่ได้ แต่จะทำงานได้ดีที่สุดเมื่อแบ่งเป็นระยะและใช้เอเจนต์ย่อยทำงานแบบขนาน
 
   </Accordion>
 
-  <Accordion title="ห้า use cases ประจำวันยอดนิยมสำหรับ OpenClaw คืออะไร">
-    สิ่งที่ช่วยได้ในชีวิตประจำวันมักมีลักษณะดังนี้:
-
-    - **Personal briefings:** สรุป inbox, calendar และข่าวที่คุณสนใจ
-    - **Research and drafting:** ค้นคว้าอย่างรวดเร็ว สรุป และร่างฉบับแรกสำหรับ emails หรือ docs
-    - **Reminders and follow ups:** การสะกิดเตือนและ checklists ที่ขับเคลื่อนด้วย Cron หรือ Heartbeat
-    - **Browser automation:** กรอกฟอร์ม เก็บข้อมูล และทำงานเว็บซ้ำ ๆ
-    - **การประสานงานข้ามอุปกรณ์:** ส่ง task จากโทรศัพท์ของคุณ ให้ Gateway รันบน server แล้วรับผลลัพธ์กลับใน chat
+  <Accordion title="กรณีใช้งาน OpenClaw ในชีวิตประจำวันห้าอันดับแรกมีอะไรบ้าง?">
+    - **สรุปข้อมูลส่วนบุคคล**: สรุปกล่องจดหมายเข้า ปฏิทิน และข่าวที่คุณสนใจ
+    - **การค้นคว้าและร่างเนื้อหา**: ค้นคว้าอย่างรวดเร็ว สรุปข้อมูล และจัดทำร่างแรกสำหรับอีเมลหรือเอกสาร
+    - **การเตือนความจำและการติดตามผล**: การแจ้งเตือนและรายการตรวจสอบที่ขับเคลื่อนด้วย Cron หรือ Heartbeat
+    - **ระบบอัตโนมัติของเบราว์เซอร์**: กรอกแบบฟอร์ม รวบรวมข้อมูล และทำงานบนเว็บซ้ำๆ
+    - **การประสานงานข้ามอุปกรณ์**: ส่งงานจากโทรศัพท์ ให้ Gateway เรียกใช้งานบนเซิร์ฟเวอร์ แล้วรับผลลัพธ์กลับมาในแชต
 
   </Accordion>
 
-  <Accordion title="OpenClaw ช่วยเรื่อง lead gen, outreach, ads และ blogs สำหรับ SaaS ได้ไหม">
-    ได้สำหรับ **การค้นคว้า การคัดกรอง และการร่าง** มันสแกนไซต์ สร้าง shortlists
-    สรุป prospects และเขียน drafts สำหรับ outreach หรือ ad copy ได้
+  <Accordion title="OpenClaw ช่วยสร้างลีด ติดต่อกลุ่มเป้าหมาย ทำโฆษณา และเขียนบล็อกสำหรับ SaaS ได้หรือไม่?">
+    ได้ สำหรับ **การค้นคว้า การคัดกรอง และการร่างเนื้อหา**: สแกนเว็บไซต์ สร้างรายชื่อที่คัดเลือกแล้ว สรุปข้อมูลผู้มีโอกาสเป็นลูกค้า และเขียนร่างข้อความติดต่อหรือข้อความโฆษณา
 
-    สำหรับ **outreach หรือ ad runs** ให้มีมนุษย์อยู่ใน loop หลีกเลี่ยง spam ทำตามกฎหมายท้องถิ่นและ
-    นโยบายแพลตฟอร์ม และตรวจทานทุกอย่างก่อนส่ง รูปแบบที่ปลอดภัยที่สุดคือให้
-    OpenClaw ร่าง แล้วคุณอนุมัติ
+    สำหรับ **การส่งข้อความติดต่อหรือการเผยแพร่โฆษณา** ควรให้มนุษย์มีส่วนร่วมในกระบวนการ หลีกเลี่ยงสแปม ปฏิบัติตามกฎหมายท้องถิ่นและนโยบายของแพลตฟอร์ม และตรวจสอบทุกอย่างก่อนส่ง ให้ OpenClaw ร่าง แล้วคุณเป็นผู้อนุมัติ
 
-    เอกสาร: [Security](/th/gateway/security).
+    เอกสาร: [ความปลอดภัย](/th/gateway/security)
 
   </Accordion>
 
-  <Accordion title="ข้อดีเมื่อเทียบกับ Claude Code สำหรับการพัฒนาเว็บคืออะไร">
-    OpenClaw คือ **ผู้ช่วยส่วนตัว** และเลเยอร์การประสานงาน ไม่ใช่ตัวแทน IDE ใช้
-    Claude Code หรือ Codex สำหรับลูปการเขียนโค้ดโดยตรงที่เร็วที่สุดภายใน repo ใช้ OpenClaw เมื่อคุณ
-    ต้องการ memory ที่คงอยู่ การเข้าถึงข้ามอุปกรณ์ และการประสาน tools
+  <Accordion title="มีข้อดีเหนือ Claude Code สำหรับการพัฒนาเว็บอย่างไร?">
+    OpenClaw เป็น **ผู้ช่วยส่วนตัว** และชั้นการประสานงาน ไม่ใช่สิ่งทดแทน IDE ใช้ Claude Code หรือ Codex เพื่อให้ได้วงจรการเขียนโค้ดโดยตรงที่รวดเร็วที่สุดภายในรีโพซิทอรี ใช้ OpenClaw สำหรับหน่วยความจำระยะยาว การเข้าถึงข้ามอุปกรณ์ และการประสานเครื่องมือ
 
-    ข้อดี:
+    - หน่วยความจำและพื้นที่ทำงานที่คงอยู่ข้ามเซสชัน
+    - การเข้าถึงหลายแพลตฟอร์ม (Telegram, WhatsApp, TUI, WebChat)
+    - การประสานเครื่องมือ (เบราว์เซอร์ ไฟล์ การตั้งเวลา ฮุก)
+    - Gateway ที่ทำงานตลอดเวลา (เรียกใช้บน VPS และโต้ตอบได้จากทุกที่)
+    - Node สำหรับเบราว์เซอร์/หน้าจอ/กล้อง/การดำเนินคำสั่งในเครื่อง
 
-    - **Persistent memory + workspace** ข้าม sessions
-    - **การเข้าถึงหลายแพลตฟอร์ม** (WhatsApp, Telegram, TUI, WebChat)
-    - **การประสาน tools** (browser, files, scheduling, hooks)
-    - **Gateway ที่เปิดตลอดเวลา** (รันบน VPS, โต้ตอบได้จากทุกที่)
-    - **Nodes** สำหรับ local browser/screen/camera/exec
-
-    Showcase: [https://openclaw.ai/showcase](https://openclaw.ai/showcase)
+    ตัวอย่างผลงาน: [https://openclaw.ai/showcase](https://openclaw.ai/showcase)
 
   </Accordion>
 </AccordionGroup>
@@ -175,22 +136,22 @@ Q&A สำหรับการรันครั้งแรก — การ�
 ## Skills และระบบอัตโนมัติ
 
 <AccordionGroup>
-  <Accordion title="ฉันจะปรับแต่ง Skills โดยไม่ทำให้ repo สกปรกได้อย่างไร">
-    ใช้ managed overrides แทนการแก้ไขสำเนาใน repo ใส่การเปลี่ยนแปลงของคุณใน `~/.openclaw/skills/<name>/SKILL.md` (หรือเพิ่มโฟลเดอร์ผ่าน `skills.load.extraDirs` ใน `~/.openclaw/openclaw.json`) ลำดับความสำคัญคือ `<workspace>/skills` → `<workspace>/.agents/skills` → `~/.agents/skills` → `~/.openclaw/skills` → bundled → `skills.load.extraDirs` ดังนั้น managed overrides ยังชนะ bundled skills โดยไม่แตะ git หากคุณต้องติดตั้ง skill แบบ global แต่ให้เห็นได้เฉพาะบาง agents ให้เก็บสำเนาที่แชร์ใน `~/.openclaw/skills` และควบคุม visibility ด้วย `agents.defaults.skills` และ `agents.list[].skills` เฉพาะการแก้ไขที่ควรส่ง upstream เท่านั้นที่ควรอยู่ใน repo และออกเป็น PRs
+  <Accordion title="ปรับแต่ง Skills โดยไม่ทำให้รีโพซิทอรีมีการเปลี่ยนแปลงค้างอยู่ได้อย่างไร?">
+    ใช้การแทนที่ที่มีการจัดการแทนการแก้ไขสำเนาในรีโพซิทอรี ใส่การเปลี่ยนแปลงไว้ใน `~/.openclaw/skills/<name>/SKILL.md` (หรือเพิ่มโฟลเดอร์ผ่าน `skills.load.extraDirs` ใน `~/.openclaw/openclaw.json`) ลำดับความสำคัญ: `<workspace>/skills` -> `<workspace>/.agents/skills` -> `~/.agents/skills` -> `~/.openclaw/skills` -> ที่มาพร้อมระบบ -> `skills.load.extraDirs` ดังนั้นการแทนที่ที่มีการจัดการจะมีความสำคัญเหนือ Skills ที่มาพร้อมระบบโดยไม่ต้องแก้ไข git หากต้องการติดตั้งแบบส่วนกลางแต่จำกัดการมองเห็นเฉพาะบางเอเจนต์ ให้เก็บสำเนาที่ใช้ร่วมกันไว้ใน `~/.openclaw/skills` และควบคุมการมองเห็นด้วย `agents.defaults.skills` / `agents.list[].skills` เฉพาะการแก้ไขที่ควรส่งกลับไปยังต้นน้ำเท่านั้นที่ควรส่งเป็น PR สำหรับสำเนาในรีโพซิทอรี
   </Accordion>
 
-  <Accordion title="ฉันโหลด Skills จากโฟลเดอร์กำหนดเองได้ไหม">
-    ได้ เพิ่ม directories เพิ่มเติมผ่าน `skills.load.extraDirs` ใน `~/.openclaw/openclaw.json` (ลำดับความสำคัญต่ำสุด) ลำดับความสำคัญเริ่มต้นคือ `<workspace>/skills` → `<workspace>/.agents/skills` → `~/.agents/skills` → `~/.openclaw/skills` → bundled → `skills.load.extraDirs` `clawhub` ติดตั้งลงใน `./skills` โดยค่าเริ่มต้น ซึ่ง OpenClaw ถือเป็น `<workspace>/skills` ใน session ถัดไป หาก skill ควรเห็นได้เฉพาะบาง agents ให้จับคู่กับ `agents.defaults.skills` หรือ `agents.list[].skills`
+  <Accordion title="โหลด Skills จากโฟลเดอร์ที่กำหนดเองได้หรือไม่?">
+    ได้: เพิ่มไดเรกทอรีผ่าน `skills.load.extraDirs` ใน `~/.openclaw/openclaw.json` (มีลำดับความสำคัญต่ำสุดตามลำดับด้านบน) โดยค่าเริ่มต้น `clawhub` จะติดตั้งลงใน `./skills` ซึ่ง OpenClaw จะถือเป็น `<workspace>/skills` ในเซสชันถัดไป หากต้องการจำกัดการมองเห็นเฉพาะบางเอเจนต์ ให้ใช้ร่วมกับ `agents.defaults.skills` หรือ `agents.list[].skills`
   </Accordion>
 
-  <Accordion title="ฉันจะใช้โมเดลหรือการตั้งค่าต่างกันสำหรับงานต่างกันได้อย่างไร">
-    ปัจจุบัน pattern ที่รองรับคือ:
+  <Accordion title="ใช้โมเดลหรือการตั้งค่าที่ต่างกันสำหรับงานแต่ละประเภทได้อย่างไร?">
+    รูปแบบที่รองรับ:
 
-    - **Cron jobs**: jobs ที่แยกกันสามารถตั้งค่า `model` override ต่อ job ได้
-    - **Agents**: กำหนดเส้นทาง tasks ไปยัง agents แยกกันที่มีโมเดลเริ่มต้น thinking levels และ stream params ต่างกัน
-    - **On-demand switch**: ใช้ `/model` เพื่อสลับโมเดลของ session ปัจจุบันได้ทุกเมื่อ
+    - **งาน Cron**: งานที่แยกออกจากกันสามารถตั้งค่าการแทนที่ `model` แยกตามงานได้
+    - **เอเจนต์**: กำหนดเส้นทางงานไปยังเอเจนต์ต่างหากที่มีโมเดลเริ่มต้น ระดับการคิด และพารามิเตอร์สตรีมแตกต่างกัน
+    - **การสลับตามต้องการ**: `/model` สลับโมเดลของเซสชันปัจจุบันได้ทุกเมื่อ
 
-    ตัวอย่างเช่น ใช้โมเดลเดียวกันพร้อมการตั้งค่าต่อเอเจนต์ที่ต่างกัน:
+    ตัวอย่าง — โมเดลเดียวกัน แต่ตั้งค่าแยกตามเอเจนต์:
 
     ```json5
     {
@@ -213,143 +174,106 @@ Q&A สำหรับการรันครั้งแรก — การ�
     }
     ```
 
-    ใส่ค่าเริ่มต้นต่อโมเดลที่แชร์ร่วมกันใน `agents.defaults.models["provider/model"].params` จากนั้นใส่ overrides เฉพาะเอเจนต์ใน `agents.list[].params` แบบ flat อย่ากำหนด entries `agents.list[].models["provider/model"].params` แบบ nested แยกต่างหากสำหรับโมเดลเดียวกัน; `agents.list[].models` ใช้สำหรับ per-agent model catalog และ runtime overrides
+    ใส่ค่าเริ่มต้นที่ใช้ร่วมกันแยกตามโมเดลไว้ใน `agents.defaults.models["provider/model"].params` แล้วใส่ค่าที่แทนที่เฉพาะเอเจนต์ไว้ใน `agents.list[].params` แบบแบน อย่าทำสำเนาโมเดลเดียวกันไว้ภายใต้ `agents.list[].models["provider/model"].params` แบบซ้อน พาธนั้นมีไว้สำหรับแค็ตตาล็อกโมเดลและค่าที่แทนที่ในรันไทม์แยกตามเอเจนต์
 
-    ดู [Cron jobs](/th/automation/cron-jobs), [การกำหนดเส้นทางหลายเอเจนต์](/th/concepts/multi-agent), [การกำหนดค่า](/th/gateway/config-agents) และ [Slash commands](/th/tools/slash-commands)
-
-  </Accordion>
-
-  <Accordion title="บอตค้างระหว่างทำงานหนัก ฉันจะ offload งานนั้นได้อย่างไร">
-    ใช้ **sub-agents** สำหรับงานยาวหรืองานขนาน Sub-agents รันใน session ของตัวเอง
-    ส่ง summary กลับมา และทำให้ chat หลักของคุณยังตอบสนองได้
-
-    ขอให้บอตของคุณ "spawn a sub-agent for this task" หรือใช้ `/subagents`
-    ใช้ `/status` ใน chat เพื่อดูว่า Gateway กำลังทำอะไรอยู่ตอนนี้ (และกำลังยุ่งอยู่หรือไม่)
-
-    เคล็ดลับเรื่อง token: งานยาวและ sub-agents ต่างก็ใช้ tokens หากกังวลเรื่องค่าใช้จ่าย ให้ตั้ง
-    โมเดลที่ถูกกว่าสำหรับ sub-agents ผ่าน `agents.defaults.subagents.model`
-
-    เอกสาร: [Sub-agents](/th/tools/subagents), [Background Tasks](/th/automation/tasks).
+    โปรดดู [งาน Cron](/th/automation/cron-jobs), [การกำหนดเส้นทางแบบหลายเอเจนต์](/th/concepts/multi-agent), [การกำหนดค่า](/th/gateway/config-agents), [คำสั่งแบบสแลช](/th/tools/slash-commands)
 
   </Accordion>
 
-  <Accordion title="thread-bound subagent sessions ทำงานอย่างไรบน Discord">
-    ใช้ thread bindings คุณสามารถ bind Discord thread เข้ากับ subagent หรือ session target เพื่อให้ follow-up messages ใน thread นั้นยังอยู่บน session ที่ bind ไว้
+  <Accordion title="บอตค้างขณะทำงานหนัก จะแบ่งภาระงานออกไปได้อย่างไร?">
+    ใช้ **เอเจนต์ย่อย** สำหรับงานระยะยาวหรืองานแบบขนาน โดยทำงานในเซสชันของตนเอง ส่งสรุปกลับมา และทำให้แชตหลักยังตอบสนองได้ ขอให้บอต "สร้างเอเจนต์ย่อยสำหรับงานนี้" หรือใช้ `/subagents` ใช้ `/status` เพื่อตรวจสอบว่า Gateway กำลังทำงานอยู่หรือไม่
 
-    Flow พื้นฐาน:
+    ทั้งงานระยะยาวและเอเจนต์ย่อยใช้โทเค็น ตั้งค่าโมเดลที่มีค่าใช้จ่ายต่ำกว่าสำหรับเอเจนต์ย่อยผ่าน `agents.defaults.subagents.model` หากค่าใช้จ่ายเป็นสิ่งสำคัญ
 
-    - Spawn ด้วย `sessions_spawn` โดยใช้ `thread: true` (และเลือกใช้ `mode: "session"` สำหรับ follow-up แบบ persistent)
-    - หรือ bind ด้วยตนเองด้วย `/focus <target>`
-    - ใช้ `/agents` เพื่อตรวจสอบ binding state
-    - ใช้ `/session idle <duration|off>` และ `/session max-age <duration|off>` เพื่อควบคุม auto-unfocus
-    - ใช้ `/unfocus` เพื่อ detach thread
-
-    Config ที่ต้องใช้:
-
-    - ค่าเริ่มต้น global: `session.threadBindings.enabled`, `session.threadBindings.idleHours`, `session.threadBindings.maxAgeHours`
-    - Discord overrides: `channels.discord.threadBindings.enabled`, `channels.discord.threadBindings.idleHours`, `channels.discord.threadBindings.maxAgeHours`
-    - Auto-bind เมื่อ spawn: `channels.discord.threadBindings.spawnSessions` มีค่าเริ่มต้นเป็น `true`; ตั้งเป็น `false` เพื่อปิด thread-bound session spawns
-
-    เอกสาร: [Sub-agents](/th/tools/subagents), [Discord](/th/channels/discord), [ข้อมูลอ้างอิงการกำหนดค่า](/th/gateway/configuration-reference), [Slash commands](/th/tools/slash-commands)
+    เอกสาร: [เอเจนต์ย่อย](/th/tools/subagents), [งานเบื้องหลัง](/th/automation/tasks)
 
   </Accordion>
 
-  <Accordion title="subagent เสร็จแล้ว แต่ completion update ไปผิดที่หรือไม่เคยถูกโพสต์ ฉันควรตรวจสอบอะไร">
-    ตรวจสอบ requester route ที่ resolve แล้วก่อน:
+  <Accordion title="เซสชันเอเจนต์ย่อยที่ผูกกับเธรดทำงานบน Discord อย่างไร?">
+    ผูกเธรด Discord เข้ากับเอเจนต์ย่อยหรือเป้าหมายเซสชัน เพื่อให้ข้อความติดตามผลในเธรดนั้นยังคงส่งไปยังเซสชันที่ผูกไว้
 
-    - การส่ง subagent แบบ completion-mode จะเลือก bound thread หรือ conversation route ใด ๆ ก่อนเมื่อมีอยู่
-    - หาก completion origin มีเพียง channel, OpenClaw จะ fallback ไปยัง stored route ของ requester session (`lastChannel` / `lastTo` / `lastAccountId`) เพื่อให้ direct delivery ยังสำเร็จได้
-    - หากไม่มีทั้ง bound route และ stored route ที่ใช้งานได้ direct delivery อาจล้มเหลว และผลลัพธ์จะ fallback ไปยัง queued session delivery แทนการโพสต์เข้า chat ทันที
-    - targets ที่ไม่ถูกต้องหรือล้าสมัยยังอาจบังคับให้ queue fallback หรือ final delivery failure ได้
-    - หาก assistant reply ที่มองเห็นล่าสุดของ child เป็น silent token ตรงตัว `NO_REPLY` / `no_reply` หรือเป็น `ANNOUNCE_SKIP` ตรงตัว OpenClaw จะตั้งใจ suppress การประกาศแทนการโพสต์ progress ก่อนหน้าที่ล้าสมัย
-    - output ของ Tool/toolResult จะไม่ถูก promote เป็น child result text; result คือ assistant reply ล่าสุดที่มองเห็นได้ของ child
+    - สร้างด้วย `sessions_spawn` โดยใช้ `thread: true` (และเลือกใช้ `mode: "session"` สำหรับการติดตามผลแบบต่อเนื่องได้)
+    - หรือผูกด้วยตนเองโดยใช้ `/focus <target>`
+    - `/agents` ตรวจสอบสถานะการผูก
+    - `/session idle <duration|off>` และ `/session max-age <duration|off>` ควบคุมการยกเลิกโฟกัสอัตโนมัติ
+    - `/unfocus` ยกเลิกการผูกเธรด
 
-    ดีบัก:
+    การกำหนดค่า: `session.threadBindings.enabled` (สวิตช์ส่วนกลาง), `session.threadBindings.idleHours` (ค่าเริ่มต้น `24`, `0` ใช้ปิดใช้งาน), `session.threadBindings.maxAgeHours` (ค่าเริ่มต้น `0` = ไม่มีขีดจำกัดตายตัว) และค่าที่แทนที่แยกตามช่องทาง `channels.discord.threadBindings.{enabled,idleHours,maxAgeHours}` โดย `channels.discord.threadBindings.spawnSessions` ควบคุมการผูกอัตโนมัติเมื่อสร้าง (ค่าเริ่มต้น `true`)
 
-    ```bash
-    openclaw tasks show <runId-or-sessionKey>
-    ```
-
-    เอกสาร: [ตัวแทนย่อย](/th/tools/subagents), [งานเบื้องหลัง](/th/automation/tasks), [เครื่องมือเซสชัน](/th/concepts/session-tool).
+    เอกสาร: [เอเจนต์ย่อย](/th/tools/subagents), [Discord](/th/channels/discord), [เอกสารอ้างอิงการกำหนดค่า](/th/gateway/configuration-reference), [คำสั่งแบบสแลช](/th/tools/slash-commands)
 
   </Accordion>
 
-  <Accordion title="Cron หรือการเตือนไม่ทำงาน ควรตรวจสอบอะไร?">
-    Cron ทำงานภายในกระบวนการ Gateway หาก Gateway ไม่ได้ทำงานอย่างต่อเนื่อง
-    งานที่ตั้งเวลาไว้จะไม่ทำงาน
+  <Accordion title="เอเจนต์ย่อยทำงานเสร็จแล้ว แต่การอัปเดตเมื่อเสร็จสิ้นไปผิดที่หรือไม่ถูกโพสต์ ควรตรวจสอบอะไร?">
+    ตรวจสอบเส้นทางผู้ร้องขอที่ระบบกำหนด:
 
-    รายการตรวจสอบ:
+    - การส่งมอบจากเอเจนต์ย่อยในโหมดเสร็จสิ้นจะเลือกใช้เธรดหรือเส้นทางการสนทนาที่ผูกไว้ก่อน หากมี
+    - หากต้นทางของการเสร็จสิ้นมีเพียงช่องทาง OpenClaw จะใช้เส้นทางที่จัดเก็บไว้ของเซสชันผู้ร้องขอเป็นทางสำรอง (`lastChannel` / `lastTo` / `lastAccountId`) เพื่อให้การส่งโดยตรงยังคงสำเร็จได้
+    - หากไม่มีเส้นทางที่ผูกไว้และไม่มีเส้นทางที่จัดเก็บซึ่งใช้งานได้ การส่งโดยตรงอาจล้มเหลว และผลลัพธ์จะเปลี่ยนไปใช้การส่งมอบผ่านคิวของเซสชันแทนการโพสต์ทันที
+    - เป้าหมายที่ไม่ถูกต้องหรือล้าสมัยอาจบังคับให้ใช้คิวเป็นทางสำรองหรือทำให้การส่งมอบขั้นสุดท้ายล้มเหลวได้เช่นกัน
+    - หากคำตอบสุดท้ายที่มองเห็นได้จากผู้ช่วยของเอเจนต์ลูกตรงกับ `NO_REPLY` / `no_reply` หรือ `ANNOUNCE_SKIP` ทุกประการ OpenClaw จะระงับการประกาศโดยเจตนาแทนการโพสต์ความคืบหน้าก่อนหน้าที่ล้าสมัย
 
-    - ยืนยันว่าเปิดใช้ cron แล้ว (`cron.enabled`) และไม่ได้ตั้งค่า `OPENCLAW_SKIP_CRON`
-    - ตรวจสอบว่า Gateway ทำงานตลอด 24/7 (ไม่มีการพักเครื่อง/รีสตาร์ต)
-    - ตรวจสอบการตั้งค่าเขตเวลาของงาน (`--tz` เทียบกับเขตเวลาของโฮสต์)
+    ดีบัก: `openclaw tasks show <lookup>` โดย `<lookup>` คือรหัสงาน รหัสการเรียกใช้ หรือคีย์เซสชัน
 
-    ดีบัก:
+    เอกสาร: [เอเจนต์ย่อย](/th/tools/subagents), [งานเบื้องหลัง](/th/automation/tasks), [เครื่องมือเซสชัน](/th/concepts/session-tool)
 
+  </Accordion>
+
+  <Accordion title="Cron หรือการเตือนความจำไม่ทำงาน ควรตรวจสอบอะไร?">
+    Cron ทำงานภายในกระบวนการ Gateway และจะไม่ทำงานหาก Gateway ไม่ได้ทำงานอย่างต่อเนื่อง
+
+    - ยืนยันว่าเปิดใช้ Cron อยู่ (`cron.enabled`) และไม่ได้ตั้งค่า `OPENCLAW_SKIP_CRON`
+    - ยืนยันว่า Gateway ทำงานตลอด 24/7 (ไม่มีการพักเครื่อง/เริ่มระบบใหม่)
+    - ตรวจสอบเขตเวลาของงาน (`--tz` เทียบกับเขตเวลาของโฮสต์)
+
+    Debug:
     ```bash
     openclaw cron run <jobId>
     openclaw cron runs --id <jobId> --limit 50
     ```
 
-    เอกสาร: [งาน Cron](/th/automation/cron-jobs), [Automation](/th/automation).
+    เอกสาร: [งาน Cron](/th/automation/cron-jobs), [ระบบอัตโนมัติ](/th/automation)
 
   </Accordion>
 
-  <Accordion title="Cron ทำงานแล้ว แต่ไม่มีอะไรถูกส่งไปยังช่องทาง เพราะอะไร?">
-    ตรวจสอบโหมดการส่งก่อน:
+  <Accordion title="Cron ทำงานแล้ว แต่ไม่มีสิ่งใดถูกส่งไปยังช่อง เพราะเหตุใด">
+    ตรวจสอบโหมดการส่ง:
 
-    - `--no-deliver` / `delivery.mode: "none"` หมายความว่าไม่คาดว่าจะมีการส่งสำรองจาก runner
-    - เป้าหมายประกาศหายไปหรือไม่ถูกต้อง (`channel` / `to`) หมายความว่า runner ข้ามการส่งออก
-    - การตรวจสอบสิทธิ์ช่องทางล้มเหลว (`unauthorized`, `Forbidden`) หมายความว่า runner พยายามส่งแล้ว แต่ข้อมูลรับรองขัดขวางไว้
-    - ผลลัพธ์แยกแบบเงียบ (`NO_REPLY` / `no_reply` เท่านั้น) จะถือว่าตั้งใจให้ส่งไม่ได้ ดังนั้น runner จึงระงับการส่งสำรองที่เข้าคิวไว้ด้วย
+    - `--no-deliver` / `delivery.mode: "none"`: ไม่คาดว่าจะมีการส่งสำรองจากตัวรัน
+    - ไม่มีเป้าหมายประกาศหรือเป้าหมายไม่ถูกต้อง (`channel` / `to`): ตัวรันข้ามการส่งออก
+    - การยืนยันตัวตนของช่องล้มเหลว (`unauthorized`, `Forbidden`): ตัวรันพยายามส่ง แต่ข้อมูลประจำตัวขัดขวางไว้
+    - ผลลัพธ์แบบแยกที่ไม่มีข้อความ (`NO_REPLY` / `no_reply` เท่านั้น) ถือว่าตั้งใจไม่ให้ส่ง ดังนั้นการส่งสำรองที่เข้าคิวไว้จึงถูกระงับด้วย
 
-    สำหรับงาน cron แบบแยก ตัวแทนยังส่งโดยตรงด้วยเครื่องมือ `message`
-    ได้เมื่อมีเส้นทางแชตพร้อมใช้งาน `--announce` ควบคุมเฉพาะเส้นทางสำรองของ runner
-    สำหรับข้อความสุดท้ายที่ตัวแทนยังไม่ได้ส่งเอง
+    สำหรับงาน Cron แบบแยก เอเจนต์ยังคงส่งโดยตรงด้วยเครื่องมือ `message` ได้เมื่อมีเส้นทางแชต `--announce` ควบคุมเฉพาะการส่งสำรองจากตัวรันสำหรับข้อความสุดท้ายที่เอเจนต์ยังไม่ได้ส่งด้วยตนเองเท่านั้น
 
-    ดีบัก:
-
+    Debug:
     ```bash
     openclaw cron runs --id <jobId> --limit 50
-    openclaw tasks show <runId-or-sessionKey>
+    openclaw tasks show <lookup>
     ```
 
-    เอกสาร: [งาน Cron](/th/automation/cron-jobs), [งานเบื้องหลัง](/th/automation/tasks).
+    เอกสาร: [งาน Cron](/th/automation/cron-jobs), [งานเบื้องหลัง](/th/automation/tasks)
 
   </Accordion>
 
-  <Accordion title="ทำไมการรัน cron แบบแยกจึงสลับโมเดลหรือลองใหม่หนึ่งครั้ง?">
-    โดยปกตินั่นคือเส้นทางสลับโมเดลแบบ live ไม่ใช่การตั้งเวลาซ้ำ
+  <Accordion title="เหตุใดการเรียกใช้ Cron แบบแยกจึงสลับโมเดลหรือลองใหม่หนึ่งครั้ง">
+    นั่นคือเส้นทางการสลับโมเดลขณะทำงาน ไม่ใช่การกำหนดเวลาซ้ำ Cron แบบแยกจะบันทึกถาวรการส่งต่อโมเดลขณะทำงานและลองใหม่เมื่อการทำงานที่ใช้งานอยู่ส่งข้อผิดพลาด `LiveSessionModelSwitchError` โดยคงผู้ให้บริการ/โมเดลที่สลับแล้ว (รวมถึงค่าลบล้างโปรไฟล์การยืนยันตัวตนที่สลับแล้ว หากมี) ไว้ก่อนลองใหม่
 
-    cron แบบแยกสามารถคงการส่งต่อโมเดลรันไทม์และลองใหม่ได้เมื่อการรันที่ใช้งานอยู่
-    โยน `LiveSessionModelSwitchError` การลองใหม่จะคง provider/model
-    ที่สลับแล้วไว้ และหากการสลับมีการ override โปรไฟล์การตรวจสอบสิทธิ์ใหม่ cron
-    ก็จะคงค่านั้นไว้ก่อนลองใหม่ด้วย
+    ลำดับความสำคัญในการเลือกโมเดล: ค่าลบล้างโมเดลของฮุก Gmail (`hooks.gmail.model`) ก่อน ตามด้วย `model` รายงาน จากนั้นค่าลบล้างโมเดลของเซสชัน Cron ที่จัดเก็บไว้ และสุดท้ายคือการเลือกโมเดลตามปกติของเอเจนต์/ค่าเริ่มต้น
 
-    กฎการเลือกที่เกี่ยวข้อง:
+    ลูปการลองใหม่จำกัดไว้ที่ความพยายามเริ่มต้นบวกการลองใหม่หลังสลับ 2 ครั้ง จากนั้น Cron จะยกเลิกแทนที่จะวนซ้ำตลอดไป
 
-    - การ override โมเดลของ Gmail hook ชนะก่อนเมื่อใช้ได้
-    - จากนั้นเป็น `model` ต่อแต่ละงาน
-    - จากนั้นเป็นการ override โมเดล cron-session ที่จัดเก็บไว้
-    - จากนั้นเป็นการเลือกโมเดลปกติของตัวแทน/ค่าเริ่มต้น
-
-    ลูปการลองใหม่มีขอบเขต หลังจากความพยายามเริ่มต้นบวกกับการลองใหม่จากการสลับ 2 ครั้ง
-    cron จะยกเลิกแทนที่จะวนซ้ำตลอดไป
-
-    ดีบัก:
-
+    Debug:
     ```bash
     openclaw cron runs --id <jobId> --limit 50
-    openclaw tasks show <runId-or-sessionKey>
     ```
 
-    เอกสาร: [งาน Cron](/th/automation/cron-jobs), [CLI cron](/th/cli/cron).
+    เอกสาร: [งาน Cron](/th/automation/cron-jobs), [CLI ของ cron](/th/cli/cron)
 
   </Accordion>
 
-  <Accordion title="ฉันจะติดตั้ง Skills บน Linux ได้อย่างไร?">
-    ใช้คำสั่ง `openclaw skills` แบบเนทีฟหรือวาง Skills ลงในพื้นที่ทำงานของคุณ UI Skills ของ macOS ไม่มีให้ใช้บน Linux
-    เรียกดู Skills ได้ที่ [https://clawhub.ai](https://clawhub.ai)
+  <Accordion title="ฉันจะติดตั้ง Skills บน Linux ได้อย่างไร">
+    ใช้คำสั่ง `openclaw skills` แบบเนทีฟหรือวาง Skills ลงในพื้นที่ทำงานของคุณ UI ของ Skills บน macOS ไม่มีให้ใช้บน Linux เรียกดู Skills ได้ที่ [https://clawhub.ai](https://clawhub.ai)
 
     ```bash
     openclaw skills search "calendar"
@@ -364,263 +288,206 @@ Q&A สำหรับการรันครั้งแรก — การ�
     openclaw skills check
     ```
 
-    โดยค่าเริ่มต้น `openclaw skills install` แบบเนทีฟจะเขียนลงในไดเรกทอรี `skills/`
-    ของพื้นที่ทำงานที่ใช้งานอยู่ เพิ่ม `--global` เพื่อติดตั้งลงในไดเรกทอรี Skills
-    ที่จัดการร่วมกันสำหรับตัวแทนทั้งหมดในเครื่อง ติดตั้ง CLI `clawhub` แยกต่างหาก
-    เฉพาะเมื่อคุณต้องการเผยแพร่หรือซิงค์ Skills ของคุณเอง ใช้
-    `agents.defaults.skills` หรือ `agents.list[].skills` หากคุณต้องการจำกัด
-    ว่าตัวแทนใดมองเห็น Skills ที่แชร์ได้
+    `openclaw skills install` แบบเนทีฟจะเขียนลงในไดเรกทอรี `skills/` ของพื้นที่ทำงานที่ใช้งานอยู่โดยค่าเริ่มต้น เพิ่ม `--global` เพื่อติดตั้งลงในไดเรกทอรี Skills ที่มีการจัดการร่วมกันสำหรับเอเจนต์ภายในเครื่องทั้งหมด ติดตั้ง CLI `clawhub` แยกต่างหากเฉพาะเมื่อต้องการเผยแพร่หรือซิงค์ Skills ของคุณเอง ใช้ `agents.defaults.skills` หรือ `agents.list[].skills` เพื่อจำกัดว่าเอเจนต์ใดจะเห็น Skills ที่ใช้ร่วมกัน
 
   </Accordion>
 
-  <Accordion title="OpenClaw สามารถรันงานตามกำหนดเวลาหรือทำงานต่อเนื่องในเบื้องหลังได้หรือไม่?">
-    ได้ ใช้ตัวจัดกำหนดการของ Gateway:
+  <Accordion title="OpenClaw สามารถเรียกใช้งานตามกำหนดเวลาหรือทำงานอย่างต่อเนื่องในเบื้องหลังได้หรือไม่">
+    ได้ ผ่านตัวกำหนดเวลาของ Gateway:
 
-    - **งาน Cron** สำหรับงานที่ตั้งเวลาไว้หรืองานที่ทำซ้ำ (คงอยู่ข้ามการรีสตาร์ต)
-    - **Heartbeat** สำหรับการตรวจสอบเป็นระยะของ "เซสชันหลัก"
-    - **งานแบบแยก** สำหรับตัวแทนอัตโนมัติที่โพสต์สรุปหรือส่งไปยังแชต
+    - **งาน Cron** สำหรับงานตามกำหนดเวลาหรืองานที่เกิดซ้ำ (คงอยู่หลังรีสตาร์ต)
+    - **Heartbeat** สำหรับการตรวจสอบเป็นระยะของเซสชันหลัก
+    - **งานแบบแยก** สำหรับเอเจนต์อัตโนมัติที่โพสต์สรุปหรือส่งไปยังแชต
 
-    เอกสาร: [งาน Cron](/th/automation/cron-jobs), [Automation](/th/automation),
-    [Heartbeat](/th/gateway/heartbeat).
+    เอกสาร: [งาน Cron](/th/automation/cron-jobs), [ระบบอัตโนมัติ](/th/automation), [Heartbeat](/th/gateway/heartbeat)
 
   </Accordion>
 
-  <Accordion title="ฉันสามารถรัน Skills ที่ใช้ได้เฉพาะ Apple macOS จาก Linux ได้หรือไม่?">
-    ไม่ได้โดยตรง Skills ของ macOS ถูกจำกัดด้วย `metadata.openclaw.os` รวมถึงไบนารีที่จำเป็น และ Skills จะปรากฏในพรอมป์ต์ระบบเฉพาะเมื่อมีสิทธิ์ใช้งานบน **โฮสต์ Gateway** บน Linux Skills ที่ใช้ได้เฉพาะ `darwin` (เช่น `apple-notes`, `apple-reminders`, `things-mac`) จะไม่โหลด เว้นแต่คุณจะ override การจำกัดสิทธิ์
+  <Accordion title="ฉันสามารถเรียกใช้ Skills ที่ใช้ได้เฉพาะ Apple macOS จาก Linux ได้หรือไม่">
+    ไม่ได้โดยตรง Skills ของ macOS ถูกจำกัดด้วย `metadata.openclaw.os` ร่วมกับไบนารีที่จำเป็น และจะโหลดเฉพาะเมื่อมีสิทธิ์บน **โฮสต์ Gateway** บน Linux Skills ที่ใช้ได้เฉพาะ `darwin` (`apple-notes`, `apple-reminders`, `things-mac`) จะไม่โหลด เว้นแต่คุณจะลบล้างข้อจำกัดดังกล่าว
 
-    คุณมีรูปแบบที่รองรับสามแบบ:
+    รูปแบบที่รองรับมีสามแบบ:
 
-    **ตัวเลือก A - รัน Gateway บน Mac (ง่ายที่สุด)**
-    รัน Gateway ในที่ที่มีไบนารีของ macOS แล้วเชื่อมต่อจาก Linux ใน[โหมดระยะไกล](#gateway-ports-already-running-and-remote-mode) หรือผ่าน Tailscale Skills จะโหลดตามปกติเพราะโฮสต์ Gateway เป็น macOS
+    **ตัวเลือก A - เรียกใช้ Gateway บน Mac (ง่ายที่สุด)** เรียกใช้ Gateway ในที่ที่มีไบนารีของ macOS จากนั้นเชื่อมต่อจาก Linux ใน[โหมดระยะไกล](#gateway-ports-already-running-and-remote-mode)หรือผ่าน Tailscale Skills จะโหลดตามปกติเนื่องจากโฮสต์ Gateway เป็น macOS
 
-    **ตัวเลือก B - ใช้โหนด macOS (ไม่มี SSH)**
-    รัน Gateway บน Linux จับคู่โหนด macOS (แอปแถบเมนู) และตั้งค่า **Node Run Commands** เป็น "ถามเสมอ" หรือ "อนุญาตเสมอ" บน Mac OpenClaw สามารถถือว่า Skills ที่ใช้ได้เฉพาะ macOS มีสิทธิ์ใช้งานเมื่อมีไบนารีที่จำเป็นอยู่บนโหนด ตัวแทนจะรัน Skills เหล่านั้นผ่านเครื่องมือ `nodes` หากคุณเลือก "ถามเสมอ" การอนุมัติ "อนุญาตเสมอ" ในพรอมป์ต์จะเพิ่มคำสั่งนั้นลงใน allowlist
+    **ตัวเลือก B - ใช้ Node macOS (ไม่ใช้ SSH)** เรียกใช้ Gateway บน Linux จับคู่ Node macOS (แอปแถบเมนู) และตั้งค่า **Node Run Commands** เป็น "Always Ask" หรือ "Always Allow" บน Mac OpenClaw จะถือว่า Skills ที่ใช้ได้เฉพาะ macOS มีสิทธิ์เมื่อมีไบนารีที่จำเป็นบน Node และเอเจนต์จะเรียกใช้ผ่านเครื่องมือ `nodes` เมื่อใช้ "Always Ask" การอนุมัติ "Always Allow" ในพรอมต์จะเพิ่มคำสั่งนั้นลงในรายการที่อนุญาต
 
-    **ตัวเลือก C - พร็อกซีไบนารี macOS ผ่าน SSH (ขั้นสูง)**
-    ให้ Gateway อยู่บน Linux ต่อไป แต่ทำให้ไบนารี CLI ที่จำเป็น resolve ไปยัง wrapper SSH ที่รันบน Mac จากนั้น override Skill เพื่ออนุญาต Linux เพื่อให้ยังมีสิทธิ์ใช้งาน
+    **ตัวเลือก C - พร็อกซีไบนารี macOS ผ่าน SSH (ขั้นสูง)** คง Gateway ไว้บน Linux แต่ทำให้ไบนารี CLI ที่จำเป็นชี้ไปยังตัวห่อหุ้ม SSH ซึ่งทำงานบน Mac จากนั้นลบล้าง Skill ให้รองรับ Linux เพื่อให้ยังคงมีสิทธิ์
 
-    1. สร้าง wrapper SSH สำหรับไบนารี (ตัวอย่าง: `memo` สำหรับ Apple Notes):
-
+    1. สร้างตัวห่อหุ้ม SSH สำหรับไบนารี (ตัวอย่าง: `memo` สำหรับ Apple Notes):
        ```bash
        #!/usr/bin/env bash
        set -euo pipefail
        exec ssh -T user@mac-host /opt/homebrew/bin/memo "$@"
        ```
-
-    2. วาง wrapper ไว้บน `PATH` บนโฮสต์ Linux (เช่น `~/bin/memo`)
-    3. Override เมตาดาต้า Skill (พื้นที่ทำงานหรือ `~/.openclaw/skills`) เพื่ออนุญาต Linux:
-
+    2. วางตัวห่อหุ้มไว้ใน `PATH` บนโฮสต์ Linux (ตัวอย่างเช่น `~/bin/memo`)
+    3. ลบล้างข้อมูลเมตาของ Skill (พื้นที่ทำงานหรือ `~/.openclaw/skills`) เพื่ออนุญาต Linux:
        ```markdown
        ---
        name: apple-notes
-       description: Manage Apple Notes via the memo CLI on macOS.
+       description: จัดการ Apple Notes ผ่าน CLI memo บน macOS
        metadata: { "openclaw": { "os": ["darwin", "linux"], "requires": { "bins": ["memo"] } } }
        ---
        ```
-
-    4. เริ่มเซสชันใหม่เพื่อให้สแนปช็อต Skills รีเฟรช
+    4. เริ่มเซสชันใหม่เพื่อรีเฟรชสแนปช็อตของ Skills
 
   </Accordion>
 
-  <Accordion title="คุณมีการผสานรวม Notion หรือ HeyGen หรือไม่?">
-    วันนี้ยังไม่มีในตัว
+  <Accordion title="มีการผสานรวมกับ Notion หรือ HeyGen หรือไม่">
+    ปัจจุบันยังไม่มีในตัว ตัวเลือกมีดังนี้:
 
-    ตัวเลือก:
+    - **Skill / Plugin แบบกำหนดเอง**: เหมาะที่สุดสำหรับการเข้าถึง API ที่เชื่อถือได้ (ทั้งสองมี API)
+    - **ระบบอัตโนมัติของเบราว์เซอร์**: ใช้งานได้โดยไม่ต้องเขียนโค้ด แต่ช้ากว่าและเปราะบางกว่า
 
-    - **Skill / Plugin แบบกำหนดเอง:** เหมาะที่สุดสำหรับการเข้าถึง API ที่เชื่อถือได้ (Notion/HeyGen ต่างก็มี API)
-    - **ระบบอัตโนมัติบนเบราว์เซอร์:** ทำงานได้โดยไม่ต้องเขียนโค้ด แต่ช้ากว่าและเปราะบางกว่า
+    สำหรับบริบทแยกตามลูกค้าในรูปแบบเอเจนซี: เก็บหน้า Notion หนึ่งหน้าต่อลูกค้าหนึ่งราย (บริบท + ค่ากำหนด + งานที่กำลังดำเนินการ) และขอให้เอเจนต์ดึงหน้านั้นเมื่อเริ่มเซสชัน
 
-    หากคุณต้องการเก็บบริบทต่อไคลเอนต์ (เวิร์กโฟลว์เอเจนซี) รูปแบบง่าย ๆ คือ:
-
-    - หนึ่งหน้า Notion ต่อหนึ่งไคลเอนต์ (บริบท + การตั้งค่า + งานที่ใช้งานอยู่)
-    - ขอให้ตัวแทนดึงหน้านั้นเมื่อเริ่มเซสชัน
-
-    หากคุณต้องการการผสานรวมแบบเนทีฟ ให้เปิดคำขอคุณสมบัติหรือสร้าง Skill
-    ที่กำหนดเป้าหมาย API เหล่านั้น
-
-    ติดตั้ง Skills:
+    สำหรับการผสานรวมแบบเนทีฟ ให้เปิดคำขอฟีเจอร์หรือสร้าง Skill โดยใช้ API เหล่านั้น
 
     ```bash
     openclaw skills install @owner/<skill-slug>
     openclaw skills update --all
     ```
 
-    การติดตั้งแบบเนทีฟจะลงในไดเรกทอรี `skills/` ของพื้นที่ทำงานที่ใช้งานอยู่ สำหรับ Skills ที่แชร์ข้ามตัวแทนทั้งหมดในเครื่อง ให้ใช้ `openclaw skills install @owner/<skill-slug> --global` (หรือวางเองใน `~/.openclaw/skills/<name>/SKILL.md`) หากควรให้เฉพาะบางตัวแทนมองเห็นการติดตั้งที่แชร์ ให้กำหนดค่า `agents.defaults.skills` หรือ `agents.list[].skills` Skills บางรายการคาดหวังให้มีไบนารีที่ติดตั้งผ่าน Homebrew บน Linux หมายถึง Linuxbrew (ดูรายการ FAQ Homebrew Linux ด้านบน) ดู [Skills](/th/tools/skills), [การกำหนดค่า Skills](/th/tools/skills-config), และ [ClawHub](/th/clawhub)
+    การติดตั้งแบบเนทีฟจะอยู่ในไดเรกทอรี `skills/` ของพื้นที่ทำงานที่ใช้งานอยู่ ใช้ `--global` สำหรับเอเจนต์ภายในเครื่องทั้งหมด หรือกำหนดค่า `agents.defaults.skills` / `agents.list[].skills` เพื่อจำกัดการมองเห็น Skills บางรายการคาดหวังไบนารีที่ติดตั้งด้วย Homebrew ซึ่งบน Linux หมายถึง Linuxbrew
+
+    ดู [Skills](/th/tools/skills), [การกำหนดค่า Skills](/th/tools/skills-config), [ClawHub](/th/clawhub)
 
   </Accordion>
 
-  <Accordion title="ฉันจะใช้ Chrome ที่ลงชื่อเข้าใช้อยู่แล้วกับ OpenClaw ได้อย่างไร?">
-    ใช้โปรไฟล์เบราว์เซอร์ `user` ในตัว ซึ่งเชื่อมต่อผ่าน Chrome DevTools MCP:
+  <Accordion title="ฉันจะใช้ Chrome ที่ลงชื่อเข้าใช้อยู่แล้วกับ OpenClaw ได้อย่างไร">
+    ใช้โปรไฟล์เบราว์เซอร์ `user` ที่มีในตัว ซึ่งเชื่อมต่อผ่าน Chrome DevTools MCP:
 
     ```bash
     openclaw browser --browser-profile user tabs
     openclaw browser --browser-profile user snapshot
     ```
 
-    หากคุณต้องการชื่อที่กำหนดเอง ให้สร้างโปรไฟล์ MCP แบบชัดเจน:
+    สำหรับชื่อที่กำหนดเอง ให้สร้างโปรไฟล์ MCP อย่างชัดเจน:
 
     ```bash
     openclaw browser create-profile --name chrome-live --driver existing-session
     openclaw browser --browser-profile chrome-live tabs
     ```
 
-    เส้นทางนี้สามารถใช้เบราว์เซอร์โฮสต์ในเครื่องหรือโหนดเบราว์เซอร์ที่เชื่อมต่ออยู่ หาก Gateway รันที่อื่น ให้รันโฮสต์โหนดบนเครื่องเบราว์เซอร์หรือใช้ CDP ระยะไกลแทน
+    วิธีนี้สามารถใช้เบราว์เซอร์บนโฮสต์ภายในเครื่องหรือ Node เบราว์เซอร์ที่เชื่อมต่ออยู่ หาก Gateway ทำงานอยู่ที่อื่น ให้เรียกใช้โฮสต์ Node บนเครื่องที่มีเบราว์เซอร์ หรือใช้ CDP ระยะไกลแทน
 
-    ขีดจำกัดปัจจุบันของ `existing-session` / `user`:
+    ข้อจำกัดปัจจุบันของโปรไฟล์ `existing-session` / `user` เมื่อเทียบกับโปรไฟล์ `openclaw` ที่มีการจัดการ:
 
-    - การดำเนินการขับเคลื่อนด้วย ref ไม่ใช่ด้วย CSS selector
-    - การอัปโหลดต้องใช้ `ref` / `inputRef` และปัจจุบันรองรับทีละไฟล์
-    - `responsebody`, การส่งออก PDF, การดักจับการดาวน์โหลด และการดำเนินการแบบชุดยังต้องใช้เบราว์เซอร์ที่จัดการแล้วหรือโปรไฟล์ CDP ดิบ
+    - `click`, `type`, `hover`, `scrollIntoView`, `drag` และ `select` ต้องใช้การอ้างอิงสแนปช็อต ไม่ใช่ตัวเลือก CSS
+    - ฮุกอัปโหลดต้องใช้ `ref` หรือ `inputRef` ครั้งละหนึ่งไฟล์ และไม่รองรับ `element` แบบ CSS
+    - `responsebody`, การส่งออก PDF, การสกัดกั้นการดาวน์โหลด และการดำเนินการแบบกลุ่มยังคงต้องใช้เส้นทางเบราว์เซอร์ที่มีการจัดการ
 
-  </Accordion>
-</AccordionGroup>
-
-## Sandboxing และหน่วยความจำ
-
-<AccordionGroup>
-  <Accordion title="มีเอกสาร Sandboxing เฉพาะหรือไม่?">
-    มี ดู [Sandboxing](/th/gateway/sandboxing) สำหรับการตั้งค่าเฉพาะ Docker (Gateway เต็มรูปแบบใน Docker หรืออิมเมจ sandbox) ดู [Docker](/th/install/docker)
-  </Accordion>
-
-  <Accordion title="Docker ดูมีข้อจำกัด - ฉันจะเปิดใช้คุณสมบัติเต็มรูปแบบได้อย่างไร?">
-    อิมเมจเริ่มต้นให้ความสำคัญกับความปลอดภัยก่อนและรันเป็นผู้ใช้ `node` ดังนั้นจึงไม่
-    รวมแพ็กเกจระบบ, Homebrew หรือเบราว์เซอร์ที่ bundled มา หากต้องการตั้งค่าที่ครบถ้วนกว่า:
-
-    - คง `/home/node` ไว้ด้วย `OPENCLAW_HOME_VOLUME` เพื่อให้แคชอยู่รอด
-    - ใส่ dependency ของระบบลงในอิมเมจด้วย `OPENCLAW_IMAGE_APT_PACKAGES`
-    - ติดตั้งเบราว์เซอร์ Playwright ผ่าน CLI ที่ bundled มา:
-      `node /app/node_modules/playwright-core/cli.js install chromium`
-    - ตั้งค่า `PLAYWRIGHT_BROWSERS_PATH` และตรวจสอบให้แน่ใจว่า path นั้นถูกคงไว้
-
-    เอกสาร: [Docker](/th/install/docker), [เบราว์เซอร์](/th/tools/browser).
-
-  </Accordion>
-
-  <Accordion title="ฉันสามารถทำให้ DM เป็นส่วนตัว แต่ทำให้กลุ่มเป็นสาธารณะ/อยู่ใน sandbox ด้วยตัวแทนเดียวได้หรือไม่?">
-    ได้ - หากทราฟฟิกส่วนตัวของคุณคือ **DMs** และทราฟฟิกสาธารณะของคุณคือ **กลุ่ม**
-
-    ใช้ `agents.defaults.sandbox.mode: "non-main"` เพื่อให้เซสชันกลุ่ม/ช่องทาง (คีย์ non-main) รันในแบ็กเอนด์ sandbox ที่กำหนดค่าไว้ ขณะที่เซสชัน DM หลักยังอยู่บนโฮสต์ Docker เป็นแบ็กเอนด์เริ่มต้นหากคุณไม่ได้เลือกอย่างใดอย่างหนึ่ง จากนั้นจำกัดว่าเครื่องมือใดพร้อมใช้งานในเซสชัน sandbox ผ่าน `tools.sandbox.tools`
-
-    คำแนะนำการตั้งค่า + ตัวอย่าง config: [กลุ่ม: DM ส่วนตัว + กลุ่มสาธารณะ](/th/channels/groups#pattern-personal-dms-public-groups-single-agent)
-
-    ข้อมูลอ้างอิง config หลัก: [การกำหนดค่า Gateway](/th/gateway/config-agents#agentsdefaultssandbox)
-
-  </Accordion>
-
-  <Accordion title="ฉันจะผูกโฟลเดอร์ของโฮสต์เข้าใน sandbox ได้อย่างไร?">
-    ตั้งค่า `agents.defaults.sandbox.docker.binds` เป็น `["host:path:mode"]` (เช่น `"/home/user/src:/src:ro"`) bind ระดับ global และต่อแต่ละตัวแทนจะถูกรวมกัน; bind ต่อแต่ละตัวแทนจะถูกละเว้นเมื่อ `scope: "shared"` ใช้ `:ro` สำหรับสิ่งที่ละเอียดอ่อน และจำไว้ว่า bind จะข้ามกำแพงระบบไฟล์ของ sandbox
-
-    OpenClaw ตรวจสอบแหล่ง bind กับทั้ง path ที่ normalize แล้วและ path canonical ที่ resolve ผ่าน ancestor ที่มีอยู่ลึกที่สุด นั่นหมายความว่าการหลุดออกผ่าน symlink-parent ยังคง fail closed แม้เมื่อ segment สุดท้ายของ path ยังไม่มีอยู่ และการตรวจสอบ allowed-root ยังคงใช้หลังจาก resolve symlink แล้ว
-
-    ดู [Sandboxing](/th/gateway/sandboxing#custom-bind-mounts) และ [Sandbox เทียบกับนโยบายเครื่องมือเทียบกับ Elevated](/th/gateway/sandbox-vs-tool-policy-vs-elevated#bind-mounts-security-quick-check) สำหรับตัวอย่างและหมายเหตุด้านความปลอดภัย
-
-  </Accordion>
-
-  <Accordion title="หน่วยความจำทำงานอย่างไร?">
-    หน่วยความจำของ OpenClaw เป็นเพียงไฟล์ Markdown ในพื้นที่ทำงานของตัวแทน:
-
-    - โน้ตรายวันใน `memory/YYYY-MM-DD.md`
-    - โน้ตระยะยาวที่คัดสรรแล้วใน `MEMORY.md` (เฉพาะเซสชันหลัก/ส่วนตัว)
-
-    OpenClaw ยังรัน **การ flush หน่วยความจำก่อน Compaction แบบเงียบ** เพื่อเตือนโมเดล
-    ให้เขียนโน้ตที่คงทนก่อน auto-compaction สิ่งนี้จะรันเฉพาะเมื่อพื้นที่ทำงาน
-    เขียนได้ (sandbox แบบอ่านอย่างเดียวจะข้ามไป) ดู [หน่วยความจำ](/th/concepts/memory)
-
-  </Accordion>
-
-  <Accordion title="Memory ลืมสิ่งต่าง ๆ อยู่เรื่อย ๆ ฉันจะทำให้จำไว้ได้อย่างไร?">
-    ขอให้บอต **เขียนข้อเท็จจริงลงใน memory** โน้ตระยะยาวควรอยู่ใน `MEMORY.md`
-    ส่วนบริบทระยะสั้นอยู่ใน `memory/YYYY-MM-DD.md`
-
-    ส่วนนี้ยังเป็นพื้นที่ที่เรากำลังปรับปรุงอยู่ การเตือนโมเดลให้จัดเก็บ memory จะช่วยได้;
-    โมเดลจะรู้ว่าต้องทำอะไร หากยังลืมอยู่ ให้ตรวจสอบว่า Gateway ใช้
-    workspace เดียวกันในการรันทุกครั้ง
-
-    เอกสาร: [Memory](/th/concepts/memory), [workspace ของ agent](/th/concepts/agent-workspace).
-
-  </Accordion>
-
-  <Accordion title="Memory คงอยู่ตลอดไปหรือไม่? มีข้อจำกัดอะไรบ้าง?">
-    ไฟล์ memory อยู่บนดิสก์และคงอยู่จนกว่าคุณจะลบ ข้อจำกัดคือ
-    พื้นที่จัดเก็บของคุณ ไม่ใช่โมเดล **บริบทของเซสชัน** ยังถูกจำกัดโดย
-    context window ของโมเดล ดังนั้นบทสนทนายาว ๆ อาจถูก compact หรือตัดทอนได้ นั่นคือเหตุผลที่มี
-    การค้นหา memory - มันดึงเฉพาะส่วนที่เกี่ยวข้องกลับเข้าสู่บริบท
-
-    เอกสาร: [Memory](/th/concepts/memory), [บริบท](/th/concepts/context).
-
-  </Accordion>
-
-  <Accordion title="การค้นหา semantic memory ต้องใช้คีย์ OpenAI API หรือไม่?">
-    ต้องใช้เฉพาะเมื่อคุณใช้ **embeddings ของ OpenAI** Codex OAuth ครอบคลุม chat/completions และ
-    **ไม่** ให้สิทธิ์เข้าถึง embeddings ดังนั้น **การลงชื่อเข้าใช้ด้วย Codex (OAuth หรือ
-    การเข้าสู่ระบบ Codex CLI)** จึงไม่ช่วยสำหรับการค้นหา semantic memory embeddings ของ OpenAI
-    ยังต้องใช้คีย์ API จริง (`OPENAI_API_KEY` หรือ `models.providers.openai.apiKey`)
-
-    หากคุณไม่ได้ตั้งค่า provider อย่างชัดเจน OpenClaw จะใช้ embeddings ของ OpenAI คอนฟิกแบบเก่า
-    ที่ยังระบุ `memorySearch.provider = "auto"` ก็จะ resolve เป็น OpenAI เช่นกัน
-    หากไม่มีคีย์ OpenAI API การค้นหา semantic memory จะยังใช้ไม่ได้
-    จนกว่าคุณจะคอนฟิกคีย์หรือเลือก provider อื่นอย่างชัดเจน
-
-    หากคุณต้องการใช้งานแบบ local ให้ตั้งค่า `memorySearch.provider = "local"` (และจะตั้ง
-    `memorySearch.fallback = "none"` เพิ่มก็ได้) หากคุณต้องการ embeddings ของ Gemini ให้ตั้งค่า
-    `memorySearch.provider = "gemini"` และระบุ `GEMINI_API_KEY` (หรือ
-    `memorySearch.remote.apiKey`) เรารองรับโมเดล embeddings แบบ **OpenAI, ที่เข้ากันได้กับ OpenAI, Gemini,
-    Voyage, Mistral, Bedrock, Ollama, LM Studio, GitHub Copilot, DeepInfra หรือ local**
-    - ดูรายละเอียดการตั้งค่าได้ที่ [Memory](/th/concepts/memory)
+    ดูการเปรียบเทียบฉบับเต็มที่ [เบราว์เซอร์](/th/tools/browser#existing-session-via-chrome-devtools-mcp)
 
   </Accordion>
 </AccordionGroup>
 
-## สิ่งต่าง ๆ อยู่ที่ไหนบนดิสก์
+## แซนด์บ็อกซ์และหน่วยความจำ
 
 <AccordionGroup>
-  <Accordion title="ข้อมูลทั้งหมดที่ใช้กับ OpenClaw ถูกบันทึกไว้ในเครื่องหรือไม่?">
-    ไม่ใช่ - **state ของ OpenClaw อยู่ในเครื่อง** แต่ **บริการภายนอกยังเห็นสิ่งที่คุณส่งไปให้**
+  <Accordion title="มีเอกสารเฉพาะสำหรับแซนด์บ็อกซ์หรือไม่">
+    มี: [แซนด์บ็อกซ์](/th/gateway/sandboxing) สำหรับการตั้งค่าเฉพาะ Docker (Gateway ทั้งหมดใน Docker หรืออิมเมจแซนด์บ็อกซ์) โปรดดู [Docker](/th/install/docker)
+  </Accordion>
 
-    - **อยู่ในเครื่องโดยค่าเริ่มต้น:** เซสชัน, ไฟล์ memory, คอนฟิก และ workspace อยู่บนโฮสต์ Gateway
-      (`~/.openclaw` + ไดเรกทอรี workspace ของคุณ)
-    - **อยู่ระยะไกลโดยความจำเป็น:** ข้อความที่คุณส่งไปยัง model providers (Anthropic/OpenAI/ฯลฯ) จะไปยัง
-      API ของพวกเขา และแพลตฟอร์มแชต (WhatsApp/Telegram/Slack/ฯลฯ) จะจัดเก็บข้อมูลข้อความไว้บน
-      เซิร์ฟเวอร์ของพวกเขา
-    - **คุณควบคุม footprint ได้:** การใช้โมเดล local จะเก็บ prompts ไว้บนเครื่องของคุณ แต่ทราฟฟิกของ channel
-      ยังคงผ่านเซิร์ฟเวอร์ของ channel
+  <Accordion title="Docker ดูมีข้อจำกัด ฉันจะเปิดใช้ฟีเจอร์ทั้งหมดได้อย่างไร">
+    อิมเมจเริ่มต้นให้ความสำคัญกับความปลอดภัยและทำงานด้วยผู้ใช้ `node` จึงไม่รวมแพ็กเกจระบบ, Homebrew และเบราว์เซอร์ที่รวมมาให้ สำหรับการตั้งค่าที่ครบถ้วนยิ่งขึ้น:
 
-    ที่เกี่ยวข้อง: [workspace ของ agent](/th/concepts/agent-workspace), [Memory](/th/concepts/memory).
+    - บันทึก `/home/node` แบบถาวรด้วย `OPENCLAW_HOME_VOLUME` เพื่อให้แคชคงอยู่
+    - รวมการขึ้นต่อกันของระบบไว้ในอิมเมจด้วย `OPENCLAW_IMAGE_APT_PACKAGES`
+    - ติดตั้งเบราว์เซอร์ Playwright ผ่าน CLI ที่รวมมาให้: `node /app/node_modules/playwright-core/cli.js install chromium`
+    - ตั้งค่า `PLAYWRIGHT_BROWSERS_PATH` และบันทึกพาธนั้นแบบถาวร
+
+    เอกสาร: [Docker](/th/install/docker), [เบราว์เซอร์](/th/tools/browser)
 
   </Accordion>
 
-  <Accordion title="OpenClaw จัดเก็บข้อมูลไว้ที่ไหน?">
+  <Accordion title="ฉันสามารถเก็บ DM ให้เป็นส่วนตัว แต่ทำให้กลุ่มเป็นสาธารณะ/อยู่ในแซนด์บ็อกซ์ด้วยเอเจนต์เดียวได้หรือไม่">
+    ได้ หากการรับส่งข้อมูลส่วนตัวคือ **DM** และการรับส่งข้อมูลสาธารณะคือ **กลุ่ม** ตั้งค่า `agents.defaults.sandbox.mode: "non-main"` เพื่อให้เซสชันกลุ่ม/ช่อง (คีย์ที่ไม่ใช่คีย์หลัก) ทำงานในแบ็กเอนด์แซนด์บ็อกซ์ที่กำหนดค่าไว้ ขณะที่เซสชัน DM หลักยังคงทำงานบนโฮสต์ Docker เป็นแบ็กเอนด์เริ่มต้นเมื่อเปิดใช้แซนด์บ็อกซ์แล้ว จำกัดเครื่องมือที่ใช้ได้ในเซสชันแซนด์บ็อกซ์ผ่าน `tools.sandbox.tools`
+
+    ขั้นตอนการตั้งค่า: [กลุ่ม: DM ส่วนตัว + กลุ่มสาธารณะ](/th/channels/groups#pattern-personal-dms-public-groups-single-agent) ข้อมูลอ้างอิงหลัก: [การกำหนดค่า Gateway](/th/gateway/config-agents#agentsdefaultssandbox)
+
+  </Accordion>
+
+  <Accordion title="ฉันจะผูกโฟลเดอร์บนโฮสต์เข้ากับแซนด์บ็อกซ์ได้อย่างไร">
+    ตั้งค่า `agents.defaults.sandbox.docker.binds` เป็น `["host:container:mode"]` (ตัวอย่างเช่น `"/home/user/src:/src:ro"`) การผูกระดับส่วนกลางและรายเอเจนต์จะถูกรวมเข้าด้วยกัน การผูกรายเอเจนต์จะถูกละเว้นเมื่อ `scope: "shared"` ใช้ `:ro` สำหรับสิ่งที่ละเอียดอ่อน เนื่องจากการผูกจะข้ามกำแพงระบบไฟล์ของแซนด์บ็อกซ์
+
+    OpenClaw ตรวจสอบแหล่งที่มาของการผูกกับทั้งพาธที่ปรับให้เป็นมาตรฐานและพาธแคนนอนิคัลที่แก้ไขผ่านบรรพบุรุษระดับลึกที่สุดที่มีอยู่ ดังนั้นการหลบหนีผ่านพาเรนต์ที่เป็น symlink จะถูกปฏิเสธโดยค่าเริ่มต้น แม้ส่วนสุดท้ายของพาธจะยังไม่มีอยู่ก็ตาม
+
+    ดู [แซนด์บ็อกซ์](/th/gateway/sandboxing#custom-bind-mounts) และ [แซนด์บ็อกซ์เทียบกับนโยบายเครื่องมือเทียบกับสิทธิ์ระดับสูง](/th/gateway/sandbox-vs-tool-policy-vs-elevated#bind-mounts-security-quick-check)
+
+  </Accordion>
+
+  <Accordion title="หน่วยความจำทำงานอย่างไร">
+    หน่วยความจำของ OpenClaw คือไฟล์ Markdown ในพื้นที่ทำงานของเอเจนต์: บันทึกรายวันใน `memory/YYYY-MM-DD.md` และบันทึกระยะยาวที่คัดสรรแล้วใน `MEMORY.md` (เฉพาะเซสชันหลัก/ส่วนตัว)
+
+    OpenClaw ยังเรียกใช้ **การล้างหน่วยความจำก่อน Compaction** แบบเงียบก่อนที่ Compaction จะสรุปการสนทนา เพื่อเตือนให้โมเดลเขียนบันทึกถาวรก่อน กระบวนการนี้จะทำงานเฉพาะเมื่อพื้นที่ทำงานเขียนได้ (แซนด์บ็อกซ์แบบอ่านอย่างเดียวจะข้ามขั้นตอนนี้) ปิดใช้งานด้วย `agents.defaults.compaction.memoryFlush.enabled: false` ดู [หน่วยความจำ](/th/concepts/memory)
+
+  </Accordion>
+
+  <Accordion title="หน่วยความจำลืมสิ่งต่าง ๆ อยู่เรื่อย ๆ ฉันจะทำให้จดจำได้อย่างไร">
+    ขอให้บอต **เขียนข้อเท็จจริงลงในหน่วยความจำ**: บันทึกระยะยาวเก็บไว้ใน `MEMORY.md` และบริบทระยะสั้นเก็บไว้ใน `memory/YYYY-MM-DD.md` การเตือนให้โมเดลจัดเก็บความทรงจำมักจะแก้ปัญหาได้ หากยังคงลืม ให้ตรวจสอบว่า Gateway ใช้พื้นที่ทำงานเดียวกันทุกครั้งที่เรียกใช้
+
+    เอกสาร: [หน่วยความจำ](/th/concepts/memory), [พื้นที่ทำงานของเอเจนต์](/th/concepts/agent-workspace)
+
+  </Accordion>
+
+  <Accordion title="หน่วยความจำคงอยู่ตลอดไปหรือไม่? มีขีดจำกัดอะไรบ้าง?">
+    ไฟล์หน่วยความจำอยู่บนดิสก์และคงอยู่จนกว่าจะถูกลบ ขีดจำกัดคือพื้นที่จัดเก็บข้อมูล ไม่ใช่โมเดล อย่างไรก็ตาม **บริบทของเซสชัน** ยังคงถูกจำกัดด้วยหน้าต่างบริบทของโมเดล ดังนั้นบทสนทนาที่ยาวอาจถูกย่อหรือถูกตัดทอน นี่จึงเป็นเหตุผลที่มีการค้นหาหน่วยความจำ ซึ่งจะดึงกลับมาเฉพาะส่วนที่เกี่ยวข้องเข้าสู่บริบท
+
+    เอกสาร: [หน่วยความจำ](/th/concepts/memory), [บริบท](/th/concepts/context)
+
+  </Accordion>
+
+  <Accordion title="การค้นหาหน่วยความจำเชิงความหมายต้องใช้คีย์ OpenAI API หรือไม่?">
+    ต้องใช้เฉพาะเมื่อใช้ **OpenAI embeddings** ซึ่งเป็นผู้ให้บริการเริ่มต้น Codex OAuth ครอบคลุมการแชต/การเติมข้อความให้สมบูรณ์ แต่ **ไม่** ให้สิทธิ์เข้าถึง embeddings ดังนั้นการลงชื่อเข้าใช้ด้วย Codex (OAuth หรือการเข้าสู่ระบบ Codex CLI) จึงไม่เปิดใช้งานการค้นหาหน่วยความจำเชิงความหมาย OpenAI embeddings ยังคงต้องใช้คีย์ API จริง (`OPENAI_API_KEY` หรือ `models.providers.openai.apiKey`)
+
+    หากต้องการประมวลผลภายในเครื่อง ให้ตั้งค่า `agents.defaults.memorySearch.provider: "local"` (GGUF/llama.cpp) ผู้ให้บริการอื่นที่รองรับ ได้แก่ Bedrock, DeepInfra, Gemini (`GEMINI_API_KEY` หรือ `memorySearch.remote.apiKey`), GitHub Copilot, LM Studio, Mistral, Ollama, ผู้ให้บริการที่เข้ากันได้กับ OpenAI และ Voyage ดูรายละเอียดการตั้งค่าได้ที่ [หน่วยความจำ](/th/concepts/memory) และ [การค้นหาหน่วยความจำ](/th/concepts/memory-search)
+
+  </Accordion>
+</AccordionGroup>
+
+## ตำแหน่งจัดเก็บสิ่งต่างๆ บนดิสก์
+
+<AccordionGroup>
+  <Accordion title="ข้อมูลทั้งหมดที่ใช้กับ OpenClaw ถูกบันทึกไว้ภายในเครื่องหรือไม่?">
+    ไม่ใช่: **สถานะของ OpenClaw เองอยู่ภายในเครื่อง** แต่ **บริการภายนอกยังคงเห็นสิ่งที่ส่งไป**
+
+    - **อยู่ภายในเครื่องโดยค่าเริ่มต้น**: เซสชัน ไฟล์หน่วยความจำ การกำหนดค่า และพื้นที่ทำงานอยู่บนโฮสต์ Gateway (`~/.openclaw` รวมถึงไดเรกทอรีพื้นที่ทำงาน)
+    - **อยู่ระยะไกลตามความจำเป็น**: ข้อความที่ส่งไปยังผู้ให้บริการโมเดล (Anthropic/OpenAI/ฯลฯ) จะถูกส่งไปยัง API ของผู้ให้บริการเหล่านั้น และแพลตฟอร์มแชต (Slack/Telegram/WhatsApp/ฯลฯ) จะจัดเก็บข้อมูลข้อความไว้บนเซิร์ฟเวอร์ของตน
+    - **ควบคุมขอบเขตข้อมูลได้**: โมเดลภายในเครื่องจะเก็บพรอมต์ไว้บนเครื่อง แต่การรับส่งข้อมูลของช่องทางยังคงผ่านเซิร์ฟเวอร์ของช่องทางนั้น
+
+    เนื้อหาที่เกี่ยวข้อง: [พื้นที่ทำงานของเอเจนต์](/th/concepts/agent-workspace), [หน่วยความจำ](/th/concepts/memory)
+
+  </Accordion>
+
+  <Accordion title="OpenClaw จัดเก็บข้อมูลไว้ที่ใด?">
     ทุกอย่างอยู่ภายใต้ `$OPENCLAW_STATE_DIR` (ค่าเริ่มต้น: `~/.openclaw`):
 
-    | พาธ                                                            | วัตถุประสงค์                                                            |
-    | --------------------------------------------------------------- | ------------------------------------------------------------------ |
-    | `$OPENCLAW_STATE_DIR/openclaw.json`                             | คอนฟิกหลัก (JSON5)                                                |
-    | `$OPENCLAW_STATE_DIR/credentials/oauth.json`                    | การนำเข้า OAuth แบบเก่า (คัดลอกเข้า auth profiles เมื่อใช้ครั้งแรก)       |
-    | `$OPENCLAW_STATE_DIR/agents/<agentId>/agent/auth-profiles.json` | Auth profiles (OAuth, คีย์ API และ `keyRef`/`tokenRef` ที่เป็นทางเลือก)  |
-    | `$OPENCLAW_STATE_DIR/secrets.json`                              | payload ลับที่มีไฟล์เป็น backend ซึ่งเป็นทางเลือกสำหรับ provider SecretRef แบบ `file` |
-    | `$OPENCLAW_STATE_DIR/agents/<agentId>/agent/auth.json`          | ไฟล์ความเข้ากันได้แบบเก่า (ล้างรายการ `api_key` แบบ static แล้ว)      |
-    | `$OPENCLAW_STATE_DIR/credentials/`                              | state ของ provider (เช่น `whatsapp/<accountId>/creds.json`)            |
-    | `$OPENCLAW_STATE_DIR/agents/`                                   | state ต่อ agent (agentDir + sessions)                              |
-    | `$OPENCLAW_STATE_DIR/agents/<agentId>/sessions/`                | ประวัติและ state ของบทสนทนา (ต่อ agent)                           |
-    | `$OPENCLAW_STATE_DIR/agents/<agentId>/sessions/sessions.json`   | เมทาดาทาของเซสชัน (ต่อ agent)                                       |
+    | พาธ                                                               | วัตถุประสงค์                                                            |
+    | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
+    | `$OPENCLAW_STATE_DIR/openclaw.json`                                 | การกำหนดค่าหลัก (JSON5)                                                 |
+    | `$OPENCLAW_STATE_DIR/credentials/oauth.json`                        | การนำเข้า OAuth แบบเดิม (คัดลอกไปยังโปรไฟล์การยืนยันตัวตนเมื่อใช้ครั้งแรก)        |
+    | `$OPENCLAW_STATE_DIR/agents/<agentId>/agent/auth-profiles.json`     | โปรไฟล์การยืนยันตัวตน (OAuth, คีย์ API, `keyRef`/`tokenRef` ที่เป็นตัวเลือก)        |
+    | `$OPENCLAW_STATE_DIR/secrets.json`                                  | เพย์โหลดข้อมูลลับแบบไฟล์ที่เป็นตัวเลือกสำหรับผู้ให้บริการ SecretRef `file`   |
+    | `$OPENCLAW_STATE_DIR/agents/<agentId>/agent/auth.json`              | ไฟล์ความเข้ากันได้แบบเดิม (ล้างรายการ `api_key` แบบคงที่แล้ว)        |
+    | `$OPENCLAW_STATE_DIR/credentials/`                                  | สถานะผู้ให้บริการ (เช่น `whatsapp/<accountId>/creds.json`)      |
+    | `$OPENCLAW_STATE_DIR/agents/`                                       | สถานะต่อเอเจนต์ (agentDir + อาร์ติแฟกต์เซสชันแบบเดิม/ที่เก็บถาวร)        |
+    | `$OPENCLAW_STATE_DIR/agents/<agentId>/agent/openclaw-agent.sqlite`  | สถานะ SQLite ต่อเอเจนต์ รวมถึงแถวเซสชันและบันทึกบทสนทนา      |
+    | `$OPENCLAW_STATE_DIR/agents/<agentId>/sessions/`                    | แหล่งข้อมูลสำหรับย้ายเซสชันแบบเดิมและอาร์ติแฟกต์สำหรับการเก็บถาวร/การสนับสนุน      |
 
-    พาธ agent เดี่ยวแบบเก่า: `~/.openclaw/agent/*` (ย้ายข้อมูลโดย `openclaw doctor`)
+    พาธแบบเอเจนต์เดียวเดิม `~/.openclaw/agent/*` จะถูกย้ายโดย `openclaw doctor`
 
-    **workspace** ของคุณ (AGENTS.md, ไฟล์ memory, skills, ฯลฯ) แยกต่างหากและคอนฟิกผ่าน `agents.defaults.workspace` (ค่าเริ่มต้น: `~/.openclaw/workspace`)
+    **พื้นที่ทำงาน** (AGENTS.md, ไฟล์หน่วยความจำ, Skills ฯลฯ) แยกออกจากกัน โดยกำหนดค่าผ่าน `agents.defaults.workspace` (ค่าเริ่มต้น: `~/.openclaw/workspace`)
 
   </Accordion>
 
-  <Accordion title="AGENTS.md / SOUL.md / USER.md / MEMORY.md ควรอยู่ที่ไหน?">
-    ไฟล์เหล่านี้อยู่ใน **workspace ของ agent** ไม่ใช่ `~/.openclaw`
+  <Accordion title="AGENTS.md / SOUL.md / USER.md / MEMORY.md ควรอยู่ที่ใด?">
+    ไฟล์เหล่านี้อยู่ใน **พื้นที่ทำงานของเอเจนต์** ไม่ใช่ `~/.openclaw`
 
-    - **Workspace (ต่อ agent)**: `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`,
-      `MEMORY.md`, `memory/YYYY-MM-DD.md`, `HEARTBEAT.md` ที่เป็นทางเลือก
-      `memory.md` ตัวพิมพ์เล็กที่ root เป็นเพียงอินพุตสำหรับการซ่อมแซมแบบเก่า; `openclaw doctor --fix`
-      สามารถรวมมันเข้าใน `MEMORY.md` ได้เมื่อมีทั้งสองไฟล์
-    - **State dir (`~/.openclaw`)**: คอนฟิก, state ของ channel/provider, auth profiles, เซสชัน, log,
-      และ Skills ที่แชร์ (`~/.openclaw/skills`)
+    - **พื้นที่ทำงาน (ต่อเอเจนต์)**: `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`, `MEMORY.md`, `memory/YYYY-MM-DD.md`, และ `HEARTBEAT.md` ที่เป็นตัวเลือก รูทตัวพิมพ์เล็ก `memory.md` เป็นเพียงอินพุตสำหรับการซ่อมแซมแบบเดิมเท่านั้น โดย `openclaw doctor --fix` สามารถผสานเข้ากับ `MEMORY.md` เมื่อมีทั้งสองรายการ
+    - **ไดเรกทอรีสถานะ (`~/.openclaw`)**: การกำหนดค่า สถานะช่องทาง/ผู้ให้บริการ โปรไฟล์การยืนยันตัวตน เซสชัน บันทึก และ Skills ที่ใช้ร่วมกัน (`~/.openclaw/skills`)
 
-    ค่าเริ่มต้นของ workspace คือ `~/.openclaw/workspace` ซึ่งคอนฟิกได้ผ่าน:
+    พื้นที่ทำงานเริ่มต้นคือ `~/.openclaw/workspace` ซึ่งกำหนดค่าได้:
 
     ```json5
     {
@@ -628,23 +495,18 @@ Q&A สำหรับการรันครั้งแรก — การ�
     }
     ```
 
-    หากบอต "ลืม" หลังรีสตาร์ต ให้ยืนยันว่า Gateway ใช้
-    workspace เดียวกันทุกครั้งที่เปิดใช้งาน (และจำไว้ว่า: โหมด remote ใช้
-    workspace ของ **โฮสต์ gateway** ไม่ใช่แล็ปท็อป local ของคุณ)
+    หากบอต "ลืม" หลังจากเริ่มระบบใหม่ ให้ตรวจสอบว่า Gateway ใช้พื้นที่ทำงานเดียวกันทุกครั้งที่เปิดใช้งาน (โหมดระยะไกลใช้พื้นที่ทำงานของ **โฮสต์ Gateway** ไม่ใช่แล็ปท็อปภายในเครื่อง)
 
-    เคล็ดลับ: หากคุณต้องการพฤติกรรมหรือ preference ที่คงทน ให้ขอให้บอต **เขียนลงใน
-    AGENTS.md หรือ MEMORY.md** แทนการพึ่งพาประวัติแชต
+    เคล็ดลับ: สำหรับพฤติกรรมหรือค่ากำหนดที่ต้องการให้คงอยู่ ให้สั่งบอตให้ **เขียนลงใน AGENTS.md หรือ MEMORY.md** แทนการพึ่งพาประวัติการแชต
 
-    ดู [workspace ของ agent](/th/concepts/agent-workspace) และ [Memory](/th/concepts/memory).
+    ดู [พื้นที่ทำงานของเอเจนต์](/th/concepts/agent-workspace) และ [หน่วยความจำ](/th/concepts/memory)
 
   </Accordion>
 
-  <Accordion title="ฉันทำให้ SOUL.md ใหญ่ขึ้นได้ไหม?">
-    ได้ `SOUL.md` เป็นหนึ่งในไฟล์ bootstrap ของ workspace ที่ถูกฉีดเข้าไปใน
-    บริบทของ agent ขีดจำกัดการฉีดต่อไฟล์เริ่มต้นคือ `20000` อักขระ
-    และงบประมาณ bootstrap รวมข้ามไฟล์คือ `60000` อักขระ
+  <Accordion title="สามารถทำให้ SOUL.md ใหญ่ขึ้นได้หรือไม่?">
+    ได้ `SOUL.md` เป็นหนึ่งในไฟล์บูตสแตรปของพื้นที่ทำงานที่แทรกเข้าไปในบริบทของเอเจนต์ ขีดจำกัดการแทรกเริ่มต้นต่อไฟล์คือ `20000` อักขระ และงบประมาณบูตสแตรปรวมของทุกไฟล์คือ `60000` อักขระ
 
-    เปลี่ยนค่าเริ่มต้นที่แชร์ในคอนฟิก OpenClaw ของคุณ:
+    เปลี่ยนค่าเริ่มต้นที่ใช้ร่วมกัน:
 
     ```json5
     {
@@ -657,57 +519,29 @@ Q&A สำหรับการรันครั้งแรก — การ�
     }
     ```
 
-    หรือ override agent หนึ่งตัว:
+    หรือแทนที่ค่าสำหรับเอเจนต์หนึ่งตัวภายใต้ `agents.list[].bootstrapMaxChars` / `bootstrapTotalMaxChars`
 
-    ```json5
-    {
-      agents: {
-        list: [
-          {
-            id: "main",
-            bootstrapMaxChars: 50000,
-            bootstrapTotalMaxChars: 300000,
-          },
-        ],
-      },
-    }
-    ```
+    ใช้ `/context` เพื่อตรวจสอบขนาดดิบเทียบกับขนาดที่แทรก และดูว่าเกิดการตัดทอนหรือไม่ ให้ `SOUL.md` มุ่งเน้นที่น้ำเสียง จุดยืน และบุคลิกภาพ ใส่กฎการทำงานไว้ใน `AGENTS.md` และข้อเท็จจริงที่ต้องคงอยู่ไว้ในหน่วยความจำ
 
-    ใช้ `/context` เพื่อตรวจสอบขนาด raw เทียบกับขนาดที่ถูกฉีด และดูว่าเกิดการตัดทอนหรือไม่
-    ให้ `SOUL.md` มุ่งเน้นที่เสียง, จุดยืน และบุคลิกภาพ; ใส่กฎการปฏิบัติงาน
-    ไว้ใน `AGENTS.md` และข้อเท็จจริงที่คงทนไว้ใน memory
-
-    ดู [บริบท](/th/concepts/context) และ [คอนฟิก agent](/th/gateway/config-agents).
+    ดู [บริบท](/th/concepts/context) และ [การกำหนดค่าเอเจนต์](/th/gateway/config-agents)
 
   </Accordion>
 
   <Accordion title="กลยุทธ์การสำรองข้อมูลที่แนะนำ">
-    ใส่ **workspace ของ agent** ของคุณไว้ใน repo git แบบ **private** และสำรองไว้ที่ใดที่หนึ่ง
-    ที่เป็น private (เช่น GitHub private) วิธีนี้จะเก็บ memory + ไฟล์ AGENTS/SOUL/USER
-    และช่วยให้คุณกู้คืน "จิตใจ" ของผู้ช่วยได้ภายหลัง
+    ใส่ **พื้นที่ทำงานของเอเจนต์** ไว้ในที่เก็บ git **ส่วนตัว** และสำรองข้อมูลไว้ในพื้นที่ส่วนตัว (เช่น GitHub แบบส่วนตัว) วิธีนี้จะเก็บทั้งหน่วยความจำและไฟล์ AGENTS/SOUL/USER และช่วยให้กู้คืน "จิตใจ" ของผู้ช่วยได้ในภายหลัง
 
-    อย่า commit สิ่งใดก็ตามภายใต้ `~/.openclaw` (credentials, เซสชัน, tokens หรือ payloads ลับที่เข้ารหัส)
-    หากคุณต้องการกู้คืนทั้งหมด ให้สำรองทั้ง workspace และ state directory
-    แยกกัน (ดูคำถามเรื่องการย้ายข้อมูลด้านบน)
+    **อย่า** commit สิ่งใดภายใต้ `~/.openclaw` (ข้อมูลประจำตัว เซสชัน โทเค็น เพย์โหลดข้อมูลลับที่เข้ารหัส) หากต้องการกู้คืนทั้งหมด ให้สำรองพื้นที่ทำงานและไดเรกทอรีสถานะแยกกัน
 
-    เอกสาร: [workspace ของ agent](/th/concepts/agent-workspace).
+    เอกสาร: [พื้นที่ทำงานของเอเจนต์](/th/concepts/agent-workspace)
 
   </Accordion>
 
-  <Accordion title="ฉันจะถอนการติดตั้ง OpenClaw ทั้งหมดได้อย่างไร?">
-    ดูคู่มือเฉพาะ: [ถอนการติดตั้ง](/th/install/uninstall).
+  <Accordion title="จะถอนการติดตั้ง OpenClaw อย่างสมบูรณ์ได้อย่างไร?">
+    ดู [ถอนการติดตั้ง](/th/install/uninstall)
   </Accordion>
 
-  <Accordion title="Agents ทำงานนอก workspace ได้หรือไม่?">
-    ได้ workspace คือ **cwd เริ่มต้น** และจุดยึดของ memory ไม่ใช่ sandbox แบบแข็ง
-    พาธสัมพัทธ์จะ resolve ภายใน workspace แต่พาธสัมบูรณ์สามารถเข้าถึงตำแหน่งอื่น
-    บนโฮสต์ได้ เว้นแต่จะเปิดใช้ sandboxing หากคุณต้องการการแยกกัน ให้ใช้
-    [`agents.defaults.sandbox`](/th/gateway/sandboxing) หรือการตั้งค่า sandbox ต่อ agent หากคุณ
-    ต้องการให้ repo เป็นไดเรกทอรีทำงานเริ่มต้น ให้ชี้ `workspace` ของ agent นั้น
-    ไปที่ root ของ repo repo OpenClaw เป็นเพียง source code; แยก
-    workspace ไว้ต่างหาก เว้นแต่คุณตั้งใจให้ agent ทำงานภายในนั้น
-
-    ตัวอย่าง (repo เป็น cwd เริ่มต้น):
+  <Accordion title="เอเจนต์สามารถทำงานนอกพื้นที่ทำงานได้หรือไม่?">
+    ได้ พื้นที่ทำงานคือ **cwd เริ่มต้น** และจุดยึดของหน่วยความจำ ไม่ใช่แซนด์บ็อกซ์แบบตายตัว พาธสัมพัทธ์จะถูกตีความภายในพื้นที่ทำงาน ส่วนพาธสัมบูรณ์สามารถเข้าถึงตำแหน่งอื่นบนโฮสต์ได้ เว้นแต่จะเปิดใช้แซนด์บ็อกซ์ หากต้องการแยกการทำงาน ให้ใช้ [`agents.defaults.sandbox`](/th/gateway/sandboxing) หรือการตั้งค่าแซนด์บ็อกซ์ต่อเอเจนต์ หากต้องการให้ที่เก็บเป็นไดเรกทอรีทำงานเริ่มต้น ให้ชี้ `workspace` ของเอเจนต์นั้นไปยังรูทของที่เก็บ ที่เก็บ OpenClaw เองเป็นเพียงซอร์สโค้ด ดังนั้นควรแยกพื้นที่ทำงานออกจากกัน เว้นแต่ตั้งใจให้เอเจนต์ทำงานภายในที่เก็บนั้น
 
     ```json5
     {
@@ -721,30 +555,20 @@ Q&A สำหรับการรันครั้งแรก — การ�
 
   </Accordion>
 
-  <Accordion title="โหมด remote: session store อยู่ที่ไหน?">
-    state ของเซสชันเป็นของ **โฮสต์ gateway** หากคุณอยู่ในโหมด remote session store ที่คุณสนใจจะอยู่บนเครื่อง remote ไม่ใช่แล็ปท็อป local ของคุณ ดู [การจัดการเซสชัน](/th/concepts/session).
+  <Accordion title="โหมดระยะไกล: ที่เก็บเซสชันอยู่ที่ใด?">
+    สถานะเซสชันเป็นของ **โฮสต์ Gateway** ในโหมดระยะไกล ที่เก็บเซสชันที่เกี่ยวข้องจะอยู่บนเครื่องระยะไกล ไม่ใช่แล็ปท็อปภายในเครื่อง ดู [การจัดการเซสชัน](/th/concepts/session)
   </Accordion>
 </AccordionGroup>
 
-## พื้นฐานคอนฟิก
+## พื้นฐานการกำหนดค่า
 
 <AccordionGroup>
-  <Accordion title="คอนฟิกอยู่ในรูปแบบอะไร? อยู่ที่ไหน?">
-    OpenClaw อ่านคอนฟิก **JSON5** ที่เป็นทางเลือกจาก `$OPENCLAW_CONFIG_PATH` (ค่าเริ่มต้น: `~/.openclaw/openclaw.json`):
-
-    ```
-    $OPENCLAW_CONFIG_PATH
-    ```
-
-    หากไม่มีไฟล์ จะใช้ค่าเริ่มต้นที่ค่อนข้างปลอดภัย (รวมถึง workspace เริ่มต้นที่ `~/.openclaw/workspace`)
-
+  <Accordion title="การกำหนดค่าใช้รูปแบบใด? อยู่ที่ใด?">
+    OpenClaw อ่านการกำหนดค่า **JSON5** ที่เป็นตัวเลือกจาก `$OPENCLAW_CONFIG_PATH` (ค่าเริ่มต้น: `~/.openclaw/openclaw.json`) หากไม่มีไฟล์ดังกล่าว ระบบจะใช้ค่าเริ่มต้นที่ค่อนข้างปลอดภัย รวมถึงพื้นที่ทำงานเริ่มต้น `~/.openclaw/workspace`
   </Accordion>
 
-  <Accordion title='ฉันตั้งค่า gateway.bind: "lan" (หรือ "tailnet") แล้วตอนนี้ไม่มีอะไร listen / UI บอกว่า unauthorized'>
-    การ bind แบบไม่ใช่ loopback **ต้องมีพาธ auth ของ gateway ที่ถูกต้อง** ในทางปฏิบัติหมายถึง:
-
-    - auth แบบ shared-secret: token หรือ password
-    - `gateway.auth.mode: "trusted-proxy"` อยู่หลัง reverse proxy ที่รู้ identity และคอนฟิกอย่างถูกต้อง
+  <Accordion title='ตั้งค่า gateway.bind: "lan" (หรือ "tailnet") แล้วไม่มีสิ่งใดรับฟัง / UI แจ้งว่าไม่ได้รับอนุญาต'>
+    การผูกกับอินเทอร์เฟซที่ไม่ใช่ลูปแบ็ก **ต้องมีเส้นทางการยืนยันตัวตน Gateway ที่ถูกต้อง** ได้แก่ การยืนยันตัวตนด้วยข้อมูลลับที่ใช้ร่วมกัน (โทเค็นหรือรหัสผ่าน) หรือ `gateway.auth.mode: "trusted-proxy"` หลังพร็อกซีย้อนกลับที่รับรู้ข้อมูลประจำตัวและกำหนดค่าอย่างถูกต้อง
 
     ```json5
     {
@@ -758,34 +582,27 @@ Q&A สำหรับการรันครั้งแรก — การ�
     }
     ```
 
-    หมายเหตุ:
-
-    - `gateway.remote.token` / `.password` **ไม่** เปิดใช้ auth ของ gateway local ด้วยตัวเอง
-    - พาธการเรียก local สามารถใช้ `gateway.remote.*` เป็น fallback ได้เฉพาะเมื่อไม่ได้ตั้งค่า `gateway.auth.*`
-    - สำหรับ auth แบบ password ให้ตั้งค่า `gateway.auth.mode: "password"` พร้อม `gateway.auth.password` (หรือ `OPENCLAW_GATEWAY_PASSWORD`) แทน
-    - หาก `gateway.auth.token` / `gateway.auth.password` ถูกคอนฟิกอย่างชัดเจนผ่าน SecretRef และ resolve ไม่ได้ การ resolve จะ fail closed (ไม่มี remote fallback มาบัง)
-    - การตั้งค่า Control UI แบบ shared-secret จะ authenticate ผ่าน `connect.params.auth.token` หรือ `connect.params.auth.password` (จัดเก็บใน settings ของ app/UI) โหมดที่มี identity เช่น Tailscale Serve หรือ `trusted-proxy` จะใช้ request headers แทน หลีกเลี่ยงการใส่ shared secrets ใน URLs
-    - เมื่อใช้ `gateway.auth.mode: "trusted-proxy"` reverse proxies แบบ loopback บนโฮสต์เดียวกันต้องมี `gateway.auth.trustedProxy.allowLoopback = true` อย่างชัดเจน และมีรายการ loopback ใน `gateway.trustedProxies`
+    - `gateway.remote.token` / `.password` **ไม่** เปิดใช้งานการยืนยันตัวตน Gateway ภายในเครื่องด้วยตนเอง เส้นทางการเรียกภายในเครื่องสามารถใช้ `gateway.remote.*` เป็นทางเลือกสำรองได้เฉพาะเมื่อไม่ได้ตั้งค่า `gateway.auth.*`
+    - สำหรับการยืนยันตัวตนด้วยรหัสผ่าน ให้ตั้งค่า `gateway.auth.mode: "password"` พร้อมกับ `gateway.auth.password` (หรือ `OPENCLAW_GATEWAY_PASSWORD`)
+    - หากกำหนดค่า `gateway.auth.token` / `.password` อย่างชัดเจนผ่าน SecretRef แต่ไม่สามารถแก้ไขค่าได้ การแก้ไขค่าจะล้มเหลวแบบปิด (ไม่มีทางเลือกสำรองระยะไกลมาปกปิด)
+    - การตั้งค่า Control UI ที่ใช้ข้อมูลลับร่วมกันจะยืนยันตัวตนผ่าน `connect.params.auth.token` หรือ `connect.params.auth.password` (จัดเก็บในการตั้งค่าแอป/UI) โหมดที่มีข้อมูลประจำตัว เช่น Tailscale Serve หรือ `trusted-proxy` จะใช้ส่วนหัวคำขอแทน จึงควรหลีกเลี่ยงการใส่ข้อมูลลับที่ใช้ร่วมกันใน URL
+    - เมื่อใช้ `gateway.auth.mode: "trusted-proxy"` พร็อกซีย้อนกลับแบบลูปแบ็กบนโฮสต์เดียวกันต้องกำหนด `gateway.auth.trustedProxy.allowLoopback = true` อย่างชัดเจน และมีรายการลูปแบ็กใน `gateway.trustedProxies`
 
   </Accordion>
 
-  <Accordion title="ทำไมตอนนี้ฉันต้องใช้ token บน localhost?">
-    OpenClaw บังคับใช้ auth ของ gateway โดยค่าเริ่มต้น รวมถึง loopback ในพาธเริ่มต้นตามปกติ นั่นหมายถึง auth แบบ token: หากไม่ได้คอนฟิกพาธ auth อย่างชัดเจน การเริ่มต้น gateway จะ resolve เป็นโหมด token และสร้าง token แบบใช้เฉพาะ runtime สำหรับการเริ่มต้นครั้งนั้น ดังนั้น **ไคลเอนต์ WS local ต้อง authenticate** คอนฟิก `gateway.auth.token`, `gateway.auth.password`, `OPENCLAW_GATEWAY_TOKEN` หรือ `OPENCLAW_GATEWAY_PASSWORD` อย่างชัดเจนเมื่อไคลเอนต์ต้องการ secret ที่คงที่ข้ามการรีสตาร์ต วิธีนี้จะบล็อก process local อื่นไม่ให้เรียก Gateway.
+  <Accordion title="เหตุใดตอนนี้จึงต้องใช้โทเค็นบน localhost?">
+    OpenClaw บังคับใช้การยืนยันตัวตน Gateway โดยค่าเริ่มต้น รวมถึงลูปแบ็ก หากไม่ได้กำหนดเส้นทางการยืนยันตัวตนไว้อย่างชัดเจน การเริ่มทำงานจะเลือกโหมดโทเค็นและสร้างโทเค็นเฉพาะรันไทม์สำหรับการเริ่มทำงานครั้งนั้น ดังนั้นไคลเอนต์ WS ภายในเครื่องจึงต้องยืนยันตัวตน ซึ่งป้องกันไม่ให้กระบวนการอื่นภายในเครื่องเรียก Gateway
 
-    หากคุณต้องการเส้นทางการยืนยันตัวตนแบบอื่น คุณสามารถเลือกโหมดรหัสผ่านอย่างชัดเจนได้ (หรือ `trusted-proxy` สำหรับ reverse proxy ที่รับรู้ตัวตน) หากคุณ **ต้องการ** loopback แบบเปิดจริง ๆ ให้ตั้งค่า `gateway.auth.mode: "none"` อย่างชัดเจนใน config ของคุณ Doctor สามารถสร้าง token ให้คุณได้ทุกเมื่อ: `openclaw doctor --generate-gateway-token`.
-
-  </Accordion>
-
-  <Accordion title="ฉันต้องรีสตาร์ตหลังจากเปลี่ยน config ไหม">
-    Gateway เฝ้าดู config และรองรับ hot-reload:
-
-    - `gateway.reload.mode: "hybrid"` (ค่าเริ่มต้น): ใช้การเปลี่ยนแปลงที่ปลอดภัยแบบ hot-apply และรีสตาร์ตสำหรับการเปลี่ยนแปลงสำคัญ
-    - รองรับ `hot`, `restart`, `off` ด้วย
+    กำหนด `gateway.auth.token`, `gateway.auth.password`, `OPENCLAW_GATEWAY_TOKEN` หรือ `OPENCLAW_GATEWAY_PASSWORD` อย่างชัดเจน เมื่อไคลเอนต์ต้องใช้ข้อมูลลับที่คงที่หลังการเริ่มระบบใหม่ นอกจากนี้ยังเลือกโหมดรหัสผ่าน หรือ `trusted-proxy` สำหรับพร็อกซีย้อนกลับที่รับรู้ข้อมูลประจำตัวได้ หากต้องการเปิดลูปแบ็ก ให้ตั้งค่า `gateway.auth.mode: "none"` อย่างชัดเจน `openclaw doctor --generate-gateway-token` จะสร้างโทเค็นได้ทุกเมื่อ
 
   </Accordion>
 
-  <Accordion title="ฉันจะปิด tagline ตลก ๆ ของ CLI ได้อย่างไร">
-    ตั้งค่า `cli.banner.taglineMode` ใน config:
+  <Accordion title="ต้องเริ่มระบบใหม่หลังเปลี่ยนการกำหนดค่าหรือไม่?">
+    Gateway เฝ้าดูการกำหนดค่าและรองรับการโหลดซ้ำขณะทำงาน: `gateway.reload.mode: "hybrid"` (ค่าเริ่มต้น) จะนำการเปลี่ยนแปลงที่ปลอดภัยมาใช้ทันที และเริ่มระบบใหม่สำหรับการเปลี่ยนแปลงสำคัญ นอกจากนี้ยังรองรับ `hot`, `restart` และ `off` การเปลี่ยนแปลงส่วนใหญ่ของ `tools.*`, นโยบาย `agents.*`, `session.*` และ `messages.*` จะมีผลทันทีโดยไม่ต้องดำเนินการโหลดซ้ำ ส่วนการเปลี่ยนแปลงการผูก/พอร์ตของ `gateway.*` ต้องเริ่มระบบใหม่
+  </Accordion>
+
+  <Accordion title="จะปิดข้อความสโลแกนตลกๆ ของ CLI ได้อย่างไร?">
+    ตั้งค่า `cli.banner.taglineMode`:
 
     ```json5
     {
@@ -797,36 +614,34 @@ Q&A สำหรับการรันครั้งแรก — การ�
     }
     ```
 
-    - `off`: ซ่อนข้อความ tagline แต่ยังคงบรรทัดชื่อ banner/เวอร์ชันไว้
-    - `default`: ใช้ `All your chats, one OpenClaw.` ทุกครั้ง
-    - `random`: หมุนเวียน tagline ตลก/ตามฤดูกาล (พฤติกรรมเริ่มต้น)
-    - หากคุณไม่ต้องการ banner เลย ให้ตั้งค่า env `OPENCLAW_HIDE_BANNER=1`
+    - `off`: ซ่อนข้อความสโลแกน แต่ยังคงแสดงบรรทัดชื่อ/เวอร์ชันของแบนเนอร์
+    - `default`: ใช้ `All your chats, one OpenClaw.` เสมอ
+    - `random`: หมุนเวียนสโลแกนตลก/ตามฤดูกาล (พฤติกรรมเริ่มต้น)
+    - หากไม่ต้องการแบนเนอร์เลย ให้ตั้งค่าตัวแปรสภาพแวดล้อม `OPENCLAW_HIDE_BANNER=1`
 
   </Accordion>
 
-  <Accordion title="ฉันจะเปิดใช้งาน web search (และ web fetch) ได้อย่างไร">
-    `web_fetch` ทำงานได้โดยไม่ต้องใช้ API key ส่วน `web_search` ขึ้นอยู่กับ provider
-    ที่คุณเลือก:
+  <Accordion title="จะเปิดใช้งานการค้นหาเว็บ (และการดึงข้อมูลจากเว็บ) ได้อย่างไร?">
+    `web_fetch` ทำงานได้โดยไม่ต้องใช้คีย์ API ส่วน `web_search` ขึ้นอยู่กับผู้ให้บริการที่เลือก:
 
-    - provider ที่ใช้ API เช่น Brave, Exa, Firecrawl, Gemini, Kimi, MiniMax Search, Perplexity และ Tavily ต้องตั้งค่า API key ตามปกติ
-    - Grok สามารถใช้ xAI OAuth จากการยืนยันตัวตนของโมเดลซ้ำได้ หรือ fallback ไปใช้ `XAI_API_KEY` / config web-search ของ plugin
-    - Ollama Web Search ไม่ต้องใช้ key แต่ใช้โฮสต์ Ollama ที่คุณกำหนดค่าไว้และต้องใช้ `ollama signin`
-    - DuckDuckGo ไม่ต้องใช้ key แต่เป็น integration แบบไม่เป็นทางการที่อิง HTML
-    - SearXNG ไม่ต้องใช้ key/โฮสต์เองได้; กำหนดค่า `SEARXNG_BASE_URL` หรือ `plugins.entries.searxng.config.webSearch.baseUrl`
+    | ผู้ให้บริการ | ไม่ต้องใช้คีย์ | ตัวแปรสภาพแวดล้อม |
+    | --- | --- | --- |
+    | Brave | ไม่ | `BRAVE_API_KEY` |
+    | DuckDuckGo | ใช่ (ใช้ HTML อย่างไม่เป็นทางการ) | - |
+    | Exa | ไม่ | `EXA_API_KEY` |
+    | Firecrawl | ไม่ | `FIRECRAWL_API_KEY` |
+    | Gemini | ไม่ | `GEMINI_API_KEY` |
+    | Grok | ไม่ (xAI OAuth หรือคีย์) | `XAI_API_KEY` |
+    | Kimi | ไม่ | `KIMI_API_KEY` หรือ `MOONSHOT_API_KEY` |
+    | MiniMax Search | ไม่ | `MINIMAX_CODE_PLAN_KEY`, `MINIMAX_CODING_API_KEY` หรือ `MINIMAX_API_KEY` |
+    | Ollama Web Search | ใช่ (ต้องมี `ollama signin`) | - |
+    | Perplexity | ไม่ | `PERPLEXITY_API_KEY` หรือ `OPENROUTER_API_KEY` |
+    | SearXNG | ใช่ (โฮสต์เอง) | `SEARXNG_BASE_URL` |
+    | Tavily | ไม่ | `TAVILY_API_KEY` |
 
-    **แนะนำ:** รัน `openclaw configure --section web` แล้วเลือก provider
-    ทางเลือกผ่าน environment:
+    Grok ยังสามารถนำ xAI OAuth จากการยืนยันตัวตนของโมเดลมาใช้ซ้ำได้ (`openclaw onboard --auth-choice xai-oauth`)
 
-    - Brave: `BRAVE_API_KEY`
-    - Exa: `EXA_API_KEY`
-    - Firecrawl: `FIRECRAWL_API_KEY`
-    - Gemini: `GEMINI_API_KEY`
-    - Grok: xAI OAuth, `XAI_API_KEY`
-    - Kimi: `KIMI_API_KEY` หรือ `MOONSHOT_API_KEY`
-    - MiniMax Search: `MINIMAX_CODE_PLAN_KEY`, `MINIMAX_CODING_API_KEY` หรือ `MINIMAX_API_KEY`
-    - Perplexity: `PERPLEXITY_API_KEY` หรือ `OPENROUTER_API_KEY`
-    - SearXNG: `SEARXNG_BASE_URL`
-    - Tavily: `TAVILY_API_KEY`
+    **แนะนำ**: `openclaw configure --section web` แล้วเลือกผู้ให้บริการ
 
     ```json5
     {
@@ -840,86 +655,74 @@ Q&A สำหรับการรันครั้งแรก — การ�
             },
           },
         },
-        },
-        tools: {
-          web: {
-            search: {
-              enabled: true,
-              provider: "brave",
-              maxResults: 5,
-            },
-            fetch: {
-              enabled: true,
-              provider: "firecrawl", // optional; omit for auto-detect
-            },
+      },
+      tools: {
+        web: {
+          search: {
+            enabled: true,
+            provider: "brave",
+            maxResults: 5,
+          },
+          fetch: {
+            enabled: true,
+            provider: "firecrawl", // ไม่บังคับ; ละไว้เพื่อตรวจหาอัตโนมัติ
           },
         },
+      },
     }
     ```
 
-    ตอนนี้ config web-search เฉพาะ provider อยู่ใต้ `plugins.entries.<plugin>.config.webSearch.*`
-    เส้นทาง provider แบบเดิม `tools.web.search.*` ยังโหลดชั่วคราวเพื่อความเข้ากันได้ แต่ไม่ควรใช้กับ config ใหม่
-    config fallback ของ Firecrawl web-fetch อยู่ใต้ `plugins.entries.firecrawl.config.webFetch.*`
+    การกำหนดค่าการค้นหาเว็บเฉพาะผู้ให้บริการอยู่ภายใต้ `plugins.entries.<plugin>.config.webSearch.*` เส้นทางผู้ให้บริการแบบเดิม `tools.web.search.*` ยังคงโหลดเพื่อความเข้ากันได้ แต่ไม่ควรใช้ในการกำหนดค่าใหม่ การกำหนดค่าตัวสำรองสำหรับการดึงข้อมูลเว็บของ Firecrawl อยู่ภายใต้ `plugins.entries.firecrawl.config.webFetch.*`
 
-    หมายเหตุ:
+    - รายการอนุญาต: เพิ่ม `web_search`/`web_fetch`/`x_search` หรือ `group:web` สำหรับทั้งสามรายการ
+    - `web_fetch` เปิดใช้งานโดยค่าเริ่มต้น
+    - หากละ `tools.web.fetch.provider` ไว้ OpenClaw จะตรวจหาผู้ให้บริการตัวสำรองสำหรับการดึงข้อมูลรายแรกที่พร้อมใช้งานโดยอัตโนมัติจากข้อมูลประจำตัวที่มีอยู่ โดย Plugin Firecrawl อย่างเป็นทางการจะจัดเตรียมตัวสำรองดังกล่าว
+    - ดีมอนอ่านตัวแปรสภาพแวดล้อมจาก `~/.openclaw/.env` (หรือสภาพแวดล้อมของบริการ)
 
-    - หากคุณใช้ allowlist ให้เพิ่ม `web_search`/`web_fetch`/`x_search` หรือ `group:web`
-    - `web_fetch` เปิดใช้งานตามค่าเริ่มต้น (เว้นแต่จะปิดใช้งานอย่างชัดเจน)
-    - หากละเว้น `tools.web.fetch.provider` OpenClaw จะตรวจหา provider fallback สำหรับ fetch ตัวแรกที่พร้อมใช้งานโดยอัตโนมัติจาก credentials ที่มีอยู่ Plugin Firecrawl อย่างเป็นทางการให้ fallback นี้
-    - daemon อ่าน env vars จาก `~/.openclaw/.env` (หรือ environment ของบริการ)
-
-    Docs: [เครื่องมือเว็บ](/th/tools/web).
+    เอกสาร: [เครื่องมือเว็บ](/th/tools/web)
 
   </Accordion>
 
-  <Accordion title="config.apply ล้าง config ของฉัน ฉันจะกู้คืนและหลีกเลี่ยงปัญหานี้ได้อย่างไร">
-    `config.apply` จะแทนที่ **config ทั้งหมด** หากคุณส่ง object บางส่วน ทุกอย่าง
-    ที่เหลือจะถูกลบออก
+  <Accordion title="config.apply ล้างการกำหนดค่าของฉัน ฉันจะกู้คืนและป้องกันไม่ให้เกิดเหตุการณ์นี้ได้อย่างไร">
+    `config.apply` จะแทนที่ **การกำหนดค่าทั้งหมด** วัตถุบางส่วนจะลบทุกอย่างที่เหลือ
 
-    OpenClaw ปัจจุบันป้องกันการเขียนทับโดยไม่ตั้งใจหลายกรณี:
+    ปัจจุบัน OpenClaw ป้องกันการเขียนทับโดยไม่ตั้งใจส่วนใหญ่:
 
-    - การเขียน config ที่ OpenClaw เป็นเจ้าของจะตรวจสอบ config ทั้งหมดหลังการเปลี่ยนแปลงก่อนเขียน
-    - การเขียนที่ไม่ถูกต้องหรือทำลายข้อมูลซึ่ง OpenClaw เป็นเจ้าของจะถูกปฏิเสธและบันทึกเป็น `openclaw.json.rejected.*`
-    - หากการแก้ไขโดยตรงทำให้ startup หรือ hot reload เสีย Gateway จะ fail closed หรือข้ามการ reload; จะไม่เขียน `openclaw.json` ใหม่
-    - `openclaw doctor --fix` เป็นเจ้าของการซ่อมแซมและสามารถกู้คืน last-known-good พร้อมบันทึกไฟล์ที่ถูกปฏิเสธเป็น `openclaw.json.clobbered.*`
+    - การเขียนการกำหนดค่าที่ OpenClaw เป็นเจ้าของจะตรวจสอบการกำหนดค่าทั้งหมดหลังการเปลี่ยนแปลงก่อนเขียน
+    - การเขียนที่ไม่ถูกต้องหรือสร้างความเสียหายซึ่ง OpenClaw เป็นเจ้าของจะถูกปฏิเสธและบันทึกเป็น `openclaw.json.rejected.*`
+    - การแก้ไขโดยตรงที่ทำให้การเริ่มต้นหรือการโหลดซ้ำแบบทันทีล้มเหลว จะทำให้ Gateway ปิดกั้นเมื่อเกิดข้อผิดพลาดหรือข้ามการโหลดซ้ำ โดยจะไม่เขียน `openclaw.json` ใหม่
+    - `openclaw doctor --fix` รับผิดชอบการซ่อมแซม สามารถคืนค่าการกำหนดค่าที่ใช้งานได้ล่าสุด และบันทึกไฟล์ที่ถูกปฏิเสธเป็น `openclaw.json.clobbered.*`
 
-    กู้คืน:
+    วิธีการกู้คืน:
 
     - ตรวจสอบ `openclaw logs --follow` เพื่อหา `Invalid config at`, `Config write rejected:` หรือ `config reload skipped (invalid config)`
-    - ตรวจดู `openclaw.json.clobbered.*` หรือ `openclaw.json.rejected.*` ล่าสุดข้าง ๆ config ที่ใช้งานอยู่
-    - รัน `openclaw config validate` และ `openclaw doctor --fix`
-    - คัดลอกกลับเฉพาะ key ที่ตั้งใจไว้ด้วย `openclaw config set` หรือ `config.patch`
-    - หากคุณไม่มี last-known-good หรือ payload ที่ถูกปฏิเสธ ให้กู้คืนจาก backup หรือรัน `openclaw doctor` อีกครั้งแล้วกำหนดค่า channels/models ใหม่
-    - หากนี่เป็นสิ่งที่ไม่คาดคิด ให้รายงาน bug และแนบ config ล่าสุดที่คุณทราบหรือ backup ใด ๆ
-    - เอเจนต์เขียนโค้ดในเครื่องมักสามารถสร้าง config ที่ใช้งานได้ใหม่จาก logs หรือ history
+    - ตรวจสอบ `openclaw.json.clobbered.*` หรือ `openclaw.json.rejected.*` ล่าสุดซึ่งอยู่ข้างการกำหนดค่าที่ใช้งานอยู่
+    - เรียกใช้ `openclaw config validate` และ `openclaw doctor --fix`
+    - คัดลอกกลับเฉพาะคีย์ที่ต้องการด้วย `openclaw config set` หรือ `config.patch`
+    - หากไม่มีการกำหนดค่าที่ใช้งานได้ล่าสุดหรือเพย์โหลดที่ถูกปฏิเสธ ให้คืนค่าจากข้อมูลสำรอง หรือเรียกใช้ `openclaw doctor` อีกครั้งแล้วกำหนดค่าช่องทาง/โมเดลใหม่
+    - หากข้อมูลสูญหายโดยไม่คาดคิด ให้รายงานบั๊กพร้อมการกำหนดค่าล่าสุดที่ทราบหรือข้อมูลสำรอง เอเจนต์เขียนโค้ดในเครื่องมักสามารถสร้างการกำหนดค่าที่ใช้งานได้ขึ้นใหม่จากบันทึกหรือประวัติ
 
-    หลีกเลี่ยง:
+    วิธีหลีกเลี่ยง: ใช้ `openclaw config set` สำหรับการเปลี่ยนแปลงเล็กน้อย, `openclaw configure` สำหรับการแก้ไขแบบโต้ตอบ, `config.schema.lookup` เพื่อตรวจสอบเส้นทางที่ไม่คุ้นเคย (ส่งคืนโหนดสคีมาแบบตื้นพร้อมข้อมูลสรุปของโหนดย่อยระดับถัดไป) และ `config.patch` สำหรับการแก้ไข RPC บางส่วน โดยสงวน `config.apply` ไว้สำหรับการแทนที่การกำหนดค่าทั้งหมด เครื่องมือรันไทม์ `gateway` สำหรับเอเจนต์จะปฏิเสธการเขียน `tools.exec.ask` / `tools.exec.security` ใหม่ แม้จะเรียกผ่านนามแฝงแบบเดิม `tools.bash.*`
 
-    - ใช้ `openclaw config set` สำหรับการเปลี่ยนแปลงเล็ก ๆ
-    - ใช้ `openclaw configure` สำหรับการแก้ไขแบบ interactive
-    - ใช้ `config.schema.lookup` ก่อนเมื่อคุณไม่แน่ใจเกี่ยวกับ path หรือรูปทรง field ที่แน่นอน; มันจะคืนค่า schema node แบบตื้นพร้อมสรุปลูกโดยตรงสำหรับเจาะลึก
-    - ใช้ `config.patch` สำหรับการแก้ไข RPC บางส่วน; เก็บ `config.apply` ไว้สำหรับการแทนที่ config ทั้งหมดเท่านั้น
-    - หากคุณใช้เครื่องมือ `gateway` สำหรับเอเจนต์จาก agent run เครื่องมือนั้นยังจะปฏิเสธการเขียนไปยัง `tools.exec.ask` / `tools.exec.security` (รวมถึง alias เดิม `tools.bash.*` ที่ normalize ไปยัง path exec ที่ได้รับการป้องกันเดียวกัน)
-
-    Docs: [Config](/th/cli/config), [Configure](/th/cli/configure), [การแก้ไขปัญหา Gateway](/th/gateway/troubleshooting#gateway-rejected-invalid-config), [Doctor](/th/gateway/doctor).
+    เอกสาร: [การกำหนดค่า](/th/cli/config), [การตั้งค่า](/th/cli/configure), [การแก้ไขปัญหา Gateway](/th/gateway/troubleshooting#gateway-rejected-invalid-config), [Doctor](/th/gateway/doctor)
 
   </Accordion>
 
-  <Accordion title="ฉันจะรัน Gateway กลางพร้อม workers เฉพาะทางข้ามอุปกรณ์ได้อย่างไร">
-    รูปแบบทั่วไปคือ **Gateway เดียว** (เช่น Raspberry Pi) พร้อม **โหนด** และ **เอเจนต์**:
+  <Accordion title="ฉันจะใช้งาน Gateway ส่วนกลางร่วมกับตัวทำงานเฉพาะทางบนอุปกรณ์หลายเครื่องได้อย่างไร">
+    รูปแบบที่พบบ่อย: **Gateway หนึ่งรายการ** (เช่น Raspberry Pi) ร่วมกับ **โหนด** และ **เอเจนต์**
 
-    - **Gateway (กลาง):** เป็นเจ้าของ channels (Signal/WhatsApp), routing และ sessions
-    - **โหนด (อุปกรณ์):** Macs/iOS/Android เชื่อมต่อเป็นอุปกรณ์ต่อพ่วงและเปิดเผยเครื่องมือ local (`system.run`, `canvas`, `camera`)
-    - **เอเจนต์ (workers):** สมอง/workspaces แยกสำหรับบทบาทพิเศษ (เช่น "Hetzner ops", "Personal data")
-    - **เอเจนต์ย่อย:** สร้างงานเบื้องหลังจากเอเจนต์หลักเมื่อคุณต้องการการทำงานแบบขนาน
-    - **TUI:** เชื่อมต่อกับ Gateway แล้วสลับเอเจนต์/sessions
+    - **Gateway (ส่วนกลาง)**: จัดการช่องทาง (Signal/WhatsApp), การกำหนดเส้นทาง และเซสชัน
+    - **โหนด (อุปกรณ์)**: Mac/iOS/Android เชื่อมต่อเป็นอุปกรณ์ต่อพ่วงและเปิดให้ใช้เครื่องมือภายในเครื่อง (`system.run`, `canvas`, `camera`)
+    - **เอเจนต์ (ตัวทำงาน)**: สมอง/พื้นที่ทำงานแยกกันสำหรับบทบาทเฉพาะ (เช่น งานปฏิบัติการเทียบกับข้อมูลส่วนบุคคล)
+    - **เอเจนต์ย่อย**: เริ่มงานเบื้องหลังจากเอเจนต์หลักเพื่อทำงานแบบขนาน
+    - **TUI**: เชื่อมต่อกับ Gateway และสลับเอเจนต์/เซสชัน
 
-    Docs: [โหนด](/th/nodes), [การเข้าถึงระยะไกล](/th/gateway/remote), [การกำหนดเส้นทางหลายเอเจนต์](/th/concepts/multi-agent), [เอเจนต์ย่อย](/th/tools/subagents), [TUI](/th/web/tui).
+    เอกสาร: [โหนด](/th/nodes), [การเข้าถึงระยะไกล](/th/gateway/remote), [การกำหนดเส้นทางหลายเอเจนต์](/th/concepts/multi-agent), [เอเจนต์ย่อย](/th/tools/subagents), [TUI](/th/web/tui)
 
   </Accordion>
 
-  <Accordion title="เบราว์เซอร์ OpenClaw รันแบบ headless ได้ไหม">
-    ได้ นี่เป็นตัวเลือก config:
+  <Accordion title="เบราว์เซอร์ OpenClaw สามารถทำงานแบบ headless ได้หรือไม่">
+    ได้:
 
     ```json5
     {
@@ -932,153 +735,118 @@ Q&A สำหรับการรันครั้งแรก — การ�
     }
     ```
 
-    ค่าเริ่มต้นคือ `false` (headful) Headless มีแนวโน้มกระตุ้นการตรวจสอบ anti-bot บางเว็บไซต์มากกว่า ดู [เบราว์เซอร์](/th/tools/browser)
-
-    Headless ใช้ **Chromium engine เดียวกัน** และทำงานได้กับ automation ส่วนใหญ่ (forms, clicks, scraping, logins) ความแตกต่างหลักคือ:
-
-    - ไม่มีหน้าต่างเบราว์เซอร์ที่มองเห็นได้ (ใช้ screenshots หากคุณต้องการภาพ)
-    - บางเว็บไซต์เข้มงวดกับ automation ในโหมด headless มากกว่า (CAPTCHAs, anti-bot)
-      ตัวอย่างเช่น X/Twitter มักบล็อก sessions แบบ headless
+    ค่าเริ่มต้นคือ `false` (แสดงหน้าต่าง) โหมด Headless มีแนวโน้มกระตุ้นการตรวจสอบต่อต้านบอตในบางเว็บไซต์มากกว่า (X/Twitter มักบล็อกเซสชันแบบ headless) โหมดนี้ใช้เอนจิน Chromium เดียวกันและทำงานกับระบบอัตโนมัติส่วนใหญ่ได้ ความแตกต่างหลักคือไม่มีหน้าต่างเบราว์เซอร์ที่มองเห็นได้ (ใช้ภาพหน้าจอสำหรับการตรวจสอบภาพ) ดู [เบราว์เซอร์](/th/tools/browser)
 
   </Accordion>
 
-  <Accordion title="ฉันจะใช้ Brave สำหรับการควบคุมเบราว์เซอร์ได้อย่างไร">
-    ตั้งค่า `browser.executablePath` เป็น binary ของ Brave (หรือเบราว์เซอร์ที่ใช้ Chromium อื่น ๆ) แล้วรีสตาร์ต Gateway
-    ดูตัวอย่าง config แบบเต็มใน [เบราว์เซอร์](/th/tools/browser#use-brave-or-another-chromium-based-browser)
+  <Accordion title="ฉันจะใช้ Brave เพื่อควบคุมเบราว์เซอร์ได้อย่างไร">
+    ตั้งค่า `browser.executablePath` เป็นไบนารี Brave ของคุณ (หรือเบราว์เซอร์ที่ใช้ Chromium อื่น) แล้วเริ่ม Gateway ใหม่ ดู [เบราว์เซอร์](/th/tools/browser#use-brave-or-another-chromium-based-browser)
   </Accordion>
 </AccordionGroup>
 
 ## Gateway และโหนดระยะไกล
 
 <AccordionGroup>
-  <Accordion title="คำสั่งเผยแพร่ระหว่าง Telegram, gateway และโหนดอย่างไร">
-    ข้อความ Telegram จัดการโดย **gateway** gateway รันเอเจนต์และ
-    จากนั้นจึงเรียกโหนดผ่าน **Gateway WebSocket** เฉพาะเมื่อจำเป็นต้องใช้เครื่องมือของโหนด:
+  <Accordion title="คำสั่งส่งต่อระหว่าง Telegram, Gateway และโหนดอย่างไร">
+    ข้อความ Telegram จะได้รับการจัดการโดย **Gateway** ซึ่งเรียกใช้เอเจนต์ก่อน แล้วจึงเรียกโหนดผ่าน **Gateway WebSocket** เฉพาะเมื่อต้องใช้เครื่องมือของโหนด:
 
-    Telegram → Gateway → Agent → `node.*` → Node → Gateway → Telegram
+    Telegram -> Gateway -> เอเจนต์ -> `node.*` -> โหนด -> Gateway -> Telegram
 
-    โหนดจะไม่เห็นทราฟฟิก provider ขาเข้า; จะได้รับเฉพาะการเรียก node RPC เท่านั้น
+    โหนดจะไม่เห็นทราฟฟิกขาเข้าจากผู้ให้บริการ แต่จะได้รับเฉพาะการเรียก RPC ของโหนดเท่านั้น
 
   </Accordion>
 
-  <Accordion title="เอเจนต์ของฉันจะเข้าถึงคอมพิวเตอร์ของฉันได้อย่างไรหาก Gateway โฮสต์อยู่ระยะไกล">
-    คำตอบสั้น ๆ: **จับคู่คอมพิวเตอร์ของคุณเป็นโหนด** Gateway รันอยู่ที่อื่น แต่สามารถ
-    เรียกเครื่องมือ `node.*` (screen, camera, system) บนเครื่อง local ของคุณผ่าน Gateway WebSocket ได้
+  <Accordion title="เอเจนต์ของฉันจะเข้าถึงคอมพิวเตอร์ของฉันได้อย่างไร หาก Gateway โฮสต์อยู่จากระยะไกล">
+    จับคู่คอมพิวเตอร์เป็น **โหนด** Gateway ทำงานที่อื่น แต่สามารถเรียกเครื่องมือ `node.*` (หน้าจอ กล้อง ระบบ) บนเครื่องภายในของคุณผ่าน Gateway WebSocket
 
-    การตั้งค่าทั่วไป:
-
-    1. รัน Gateway บนโฮสต์ที่เปิดตลอดเวลา (VPS/home server)
-    2. วางโฮสต์ Gateway + คอมพิวเตอร์ของคุณบน tailnet เดียวกัน
-    3. ตรวจสอบให้แน่ใจว่า Gateway WS เข้าถึงได้ (tailnet bind หรือ SSH tunnel)
-    4. เปิดแอป macOS ในเครื่องแล้วเชื่อมต่อในโหมด **Remote over SSH** (หรือ tailnet โดยตรง)
-       เพื่อให้ลงทะเบียนเป็นโหนดได้
-    5. อนุมัติโหนดบน Gateway:
-
+    1. เรียกใช้ Gateway บนโฮสต์ที่เปิดอยู่ตลอดเวลา (VPS/เซิร์ฟเวอร์ภายในบ้าน)
+    2. ให้โฮสต์ Gateway และคอมพิวเตอร์ของคุณอยู่บน tailnet เดียวกัน
+    3. ตรวจสอบให้แน่ใจว่าสามารถเข้าถึง Gateway WS ได้ (ผูกกับ tailnet หรือใช้อุโมงค์ SSH)
+    4. เปิดแอป macOS ภายในเครื่องและเชื่อมต่อในโหมด **Remote over SSH** (หรือผ่าน tailnet โดยตรง) เพื่อให้แอปลงทะเบียนเป็นโหนด
+    5. อนุมัติโหนด:
        ```bash
        openclaw devices list
        openclaw devices approve <requestId>
        ```
 
-    ไม่จำเป็นต้องมี TCP bridge แยกต่างหาก; โหนดเชื่อมต่อผ่าน Gateway WebSocket
+    ไม่จำเป็นต้องใช้บริดจ์ TCP แยกต่างหาก โหนดจะเชื่อมต่อผ่าน Gateway WebSocket
 
-    คำเตือนด้านความปลอดภัย: การจับคู่โหนด macOS อนุญาตให้ใช้ `system.run` บนเครื่องนั้นได้ จับคู่
-    เฉพาะอุปกรณ์ที่คุณไว้วางใจ และตรวจทาน [ความปลอดภัย](/th/gateway/security)
+    คำเตือนด้านความปลอดภัย: การจับคู่โหนด macOS จะอนุญาต `system.run` บนเครื่องดังกล่าว จับคู่เฉพาะอุปกรณ์ที่คุณเชื่อถือเท่านั้น โปรดอ่าน [ความปลอดภัย](/th/gateway/security)
 
-    Docs: [โหนด](/th/nodes), [โปรโตคอล Gateway](/th/gateway/protocol), [โหมดระยะไกล macOS](/th/platforms/mac/remote), [ความปลอดภัย](/th/gateway/security).
-
-  </Accordion>
-
-  <Accordion title="Tailscale เชื่อมต่อแล้วแต่ฉันไม่ได้รับคำตอบ ตอนนี้ควรทำอย่างไร">
-    ตรวจสอบพื้นฐาน:
-
-    - Gateway กำลังทำงาน: `openclaw gateway status`
-    - สุขภาพของ Gateway: `openclaw status`
-    - สุขภาพของ channel: `openclaw channels status`
-
-    จากนั้นตรวจสอบการยืนยันตัวตนและ routing:
-
-    - หากคุณใช้ Tailscale Serve ตรวจสอบให้แน่ใจว่าตั้งค่า `gateway.auth.allowTailscale` ถูกต้อง
-    - หากคุณเชื่อมต่อผ่าน SSH tunnel ให้ยืนยันว่า tunnel ในเครื่องทำงานอยู่และชี้ไปยัง port ที่ถูกต้อง
-    - ยืนยันว่า allowlists ของคุณ (DM หรือ group) รวม account ของคุณไว้แล้ว
-
-    Docs: [Tailscale](/th/gateway/tailscale), [การเข้าถึงระยะไกล](/th/gateway/remote), [Channels](/th/channels).
+    เอกสาร: [โหนด](/th/nodes), [โปรโตคอล Gateway](/th/gateway/protocol), [โหมดระยะไกลของ macOS](/th/platforms/mac/remote), [ความปลอดภัย](/th/gateway/security)
 
   </Accordion>
 
-  <Accordion title="OpenClaw สอง instance คุยกันได้ไหม (local + VPS)">
-    ได้ ไม่มี bridge "bot-to-bot" ในตัว แต่คุณสามารถเชื่อมต่อได้ด้วยวิธีที่เชื่อถือได้ไม่กี่แบบ:
-
-    **ง่ายที่สุด:** ใช้ channel แชทปกติที่ bot ทั้งสองเข้าถึงได้ (Telegram/Slack/WhatsApp)
-    ให้ Bot A ส่งข้อความถึง Bot B แล้วให้ Bot B ตอบกลับตามปกติ
-
-    **CLI bridge (ทั่วไป):** รัน script ที่เรียก Gateway อีกตัวด้วย
-    `openclaw agent --message ... --deliver` โดย target ไปยังแชทที่ bot อีกตัว
-    ฟังอยู่ หาก bot ตัวหนึ่งอยู่บน VPS ระยะไกล ให้ชี้ CLI ของคุณไปยัง Gateway ระยะไกลนั้น
-    ผ่าน SSH/Tailscale (ดู [การเข้าถึงระยะไกล](/th/gateway/remote))
-
-    รูปแบบตัวอย่าง (รันจากเครื่องที่เข้าถึง Gateway ปลายทางได้):
+  <Accordion title="Tailscale เชื่อมต่อแล้วแต่ฉันไม่ได้รับการตอบกลับ ต้องทำอย่างไร">
+    ตรวจสอบข้อมูลพื้นฐาน:
 
     ```bash
-    openclaw agent --message "Hello from local bot" --deliver --channel telegram --reply-to <chat-id>
+    openclaw gateway status
+    openclaw status
+    openclaw channels status
     ```
 
-    เคล็ดลับ: เพิ่ม guardrail เพื่อไม่ให้ bot ทั้งสองวนลูปไม่สิ้นสุด (mention-only, channel
-    allowlists หรือกฎ "ไม่ตอบกลับข้อความจาก bot")
+    จากนั้นตรวจสอบการยืนยันตัวตนและการกำหนดเส้นทาง: หากใช้ Tailscale Serve ให้ยืนยันว่าตั้งค่า `gateway.auth.allowTailscale` ถูกต้อง หากเชื่อมต่อผ่านอุโมงค์ SSH ให้ยืนยันว่าอุโมงค์ทำงานอยู่และชี้ไปยังพอร์ตที่ถูกต้อง และยืนยันว่ารายการอนุญาตสำหรับ DM/กลุ่มมีบัญชีของคุณอยู่
 
-    Docs: [การเข้าถึงระยะไกล](/th/gateway/remote), [Agent CLI](/th/cli/agent), [Agent send](/th/tools/agent-send).
-
-  </Accordion>
-
-  <Accordion title="ฉันต้องใช้ VPS แยกสำหรับหลายเอเจนต์ไหม">
-    ไม่ต้อง Gateway เดียวสามารถโฮสต์หลายเอเจนต์ได้ โดยแต่ละตัวมี workspace, ค่าเริ่มต้นของโมเดล
-    และ routing ของตัวเอง นี่คือการตั้งค่าปกติ และถูกกว่าและง่ายกว่าการรัน
-    VPS หนึ่งตัวต่อเอเจนต์มาก
-
-    ใช้ VPS แยกเฉพาะเมื่อคุณต้องการการแยกอย่างเข้มงวด (ขอบเขตความปลอดภัย) หรือ config
-    ที่แตกต่างกันมากซึ่งคุณไม่ต้องการแชร์ มิฉะนั้น ให้ใช้ Gateway เดียวและ
-    ใช้หลายเอเจนต์หรือเอเจนต์ย่อย
+    เอกสาร: [Tailscale](/th/gateway/tailscale), [การเข้าถึงระยะไกล](/th/gateway/remote), [ช่องทาง](/th/channels)
 
   </Accordion>
 
-  <Accordion title="มีประโยชน์ไหมหากใช้ Node บนแล็ปท็อปส่วนตัวแทนการ SSH จาก VPS?">
-    มี - Node เป็นวิธีหลักในการเข้าถึงแล็ปท็อปของคุณจาก Gateway ระยะไกล และยัง
-    เปิดความสามารถมากกว่าการเข้าถึง shell Gateway ทำงานบน macOS/Linux (Windows ผ่าน WSL2) และ
-    เบา (VPS ขนาดเล็กหรือเครื่องระดับ Raspberry Pi ก็ใช้ได้; RAM 4 GB เพียงพอ) ดังนั้นการตั้งค่าทั่วไป
-    คือโฮสต์ที่เปิดตลอดเวลาพร้อมแล็ปท็อปของคุณในฐานะ Node
+  <Accordion title="อินสแตนซ์ OpenClaw สองรายการสามารถสื่อสารกันได้หรือไม่ (ภายในเครื่อง + VPS)">
+    ได้ แต่ไม่มีบริดจ์ระหว่างบอตในตัว
 
-    - **ไม่ต้องใช้ SSH ขาเข้า** Node เชื่อมต่อออกไปยัง Gateway WebSocket และใช้การจับคู่อุปกรณ์
-    - **การควบคุมการรันที่ปลอดภัยกว่า** `system.run` ถูกควบคุมด้วย allowlist/การอนุมัติของ Node บนแล็ปท็อปเครื่องนั้น
-    - **เครื่องมืออุปกรณ์มากขึ้น** Node เปิดเผย `canvas`, `camera`, และ `screen` นอกเหนือจาก `system.run`
-    - **ระบบอัตโนมัติเบราว์เซอร์ในเครื่อง** เก็บ Gateway ไว้บน VPS แต่รัน Chrome ในเครื่องผ่านโฮสต์ Node บนแล็ปท็อป หรือแนบกับ Chrome ในเครื่องบนโฮสต์ผ่าน Chrome MCP
+    **วิธีที่ง่ายที่สุด**: ใช้ช่องทางแชตปกติที่บอตทั้งสองเข้าถึงได้ (Slack/Telegram/WhatsApp) ให้บอต A ส่งข้อความถึงบอต B แล้วให้บอต B ตอบกลับตามปกติ
 
-    SSH เหมาะสำหรับการเข้าถึง shell แบบเฉพาะกิจ แต่ Node ง่ายกว่าสำหรับเวิร์กโฟลว์เอเจนต์ต่อเนื่องและ
-    ระบบอัตโนมัติของอุปกรณ์
+    **บริดจ์ CLI (ทั่วไป)**: เรียกใช้สคริปต์ที่เรียก Gateway อีกฝั่งด้วย `openclaw agent --message ... --deliver` โดยกำหนดเป้าหมายเป็นแชตที่บอตอีกตัวรับฟังอยู่ หากบอตตัวหนึ่งอยู่บน VPS ระยะไกล ให้ชี้ CLI ไปยัง Gateway ระยะไกลนั้นผ่าน SSH/Tailscale (ดู [การเข้าถึงระยะไกล](/th/gateway/remote)):
 
-    เอกสาร: [Node](/th/nodes), [CLI ของ Node](/th/cli/nodes), [เบราว์เซอร์](/th/tools/browser).
+    ```bash
+    openclaw agent --message "สวัสดีจากบอตภายในเครื่อง" --deliver --channel telegram --reply-to <chat-id>
+    ```
 
-  </Accordion>
+    เพิ่มมาตรการป้องกันไม่ให้บอตทั้งสองตอบโต้กันอย่างไม่สิ้นสุด (ตอบเฉพาะเมื่อถูกกล่าวถึง, ใช้รายการอนุญาตของช่องทาง หรือใช้กฎ "ห้ามตอบกลับข้อความจากบอต")
 
-  <Accordion title="Node รันบริการ Gateway หรือไม่?">
-    ไม่ มีเพียง **gateway หนึ่งตัว** เท่านั้นที่ควรรันต่อโฮสต์ เว้นแต่คุณตั้งใจรันโปรไฟล์ที่แยกกัน (ดู [Gateway หลายตัว](/th/gateway/multiple-gateways)) Node เป็นอุปกรณ์ต่อพ่วงที่เชื่อมต่อ
-    ไปยัง gateway (Node บน iOS/Android หรือ "โหมด Node" ของ macOS ในแอปแถบเมนู) สำหรับโฮสต์ Node
-    แบบไม่มีหน้าจอและการควบคุมด้วย CLI โปรดดู [CLI โฮสต์ Node](/th/cli/node)
-
-    ต้องรีสตาร์ตแบบเต็มสำหรับการเปลี่ยนแปลงพื้นผิว `gateway`, `discovery`, และ Plugin ที่โฮสต์อยู่
+    เอกสาร: [การเข้าถึงระยะไกล](/th/gateway/remote), [CLI เอเจนต์](/th/cli/agent), [การส่งจากเอเจนต์](/th/tools/agent-send)
 
   </Accordion>
 
-  <Accordion title="มีวิธี API / RPC เพื่อใช้ config หรือไม่?">
-    มี
-
-    - `config.schema.lookup`: ตรวจสอบ subtree ของ config หนึ่งรายการพร้อมโหนด schema แบบตื้น, UI hint ที่ตรงกัน, และสรุปลูกระดับถัดไปก่อนเขียน
-    - `config.get`: ดึง snapshot + hash ปัจจุบัน
-    - `config.patch`: อัปเดตบางส่วนอย่างปลอดภัย (แนะนำสำหรับการแก้ไข RPC ส่วนใหญ่); hot-reload เมื่อทำได้และรีสตาร์ตเมื่อจำเป็น
-    - `config.apply`: ตรวจสอบความถูกต้อง + แทนที่ config ทั้งหมด; hot-reload เมื่อทำได้และรีสตาร์ตเมื่อจำเป็น
-    - เครื่องมือ runtime `gateway` สำหรับเอเจนต์ยังคงปฏิเสธการเขียน `tools.exec.ask` / `tools.exec.security` ใหม่; alias เดิม `tools.bash.*` จะ normalize ไปยัง path exec ที่ได้รับการป้องกันเดียวกัน
+  <Accordion title="ฉันต้องใช้ VPS แยกกันสำหรับเอเจนต์หลายตัวหรือไม่">
+    ไม่ Gateway หนึ่งรายการสามารถโฮสต์เอเจนต์หลายตัว โดยแต่ละตัวมีพื้นที่ทำงาน ค่าเริ่มต้นของโมเดล และการกำหนดเส้นทางของตนเอง นี่คือการตั้งค่าปกติและมีราคาถูกกว่า/ง่ายกว่าการใช้ VPS หนึ่งรายการต่อเอเจนต์มาก ใช้ VPS แยกกันเฉพาะเมื่อต้องการการแยกอย่างเด็ดขาด (ขอบเขตความปลอดภัย) หรือมีการกำหนดค่าที่แตกต่างกันมากซึ่งไม่ต้องการใช้ร่วมกัน
 
   </Accordion>
 
-  <Accordion title="Config ขั้นต่ำที่เหมาะสมสำหรับการติดตั้งครั้งแรก">
+  <Accordion title="การใช้โหนดบนแล็ปท็อปส่วนตัวแทน SSH จาก VPS มีประโยชน์หรือไม่">
+    มี โหนดเป็นวิธีหลักในการเข้าถึงแล็ปท็อปจาก Gateway ระยะไกล และทำได้มากกว่าการเข้าถึงเชลล์ Gateway ทำงานบน macOS/Linux (Windows ผ่าน WSL2) และใช้ทรัพยากรน้อย (VPS ขนาดเล็กหรือเครื่องระดับ Raspberry Pi ก็เพียงพอ โดย RAM 4 GB เหลือเฟือ) ดังนั้นการตั้งค่าที่พบบ่อยคือใช้โฮสต์ที่เปิดอยู่ตลอดเวลาร่วมกับแล็ปท็อปของคุณในฐานะโหนด
+
+    - **ไม่ต้องใช้ SSH ขาเข้า** - โหนดเชื่อมต่อออกไปยัง Gateway WebSocket ผ่านการจับคู่อุปกรณ์
+    - **การควบคุมการดำเนินการที่ปลอดภัยกว่า** - `system.run` ถูกควบคุมด้วยรายการอนุญาต/การอนุมัติของโหนดบนแล็ปท็อปนั้น
+    - **เครื่องมืออุปกรณ์เพิ่มเติม** - โหนดเปิดให้ใช้ `canvas`, `camera` และ `screen` นอกเหนือจาก `system.run`
+    - **ระบบอัตโนมัติของเบราว์เซอร์ภายในเครื่อง** - ให้ Gateway อยู่บน VPS แต่เรียกใช้ Chrome ภายในเครื่องผ่านโฮสต์โหนด หรือเชื่อมต่อกับ Chrome ภายในเครื่องผ่าน Chrome MCP
+
+    SSH เหมาะสำหรับการเข้าถึงเชลล์เป็นครั้งคราว ส่วนโหนดใช้งานง่ายกว่าสำหรับเวิร์กโฟลว์เอเจนต์และระบบอัตโนมัติของอุปกรณ์ที่ทำงานต่อเนื่อง
+
+    เอกสาร: [โหนด](/th/nodes), [CLI โหนด](/th/cli/nodes), [เบราว์เซอร์](/th/tools/browser)
+
+  </Accordion>
+
+  <Accordion title="โหนดเรียกใช้บริการ Gateway หรือไม่">
+    ไม่ ควรเรียกใช้ **Gateway เพียงหนึ่งรายการ** ต่อโฮสต์ เว้นแต่ตั้งใจเรียกใช้โปรไฟล์ที่แยกจากกัน (ดู [Gateway หลายรายการ](/th/gateway/multiple-gateways)) โหนดคืออุปกรณ์ต่อพ่วงที่เชื่อมต่อกับ Gateway (โหนด iOS/Android หรือ "โหมดโหนด" ของ macOS ในแอปแถบเมนู) สำหรับโฮสต์โหนดแบบ headless และการควบคุมด้วย CLI โปรดดู [CLI โฮสต์โหนด](/th/cli/node)
+
+    ต้องเริ่มระบบใหม่ทั้งหมดเมื่อมีการเปลี่ยนแปลง `gateway`, `discovery` และพื้นผิว Plugin ที่โฮสต์ไว้
+
+  </Accordion>
+
+  <Accordion title="มีวิธีใช้ API / RPC เพื่อใช้การกำหนดค่าหรือไม่">
+    มี:
+
+    - `config.schema.lookup`: ตรวจสอบซับทรีการกำหนดค่าหนึ่งรายการ พร้อมโหนดสคีมาระดับตื้น คำใบ้ UI ที่ตรงกัน และสรุปโหนดย่อยโดยตรงก่อนเขียน
+    - `config.get`: ดึงสแนปช็อตปัจจุบันพร้อมแฮช
+    - `config.patch`: อัปเดตบางส่วนอย่างปลอดภัย (แนะนำสำหรับการแก้ไข RPC ส่วนใหญ่) โหลดใหม่แบบทันทีเมื่อทำได้ และรีสตาร์ตเมื่อจำเป็น
+    - `config.apply`: ตรวจสอบความถูกต้องและแทนที่การกำหนดค่าทั้งหมด โหลดใหม่แบบทันทีเมื่อทำได้ และรีสตาร์ตเมื่อจำเป็น
+    - เครื่องมือรันไทม์ `gateway` สำหรับเอเจนต์ยังคงปฏิเสธการเขียน `tools.exec.ask` / `tools.exec.security` ใหม่ ส่วนชื่อแทน `tools.bash.*` แบบเดิมจะถูกปรับให้อยู่ในรูปมาตรฐานเป็นพาธที่ได้รับการป้องกันเดียวกัน
+
+  </Accordion>
+
+  <Accordion title="การกำหนดค่าขั้นต่ำที่เหมาะสมสำหรับการติดตั้งครั้งแรก">
     ```json5
     {
       agents: { defaults: { workspace: "~/.openclaw/workspace" } },
@@ -1086,84 +854,65 @@ Q&A สำหรับการรันครั้งแรก — การ�
     }
     ```
 
-    สิ่งนี้ตั้งค่า workspace ของคุณและจำกัดว่าใครสามารถเรียกใช้บอตได้
+    กำหนดพื้นที่ทำงานและจำกัดผู้ที่สามารถเรียกใช้บอตได้
 
   </Accordion>
 
-  <Accordion title="ฉันจะตั้งค่า Tailscale บน VPS และเชื่อมต่อจาก Mac ได้อย่างไร?">
-    ขั้นตอนขั้นต่ำ:
-
-    1. **ติดตั้ง + เข้าสู่ระบบบน VPS**
-
+  <Accordion title="ฉันจะตั้งค่า Tailscale บน VPS และเชื่อมต่อจาก Mac ได้อย่างไร">
+    1. **ติดตั้งและเข้าสู่ระบบบน VPS**:
        ```bash
        curl -fsSL https://tailscale.com/install.sh | sh
        sudo tailscale up
        ```
+    2. **ติดตั้งและเข้าสู่ระบบบน Mac** โดยใช้แอป Tailscale และใช้ tailnet เดียวกัน
+    3. **เปิดใช้ MagicDNS** ในคอนโซลผู้ดูแลระบบ Tailscale เพื่อให้ VPS มีชื่อที่คงที่
+    4. **ใช้ชื่อโฮสต์ของ tailnet**: SSH `ssh user@your-vps.tailnet-xxxx.ts.net`; Gateway WS `ws://your-vps.tailnet-xxxx.ts.net:18789`
 
-    2. **ติดตั้ง + เข้าสู่ระบบบน Mac ของคุณ**
-       - ใช้แอป Tailscale และลงชื่อเข้าใช้ tailnet เดียวกัน
-    3. **เปิดใช้ MagicDNS (แนะนำ)**
-       - ในคอนโซลผู้ดูแลระบบ Tailscale ให้เปิดใช้ MagicDNS เพื่อให้ VPS มีชื่อที่เสถียร
-    4. **ใช้ชื่อโฮสต์ของ tailnet**
-       - SSH: `ssh user@your-vps.tailnet-xxxx.ts.net`
-       - Gateway WS: `ws://your-vps.tailnet-xxxx.ts.net:18789`
-
-    หากคุณต้องการ Control UI โดยไม่ใช้ SSH ให้ใช้ Tailscale Serve บน VPS:
+    หากต้องการใช้ UI ควบคุมโดยไม่ผ่าน SSH ให้ใช้ Tailscale Serve บน VPS:
 
     ```bash
     openclaw gateway --tailscale serve
     ```
 
-    สิ่งนี้ทำให้ gateway ผูกกับ loopback และเปิดเผย HTTPS ผ่าน Tailscale ดู [Tailscale](/th/gateway/tailscale)
+    วิธีนี้ทำให้ Gateway ยังคงผูกกับ loopback และเปิดให้เข้าถึงผ่าน HTTPS ด้วย Tailscale ดู [Tailscale](/th/gateway/tailscale)
 
   </Accordion>
 
-  <Accordion title="ฉันจะเชื่อมต่อ Node ของ Mac กับ Gateway ระยะไกล (Tailscale Serve) ได้อย่างไร?">
-    Serve เปิดเผย **Gateway Control UI + WS** Node เชื่อมต่อผ่าน endpoint ของ Gateway WS เดียวกัน
+  <Accordion title="ฉันจะเชื่อมต่อ Node บน Mac กับ Gateway ระยะไกลได้อย่างไร (Tailscale Serve)">
+    Serve เปิดให้เข้าถึง **UI ควบคุม Gateway + WS** ส่วน Node จะเชื่อมต่อผ่านปลายทาง Gateway WS เดียวกัน
 
-    การตั้งค่าที่แนะนำ:
-
-    1. **ตรวจสอบให้แน่ใจว่า VPS + Mac อยู่ใน tailnet เดียวกัน**
-    2. **ใช้แอป macOS ในโหมด Remote** (เป้าหมาย SSH อาจเป็นชื่อโฮสต์ของ tailnet)
-       แอปจะ tunnel พอร์ต Gateway และเชื่อมต่อในฐานะ Node
-    3. **อนุมัติ Node** บน gateway:
-
+    1. ตรวจสอบว่า VPS และ Mac อยู่บน tailnet เดียวกัน
+    2. ใช้แอป macOS ในโหมดระยะไกล (เป้าหมาย SSH สามารถเป็นชื่อโฮสต์ของ tailnet ได้) แอปจะสร้างอุโมงค์ให้พอร์ต Gateway และเชื่อมต่อในฐานะ Node
+    3. อนุมัติ Node:
        ```bash
        openclaw devices list
        openclaw devices approve <requestId>
        ```
 
-    เอกสาร: [โปรโตคอล Gateway](/th/gateway/protocol), [Discovery](/th/gateway/discovery), [โหมดระยะไกลของ macOS](/th/platforms/mac/remote).
+    เอกสาร: [โปรโตคอล Gateway](/th/gateway/protocol), [การค้นพบ](/th/gateway/discovery), [โหมดระยะไกลของ macOS](/th/platforms/mac/remote)
 
   </Accordion>
 
-  <Accordion title="ฉันควรติดตั้งบนแล็ปท็อปเครื่องที่สอง หรือแค่เพิ่ม Node?">
-    หากคุณต้องการเพียง **เครื่องมือในเครื่อง** (screen/camera/exec) บนแล็ปท็อปเครื่องที่สอง ให้เพิ่มเป็น
-    **Node** สิ่งนี้คง Gateway เดียวไว้และหลีกเลี่ยง config ซ้ำซ้อน เครื่องมือ Node ในเครื่อง
-    ตอนนี้รองรับเฉพาะ macOS แต่เราวางแผนจะขยายไปยัง OS อื่น
+  <Accordion title="ฉันควรติดตั้งบนแล็ปท็อปเครื่องที่สองหรือเพียงเพิ่ม Node">
+    สำหรับ **เครื่องมือภายในเครื่องเท่านั้น** (หน้าจอ/กล้อง/การเรียกใช้คำสั่ง) บนแล็ปท็อปเครื่องที่สอง ให้เพิ่มเป็น **Node** ซึ่งจะใช้ Gateway เดียวโดยไม่ต้องทำการกำหนดค่าซ้ำ ปัจจุบันเครื่องมือ Node ภายในเครื่องรองรับเฉพาะ macOS ติดตั้ง Gateway เครื่องที่สองเฉพาะเมื่อต้องการ **การแยกอย่างเด็ดขาด** หรือบอตสองตัวที่แยกจากกันโดยสมบูรณ์
 
-    ติดตั้ง Gateway ตัวที่สองเฉพาะเมื่อคุณต้องการ **การแยกอย่างเข้มงวด** หรือบอตสองตัวที่แยกกันอย่างสมบูรณ์
-
-    เอกสาร: [Node](/th/nodes), [CLI ของ Node](/th/cli/nodes), [Gateway หลายตัว](/th/gateway/multiple-gateways).
+    เอกสาร: [Node](/th/nodes), [CLI สำหรับ Node](/th/cli/nodes), [Gateway หลายรายการ](/th/gateway/multiple-gateways)
 
   </Accordion>
 </AccordionGroup>
 
-## Env vars และการโหลด .env
+## ตัวแปรสภาพแวดล้อมและการโหลด .env
 
 <AccordionGroup>
-  <Accordion title="OpenClaw โหลดตัวแปรสภาพแวดล้อมอย่างไร?">
-    OpenClaw อ่าน env vars จาก process แม่ (shell, launchd/systemd, CI, ฯลฯ) และยังโหลดเพิ่มเติม:
+  <Accordion title="OpenClaw โหลดตัวแปรสภาพแวดล้อมอย่างไร">
+    OpenClaw อ่านตัวแปรสภาพแวดล้อมจากโปรเซสแม่ (เชลล์, launchd/systemd, CI เป็นต้น) และยังโหลดรายการต่อไปนี้เพิ่มเติม:
 
     - `.env` จากไดเรกทอรีทำงานปัจจุบัน
-    - fallback `.env` ส่วนกลางจาก `~/.openclaw/.env` (หรือ `$OPENCLAW_STATE_DIR/.env`)
+    - ไฟล์สำรองส่วนกลาง `.env` จาก `~/.openclaw/.env` (`$OPENCLAW_STATE_DIR/.env`)
 
-    ไฟล์ `.env` ทั้งสองไม่ override env vars ที่มีอยู่
-    ตัวแปรข้อมูลรับรองของ provider เป็นข้อยกเว้นสำหรับ workspace `.env`: key เช่น
-    `GEMINI_API_KEY`, `XAI_API_KEY`, หรือ `MISTRAL_API_KEY` จะถูกละเว้นจาก workspace
-    `.env` และควรอยู่ใน process environment, `~/.openclaw/.env`, หรือ config `env`
+    ไฟล์ `.env` ทั้งสองไฟล์จะไม่เขียนทับตัวแปรสภาพแวดล้อมที่มีอยู่ คีย์ข้อมูลประจำตัวของผู้ให้บริการและคีย์กำหนดเส้นทางปลายทางเป็นข้อยกเว้นสำหรับ `.env` ของพื้นที่ทำงาน โดยคีย์อย่างเช่น `GEMINI_API_KEY`, `XAI_API_KEY`, `MISTRAL_API_KEY` หรือคีย์ใดก็ตามที่ลงท้ายด้วย `_ENDPOINT` (รวมถึงตัวแปรสภาพแวดล้อมสำหรับการยืนยันตัวตนหรือปลายทางของผู้ให้บริการที่รวมมาด้วยรายอื่น) จะถูกละเว้นจาก `.env` ของพื้นที่ทำงาน และควรอยู่ในสภาพแวดล้อมของโปรเซส, `~/.openclaw/.env` หรือการกำหนดค่า `env`
 
-    คุณยังสามารถกำหนด env vars แบบ inline ใน config ได้ (ใช้เฉพาะเมื่อไม่มีใน process env):
+    ตัวแปรสภาพแวดล้อมแบบอินไลน์ในการกำหนดค่าจะมีผลเฉพาะเมื่อไม่มีอยู่ในสภาพแวดล้อมของโปรเซส:
 
     ```json5
     {
@@ -1174,56 +923,40 @@ Q&A สำหรับการรันครั้งแรก — การ�
     }
     ```
 
-    ดู [/environment](/th/help/environment) สำหรับลำดับความสำคัญและแหล่งที่มาทั้งหมด
+    ดูลำดับความสำคัญและแหล่งที่มาทั้งหมดได้ที่ [/environment](/th/help/environment)
 
   </Accordion>
 
-  <Accordion title="ฉันเริ่ม Gateway ผ่าน service แล้ว env vars ของฉันหายไป ตอนนี้ต้องทำอย่างไร?">
-    วิธีแก้ที่พบบ่อยสองวิธี:
+  <Accordion title="ฉันเริ่ม Gateway ผ่านบริการแล้วตัวแปรสภาพแวดล้อมหายไป ต้องทำอย่างไร">
+    มีวิธีแก้สองวิธี:
 
-    1. ใส่ key ที่หายไปใน `~/.openclaw/.env` เพื่อให้ถูกอ่านแม้ service จะไม่สืบทอด shell env ของคุณ
-    2. เปิดใช้การ import จาก shell (ความสะดวกแบบ opt-in):
-
-    ```json5
-    {
-      env: {
-        shellEnv: {
-          enabled: true,
-          timeoutMs: 15000,
-        },
-      },
-    }
-    ```
-
-    สิ่งนี้รัน login shell ของคุณและ import เฉพาะ key ที่คาดไว้ซึ่งยังไม่มี (ไม่ override) ค่าที่เทียบเท่าของ env var:
-    `OPENCLAW_LOAD_SHELL_ENV=1`, `OPENCLAW_SHELL_ENV_TIMEOUT_MS=15000`.
+    1. ใส่คีย์ที่หายไปใน `~/.openclaw/.env` เพื่อให้โหลดได้แม้บริการจะไม่ได้รับสภาพแวดล้อมจากเชลล์
+    2. เปิดใช้การนำเข้าจากเชลล์ (ความสะดวกที่ต้องเลือกเปิดใช้):
+       ```json5
+       {
+         env: {
+           shellEnv: {
+             enabled: true,
+             timeoutMs: 15000,
+           },
+         },
+       }
+       ```
+       วิธีนี้จะเรียกใช้เชลล์สำหรับเข้าสู่ระบบและนำเข้าเฉพาะคีย์ที่คาดไว้ซึ่งยังไม่มีเท่านั้น (ไม่เขียนทับโดยเด็ดขาด) ตัวแปรสภาพแวดล้อมที่เทียบเท่ากันคือ `OPENCLAW_LOAD_SHELL_ENV=1`, `OPENCLAW_SHELL_ENV_TIMEOUT_MS=15000`
 
   </Accordion>
 
-  <Accordion title='ฉันตั้งค่า COPILOT_GITHUB_TOKEN แล้ว แต่สถานะ models แสดงว่า "Shell env: off." เพราะอะไร?'>
-    `openclaw models status` รายงานว่าเปิดใช้ **การ import shell env** หรือไม่ "Shell env: off"
-    **ไม่ได้** หมายความว่า env vars ของคุณหายไป - แค่หมายความว่า OpenClaw จะไม่โหลด
-    login shell ของคุณโดยอัตโนมัติ
+  <Accordion title='ฉันตั้งค่า COPILOT_GITHUB_TOKEN แล้ว แต่สถานะโมเดลแสดง "Shell env: off." เพราะเหตุใด'>
+    `openclaw models status` รายงานว่าเปิดใช้ **การนำเข้าสภาพแวดล้อมจากเชลล์** หรือไม่ "Shell env: off" **ไม่ได้** หมายความว่าตัวแปรสภาพแวดล้อมหายไป แต่หมายความเพียงว่า OpenClaw จะไม่โหลดเชลล์สำหรับเข้าสู่ระบบโดยอัตโนมัติ
 
-    หาก Gateway รันเป็น service (launchd/systemd) มันจะไม่สืบทอด shell
-    environment ของคุณ แก้ไขโดยทำหนึ่งในสิ่งต่อไปนี้:
-
-    1. ใส่ token ใน `~/.openclaw/.env`:
-
-       ```
-       COPILOT_GITHUB_TOKEN=...
-       ```
-
-    2. หรือเปิดใช้ shell import (`env.shellEnv.enabled: true`)
-    3. หรือเพิ่มลงในบล็อก config `env` ของคุณ (ใช้เฉพาะเมื่อยังไม่มี)
-
-    จากนั้นรีสตาร์ต gateway และตรวจสอบอีกครั้ง:
+    หาก Gateway ทำงานเป็นบริการ (launchd/systemd) บริการจะไม่ได้รับสภาพแวดล้อมจากเชลล์ แก้ไขโดยใส่โทเค็นไว้ใน `~/.openclaw/.env`, เปิดใช้ `env.shellEnv.enabled: true` หรือเพิ่มลงในการกำหนดค่า `env` (มีผลเฉพาะเมื่อยังไม่มี) จากนั้นรีสตาร์ต Gateway และตรวจสอบอีกครั้ง:
 
     ```bash
     openclaw models status
     ```
 
-    token ของ Copilot จะอ่านจาก `COPILOT_GITHUB_TOKEN` (รวมถึง `GH_TOKEN` / `GITHUB_TOKEN`)
+    โทเค็น Copilot จะได้รับการค้นหาตามลำดับนี้: `OPENCLAW_GITHUB_TOKEN`, จากนั้น `COPILOT_GITHUB_TOKEN`, ตามด้วย `GH_TOKEN` และสุดท้าย `GITHUB_TOKEN`
+
     ดู [/concepts/model-providers](/th/concepts/model-providers) และ [/environment](/th/help/environment)
 
   </Accordion>
@@ -1232,118 +965,92 @@ Q&A สำหรับการรันครั้งแรก — การ�
 ## เซสชันและหลายแชต
 
 <AccordionGroup>
-  <Accordion title="ฉันจะเริ่มการสนทนาใหม่ได้อย่างไร?">
+  <Accordion title="ฉันจะเริ่มการสนทนาใหม่ได้อย่างไร">
     ส่ง `/new` หรือ `/reset` เป็นข้อความเดี่ยว ดู [การจัดการเซสชัน](/th/concepts/session)
   </Accordion>
 
-  <Accordion title="เซสชันรีเซ็ตโดยอัตโนมัติไหมหากฉันไม่เคยส่ง /new?">
-    เซสชันสามารถหมดอายุหลังจาก `session.idleMinutes` ได้ แต่สิ่งนี้ **ปิดไว้ตามค่าเริ่มต้น** (ค่าเริ่มต้น **0**)
-    ตั้งค่าเป็นค่าบวกเพื่อเปิดใช้การหมดอายุเมื่อไม่ได้ใช้งาน เมื่อเปิดใช้แล้ว ข้อความ **ถัดไป**
-    หลังช่วงเวลาที่ไม่ได้ใช้งานจะเริ่ม session id ใหม่สำหรับ chat key นั้น
-    สิ่งนี้ไม่ลบ transcript - แค่เริ่มเซสชันใหม่
+  <Accordion title="เซสชันจะรีเซ็ตโดยอัตโนมัติหรือไม่หากฉันไม่เคยส่ง /new">
+    ไม่ โดยค่าเริ่มต้น เซสชันจะใช้ `sessionId` เดิมต่อไป และ Compaction จะจำกัดบริบทของโมเดลที่ใช้งานอยู่เมื่อการสนทนายาวขึ้น `/new` และ `/reset` ยังคงใช้งานได้ หรือเลือกเปิดใช้การรีเซ็ตอัตโนมัติด้วย `mode: "daily"` หรือ `mode: "idle"` ก็ได้ โหมดรายวันจะเปลี่ยนรอบเมื่อถึง `session.reset.atHour` (ค่าเริ่มต้น `4`, 0-23) บนโฮสต์ Gateway ส่วนโหมดไม่ได้ใช้งานจะนับ `session.reset.idleMinutes` ตั้งแต่การโต้ตอบจริงครั้งล่าสุด โดยไม่นับเหตุการณ์ระบบ Heartbeat/Cron/การเรียกใช้คำสั่ง
 
     ```json5
     {
       session: {
-        idleMinutes: 240,
+        reset: { mode: "daily", atHour: 4 },
+        resetByType: {
+          group: { mode: "idle", idleMinutes: 120 },
+          thread: { mode: "daily", atHour: 6 },
+        },
+        resetByChannel: {
+          discord: { mode: "idle", idleMinutes: 10080 },
+        },
       },
     }
     ```
 
-  </Accordion>
-
-  <Accordion title="มีวิธีสร้างทีมของอินสแตนซ์ OpenClaw (CEO หนึ่งคนและเอเจนต์หลายตัว) หรือไม่?">
-    มี ผ่าน **multi-agent routing** และ **sub-agents** คุณสามารถสร้างเอเจนต์ผู้ประสานงานหนึ่งตัว
-    และเอเจนต์ worker หลายตัวพร้อม workspace และโมเดลของตนเอง
-
-    อย่างไรก็ตาม สิ่งนี้เหมาะจะมองว่าเป็น **การทดลองสนุกๆ** มากกว่า ใช้ token มากและมัก
-    มีประสิทธิภาพน้อยกว่าการใช้บอตเดียวพร้อมเซสชันแยกกัน โมเดลทั่วไปที่เรา
-    คาดไว้คือบอตหนึ่งตัวที่คุณคุยด้วย พร้อมเซสชันต่างๆ สำหรับงานคู่ขนาน บอตนั้น
-    ยังสามารถ spawn sub-agents ได้เมื่อจำเป็น
-
-    เอกสาร: [Multi-agent routing](/th/concepts/multi-agent), [Sub-agents](/th/tools/subagents), [CLI ของเอเจนต์](/th/cli/agents).
+    `resetByType` รองรับ `direct` (ชื่อแทนแบบเดิม `dm`), `group` และ `thread` ส่วน `session.idleMinutes` ระดับบนสุดแบบเดิมยังคงทำงานเป็นชื่อแทนเพื่อความเข้ากันได้สำหรับค่าเริ่มต้นของโหมดไม่ได้ใช้งาน เมื่อไม่ได้ตั้งค่าบล็อก `session.reset`/`resetByType` ดูวงจรชีวิตทั้งหมดได้ที่ [การจัดการเซสชัน](/th/concepts/session)
 
   </Accordion>
 
-  <Accordion title="ทำไม context ถึงถูกตัดกลางงาน? ฉันจะป้องกันได้อย่างไร?">
-    context ของเซสชันถูกจำกัดโดย window ของโมเดล แชตยาว, output จากเครื่องมือขนาดใหญ่, หรือไฟล์จำนวนมาก
-    อาจทำให้เกิด Compaction หรือการตัดทอนได้
+  <Accordion title="มีวิธีสร้างทีมอินสแตนซ์ OpenClaw หรือไม่ (CEO หนึ่งรายและเอเจนต์หลายราย)">
+    มี โดยใช้ **การกำหนดเส้นทางแบบหลายเอเจนต์** และ **เอเจนต์ย่อย** ซึ่งประกอบด้วยเอเจนต์ผู้ประสานงานหนึ่งรายและเอเจนต์ผู้ปฏิบัติงานหลายรายที่มีพื้นที่ทำงานและโมเดลของตนเอง
 
-    สิ่งที่ช่วยได้:
+    วิธีนี้เหมาะจะมองว่าเป็นการทดลองที่น่าสนใจ เนื่องจากใช้โทเค็นมากและมักมีประสิทธิภาพน้อยกว่าบอตหนึ่งตัวที่ใช้เซสชันแยกกัน รูปแบบทั่วไปคือบอตหนึ่งตัวที่ใช้สนทนาด้วย โดยมีเซสชันต่างกันสำหรับงานแบบขนาน และสร้างเอเจนต์ย่อยเมื่อจำเป็น
 
-    - ขอให้บอตสรุปสถานะปัจจุบันและเขียนลงไฟล์
-    - ใช้ `/compact` ก่อนงานยาว และ `/new` เมื่อเปลี่ยนหัวข้อ
-    - เก็บ context สำคัญไว้ใน workspace และขอให้บอตอ่านกลับ
-    - ใช้ sub-agents สำหรับงานยาวหรืองานคู่ขนานเพื่อให้แชตหลักเล็กลง
-    - เลือกโมเดลที่มี context window ใหญ่ขึ้นหากเกิดปัญหานี้บ่อย
+    เอกสาร: [การกำหนดเส้นทางแบบหลายเอเจนต์](/th/concepts/multi-agent), [เอเจนต์ย่อย](/th/tools/subagents), [CLI สำหรับเอเจนต์](/th/cli/agents)
 
   </Accordion>
 
-  <Accordion title="ฉันจะรีเซ็ต OpenClaw อย่างสมบูรณ์แต่ยังคงติดตั้งไว้ได้อย่างไร?">
-    ใช้คำสั่ง reset:
+  <Accordion title="เหตุใดบริบทจึงถูกตัดระหว่างงาน และจะป้องกันได้อย่างไร">
+    บริบทของเซสชันถูกจำกัดด้วยหน้าต่างบริบทของโมเดล แชตที่ยาว เอาต์พุตจากเครื่องมือจำนวนมาก หรือไฟล์จำนวนมากอาจทำให้เกิด Compaction หรือการตัดทอน
 
+    - ขอให้บอตสรุปสถานะปัจจุบันและเขียนลงในไฟล์
+    - ใช้ `/compact` ก่อนเริ่มงานที่ใช้เวลานาน และใช้ `/new` เมื่อเปลี่ยนหัวข้อ
+    - เก็บบริบทสำคัญไว้ในพื้นที่ทำงานและขอให้บอตอ่านกลับ
+    - ใช้เอเจนต์ย่อยสำหรับงานที่ใช้เวลานานหรือทำแบบขนาน เพื่อให้แชตหลักมีขนาดเล็กลง
+    - เลือกโมเดลที่มีหน้าต่างบริบทขนาดใหญ่ขึ้นหากเกิดเหตุการณ์นี้บ่อยครั้ง
+
+  </Accordion>
+
+  <Accordion title="ฉันจะรีเซ็ต OpenClaw ทั้งหมดโดยยังคงติดตั้งไว้ได้อย่างไร">
     ```bash
     openclaw reset
     ```
 
-    รีเซ็ตเต็มรูปแบบแบบไม่โต้ตอบ:
+    รีเซ็ตทั้งหมดแบบไม่โต้ตอบ:
 
     ```bash
     openclaw reset --scope full --yes --non-interactive
     ```
 
-    จากนั้นรัน setup อีกครั้ง:
+    จากนั้นเรียกใช้การตั้งค่าอีกครั้ง:
 
     ```bash
     openclaw onboard --install-daemon
     ```
 
-    หมายเหตุ:
-
-    - Onboarding ยังเสนอ **Reset** หากเห็น config ที่มีอยู่ ดู [Onboarding (CLI)](/th/start/wizard)
-    - หากคุณใช้ profiles (`--profile` / `OPENCLAW_PROFILE`) ให้ reset state dir แต่ละอัน (ค่าเริ่มต้นคือ `~/.openclaw-<profile>`)
-    - Dev reset: `openclaw gateway --dev --reset` (เฉพาะ dev; ล้าง config dev + credentials + sessions + workspace)
+    ขั้นตอนเริ่มต้นใช้งานยังมีตัวเลือก **รีเซ็ต** หากตรวจพบการกำหนดค่าที่มีอยู่ ดู [การเริ่มต้นใช้งาน (CLI)](/th/start/wizard) หากใช้โปรไฟล์ (`--profile` / `OPENCLAW_PROFILE`) ให้รีเซ็ตไดเรกทอรีสถานะของแต่ละโปรไฟล์ (ค่าเริ่มต้น `~/.openclaw-<profile>`) การรีเซ็ตสำหรับการพัฒนาเท่านั้น: `openclaw gateway --dev --reset` จะล้างการกำหนดค่าสำหรับการพัฒนา ข้อมูลประจำตัว เซสชัน และพื้นที่ทำงาน
 
   </Accordion>
 
-  <Accordion title='ฉันได้รับข้อผิดพลาด "context too large" - ฉันจะ reset หรือ compact ได้อย่างไร?'>
-    ใช้หนึ่งในวิธีต่อไปนี้:
+  <Accordion title='ฉันได้รับข้อผิดพลาด "context too large" จะรีเซ็ตหรือทำ Compaction ได้อย่างไร'>
+    - **ทำ Compaction** (คงการสนทนาไว้และสรุปรอบสนทนาเก่า): ใช้ `/compact` หรือ `/compact <instructions>` เพื่อกำหนดแนวทางการสรุป
+    - **รีเซ็ต** (สร้าง ID เซสชันใหม่สำหรับคีย์แชตเดิม): `/new` หรือ `/reset`
 
-    - **Compact** (เก็บการสนทนาไว้แต่สรุป turn เก่า):
+    หากยังคงเกิดขึ้น ให้ปรับ **การตัดแต่งเซสชัน** (`agents.defaults.contextPruning`) เพื่อตัดเอาต์พุตเก่าของเครื่องมือ หรือใช้โมเดลที่มีหน้าต่างบริบทขนาดใหญ่ขึ้น
 
-      ```
-      /compact
-      ```
-
-      หรือ `/compact <instructions>` เพื่อกำกับสรุป
-
-    - **Reset** (session ID ใหม่สำหรับ chat key เดิม):
-
-      ```
-      /new
-      /reset
-      ```
-
-    หากยังเกิดขึ้นต่อเนื่อง:
-
-    - เปิดใช้หรือปรับแต่ง **session pruning** (`agents.defaults.contextPruning`) เพื่อตัด output เครื่องมือเก่า
-    - ใช้โมเดลที่มี context window ใหญ่ขึ้น
-
-    เอกสาร: [Compaction](/th/concepts/compaction), [Session pruning](/th/concepts/session-pruning), [การจัดการเซสชัน](/th/concepts/session).
+    เอกสาร: [Compaction](/th/concepts/compaction), [การตัดแต่งเซสชัน](/th/concepts/session-pruning), [การจัดการเซสชัน](/th/concepts/session)
 
   </Accordion>
 
-  <Accordion title='ทำไมฉันถึงเห็น "LLM request rejected: messages.content.tool_use.input field required"?'>
-    นี่เป็นข้อผิดพลาดการตรวจสอบของ provider: โมเดลปล่อยบล็อก `tool_use` โดยไม่มี
-    `input` ที่จำเป็น โดยปกติหมายความว่าประวัติเซสชันเก่าหรือเสียหาย (มักเกิดหลัง thread ยาว
-    หรือการเปลี่ยนแปลงเครื่องมือ/schema)
+  <Accordion title='เหตุใดฉันจึงเห็น "LLM request rejected: messages.content.tool_use.input field required"'>
+    ข้อผิดพลาดในการตรวจสอบความถูกต้องจากผู้ให้บริการ: โมเดลสร้างบล็อก `tool_use` โดยไม่มี `input` ที่จำเป็น โดยทั่วไปหมายความว่าประวัติเซสชันล้าสมัยหรือเสียหาย (มักเกิดหลังจากเธรดที่ยาวหรือการเปลี่ยนแปลงเครื่องมือ/สคีมา)
 
     วิธีแก้: เริ่มเซสชันใหม่ด้วย `/new` (ข้อความเดี่ยว)
 
   </Accordion>
 
-  <Accordion title="ทำไมฉันถึงได้รับข้อความ Heartbeat ทุก 30 นาที?">
-    Heartbeat ทำงานทุก **30m** ตามค่าเริ่มต้น (**1h** เมื่อใช้การยืนยันตัวตนแบบ OAuth) ปรับแต่งหรือปิดใช้ได้:
+  <Accordion title="เหตุใดฉันจึงได้รับข้อความ Heartbeat ทุก 30 นาที">
+    โดยค่าเริ่มต้น Heartbeat จะทำงานทุก **30m** หรือทุก **1h** เมื่อโหมดการยืนยันตัวตนที่ได้รับการแก้ไขเป็นการยืนยันตัวตนด้วย Anthropic OAuth/โทเค็น (รวมถึงการนำ Claude CLI กลับมาใช้) และไม่ได้ตั้งค่า `heartbeat.every` ปรับหรือปิดใช้งานได้ดังนี้:
 
     ```json5
     {
@@ -1357,20 +1064,16 @@ Q&A สำหรับการรันครั้งแรก — การ�
     }
     ```
 
-    หาก `HEARTBEAT.md` มีอยู่แต่แทบจะว่างเปล่า (มีเพียงบรรทัดว่าง,
-    ความคิดเห็น Markdown/HTML, หัวข้อ Markdown เช่น `# Heading`, เครื่องหมาย fence,
-    หรือโครง checklist ว่างเปล่า) OpenClaw จะข้ามการรัน heartbeat เพื่อประหยัดการเรียก API
-    หากไฟล์หายไป heartbeat จะยังคงทำงาน และโมเดลจะตัดสินใจว่าจะทำอะไร
+    หากมี `HEARTBEAT.md` แต่ไม่มีเนื้อหาที่มีผลจริง (มีเพียงบรรทัดว่าง ความคิดเห็น Markdown/HTML หัวข้อ ATX เครื่องหมายรั้ว หรือโครงรายการว่าง) OpenClaw จะข้ามการทำงานของ Heartbeat เพื่อประหยัดการเรียก API หากไม่มีไฟล์ดังกล่าว Heartbeat จะยังคงทำงานและโมเดลจะตัดสินใจว่าต้องทำอะไร
 
-    การแทนที่ค่าเฉพาะ agent ใช้ `agents.list[].heartbeat` เอกสาร: [Heartbeat](/th/gateway/heartbeat).
+    การเขียนทับสำหรับแต่ละเอเจนต์ใช้ `agents.list[].heartbeat` เอกสาร: [Heartbeat](/th/gateway/heartbeat)
 
   </Accordion>
 
-  <Accordion title='ฉันต้องเพิ่ม "บัญชีบอต" เข้าไปในกลุ่ม WhatsApp หรือไม่?'>
-    ไม่ต้อง OpenClaw ทำงานบน**บัญชีของคุณเอง** ดังนั้นหากคุณอยู่ในกลุ่ม OpenClaw ก็จะเห็นกลุ่มนั้นได้
-    โดยค่าเริ่มต้น การตอบกลับในกลุ่มจะถูกบล็อกจนกว่าคุณจะอนุญาตผู้ส่ง (`groupPolicy: "allowlist"`)
+  <Accordion title='ฉันจำเป็นต้องเพิ่ม "บัญชีบอต" ลงในกลุ่ม WhatsApp หรือไม่'>
+    ไม่ OpenClaw ทำงานบน **บัญชีของคุณเอง** หากอยู่ในกลุ่ม OpenClaw ก็จะมองเห็นกลุ่มนั้น โดยค่าเริ่มต้น การตอบกลับในกลุ่มจะถูกบล็อกจนกว่าจะอนุญาตผู้ส่ง (`groupPolicy: "allowlist"`)
 
-    หากคุณต้องการให้มีเพียง**คุณ**เท่านั้นที่สามารถทริกเกอร์การตอบกลับในกลุ่มได้:
+    หากต้องการจำกัดการตอบกลับในกลุ่มให้ตอบเฉพาะคุณ:
 
     ```json5
     {
@@ -1385,128 +1088,99 @@ Q&A สำหรับการรันครั้งแรก — การ�
 
   </Accordion>
 
-  <Accordion title="ฉันจะรับ JID ของกลุ่ม WhatsApp ได้อย่างไร?">
-    ตัวเลือกที่ 1 (เร็วที่สุด): tail logs แล้วส่งข้อความทดสอบในกลุ่ม:
+  <Accordion title="ฉันจะรับ JID ของกลุ่ม WhatsApp ได้อย่างไร">
+    วิธีที่เร็วที่สุดคือเฝ้าดูบันทึกและส่งข้อความทดสอบในกลุ่ม
 
     ```bash
     openclaw logs --follow --json
     ```
 
-    มองหา `chatId` (หรือ `from`) ที่ลงท้ายด้วย `@g.us` เช่น:
-    `1234567890-1234567890@g.us`.
+    มองหา `chatId` (หรือ `from`) ที่ลงท้ายด้วย `@g.us` เช่น `1234567890-1234567890@g.us`
 
-    ตัวเลือกที่ 2 (หากกำหนดค่า/allowlisted ไว้แล้ว): แสดงรายการกลุ่มจาก config:
+    หากกำหนดค่า/เพิ่มลงในรายการอนุญาตแล้ว ให้แสดงรายการกลุ่มจากการกำหนดค่า:
 
     ```bash
     openclaw directory groups list --channel whatsapp
     ```
 
-    เอกสาร: [WhatsApp](/th/channels/whatsapp), [Directory](/th/cli/directory), [Logs](/th/cli/logs).
+    เอกสาร: [WhatsApp](/th/channels/whatsapp), [ไดเรกทอรี](/th/cli/directory), [บันทึก](/th/cli/logs)
 
   </Accordion>
 
-  <Accordion title="ทำไม OpenClaw ไม่ตอบกลับในกลุ่ม?">
-    สาเหตุที่พบบ่อยมีสองอย่าง:
+  <Accordion title="เหตุใด OpenClaw จึงไม่ตอบกลับในกลุ่ม?">
+    สาเหตุที่พบบ่อยมีสองประการ: การจำกัดด้วยการกล่าวถึงเปิดอยู่โดยค่าเริ่มต้น (ต้อง @mention บอต หรือข้อความตรงกับ `mentionPatterns`) หรือกำหนดค่า `channels.whatsapp.groups` โดยไม่มี `"*"` และกลุ่มไม่ได้อยู่ในรายการที่อนุญาต
 
-    - เปิดการ gating ด้วยการ mention อยู่ (ค่าเริ่มต้น) คุณต้อง @mention บอต (หรือให้ตรงกับ `mentionPatterns`)
-    - คุณกำหนดค่า `channels.whatsapp.groups` โดยไม่มี `"*"` และกลุ่มไม่ได้อยู่ใน allowlist
-
-    ดู [Groups](/th/channels/groups) และ [Group messages](/th/channels/group-messages).
+    ดู [กลุ่ม](/th/channels/groups) และ [ข้อความกลุ่ม](/th/channels/group-messages)
 
   </Accordion>
 
-  <Accordion title="กลุ่ม/เธรดแชร์ context กับ DM หรือไม่?">
-    แชทโดยตรงจะยุบรวมเข้ากับเซสชันหลักตามค่าเริ่มต้น กลุ่ม/แชนเนลมีคีย์เซสชันของตัวเอง และหัวข้อ Telegram / เธรด Discord เป็นเซสชันแยกต่างหาก ดู [Groups](/th/channels/groups) และ [Group messages](/th/channels/group-messages).
+  <Accordion title="กลุ่ม/เธรดใช้บริบทร่วมกับ DM หรือไม่?">
+    โดยค่าเริ่มต้น แชตโดยตรงจะรวมเข้าสู่เซสชันหลัก กลุ่ม/ช่องมีคีย์เซสชันของตนเอง และหัวข้อ Telegram / เธรด Discord เป็นเซสชันแยกกัน ดู [กลุ่ม](/th/channels/groups) และ [ข้อความกลุ่ม](/th/channels/group-messages)
   </Accordion>
 
-  <Accordion title="ฉันสามารถสร้าง workspace และ agent ได้กี่รายการ?">
-    ไม่มีขีดจำกัดตายตัว หลายสิบรายการ (แม้กระทั่งหลายร้อยรายการ) ก็ใช้ได้ แต่ให้ระวัง:
+  <Accordion title="สามารถสร้างเวิร์กสเปซและเอเจนต์ได้กี่รายการ?">
+    ไม่มีขีดจำกัดตายตัว โดยสร้างได้หลายสิบหรือแม้แต่หลายร้อยรายการ แต่ควรระวัง:
 
-    - **การเติบโตของดิสก์:** เซสชัน + transcripts อยู่ใต้ `~/.openclaw/agents/<agentId>/sessions/`.
-    - **ต้นทุน token:** agent มากขึ้นหมายถึงการใช้งานโมเดลพร้อมกันมากขึ้น
-    - **ภาระงาน Ops:** auth profiles, workspaces และการกำหนดเส้นทางแชนเนลแบบต่อ agent
+    - **การเพิ่มขึ้นของพื้นที่ดิสก์**: เซสชันที่ใช้งานอยู่และทรานสคริปต์จะอยู่ในฐานข้อมูล SQLite แยกตามเอเจนต์ ส่วนอาร์ติแฟกต์แบบเดิม/ที่เก็บถาวรยังอาจสะสมอยู่ภายใต้ `~/.openclaw/agents/<agentId>/sessions/`
+    - **ค่าใช้จ่ายโทเค็น**: เอเจนต์มากขึ้นหมายถึงการใช้งานโมเดลพร้อมกันมากขึ้น
+    - **ภาระการดำเนินงาน**: โปรไฟล์การยืนยันตัวตน เวิร์กสเปซ และการกำหนดเส้นทางช่องแยกตามเอเจนต์
 
-    เคล็ดลับ:
-
-    - เก็บ workspace ที่**ใช้งานอยู่**หนึ่งรายการต่อ agent (`agents.defaults.workspace`)
-    - ตัดเซสชันเก่าออก (ลบ JSONL หรือรายการ store) หากดิสก์โตขึ้น
-    - ใช้ `openclaw doctor` เพื่อตรวจหา workspace ที่หลงเหลือและ profile ที่ไม่ตรงกัน
+    ใช้เวิร์กสเปซที่ **ใช้งานอยู่** หนึ่งรายการต่อเอเจนต์ (`agents.defaults.workspace`) ล้างเซสชันเก่าด้วย `openclaw sessions cleanup` หากพื้นที่ดิสก์เพิ่มขึ้น (อย่าแก้ไขสถานะ SQLite ที่ใช้งานอยู่ด้วยตนเอง) และใช้ `openclaw doctor` เพื่อตรวจหาเวิร์กสเปซที่หลงเหลือและโปรไฟล์ที่ไม่ตรงกัน
 
   </Accordion>
 
-  <Accordion title="ฉันสามารถรันบอตหรือแชทหลายตัวพร้อมกัน (Slack) ได้หรือไม่ และควรตั้งค่าอย่างไร?">
-    ได้ ใช้ **Multi-Agent Routing** เพื่อรัน agent หลายตัวที่แยกจากกัน และกำหนดเส้นทางข้อความขาเข้าตาม
-    แชนเนล/บัญชี/peer Slack รองรับในฐานะแชนเนลและสามารถผูกกับ agent เฉพาะได้
+  <Accordion title="สามารถเรียกใช้บอตหรือแชตหลายรายการพร้อมกัน (Slack) ได้หรือไม่ และควรตั้งค่าอย่างไร?">
+    ได้ ผ่าน **การกำหนดเส้นทางแบบหลายเอเจนต์**: เรียกใช้เอเจนต์ที่แยกจากกันหลายตัวและกำหนดเส้นทางข้อความขาเข้าตามช่อง/บัญชี/เพียร์ รองรับ Slack ในฐานะช่องและสามารถผูกกับเอเจนต์ที่ระบุได้
 
-    การเข้าถึงเบราว์เซอร์ทรงพลัง แต่ไม่ใช่ "ทำได้ทุกอย่างเหมือนมนุษย์" - anti-bot, CAPTCHA และ MFA
-    ยังสามารถบล็อก automation ได้ สำหรับการควบคุมเบราว์เซอร์ที่เชื่อถือได้ที่สุด ให้ใช้ Chrome MCP ในเครื่องบนโฮสต์
-    หรือใช้ CDP บนเครื่องที่รันเบราว์เซอร์จริง
+    การเข้าถึงเบราว์เซอร์มีประสิทธิภาพ แต่ไม่ใช่ "ทำได้ทุกอย่างที่มนุษย์ทำได้" เพราะระบบป้องกันบอต CAPTCHA และ MFA ยังอาจปิดกั้นการทำงานอัตโนมัติ เพื่อการควบคุมที่เชื่อถือได้ที่สุด ให้ใช้ Chrome MCP ภายในเครื่องบนโฮสต์ หรือ CDP บนเครื่องที่เรียกใช้เบราว์เซอร์จริง
 
-    การตั้งค่าตามแนวทางปฏิบัติที่ดีที่สุด:
+    การตั้งค่าที่แนะนำ: โฮสต์ Gateway ที่เปิดตลอดเวลา (VPS/Mac mini), เอเจนต์หนึ่งตัวต่อบทบาท (การผูก), ช่อง Slack ที่ผูกกับเอเจนต์เหล่านั้น และเบราว์เซอร์ภายในเครื่องผ่าน Chrome MCP หรือ Node เมื่อจำเป็น
 
-    - โฮสต์ Gateway ที่เปิดตลอดเวลา (VPS/Mac mini)
-    - หนึ่ง agent ต่อบทบาท (bindings)
-    - แชนเนล Slack ผูกกับ agent เหล่านั้น
-    - เบราว์เซอร์ในเครื่องผ่าน Chrome MCP หรือ node เมื่อจำเป็น
-
-    เอกสาร: [Multi-Agent Routing](/th/concepts/multi-agent), [Slack](/th/channels/slack),
-    [Browser](/th/tools/browser), [Nodes](/th/nodes).
+    เอกสาร: [การกำหนดเส้นทางแบบหลายเอเจนต์](/th/concepts/multi-agent), [Slack](/th/channels/slack), [เบราว์เซอร์](/th/tools/browser), [Node](/th/nodes)
 
   </Accordion>
 </AccordionGroup>
 
-## โมเดล, failover และ auth profiles
+## โมเดล การสลับเมื่อขัดข้อง และโปรไฟล์การยืนยันตัวตน
 
-ถามตอบเกี่ยวกับโมเดล — ค่าเริ่มต้น, การเลือก, aliases, การสลับ, failover, auth profiles —
-อยู่ใน [คำถามที่พบบ่อยเกี่ยวกับโมเดล](/th/help/faq-models).
+คำถามและคำตอบเกี่ยวกับโมเดล ได้แก่ ค่าเริ่มต้น การเลือก นามแฝง การสลับ การสลับเมื่อขัดข้อง และโปรไฟล์การยืนยันตัวตน อยู่ใน [คำถามที่พบบ่อยเกี่ยวกับโมเดล](/th/help/faq-models)
 
-## Gateway: พอร์ต, "already running" และโหมดระยะไกล
+## Gateway: พอร์ต "ทำงานอยู่แล้ว" และโหมดระยะไกล
 
 <AccordionGroup>
   <Accordion title="Gateway ใช้พอร์ตใด?">
-    `gateway.port` ควบคุมพอร์ต multiplexed เดียวสำหรับ WebSocket + HTTP (Control UI, hooks ฯลฯ)
+    `gateway.port` ควบคุมพอร์ตมัลติเพล็กซ์เดียวสำหรับ WebSocket + HTTP (Control UI, ฮุก เป็นต้น) ลำดับความสำคัญ:
 
-    ลำดับความสำคัญ:
-
-    ```
-    --port > OPENCLAW_GATEWAY_PORT > gateway.port > default 18789
+    ```text
+    --port > OPENCLAW_GATEWAY_PORT > gateway.port > ค่าเริ่มต้น 18789
     ```
 
   </Accordion>
 
-  <Accordion title='ทำไม openclaw gateway status จึงบอกว่า "Runtime: running" แต่ "Connectivity probe: failed"?'>
-    เพราะ "running" เป็นมุมมองของ**supervisor** (launchd/systemd/schtasks) ส่วน connectivity probe คือ CLI ที่เชื่อมต่อกับ WebSocket ของ Gateway จริง
-
-    ใช้ `openclaw gateway status` และเชื่อถือบรรทัดเหล่านี้:
-
-    - `Probe target:` (URL ที่ probe ใช้จริง)
-    - `Listening:` (สิ่งที่ bind อยู่จริงบนพอร์ต)
-    - `Last gateway error:` (สาเหตุรากที่พบบ่อยเมื่อ process ยังมีชีวิตอยู่แต่พอร์ตไม่ได้ listening)
-
+  <Accordion title='เหตุใด openclaw gateway status จึงแสดง "Runtime: running" แต่ "Connectivity probe: failed"?'>
+    "Running" เป็นมุมมองของ **ซูเปอร์ไวเซอร์** (launchd/systemd/schtasks) ส่วนการตรวจสอบการเชื่อมต่อคือ CLI ที่เชื่อมต่อกับ WebSocket ของ Gateway จริง ให้เชื่อถือบรรทัดเหล่านี้จาก `openclaw gateway status`: `Probe target:` (URL ที่การตรวจสอบใช้), `Listening:` (สิ่งที่ผูกอยู่กับพอร์ตจริง), `Last gateway error:` (สาเหตุหลักที่พบบ่อยเมื่อโปรเซสยังทำงานอยู่แต่พอร์ตไม่ได้รับฟัง)
   </Accordion>
 
-  <Accordion title='ทำไม openclaw gateway status แสดง "Config (cli)" และ "Config (service)" ต่างกัน?'>
-    คุณกำลังแก้ไขไฟล์ config หนึ่ง ขณะที่ service กำลังรันอีกไฟล์หนึ่ง (มักเป็นความไม่ตรงกันของ `--profile` / `OPENCLAW_STATE_DIR`)
+  <Accordion title='เหตุใด openclaw gateway status จึงแสดง "Config (cli)" และ "Config (service)" แตกต่างกัน?'>
+    กำลังแก้ไขไฟล์การกำหนดค่าหนึ่งไฟล์ ขณะที่บริการเรียกใช้อีกไฟล์หนึ่ง (มักเกิดจาก `--profile` / `OPENCLAW_STATE_DIR` ไม่ตรงกัน)
 
-    วิธีแก้:
+    วิธีแก้ ให้เรียกใช้จาก `--profile` / สภาพแวดล้อมเดียวกับที่ต้องการให้บริการใช้:
 
     ```bash
     openclaw gateway install --force
     ```
 
-    รันคำสั่งนั้นจาก `--profile` / environment เดียวกับที่คุณต้องการให้ service ใช้
+  </Accordion>
+
+  <Accordion title='"another gateway instance is already listening" หมายความว่าอย่างไร?'>
+    OpenClaw บังคับใช้ล็อกขณะทำงานโดยผูกตัวรับฟัง WebSocket ทันทีเมื่อเริ่มต้น (ค่าเริ่มต้น `ws://127.0.0.1:18789`) หากการผูกล้มเหลวด้วย `EADDRINUSE` ระบบจะส่งข้อผิดพลาด `GatewayLockError` ("another gateway instance is already listening")
+
+    วิธีแก้: หยุดอินสแตนซ์อื่น ปลดพอร์ต หรือเรียกใช้ด้วย `openclaw gateway --port <port>`
 
   </Accordion>
 
-  <Accordion title='"another gateway instance is already listening" หมายความว่าอะไร?'>
-    OpenClaw บังคับใช้ runtime lock โดย bind WebSocket listener ทันทีเมื่อเริ่มต้น (ค่าเริ่มต้น `ws://127.0.0.1:18789`) หาก bind ล้มเหลวด้วย `EADDRINUSE` ระบบจะโยน `GatewayLockError` ที่ระบุว่ามี instance อื่น listening อยู่แล้ว
-
-    วิธีแก้: หยุด instance อื่น, ปล่อยพอร์ต, หรือรันด้วย `openclaw gateway --port <port>`
-
-  </Accordion>
-
-  <Accordion title="ฉันจะรัน OpenClaw ในโหมดระยะไกลได้อย่างไร (client เชื่อมต่อกับ Gateway ที่อื่น)?">
-    ตั้งค่า `gateway.mode: "remote"` และชี้ไปยัง URL WebSocket ระยะไกล โดยอาจมี credentials ระยะไกลแบบ shared-secret:
+  <Accordion title="จะเรียกใช้ OpenClaw ในโหมดระยะไกล (ไคลเอนต์เชื่อมต่อกับ Gateway ที่อื่น) ได้อย่างไร?">
+    ตั้งค่า `gateway.mode: "remote"` และชี้ไปยัง URL ของ WebSocket ระยะไกล โดยอาจใช้ข้อมูลประจำตัวระยะไกลแบบความลับร่วมด้วย:
 
     ```json5
     {
@@ -1521,189 +1195,135 @@ Q&A สำหรับการรันครั้งแรก — การ�
     }
     ```
 
-    หมายเหตุ:
-
-    - `openclaw gateway` จะเริ่มทำงานเฉพาะเมื่อ `gateway.mode` เป็น `local` (หรือคุณส่ง flag override)
-    - แอป macOS จะเฝ้าดูไฟล์ config และสลับโหมดแบบ live เมื่อค่าเหล่านี้เปลี่ยน
-    - `gateway.remote.token` / `.password` เป็น credentials ระยะไกลฝั่ง client เท่านั้น; ไม่ได้เปิดใช้งาน auth ของ Gateway ในเครื่องด้วยตัวเอง
+    - `openclaw gateway` จะเริ่มทำงานเฉพาะเมื่อ `gateway.mode` เป็น `local` (หรือส่งแฟล็กแทนที่)
+    - แอป macOS เฝ้าดูไฟล์การกำหนดค่าและสลับโหมดแบบสดเมื่อค่าเหล่านี้เปลี่ยนแปลง
+    - `gateway.remote.token` / `.password` เป็นข้อมูลประจำตัวระยะไกลฝั่งไคลเอนต์เท่านั้น และไม่เปิดใช้การยืนยันตัวตนของ Gateway ภายในเครื่องด้วยตัวเอง
 
   </Accordion>
 
-  <Accordion title='Control UI บอกว่า "unauthorized" (หรือ reconnect ตลอด) ต้องทำอย่างไร?'>
-    เส้นทาง auth ของ Gateway และวิธี auth ของ UI ไม่ตรงกัน
+  <Accordion title='Control UI แสดง "unauthorized" (หรือเชื่อมต่อใหม่อย่างต่อเนื่อง) ควรทำอย่างไร?'>
+    เส้นทางการยืนยันตัวตนของ Gateway และวิธีการยืนยันตัวตนของ UI ไม่ตรงกัน
 
     ข้อเท็จจริง (จากโค้ด):
 
-    - Control UI เก็บ token ไว้ใน `sessionStorage` สำหรับเซสชันแท็บเบราว์เซอร์ปัจจุบันและ URL Gateway ที่เลือก ดังนั้นการ refresh ในแท็บเดิมยังทำงานต่อได้โดยไม่ต้องกู้คืนการคงอยู่ของ token ใน localStorage ระยะยาว
-    - เมื่อเกิด `AUTH_TOKEN_MISMATCH` client ที่ trusted สามารถลองใหม่แบบมีขอบเขตหนึ่งครั้งด้วย device token ที่ cache ไว้ เมื่อ Gateway ส่ง retry hints (`canRetryWithDeviceToken=true`, `recommendedNextStep=retry_with_device_token`) กลับมา
-    - การ retry ด้วย cached-token นั้นตอนนี้นำ approved scopes ที่ cache ไว้และจัดเก็บพร้อมกับ device token มาใช้ซ้ำ ผู้เรียกแบบ explicit `deviceToken` / explicit `scopes` ยังคงเก็บชุด scope ที่ขอไว้ แทนที่จะสืบทอด cached scopes
-    - นอกเส้นทาง retry นั้น ลำดับความสำคัญของ connect auth คือ shared token/password แบบ explicit ก่อน จากนั้น explicit `deviceToken` จากนั้น stored device token จากนั้น bootstrap token
-    - bootstrap setup-code ที่มีในตัวจะคืนค่า node device token พร้อม `scopes: []` บวกกับ operator handoff token แบบมีขอบเขตสำหรับการ onboard มือถือที่ trusted operator handoff สามารถอ่านการกำหนดค่า native ช่วง setup ได้ แต่ไม่ให้ pairing mutation scopes หรือ `operator.admin`
+    - Control UI เก็บโทเค็นไว้ใน `sessionStorage` โดยจำกัดขอบเขตไว้ที่แท็บเบราว์เซอร์ปัจจุบันและ URL ของ Gateway ที่เลือก ดังนั้นการรีเฟรชในแท็บเดิมจึงยังทำงานได้โดยไม่ต้องเก็บโทเค็นระยะยาวใน localStorage
+    - ใน `AUTH_TOKEN_MISMATCH` ไคลเอนต์ที่เชื่อถือได้สามารถลองใหม่แบบจำกัดหนึ่งครั้งด้วยโทเค็นอุปกรณ์ที่แคชไว้ เมื่อ Gateway ส่งคำแนะนำให้ลองใหม่ (`canRetryWithDeviceToken=true`, `recommendedNextStep=retry_with_device_token`)
+    - การลองใหม่ด้วยโทเค็นที่แคชไว้นั้นจะใช้ขอบเขตที่อนุมัติและจัดเก็บไว้กับโทเค็นอุปกรณ์ซ้ำ ส่วนผู้เรียกที่ระบุ `deviceToken` / `scopes` อย่างชัดเจนจะคงชุดขอบเขตที่ร้องขอไว้แทนการสืบทอดขอบเขตจากแคช
+    - นอกเส้นทางการลองใหม่นั้น ลำดับความสำคัญของการยืนยันตัวตนขณะเชื่อมต่อคือโทเค็น/รหัสผ่านแบบความลับร่วมที่ระบุอย่างชัดเจนก่อน ตามด้วย `deviceToken` ที่ระบุอย่างชัดเจน จากนั้นโทเค็นอุปกรณ์ที่จัดเก็บไว้ และสุดท้ายคือโทเค็นบูตสแตรป
+    - การบูตสแตรปด้วยโค้ดตั้งค่าในตัวจะส่งคืนโทเค็นอุปกรณ์ Node พร้อม `scopes: []` รวมถึงโทเค็นส่งมอบให้ผู้ปฏิบัติงานแบบจำกัดสำหรับการเริ่มต้นใช้งานบนมือถือที่เชื่อถือได้ การส่งมอบให้ผู้ปฏิบัติงานสามารถอ่านการกำหนดค่าแบบเนทีฟระหว่างการตั้งค่าได้ แต่ไม่มอบขอบเขตการแก้ไขการจับคู่หรือ `operator.admin`
 
     วิธีแก้:
 
-    - เร็วที่สุด: `openclaw dashboard` (พิมพ์ + คัดลอก URL dashboard, พยายามเปิด; แสดงคำใบ้ SSH หากเป็น headless)
-    - หากคุณยังไม่มี token: `openclaw doctor --generate-gateway-token`
-    - หากเป็นระยะไกล ให้ tunnel ก่อน: `ssh -N -L 18789:127.0.0.1:18789 user@host` แล้วเปิด `http://127.0.0.1:18789/`.
-    - โหมด shared-secret: ตั้งค่า `gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN` หรือ `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD` แล้ววาง secret ที่ตรงกันใน settings ของ Control UI
-    - โหมด Tailscale Serve: ตรวจสอบให้แน่ใจว่าเปิดใช้ `gateway.auth.allowTailscale` แล้ว และคุณกำลังเปิด Serve URL ไม่ใช่ loopback/tailnet URL ดิบที่ bypass headers identity ของ Tailscale
-    - โหมด trusted-proxy: ตรวจสอบให้แน่ใจว่าคุณเข้ามาผ่าน proxy ที่รู้ identity ตามที่กำหนดค่าไว้ ไม่ใช่ URL Gateway ดิบ proxy แบบ loopback บนโฮสต์เดียวกันยังต้องใช้ `gateway.auth.trustedProxy.allowLoopback = true` ด้วย
-    - หากยังไม่ตรงกันหลังจาก retry หนึ่งครั้ง ให้ rotate/re-approve paired device token:
-      - `openclaw devices list`
-      - `openclaw devices rotate --device <id> --role operator`
-    - หากการเรียก rotate นั้นบอกว่าถูกปฏิเสธ ให้ตรวจสองอย่าง:
-      - เซสชัน paired-device สามารถ rotate ได้เฉพาะ device **ของตัวเอง** เว้นแต่จะมี `operator.admin` ด้วย
-      - ค่า `--scope` แบบ explicit ต้องไม่เกิน operator scopes ปัจจุบันของผู้เรียก
-    - ยังติดอยู่ใช่ไหม? รัน `openclaw status --all` แล้วทำตาม [การแก้ไขปัญหา](/th/gateway/troubleshooting) ดู [Dashboard](/th/web/dashboard) สำหรับรายละเอียด auth
+    - เร็วที่สุด: `openclaw dashboard` (พิมพ์ + คัดลอก URL แดชบอร์ดและพยายามเปิด พร้อมแสดงคำแนะนำ SSH หากไม่มีส่วนติดต่อผู้ใช้)
+    - ยังไม่มีโทเค็น: `openclaw doctor --generate-gateway-token`
+    - ระยะไกล: สร้างทันเนลก่อนด้วย `ssh -N -L 18789:127.0.0.1:18789 user@host` แล้วเปิด `http://127.0.0.1:18789/`
+    - โหมดความลับร่วม: ตั้งค่า `gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN` หรือ `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD` แล้ววางความลับที่ตรงกันในการตั้งค่า Control UI
+    - โหมด Tailscale Serve: ยืนยันว่าเปิดใช้ `gateway.auth.allowTailscale` และกำลังเปิด URL ของ Serve ไม่ใช่ URL ลูปแบ็ก/เครือข่ายส่วนตัวแบบดิบที่ข้ามส่วนหัวข้อมูลประจำตัวของ Tailscale
+    - โหมดพร็อกซีที่เชื่อถือได้: ยืนยันว่ากำลังเชื่อมต่อผ่านพร็อกซีที่รับรู้ข้อมูลประจำตัวตามที่กำหนดค่าไว้ พร็อกซีลูปแบ็กบนโฮสต์เดียวกันต้องใช้ `gateway.auth.trustedProxy.allowLoopback = true` ด้วย
+    - หากยังไม่ตรงกันหลังลองใหม่หนึ่งครั้ง: หมุนเวียน/อนุมัติโทเค็นอุปกรณ์ที่จับคู่ใหม่:
+      ```bash
+      openclaw devices list
+      openclaw devices rotate --device <id> --role operator
+      ```
+    - หากการหมุนเวียนถูกปฏิเสธ: เซสชันอุปกรณ์ที่จับคู่สามารถหมุนเวียนได้เฉพาะอุปกรณ์ของ **ตนเอง** เว้นแต่จะมี `operator.admin` ด้วย และค่า `--scope` ที่ระบุอย่างชัดเจนต้องไม่เกินขอบเขตผู้ปฏิบัติงานปัจจุบันของผู้เรียก
+    - หากยังติดขัด: `openclaw status --all` พร้อม [การแก้ไขปัญหา](/th/gateway/troubleshooting) ดูรายละเอียดการยืนยันตัวตนที่ [แดชบอร์ด](/th/web/dashboard)
 
   </Accordion>
 
-  <Accordion title="ฉันตั้งค่า gateway.bind เป็น tailnet แต่ bind ไม่ได้และไม่มีอะไร listening">
-    การ bind แบบ `tailnet` จะเลือก IP ของ Tailscale จาก network interfaces ของคุณ (100.64.0.0/10) หากเครื่องไม่ได้อยู่บน Tailscale (หรือ interface down) ก็จะไม่มีอะไรให้ bind
+  <Accordion title="ตั้งค่า gateway.bind เป็น tailnet แล้ว แต่รับฟังเฉพาะลูปแบ็ก">
+    การผูก `tailnet` จะเลือก IP ของ Tailscale จากอินเทอร์เฟซเครือข่าย (100.64.0.0/10) หากเครื่องไม่ได้อยู่บน Tailscale (หรืออินเทอร์เฟซไม่ทำงาน) Gateway จะย้อนกลับไปใช้ลูปแบ็กแทนการเปิดเผยอินเทอร์เฟซเครือข่ายอื่น
 
-    วิธีแก้:
+    วิธีแก้: เริ่ม Tailscale บนโฮสต์นั้นแล้วรีสตาร์ต Gateway หรือสลับไปใช้ `gateway.bind: "loopback"` / `"lan"` อย่างชัดเจน
 
-    - เริ่ม Tailscale บนโฮสต์นั้น (เพื่อให้มี address 100.x), หรือ
-    - เปลี่ยนเป็น `gateway.bind: "loopback"` / `"lan"`.
-
-    หมายเหตุ: `tailnet` เป็นแบบ explicit `auto` จะเลือก loopback ก่อน; ใช้ `gateway.bind: "tailnet"` เมื่อคุณต้องการ bind เฉพาะ tailnet
+    `tailnet` เป็นการระบุอย่างชัดเจน ส่วน `auto` ให้ความสำคัญกับลูปแบ็ก ใช้ `gateway.bind: "tailnet"` เพื่อจำกัดการเปิดเผยที่ไม่ใช่ลูปแบ็กไว้เฉพาะ Tailnet พร้อมคงตัวรับฟัง `127.0.0.1` บนโฮสต์เดียวกันที่จำเป็นไว้
 
   </Accordion>
 
-  <Accordion title="ฉันสามารถรัน Gateway หลายตัวบนโฮสต์เดียวกันได้หรือไม่?">
-    โดยทั่วไปไม่ได้ - Gateway หนึ่งตัวสามารถรันแชนเนลข้อความและ agent ได้หลายรายการ ใช้ Gateway หลายตัวเฉพาะเมื่อคุณต้องการ redundancy (เช่น rescue bot) หรือการแยกอย่างเข้มงวด
+  <Accordion title="สามารถเรียกใช้ Gateway หลายรายการบนโฮสต์เดียวกันได้หรือไม่?">
+    โดยทั่วไปไม่ได้ เนื่องจาก Gateway หนึ่งรายการสามารถเรียกใช้ช่องการรับส่งข้อความและเอเจนต์ได้หลายรายการ ใช้ Gateway หลายรายการเฉพาะเพื่อความซ้ำซ้อน (เช่น บอตกู้คืน) หรือการแยกอย่างเด็ดขาด และแยกแต่ละรายการด้วย `OPENCLAW_CONFIG_PATH`, `OPENCLAW_STATE_DIR`, `agents.defaults.workspace` ของตนเอง รวมถึง `gateway.port` ที่ไม่ซ้ำกัน
 
-    ได้ แต่คุณต้องแยก:
+    คำแนะนำ: ใช้ `openclaw --profile <name> ...` ต่ออินสแตนซ์ (สร้าง `~/.openclaw-<name>` โดยอัตโนมัติ), ใช้ `gateway.port` ที่ไม่ซ้ำกันต่อการกำหนดค่าโปรไฟล์ (หรือ `--port` สำหรับการเรียกใช้ด้วยตนเอง) และใช้บริการแยกตามโปรไฟล์ด้วย `openclaw --profile <name> gateway install`
 
-    - `OPENCLAW_CONFIG_PATH` (config แบบต่อ instance)
-    - `OPENCLAW_STATE_DIR` (state แบบต่อ instance)
-    - `agents.defaults.workspace` (การแยก workspace)
-    - `gateway.port` (พอร์ตไม่ซ้ำกัน)
+    โปรไฟล์ยังเติมส่วนต่อท้ายชื่อบริการด้วย: launchd `ai.openclaw.<profile>`, systemd `openclaw-gateway-<profile>.service`, Windows `OpenClaw Gateway (<profile>)` หน่วย systemd แบบไม่มีตัวระบุ `openclaw-gateway` มีเฉพาะสำหรับโปรไฟล์เริ่มต้น ส่วนชื่อหน่วย systemd แบบเดิมก่อนเปลี่ยนชื่อ `clawdbot-gateway` จะถูกย้ายโดยอัตโนมัติ
 
-    การตั้งค่าอย่างรวดเร็ว (แนะนำ):
-
-    - ใช้ `openclaw --profile <name> ...` ต่อ instance (สร้าง `~/.openclaw-<name>` โดยอัตโนมัติ)
-    - ตั้งค่า `gateway.port` ที่ไม่ซ้ำกันใน config ของแต่ละ profile (หรือส่ง `--port` สำหรับการรันด้วยตนเอง)
-    - ติดตั้ง service แบบต่อ profile: `openclaw --profile <name> gateway install`.
-
-    Profiles ยังเติม suffix ให้ชื่อ service (`ai.openclaw.<profile>`; legacy `com.openclaw.*`, `openclaw-gateway-<profile>.service`, `OpenClaw Gateway (<profile>)`)
-    คู่มือฉบับเต็ม: [หลาย Gateway](/th/gateway/multiple-gateways).
+    คู่มือฉบับเต็ม: [Gateway หลายรายการ](/th/gateway/multiple-gateways)
 
   </Accordion>
 
-  <Accordion title='"invalid handshake" / code 1008 หมายความว่าอะไร?'>
-    Gateway เป็น**เซิร์ฟเวอร์ WebSocket** และคาดหวังให้ข้อความแรกสุด
-    เป็นเฟรม `connect` หากได้รับอย่างอื่น จะปิดการเชื่อมต่อ
-    ด้วย **code 1008** (policy violation)
+  <Accordion title='"invalid handshake" / รหัส 1008 หมายความว่าอย่างไร?'>
+    Gateway เป็น **เซิร์ฟเวอร์ WebSocket** และคาดว่าข้อความแรกจะเป็นเฟรม `connect` สิ่งอื่นใดจะทำให้การเชื่อมต่อปิดด้วย **รหัส 1008** (การละเมิดนโยบาย)
 
-    สาเหตุที่พบบ่อย:
+    สาเหตุที่พบบ่อย: เปิด URL แบบ **HTTP** ในเบราว์เซอร์แทนไคลเอนต์ WS, ใช้พอร์ต/พาธผิด หรือพร็อกซี/ทันเนลตัดส่วนหัวการยืนยันตัวตนหรือส่งคำขอที่ไม่ใช่ของ Gateway
 
-    - คุณเปิด URL **HTTP** ในเบราว์เซอร์ (`http://...`) แทนที่จะใช้ client WS
-    - คุณใช้พอร์ตหรือ path ผิด
-    - proxy หรือ tunnel ตัด auth headers ออกหรือส่งคำขอที่ไม่ใช่ Gateway
+    วิธีแก้: ใช้ URL ของ WS (`ws://<host>:18789` หรือ `wss://...` ผ่าน HTTPS) อย่าเปิดพอร์ต WS ในแท็บเบราว์เซอร์ปกติ และใส่โทเค็น/รหัสผ่านในเฟรม `connect` เมื่อเปิดใช้การยืนยันตัวตน ตัวอย่าง CLI/TUI:
 
-    วิธีแก้อย่างรวดเร็ว:
-
-    1. ใช้ URL WS: `ws://<host>:18789` (หรือ `wss://...` หากเป็น HTTPS)
-    2. อย่าเปิดพอร์ต WS ในแท็บเบราว์เซอร์ปกติ
-    3. หากเปิด auth อยู่ ให้ใส่ token/password ในเฟรม `connect`
-
-    หากคุณใช้ CLI หรือ TUI, URL ควรมีลักษณะดังนี้:
-
-    ```
+    ```bash
     openclaw tui --url ws://<host>:18789 --token <token>
     ```
 
-    รายละเอียด protocol: [Gateway protocol](/th/gateway/protocol).
+    รายละเอียดโปรโตคอล: [โปรโตคอล Gateway](/th/gateway/protocol)
 
   </Accordion>
 </AccordionGroup>
 
-## การ logging และ debugging
+## การบันทึกและการดีบัก
 
 <AccordionGroup>
-  <Accordion title="logs อยู่ที่ไหน?">
-    ไฟล์ logs (แบบมีโครงสร้าง):
+  <Accordion title="บันทึกอยู่ที่ใด?">
+    บันทึกไฟล์ (มีโครงสร้าง): `/tmp/openclaw/openclaw-YYYY-MM-DD.log` ตั้งค่าพาธคงที่ผ่าน `logging.file`; ระดับบันทึกไฟล์ผ่าน `logging.level`; ระดับรายละเอียดคอนโซลผ่าน `--verbose` และ `logging.consoleLevel`
 
-    ```
-    /tmp/openclaw/openclaw-YYYY-MM-DD.log
-    ```
-
-    คุณสามารถตั้งค่าพาธที่คงที่ได้ผ่าน `logging.file` ระดับล็อกของไฟล์ควบคุมด้วย `logging.level` ความละเอียดของคอนโซลควบคุมด้วย `--verbose` และ `logging.consoleLevel`
-
-    การติดตามล็อกที่เร็วที่สุด:
+    วิธีติดตามที่เร็วที่สุด:
 
     ```bash
     openclaw logs --follow
     ```
 
-    ล็อกของบริการ/ซูเปอร์ไวเซอร์ (เมื่อ gateway ทำงานผ่าน launchd/systemd):
+    บันทึกบริการ/ซูเปอร์ไวเซอร์ (เมื่อ Gateway ทำงานผ่าน launchd/systemd):
 
     - stdout ของ macOS launchd: `~/Library/Logs/openclaw/gateway.log` (โปรไฟล์ใช้ `gateway-<profile>.log`; stderr ถูกระงับ)
     - Linux: `journalctl --user -u openclaw-gateway[-<profile>].service -n 200 --no-pager`
     - Windows: `schtasks /Query /TN "OpenClaw Gateway (<profile>)" /V /FO LIST`
 
-    ดูเพิ่มเติมที่ [การแก้ไขปัญหา](/th/gateway/troubleshooting)
+    ดูข้อมูลเพิ่มเติมที่ [การแก้ไขปัญหา](/th/gateway/troubleshooting)
 
   </Accordion>
 
-  <Accordion title="ฉันจะเริ่ม/หยุด/รีสตาร์ตบริการ Gateway ได้อย่างไร?">
-    ใช้ตัวช่วยของ gateway:
-
+  <Accordion title="จะเริ่ม/หยุด/รีสตาร์ตบริการ Gateway ได้อย่างไร?">
     ```bash
     openclaw gateway status
     openclaw gateway restart
     ```
 
-    หากคุณรัน gateway ด้วยตนเอง `openclaw gateway --force` สามารถยึดพอร์ตกลับคืนได้ ดู [Gateway](/th/gateway)
+    หากเรียกใช้ Gateway ด้วยตนเอง `openclaw gateway --force` สามารถเรียกคืนพอร์ตได้ ดู [Gateway](/th/gateway)
 
   </Accordion>
 
-  <Accordion title="ฉันปิดเทอร์มินัลบน Windows ไปแล้ว - จะรีสตาร์ต OpenClaw ได้อย่างไร?">
-    มี **โหมดการติดตั้ง Windows สามโหมด**:
+  <Accordion title="ปิดเทอร์มินัลบน Windows ไปแล้ว จะรีสตาร์ต OpenClaw ได้อย่างไร?">
+    โหมดการติดตั้ง Windows มีสามแบบ:
 
-    **1) การตั้งค่า Windows Hub แบบ local:** แอป native จัดการ WSL Gateway ที่เป็นของแอปแบบ local
+    **1) การตั้งค่าภายในเครื่องด้วย Windows Hub**: แอปเนทีฟจัดการ WSL Gateway ภายในเครื่องที่แอปเป็นเจ้าของ เปิด **OpenClaw Companion** จากเมนู Start หรือถาดระบบ จากนั้นใช้ **Gateway Setup** หรือแท็บ Connections
 
-    เปิด **OpenClaw Companion** จากเมนู Start หรือถาดระบบ แล้วใช้
-    **Gateway Setup** หรือแท็บ Connections
-
-    **2) WSL2 Gateway แบบแมนนวล:** Gateway ทำงานภายใน Linux
-
-    เปิด PowerShell, เข้า WSL แล้วรีสตาร์ต:
-
+    **2) WSL2 Gateway แบบกำหนดเอง**: Gateway ทำงานภายใน Linux
     ```powershell
     wsl
     openclaw gateway status
     openclaw gateway restart
     ```
+    หากยังไม่เคยติดตั้งบริการ ให้เริ่มบริการในเบื้องหน้า: `openclaw gateway run`
 
-    หากคุณไม่เคยติดตั้งบริการ ให้เริ่มในโหมด foreground:
-
-    ```bash
-    openclaw gateway run
-    ```
-
-    **3) Windows CLI/Gateway แบบ native:** Gateway ทำงานโดยตรงใน Windows
-
-    เปิด PowerShell แล้วรัน:
-
+    **3) CLI/Gateway แบบเนทีฟบน Windows**: ทำงานโดยตรงใน Windows
     ```powershell
     openclaw gateway status
     openclaw gateway restart
     ```
-
-    หากคุณรันด้วยตนเอง (ไม่มีบริการ) ให้ใช้:
-
-    ```powershell
-    openclaw gateway run
-    ```
+    หากเรียกใช้ด้วยตนเอง (ไม่มีบริการ): `openclaw gateway run`
 
     เอกสาร: [Windows](/th/platforms/windows), [คู่มือการปฏิบัติงานบริการ Gateway](/th/gateway)
 
   </Accordion>
 
-  <Accordion title="Gateway เปิดอยู่ แต่ไม่มีคำตอบกลับเข้ามา ควรตรวจสอบอะไร?">
-    เริ่มด้วยการตรวจสุขภาพอย่างรวดเร็ว:
+  <Accordion title="Gateway ทำงานอยู่แต่ไม่ได้รับการตอบกลับ ควรตรวจสอบอะไรบ้าง">
+    ตรวจสอบสถานะอย่างรวดเร็ว:
 
     ```bash
     openclaw status
@@ -1712,125 +1332,89 @@ Q&A สำหรับการรันครั้งแรก — การ�
     openclaw logs --follow
     ```
 
-    สาเหตุที่พบบ่อย:
+    สาเหตุที่พบบ่อย: ไม่ได้โหลดการยืนยันตัวตนของโมเดลบน **โฮสต์ Gateway** (ตรวจสอบ `models status`), การจับคู่/รายการอนุญาตของช่องทางบล็อกการตอบกลับ (ตรวจสอบการกำหนดค่าช่องทางและบันทึก) หรือเปิด WebChat/Dashboard โดยไม่มีโทเค็นที่ถูกต้อง หากเชื่อมต่อจากระยะไกล ให้ยืนยันว่าการเชื่อมต่อทันเนล/Tailscale ทำงานอยู่และสามารถเข้าถึง Gateway WebSocket ได้
 
-    - ยังไม่ได้โหลดการยืนยันตัวตนของโมเดลบน **โฮสต์ gateway** (ตรวจสอบ `models status`)
-    - การจับคู่/allowlist ของช่องทางกำลังบล็อกคำตอบ (ตรวจสอบ config ช่องทาง + ล็อก)
-    - WebChat/Dashboard เปิดอยู่โดยไม่มี token ที่ถูกต้อง
-
-    หากคุณอยู่ระยะไกล ให้ยืนยันว่า tunnel/การเชื่อมต่อ Tailscale เปิดอยู่ และ
-    Gateway WebSocket เข้าถึงได้
-
-    เอกสาร: [ช่องทาง](/th/channels), [การแก้ไขปัญหา](/th/gateway/troubleshooting), [การเข้าถึงระยะไกล](/th/gateway/remote)
+    เอกสาร: [ช่องทาง](/th/channels), [การแก้ไขปัญหา](/th/gateway/troubleshooting), [การเข้าถึงจากระยะไกล](/th/gateway/remote)
 
   </Accordion>
 
-  <Accordion title='"ตัดการเชื่อมต่อจาก gateway: ไม่มีเหตุผล" - แล้วต้องทำอย่างไร?'>
-    โดยทั่วไปหมายความว่า UI สูญเสียการเชื่อมต่อ WebSocket ตรวจสอบ:
+  <Accordion title='"ตัดการเชื่อมต่อจาก Gateway: ไม่มีเหตุผล" — ควรทำอย่างไร'>
+    โดยทั่วไปหมายความว่า UI สูญเสียการเชื่อมต่อ WebSocket ตรวจสอบว่า Gateway ทำงานอยู่หรือไม่ (`openclaw gateway status`) สถานะปกติหรือไม่ (`openclaw status`) UI มีโทเค็นที่ถูกต้องหรือไม่ (`openclaw dashboard`) หากเชื่อมต่อจากระยะไกล ลิงก์ทันเนล/Tailscale ทำงานอยู่หรือไม่
 
-    1. Gateway กำลังทำงานอยู่หรือไม่? `openclaw gateway status`
-    2. Gateway ปกติหรือไม่? `openclaw status`
-    3. UI มี token ที่ถูกต้องหรือไม่? `openclaw dashboard`
-    4. หากใช้งานระยะไกล ลิงก์ tunnel/Tailscale เปิดอยู่หรือไม่?
-
-    จากนั้นติดตามล็อก:
+    จากนั้นติดตามบันทึก:
 
     ```bash
     openclaw logs --follow
     ```
 
-    เอกสาร: [Dashboard](/th/web/dashboard), [การเข้าถึงระยะไกล](/th/gateway/remote), [การแก้ไขปัญหา](/th/gateway/troubleshooting)
+    เอกสาร: [Dashboard](/th/web/dashboard), [การเข้าถึงจากระยะไกล](/th/gateway/remote), [การแก้ไขปัญหา](/th/gateway/troubleshooting)
 
   </Accordion>
 
-  <Accordion title="Telegram setMyCommands ล้มเหลว ควรตรวจสอบอะไร?">
-    เริ่มจากล็อกและสถานะช่องทาง:
-
+  <Accordion title="setMyCommands ของ Telegram ล้มเหลว ควรตรวจสอบอะไรบ้าง">
     ```bash
     openclaw channels status
     openclaw channels logs --channel telegram
     ```
 
-    จากนั้นเทียบข้อผิดพลาด:
+    จากนั้นเทียบกับข้อผิดพลาด:
 
-    - `BOT_COMMANDS_TOO_MUCH`: เมนู Telegram มีรายการมากเกินไป OpenClaw ตัดให้เหลือไม่เกินขีดจำกัดของ Telegram และลองใหม่ด้วยคำสั่งที่น้อยลงอยู่แล้ว แต่ยังต้องตัดรายการเมนูบางรายการออก ลดคำสั่งจาก plugin/skill/แบบกำหนดเอง หรือปิด `channels.telegram.commands.native` หากคุณไม่ต้องการเมนู
-    - `TypeError: fetch failed`, `Network request for 'setMyCommands' failed!` หรือข้อผิดพลาดเครือข่ายที่คล้ายกัน: หากคุณอยู่บน VPS หรืออยู่หลังพร็อกซี ให้ยืนยันว่าอนุญาต HTTPS ขาออกและ DNS ใช้งานได้สำหรับ `api.telegram.org`
+    - `BOT_COMMANDS_TOO_MUCH`: เมนู Telegram มีรายการมากเกินไป OpenClaw ตัดรายการให้เหลือตามขีดจำกัดของ Telegram และลองใหม่ด้วยคำสั่งที่น้อยลงอยู่แล้ว แต่รายการเมนูบางรายการอาจยังถูกตัดออก ให้ลดคำสั่งของ Plugin/Skills/คำสั่งแบบกำหนดเอง หรือปิดใช้ `channels.telegram.commands.native` หากไม่ต้องการเมนู
+    - `TypeError: fetch failed`, `Network request for 'setMyCommands' failed!` หรือข้อผิดพลาดเครือข่ายที่คล้ายกัน: หากใช้งานบน VPS หรือหลังพร็อกซี ให้ยืนยันว่าอนุญาต HTTPS ขาออกและ DNS สำหรับ `api.telegram.org` ทำงานได้
 
-    หาก Gateway อยู่ระยะไกล ตรวจสอบให้แน่ใจว่าคุณกำลังดูล็อกบนโฮสต์ Gateway
+    หาก Gateway อยู่ระยะไกล ให้ตรวจสอบบันทึกบนโฮสต์ Gateway
 
     เอกสาร: [Telegram](/th/channels/telegram), [การแก้ไขปัญหาช่องทาง](/th/channels/troubleshooting)
 
   </Accordion>
 
-  <Accordion title="TUI ไม่แสดงผลลัพธ์ ควรตรวจสอบอะไร?">
-    ก่อนอื่นให้ยืนยันว่า Gateway เข้าถึงได้และเอเจนต์รันได้:
-
+  <Accordion title="TUI ไม่แสดงผลลัพธ์ ควรตรวจสอบอะไรบ้าง">
     ```bash
     openclaw status
     openclaw models status
     openclaw logs --follow
     ```
 
-    ใน TUI ให้ใช้ `/status` เพื่อดูสถานะปัจจุบัน หากคุณคาดหวังคำตอบในช่องทางแชท
-    ตรวจสอบให้แน่ใจว่าเปิดการส่งไว้แล้ว (`/deliver on`)
+    ใน TUI ให้ใช้ `/status` เพื่อดูสถานะปัจจุบัน หากคาดว่าจะได้รับการตอบกลับในช่องทางแชต ให้ยืนยันว่าเปิดใช้การนำส่งแล้ว (`/deliver on`)
 
-    เอกสาร: [TUI](/th/web/tui), [คำสั่ง Slash](/th/tools/slash-commands)
+    เอกสาร: [TUI](/th/web/tui), [คำสั่งแบบเครื่องหมายทับ](/th/tools/slash-commands)
 
   </Accordion>
 
-  <Accordion title="ฉันจะหยุดแล้วเริ่ม Gateway ใหม่อย่างสมบูรณ์ได้อย่างไร?">
-    หากคุณติดตั้งบริการแล้ว:
+  <Accordion title="จะหยุด Gateway โดยสมบูรณ์แล้วเริ่มใหม่ได้อย่างไร">
+    หากติดตั้งบริการไว้แล้ว (launchd บน macOS, systemd บน Linux):
 
     ```bash
     openclaw gateway stop
     openclaw gateway start
     ```
 
-    คำสั่งนี้หยุด/เริ่ม **บริการที่มีการดูแล** (launchd บน macOS, systemd บน Linux)
-    ใช้สิ่งนี้เมื่อ Gateway ทำงานเป็น daemon อยู่เบื้องหลัง
-
-    หากคุณกำลังรันใน foreground ให้หยุดด้วย Ctrl-C แล้ว:
-
-    ```bash
-    openclaw gateway run
-    ```
+    หากทำงานในโฟร์กราวด์ ให้หยุดด้วย Ctrl-C แล้วใช้ `openclaw gateway run`
 
     เอกสาร: [คู่มือการปฏิบัติงานบริการ Gateway](/th/gateway)
 
   </Accordion>
 
-  <Accordion title="อธิบายแบบง่าย: openclaw gateway restart เทียบกับ openclaw gateway">
-    - `openclaw gateway restart`: รีสตาร์ต **บริการเบื้องหลัง** (launchd/systemd)
-    - `openclaw gateway`: รัน gateway **ใน foreground** สำหรับเซสชันเทอร์มินัลนี้
-
-    หากคุณติดตั้งบริการแล้ว ให้ใช้คำสั่ง gateway ใช้ `openclaw gateway` เมื่อ
-    คุณต้องการรันแบบครั้งเดียวใน foreground
-
+  <Accordion title="อธิบายแบบง่าย ๆ: openclaw gateway restart เทียบกับ openclaw gateway">
+    `openclaw gateway restart` เริ่ม **บริการเบื้องหลัง** (launchd/systemd) ใหม่ ส่วน `openclaw gateway` เรียกใช้ Gateway **ในโฟร์กราวด์** สำหรับเซสชันเทอร์มินัลนี้ ใช้คำสั่งย่อยของ Gateway หากติดตั้งบริการไว้แล้ว และใช้การเรียกใช้แบบโฟร์กราวด์โดยตรงสำหรับการใช้งานครั้งเดียว
   </Accordion>
 
-  <Accordion title="วิธีที่เร็วที่สุดในการดูรายละเอียดเพิ่มเมื่อบางอย่างล้มเหลว">
-    เริ่ม Gateway ด้วย `--verbose` เพื่อดูรายละเอียดคอนโซลเพิ่มเติม จากนั้นตรวจสอบไฟล์ล็อกสำหรับการยืนยันตัวตนของช่องทาง การกำหนดเส้นทางโมเดล และข้อผิดพลาด RPC
+  <Accordion title="วิธีที่เร็วที่สุดในการดูรายละเอียดเพิ่มเติมเมื่อมีบางอย่างล้มเหลว">
+    เริ่ม Gateway ด้วย `--verbose` เพื่อดูรายละเอียดในคอนโซลเพิ่มเติม จากนั้นตรวจสอบไฟล์บันทึกเพื่อดูข้อผิดพลาดเกี่ยวกับการยืนยันตัวตนของช่องทาง การกำหนดเส้นทางโมเดล และ RPC
   </Accordion>
 </AccordionGroup>
 
 ## สื่อและไฟล์แนบ
 
 <AccordionGroup>
-  <Accordion title="skill ของฉันสร้างรูปภาพ/PDF แต่ไม่มีอะไรถูกส่ง">
-    ไฟล์แนบขาออกจากเอเจนต์ต้องใช้ฟิลด์สื่อแบบมีโครงสร้าง เช่น `media`, `mediaUrl`, `path` หรือ `filePath` ดู [การตั้งค่า OpenClaw assistant](/th/start/openclaw) และ [การส่งของเอเจนต์](/th/tools/agent-send)
-
-    การส่งผ่าน CLI:
+  <Accordion title="Skills ของฉันสร้างรูปภาพ/PDF แต่ไม่มีสิ่งใดถูกส่ง">
+    ไฟล์แนบขาออกจากเอเจนต์ต้องใช้ฟิลด์สื่อแบบมีโครงสร้าง เช่น `media`, `mediaUrl`, `path` หรือ `filePath` ดู [การตั้งค่าผู้ช่วย OpenClaw](/th/start/openclaw) และ [การส่งของเอเจนต์](/th/tools/agent-send)
 
     ```bash
-    openclaw message send --target +15555550123 --message "Here you go" --media /path/to/file.png
+    openclaw message send --target +15555550123 --message "ส่งให้แล้ว" --media /path/to/file.png
     ```
 
-    ตรวจสอบเพิ่มเติม:
-
-    - ช่องทางเป้าหมายรองรับสื่อขาออกและไม่ได้ถูกบล็อกโดย allowlist
-    - ไฟล์อยู่ภายในขีดจำกัดขนาดของผู้ให้บริการ (รูปภาพจะถูกปรับขนาดเป็นสูงสุด 2048px)
-    - `tools.fs.workspaceOnly=true` จำกัดการส่งด้วยพาธ local ให้อยู่เฉพาะ workspace, temp/media-store และไฟล์ที่ผ่านการตรวจสอบโดย sandbox
-    - `tools.fs.workspaceOnly=false` อนุญาตให้การส่งสื่อ local แบบมีโครงสร้างใช้ไฟล์ host-local ที่เอเจนต์อ่านได้อยู่แล้ว แต่เฉพาะสื่อและชนิดเอกสารที่ปลอดภัยเท่านั้น (รูปภาพ, เสียง, วิดีโอ, PDF, เอกสาร Office และเอกสารข้อความที่ผ่านการตรวจสอบ เช่น Markdown/MD, TXT, JSON, YAML และ YML) สิ่งนี้ไม่ใช่เครื่องสแกนความลับ: `secret.txt` หรือ `config.json` ที่เอเจนต์อ่านได้สามารถถูกแนบได้เมื่อ extension และการตรวจสอบเนื้อหาตรงกัน เก็บไฟล์ที่ละเอียดอ่อนไว้นอกพาธที่เอเจนต์อ่านได้ หรือคง `tools.fs.workspaceOnly=true` ไว้เพื่อการส่งด้วยพาธ local ที่เข้มงวดยิ่งขึ้น
+    นอกจากนี้ให้ตรวจสอบว่า ช่องทางปลายทางรองรับสื่อขาออกและไม่ถูกบล็อกโดยรายการอนุญาต ไฟล์มีขนาดไม่เกินขีดจำกัดของผู้ให้บริการ (รูปภาพจะถูกปรับขนาดให้ด้านที่ยาวที่สุดไม่เกิน 2048px) `tools.fs.workspaceOnly=true` จำกัดการส่งจากพาธภายในเครื่องไว้เฉพาะไฟล์ในพื้นที่ทำงาน ที่เก็บสื่อ/ไฟล์ชั่วคราว และไฟล์ที่ผ่านการตรวจสอบโดยแซนด์บ็อกซ์ ส่วน `tools.fs.workspaceOnly=false` (ค่าเริ่มต้น) อนุญาตให้การส่งสื่อภายในเครื่องแบบมีโครงสร้างใช้ไฟล์ในเครื่องโฮสต์ที่เอเจนต์อ่านได้อยู่แล้ว ทั้งไฟล์สื่อและเอกสารประเภทที่ปลอดภัย (รูปภาพ เสียง วิดีโอ PDF เอกสาร Office และเอกสารข้อความที่ผ่านการตรวจสอบ เช่น Markdown/MD, TXT, JSON, YAML/YML) นี่ไม่ใช่เครื่องมือตรวจหาความลับ โดยสามารถแนบ `secret.txt` หรือ `config.json` ที่เอเจนต์อ่านได้ เมื่อส่วนขยายและเนื้อหาผ่านการตรวจสอบ เก็บไฟล์ที่ละเอียดอ่อนไว้นอกพาธที่เอเจนต์อ่านได้ หรือคงใช้ `tools.fs.workspaceOnly=true` เพื่อให้การส่งจากพาธภายในเครื่องเข้มงวดยิ่งขึ้น
 
     ดู [รูปภาพ](/th/nodes/images)
 
@@ -1840,139 +1424,82 @@ Q&A สำหรับการรันครั้งแรก — การ�
 ## ความปลอดภัยและการควบคุมการเข้าถึง
 
 <AccordionGroup>
-  <Accordion title="ปลอดภัยไหมที่จะเปิด OpenClaw ให้รับ DM ขาเข้า?">
-    ถือว่า DM ขาเข้าเป็นอินพุตที่ไม่น่าเชื่อถือ ค่าเริ่มต้นออกแบบมาเพื่อลดความเสี่ยง:
+  <Accordion title="เปิดให้ OpenClaw รับ DM ขาเข้าปลอดภัยหรือไม่">
+    ให้ถือว่า DM ขาเข้าเป็นอินพุตที่ไม่น่าเชื่อถือ ค่าเริ่มต้นช่วยลดความเสี่ยงดังนี้:
 
-    - พฤติกรรมเริ่มต้นบนช่องทางที่รองรับ DM คือ **การจับคู่**:
-      - ผู้ส่งที่ไม่รู้จักจะได้รับรหัสจับคู่; bot จะไม่ประมวลผลข้อความของพวกเขา
-      - อนุมัติด้วย: `openclaw pairing approve --channel <channel> [--account <id>] <code>`
-      - คำขอที่รอดำเนินการจำกัดที่ **3 รายการต่อช่องทาง**; ตรวจสอบ `openclaw pairing list --channel <channel> [--account <id>]` หากรหัสไม่มาถึง
-    - การเปิด DM สู่สาธารณะต้องเลือกใช้อย่างชัดเจน (`dmPolicy: "open"` และ allowlist `"*"`)
+    - พฤติกรรมเริ่มต้นบนช่องทางที่รองรับ DM คือ **การจับคู่**: ผู้ส่งที่ไม่รู้จักจะได้รับรหัสจับคู่และข้อความของผู้ส่งจะไม่ถูกประมวลผล อนุมัติด้วย `openclaw pairing approve --channel <channel> [--account <id>] <code>` คำขอที่รอดำเนินการถูกจำกัดไว้ที่ **3 รายการต่อช่องทาง** ให้ตรวจสอบ `openclaw pairing list --channel <channel> [--account <id>]` หากไม่ได้รับรหัส
+    - การเปิด DM เป็นสาธารณะต้องเลือกเข้าร่วมอย่างชัดเจน (`dmPolicy: "open"` และรายการอนุญาต `"*"`)
 
-    รัน `openclaw doctor` เพื่อแสดงนโยบาย DM ที่มีความเสี่ยง
+    เรียกใช้ `openclaw doctor` เพื่อแสดงนโยบาย DM ที่มีความเสี่ยง
 
   </Accordion>
 
-  <Accordion title="prompt injection เป็นข้อกังวลเฉพาะสำหรับ bot สาธารณะหรือไม่?">
-    ไม่ใช่ Prompt injection เกี่ยวกับ **เนื้อหาที่ไม่น่าเชื่อถือ** ไม่ใช่เพียงว่าใครสามารถ DM หา bot ได้
-    หาก assistant ของคุณอ่านข้อความจากภายนอก (web search/fetch, หน้าเบราว์เซอร์, อีเมล,
-    เอกสาร, ไฟล์แนบ, ล็อกที่วางมา) เนื้อหานั้นอาจมีคำสั่งที่พยายาม
-    ยึดโมเดลได้ สิ่งนี้เกิดขึ้นได้แม้ว่า **คุณจะเป็นผู้ส่งเพียงคนเดียว**
+  <Accordion title="Prompt injection เป็นข้อกังวลเฉพาะบอตสาธารณะหรือไม่">
+    ไม่ใช่ Prompt injection เกี่ยวข้องกับ **เนื้อหาที่ไม่น่าเชื่อถือ** ไม่ใช่เพียงว่าใครสามารถส่ง DM ถึงบอตได้ หากผู้ช่วยอ่านเนื้อหาภายนอก (การค้นหา/ดึงข้อมูลเว็บ หน้าเบราว์เซอร์ อีเมล เอกสาร ไฟล์แนบ บันทึกที่วางเข้ามา) เนื้อหานั้นอาจมีคำสั่งที่พยายามยึดการควบคุมโมเดล แม้ว่าจะมีคุณเป็นผู้ส่งเพียงคนเดียวก็ตาม
 
-    ความเสี่ยงที่ใหญ่ที่สุดเกิดขึ้นเมื่อเปิดใช้เครื่องมือ: โมเดลอาจถูกหลอกให้
-    ขโมย context ออกไปหรือเรียกใช้เครื่องมือแทนคุณ ลดขอบเขตผลกระทบโดย:
+    ความเสี่ยงสูงสุดเกิดขึ้นเมื่อเปิดใช้เครื่องมือ: โมเดลอาจถูกหลอกให้รั่วไหลบริบทหรือเรียกใช้เครื่องมือในนามของคุณ ลดขอบเขตความเสียหายดังนี้:
 
-    - ใช้เอเจนต์ "ตัวอ่าน" ที่เป็น read-only หรือปิดเครื่องมือ เพื่อสรุปเนื้อหาที่ไม่น่าเชื่อถือ
+    - ใช้เอเจนต์ "ผู้อ่าน" แบบอ่านอย่างเดียวหรือปิดใช้เครื่องมือเพื่อสรุปเนื้อหาที่ไม่น่าเชื่อถือ
     - ปิด `web_search` / `web_fetch` / `browser` สำหรับเอเจนต์ที่เปิดใช้เครื่องมือ
-    - ถือว่าข้อความจากไฟล์/เอกสารที่ถอดรหัสแล้วก็ไม่น่าเชื่อถือเช่นกัน: OpenResponses
-      `input_file` และการแยกข้อความจากไฟล์แนบสื่อต่างห่อข้อความที่แยกได้ด้วย
-      marker ขอบเขตเนื้อหาภายนอกอย่างชัดเจน แทนที่จะส่งข้อความไฟล์ดิบ
-    - ใช้ sandbox และ allowlist เครื่องมือที่เข้มงวด
+    - ถือว่าข้อความที่ถอดรหัสจากไฟล์/เอกสารเป็นข้อมูลที่ไม่น่าเชื่อถือด้วย: ทั้ง OpenResponses `input_file` และการแยกข้อมูลจากไฟล์แนบสื่อจะครอบข้อความที่แยกได้ด้วยเครื่องหมายขอบเขตเนื้อหาภายนอกที่ชัดเจน แทนการส่งข้อความดิบจากไฟล์
+    - ใช้แซนด์บ็อกซ์และรายการอนุญาตเครื่องมือที่เข้มงวด
 
     รายละเอียด: [ความปลอดภัย](/th/gateway/security)
 
   </Accordion>
 
-  <Accordion title="OpenClaw ปลอดภัยน้อยลงหรือไม่เพราะใช้ TypeScript/Node แทน Rust/WASM?">
-    ภาษาและ runtime มีความสำคัญ แต่ไม่ใช่ความเสี่ยงหลักสำหรับเอเจนต์ส่วนบุคคล
-    ความเสี่ยงเชิงปฏิบัติของ OpenClaw คือการเปิดเผย gateway, ใครสามารถส่งข้อความหา
-    bot ได้, prompt injection, ขอบเขตเครื่องมือ, การจัดการ credential, การเข้าถึงเบราว์เซอร์, การเข้าถึง exec
-    และความน่าเชื่อถือของ skill หรือ plugin จากภายนอก
+  <Accordion title="OpenClaw ปลอดภัยน้อยลงเพราะใช้ TypeScript/Node แทน Rust/WASM หรือไม่">
+    ภาษาและรันไทม์มีความสำคัญ แต่ไม่ใช่ความเสี่ยงหลักสำหรับเอเจนต์ส่วนบุคคล ความเสี่ยงในทางปฏิบัติได้แก่ การเปิดเผย Gateway ผู้ที่ส่งข้อความถึงบอตได้ Prompt injection ขอบเขตของเครื่องมือ การจัดการข้อมูลรับรอง การเข้าถึงเบราว์เซอร์ การเข้าถึงการเรียกใช้คำสั่ง และความน่าเชื่อถือของ Skills/Plugin จากบุคคลที่สาม
 
-    Rust และ WASM สามารถให้การแยกที่แข็งแรงกว่าสำหรับโค้ดบางประเภท แต่
-    ไม่ได้แก้ prompt injection, allowlist ที่ไม่ดี, การเปิดเผย gateway สาธารณะ,
-    เครื่องมือที่กว้างเกินไป หรือโปรไฟล์เบราว์เซอร์ที่ล็อกอินบัญชีที่ละเอียดอ่อนอยู่แล้ว
-    ให้ถือสิ่งเหล่านี้เป็นการควบคุมหลัก:
+    Rust และ WASM สามารถให้การแยกที่แข็งแกร่งกว่าสำหรับโค้ดบางประเภท แต่ไม่สามารถแก้ปัญหา Prompt injection รายการอนุญาตที่ไม่เหมาะสม การเปิดเผย Gateway สู่สาธารณะ เครื่องมือที่มีขอบเขตกว้างเกินไป หรือโปรไฟล์เบราว์เซอร์ที่เข้าสู่ระบบบัญชีละเอียดอ่อนไว้แล้ว ให้ถือว่าสิ่งเหล่านี้เป็นมาตรการควบคุมหลัก: รักษา Gateway ให้เป็นส่วนตัวหรือมีการยืนยันตัวตน ใช้การจับคู่และรายการอนุญาตสำหรับ DM/กลุ่ม ปฏิเสธหรือแยกเครื่องมือที่มีความเสี่ยงไว้ในแซนด์บ็อกซ์สำหรับอินพุตที่ไม่น่าเชื่อถือ ติดตั้งเฉพาะ Plugin และ Skills ที่เชื่อถือได้ และเรียกใช้ `openclaw security audit --deep` หลังเปลี่ยนการกำหนดค่า
 
-    - ทำให้ Gateway เป็นส่วนตัวหรือมีการยืนยันตัวตน
-    - ใช้การจับคู่และ allowlist สำหรับ DM และกลุ่ม
-    - ปฏิเสธหรือ sandbox เครื่องมือที่มีความเสี่ยงสำหรับอินพุตที่ไม่น่าเชื่อถือ
-    - ติดตั้งเฉพาะ plugins และ skills ที่เชื่อถือได้
-    - รัน `openclaw security audit --deep` หลังเปลี่ยน config
-
-    รายละเอียด: [ความปลอดภัย](/th/gateway/security), [Sandboxing](/th/gateway/sandboxing)
+    รายละเอียด: [ความปลอดภัย](/th/gateway/security), [การใช้แซนด์บ็อกซ์](/th/gateway/sandboxing)
 
   </Accordion>
 
-  <Accordion title="ฉันเห็นรายงานเกี่ยวกับอินสแตนซ์ OpenClaw ที่ถูกเปิดเผย ควรตรวจสอบอะไร?">
-    ก่อนอื่นตรวจสอบ deployment จริงของคุณ:
-
+  <Accordion title="พบรายงานเกี่ยวกับอินสแตนซ์ OpenClaw ที่ถูกเปิดเผย ควรตรวจสอบอะไรบ้าง">
     ```bash
     openclaw security audit --deep
     openclaw gateway status
     ```
 
-    baseline ที่ปลอดภัยกว่า คือ:
+    ค่าพื้นฐานที่ปลอดภัยกว่า: ผูก Gateway กับ `loopback` หรือเปิดเผยเฉพาะผ่านการเข้าถึงส่วนตัวที่มีการยืนยันตัวตน (tailnet, ทันเนล SSH, การยืนยันตัวตนด้วยโทเค็น/รหัสผ่าน หรือพร็อกซีที่เชื่อถือได้และกำหนดค่าอย่างถูกต้อง) DM อยู่ในโหมด `pairing` หรือ `allowlist` กลุ่มอยู่ในรายการอนุญาตและต้องมีการกล่าวถึง เว้นแต่สมาชิกทุกคนจะเชื่อถือได้ เครื่องมือความเสี่ยงสูง (`exec`, `browser`, `gateway`, `cron`) ถูกปฏิเสธหรือจำกัดขอบเขตอย่างเข้มงวดสำหรับเอเจนต์ที่อ่านเนื้อหาที่ไม่น่าเชื่อถือ และเปิดใช้แซนด์บ็อกซ์ในกรณีที่การเรียกใช้เครื่องมือต้องการจำกัดขอบเขตความเสียหายให้เล็กลง
 
-    - Gateway ผูกกับ `loopback` หรือเปิดเผยผ่านการเข้าถึงส่วนตัวที่ยืนยันตัวตนแล้วเท่านั้น
-      เช่น tailnet, SSH tunnel, การยืนยันตัวตนด้วย token/password หรือพร็อกซีที่เชื่อถือได้ซึ่ง
-      กำหนดค่าอย่างถูกต้อง
-    - DM อยู่ในโหมด `pairing` หรือ `allowlist`
-    - กลุ่มอยู่ใน allowlist และต้องมีการ mention เว้นแต่สมาชิกทุกคนจะเชื่อถือได้
-    - เครื่องมือความเสี่ยงสูง (`exec`, `browser`, `gateway`, `cron`) ถูกปฏิเสธหรือจำกัดขอบเขตอย่างเข้มงวด
-      สำหรับเอเจนต์ที่อ่านเนื้อหาที่ไม่น่าเชื่อถือ
-    - เปิดใช้ sandboxing ในที่ที่การรันเครื่องมือต้องการขอบเขตผลกระทบที่เล็กลง
-
-    การ bind สาธารณะโดยไม่มี auth, DM/กลุ่มแบบเปิดพร้อมเครื่องมือ และการเปิดเผยการควบคุมเบราว์เซอร์
-    คือสิ่งที่ควรแก้ก่อน รายละเอียด:
-    [เช็กลิสต์การตรวจสอบความปลอดภัย](/th/gateway/security#security-audit-checklist)
+    สิ่งที่ต้องแก้ไขก่อนคือการผูกแบบสาธารณะโดยไม่มีการยืนยันตัวตน DM/กลุ่มแบบเปิดพร้อมเครื่องมือ และการเปิดเผยการควบคุมเบราว์เซอร์ รายละเอียด: [openclaw security audit](/th/gateway/security#openclaw-security-audit)
 
   </Accordion>
 
-  <Accordion title="Skills ของ ClawHub และ plugins จากภายนอกปลอดภัยสำหรับการติดตั้งหรือไม่?">
-    ถือว่า skills และ plugins จากภายนอกเป็นโค้ดที่คุณเลือกจะเชื่อถือ
-    หน้า skill ของ ClawHub แสดงสถานะการสแกนก่อนติดตั้ง แต่การสแกนไม่ใช่
-    ขอบเขตความปลอดภัยที่สมบูรณ์ OpenClaw ไม่ได้รันการบล็อกโค้ดอันตรายแบบ local
-    ในตัวระหว่างขั้นตอนการติดตั้ง/อัปเดต plugin หรือ skill; ใช้
-    `security.installPolicy` ที่ผู้ปฏิบัติการเป็นเจ้าของสำหรับการตัดสินใจอนุญาต/บล็อกแบบ local
+  <Accordion title="Skills จาก ClawHub และ Plugin จากบุคคลที่สามปลอดภัยต่อการติดตั้งหรือไม่">
+    ให้ถือว่า Skills และ Plugin จากบุคคลที่สามเป็นโค้ดที่คุณเลือกจะเชื่อถือ หน้า Skills ของ ClawHub แสดงสถานะการสแกนก่อนติดตั้ง แต่การสแกนไม่ใช่ขอบเขตความปลอดภัยที่สมบูรณ์ OpenClaw ไม่เรียกใช้การบล็อกโค้ดอันตรายภายในเครื่องแบบในตัวระหว่างการติดตั้งหรืออัปเดต Plugin/Skills ให้ใช้ `security.installPolicy` ที่ผู้ดำเนินการเป็นผู้ดูแลสำหรับการตัดสินใจอนุญาต/บล็อกภายในเครื่อง
 
-    รูปแบบที่ปลอดภัยกว่า:
+    รูปแบบที่ปลอดภัยกว่า: เลือกผู้เขียนที่เชื่อถือได้และเวอร์ชันที่ตรึงไว้ อ่าน Skills/Plugin ก่อนเปิดใช้ จำกัดรายการอนุญาตของ Plugin/Skills ให้แคบ เรียกใช้เวิร์กโฟลว์ที่รับอินพุตไม่น่าเชื่อถือในแซนด์บ็อกซ์พร้อมเครื่องมือขั้นต่ำ และหลีกเลี่ยงการให้โค้ดจากบุคคลที่สามเข้าถึงระบบไฟล์ การเรียกใช้คำสั่ง เบราว์เซอร์ หรือความลับในวงกว้าง
 
-    - เลือกผู้เขียนที่เชื่อถือได้และเวอร์ชันที่ pin ไว้
-    - อ่าน skill หรือ plugin ก่อนเปิดใช้งาน
-    - จำกัด allowlist ของ plugin และ skill ให้แคบ
-    - รัน workflow ที่มีอินพุตไม่น่าเชื่อถือใน sandbox พร้อมเครื่องมือขั้นต่ำ
-    - หลีกเลี่ยงการให้โค้ดจากภายนอกเข้าถึง filesystem, exec, browser หรือ secret อย่างกว้างขวาง
-
-    รายละเอียด: [Skills](/th/tools/skills), [Plugin](/th/tools/plugin),
-    [ความปลอดภัย](/th/gateway/security).
+    รายละเอียด: [Skills](/th/tools/skills), [Plugin](/th/tools/plugin), [ความปลอดภัย](/th/gateway/security)
 
   </Accordion>
 
-  <Accordion title="บอตของฉันควรมีอีเมล บัญชี GitHub หรือหมายเลขโทรศัพท์ของตัวเองหรือไม่?">
-    ใช่ สำหรับการตั้งค่าส่วนใหญ่ การแยกบอตออกด้วยบัญชีและหมายเลขโทรศัพท์ต่างหาก
-    ช่วยลดขอบเขตผลกระทบหากมีบางอย่างผิดพลาด และยังทำให้หมุนเวียน
-    ข้อมูลรับรองหรือเพิกถอนสิทธิ์เข้าถึงได้ง่ายขึ้นโดยไม่กระทบบัญชีส่วนตัวของคุณ
+  <Accordion title="บอตควรมีอีเมล บัญชี GitHub หรือหมายเลขโทรศัพท์แยกต่างหากหรือไม่">
+    ควรสำหรับการตั้งค่าส่วนใหญ่ การแยกบอตด้วยบัญชีและหมายเลขโทรศัพท์ต่างหากช่วยลดขอบเขตความเสียหายหากมีสิ่งผิดปกติ และช่วยให้หมุนเวียนข้อมูลรับรองหรือเพิกถอนการเข้าถึงได้ง่ายขึ้นโดยไม่กระทบบัญชีส่วนตัว
 
-    เริ่มจากขอบเขตเล็กก่อน ให้สิทธิ์เข้าถึงเฉพาะเครื่องมือและบัญชีที่คุณจำเป็นต้องใช้จริง
-    แล้วค่อยขยายภายหลังหากจำเป็น
+    เริ่มจากขอบเขตเล็ก ๆ: ให้สิทธิ์เข้าถึงเฉพาะเครื่องมือและบัญชีที่จำเป็นจริง ๆ แล้วค่อยขยายในภายหลังหากจำเป็น
 
-    เอกสาร: [ความปลอดภัย](/th/gateway/security), [การจับคู่](/th/channels/pairing).
+    เอกสาร: [ความปลอดภัย](/th/gateway/security), [การจับคู่](/th/channels/pairing)
 
   </Accordion>
 
-  <Accordion title="ฉันให้มันทำงานอัตโนมัติกับข้อความของฉันได้ไหม และปลอดภัยหรือไม่?">
-    เรา**ไม่**แนะนำให้ให้สิทธิ์ทำงานอัตโนมัติเต็มรูปแบบกับข้อความส่วนตัวของคุณ รูปแบบที่ปลอดภัยที่สุดคือ:
+  <Accordion title="ให้ระบบทำงานกับข้อความของฉันโดยอัตโนมัติได้หรือไม่ และปลอดภัยหรือไม่">
+    **ไม่** แนะนำให้ระบบทำงานกับข้อความส่วนตัวโดยอัตโนมัติทั้งหมด รูปแบบที่ปลอดภัยที่สุดคือ คง DM ไว้ใน **โหมดจับคู่** หรือใช้รายการอนุญาตที่เข้มงวด ใช้ **หมายเลขหรือบัญชีแยกต่างหาก** หากต้องการให้ส่งข้อความในนามของคุณ และให้ระบบร่างข้อความโดยที่คุณ **อนุมัติก่อนส่ง**
 
-    - เก็บข้อความส่วนตัวไว้ใน**โหมดการจับคู่**หรือรายการอนุญาตที่จำกัดมาก
-    - ใช้**หมายเลขหรือบัญชีแยกต่างหาก**หากคุณต้องการให้มันส่งข้อความแทนคุณ
-    - ให้มันร่างข้อความ แล้ว**อนุมัติก่อนส่ง**
-
-    หากคุณต้องการทดลอง ให้ทำบนบัญชีเฉพาะและแยกออกจากบัญชีอื่น ดู
-    [ความปลอดภัย](/th/gateway/security).
+    หากต้องการทดลอง ให้ใช้บัญชีเฉพาะที่แยกออกจากบัญชีอื่น ดู [ความปลอดภัย](/th/gateway/security)
 
   </Accordion>
 
-  <Accordion title="ฉันใช้โมเดลที่ถูกกว่าสำหรับงานผู้ช่วยส่วนตัวได้ไหม?">
-    ได้ **ถ้า**เอเจนต์เป็นแบบแชทเท่านั้นและข้อมูลขาเข้าน่าเชื่อถือ ระดับโมเดลที่เล็กกว่า
-    อ่อนไหวต่อการถูกแทรกคำสั่งมากกว่า จึงควรหลีกเลี่ยงสำหรับเอเจนต์ที่เปิดใช้เครื่องมือ
-    หรือเมื่ออ่านข้อความที่ไม่น่าเชื่อถือ หากคุณจำเป็นต้องใช้โมเดลที่เล็กกว่า ให้จำกัด
-    เครื่องมืออย่างเข้มงวดและรันภายในแซนด์บ็อกซ์ ดู [ความปลอดภัย](/th/gateway/security).
+  <Accordion title="ใช้โมเดลราคาถูกกว่าสำหรับงานผู้ช่วยส่วนบุคคลได้หรือไม่">
+    ได้ **หาก** เอเจนต์ใช้เฉพาะการแชตและอินพุตเชื่อถือได้ โมเดลระดับเล็กกว่ามีโอกาสถูกยึดการควบคุมด้วยคำสั่งมากกว่า จึงควรหลีกเลี่ยงการใช้กับเอเจนต์ที่เปิดใช้เครื่องมือหรือเมื่ออ่านเนื้อหาที่ไม่น่าเชื่อถือ หากจำเป็นต้องใช้โมเดลที่เล็กกว่า ให้จำกัดเครื่องมือและเรียกใช้ภายในแซนด์บ็อกซ์ ดู [ความปลอดภัย](/th/gateway/security)
   </Accordion>
 
-  <Accordion title="ฉันรัน /start ใน Telegram แต่ไม่ได้รับรหัสจับคู่">
-    รหัสจับคู่จะถูกส่ง**เฉพาะ**เมื่อผู้ส่งที่ไม่รู้จักส่งข้อความถึงบอตและเปิดใช้
-    `dmPolicy: "pairing"` แล้วเท่านั้น `/start` เพียงอย่างเดียวจะไม่สร้างรหัส
+  <Accordion title="เรียกใช้ /start ใน Telegram แล้วแต่ไม่ได้รับรหัสจับคู่">
+    รหัสจับคู่จะถูกส่ง **เฉพาะ** เมื่อผู้ส่งที่ไม่รู้จักส่งข้อความถึงบอตและเปิดใช้ `dmPolicy: "pairing"` อยู่ โดย `/start` เพียงอย่างเดียวจะไม่สร้างรหัส
 
     ตรวจสอบคำขอที่รอดำเนินการ:
 
@@ -1980,98 +1507,58 @@ Q&A สำหรับการรันครั้งแรก — การ�
     openclaw pairing list telegram
     ```
 
-    หากคุณต้องการเข้าถึงทันที ให้เพิ่มรหัสผู้ส่งของคุณในรายการอนุญาตหรือตั้งค่า `dmPolicy: "open"`
-    สำหรับบัญชีนั้น
+    หากต้องการเข้าถึงทันที ให้เพิ่ม ID ผู้ส่งลงในรายการอนุญาต หรือตั้งค่า `dmPolicy: "open"` สำหรับบัญชีนั้น
 
   </Accordion>
 
-  <Accordion title="WhatsApp: มันจะส่งข้อความถึงรายชื่อติดต่อของฉันไหม? การจับคู่ทำงานอย่างไร?">
-    ไม่ นโยบายข้อความส่วนตัวเริ่มต้นของ WhatsApp คือ**การจับคู่** ผู้ส่งที่ไม่รู้จักจะได้รับเฉพาะรหัสจับคู่ และข้อความของพวกเขา**จะไม่ถูกประมวลผล** OpenClaw จะตอบกลับเฉพาะแชทที่ได้รับหรือการส่งที่คุณสั่งอย่างชัดเจนเท่านั้น
-
-    อนุมัติการจับคู่ด้วย:
+  <Accordion title="WhatsApp: ระบบจะส่งข้อความถึงผู้ติดต่อของฉันหรือไม่ การจับคู่ทำงานอย่างไร">
+    ไม่ นโยบาย DM เริ่มต้นของ WhatsApp คือ **การจับคู่** ผู้ส่งที่ไม่รู้จักจะได้รับเพียงรหัสจับคู่ และข้อความของผู้ส่งจะ **ไม่ถูกประมวลผล** OpenClaw จะตอบกลับเฉพาะแชตที่ได้รับ หรือการส่งที่คุณเรียกใช้อย่างชัดเจนเท่านั้น
 
     ```bash
     openclaw pairing approve whatsapp <code>
-    ```
-
-    แสดงรายการคำขอที่รอดำเนินการ:
-
-    ```bash
     openclaw pairing list whatsapp
     ```
 
-    พรอมต์หมายเลขโทรศัพท์ในตัวช่วยตั้งค่า: ใช้เพื่อตั้งค่า**รายการอนุญาต/เจ้าของ**ของคุณ เพื่อให้ข้อความส่วนตัวของคุณเองได้รับอนุญาต ไม่ได้ใช้สำหรับการส่งอัตโนมัติ หากคุณรันบนหมายเลข WhatsApp ส่วนตัว ให้ใช้หมายเลขนั้นและเปิดใช้ `channels.whatsapp.selfChatMode`
+    พรอมต์หมายเลขโทรศัพท์ของตัวช่วยตั้งค่าจะกำหนด **รายการอนุญาต/เจ้าของ** เพื่ออนุญาต DM ของคุณเอง โดยไม่ได้ใช้สำหรับการส่งอัตโนมัติ สำหรับหมายเลข WhatsApp ส่วนตัว ให้ใช้หมายเลขนั้นและเปิดใช้ `channels.whatsapp.selfChatMode`
 
   </Accordion>
 </AccordionGroup>
 
-## คำสั่งแชท การยกเลิกงาน และ "มันไม่ยอมหยุด"
+## คำสั่งแชต การยกเลิกงาน และ "ทำไมถึงไม่หยุด"
 
 <AccordionGroup>
-  <Accordion title="ฉันจะหยุดไม่ให้ข้อความระบบภายในแสดงในแชทได้อย่างไร?">
-    ข้อความภายในหรือข้อความเครื่องมือส่วนใหญ่จะแสดงเฉพาะเมื่อเปิดใช้ **verbose**, **trace** หรือ **reasoning**
-    สำหรับเซสชันนั้น
+  <Accordion title="ฉันจะหยุดไม่ให้ข้อความระบบภายในแสดงในแชตได้อย่างไร">
+    ข้อความภายใน/ข้อความจากเครื่องมือส่วนใหญ่จะแสดงเฉพาะเมื่อเปิดใช้ **verbose**, **trace** หรือ **reasoning** สำหรับเซสชันนั้น
 
-    แก้ไขในแชทที่คุณเห็นข้อความนั้น:
+    แก้ไขในแชตที่พบข้อความดังกล่าว:
 
-    ```
+    ```text
     /verbose off
     /trace off
     /reasoning off
     ```
 
-    หากยังมีเสียงรบกวนมาก ให้ตรวจสอบการตั้งค่าเซสชันใน Control UI และตั้งค่า verbose
-    เป็น **inherit** และยืนยันด้วยว่าคุณไม่ได้ใช้โปรไฟล์บอตที่ตั้งค่า `verboseDefault`
-    เป็น `on` ในคอนฟิก
+    หากยังมีข้อความรบกวน: ตรวจสอบการตั้งค่าเซสชันใน Control UI และตั้งค่า verbose เป็น **inherit** พร้อมยืนยันว่าคุณไม่ได้ใช้โปรไฟล์บอตที่มี `verboseDefault: "on"` ในการกำหนดค่า
 
-    เอกสาร: [การคิดและ verbose](/th/tools/thinking), [ความปลอดภัย](/th/gateway/security/index#reasoning-and-verbose-output-in-groups).
+    เอกสาร: [การคิดและ verbose](/th/tools/thinking), [ความปลอดภัย](/th/gateway/security/index#reasoning-and-verbose-output-in-groups)
 
   </Accordion>
 
-  <Accordion title="ฉันจะหยุด/ยกเลิกงานที่กำลังรันอยู่ได้อย่างไร?">
-    ส่งรายการใดรายการหนึ่งต่อไปนี้**เป็นข้อความเดี่ยว** (ไม่มีเครื่องหมายสแลช):
+  <Accordion title="ฉันจะหยุด/ยกเลิกงานที่กำลังทำงานได้อย่างไร">
+    ส่งรายการใดรายการหนึ่งต่อไปนี้ **เป็นข้อความเดี่ยว** (ไม่มีเครื่องหมายทับ) เพื่อสั่งยกเลิก: `stop`, `stop action`, `stop current action`, `stop run`, `stop current run`, `stop agent`, `stop the agent`, `stop openclaw`, `openclaw stop`, `stop don't do anything`, `stop do not do anything`, `stop doing anything`, `do not do that`, `please stop`, `stop please`, `abort`, `esc`, `exit`, `interrupt`, `halt` คำสั่งเรียกใช้ทั่วไปที่ไม่ใช่ภาษาอังกฤษ (ฝรั่งเศส เยอรมัน สเปน จีน ญี่ปุ่น ฮินดี อาหรับ รัสเซีย) ก็ใช้งานได้เช่นกัน
 
-    ```
-    stop
-    stop action
-    stop current action
-    stop run
-    stop current run
-    stop agent
-    stop the agent
-    stop openclaw
-    openclaw stop
-    stop don't do anything
-    stop do not do anything
-    stop doing anything
-    please stop
-    stop please
-    abort
-    esc
-    wait
-    exit
-    interrupt
-    ```
+    สำหรับโพรเซสเบื้องหลังที่เริ่มโดยเครื่องมือ exec ให้ขอให้เอเจนต์เรียกใช้:
 
-    รายการเหล่านี้เป็นทริกเกอร์ยกเลิก (ไม่ใช่คำสั่งสแลช)
-
-    สำหรับกระบวนการเบื้องหลัง (จากเครื่องมือ exec) คุณสามารถขอให้เอเจนต์รัน:
-
-    ```
+    ```text
     process action:kill sessionId:XXX
     ```
 
-    ภาพรวมคำสั่งสแลช: ดู [คำสั่งสแลช](/th/tools/slash-commands).
-
-    คำสั่งส่วนใหญ่ต้องส่งเป็นข้อความ**เดี่ยว**ที่ขึ้นต้นด้วย `/` แต่ทางลัดบางรายการ (เช่น `/status`) ก็ใช้แบบแทรกในข้อความได้เช่นกันสำหรับผู้ส่งที่อยู่ในรายการอนุญาต
+    คำสั่งที่มีเครื่องหมายทับส่วนใหญ่ต้องส่งเป็นข้อความ **เดี่ยว** ที่ขึ้นต้นด้วย `/` แต่คำสั่งลัดบางรายการ (เช่น `/status`) สามารถใช้แทรกในข้อความได้เช่นกันสำหรับผู้ส่งที่อยู่ในรายการอนุญาต ดู[คำสั่งที่มีเครื่องหมายทับ](/th/tools/slash-commands)
 
   </Accordion>
 
-  <Accordion title='ฉันจะส่งข้อความ Discord จาก Telegram ได้อย่างไร? ("การส่งข้อความข้ามบริบทถูกปฏิเสธ")'>
-    OpenClaw บล็อกการส่งข้อความ**ข้ามผู้ให้บริการ**โดยค่าเริ่มต้น หากการเรียกเครื่องมือผูกอยู่กับ
-    Telegram มันจะไม่ส่งไปยัง Discord เว้นแต่คุณจะอนุญาตอย่างชัดเจน
-
-    เปิดใช้การส่งข้อความข้ามผู้ให้บริการสำหรับเอเจนต์:
+  <Accordion title='ฉันจะส่งข้อความ Discord จาก Telegram ได้อย่างไร ("การส่งข้อความข้ามบริบทถูกปฏิเสธ")'>
+    OpenClaw บล็อกการส่งข้อความ **ข้ามผู้ให้บริการ** โดยค่าเริ่มต้น หากการเรียกใช้เครื่องมือผูกกับ Telegram เครื่องมือจะไม่ส่งข้อความไปยัง Discord เว้นแต่คุณจะอนุญาตอย่างชัดเจน และการตั้งค่านี้จะมีผลทันทีโดยไม่ต้องรีสตาร์ต Gateway:
 
     ```json5
     {
@@ -2079,44 +1566,42 @@ Q&A สำหรับการรันครั้งแรก — การ�
         message: {
           crossContext: {
             allowAcrossProviders: true,
-            marker: { enabled: true, prefix: "[from {channel}] " },
+            marker: { enabled: true, prefix: "[จาก {channel}] " },
           },
         },
       },
     }
     ```
 
-    รีสตาร์ต Gateway หลังแก้ไขคอนฟิก
-
   </Accordion>
 
-  <Accordion title='ทำไมจึงรู้สึกเหมือนบอต "ละเลย" ข้อความที่ส่งรัว ๆ?'>
-    โดยค่าเริ่มต้น พรอมต์ระหว่างที่กำลังรันจะถูกนำทางเข้าไปยังรันที่ใช้งานอยู่ ใช้ `/queue` เพื่อเลือกพฤติกรรมของรันที่ใช้งานอยู่:
+  <Accordion title='ทำไมจึงรู้สึกว่าบอต "เพิกเฉย" ต่อข้อความที่ส่งติด ๆ กัน'>
+    โดยค่าเริ่มต้น พรอมต์ที่ส่งระหว่างการทำงานจะถูกนำไปกำกับการทำงานที่กำลังดำเนินอยู่ ใช้ `/queue` เพื่อเลือกพฤติกรรมของการทำงานที่กำลังดำเนินอยู่:
 
-    - `steer` - ชี้นำรันที่ใช้งานอยู่ที่ขอบเขตโมเดลถัดไป
-    - `followup` - จัดคิวข้อความและรันทีละรายการหลังจากรันปัจจุบันจบ
-    - `collect` - จัดคิวข้อความที่เข้ากันได้และตอบกลับครั้งเดียวหลังจากรันปัจจุบันจบ
-    - `interrupt` - ยกเลิกรันปัจจุบันและเริ่มใหม่
+    - `steer` (ค่าเริ่มต้น) - กำกับการทำงานที่กำลังดำเนินอยู่ ณ ขอบเขตโมเดลถัดไป
+    - `followup` - จัดข้อความเข้าคิวและประมวลผลทีละข้อความหลังจากการทำงานปัจจุบันสิ้นสุดลง
+    - `collect` - จัดข้อความที่เข้ากันได้เข้าคิวและตอบกลับครั้งเดียวหลังจากการทำงานปัจจุบันสิ้นสุดลง
+    - `interrupt` - ยกเลิกการทำงานปัจจุบันและเริ่มใหม่
 
-    โหมดเริ่มต้นคือ `steer` คุณสามารถเพิ่มตัวเลือกอย่าง `debounce:0.5s cap:25 drop:summarize` สำหรับโหมดที่จัดคิวได้ ดู [คิวคำสั่ง](/th/concepts/queue) และ [คิวการชี้นำ](/th/concepts/queue-steering).
+    เพิ่มตัวเลือกให้โหมดที่ใช้คิวได้ เช่น `debounce:0.5s cap:25 drop:summarize` ดู[คิวคำสั่ง](/th/concepts/queue)และ[คิวการกำกับ](/th/concepts/queue-steering)
 
   </Accordion>
 </AccordionGroup>
 
-## อื่น ๆ
+## เบ็ดเตล็ด
 
 <AccordionGroup>
-  <Accordion title='โมเดลเริ่มต้นสำหรับ Anthropic เมื่อใช้ API key คืออะไร?'>
-    ใน OpenClaw ข้อมูลรับรองและการเลือกโมเดลเป็นคนละส่วนกัน การตั้งค่า `ANTHROPIC_API_KEY` (หรือจัดเก็บ Anthropic API key ในโปรไฟล์ยืนยันตัวตน) จะเปิดใช้การยืนยันตัวตน แต่โมเดลเริ่มต้นจริงคือสิ่งที่คุณกำหนดค่าไว้ใน `agents.defaults.model.primary` (เช่น `anthropic/claude-sonnet-4-6` หรือ `anthropic/claude-opus-4-6`) หากคุณเห็น `No credentials found for profile "anthropic:default"` หมายความว่า Gateway ไม่พบข้อมูลรับรอง Anthropic ใน `auth-profiles.json` ที่คาดไว้สำหรับเอเจนต์ที่กำลังรันอยู่
+  <Accordion title='โมเดลเริ่มต้นสำหรับ Anthropic เมื่อใช้คีย์ API คืออะไร'>
+    ข้อมูลประจำตัวและการเลือกโมเดลเป็นคนละส่วนกัน การตั้งค่า `ANTHROPIC_API_KEY` (หรือจัดเก็บคีย์ API ของ Anthropic ในโปรไฟล์การยืนยันตัวตน) จะเปิดใช้การยืนยันตัวตน แต่โมเดลเริ่มต้นจริงคือโมเดลที่คุณกำหนดค่าไว้ใน `agents.defaults.model.primary` (เช่น `anthropic/claude-sonnet-4-6` หรือ `anthropic/claude-opus-4-6`) `No credentials found for profile "anthropic:default"` หมายความว่า Gateway ไม่พบข้อมูลประจำตัว Anthropic ใน `auth-profiles.json` ที่คาดไว้สำหรับเอเจนต์ที่กำลังทำงาน
   </Accordion>
 </AccordionGroup>
 
 ---
 
-ยังติดปัญหาอยู่หรือไม่? ถามใน [Discord](https://discord.com/invite/clawd) หรือเปิด [การสนทนา GitHub](https://github.com/openclaw/openclaw/discussions).
+หากยังแก้ปัญหาไม่ได้ ให้สอบถามใน [Discord](https://discord.com/invite/clawd) หรือเปิด[การสนทนาบน GitHub](https://github.com/openclaw/openclaw/discussions)
 
-## ที่เกี่ยวข้อง
+## เนื้อหาที่เกี่ยวข้อง
 
-- [คำถามที่พบบ่อยในการรันครั้งแรก](/th/help/faq-first-run) — การติดตั้ง การเริ่มใช้งาน การยืนยันตัวตน การสมัครใช้งาน ข้อผิดพลาดช่วงแรก
-- [คำถามที่พบบ่อยเกี่ยวกับโมเดล](/th/help/faq-models) — การเลือกโมเดล failover โปรไฟล์ยืนยันตัวตน
-- [การแก้ไขปัญหา](/th/help/troubleshooting) — การคัดแยกตามอาการก่อน
+- [คำถามที่พบบ่อยเกี่ยวกับการใช้งานครั้งแรก](/th/help/faq-first-run) - การติดตั้ง การเริ่มต้นใช้งาน การยืนยันตัวตน การสมัครใช้บริการ และความล้มเหลวในช่วงแรก
+- [คำถามที่พบบ่อยเกี่ยวกับโมเดล](/th/help/faq-models) - การเลือกโมเดล การสลับเมื่อขัดข้อง และโปรไฟล์การยืนยันตัวตน
+- [การแก้ไขปัญหา](/th/help/troubleshooting) - การคัดแยกปัญหาโดยเริ่มจากอาการ

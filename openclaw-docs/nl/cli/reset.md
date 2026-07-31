@@ -1,22 +1,23 @@
 ---
 read_when:
-    - Je wilt de lokale status wissen terwijl de CLI geïnstalleerd blijft
-    - U wilt een proefuitvoering van wat er zou worden verwijderd
-summary: CLI-referentie voor `openclaw reset` (lokale status/configuratie opnieuw instellen)
+    - Je wilt de lokale status wissen, maar de CLI geïnstalleerd houden
+    - Je wilt een proefuitvoering van wat er zou worden verwijderd
+summary: CLI-referentie voor `openclaw reset` (lokale status/configuratie resetten)
 title: Opnieuw instellen
 x-i18n:
-    generated_at: "2026-07-12T08:46:44Z"
+    generated_at: "2026-07-27T05:41:44Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f18af9c5e187217de4c02f4b55de9a1c94f7246b74056dc660aa172168edcef9
+    source_hash: 54f1d320ee368dae4a4bfb32dea73d19eb35f9f30edd12d9c2580ab7e6a26fa6
     source_path: cli/reset.md
     workflow: 16
 ---
 
 # `openclaw reset`
 
-Stel de lokale configuratie/status opnieuw in (de CLI blijft geïnstalleerd).
+Lokale configuratie/status opnieuw instellen (de CLI blijft geïnstalleerd).
 
 ```bash
 openclaw reset
@@ -35,20 +36,21 @@ openclaw reset --scope full --yes --non-interactive
 
 ## Bereiken
 
-| Bereik                  | Verwijdert                                                                                                          | Stopt eerst de Gateway |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `config`                | alleen het configuratiebestand                                                                                      | nee                    |
-| `config+creds+sessions` | configuratiebestand, OAuth-/referentiemap en sessiemappen per agent                                                  | ja                     |
-| `full`                  | statusmap (inclusief configuratie/referenties als die daarin zijn genest), plus werkruimtemappen en werkruimteverklaringen | ja                     |
+| Bereik                  | Verwijdert                                                                  | Stopt eerst de Gateway |
+| ----------------------- | --------------------------------------------------------------------------- | ---------------------- |
+| `config`                | alleen het configuratiebestand                                              | nee                    |
+| `config+creds+sessions` | configuratiebestand, map met OAuth-/aanmeldgegevens en sessiemappen per agent | ja                     |
+| `full`                  | statusmap (inclusief de gedeelde SQLite-database) plus werkruimtemappen      | ja                     |
 
 `config+creds+sessions` en `full` stoppen een actieve beheerde Gateway-service voordat de status wordt verwijderd.
 
 ## Opmerkingen
 
-- Voer eerst `openclaw backup create` uit om een herstelbare momentopname te maken voordat u de lokale status verwijdert.
+- Voer eerst `openclaw backup create` uit voor een herstelbare momentopname voordat je de lokale status verwijdert.
+- De status en attestaties van de werkruimte-instellingen zijn rijen in de gedeelde SQLite-database. Daarom verwijdert `full` deze samen met de statusmap; er zijn momenteel geen afzonderlijke attestatiebestanden die apart moeten worden verwijderd.
 - Zonder `--scope` vraagt `openclaw reset` interactief welk bereik moet worden verwijderd.
 - `--non-interactive` is alleen geldig wanneer zowel `--scope` als `--yes` zijn ingesteld.
-- `config+creds+sessions` en `full` geven na voltooiing `Volgende: openclaw onboard --install-daemon` weer.
+- `config+creds+sessions` en `full` geven na voltooiing `Next: openclaw onboard --install-daemon` weer.
 
 ## Gerelateerd
 

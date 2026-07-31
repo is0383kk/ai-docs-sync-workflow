@@ -1,31 +1,32 @@
 ---
 read_when:
     - Cerebras'ı OpenClaw ile kullanmak istiyorsunuz
-    - Cerebras API anahtarı ortam değişkenine veya CLI kimlik doğrulama seçeneğine ihtiyacınız var
+    - Cerebras API anahtarı ortam değişkeni veya CLI kimlik doğrulama seçeneği gereklidir
 summary: Cerebras kurulumu (kimlik doğrulama + model seçimi)
 title: Cerebras
 x-i18n:
-    generated_at: "2026-07-12T12:38:48Z"
+    generated_at: "2026-07-26T23:35:48Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: fca8110d345c796f0481ebf1a8d85c2cc9630b8bd55db8d4bf60772151b35b37
+    source_hash: 716eef83155ef80d9aa61bd55ed83e3e38ad22720ae055bce7eb9c2cbfb6cf41
     source_path: providers/cerebras.md
     workflow: 16
 ---
 
-[Cerebras](https://www.cerebras.ai), özel çıkarım donanımında yüksek hızlı, OpenAI uyumlu çıkarım sağlar. Plugin, statik bir dört modelli katalogla sunulur (canlı keşif yoktur).
+[Cerebras](https://www.cerebras.ai), özel çıkarım donanımında yüksek hızlı, OpenAI uyumlu çıkarım sağlar. Plugin, statik iki modelli bir katalogla sunulur (canlı keşif yoktur).
 
-| Özellik                  | Değer                                                     |
-| ------------------------ | --------------------------------------------------------- |
-| Sağlayıcı kimliği        | `cerebras`                                                |
-| Plugin                   | resmî harici paket (`@openclaw/cerebras-provider`)        |
-| Kimlik doğrulama ortam değişkeni | `CEREBRAS_API_KEY`                               |
-| İlk kurulum bayrağı      | `--auth-choice cerebras-api-key`                          |
-| Doğrudan CLI bayrağı     | `--cerebras-api-key <key>`                                |
-| API                      | OpenAI uyumlu (`openai-completions`)                      |
-| Temel URL                | `https://api.cerebras.ai/v1`                              |
-| Varsayılan model         | `cerebras/zai-glm-4.7`                                    |
+| Özellik              | Değer                                                     |
+| -------------------- | --------------------------------------------------------- |
+| Sağlayıcı kimliği    | `cerebras`                                        |
+| Plugin               | resmi harici paket (`@openclaw/cerebras-provider`)                   |
+| Kimlik doğrulama ortam değişkeni | `CEREBRAS_API_KEY`                            |
+| İlk kurulum bayrağı  | `--auth-choice cerebras-api-key`                                        |
+| Doğrudan CLI bayrağı | `--cerebras-api-key <key>`                                        |
+| API                  | OpenAI uyumlu (`openai-completions`)                        |
+| Temel URL            | `https://api.cerebras.ai/v1`                                        |
+| Varsayılan model     | `cerebras/zai-glm-4.7`                                        |
 
 ## Plugin'i yükleme
 
@@ -37,10 +38,10 @@ openclaw gateway restart
 ## Başlarken
 
 <Steps>
-  <Step title="Bir API anahtarı edinin">
+  <Step title="Bir API anahtarı alma">
     [Cerebras Cloud Console](https://cloud.cerebras.ai) içinde bir API anahtarı oluşturun.
   </Step>
-  <Step title="İlk kurulumu çalıştırın">
+  <Step title="İlk kurulumu çalıştırma">
     <CodeGroup>
 
 ```bash İlk kurulum
@@ -60,12 +61,12 @@ export CEREBRAS_API_KEY=csk-...
     </CodeGroup>
 
   </Step>
-  <Step title="Modellerin kullanılabilir olduğunu doğrulayın">
+  <Step title="Modellerin kullanılabilir olduğunu doğrulama">
     ```bash
     openclaw models list --provider cerebras
     ```
 
-    Dört statik modelin tümünü listeler. `CEREBRAS_API_KEY` çözümlenemiyorsa `openclaw models status --json`, eksik kimlik bilgisini `auth.unusableProfiles` altında bildirir.
+    Her iki statik modeli de listeler. `CEREBRAS_API_KEY` çözümlenmemişse `openclaw models status --json`, eksik kimlik bilgisini `auth.unusableProfiles` altında bildirir.
 
   </Step>
 </Steps>
@@ -81,22 +82,16 @@ openclaw onboard --non-interactive \
 
 ## Yerleşik katalog
 
-Dört modelin tümü 128 bin bağlam penceresini ve en fazla 8.192 çıktı tokenini paylaşır.
+Her iki model de 128k bağlam penceresini ve en fazla 8.192 çıktı token'ını destekler.
 
-| Model referansı                            | Ad                   | Akıl yürütme | Notlar                                            |
-| ------------------------------------------ | -------------------- | ------------ | ------------------------------------------------- |
-| `cerebras/zai-glm-4.7`                     | Z.ai GLM 4.7         | evet         | Varsayılan model; önizleme akıl yürütme modeli    |
-| `cerebras/gpt-oss-120b`                    | GPT OSS 120B         | evet         | Üretim akıl yürütme modeli                        |
-| `cerebras/qwen-3-235b-a22b-instruct-2507`  | Qwen 3 235B Instruct | hayır        | Önizleme, akıl yürütme yapmayan model             |
-| `cerebras/llama3.1-8b`                     | Llama 3.1 8B         | hayır        | Üretim için hız odaklı model                      |
-
-<Warning>
-Cerebras, `zai-glm-4.7` ve `qwen-3-235b-a22b-instruct-2507` modellerini önizleme modelleri olarak işaretler; ayrıca `llama3.1-8b` ile `qwen-3-235b-a22b-instruct-2507` modellerinin 27 Mayıs 2026'da kullanımdan kaldırılması planlanmaktadır. Üretim iş yüklerinde bu modellere güvenmeden önce Cerebras'ın [desteklenen modeller sayfasını](https://inference-docs.cerebras.ai/models/overview) kontrol edin.
-</Warning>
+| Model referansı          | Ad           | Akıl yürütme | Notlar                                      |
+| ------------------------ | ------------ | ------------ | ------------------------------------------- |
+| `cerebras/zai-glm-4.7`       | Z.ai GLM 4.7 | evet         | Varsayılan model; önizleme akıl yürütme modeli |
+| `cerebras/gpt-oss-120b`       | GPT OSS 120B | evet         | Üretim akıl yürütme modeli                  |
 
 ## Manuel yapılandırma
 
-Çoğu kurulumda yalnızca API anahtarı gerekir. Model meta verilerini geçersiz kılmak veya statik katalogla birlikte `mode: "merge"` modunda çalışmak için açık bir `models.providers.cerebras` yapılandırması kullanın:
+Çoğu kurulum yalnızca API anahtarını gerektirir. Model meta verilerini geçersiz kılmak veya statik kataloğa karşı `mode: "merge"` içinde çalışmak için açık `models.providers.cerebras` yapılandırmasını kullanın:
 
 ```json5
 {
@@ -124,20 +119,20 @@ Cerebras, `zai-glm-4.7` ve `qwen-3-235b-a22b-instruct-2507` modellerini önizlem
 ```
 
 <Note>
-Gateway bir artalan hizmeti olarak çalışıyorsa (launchd, systemd, Docker), `CEREBRAS_API_KEY` değişkeninin bu işlem tarafından kullanılabilir olduğundan emin olun; örneğin `~/.openclaw/.env` içinde veya `env.shellEnv` aracılığıyla. Yalnızca etkileşimli bir kabukta dışa aktarılan anahtar, ortam değişkenleri ayrıca içe aktarılmadıkça yönetilen bir hizmete yardımcı olmaz.
+Gateway bir daemon (launchd, systemd, Docker) olarak çalışıyorsa `CEREBRAS_API_KEY` değerinin bu işlem tarafından kullanılabildiğinden emin olun; örneğin `~/.openclaw/.env` içinde veya `env.shellEnv` aracılığıyla. Yalnızca etkileşimli bir kabukta dışa aktarılan anahtar, ortam ayrı olarak içe aktarılmadıkça yönetilen bir hizmete yardımcı olmaz.
 </Note>
 
-## İlgili içerikler
+## İlgili
 
 <CardGroup cols={2}>
   <Card title="Model sağlayıcıları" href="/tr/concepts/model-providers" icon="layers">
     Sağlayıcıları, model referanslarını ve yük devretme davranışını seçme.
   </Card>
   <Card title="Düşünme modları" href="/tr/tools/thinking" icon="brain">
-    Akıl yürütme özelliğine sahip iki Cerebras modeli için akıl yürütme çabası düzeyleri.
+    Akıl yürütme özelliğine sahip iki Cerebras modeli için akıl yürütme eforu düzeyleri.
   </Card>
   <Card title="Yapılandırma referansı" href="/tr/gateway/config-agents#agent-defaults" icon="gear">
-    Ajan varsayılanları ve model yapılandırması.
+    Agent varsayılanları ve model yapılandırması.
   </Card>
   <Card title="Modeller hakkında SSS" href="/tr/help/faq-models" icon="circle-question">
     Kimlik doğrulama profilleri, model değiştirme ve "profil yok" hatalarını çözme.

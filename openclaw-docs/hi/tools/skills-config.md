@@ -1,24 +1,25 @@
 ---
 read_when:
-    - Skills लोड करना, इंस्टॉलेशन या गेटिंग व्यवहार कॉन्फ़िगर करना
-    - प्रति-एजेंट skill दृश्यता सेट करना
-    - Skill Workshop सीमाएँ या स्वीकृति नीति समायोजित करना
+    - Skills की लोडिंग, इंस्टॉलेशन या गेटिंग व्यवहार को कॉन्फ़िगर करना
+    - प्रति-एजेंट Skills की दृश्यता सेट करना
+    - Skill Workshop की सीमाएँ या अनुमोदन नीति समायोजित करना
 sidebarTitle: Skills config
-summary: skills.* कॉन्फ़िग स्कीमा, एजेंट allowlists, workshop सेटिंग्स, और sandbox env var हैंडलिंग के लिए पूर्ण संदर्भ।
+summary: skills.* कॉन्फ़िग स्कीमा, एजेंट अनुमति-सूचियों, वर्कशॉप सेटिंग्स और सैंडबॉक्स एनवायरनमेंट वेरिएबल प्रबंधन का संपूर्ण संदर्भ।
 title: Skills कॉन्फ़िगरेशन
 x-i18n:
-    generated_at: "2026-07-01T08:07:50Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:48:43Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 37251cd12162c3083b8b9e1a84c462233eb44656a84ca915705859a352c9557b
+    source_hash: bc154bdf8a8537095a4d39bc6e86ebfd716e6beacd45def9c8a1c15fcdc93698
     source_path: tools/skills-config.md
     workflow: 16
 ---
 
-अधिकांश कौशल कॉन्फ़िगरेशन `~/.openclaw/openclaw.json` में
-`skills` के अंतर्गत रहता है। एजेंट-विशिष्ट दृश्यता
-`agents.defaults.skills` और `agents.list[].skills` के अंतर्गत रहती है।
+अधिकांश Skills कॉन्फ़िगरेशन `~/.openclaw/openclaw.json` में
+`skills` के अंतर्गत होता है। एजेंट-विशिष्ट दृश्यता
+`agents.defaults.skills` और `agents.entries.*.skills` के अंतर्गत होती है।
 
 ```json5
 {
@@ -28,7 +29,6 @@ x-i18n:
       extraDirs: ["~/Projects/agent-scripts/skills"],
       allowSymlinkTargets: ["~/Projects/manager/skills"],
       watch: true,
-      watchDebounceMs: 250,
     },
     install: {
       preferBrew: true,
@@ -38,7 +38,7 @@ x-i18n:
     workshop: {
       autonomous: { enabled: false },
       allowSymlinkTargetWrites: false,
-      approvalPolicy: "pending",
+      approvalPolicy: "auto",
       maxPending: 50,
       maxSkillBytes: 40000,
     },
@@ -56,33 +56,29 @@ x-i18n:
 ```
 
 <Note>
-  बिल्ट-इन इमेज जनरेशन के लिए, `skills.entries` के बजाय
-  `agents.defaults.imageGenerationModel` और कोर `image_generate` टूल का उपयोग करें। कौशल
-  प्रविष्टियां केवल कस्टम या तृतीय-पक्ष कौशल वर्कफ़्लो के लिए हैं।
+  अंतर्निहित इमेज जनरेशन के लिए, `skills.entries` के बजाय
+  `agents.defaults.mediaModels.image` और मुख्य `image_generate` टूल का उपयोग करें। Skill
+  प्रविष्टियाँ केवल कस्टम या तृतीय-पक्ष Skill कार्यप्रवाहों के लिए हैं।
 </Note>
 
-## लोड करना (`skills.load`)
+## लोडिंग (`skills.load`)
 
 <ParamField path="skills.load.extraDirs" type="string[]">
-  स्कैन करने के लिए अतिरिक्त कौशल डायरेक्टरियां, सबसे कम प्राथमिकता पर (बंडल किए गए
-  और Plugin कौशल के बाद)। पाथ `~` समर्थन के साथ विस्तारित किए जाते हैं।
+  स्कैन की जाने वाली अतिरिक्त Skill डायरेक्टरियाँ, सबसे कम प्राथमिकता पर
+  (बंडल और Plugin Skills से नीचे)। पाथ `~` समर्थन के साथ विस्तृत किए जाते हैं।
 </ParamField>
 
 <ParamField path="skills.load.allowSymlinkTargets" type="string[]">
-  विश्वसनीय वास्तविक लक्ष्य डायरेक्टरियां जिनमें सिमलिंक किए गए कौशल फ़ोल्डर रिज़ॉल्व हो सकते हैं,
-  भले ही सिमलिंक कॉन्फ़िगर किए गए रूट के बाहर हो। इसका उपयोग
-  जानबूझकर बनाए गए सिबलिंग-रेपो लेआउट के लिए करें, जैसे
+  विश्वसनीय वास्तविक लक्ष्य डायरेक्टरियाँ, जिनमें सिमलिंक की गई Skill
+  डायरेक्टरियाँ रिज़ॉल्व हो सकती हैं, भले ही सिमलिंक कॉन्फ़िगर किए गए रूट से
+  बाहर हो। इसका उपयोग जानबूझकर बनाए गए सिबलिंग-रिपॉज़िटरी लेआउट के लिए करें, जैसे
   `<workspace>/skills/manager -> ~/Projects/manager/skills`। इस सूची को
-  सीमित रखें — `~` या `~/Projects` जैसे व्यापक रूट की ओर संकेत न करें।
+  सीमित रखें—इसे `~` या `~/Projects` जैसे व्यापक रूट की ओर इंगित न करें।
 </ParamField>
 
 <ParamField path="skills.load.watch" type="boolean" default="true">
-  कौशल फ़ोल्डर देखें और `SKILL.md` फ़ाइलों में बदलाव होने पर कौशल स्नैपशॉट
-  रीफ़्रेश करें। समूहित कौशल रूट के अंतर्गत नेस्टेड फ़ाइलों को कवर करता है।
-</ParamField>
-
-<ParamField path="skills.load.watchDebounceMs" type="number" default="250">
-  कौशल वॉचर इवेंट के लिए मिलीसेकंड में डिबाउंस विंडो।
+  Skill फ़ोल्डरों पर नज़र रखें और `SKILL.md` फ़ाइलें बदलने पर
+  Skills स्नैपशॉट को रीफ़्रेश करें। समूहबद्ध Skill रूट के अंतर्गत नेस्टेड फ़ाइलें भी शामिल हैं।
 </ParamField>
 
 ## इंस्टॉल (`skills.install`)
@@ -92,25 +88,28 @@ x-i18n:
 </ParamField>
 
 <ParamField path="skills.install.nodeManager" type='"npm" | "pnpm" | "yarn" | "bun"' default='"npm"'>
-  कौशल इंस्टॉल के लिए Node पैकेज मैनेजर प्राथमिकता। यह केवल कौशल
-  इंस्टॉल को प्रभावित करता है — Gateway रनटाइम को फिर भी Node का उपयोग करना चाहिए (WhatsApp/Telegram के लिए Bun की अनुशंसा नहीं है)।
-  npm, pnpm, या bun के लिए `openclaw setup --node-manager` का उपयोग करें;
-  Yarn-समर्थित कौशल इंस्टॉल के लिए `"yarn"` मैन्युअल रूप से सेट करें।
+  Skill इंस्टॉल के लिए Node पैकेज मैनेजर की प्राथमिकता। यह केवल Skill
+  इंस्टॉल को प्रभावित करता है—OpenClaw CLI और Gateway रनटाइम को Node की
+  आवश्यकता होती है, क्योंकि कैनोनिकल स्टेट स्टोर `node:sqlite` का उपयोग करता है।
+  `openclaw setup --node-manager` और `openclaw onboard --node-manager`, `npm`, `pnpm`,
+  या `bun` स्वीकार करते हैं; Yarn-आधारित Skill इंस्टॉल के लिए
+  कॉन्फ़िगरेशन में सीधे `"yarn"` सेट करें।
 </ParamField>
 
 <ParamField path="skills.install.allowUploadedArchives" type="boolean" default="false">
-  विश्वसनीय `operator.admin` Gateway क्लाइंट को `skills.upload.*` के माध्यम से स्टेज किए गए निजी zip
-  आर्काइव इंस्टॉल करने दें। सामान्य ClawHub इंस्टॉल के लिए
-  इस सेटिंग की आवश्यकता नहीं है।
+  विश्वसनीय `operator.admin` Gateway क्लाइंट को `skills.upload.*` के
+  माध्यम से स्टेज किए गए निजी zip आर्काइव इंस्टॉल करने दें। सामान्य ClawHub
+  इंस्टॉल के लिए इस सेटिंग की आवश्यकता नहीं होती।
 </ParamField>
 
 ## ऑपरेटर इंस्टॉल नीति (`security.installPolicy`)
 
-जब ऑपरेटर को होस्ट-विशिष्ट नीति के साथ कौशल और Plugin इंस्टॉल को
-स्वीकृत या ब्लॉक करने के लिए किसी विश्वसनीय स्थानीय कमांड की आवश्यकता हो, तो `security.installPolicy` का उपयोग करें। नीति
-OpenClaw द्वारा स्रोत सामग्री स्टेज करने के बाद और इंस्टॉल या अपडेट
-जारी रहने से पहले चलती है। यह ClawHub कौशल, अपलोड किए गए कौशल, Git/स्थानीय कौशल,
-कौशल डिपेंडेंसी इंस्टॉलर, और Plugin इंस्टॉल/अपडेट स्रोतों पर लागू होती है।
+जब ऑपरेटरों को होस्ट-विशिष्ट नीति के साथ Skill और Plugin इंस्टॉल को
+स्वीकृत या अवरुद्ध करने के लिए किसी विश्वसनीय स्थानीय कमांड की आवश्यकता हो,
+तो `security.installPolicy` का उपयोग करें। यह नीति OpenClaw द्वारा स्रोत सामग्री
+स्टेज किए जाने के बाद और इंस्टॉल या अपडेट जारी रहने से पहले चलती है। यह
+ClawHub Skills, अपलोड किए गए Skills, Git/स्थानीय Skills, Skill निर्भरता
+इंस्टॉलर और Plugin इंस्टॉल/अपडेट स्रोतों पर लागू होती है।
 
 ```json5
 {
@@ -136,76 +135,79 @@ OpenClaw द्वारा स्रोत सामग्री स्टे�
 ```
 
 <ParamField path="security.installPolicy.enabled" type="boolean" default="false">
-  ऑपरेटर-स्वामित्व वाली इंस्टॉल नीति सक्षम करता है। वैध `exec`
-  कमांड के बिना सक्षम होने पर, इंस्टॉल fail closed होते हैं।
+  ऑपरेटर-स्वामित्व वाली इंस्टॉल नीति को सक्षम करता है। किसी मान्य
+  `exec` कमांड के बिना सक्षम होने पर इंस्टॉल बंद स्थिति में विफल होते हैं।
 </ParamField>
 
 <ParamField path="security.installPolicy.targets" type='("skill" | "plugin")[]'>
-  वैकल्पिक लक्ष्य फ़िल्टर। छोड़े जाने पर, नीति हर समर्थित लक्ष्य पर लागू होती है
-  ताकि नए इंस्टॉल अप्रत्याशित रूप से fail open न हों।
+  वैकल्पिक लक्ष्य फ़िल्टर। इसे छोड़ने पर नीति प्रत्येक समर्थित लक्ष्य पर
+  लागू होती है, ताकि नए इंस्टॉल अनपेक्षित रूप से खुली स्थिति में विफल न हों।
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.command" type="string">
-  विश्वसनीय नीति executable का absolute path। OpenClaw इसे
-  shell के बिना चलाता है और उपयोग से पहले पाथ को वैलिडेट करता है।
+  विश्वसनीय नीति एक्ज़िक्यूटेबल का निरपेक्ष पाथ। OpenClaw इसे शेल के बिना
+  चलाता है और उपयोग से पहले पाथ को सत्यापित करता है।
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.args" type="string[]">
-  `command` के बाद पास किए गए स्थिर आर्ग्युमेंट।
+  `command` के बाद पास किए जाने वाले स्थिर आर्ग्युमेंट।
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.timeoutMs" type="number" default="10000">
-  एक नीति निर्णय के लिए अधिकतम wall-clock रनटाइम।
+  एक नीति निर्णय के लिए अधिकतम वॉल-क्लॉक रनटाइम।
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.noOutputTimeoutMs" type="number" default="timeoutMs">
-  नीति के fail closed होने से पहले stdout या stderr आउटपुट के बिना अधिकतम समय।
+  नीति के बंद स्थिति में विफल होने से पहले stdout या stderr आउटपुट के बिना
+  अधिकतम समय।
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.maxOutputBytes" type="number" default="1048576">
-  नीति प्रक्रिया से स्वीकार किए जाने वाले अधिकतम संयुक्त stdout और stderr बाइट।
+  नीति प्रक्रिया से स्वीकार किए जाने वाले संयुक्त stdout और stderr बाइट की अधिकतम संख्या।
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.env" type="Record<string, string>">
-  नीति प्रक्रिया को प्रदान किए गए literal environment variables।
+  नीति प्रक्रिया को दिए जाने वाले शाब्दिक एनवायरनमेंट वेरिएबल।
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.passEnv" type="string[]">
-  OpenClaw प्रक्रिया से नीति प्रक्रिया में कॉपी किए गए environment variable नाम।
-  केवल नामित variables पास किए जाते हैं।
+  OpenClaw प्रक्रिया से नीति प्रक्रिया में कॉपी किए जाने वाले एनवायरनमेंट
+  वेरिएबल के नाम। केवल नामित वेरिएबल पास किए जाते हैं।
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.trustedDirs" type="string[]">
-  उन डायरेक्टरियों की वैकल्पिक allowlist जिनमें नीति executable हो सकता है।
+  उन डायरेक्टरियों की वैकल्पिक अनुमति-सूची जिनमें नीति एक्ज़िक्यूटेबल हो सकता है।
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.allowInsecurePath" type="boolean" default="false">
-  कमांड पाथ ownership और permission जांचों को बायपास करता है। केवल तब उपयोग करें जब पाथ
-  किसी अन्य mechanism द्वारा सुरक्षित हो।
+  कमांड पाथ के स्वामित्व और अनुमति जाँच को बायपास करता है। इसका उपयोग केवल
+  तब करें जब पाथ किसी अन्य तंत्र द्वारा सुरक्षित हो।
 </ParamField>
 
 <ParamField path="security.installPolicy.exec.allowSymlinkCommand" type="boolean" default="false">
-  कॉन्फ़िगर किए गए कमांड पाथ को सिमलिंक होने देता है। resolved target को
-  फिर भी अन्य पाथ जांचें पूरी करनी होंगी। Interpreter script arguments
-  सीधे regular files होने चाहिए, सिमलिंक नहीं।
+  कॉन्फ़िगर किए गए कमांड पाथ को सिमलिंक होने देता है। रिज़ॉल्व किए गए लक्ष्य
+  को फिर भी अन्य पाथ जाँच पूरी करनी होंगी। इंटरप्रेटर स्क्रिप्ट आर्ग्युमेंट
+  सीधे नियमित फ़ाइलें होने चाहिए, सिमलिंक नहीं।
 </ParamField>
 
-नीति stdin पर `protocolVersion: 1`, `openclawVersion`, `targetType`, `targetName`, `sourcePath`, `sourcePathKind`,
-वैकल्पिक structured `source`, structured `origin`, और `request` के साथ एक JSON object प्राप्त करती है। इसे stdout पर
-एक JSON object लिखना होगा: `{ "protocolVersion": 1, "decision": "allow" }` या
-`{ "protocolVersion": 1, "decision": "block", "reason": "..." }`। Non-zero
-exit, timeout, malformed JSON, missing fields, या unsupported protocol versions
-fail closed होते हैं।
+नीति को stdin पर `protocolVersion: 1`, `openclawVersion`, `targetType`,
+`targetName`, `sourcePath`, `sourcePathKind`, वैकल्पिक संरचित
+`source`, संरचित `origin`, और `request` वाला एक
+JSON ऑब्जेक्ट मिलता है। इसे stdout पर एक JSON ऑब्जेक्ट लिखना होगा:
+`{ "protocolVersion": 1, "decision": "allow" }` या `{ "protocolVersion": 1, "decision": "block", "reason": "..." }`। गैर-शून्य
+एक्ज़िट, टाइमआउट, विकृत JSON, अनुपस्थित फ़ील्ड या असमर्थित प्रोटोकॉल
+संस्करण बंद स्थिति में विफल होते हैं।
 
-OpenClaw सामान्य Gateway startup के दौरान install policy execute नहीं करता। policy सक्षम लेकिन unavailable होने पर installs
-और updates fail closed होते हैं। `openclaw doctor`
-static validation करता है, और `openclaw doctor --deep` configured command के विरुद्ध एक synthetic
-install probe execute करता है।
+OpenClaw सामान्य Gateway स्टार्टअप के दौरान इंस्टॉल नीति निष्पादित नहीं करता।
+नीति सक्षम लेकिन अनुपलब्ध होने पर इंस्टॉल और अपडेट बंद स्थिति में विफल होते हैं।
+`openclaw doctor` स्थिर सत्यापन करता है; `openclaw doctor --deep`
+कॉन्फ़िगर किए गए कमांड के विरुद्ध एक कृत्रिम इंस्टॉल प्रोब निष्पादित करता है।
 
-Bulk updates target के अनुसार policy apply करते हैं: blocked skill या Plugin update
-उस target को fail करता है, policy को disable किए बिना या batch में बाद के targets को skip किए बिना।
+बल्क अपडेट प्रत्येक लक्ष्य पर अलग-अलग नीति लागू करते हैं: अवरुद्ध Skill या
+Plugin अपडेट उस लक्ष्य के लिए विफल होता है, लेकिन नीति को अक्षम नहीं करता
+और न ही बैच में बाद के लक्ष्यों को छोड़ता है।
 
-उदाहरण stdin:
+stdin का उदाहरण:
 
 ```json
 {
@@ -255,7 +257,7 @@ process.stdin.on("end", () => {
       JSON.stringify({
         protocolVersion: 1,
         decision: "block",
-        reason: "local plugin paths are not approved on this host",
+        reason: "इस होस्ट पर स्थानीय Plugin पाथ स्वीकृत नहीं हैं",
       }),
     );
     return;
@@ -264,44 +266,46 @@ process.stdin.on("end", () => {
 });
 ```
 
-## बंडल किए गए कौशल की allowlist
+## बंडल किए गए Skill की अनुमति-सूची
 
 <ParamField path="skills.allowBundled" type="string[]">
-  केवल **बंडल किए गए** कौशल के लिए वैकल्पिक allowlist। सेट होने पर, सूची में मौजूद केवल बंडल किए गए कौशल
-  पात्र होते हैं। Managed, agent-level, और workspace कौशल
-  अप्रभावित रहते हैं।
+  केवल **बंडल किए गए** Skills के लिए वैकल्पिक अनुमति-सूची। सेट होने पर,
+  केवल सूची में मौजूद बंडल किए गए Skills पात्र होते हैं। प्रबंधित,
+  एजेंट-स्तरीय और कार्यस्थान Skills अप्रभावित रहते हैं।
 </ParamField>
 
-## प्रति-कौशल प्रविष्टियां (`skills.entries`)
+## प्रति-Skill प्रविष्टियाँ (`skills.entries`)
 
-`entries` के अंतर्गत keys default रूप से skill `name` से match करती हैं। यदि कोई skill
-`metadata.openclaw.skillKey` define करता है, तो उसके बजाय उस key का उपयोग करें। hyphenated names को quote करें
-(JSON5 quoted keys की अनुमति देता है)।
+`entries` के अंतर्गत कुंजियाँ डिफ़ॉल्ट रूप से Skill
+`name` से मेल खाती हैं। यदि कोई Skill `metadata.openclaw.skillKey`
+परिभाषित करता है, तो उसके बजाय उस कुंजी का उपयोग करें। हाइफ़न वाले नामों को
+उद्धरण चिह्नों में रखें (JSON5 उद्धृत कुंजियों की अनुमति देता है)।
 
 <ParamField path="skills.entries.<key>.enabled" type="boolean">
-  `false` skill को disable करता है, भले ही वह bundled या installed हो। `coding-agent`
-  bundled skill opt-in है — इसे `true` पर सेट करें और सुनिश्चित करें कि `claude`,
-  `codex`, `opencode`, या कोई अन्य supported CLI installed और authenticated है।
+  `false` बंडल या इंस्टॉल होने पर भी Skill को अक्षम करता है।
+  `coding-agent` बंडल किया गया Skill ऑप्ट-इन है—इसे `true`
+  पर सेट करें और सुनिश्चित करें कि `claude`, `codex`,
+  `opencode`, या कोई अन्य समर्थित CLI इंस्टॉल और प्रमाणीकृत हो।
 </ParamField>
 
 <ParamField path="skills.entries.<key>.apiKey" type='string | { source, provider, id }'>
-  उन skills के लिए convenience field जो `metadata.openclaw.primaryEnv` declare करते हैं।
-  plaintext string या SecretRef support करता है: `{ source: "env", provider: "default", id: "VAR_NAME" }`।
+  `metadata.openclaw.primaryEnv` घोषित करने वाले Skills के लिए सुविधा फ़ील्ड।
+  सादे टेक्स्ट स्ट्रिंग या SecretRef का समर्थन करता है: `{ source: "env", provider: "default", id: "VAR_NAME" }`।
 </ParamField>
 
 <ParamField path="skills.entries.<key>.env" type="Record<string, string>">
-  agent run के लिए inject किए गए environment variables। केवल तब inject किए जाते हैं जब
-  variable process में पहले से set न हो।
+  एजेंट रन के लिए इंजेक्ट किए जाने वाले एनवायरनमेंट वेरिएबल। केवल तब
+  इंजेक्ट किए जाते हैं जब वेरिएबल प्रक्रिया में पहले से सेट न हो।
 </ParamField>
 
 <ParamField path="skills.entries.<key>.config" type="object">
-  custom per-skill configuration fields के लिए वैकल्पिक bag।
+  कस्टम प्रति-Skill कॉन्फ़िगरेशन फ़ील्ड के लिए वैकल्पिक संग्रह।
 </ParamField>
 
-## एजेंट allowlists (`agents`)
+## एजेंट अनुमति-सूचियाँ (`agents`)
 
-जब आप समान machine/workspace skill roots लेकिन प्रति agent
-अलग visible skill set चाहते हैं, तो agent config का उपयोग करें।
+जब एक ही मशीन/कार्यस्थान के Skill रूट रखते हुए प्रत्येक एजेंट के लिए अलग
+दृश्यमान Skill सेट चाहिए, तो एजेंट कॉन्फ़िगरेशन का उपयोग करें।
 
 ```json5
 {
@@ -319,62 +323,74 @@ process.stdin.on("end", () => {
 ```
 
 <ParamField path="agents.defaults.skills" type="string[]">
-  उन agents द्वारा inherited shared baseline allowlist जो `agents.list[].skills` omit करते हैं।
-  skills को default रूप से unrestricted छोड़ने के लिए पूरी तरह omit करें।
+  `agents.entries.*.skills` छोड़ने वाले एजेंटों द्वारा विरासत में ली जाने वाली
+  साझा आधारभूत अनुमति-सूची। Skills को डिफ़ॉल्ट रूप से अप्रतिबंधित रखने के
+  लिए इसे पूरी तरह छोड़ दें।
 </ParamField>
 
-<ParamField path="agents.list[].skills" type="string[]">
-  उस agent के लिए explicit final skill set। Explicit lists inherited
-  defaults को **replace** करती हैं — वे merge नहीं करतीं। उस agent के लिए कोई skills expose न करने के लिए `[]` पर set करें।
+<ParamField path="agents.entries.*.skills" type="string[]">
+  उस एजेंट के लिए स्पष्ट अंतिम Skill सेट। स्पष्ट सूचियाँ विरासत में मिले
+  डिफ़ॉल्ट को **प्रतिस्थापित** करती हैं—वे मर्ज नहीं होतीं। उस एजेंट के लिए
+  कोई Skill प्रदर्शित न करने हेतु इसे `[]` पर सेट करें।
 </ParamField>
 
 <Warning>
-  Agent skill allowlists OpenClaw skill
-  discovery, prompts, slash-command discovery, sandbox sync, और skill
-  snapshots के लिए visibility और loading filter हैं। वे shell-time authorization boundary नहीं हैं। यदि कोई agent
-  host `exec` run कर सकता है, तो वह shell अब भी external clients run कर सकता है या host files पढ़ सकता है
-  जो execution user को visible हैं, जिसमें MCP client registries जैसे
-  `~/.openclaw/skills/config/mcporter.json` शामिल हैं। per-agent MCP isolation के लिए,
-  skill allowlists को sandbox/OS-user isolation के साथ combine करें, host exec को deny करें या tightly
-  allowlist करें, और MCP server पर per-agent credentials को prefer करें।
+  एजेंट Skill अनुमति-सूचियाँ OpenClaw Skill खोज, प्रॉम्प्ट, स्लैश-कमांड
+  खोज, सैंडबॉक्स सिंक और Skill स्नैपशॉट के लिए दृश्यता और लोडिंग फ़िल्टर हैं।
+  वे शेल-समय की प्राधिकरण सीमा नहीं हैं। यदि कोई एजेंट होस्ट
+  `exec` चला सकता है, तो वह शेल अभी भी बाहरी क्लाइंट चला सकता
+  है या निष्पादन उपयोगकर्ता को दिखाई देने वाली होस्ट फ़ाइलें पढ़ सकता है,
+  जिनमें `~/.openclaw/skills/config/mcporter.json` जैसी MCP क्लाइंट रजिस्ट्री शामिल हैं।
+  प्रति-एजेंट MCP पृथक्करण के लिए Skill अनुमति-सूचियों को सैंडबॉक्स/OS-उपयोगकर्ता
+  पृथक्करण के साथ संयोजित करें, होस्ट exec को अस्वीकार करें या अत्यंत सीमित
+  अनुमति-सूची दें, और MCP सर्वर पर प्रति-एजेंट क्रेडेंशियल को प्राथमिकता दें।
 </Warning>
 
 ## Workshop (`skills.workshop`)
 
 <ParamField path="skills.workshop.autonomous.enabled" type="boolean" default="false">
-  जब `true` हो, तो agents सफल turns के बाद durable conversation
-  signals से pending proposals create कर सकते हैं। User-prompted skill creation हमेशा
-  इस setting की परवाह किए बिना Skill Workshop से होकर जाती है।
+  जब `true` हो, तब OpenClaw स्थायी सुधारों से लंबित प्रस्ताव बना सकता है
+  और सिस्टम के निष्क्रिय होने के बाद सफलतापूर्वक पूर्ण किए गए महत्वपूर्ण कार्य की
+  समीक्षा कर सकता है। इससे पात्र चरणों के बाद पृष्ठभूमि में एक मॉडल रन जुड़ सकता है। उपयोगकर्ता द्वारा आरंभ किया गया
+  स्किल निर्माण और `/learn`, सेटिंग के `false` होने पर भी काम करते रहते हैं।
 </ParamField>
 
-<ParamField path="skills.workshop.approvalPolicy" type='"pending" | "auto"' default='"pending"'>
-  `pending` के लिए एजेंट द्वारा शुरू किए गए लागू करने, अस्वीकार करने, या
-  क्वारंटीन से पहले ऑपरेटर की स्वीकृति आवश्यक होती है। `auto` उन कार्रवाइयों को बिना स्वीकृति की अनुमति देता है।
+पात्रता, गोपनीयता, लागत, केवल-प्रस्ताव अनुमतियों और समस्या निवारण के लिए
+[स्वयं सीखना](/hi/tools/self-learning) देखें।
+
+<ParamField path="skills.workshop.approvalPolicy" type='"pending" | "auto"' default='"auto"'>
+  `auto` बिना किसी अतिरिक्त अनुमोदन संकेत के एजेंट द्वारा आरंभ किए गए लागू करने,
+  अस्वीकार करने या क्वारंटीन करने की अनुमति देता है। `pending` के लिए ऑपरेटर की स्वीकृति आवश्यक है।
 </ParamField>
 
 <ParamField path="skills.workshop.allowSymlinkTargetWrites" type="boolean" default="false">
-  Skill Workshop apply को उन workspace skill सिमलिंक के माध्यम से लिखने की अनुमति दें जिनका
-  वास्तविक लक्ष्य पहले से ही `skills.load.allowSymlinkTargets` द्वारा विश्वसनीय है। इसे
-  अक्षम रखें जब तक कि जनरेट किए गए प्रस्ताव लागू होने पर उस साझा skill
-  रूट को बदलना आवश्यक न हो।
+  Skill Workshop को ऐसे वर्कस्पेस स्किल सिमलिंक के माध्यम से लिखने की अनुमति दें,
+  जिनका वास्तविक लक्ष्य पहले से ही `skills.load.allowSymlinkTargets` द्वारा विश्वसनीय है। इसे तब तक
+  अक्षम रखें, जब तक जनरेट किए गए प्रस्ताव को लागू करने की प्रक्रिया को उस साझा
+  स्किल रूट में बदलाव नहीं करना चाहिए।
 </ParamField>
 
 <ParamField path="skills.workshop.maxPending" type="number" default="50">
-  प्रति workspace रखे जाने वाले अधिकतम लंबित और क्वारंटीन किए गए प्रस्ताव।
+  प्रति वर्कस्पेस बनाए रखे जाने वाले लंबित और क्वारंटीन किए गए प्रस्तावों की अधिकतम संख्या
+  (अनुमत सीमा: 1-200)।
 </ParamField>
 
 <ParamField path="skills.workshop.maxSkillBytes" type="number" default="40000">
-  बाइट में अधिकतम प्रस्ताव बॉडी आकार। प्रस्ताव विवरणों पर
-  160 बाइट की कठोर सीमा है क्योंकि वे डिस्कवरी और लिस्टिंग आउटपुट में दिखाई देते हैं।
+  प्रस्ताव के मुख्य भाग का अधिकतम आकार बाइट में (अनुमत सीमा: 1024-200000)। प्रस्ताव
+  विवरणों पर अलग से 160 बाइट की कठोर सीमा है, क्योंकि वे खोज और सूचीकरण आउटपुट
+  में दिखाई देते हैं।
 </ParamField>
 
-## सिमलिंक किए गए skill रूट
+यह कॉन्फ़िग जिन प्रस्ताव जीवनचक्र, CLI
+कमांड, एजेंट टूल पैरामीटर और Gateway विधियों को नियंत्रित करता है, उनके लिए [Skill Workshop](/hi/tools/skill-workshop) देखें।
 
-डिफ़ॉल्ट रूप से, workspace, project-agent, extra-dir, और bundled skill रूट
-containment सीमाएं हैं। `<workspace>/skills` के अंतर्गत ऐसा सिमलिंक किया गया skill फ़ोल्डर
-जो रूट के बाहर resolve होता है, लॉग संदेश के साथ छोड़ दिया जाता है।
+## सिमलिंक किए गए स्किल रूट
 
-जानबूझकर बनाए गए सिमलिंक लेआउट की अनुमति देने के लिए, विश्वसनीय लक्ष्य घोषित करें:
+डिफ़ॉल्ट रूप से, वर्कस्पेस, प्रोजेक्ट-एजेंट, अतिरिक्त-डायरेक्टरी और बंडल किए गए स्किल रूट
+कंटेनमेंट सीमाएँ हैं। `<workspace>/skills` के अंतर्गत ऐसा सिमलिंक किया गया स्किल फ़ोल्डर,
+जो रूट के बाहर रिज़ॉल्व होता है, लॉग संदेश के साथ छोड़ दिया जाता है।
+
+किसी अभिप्रेत सिमलिंक लेआउट की अनुमति देने के लिए, विश्वसनीय लक्ष्य घोषित करें:
 
 ```json5
 {
@@ -387,13 +403,13 @@ containment सीमाएं हैं। `<workspace>/skills` के अं�
 }
 ```
 
-इस config के साथ, `<workspace>/skills/manager -> ~/Projects/manager/skills` को
-realpath resolution के बाद स्वीकार किया जाता है। `extraDirs` sibling repo को सीधे स्कैन करता है;
-`allowSymlinkTargets` मौजूदा लेआउट के लिए सिमलिंक किए गए path को सुरक्षित रखता है।
+इस कॉन्फ़िग के साथ, वास्तविक पथ रिज़ॉल्यूशन के बाद `<workspace>/skills/manager -> ~/Projects/manager/skills`
+स्वीकार किया जाता है। `extraDirs` सीधे सहोदर रिपॉज़िटरी को स्कैन करता है;
+`allowSymlinkTargets` मौजूदा लेआउट के लिए सिमलिंक किया गया पथ बनाए रखता है।
 
-Skill Workshop apply डिफ़ॉल्ट रूप से उन सिमलिंक के माध्यम से नहीं लिखता। Workshop apply को
-पहले से विश्वसनीय सिमलिंक लक्ष्यों के अंतर्गत skills बदलने देने के लिए, अलग से
-opt in करें:
+Skill Workshop का लागू करना डिफ़ॉल्ट रूप से उन सिमलिंक के माध्यम से नहीं लिखता। Workshop द्वारा
+पहले से विश्वसनीय सिमलिंक लक्ष्यों के अंतर्गत स्किल में बदलाव की अनुमति देने के लिए, अलग से
+ऑप्ट इन करें:
 
 ```json5
 {
@@ -408,20 +424,22 @@ opt in करें:
 }
 ```
 
-प्रबंधित `~/.openclaw/skills` और व्यक्तिगत `~/.agents/skills` directories
-पहले से ही skill-directory सिमलिंक स्वीकार करती हैं (प्रति-skill `SKILL.md` containment अभी भी
-लागू होता है)।
+प्रबंधित `~/.openclaw/skills` और व्यक्तिगत `~/.agents/skills` डायरेक्टरी
+पहले से ही स्किल-डायरेक्टरी सिमलिंक को बिना शर्त स्वीकार करती हैं (प्रति-स्किल
+`SKILL.md` कंटेनमेंट फिर भी लागू होता है) — `allowSymlinkTargets` केवल
+वर्कस्पेस, अतिरिक्त-डायरेक्टरी और प्रोजेक्ट-एजेंट (`<workspace>/.agents/skills`)
+रूट के लिए आवश्यक है।
 
-## सैंडबॉक्स किए गए skills और env vars
+## सैंडबॉक्स किए गए स्किल और एनवायरनमेंट वैरिएबल
 
 <Warning>
-  `skills.entries.<skill>.env` और `apiKey` केवल **host** runs पर लागू होते हैं। सैंडबॉक्स के अंदर
-  उनका कोई प्रभाव नहीं होता — `GEMINI_API_KEY` पर निर्भर skill
-  `apiKey not configured` के साथ विफल होगा, जब तक कि सैंडबॉक्स को variable
+  `skills.entries.<skill>.env` और `apiKey` केवल **होस्ट** रन पर लागू होते हैं।
+  सैंडबॉक्स के अंदर उनका कोई प्रभाव नहीं होता — `GEMINI_API_KEY` पर निर्भर स्किल
+  `apiKey not configured` के साथ विफल हो जाएगा, जब तक सैंडबॉक्स को वह वैरिएबल
   अलग से न दिया जाए।
 </Warning>
 
-Docker सैंडबॉक्स में secrets इस तरह पास करें:
+Docker सैंडबॉक्स में सीक्रेट इस प्रकार पास करें:
 
 ```json5
 {
@@ -438,38 +456,41 @@ Docker सैंडबॉक्स में secrets इस तरह पास 
 ```
 
 <Note>
-  Docker daemon access वाले उपयोगकर्ता Docker metadata के माध्यम से `sandbox.docker.env` मानों
-  की जांच कर सकते हैं। जब वह exposure स्वीकार्य न हो, तो mounted secret file, custom image, या
-  कोई अन्य delivery path उपयोग करें।
+  Docker डेमन की पहुँच वाले उपयोगकर्ता Docker मेटाडेटा के माध्यम से
+  `sandbox.docker.env` मानों की जाँच कर सकते हैं। जब यह जोखिम स्वीकार्य न हो,
+  तब माउंट की गई सीक्रेट फ़ाइल, कस्टम इमेज या किसी अन्य वितरण पथ का उपयोग करें।
 </Note>
 
-## लोडिंग क्रम रिमाइंडर
+## लोडिंग क्रम का स्मरण
 
 ```text
-workspace/skills      (highest)
+workspace/skills      (सर्वोच्च)
 workspace/.agents/skills
 ~/.agents/skills
 ~/.openclaw/skills
-bundled skills
-skills.load.extraDirs (lowest)
+बंडल किए गए स्किल
+skills.load.extraDirs (न्यूनतम)
 ```
 
-watcher सक्षम होने पर skills और config में बदलाव अगले नए session पर प्रभावी होते हैं,
-या जब watcher कोई बदलाव detect करता है तो अगले agent turn पर।
+वॉचर सक्षम होने पर स्किल और कॉन्फ़िग में किए गए बदलाव अगले नए सत्र में,
+या वॉचर द्वारा बदलाव का पता लगाए जाने पर एजेंट के अगले चरण में प्रभावी होते हैं।
 
 ## संबंधित
 
 <CardGroup cols={2}>
-  <Card title="Skills संदर्भ" href="/hi/tools/skills" icon="puzzle-piece">
-    Skills क्या हैं, loading order, gating, और SKILL.md format।
+  <Card title="स्किल संदर्भ" href="/hi/tools/skills" icon="puzzle-piece">
+    स्किल क्या हैं, लोडिंग क्रम, गेटिंग और SKILL.md प्रारूप।
   </Card>
-  <Card title="Skills बनाना" href="/hi/tools/creating-skills" icon="hammer">
-    custom workspace skills लिखना।
+  <Card title="स्किल बनाना" href="/hi/tools/creating-skills" icon="hammer">
+    कस्टम वर्कस्पेस स्किल का लेखन।
   </Card>
   <Card title="Skill Workshop" href="/hi/tools/skill-workshop" icon="flask">
-    एजेंट द्वारा draft किए गए skills के लिए proposal queue।
+    एजेंट द्वारा तैयार किए गए स्किल के लिए प्रस्ताव कतार।
+  </Card>
+  <Card title="स्वयं सीखना" href="/hi/tools/self-learning" icon="brain">
+    पूर्ण किए गए कार्य से सावधानीपूर्ण, ऑप्ट-इन प्रस्ताव।
   </Card>
   <Card title="स्लैश कमांड" href="/hi/tools/slash-commands" icon="terminal">
-    native slash-command catalog और chat directives।
+    नेटिव स्लैश-कमांड कैटलॉग और चैट निर्देश।
   </Card>
 </CardGroup>

@@ -4,74 +4,78 @@ read_when:
 summary: Spraakactivering en push-to-talk-modi plus routeringsdetails in de Mac-app
 title: Stemactivatie (macOS)
 x-i18n:
-    generated_at: "2026-07-12T09:00:28Z"
+    generated_at: "2026-07-27T05:39:02Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2a0a5ac44931b578daa4f74b3728a65a1c19ab9742e2d4b9f4c6db49fa5d7b8a
+    source_hash: d3b2a01ee997b4158bf88b9ef54b1e523503722620f943d594323516619e7502
     source_path: platforms/mac/voicewake.md
     workflow: 16
 ---
 
-# Spraakactivering en indrukken om te spreken
+# Voice Wake en push-to-talk
 
 ## Vereisten
 
-Spraakactivering en indrukken om te spreken vereisen macOS 26 of nieuwer. Op oudere versies van macOS zijn de bedieningselementen verborgen op de pagina met spraakinstellingen; in plaats daarvan wordt de vereiste van macOS 26 weergegeven.
+Voice Wake en push-to-talk vereisen macOS 26 of nieuwer. Op oudere macOS-versies zijn de bedieningselementen verborgen op de pagina met spraakinstellingen, waar in plaats daarvan de vereiste van macOS 26 wordt weergegeven.
+
+Voor Voice Wake moet Apple Speech herkenning op het apparaat ondersteunen voor de geselecteerde taal. De app weigert passief naar het activeringswoord te luisteren wanneer dit uitsluitend lokale contract niet beschikbaar is; er wordt nooit teruggevallen op herkenning via het netwerk. Push-to-talk, Talk Mode en dicteren met Quick Chat zijn expliciete gebruikersacties en mogen Apple Speech-netwerkdiensten gebruiken voor bredere taalondersteuning.
 
 ## Modi
 
-- **Activeringswoordmodus** (standaard): een continu actieve spraakherkenner wacht op activeringstokens (`swabbleTriggerWords`). Bij een overeenkomst begint de opname, verschijnt de overlay met gedeeltelijke tekst en wordt de tekst na een stilte automatisch verzonden.
-- **Indrukken om te spreken (rechter Option ingedrukt houden)**: houd de rechter Option-toets ingedrukt om direct op te nemen; er is geen activering nodig. De overlay verschijnt zolang de toets ingedrukt blijft. Wanneer je de toets loslaat, wordt de opname afgerond en na een korte vertraging doorgestuurd, zodat je de tekst kunt bewerken.
+- **Activeringswoordmodus** (standaard): een altijd actieve Speech-herkenner op het apparaat wacht op activeringstokens (`swabbleTriggerWords`). Bij een overeenkomst begint de opname, verschijnt de overlay met gedeeltelijke tekst en wordt het bericht na een stilte automatisch verzonden.
+- **Push-to-talk (rechter Option ingedrukt houden)**: houd de rechter Option-toets ingedrukt om direct op te nemen; er is geen activering nodig. De overlay verschijnt zolang je de toets ingedrukt houdt. Als je de toets loslaat, wordt de opname afgerond en na een korte vertraging doorgestuurd, zodat je de tekst kunt bewerken.
 
 ## Runtimegedrag (activeringswoord)
 
 - De herkenner bevindt zich in `VoiceWakeRuntime`.
-- Activering vindt alleen plaats wanneer er een duidelijke pauze is tussen het activeringswoord en het volgende woord (`triggerPauseWindow` = 0,55 s). De overlay of het geluidssignaal kan tijdens de pauze al worden gestart, nog voordat de opdracht begint.
-- Stiltevensters: 2,0 s (`silenceWindow`) wanneer er doorlopend wordt gesproken, en 5,0 s (`triggerOnlySilenceWindow`) als alleen de activering is gehoord.
-- Harde stop: 120 s (`captureHardStop`) om onbeheersbare sessies te voorkomen.
-- Ontdendering tussen sessies: 350 ms (`debounceAfterSend`) na verzending.
-- De overlay wordt aangestuurd via `VoiceWakeOverlayController`, met afzonderlijke kleuren voor vastgelegde en voorlopige tekst.
-- Na verzending wordt de herkenner opnieuw en schoon gestart om naar de volgende activering te luisteren.
+- De activering vindt alleen plaats wanneer er een duidelijke pauze is tussen het activeringswoord en het volgende woord (`triggerPauseWindow` = 0.55s). De overlay/geluidstoon kan tijdens de pauze al starten, nog voordat de opdracht begint.
+- Stiltevensters: 2.0s (`silenceWindow`) wanneer er doorlopend wordt gesproken, 5.0s (`triggerOnlySilenceWindow`) als alleen de activering is gehoord.
+- Harde stop: 120s (`captureHardStop`) om uit de hand lopende sessies te voorkomen.
+- Debounce tussen sessies: 350ms (`debounceAfterSend`) na verzending.
+- De overlay wordt aangestuurd via `VoiceWakeOverlayController`, met verschillende tekstkleuren voor vastgelegde en vluchtige tekst.
+- Na verzending wordt de herkenner opnieuw en zonder resterende status gestart om naar de volgende activering te luisteren.
 
 ## Levenscyclusinvarianten
 
-- Als spraakactivering is ingeschakeld en de machtigingen zijn verleend, blijft de activeringswoordherkenner luisteren, behalve tijdens een actieve opname via indrukken om te spreken.
-- Als de overlay wordt gesloten, ook handmatig via de X-knop, wordt de herkenner altijd hervat: `VoiceSessionCoordinator.overlayDidDismiss` roept bij elk sluitingspad `VoiceWakeRuntime.refresh(state:)` aan. Zie [Spraakoverlay](/nl/platforms/mac/voice-overlay) voor het sessie-/tokenmodel.
+- Als Voice Wake is ingeschakeld en de machtigingen zijn verleend, blijft de activeringswoordherkenner luisteren, behalve tijdens een actieve push-to-talk-opname.
+- Bij het sluiten van de overlay, ook wanneer deze handmatig met de X-knop wordt gesloten, wordt de herkenner altijd hervat: `VoiceSessionCoordinator.overlayDidDismiss` roept bij elk sluitingspad `VoiceWakeRuntime.refresh(state:)` aan. Zie [Spraakoverlay](/nl/platforms/mac/voice-overlay) voor het sessie-/tokenmodel.
 
-## Details van indrukken om te spreken
+## Details van push-to-talk
 
-- Voor sneltoetsdetectie wordt een globale `.flagsChanged`-monitor gebruikt voor de rechter Option-toets (`keyCode 61` + `.option`). Deze neemt gebeurtenissen alleen waar en onderschept ze nooit.
-- De opname vindt plaats in `VoicePushToTalk`: spraakherkenning wordt onmiddellijk gestart, gedeeltelijke resultaten worden naar de overlay gestreamd en bij het loslaten wordt `VoiceWakeForwarder` aangeroepen.
-- Wanneer indrukken om te spreken wordt gestart, wordt de runtime voor het activeringswoord gepauzeerd om conflicterende audiotaps te voorkomen; na het loslaten wordt deze automatisch opnieuw gestart.
-- Machtigingen: Microfoon en Spraakherkenning zijn vereist; voor het ontvangen van toetsgebeurtenissen is goedkeuring voor Toegankelijkheid/Invoercontrole nodig.
-- Externe toetsenborden: sommige geven de rechter Option-toets niet zoals verwacht door. Bied een alternatieve sneltoets aan als gebruikers melden dat activeringen worden gemist.
+- Voor sneltoetsdetectie wordt een globale `.flagsChanged`-monitor gebruikt voor de rechter Option-toets (`keyCode 61` + `.option`). Deze neemt gebeurtenissen alleen waar en houdt ze nooit tegen.
+- De opname bevindt zich in `VoicePushToTalk`: Speech wordt onmiddellijk gestart, gedeeltelijke resultaten worden naar de overlay gestreamd en bij het loslaten wordt `VoiceWakeForwarder` aangeroepen.
+- Bij het starten van push-to-talk wordt de activeringswoordruntime gepauzeerd om conflicterende audiotaps te voorkomen; deze wordt na het loslaten automatisch opnieuw gestart.
+- Machtigingen: Microfoon + Spraak zijn vereist; voor het ontvangen van toetsgebeurtenissen is goedkeuring voor Accessibility/Input Monitoring nodig.
+- Externe toetsenborden: sommige maken de rechter Option-toets niet beschikbaar zoals verwacht. Bied een alternatieve sneltoets aan als gebruikers melden dat invoer wordt gemist.
 
 ## Instellingen voor gebruikers
 
-- Schakelaar **Spraakactivering**: schakelt de runtime voor het activeringswoord in.
-- **Houd rechter Option ingedrukt om te spreken**: schakelt de monitor voor indrukken om te spreken in.
-- Keuzelijsten voor taal en microfoon, een live niveaumeter, een tabel met activeringswoorden en een testfunctie (alleen lokaal, stuurt nooit iets door).
-- De microfoonkeuzelijst bewaart de laatste selectie als een apparaat wordt losgekoppeld, toont een melding dat het apparaat niet verbonden is en valt tijdelijk terug op de systeemstandaard totdat het apparaat terugkeert.
-- **Geluiden**: geluidssignalen bij detectie van de activering en bij verzending, standaard met het macOS-systeemgeluid "Glass". Kies per gebeurtenis een bestand dat door `NSSound` kan worden geladen (bijvoorbeeld MP3/WAV/AIFF), of kies **Geen geluid**.
+- Schakelaar **Voice Wake**: schakelt de activeringswoordruntime in.
+- **Hold Right Option to talk**: schakelt de push-to-talk-monitor in.
+- Als de geselecteerde taal geen herkenning op het apparaat ondersteunt op deze Mac, blijft Voice Wake uitgeschakeld terwijl push-to-talk en Talk Mode beschikbaar blijven.
+- Taal- en microfoonkeuzelijsten, een live niveaumeter, een tabel met activeringswoorden en een tester (uitsluitend lokaal, stuurt nooit iets door).
+- De microfoonkeuzelijst behoudt de laatste selectie als een apparaat wordt losgekoppeld, toont een melding dat het apparaat niet is verbonden en valt tijdelijk terug op de systeemstandaard totdat het apparaat terugkeert.
+- **Geluiden**: geluidstonen bij detectie van de activering en bij verzending, standaard ingesteld op het macOS-systeemgeluid "Glass". Kies per gebeurtenis een bestand dat door `NSSound` kan worden geladen (bijv. MP3/WAV/AIFF), of kies **No Sound**.
 
 ## Doorstuurgedrag
 
-- Bij het doorsturen kiest `VoiceWakeForwarder.selectedSessionOptions` de actieve WebChat-sessiesleutel als die is ingesteld; anders wordt de hoofdsessiesleutel van de Gateway gebruikt.
-- De sessie wordt opgezocht via `sessions.list`, waarna het afleveringskanaal en -doel worden afgeleid uit de afleveringscontext van de sessie. Daarbij wordt teruggevallen op het laatste kanaal/doel en vervolgens op een geparseerde sessiesleutel. Als niets kan worden bepaald, wordt standaard WebChat gebruikt.
-- Als aflevering mislukt, wordt de fout geregistreerd (categorie `voicewake.forward`) en blijft de uitvoering zichtbaar via WebChat-/sessielogboeken.
+- Bij het doorsturen kiest `VoiceWakeForwarder.selectedSessionOptions` de sessiesleutel van de actieve WebChat-sessie als die is ingesteld, en anders de hoofdsessiesleutel van de Gateway.
+- De sessie wordt opgezocht via `sessions.list`. Het bezorgkanaal en het doel worden afgeleid uit de bezorgcontext van de sessie (waarbij wordt teruggevallen op het laatste kanaal/doel en vervolgens op een geparseerde sessiesleutel). Als niets kan worden bepaald, wordt standaard WebChat gebruikt.
+- Als de bezorging mislukt, wordt de fout vastgelegd (`voicewake.forward`-categorie) en blijft de uitvoering zichtbaar via WebChat-/sessielogboeken.
 
 ## Doorstuurpayload
 
-- `VoiceWakeForwarder.prefixedTranscript(_:)` voegt vóór het transcript een regel met een machinehint toe (de herleide hostnaam, met "deze Mac" als terugvalwaarde). Deze wordt gedeeld door de paden voor het activeringswoord en indrukken om te spreken.
+- `VoiceWakeForwarder.prefixedTranscript(_:)` plaatst vóór het transcript een regel met een machinehint (de bepaalde hostnaam, waarbij wordt teruggevallen op "deze Mac"), die wordt gedeeld door de activeringswoord- en push-to-talk-paden.
 
 ## Snelle verificatie
 
-- Schakel indrukken om te spreken in, houd de rechter Option-toets ingedrukt, spreek en laat de toets los: de overlay moet gedeeltelijke resultaten tonen en deze vervolgens verzenden.
+- Schakel push-to-talk in, houd de rechter Option-toets ingedrukt, spreek en laat de toets los: de overlay moet gedeeltelijke resultaten tonen en deze vervolgens verzenden.
 - Tijdens het ingedrukt houden moeten de oren in de menubalk vergroot blijven (`triggerVoiceEars(ttl: nil)`); na het loslaten worden ze weer kleiner.
 
 ## Gerelateerd
 
-- [Spraakactivering](/nl/nodes/voicewake)
+- [Voice Wake](/nl/nodes/voicewake)
 - [Spraakoverlay](/nl/platforms/mac/voice-overlay)
 - [macOS-app](/nl/platforms/macos)

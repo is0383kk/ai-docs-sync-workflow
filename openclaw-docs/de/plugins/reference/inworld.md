@@ -4,18 +4,19 @@ read_when:
 summary: Inworld-Streaming-Text-to-Speech (MP3, OGG_OPUS, PCM-Telefonie).
 title: Inworld-Plugin
 x-i18n:
-    generated_at: "2026-07-12T01:57:02Z"
+    generated_at: "2026-07-26T17:59:09Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 02d912c51460e181e100bc227575cafd1ab3c49494057d2df1e26571000020a8
+    source_hash: 3682eb0f40307e258cd34b0c1f7963f710e6e8852aad7f10efb8cedb023291f1
     source_path: plugins/reference/inworld.md
     workflow: 16
 ---
 
 # Inworld-Plugin
 
-Inworld-Streaming-Text-to-Speech (MP3, OGG_OPUS, PCM-Telefonie).
+Inworld-Streaming-Text-zu-Sprache (MP3, OGG_OPUS, PCM-Telefonie).
 
 ## Distribution
 
@@ -24,8 +25,8 @@ Inworld-Streaming-Text-to-Speech (MP3, OGG_OPUS, PCM-Telefonie).
 
 ## Oberfläche
 
-Verträge: speechProviders
+Verträge: `speechProviders`
 
 ## Zugehörige Dokumentation
 
-- [Inworld](/de/providers/inworld)
+- [inworld](/de/providers/inworld)

@@ -5,26 +5,27 @@ read_when:
 summary: 在 DigitalOcean Droplet 上託管 OpenClaw
 title: DigitalOcean
 x-i18n:
-    generated_at: "2026-07-11T21:27:19Z"
+    generated_at: "2026-07-26T08:29:08Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: e124a59c079efda0c8e880018f2657fad784af1489ca3f98ed8ab609249e35bd
     source_path: install/digitalocean.md
     workflow: 16
 ---
 
-在 DigitalOcean Droplet 上執行持續運作的 OpenClaw 閘道（1 GB Basic 方案約每月 6 美元）。
+在 DigitalOcean Droplet 上執行常駐的 OpenClaw 閘道（1 GB Basic 方案每月約 $6）。
 
-DigitalOcean 是簡單直接的付費 VPS 選擇。若要使用更便宜或免費的選項：
+DigitalOcean 是簡單直接的付費 VPS 選擇。如需更便宜或免費的選項：
 
-- [Hetzner](/zh-TW/install/hetzner) -- 每一美元可獲得更多 CPU 核心與 RAM。
-- [Oracle Cloud](/zh-TW/install/oracle) -- Always Free ARM 方案（最高 4 OCPU、24 GB RAM），但註冊流程可能不太順利，而且僅支援 ARM。
+- [Hetzner](/zh-TW/install/hetzner) -- 每一美元可獲得更多核心／RAM。
+- [Oracle Cloud](/zh-TW/install/oracle) -- 永久免費的 ARM 層級（最高 4 OCPU、24 GB RAM），但註冊流程可能不太順利，而且僅支援 ARM。
 
 ## 先決條件
 
 - DigitalOcean 帳號（[註冊](https://cloud.digitalocean.com/registrations/new)）
-- SSH 金鑰對（或願意使用密碼驗證）
+- SSH 金鑰組（或願意使用密碼驗證）
 - 約 20 分鐘
 
 ## 設定
@@ -32,16 +33,16 @@ DigitalOcean 是簡單直接的付費 VPS 選擇。若要使用更便宜或免�
 <Steps>
   <Step title="建立 Droplet">
     <Warning>
-    使用乾淨的基礎映像檔（Ubuntu 24.04 LTS）。除非你已檢查第三方 Marketplace 一鍵映像檔的啟動指令碼和防火牆預設值，否則請避免使用。
+    請使用乾淨的基礎映像檔（Ubuntu 24.04 LTS）。除非你已檢視第三方 Marketplace 單鍵安裝映像檔的啟動指令碼與防火牆預設值，否則請避免使用。
     </Warning>
 
     1. 登入 [DigitalOcean](https://cloud.digitalocean.com/)。
     2. 按一下 **Create > Droplets**。
     3. 選擇：
-       - **Region:** 離你最近的位置
+       - **Region:** 離你最近的區域
        - **Image:** Ubuntu 24.04 LTS
        - **Size:** Basic、Regular、1 vCPU / 1 GB RAM / 25 GB SSD
-       - **Authentication:** SSH 金鑰（建議）或密碼
+       - **Authentication:** SSH key（建議）或密碼
     4. 按一下 **Create Droplet**，並記下 IP 位址。
 
   </Step>
@@ -59,7 +60,7 @@ DigitalOcean 是簡單直接的付費 VPS 選擇。若要使用更便宜或免�
     # 安裝 OpenClaw
     curl -fsSL https://openclaw.ai/install.sh | bash
 
-    # 建立擁有 OpenClaw 狀態與服務的非 root 使用者。
+    # 建立將擁有 OpenClaw 狀態與服務的非 root 使用者。
     adduser openclaw
     usermod -aG sudo openclaw
     loginctl enable-linger openclaw
@@ -68,7 +69,7 @@ DigitalOcean 是簡單直接的付費 VPS 選擇。若要使用更便宜或免�
     openclaw --version
     ```
 
-    僅使用 root shell 進行系統初始設定。請以非 root 的 `openclaw` 使用者執行 OpenClaw 命令，使狀態儲存在 `/home/openclaw/.openclaw/` 下，並將閘道安裝為該使用者的 systemd `--user` 服務。
+    僅在系統初始設定時使用 root shell。請以非 root 的 `openclaw` 使用者執行 OpenClaw 命令，讓狀態儲存在 `/home/openclaw/.openclaw/` 下，並將閘道安裝為該使用者的 systemd `--user` 服務。
 
   </Step>
 
@@ -100,12 +101,12 @@ DigitalOcean 是簡單直接的付費 VPS 選擇。若要使用更便宜或免�
   </Step>
 
   <Step title="存取控制介面">
-    閘道預設繫結至 local loopback。請選擇下列其中一個選項。
+    閘道預設繫結至迴路介面。請選擇下列其中一個選項。
 
     **選項 A：SSH 通道（最簡單）**
 
     ```bash
-    # 從你的本機電腦執行
+    # 從你的本機電腦
     ssh -L 18789:localhost:18789 root@YOUR_DROPLET_IP
     ```
 
@@ -122,7 +123,7 @@ DigitalOcean 是簡單直接的付費 VPS 選擇。若要使用更便宜或免�
 
     接著從 tailnet 上的任何裝置開啟 `https://<magicdns>/`。
 
-    Tailscale Serve 會透過 tailnet 身分標頭驗證控制介面和 WebSocket 流量，這是假設閘道主機本身可信任。無論如何，HTTP API 端點仍會遵循閘道的一般驗證模式（權杖／密碼）。若要透過 Serve 明確要求共用密鑰憑證，請設定 `gateway.auth.allowTailscale: false`，並使用 `gateway.auth.mode: "token"` 或 `"password"`。
+    Tailscale Serve 會透過 tailnet 身分標頭驗證控制介面與 WebSocket 流量；這項機制假設閘道主機本身受到信任。無論如何，HTTP API 端點仍會遵循閘道的一般驗證模式（權杖／密碼）。若要透過 Serve 明確要求共用密鑰認證資訊，請設定 `gateway.auth.allowTailscale: false`，並使用 `gateway.auth.mode: "token"` 或 `"password"`。
 
     **選項 C：繫結至 Tailnet（不使用 Serve）**
 
@@ -136,14 +137,14 @@ DigitalOcean 是簡單直接的付費 VPS 選擇。若要使用更便宜或免�
   </Step>
 </Steps>
 
-## 持久化與備份
+## 持久性與備份
 
 OpenClaw 狀態儲存在：
 
-- `~/.openclaw/` -- `openclaw.json`、頻道／供應商憑證、各代理程式的 `auth-profiles.json`，以及工作階段資料。
-- `~/.openclaw/workspace/` -- 代理程式工作區（SOUL.md、記憶、成品）。
+- `~/.openclaw/` -- `openclaw.json`、頻道／供應商認證資訊、每個代理程式的 `auth-profiles.json`，以及工作階段資料。
+- `~/.openclaw/workspace/` -- 代理程式工作區（SOUL.md、記憶與成品）。
 
-這些資料會在 Droplet 重新啟動後保留。若要建立可攜式快照：
+這些資料在 Droplet 重新啟動後仍會保留。若要建立可攜式快照：
 
 ```bash
 openclaw backup create
@@ -153,26 +154,26 @@ DigitalOcean 快照會備份整個 Droplet；`openclaw backup create` 則可跨�
 
 ## 1 GB RAM 使用提示
 
-每月 6 美元的 Droplet 只有 1 GB RAM。為了保持順暢運作：
+$6 的 Droplet 只有 1 GB RAM。若要維持順暢運作：
 
-- 確認上述交換空間步驟已寫入 `/etc/fstab`，使其在重新啟動後仍可使用。
-- 優先使用以 API 為基礎的模型（Claude、GPT），而非本機模型 -- 1 GB 無法容納本機 LLM 推論。
+- 確認上述交換空間步驟已寫入 `/etc/fstab`，使其在重新啟動後仍然生效。
+- 優先使用以 API 為基礎的模型（Claude、GPT），而非本機模型 -- 1 GB RAM 無法容納本機 LLM 推論。
 - 如果大型提示詞導致記憶體不足，請將 `agents.defaults.model.primary` 設為較小的模型。
-- 使用 `free -h` 和 `htop` 進行監控。
+- 使用 `free -h` 與 `htop` 進行監控。
 
 ## 疑難排解
 
-**閘道無法啟動** -- 執行 `openclaw doctor --non-interactive`，並使用 `journalctl --user -u openclaw-gateway.service -n 50` 檢查日誌。
+**閘道無法啟動** -- 執行 `openclaw doctor --non-interactive`，並使用 `journalctl --user -u openclaw-gateway.service -n 50` 檢查記錄。
 
-**連接埠已被使用** -- 執行 `lsof -i :18789` 找出該程序，然後將其停止。
+**連接埠已被使用** -- 執行 `lsof -i :18789` 找出處理程序，然後將其停止。
 
-**記憶體不足** -- 使用 `free -h` 確認交換空間已啟用。如果仍發生記憶體不足，請改用以 API 為基礎的模型（Claude、GPT），而非本機模型，或升級至 2 GB Droplet。
+**記憶體不足** -- 使用 `free -h` 驗證交換空間是否已啟用。如果仍發生記憶體不足，請改用以 API 為基礎的模型（Claude、GPT），而非本機模型，或升級至 2 GB Droplet。
 
 ## 後續步驟
 
 - [頻道](/zh-TW/channels) -- 連接 Telegram、WhatsApp、Discord 等服務
 - [閘道設定](/zh-TW/gateway/configuration) -- 所有設定選項
-- [更新](/zh-TW/install/updating) -- 讓 OpenClaw 保持最新版本
+- [更新](/zh-TW/install/updating) -- 讓 OpenClaw 保持最新狀態
 
 ## 相關內容
 

@@ -1,33 +1,34 @@
 ---
 read_when:
-    - Je wilt verbinding maken met een Yuanbao-bot
+    - Je wilt een Yuanbao-bot verbinden
     - Je configureert het Yuanbao-kanaal
 summary: Overzicht, functies en configuratie van de Yuanbao-bot
 title: Yuanbao
 x-i18n:
-    generated_at: "2026-07-12T08:40:48Z"
+    generated_at: "2026-07-27T05:25:35Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 43488834f588530206b290cb0fb185fd1fe2e1f214ab4a4ccccc49b9b549b6ac
     source_path: channels/yuanbao.md
     workflow: 16
 ---
 
-Tencent Yuanbao is het AI-assistentplatform van Tencent. De door de community onderhouden plugin `openclaw-plugin-yuanbao` verbindt Yuanbao-bots via WebSocket met OpenClaw voor privéberichten en groepschats.
+Tencent Yuanbao is het AI-assistentplatform van Tencent. De door de community onderhouden `openclaw-plugin-yuanbao`-plugin verbindt Yuanbao-bots via WebSocket met OpenClaw voor privéberichten en groepschats.
 
-**Status:** gereed voor productie voor privéberichten met bots en groepschats. WebSocket is de enige ondersteunde verbindingsmodus. Deze plugin wordt door het Tencent Yuanbao-team onderhouden als een externe catalogusvermelding, niet door de kern van OpenClaw; de onderstaande configuratie- en gedragsdetails (afgezien van de installatie en de algemene CLI-interface) zijn afkomstig uit de eigen documentatie van de plugin en zijn niet geverifieerd aan de hand van de broncode van de OpenClaw-kern.
+**Status:** productieklaar voor privéberichten met bots en groepschats. WebSocket is de enige ondersteunde verbindingsmodus. Deze plugin wordt als externe catalogusvermelding onderhouden door het Tencent Yuanbao-team, niet door de kern van OpenClaw; de onderstaande configuratie- en gedragsdetails (afgezien van de installatie en de algemene CLI-interface) zijn afkomstig uit de eigen documentatie van de plugin en zijn niet geverifieerd aan de hand van de broncode van de OpenClaw-kern.
 
 ## Snel aan de slag
 
 Vereist OpenClaw 2026.4.10 of hoger. Controleer dit met `openclaw --version`; voer een upgrade uit met `openclaw update`.
 
 <Steps>
-  <Step title="Voeg het Yuanbao-kanaal toe met je aanmeldgegevens">
+  <Step title="Voeg het Yuanbao-kanaal toe met je inloggegevens">
   ```bash
   openclaw channels add --channel yuanbao --token "appKey:appSecret"
   ```
-  `--token` gebruikt `appKey:appSecret`, gescheiden door een dubbele punt. Verkrijg deze vanuit de Yuanbao-app door een bot aan te maken in de instellingen van je toepassing.
+  `--token` gebruikt met dubbele punten gescheiden `appKey:appSecret`. Verkrijg deze vanuit de Yuanbao-app door een bot te maken in de instellingen van je applicatie.
   </Step>
 
   <Step title="Start de Gateway opnieuw om de wijziging toe te passen">
@@ -37,7 +38,7 @@ Vereist OpenClaw 2026.4.10 of hoger. Controleer dit met `openclaw --version`; vo
   </Step>
 </Steps>
 
-### Interactieve configuratie (alternatief)
+### Interactieve installatie (alternatief)
 
 ```bash
 openclaw channels login --channel yuanbao
@@ -51,14 +52,14 @@ Volg de aanwijzingen om je App ID en App Secret in te voeren.
 
 `channels.yuanbao.dm.policy`:
 
-| Waarde           | Gedrag                                                        |
-| ---------------- | ------------------------------------------------------------- |
-| `open` (standaard) | Alle gebruikers toestaan                                    |
-| `pairing`        | Onbekende gebruikers krijgen een koppelcode; keur goed via CLI |
+| Waarde            | Gedrag                                          |
+| ---------------- | ------------------------------------------------- |
+| `open` (standaard) | Alle gebruikers toestaan                                   |
+| `pairing`        | Onbekende gebruikers krijgen een koppelingscode; keur deze goed via de CLI |
 | `allowlist`      | Alleen gebruikers in `allowFrom` kunnen chatten                |
-| `disabled`       | Alle privéberichten uitschakelen                               |
+| `disabled`       | Alle privéberichten uitschakelen                                   |
 
-Keur een koppelverzoek goed:
+Een koppelingsverzoek goedkeuren:
 
 ```bash
 openclaw pairing list yuanbao
@@ -67,11 +68,11 @@ openclaw pairing approve yuanbao <CODE>
 
 ### Groepschats
 
-`channels.yuanbao.requireMention` (standaard `true`): vereist een @vermelding voordat de bot in een groep reageert. Reageren op een bericht van de bot zelf geldt als een impliciete vermelding.
+`channels.yuanbao.requireMention` (standaard `true`): vereist een @vermelding voordat de bot in een groep reageert. Een antwoord op een bericht van de bot zelf wordt als een impliciete vermelding beschouwd.
 
 ## Configuratievoorbeelden
 
-Basisconfiguratie met open beleid voor privéberichten:
+Basisconfiguratie, open beleid voor privéberichten:
 
 ```json5
 {
@@ -87,7 +88,7 @@ Basisconfiguratie met open beleid voor privéberichten:
 }
 ```
 
-Beperk privéberichten tot specifieke gebruikers:
+Privéberichten beperken tot specifieke gebruikers:
 
 ```json5
 {
@@ -104,7 +105,7 @@ Beperk privéberichten tot specifieke gebruikers:
 }
 ```
 
-Schakel de vereiste voor @vermeldingen in groepen uit:
+De vereiste voor een @vermelding in groepen uitschakelen:
 
 ```json5
 {
@@ -116,15 +117,15 @@ Schakel de vereiste voor @vermeldingen in groepen uit:
 }
 ```
 
-Afstemming van uitgaande bezorging:
+Uitgaande bezorging afstemmen:
 
 ```json5
 {
   channels: {
     yuanbao: {
       outboundQueueStrategy: "merge-text",
-      minChars: 2800, // buffer totdat dit aantal tekens is bereikt
-      maxChars: 3000, // boven deze limiet splitsen afdwingen
+      minChars: 2800, // bufferen tot dit aantal tekens
+      maxChars: 3000, // boven deze limiet geforceerd splitsen
       idleMs: 5000, // automatisch verzenden na time-out wegens inactiviteit (ms)
     },
   },
@@ -135,16 +136,16 @@ Stel `outboundQueueStrategy: "immediate"` in om elk fragment zonder buffering te
 
 ## Veelgebruikte opdrachten
 
-| Opdracht   | Beschrijving                         |
-| ---------- | ------------------------------------ |
-| `/help`    | Beschikbare opdrachten weergeven     |
-| `/status`  | Botstatus weergeven                  |
-| `/new`     | Een nieuwe sessie starten            |
+| Opdracht    | Beschrijving                 |
+| ---------- | --------------------------- |
+| `/help`    | Beschikbare opdrachten tonen     |
+| `/status`  | Botstatus tonen             |
+| `/new`     | Een nieuwe sessie starten         |
 | `/stop`    | De huidige uitvoering stoppen        |
-| `/restart` | OpenClaw opnieuw starten             |
-| `/compact` | De sessiecontext comprimeren         |
+| `/restart` | OpenClaw opnieuw starten            |
+| `/compact` | De sessiecontext comprimeren |
 
-Yuanbao ondersteunt systeemeigen menu's voor slashopdrachten; opdrachten worden automatisch met het platform gesynchroniseerd wanneer de Gateway start.
+Yuanbao ondersteunt systeemeigen menu's voor slash-opdrachten; opdrachten worden automatisch met het platform gesynchroniseerd wanneer de Gateway start.
 
 ## Problemen oplossen
 
@@ -156,7 +157,7 @@ Yuanbao ondersteunt systeemeigen menu's voor slashopdrachten; opdrachten worden 
 
 **Bot ontvangt geen berichten:**
 
-1. Controleer of de bot in de Yuanbao-app is aangemaakt en goedgekeurd
+1. Controleer of de bot in de Yuanbao-app is gemaakt en goedgekeurd
 2. Controleer of `appKey` en `appSecret` correct zijn geconfigureerd
 3. Controleer of de Gateway actief is: `openclaw gateway status`
 4. Controleer de logboeken: `openclaw logs --follow`
@@ -167,7 +168,7 @@ Yuanbao ondersteunt systeemeigen menu's voor slashopdrachten; opdrachten worden 
 2. Standaard terugvalantwoord: "暂时无法解答，你可以换个问题问问我哦"
 3. Pas dit aan met `channels.yuanbao.fallbackReply`
 
-**App Secret is gelekt:**
+**App Secret is uitgelekt:**
 
 1. Stel het App Secret opnieuw in de Yuanbao-app in
 2. Werk de waarde in je configuratie bij
@@ -186,12 +187,12 @@ Yuanbao ondersteunt systeemeigen menu's voor slashopdrachten; opdrachten worden 
         main: {
           appKey: "key_xxx",
           appSecret: "secret_xxx",
-          name: "Primary bot",
+          name: "Primaire bot",
         },
         backup: {
           appKey: "key_yyy",
           appSecret: "secret_yyy",
-          name: "Backup bot",
+          name: "Reservebot",
           enabled: false,
         },
       },
@@ -210,7 +211,7 @@ Yuanbao ondersteunt systeemeigen menu's voor slashopdrachten; opdrachten worden 
 
 ### Streaming
 
-Yuanbao ondersteunt streaminguitvoer op blokniveau; de bot verzendt tekst in fragmenten terwijl deze wordt gegenereerd.
+Yuanbao ondersteunt streaminguitvoer op blokniveau; de bot verzendt de tekst tijdens het genereren in fragmenten.
 
 ```json5
 {
@@ -224,7 +225,7 @@ Yuanbao ondersteunt streaminguitvoer op blokniveau; de bot verzendt tekst in fra
 
 Stel `disableBlockStreaming: true` in om het volledige antwoord in één bericht te verzenden.
 
-### Historische context van groepschats
+### Geschiedeniscontext voor groepschats
 
 ```json5
 {
@@ -250,11 +251,11 @@ Bepaalt hoeveel historische berichten voor groepschats in de AI-context worden o
 }
 ```
 
-| Waarde  | Gedrag                                                               |
-| ------- | -------------------------------------------------------------------- |
-| `off`   | Geen geciteerd antwoord                                               |
-| `first` | Alleen het eerste antwoord per inkomend bericht citeren (standaard)   |
-| `all`   | Elk antwoord citeren                                                  |
+| Waarde   | Gedrag                                                 |
+| ------- | -------------------------------------------------------- |
+| `off`   | Geen geciteerd antwoord                                           |
+| `first` | Alleen het eerste antwoord per binnenkomend bericht citeren (standaard) |
+| `all`   | Elk antwoord citeren                                        |
 
 ### Markdown-hintinjectie
 
@@ -270,7 +271,7 @@ Standaard injecteert de bot een instructie in de systeemprompt om te voorkomen d
 }
 ```
 
-### Foutopsporingsmodus
+### Debugmodus
 
 ```json5
 {
@@ -284,7 +285,7 @@ Standaard injecteert de bot een instructie in de systeemprompt om te voorkomen d
 
 Schakelt niet-geanonimiseerde logboekuitvoer in voor de vermelde bot-ID's.
 
-### Routering met meerdere agents
+### Routing met meerdere agents
 
 Gebruik `bindings` om privéberichten of groepen van Yuanbao naar verschillende agents te routeren:
 
@@ -324,43 +325,43 @@ Gebruik `bindings` om privéberichten of groepen van Yuanbao naar verschillende 
 
 Volledige configuratie: [Gateway-configuratie](/nl/gateway/configuration)
 
-| Instelling                                  | Beschrijving                                                    | Standaard                              |
-| ------------------------------------------- | --------------------------------------------------------------- | -------------------------------------- |
-| `channels.yuanbao.enabled`                  | Het kanaal in-/uitschakelen                                     | `true`                                 |
-| `channels.yuanbao.defaultAccount`           | Standaardaccount voor uitgaande routering                        | `default`                              |
-| `channels.yuanbao.accounts.<id>.appKey`     | App Key (ondertekening + ticketgeneratie)                        | -                                      |
-| `channels.yuanbao.accounts.<id>.appSecret`  | App Secret (ondertekening)                                      | -                                      |
-| `channels.yuanbao.accounts.<id>.token`      | Vooraf ondertekend token (slaat automatische ticketondertekening over) | -                                 |
-| `channels.yuanbao.accounts.<id>.name`       | Weergavenaam van account                                        | -                                      |
-| `channels.yuanbao.accounts.<id>.enabled`    | Een specifiek account in-/uitschakelen                           | `true`                                 |
-| `channels.yuanbao.dm.policy`                | Beleid voor privéberichten                                      | `open`                                 |
-| `channels.yuanbao.dm.allowFrom`             | Toegestane afzenders voor privéberichten (lijst met gebruikers-ID's) | -                                 |
-| `channels.yuanbao.requireMention`           | @vermelding in groepen vereisen                                  | `true`                                 |
-| `channels.yuanbao.overflowPolicy`           | Afhandeling van lange berichten (`split` of `stop`)              | `split`                                |
-| `channels.yuanbao.replyToMode`              | Antwoordstrategie voor groepen (`off`, `first`, `all`)           | `first`                                |
-| `channels.yuanbao.outboundQueueStrategy`    | Uitgaande strategie (`merge-text` of `immediate`)                | `merge-text`                           |
-| `channels.yuanbao.minChars`                 | Tekst samenvoegen: minimumaantal tekens om verzending te activeren | `2800`                              |
-| `channels.yuanbao.maxChars`                 | Tekst samenvoegen: maximumaantal tekens per bericht              | `3000`                                 |
-| `channels.yuanbao.idleMs`                   | Tekst samenvoegen: time-out bij inactiviteit vóór automatisch verzenden (ms) | `5000`                    |
-| `channels.yuanbao.mediaMaxMb`               | Limiet voor mediagrootte (MB)                                   | `20`                                   |
-| `channels.yuanbao.historyLimit`             | Aantal contextitems uit de groepschatgeschiedenis                | `100`                                  |
-| `channels.yuanbao.disableBlockStreaming`    | Streaminguitvoer op blokniveau uitschakelen                      | `false`                                |
-| `channels.yuanbao.fallbackReply`            | Terugvalantwoord wanneer het model geen inhoud retourneert       | `暂时无法解答，你可以换个问题问问我哦` |
-| `channels.yuanbao.markdownHintEnabled`      | Markdown-instructies injecteren om volledige codeblokken te voorkomen | `true`                            |
-| `channels.yuanbao.debugBotIds`              | Lijst met toegestane bot-ID's voor foutopsporing (niet-geanonimiseerde logboeken) | `[]`                  |
+| Instelling                                    | Beschrijving                                       | Standaard                                |
+| ------------------------------------------ | ------------------------------------------------- | -------------------------------------- |
+| `channels.yuanbao.enabled`                 | Het kanaal in-/uitschakelen                        | `true`                                 |
+| `channels.yuanbao.defaultAccount`          | Standaardaccount voor uitgaande routing              | `default`                              |
+| `channels.yuanbao.accounts.<id>.appKey`    | App Key (ondertekening + ticketgeneratie)             | -                                      |
+| `channels.yuanbao.accounts.<id>.appSecret` | App Secret (ondertekening)                              | -                                      |
+| `channels.yuanbao.accounts.<id>.token`     | Vooraf ondertekend token (slaat automatische ticketondertekening over) | -                                      |
+| `channels.yuanbao.accounts.<id>.name`      | Weergavenaam van account                              | -                                      |
+| `channels.yuanbao.accounts.<id>.enabled`   | Een specifiek account in-/uitschakelen                 | `true`                                 |
+| `channels.yuanbao.dm.policy`               | Beleid voor privéberichten                                         | `open`                                 |
+| `channels.yuanbao.dm.allowFrom`            | Toestaanlijst voor privéberichten (lijst met gebruikers-ID's)                       | -                                      |
+| `channels.yuanbao.requireMention`          | @Vermelding in groepen vereisen                        | `true`                                 |
+| `channels.yuanbao.overflowPolicy`          | Afhandeling van lange berichten (`split` of `stop`)         | `split`                                |
+| `channels.yuanbao.replyToMode`             | Strategie voor groepsantwoorden (`off`, `first`, `all`)   | `first`                                |
+| `channels.yuanbao.outboundQueueStrategy`   | Uitgaande strategie (`merge-text` of `immediate`)   | `merge-text`                           |
+| `channels.yuanbao.minChars`                | Tekst samenvoegen: minimumaantal tekens om verzending te activeren             | `2800`                                 |
+| `channels.yuanbao.maxChars`                | Tekst samenvoegen: maximumaantal tekens per bericht                 | `3000`                                 |
+| `channels.yuanbao.idleMs`                  | Tekst samenvoegen: time-out wegens inactiviteit vóór automatisch verzenden (ms)   | `5000`                                 |
+| `channels.yuanbao.mediaMaxMb`              | Limiet voor mediagrootte (MB)                             | `20`                                   |
+| `channels.yuanbao.historyLimit`            | Contextitems uit de geschiedenis van groepschats                | `100`                                  |
+| `channels.yuanbao.disableBlockStreaming`   | Streaminguitvoer op blokniveau uitschakelen              | `false`                                |
+| `channels.yuanbao.fallbackReply`           | Terugvalantwoord wanneer het model geen inhoud retourneert  | `暂时无法解答，你可以换个问题问问我哦` |
+| `channels.yuanbao.markdownHintEnabled`     | Markdown-instructies tegen volledige codeblokken injecteren        | `true`                                 |
+| `channels.yuanbao.debugBotIds`             | Bot-ID's op de debugtoestaanlijst (niet-geanonimiseerde logboeken)        | `[]`                                   |
 
 ## Ondersteunde berichttypen
 
-**Ontvangen:** tekst, afbeeldingen, bestanden, audio/spraak, video, stickers/aangepaste emoji en aangepaste elementen (linkkaarten).
+**Ontvangen:** tekst, afbeeldingen, bestanden, audio/spraak, video, stickers/aangepaste emoji, aangepaste elementen (linkkaarten).
 
-**Verzenden:** tekst (Markdown), afbeeldingen, bestanden, audio, video en stickers.
+**Verzenden:** tekst (Markdown), afbeeldingen, bestanden, audio, video, stickers.
 
-**Discussies en antwoorden:** geciteerde antwoorden (configureerbaar via `replyToMode`); antwoorden in discussies worden niet door het platform ondersteund.
+**Threads en antwoorden:** geciteerde antwoorden (configureerbaar via `replyToMode`); threadantwoorden worden niet door het platform ondersteund.
 
 ## Gerelateerd
 
 - [Overzicht van kanalen](/nl/channels) - alle ondersteunde kanalen
-- [Koppelen](/nl/channels/pairing) - authenticatie van privéberichten en koppelproces
-- [Groepen](/nl/channels/groups) - gedrag van groepschats en vereiste vermeldingen
+- [Koppelen](/nl/channels/pairing) - DM-authenticatie en koppelingsflow
+- [Groepen](/nl/channels/groups) - gedrag van groepschats en vermelding als voorwaarde
 - [Kanaalroutering](/nl/channels/channel-routing) - sessieroutering voor berichten
-- [Beveiliging](/nl/gateway/security) - toegangsmodel en beveiliging aanscherpen
+- [Beveiliging](/nl/gateway/security) - toegangsmodel en beveiligingsmaatregelen

@@ -1,28 +1,29 @@
 ---
 read_when:
     - आप आउटबाउंड उत्तरों के लिए Azure Speech संश्लेषण चाहते हैं
-    - आपको Azure Speech से नेटिव Ogg Opus वॉइस-नोट आउटपुट चाहिए
-summary: OpenClaw उत्तरों के लिए Azure AI Speech टेक्स्ट-टू-स्पीच
-title: Azure Speech
+    - आपको Azure Speech से मूल Ogg Opus वॉइस-नोट आउटपुट चाहिए
+summary: OpenClaw के उत्तरों के लिए Azure AI Speech टेक्स्ट-टू-स्पीच
+title: Azure स्पीच
 x-i18n:
-    generated_at: "2026-06-28T23:56:35Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:20:59Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c14b1f3c2fda9b2f820e537d7133b1dbf71573b7d735207c6a4ca19432a8d8c3
+    source_hash: cfeeb9daa8d7d6aa24e497d57d64e07efa94c3c0c6b16f793343a450286ab3c1
     source_path: providers/azure-speech.md
     workflow: 16
 ---
 
-Azure Speech एक Azure AI Speech टेक्स्ट-टू-स्पीच प्रदाता है। OpenClaw में यह
-आउटबाउंड उत्तर ऑडियो को डिफ़ॉल्ट रूप से MP3, वॉइस नोट्स के लिए मूल Ogg/Opus,
-और Voice Call जैसे टेलीफोनी चैनलों के लिए 8 kHz mulaw ऑडियो के रूप में संश्लेषित करता है।
-
-OpenClaw SSML के साथ सीधे Azure Speech REST API का उपयोग करता है और
-प्रदाता-स्वामित्व वाला आउटपुट फ़ॉर्मैट `X-Microsoft-OutputFormat` के माध्यम से भेजता है।
+Azure Speech एक बंडल किया गया Azure AI Speech टेक्स्ट-टू-स्पीच प्रदाता है। OpenClaw
+SSML के साथ Azure Speech REST API को सीधे कॉल करता है और
+मानक उत्तरों के लिए MP3, वॉइस नोट्स के लिए नेटिव Ogg/Opus, और
+Voice Call जैसे टेलीफ़ोनी चैनलों के लिए 8 kHz mulaw संश्लेषित करता है। अनुरोध, प्रदाता के स्वामित्व वाला
+आउटपुट प्रारूप `X-Microsoft-OutputFormat` हेडर के माध्यम से भेजता है।
 
 | विवरण                  | मान                                                                                                          |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| प्रदाता ID             | `azure-speech` (उपनाम: `azure`)                                                                                |
 | वेबसाइट                 | [Azure AI Speech](https://azure.microsoft.com/products/ai-services/ai-speech)                                  |
 | दस्तावेज़                    | [Speech REST टेक्स्ट-टू-स्पीच](https://learn.microsoft.com/azure/ai-services/speech-service/rest-text-to-speech) |
 | प्रमाणीकरण                    | `AZURE_SPEECH_KEY` और `AZURE_SPEECH_REGION`                                                                  |
@@ -30,13 +31,13 @@ OpenClaw SSML के साथ सीधे Azure Speech REST API का उप�
 | डिफ़ॉल्ट फ़ाइल आउटपुट     | `audio-24khz-48kbitrate-mono-mp3`                                                                              |
 | डिफ़ॉल्ट वॉइस-नोट फ़ाइल | `ogg-24khz-16bit-mono-opus`                                                                                    |
 
-## शुरू करना
+## आरंभ करना
 
 <Steps>
   <Step title="Azure Speech संसाधन बनाएँ">
-    Azure पोर्टल में, Speech संसाधन बनाएँ। Resource Management > Keys and Endpoint से **KEY 1** कॉपी करें,
-    और संसाधन स्थान कॉपी करें
-    जैसे `eastus`।
+    Azure पोर्टल में एक Speech संसाधन बनाएँ। Resource Management > Keys and Endpoint से **KEY 1**
+    कॉपी करें और `eastus` जैसे संसाधन का स्थान
+    कॉपी करें।
 
     ```
     AZURE_SPEECH_KEY=<speech-resource-key>
@@ -44,18 +45,16 @@ OpenClaw SSML के साथ सीधे Azure Speech REST API का उप�
     ```
 
   </Step>
-  <Step title="messages.tts में Azure Speech चुनें">
+  <Step title="tts में Azure Speech चुनें">
     ```json5
     {
-      messages: {
-        tts: {
-          auto: "always",
-          provider: "azure-speech",
-          providers: {
-            "azure-speech": {
-              speakerVoice: "en-US-JennyNeural",
-              lang: "en-US",
-            },
+      tts: {
+        auto: "always",
+        provider: "azure-speech",
+        providers: {
+          "azure-speech": {
+            voice: "en-US-JennyNeural",
+            lang: "en-US",
           },
         },
       },
@@ -63,49 +62,58 @@ OpenClaw SSML के साथ सीधे Azure Speech REST API का उप�
     ```
   </Step>
   <Step title="संदेश भेजें">
-    किसी भी जुड़े हुए चैनल के माध्यम से उत्तर भेजें। OpenClaw Azure Speech
-    के साथ ऑडियो संश्लेषित करता है और मानक ऑडियो के लिए MP3 डिलीवर करता है, या
-    जब चैनल वॉइस नोट की अपेक्षा करता है तो Ogg/Opus।
+    किसी भी कनेक्ट किए गए चैनल के माध्यम से उत्तर भेजें। OpenClaw, Azure Speech से ऑडियो
+    संश्लेषित करता है और मानक ऑडियो के लिए MP3 या चैनल द्वारा वॉइस नोट
+    अपेक्षित होने पर Ogg/Opus वितरित करता है।
   </Step>
 </Steps>
 
 ## कॉन्फ़िगरेशन विकल्प
 
-| विकल्प                  | पथ                                                        | विवरण                                                                                           |
-| ----------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `apiKey`                | `messages.tts.providers.azure-speech.apiKey`                | Azure Speech संसाधन कुंजी। `AZURE_SPEECH_KEY`, `AZURE_SPEECH_API_KEY`, या `SPEECH_KEY` पर फ़ॉलबैक करता है। |
-| `region`                | `messages.tts.providers.azure-speech.region`                | Azure Speech संसाधन क्षेत्र। `AZURE_SPEECH_REGION` या `SPEECH_REGION` पर फ़ॉलबैक करता है।                 |
-| `endpoint`              | `messages.tts.providers.azure-speech.endpoint`              | वैकल्पिक Azure Speech एंडपॉइंट/बेस URL ओवरराइड।                                                     |
-| `baseUrl`               | `messages.tts.providers.azure-speech.baseUrl`               | वैकल्पिक Azure Speech बेस URL ओवरराइड।                                                              |
-| `speakerVoice`          | `messages.tts.providers.azure-speech.speakerVoice`          | Azure वॉइस ShortName (डिफ़ॉल्ट `en-US-JennyNeural`)। लेगेसी उपनाम: `voice`।                           |
-| `lang`                  | `messages.tts.providers.azure-speech.lang`                  | SSML भाषा कोड (डिफ़ॉल्ट `en-US`)।                                                                 |
-| `outputFormat`          | `messages.tts.providers.azure-speech.outputFormat`          | ऑडियो-फ़ाइल आउटपुट फ़ॉर्मैट (डिफ़ॉल्ट `audio-24khz-48kbitrate-mono-mp3`)।                                 |
-| `voiceNoteOutputFormat` | `messages.tts.providers.azure-speech.voiceNoteOutputFormat` | वॉइस-नोट आउटपुट फ़ॉर्मैट (डिफ़ॉल्ट `ogg-24khz-16bit-mono-opus`)।                                       |
+सभी विकल्प `tts.providers["azure-speech"]` के अंतर्गत होते हैं।
 
-## नोट्स
+| विकल्प                  | विवरण                                                                                           |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| `apiKey`                | Azure Speech संसाधन कुंजी। उपलब्ध न होने पर `AZURE_SPEECH_KEY`, `AZURE_SPEECH_API_KEY`, या `SPEECH_KEY` का उपयोग करता है। |
+| `region`                | Azure Speech संसाधन क्षेत्र। उपलब्ध न होने पर `AZURE_SPEECH_REGION` या `SPEECH_REGION` का उपयोग करता है।                 |
+| `endpoint`              | वैकल्पिक Azure Speech एंडपॉइंट ओवरराइड। उपलब्ध न होने पर विश्वसनीय `AZURE_SPEECH_ENDPOINT` का उपयोग करता है।               |
+| `baseUrl`               | वैकल्पिक Azure Speech बेस URL ओवरराइड।                                                              |
+| `voice`                 | Azure वॉइस ShortName (डिफ़ॉल्ट `en-US-JennyNeural`)। पुराना उपनाम: `voiceId`।                         |
+| `lang`                  | SSML भाषा कोड (डिफ़ॉल्ट `en-US`)।                                                                 |
+| `outputFormat`          | ऑडियो-फ़ाइल आउटपुट प्रारूप (डिफ़ॉल्ट `audio-24khz-48kbitrate-mono-mp3`)।                                 |
+| `voiceNoteOutputFormat` | वॉइस-नोट आउटपुट प्रारूप (डिफ़ॉल्ट `ogg-24khz-16bit-mono-opus`)।                                       |
+| `timeoutMs`             | अनुरोध टाइमआउट ओवरराइड, मिलीसेकंड में। उपलब्ध न होने पर वैश्विक `tts.timeoutMs` का उपयोग करता है।                   |
+
+`apiKey` के साथ `region`, `endpoint`, या
+`baseUrl` में से कोई एक सेट होने पर प्रदाता को कॉन्फ़िगर किया हुआ माना जाता है। पर्यावरण चर केवल उन
+कॉन्फ़िगरेशन कुंजियों के लिए फ़ॉलबैक के रूप में जाँचे जाते हैं जिन्हें सेट नहीं किया गया है। वर्कस्पेस की `.env` फ़ाइलें
+`AZURE_SPEECH_ENDPOINT` सेट नहीं कर सकतीं; एंडपॉइंट रूटिंग के लिए प्रोसेस परिवेश, वैश्विक रनटाइम dotenv,
+या स्पष्ट कॉन्फ़िगरेशन का उपयोग करें।
+
+## टिप्पणियाँ
 
 <AccordionGroup>
   <Accordion title="प्रमाणीकरण">
-    Azure Speech, Azure OpenAI कुंजी नहीं, बल्कि Speech संसाधन कुंजी का उपयोग करता है। कुंजी
-    `Ocp-Apim-Subscription-Key` के रूप में भेजी जाती है; OpenClaw `region` से
-    `https://<region>.tts.speech.microsoft.com` निकालता है, जब तक कि आप
-    `endpoint` या `baseUrl` प्रदान नहीं करते।
+    Azure Speech, Azure OpenAI कुंजी के बजाय Speech संसाधन कुंजी का उपयोग करता है। कुंजी
+    `Ocp-Apim-Subscription-Key` के रूप में भेजी जाती है; जब तक आप
+    `endpoint` या `baseUrl` प्रदान नहीं करते, OpenClaw
+    `region` से `https://<region>.tts.speech.microsoft.com` प्राप्त करता है।
   </Accordion>
-  <Accordion title="वॉइस नाम">
-    Azure Speech वॉइस `ShortName` मान का उपयोग करें, उदाहरण के लिए
-    `en-US-JennyNeural`। बंडल किया गया प्रदाता उसी
-    Speech संसाधन के माध्यम से वॉइसों की सूची दे सकता है और deprecated या retired चिह्नित वॉइसों को फ़िल्टर करता है।
+  <Accordion title="वॉइस के नाम">
+    Azure Speech वॉइस के `ShortName` मान का उपयोग करें, उदाहरण के लिए
+    `en-US-JennyNeural`। बंडल किया गया प्रदाता उसी Speech संसाधन के माध्यम से वॉइस सूचीबद्ध कर सकता है
+    और अप्रचलित, सेवानिवृत्त या अक्षम चिह्नित वॉइस को फ़िल्टर कर देता है।
   </Accordion>
   <Accordion title="ऑडियो आउटपुट">
-    Azure `audio-24khz-48kbitrate-mono-mp3`,
-    `ogg-24khz-16bit-mono-opus`, और `riff-24khz-16bit-mono-pcm` जैसे आउटपुट फ़ॉर्मैट स्वीकार करता है। OpenClaw
-    `voice-note` लक्ष्यों के लिए Ogg/Opus का अनुरोध करता है, ताकि चैनल अतिरिक्त MP3 रूपांतरण के बिना मूल
-    वॉइस बबल भेज सकें।
+    Azure, `audio-24khz-48kbitrate-mono-mp3`, `ogg-24khz-16bit-mono-opus`,
+    और `riff-24khz-16bit-mono-pcm` जैसे आउटपुट प्रारूप स्वीकार करता है। OpenClaw
+    `voice-note` लक्ष्यों के लिए Ogg/Opus का अनुरोध करता है, ताकि चैनल अतिरिक्त MP3 रूपांतरण के बिना
+    नेटिव वॉइस बबल भेज सकें, और टेलीफ़ोनी लक्ष्यों के लिए
+    `raw-8khz-8bit-mono-mulaw` को अनिवार्य करता है।
   </Accordion>
   <Accordion title="उपनाम">
-    मौजूदा PRs और उपयोगकर्ता कॉन्फ़िग के लिए `azure` को प्रदाता उपनाम के रूप में स्वीकार किया जाता है,
-    लेकिन नए कॉन्फ़िग में Azure
-    OpenAI मॉडल प्रदाताओं के साथ भ्रम से बचने के लिए `azure-speech` का उपयोग करना चाहिए।
+    मौजूदा कॉन्फ़िगरेशन के लिए `azure` को प्रदाता उपनाम के रूप में स्वीकार किया जाता है, लेकिन Azure OpenAI
+    मॉडल प्रदाताओं से भ्रम से बचने के लिए नए कॉन्फ़िगरेशन में `azure-speech` का उपयोग करना चाहिए।
   </Accordion>
 </AccordionGroup>
 
@@ -113,15 +121,15 @@ OpenClaw SSML के साथ सीधे Azure Speech REST API का उप�
 
 <CardGroup cols={2}>
   <Card title="टेक्स्ट-टू-स्पीच" href="/hi/tools/tts" icon="waveform-lines">
-    TTS अवलोकन, प्रदाता, और `messages.tts` कॉन्फ़िग।
+    TTS का अवलोकन, प्रदाता और `tts` कॉन्फ़िगरेशन।
   </Card>
   <Card title="कॉन्फ़िगरेशन" href="/hi/gateway/configuration" icon="gear">
-    `messages.tts` सेटिंग्स सहित पूर्ण कॉन्फ़िग संदर्भ।
+    `tts` सेटिंग्स सहित संपूर्ण कॉन्फ़िगरेशन संदर्भ।
   </Card>
   <Card title="प्रदाता" href="/hi/providers" icon="grid">
-    सभी बंडल किए गए OpenClaw प्रदाता।
+    OpenClaw के सभी बंडल किए गए प्रदाता।
   </Card>
   <Card title="समस्या निवारण" href="/hi/help/troubleshooting" icon="wrench">
-    सामान्य समस्याएँ और डीबगिंग चरण।
+    सामान्य समस्याएँ और डीबगिंग के चरण।
   </Card>
 </CardGroup>

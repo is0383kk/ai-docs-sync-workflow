@@ -1,65 +1,51 @@
 ---
 read_when:
     - आप एक OpenClaw Plugin बना रहे हैं
-    - आपको Plugin कॉन्फ़िग स्कीमा शिप करना है या Plugin सत्यापन त्रुटियों को डीबग करना है
+    - आपको Plugin कॉन्फ़िगरेशन स्कीमा जारी करना है या Plugin सत्यापन त्रुटियों को डीबग करना है
 summary: Plugin मैनिफ़ेस्ट + JSON स्कीमा आवश्यकताएँ (सख्त कॉन्फ़िग सत्यापन)
-title: Plugin मेनिफेस्ट
+title: Plugin मैनिफ़ेस्ट
 x-i18n:
-    generated_at: "2026-06-28T23:37:07Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:14:06Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 62f6684ab074e4f14ce5c833fe8c8c624a2750f80215bdeffd972e27dd6bfc9c
+    source_hash: 244e5c8265ff79b0ff6e8f4b60c9635cccc3ba66093cecab458676beb9578264
     source_path: plugins/manifest.md
     workflow: 16
 ---
 
-यह पृष्ठ केवल **नेटिव OpenClaw Plugin मेनिफेस्ट** के लिए है।
+यह पृष्ठ **मूल OpenClaw Plugin मैनिफ़ेस्ट**, `openclaw.plugin.json`, को कवर करता है। संगत बंडल लेआउट (Codex, Claude, Cursor) के लिए, [Plugin बंडल](/hi/plugins/bundles) देखें।
 
-संगत बंडल लेआउट के लिए, [Plugin बंडल](/hi/plugins/bundles) देखें।
-
-संगत बंडल फ़ॉर्मैट अलग मेनिफेस्ट फ़ाइलों का उपयोग करते हैं:
+संगत बंडल प्रारूप इसके बजाय अपनी स्वयं की मैनिफ़ेस्ट फ़ाइलों का उपयोग करते हैं:
 
 - Codex बंडल: `.codex-plugin/plugin.json`
-- Claude बंडल: `.claude-plugin/plugin.json` या बिना मेनिफेस्ट वाला डिफ़ॉल्ट Claude घटक
-  लेआउट
+- Claude बंडल: `.claude-plugin/plugin.json`, या बिना मैनिफ़ेस्ट वाला डिफ़ॉल्ट Claude कंपोनेंट लेआउट
 - Cursor बंडल: `.cursor-plugin/plugin.json`
 
-OpenClaw उन बंडल लेआउट को भी स्वतः पहचानता है, लेकिन उन्हें यहाँ वर्णित
-`openclaw.plugin.json` स्कीमा के विरुद्ध सत्यापित नहीं किया जाता।
+OpenClaw उन लेआउट का स्वतः पता लगाता है, लेकिन नीचे दिए गए `openclaw.plugin.json` स्कीमा के अनुसार उन्हें सत्यापित नहीं करता। संगत बंडल के लिए, लेआउट के OpenClaw की रनटाइम अपेक्षाओं से मेल खाने पर OpenClaw बंडल मेटाडेटा, घोषित स्किल रूट, Claude कमांड रूट, Claude `settings.json` डिफ़ॉल्ट, Claude LSP डिफ़ॉल्ट और समर्थित हुक पैक पढ़ता है।
 
-संगत बंडलों के लिए, OpenClaw वर्तमान में बंडल मेटाडेटा के साथ घोषित
-skill रूट, Claude कमांड रूट, Claude बंडल `settings.json` डिफ़ॉल्ट,
-Claude बंडल LSP डिफ़ॉल्ट, और समर्थित hook पैक पढ़ता है, जब लेआउट
-OpenClaw रनटाइम अपेक्षाओं से मेल खाता है।
+प्रत्येक मूल OpenClaw Plugin के **Plugin रूट** में `openclaw.plugin.json` **होना अनिवार्य है**। OpenClaw इसका उपयोग **Plugin कोड निष्पादित किए बिना** कॉन्फ़िगरेशन सत्यापित करने के लिए करता है। अनुपलब्ध या अमान्य मैनिफ़ेस्ट कॉन्फ़िगरेशन सत्यापन को रोक देता है और इसे Plugin त्रुटि माना जाता है।
 
-हर नेटिव OpenClaw Plugin को **Plugin रूट** में एक `openclaw.plugin.json` फ़ाइल
-शिप करनी **अनिवार्य** है। OpenClaw इस मेनिफेस्ट का उपयोग **Plugin कोड निष्पादित किए बिना**
-कॉन्फ़िगरेशन सत्यापित करने के लिए करता है। अनुपस्थित या अमान्य मेनिफेस्ट को
-Plugin त्रुटियाँ माना जाता है और वे कॉन्फ़िग सत्यापन को रोकते हैं।
-
-पूरा Plugin सिस्टम गाइड देखें: [Plugins](/hi/tools/plugin)।
-नेटिव क्षमता मॉडल और वर्तमान बाहरी-संगतता मार्गदर्शन के लिए:
-[क्षमता मॉडल](/hi/plugins/architecture#public-capability-model)।
+संपूर्ण Plugin सिस्टम मार्गदर्शिका के लिए [Plugin](/hi/tools/plugin) और मूल क्षमता मॉडल तथा मौजूदा बाहरी-संगतता मार्गदर्शन के लिए [क्षमता मॉडल](/hi/plugins/architecture#public-capability-model) देखें।
 
 ## यह फ़ाइल क्या करती है
 
-`openclaw.plugin.json` वह मेटाडेटा है जिसे OpenClaw आपका
-**Plugin कोड लोड करने से पहले** पढ़ता है। नीचे दी गई हर चीज़ इतनी हल्की होनी चाहिए
-कि Plugin रनटाइम बूट किए बिना निरीक्षण की जा सके।
+`openclaw.plugin.json` वह मेटाडेटा है जिसे OpenClaw **आपका Plugin कोड लोड करने से पहले** पढ़ता है। इसमें मौजूद प्रत्येक चीज़ इतनी किफ़ायती होनी चाहिए कि Plugin रनटाइम बूट किए बिना उसका निरीक्षण किया जा सके।
 
-**इसका उपयोग करें:**
+**इसका उपयोग इनके लिए करें:**
 
-- Plugin पहचान, कॉन्फ़िग सत्यापन, और कॉन्फ़िग UI संकेतों के लिए
-- auth, ऑनबोर्डिंग, और सेटअप मेटाडेटा (alias, auto-enable, provider env vars, auth choices) के लिए
-- control-plane सतहों के लिए activation संकेतों के लिए
-- मॉडल-फ़ैमिली स्वामित्व के शॉर्टहैंड के लिए
-- स्थिर क्षमता-स्वामित्व स्नैपशॉट (`contracts`) के लिए
-- QA runner मेटाडेटा जिसे साझा `openclaw qa` होस्ट निरीक्षण कर सके
-- catalog और validation सतहों में merge किए गए channel-specific config metadata के लिए
+- Plugin पहचान, कॉन्फ़िगरेशन सत्यापन और कॉन्फ़िगरेशन UI संकेत
+- प्रमाणीकरण, ऑनबोर्डिंग और सेटअप मेटाडेटा (उपनाम, स्वतः-सक्षम करना, प्रदाता एनवायरनमेंट वेरिएबल, प्रमाणीकरण विकल्प)
+- कंट्रोल-प्लेन सतहों के लिए सक्रियण संकेत
+- संक्षिप्त मॉडल-फ़ैमिली स्वामित्व
+- स्थिर क्षमता-स्वामित्व स्नैपशॉट (`contracts`)
+- डैशबोर्ड विजेट डेटा बाइंडिंग और क्रिया शब्द
+- स्थिर MCP सर्वर, जो Plugin सक्षम रहने के दौरान मौजूद होने चाहिए
+- QA रनर मेटाडेटा, जिसका साझा `openclaw qa` होस्ट निरीक्षण कर सकता है
+- चैनल-विशिष्ट कॉन्फ़िगरेशन मेटाडेटा, जिसे कैटलॉग और सत्यापन सतहों में मर्ज किया जाता है
 
-**इसका उपयोग न करें:** रनटाइम व्यवहार रजिस्टर करने, कोड entrypoints घोषित करने,
-या npm install metadata के लिए। वे आपके Plugin कोड और `package.json` में होते हैं।
+**इसका उपयोग इनके लिए न करें:** मूल रनटाइम हुक पंजीकृत करना, Plugin कोड एंट्रीपॉइंट घोषित करना या npm इंस्टॉल मेटाडेटा। ये आपके Plugin कोड और `package.json` में होने चाहिए।
 
 ## न्यूनतम उदाहरण
 
@@ -74,13 +60,13 @@ Plugin त्रुटियाँ माना जाता है और व�
 }
 ```
 
-## समृद्ध उदाहरण
+## विस्तृत उदाहरण
 
 ```json
 {
   "id": "openrouter",
   "name": "OpenRouter",
-  "description": "OpenRouter provider plugin",
+  "description": "OpenRouter प्रदाता Plugin",
   "version": "1.0.0",
   "providers": ["openrouter"],
   "modelSupport": {
@@ -119,27 +105,24 @@ Plugin त्रुटियाँ माना जाता है और व�
   "providerAuthAliases": {
     "openrouter-coding": "openrouter"
   },
-  "channelEnvVars": {
-    "openrouter-chatops": ["OPENROUTER_CHATOPS_TOKEN"]
-  },
   "providerAuthChoices": [
     {
       "provider": "openrouter",
       "method": "api-key",
       "choiceId": "openrouter-api-key",
-      "choiceLabel": "OpenRouter API key",
+      "choiceLabel": "OpenRouter API कुंजी",
       "groupId": "openrouter",
       "groupLabel": "OpenRouter",
       "optionKey": "openrouterApiKey",
       "cliFlag": "--openrouter-api-key",
       "cliOption": "--openrouter-api-key <key>",
-      "cliDescription": "OpenRouter API key",
+      "cliDescription": "OpenRouter API कुंजी",
       "onboardingScopes": ["text-inference"]
     }
   ],
   "uiHints": {
     "apiKey": {
-      "label": "API key",
+      "label": "API कुंजी",
       "placeholder": "sk-or-v1-...",
       "sensitive": true
     }
@@ -158,61 +141,129 @@ Plugin त्रुटियाँ माना जाता है और व�
 
 ## शीर्ष-स्तरीय फ़ील्ड संदर्भ
 
-| फ़ील्ड                               | आवश्यक | प्रकार                           | इसका अर्थ                                                                                                                                                                                                                                      |
-| ------------------------------------ | ------ | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                                 | हाँ    | `string`                         | कैननिकल plugin id. यह `plugins.entries.<id>` में उपयोग किया जाने वाला id है।                                                                                                                                                                    |
-| `configSchema`                       | हाँ    | `object`                         | इस plugin के config के लिए इनलाइन JSON Schema.                                                                                                                                                                                                 |
-| `requiresPlugins`                    | नहीं   | `string[]`                       | Plugin ids जो इस plugin के प्रभावी होने के लिए साथ में इंस्टॉल होने चाहिए। Discovery plugin को लोड करने योग्य रखती है, लेकिन कोई आवश्यक plugin न मिलने पर चेतावनी देती है।                                                                     |
-| `enabledByDefault`                   | नहीं   | `true`                           | bundled plugin को डिफ़ॉल्ट रूप से सक्षम के रूप में चिह्नित करता है। इसे छोड़ दें, या कोई भी non-`true` मान सेट करें, ताकि plugin डिफ़ॉल्ट रूप से अक्षम रहे।                                                                                   |
-| `enabledByDefaultOnPlatforms`        | नहीं   | `string[]`                       | bundled plugin को केवल सूचीबद्ध Node.js platforms पर डिफ़ॉल्ट रूप से सक्षम के रूप में चिह्नित करता है, उदाहरण के लिए `["darwin"]`. स्पष्ट config फिर भी प्राथमिक रहेगा।                                                                      |
-| `legacyPluginIds`                    | नहीं   | `string[]`                       | Legacy ids जो इस कैननिकल plugin id में normalize होते हैं।                                                                                                                                                                                     |
-| `autoEnableWhenConfiguredProviders`  | नहीं   | `string[]`                       | Provider ids जो auth, config, या model refs में उल्लिखित होने पर इस plugin को auto-enable करें।                                                                                                                                                |
-| `kind`                               | नहीं   | `"memory"` \| `"context-engine"` | `plugins.slots.*` द्वारा उपयोग किया जाने वाला एक exclusive plugin kind घोषित करता है।                                                                                                                                                          |
-| `channels`                           | नहीं   | `string[]`                       | इस plugin के स्वामित्व वाले Channel ids. Discovery और config validation के लिए उपयोग किया जाता है।                                                                                                                                             |
-| `providers`                          | नहीं   | `string[]`                       | इस plugin के स्वामित्व वाले Provider ids.                                                                                                                                                                                                      |
-| `providerCatalogEntry`               | नहीं   | `string`                         | plugin root के सापेक्ष lightweight provider-catalog module path, manifest-scoped provider catalog metadata के लिए, जिसे पूरे plugin runtime को सक्रिय किए बिना लोड किया जा सकता है।                                                            |
-| `modelSupport`                       | नहीं   | `object`                         | runtime से पहले plugin को auto-load करने के लिए उपयोग किया जाने वाला manifest-owned shorthand model-family metadata.                                                                                                                           |
-| `modelCatalog`                       | नहीं   | `object`                         | इस plugin के स्वामित्व वाले providers के लिए declarative model catalog metadata. यह भविष्य की read-only listing, onboarding, model pickers, aliases, और plugin runtime लोड किए बिना suppression के लिए control-plane contract है।              |
-| `modelPricing`                       | नहीं   | `object`                         | Provider-owned external pricing lookup policy. इसका उपयोग local/self-hosted providers को remote pricing catalogs से opt out करने या core में provider ids hardcode किए बिना provider refs को OpenRouter/LiteLLM catalog ids पर map करने के लिए करें। |
-| `modelIdNormalization`               | नहीं   | `object`                         | Provider-owned model-id alias/prefix cleanup जो provider runtime लोड होने से पहले चलना चाहिए।                                                                                                                                                  |
-| `providerEndpoints`                  | नहीं   | `object[]`                       | Provider routes के लिए manifest-owned endpoint host/baseUrl metadata, जिसे core को provider runtime लोड होने से पहले classify करना चाहिए।                                                                                                      |
-| `providerRequest`                    | नहीं   | `object`                         | Generic request policy द्वारा provider runtime लोड होने से पहले उपयोग किया जाने वाला सस्ता provider-family और request-compatibility metadata.                                                                                                  |
-| `secretProviderIntegrations`         | नहीं   | `Record<string, object>`         | Declarative SecretRef exec provider presets जिन्हें setup या install surfaces core में provider-specific integrations hardcode किए बिना offer कर सकते हैं।                                                                                       |
-| `cliBackends`                        | नहीं   | `string[]`                       | इस plugin के स्वामित्व वाले CLI inference backend ids. explicit config refs से startup auto-activation के लिए उपयोग किया जाता है।                                                                                                              |
-| `syntheticAuthRefs`                  | नहीं   | `string[]`                       | Provider या CLI backend refs जिनके plugin-owned synthetic auth hook को runtime लोड होने से पहले cold model discovery के दौरान probe किया जाना चाहिए।                                                                                            |
-| `nonSecretAuthMarkers`               | नहीं   | `string[]`                       | Bundled-plugin-owned placeholder API key values जो non-secret local, OAuth, या ambient credential state को दर्शाते हैं।                                                                                                                         |
-| `commandAliases`                     | नहीं   | `object[]`                       | इस plugin के स्वामित्व वाले Command names, जिन्हें runtime लोड होने से पहले plugin-aware config और CLI diagnostics उत्पन्न करने चाहिए।                                                                                                         |
-| `providerAuthEnvVars`                | नहीं   | `Record<string, string[]>`       | Provider auth/status lookup के लिए deprecated compatibility env metadata. नए plugins के लिए `setup.providers[].envVars` को प्राथमिकता दें; OpenClaw deprecation window के दौरान इसे अभी भी पढ़ता है।                                          |
-| `providerAuthAliases`                | नहीं   | `Record<string, string>`         | Provider ids जिन्हें auth lookup के लिए किसी अन्य provider id का पुनः उपयोग करना चाहिए, उदाहरण के लिए ऐसा coding provider जो base provider API key और auth profiles साझा करता है।                                                             |
-| `channelEnvVars`                     | नहीं   | `Record<string, string[]>`       | सस्ता channel env metadata जिसे OpenClaw plugin code लोड किए बिना inspect कर सकता है। इसका उपयोग env-driven channel setup या auth surfaces के लिए करें जिन्हें generic startup/config helpers को देखना चाहिए।                                |
-| `providerAuthChoices`                | नहीं   | `object[]`                       | Onboarding pickers, preferred-provider resolution, और simple CLI flag wiring के लिए सस्ता auth-choice metadata.                                                                                                                                |
-| `activation`                         | नहीं   | `object`                         | startup, provider, command, channel, route, और capability-triggered loading के लिए सस्ता activation planner metadata. केवल metadata; actual behavior का स्वामित्व अभी भी plugin runtime के पास है।                                           |
-| `setup`                              | नहीं   | `object`                         | सस्ते setup/onboarding descriptors जिन्हें discovery और setup surfaces plugin runtime लोड किए बिना inspect कर सकते हैं।                                                                                                                        |
-| `qaRunners`                          | नहीं   | `object[]`                       | shared `openclaw qa` host द्वारा plugin runtime लोड होने से पहले उपयोग किए जाने वाले सस्ते QA runner descriptors.                                                                                                                             |
-| `contracts`                          | नहीं   | `object`                         | external auth hooks, embeddings, speech, realtime transcription, realtime voice, media-understanding, image-generation, music-generation, video-generation, web-fetch, web search, और tool ownership के लिए static capability ownership snapshot. |
-| `mediaUnderstandingProviderMetadata` | नहीं   | `Record<string, object>`         | `contracts.mediaUnderstandingProviders` में घोषित provider ids के लिए सस्ते media-understanding defaults.                                                                                                                                      |
-| `imageGenerationProviderMetadata`    | नहीं   | `Record<string, object>`         | `contracts.imageGenerationProviders` में घोषित provider ids के लिए सस्ता image-generation auth metadata, जिसमें provider-owned auth aliases और base-url guards शामिल हैं।                                                                      |
-| `videoGenerationProviderMetadata`    | नहीं   | `Record<string, object>`         | `contracts.videoGenerationProviders` में घोषित provider ids के लिए सस्ता video-generation auth metadata, जिसमें provider-owned auth aliases और base-url guards शामिल हैं।                                                                      |
-| `musicGenerationProviderMetadata`    | नहीं   | `Record<string, object>`         | `contracts.musicGenerationProviders` में घोषित provider ids के लिए सस्ता music-generation auth metadata, जिसमें provider-owned auth aliases और base-url guards शामिल हैं।                                                                      |
-| `toolMetadata`                       | नहीं       | `Record<string, object>`         | `contracts.tools` में घोषित Plugin-स्वामित्व वाले टूल के लिए हल्का उपलब्धता मेटाडेटा। इसका उपयोग तब करें जब किसी टूल को कॉन्फ़िग, परिवेश, या प्रमाणीकरण प्रमाण मौजूद होने तक रनटाइम लोड नहीं करना चाहिए।                                                                       |
-| `channelConfigs`                     | नहीं       | `Record<string, object>`         | रनटाइम लोड होने से पहले डिस्कवरी और सत्यापन सतहों में मर्ज किया गया मैनिफ़ेस्ट-स्वामित्व वाला चैनल कॉन्फ़िग मेटाडेटा।                                                                                                                                      |
-| `skills`                             | नहीं       | `string[]`                       | लोड करने के लिए Skills निर्देशिकाएं, Plugin रूट के सापेक्ष।                                                                                                                                                                                         |
-| `name`                               | नहीं       | `string`                         | मनुष्य-पठनीय Plugin नाम।                                                                                                                                                                                                                     |
-| `description`                        | नहीं       | `string`                         | Plugin सतहों में दिखाया गया संक्षिप्त सारांश।                                                                                                                                                                                                         |
-| `icon`                               | नहीं       | `string`                         | मार्केटप्लेस/कैटलॉग कार्ड के लिए HTTPS छवि URL। ClawHub किसी भी मान्य `https://` URL को स्वीकार करता है और इसके छोड़े जाने या अमान्य होने पर डिफ़ॉल्ट Plugin आइकन पर वापस जाता है।                                                                              |
-| `version`                            | नहीं       | `string`                         | सूचनात्मक Plugin संस्करण।                                                                                                                                                                                                                   |
-| `uiHints`                            | नहीं       | `Record<string, object>`         | कॉन्फ़िग फ़ील्ड के लिए UI लेबल, प्लेसहोल्डर, और संवेदनशीलता संकेत।                                                                                                                                                                               |
+| फ़ील्ड                                | आवश्यक | प्रकार                         | इसका अर्थ                                                                                                                                                                                                                                                                                  |
+| ------------------------------------ | -------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                                 | हाँ      | `string`                     | प्रामाणिक Plugin आईडी। यही आईडी `plugins.entries.<id>` में उपयोग की जाती है।                                                                                                                                                                                                                            |
+| `configSchema`                       | हाँ      | `object`                     | इस Plugin के कॉन्फ़िगरेशन के लिए इनलाइन JSON Schema।                                                                                                                                                                                                                                                   |
+| `requiresPlugins`                    | नहीं       | `string[]`                   | वे Plugin आईडी जिन्हें इस Plugin के प्रभावी होने के लिए भी इंस्टॉल करना आवश्यक है। खोज प्रक्रिया Plugin को लोड करने योग्य रखती है, लेकिन कोई आवश्यक Plugin अनुपस्थित होने पर चेतावनी देती है।                                                                                                                                   |
+| `enabledByDefault`                   | नहीं       | `true`                       | बंडल किए गए Plugin को डिफ़ॉल्ट रूप से सक्षम के रूप में चिह्नित करता है। Plugin को डिफ़ॉल्ट रूप से अक्षम रखने के लिए इसे छोड़ दें या कोई भी गैर-`true` मान सेट करें।                                                                                                                                                                   |
+| `enabledByDefaultOnPlatforms`        | नहीं       | `string[]`                   | बंडल किए गए Plugin को केवल सूचीबद्ध Node.js प्लेटफ़ॉर्म पर डिफ़ॉल्ट रूप से सक्षम के रूप में चिह्नित करता है, उदाहरण के लिए `["darwin"]`। स्पष्ट कॉन्फ़िगरेशन फिर भी प्राथमिकता पाता है।                                                                                                                                                       |
+| `legacyPluginIds`                    | नहीं       | `string[]`                   | पुराने आईडी जो इस प्रामाणिक Plugin आईडी में सामान्यीकृत होते हैं।                                                                                                                                                                                                                                         |
+| `autoEnableWhenConfiguredProviders`  | नहीं       | `string[]`                   | वे प्रदाता आईडी जिनका उल्लेख प्रमाणीकरण, कॉन्फ़िगरेशन या मॉडल संदर्भों में होने पर यह Plugin स्वतः सक्षम होना चाहिए।                                                                                                                                                                                                |
+| `kind`                               | नहीं       | `PluginKind \| PluginKind[]` | `plugins.slots.*` द्वारा उपयोग किए जाने वाले एक या अधिक अनन्य Plugin प्रकार (`"memory"`, `"context-engine"`) घोषित करता है। दोनों स्लॉट का स्वामी Plugin दोनों प्रकारों को एक ही ऐरे में घोषित करता है।                                                                                                                        |
+| `channels`                           | नहीं       | `string[]`                   | इस Plugin के स्वामित्व वाली चैनल आईडी। खोज और कॉन्फ़िगरेशन सत्यापन के लिए उपयोग की जाती हैं।                                                                                                                                                                                                                    |
+| `providers`                          | नहीं       | `string[]`                   | इस Plugin के स्वामित्व वाली प्रदाता आईडी।                                                                                                                                                                                                                                                             |
+| `providerCatalogEntry`               | नहीं       | `string`                     | Plugin रूट के सापेक्ष हल्के प्रदाता-कैटलॉग मॉड्यूल का पथ, मैनिफ़ेस्ट-स्कोप वाले प्रदाता कैटलॉग मेटाडेटा के लिए, जिसे पूर्ण Plugin रनटाइम सक्रिय किए बिना लोड किया जा सकता है।                                                                                                            |
+| `modelSupport`                       | नहीं       | `object`                     | रनटाइम से पहले Plugin को स्वतः लोड करने के लिए उपयोग किया जाने वाला मैनिफ़ेस्ट-स्वामित्व वाला संक्षिप्त मॉडल-परिवार मेटाडेटा।                                                                                                                                                                                                    |
+| `modelCatalog`                       | नहीं       | `object`                     | इस Plugin के स्वामित्व वाले प्रदाताओं के लिए घोषणात्मक मॉडल कैटलॉग मेटाडेटा। यह Plugin रनटाइम लोड किए बिना भविष्य की केवल-पठन सूची, ऑनबोर्डिंग, मॉडल चयनकर्ताओं, उपनामों और दमन के लिए नियंत्रण-प्लेन अनुबंध है।                                                                    |
+| `modelPricing`                       | नहीं       | `object`                     | प्रदाता-स्वामित्व वाली बाहरी मूल्य-खोज नीति। इसका उपयोग स्थानीय/स्व-होस्टेड प्रदाताओं को दूरस्थ मूल्य कैटलॉग से बाहर रखने या कोर में प्रदाता आईडी हार्डकोड किए बिना प्रदाता संदर्भों को OpenRouter/LiteLLM कैटलॉग आईडी से मैप करने के लिए करें।                                                                        |
+| `modelIdNormalization`               | नहीं       | `object`                     | प्रदाता-स्वामित्व वाली मॉडल-आईडी उपनाम/उपसर्ग सफ़ाई, जिसे प्रदाता रनटाइम लोड होने से पहले चलना आवश्यक है।                                                                                                                                                                                                      |
+| `providerEndpoints`                  | नहीं       | `object[]`                   | प्रदाता रूट के लिए मैनिफ़ेस्ट-स्वामित्व वाला एंडपॉइंट होस्ट/baseUrl मेटाडेटा, जिसे कोर को प्रदाता रनटाइम लोड होने से पहले वर्गीकृत करना आवश्यक है।                                                                                                                                                                       |
+| `providerRequest`                    | नहीं       | `object`                     | प्रदाता रनटाइम लोड होने से पहले सामान्य अनुरोध नीति द्वारा उपयोग किया जाने वाला हल्का प्रदाता-परिवार और अनुरोध-संगतता मेटाडेटा।                                                                                                                                                                         |
+| `secretProviderIntegrations`         | नहीं       | `Record<string, object>`     | घोषणात्मक SecretRef exec प्रदाता प्रीसेट, जिन्हें सेटअप या इंस्टॉल सतहें कोर में प्रदाता-विशिष्ट एकीकरण हार्डकोड किए बिना प्रस्तुत कर सकती हैं।                                                                                                                                                |
+| `cliBackends`                        | नहीं       | `string[]`                   | इस Plugin के स्वामित्व वाली CLI अनुमान बैकएंड आईडी। स्पष्ट कॉन्फ़िगरेशन संदर्भों से स्टार्टअप पर स्वचालित सक्रियण के लिए उपयोग की जाती हैं।                                                                                                                                                                                    |
+| `syntheticAuthRefs`                  | नहीं       | `string[]`                   | वे प्रदाता या CLI बैकएंड संदर्भ जिनके Plugin-स्वामित्व वाले कृत्रिम प्रमाणीकरण हुक की जाँच रनटाइम लोड होने से पहले कोल्ड मॉडल खोज के दौरान की जानी चाहिए।                                                                                                                                                         |
+| `nonSecretAuthMarkers`               | नहीं       | `string[]`                   | बंडल किए गए Plugin के स्वामित्व वाले प्लेसहोल्डर API कुंजी मान, जो गैर-गोपनीय स्थानीय, OAuth या परिवेशी क्रेडेंशियल स्थिति दर्शाते हैं।                                                                                                                                                                           |
+| `commandAliases`                     | नहीं       | `object[]`                   | इस Plugin के स्वामित्व वाले कमांड नाम, जिन्हें रनटाइम लोड होने से पहले Plugin-जागरूक कॉन्फ़िगरेशन और CLI निदान उत्पन्न करना चाहिए।                                                                                                                                                                           |
+| `providerUsageAuthEnvVars`           | नहीं       | `Record<string, string[]>`   | केवल उपयोग/बिलिंग के लिए प्रदाता क्रेडेंशियल। OpenClaw इन नामों का उपयोग उपयोग खोज और गोपनीय जानकारी हटाने के लिए करता है, लेकिन अनुमान प्रमाणीकरण के लिए कभी नहीं।                                                                                                                                                      |
+| `providerAuthAliases`                | नहीं       | `Record<string, string>`     | वे प्रदाता आईडी जिन्हें प्रमाणीकरण खोज के लिए किसी अन्य प्रदाता आईडी का पुनः उपयोग करना चाहिए, उदाहरण के लिए ऐसा कोडिंग प्रदाता जो आधार प्रदाता की API कुंजी और प्रमाणीकरण प्रोफ़ाइल साझा करता है।                                                                                                                                     |
+| `providerAuthChoices`                | नहीं       | `object[]`                   | ऑनबोर्डिंग चयनकर्ताओं, पसंदीदा-प्रदाता समाधान और सरल CLI फ़्लैग वायरिंग के लिए हल्का प्रमाणीकरण-विकल्प मेटाडेटा।                                                                                                                                                                                  |
+| `activation`                         | नहीं       | `object`                     | स्टार्टअप, प्रदाता, कमांड, चैनल, रूट और क्षमता से ट्रिगर होने वाली लोडिंग के लिए हल्का सक्रियण योजनाकार मेटाडेटा। केवल मेटाडेटा; वास्तविक व्यवहार का स्वामी फिर भी Plugin रनटाइम है।                                                                                                                  |
+| `setup`                              | नहीं       | `object`                     | हल्के सेटअप/ऑनबोर्डिंग वर्णनकर्ता, जिनका निरीक्षण खोज और सेटअप सतहें Plugin रनटाइम लोड किए बिना कर सकती हैं।                                                                                                                                                                               |
+| `qaRunners`                          | नहीं       | `object[]`                   | साझा `openclaw qa` होस्ट द्वारा Plugin रनटाइम लोड होने से पहले उपयोग किए जाने वाले हल्के QA रनर वर्णनकर्ता।                                                                                                                                                                                                 |
+| `dashboard`                          | नहीं       | `object`                     | डैशबोर्ड विजेट डेटा बाइंडिंग और क्रिया क्रियापद। प्रत्येक प्रविष्टि को इस Plugin द्वारा आवश्यक पठन या लेखन स्कोप के साथ पंजीकृत Gateway विधि के विरुद्ध सत्यापित किया जाता है। [डैशबोर्ड संदर्भ](#dashboard-reference) देखें।                                                                            |
+| `mcpServers`                         | नहीं       | `Record<string, object>`     | इस Plugin के सक्षम रहने के दौरान प्रदान की गई स्थिर MCP सर्वर परिभाषाएँ। सापेक्ष कमांड आर्ग्युमेंट और कार्यशील डायरेक्टरी Plugin रूट से रिज़ॉल्व होती हैं। ऑपरेटर की `mcp.servers` प्रविष्टियाँ समान नाम वाली परिभाषाओं को ओवरराइड या अक्षम करती हैं। [MCP सर्वर संदर्भ](#mcp-server-reference) देखें। |
+| `contracts`                          | नहीं       | `object`                     | बाहरी प्रमाणीकरण हुक, एम्बेडिंग, वाक्, रीयलटाइम ट्रांसक्रिप्शन, रीयलटाइम वॉइस, मीडिया-समझ, छवि/वीडियो/संगीत जनरेशन, वेब फ़ेच, वेब खोज, वर्कर प्रदाताओं, दस्तावेज़/वेब-सामग्री निष्कर्षण और टूल स्वामित्व के लिए स्थिर क्षमता-स्वामित्व स्नैपशॉट।                     |
+| `configContracts`                    | नहीं       | `object`                     | जेनेरिक कोर सहायकों द्वारा उपयोग किया जाने वाला मैनिफ़ेस्ट-स्वामित्व वाला कॉन्फ़िग व्यवहार: खतरनाक फ़्लैग की पहचान, SecretRef माइग्रेशन लक्ष्य और लीगेसी कॉन्फ़िग-पथ का संकुचन। [configContracts संदर्भ](#configcontracts-reference) देखें।                                                                         |
+| `mediaUnderstandingProviderMetadata` | नहीं       | `Record<string, object>`     | `contracts.mediaUnderstandingProviders` में घोषित प्रदाता आईडी के लिए कम लागत वाले मीडिया-समझ डिफ़ॉल्ट।                                                                                                                                                                                       |
+| `imageGenerationProviderMetadata`    | नहीं       | `Record<string, object>`     | `contracts.imageGenerationProviders` में घोषित प्रदाता आईडी के लिए कम लागत वाला छवि-जनरेशन प्रमाणीकरण मेटाडेटा, जिसमें प्रदाता-स्वामित्व वाले प्रमाणीकरण उपनाम और बेस-URL गार्ड शामिल हैं।                                                                                                                             |
+| `videoGenerationProviderMetadata`    | नहीं       | `Record<string, object>`     | `contracts.videoGenerationProviders` में घोषित प्रदाता आईडी के लिए कम लागत वाला वीडियो-जनरेशन प्रमाणीकरण मेटाडेटा, जिसमें प्रदाता-स्वामित्व वाले प्रमाणीकरण उपनाम और बेस-URL गार्ड शामिल हैं।                                                                                                                             |
+| `musicGenerationProviderMetadata`    | नहीं       | `Record<string, object>`     | `contracts.musicGenerationProviders` में घोषित प्रदाता आईडी के लिए कम लागत वाला संगीत-जनरेशन प्रमाणीकरण मेटाडेटा, जिसमें प्रदाता-स्वामित्व वाले प्रमाणीकरण उपनाम और बेस-URL गार्ड शामिल हैं।                                                                                                                             |
+| `toolMetadata`                       | नहीं       | `Record<string, object>`     | `contracts.tools` में घोषित Plugin-स्वामित्व वाले टूल के लिए कम लागत वाला उपलब्धता मेटाडेटा। इसका उपयोग तब करें, जब कॉन्फ़िग, परिवेश या प्रमाणीकरण का प्रमाण मौजूद न होने पर किसी टूल को रनटाइम लोड नहीं करना चाहिए।                                                                                                                      |
+| `channelConfigs`                     | नहीं       | `Record<string, object>`     | रनटाइम लोड होने से पहले खोज और सत्यापन सतहों में मर्ज किया गया मैनिफ़ेस्ट-स्वामित्व वाला चैनल कॉन्फ़िग मेटाडेटा।                                                                                                                                                                                     |
+| `skills`                             | नहीं       | `string[]`                   | लोड की जाने वाली Skill डायरेक्टरी, जो Plugin रूट के सापेक्ष हैं।                                                                                                                                                                                                                                        |
+| `name`                               | नहीं       | `string`                     | मानव-पठनीय Plugin नाम।                                                                                                                                                                                                                                                                    |
+| `description`                        | नहीं       | `string`                     | Plugin सतहों पर दिखाया जाने वाला संक्षिप्त सारांश।                                                                                                                                                                                                                                                        |
+| `catalog`                            | नहीं       | `object`                     | Plugin कैटलॉग सतहों के लिए वैकल्पिक प्रस्तुति संकेत। यह मेटाडेटा किसी Plugin को इंस्टॉल या सक्षम नहीं करता और न ही उसे विश्वसनीयता प्रदान करता है।                                                                                                                                                                   |
+| `icon`                               | नहीं       | `string`                     | मार्केटप्लेस/कैटलॉग कार्ड के लिए HTTPS छवि URL। ClawHub किसी भी मान्य `https://` URL को स्वीकार करता है और इसे छोड़े जाने या अमान्य होने पर डिफ़ॉल्ट Plugin आइकन का उपयोग करता है।                                                                                                                             |
+| `version`                            | नहीं       | `string`                     | जानकारी हेतु Plugin संस्करण।                                                                                                                                                                                                                                                                  |
+| `uiHints`                            | नहीं       | `Record<string, object>`     | कॉन्फ़िग फ़ील्ड के लिए UI लेबल, प्लेसहोल्डर और संवेदनशीलता संकेत।                                                                                                                                                                                                                              |
 
-## जनरेशन प्रोवाइडर मेटाडेटा संदर्भ
+## MCP सर्वर संदर्भ
 
-जनरेशन प्रोवाइडर मेटाडेटा फ़ील्ड उन प्रोवाइडर के लिए स्थिर ऑथ सिग्नल बताते हैं
-जो संबंधित `contracts.*GenerationProviders` सूची में घोषित हैं।
-OpenClaw इन फ़ील्ड को प्रोवाइडर रनटाइम लोड होने से पहले पढ़ता है ताकि कोर टूल
-हर प्रोवाइडर Plugin को इंपोर्ट किए बिना तय कर सकें कि कोई जनरेशन प्रोवाइडर उपलब्ध है या नहीं।
+`mcpServers` किसी नेटिव Plugin को MCP App सहित MCP सर्वर प्रदान करने देता है, जिसके लिए ऑपरेटरों को `openclaw.json` में उसकी स्थिर प्रक्रिया परिभाषा दोहराने की आवश्यकता नहीं होती:
 
-इन फ़ील्ड का उपयोग केवल सस्ते, घोषणात्मक तथ्यों के लिए करें। ट्रांसपोर्ट, अनुरोध
-ट्रांसफ़ॉर्म, टोकन रिफ़्रेश, क्रेडेंशियल सत्यापन, और वास्तविक जनरेशन व्यवहार
-Plugin रनटाइम में रहते हैं।
+```json
+{
+  "mcpServers": {
+    "example": {
+      "transport": "stdio",
+      "command": "node",
+      "args": ["./mcp-server.js"]
+    }
+  }
+}
+```
+
+OpenClaw इन सर्वरों को केवल तभी शामिल करता है, जब स्वामी Plugin सक्षम हो। सापेक्ष `command`, `args`, `cwd`, और `workingDirectory` पथ Plugin रूट से रिज़ॉल्व होते हैं। उपयोगकर्ता कॉन्फ़िगरेशन प्रामाणिक रहता है: `mcp.servers.<name>` किसी Plugin डिफ़ॉल्ट को बदल सकता है या उसे छोड़ने के लिए `enabled: false` सेट कर सकता है। MCP App रेंडरिंग और सर्वर-टूल कॉल के लिए अब भी सामान्य MCP Apps सेटिंग और प्रभावी टूल नीति आवश्यक हैं; सर्वर घोषित करने से इनमें से कोई भी सीमा बायपास नहीं होती।
+
+## डैशबोर्ड संदर्भ
+
+`dashboard` किसी सक्षम Plugin को कोर में Plugin नीति जोड़े बिना, अनुमति-प्राप्त डैशबोर्ड विजेट के लिए मौजूदा Gateway RPC उपलब्ध कराने देता है। डेटा बाइंडिंग में उसी Plugin द्वारा `operator.read` के साथ पंजीकृत विधि का नाम होना चाहिए; एक्शन वर्ब में उसके द्वारा `operator.write` के साथ पंजीकृत विधि का नाम होना चाहिए। असंगति होने पर पंजीकरण के दौरान Plugin अस्वीकार कर दिया जाता है।
+
+```json
+{
+  "dashboard": {
+    "dataBindings": [
+      {
+        "id": "items.list",
+        "method": "example.items.list",
+        "description": "उदाहरण आइटम सूचीबद्ध करें।"
+      }
+    ],
+    "actionVerbs": [
+      {
+        "id": "refresh",
+        "method": "example.items.refresh",
+        "description": "उदाहरण आइटम रीफ़्रेश करें।",
+        "paramShape": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "force": { "type": "boolean" }
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+मैनिफ़ेस्ट आईडी Plugin-स्थानीय होते हैं। विजेट अनुमतियाँ `<plugin-id>.<id>` का उपयोग करती हैं, जैसे `example.items.list` और `example.refresh`। स्थायी अनुमति नेमस्पेस को असंदिग्ध रखने के लिए, OpenClaw Plugin-आईडी खंड में `%` और `.` को `%25` और `%2E` के रूप में एस्केप करता है; सामान्य Plugin आईडी अपना स्वाभाविक रूप बनाए रखते हैं। `paramShape` एक वैकल्पिक JSON Schema है, जिसे OpenClaw द्वारा Plugin RPC लागू करने से पहले एक्शन पैरामीटर ऑब्जेक्ट पर लागू किया जाता है।
+
+## कैटलॉग संदर्भ
+
+`catalog` Plugin ब्राउज़र के लिए वैकल्पिक प्रदर्शन संकेत प्रदान करता है। होस्ट इन संकेतों को अनदेखा कर सकते हैं। ये कभी भी Plugin को इंस्टॉल या सक्षम नहीं करते, और न ही उसके रनटाइम व्यवहार या विश्वास स्तर को बदलते हैं।
+
+```json
+{
+  "catalog": {
+    "featured": true,
+    "order": 10
+  }
+}
+```
+
+| फ़ील्ड      | प्रकार      | इसका अर्थ                                                              |
+| ---------- | --------- | -------------------------------------------------------------------------- |
+| `featured` | `boolean` | क्या कैटलॉग सतहों को इस Plugin को प्रमुखता देनी चाहिए।                       |
+| `order`    | `number`  | क्यूरेट किए गए Plugin के बीच आरोही प्रदर्शन संकेत; कम मान पहले दिखाई देते हैं। |
+
+## जनरेशन प्रदाता मेटाडेटा संदर्भ
+
+जनरेशन प्रदाता मेटाडेटा फ़ील्ड संबद्ध `contracts.*GenerationProviders` सूची में घोषित प्रदाताओं के लिए स्थिर प्रमाणीकरण संकेतों का वर्णन करते हैं। OpenClaw इन फ़ील्ड को प्रदाता रनटाइम लोड होने से पहले पढ़ता है, ताकि कोर टूल प्रत्येक प्रदाता Plugin को आयात किए बिना यह तय कर सकें कि कोई जनरेशन प्रदाता उपलब्ध है या नहीं।
+
+इन फ़ील्ड का उपयोग केवल कम लागत वाले, घोषणात्मक तथ्यों के लिए करें। ट्रांसपोर्ट, अनुरोध रूपांतरण, टोकन रीफ़्रेश, क्रेडेंशियल सत्यापन और वास्तविक जनरेशन व्यवहार Plugin रनटाइम में रहते हैं।
 
 ```json
 {
@@ -254,57 +305,54 @@ Plugin रनटाइम में रहते हैं।
 }
 ```
 
-हर मेटाडेटा एंट्री समर्थित करती है:
+प्रत्येक मेटाडेटा प्रविष्टि में ये समर्थित हैं:
 
-| फ़ील्ड                  | आवश्यक | प्रकार     | इसका अर्थ                                                                                                                                       |
+| फ़ील्ड                  | आवश्यक | प्रकार       | इसका अर्थ                                                                                                                                       |
 | ---------------------- | -------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `aliases`              | नहीं       | `string[]` | अतिरिक्त प्रोवाइडर ids जिन्हें जनरेशन प्रोवाइडर के लिए स्थिर ऑथ उपनाम माना जाना चाहिए।                                                       |
-| `authProviders`        | नहीं       | `string[]` | प्रोवाइडर ids जिनकी कॉन्फ़िगर की गई ऑथ प्रोफ़ाइलों को इस जनरेशन प्रोवाइडर के लिए ऑथ माना जाना चाहिए।                                                      |
-| `configSignals`        | नहीं       | `object[]` | लोकल या स्वयं-होस्टेड प्रोवाइडर के लिए सस्ते केवल-कॉन्फ़िग उपलब्धता सिग्नल, जिन्हें ऑथ प्रोफ़ाइलों या env vars के बिना कॉन्फ़िगर किया जा सकता है।                 |
-| `authSignals`          | नहीं       | `object[]` | स्पष्ट ऑथ सिग्नल। मौजूद होने पर ये प्रोवाइडर id, `aliases`, और `authProviders` से बने डिफ़ॉल्ट सिग्नल सेट को बदल देते हैं।                     |
-| `referenceAudioInputs` | नहीं       | `boolean`  | केवल वीडियो-जनरेशन। जब प्रोवाइडर संदर्भ ऑडियो एसेट स्वीकार करता हो तो `true` पर सेट करें; अन्यथा `video_generate` ऑडियो संदर्भ पैरामीटर छिपा देता है। |
+| `aliases`              | नहीं       | `string[]` | अतिरिक्त प्रदाता आईडी, जिन्हें जनरेशन प्रदाता के लिए स्थिर प्रमाणीकरण उपनामों के रूप में गिना जाना चाहिए।                                                       |
+| `authProviders`        | नहीं       | `string[]` | वे प्रदाता आईडी, जिनकी कॉन्फ़िगर की गई प्रमाणीकरण प्रोफ़ाइल को इस जनरेशन प्रदाता के लिए प्रमाणीकरण माना जाना चाहिए।                                                      |
+| `configSignals`        | नहीं       | `object[]` | स्थानीय या स्व-होस्टेड प्रदाताओं के लिए कम लागत वाले, केवल-कॉन्फ़िगरेशन उपलब्धता संकेत, जिन्हें प्रमाणीकरण प्रोफ़ाइल या एनवायरनमेंट वेरिएबल के बिना कॉन्फ़िगर किया जा सकता है।                 |
+| `authSignals`          | नहीं       | `object[]` | स्पष्ट प्रमाणीकरण संकेत। मौजूद होने पर ये प्रदाता आईडी, `aliases`, और `authProviders` से प्राप्त डिफ़ॉल्ट संकेत सेट को बदल देते हैं।                     |
+| `referenceAudioInputs` | नहीं       | `boolean`  | केवल वीडियो जनरेशन। जब प्रदाता संदर्भ ऑडियो एसेट स्वीकार करता हो, तो इसे `true` पर सेट करें; अन्यथा `video_generate` ऑडियो संदर्भ पैरामीटर छिपा देता है। |
 
-हर `configSignals` एंट्री समर्थित करती है:
+प्रत्येक `configSignals` प्रविष्टि में ये समर्थित हैं:
 
-| फ़ील्ड            | आवश्यक | प्रकार     | इसका अर्थ                                                                                                                                                                             |
+| फ़ील्ड            | आवश्यक | प्रकार       | इसका अर्थ                                                                                                                                                                             |
 | ---------------- | -------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rootPath`       | हाँ      | `string`   | जाँचने के लिए Plugin-स्वामित्व वाले कॉन्फ़िग ऑब्जेक्ट तक डॉट पाथ, उदाहरण के लिए `plugins.entries.example.config`।                                                                                      |
-| `overlayPath`    | नहीं       | `string`   | रूट कॉन्फ़िग के अंदर डॉट पाथ, जिसका ऑब्जेक्ट सिग्नल का मूल्यांकन करने से पहले रूट ऑब्जेक्ट पर ओवरले होना चाहिए। इसे `image`, `video`, या `music` जैसी क्षमता-विशिष्ट कॉन्फ़िग के लिए उपयोग करें।   |
-| `overlayMapPath` | नहीं       | `string`   | रूट कॉन्फ़िग के अंदर डॉट पाथ, जिसके ऑब्जेक्ट मानों में से हर एक रूट ऑब्जेक्ट पर ओवरले होना चाहिए। इसे `accounts` जैसे नामित अकाउंट मैप के लिए उपयोग करें, जहाँ कोई भी कॉन्फ़िगर किया गया अकाउंट पात्र होना चाहिए। |
-| `required`       | नहीं       | `string[]` | प्रभावी कॉन्फ़िग के अंदर डॉट पाथ जिनमें कॉन्फ़िगर किए गए मान होने चाहिए। स्ट्रिंग खाली नहीं होनी चाहिए; ऑब्जेक्ट और ऐरे खाली नहीं होने चाहिए।                                                  |
-| `requiredAny`    | नहीं       | `string[]` | प्रभावी कॉन्फ़िग के अंदर डॉट पाथ, जिनमें से कम से कम एक में कॉन्फ़िगर किया गया मान होना चाहिए।                                                                                                    |
-| `mode`           | नहीं       | `object`   | प्रभावी कॉन्फ़िग के अंदर वैकल्पिक स्ट्रिंग मोड गार्ड। इसका उपयोग तब करें जब केवल-कॉन्फ़िग उपलब्धता सिर्फ़ एक मोड पर लागू होती हो।                                                                  |
+| `rootPath`       | हाँ      | `string`   | जाँचने के लिए Plugin-स्वामित्व वाले कॉन्फ़िगरेशन ऑब्जेक्ट का डॉट पथ, उदाहरण के लिए `plugins.entries.example.config`।                                                                                      |
+| `overlayPath`    | नहीं       | `string`   | रूट कॉन्फ़िगरेशन के अंदर वह डॉट पथ, जिसका ऑब्जेक्ट संकेत का मूल्यांकन करने से पहले रूट ऑब्जेक्ट पर ओवरले होना चाहिए। इसका उपयोग क्षमता-विशिष्ट कॉन्फ़िगरेशन के लिए करें, जैसे `image`, `video`, या `music`।   |
+| `overlayMapPath` | नहीं       | `string`   | रूट कॉन्फ़िगरेशन के अंदर वह डॉट पथ, जिसके प्रत्येक ऑब्जेक्ट मान को रूट ऑब्जेक्ट पर ओवरले होना चाहिए। इसका उपयोग `accounts` जैसे नामित अकाउंट मैप के लिए करें, जहाँ कोई भी कॉन्फ़िगर किया गया अकाउंट योग्य होना चाहिए। |
+| `required`       | नहीं       | `string[]` | प्रभावी कॉन्फ़िगरेशन के अंदर वे डॉट पथ, जिनमें कॉन्फ़िगर किए गए मान होना आवश्यक है। स्ट्रिंग खाली नहीं होनी चाहिए; ऑब्जेक्ट और ऐरे खाली नहीं होने चाहिए।                                                  |
+| `requiredAny`    | नहीं       | `string[]` | प्रभावी कॉन्फ़िगरेशन के अंदर वे डॉट पथ, जिनमें से कम-से-कम एक में कॉन्फ़िगर किया गया मान होना आवश्यक है।                                                                                                    |
+| `mode`           | नहीं       | `object`   | प्रभावी कॉन्फ़िगरेशन के अंदर वैकल्पिक स्ट्रिंग मोड गार्ड। इसका उपयोग तब करें, जब केवल-कॉन्फ़िगरेशन उपलब्धता केवल एक मोड पर लागू होती हो।                                                                  |
 
-हर `mode` गार्ड समर्थित करता है:
+प्रत्येक `mode` गार्ड में ये समर्थित हैं:
 
-| फ़ील्ड        | आवश्यक | प्रकार     | इसका अर्थ                                                                      |
+| फ़ील्ड        | आवश्यक | प्रकार       | इसका अर्थ                                                                      |
 | ------------ | -------- | ---------- | ---------------------------------------------------------------------------------- |
-| `path`       | नहीं       | `string`   | प्रभावी कॉन्फ़िग के अंदर डॉट पाथ। डिफ़ॉल्ट `mode` है।                          |
-| `default`    | नहीं       | `string`   | जब कॉन्फ़िग पाथ छोड़ देता है, तब उपयोग करने वाला मोड मान।                                  |
-| `allowed`    | नहीं       | `string[]` | मौजूद होने पर, सिग्नल केवल तब पास होता है जब प्रभावी मोड इन मानों में से एक हो। |
-| `disallowed` | नहीं       | `string[]` | मौजूद होने पर, सिग्नल तब विफल होता है जब प्रभावी मोड इन मानों में से एक हो।       |
+| `path`       | नहीं       | `string`   | प्रभावी कॉन्फ़िगरेशन के अंदर डॉट पथ। डिफ़ॉल्ट रूप से `mode`।                          |
+| `default`    | नहीं       | `string`   | कॉन्फ़िगरेशन में पथ न होने पर उपयोग किया जाने वाला मोड मान।                                  |
+| `allowed`    | नहीं       | `string[]` | मौजूद होने पर संकेत केवल तभी सफल होता है, जब प्रभावी मोड इनमें से किसी एक मान के बराबर हो। |
+| `disallowed` | नहीं       | `string[]` | मौजूद होने पर संकेत तब विफल होता है, जब प्रभावी मोड इनमें से किसी एक मान के बराबर हो।       |
 
-हर `authSignals` एंट्री समर्थित करती है:
+प्रत्येक `authSignals` प्रविष्टि में ये समर्थित हैं:
 
-| फ़ील्ड             | आवश्यक | प्रकार   | इसका अर्थ                                                                                                                                                                 |
+| फ़ील्ड             | आवश्यक | प्रकार     | इसका अर्थ                                                                                                                                                                 |
 | ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `provider`        | हाँ      | `string` | कॉन्फ़िगर की गई ऑथ प्रोफ़ाइलों में जाँचने के लिए प्रोवाइडर id।                                                                                                                             |
-| `providerBaseUrl` | नहीं       | `object` | वैकल्पिक गार्ड जो सिग्नल को केवल तब गिनता है जब संदर्भित कॉन्फ़िगर किया गया प्रोवाइडर अनुमत बेस URL का उपयोग करता हो। इसका उपयोग तब करें जब कोई ऑथ उपनाम केवल कुछ APIs के लिए मान्य हो। |
+| `provider`        | हाँ      | `string` | कॉन्फ़िगर की गई प्रमाणीकरण प्रोफ़ाइल में जाँचने के लिए प्रदाता आईडी।                                                                                                                             |
+| `providerBaseUrl` | नहीं       | `object` | वैकल्पिक गार्ड, जो संकेत को केवल तभी गिनता है, जब संदर्भित कॉन्फ़िगर किया गया प्रदाता किसी अनुमत बेस URL का उपयोग करता हो। इसका उपयोग तब करें, जब कोई प्रमाणीकरण उपनाम केवल कुछ API के लिए मान्य हो। |
 
-हर `providerBaseUrl` गार्ड समर्थित करता है:
+प्रत्येक `providerBaseUrl` गार्ड में ये समर्थित हैं:
 
-| फ़ील्ड             | आवश्यक | प्रकार     | इसका अर्थ                                                                                                                                        |
+| फ़ील्ड             | आवश्यक | प्रकार       | इसका अर्थ                                                                                                                                        |
 | ----------------- | -------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `provider`        | हाँ      | `string`   | प्रोवाइडर कॉन्फ़िग id, जिसका `baseUrl` जाँचना चाहिए।                                                                                                |
-| `defaultBaseUrl`  | नहीं       | `string`   | जब प्रोवाइडर कॉन्फ़िग `baseUrl` छोड़ देता है, तब मानने वाला बेस URL।                                                                                         |
-| `allowedBaseUrls` | हाँ      | `string[]` | इस ऑथ सिग्नल के लिए अनुमत बेस URLs। जब कॉन्फ़िगर किया गया या डिफ़ॉल्ट बेस URL इन सामान्यीकृत मानों में से किसी एक से मेल नहीं खाता, तो सिग्नल अनदेखा किया जाता है। |
+| `provider`        | हाँ      | `string`   | वह प्रदाता कॉन्फ़िगरेशन आईडी, जिसके `baseUrl` की जाँच की जानी चाहिए।                                                                                                |
+| `defaultBaseUrl`  | नहीं       | `string`   | प्रदाता कॉन्फ़िगरेशन में `baseUrl` न होने पर माने जाने वाला बेस URL।                                                                                         |
+| `allowedBaseUrls` | हाँ      | `string[]` | इस प्रमाणीकरण संकेत के लिए अनुमत बेस URL। कॉन्फ़िगर किया गया या डिफ़ॉल्ट बेस URL इन सामान्यीकृत मानों में से किसी से मेल न खाने पर संकेत अनदेखा कर दिया जाता है। |
 
 ## टूल मेटाडेटा संदर्भ
 
-`toolMetadata` टूल नाम से की गई कुंजी के साथ, जनरेशन प्रोवाइडर मेटाडेटा जैसी ही
-`configSignals` और `authSignals` आकृतियों का उपयोग करता है। `contracts.tools` स्वामित्व घोषित करता है।
-`toolMetadata` सस्ता उपलब्धता प्रमाण घोषित करता है ताकि OpenClaw केवल अपने टूल फ़ैक्टरी से `null`
-वापस दिलाने के लिए Plugin रनटाइम इंपोर्ट करने से बच सके।
+`toolMetadata` टूल नाम के अनुसार कुंजीबद्ध, जनरेशन प्रदाता मेटाडेटा के समान `configSignals` और `authSignals` आकारों का उपयोग करता है। `contracts.tools` स्वामित्व घोषित करता है। `toolMetadata` कम लागत वाला उपलब्धता प्रमाण घोषित करता है, ताकि केवल उसकी टूल फ़ैक्ट्री से `null` लौटवाने के लिए OpenClaw को Plugin रनटाइम आयात न करना पड़े।
 
 ```json
 {
@@ -338,42 +386,48 @@ Plugin रनटाइम में रहते हैं।
 }
 ```
 
-यदि किसी टूल के पास `toolMetadata` नहीं है, तो OpenClaw मौजूदा व्यवहार सुरक्षित रखता है और
-टूल कॉन्ट्रैक्ट पॉलिसी से मेल खाने पर स्वामित्व वाला Plugin लोड करता है। हॉट-पाथ
-टूल जिनकी फ़ैक्टरी ऑथ/कॉन्फ़िग पर निर्भर करती है, उनके लिए Plugin लेखकों को पूछने के लिए
-कोर से रनटाइम इंपोर्ट करवाने के बजाय `toolMetadata` घोषित करना चाहिए।
+`toolMetadata` प्रविष्टियाँ साझा किए गए उपरोक्त `configSignals`/`authSignals` फ़ील्ड के अतिरिक्त `optional` (टूल को Plugin सक्रियण के लिए अनिवार्य नहीं चिह्नित करता है) और `replaySafe` (अपूर्ण मॉडल टर्न के बाद टूल निष्पादन को दोहराने के लिए सुरक्षित चिह्नित करता है) भी स्वीकार करती हैं।
+
+यदि किसी टूल में `toolMetadata` नहीं है, तो OpenClaw मौजूदा व्यवहार बनाए रखता है और टूल अनुबंध के नीति से मेल खाने पर स्वामी Plugin को लोड करता है। उन हॉट-पाथ टूल के लिए जिनकी फ़ैक्टरी प्रमाणीकरण/कॉन्फ़िगरेशन पर निर्भर है, Plugin लेखकों को पूछने के लिए कोर से रनटाइम आयात कराने के बजाय `toolMetadata` घोषित करना चाहिए।
 
 ## providerAuthChoices संदर्भ
 
-हर `providerAuthChoices` एंट्री एक ऑनबोर्डिंग या ऑथ विकल्प बताती है।
-OpenClaw इसे प्रोवाइडर रनटाइम लोड होने से पहले पढ़ता है।
-प्रोवाइडर सेटअप सूचियाँ प्रोवाइडर रनटाइम लोड किए बिना इन मैनिफ़ेस्ट विकल्पों, डिस्क्रिप्टर-व्युत्पन्न सेटअप
-विकल्पों, और इंस्टॉल-कैटलॉग मेटाडेटा का उपयोग करती हैं।
+प्रत्येक `providerAuthChoices` प्रविष्टि एक ऑनबोर्डिंग या प्रमाणीकरण विकल्प का वर्णन करती है। OpenClaw इसे प्रदाता रनटाइम लोड होने से पहले पढ़ता है। प्रदाता सेटअप सूचियाँ प्रदाता रनटाइम लोड किए बिना इन मैनिफ़ेस्ट विकल्पों, डिस्क्रिप्टर से प्राप्त सेटअप विकल्पों और इंस्टॉल-कैटलॉग मेटाडेटा का उपयोग करती हैं।
 
-| फ़ील्ड                 | आवश्यक | प्रकार                                                                  | इसका अर्थ क्या है                                                                                            |
-| --------------------- | -------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `provider`            | हाँ      | `string`                                                              | प्रदाता आईडी जिससे यह विकल्प संबंधित है।                                                                      |
-| `method`              | हाँ      | `string`                                                              | जिस पर डिस्पैच करना है वह प्रमाणीकरण विधि आईडी।                                                                           |
-| `choiceId`            | हाँ      | `string`                                                              | ऑनबोर्डिंग और CLI फ़्लो द्वारा उपयोग की जाने वाली स्थिर प्रमाणीकरण-विकल्प आईडी।                                                  |
-| `choiceLabel`         | नहीं       | `string`                                                              | उपयोगकर्ता को दिखने वाला लेबल। अगर छोड़ा गया हो, तो OpenClaw `choiceId` पर वापस जाता है।                                        |
-| `choiceHint`          | नहीं       | `string`                                                              | पिकर के लिए छोटा सहायक टेक्स्ट।                                                                        |
-| `assistantPriority`   | नहीं       | `number`                                                              | कम मान सहायक-संचालित इंटरैक्टिव पिकर में पहले क्रमबद्ध होते हैं।                                       |
-| `assistantVisibility` | नहीं       | `"visible"` \| `"manual-only"`                                        | मैन्युअल CLI चयन की अनुमति देते हुए भी विकल्प को सहायक पिकर से छिपाएँ।                        |
-| `deprecatedChoiceIds` | नहीं       | `string[]`                                                            | पुराने विकल्प आईडी जिन्हें उपयोगकर्ताओं को इस प्रतिस्थापन विकल्प पर रीडायरेक्ट करना चाहिए।                                 |
-| `groupId`             | नहीं       | `string`                                                              | संबंधित विकल्पों को समूहित करने के लिए वैकल्पिक समूह आईडी।                                                          |
-| `groupLabel`          | नहीं       | `string`                                                              | उस समूह के लिए उपयोगकर्ता को दिखने वाला लेबल।                                                                        |
-| `groupHint`           | नहीं       | `string`                                                              | समूह के लिए छोटा सहायक टेक्स्ट।                                                                         |
-| `optionKey`           | नहीं       | `string`                                                              | सरल एक-फ़्लैग प्रमाणीकरण फ़्लो के लिए आंतरिक विकल्प कुंजी।                                                      |
-| `cliFlag`             | नहीं       | `string`                                                              | CLI फ़्लैग नाम, जैसे `--openrouter-api-key`।                                                           |
-| `cliOption`           | नहीं       | `string`                                                              | पूरा CLI विकल्प आकार, जैसे `--openrouter-api-key <key>`।                                             |
-| `cliDescription`      | नहीं       | `string`                                                              | CLI सहायता में उपयोग किया गया विवरण।                                                                            |
-| `onboardingScopes`    | नहीं       | `Array<"text-inference" \| "image-generation" \| "music-generation">` | यह विकल्प किन ऑनबोर्डिंग सतहों में दिखना चाहिए। अगर छोड़ा गया हो, तो यह डिफ़ॉल्ट रूप से `["text-inference"]` होता है। |
+| फ़ील्ड                 | आवश्यक | प्रकार                                                                  | इसका अर्थ                                                                                             |
+| --------------------- | -------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `provider`            | हाँ      | `string`                                                              | वह प्रदाता आईडी जिससे यह विकल्प संबंधित है।                                                                       |
+| `method`              | हाँ      | `string`                                                              | वह प्रमाणीकरण विधि आईडी जिस पर डिस्पैच करना है।                                                                            |
+| `choiceId`            | हाँ      | `string`                                                              | ऑनबोर्डिंग और CLI प्रवाहों द्वारा उपयोग की जाने वाली स्थिर प्रमाणीकरण-विकल्प आईडी।                                                   |
+| `choiceLabel`         | नहीं       | `string`                                                              | उपयोगकर्ता को दिखाई देने वाला लेबल। इसे छोड़ने पर OpenClaw `choiceId` का उपयोग करता है।                                         |
+| `choiceHint`          | नहीं       | `string`                                                              | चयनकर्ता के लिए संक्षिप्त सहायक पाठ।                                                                         |
+| `icon`                | नहीं       | HTTPS URL                                                             | समर्थित ऑनबोर्डिंग क्लाइंट में इस विकल्प के बगल में दिखाई जाने वाली कलाकृति।                                         |
+| `website`             | नहीं       | HTTPS URL                                                             | समर्थित ऑनबोर्डिंग क्लाइंट द्वारा दिखाई जाने वाली उत्पाद, साइन-इन या इंस्टॉलेशन पृष्ठ।                             |
+| `assistantPriority`   | नहीं       | `number`                                                              | सहायक-संचालित इंटरैक्टिव चयनकर्ताओं में कम मान पहले क्रमबद्ध होते हैं।                                        |
+| `assistantVisibility` | नहीं       | `"visible"` \| `"manual-only"`                                        | मैन्युअल CLI चयन की अनुमति बनाए रखते हुए विकल्प को सहायक चयनकर्ताओं से छिपाएँ।                         |
+| `deprecatedChoiceIds` | नहीं       | `string[]`                                                            | पुराने विकल्प आईडी जिन्हें उपयोगकर्ताओं को इस प्रतिस्थापन विकल्प पर पुनर्निर्देशित करना चाहिए।                                  |
+| `groupId`             | नहीं       | `string`                                                              | संबंधित विकल्पों को समूहित करने के लिए वैकल्पिक समूह आईडी।                                                           |
+| `groupLabel`          | नहीं       | `string`                                                              | उस समूह के लिए उपयोगकर्ता को दिखाई देने वाला लेबल।                                                                         |
+| `groupHint`           | नहीं       | `string`                                                              | समूह के लिए संक्षिप्त सहायक पाठ।                                                                          |
+| `onboardingFeatured`  | नहीं       | `boolean`                                                             | इंटरैक्टिव ऑनबोर्डिंग चयनकर्ता में "More..." प्रविष्टि से पहले इस समूह को फ़ीचर्ड स्तर में दिखाएँ। |
+| `optionKey`           | नहीं       | `string`                                                              | सरल एक-फ़्लैग प्रमाणीकरण प्रवाहों के लिए आंतरिक विकल्प कुंजी।                                                       |
+| `cliFlag`             | नहीं       | `string`                                                              | CLI फ़्लैग नाम, जैसे `--openrouter-api-key`।                                                            |
+| `cliOption`           | नहीं       | `string`                                                              | पूर्ण CLI विकल्प स्वरूप, जैसे `--openrouter-api-key <key>`।                                              |
+| `cliDescription`      | नहीं       | `string`                                                              | CLI सहायता में उपयोग किया जाने वाला विवरण।                                                                             |
+| `appGuidedSecret`     | नहीं       | `boolean`                                                             | ऐप-निर्देशित सेटअप के लिए चिपकाया गया एक सीक्रेट और प्रदाता डिफ़ॉल्ट पर्याप्त हैं।                              |
+| `appGuidedDiscovery`  | नहीं       | `boolean`                                                             | मेल खाने वाली रनटाइम प्रमाणीकरण विधि `appGuidedSetup` के माध्यम से केवल-पढ़ने योग्य स्थानीय खोज की स्वामी है।                 |
+| `appGuidedAuth`       | नहीं       | `"oauth"` \| `"device-code"`                                          | प्रदाता-स्वामित्व वाला इंटरैक्टिव लॉगिन जिसे नेटिव सेटअप क्लाइंट सामान्य रूप से रेंडर कर सकते हैं।                        |
+| `onboardingScopes`    | नहीं       | `Array<"text-inference" \| "image-generation" \| "music-generation">` | यह विकल्प किन ऑनबोर्डिंग सतहों में दिखाई देना चाहिए। इसे छोड़ने पर यह `["text-inference"]` पर डिफ़ॉल्ट होता है।  |
+
+जब `appGuidedDiscovery` सत्य हो, तो मेल खाने वाली प्रदाता प्रमाणीकरण विधि को
+`appGuidedSetup.detect` और `appGuidedSetup.prepare` उपलब्ध कराने होंगे। पहचान
+केवल-पढ़ने योग्य होनी चाहिए: कोई लॉगिन, मॉडल पुल, डाउनलोड या कॉन्फ़िगरेशन लेखन नहीं। तैयारी
+चुने गए सटीक मॉडल की दोबारा जाँच करती है और एक कॉन्फ़िगरेशन प्रस्ताव लौटाती है; OpenClaw उस
+प्रस्ताव का अलगाव में लाइव परीक्षण करता है और सफलता के बाद ही उसे कमिट करता है।
 
 ## commandAliases संदर्भ
 
-`commandAliases` का उपयोग तब करें जब कोई Plugin ऐसा रनटाइम कमांड नाम रखता हो जिसे उपयोगकर्ता
-गलती से `plugins.allow` में डाल सकते हैं या root CLI कमांड की तरह चलाने की कोशिश कर सकते हैं। OpenClaw
-Plugin रनटाइम कोड आयात किए बिना निदान के लिए इस मेटाडेटा का उपयोग करता है।
+जब कोई Plugin ऐसे रनटाइम कमांड नाम का स्वामी हो जिसे उपयोगकर्ता गलती से `plugins.allow` में रख सकते हैं या रूट CLI कमांड के रूप में चलाने का प्रयास कर सकते हैं, तब `commandAliases` का उपयोग करें। OpenClaw निदान के लिए Plugin रनटाइम कोड आयात किए बिना इस मेटाडेटा का उपयोग करता है।
 
 ```json
 {
@@ -387,41 +441,21 @@ Plugin रनटाइम कोड आयात किए बिना नि�
 }
 ```
 
-| फ़ील्ड        | आवश्यक | प्रकार              | इसका अर्थ क्या है                                                           |
+| फ़ील्ड        | आवश्यक | प्रकार              | इसका अर्थ                                                           |
 | ------------ | -------- | ----------------- | ----------------------------------------------------------------------- |
-| `name`       | हाँ      | `string`          | कमांड नाम जो इस Plugin से संबंधित है।                               |
-| `kind`       | नहीं       | `"runtime-slash"` | उपनाम को root CLI कमांड के बजाय चैट स्लैश कमांड के रूप में चिह्नित करता है। |
-| `cliCommand` | नहीं       | `string`          | CLI संचालन के लिए सुझाने योग्य संबंधित root CLI कमांड, अगर कोई मौजूद हो।  |
+| `name`       | हाँ      | `string`          | वह कमांड नाम जो इस Plugin से संबंधित है।                               |
+| `kind`       | नहीं       | `"runtime-slash"` | उपनाम को रूट CLI कमांड के बजाय चैट स्लैश कमांड के रूप में चिह्नित करता है। |
+| `cliCommand` | नहीं       | `string`          | CLI संचालनों के लिए सुझाया जाने वाला संबंधित रूट CLI कमांड, यदि कोई हो।  |
 
 ## activation संदर्भ
 
-`activation` का उपयोग तब करें जब Plugin कम लागत में यह घोषित कर सकता हो कि किन नियंत्रण-प्लेन इवेंट्स
-में उसे सक्रियण/लोड योजना में शामिल किया जाना चाहिए।
+जब Plugin कम लागत में यह घोषित कर सकता हो कि किन नियंत्रण-प्लेन इवेंट में उसे सक्रियण/लोड योजना में शामिल करना चाहिए, तब `activation` का उपयोग करें।
 
-यह ब्लॉक प्लानर मेटाडेटा है, लाइफ़साइकल API नहीं। यह
-रनटाइम व्यवहार पंजीकृत नहीं करता, `register(...)` को प्रतिस्थापित नहीं करता, और यह वादा नहीं करता कि
-Plugin कोड पहले ही निष्पादित हो चुका है। सक्रियण प्लानर मौजूदा मैनिफ़ेस्ट स्वामित्व
-मेटाडेटा जैसे `providers`, `channels`, `commandAliases`, `setup.providers`,
-`contracts.tools`, और हुक्स पर वापस जाने से पहले उम्मीदवार Plugins को सीमित करने के लिए इन फ़ील्ड्स का उपयोग करता है।
+यह ब्लॉक प्लानर मेटाडेटा है, लाइफ़साइकल API नहीं। यह रनटाइम व्यवहार पंजीकृत नहीं करता, `register(...)` को प्रतिस्थापित नहीं करता और यह वादा नहीं करता कि Plugin कोड पहले ही निष्पादित हो चुका है। सक्रियण प्लानर मौजूदा मैनिफ़ेस्ट स्वामित्व मेटाडेटा, जैसे `providers`, `channels`, `commandAliases`, `setup.providers`, `contracts.tools` और हुक पर वापस जाने से पहले उम्मीदवार Plugin को सीमित करने के लिए इन फ़ील्ड का उपयोग करता है।
 
-सबसे संकीर्ण मेटाडेटा को प्राथमिकता दें जो पहले से स्वामित्व का वर्णन करता हो। जब
-`providers`, `channels`, `commandAliases`, सेटअप डिस्क्रिप्टर, या `contracts`
-संबंध व्यक्त करते हों, तो उनका उपयोग करें। अतिरिक्त प्लानर
-संकेतों के लिए `activation` का उपयोग करें जिन्हें उन स्वामित्व फ़ील्ड्स से निरूपित नहीं किया जा सकता।
-`claude-cli`, `my-cli`, या `google-gemini-cli` जैसे CLI रनटाइम उपनामों के लिए शीर्ष-स्तरीय `cliBackends` का उपयोग करें; `activation.onAgentHarnesses` केवल उन
-एम्बेडेड एजेंट हार्नेस आईडी के लिए है जिनके पास पहले से कोई स्वामित्व फ़ील्ड नहीं है।
+उस सबसे संकीर्ण मेटाडेटा को प्राथमिकता दें जो पहले से स्वामित्व का वर्णन करता है। जब `providers`, `channels`, `commandAliases`, सेटअप डिस्क्रिप्टर या `contracts` संबंध को व्यक्त करते हों, तब उनका उपयोग करें। उन अतिरिक्त प्लानर संकेतों के लिए `activation` का उपयोग करें जिन्हें उन स्वामित्व फ़ील्ड द्वारा दर्शाया नहीं जा सकता। `claude-cli`, `my-cli` या `google-gemini-cli` जैसे CLI रनटाइम उपनामों के लिए शीर्ष-स्तरीय `cliBackends` का उपयोग करें; `activation.onAgentHarnesses` केवल उन एम्बेडेड एजेंट हार्नेस आईडी के लिए है जिनके पास पहले से कोई स्वामित्व फ़ील्ड नहीं है।
 
-यह ब्लॉक केवल मेटाडेटा है। यह रनटाइम व्यवहार पंजीकृत नहीं करता, और यह
-`register(...)`, `setupEntry`, या अन्य रनटाइम/Plugin एंट्रीपॉइंट्स को प्रतिस्थापित नहीं करता।
-वर्तमान उपभोक्ता व्यापक Plugin लोडिंग से पहले इसे सीमित करने वाले संकेत के रूप में उपयोग करते हैं, इसलिए
-गैर-स्टार्टअप सक्रियण मेटाडेटा का न होना आम तौर पर केवल प्रदर्शन की लागत बनता है; जब तक
-मैनिफ़ेस्ट स्वामित्व फॉलबैक अभी भी मौजूद हैं, इससे शुद्धता नहीं बदलनी चाहिए।
-
-हर Plugin को `activation.onStartup` जानबूझकर सेट करना चाहिए। इसे `true`
-केवल तब सेट करें जब Plugin को Gateway स्टार्टअप के दौरान चलना ही हो। इसे `false` तब सेट करें जब
-Plugin स्टार्टअप पर निष्क्रिय हो और केवल संकीर्ण ट्रिगर्स से लोड होना चाहिए।
-`onStartup` छोड़ देने से अब Plugin परोक्ष रूप से स्टार्टअप-लोड नहीं होता; स्टार्टअप, चैनल, कॉन्फ़िग, एजेंट-हार्नेस, मेमोरी, या
-अन्य संकीर्ण सक्रियण ट्रिगर्स के लिए स्पष्ट सक्रियण मेटाडेटा का उपयोग करें।
+प्रत्येक Plugin को `activation.onStartup` जानबूझकर सेट करना चाहिए। इसे केवल तभी `true` पर सेट करें जब Plugin को Gateway स्टार्टअप के दौरान चलना अनिवार्य हो। जब Plugin स्टार्टअप पर निष्क्रिय हो और केवल अधिक संकीर्ण ट्रिगर से लोड होना चाहिए, तब इसे `false` पर सेट करें। `onStartup` को छोड़ने पर अब Plugin स्टार्टअप पर निहित रूप से लोड नहीं होता; स्टार्टअप, चैनल, कॉन्फ़िगरेशन, एजेंट हार्नेस, मेमोरी या अन्य अधिक संकीर्ण सक्रियण ट्रिगर के लिए स्पष्ट सक्रियण मेटाडेटा का उपयोग करें।
 
 ```json
 {
@@ -437,61 +471,54 @@ Plugin स्टार्टअप पर निष्क्रिय हो औ
 }
 ```
 
-| फ़ील्ड              | आवश्यक | प्रकार                                                 | इसका अर्थ क्या है                                                                                                                                                                               |
+| फ़ील्ड              | आवश्यक | प्रकार                                                 | इसका अर्थ                                                                                                                                                                               |
 | ------------------ | -------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `onStartup`        | नहीं       | `boolean`                                            | स्पष्ट Gateway स्टार्टअप सक्रियण। हर Plugin को यह सेट करना चाहिए। `true` स्टार्टअप के दौरान Plugin आयात करता है; `false` इसे तब तक स्टार्टअप-लेज़ी रखता है जब तक कोई दूसरा मिलान वाला ट्रिगर लोडिंग की मांग न करे। |
-| `onProviders`      | नहीं       | `string[]`                                           | प्रदाता आईडी जिन्हें इस Plugin को सक्रियण/लोड योजनाओं में शामिल करना चाहिए।                                                                                                                      |
-| `onAgentHarnesses` | नहीं       | `string[]`                                           | एम्बेडेड एजेंट हार्नेस रनटाइम आईडी जिन्हें इस Plugin को सक्रियण/लोड योजनाओं में शामिल करना चाहिए। CLI बैकएंड उपनामों के लिए शीर्ष-स्तरीय `cliBackends` का उपयोग करें।                                           |
-| `onCommands`       | नहीं       | `string[]`                                           | कमांड आईडी जिन्हें इस Plugin को सक्रियण/लोड योजनाओं में शामिल करना चाहिए।                                                                                                                       |
-| `onChannels`       | नहीं       | `string[]`                                           | चैनल आईडी जिन्हें इस Plugin को सक्रियण/लोड योजनाओं में शामिल करना चाहिए।                                                                                                                       |
-| `onRoutes`         | नहीं       | `string[]`                                           | रूट प्रकार जिन्हें इस Plugin को सक्रियण/लोड योजनाओं में शामिल करना चाहिए।                                                                                                                       |
-| `onConfigPaths`    | नहीं       | `string[]`                                           | root-सापेक्ष कॉन्फ़िग पथ जिन्हें पथ मौजूद होने और स्पष्ट रूप से अक्षम न होने पर इस Plugin को स्टार्टअप/लोड योजनाओं में शामिल करना चाहिए।                                                      |
-| `onCapabilities`   | नहीं       | `Array<"provider" \| "channel" \| "tool" \| "hook">` | नियंत्रण-प्लेन सक्रियण योजना द्वारा उपयोग किए जाने वाले व्यापक क्षमता संकेत। संभव होने पर संकीर्ण फ़ील्ड्स को प्राथमिकता दें।                                                                                     |
+| `onStartup`        | नहीं       | `boolean`                                            | स्पष्ट Gateway स्टार्टअप सक्रियण। प्रत्येक Plugin को इसे सेट करना चाहिए। `true` स्टार्टअप के दौरान Plugin को इंपोर्ट करता है; `false` इसे स्टार्टअप पर लेज़ी रखता है, जब तक कि किसी अन्य मेल खाने वाले ट्रिगर के कारण इसे लोड करना आवश्यक न हो। |
+| `onProviders`      | नहीं       | `string[]`                                           | वे प्रोवाइडर आईडी, जिन्हें सक्रियण/लोड योजनाओं में इस Plugin को शामिल करना चाहिए।                                                                                                                      |
+| `onAgentHarnesses` | नहीं       | `string[]`                                           | एम्बेडेड एजेंट हार्नेस रनटाइम आईडी, जिन्हें सक्रियण/लोड योजनाओं में इस Plugin को शामिल करना चाहिए। CLI बैकएंड उपनामों के लिए शीर्ष-स्तरीय `cliBackends` का उपयोग करें।                                           |
+| `onCommands`       | नहीं       | `string[]`                                           | वे कमांड आईडी, जिन्हें सक्रियण/लोड योजनाओं में इस Plugin को शामिल करना चाहिए।                                                                                                                       |
+| `onChannels`       | नहीं       | `string[]`                                           | वे चैनल आईडी, जिन्हें सक्रियण/लोड योजनाओं में इस Plugin को शामिल करना चाहिए।                                                                                                                       |
+| `onRoutes`         | नहीं       | `string[]`                                           | वे रूट प्रकार, जिन्हें सक्रियण/लोड योजनाओं में इस Plugin को शामिल करना चाहिए।                                                                                                                       |
+| `onConfigPaths`    | नहीं       | `string[]`                                           | रूट-सापेक्ष कॉन्फ़िगरेशन पथ, जिन्हें पथ मौजूद होने और स्पष्ट रूप से अक्षम न किए जाने पर स्टार्टअप/लोड योजनाओं में इस Plugin को शामिल करना चाहिए।                                                      |
+| `onCapabilities`   | नहीं       | `Array<"provider" \| "channel" \| "tool" \| "hook">` | कंट्रोल-प्लेन सक्रियण योजना में उपयोग किए जाने वाले व्यापक क्षमता संकेत। संभव होने पर अधिक विशिष्ट फ़ील्ड को प्राथमिकता दें।                                                                                     |
 
-वर्तमान लाइव उपभोक्ता:
+वर्तमान सक्रिय उपभोक्ता:
 
-- Gateway स्टार्टअप योजना स्पष्ट स्टार्टअप
-  आयात के लिए `activation.onStartup` का उपयोग करती है
-- कमांड-ट्रिगर वाली CLI योजना पुराने
-  `commandAliases[].cliCommand` या `commandAliases[].name` पर वापस जाती है
-- एजेंट-रनटाइम स्टार्टअप योजना
-  एम्बेडेड हार्नेस के लिए `activation.onAgentHarnesses` और CLI रनटाइम उपनामों के लिए शीर्ष-स्तरीय `cliBackends[]` का उपयोग करती है
-- चैनल-ट्रिगर सेटअप/चैनल योजना स्पष्ट चैनल सक्रियण मेटाडेटा न होने पर पुराने `channels[]`
-  स्वामित्व पर वापस जाती है
-- स्टार्टअप Plugin योजना bundled ब्राउज़र Plugin के `browser` ब्लॉक जैसी गैर-चैनल root
-  कॉन्फ़िग सतहों के लिए `activation.onConfigPaths` का उपयोग करती है
-- प्रदाता-ट्रिगर सेटअप/रनटाइम योजना स्पष्ट प्रदाता
-  सक्रियण मेटाडेटा न होने पर पुराने `providers[]` और शीर्ष-स्तरीय `cliBackends[]` स्वामित्व पर वापस जाती है
+- Gateway स्टार्टअप योजना स्पष्ट स्टार्टअप इंपोर्ट के लिए `activation.onStartup` का उपयोग करती है।
+- कमांड-ट्रिगर की गई CLI योजना पुराने `commandAliases[].cliCommand` या `commandAliases[].name` पर फ़ॉलबैक करती है।
+- एजेंट-रनटाइम स्टार्टअप योजना एम्बेडेड हार्नेस के लिए `activation.onAgentHarnesses` और CLI रनटाइम उपनामों के लिए शीर्ष-स्तरीय `cliBackends[]` का उपयोग करती है।
+- स्पष्ट चैनल सक्रियण मेटाडेटा अनुपलब्ध होने पर चैनल-ट्रिगर की गई सेटअप/चैनल योजना पुराने `channels[]` स्वामित्व पर फ़ॉलबैक करती है।
+- स्टार्टअप Plugin योजना बंडल किए गए ब्राउज़र Plugin के `browser` ब्लॉक जैसे गैर-चैनल रूट कॉन्फ़िगरेशन सतहों के लिए `activation.onConfigPaths` का उपयोग करती है।
+- स्पष्ट प्रोवाइडर सक्रियण मेटाडेटा अनुपलब्ध होने पर प्रोवाइडर-ट्रिगर की गई सेटअप/रनटाइम योजना पुराने `providers[]` और शीर्ष-स्तरीय `cliBackends[]` स्वामित्व पर फ़ॉलबैक करती है।
 
-प्लानर निदान स्पष्ट सक्रियण संकेतों को मैनिफ़ेस्ट
-स्वामित्व फॉलबैक से अलग कर सकते हैं। उदाहरण के लिए, `activation-command-hint` का अर्थ है कि
-`activation.onCommands` मिला, जबकि `manifest-command-alias` का अर्थ है कि
-प्लानर ने इसके बजाय `commandAliases` स्वामित्व का उपयोग किया। ये कारण लेबल
-होस्ट निदान और परीक्षणों के लिए हैं; Plugin लेखकों को वह मेटाडेटा घोषित करते रहना चाहिए
-जो स्वामित्व का सबसे अच्छा वर्णन करता है।
+प्लानर डायग्नोस्टिक्स स्पष्ट सक्रियण संकेतों को मैनिफ़ेस्ट स्वामित्व फ़ॉलबैक से अलग कर सकते हैं। उदाहरण के लिए, `activation-command-hint` का अर्थ है कि `activation.onCommands` मेल खाता है, जबकि `manifest-command-alias` का अर्थ है कि प्लानर ने इसके बजाय `commandAliases` स्वामित्व का उपयोग किया। ये कारण लेबल होस्ट डायग्नोस्टिक्स और परीक्षणों के लिए हैं; Plugin लेखकों को उस मेटाडेटा की घोषणा जारी रखनी चाहिए जो स्वामित्व का सर्वोत्तम वर्णन करता है।
 
 ## qaRunners संदर्भ
 
-`qaRunners` का उपयोग तब करें जब कोई Plugin साझा
-`openclaw qa` root के नीचे एक या अधिक ट्रांसपोर्ट रनर योगदान करता हो। इस मेटाडेटा को सस्ता और स्थिर रखें; Plugin
-रनटाइम अभी भी हल्के
-`runtime-api.ts` सतह के माध्यम से वास्तविक CLI पंजीकरण का स्वामी है जो `qaRunnerCliRegistrations` निर्यात करती है।
+जब कोई Plugin साझा `openclaw qa` रूट के अंतर्गत एक या अधिक ट्रांसपोर्ट रनर प्रदान करता है, तब `qaRunners` का उपयोग करें। इस मेटाडेटा को सस्ता और स्थिर रखें; Plugin
+रनटाइम अब भी एक हल्की
+`runtime-api.ts` सतह के माध्यम से वास्तविक CLI पंजीकरण का स्वामी होता है, जो मेल खाने वाले `qaRunnerCliRegistrations` निर्यात करती है। एक
+वैकल्पिक `adapterFactory` पंजीकृत कमांड के रनर को बदले बिना
+ट्रांसपोर्ट को साझा QA परिदृश्यों के लिए उपलब्ध कराता है।
 
 ```json
 {
   "qaRunners": [
     {
       "commandName": "matrix",
-      "description": "Run the Docker-backed Matrix live QA lane against a disposable homeserver"
+      "description": "डिस्पोज़ेबल होमसर्वर के विरुद्ध Docker-समर्थित Matrix लाइव QA लेन चलाएँ"
     }
   ]
 }
 ```
 
-| फ़ील्ड        | आवश्यक | प्रकार   | इसका अर्थ                                                        |
+| फ़ील्ड         | आवश्यक | प्रकार     | इसका अर्थ                                                      |
 | ------------- | -------- | -------- | ------------------------------------------------------------------ |
-| `commandName` | हाँ      | `string` | `openclaw qa` के नीचे माउंट किया गया उपकमांड, उदाहरण के लिए `matrix`। |
-| `description` | नहीं     | `string` | साझा होस्ट को स्टब कमांड की आवश्यकता होने पर उपयोग किया जाने वाला फ़ॉलबैक सहायता पाठ। |
+| `commandName` | हाँ      | `string` | `openclaw qa` के अंतर्गत माउंट किया गया सबकमांड, उदाहरण के लिए `matrix`।    |
+| `description` | नहीं       | `string` | साझा होस्ट को स्टब कमांड की आवश्यकता होने पर उपयोग किया जाने वाला फ़ॉलबैक सहायता टेक्स्ट। |
+
+`adapterFactory` आईडी का `commandName` से मेल खाना आवश्यक है। मैनिफ़ेस्ट में अनुपस्थित
+कमांड के लिए पंजीकरण निर्यात न करें।
 
 ## setup संदर्भ
 
@@ -511,7 +538,7 @@ Plugin स्टार्टअप पर निष्क्रिय हो औ
             "fileEnvVar": "OPENAI_CREDENTIALS_FILE",
             "requiresAllEnv": ["OPENAI_PROJECT"],
             "credentialMarker": "openai-local-credentials",
-            "source": "openai local credentials"
+            "source": "openai स्थानीय क्रेडेंशियल"
           }
         ]
       }
@@ -523,90 +550,64 @@ Plugin स्टार्टअप पर निष्क्रिय हो औ
 }
 ```
 
-शीर्ष-स्तरीय `cliBackends` वैध रहता है और CLI अनुमान
-बैकएंड का वर्णन करना जारी रखता है। `setup.cliBackends` उन
-कंट्रोल-प्लेन/setup फ़्लो के लिए सेटअप-विशिष्ट वर्णनकर्ता सतह है जिन्हें केवल-मेटाडेटा रहना चाहिए।
+शीर्ष-स्तरीय `cliBackends` वैध रहता है और CLI अनुमान बैकएंड का वर्णन करना जारी रखता है। `setup.cliBackends` कंट्रोल-प्लेन/सेटअप प्रवाहों के लिए सेटअप-विशिष्ट डिस्क्रिप्टर सतह है, जिसे केवल-मेटाडेटा रहना चाहिए।
 
-मौजूद होने पर, `setup.providers` और `setup.cliBackends` सेटअप खोज के लिए
-पसंदीदा वर्णनकर्ता-प्रथम लुकअप सतह हैं। यदि वर्णनकर्ता केवल उम्मीदवार
-Plugin को सीमित करता है और सेटअप को अभी भी अधिक समृद्ध सेटअप-समय रनटाइम
-हुक की आवश्यकता है, तो `requiresRuntime: true` सेट करें और फ़ॉलबैक
-निष्पादन पथ के रूप में `setup-api` को बनाए रखें।
+मौजूद होने पर, `setup.providers` और `setup.cliBackends` सेटअप खोज के लिए पसंदीदा डिस्क्रिप्टर-प्रथम लुकअप सतह हैं। यदि डिस्क्रिप्टर केवल उम्मीदवार Plugin को सीमित करता है और सेटअप को अब भी अधिक समृद्ध सेटअप-समय रनटाइम हुक की आवश्यकता है, तो `requiresRuntime: true` सेट करें और फ़ॉलबैक निष्पादन पथ के रूप में `setup-api` को बनाए रखें।
 
-OpenClaw सामान्य प्रदाता प्रमाणीकरण और पर्यावरण-चर लुकअप में
-`setup.providers[].envVars` भी शामिल करता है। `providerAuthEnvVars` अवमूल्यन
-विंडो के दौरान संगतता अडैप्टर के माध्यम से समर्थित रहता है, लेकिन जो गैर-बंडल Plugins अभी भी इसका उपयोग करते हैं
-उन्हें मैनिफ़ेस्ट डायग्नोस्टिक मिलता है। नए Plugins को सेटअप/स्थिति पर्यावरण मेटाडेटा
-`setup.providers[].envVars` पर रखना चाहिए।
+OpenClaw सामान्य प्रोवाइडर प्रमाणीकरण और एन्वायरनमेंट-वेरिएबल लुकअप में `setup.providers[].envVars` को शामिल करता है। सेटअप और स्थिति का एन्वायरनमेंट मेटाडेटा वहाँ रखें।
 
-जब कोई सेटअप प्रविष्टि उपलब्ध न हो, या जब `setup.requiresRuntime: false`
-सेटअप रनटाइम को अनावश्यक घोषित करता हो, तब OpenClaw `setup.providers[].authMethods`
-से सरल सेटअप विकल्प भी निकाल सकता है। स्पष्ट `providerAuthChoices` प्रविष्टियां
-कस्टम लेबल, CLI फ़्लैग, ऑनबोर्डिंग स्कोप, और सहायक मेटाडेटा के लिए पसंदीदा रहती हैं।
+जब किसी बिलिंग या संगठन-स्तरीय क्रेडेंशियल को अनुमान क्रेडेंशियल बने बिना `resolveUsageAuth` सक्रिय करना हो, तब `providerUsageAuthEnvVars` का उपयोग करें। ये नाम वर्कस्पेस dotenv ब्लॉकिंग, ACP चाइल्ड-प्रोसेस स्ट्रिपिंग, सैंडबॉक्स सीक्रेट फ़िल्टरिंग और व्यापक सीक्रेट स्क्रबिंग में जुड़ते हैं। प्रोवाइडर रनटाइम अब भी `resolveUsageAuth` के भीतर मान को पढ़ता और वर्गीकृत करता है।
 
-`requiresRuntime: false` केवल तब सेट करें जब वे वर्णनकर्ता सेटअप सतह के लिए
-पर्याप्त हों। OpenClaw स्पष्ट `false` को केवल-वर्णनकर्ता अनुबंध मानता है
-और सेटअप लुकअप के लिए `setup-api` या `openclaw.setupEntry` निष्पादित नहीं करेगा। यदि
-केवल-वर्णनकर्ता Plugin फिर भी उन सेटअप रनटाइम प्रविष्टियों में से एक भेजता है,
-तो OpenClaw एक योगात्मक डायग्नोस्टिक रिपोर्ट करता है और उसे अनदेखा करना जारी रखता है। छोड़ा गया
-`requiresRuntime` विरासत फ़ॉलबैक व्यवहार बनाए रखता है ताकि जिन मौजूदा Plugins ने
-फ़्लैग के बिना वर्णनकर्ता जोड़े थे, वे टूटें नहीं।
+जब कोई सेटअप प्रविष्टि उपलब्ध न हो, या जब `setup.requiresRuntime: false` यह घोषित करे कि सेटअप रनटाइम अनावश्यक है, तब OpenClaw `setup.providers[].authMethods` से सरल सेटअप विकल्प भी प्राप्त कर सकता है। कस्टम लेबल, CLI फ़्लैग, ऑनबोर्डिंग दायरे और असिस्टेंट मेटाडेटा के लिए स्पष्ट `providerAuthChoices` प्रविष्टियों को प्राथमिकता मिलती है।
 
-क्योंकि सेटअप लुकअप Plugin-स्वामित्व वाला `setup-api` कोड निष्पादित कर सकता है, सामान्यीकृत
-`setup.providers[].id` और `setup.cliBackends[]` मान खोजे गए Plugins में
-अद्वितीय रहने चाहिए। अस्पष्ट स्वामित्व खोज क्रम से
-विजेता चुनने के बजाय बंद होकर विफल होता है।
+`requiresRuntime: false` केवल तभी सेट करें, जब वे डिस्क्रिप्टर सेटअप सतह के लिए पर्याप्त हों। OpenClaw स्पष्ट `false` को केवल-डिस्क्रिप्टर अनुबंध मानता है और सेटअप लुकअप के लिए `setup-api` या `openclaw.setupEntry` निष्पादित नहीं करेगा। यदि कोई केवल-डिस्क्रिप्टर Plugin फिर भी उन सेटअप रनटाइम प्रविष्टियों में से किसी एक को शिप करता है, तो OpenClaw एक योगात्मक डायग्नोस्टिक रिपोर्ट करता है और उसे अनदेखा करना जारी रखता है। `requiresRuntime` को छोड़ देने पर पुराना फ़ॉलबैक व्यवहार बना रहता है, ताकि फ़्लैग के बिना डिस्क्रिप्टर जोड़ने वाले मौजूदा Plugin न टूटें।
 
-जब सेटअप रनटाइम निष्पादित होता है, सेटअप रजिस्ट्री डायग्नोस्टिक्स वर्णनकर्ता
-बहाव रिपोर्ट करते हैं यदि `setup-api` कोई ऐसा प्रदाता या CLI बैकएंड पंजीकृत करता है जिसे मैनिफ़ेस्ट
-वर्णनकर्ता घोषित नहीं करते, या यदि किसी वर्णनकर्ता का मेल खाता रनटाइम
-पंजीकरण नहीं है। ये डायग्नोस्टिक्स योगात्मक हैं और विरासत Plugins को अस्वीकार नहीं करते।
+चूँकि सेटअप लुकअप Plugin-स्वामित्व वाला `setup-api` कोड निष्पादित कर सकता है, सामान्यीकृत `setup.providers[].id` और `setup.cliBackends[]` मानों को खोजे गए सभी Plugin में अद्वितीय रहना आवश्यक है। अस्पष्ट स्वामित्व खोज क्रम से विजेता चुनने के बजाय बंद होकर विफल होता है।
+
+जब सेटअप रनटाइम निष्पादित होता है, तब सेटअप रजिस्ट्री डायग्नोस्टिक्स डिस्क्रिप्टर विचलन की रिपोर्ट करते हैं, यदि `setup-api` ऐसे प्रोवाइडर या CLI बैकएंड को पंजीकृत करता है जिसे मैनिफ़ेस्ट डिस्क्रिप्टर घोषित नहीं करते, या यदि किसी डिस्क्रिप्टर के लिए कोई मेल खाता रनटाइम पंजीकरण नहीं है। ये डायग्नोस्टिक्स योगात्मक हैं और पुराने Plugin को अस्वीकार नहीं करते।
 
 ### setup.providers संदर्भ
 
-| फ़ील्ड         | आवश्यक | प्रकार     | इसका अर्थ                                                                                         |
+| फ़ील्ड          | आवश्यक | प्रकार       | इसका अर्थ                                                                                    |
 | -------------- | -------- | ---------- | ------------------------------------------------------------------------------------------------ |
-| `id`           | हाँ      | `string`   | सेटअप या ऑनबोर्डिंग के दौरान उजागर किया गया प्रदाता id। सामान्यीकृत ids को वैश्विक रूप से अद्वितीय रखें। |
-| `authMethods`  | नहीं     | `string[]` | वे सेटअप/प्रमाणीकरण विधि ids जिन्हें यह प्रदाता पूर्ण रनटाइम लोड किए बिना समर्थन करता है।              |
-| `envVars`      | नहीं     | `string[]` | वे पर्यावरण चर जिन्हें सामान्य सेटअप/स्थिति सतहें Plugin रनटाइम लोड होने से पहले जांच सकती हैं।         |
-| `authEvidence` | नहीं     | `object[]` | उन प्रदाताओं के लिए सस्ती स्थानीय प्रमाणीकरण साक्ष्य जांच जो गैर-गुप्त मार्कर से प्रमाणीकरण कर सकते हैं। |
+| `id`           | हाँ      | `string`   | सेटअप या ऑनबोर्डिंग के दौरान प्रदर्शित प्रोवाइडर आईडी। सामान्यीकृत आईडी को वैश्विक रूप से अद्वितीय रखें।             |
+| `authMethods`  | नहीं       | `string[]` | वे सेटअप/प्रमाणीकरण विधि आईडी, जिनका यह प्रोवाइडर पूर्ण रनटाइम लोड किए बिना समर्थन करता है।                       |
+| `envVars`      | नहीं       | `string[]` | वे एन्वायरनमेंट वेरिएबल, जिन्हें सामान्य सेटअप/स्थिति सतहें Plugin रनटाइम लोड होने से पहले जाँच सकती हैं।               |
+| `authEvidence` | नहीं       | `object[]` | उन प्रोवाइडर के लिए सस्ती स्थानीय प्रमाणीकरण प्रमाण जाँच, जो गैर-सीक्रेट मार्कर के माध्यम से प्रमाणित कर सकते हैं। |
 
-`authEvidence` प्रदाता-स्वामित्व वाले स्थानीय क्रेडेंशियल मार्कर के लिए है जिन्हें
-रनटाइम कोड लोड किए बिना सत्यापित किया जा सकता है। ये जांचें सस्ती और स्थानीय रहनी चाहिए:
-कोई नेटवर्क कॉल नहीं, कोई कीचेन या सीक्रेट-मैनेजर रीड नहीं, कोई शेल कमांड नहीं, और कोई
-प्रदाता API जांच नहीं।
+`authEvidence` प्रोवाइडर-स्वामित्व वाले स्थानीय क्रेडेंशियल मार्कर के लिए है, जिन्हें रनटाइम कोड लोड किए बिना सत्यापित किया जा सकता है। इन जाँचों को सस्ता और स्थानीय रहना आवश्यक है: कोई नेटवर्क कॉल नहीं, कोई कीचेन या सीक्रेट-मैनेजर रीड नहीं, कोई शेल कमांड नहीं और कोई प्रोवाइडर API प्रोब नहीं।
 
-समर्थित साक्ष्य प्रविष्टियां:
+समर्थित प्रमाण प्रविष्टियाँ:
 
-| फ़ील्ड             | आवश्यक | प्रकार     | इसका अर्थ                                                                                                  |
+| फ़ील्ड              | आवश्यक | प्रकार       | इसका अर्थ                                                                                                  |
 | ------------------ | -------- | ---------- | -------------------------------------------------------------------------------------------------------------- |
 | `type`             | हाँ      | `string`   | वर्तमान में `local-file-with-env`।                                                                               |
-| `fileEnvVar`       | नहीं     | `string`   | स्पष्ट क्रेडेंशियल फ़ाइल पथ रखने वाला पर्यावरण चर।                                                           |
-| `fallbackPaths`    | नहीं     | `string[]` | जब `fileEnvVar` अनुपस्थित या खाली हो, तब जांचे जाने वाले स्थानीय क्रेडेंशियल फ़ाइल पथ। `${HOME}` और `${APPDATA}` समर्थित हैं। |
-| `requiresAnyEnv`   | नहीं     | `string[]` | साक्ष्य वैध होने से पहले सूचीबद्ध पर्यावरण चरों में से कम से कम एक गैर-खाली होना चाहिए।                         |
-| `requiresAllEnv`   | नहीं     | `string[]` | साक्ष्य वैध होने से पहले प्रत्येक सूचीबद्ध पर्यावरण चर गैर-खाली होना चाहिए।                                   |
-| `credentialMarker` | हाँ      | `string`   | साक्ष्य मौजूद होने पर लौटाया जाने वाला गैर-गुप्त मार्कर।                                                       |
-| `source`           | नहीं     | `string`   | प्रमाणीकरण/स्थिति आउटपुट के लिए उपयोगकर्ता-दर्शित स्रोत लेबल।                                                |
+| `fileEnvVar`       | नहीं       | `string`   | स्पष्ट क्रेडेंशियल फ़ाइल पथ वाला एन्वायरनमेंट वेरिएबल।                                                           |
+| `fallbackPaths`    | नहीं       | `string[]` | `fileEnvVar` के अनुपस्थित या रिक्त होने पर जाँचे जाने वाले स्थानीय क्रेडेंशियल फ़ाइल पथ। `${HOME}` और `${APPDATA}` का समर्थन करता है। |
+| `requiresAnyEnv`   | नहीं       | `string[]` | प्रमाण के वैध होने से पहले सूचीबद्ध एन्वायरनमेंट वेरिएबल में से कम-से-कम एक गैर-रिक्त होना आवश्यक है।                                    |
+| `requiresAllEnv`   | नहीं       | `string[]` | प्रमाण के वैध होने से पहले प्रत्येक सूचीबद्ध एन्वायरनमेंट वेरिएबल का गैर-रिक्त होना आवश्यक है।                                           |
+| `credentialMarker` | हाँ      | `string`   | प्रमाण मौजूद होने पर लौटाया गया गैर-सीक्रेट मार्कर।                                                       |
+| `source`           | नहीं       | `string`   | प्रमाणीकरण/स्थिति आउटपुट के लिए उपयोगकर्ता-दृश्य स्रोत लेबल।                                                               |
 
 ### setup फ़ील्ड
 
-| फ़ील्ड             | आवश्यक | प्रकार     | इसका अर्थ                                                                                       |
+| फ़ील्ड              | आवश्यक | प्रकार       | इसका अर्थ                                                                                       |
 | ------------------ | -------- | ---------- | --------------------------------------------------------------------------------------------------- |
-| `providers`        | नहीं     | `object[]` | सेटअप और ऑनबोर्डिंग के दौरान उजागर किए गए प्रदाता सेटअप वर्णनकर्ता।                                  |
-| `cliBackends`      | नहीं     | `string[]` | वर्णनकर्ता-प्रथम सेटअप लुकअप के लिए उपयोग किए गए सेटअप-समय बैकएंड ids। सामान्यीकृत ids को वैश्विक रूप से अद्वितीय रखें। |
-| `configMigrations` | नहीं     | `string[]` | इस Plugin की सेटअप सतह के स्वामित्व वाले कॉन्फ़िग माइग्रेशन ids।                                      |
-| `requiresRuntime`  | नहीं     | `boolean`  | क्या वर्णनकर्ता लुकअप के बाद सेटअप को अब भी `setup-api` निष्पादन की आवश्यकता है।                      |
+| `providers`        | नहीं       | `object[]` | सेटअप और ऑनबोर्डिंग के दौरान उपलब्ध कराए गए प्रदाता सेटअप विवरणक।                                     |
+| `cliBackends`      | नहीं       | `string[]` | विवरणक-प्रथम सेटअप लुकअप के लिए उपयोग की जाने वाली सेटअप-समय बैकएंड आईडी। सामान्यीकृत आईडी को वैश्विक रूप से अद्वितीय रखें। |
+| `configMigrations` | नहीं       | `string[]` | इस Plugin की सेटअप सतह के स्वामित्व वाली कॉन्फ़िग माइग्रेशन आईडी।                                          |
+| `requiresRuntime`  | नहीं       | `boolean`  | क्या विवरणक लुकअप के बाद भी सेटअप को `setup-api` निष्पादन की आवश्यकता है।                            |
 
 ## uiHints संदर्भ
 
-`uiHints` कॉन्फ़िग फ़ील्ड नामों से छोटे रेंडरिंग संकेतों तक का मैप है।
+`uiHints` कॉन्फ़िग फ़ील्ड नामों से छोटे रेंडरिंग संकेतों तक का एक मैप है। नेस्टेड कॉन्फ़िग फ़ील्ड के लिए कुंजियों में डॉट का उपयोग किया जा सकता है, लेकिन कोई भी पथ खंड `__proto__`, `constructor`, या `prototype` नहीं हो सकता; सेटअप इन नामों को अस्वीकार करता है।
 
 ```json
 {
   "uiHints": {
     "apiKey": {
-      "label": "API key",
-      "help": "Used for OpenRouter requests",
+      "label": "API कुंजी",
+      "help": "OpenRouter अनुरोधों के लिए उपयोग किया जाता है",
       "placeholder": "sk-or-v1-...",
       "sensitive": true
     }
@@ -616,19 +617,19 @@ OpenClaw सामान्य प्रदाता प्रमाणीकर
 
 प्रत्येक फ़ील्ड संकेत में ये शामिल हो सकते हैं:
 
-| फ़ील्ड        | प्रकार     | इसका अर्थ                         |
-| ------------- | ---------- | --------------------------------------- |
-| `label`       | `string`   | उपयोगकर्ता-दर्शित फ़ील्ड लेबल।          |
-| `help`        | `string`   | संक्षिप्त सहायक पाठ।                    |
-| `tags`        | `string[]` | वैकल्पिक UI टैग।                        |
-| `advanced`    | `boolean`  | फ़ील्ड को उन्नत के रूप में चिह्नित करता है। |
-| `sensitive`   | `boolean`  | फ़ील्ड को गुप्त या संवेदनशील के रूप में चिह्नित करता है। |
-| `placeholder` | `string`   | फ़ॉर्म इनपुट के लिए प्लेसहोल्डर पाठ।     |
+| फ़ील्ड          | प्रकार             | इसका अर्थ                                                                                                     |
+| -------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `label`        | `string`         | उपयोगकर्ता को दिखाई देने वाला फ़ील्ड लेबल।                                                                                          |
+| `help`         | `string`         | संक्षिप्त सहायक टेक्स्ट।                                                                                                |
+| `tags`         | `string[]`       | वैकल्पिक UI टैग।                                                                                                 |
+| `advanced`     | `boolean`        | फ़ील्ड को उन्नत के रूप में चिह्नित करता है।                                                                                      |
+| `sensitive`    | `boolean`        | फ़ील्ड को गुप्त या संवेदनशील के रूप में चिह्नित करता है।                                                                           |
+| `placeholder`  | `string`         | फ़ॉर्म इनपुट के लिए प्लेसहोल्डर टेक्स्ट।                                                                                 |
+| `presentation` | `"phone-number"` | पार्स किए जा सकने वाले अंतरराष्ट्रीय (`+...`) मानों के लिए केवल-प्रदर्शन स्थानीयकृत फ़ोन प्रारूपण; मूल मान अपरिवर्तित रहते हैं। |
 
 ## contracts संदर्भ
 
-`contracts` का उपयोग केवल स्थिर क्षमता स्वामित्व मेटाडेटा के लिए करें जिसे OpenClaw
-Plugin रनटाइम आयात किए बिना पढ़ सकता है।
+`contracts` का उपयोग केवल स्थिर क्षमता-स्वामित्व मेटाडेटा के लिए करें, जिसे OpenClaw Plugin रनटाइम आयात किए बिना पढ़ सके।
 
 ```json
 {
@@ -644,8 +645,13 @@ Plugin रनटाइम आयात किए बिना पढ़ सक�
     "mediaUnderstandingProviders": ["openai"],
     "imageGenerationProviders": ["openai"],
     "videoGenerationProviders": ["qwen"],
+    "musicGenerationProviders": ["stability-audio"],
+    "documentExtractors": ["example-docs"],
+    "webContentExtractors": ["firecrawl"],
     "webFetchProviders": ["firecrawl"],
     "webSearchProviders": ["gemini"],
+    "workerProviders": ["example-worker"],
+    "usageProviders": ["acme-ai"],
     "migrationProviders": ["hermes"],
     "gatewayMethodDispatch": ["authenticated-request"],
     "tools": ["firecrawl_search", "firecrawl_scrape"]
@@ -655,67 +661,101 @@ Plugin रनटाइम आयात किए बिना पढ़ सक�
 
 प्रत्येक सूची वैकल्पिक है:
 
-| फ़ील्ड                           | प्रकार     | इसका अर्थ                                                                                                                        |
+| फ़ील्ड                            | प्रकार       | इसका अर्थ                                                                                                                        |
 | -------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `embeddedExtensionFactories`     | `string[]` | Codex app-server extension factory ids, वर्तमान में `codex-app-server`।                                                                |
-| `agentToolResultMiddleware`      | `string[]` | Runtime ids जिनके लिए यह Plugin tool-result middleware पंजीकृत कर सकता है।                                                                     |
-| `trustedToolPolicies`            | `string[]` | Plugin-स्थानीय विश्वसनीय pre-tool policy ids जिन्हें इंस्टॉल किया गया Plugin पंजीकृत कर सकता है। बंडल किए गए Plugins इस फ़ील्ड के बिना policies पंजीकृत कर सकते हैं। |
-| `externalAuthProviders`          | `string[]` | Provider ids जिनके external auth profile hook का स्वामी यह Plugin है।                                                                      |
-| `embeddingProviders`             | `string[]` | सामान्य embedding provider ids जिनका स्वामी यह Plugin पुन: प्रयोज्य vector embedding उपयोग, memory सहित, के लिए है।                                 |
-| `speechProviders`                | `string[]` | Speech provider ids जिनका स्वामी यह Plugin है।                                                                                                |
-| `realtimeTranscriptionProviders` | `string[]` | Realtime-transcription provider ids जिनका स्वामी यह Plugin है।                                                                                |
-| `realtimeVoiceProviders`         | `string[]` | Realtime-voice provider ids जिनका स्वामी यह Plugin है।                                                                                        |
-| `memoryEmbeddingProviders`       | `string[]` | Deprecated memory-विशिष्ट embedding provider ids जिनका स्वामी यह Plugin है।                                                                  |
-| `mediaUnderstandingProviders`    | `string[]` | Media-understanding provider ids जिनका स्वामी यह Plugin है।                                                                                   |
-| `transcriptSourceProviders`      | `string[]` | Transcript source provider ids जिनका स्वामी यह Plugin है।                                                                                     |
-| `imageGenerationProviders`       | `string[]` | Image-generation provider ids जिनका स्वामी यह Plugin है।                                                                                      |
-| `videoGenerationProviders`       | `string[]` | Video-generation provider ids जिनका स्वामी यह Plugin है।                                                                                      |
-| `webFetchProviders`              | `string[]` | Web-fetch provider ids जिनका स्वामी यह Plugin है।                                                                                             |
-| `webSearchProviders`             | `string[]` | Web-search provider ids जिनका स्वामी यह Plugin है।                                                                                            |
-| `migrationProviders`             | `string[]` | `openclaw migrate` के लिए import provider ids जिनका स्वामी यह Plugin है।                                                                         |
-| `gatewayMethodDispatch`          | `string[]` | प्रमाणित Plugin HTTP routes के लिए आरक्षित entitlement, जो Gateway methods को process के भीतर dispatch करते हैं।                                  |
-| `tools`                          | `string[]` | Agent tool names जिनका स्वामी यह Plugin है।                                                                                                   |
+| `embeddedExtensionFactories`     | `string[]` | Codex ऐप-सर्वर एक्सटेंशन फ़ैक्टरी आईडी, वर्तमान में `codex-app-server`।                                                                |
+| `agentToolResultMiddleware`      | `string[]` | वे रनटाइम आईडी जिनके लिए यह Plugin टूल-परिणाम मिडलवेयर पंजीकृत कर सकता है।                                                                     |
+| `trustedToolPolicies`            | `string[]` | Plugin-स्थानीय विश्वसनीय प्री-टूल नीति आईडी, जिन्हें कोई इंस्टॉल किया गया Plugin पंजीकृत कर सकता है। बंडल किए गए Plugin इस फ़ील्ड के बिना नीतियाँ पंजीकृत कर सकते हैं। |
+| `externalAuthProviders`          | `string[]` | वे प्रदाता आईडी जिनके बाहरी प्रमाणीकरण प्रोफ़ाइल हुक का स्वामित्व इस Plugin के पास है।                                                                      |
+| `embeddingProviders`             | `string[]` | पुनः उपयोग योग्य वेक्टर एम्बेडिंग उपयोग, जिसमें मेमोरी भी शामिल है, के लिए इस Plugin के स्वामित्व वाली सामान्य एम्बेडिंग प्रदाता आईडी।                                 |
+| `speechProviders`                | `string[]` | इस Plugin के स्वामित्व वाली वाक् प्रदाता आईडी।                                                                                                |
+| `realtimeTranscriptionProviders` | `string[]` | इस Plugin के स्वामित्व वाली रीयलटाइम-ट्रांसक्रिप्शन प्रदाता आईडी।                                                                                |
+| `realtimeVoiceProviders`         | `string[]` | इस Plugin के स्वामित्व वाली रीयलटाइम-वॉइस प्रदाता आईडी।                                                                                        |
+| `memoryEmbeddingProviders`       | `string[]` | इस Plugin के स्वामित्व वाली अप्रचलित मेमोरी-विशिष्ट एम्बेडिंग प्रदाता आईडी।                                                                  |
+| `mediaUnderstandingProviders`    | `string[]` | इस Plugin के स्वामित्व वाली मीडिया-समझ प्रदाता आईडी।                                                                                   |
+| `transcriptSourceProviders`      | `string[]` | इस Plugin के स्वामित्व वाली ट्रांसक्रिप्ट स्रोत प्रदाता आईडी।                                                                                     |
+| `documentExtractors`             | `string[]` | इस Plugin के स्वामित्व वाली दस्तावेज़ (उदाहरण के लिए PDF) निष्कर्षक प्रदाता आईडी।                                                                  |
+| `imageGenerationProviders`       | `string[]` | इस Plugin के स्वामित्व वाली छवि-जनरेशन प्रदाता आईडी।                                                                                      |
+| `videoGenerationProviders`       | `string[]` | इस Plugin के स्वामित्व वाली वीडियो-जनरेशन प्रदाता आईडी।                                                                                      |
+| `musicGenerationProviders`       | `string[]` | इस Plugin के स्वामित्व वाली संगीत-जनरेशन प्रदाता आईडी।                                                                                      |
+| `webContentExtractors`           | `string[]` | इस Plugin के स्वामित्व वाली वेब-पेज सामग्री-निष्कर्षण प्रदाता आईडी।                                                                           |
+| `webFetchProviders`              | `string[]` | इस Plugin के स्वामित्व वाली वेब-फ़ेच प्रदाता आईडी।                                                                                             |
+| `webSearchProviders`             | `string[]` | इस Plugin के स्वामित्व वाली वेब-सर्च प्रदाता आईडी।                                                                                            |
+| `workerProviders`                | `string[]` | प्रावधान और प्रोफ़ाइल-समर्थित लीज़ जीवनचक्र के लिए इस Plugin के स्वामित्व वाली क्लाउड-वर्कर प्रदाता आईडी।                                      |
+| `usageProviders`                 | `string[]` | वे प्रदाता आईडी जिनके उपयोग-प्रमाणीकरण और उपयोग-स्नैपशॉट हुक का स्वामित्व इस Plugin के पास है।                                                             |
+| `migrationProviders`             | `string[]` | `openclaw migrate` के लिए इस Plugin के स्वामित्व वाली आयात प्रदाता आईडी।                                                                         |
+| `gatewayMethodDispatch`          | `string[]` | प्रमाणीकृत Plugin HTTP रूट के लिए आरक्षित अधिकार, जो प्रक्रिया के भीतर Gateway विधियाँ डिस्पैच करते हैं।                                  |
+| `tools`                          | `string[]` | इस Plugin के स्वामित्व वाले एजेंट टूल नाम।                                                                                                   |
 
-`contracts.embeddedExtensionFactories` को बंडल किए गए Codex
-केवल app-server extension factories के लिए बनाए रखा गया है। बंडल किए गए tool-result transforms को
-इसके बजाय `contracts.agentToolResultMiddleware` घोषित करना चाहिए और
-`api.registerAgentToolResultMiddleware(...)` के साथ पंजीकृत करना चाहिए। इंस्टॉल किए गए Plugins
-उसी middleware seam का उपयोग केवल तभी कर सकते हैं जब उसे स्पष्ट रूप से सक्षम किया गया हो और केवल उन runtimes के लिए
-जिन्हें वे `contracts.agentToolResultMiddleware` में घोषित करते हैं।
+`contracts.embeddedExtensionFactories` को केवल बंडल किए गए Codex ऐप-सर्वर एक्सटेंशन फ़ैक्टरी के लिए रखा गया है। इसके बजाय बंडल किए गए टूल-परिणाम रूपांतरणों को `contracts.agentToolResultMiddleware` घोषित करना और `api.registerAgentToolResultMiddleware(...)` के साथ पंजीकृत करना चाहिए। इंस्टॉल किए गए Plugin केवल स्पष्ट रूप से सक्षम होने पर और केवल उन रनटाइम के लिए समान मिडलवेयर सीम का उपयोग कर सकते हैं, जिन्हें वे `contracts.agentToolResultMiddleware` में घोषित करते हैं।
 
-जिन इंस्टॉल किए गए Plugins को host-trusted pre-tool policy tier की आवश्यकता है, उन्हें
-`contracts.trustedToolPolicies` में प्रत्येक पंजीकृत local id घोषित करनी होगी और स्पष्ट रूप से
-सक्षम होना होगा। बंडल किए गए Plugins मौजूदा trusted-policy path बनाए रखते हैं, लेकिन इंस्टॉल किए गए
-Plugins जिनके policy ids घोषित नहीं हैं, पंजीकरण से पहले अस्वीकार कर दिए जाते हैं। Policy ids
-पंजीकरण करने वाले Plugin के scope में होते हैं, इसलिए दो Plugins दोनों
-`workflow-budget` घोषित और पंजीकृत कर सकते हैं; एक ही Plugin उसी local id को
-दो बार पंजीकृत नहीं कर सकता।
+जिन इंस्टॉल किए गए Plugin को होस्ट-विश्वसनीय प्री-टूल नीति स्तर की आवश्यकता है, उन्हें प्रत्येक पंजीकृत स्थानीय आईडी को `contracts.trustedToolPolicies` में घोषित करना और स्पष्ट रूप से सक्षम होना चाहिए। बंडल किए गए Plugin मौजूदा विश्वसनीय-नीति पथ बनाए रखते हैं, लेकिन अघोषित नीति आईडी वाले इंस्टॉल किए गए Plugin पंजीकरण से पहले अस्वीकार कर दिए जाते हैं। नीति आईडी पंजीकरण करने वाले Plugin के दायरे में होती हैं, इसलिए दो Plugin दोनों `workflow-budget` को घोषित और पंजीकृत कर सकते हैं; कोई एकल Plugin समान स्थानीय आईडी को दो बार पंजीकृत नहीं कर सकता।
 
-Runtime `api.registerTool(...)` registrations को `contracts.tools` से मेल खाना चाहिए।
-Tool discovery इस सूची का उपयोग केवल उन Plugin runtimes को लोड करने के लिए करती है जो
-अनुरोधित tools के स्वामी हो सकते हैं।
+रनटाइम `api.registerTool(...)` पंजीकरणों का `contracts.tools` से मेल खाना आवश्यक है। टूल खोज इस सूची का उपयोग केवल उन Plugin रनटाइम को लोड करने के लिए करती है, जो अनुरोधित टूल के स्वामी हो सकते हैं।
 
-Provider Plugins जो `resolveExternalAuthProfiles` लागू करते हैं, उन्हें
-`contracts.externalAuthProviders` घोषित करना चाहिए; अघोषित external-auth hooks अनदेखे किए जाते हैं।
+`resolveExternalAuthProfiles` लागू करने वाले प्रदाता Plugin को `contracts.externalAuthProviders` घोषित करना चाहिए; अघोषित बाहरी-प्रमाणीकरण हुक अनदेखे किए जाते हैं।
 
-सामान्य embedding providers को `api.registerEmbeddingProvider(...)` के साथ पंजीकृत
-प्रत्येक adapter के लिए `contracts.embeddingProviders` घोषित करना चाहिए। पुन: प्रयोज्य
-vector generation के लिए सामान्य contract का उपयोग करें, जिसमें memory search द्वारा उपयोग किए गए providers शामिल हैं।
-`contracts.memoryEmbeddingProviders` deprecated memory-विशिष्ट compatibility है और
-केवल तब तक बनी रहती है जब तक मौजूदा providers generic embedding provider seam पर migrate नहीं हो जाते।
+`resolveUsageAuth` और `fetchUsageSnapshot` दोनों लागू करने वाले प्रदाता Plugin को प्रत्येक स्वतः खोजी गई प्रदाता आईडी को `contracts.usageProviders` में घोषित करना चाहिए। उपयोग खोज रनटाइम कोड लोड करने से पहले इस अनुबंध को पढ़ती है, फिर केवल घोषित स्वामियों को लोड करने के बाद दोनों हुक सत्यापित करती है।
 
-`contracts.gatewayMethodDispatch` वर्तमान में
-`"authenticated-request"` स्वीकार करता है। यह native Plugin HTTP
-routes के लिए एक API hygiene gate है, जो जानबूझकर Gateway control-plane methods को process के भीतर
-dispatch करते हैं; यह malicious native Plugins के विरुद्ध sandbox नहीं है। इसे केवल कड़ाई से समीक्षा किए गए
-बंडल किए गए/operator surfaces के लिए उपयोग करें जिन्हें पहले से Gateway HTTP auth की आवश्यकता होती है।
+सामान्य एम्बेडिंग प्रदाताओं को `api.registerEmbeddingProvider(...)` के साथ पंजीकृत प्रत्येक अडैप्टर के लिए `contracts.embeddingProviders` घोषित करना चाहिए। मेमोरी खोज द्वारा उपयोग किए जाने वाले प्रदाताओं सहित पुनः उपयोग योग्य वेक्टर जनरेशन के लिए सामान्य अनुबंध का उपयोग करें। `contracts.memoryEmbeddingProviders` अप्रचलित मेमोरी-विशिष्ट संगतता है और केवल तब तक रहता है, जब तक मौजूदा प्रदाता सामान्य एम्बेडिंग प्रदाता सीम पर माइग्रेट नहीं हो जाते।
+
+वर्कर प्रदाताओं को प्रत्येक `api.registerWorkerProvider(...)` आईडी को `contracts.workerProviders` में घोषित करना होगा। कोर `provision` को कॉल करने से पहले स्थायी आशय सहेजता है; प्रदाता बाहरी आवंटन से पहले अपनी सेटिंग सत्यापित करते हैं, और समान ऑपरेशन आईडी वाले दोहराए गए कॉल को समान लीज़ अपनानी होगी। कोर उस सत्यापित सेटिंग स्नैपशॉट को भी सहेजता है और नामित प्रोफ़ाइल बदले या हटाए जाने के बाद भी उसे `leaseId` के साथ `inspect({ leaseId, profile })` और `destroy({ leaseId, profile })` को भेजता है। विनाश आइडेम्पोटेंट है, निरीक्षण बंद `active` / `destroyed` / `unknown` स्थिति यूनियन लौटाता है, और SSH निजी-कुंजी सामग्री को केवल `SecretRef` के माध्यम से संदर्भित किया जाता है। प्रावधान किए गए SSH एंडपॉइंट में विश्वसनीय प्रावधान आउटपुट से एक सार्वजनिक `hostKey` भी ठीक `algorithm base64` के रूप में शामिल होना चाहिए, बिना होस्टनाम या टिप्पणी के, ताकि कोर कनेक्ट होने से पहले होस्ट को पिन कर सके। गतिशील पहचान संदर्भ जारी करने वाले प्रदाता प्रामाणिक `resolveSshIdentity({ leaseId, profile, keyRef })` लागू कर सकते हैं; इसके बिना प्रदाता कोर के सामान्य सीक्रेट रिज़ॉल्वर का उपयोग करते हैं। एक प्रामाणिक `unknown` सक्रिय स्थानीय रिकॉर्ड को अनाथ कर देता है; स्थायी विनाश अनुरोध के बाद यह विघटन की पुष्टि करता है।
+
+`contracts.gatewayMethodDispatch` वर्तमान में `"authenticated-request"` स्वीकार करता है। यह उन नेटिव Plugin HTTP रूटों के लिए एक API स्वच्छता गेट है जो जानबूझकर Gateway कंट्रोल-प्लेन विधियों को इन-प्रोसेस डिस्पैच करते हैं, दुर्भावनापूर्ण नेटिव Plugins के विरुद्ध सैंडबॉक्स नहीं। इसका उपयोग केवल कड़ी समीक्षा वाले बंडल किए गए/ऑपरेटर सरफ़ेसों के लिए करें, जिन्हें पहले से Gateway HTTP प्रमाणीकरण की आवश्यकता होती है। Gateway रूट-वर्क प्रवेश बंद होने पर भी कोई अधिकार-प्राप्त रूट केवल तभी पहुँच योग्य रहता है, जब वह `auth: "gateway"` और रूट-विशिष्ट `gatewayRuntimeScopeSurface: "trusted-operator"` भी घोषित करता है; उसी Plugin के सामान्य सहोदर रूट प्रवेश सीमा के पीछे बने रहते हैं। इससे पूरे Plugin को प्रवेश बायपास दिए बिना निलंबन स्थिति और पुनः आरंभ तक पहुँच बनी रहती है। पार्सिंग और प्रतिक्रिया संरचना को डिस्पैच के बाहर सीमित रखें; महत्वपूर्ण या परिवर्तनकारी कार्य Gateway विधि डिस्पैच से होकर जाना चाहिए, जो प्रवेश और स्कोप प्रवर्तन का स्वामी है।
+
+## configContracts संदर्भ
+
+मैनिफ़ेस्ट-स्वामित्व वाले उस कॉन्फ़िग व्यवहार के लिए `configContracts` का उपयोग करें, जिसकी सामान्य कोर सहायकों को Plugin रनटाइम आयात किए बिना आवश्यकता होती है: खतरनाक फ़्लैग की पहचान, SecretRef माइग्रेशन लक्ष्य और पुराने कॉन्फ़िग-पथ का संकुचन।
+
+```json
+{
+  "configContracts": {
+    "compatibilityMigrationPaths": ["legacyProvider"],
+    "compatibilityRuntimePaths": ["legacyProvider.webhook"],
+    "dangerousFlags": [
+      {
+        "path": "accounts.*.allowUnverifiedSenders",
+        "equals": true
+      }
+    ],
+    "secretInputs": {
+      "bundledDefaultEnabled": false,
+      "paths": [
+        {
+          "path": "routes.*.secret",
+          "expected": "string",
+          "ownerKind": "route"
+        }
+      ]
+    }
+  }
+}
+```
+
+| फ़ील्ड                         | आवश्यक | प्रकार       | इसका अर्थ                                                                                                                                                                                                                          |
+| ----------------------------- | -------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `compatibilityMigrationPaths` | नहीं       | `string[]` | रूट-सापेक्ष कॉन्फ़िग पथ, जो संकेत देते हैं कि इस Plugin के सेटअप-समय संगतता माइग्रेशन लागू हो सकते हैं। जब कॉन्फ़िग में Plugin का कोई संदर्भ न हो, तो सामान्य रनटाइम कॉन्फ़िग रीड को प्रत्येक Plugin सेटअप सरफ़ेस छोड़ने देता है।                 |
+| `compatibilityRuntimePaths`   | नहीं       | `string[]` | रूट-सापेक्ष संगतता पथ, जिन्हें यह Plugin, Plugin कोड पूरी तरह सक्रिय होने से पहले रनटाइम के दौरान संभाल सकता है। इसका उपयोग उन पुराने सरफ़ेसों के लिए करें, जिन्हें प्रत्येक संगत Plugin रनटाइम आयात किए बिना बंडल किए गए प्रत्याशी समूहों को सीमित करना चाहिए। |
+| `dangerousFlags`              | नहीं       | `object[]` | वे कॉन्फ़िग लिटरल, जिन्हें सक्षम होने पर `openclaw doctor` को असुरक्षित या खतरनाक के रूप में चिह्नित करना चाहिए। नीचे देखें।                                                                                                                                   |
+| `secretInputs`                | नहीं       | `object`   | SecretRef माइग्रेशन, ऑडिट, स्टार्टअप मैटेरियलाइज़ेशन और वैकल्पिक रनटाइम स्वामी पृथक्करण के लिए `plugins.entries.<id>.config` के अंतर्गत कॉन्फ़िग पथ। नीचे देखें।                                                                             |
+
+प्रत्येक `dangerousFlags` प्रविष्टि इसका समर्थन करती है:
+
+| फ़ील्ड    | आवश्यक | प्रकार                                  | इसका अर्थ                                                                                                       |
+| -------- | -------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `path`   | हाँ      | `string`                              | `plugins.entries.<id>.config` के सापेक्ष डॉट से अलग किया गया कॉन्फ़िग पथ। मैप/ऐरे खंडों के लिए `*` वाइल्डकार्ड का समर्थन करता है। |
+| `equals` | हाँ      | `string \| number \| boolean \| null` | सटीक लिटरल, जो इस कॉन्फ़िग मान को खतरनाक के रूप में चिह्नित करता है।                                                            |
+
+`secretInputs` इसका समर्थन करता है:
+
+| फ़ील्ड                   | आवश्यक | प्रकार       | इसका अर्थ                                                                                                                                                                                                                                                                                                                                              |
+| ----------------------- | -------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bundledDefaultEnabled` | नहीं       | `boolean`  | यह तय करते समय कि यह SecretRef सरफ़ेस सक्रिय है या नहीं, बंडल किए गए Plugin की डिफ़ॉल्ट सक्षमता को ओवरराइड करें। इसका उपयोग तब करें, जब Plugin बंडल किया गया हो, लेकिन कॉन्फ़िग में स्पष्ट रूप से सक्षम किए जाने तक सरफ़ेस निष्क्रिय रहना चाहिए।                                                                                                                                            |
+| `paths`                 | हाँ      | `object[]` | सीक्रेट-रूपी कॉन्फ़िग पथ, प्रत्येक में `path` (डॉट से अलग किया गया, `plugins.entries.<id>.config` के सापेक्ष, `*` वाइल्डकार्ड समर्थित), वैकल्पिक `expected` (वर्तमान में केवल `"string"`) और वैकल्पिक `ownerKind` (वर्तमान में केवल `"route"`)। रिज़ॉल्यूशन विफल होने पर घोषित स्वामी केवल उसी सटीक मेल खाने वाले पथ को पृथक करता है; उसका स्वामी आईडी पूर्ण कॉन्फ़िग पथ होता है। |
 
 ## mediaUnderstandingProviderMetadata संदर्भ
 
-`mediaUnderstandingProviderMetadata` का उपयोग तब करें जब किसी media-understanding provider के पास
-default models, auto-auth fallback priority, या native document support हो जिसकी
-generic core helpers को runtime loads से पहले आवश्यकता होती है। Keys को
-`contracts.mediaUnderstandingProviders` में भी घोषित किया जाना चाहिए।
+जब किसी मीडिया-समझ प्रदाता के पास डिफ़ॉल्ट मॉडल, स्वचालित प्रमाणीकरण फ़ॉलबैक प्राथमिकता या नेटिव दस्तावेज़ समर्थन हो, जिसकी सामान्य कोर सहायकों को रनटाइम लोड होने से पहले आवश्यकता होती है, तब `mediaUnderstandingProviderMetadata` का उपयोग करें। कुंजियाँ `contracts.mediaUnderstandingProviders` में भी घोषित होनी चाहिए।
 
 ```json
 {
@@ -732,49 +772,42 @@ generic core helpers को runtime loads से पहले आवश्यक
       "autoPriority": {
         "image": 40
       },
-      "nativeDocumentInputs": ["pdf"]
+      "nativeDocumentInputs": ["pdf"],
+      "documentModels": {
+        "pdf": {
+          "textExtraction": "example-doc-text-latest",
+          "image": "example-doc-vision-latest"
+        }
+      }
     }
   }
 }
 ```
 
-प्रत्येक provider entry में ये शामिल हो सकते हैं:
+प्रत्येक प्रदाता प्रविष्टि में ये शामिल हो सकते हैं:
 
-| फ़ील्ड                 | प्रकार                              | इसका अर्थ                                                               |
-| ---------------------- | ----------------------------------- | ---------------------------------------------------------------------------- |
-| `capabilities`         | `("image" \| "audio" \| "video")[]` | इस provider द्वारा उजागर की गई media capabilities।                                 |
-| `defaultModels`        | `Record<string, string>`            | जब config कोई model निर्दिष्ट नहीं करता, तब उपयोग किए जाने वाले capability-to-model defaults।      |
-| `autoPriority`         | `Record<string, number>`            | automatic credential-based provider fallback के लिए कम संख्याएं पहले sort होती हैं। |
-| `nativeDocumentInputs` | `"pdf"[]`                           | provider द्वारा समर्थित native document inputs।                            |
+| फ़ील्ड                  | प्रकार                                                             | इसका अर्थ                                                                                                   |
+| ---------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `capabilities`         | `("image" \| "audio" \| "video")[]`                              | इस प्रदाता द्वारा उपलब्ध कराई गई मीडिया क्षमताएँ।                                                                    |
+| `defaultModels`        | `Record<string, string>`                                         | जब कॉन्फ़िग कोई मॉडल निर्दिष्ट नहीं करता, तब उपयोग किए जाने वाले क्षमता-से-मॉडल डिफ़ॉल्ट।                                         |
+| `autoPriority`         | `Record<string, number>`                                         | स्वचालित क्रेडेंशियल-आधारित प्रदाता फ़ॉलबैक के लिए छोटी संख्याएँ पहले क्रमबद्ध होती हैं।                                    |
+| `nativeDocumentInputs` | `"pdf"[]`                                                        | प्रदाता द्वारा समर्थित नेटिव दस्तावेज़ इनपुट।                                                               |
+| `documentModels`       | `{ pdf?: { textExtraction?: string; image?: string \| false } }` | प्रति-दस्तावेज़-प्रकार मॉडल ओवरराइड। उस दस्तावेज़ प्रकार के लिए छवि-आधारित निष्कर्षण अक्षम करने हेतु `image: false` सेट करें। |
 
 ## channelConfigs संदर्भ
 
-`channelConfigs` का उपयोग तब करें जब किसी channel Plugin को runtime loads से पहले
-सस्ती config metadata की आवश्यकता हो। Read-only channel setup/status discovery इस metadata का
-सीधे उपयोग configured external channels के लिए कर सकती है जब कोई setup entry उपलब्ध न हो, या
-जब `setup.requiresRuntime: false` setup runtime को अनावश्यक घोषित करता है।
+जब किसी चैनल Plugin को रनटाइम लोड होने से पहले कम लागत वाले कॉन्फ़िग मेटाडेटा की आवश्यकता हो, तब `channelConfigs` का उपयोग करें। जब कोई सेटअप प्रविष्टि उपलब्ध न हो, या जब `setup.requiresRuntime: false` सेटअप रनटाइम को अनावश्यक घोषित करे, तब केवल-पढ़ने योग्य चैनल सेटअप/स्थिति खोज कॉन्फ़िगर किए गए बाहरी चैनलों के लिए सीधे इस मेटाडेटा का उपयोग कर सकती है।
 
-`channelConfigs` Plugin manifest metadata है, कोई नया top-level user config
-section नहीं। Users अभी भी channel instances को `channels.<channel-id>` के अंतर्गत configure करते हैं।
-OpenClaw manifest metadata पढ़ता है ताकि तय कर सके कि Plugin runtime code execute होने से पहले
-उस configured channel का स्वामी कौन सा Plugin है।
+`channelConfigs` Plugin मैनिफ़ेस्ट मेटाडेटा है, कोई नया शीर्ष-स्तरीय उपयोगकर्ता कॉन्फ़िग अनुभाग नहीं। उपयोगकर्ता अब भी चैनल इंस्टेंस को `channels.<channel-id>` के अंतर्गत कॉन्फ़िगर करते हैं। Plugin रनटाइम कोड निष्पादित होने से पहले, OpenClaw यह तय करने के लिए मैनिफ़ेस्ट मेटाडेटा पढ़ता है कि उस कॉन्फ़िगर किए गए चैनल का स्वामी कौन-सा Plugin है।
 
-किसी channel Plugin के लिए, `configSchema` और `channelConfigs` अलग
-paths का वर्णन करते हैं:
+किसी चैनल Plugin के लिए, `configSchema` और `channelConfigs` अलग-अलग पथों का वर्णन करते हैं:
 
-- `configSchema` `plugins.entries.<plugin-id>.config` को validate करता है
-- `channelConfigs.<channel-id>.schema` `channels.<channel-id>` को validate करता है
+- `configSchema`, `plugins.entries.<plugin-id>.config` को सत्यापित करता है
+- `channelConfigs.<channel-id>.schema`, `channels.<channel-id>` को सत्यापित करता है
 
-Non-bundled Plugins जो `channels[]` घोषित करते हैं, उन्हें matching
-`channelConfigs` entries भी घोषित करनी चाहिए। इनके बिना, OpenClaw अभी भी Plugin load कर सकता है, लेकिन
-cold-path config schema, setup, और Control UI surfaces Plugin runtime execute होने तक
-channel-owned option shape नहीं जान सकते।
+`channels[]` घोषित करने वाले गैर-बंडल Plugins को मेल खाती `channelConfigs` प्रविष्टियाँ भी घोषित करनी चाहिए। इनके बिना OpenClaw अब भी Plugin लोड कर सकता है, लेकिन Plugin रनटाइम निष्पादित होने तक कोल्ड-पाथ कॉन्फ़िग स्कीमा, सेटअप और Control UI सरफ़ेस चैनल-स्वामित्व वाले विकल्प का आकार या केवल-प्रदर्शन UI संकेत नहीं जान सकते।
 
-`channelConfigs.<channel-id>.commands.nativeCommandsAutoEnabled` और
-`nativeSkillsAutoEnabled` command config checks के लिए static `auto` defaults घोषित कर सकते हैं
-जो channel runtime loads से पहले चलते हैं। बंडल किए गए channels भी
-अपने अन्य package-owned channel catalog metadata के साथ
-`package.json#openclaw.channel.commands` के माध्यम से वही defaults publish कर सकते हैं।
+`channelConfigs.<channel-id>.commands.nativeCommandsAutoEnabled` और `nativeSkillsAutoEnabled` कमांड कॉन्फ़िग जाँचों के लिए स्थिर `auto` डिफ़ॉल्ट घोषित कर सकते हैं, जो चैनल रनटाइम लोड होने से पहले चलती हैं। बंडल किए गए चैनल अपने अन्य पैकेज-स्वामित्व वाले चैनल कैटलॉग मेटाडेटा के साथ `package.json#openclaw.channel.commands` के माध्यम से भी वही डिफ़ॉल्ट प्रकाशित कर सकते हैं।
 
 ```json
 {
@@ -805,23 +838,20 @@ channel-owned option shape नहीं जान सकते।
 }
 ```
 
-प्रत्येक channel entry में ये शामिल हो सकते हैं:
+प्रत्येक चैनल प्रविष्टि में ये शामिल हो सकते हैं:
 
-| फ़ील्ड        | प्रकार                   | इसका अर्थ                                                                            |
-| ------------- | ------------------------ | ----------------------------------------------------------------------------------------- |
-| `schema`      | `object`                 | `channels.<id>` के लिए JSON Schema। प्रत्येक घोषित channel config entry के लिए आवश्यक।         |
-| `uiHints`     | `Record<string, object>` | उस channel config section के लिए वैकल्पिक UI labels/placeholders/sensitive hints।          |
-| `label`       | `string`                 | जब runtime metadata तैयार नहीं होता, तब picker और inspect surfaces में merge किया गया channel label। |
-| `description` | `string`                 | inspect और catalog surfaces के लिए संक्षिप्त channel description।                               |
-| `commands`    | `object`                 | pre-runtime config checks के लिए static native command और native skill auto-defaults।       |
-| `preferOver`  | `string[]`               | Legacy या lower-priority Plugin ids जिन्हें इस channel को selection surfaces में पीछे रखना चाहिए।    |
+| फ़ील्ड         | प्रकार                     | इसका अर्थ                                                                                                    |
+| ------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `schema`      | `object`                 | `channels.<id>` के लिए JSON Schema। प्रत्येक घोषित चैनल कॉन्फ़िग प्रविष्टि के लिए आवश्यक।                                |
+| `uiHints`     | `Record<string, object>` | उस चैनल कॉन्फ़िग अनुभाग के लिए वैकल्पिक लेबल, प्लेसहोल्डर, संवेदनशीलता और केवल-प्रदर्शन प्रस्तुति संकेत। |
+| `label`       | `string`                 | रनटाइम मेटाडेटा तैयार न होने पर पिकर और निरीक्षण सरफ़ेसों में मर्ज किया गया चैनल लेबल।                        |
+| `description` | `string`                 | निरीक्षण और कैटलॉग सरफ़ेसों के लिए संक्षिप्त चैनल विवरण।                                                      |
+| `commands`    | `object`                 | रनटाइम-पूर्व कॉन्फ़िग जाँचों के लिए स्थिर नेटिव कमांड और नेटिव Skills स्वचालित डिफ़ॉल्ट।                              |
+| `preferOver`  | `string[]`               | पुराने या कम प्राथमिकता वाले Plugin आईडी, जिनसे इस चैनल को चयन सरफ़ेसों में ऊपर स्थान मिलना चाहिए।                           |
 
-### किसी अन्य channel Plugin को बदलना
+### किसी अन्य चैनल Plugin को प्रतिस्थापित करना
 
-`preferOver` का उपयोग तब करें जब आपका Plugin किसी channel id के लिए preferred owner हो
-जिसे कोई दूसरा Plugin भी provide कर सकता है। सामान्य cases हैं renamed Plugin id,
-standalone Plugin जो किसी bundled Plugin को supersede करता है, या maintained fork जो
-config compatibility के लिए वही channel id रखता है।
+जब आपका Plugin ऐसे चैनल आईडी का पसंदीदा स्वामी हो, जिसे कोई अन्य Plugin भी प्रदान कर सकता है, तब `preferOver` का उपयोग करें। सामान्य मामलों में बदला हुआ Plugin आईडी, बंडल किए गए Plugin का स्थान लेने वाला स्टैंडअलोन Plugin, या कॉन्फ़िग संगतता के लिए वही चैनल आईडी बनाए रखने वाला अनुरक्षित फ़ोर्क शामिल हैं।
 
 ```json
 {
@@ -842,22 +872,13 @@ config compatibility के लिए वही channel id रखता है�
 }
 ```
 
-जब `channels.chat` configured होता है, OpenClaw channel id और
-preferred Plugin id दोनों पर विचार करता है। यदि lower-priority Plugin केवल इसलिए selected था क्योंकि
-वह bundled है या default रूप से enabled है, तो OpenClaw उसे effective
-runtime config में disabled कर देता है ताकि एक Plugin channel और उसके tools का स्वामी हो। Explicit user
-selection अभी भी जीतता है: यदि user दोनों Plugins को स्पष्ट रूप से enable करता है, तो OpenClaw
-उस choice को preserve करता है और requested Plugin set को silently बदलने के बजाय
-duplicate channel/tool diagnostics report करता है।
+जब `channels.chat` कॉन्फ़िगर किया जाता है, तो OpenClaw चैनल आईडी और पसंदीदा Plugin आईडी, दोनों पर विचार करता है। यदि कम-प्राथमिकता वाला Plugin केवल इसलिए चुना गया था क्योंकि वह बंडल में शामिल है या डिफ़ॉल्ट रूप से सक्षम है, तो OpenClaw प्रभावी रनटाइम कॉन्फ़िगरेशन में उसे अक्षम कर देता है, ताकि एक Plugin चैनल और उसके टूल का स्वामी हो। स्पष्ट उपयोगकर्ता चयन फिर भी प्रभावी रहता है: यदि उपयोगकर्ता दोनों Plugin को स्पष्ट रूप से सक्षम करता है (`plugins.allow` या किसी वास्तविक `plugins.entries` कॉन्फ़िगरेशन के माध्यम से), तो OpenClaw उस चयन को बनाए रखता है और अनुरोधित Plugin समूह को चुपचाप बदलने के बजाय डुप्लिकेट चैनल/टूल निदान रिपोर्ट करता है।
 
-`preferOver` को उन Plugin ids तक scoped रखें जो सच में वही channel provide कर सकते हैं।
-यह कोई general priority field नहीं है और यह user config keys को rename नहीं करता।
+`preferOver` को केवल उन Plugin आईडी तक सीमित रखें जो वास्तव में वही चैनल प्रदान कर सकती हैं। यह कोई सामान्य प्राथमिकता फ़ील्ड नहीं है और यह उपयोगकर्ता कॉन्फ़िगरेशन कुंजियों का नाम नहीं बदलता।
 
 ## modelSupport संदर्भ
 
-जब OpenClaw को plugin runtime लोड होने से पहले `gpt-5.5` या `claude-sonnet-4.6` जैसे
-शॉर्टहैंड मॉडल id से आपके provider plugin का अनुमान लगाना हो, तब `modelSupport`
-का उपयोग करें।
+जब Plugin रनटाइम लोड होने से पहले OpenClaw को `gpt-5.6-sol` या `claude-sonnet-4.6` जैसी संक्षिप्त मॉडल आईडी से आपके प्रदाता Plugin का अनुमान लगाना चाहिए, तब `modelSupport` का उपयोग करें।
 
 ```json
 {
@@ -868,32 +889,25 @@ duplicate channel/tool diagnostics report करता है।
 }
 ```
 
-OpenClaw यह प्राथमिकता लागू करता है:
+OpenClaw यह वरीयता क्रम लागू करता है:
 
-- स्पष्ट `provider/model` refs मालिकाना `providers` manifest metadata का उपयोग करते हैं
-- `modelPatterns`, `modelPrefixes` से पहले लागू होते हैं
-- अगर एक non-bundled plugin और एक bundled plugin, दोनों मेल खाते हैं, तो non-bundled
-  plugin जीतता है
-- बाकी अस्पष्टता को तब तक अनदेखा किया जाता है जब तक user या config कोई provider निर्दिष्ट नहीं करता
+- स्पष्ट `provider/model` संदर्भ स्वामी `providers` की मैनिफ़ेस्ट मेटाडेटा का उपयोग करते हैं
+- `modelPatterns`, `modelPrefixes` से अधिक प्राथमिकता रखते हैं
+- यदि एक गैर-बंडल Plugin और एक बंडल Plugin, दोनों मेल खाते हैं, तो गैर-बंडल Plugin को प्राथमिकता मिलती है
+- शेष अस्पष्टता को तब तक अनदेखा किया जाता है, जब तक उपयोगकर्ता या कॉन्फ़िगरेशन किसी प्रदाता को निर्दिष्ट नहीं करता
 
 फ़ील्ड:
 
 | फ़ील्ड           | प्रकार       | इसका अर्थ                                                                   |
 | --------------- | ---------- | ------------------------------------------------------------------------------- |
-| `modelPrefixes` | `string[]` | शॉर्टहैंड मॉडल ids के विरुद्ध `startsWith` से मिलाए जाने वाले prefix.                 |
-| `modelPatterns` | `string[]` | profile suffix removal के बाद शॉर्टहैंड मॉडल ids के विरुद्ध मिलाए जाने वाले regex sources. |
+| `modelPrefixes` | `string[]` | संक्षिप्त मॉडल आईडी के विरुद्ध `startsWith` से मिलाए गए उपसर्ग।                 |
+| `modelPatterns` | `string[]` | प्रोफ़ाइल प्रत्यय हटाने के बाद संक्षिप्त मॉडल आईडी से मिलाए गए रेगेक्स स्रोत। |
 
-`modelPatterns` entries को `compileSafeRegex` के माध्यम से compile किया जाता है, जो
-nested repetition वाले patterns को अस्वीकार करता है (उदाहरण के लिए `(a+)+$`)। safety
-check में असफल होने वाले patterns को चुपचाप छोड़ दिया जाता है, ठीक वैसे ही जैसे syntactically invalid regex।
-patterns को सरल रखें और nested quantifiers से बचें।
+`modelPatterns` प्रविष्टियों को `compileSafeRegex` के माध्यम से संकलित किया जाता है, जो नेस्टेड पुनरावृत्ति वाले पैटर्न (उदाहरण के लिए `(a+)+$`) को अस्वीकार करता है। सुरक्षा जाँच में विफल होने वाले पैटर्न को वाक्य-विन्यास की दृष्टि से अमान्य रेगेक्स की तरह चुपचाप छोड़ दिया जाता है। पैटर्न सरल रखें और नेस्टेड क्वांटिफ़ायर से बचें।
 
-## modelCatalog reference
+## modelCatalog संदर्भ
 
-जब OpenClaw को plugin runtime लोड करने से पहले provider model metadata जानना हो, तब
-`modelCatalog` का उपयोग करें। यह fixed catalog rows, provider aliases, suppression rules,
-और discovery mode के लिए manifest-owned source है। Runtime refresh अभी भी provider runtime
-code में रहता है, लेकिन manifest core को बताता है कि runtime कब आवश्यक है।
+जब Plugin रनटाइम लोड करने से पहले OpenClaw को प्रदाता मॉडल मेटाडेटा की जानकारी होनी चाहिए, तब `modelCatalog` का उपयोग करें। यह स्थिर कैटलॉग पंक्तियों, प्रदाता उपनामों, दमन नियमों और खोज मोड के लिए मैनिफ़ेस्ट-स्वामित्व वाला स्रोत है। रनटाइम रीफ़्रेश अब भी प्रदाता रनटाइम कोड के अंतर्गत आता है, लेकिन मैनिफ़ेस्ट कोर को बताता है कि रनटाइम कब आवश्यक है।
 
 ```json
 {
@@ -946,78 +960,65 @@ code में रहता है, लेकिन manifest core को बत�
 
 | फ़ील्ड            | प्रकार                                                     | इसका अर्थ                                                                                               |
 | ---------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `providers`      | `Record<string, object>`                                 | इस plugin के स्वामित्व वाले provider ids के लिए catalog rows. keys शीर्ष-स्तरीय `providers` में भी दिखाई देनी चाहिए।       |
-| `aliases`        | `Record<string, object>`                                 | Provider aliases जिन्हें catalog या suppression planning के लिए किसी owned provider में resolve होना चाहिए।              |
-| `suppressions`   | `object[]`                                               | किसी दूसरे source से model rows जिन्हें यह plugin provider-specific कारण से suppress करता है।                  |
-| `discovery`      | `Record<string, "static" \| "refreshable" \| "runtime">` | क्या provider catalog को manifest metadata से पढ़ा जा सकता है, cache में refresh किया जा सकता है, या runtime की आवश्यकता है। |
-| `runtimeAugment` | `boolean`                                                | केवल तब `true` पर set करें जब provider runtime को manifest/config planning के बाद catalog rows append करनी हों।       |
+| `providers`      | `Record<string, object>`                                 | इस Plugin के स्वामित्व वाली प्रदाता आईडी के लिए कैटलॉग पंक्तियाँ। कुंजियाँ शीर्ष-स्तरीय `providers` में भी दिखाई देनी चाहिए।       |
+| `aliases`        | `Record<string, object>`                                 | प्रदाता उपनाम, जिन्हें कैटलॉग या दमन योजना के लिए किसी स्वामित्व वाले प्रदाता में रिज़ॉल्व होना चाहिए।              |
+| `suppressions`   | `object[]`                                               | किसी अन्य स्रोत की मॉडल पंक्तियाँ, जिन्हें यह Plugin प्रदाता-विशिष्ट कारण से दबाता है।                  |
+| `discovery`      | `Record<string, "static" \| "refreshable" \| "runtime">` | क्या प्रदाता कैटलॉग को मैनिफ़ेस्ट मेटाडेटा से पढ़ा जा सकता है, कैश में रीफ़्रेश किया जा सकता है, या उसे रनटाइम की आवश्यकता है। |
+| `runtimeAugment` | `boolean`                                                | केवल तभी `true` पर सेट करें, जब प्रदाता रनटाइम को मैनिफ़ेस्ट/कॉन्फ़िगरेशन योजना के बाद कैटलॉग पंक्तियाँ जोड़नी हों।       |
 
-`aliases` model-catalog planning के लिए provider ownership lookup में भाग लेता है।
-Alias targets उसी plugin के स्वामित्व वाले शीर्ष-स्तरीय providers होने चाहिए। जब कोई
-provider-filtered list alias का उपयोग करती है, तो OpenClaw owning manifest पढ़ सकता है और
-provider runtime लोड किए बिना alias API/base URL overrides लागू कर सकता है।
-Aliases unfiltered catalog listings को expand नहीं करते; broad lists केवल owning
-canonical provider rows emit करते हैं।
+`aliases` मॉडल-कैटलॉग योजना के लिए प्रदाता स्वामित्व खोज में भाग लेता है। उपनाम लक्ष्य उसी Plugin के स्वामित्व वाले शीर्ष-स्तरीय प्रदाता होने चाहिए। जब प्रदाता-फ़िल्टर की गई सूची किसी उपनाम का उपयोग करती है, तो OpenClaw प्रदाता रनटाइम लोड किए बिना स्वामी मैनिफ़ेस्ट को पढ़ सकता है और उपनाम के API/आधार URL ओवरराइड लागू कर सकता है। उपनाम बिना फ़िल्टर वाली कैटलॉग सूचियों का विस्तार नहीं करते; व्यापक सूचियाँ केवल स्वामी की कैनोनिकल प्रदाता पंक्तियाँ उत्सर्जित करती हैं।
 
-`suppressions` पुराने provider runtime `suppressBuiltInModel` hook को प्रतिस्थापित करता है।
-Suppression entries को केवल तब माना जाता है जब provider plugin के स्वामित्व में हो या
-`modelCatalog.aliases` key के रूप में घोषित हो जो किसी owned provider को target करती है। Runtime
-suppression hooks को अब model resolution के दौरान call नहीं किया जाता।
+`suppressions` पुराने प्रदाता रनटाइम `suppressBuiltInModel` हुक का स्थान लेता है। दमन प्रविष्टियों का पालन केवल तभी किया जाता है, जब प्रदाता Plugin के स्वामित्व में हो या उसे ऐसी `modelCatalog.aliases` कुंजी के रूप में घोषित किया गया हो जो किसी स्वामित्व वाले प्रदाता को लक्षित करती है। मॉडल रिज़ॉल्यूशन के दौरान अब रनटाइम दमन हुक नहीं बुलाए जाते।
 
-Provider फ़ील्ड:
+प्रदाता फ़ील्ड:
 
-| फ़ील्ड     | प्रकार                     | इसका अर्थ                                                     |
-| --------- | ------------------------ | ----------------------------------------------------------------- |
-| `baseUrl` | `string`                 | इस provider catalog में models के लिए optional default base URL.    |
-| `api`     | `ModelApi`               | इस provider catalog में models के लिए optional default API adapter. |
-| `headers` | `Record<string, string>` | optional static headers जो इस provider catalog पर लागू होते हैं।      |
-| `models`  | `object[]`               | आवश्यक model rows. `id` के बिना rows को ignored किया जाता है।            |
+| फ़ील्ड                 | प्रकार                     | इसका अर्थ                                                                                                                                                                                                     |
+| --------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`             | `string`                 | इस प्रदाता कैटलॉग के मॉडलों के लिए वैकल्पिक डिफ़ॉल्ट आधार URL।                                                                                                                                                    |
+| `api`                 | `ModelApi`               | इस प्रदाता कैटलॉग के मॉडलों के लिए वैकल्पिक डिफ़ॉल्ट API अडैप्टर।                                                                                                                                                 |
+| `headers`             | `Record<string, string>` | इस प्रदाता कैटलॉग पर लागू होने वाले वैकल्पिक स्थिर हेडर।                                                                                                                                                      |
+| `defaultUtilityModel` | `string`                 | छोटे आंतरिक उपयोगिता कार्यों (शीर्षक, प्रगति विवरण) के लिए वैकल्पिक प्रदाता-अनुशंसित लघु मॉडल आईडी। इसका उपयोग तब किया जाता है, जब `agents.defaults.utilityModel` सेट न हो और यह प्रदाता एजेंट के प्राथमिक मॉडल को सेवा देता हो। |
+| `models`              | `object[]`               | आवश्यक मॉडल पंक्तियाँ। `id` के बिना पंक्तियों को अनदेखा किया जाता है।                                                                                                                                                            |
 
-Model फ़ील्ड:
+मॉडल फ़ील्ड:
 
-| फ़ील्ड           | प्रकार                                                           | इसका अर्थ                                                               |
-| --------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `id`            | `string`                                                       | Provider-local model id, `provider/` prefix के बिना।                    |
-| `name`          | `string`                                                       | optional display name.                                                      |
-| `api`           | `ModelApi`                                                     | optional per-model API override.                                            |
-| `baseUrl`       | `string`                                                       | optional per-model base URL override.                                       |
-| `headers`       | `Record<string, string>`                                       | optional per-model static headers.                                          |
-| `input`         | `Array<"text" \| "image" \| "document" \| "audio" \| "video">` | model जिन modalities को स्वीकार करता है।                                               |
-| `reasoning`     | `boolean`                                                      | क्या model reasoning behavior expose करता है।                               |
-| `contextWindow` | `number`                                                       | native provider context window.                                             |
-| `contextTokens` | `number`                                                       | optional effective runtime context cap, जब यह `contextWindow` से अलग हो। |
-| `maxTokens`     | `number`                                                       | ज्ञात होने पर maximum output tokens.                                           |
-| `cost`          | `object`                                                       | optional USD per million token pricing, जिसमें optional `tieredPricing` शामिल है। |
-| `compat`        | `object`                                                       | OpenClaw model config compatibility से मेल खाने वाले optional compatibility flags.  |
-| `status`        | `"available"` \| `"preview"` \| `"deprecated"` \| `"disabled"` | listing status. केवल तभी suppress करें जब row बिल्कुल दिखाई नहीं देनी चाहिए।          |
-| `statusReason`  | `string`                                                       | non-available status के साथ दिखाया जाने वाला optional reason.                            |
-| `replaces`      | `string[]`                                                     | पुराने provider-local model ids जिन्हें यह model supersede करता है।                       |
-| `replacedBy`    | `string`                                                       | deprecated rows के लिए replacement provider-local model id.                    |
-| `tags`          | `string[]`                                                     | pickers और filters द्वारा उपयोग किए जाने वाले stable tags.                                    |
+| फ़ील्ड              | प्रकार                                                           | इसका अर्थ                                                               |
+| ------------------ | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `id`               | `string`                                                       | `provider/` उपसर्ग के बिना प्रदाता-स्थानीय मॉडल आईडी।                    |
+| `name`             | `string`                                                       | वैकल्पिक प्रदर्शन नाम।                                                      |
+| `api`              | `ModelApi`                                                     | वैकल्पिक प्रति-मॉडल API ओवरराइड।                                            |
+| `baseUrl`          | `string`                                                       | वैकल्पिक प्रति-मॉडल आधार URL ओवरराइड।                                       |
+| `headers`          | `Record<string, string>`                                       | वैकल्पिक प्रति-मॉडल स्थिर हेडर।                                          |
+| `input`            | `Array<"text" \| "image" \| "document">`                       | मॉडल द्वारा स्वीकार की जाने वाली मोडैलिटी। अन्य मान चुपचाप हटा दिए जाते हैं।            |
+| `reasoning`        | `boolean`                                                      | क्या मॉडल तर्क-क्षमता व्यवहार प्रदान करता है।                               |
+| `contextWindow`    | `number`                                                       | प्रदाता का मूल कॉन्टेक्स्ट विंडो।                                             |
+| `contextTokens`    | `number`                                                       | `contextWindow` से भिन्न होने पर वैकल्पिक प्रभावी रनटाइम कॉन्टेक्स्ट सीमा। |
+| `maxTokens`        | `number`                                                       | ज्ञात होने पर अधिकतम आउटपुट टोकन।                                           |
+| `thinkingLevelMap` | `Record<string, string \| null>`                               | वैकल्पिक प्रति-विचार-स्तर मॉडल-आईडी या पैरामीटर ओवरराइड।                    |
+| `cost`             | `object`                                                       | वैकल्पिक `tieredPricing` सहित, प्रति दस लाख टोकन वैकल्पिक USD मूल्य निर्धारण। |
+| `compat`           | `object`                                                       | OpenClaw मॉडल कॉन्फ़िगरेशन संगतता से मेल खाने वाले वैकल्पिक संगतता फ़्लैग।  |
+| `mediaInput`       | `object`                                                       | वैकल्पिक प्रति-मोडैलिटी इनपुट कॉन्फ़िगरेशन, वर्तमान में केवल चित्र।                   |
+| `status`           | `"available"` \| `"preview"` \| `"deprecated"` \| `"disabled"` | सूचीकरण स्थिति। केवल तभी दबाएँ, जब पंक्ति बिल्कुल दिखाई नहीं देनी चाहिए।          |
+| `statusReason`     | `string`                                                       | अनुपलब्ध स्थिति के साथ दिखाया जाने वाला वैकल्पिक कारण।                            |
+| `replaces`         | `string[]`                                                     | पुराने प्रदाता-स्थानीय मॉडल आईडी, जिनका स्थान यह मॉडल लेता है।                       |
+| `replacedBy`       | `string`                                                       | अप्रचलित पंक्तियों के लिए प्रतिस्थापन प्रदाता-स्थानीय मॉडल आईडी।                    |
+| `tags`             | `string[]`                                                     | चयनकर्ताओं और फ़िल्टर द्वारा उपयोग किए जाने वाले स्थिर टैग।                                    |
 
-Suppression फ़ील्ड:
+दमन फ़ील्ड:
 
 | फ़ील्ड                      | प्रकार       | इसका अर्थ                                                                                             |
 | -------------------------- | ---------- | --------------------------------------------------------------------------------------------------------- |
-| `provider`                 | `string`   | suppress करने के लिए upstream row का provider id. यह इस plugin के स्वामित्व में होना चाहिए या owned alias के रूप में घोषित होना चाहिए। |
-| `model`                    | `string`   | suppress करने के लिए provider-local model id.                                                                      |
-| `reason`                   | `string`   | suppressed row को सीधे request किए जाने पर दिखाया जाने वाला optional message.                                     |
-| `when.baseUrlHosts`        | `string[]` | suppression लागू होने से पहले आवश्यक effective provider base URL hosts की optional list.               |
-| `when.providerConfigApiIn` | `string[]` | suppression लागू होने से पहले आवश्यक exact provider-config `api` values की optional list.              |
+| `provider`                 | `string`   | दबाने के लिए अपस्ट्रीम पंक्ति की प्रोवाइडर आईडी। इसका स्वामित्व इस Plugin के पास होना चाहिए या इसे स्वामित्व वाले उपनाम के रूप में घोषित किया जाना चाहिए। |
+| `model`                    | `string`   | दबाने के लिए प्रोवाइडर-स्थानीय मॉडल आईडी।                                                                      |
+| `reason`                   | `string`   | दबाई गई पंक्ति का सीधे अनुरोध किए जाने पर दिखाया जाने वाला वैकल्पिक संदेश।                                     |
+| `when.baseUrlHosts`        | `string[]` | दबाव लागू होने से पहले आवश्यक प्रभावी प्रोवाइडर बेस URL होस्ट की वैकल्पिक सूची।               |
+| `when.providerConfigApiIn` | `string[]` | दबाव लागू होने से पहले आवश्यक सटीक प्रोवाइडर-कॉन्फ़िग `api` मानों की वैकल्पिक सूची।              |
 
-`modelCatalog` में runtime-only data न डालें। `static` का उपयोग केवल तब करें जब manifest
-rows provider-filtered list और picker surfaces के लिए registry/runtime discovery छोड़ने हेतु
-काफ़ी पूर्ण हों। `refreshable` का उपयोग तब करें जब manifest rows उपयोगी
-listable seeds या supplements हों, लेकिन refresh/cache बाद में और rows जोड़ सके;
-refreshable rows अपने आप में authoritative नहीं होते। `runtime` का उपयोग तब करें जब OpenClaw
-को list जानने के लिए provider runtime लोड करना ही हो।
+केवल रनटाइम के डेटा को `modelCatalog` में न रखें। `static` का उपयोग केवल तब करें, जब मैनिफ़ेस्ट पंक्तियाँ इतनी पूर्ण हों कि प्रोवाइडर-फ़िल्टर की गई सूची और पिकर सतहें रजिस्ट्री/रनटाइम खोज को छोड़ सकें। `refreshable` का उपयोग तब करें, जब मैनिफ़ेस्ट पंक्तियाँ सूचीबद्ध किए जा सकने वाले उपयोगी प्रारंभिक डेटा या पूरक हों, लेकिन रीफ़्रेश/कैश बाद में और पंक्तियाँ जोड़ सके; रीफ़्रेश की जा सकने वाली पंक्तियाँ अपने आप में प्रामाणिक नहीं होतीं। `runtime` का उपयोग तब करें, जब सूची जानने के लिए OpenClaw को प्रोवाइडर रनटाइम लोड करना आवश्यक हो।
 
-## modelIdNormalization reference
+## modelIdNormalization संदर्भ
 
-`modelIdNormalization` का उपयोग cheap provider-owned model-id cleanup के लिए करें जिसे
-provider runtime लोड होने से पहले होना चाहिए। यह short model names, provider-local legacy ids,
-और proxy prefix rules जैसे aliases को core model-selection tables के बजाय owning plugin
-manifest में रखता है।
+कम लागत वाली, प्रोवाइडर-स्वामित्व वाली मॉडल-आईडी सफ़ाई के लिए `modelIdNormalization` का उपयोग करें, जिसे प्रोवाइडर रनटाइम लोड होने से पहले होना आवश्यक है। इससे छोटे मॉडल नामों, प्रोवाइडर-स्थानीय लेगेसी आईडी और प्रॉक्सी प्रीफ़िक्स नियमों जैसे उपनाम कोर मॉडल-चयन तालिकाओं के बजाय स्वामी Plugin मैनिफ़ेस्ट में रहते हैं।
 
 ```json
 {
@@ -1037,41 +1038,42 @@ manifest में रखता है।
 }
 ```
 
-Provider फ़ील्ड:
+प्रोवाइडर फ़ील्ड:
 
 | फ़ील्ड                                | प्रकार                    | इसका अर्थ                                                                             |
 | ------------------------------------ | ----------------------- | ----------------------------------------------------------------------------------------- |
-| `aliases`                            | `Record<string,string>` | case-insensitive exact model-id aliases. values जैसे लिखे हैं वैसे ही लौटाए जाते हैं।                  |
-| `stripPrefixes`                      | `string[]`              | alias lookup से पहले हटाए जाने वाले prefixes, legacy provider/model duplication के लिए उपयोगी।     |
-| `prefixWhenBare`                     | `string`                | जब normalized model id में पहले से `/` न हो, तब जोड़ने वाला prefix.                  |
-| `prefixWhenBareAfterAliasStartsWith` | `object[]`              | alias lookup के बाद conditional bare-id prefix rules, `modelPrefix` और `prefix` द्वारा keyed. |
+| `aliases`                            | `Record<string,string>` | केस-असंवेदी सटीक मॉडल-आईडी उपनाम। मान लिखे गए रूप में ही लौटाए जाते हैं।                  |
+| `stripPrefixes`                      | `string[]`              | उपनाम खोज से पहले हटाए जाने वाले प्रीफ़िक्स, जो लेगेसी प्रोवाइडर/मॉडल दोहराव के लिए उपयोगी हैं।     |
+| `prefixWhenBare`                     | `string`                | जब सामान्यीकृत मॉडल आईडी में पहले से `/` न हो, तब जोड़ा जाने वाला प्रीफ़िक्स।                  |
+| `prefixWhenBareAfterAliasStartsWith` | `object[]`              | उपनाम खोज के बाद सशर्त बेयर-आईडी प्रीफ़िक्स नियम, जिन्हें `modelPrefix` और `prefix` द्वारा कुंजीबद्ध किया जाता है। |
 
-## providerEndpoints reference
+## providerEndpoints संदर्भ
 
-generic request policy को provider runtime लोड होने से पहले जिस endpoint classification को जानना
-हो, उसके लिए `providerEndpoints` का उपयोग करें। Core अभी भी प्रत्येक `endpointClass` का अर्थ own करता है;
-plugin manifests host और base URL metadata own करते हैं।
+एंडपॉइंट वर्गीकरण के लिए `providerEndpoints` का उपयोग करें, जिसे सामान्य अनुरोध नीति को प्रोवाइडर रनटाइम लोड होने से पहले जानना आवश्यक है। प्रत्येक `endpointClass` का अर्थ अब भी कोर के स्वामित्व में है; होस्ट और बेस URL मेटाडेटा Plugin मैनिफ़ेस्ट के स्वामित्व में है।
+
+आधिकारिक रूप से बाहरी किए गए प्रोवाइडर Plugin कोर डिस्ट्रीब्यूशन से बाहर रखे जाते हैं, इसलिए
+इंस्टॉल होने तक उनके मैनिफ़ेस्ट दिखाई नहीं देते। उनके `providerEndpoints` को
+`scripts/lib/official-external-provider-catalog.json` में भी प्रतिबिंबित किया जाना चाहिए, ताकि
+Plugin के बिना भी एंडपॉइंट वर्गीकरण कार्य करता रहे; एक अनुबंध परीक्षण
+इस प्रतिबिंब को लागू करता है।
 
 एंडपॉइंट फ़ील्ड:
 
-| फ़ील्ड                         | प्रकार     | इसका अर्थ                                                                                  |
+| फ़ील्ड                          | प्रकार       | इसका अर्थ                                                                                  |
 | ------------------------------ | ---------- | ---------------------------------------------------------------------------------------------- |
-| `endpointClass`                | `string`   | ज्ञात कोर एंडपॉइंट वर्ग, जैसे `openrouter`, `moonshot-native`, या `google-vertex`।        |
-| `hosts`                        | `string[]` | वे सटीक होस्टनाम जो एंडपॉइंट वर्ग से मैप होते हैं।                                                |
-| `hostSuffixes`                 | `string[]` | वे होस्ट प्रत्यय जो एंडपॉइंट वर्ग से मैप होते हैं। केवल डोमेन-प्रत्यय मिलान के लिए `.` उपसर्ग लगाएँ। |
-| `baseUrls`                     | `string[]` | वे सटीक सामान्यीकृत HTTP(S) आधार URL जो एंडपॉइंट वर्ग से मैप होते हैं।                             |
+| `endpointClass`                | `string`   | ज्ञात कोर एंडपॉइंट वर्ग, जैसे `openrouter`, `moonshot-native` या `google-vertex`।        |
+| `hosts`                        | `string[]` | एंडपॉइंट वर्ग से मैप होने वाले सटीक होस्टनाम।                                                |
+| `hostSuffixes`                 | `string[]` | एंडपॉइंट वर्ग से मैप होने वाले होस्ट प्रत्यय। केवल डोमेन-प्रत्यय मिलान के लिए `.` से शुरू करें। |
+| `baseUrls`                     | `string[]` | एंडपॉइंट वर्ग से मैप होने वाले सटीक सामान्यीकृत HTTP(S) बेस URL।                             |
 | `googleVertexRegion`           | `string`   | सटीक वैश्विक होस्ट के लिए स्थिर Google Vertex क्षेत्र।                                            |
-| `googleVertexRegionHostSuffix` | `string`   | मिलान करने वाले होस्ट से हटाया जाने वाला प्रत्यय, ताकि Google Vertex क्षेत्र उपसर्ग उजागर हो सके।                 |
+| `googleVertexRegionHostSuffix` | `string`   | Google Vertex क्षेत्र प्रीफ़िक्स दिखाने के लिए मेल खाने वाले होस्ट से हटाया जाने वाला प्रत्यय।                 |
 
-## `providerRequest` संदर्भ
+## providerRequest संदर्भ
 
-सस्ते अनुरोध-संगतता मेटाडेटा के लिए `providerRequest` का उपयोग करें, जिसकी सामान्य
-अनुरोध नीति को provider runtime लोड किए बिना आवश्यकता होती है। व्यवहार-विशिष्ट
-payload rewriting को provider runtime hooks या साझा provider-family helpers में रखें।
+कम लागत वाले अनुरोध-संगतता मेटाडेटा के लिए `providerRequest` का उपयोग करें, जिसकी सामान्य अनुरोध नीति को प्रोवाइडर रनटाइम लोड किए बिना आवश्यकता होती है। व्यवहार-विशिष्ट पेलोड पुनर्लेखन को प्रोवाइडर रनटाइम हुक या साझा प्रोवाइडर-परिवार हेल्पर में रखें।
 
 ```json
 {
-  "providers": ["vllm"],
   "providerRequest": {
     "providers": {
       "vllm": {
@@ -1085,22 +1087,17 @@ payload rewriting को provider runtime hooks या साझा provider-fam
 }
 ```
 
-Provider फ़ील्ड:
+प्रोवाइडर फ़ील्ड:
 
-| फ़ील्ड                | प्रकार       | इसका अर्थ                                                                          |
+| फ़ील्ड                 | प्रकार         | इसका अर्थ                                                                          |
 | --------------------- | ------------ | -------------------------------------------------------------------------------------- |
-| `family`              | `string`     | सामान्य अनुरोध-संगतता निर्णयों और निदान में उपयोग किया जाने वाला provider family लेबल। |
-| `compatibilityFamily` | `"moonshot"` | साझा अनुरोध helpers के लिए वैकल्पिक provider-family संगतता bucket।              |
-| `openAICompletions`   | `object`     | OpenAI-संगत completions अनुरोध flags, वर्तमान में `supportsStreamingUsage`।       |
+| `family`              | `string`     | सामान्य अनुरोध संगतता निर्णयों और निदान द्वारा उपयोग किया जाने वाला प्रोवाइडर परिवार लेबल। |
+| `compatibilityFamily` | `"moonshot"` | साझा अनुरोध हेल्पर के लिए वैकल्पिक प्रोवाइडर-परिवार संगतता बकेट।              |
+| `openAICompletions`   | `object`     | OpenAI-संगत कम्प्लीशन अनुरोध फ़्लैग, वर्तमान में `supportsStreamingUsage`।       |
 
-## `secretProviderIntegrations` संदर्भ
+## secretProviderIntegrations संदर्भ
 
-जब कोई plugin पुन: उपयोग योग्य SecretRef exec provider preset प्रकाशित कर सकता है, तब
-`secretProviderIntegrations` का उपयोग करें। OpenClaw plugin runtime लोड होने से पहले
-यह मेटाडेटा पढ़ता है, `secrets.providers.<alias>.pluginIntegration` में plugin ownership
-संग्रहीत करता है, और वास्तविक secret resolution को SecretRef runtime पर छोड़ता है।
-Presets केवल bundled plugins और managed plugin install roots से खोजे गए installed plugins
-के लिए उजागर होते हैं, जैसे git और ClawHub installs।
+जब कोई Plugin पुनः उपयोग योग्य SecretRef exec प्रोवाइडर प्रीसेट प्रकाशित कर सकता हो, तब `secretProviderIntegrations` का उपयोग करें। OpenClaw, Plugin रनटाइम लोड होने से पहले यह मेटाडेटा पढ़ता है, Plugin स्वामित्व को `secrets.providers.<alias>.pluginIntegration` में संग्रहीत करता है और वास्तविक सीक्रेट समाधान को SecretRef रनटाइम पर छोड़ देता है। प्रीसेट केवल बंडल किए गए Plugin और प्रबंधित Plugin इंस्टॉल रूट से खोजे गए इंस्टॉल किए हुए Plugin, जैसे git और ClawHub इंस्टॉल, के लिए उपलब्ध कराए जाते हैं।
 
 ```json
 {
@@ -1116,12 +1113,9 @@ Presets केवल bundled plugins और managed plugin install roots से 
 }
 ```
 
-map key integration id है। यदि `providerAlias` छोड़ दिया गया है, तो OpenClaw
-integration id को SecretRef provider alias के रूप में उपयोग करता है। Provider aliases को
-सामान्य SecretRef provider alias pattern से मेल खाना चाहिए, उदाहरण के लिए `team-secrets` या
-`onepassword-work`।
+मैप कुंजी इंटीग्रेशन आईडी है। यदि `providerAlias` छोड़ दिया गया है, तो OpenClaw इंटीग्रेशन आईडी को SecretRef प्रोवाइडर उपनाम के रूप में उपयोग करता है। प्रोवाइडर उपनाम को सामान्य SecretRef प्रोवाइडर उपनाम पैटर्न से मेल खाना चाहिए, उदाहरण के लिए `team-secrets` या `onepassword-work`।
 
-जब कोई operator preset चुनता है, तो OpenClaw इस तरह provider reference लिखता है:
+जब कोई ऑपरेटर प्रीसेट चुनता है, तो OpenClaw इस तरह का प्रोवाइडर संदर्भ लिखता है:
 
 ```json
 {
@@ -1139,31 +1133,15 @@ integration id को SecretRef provider alias के रूप में उप
 }
 ```
 
-startup/reload पर, OpenClaw वर्तमान plugin manifest metadata लोड करके, owning plugin
-installed और active है यह जाँचकर, और manifest से exec command materialize करके उस
-provider को resolve करता है। plugin को disable या remove करने से active SecretRefs के लिए
-provider revoked हो जाता है। जो operators standalone exec configuration चाहते हैं, वे अभी भी
-manual `command`/`args` providers सीधे लिख सकते हैं।
+स्टार्टअप/रीलोड पर, OpenClaw वर्तमान Plugin मैनिफ़ेस्ट मेटाडेटा लोड करके, यह जाँचकर कि स्वामी Plugin इंस्टॉल और सक्रिय है, और मैनिफ़ेस्ट से exec कमांड को साकार करके उस प्रोवाइडर को हल करता है। Plugin को अक्षम करने या हटाने से सक्रिय SecretRefs के लिए प्रोवाइडर निरस्त हो जाता है। जो ऑपरेटर स्वतंत्र exec कॉन्फ़िगरेशन चाहते हैं, वे अब भी मैन्युअल `command`/`args` प्रोवाइडर सीधे लिख सकते हैं।
 
-वर्तमान में केवल `source: "exec"` presets समर्थित हैं। `command` को
-`${node}` होना चाहिए, और `args[0]` को `./` plugin-root-relative resolver script होना चाहिए।
-OpenClaw इसे startup/reload पर वर्तमान Node executable और absolute in-plugin script path
-में materialize करता है। Node options जैसे `--require`, `--import`,
-`--loader`, `--env-file`, `--eval`, और `--print` manifest
-preset contract का हिस्सा नहीं हैं। जिन operators को non-Node commands चाहिए, वे standalone
-manual exec providers सीधे configure कर सकते हैं।
+वर्तमान में केवल `source: "exec"` प्रीसेट समर्थित हैं। `command`, `${node}` होना चाहिए और `args[0]`, `./` Plugin-रूट-सापेक्ष रिज़ॉल्वर स्क्रिप्ट होनी चाहिए। OpenClaw स्टार्टअप/रीलोड पर इसे वर्तमान Node एक्ज़ीक्यूटेबल और Plugin के भीतर पूर्ण स्क्रिप्ट पथ में साकार करता है। `--require`, `--import`, `--loader`, `--env-file`, `--eval` और `--print` जैसे Node विकल्प मैनिफ़ेस्ट प्रीसेट अनुबंध का भाग नहीं हैं। जिन ऑपरेटरों को गैर-Node कमांड की आवश्यकता है, वे स्वतंत्र मैन्युअल exec प्रोवाइडर सीधे कॉन्फ़िगर कर सकते हैं।
 
-OpenClaw manifest presets के लिए `trustedDirs` को plugin root से और,
-`${node}` presets के लिए, वर्तमान Node executable directory से derive करता है। Manifest-authored
-`trustedDirs` अनदेखे किए जाते हैं। अन्य exec provider options जैसे `timeoutMs`,
-`maxOutputBytes`, `jsonOnly`, `env`, `passEnv`, और `allowInsecurePath` सामान्य
-SecretRef exec provider config तक pass through होते हैं।
+OpenClaw मैनिफ़ेस्ट प्रीसेट के लिए `trustedDirs` को Plugin रूट से और `${node}` प्रीसेट के लिए वर्तमान Node एक्ज़ीक्यूटेबल डायरेक्टरी से प्राप्त करता है। मैनिफ़ेस्ट में लिखे गए `trustedDirs` को अनदेखा किया जाता है। `timeoutMs`, `noOutputTimeoutMs`, `maxOutputBytes`, `jsonOnly`, `env`, `passEnv` और `allowInsecurePath` जैसे अन्य exec प्रोवाइडर विकल्प सामान्य SecretRef exec प्रोवाइडर कॉन्फ़िगरेशन को यथावत भेजे जाते हैं।
 
-## `modelPricing` संदर्भ
+## modelPricing संदर्भ
 
-जब किसी provider को runtime load होने से पहले control-plane pricing behavior की आवश्यकता हो,
-तब `modelPricing` का उपयोग करें। Gateway pricing cache provider runtime code import किए बिना
-यह metadata पढ़ता है।
+जब किसी प्रोवाइडर को रनटाइम लोड होने से पहले कंट्रोल-प्लेन मूल्य-निर्धारण व्यवहार की आवश्यकता हो, तब `modelPricing` का उपयोग करें। Gateway मूल्य-निर्धारण कैश प्रोवाइडर रनटाइम कोड आयात किए बिना यह मेटाडेटा पढ़ता है।
 
 ```json
 {
@@ -1184,117 +1162,101 @@ SecretRef exec provider config तक pass through होते हैं।
 }
 ```
 
-Provider फ़ील्ड:
+प्रोवाइडर फ़ील्ड:
 
-| फ़ील्ड       | प्रकार            | इसका अर्थ                                                                                      |
+| फ़ील्ड        | प्रकार              | इसका अर्थ                                                                                      |
 | ------------ | ----------------- | -------------------------------------------------------------------------------------------------- |
-| `external`   | `boolean`         | local/self-hosted providers के लिए `false` सेट करें, जिन्हें कभी OpenRouter या LiteLLM pricing fetch नहीं करनी चाहिए। |
-| `openRouter` | `false \| object` | OpenRouter pricing lookup mapping। `false` इस provider के लिए OpenRouter lookup disable करता है।           |
-| `liteLLM`    | `false \| object` | LiteLLM pricing lookup mapping। `false` इस provider के लिए LiteLLM lookup disable करता है।                 |
+| `external`   | `boolean`         | स्थानीय/स्वयं-होस्ट किए गए प्रोवाइडर के लिए `false` सेट करें, जिन्हें कभी भी OpenRouter या LiteLLM मूल्य-निर्धारण प्राप्त नहीं करना चाहिए। |
+| `openRouter` | `false \| object` | OpenRouter मूल्य-निर्धारण खोज मैपिंग। `false` इस प्रोवाइडर के लिए OpenRouter खोज अक्षम करता है।           |
+| `liteLLM`    | `false \| object` | LiteLLM मूल्य-निर्धारण खोज मैपिंग। `false` इस प्रोवाइडर के लिए LiteLLM खोज अक्षम करता है।                 |
 
-Source फ़ील्ड:
+स्रोत फ़ील्ड:
 
-| फ़ील्ड                     | प्रकार              | इसका अर्थ                                                                                                        |
+| फ़ील्ड                      | प्रकार               | इसका अर्थ                                                                                                        |
 | -------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `provider`                 | `string`           | External catalog provider id, जब यह OpenClaw provider id से अलग हो, उदाहरण के लिए `zai` provider के लिए `z-ai`। |
-| `passthroughProviderModel` | `boolean`          | slash-containing model ids को nested provider/model refs की तरह मानें, जो OpenRouter जैसे proxy providers के लिए उपयोगी है।       |
-| `modelIdTransforms`        | `"version-dots"[]` | अतिरिक्त external catalog model-id variants। `version-dots` `claude-opus-4.6` जैसे dotted version ids आज़माता है।            |
+| `provider`                 | `string`           | जब बाहरी कैटलॉग प्रोवाइडर आईडी OpenClaw प्रोवाइडर आईडी से अलग हो, उदाहरण के लिए किसी `zai` प्रोवाइडर के लिए `z-ai`। |
+| `passthroughProviderModel` | `boolean`          | स्लैश वाले मॉडल आईडी को नेस्टेड प्रोवाइडर/मॉडल संदर्भ मानें, जो OpenRouter जैसे प्रॉक्सी प्रोवाइडर के लिए उपयोगी है।       |
+| `modelIdTransforms`        | `"version-dots"[]` | अतिरिक्त बाहरी कैटलॉग मॉडल-आईडी प्रकार। `version-dots`, `claude-opus-4.6` जैसे डॉट वाले संस्करण आईडी आज़माता है।            |
 
-### OpenClaw Provider Index
+### OpenClaw प्रोवाइडर इंडेक्स
 
-OpenClaw Provider Index उन providers के लिए OpenClaw-owned preview metadata है
-जिनके plugins अभी installed नहीं हो सकते। यह plugin manifest का हिस्सा नहीं है।
-Plugin manifests installed-plugin authority बने रहते हैं। Provider Index वह
-internal fallback contract है जिसका उपयोग भविष्य के installable-provider और pre-install
-model picker surfaces तब करेंगे जब कोई provider plugin installed नहीं होगा।
+OpenClaw प्रोवाइडर इंडेक्स उन प्रोवाइडर के लिए OpenClaw-स्वामित्व वाला पूर्वावलोकन मेटाडेटा है, जिनके Plugin संभवतः अभी इंस्टॉल नहीं हुए हैं। यह किसी Plugin मैनिफ़ेस्ट का भाग नहीं है। Plugin मैनिफ़ेस्ट इंस्टॉल किए गए Plugin के लिए प्रामाणिक स्रोत बने रहते हैं। प्रोवाइडर इंडेक्स वह आंतरिक फ़ॉलबैक अनुबंध है, जिसका उपयोग भविष्य की इंस्टॉल-योग्य प्रोवाइडर और इंस्टॉल-पूर्व मॉडल पिकर सतहें तब करेंगी, जब कोई प्रोवाइडर Plugin इंस्टॉल नहीं है।
 
-Catalog authority order:
+कैटलॉग प्रामाणिकता क्रम:
 
-1. User config।
-2. Installed plugin manifest `modelCatalog`।
-3. Explicit refresh से model catalog cache।
-4. OpenClaw Provider Index preview rows।
+1. उपयोगकर्ता कॉन्फ़िगरेशन।
+2. इंस्टॉल किया गया Plugin मैनिफ़ेस्ट `modelCatalog`।
+3. स्पष्ट रीफ़्रेश से मॉडल कैटलॉग कैश।
+4. OpenClaw प्रोवाइडर इंडेक्स पूर्वावलोकन पंक्तियाँ।
 
-Provider Index में secrets, enabled state, runtime hooks, या
-live account-specific model data नहीं होना चाहिए। इसके preview catalogs वही
-`modelCatalog` provider row shape उपयोग करते हैं जो plugin manifests करते हैं, लेकिन इन्हें stable display metadata तक सीमित रहना चाहिए, जब तक runtime adapter fields जैसे `api`,
-`baseUrl`, pricing, या compatibility flags को जानबूझकर installed plugin manifest के साथ aligned न रखा गया हो। Live `/models` discovery वाले providers को सामान्य listing या onboarding के दौरान provider APIs call करने के बजाय explicit model catalog cache path के जरिए refreshed rows लिखनी चाहिए।
+Provider Index में secrets, enabled state, runtime hooks, या live account-specific model data नहीं होना चाहिए। इसके preview catalogs plugin manifests के समान `modelCatalog` provider row shape का उपयोग करते हैं, लेकिन इन्हें स्थिर display metadata तक सीमित रहना चाहिए, जब तक कि `api`, `baseUrl`, pricing, या compatibility flags जैसे runtime adapter fields को जानबूझकर installed plugin manifest के साथ संरेखित न रखा गया हो। live `/models` discovery वाले providers को सामान्य listing या onboarding से provider APIs कॉल कराने के बजाय explicit model catalog cache path के माध्यम से refreshed rows लिखनी चाहिए।
 
-Provider Index entries उन providers के लिए installable-plugin metadata भी रख सकती हैं
-जिनका plugin core से बाहर चला गया है या अन्यथा अभी installed नहीं है। यह
-metadata channel catalog pattern को mirror करता है: package name, npm install spec,
-expected integrity, और cheap auth-choice labels किसी installable setup option को दिखाने के लिए पर्याप्त हैं। Plugin installed हो जाने पर, उसका manifest जीतता है और
-उस provider के लिए Provider Index entry अनदेखी की जाती है।
+Provider Index entries उन providers के लिए installable-plugin metadata भी रख सकती हैं, जिनका plugin core से बाहर स्थानांतरित हो गया है या किसी अन्य कारण से अभी installed नहीं है। यह metadata channel catalog pattern को प्रतिबिंबित करता है: package name, npm install spec, expected integrity, और सरल auth-choice labels किसी installable setup option को दिखाने के लिए पर्याप्त हैं। plugin install हो जाने के बाद, उसका manifest प्रभावी होता है और उस provider के लिए Provider Index entry की उपेक्षा की जाती है।
 
-Legacy top-level capability keys deprecated हैं। `speechProviders`, `realtimeTranscriptionProviders`,
-`realtimeVoiceProviders`, `mediaUnderstandingProviders`,
-`imageGenerationProviders`, `videoGenerationProviders`,
-`webFetchProviders`, और `webSearchProviders` को `contracts` के अंतर्गत ले जाने के लिए
-`openclaw doctor --fix` का उपयोग करें; सामान्य manifest loading अब उन top-level fields को capability
-ownership के रूप में नहीं मानती।
+`openclaw doctor --fix`, legacy top-level manifest capability keys के एक छोटे, बंद समूह को `contracts.*` में migrate करता है: `speechProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, और `tools`। इनमें से किसी को भी (या किसी अन्य capability list को) अब top-level manifest fields के रूप में नहीं पढ़ा जाता; सामान्य manifest loading इन्हें केवल `contracts` के अंतर्गत पहचानती है।
 
 ## Manifest बनाम package.json
 
-दोनों files अलग-अलग काम करती हैं:
+दोनों files अलग-अलग कार्य करती हैं:
 
-| File                   | इसका उपयोग करें                                                                                                                       |
+| फ़ाइल                   | इसका उपयोग                                                                                                                       |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `openclaw.plugin.json` | Discovery, config validation, auth-choice metadata, और UI hints जो plugin code चलने से पहले मौजूद होने चाहिए                         |
-| `package.json`         | npm metadata, dependency installation, और entrypoints, install gating, setup, या catalog metadata के लिए उपयोग किया गया `openclaw` block |
+| `openclaw.plugin.json` | Discovery, config validation, auth-choice metadata, और ऐसे UI hints जिनका plugin code चलने से पहले उपलब्ध होना आवश्यक है                         |
+| `package.json`         | npm metadata, dependency installation, और entrypoints, install gating, setup, या catalog metadata के लिए उपयोग होने वाला `openclaw` block |
 
-यदि आप निश्चित नहीं हैं कि metadata का कोई हिस्सा कहाँ होना चाहिए, तो यह नियम उपयोग करें:
+यदि यह स्पष्ट न हो कि metadata का कोई भाग कहाँ होना चाहिए, तो इस नियम का उपयोग करें:
 
-- यदि OpenClaw को plugin code load करने से पहले इसे जानना आवश्यक है, तो इसे `openclaw.plugin.json` में रखें
-- यदि यह packaging, entry files, या npm install behavior के बारे में है, तो इसे `package.json` में रखें
+- यदि OpenClaw को plugin code load करने से पहले इसकी जानकारी होना आवश्यक है, तो इसे `openclaw.plugin.json` में रखें
+- यदि यह packaging, entry files, या npm install behavior से संबंधित है, तो इसे `package.json` में रखें
 
-### package.json fields जो discovery को प्रभावित करते हैं
+### discovery को प्रभावित करने वाले package.json fields
 
-कुछ pre-runtime plugin metadata जानबूझकर `openclaw.plugin.json` के बजाय
-`package.json` में `openclaw` block के अंतर्गत रहता है।
-`openclaw.bundle` और `openclaw.bundle.json` OpenClaw plugin contracts नहीं हैं;
-native plugins को `openclaw.plugin.json` और नीचे दिए गए समर्थित
-`package.json#openclaw` fields का उपयोग करना चाहिए।
+कुछ pre-runtime plugin metadata जानबूझकर `openclaw.plugin.json` के बजाय `package.json` में `openclaw` block के अंतर्गत रहता है। `openclaw.bundle` और `openclaw.bundle.json`, OpenClaw plugin contracts नहीं हैं; native plugins को `openclaw.plugin.json` तथा नीचे दिए गए supported `package.json#openclaw` fields का उपयोग करना चाहिए।
 
 महत्वपूर्ण उदाहरण:
 
-| फ़ील्ड                                                                                      | इसका अर्थ                                                                                                                                                                        |
-| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `openclaw.extensions`                                                                      | नेटिव Plugin एंट्रीपॉइंट घोषित करता है। Plugin पैकेज डायरेक्टरी के अंदर ही रहना चाहिए।                                                                                                   |
-| `openclaw.runtimeExtensions`                                                               | इंस्टॉल किए गए पैकेजों के लिए बिल्ट JavaScript runtime एंट्रीपॉइंट घोषित करता है। Plugin पैकेज डायरेक्टरी के अंदर ही रहना चाहिए।                                                                 |
-| `openclaw.setupEntry`                                                                      | onboarding, स्थगित channel startup, और read-only channel status/SecretRef discovery के दौरान उपयोग किया जाने वाला हल्का setup-only एंट्रीपॉइंट। Plugin पैकेज डायरेक्टरी के अंदर ही रहना चाहिए। |
-| `openclaw.runtimeSetupEntry`                                                               | इंस्टॉल किए गए पैकेजों के लिए बिल्ट JavaScript setup एंट्रीपॉइंट घोषित करता है। `setupEntry` आवश्यक है, मौजूद होना चाहिए, और Plugin पैकेज डायरेक्टरी के अंदर ही रहना चाहिए।                         |
-| `openclaw.channel`                                                                         | labels, docs paths, aliases, और selection copy जैसे सस्ते channel catalog metadata।                                                                                                 |
-| `openclaw.channel.commands`                                                                | channel runtime लोड होने से पहले config, audit, और command-list surfaces द्वारा उपयोग किया जाने वाला static native command और native skill auto-default metadata।                                          |
-| `openclaw.channel.configuredState`                                                         | हल्का configured-state checker metadata जो पूरा channel runtime लोड किए बिना "क्या env-only setup पहले से मौजूद है?" का उत्तर दे सकता है।                                         |
-| `openclaw.channel.persistedAuthState`                                                      | हल्का persisted-auth checker metadata जो पूरा channel runtime लोड किए बिना "क्या कुछ पहले से signed in है?" का उत्तर दे सकता है।                                               |
-| `openclaw.install.clawhubSpec` / `openclaw.install.npmSpec` / `openclaw.install.localPath` | bundled और externally published Plugins के लिए install/update संकेत।                                                                                                                   |
-| `openclaw.install.defaultChoice`                                                           | जब कई install sources उपलब्ध हों, तब पसंदीदा install path।                                                                                                                  |
-| `openclaw.install.minHostVersion`                                                          | न्यूनतम समर्थित OpenClaw host version, `>=2026.3.22` या `>=2026.5.1-beta.1` जैसे semver floor का उपयोग करते हुए।                                                                             |
-| `openclaw.compat.pluginApi`                                                                | इस पैकेज के लिए आवश्यक न्यूनतम OpenClaw plugin API range, `>=2026.5.27` जैसे semver floor का उपयोग करते हुए।                                                                                 |
-| `openclaw.install.expectedIntegrity`                                                       | अपेक्षित npm dist integrity string जैसे `sha512-...`; install और update flows fetched artifact को इसके विरुद्ध verify करते हैं।                                                            |
-| `openclaw.install.allowInvalidConfigRecovery`                                              | config अमान्य होने पर एक संकीर्ण bundled-plugin reinstall recovery path की अनुमति देता है।                                                                                                       |
-| `openclaw.install.requiredPlatformPackages`                                                | npm package aliases जिन्हें तब materialize होना चाहिए जब उनके lockfile platform constraints मौजूदा host से मेल खाते हों।                                                                           |
-| `openclaw.startup.deferConfiguredChannelFullLoadUntilAfterListen`                          | setup-runtime channel surfaces को listen से पहले लोड होने देता है, फिर पूरे configured channel Plugin को post-listen activation तक defer करता है।                                                 |
+| फ़ील्ड                                                                                      | इसका अर्थ                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openclaw.extensions`                                                                      | native plugin entrypoints घोषित करता है। इन्हें plugin package directory के भीतर ही रहना चाहिए।                                                                                                        |
+| `openclaw.runtimeExtensions`                                                               | installed packages के लिए built JavaScript runtime entrypoints घोषित करता है। इन्हें plugin package directory के भीतर ही रहना चाहिए।                                                                      |
+| `openclaw.setupEntry`                                                                      | onboarding, deferred channel startup, और read-only channel status/SecretRef discovery के दौरान उपयोग होने वाला lightweight setup-only entrypoint। इसे plugin package directory के भीतर ही रहना चाहिए।      |
+| `openclaw.runtimeSetupEntry`                                                               | installed packages के लिए built JavaScript setup entrypoint घोषित करता है। इसके लिए `setupEntry` आवश्यक है, इसका मौजूद होना आवश्यक है, और इसे plugin package directory के भीतर ही रहना चाहिए।                              |
+| `openclaw.channel`                                                                         | labels, docs paths, aliases, और selection copy जैसा सरल channel catalog metadata।                                                                                                      |
+| `openclaw.channel.approvalFlags`                                                           | runtime load से पहले उपलब्ध बंद approval behavior flags। `native` का अर्थ है कि channel, native approval UI और same-turn resolution का स्वामी है।                                                |
+| `openclaw.channel.commands`                                                                | config, audit, और command-list surfaces द्वारा channel runtime load होने से पहले उपयोग किया जाने वाला static native command तथा native skill auto-default metadata।                                               |
+| `openclaw.channel.cliAddOptions`                                                           | Plugin के स्वामित्व वाले `openclaw channels add` options। प्रत्येक entry, `flags`, `description`, वैकल्पिक `defaultValue`, और generic input coercion के लिए वैकल्पिक `valueType` (`int` या `list`) घोषित करती है। |
+| `openclaw.channel.configuredState`                                                         | lightweight configured-state checker metadata, जो पूरा channel runtime load किए बिना यह उत्तर दे सकता है कि "क्या env-only setup पहले से मौजूद है?"                                              |
+| `openclaw.channel.persistedAuthState`                                                      | lightweight persisted-auth checker metadata, जो पूरा channel runtime load किए बिना यह उत्तर दे सकता है कि "क्या किसी भी चीज़ में पहले से sign in किया गया है?"                                                    |
+| `openclaw.install.clawhubSpec` / `openclaw.install.npmSpec` / `openclaw.install.localPath` | bundled और externally published plugins के लिए install/update hints।                                                                                                                        |
+| `openclaw.install.defaultChoice`                                                           | अनेक install sources उपलब्ध होने पर पसंदीदा install path।                                                                                                                       |
+| `openclaw.install.minHostVersion`                                                          | न्यूनतम supported OpenClaw host version, जिसमें `>=2026.3.22` या `>=2026.5.1-beta.1` जैसी semver floor का उपयोग होता है।                                                                                  |
+| `openclaw.compat.pluginApi`                                                                | इस package के लिए आवश्यक न्यूनतम OpenClaw plugin API range, जिसमें `>=2026.5.27` जैसी semver floor का उपयोग होता है।                                                                                      |
+| `openclaw.install.expectedIntegrity`                                                       | `sha512-...` जैसी expected npm dist integrity string; install और update प्रवाह fetched artifact को इसके विरुद्ध verify करते हैं।                                                                 |
+| `openclaw.install.allowInvalidConfigRecovery`                                              | config के invalid होने पर सीमित bundled-plugin reinstall recovery path की अनुमति देता है।                                                                                                            |
+| `openclaw.install.requiredPlatformPackages`                                                | वे npm package aliases जिन्हें उनके lockfile platform constraints के current host से match होने पर materialize होना आवश्यक है।                                                                                |
+| `openclaw.startup.deferConfiguredChannelFullLoadUntilAfterListen`                          | setup-runtime channel surfaces को listen से पहले load होने देता है, फिर पूर्ण configured channel plugin को post-listen activation तक defer करता है।                                                      |
 
-Manifest metadata तय करता है कि runtime लोड होने से पहले onboarding में कौन-से provider/channel/setup विकल्प दिखते हैं। `package.json#openclaw.install` onboarding को बताता है कि जब user उन विकल्पों में से एक चुनता है तो उस Plugin को कैसे fetch या enable करना है। install hints को `openclaw.plugin.json` में न ले जाएं।
+Manifest metadata निर्धारित करता है कि runtime load होने से पहले onboarding में कौन-से provider/channel/setup choices दिखाई देंगे। जब उपयोगकर्ता उन choices में से किसी एक को चुनता है, तो `package.json#openclaw.install` onboarding को बताता है कि उस plugin को कैसे fetch या enable करना है। install hints को `openclaw.plugin.json` में न ले जाएँ।
 
-`openclaw.install.minHostVersion` non-bundled Plugin sources के लिए install और manifest registry loading के दौरान enforce किया जाता है। अमान्य values reject की जाती हैं; newer-but-valid values पुराने hosts पर external Plugins को skip करती हैं। Bundled source Plugins को host checkout के साथ co-versioned माना जाता है।
+`openclaw.channel.cliAddOptions` के लिए Commander's long-option syntax का उपयोग करें, जैसे `--initial-sync-limit <n>`। non-negative integer parse करने के लिए `valueType: "int"` सेट करें, या plugin setup adapter को input मिलने से पहले comma-, semicolon-, या newline-delimited input को strings में विभाजित करने के लिए `valueType: "list"` सेट करें। parsed Commander value को अपरिवर्तित रूप से आगे भेजने के लिए `valueType` को छोड़ दें।
 
-`openclaw.install.requiredPlatformPackages` उन npm packages के लिए है जो optional, platform-specific aliases के माध्यम से आवश्यक native binaries expose करते हैं। हर supported platform alias के लिए bare npm package name list करें। npm install के दौरान, OpenClaw केवल उस declared alias को verify करता है जिसके lockfile constraints मौजूदा host से मेल खाते हैं। यदि npm success report करता है लेकिन वह alias omit करता है, तो OpenClaw fresh cache के साथ एक बार retry करता है और alias फिर भी missing हो तो install को roll back करता है।
+non-bundled plugin sources के लिए install और manifest registry loading के दौरान `openclaw.install.minHostVersion` लागू किया जाता है। invalid values अस्वीकार कर दी जाती हैं; newer-but-valid values पुराने hosts पर external plugins को छोड़ देती हैं। bundled source plugins को host checkout के साथ co-versioned माना जाता है।
 
-`openclaw.compat.pluginApi` non-bundled Plugin sources के लिए package install के दौरान enforce किया जाता है। इसे उस OpenClaw plugin SDK/runtime API floor के लिए उपयोग करें जिसके विरुद्ध package बनाया गया था। यह `minHostVersion` से stricter हो सकता है जब किसी Plugin package को newer API चाहिए लेकिन दूसरे flows के लिए lower install hint रखा जाता है। Official OpenClaw release sync default रूप से existing official Plugin API floors को OpenClaw release version तक bump करता है, लेकिन plugin-only releases lower floor रख सकते हैं जब package जानबूझकर older hosts को support करता हो। compatibility contract के रूप में केवल package version का उपयोग न करें। `peerDependencies.openclaw` npm package metadata बना रहता है; OpenClaw install compatibility decisions के लिए `openclaw.compat.pluginApi` contract का उपयोग करता है।
+`openclaw.install.requiredPlatformPackages` उन npm packages के लिए है जो optional, platform-specific aliases के माध्यम से आवश्यक native binaries उपलब्ध कराते हैं। प्रत्येक supported platform alias के लिए bare npm package name सूचीबद्ध करें। npm install के दौरान, OpenClaw केवल उस declared alias को verify करता है जिसके lockfile constraints current host से match करते हैं। यदि npm success report करता है लेकिन उस alias को छोड़ देता है, तो OpenClaw fresh cache के साथ एक बार retry करता है और alias के अब भी missing होने पर install को roll back कर देता है।
 
-Official install-on-demand metadata को `clawhubSpec` का उपयोग करना चाहिए जब Plugin ClawHub पर published हो; onboarding उसे preferred remote source मानता है और install के बाद ClawHub artifact facts record करता है। `npmSpec` उन packages के लिए compatibility fallback बना रहता है जो अभी ClawHub पर move नहीं हुए हैं।
+non-bundled plugin sources के लिए package install के दौरान `openclaw.compat.pluginApi` लागू किया जाता है। इसका उपयोग उस OpenClaw plugin SDK/runtime API floor के लिए करें जिसके विरुद्ध package बनाया गया था। यदि किसी plugin package को नए API की आवश्यकता है, लेकिन वह अन्य प्रवाहों के लिए कम install hint बनाए रखता है, तो यह `minHostVersion` से अधिक strict हो सकता है। Official OpenClaw release sync मौजूदा official plugin API floors को default रूप से OpenClaw release version तक बढ़ाता है, लेकिन plugin-only releases कम floor बनाए रख सकते हैं, जब package जानबूझकर पुराने hosts को support करता हो। केवल package version को compatibility contract के रूप में उपयोग न करें। `peerDependencies.openclaw`, npm package metadata ही रहता है; OpenClaw install compatibility decisions के लिए `openclaw.compat.pluginApi` contract का उपयोग करता है।
 
-Exact npm version pinning पहले से `npmSpec` में रहती है, उदाहरण के लिए `"npmSpec": "@wecom/wecom-openclaw-plugin@1.2.3"`। Official external catalog entries को exact specs के साथ `expectedIntegrity` pair करना चाहिए ताकि update flows fail closed हों यदि fetched npm artifact अब pinned release से मेल नहीं खाता। Interactive onboarding compatibility के लिए trusted registry npm specs अब भी offer करता है, जिनमें bare package names और dist-tags शामिल हैं। Catalog diagnostics exact, floating, integrity-pinned, missing-integrity, package-name mismatch, और invalid default-choice sources में अंतर कर सकते हैं। वे तब भी warn करते हैं जब `expectedIntegrity` मौजूद हो लेकिन कोई valid npm source नहीं हो जिसे वह pin कर सके। जब `expectedIntegrity` मौजूद हो, install/update flows उसे enforce करते हैं; जब वह omitted हो, registry resolution integrity pin के बिना record किया जाता है।
+जब plugin ClawHub पर published हो, तो official install-on-demand metadata को `clawhubSpec` का उपयोग करना चाहिए; onboarding इसे पसंदीदा remote source मानता है और install के बाद ClawHub artifact facts record करता है। उन packages के लिए जो अभी ClawHub पर स्थानांतरित नहीं हुए हैं, `npmSpec` compatibility fallback बना रहता है।
 
-Channel Plugins को `openclaw.setupEntry` देना चाहिए जब status, channel list, या SecretRef scans को पूरा runtime लोड किए बिना configured accounts identify करने की जरूरत हो। setup entry को channel metadata के साथ setup-safe config, status, और secrets adapters expose करने चाहिए; network clients, gateway listeners, और transport runtimes को main extension entrypoint में रखें।
+Exact npm version pinning पहले से `npmSpec` में रहता है, उदाहरण के लिए `"npmSpec": "@wecom/wecom-openclaw-plugin@1.2.3"`। Official external catalog entries को exact specs के साथ `expectedIntegrity` जोड़ना चाहिए, ताकि fetched npm artifact के pinned release से अब match न करने पर update प्रवाह fail closed हों। compatibility के लिए interactive onboarding अभी भी trusted registry npm specs प्रदान करता है, जिनमें bare package names और dist-tags शामिल हैं। Catalog diagnostics exact, floating, integrity-pinned, missing-integrity, package-name mismatch, और invalid default-choice sources के बीच अंतर कर सकते हैं। जब `expectedIntegrity` मौजूद हो लेकिन ऐसा कोई valid npm source न हो जिसे वह pin कर सके, तो वे चेतावनी भी देते हैं। जब `expectedIntegrity` मौजूद हो, तो install/update प्रवाह इसे लागू करते हैं; जब इसे छोड़ दिया जाता है, तो registry resolution को integrity pin के बिना record किया जाता है।
 
-Runtime entrypoint fields source entrypoint fields के लिए package-boundary checks को override नहीं करते। उदाहरण के लिए, `openclaw.runtimeExtensions` किसी escaping `openclaw.extensions` path को loadable नहीं बना सकता।
+जब status, channel list, या SecretRef scans को पूरा runtime load किए बिना configured accounts की पहचान करनी हो, तो channel plugins को `openclaw.setupEntry` प्रदान करना चाहिए। setup entry को channel metadata के साथ setup-safe config, status, और secrets adapters उपलब्ध कराने चाहिए; network clients, gateway listeners, और transport runtimes को main extension entrypoint में रखें।
 
-`openclaw.install.allowInvalidConfigRecovery` जानबूझकर संकीर्ण है। यह arbitrary broken configs को installable नहीं बनाता। आज यह केवल install flows को specific stale bundled-plugin upgrade failures से recover करने देता है, जैसे missing bundled Plugin path या उसी bundled Plugin के लिए stale `channels.<id>` entry। Unrelated config errors अब भी install block करते हैं और operators को `openclaw doctor --fix` पर भेजते हैं।
+रनटाइम एंट्रीपॉइंट फ़ील्ड, स्रोत एंट्रीपॉइंट फ़ील्ड के लिए पैकेज-सीमा जाँचों को ओवरराइड नहीं करते। उदाहरण के लिए, `openclaw.runtimeExtensions` किसी सीमा से बाहर जाते `openclaw.extensions` पथ को लोड करने योग्य नहीं बना सकता।
 
-`openclaw.channel.persistedAuthState` एक tiny checker module के लिए package metadata है:
+`openclaw.install.allowInvalidConfigRecovery` जानबूझकर सीमित है। यह मनमाने ढंग से खराब कॉन्फ़िग को इंस्टॉल करने योग्य नहीं बनाता। वर्तमान में यह केवल इंस्टॉल प्रवाहों को विशिष्ट पुराने बंडल किए गए Plugin अपग्रेड विफलताओं से उबरने देता है, जैसे बंडल किए गए Plugin का पथ अनुपलब्ध होना या उसी बंडल किए गए Plugin के लिए पुरानी `channels.<id>` प्रविष्टि। असंबंधित कॉन्फ़िग त्रुटियाँ अब भी इंस्टॉल को अवरुद्ध करती हैं और ऑपरेटरों को `openclaw doctor --fix` पर भेजती हैं।
+
+`openclaw.channel.persistedAuthState` एक छोटे जाँचकर्ता मॉड्यूल के लिए पैकेज मेटाडेटा है:
 
 ```json
 {
@@ -1310,9 +1272,9 @@ Runtime entrypoint fields source entrypoint fields के लिए package-boun
 }
 ```
 
-इसे तब उपयोग करें जब setup, doctor, status, या read-only presence flows को पूरा channel Plugin लोड होने से पहले cheap yes/no auth probe चाहिए। Persisted auth state configured channel state नहीं है: इस metadata का उपयोग Plugins को auto-enable करने, runtime dependencies repair करने, या यह तय करने के लिए न करें कि channel runtime load होना चाहिए या नहीं। target export एक small function होना चाहिए जो केवल persisted state पढ़ता हो; इसे full channel runtime barrel के through route न करें।
+इसका उपयोग तब करें जब सेटअप, डॉक्टर, स्थिति या केवल-पठन उपस्थिति प्रवाहों को पूरा चैनल Plugin लोड होने से पहले एक सस्ती हाँ/नहीं प्रमाणीकरण जाँच की आवश्यकता हो। स्थायी प्रमाणीकरण स्थिति, कॉन्फ़िगर की गई चैनल स्थिति नहीं है: Plugin को स्वतः सक्षम करने, रनटाइम निर्भरताओं की मरम्मत करने या यह तय करने के लिए कि किसी चैनल रनटाइम को लोड होना चाहिए या नहीं, इस मेटाडेटा का उपयोग न करें। लक्ष्य एक्सपोर्ट एक छोटा फ़ंक्शन होना चाहिए जो केवल स्थायी स्थिति पढ़े; इसे पूरे चैनल रनटाइम बैरल के माध्यम से रूट न करें।
 
-`openclaw.channel.configuredState` cheap env-only configured checks के लिए वही shape follow करता है:
+`openclaw.channel.configuredState` कम लागत वाली कॉन्फ़िगरेशन जाँचों का समर्थन करता है। जब पर्यावरण चर पर्याप्त हों, तो घोषणात्मक पर्यावरण मेटाडेटा को प्राथमिकता दें:
 
 ```json
 {
@@ -1320,43 +1282,44 @@ Runtime entrypoint fields source entrypoint fields के लिए package-boun
     "channel": {
       "id": "telegram",
       "configuredState": {
-        "specifier": "./configured-state",
-        "exportName": "hasTelegramConfiguredState"
+        "env": {
+          "allOf": ["TELEGRAM_BOT_TOKEN"]
+        }
       }
     }
   }
 }
 ```
 
-इसे तब उपयोग करें जब कोई channel env या अन्य tiny non-runtime inputs से configured-state का उत्तर दे सकता हो। यदि check को full config resolution या real channel runtime चाहिए, तो उस logic को Plugin `config.hasConfiguredState` hook में ही रखें।
+जब प्रत्येक सूचीबद्ध चर आवश्यक हो, तब `env.allOf` का उपयोग करें और जब कोई भी एक गैर-रिक्त चर पर्याप्त हो, तब `env.anyOf` का उपयोग करें। यदि किसी छोटे गैर-रनटाइम जाँच को पर्यावरण मेटाडेटा से अधिक की आवश्यकता हो, तो `persistedAuthState` के लिए दिखाए अनुसार `specifier` के साथ `exportName` का उपयोग करें; जब `env` मौजूद होता है, तो OpenClaw उस मॉड्यूल को लोड किए बिना इसका उपयोग करता है। यदि जाँच को पूर्ण कॉन्फ़िग समाधान या वास्तविक चैनल रनटाइम की आवश्यकता हो, तो उस लॉजिक को इसके बजाय Plugin के `config.hasConfiguredState` हुक में रखें।
 
-## Discovery precedence (duplicate plugin ids)
+## खोज प्राथमिकता (डुप्लिकेट Plugin आईडी)
 
-OpenClaw कई roots से Plugins discover करता है। raw filesystem scan order के लिए, [Plugin scan
-order](/hi/gateway/configuration-reference#plugin-scan-order) देखें। यदि दो discoveries का समान `id` है, तो केवल **highest-precedence** manifest रखा जाता है; lower-precedence duplicates को साथ में लोड करने के बजाय drop कर दिया जाता है।
+OpenClaw तीन रूट से Plugin खोजता है, जिनकी जाँच इस क्रम में होती है: OpenClaw के साथ भेजे गए बंडल किए गए Plugin, वैश्विक इंस्टॉल रूट (`~/.openclaw/extensions`), और वर्तमान कार्यस्थान रूट (`<workspace>/.openclaw/extensions`), साथ ही कोई भी स्पष्ट `plugins.load.paths` प्रविष्टियाँ।
 
-Precedence, highest to lowest:
+यदि दो खोजों में समान `id` हो, तो केवल **सर्वोच्च-प्राथमिकता** वाला मैनिफ़ेस्ट रखा जाता है; निम्न-प्राथमिकता वाले डुप्लिकेट को साथ में लोड करने के बजाय हटा दिया जाता है। प्राथमिकता, सर्वोच्च से निम्नतम:
 
-1. **Config-selected** — `plugins.entries.<id>` में स्पष्ट रूप से pinned path
-2. **Bundled** — OpenClaw के साथ shipped Plugins
-3. **Global install** — global OpenClaw Plugin root में installed Plugins
-4. **Workspace** — मौजूदा workspace के relative discover किए गए Plugins
+1. **कॉन्फ़िग द्वारा चयनित** — `plugins.entries.<id>` में स्पष्ट रूप से पिन किया गया पथ
+2. **ट्रैक किए गए इंस्टॉल रिकॉर्ड से मेल खाने वाला वैश्विक इंस्टॉल** — `openclaw plugin install`/`openclaw plugin update` के माध्यम से इंस्टॉल किया गया ऐसा Plugin, जिसे OpenClaw की इंस्टॉल ट्रैकिंग उसी आईडी के लिए पहचानती है, भले ही वह आईडी किसी बंडल किए गए Plugin की भी हो
+3. **बंडल किया गया** — OpenClaw के साथ भेजे गए Plugin
+4. **कार्यस्थान** — वर्तमान कार्यस्थान के सापेक्ष खोजे गए Plugin
+5. कोई अन्य खोजा गया उम्मीदवार
 
-Implications:
+निहितार्थ:
 
-- workspace में पड़ी bundled Plugin की forked या stale copy bundled build को shadow नहीं करेगी।
-- bundled Plugin को local one से सच में override करने के लिए, उसे `plugins.entries.<id>` के जरिए pin करें ताकि वह workspace discovery पर निर्भर रहने के बजाय precedence से जीते।
-- Duplicate drops log किए जाते हैं ताकि Doctor और startup diagnostics discarded copy की ओर point कर सकें।
-- Config-selected duplicate overrides diagnostics में explicit overrides के रूप में word किए जाते हैं, लेकिन फिर भी warn करते हैं ताकि stale forks और accidental shadows visible रहें।
+- कार्यस्थान या वैश्विक रूट में बिना ट्रैकिंग के मौजूद किसी बंडल किए गए Plugin की फ़ोर्क की गई या पुरानी प्रति, बंडल किए गए बिल्ड को प्रतिस्थापित नहीं करेगी।
+- किसी बंडल किए गए Plugin को ओवरराइड करने के लिए, या तो उस आईडी के लिए `openclaw plugin install` चलाएँ ताकि ट्रैक किया गया वैश्विक इंस्टॉल बंडल की गई प्रति से उच्च प्राथमिकता पाए, या `plugins.entries.<id>` के माध्यम से किसी विशिष्ट पथ को पिन करें ताकि वह कॉन्फ़िग द्वारा चयनित प्राथमिकता से विजयी हो।
+- डुप्लिकेट हटाए जाने को लॉग किया जाता है, ताकि डॉक्टर और स्टार्टअप निदान छोड़ी गई प्रति की ओर संकेत कर सकें।
+- कॉन्फ़िग द्वारा चयनित डुप्लिकेट ओवरराइड को निदान में स्पष्ट ओवरराइड के रूप में लिखा जाता है, लेकिन फिर भी चेतावनी दी जाती है ताकि पुराने फ़ोर्क और आकस्मिक प्रतिस्थापन दिखाई देते रहें।
 
-## JSON Schema requirements
+## JSON Schema आवश्यकताएँ
 
-- **हर Plugin को JSON Schema के साथ शिप होना चाहिए**, भले ही वह कोई कॉन्फ़िग स्वीकार न करता हो।
-- खाली स्कीमा स्वीकार्य है (उदाहरण के लिए, `{ "type": "object", "additionalProperties": false }`)।
-- स्कीमा रनटाइम पर नहीं, बल्कि कॉन्फ़िग पढ़ने/लिखने के समय सत्यापित किए जाते हैं।
-- नए कॉन्फ़िग कुंजियों के साथ किसी बंडल किए गए Plugin को विस्तारित या फ़ोर्क करते समय, उसी समय उस Plugin के `openclaw.plugin.json` `configSchema` को अपडेट करें। बंडल किए गए Plugin स्कीमा सख्त होते हैं, इसलिए `configSchema.properties` में `myNewKey` जोड़े बिना उपयोगकर्ता कॉन्फ़िग में `plugins.entries.<id>.config.myNewKey` जोड़ना Plugin रनटाइम लोड होने से पहले अस्वीकार कर दिया जाएगा।
+- **प्रत्येक Plugin को JSON Schema प्रदान करना आवश्यक है**, भले ही वह कोई कॉन्फ़िग स्वीकार न करता हो।
+- रिक्त स्कीमा स्वीकार्य है (उदाहरण के लिए, `{ "type": "object", "additionalProperties": false }`)।
+- स्कीमा का सत्यापन कॉन्फ़िग पढ़ने/लिखने के समय होता है, रनटाइम पर नहीं।
+- किसी बंडल किए गए Plugin को नई कॉन्फ़िग कुंजियों के साथ विस्तारित या फ़ोर्क करते समय, उसी समय उस Plugin के `openclaw.plugin.json` `configSchema` को भी अपडेट करें। बंडल किए गए Plugin के स्कीमा सख्त होते हैं, इसलिए `myNewKey` को `configSchema.properties` में जोड़े बिना उपयोगकर्ता कॉन्फ़िग में `plugins.entries.<id>.config.myNewKey` जोड़ने पर Plugin रनटाइम लोड होने से पहले ही उसे अस्वीकार कर दिया जाएगा।
 
-उदाहरण स्कीमा एक्सटेंशन:
+स्कीमा विस्तार का उदाहरण:
 
 ```json
 {
@@ -1374,40 +1337,37 @@ Implications:
 
 ## सत्यापन व्यवहार
 
-- अज्ञात `channels.*` कुंजियाँ **त्रुटियाँ** हैं, जब तक चैनल id को
-  किसी Plugin मेनिफ़ेस्ट द्वारा घोषित न किया गया हो।
-- `plugins.entries.<id>`, `plugins.allow`, `plugins.deny`, और `plugins.slots.*`
-  को **खोजे जा सकने वाले** Plugin ids का संदर्भ देना चाहिए। अज्ञात ids **त्रुटियाँ** हैं।
-- यदि कोई Plugin इंस्टॉल है लेकिन उसका मेनिफ़ेस्ट या स्कीमा टूटा हुआ या अनुपस्थित है,
-  तो सत्यापन विफल हो जाता है और Doctor Plugin त्रुटि रिपोर्ट करता है।
-- यदि Plugin कॉन्फ़िग मौजूद है लेकिन Plugin **अक्षम** है, तो कॉन्फ़िग रखा जाता है और
-  Doctor + लॉग में एक **चेतावनी** दिखाई जाती है।
+- अज्ञात `channels.*` कुंजियाँ **त्रुटियाँ** हैं, जब तक चैनल आईडी किसी Plugin मैनिफ़ेस्ट द्वारा घोषित न हो। यदि वही आईडी `plugins.allow`, `plugins.entries`, या `plugins.installs` (ऐसा Plugin जिसका संदर्भ दिया गया है, लेकिन जो वर्तमान में खोजने योग्य नहीं है) में भी दिखाई देती है, तो OpenClaw इसके बजाय इसे घटाकर **चेतावनी** कर देता है।
+- अज्ञात Plugin आईडी का संदर्भ देने वाले `plugins.entries.<id>`, `plugins.allow`, और `plugins.deny` **चेतावनियाँ** ("पुरानी कॉन्फ़िग प्रविष्टि अनदेखी की गई") हैं, त्रुटियाँ नहीं, ताकि अपग्रेड और हटाए गए/पुनःनामित Plugin Gateway स्टार्टअप को अवरुद्ध न करें।
+- अज्ञात Plugin आईडी का संदर्भ देने वाला `plugins.slots.memory` एक **त्रुटि** है, ज्ञात `memory-lancedb` आधिकारिक बाहरी Plugin को छोड़कर, जिसके लिए इसके बजाय चेतावनी दी जाती है।
+- यदि कोई Plugin इंस्टॉल है, लेकिन उसका मैनिफ़ेस्ट या स्कीमा खराब अथवा अनुपलब्ध है, तो सत्यापन विफल हो जाता है और डॉक्टर Plugin त्रुटि की रिपोर्ट करता है।
+- यदि Plugin कॉन्फ़िग मौजूद है, लेकिन Plugin **अक्षम** है, तो कॉन्फ़िग रखा जाता है और डॉक्टर + लॉग में एक **चेतावनी** दिखाई जाती है।
 
 पूर्ण `plugins.*` स्कीमा के लिए [कॉन्फ़िगरेशन संदर्भ](/hi/gateway/configuration) देखें।
 
-## नोट्स
+## टिप्पणियाँ
 
-- मेनिफ़ेस्ट **मूल OpenClaw Plugin** के लिए आवश्यक है, जिसमें स्थानीय फ़ाइल सिस्टम लोड भी शामिल हैं। रनटाइम फिर भी Plugin मॉड्यूल को अलग से लोड करता है; मेनिफ़ेस्ट केवल खोज + सत्यापन के लिए है।
-- मूल मेनिफ़ेस्ट JSON5 के साथ पार्स किए जाते हैं, इसलिए टिप्पणियाँ, trailing commas, और unquoted keys तब तक स्वीकार किए जाते हैं जब तक अंतिम मान अभी भी एक ऑब्जेक्ट हो।
-- मेनिफ़ेस्ट लोडर केवल दस्तावेज़ित मेनिफ़ेस्ट फ़ील्ड पढ़ता है। कस्टम शीर्ष-स्तरीय कुंजियों से बचें।
-- जब किसी Plugin को उनकी आवश्यकता न हो, तो `channels`, `providers`, `cliBackends`, और `skills` सभी छोड़े जा सकते हैं।
-- `providerCatalogEntry` हल्का रहना चाहिए और व्यापक रनटाइम कोड आयात नहीं करना चाहिए; इसे स्थिर provider catalog मेटाडेटा या संकीर्ण खोज डिस्क्रिप्टर के लिए उपयोग करें, request-time execution के लिए नहीं।
-- विशिष्ट Plugin प्रकार `plugins.slots.*` के माध्यम से चुने जाते हैं: `plugins.slots.memory` के माध्यम से `kind: "memory"`, `plugins.slots.contextEngine` के माध्यम से `kind: "context-engine"` (डिफ़ॉल्ट `legacy`)।
-- इस मेनिफ़ेस्ट में विशिष्ट Plugin प्रकार घोषित करें। Runtime-entry `OpenClawPluginDefinition.kind` deprecated है और पुराने Plugin के लिए केवल compatibility fallback के रूप में रहता है।
-- Env-var मेटाडेटा (`setup.providers[].envVars`, deprecated `providerAuthEnvVars`, और `channelEnvVars`) केवल घोषणात्मक है। Status, audit, Cron delivery validation, और अन्य read-only surfaces अभी भी किसी env var को configured मानने से पहले Plugin trust और effective activation policy लागू करते हैं।
-- provider code की आवश्यकता वाले runtime wizard metadata के लिए, [Provider runtime hooks](/hi/plugins/architecture-internals#provider-runtime-hooks) देखें।
-- यदि आपका Plugin native modules पर निर्भर करता है, तो build steps और किसी भी package-manager allowlist आवश्यकताओं का दस्तावेज़ बनाएं (उदाहरण के लिए, pnpm `allow-build-scripts` + `pnpm rebuild <package>`)।
+- स्थानीय फ़ाइल सिस्टम लोड सहित, **मूल OpenClaw Plugin के लिए मैनिफ़ेस्ट आवश्यक है**। रनटाइम अब भी Plugin मॉड्यूल को अलग से लोड करता है; मैनिफ़ेस्ट केवल खोज + सत्यापन के लिए है।
+- मूल मैनिफ़ेस्ट को JSON5 के साथ पार्स किया जाता है, इसलिए टिप्पणियाँ, अंतिम अल्पविराम और उद्धरण-रहित कुंजियाँ स्वीकार की जाती हैं, बशर्ते अंतिम मान अब भी एक ऑब्जेक्ट हो।
+- मैनिफ़ेस्ट लोडर केवल दस्तावेजीकृत मैनिफ़ेस्ट फ़ील्ड पढ़ता है। कस्टम शीर्ष-स्तरीय कुंजियों से बचें।
+- जब किसी Plugin को उनकी आवश्यकता न हो, तो `channels`, `providers`, `cliBackends`, और `skills` सभी को छोड़ा जा सकता है।
+- `providerCatalogEntry` हल्का रहना चाहिए और व्यापक रनटाइम कोड आयात नहीं करना चाहिए; इसका उपयोग स्थिर प्रदाता कैटलॉग मेटाडेटा या सीमित खोज विवरणकों के लिए करें, अनुरोध-समय निष्पादन के लिए नहीं।
+- विशिष्ट Plugin प्रकारों का चयन `plugins.slots.*` के माध्यम से होता है: `plugins.slots.memory` के माध्यम से `kind: "memory"` (डिफ़ॉल्ट `memory-core`), `plugins.slots.contextEngine` के माध्यम से `kind: "context-engine"` (डिफ़ॉल्ट `legacy`)।
+- इस मैनिफ़ेस्ट में विशिष्ट Plugin प्रकार घोषित करें। रनटाइम-प्रविष्टि `OpenClawPluginDefinition.kind` अप्रचलित है और केवल पुराने Plugin के लिए संगतता फ़ॉलबैक के रूप में बनी हुई है।
+- `setup.providers[].envVars` में पर्यावरण-चर मेटाडेटा केवल घोषणात्मक है। स्थिति, ऑडिट, Cron डिलीवरी सत्यापन और अन्य केवल-पठन सतहें किसी पर्यावरण चर को कॉन्फ़िगर किया हुआ मानने से पहले अब भी Plugin विश्वास और प्रभावी सक्रियण नीति लागू करती हैं।
+- प्रदाता कोड की आवश्यकता वाले रनटाइम विज़ार्ड मेटाडेटा के लिए, [प्रदाता रनटाइम हुक](/hi/plugins/architecture-internals#provider-runtime-hooks) देखें।
+- यदि आपका Plugin मूल मॉड्यूल पर निर्भर है, तो बिल्ड चरणों और पैकेज-मैनेजर अनुमति-सूची की किसी भी आवश्यकता का दस्तावेज़ीकरण करें (उदाहरण के लिए, pnpm `allow-build-scripts` + `pnpm rebuild <package>`)।
 
 ## संबंधित
 
 <CardGroup cols={3}>
-  <Card title="Building plugins" href="/hi/plugins/building-plugins" icon="rocket">
+  <Card title="Plugin बनाना" href="/hi/plugins/building-plugins" icon="rocket">
     Plugin के साथ शुरुआत करना।
   </Card>
-  <Card title="Plugin architecture" href="/hi/plugins/architecture" icon="diagram-project">
-    आंतरिक आर्किटेक्चर और capability model।
+  <Card title="Plugin आर्किटेक्चर" href="/hi/plugins/architecture" icon="diagram-project">
+    आंतरिक आर्किटेक्चर और क्षमता मॉडल।
   </Card>
-  <Card title="SDK overview" href="/hi/plugins/sdk-overview" icon="book">
-    Plugin SDK संदर्भ और subpath imports।
+  <Card title="SDK अवलोकन" href="/hi/plugins/sdk-overview" icon="book">
+    Plugin SDK संदर्भ और उपपथ आयात।
   </Card>
 </CardGroup>

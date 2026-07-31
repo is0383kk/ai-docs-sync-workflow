@@ -1,14 +1,15 @@
 ---
 read_when:
     - API anahtarı gerektirmeyen bir web arama sağlayıcısı istiyorsunuz
-    - Web araması için DuckDuckGo'yu kullanmak istiyorsunuz
-    - Açıkça seçilmiş, anahtarsız bir arama sağlayıcısı istiyorsunuz
+    - web_search için DuckDuckGo kullanmak istiyorsunuz
+    - Açıkça seçilmiş, anahtar gerektirmeyen bir arama sağlayıcısı istiyorsunuz
 summary: DuckDuckGo web araması -- anahtar gerektirmeyen sağlayıcı (deneysel, HTML tabanlı)
 title: DuckDuckGo araması
 x-i18n:
-    generated_at: "2026-07-12T12:52:23Z"
+    generated_at: "2026-07-27T00:07:21Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 84e90532de276dcb3f73c67015dffe5f5a62be673e44a19053b2b1dfcb0986ac
     source_path: tools/duckduckgo-search.md
@@ -18,7 +19,7 @@ x-i18n:
 OpenClaw, DuckDuckGo'yu **anahtar gerektirmeyen** bir `web_search` sağlayıcısı olarak destekler. API anahtarı veya hesap gerekmez.
 
 <Warning>
-  DuckDuckGo, resmi bir API değil, DuckDuckGo'nun JavaScript kullanmayan HTML arama sayfalarından veri alan **deneysel ve resmi olmayan** bir entegrasyondur. Bot doğrulama sayfaları veya HTML değişiklikleri nedeniyle zaman zaman bozulmalar yaşanabilir.
+  DuckDuckGo, resmi bir API değil, DuckDuckGo'nun JavaScript kullanmayan HTML arama sayfalarından veri ayıklayan **deneysel ve resmi olmayan** bir entegrasyondur. Bot doğrulama sayfaları veya HTML değişiklikleri nedeniyle zaman zaman bozulması beklenebilir.
 </Warning>
 
 ## Kurulum
@@ -50,7 +51,7 @@ Sağlayıcıyı doğrudan yapılandırmada ayarlayın:
 }
 ```
 
-Bölge ve SafeSearch için isteğe bağlı Plugin düzeyi ayarlar:
+Bölge ve SafeSearch için isteğe bağlı Plugin düzeyi ayarları:
 
 ```json5
 {
@@ -76,7 +77,7 @@ Arama sorgusu.
 </ParamField>
 
 <ParamField path="count" type="number" default="5">
-Döndürülecek sonuç sayısı (1-10).
+Döndürülecek sonuçlar (1-10).
 </ParamField>
 
 <ParamField path="region" type="string">
@@ -91,18 +92,18 @@ SafeSearch düzeyi.
 
 ## Notlar
 
-- **API anahtarı gerekmez** -- DuckDuckGo, `web_search` sağlayıcısı olarak seçildikten sonra çalışır.
-- **Deneysel** -- resmi bir API veya SDK kullanmak yerine DuckDuckGo'nun JavaScript kullanmayan HTML arama sayfalarından veri alır. Sonuçlar, bildirim yapılmadan değişebilecek sayfa yapısına bağlıdır.
-- **Bot doğrulaması riski** -- DuckDuckGo, yoğun veya otomatik kullanım sırasında CAPTCHA gösterebilir ya da istekleri engelleyebilir.
-- **Yalnızca açıkça seçilir** -- OpenClaw'ın otomatik algılama özelliği yalnızca kullanılabilir kimlik bilgilerine sahip sağlayıcıları dikkate aldığından DuckDuckGo gibi anahtar gerektirmeyen bir sağlayıcı hiçbir zaman otomatik olarak seçilmez; `provider: "duckduckgo"` ayarını yapmanız gerekir.
-- **Yapılandırılmadığında SafeSearch varsayılan olarak `moderate` değerini kullanır.**
+- **API anahtarı yok** -- DuckDuckGo, `web_search` sağlayıcısı olarak seçildiğinde çalışır.
+- **Deneysel** -- resmi bir API veya SDK kullanmak yerine DuckDuckGo'nun JavaScript kullanmayan HTML arama sayfalarından veri ayıklar. Sonuçlar, bildirimde bulunulmadan değişebilecek sayfa yapısına bağlıdır.
+- **Bot doğrulama riski** -- DuckDuckGo, yoğun veya otomatik kullanımda CAPTCHA sunabilir ya da istekleri engelleyebilir.
+- **Yalnızca açık seçim** -- OpenClaw'ın otomatik algılaması yalnızca kullanılabilir kimlik bilgilerine sahip sağlayıcıları dikkate alır; bu nedenle DuckDuckGo gibi anahtar gerektirmeyen bir sağlayıcı hiçbir zaman otomatik olarak seçilmez. `provider: "duckduckgo"` değerini ayarlamanız gerekir.
+- Yapılandırılmadığında **SafeSearch varsayılan olarak `moderate` değerini kullanır**.
 
 <Tip>
-  Üretim ortamında kullanım için [Brave Search](/tr/tools/brave-search) (ücretsiz katman mevcuttur) veya API destekli başka bir sağlayıcı kullanmayı değerlendirin.
+  Üretim kullanımı için [Brave Search](/tr/tools/brave-search) (ücretsiz katman mevcuttur) veya API destekli başka bir sağlayıcı kullanmayı değerlendirin.
 </Tip>
 
-## İlgili içerikler
+## İlgili
 
 - [Web Aramasına genel bakış](/tr/tools/web) -- tüm sağlayıcılar ve otomatik algılama
-- [Brave Search](/tr/tools/brave-search) -- ücretsiz katmanlı yapılandırılmış sonuçlar
-- [Exa Search](/tr/tools/exa-search) -- içerik ayıklamalı sinir ağı tabanlı arama
+- [Brave Search](/tr/tools/brave-search) -- ücretsiz katmanla yapılandırılmış sonuçlar
+- [Exa Search](/tr/tools/exa-search) -- içerik çıkarma özellikli sinir ağı tabanlı arama

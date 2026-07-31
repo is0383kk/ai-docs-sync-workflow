@@ -1,12 +1,13 @@
 ---
 read_when:
-    - ドキュメント全体の構成を把握したい場合
-summary: すべてのOpenClawドキュメントにリンクするハブ
+    - ドキュメント全体のマップが必要な場合
+summary: OpenClaw のすべてのドキュメントへのリンクをまとめたハブ
 title: ドキュメントハブ
 x-i18n:
-    generated_at: "2026-07-11T22:42:18Z"
+    generated_at: "2026-07-26T09:19:04Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 9b51fc77155b2e7ed6cb6e36d375585ebd457c3d89f97c4151877d1aae20717f
     source_path: start/hubs.md
@@ -14,12 +15,12 @@ x-i18n:
 ---
 
 <Note>
-OpenClaw を初めて使用する場合は、[はじめに](/ja-JP/start/getting-started)から開始してください。
+OpenClaw を初めて使用する場合は、[はじめに](/ja-JP/start/getting-started)から始めてください。
 </Note>
 
-左側のナビゲーションに表示されない詳細解説やリファレンスドキュメントを含むすべてのページは、以下のハブから見つけられます。
+左側のナビゲーションに表示されない詳細解説やリファレンスドキュメントを含む、すべてのページを見つけるには、これらのハブを使用してください。
 
-## まずはこちら
+## ここから始める
 
 - [索引](/ja-JP)
 - [はじめに](/ja-JP/start/getting-started)
@@ -28,19 +29,19 @@ OpenClaw を初めて使用する場合は、[はじめに](/ja-JP/start/getting
 - [セットアップ](/ja-JP/start/setup)
 - [ダッシュボード（ローカル Gateway）](http://127.0.0.1:18789/)
 - [ヘルプ](/ja-JP/help)
-- [ドキュメント一覧](/ja-JP/start/docs-directory)
+- [ドキュメントディレクトリ](/ja-JP/start/docs-directory)
 - [設定](/ja-JP/gateway/configuration)
 - [設定例](/ja-JP/gateway/configuration-examples)
 - [OpenClaw アシスタント](/ja-JP/start/openclaw)
 - [ショーケース](/ja-JP/start/showcase)
-- [背景世界](/ja-JP/start/lore)
+- [物語](/ja-JP/start/lore)
 
 ## インストールと更新
 
 - [Docker](/ja-JP/install/docker)
 - [Nix](/ja-JP/install/nix)
 - [更新とロールバック](/ja-JP/install/updating)
-- [Bun ワークフロー（試験的）](/ja-JP/install/bun)
+- [Bun ワークフロー（実験的）](/ja-JP/install/bun)
 
 ## コア概念
 
@@ -65,15 +66,15 @@ OpenClaw を初めて使用する場合は、[はじめに](/ja-JP/start/getting
 - [プレゼンス](/ja-JP/concepts/presence)
 - [検出とトランスポート](/ja-JP/gateway/discovery)
 - [Bonjour](/ja-JP/gateway/bonjour)
-- [チャンネルルーティング](/ja-JP/channels/channel-routing)
+- [チャネルルーティング](/ja-JP/channels/channel-routing)
 - [グループ](/ja-JP/channels/groups)
 - [グループメッセージ](/ja-JP/channels/group-messages)
 - [モデルのフェイルオーバー](/ja-JP/concepts/model-failover)
 - [OAuth](/ja-JP/concepts/oauth)
 
-## プロバイダーと受信経路
+## プロバイダーと受信
 
-- [チャットチャンネルハブ](/ja-JP/channels)
+- [チャットチャネルハブ](/ja-JP/channels)
 - [モデルプロバイダーハブ](/ja-JP/providers/models)
 - [Discord](/ja-JP/channels/discord)
 - [iMessage](/ja-JP/channels/imessage)
@@ -92,13 +93,13 @@ OpenClaw を初めて使用する場合は、[はじめに](/ja-JP/start/getting
 
 - [Gateway 運用手順書](/ja-JP/gateway)
 - [ネットワークモデル](/ja-JP/network#core-model)
-- [Gateway のペアリング](/ja-JP/gateway/pairing)
-- [Gateway のロック](/ja-JP/gateway/gateway-lock)
+- [Gateway ペアリング](/ja-JP/gateway/pairing)
+- [Gateway ロック](/ja-JP/gateway/gateway-lock)
 - [バックグラウンドプロセス](/ja-JP/gateway/background-process)
-- [健全性](/ja-JP/gateway/health)
+- [ヘルス](/ja-JP/gateway/health)
 - [Heartbeat](/ja-JP/gateway/heartbeat)
-- [診断](/ja-JP/gateway/doctor)
-- [ログ記録](/ja-JP/gateway/logging)
+- [Doctor](/ja-JP/gateway/doctor)
+- [ロギング](/ja-JP/gateway/logging)
 - [サンドボックス化](/ja-JP/gateway/sandboxing)
 - [ダッシュボード](/ja-JP/web/dashboard)
 - [コントロール UI](/ja-JP/web/control-ui)
@@ -156,11 +157,11 @@ OpenClaw を初めて使用する場合は、[はじめに](/ja-JP/start/getting
 - [macOS WebChat](/ja-JP/platforms/mac/webchat)
 - [macOS Canvas](/ja-JP/platforms/mac/canvas)
 - [macOS 子プロセス](/ja-JP/platforms/mac/child-process)
-- [macOS の健全性](/ja-JP/platforms/mac/health)
+- [macOS ヘルス](/ja-JP/platforms/mac/health)
 - [macOS アイコン](/ja-JP/platforms/mac/icon)
-- [macOS ログ記録](/ja-JP/platforms/mac/logging)
+- [macOS ロギング](/ja-JP/platforms/mac/logging)
 - [macOS 権限](/ja-JP/platforms/mac/permissions)
-- [macOS リモートアクセス](/ja-JP/platforms/mac/remote)
+- [macOS リモート](/ja-JP/platforms/mac/remote)
 - [macOS 署名](/ja-JP/platforms/mac/signing)
 - [macOS Gateway（launchd）](/ja-JP/platforms/mac/bundled-gateway)
 - [macOS XPC](/ja-JP/platforms/mac/xpc)
@@ -175,7 +176,7 @@ OpenClaw を初めて使用する場合は、[はじめに](/ja-JP/start/getting
 - [Plugin マニフェスト](/ja-JP/plugins/manifest)
 - [エージェントツール](/ja-JP/plugins/building-plugins#registering-agent-tools)
 - [Plugin バンドル](/ja-JP/plugins/bundles)
-- [ClawHub](/clawhub)
+- [ClawHub](/ja-JP/clawhub)
 - [機能クックブック](/ja-JP/plugins/adding-capabilities)
 - [音声通話 Plugin](/ja-JP/plugins/voice-call)
 - [Zalo ユーザー Plugin](/ja-JP/plugins/zalouser)
@@ -183,7 +184,7 @@ OpenClaw を初めて使用する場合は、[はじめに](/ja-JP/start/getting
 ## ワークスペースとテンプレート
 
 - [Skills](/ja-JP/tools/skills)
-- [ClawHub](/clawhub)
+- [ClawHub](/ja-JP/clawhub)
 - [Skills の設定](/ja-JP/tools/skills-config)
 - [デフォルトの AGENTS](/ja-JP/reference/AGENTS.default)
 - [テンプレート：AGENTS](/ja-JP/reference/templates/AGENTS)

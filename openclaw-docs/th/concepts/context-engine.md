@@ -1,37 +1,38 @@
 ---
 read_when:
     - คุณต้องการทำความเข้าใจว่า OpenClaw ประกอบบริบทของโมเดลอย่างไร
-    - คุณกำลังสลับระหว่างเอนจินแบบเดิมและเอนจิน Plugin
-    - คุณกำลังสร้าง Plugin เอนจินบริบท
+    - คุณกำลังสลับระหว่างเอนจินแบบเดิมกับเอนจิน Plugin
+    - คุณกำลังสร้าง Plugin สำหรับกลไกบริบท
 sidebarTitle: Context engine
-summary: 'เอนจินบริบท: การประกอบบริบทแบบเสียบต่อได้, Compaction, และวงจรชีวิตของเอเจนต์ย่อย'
-title: เอนจินบริบท
+summary: 'กลไกบริบท: การประกอบบริบทแบบถอดเปลี่ยนได้, Compaction และวงจรชีวิตของเอเจนต์ย่อย'
+title: กลไกบริบท
 x-i18n:
-    generated_at: "2026-06-30T14:32:41Z"
-    model: gpt-5.5
+    generated_at: "2026-07-20T05:51:56Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f0ed65cbb72b14b1a6e8d4d9a394f730a48ada35d77e34c12b3356162b281eec
+    source_hash: 721780790dacebec44e3c7540b225bd853ee66bf5ae066b84df4344614d93a62
     source_path: concepts/context-engine.md
     workflow: 16
 ---
 
-**เอนจินบริบท** ควบคุมวิธีที่ OpenClaw สร้างบริบทโมเดลสำหรับแต่ละรัน: จะรวมข้อความใด วิธีสรุปประวัติเก่ากว่า และวิธีจัดการบริบทข้ามขอบเขต subagent
+A **กลไกบริบท** ควบคุมวิธีที่ OpenClaw สร้างบริบทของโมเดลสำหรับการเรียกใช้แต่ละครั้ง ได้แก่ จะรวมข้อความใด วิธีสรุปประวัติเก่า และวิธีจัดการบริบทข้ามขอบเขตของเอเจนต์ย่อย
 
-OpenClaw มาพร้อมเอนจิน `legacy` ในตัวและใช้เป็นค่าเริ่มต้น - ผู้ใช้ส่วนใหญ่ไม่จำเป็นต้องเปลี่ยนสิ่งนี้ ติดตั้งและเลือกเอนจิน Plugin เฉพาะเมื่อคุณต้องการพฤติกรรมการประกอบ, Compaction, หรือการเรียกคืนข้ามเซสชันที่แตกต่างออกไป
+OpenClaw มาพร้อมกลไก `legacy` ในตัวและใช้เป็นค่าเริ่มต้น ติดตั้งและเลือกกลไก Plugin เฉพาะเมื่อต้องการลักษณะการประกอบบริบท การทำ Compaction หรือการเรียกคืนข้อมูลข้ามเซสชันที่แตกต่างออกไป
 
 ## เริ่มต้นอย่างรวดเร็ว
 
 <Steps>
-  <Step title="ตรวจสอบว่าเอนจินใดใช้งานอยู่">
+  <Step title="ตรวจสอบว่ากลไกใดกำลังทำงานอยู่">
     ```bash
     openclaw doctor
-    # or inspect config directly:
+    # หรือตรวจสอบการกำหนดค่าโดยตรง:
     cat ~/.openclaw/openclaw.json | jq '.plugins.slots.contextEngine'
     ```
   </Step>
-  <Step title="ติดตั้งเอนจิน Plugin">
-    Plugin เอนจินบริบทติดตั้งเหมือนกับ Plugin อื่นของ OpenClaw
+  <Step title="ติดตั้งกลไก Plugin">
+    Plugin กลไกบริบทติดตั้งได้เช่นเดียวกับ Plugin อื่นๆ ของ OpenClaw
 
     <Tabs>
       <Tab title="จาก npm">
@@ -39,7 +40,7 @@ OpenClaw มาพร้อมเอนจิน `legacy` ในตัวแล�
         openclaw plugins install @martian-engineering/lossless-claw
         ```
       </Tab>
-      <Tab title="จากพาธในเครื่อง">
+      <Tab title="จากพาธภายในเครื่อง">
         ```bash
         openclaw plugins install -l ./my-context-engine
         ```
@@ -47,84 +48,86 @@ OpenClaw มาพร้อมเอนจิน `legacy` ในตัวแล�
     </Tabs>
 
   </Step>
-  <Step title="เปิดใช้และเลือกเอนจิน">
+  <Step title="เปิดใช้งานและเลือกกลไก">
     ```json5
     // openclaw.json
     {
       plugins: {
         slots: {
-          contextEngine: "lossless-claw", // must match the plugin's registered engine id
+          contextEngine: "lossless-claw", // ต้องตรงกับรหัสกลไกที่ Plugin ลงทะเบียนไว้
         },
         entries: {
           "lossless-claw": {
             enabled: true,
-            // Plugin-specific config goes here (see the plugin's docs)
+            // ใส่การกำหนดค่าเฉพาะของ Plugin ที่นี่ (ดูเอกสารของ Plugin)
           },
         },
       },
     }
     ```
 
-    รีสตาร์ท Gateway หลังจากติดตั้งและกำหนดค่าแล้ว
+    รีสตาร์ต Gateway หลังจากติดตั้งและกำหนดค่าแล้ว
 
   </Step>
-  <Step title="สลับกลับเป็น legacy (ไม่บังคับ)">
-    ตั้งค่า `contextEngine` เป็น `"legacy"` (หรือลบคีย์ออกทั้งหมด - `"legacy"` เป็นค่าเริ่มต้น)
+  <Step title="สลับกลับไปใช้กลไกเดิม (ไม่บังคับ)">
+    ตั้งค่า `contextEngine` เป็น `"legacy"` (หรือลบคีย์ออกทั้งหมด โดย `"legacy"` เป็นค่าเริ่มต้น)
   </Step>
 </Steps>
 
 ## วิธีการทำงาน
 
-ทุกครั้งที่ OpenClaw รันพรอมป์โมเดล เอนจินบริบทจะเข้าร่วมที่จุด lifecycle สี่จุด:
+ทุกครั้งที่ OpenClaw เรียกใช้พรอมต์ของโมเดล กลไกบริบทจะมีส่วนร่วมในสี่จุดของวงจรชีวิต:
 
 <AccordionGroup>
   <Accordion title="1. รับเข้า">
-    เรียกเมื่อมีการเพิ่มข้อความใหม่เข้าในเซสชัน เอนจินสามารถจัดเก็บหรือทำดัชนีข้อความในที่เก็บข้อมูลของตนเองได้
+    เรียกใช้เมื่อเพิ่มข้อความใหม่ลงในเซสชัน กลไกสามารถจัดเก็บหรือทำดัชนีข้อความไว้ในที่เก็บข้อมูลของตนเอง
   </Accordion>
   <Accordion title="2. ประกอบ">
-    เรียกก่อนการรันโมเดลแต่ละครั้ง เอนจินส่งคืนชุดข้อความแบบเรียงลำดับ (และ `systemPromptAddition` ที่ไม่บังคับ) ที่พอดีกับงบประมาณโทเคน
+    เรียกใช้ก่อนการทำงานของโมเดลแต่ละครั้ง กลไกจะส่งคืนชุดข้อความตามลำดับ (และ `systemPromptAddition` ซึ่งเป็นตัวเลือก) ที่อยู่ภายในงบประมาณโทเค็น
   </Accordion>
-  <Accordion title="3. Compact">
-    เรียกเมื่อหน้าต่างบริบทเต็ม หรือเมื่อผู้ใช้รัน `/compact` เอนจินจะสรุปประวัติเก่ากว่าเพื่อเพิ่มพื้นที่ว่าง
+  <Accordion title="3. ทำ Compaction">
+    เรียกใช้เมื่อหน้าต่างบริบทเต็ม หรือเมื่อผู้ใช้เรียกใช้ `/compact` กลไกจะสรุปประวัติเก่าเพื่อเพิ่มพื้นที่ว่าง
   </Accordion>
-  <Accordion title="4. หลังเทิร์น">
-    เรียกหลังจากรันเสร็จ เอนจินสามารถคงสถานะไว้, ทริกเกอร์ Compaction เบื้องหลัง, หรืออัปเดตดัชนีได้
+  <Accordion title="4. หลังจบรอบ">
+    เรียกใช้หลังจากการทำงานเสร็จสิ้น กลไกสามารถคงสถานะไว้ เรียกใช้ Compaction เบื้องหลัง หรืออัปเดตดัชนี
   </Accordion>
 </AccordionGroup>
 
-สำหรับฮาร์เนส Codex แบบไม่ใช่ ACP ที่รวมมา OpenClaw ใช้ lifecycle เดียวกันโดยฉายบริบทที่ประกอบแล้วเข้าไปในคำสั่งสำหรับนักพัฒนาของ Codex และพรอมป์ของเทิร์นปัจจุบัน Codex ยังคงเป็นเจ้าของประวัติเธรดแบบเนทีฟและ compactor แบบเนทีฟของตนเอง
+กลไกยังสามารถนำเมธอด `maintain()` ซึ่งเป็นตัวเลือกไปใช้สำหรับการบำรุงรักษาทรานสคริปต์ (การเขียนใหม่อย่างปลอดภัยผ่าน `runtimeContext.rewriteTranscriptEntries()`) หลังการบูตสแตรป รอบที่สำเร็จ หรือการทำ Compaction ได้ ตั้งค่า `info.turnMaintenanceMode: "background"` เพื่อเรียกใช้เป็นงานที่เลื่อนออกไปแทนการบล็อกการตอบกลับ
 
-### Lifecycle ของ subagent (ไม่บังคับ)
+สำหรับชุดเครื่องมือ Codex แบบ non-ACP ที่รวมมาให้ OpenClaw ใช้วงจรชีวิตเดียวกันโดยฉายบริบทที่ประกอบแล้วไปยังคำสั่งสำหรับนักพัฒนาของ Codex และพรอมต์ของรอบปัจจุบัน Codex ยังคงเป็นเจ้าของประวัติเธรดดั้งเดิมและตัวทำ Compaction ดั้งเดิมของตนเอง
 
-OpenClaw เรียก hook lifecycle ของ subagent ที่ไม่บังคับสองรายการ:
+### วงจรชีวิตของเอเจนต์ย่อย (ไม่บังคับ)
+
+OpenClaw เรียกฮุกวงจรชีวิตของเอเจนต์ย่อยสองรายการที่เป็นตัวเลือก:
 
 <ParamField path="prepareSubagentSpawn" type="method">
-  เตรียมสถานะบริบทร่วมก่อนที่รันลูกจะเริ่ม hook ได้รับคีย์เซสชันแม่/ลูก, `contextMode` (`isolated` หรือ `fork`), id/ไฟล์ transcript ที่พร้อมใช้งาน, และ TTL ที่ไม่บังคับ หากส่งคืน handle สำหรับ rollback, OpenClaw จะเรียกใช้เมื่อการ spawn ล้มเหลวหลังจากการเตรียมสำเร็จ การ spawn subagent แบบเนทีฟที่ร้องขอ `lightContext` และ resolve เป็น `contextMode="isolated"` จะข้าม hook นี้โดยตั้งใจ เพื่อให้ลูกเริ่มจากบริบท bootstrap แบบเบาโดยไม่มีสถานะก่อน spawn ที่จัดการโดยเอนจินบริบท
+  เตรียมสถานะบริบทที่ใช้ร่วมกันก่อนเริ่มการทำงานของเอเจนต์ลูก ฮุกจะได้รับคีย์เซสชันของเอเจนต์แม่/ลูก, `contextMode` (`isolated` หรือ `fork`), รหัส/ไฟล์ทรานสคริปต์ที่มีอยู่ และ TTL ซึ่งเป็นตัวเลือก หากส่งคืนแฮนเดิลย้อนกลับ OpenClaw จะเรียกใช้แฮนเดิลดังกล่าวเมื่อการสร้างเอเจนต์ล้มเหลวหลังจากเตรียมการสำเร็จ การสร้างเอเจนต์ย่อยแบบดั้งเดิมที่ร้องขอ `lightContext` และแปลงผลเป็น `contextMode="isolated"` จะข้ามฮุกนี้โดยเจตนา เพื่อให้เอเจนต์ลูกเริ่มจากบริบทบูตสแตรปขนาดเล็กโดยไม่มีสถานะก่อนสร้างที่กลไกบริบทจัดการ
 </ParamField>
 <ParamField path="onSubagentEnded" type="method">
-  ล้างข้อมูลเมื่อเซสชัน subagent เสร็จสิ้นหรือถูกกวาดล้าง
+  ล้างข้อมูลเมื่อเซสชันของเอเจนต์ย่อยเสร็จสิ้นหรือถูกกวาดออก
 </ParamField>
 
-### การเพิ่ม system prompt
+### ส่วนเพิ่มเติมของพรอมต์ระบบ
 
-เมธอด `assemble` สามารถส่งคืนสตริง `systemPromptAddition` ได้ OpenClaw จะเติมสิ่งนี้ไว้หน้าสุดของ system prompt สำหรับการรัน สิ่งนี้ทำให้เอนจินแทรกคำแนะนำการเรียกคืนแบบไดนามิก, คำสั่ง retrieval, หรือคำใบ้ที่รับรู้บริบทได้โดยไม่ต้องใช้ไฟล์ workspace แบบคงที่
+เมธอด `assemble` สามารถส่งคืนสตริง `systemPromptAddition` ได้ OpenClaw จะเติมสตริงนี้ไว้ด้านหน้าพรอมต์ระบบสำหรับการทำงานนั้น ซึ่งช่วยให้กลไกสามารถแทรกคำแนะนำการเรียกคืนข้อมูลแบบไดนามิก คำสั่งการดึงข้อมูล หรือคำแนะนำที่ตระหนักถึงบริบท โดยไม่ต้องใช้ไฟล์พื้นที่ทำงานแบบคงที่
 
-## เอนจิน legacy
+## กลไกเดิม
 
-เอนจิน `legacy` ในตัวรักษาพฤติกรรมเดิมของ OpenClaw:
+กลไก `legacy` ในตัวจะรักษาพฤติกรรมดั้งเดิมของ OpenClaw:
 
-- **Ingest**: no-op (ตัวจัดการเซสชันจัดการการคงอยู่ของข้อความโดยตรง)
-- **Assemble**: pass-through (pipeline sanitize → validate → limit ที่มีอยู่ใน runtime จัดการการประกอบบริบท)
-- **Compact**: มอบหมายให้ Compaction การสรุปในตัว ซึ่งสร้างสรุปเดียวของข้อความเก่ากว่าและคงข้อความล่าสุดไว้เหมือนเดิม
-- **After turn**: no-op
+- **รับเข้า**: ไม่ดำเนินการใดๆ (ตัวจัดการเซสชันจัดการการคงข้อความไว้โดยตรง)
+- **ประกอบ**: ส่งผ่านโดยไม่เปลี่ยนแปลง (ไปป์ไลน์ sanitize → validate → limit ที่มีอยู่ในรันไทม์จัดการการประกอบบริบท)
+- **ทำ Compaction**: มอบหมายให้การทำ Compaction ด้วยการสรุปในตัว ซึ่งสร้างบทสรุปเดียวจากข้อความเก่าและเก็บข้อความล่าสุดไว้โดยไม่เปลี่ยนแปลง
+- **หลังจบรอบ**: ไม่ดำเนินการใดๆ
 
-เอนจิน legacy ไม่ลงทะเบียนเครื่องมือหรือให้ `systemPromptAddition`
+กลไกเดิมไม่ลงทะเบียนเครื่องมือหรือจัดเตรียม `systemPromptAddition`
 
-เมื่อไม่ได้ตั้งค่า `plugins.slots.contextEngine` (หรือตั้งเป็น `"legacy"`) เอนจินนี้จะถูกใช้โดยอัตโนมัติ
+เมื่อไม่ได้ตั้งค่า `plugins.slots.contextEngine` (หรือตั้งค่าเป็น `"legacy"`) ระบบจะใช้กลไกนี้โดยอัตโนมัติ
 
-## เอนจิน Plugin
+## กลไก Plugin
 
-Plugin สามารถลงทะเบียนเอนจินบริบทโดยใช้ Plugin API:
+Plugin สามารถลงทะเบียนกลไกบริบทโดยใช้ API ของ Plugin:
 
 ```ts
 import { buildMemorySystemPromptAddition } from "openclaw/plugin-sdk/core";
@@ -138,35 +141,46 @@ export default function register(api) {
     },
 
     async ingest({ sessionId, message, isHeartbeat }) {
-      // Store the message in your data store
+      // จัดเก็บข้อความในที่เก็บข้อมูลของคุณ
       return { ingested: true };
     },
 
-    async assemble({ sessionId, messages, tokenBudget, availableTools, citationsMode }) {
-      // Return messages that fit the budget
+    async assemble({
+      sessionId,
+      sessionKey,
+      messages,
+      tokenBudget,
+      availableTools,
+      citationsMode,
+    }) {
+      // ส่งคืนข้อความที่อยู่ภายในงบประมาณ
       return {
         messages: buildContext(messages, tokenBudget),
         estimatedTokens: countTokens(messages),
         systemPromptAddition: buildMemorySystemPromptAddition({
           availableTools: availableTools ?? new Set(),
           citationsMode,
+          agentSessionKey: sessionKey,
         }),
       };
     },
 
     async compact({ sessionId, force }) {
-      // Summarize older context
+      // สรุปบริบทเก่า
       return { ok: true, compacted: true };
     },
   }));
 }
 ```
 
-factory `ctx` มีค่า `config`, `agentDir`, และ `workspaceDir`
-ที่ไม่บังคับ เพื่อให้ Plugin สามารถ initialize สถานะต่อ agent หรือ ต่อ workspace ก่อนที่
-hook lifecycle แรกจะรัน
+แฟกทอรี `ctx` มีค่า `config`, `agentDir` และ `workspaceDir`
+ที่เป็นตัวเลือก เพื่อให้ Plugin สามารถเตรียมใช้งานสถานะต่อเอเจนต์หรือต่อพื้นที่ทำงานก่อน
+การเรียกวงจรชีวิตครั้งแรก ก่อนการเรียก `assemble()` ที่ไม่ใช่กลไกเดิม โฮสต์จะดำเนินการ
+เตรียมพรอมต์หน่วยความจำแบบอะซิงโครนัสที่ลงทะเบียนไว้จนเสร็จสมบูรณ์ ตัวช่วยแบบซิงโครนัส
+`buildMemorySystemPromptAddition(...)` จะอ่านสแนปช็อตการทำงานที่เปลี่ยนแปลงไม่ได้ดังกล่าว
+โดยส่งต่อบริบทของเครื่องมือ การอ้างอิง เอเจนต์ และเซสชันที่ให้มาโดยไม่เปลี่ยนแปลง
 
-จากนั้นเปิดใช้ใน config:
+จากนั้นเปิดใช้งานในการกำหนดค่า:
 
 ```json5
 {
@@ -187,83 +201,89 @@ hook lifecycle แรกจะรัน
 
 สมาชิกที่จำเป็น:
 
-| สมาชิก            | ชนิด     | วัตถุประสงค์                                             |
+| สมาชิก             | ชนิด     | วัตถุประสงค์                                                  |
 | ------------------ | -------- | -------------------------------------------------------- |
-| `info`             | Property | id เอนจิน, ชื่อ, เวอร์ชัน, และเป็นเจ้าของ Compaction หรือไม่ |
-| `ingest(params)`   | Method   | จัดเก็บข้อความเดียว                                     |
-| `assemble(params)` | Method   | สร้างบริบทสำหรับการรันโมเดล (ส่งคืน `AssembleResult`) |
-| `compact(params)`  | Method   | สรุป/ลดบริบท                                            |
+| `info`             | พร็อพเพอร์ตี | รหัส ชื่อ เวอร์ชันของกลไก และกลไกเป็นเจ้าของการทำ Compaction หรือไม่ |
+| `ingest(params)`   | เมธอด   | จัดเก็บข้อความหนึ่งรายการ                                   |
+| `assemble(params)` | เมธอด   | สร้างบริบทสำหรับการทำงานของโมเดล (ส่งคืน `AssembleResult`) |
+| `compact(params)`  | เมธอด   | สรุป/ลดบริบท                                 |
 
-`assemble` ส่งคืน `AssembleResult` พร้อม:
+`assemble` ส่งคืน `AssembleResult` ซึ่งประกอบด้วย:
 
 <ParamField path="messages" type="Message[]" required>
-  ข้อความแบบเรียงลำดับที่จะส่งไปยังโมเดล
+  ข้อความตามลำดับที่จะส่งให้โมเดล
 </ParamField>
 <ParamField path="estimatedTokens" type="number" required>
-  ค่าประมาณจำนวนโทเคนทั้งหมดของเอนจินในบริบทที่ประกอบแล้ว OpenClaw ใช้สิ่งนี้สำหรับการตัดสินใจ threshold ของ Compaction และการรายงาน diagnostic
+  ค่าประมาณจำนวนโทเค็นทั้งหมดในบริบทที่ประกอบแล้วของกลไก OpenClaw ใช้ค่านี้ในการตัดสินใจตามเกณฑ์การทำ Compaction และการรายงานการวินิจฉัย
 </ParamField>
 <ParamField path="systemPromptAddition" type="string">
-  เติมไว้หน้าสุดของ system prompt
+  เติมไว้ด้านหน้าพรอมต์ระบบ
 </ParamField>
 <ParamField path="promptAuthority" type='"assembled" | "preassembly_may_overflow"'>
-  ควบคุมค่าประมาณโทเคนที่ runner ใช้สำหรับ precheck overflow
-  เชิงป้องกัน ค่าเริ่มต้นคือ `"assembled"` ซึ่งหมายความว่าจะตรวจเฉพาะค่าประมาณของพรอมป์
-  ที่ประกอบแล้วสำหรับเอนจินที่ไม่ได้เป็นเจ้าของ Compaction
-  เอนจินที่ตั้งค่า `ownsCompaction: true` จัดการ prompt admission ของตนเอง
-  ดังนั้น OpenClaw จะข้าม precheck ก่อนพรอมป์แบบ generic ตามค่าเริ่มต้น ตั้งค่า
+  ควบคุมค่าประมาณโทเค็นที่ตัวเรียกใช้ใช้สำหรับการตรวจสอบล่วงหน้าว่าจะล้นหรือไม่
+  ค่าเริ่มต้นคือ `"assembled"` ซึ่งหมายความว่าจะตรวจสอบเฉพาะค่าประมาณของพรอมต์
+  ที่ประกอบแล้วสำหรับกลไกที่ไม่ได้เป็นเจ้าของการทำ Compaction
+  กลไกที่ตั้งค่า `ownsCompaction: true` จะจัดการการรับพรอมต์ด้วยตนเอง
+  ดังนั้นโดยค่าเริ่มต้น OpenClaw จะข้ามการตรวจสอบทั่วไปก่อนส่งพรอมต์ ตั้งค่า
   `"preassembly_may_overflow"` เฉพาะเมื่อมุมมองที่ประกอบแล้วของคุณสามารถซ่อนความเสี่ยง
-  overflow ใน transcript เบื้องหลังได้ จากนั้น runner จะคง precheck แบบ generic
-  ไว้และใช้ค่าสูงสุดระหว่างค่าประมาณที่ประกอบแล้วกับค่าประมาณประวัติเซสชัน
-  ก่อนการประกอบ (ไม่ถูก window) เมื่อตัดสินใจว่าจะ compact ล่วงหน้าหรือไม่
-  ไม่ว่าแบบใด ข้อความที่คุณส่งคืนยังคงเป็นสิ่งที่โมเดลเห็น - `promptAuthority` มีผลเฉพาะกับ precheck
+  ที่จะล้นในทรานสคริปต์พื้นฐานได้ จากนั้นตัวเรียกใช้จะคงการตรวจสอบทั่วไปไว้
+  และใช้ค่าสูงสุดระหว่างค่าประมาณที่ประกอบแล้วกับค่าประมาณประวัติเซสชัน
+  ก่อนประกอบ (ไม่มีการกำหนดหน้าต่าง) เมื่อตัดสินใจว่าจะทำ Compaction ล่วงหน้าหรือไม่
+  ไม่ว่าจะกรณีใด ข้อความที่คุณส่งคืนยังคงเป็นสิ่งที่โมเดลมองเห็น โดย
+  `promptAuthority` มีผลต่อการตรวจสอบล่วงหน้าเท่านั้น
+</ParamField>
+<ParamField path="contextProjection" type="ContextEngineProjection">
+  วงจรชีวิตการฉายภาพที่เป็นตัวเลือกสำหรับโฮสต์ที่มีเธรดแบ็กเอนด์แบบคงอยู่ (เช่น Codex app-server) `mode: "thread_bootstrap"` ที่มี `epoch` แบบคงที่จะขอให้โฮสต์แทรกบริบทที่ประกอบแล้วหนึ่งครั้งต่อเอพอค และใช้เธรดแบ็กเอนด์ซ้ำจนกว่าเอพอคจะเปลี่ยน แทนที่จะฉายภาพใหม่ทุกรอบ ละฟิลด์นี้ไว้สำหรับการฉายภาพปกติต่อรอบ
 </ParamField>
 
-`compact` ส่งคืน `CompactResult` เมื่อ Compaction หมุน transcript ที่ใช้งานอยู่
-`result.sessionId` และ `result.sessionFile` จะระบุเซสชันตัวถัดไป
-ที่ retry หรือเทิร์นถัดไปต้องใช้
+`compact` ส่งคืน `CompactResult` เมื่อการทำ Compaction เปลี่ยนข้อมูลประจำตัวของเซสชันที่ใช้งานอยู่
+`result.sessionTarget` (`ContextEngineSessionTarget` แบบมีชนิดซึ่งมี
+ข้อมูลประจำตัวของเซสชันและขอบเขตที่เก็บข้อมูล) จะระบุเซสชันผู้สืบทอดที่
+การลองใหม่หรือรอบถัดไปต้องใช้ ส่วน `result.sessionId` สะท้อนรหัสของผู้สืบทอด
 
-สมาชิกที่ไม่บังคับ:
+สมาชิกที่เป็นตัวเลือก:
 
-| สมาชิก                         | ชนิด   | วัตถุประสงค์                                                                                                         |
-| ------------------------------ | ------ | --------------------------------------------------------------------------------------------------------------- |
-| `bootstrap(params)`            | Method | Initialize สถานะเอนจินสำหรับเซสชัน เรียกหนึ่งครั้งเมื่อเอนจินเห็นเซสชันครั้งแรก (เช่น import ประวัติ) |
-| `ingestBatch(params)`          | Method | รับเทิร์นที่เสร็จสมบูรณ์เข้าเป็น batch เรียกหลังจากรันเสร็จ พร้อมข้อความทั้งหมดจากเทิร์นนั้นในครั้งเดียว |
-| `afterTurn(params)`            | Method | งาน lifecycle หลังรัน (คงสถานะไว้, ทริกเกอร์ Compaction เบื้องหลัง) |
-| `prepareSubagentSpawn(params)` | Method | ตั้งค่าสถานะร่วมสำหรับเซสชันลูกก่อนเริ่มต้น |
-| `onSubagentEnded(params)`      | Method | ล้างข้อมูลหลังจาก subagent สิ้นสุด |
-| `dispose()`                    | Method | ปล่อยทรัพยากร เรียกระหว่างการปิด Gateway หรือ reload Plugin - ไม่ใช่ต่อเซสชัน |
+| สมาชิก                         | ชนิด   | วัตถุประสงค์                                                                                                                                      |
+| ------------------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bootstrap(params)`            | เมธอด | เตรียมใช้งานสถานะกลไกสำหรับเซสชัน เรียกหนึ่งครั้งเมื่อกลไกพบเซสชันเป็นครั้งแรก (เช่น นำเข้าประวัติ)                              |
+| `maintain(params)`             | เมธอด | บำรุงรักษาทรานสคริปต์หลังการบูตสแตรป รอบที่สำเร็จ หรือการทำ Compaction ใช้ `runtimeContext.rewriteTranscriptEntries()` เพื่อเขียนใหม่อย่างปลอดภัย |
+| `ingestBatch(params)`          | เมธอด | รับรอบที่เสร็จสมบูรณ์เข้าเป็นชุด เรียกหลังจากการทำงานเสร็จสิ้น พร้อมข้อความทั้งหมดจากรอบนั้นในคราวเดียว                                  |
+| `afterTurn(params)`            | เมธอด | งานวงจรชีวิตหลังการทำงาน (คงสถานะไว้ เรียกใช้ Compaction เบื้องหลัง)                                                                      |
+| `prepareSubagentSpawn(params)` | เมธอด | ตั้งค่าสถานะที่ใช้ร่วมกันสำหรับเซสชันลูกก่อนเริ่มทำงาน                                                                                    |
+| `onSubagentEnded(params)`      | เมธอด | ล้างข้อมูลหลังจากเอเจนต์ย่อยสิ้นสุด                                                                                                              |
+| `dispose()`                    | เมธอด | ปล่อยทรัพยากร เรียกใช้ระหว่างการปิด Gateway หรือการโหลด Plugin ใหม่ ไม่ใช่ต่อเซสชัน                                                        |
 
-### การตั้งค่า Runtime
+### การตั้งค่ารันไทม์
 
-hook lifecycle ที่รันภายใน OpenClaw จะได้รับออบเจ็กต์
-`runtimeSettings` ที่ไม่บังคับ สิ่งนี้เป็นพื้นผิว API ภายในแบบมีเวอร์ชันและอ่านอย่างเดียว
-สำหรับ producer/consumer: OpenClaw ผลิตให้เอนจินบริบทที่เลือก
-และเอนจินบริบทใช้ภายใน hook lifecycle สิ่งนี้ไม่ได้
-render โดยตรงให้ผู้ใช้และไม่ได้สร้างพื้นผิวรายงานเฉพาะ
+ฮุกวงจรชีวิตที่ทำงานภายใน OpenClaw จะได้รับออบเจ็กต์
+`runtimeSettings` ซึ่งเป็นตัวเลือก นี่คือพื้นผิว API ภายในแบบอ่านอย่างเดียว
+ที่มีการกำหนดเวอร์ชันสำหรับผู้ผลิต/ผู้ใช้ข้อมูล: OpenClaw สร้างออบเจ็กต์นี้ให้กลไกบริบท
+ที่เลือก และกลไกบริบทใช้ออบเจ็กต์นี้ภายในฮุกวงจรชีวิต ออบเจ็กต์นี้จะไม่แสดงผล
+ให้ผู้ใช้โดยตรง และไม่สร้างพื้นผิวการรายงานเฉพาะขึ้นมา
 
 - `schemaVersion`: ปัจจุบันคือ `1`
-- `runtime`: host ของ OpenClaw, โหมด runtime (`normal`, `fallback`, หรือ
-  `degraded`), และ id ของ harness/runtime ที่ไม่บังคับ
-- `contextEngineSelection`: id เอนจินบริบทที่เลือกและแหล่งที่มาของการเลือก
-- `executionHost`: id และ label ของ host สำหรับพื้นผิวที่เรียก hook
-- `model`: โมเดลที่ร้องขอ, โมเดลที่ resolve แล้ว, provider, และตระกูลโมเดลที่ไม่บังคับ
-- `limits`: งบประมาณโทเคนพรอมป์และโทเคนเอาต์พุตสูงสุดเมื่อทราบ
-- `diagnostics`: โค้ดเหตุผล fallback แบบปิดและ degraded เมื่อทราบ
+- `runtime`: โฮสต์ OpenClaw, โหมดรันไทม์ (`normal`, `fallback` หรือ
+  `degraded`) และรหัสชุดทดสอบ/รันไทม์ที่ระบุหรือไม่ก็ได้
+- `contextEngineSelection`: รหัสกลไกบริบทที่เลือกและแหล่งที่มาของการเลือก
+- `executionHost`: รหัสและป้ายกำกับโฮสต์สำหรับพื้นผิวที่เรียกใช้ฮุก
+- `model`: โมเดลที่ร้องขอ โมเดลที่ได้รับการแก้ไขแล้ว ผู้ให้บริการ และตระกูลโมเดลที่ระบุหรือไม่ก็ได้
+- `limits`: งบประมาณโทเค็นพรอมต์และจำนวนโทเค็นเอาต์พุตสูงสุดเมื่อทราบ
+- `diagnostics`: รหัสเหตุผลของการสำรองแบบปิดและการทำงานที่ลดระดับลงเมื่อทราบ
 
-ฟิลด์ที่อาจไม่ทราบจะแสดงเป็น `null`; ฟิลด์ discriminator เช่น
-โหมด runtime และแหล่งที่มาของการเลือกยังคงไม่เป็น nullable เอนจินเก่ายังคง
-เข้ากันได้: หากเอนจิน legacy แบบเข้มงวดปฏิเสธ `runtimeSettings` ว่าเป็น
-property ที่ไม่รู้จัก OpenClaw จะลองเรียก lifecycle อีกครั้งโดยไม่มีสิ่งนี้แทนที่จะ quarantine
-เอนจิน
+ฟิลด์ที่อาจไม่ทราบจะแสดงเป็น `null`; ฟิลด์ตัวจำแนก เช่น
+โหมดรันไทม์และแหล่งที่มาของการเลือกจะยังคงไม่อนุญาตให้เป็น null กลไกรุ่นเก่ายังคง
+ใช้งานร่วมกันได้: หากกลไกรุ่นเก่าที่เข้มงวดปฏิเสธ `runtimeSettings` เนื่องจากเป็น
+พร็อพเพอร์ตีที่ไม่รู้จัก OpenClaw จะลองเรียกวงจรชีวิตอีกครั้งโดยไม่มีพร็อพเพอร์ตีนี้ แทนที่จะกักกัน
+กลไกดังกล่าว
 
-### ข้อกำหนดของ Host
+### ข้อกำหนดของโฮสต์
 
-เอนจินบริบทสามารถประกาศข้อกำหนด capability ของ host ได้ที่ `info.hostRequirements`
-OpenClaw ตรวจสอบข้อกำหนดเหล่านี้ก่อนเริ่ม operation และ fail closed
-พร้อมข้อผิดพลาดที่อธิบายได้เมื่อ runtime ที่เลือกไม่สามารถตอบสนองได้
+กลไกบริบทสามารถประกาศข้อกำหนดด้านความสามารถของโฮสต์ใน `info.hostRequirements`
+OpenClaw จะตรวจสอบข้อกำหนดเหล่านี้ก่อนเริ่มการดำเนินการและปฏิเสธการทำงาน
+พร้อมข้อผิดพลาดที่อธิบายชัดเจน เมื่อรันไทม์ที่เลือกไม่สามารถตอบสนองข้อกำหนดได้
 
-สำหรับการรัน agent ให้ประกาศ `assemble-before-prompt` เมื่อเอนจินต้องควบคุม
-พรอมป์โมเดลจริงผ่าน `assemble()`:
+สำหรับการรันเอเจนต์ ให้ประกาศ `assemble-before-prompt` เมื่อกลไกต้องควบคุม
+พรอมต์โมเดลจริงผ่าน `assemble()`:
 
 ```ts
 info: {
@@ -273,59 +293,59 @@ info: {
     "agent-run": {
       requiredCapabilities: ["assemble-before-prompt"],
       unsupportedMessage:
-        "Use the native Codex or OpenClaw embedded runtime, or select the legacy context engine.",
+        "ใช้รันไทม์ Codex แบบเนทีฟหรือรันไทม์ฝังตัวของ OpenClaw หรือเลือกกลไกบริบทรุ่นเก่า",
     },
   },
 }
 ```
 
-การรัน agent แบบ Native Codex และ OpenClaw embedded รองรับ `assemble-before-prompt`
-backend CLI แบบ generic ไม่รองรับ ดังนั้นเอนจินที่ต้องใช้ capability นี้จะถูกปฏิเสธก่อน
-กระบวนการ CLI เริ่มต้น
+การรันเอเจนต์ด้วย Codex แบบเนทีฟและ OpenClaw แบบฝังตัวรองรับ `assemble-before-prompt`
+แบ็กเอนด์ CLI ทั่วไปไม่รองรับ ดังนั้นกลไกที่ต้องใช้ความสามารถนี้จะถูกปฏิเสธก่อน
+กระบวนการ CLI เริ่มทำงาน
 
 ### การแยกความล้มเหลว
 
-OpenClaw แยกเอนจิน Plugin ที่เลือกไว้ออกจากเส้นทางการตอบกลับหลัก หากเอนจินที่ไม่ใช่ legacy
-หายไป, ไม่ผ่านการตรวจสอบสัญญา, throw ระหว่างการสร้าง factory
-หรือ throw จากเมธอด lifecycle, OpenClaw จะกักกันเอนจินนั้น
-สำหรับกระบวนการ Gateway ปัจจุบัน และลดระดับงาน context-engine ไปใช้
-เอนจิน `legacy` ในตัว ระบบจะบันทึกข้อผิดพลาดพร้อมกับการดำเนินการที่ล้มเหลว เพื่อให้
-ผู้ปฏิบัติงานสามารถซ่อมแซม อัปเดต หรือปิดใช้งาน Plugin ได้โดยที่ agent ไม่
-เงียบหายไป
+OpenClaw แยกกลไก Plugin ที่เลือกออกจากเส้นทางตอบกลับหลัก หากกลไก
+ที่ไม่ใช่รุ่นเก่าหายไป ไม่ผ่านการตรวจสอบสัญญา เกิดข้อยกเว้นระหว่างการสร้างแฟกทอรี
+หรือเกิดข้อยกเว้นจากเมธอดวงจรชีวิต OpenClaw จะกักกันกลไกนั้น
+สำหรับกระบวนการ Gateway ปัจจุบัน และลดระดับงานของกลไกบริบทไปใช้
+กลไก `legacy` ในตัว ระบบจะบันทึกข้อผิดพลาดพร้อมการดำเนินการที่ล้มเหลว เพื่อให้
+ผู้ดูแลระบบสามารถซ่อมแซม อัปเดต หรือปิดใช้งาน Plugin ได้โดยไม่ทำให้เอเจนต์
+หยุดตอบสนอง
 
-ความล้มเหลวด้านข้อกำหนดของโฮสต์นั้นต่างออกไป: เมื่อเอนจินประกาศว่า runtime
-ขาด capability ที่จำเป็น OpenClaw จะ fail closed ก่อนเริ่ม run การทำเช่นนี้
-ปกป้องเอนจินที่อาจทำให้ state เสียหายหากรันในโฮสต์ที่ไม่รองรับ
+ความล้มเหลวของข้อกำหนดโฮสต์จะแตกต่างออกไป: เมื่อกลไกประกาศว่ารันไทม์
+ขาดความสามารถที่จำเป็น OpenClaw จะปฏิเสธการทำงานก่อนเริ่มการรัน การทำเช่นนี้
+ช่วยปกป้องกลไกที่อาจทำให้สถานะเสียหายหากทำงานบนโฮสต์ที่ไม่รองรับ
 
 ### ownsCompaction
 
-`ownsCompaction` ควบคุมว่า auto-compaction ภายใน attempt ที่มีใน runtime ของ OpenClaw จะยังเปิดใช้งานสำหรับ run นั้นหรือไม่:
+`ownsCompaction` ควบคุมว่าจะเปิดใช้การทำ Compaction อัตโนมัติระหว่างความพยายามในตัวของรันไทม์ OpenClaw สำหรับการรันนั้นหรือไม่:
 
 <AccordionGroup>
   <Accordion title="ownsCompaction: true">
-    เอนจินเป็นเจ้าของพฤติกรรม compaction OpenClaw จะปิด auto-compaction ในตัวของ runtime OpenClaw และการตรวจสอบล้นก่อน pre-prompt แบบทั่วไปสำหรับ run นั้น และ implementation `compact()` ของเอนจินจะรับผิดชอบ `/compact`, compaction สำหรับการกู้คืนเมื่อ provider overflow และ proactive compaction ใดๆ ที่ต้องการทำใน `afterTurn()` OpenClaw ยังจะรัน pre-prompt overflow safeguard เมื่อเอนจินคืนค่า `promptAuthority: "preassembly_may_overflow"` จาก `assemble()`
+    กลไกเป็นผู้ควบคุมพฤติกรรม Compaction OpenClaw จะปิดใช้การทำ Compaction อัตโนมัติในตัวของรันไทม์ OpenClaw และการตรวจสอบโอเวอร์โฟลว์ทั่วไปก่อนส่งพรอมต์สำหรับการรันนั้น และการใช้งาน `compact()` ของกลไกจะรับผิดชอบ `/compact` การทำ Compaction เพื่อกู้คืนจากโอเวอร์โฟลว์ของผู้ให้บริการ และการทำ Compaction เชิงรุกใดๆ ที่ต้องการดำเนินการใน `afterTurn()` OpenClaw ยังคงเรียกใช้มาตรการป้องกันโอเวอร์โฟลว์ก่อนส่งพรอมต์เมื่อกลไกส่งคืน `promptAuthority: "preassembly_may_overflow"` จาก `assemble()`
   </Accordion>
-  <Accordion title="ownsCompaction: false หรือไม่ได้ตั้งค่า">
-    auto-compaction ในตัวของ runtime OpenClaw อาจยังรันระหว่างการประมวลผล prompt แต่เมธอด `compact()` ของเอนจินที่ใช้งานอยู่ยังคงถูกเรียกสำหรับ `/compact` และการกู้คืนจาก overflow
+  <Accordion title="ownsCompaction: false or unset">
+    การทำ Compaction อัตโนมัติในตัวของรันไทม์ OpenClaw อาจยังคงทำงานระหว่างการประมวลผลพรอมต์ แต่เมธอด `compact()` ของกลไกที่ใช้งานอยู่จะยังคงถูกเรียกสำหรับ `/compact` และการกู้คืนจากโอเวอร์โฟลว์
   </Accordion>
 </AccordionGroup>
 
 <Warning>
-`ownsCompaction: false` **ไม่ได้** หมายความว่า OpenClaw จะ fallback ไปใช้เส้นทาง compaction ของเอนจิน legacy โดยอัตโนมัติ
+`ownsCompaction: false` **ไม่ได้** หมายความว่า OpenClaw จะถอยกลับไปใช้เส้นทาง Compaction ของกลไกรุ่นเก่าโดยอัตโนมัติ
 </Warning>
 
-นั่นหมายความว่ามีรูปแบบ Plugin ที่ถูกต้องสองแบบ:
+ดังนั้นจึงมีรูปแบบ Plugin ที่ถูกต้องสองรูปแบบ:
 
 <Tabs>
-  <Tab title="โหมดเป็นเจ้าของ">
-    Implement อัลกอริทึม compaction ของคุณเองและตั้งค่า `ownsCompaction: true`
+  <Tab title="โหมดควบคุมเอง">
+    ใช้อัลกอริทึม Compaction ของคุณเองและตั้งค่า `ownsCompaction: true`
   </Tab>
   <Tab title="โหมดมอบหมาย">
-    ตั้งค่า `ownsCompaction: false` และให้ `compact()` เรียก `delegateCompactionToRuntime(...)` จาก `openclaw/plugin-sdk/core` เพื่อใช้พฤติกรรม compaction ในตัวของ OpenClaw
+    ตั้งค่า `ownsCompaction: false` และให้ `compact()` เรียก `delegateCompactionToRuntime(...)` จาก `openclaw/plugin-sdk/core` เพื่อใช้พฤติกรรม Compaction ในตัวของ OpenClaw
   </Tab>
 </Tabs>
 
-`compact()` แบบ no-op ไม่ปลอดภัยสำหรับเอนจินที่กำลังใช้งานและไม่ได้เป็นเจ้าของ เพราะมันจะปิดเส้นทาง compaction ปกติของ `/compact` และ overflow-recovery สำหรับช่องเอนจินนั้น
+`compact()` ที่ไม่ดำเนินการใดๆ ไม่ปลอดภัยสำหรับกลไกที่ใช้งานอยู่และไม่ได้ควบคุมเอง เพราะจะปิดใช้เส้นทาง Compaction ปกติสำหรับ `/compact` และการกู้คืนจากโอเวอร์โฟลว์ในสล็อตกลไกนั้น
 
 ## ข้อมูลอ้างอิงการกำหนดค่า
 
@@ -333,8 +353,8 @@ OpenClaw แยกเอนจิน Plugin ที่เลือกไว้อ
 {
   plugins: {
     slots: {
-      // Select the active context engine. Default: "legacy".
-      // Set to a plugin id to use a plugin engine.
+      // เลือกกลไกบริบทที่ใช้งานอยู่ ค่าเริ่มต้น: "legacy"
+      // ตั้งเป็นรหัส Plugin เพื่อใช้กลไก Plugin
       contextEngine: "legacy",
     },
   },
@@ -342,38 +362,38 @@ OpenClaw แยกเอนจิน Plugin ที่เลือกไว้อ
 ```
 
 <Note>
-slot เป็นแบบเอกสิทธิ์เฉพาะขณะ run - สำหรับ run หรือการดำเนินการ compaction หนึ่งๆ จะ resolve context engine ที่ลงทะเบียนไว้เพียงตัวเดียวเท่านั้น Plugin อื่นที่เปิดใช้งานและเป็น `kind: "context-engine"` ยังสามารถโหลดและรันโค้ด registration ของตัวเองได้; `plugins.slots.contextEngine` เพียงเลือก id ของเอนจินที่ลงทะเบียนไว้ซึ่ง OpenClaw จะ resolve เมื่อจำเป็นต้องใช้ context engine
+สล็อตนี้เป็นแบบเอกสิทธิ์เฉพาะขณะรัน โดยจะมีเพียงกลไกบริบทที่ลงทะเบียนไว้หนึ่งรายการเท่านั้นที่ได้รับการแก้ไขสำหรับการรันหรือการดำเนินการ Compaction แต่ละครั้ง Plugin `kind: "context-engine"` อื่นที่เปิดใช้งานยังคงโหลดและเรียกใช้โค้ดการลงทะเบียนได้; `plugins.slots.contextEngine` เพียงเลือกว่ารหัสกลไกที่ลงทะเบียนใดที่ OpenClaw จะแก้ไขเมื่อต้องใช้กลไกบริบท
 </Note>
 
 <Note>
-**การถอนการติดตั้ง Plugin:** เมื่อคุณถอนการติดตั้ง Plugin ที่กำลังถูกเลือกเป็น `plugins.slots.contextEngine` อยู่ OpenClaw จะรีเซ็ต slot กลับไปเป็นค่าเริ่มต้น (`legacy`) พฤติกรรมรีเซ็ตเดียวกันนี้ใช้กับ `plugins.slots.memory` ด้วย ไม่จำเป็นต้องแก้ไข config ด้วยตนเอง
+**การถอนการติดตั้ง Plugin:** เมื่อถอนการติดตั้ง Plugin ที่เลือกเป็น `plugins.slots.contextEngine` อยู่ในปัจจุบัน OpenClaw จะรีเซ็ตสล็อตกลับเป็นค่าเริ่มต้น (`legacy`) ลักษณะการรีเซ็ตเดียวกันนี้ใช้กับ `plugins.slots.memory` เช่นกัน ไม่จำเป็นต้องแก้ไขการกำหนดค่าด้วยตนเอง
 </Note>
 
-## ความสัมพันธ์กับ compaction และ memory
+## ความสัมพันธ์กับ Compaction และหน่วยความจำ
 
 <AccordionGroup>
   <Accordion title="Compaction">
-    Compaction เป็นหนึ่งในความรับผิดชอบของ context engine เอนจิน legacy มอบหมายไปยังการสรุปความในตัวของ OpenClaw เอนจิน Plugin สามารถ implement กลยุทธ์ compaction แบบใดก็ได้ (สรุปแบบ DAG, vector retrieval ฯลฯ)
+    Compaction เป็นหนึ่งในความรับผิดชอบของกลไกบริบท กลไกรุ่นเก่าจะมอบหมายให้ระบบสรุปในตัวของ OpenClaw กลไก Plugin สามารถใช้กลยุทธ์ Compaction ใดก็ได้ (สรุปแบบ DAG, การค้นคืนด้วยเวกเตอร์ เป็นต้น)
   </Accordion>
-  <Accordion title="Plugin memory">
-    Plugin memory (`plugins.slots.memory`) แยกจาก context engine Plugin memory ให้ความสามารถด้านการค้นหา/retrieval; context engine ควบคุมสิ่งที่โมเดลเห็น ทั้งสองอย่างสามารถทำงานร่วมกันได้ - context engine อาจใช้ข้อมูลจาก Plugin memory ระหว่าง assembly เอนจิน Plugin ที่ต้องการใช้เส้นทาง active memory prompt ควรเลือกใช้ `buildMemorySystemPromptAddition(...)` จาก `openclaw/plugin-sdk/core` ซึ่งแปลงส่วน active memory prompt ให้เป็น `systemPromptAddition` ที่พร้อม prepend หากเอนจินต้องการการควบคุมระดับต่ำกว่า ก็ยังสามารถดึงบรรทัดดิบจาก `openclaw/plugin-sdk/memory-host-core` ผ่าน `buildActiveMemoryPromptSection(...)` ได้
+  <Accordion title="Plugin หน่วยความจำ">
+    Plugin หน่วยความจำ (`plugins.slots.memory`) แยกจากกลไกบริบท Plugin หน่วยความจำให้บริการการค้นหา/ค้นคืน ส่วนกลไกบริบทควบคุมสิ่งที่โมเดลเห็น ทั้งสองสามารถทำงานร่วมกันได้ เช่น กลไกบริบทอาจใช้ข้อมูลจาก Plugin หน่วยความจำระหว่างการประกอบ กลไก Plugin ที่ต้องการเส้นทางพรอมต์หน่วยความจำที่ใช้งานอยู่ควรใช้ `buildMemorySystemPromptAddition(...)` จาก `openclaw/plugin-sdk/core` ซึ่งจะแปลงส่วนพรอมต์หน่วยความจำที่โฮสต์เตรียมไว้เป็น `systemPromptAddition` ที่พร้อมเติมไว้ด้านหน้า โดยไม่เปิดเผยโครงสร้างของ Plugin หน่วยความจำ
   </Accordion>
-  <Accordion title="การ prune session">
-    การตัดผลลัพธ์ tool เก่าใน memory ยังคงทำงานไม่ว่า context engine ใดจะ active อยู่
+  <Accordion title="การตัดแต่งเซสชัน">
+    การตัดผลลัพธ์เก่าของเครื่องมือออกจากหน่วยความจำยังคงทำงาน ไม่ว่ากลไกบริบทใดจะใช้งานอยู่
   </Accordion>
 </AccordionGroup>
 
 ## เคล็ดลับ
 
-- ใช้ `openclaw doctor` เพื่อตรวจสอบว่าเอนจินของคุณโหลดอย่างถูกต้อง
-- หากสลับเอนจิน session ที่มีอยู่จะดำเนินต่อไปพร้อม history ปัจจุบัน เอนจินใหม่จะรับช่วงสำหรับ run ในอนาคต
-- ข้อผิดพลาดของเอนจินจะถูกบันทึก และเอนจิน Plugin ที่เลือกไว้จะถูกกักกันสำหรับกระบวนการ Gateway ปัจจุบัน OpenClaw จะ fallback ไปที่ `legacy` สำหรับ turn ของผู้ใช้เพื่อให้การตอบกลับดำเนินต่อไปได้ แต่คุณยังควรซ่อมแซม อัปเดต ปิดใช้งาน หรือถอนการติดตั้ง Plugin ที่เสีย
-- สำหรับการพัฒนา ใช้ `openclaw plugins install -l ./my-engine` เพื่อ link ไดเรกทอรี Plugin ภายในเครื่องโดยไม่ต้องคัดลอก
+- ใช้ `openclaw doctor` เพื่อตรวจสอบว่ากลไกของคุณโหลดอย่างถูกต้อง
+- เมื่อสลับกลไก เซสชันที่มีอยู่จะดำเนินต่อด้วยประวัติปัจจุบัน กลไกใหม่จะเข้าควบคุมการรันในอนาคต
+- ระบบจะบันทึกข้อผิดพลาดของกลไกและกักกันกลไก Plugin ที่เลือกสำหรับกระบวนการ Gateway ปัจจุบัน OpenClaw จะถอยกลับไปใช้ `legacy` สำหรับรอบสนทนาของผู้ใช้เพื่อให้ตอบกลับต่อไปได้ แต่ยังคงควรซ่อมแซม อัปเดต ปิดใช้งาน หรือถอนการติดตั้ง Plugin ที่เสียหาย
+- สำหรับการพัฒนา ให้ใช้ `openclaw plugins install -l ./my-engine` เพื่อเชื่อมโยงไดเรกทอรี Plugin ในเครื่องโดยไม่ต้องคัดลอก
 
-## ที่เกี่ยวข้อง
+## เนื้อหาที่เกี่ยวข้อง
 
-- [Compaction](/th/concepts/compaction) - การสรุปบทสนทนายาวๆ
-- [Context](/th/concepts/context) - วิธีสร้าง context สำหรับ turn ของ agent
-- [สถาปัตยกรรม Plugin](/th/plugins/architecture) - การลงทะเบียน Plugin context engine
-- [manifest ของ Plugin](/th/plugins/manifest) - ฟิลด์ manifest ของ Plugin
-- [Plugins](/th/tools/plugin) - ภาพรวม Plugin
+- [Compaction](/th/concepts/compaction) - การสรุปบทสนทนาที่ยาว
+- [บริบท](/th/concepts/context) - วิธีสร้างบริบทสำหรับรอบการทำงานของเอเจนต์
+- [สถาปัตยกรรม Plugin](/th/plugins/architecture) - การลงทะเบียน Plugin กลไกบริบท
+- [ไฟล์มานิเฟสต์ของ Plugin](/th/plugins/manifest) - ฟิลด์ในไฟล์มานิเฟสต์ของ Plugin
+- [Plugin](/th/tools/plugin) - ภาพรวม Plugin

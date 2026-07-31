@@ -2,32 +2,33 @@
 read_when:
     - 位置情報 Node のサポートまたは権限 UI の追加
     - Android の位置情報権限またはフォアグラウンド動作の設計
-summary: Node の位置情報コマンド（location.get）、権限モード、Android のフォアグラウンド動作
+summary: Node の位置情報コマンド、プラットフォームの権限モード、Linux GeoClue のセットアップ
 title: 位置情報コマンド
 x-i18n:
-    generated_at: "2026-07-11T22:22:55Z"
+    generated_at: "2026-07-26T10:07:58Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: fae9f7707620f3f743d40c07618a431a6baa7a357dda6d74021bc986cd4974b1
+    source_hash: 644229c1eafc8fc7b59bc23ba01d4ba95687ea66c4f9bd4a4cda98a87f2b6085
     source_path: nodes/location-command.md
     workflow: 16
 ---
 
-## 要約
+## TL;DR
 
-- `location.get` は Node コマンドで、`node.invoke` または `openclaw nodes location get` を介して呼び出します。
+- `location.get` は Node コマンドで、`node.invoke` または `openclaw nodes location get` を介して呼び出されます。
 - デフォルトではオフです。
-- Android のサードパーティビルドでは、オフ / 使用中のみ / 常に許可のセレクターを使用します。Play ビルドでは引き続きオフ / 使用中のみとなります。
-- 正確な位置情報は別のトグルです。
+- Android のサードパーティビルドでは、Off / While Using / Always のセレクターを使用します。Play ビルドでは引き続き Off / While Using のみです。
+- Precise Location は独立したトグルです。
 
-## 単なるスイッチではなくセレクターを使う理由
+## スイッチだけでなくセレクターを使用する理由
 
-OS の位置情報権限には複数のレベルがあります。正確な位置情報も OS で別途許可されます（iOS 14 以降の「正確」、Android の「高精度」と「概略」）。アプリ内のセレクターは要求するモードを指定しますが、実際に付与する権限は引き続き OS が決定します。
+OS の位置情報権限には複数のレベルがあります。正確な位置情報も独立した OS 権限です（iOS 14+ の「Precise」、Android の「fine」と「coarse」）。アプリ内のセレクターによって要求するモードが決まりますが、実際に付与する権限は引き続き OS が決定します。
 
 ## 設定モデル
 
-Node デバイスごとに設定します。
+Node デバイスごと:
 
 - `location.enabledMode`: `off | whileUsing | always`
 - `location.preciseEnabled`: bool
@@ -35,17 +36,17 @@ Node デバイスごとに設定します。
 UI の動作:
 
 - `whileUsing` を選択すると、フォアグラウンド権限を要求します。
-- Android のサードパーティビルドで `always` を選択すると、最初にフォアグラウンド権限を要求し、バックグラウンドアクセスについて説明してから、別途 **Allow all the time** 権限を付与するための Android アプリ設定を開きます。
+- Android のサードパーティビルドで `always` を選択すると、まずフォアグラウンド権限を要求し、バックグラウンドアクセスについて説明した後、独立した **Allow all the time** 権限を付与するために Android のアプリ設定を開きます。
 - Android Play ビルドでは、バックグラウンド位置情報権限を宣言せず、`always` も表示しません。
-- OS が要求されたレベルを拒否した場合、アプリは付与済みのうち最も高いレベルに戻し、ステータスを表示します。
+- OS が要求されたレベルを拒否した場合、アプリは付与済みの最高レベルに戻し、ステータスを表示します。
 
 ## 権限のマッピング（node.permissions）
 
-任意です。macOS Node は `node.list`/`node.describe` の `permissions` マップを介して `location` を報告します。iOS/Android では省略される場合があります。
+任意です。macOS Node は、`node.list`/`node.describe` の `permissions` マップを介して `location` を報告します。iOS/Android では省略される場合があります。
 
 ## コマンド: `location.get`
 
-`node.invoke` または CLI ヘルパーを介して呼び出します。
+`node.invoke` または CLI ヘルパーを介して呼び出します:
 
 ```bash
 openclaw nodes location get --node <idOrNameOrIp>
@@ -62,9 +63,9 @@ openclaw nodes location get --node <idOrNameOrIp> --accuracy precise --max-age 1
 }
 ```
 
-CLI フラグは直接対応します。`--location-timeout` -> `timeoutMs`、`--max-age` -> `maxAgeMs`、`--accuracy` -> `desiredAccuracy`。
+CLI フラグは直接対応します: `--location-timeout` -> `timeoutMs`、`--max-age` -> `maxAgeMs`、`--accuracy` -> `desiredAccuracy`。
 
-レスポンスのペイロード:
+レスポンスペイロード:
 
 ```json
 {
@@ -84,28 +85,54 @@ CLI フラグは直接対応します。`--location-timeout` -> `timeoutMs`、`-
 
 - `LOCATION_DISABLED`: セレクターがオフです。
 - `LOCATION_PERMISSION_REQUIRED`: 要求されたモードに必要な権限がありません。
-- `LOCATION_BACKGROUND_UNAVAILABLE`: アプリがバックグラウンドにありますが、使用中のみの権限しか付与されていません。
+- `LOCATION_BACKGROUND_UNAVAILABLE`: アプリがバックグラウンドにありますが、While Using のみが付与されています。
 - `LOCATION_TIMEOUT`: 時間内に位置情報を取得できませんでした。
-- `LOCATION_UNAVAILABLE`: システム障害が発生したか、利用可能なプロバイダーがありません。
+- `LOCATION_UNAVAILABLE`: システム障害、またはプロバイダーがありません。
 
 ## バックグラウンドでの動作
 
-- Android のサードパーティビルドでは、ユーザーが「常に許可」を選択し、Android がバックグラウンド位置情報を許可した場合にのみ、バックグラウンドで `location.get` を受け付けます。既存の常駐 Node サービスは `location` サービスタイプを追加し、アクティブな間は「位置情報: 常に許可」と明示します。
-- Android Play ビルドと「使用中のみ」モードでは、バックグラウンド中の `location.get` を拒否します。
-- 他の Node プラットフォームでは動作が異なる場合があります。
+- Android のサードパーティビルドでは、ユーザーが `Always` を選択し、Android がバックグラウンド位置情報を許可した場合に限り、バックグラウンドでの `location.get` を受け付けます。既存の常駐 Node サービスは `location` サービスタイプを追加し、動作中は `Location: Always` を明示します。
+- Android Play ビルドと `While Using` モードでは、バックグラウンド中の `location.get` を拒否します。
+- その他の Node プラットフォームでは動作が異なる場合があります。
 
-## モデルおよびツールとの統合
+## Linux Node ホスト
 
-- エージェントツール: `nodes` ツールの `location_get` アクション（Node の指定が必要）。
+同梱の Linux Node Plugin は、Linux デスクトップアプリのないヘッドレスホストを含む CLI `openclaw node` サービスに `location.get` を追加します。位置情報はデフォルトでオフです。Plugin エントリで有効にしてから、Node サービスを再起動します:
+
+```json5
+{
+  plugins: {
+    entries: {
+      "linux-node": {
+        config: {
+          location: { enabled: true },
+        },
+      },
+    },
+  },
+}
+```
+
+GeoClue2 とその `where-am-i` デモ（Debian および Ubuntu では `geoclue-2-demo`）をインストールします。Node サービスのユーザーは、ホストの GeoClue ポリシーおよび認可エージェントによって許可されている必要があります。
+
+Plugin は、一連の `busctl` 呼び出しの代わりに `where-am-i` を使用します。GeoClue では、クライアントの作成、プロパティ、開始、更新、停止が単一の D-Bus クライアント接続に関連付けられます。デモはこのライフサイクルをまとめて維持しますが、個別の `busctl` サブプロセスでは維持できません。npm 依存関係は追加されません。
+
+Linux は `coarse`、`balanced`、`precise` を、それぞれ GeoClue の精度レベル `4`、`6`、`8` にマッピングします。返されたタイムスタンプに対して `maxAgeMs` を検証します。GeoClue のデモでは選択されたプロバイダーが公開されないため、`source` は `unknown` です。`isPrecise` は、報告された精度が 100 メートル以下の場合にのみ true になります。
+
+Linux でも同じ安定したエラーを使用します: `LOCATION_DISABLED`、`LOCATION_TIMEOUT`、`LOCATION_UNAVAILABLE`。
+
+## モデル／ツール連携
+
+- エージェントツール: `nodes` ツールの `location_get` アクション（Node が必要）。
 - CLI: `openclaw nodes location get --node <id>`。
-- エージェント向けガイドライン: ユーザーが位置情報を有効にし、その適用範囲を理解している場合にのみ呼び出してください。
+- エージェントのガイドライン: ユーザーが位置情報を有効にし、その範囲を理解している場合にのみ呼び出します。
 
 ## UX 文言（推奨）
 
-- オフ: 「位置情報の共有は無効です。」
-- 使用中のみ: 「OpenClaw を開いているときのみ。」
-- 常に許可: 「OpenClaw がバックグラウンドにある間も、要求された位置情報の確認を許可します。」
-- 正確: 「正確な GPS 位置情報を使用します。おおよその位置情報を共有するにはオフにしてください。」
+- Off: 「位置情報の共有は無効です。」
+- While Using: 「OpenClaw が開いているときのみ。」
+- Always: 「OpenClaw がバックグラウンドにある間も、要求された位置情報の確認を許可します。」
+- Precise: 「正確な GPS 位置情報を使用します。おおよその位置情報を共有するにはオフに切り替えてください。」
 
 ## 関連項目
 

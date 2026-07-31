@@ -1,12 +1,13 @@
 ---
 read_when:
     - Quieres un mapa completo de la documentación
-summary: Páginas centrales que enlazan a toda la documentación de OpenClaw
+summary: Centros que enlazan a toda la documentación de OpenClaw
 title: Centros de documentación
 x-i18n:
-    generated_at: "2026-07-11T23:32:24Z"
+    generated_at: "2026-07-26T04:52:10Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 9b51fc77155b2e7ed6cb6e36d375585ebd457c3d89f97c4151877d1aae20717f
     source_path: start/hubs.md
@@ -32,7 +33,7 @@ Use estos centros para descubrir todas las páginas, incluidos los análisis det
 - [Configuración](/es/gateway/configuration)
 - [Ejemplos de configuración](/es/gateway/configuration-examples)
 - [Asistente de OpenClaw](/es/start/openclaw)
-- [Demostraciones](/es/start/showcase)
+- [Galería](/es/start/showcase)
 - [Historia](/es/start/lore)
 
 ## Instalación y actualizaciones
@@ -42,10 +43,10 @@ Use estos centros para descubrir todas las páginas, incluidos los análisis det
 - [Actualización y reversión](/es/install/updating)
 - [Flujo de trabajo con Bun (experimental)](/es/install/bun)
 
-## Conceptos fundamentales
+## Conceptos básicos
 
 - [Arquitectura](/es/concepts/architecture)
-- [Funciones](/es/concepts/features)
+- [Características](/es/concepts/features)
 - [Centro de red](/es/network)
 - [Entorno de ejecución del agente](/es/concepts/agent)
 - [Espacio de trabajo del agente](/es/concepts/agent-workspace)
@@ -58,12 +59,12 @@ Use estos centros para descubrir todas las páginas, incluidos los análisis det
 - [Depuración de sesiones](/es/concepts/session-pruning)
 - [Herramientas de sesión](/es/concepts/session-tool)
 - [Cola](/es/concepts/queue)
-- [Comandos con barra](/es/tools/slash-commands)
+- [Comandos de barra](/es/tools/slash-commands)
 - [Adaptadores RPC](/es/reference/rpc)
 - [Esquemas de TypeBox](/es/concepts/typebox)
 - [Gestión de zonas horarias](/es/concepts/timezone)
 - [Presencia](/es/concepts/presence)
-- [Detección y transportes](/es/gateway/discovery)
+- [Descubrimiento y transportes](/es/gateway/discovery)
 - [Bonjour](/es/gateway/bonjour)
 - [Enrutamiento de canales](/es/channels/channel-routing)
 - [Grupos](/es/channels/groups)
@@ -84,20 +85,20 @@ Use estos centros para descubrir todas las páginas, incluidos los análisis det
 - [Telegram](/es/channels/telegram)
 - [WebChat](/es/web/webchat)
 - [WhatsApp](/es/channels/whatsapp)
-- [Análisis de ubicación](/es/channels/location)
+- [Análisis de ubicaciones](/es/channels/location)
 - [Webhooks](/es/automation/cron-jobs#webhooks)
 - [Pub/Sub de Gmail](/es/automation/cron-jobs#gmail-pubsub-integration)
 
 ## Gateway y operaciones
 
-- [Manual operativo del Gateway](/es/gateway)
+- [Manual de operaciones del Gateway](/es/gateway)
 - [Modelo de red](/es/network#core-model)
 - [Emparejamiento del Gateway](/es/gateway/pairing)
 - [Bloqueo del Gateway](/es/gateway/gateway-lock)
 - [Proceso en segundo plano](/es/gateway/background-process)
 - [Estado](/es/gateway/health)
 - [Heartbeat](/es/gateway/heartbeat)
-- [Doctor](/es/gateway/doctor)
+- [Diagnóstico](/es/gateway/doctor)
 - [Registro](/es/gateway/logging)
 - [Aislamiento](/es/gateway/sandboxing)
 - [Panel de control](/es/web/dashboard)
@@ -115,8 +116,8 @@ Use estos centros para descubrir todas las páginas, incluidos los análisis det
 - [Referencia de la CLI](/es/cli)
 - [Herramienta de ejecución](/es/tools/exec)
 - [Herramienta de PDF](/es/tools/pdf)
-- [Modo elevado](/es/tools/elevated)
-- [Tareas Cron](/es/automation/cron-jobs)
+- [Modo con privilegios elevados](/es/tools/elevated)
+- [Tareas de Cron](/es/automation/cron-jobs)
 - [Automatización](/es/automation)
 - [Razonamiento y modo detallado](/es/tools/thinking)
 - [Modelos](/es/concepts/models)
@@ -135,7 +136,7 @@ Use estos centros para descubrir todas las páginas, incluidos los análisis det
 - [Audio](/es/nodes/audio)
 - [Comando de ubicación](/es/nodes/location-command)
 - [Activación por voz](/es/nodes/voicewake)
-- [Modo conversación](/es/nodes/talk)
+- [Modo de conversación](/es/nodes/talk)
 
 ## Plataformas
 
@@ -147,35 +148,35 @@ Use estos centros para descubrir todas las páginas, incluidos los análisis det
 - [Linux](/es/platforms/linux)
 - [Superficies web](/es/web)
 
-## Aplicación complementaria de macOS (avanzado)
+## Aplicación complementaria para macOS (avanzado)
 
-- [Configuración de desarrollo para macOS](/es/platforms/mac/dev-setup)
+- [Configuración de desarrollo en macOS](/es/platforms/mac/dev-setup)
 - [Barra de menús de macOS](/es/platforms/mac/menu-bar)
 - [Activación por voz en macOS](/es/platforms/mac/voicewake)
 - [Superposición de voz en macOS](/es/platforms/mac/voice-overlay)
-- [WebChat para macOS](/es/platforms/mac/webchat)
-- [Canvas para macOS](/es/platforms/mac/canvas)
+- [WebChat en macOS](/es/platforms/mac/webchat)
+- [Canvas de macOS](/es/platforms/mac/canvas)
 - [Proceso secundario de macOS](/es/platforms/mac/child-process)
 - [Estado de macOS](/es/platforms/mac/health)
 - [Icono de macOS](/es/platforms/mac/icon)
 - [Registro de macOS](/es/platforms/mac/logging)
 - [Permisos de macOS](/es/platforms/mac/permissions)
 - [Acceso remoto en macOS](/es/platforms/mac/remote)
-- [Firma para macOS](/es/platforms/mac/signing)
+- [Firma de macOS](/es/platforms/mac/signing)
 - [Gateway de macOS (launchd)](/es/platforms/mac/bundled-gateway)
 - [XPC de macOS](/es/platforms/mac/xpc)
 - [Skills de macOS](/es/platforms/mac/skills)
-- [Peekaboo para macOS](/es/platforms/mac/peekaboo)
+- [Peekaboo de macOS](/es/platforms/mac/peekaboo)
 
 ## Plugins
 
 - [Descripción general de los Plugins](/es/tools/plugin)
 - [Creación de plugins](/es/plugins/building-plugins)
-- [Hooks de Plugin](/es/plugins/hooks)
-- [Manifiesto de Plugin](/es/plugins/manifest)
+- [Hooks de plugins](/es/plugins/hooks)
+- [Manifiesto del Plugin](/es/plugins/manifest)
 - [Herramientas del agente](/es/plugins/building-plugins#registering-agent-tools)
-- [Paquetes de Plugins](/es/plugins/bundles)
-- [ClawHub](/clawhub)
+- [Paquetes de plugins](/es/plugins/bundles)
+- [ClawHub](/es/clawhub)
 - [Recetario de capacidades](/es/plugins/adding-capabilities)
 - [Plugin de llamadas de voz](/es/plugins/voice-call)
 - [Plugin de usuario de Zalo](/es/plugins/zalouser)
@@ -183,7 +184,7 @@ Use estos centros para descubrir todas las páginas, incluidos los análisis det
 ## Espacio de trabajo y plantillas
 
 - [Skills](/es/tools/skills)
-- [ClawHub](/clawhub)
+- [ClawHub](/es/clawhub)
 - [Configuración de Skills](/es/tools/skills-config)
 - [AGENTS predeterminado](/es/reference/AGENTS.default)
 - [Plantillas: AGENTS](/es/reference/templates/AGENTS)
@@ -204,6 +205,6 @@ Use estos centros para descubrir todas las páginas, incluidos los análisis det
 - [Política de publicación](/es/reference/RELEASING)
 - [Modelos de dispositivos](/es/reference/device-models)
 
-## Contenido relacionado
+## Relacionado
 
 - [Primeros pasos](/es/start/getting-started)

@@ -1,144 +1,139 @@
 ---
 read_when:
-    - macOS Canvas पैनल लागू करना
+    - macOS Canvas पैनल का कार्यान्वयन
     - दृश्य कार्यस्थान के लिए एजेंट नियंत्रण जोड़ना
-    - WKWebView कैनवास लोड की डिबगिंग
-summary: एजेंट-नियंत्रित Canvas पैनल, WKWebView + कस्टम URL स्कीम के माध्यम से एम्बेड किया गया
+    - WKWebView कैनवास लोड की डीबगिंग
+summary: WKWebView + कस्टम URL स्कीम के माध्यम से एम्बेड किया गया एजेंट-नियंत्रित Canvas पैनल
 title: कैनवास
 x-i18n:
-    generated_at: "2026-06-28T23:28:30Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:05:25Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 45f0e1b27fbe58e85d57dbf35a6eb44d47df30569b8b10ed24e8bd240b4b5686
+    source_hash: 56532246bc06601aa753a59f85f33bfa8d6599deecade591a03972e8b9b16fc2
     source_path: platforms/mac/canvas.md
     workflow: 16
 ---
 
-macOS ऐप `WKWebView` का उपयोग करके एजेंट-नियंत्रित **कैनवास पैनल** एम्बेड करता है। यह
-HTML/CSS/JS, A2UI, और छोटी इंटरैक्टिव UI सतहों के लिए एक हल्का दृश्य कार्यक्षेत्र है।
+macOS ऐप, HTML/CSS/JS, A2UI और छोटे इंटरैक्टिव UI
+सतहों के लिए हल्के विज़ुअल कार्यक्षेत्र `WKWebView` का उपयोग करके, एजेंट-नियंत्रित **Canvas पैनल** एम्बेड करता है।
 
-## कैनवास कहाँ रहता है
+## Canvas कहाँ स्थित है
 
-कैनवास स्थिति Application Support के अंतर्गत संग्रहीत होती है:
+Canvas की स्थिति Application Support के अंतर्गत संग्रहीत होती है:
 
 - `~/Library/Application Support/OpenClaw/canvas/<session>/...`
 
-कैनवास पैनल इन फ़ाइलों को एक **कस्टम URL स्कीम** के माध्यम से सर्व करता है:
+Canvas पैनल उन फ़ाइलों को कस्टम URL स्कीम,
+`openclaw-canvas://<session>/<path>` के माध्यम से प्रस्तुत करता है:
 
-- `openclaw-canvas://<session>/<path>`
+- `openclaw-canvas://main/` -> `<canvasRoot>/main/index.html`
+- `openclaw-canvas://main/assets/app.css` -> `<canvasRoot>/main/assets/app.css`
+- `openclaw-canvas://main/widgets/todo/` -> `<canvasRoot>/main/widgets/todo/index.html`
 
-उदाहरण:
+यदि रूट पर कोई `index.html` मौजूद नहीं है, तो ऐप एक अंतर्निर्मित स्कैफ़ोल्ड पृष्ठ दिखाता है।
 
-- `openclaw-canvas://main/` → `<canvasRoot>/main/index.html`
-- `openclaw-canvas://main/assets/app.css` → `<canvasRoot>/main/assets/app.css`
-- `openclaw-canvas://main/widgets/todo/` → `<canvasRoot>/main/widgets/todo/index.html`
+## पैनल का व्यवहार
 
-यदि रूट पर कोई `index.html` मौजूद नहीं है, तो ऐप एक **अंतर्निहित स्कैफ़ोल्ड पेज** दिखाता है।
+- मेनू बार (या माउस कर्सर) के पास स्थित सीमाहीन, आकार बदलने योग्य पैनल।
+- Canvas प्रस्तुत करने से ऐप स्विच नहीं होते या कीबोर्ड फ़ोकस नहीं छीना जाता।
+- प्रत्येक सत्र के लिए आकार/स्थिति याद रखता है।
+- स्थानीय Canvas फ़ाइलें बदलने पर स्वतः पुनः लोड होता है।
+- एक समय में केवल एक Canvas पैनल दिखाई देता है (आवश्यकतानुसार सत्र बदलते हैं)।
 
-## पैनल व्यवहार
-
-- मेनू बार (या माउस कर्सर) के पास एंकर किया गया बॉर्डरलेस, आकार बदलने योग्य पैनल।
-- प्रति सत्र आकार/स्थिति याद रखता है।
-- स्थानीय कैनवास फ़ाइलों में बदलाव होने पर अपने-आप रीलोड होता है।
-- एक समय में केवल एक कैनवास पैनल दिखाई देता है (आवश्यकतानुसार सत्र बदला जाता है)।
-
-कैनवास को सेटिंग्स → **कैनवास की अनुमति दें** से बंद किया जा सकता है। बंद होने पर, कैनवास
-नोड कमांड `CANVAS_DISABLED` लौटाते हैं।
+Canvas को Settings -> **Allow Canvas** से अक्षम किया जा सकता है। अक्षम होने पर,
+Canvas Node कमांड `CANVAS_DISABLED` लौटाते हैं।
 
 ## एजेंट API सतह
 
-कैनवास **Gateway WebSocket** के माध्यम से उपलब्ध है, इसलिए एजेंट ये कर सकता है:
-
-- पैनल दिखाना/छिपाना
-- किसी पथ या URL पर नेविगेट करना
-- JavaScript का मूल्यांकन करना
-- स्नैपशॉट इमेज कैप्चर करना
-
-CLI उदाहरण:
+Canvas को Gateway WebSocket के माध्यम से उपलब्ध कराया जाता है, ताकि एजेंट
+पैनल को दिखा/छिपा सके, किसी पथ या URL पर नेविगेट कर सके, JavaScript का मूल्यांकन
+कर सके और स्नैपशॉट छवि कैप्चर कर सके:
 
 ```bash
 openclaw nodes canvas present --node <id>
-openclaw nodes canvas navigate --node <id> --url "/"
+openclaw nodes canvas navigate --node <id> "/"
 openclaw nodes canvas eval --node <id> --js "document.title"
 openclaw nodes canvas snapshot --node <id>
 ```
 
-नोट्स:
+`eval` और `a2ui.*` पैनल को खोले या प्रकट किए बिना सामग्री अपडेट करते हैं। केवल
+`present`, `navigate` या उपयोगकर्ता की कोई कार्रवाई इसे दिखाती है; छिपाने के बाद भी सामग्री अपडेट
+छिपे हुए पैनल पर लागू होते रहते हैं। `snapshot` के लिए पैनल का दिखाई देना आवश्यक है और
+अन्यथा यह `CANVAS_HIDDEN` लौटाता है; पहले `present` चलाएँ।
 
-- `canvas.navigate` **स्थानीय कैनवास पथ**, `http(s)` URL, और `file://` URL स्वीकार करता है।
-- यदि आप `"/"` पास करते हैं, तो कैनवास स्थानीय स्कैफ़ोल्ड या `index.html` दिखाता है।
+`canvas.navigate` स्थानीय Canvas पथ, `http(s)` URL और `file://`
+URL स्वीकार करता है। `"/"` पास करने पर स्थानीय स्कैफ़ोल्ड या `index.html` दिखाई देता है।
 
-## कैनवास में A2UI
+`/__openclaw__/canvas/` और
+`/__openclaw__/a2ui/` के अंतर्गत Gateway द्वारा होस्ट किए गए लक्ष्य, Node सत्र के वर्तमान सीमित-दायरे वाले
+Canvas URL के माध्यम से रिज़ॉल्व किए जाते हैं। ऐप नेविगेशन से पहले उस अल्पकालिक क्षमता को रीफ़्रेश करता है;
+आपको स्वयं क्षमता URL बनाने या कॉपी करने की आवश्यकता नहीं है।
 
-A2UI को Gateway कैनवास होस्ट द्वारा होस्ट किया जाता है और कैनवास पैनल के भीतर रेंडर किया जाता है।
-जब Gateway कैनवास होस्ट का विज्ञापन करता है, तो macOS ऐप पहली बार खोलने पर अपने-आप
-A2UI होस्ट पेज पर नेविगेट करता है।
+## Canvas में A2UI
 
-डिफ़ॉल्ट A2UI होस्ट URL:
+A2UI को Gateway Canvas होस्ट द्वारा होस्ट किया जाता है और Canvas
+पैनल के भीतर रेंडर किया जाता है। जब Gateway किसी Canvas होस्ट की घोषणा करता है, तो macOS ऐप पहली बार खोलने पर
+स्वतः A2UI होस्ट पृष्ठ पर नेविगेट करता है।
 
-```
-http://<gateway-host>:18789/__openclaw__/a2ui/
-```
+घोषित URL क्षमता-दायरे तक सीमित होता है, उदाहरण के लिए
+`http://<gateway-host>:18789/__openclaw__/cap/<token>/__openclaw__/a2ui/?platform=macos`।
+इसे स्थायी लिंक नहीं, बल्कि अल्पकालिक क्रेडेंशियल मानें।
 
 ### A2UI कमांड (v0.8)
 
-कैनवास वर्तमान में **A2UI v0.8** सर्वर→क्लाइंट संदेश स्वीकार करता है:
-
-- `beginRendering`
-- `surfaceUpdate`
-- `dataModelUpdate`
-- `deleteSurface`
-
-`createSurface` (v0.9) समर्थित नहीं है।
-
-CLI उदाहरण:
+Canvas, A2UI v0.8 के सर्वर-से-क्लाइंट संदेश स्वीकार करता है: `beginRendering`,
+`surfaceUpdate`, `dataModelUpdate`, `deleteSurface`। `createSurface` (v0.9)
+अभी समर्थित नहीं है।
 
 ```bash
 cat > /tmp/a2ui-v0.8.jsonl <<'EOFA2'
-{"surfaceUpdate":{"surfaceId":"main","components":[{"id":"root","component":{"Column":{"children":{"explicitList":["title","content"]}}}},{"id":"title","component":{"Text":{"text":{"literalString":"Canvas (A2UI v0.8)"},"usageHint":"h1"}}},{"id":"content","component":{"Text":{"text":{"literalString":"If you can read this, A2UI push works."},"usageHint":"body"}}}]}}
+{"surfaceUpdate":{"surfaceId":"main","components":[{"id":"root","component":{"Column":{"children":{"explicitList":["title","content"]}}}},{"id":"title","component":{"Text":{"text":{"literalString":"Canvas (A2UI v0.8)"},"usageHint":"h1"}}},{"id":"content","component":{"Text":{"text":{"literalString":"यदि आप इसे पढ़ सकते हैं, तो A2UI पुश काम करता है।"},"usageHint":"body"}}}]}}
 {"beginRendering":{"surfaceId":"main","root":"root"}}
 EOFA2
 
 openclaw nodes canvas a2ui push --jsonl /tmp/a2ui-v0.8.jsonl --node <id>
 ```
 
-त्वरित स्मोक:
+त्वरित स्मोक परीक्षण:
 
 ```bash
-openclaw nodes canvas a2ui push --node <id> --text "Hello from A2UI"
+openclaw nodes canvas a2ui push --node <id> --text "A2UI की ओर से नमस्ते"
 ```
 
-## कैनवास से एजेंट रन ट्रिगर करना
+## Canvas से एजेंट रन ट्रिगर करना
 
-कैनवास डीप लिंक के माध्यम से नए एजेंट रन ट्रिगर कर सकता है:
-
-- `openclaw://agent?...`
-
-उदाहरण (JS में):
+Canvas, `openclaw://agent?...` डीप लिंक के माध्यम से नए एजेंट रन ट्रिगर कर सकता है:
 
 ```js
-window.location.href = "openclaw://agent?message=Review%20this%20design";
+window.location.href = "openclaw://agent?message=इस%20डिज़ाइन%20की%20समीक्षा%20करें";
 ```
 
 समर्थित क्वेरी पैरामीटर:
 
-- `message`: पहले से भरा हुआ एजेंट प्रॉम्प्ट।
-- `sessionKey`: स्थिर सत्र पहचानकर्ता।
-- `thinking`: वैकल्पिक थिंकिंग प्रोफ़ाइल।
-- `deliver`, `to`, या `channel`: डिलीवरी लक्ष्य।
-- `timeoutSeconds`: वैकल्पिक रन टाइमआउट।
-- `key`: विश्वसनीय स्थानीय कॉलर के लिए ऐप-जनरेटेड सुरक्षा टोकन।
+| पैरामीटर                  | अर्थ                                               |
+| -------------------------- | ----------------------------------------------------- |
+| `message`                  | पहले से भरा हुआ एजेंट प्रॉम्प्ट।                               |
+| `sessionKey`               | स्थिर सत्र पहचानकर्ता।                            |
+| `thinking`                 | वैकल्पिक चिंतन प्रोफ़ाइल।                            |
+| `deliver`, `to`, `channel` | डिलीवरी लक्ष्य।                                      |
+| `timeoutSeconds`           | वैकल्पिक रन टाइमआउट।                                 |
+| `key`                      | विश्वसनीय स्थानीय कॉलर के लिए ऐप द्वारा जनरेट किया गया सुरक्षा टोकन। |
 
-वैध कुंजी प्रदान न होने पर ऐप पुष्टि के लिए पूछता है। बिना कुंजी वाले लिंक
-स्वीकृति से पहले संदेश और URL दिखाते हैं, और डिलीवरी रूटिंग फ़ील्ड अनदेखा करते हैं;
-कुंजी वाले लिंक सामान्य Gateway रन पथ का उपयोग करते हैं।
+मान्य कुंजी प्रदान न किए जाने पर ऐप पुष्टि के लिए संकेत देता है। बिना कुंजी वाले
+लिंक अनुमोदन से पहले संदेश और URL दिखाते हैं तथा डिलीवरी रूटिंग
+फ़ील्ड को अनदेखा करते हैं; कुंजी वाले लिंक सामान्य Gateway रन पथ का उपयोग करते हैं।
 
-## सुरक्षा नोट्स
+## सुरक्षा संबंधी नोट्स
 
-- कैनवास स्कीम डायरेक्टरी ट्रैवर्सल को ब्लॉक करती है; फ़ाइलें सत्र रूट के अंतर्गत होनी चाहिए।
-- स्थानीय कैनवास सामग्री कस्टम स्कीम का उपयोग करती है (किसी loopback सर्वर की आवश्यकता नहीं)।
+- Canvas स्कीम डायरेक्टरी ट्रैवर्सल को अवरुद्ध करती है; फ़ाइलें सत्र रूट के अंतर्गत होनी चाहिए।
+- स्थानीय Canvas सामग्री कस्टम स्कीम का उपयोग करती है (लूपबैक सर्वर आवश्यक नहीं है)।
 - बाहरी `http(s)` URL केवल स्पष्ट रूप से नेविगेट किए जाने पर अनुमत हैं।
+- सामान्य वेब पृष्ठ केवल रेंडर किए जा सकते हैं। एजेंट कार्रवाइयाँ केवल
+  ऐप के स्वामित्व वाली Canvas स्कीम या ऐप द्वारा चुने गए, सटीक क्षमता-दायरे तक सीमित Gateway A2UI दस्तावेज़
+  से स्वीकार की जाती हैं; सबफ़्रेम, रीडायरेक्ट, पुरानी क्षमताएँ और बदली हुई
+  क्वेरी कार्रवाइयाँ डिस्पैच नहीं कर सकतीं।
 
 ## संबंधित
 

@@ -1,16 +1,17 @@
 ---
 read_when:
-    - セキュリティ強化を施したサーバーの自動デプロイが必要な場合
-    - VPN アクセスを備えたファイアウォール分離環境のセットアップが必要です
-    - リモートの Debian/Ubuntu サーバーにデプロイする場合
+    - セキュリティ強化を施したサーバーの自動デプロイを行いたい場合
+    - VPN アクセスを備えたファイアウォール分離環境が必要です
+    - リモートの Debian/Ubuntu サーバーにデプロイする場合です
 summary: Ansible、Tailscale VPN、ファイアウォール分離による、自動化され強化された OpenClaw のインストール
 title: Ansible
 x-i18n:
-    generated_at: "2026-07-11T22:18:25Z"
+    generated_at: "2026-07-26T09:06:02Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 8d3626ab364169609f92f636cb6b86cb980dca2b235500e748296128765444ae
+    source_hash: 2f6b473cd5a8b80389b5ed746c4e2f2729d95bb15a2daaaa183fbdfbe144e647
     source_path: install/ansible.md
     workflow: 16
 ---
@@ -18,22 +19,22 @@ x-i18n:
 OpenClaw を本番サーバーにデプロイするには、セキュリティ優先のアーキテクチャを採用した自動インストーラー **[openclaw-ansible](https://github.com/openclaw/openclaw-ansible)** を使用します。
 
 <Info>
-Ansible デプロイに関する信頼できる唯一の情報源は、[openclaw-ansible](https://github.com/openclaw/openclaw-ansible) リポジトリです。このページでは概要を簡潔に説明します。
+Ansible デプロイに関する信頼できる唯一の情報源は、[openclaw-ansible](https://github.com/openclaw/openclaw-ansible) リポジトリです。このページでは概要を簡単に説明します。
 </Info>
 
 ## 前提条件
 
 | 要件        | 詳細                                                      |
 | ----------- | --------------------------------------------------------- |
-| OS          | Debian 11 以降または Ubuntu 20.04 以降                    |
+| OS          | Debian 11+ または Ubuntu 20.04+                           |
 | アクセス    | root または sudo 権限                                     |
-| ネットワーク | パッケージをインストールするためのインターネット接続      |
-| Ansible     | 2.14 以降（クイックスタートスクリプトによって自動インストール） |
+| ネットワーク | パッケージのインストールに必要なインターネット接続        |
+| Ansible     | 2.14+（クイックスタートスクリプトによって自動インストール） |
 
-## 導入されるもの
+## 提供されるもの
 
-- ファイアウォール優先のセキュリティ：UFW + Docker による分離（SSH + Tailscale のみアクセス可能）
-- サービスを公開せずにリモートアクセスするための Tailscale VPN
+- ファイアウォール優先のセキュリティ：UFW + Docker 分離（SSH + Tailscale のみに到達可能）
+- サービスを公開せずにリモートアクセスできる Tailscale VPN
 - localhost のみにバインドされた分離サンドボックスコンテナ用の Docker
 - セキュリティ強化と起動時の自動開始を備えた systemd 統合
 - 1 コマンドでのセットアップ
@@ -47,9 +48,9 @@ curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-ansible/main/inst
 ## インストールされるもの
 
 1. Tailscale（安全なリモートアクセス用のメッシュ VPN）
-2. UFW ファイアウォール（SSH + Tailscale のポートのみ）
+2. UFW ファイアウォール（SSH + Tailscale ポートのみ）
 3. Docker CE + Compose V2（デフォルトのエージェントサンドボックスバックエンド）
-4. Node.js と pnpm（OpenClaw には Node 22.19 以降または 23.11 以降が必要。Node 24 を推奨）
+4. Node.js と pnpm（OpenClaw には Node 22.22.3+、24.15+、または 25.9+ が必要です。Node 24 を推奨します）
 5. コンテナ化せず、ホストベースでインストールされる OpenClaw
 6. セキュリティ強化を施した systemd サービス
 
@@ -62,44 +63,44 @@ Gateway は Docker 内ではなく、ホスト上で直接実行されます。�
 ## インストール後のセットアップ
 
 <Steps>
-  <Step title="Switch to the openclaw user">
+  <Step title="openclaw ユーザーに切り替える">
     ```bash
     sudo -i -u openclaw
     ```
   </Step>
-  <Step title="Run the onboarding wizard">
-    インストール後のスクリプトに従って OpenClaw を設定します。
+  <Step title="オンボーディングウィザードを実行する">
+    インストール後スクリプトに従って OpenClaw を設定します。
   </Step>
-  <Step title="Connect messaging channels">
+  <Step title="メッセージングチャネルを接続する">
     WhatsApp、Telegram、Discord、または Signal にログインします。
     ```bash
     openclaw channels login --channel <name>
     ```
   </Step>
-  <Step title="Verify the installation">
+  <Step title="インストールを確認する">
     ```bash
     sudo systemctl status openclaw
     sudo journalctl -u openclaw -f
     ```
   </Step>
-  <Step title="Connect to Tailscale">
-    安全なリモートアクセスのために VPN メッシュへ参加します。
+  <Step title="Tailscale に接続する">
+    安全なリモートアクセスのため、VPN メッシュに参加します。
   </Step>
 </Steps>
 
 ### クイックコマンド
 
 ```bash
-# Check service status
+# サービスの状態を確認
 sudo systemctl status openclaw
 
-# View live logs
+# ライブログを表示
 sudo journalctl -u openclaw -f
 
-# Restart gateway
+# Gateway を再起動
 sudo systemctl restart openclaw
 
-# Channel login (run as openclaw user)
+# チャネルにログイン（openclaw ユーザーとして実行）
 sudo -i -u openclaw
 openclaw channels login --channel <name>
 ```
@@ -109,9 +110,9 @@ openclaw channels login --channel <name>
 4 層の防御モデル：
 
 1. ファイアウォール（UFW）：SSH（22）と Tailscale（41641/udp）のみを公開
-2. VPN（Tailscale）：Gateway は VPN メッシュ経由でのみアクセス可能
-3. Docker による分離：`DOCKER-USER` iptables チェーンによって外部へのポート公開を防止
-4. Systemd のセキュリティ強化：`NoNewPrivileges`、`PrivateTmp`、非特権ユーザー
+2. VPN（Tailscale）：Gateway には VPN メッシュ経由でのみ到達可能
+3. Docker 分離：`DOCKER-USER` iptables チェーンによって外部へのポート公開を防止
+4. systemd のセキュリティ強化：`NoNewPrivileges`、`PrivateTmp`、非特権ユーザー
 
 外部からの攻撃対象領域を確認します。
 
@@ -119,30 +120,30 @@ openclaw channels login --channel <name>
 nmap -p- YOUR_SERVER_IP
 ```
 
-開いているのはポート 22（SSH）のみである必要があります。Gateway と Docker は外部からアクセスできない状態に保たれます。
+開いているのはポート 22（SSH）のみである必要があります。Gateway と Docker は引き続きアクセスを制限されます。
 
-Docker は Gateway の実行用ではなく、エージェントサンドボックス（分離されたツール実行環境）用にインストールされます。サンドボックスの設定については、[マルチエージェントのサンドボックスとツール](/ja-JP/tools/multi-agent-sandbox-tools)を参照してください。
+Docker は Gateway の実行用ではなく、エージェントサンドボックス（分離されたツール実行）用にインストールされます。サンドボックスの設定については、[マルチエージェントのサンドボックスとツール](/ja-JP/tools/multi-agent-sandbox-tools)を参照してください。
 
 ## 手動インストール
 
 <Steps>
-  <Step title="Install prerequisites">
+  <Step title="前提パッケージをインストールする">
     ```bash
     sudo apt update && sudo apt install -y ansible git
     ```
   </Step>
-  <Step title="Clone the repository">
+  <Step title="リポジトリをクローンする">
     ```bash
     git clone https://github.com/openclaw/openclaw-ansible.git
     cd openclaw-ansible
     ```
   </Step>
-  <Step title="Install Ansible collections">
+  <Step title="Ansible コレクションをインストールする">
     ```bash
     ansible-galaxy collection install -r requirements.yml
     ```
   </Step>
-  <Step title="Run the playbook">
+  <Step title="プレイブックを実行する">
     ```bash
     ./run-playbook.sh
     ```
@@ -150,7 +151,7 @@ Docker は Gateway の実行用ではなく、エージェントサンドボッ�
     または、プレイブックを直接実行してから、セットアップスクリプトを手動で実行します。
     ```bash
     ansible-playbook playbook.yml --ask-become-pass
-    # Then run: /tmp/openclaw-setup.sh
+    # 次に実行：/tmp/openclaw-setup.sh
     ```
 
   </Step>
@@ -158,57 +159,57 @@ Docker は Gateway の実行用ではなく、エージェントサンドボッ�
 
 ## 更新
 
-Ansible インストーラーは、OpenClaw を手動で更新できるように設定します。標準的な手順については、[更新](/ja-JP/install/updating)を参照してください。
+Ansible インストーラーは、OpenClaw を手動で更新するようにセットアップします。標準的な手順については、[更新](/ja-JP/install/updating)を参照してください。
 
-設定変更後などにプレイブックを再実行するには、次のコマンドを使用します。
+プレイブックを再実行する場合（設定変更後など）：
 
 ```bash
 cd openclaw-ansible
 ./run-playbook.sh
 ```
 
-この処理は冪等であり、複数回実行しても安全です。
+この処理は冪等であり、複数回安全に実行できます。
 
 ## トラブルシューティング
 
 <AccordionGroup>
-  <Accordion title="Firewall blocks my connection">
-    - まず Tailscale VPN 経由で接続してください。Gateway は設計上、その方法でのみアクセスできます。
+  <Accordion title="ファイアウォールによって接続がブロックされる">
+    - 最初に Tailscale VPN 経由で接続してください。Gateway は設計上、その方法でのみ到達できます。
     - SSH（ポート 22）は常に許可されます。
 
   </Accordion>
-  <Accordion title="Service will not start">
+  <Accordion title="サービスが起動しない">
     ```bash
-    # Check logs
+    # ログを確認
     sudo journalctl -u openclaw -n 100
 
-    # Verify permissions
+    # 権限を確認
     sudo ls -la /opt/openclaw
 
-    # Test manual start
+    # 手動起動をテスト
     sudo -i -u openclaw
     cd ~/openclaw
     openclaw gateway run
     ```
 
   </Accordion>
-  <Accordion title="Docker sandbox issues">
+  <Accordion title="Docker サンドボックスの問題">
     ```bash
-    # Verify Docker is running
+    # Docker が実行中であることを確認
     sudo systemctl status docker
 
-    # Check sandbox image
+    # サンドボックスイメージを確認
     sudo docker images | grep openclaw-sandbox
 
-    # Build the sandbox image if missing (requires a source checkout)
+    # イメージがない場合はサンドボックスイメージをビルド（ソースチェックアウトが必要）
     cd /opt/openclaw/openclaw
     sudo -u openclaw ./scripts/sandbox-setup.sh
-    # For npm installs without a source checkout, see
+    # ソースチェックアウトなしで npm インストールを使用する場合は、以下を参照
     # https://docs.openclaw.ai/gateway/sandboxing#images-and-setup
     ```
 
   </Accordion>
-  <Accordion title="Channel login fails">
+  <Accordion title="チャネルへのログインに失敗する">
     `openclaw` ユーザーとして実行していることを確認してください。
     ```bash
     sudo -i -u openclaw
@@ -230,4 +231,4 @@ cd openclaw-ansible
 - [openclaw-ansible](https://github.com/openclaw/openclaw-ansible)：完全なデプロイガイド
 - [Docker](/ja-JP/install/docker)：コンテナ化された Gateway のセットアップ
 - [サンドボックス化](/ja-JP/gateway/sandboxing)：エージェントサンドボックスの設定
-- [マルチエージェントのサンドボックスとツール](/ja-JP/tools/multi-agent-sandbox-tools)：エージェントごとの分離
+- [マルチエージェントのサンドボックスとツール](/ja-JP/tools/multi-agent-sandbox-tools)：エージェント単位の分離

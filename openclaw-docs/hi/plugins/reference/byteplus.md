@@ -1,19 +1,20 @@
 ---
 read_when:
     - आप byteplus Plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
-summary: OpenClaw में BytePlus और BytePlus Plan मॉडल प्रदाता समर्थन जोड़ता है।
+summary: OpenClaw में BytePlus और BytePlus Plan मॉडल प्रदाता के लिए समर्थन जोड़ता है।
 title: BytePlus Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:41:51Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:17:18Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: ecb4a427b1809c11631115b63e67bc7ce619191a0c840c13cf46cade27e76d4b
+    source_hash: cda52c7e6d054ab190d3a78483937e655aa4467b3c3031863233c27cfe5b4411
     source_path: plugins/reference/byteplus.md
     workflow: 16
 ---
 
-# BytePlus Plugin
+# BytePlus plugin
 
 OpenClaw में BytePlus, BytePlus Plan मॉडल प्रदाता समर्थन जोड़ता है।
 
@@ -24,4 +25,4 @@ OpenClaw में BytePlus, BytePlus Plan मॉडल प्रदाता �
 
 ## सतह
 
-providers: byteplus, byteplus-plan; contracts: videoGenerationProviders
+प्रदाता: `byteplus`, `byteplus-plan`; अनुबंध: `videoGenerationProviders`

@@ -1,81 +1,88 @@
 ---
-read_when: You want multiple isolated agents (workspaces + auth) in one gateway process.
+read_when: You want multiple agents with separate workspaces, auth, and sessions in one Gateway process.
 sidebarTitle: Multi-agent routing
 status: active
-summary: 'मल्टी-एजेंट रूटिंग: अलग-थलग एजेंट, चैनल खाते, और बाइंडिंग'
-title: बहु-एजेंट रूटिंग
+summary: 'मल्टी-एजेंट रूटिंग: एजेंट सीमाएँ, चैनल खाते और बाइंडिंग्स'
+title: मल्टी-एजेंट रूटिंग
 x-i18n:
-    generated_at: "2026-06-28T23:00:02Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:34:11Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 4c1c55188cd27ea786cf65dcabd356a602e1e6da5f842532b189df59195274db
+    source_hash: 46df162388205e46d5a4ea3567c8c8f7016117d2ecafe1184a35b4c95798fd80
     source_path: concepts/multi-agent.md
     workflow: 16
 ---
 
-कई _अलग-थलग_ एजेंट चलाएँ — हर एक का अपना कार्यक्षेत्र, स्थिति निर्देशिका (`agentDir`), और सत्र इतिहास — साथ ही एक चलते हुए Gateway में कई चैनल खाते (जैसे दो WhatsApp) चलाएँ। आने वाले संदेश बाइंडिंग के ज़रिए सही एजेंट तक रूट किए जाते हैं।
+एक Gateway प्रक्रिया में कई _पृथक_ एजेंट चलाएँ, जिनमें से प्रत्येक का अपना कार्यक्षेत्र, स्थिति डायरेक्टरी (`agentDir`), और SQLite-समर्थित सत्र इतिहास हो, साथ ही कई चैनल खाते (जैसे दो WhatsApp नंबर) हों। इनबाउंड संदेश **बाइंडिंग्स** के माध्यम से सही एजेंट तक रूट होते हैं।
 
-यहाँ **एजेंट** पूरा प्रति-पर्सोना स्कोप है: कार्यक्षेत्र फ़ाइलें, auth प्रोफ़ाइल, मॉडल रजिस्ट्री, और सत्र स्टोर। `agentDir` वह ऑन-डिस्क स्थिति निर्देशिका है जो इस प्रति-एजेंट कॉन्फ़िग को `~/.openclaw/agents/<agentId>/` पर रखती है। **बाइंडिंग** किसी चैनल खाते (जैसे Slack कार्यक्षेत्र या WhatsApp नंबर) को उन एजेंटों में से किसी एक से मैप करती है।
+एक **एजेंट** प्रति-पर्सोना पूर्ण दायरा है: कार्यक्षेत्र फ़ाइलें, प्रमाणीकरण प्रोफ़ाइलें, मॉडल रजिस्ट्री और सत्र स्टोर। एक **बाइंडिंग** किसी चैनल खाते (एक Slack कार्यक्षेत्र, एक WhatsApp नंबर आदि) को उन एजेंटों में से किसी एक से मैप करती है।
 
-## "एक एजेंट" क्या है?
+## एक एजेंट क्या है
 
-**एजेंट** अपने स्वयं के साथ पूरी तरह स्कोप किया हुआ ब्रेन है:
+प्रत्येक एजेंट का अपना होता है:
 
-- **कार्यस्थान** (फ़ाइलें, AGENTS.md/SOUL.md/USER.md, स्थानीय नोट्स, पर्सोना नियम)।
-- **स्थिति निर्देशिका** (`agentDir`) auth प्रोफ़ाइल, मॉडल रजिस्ट्री, और प्रति-एजेंट कॉन्फ़िग के लिए।
-- **सत्र स्टोर** (चैट इतिहास + रूटिंग स्थिति) `~/.openclaw/agents/<agentId>/sessions` के अंतर्गत।
+- **कार्यस्थल**: फ़ाइलें, `AGENTS.md`/`SOUL.md`/`USER.md`, स्थानीय नोट्स, पर्सोना नियम।
+- **स्थिति डायरेक्टरी** (`agentDir`): प्रमाणीकरण प्रोफ़ाइलें, मॉडल रजिस्ट्री, प्रति-एजेंट कॉन्फ़िगरेशन।
+- **सत्र स्टोर**: `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite` में चैट इतिहास और रूटिंग स्थिति।
 
-Auth प्रोफ़ाइल **प्रति-एजेंट** होती हैं। हर एजेंट अपनी स्वयं की इस जगह से पढ़ता है:
+प्रमाणीकरण प्रोफ़ाइलें प्रति-एजेंट होती हैं और यहाँ से पढ़ी जाती हैं:
 
 ```text
 ~/.openclaw/agents/<agentId>/agent/auth-profiles.json
 ```
 
 <Note>
-`sessions_history` यहाँ भी अधिक सुरक्षित क्रॉस-सत्र रिकॉल पथ है: यह कच्चा ट्रांसक्रिप्ट डंप नहीं, बल्कि सीमित और सैनिटाइज़ किया हुआ दृश्य लौटाता है। असिस्टेंट रिकॉल thinking टैग, `<relevant-memories>` स्कैफ़ोल्डिंग, प्लेन-टेक्स्ट टूल-कॉल XML पेलोड (जिसमें `<tool_call>...</tool_call>`, `<function_call>...</function_call>`, `<tool_calls>...</tool_calls>`, `<function_calls>...</function_calls>`, और कटे हुए टूल-कॉल ब्लॉक शामिल हैं), डाउनग्रेड की हुई टूल-कॉल स्कैफ़ोल्डिंग, लीक हुए ASCII/फुल-विथ मॉडल नियंत्रण टोकन, और गलत रूप वाले MiniMax टूल-कॉल XML को redaction/truncation से पहले हटा देता है।
+`sessions_history` सत्रों के बीच स्मरण का अधिक सुरक्षित मार्ग है: यह कच्चे ट्रांसक्रिप्ट डंप के बजाय एक सीमित, संशोधित दृश्य लौटाता है। यह थिंकिंग-ब्लॉक हस्ताक्षर, टूल-परिणाम पेलोड विवरण, `<relevant-memories>` स्कैफ़ोल्डिंग, टूल-कॉल XML टैग (`<tool_call>`, `<function_call>`, और उनके बहुवचन/डाउनग्रेड किए गए रूप), तथा MiniMax टूल-कॉल XML हटाता है, फिर आउटपुट को संक्षिप्त करके बाइट आकार के अनुसार सीमित करता है।
 </Note>
 
 <Warning>
-एजेंटों के बीच कभी भी `agentDir` का दोबारा उपयोग न करें (इससे auth/session टकराव होते हैं)। एजेंटों के पास स्थानीय प्रोफ़ाइल न होने पर वे default/main एजेंट की auth प्रोफ़ाइल तक पढ़ सकते हैं, लेकिन OpenClaw OAuth refresh tokens को secondary agent store में क्लोन नहीं करता। यदि आपको स्वतंत्र OAuth खाता चाहिए, तो उस एजेंट से साइन इन करें; यदि आप credentials मैन्युअल रूप से कॉपी करते हैं, तो केवल पोर्टेबल static `api_key` या `token` प्रोफ़ाइल कॉपी करें।
+एजेंटों के बीच कभी भी `agentDir` का पुनः उपयोग न करें — इससे प्रमाणीकरण/सत्र स्थिति में टकराव होता है। जब किसी द्वितीयक एजेंट का स्थानीय OAuth क्रेडेंशियल समाप्त हो जाता है या उसका रिफ़्रेश विफल होता है, तो OpenClaw उसी प्रोफ़ाइल आईडी के लिए डिफ़ॉल्ट/मुख्य एजेंट का क्रेडेंशियल पढ़ता है और जो भी टोकन सबसे नया हो उसे अपना लेता है, लेकिन रिफ़्रेश टोकन को द्वितीयक एजेंट के स्टोर में कॉपी नहीं करता। यदि आप पूरी तरह स्वतंत्र OAuth खाता चाहते हैं, तो उस एजेंट से साइन इन करें। यदि आप क्रेडेंशियल मैन्युअल रूप से कॉपी करते हैं, तो केवल पोर्टेबल स्थिर `api_key` या `token` प्रोफ़ाइलें कॉपी करें — OAuth रिफ़्रेश सामग्री डिफ़ॉल्ट रूप से पोर्टेबल नहीं होती (`copyToAgents` किसी प्रोफ़ाइल को स्पष्ट रूप से इसमें शामिल कर सकता है)।
 </Warning>
 
-Skills हर एजेंट कार्यक्षेत्र और `~/.openclaw/skills` जैसे साझा roots से लोड होती हैं, फिर कॉन्फ़िगर होने पर प्रभावी एजेंट skill allowlist के आधार पर फ़िल्टर होती हैं। साझा बेसलाइन के लिए `agents.defaults.skills` और प्रति-एजेंट replacement के लिए `agents.list[].skills` का उपयोग करें। देखें [Skills: प्रति-एजेंट बनाम साझा](/hi/tools/skills#per-agent-vs-shared-skills) और [Skills: एजेंट skill allowlists](/hi/tools/skills#agent-allowlists)।
+Skills प्रत्येक एजेंट कार्यक्षेत्र और `~/.openclaw/skills` जैसे साझा रूट से लोड होते हैं, फिर प्रभावी एजेंट Skills अनुमति-सूची के अनुसार फ़िल्टर होते हैं। साझा आधार-रेखा के लिए `agents.defaults.skills` और प्रति-एजेंट प्रतिस्थापन के लिए `agents.entries.*.skills` का उपयोग करें (स्पष्ट प्रविष्टियाँ डिफ़ॉल्ट को प्रतिस्थापित करती हैं, वे उसमें मर्ज नहीं होतीं)। [Skills: प्रति-एजेंट बनाम साझा](/hi/tools/skills#per-agent-vs-shared-skills) और [Skills: एजेंट अनुमति-सूचियाँ](/hi/tools/skills#agent-allowlists) देखें।
 
-Gateway **एक एजेंट** (डिफ़ॉल्ट) या **कई एजेंटों** को साथ-साथ होस्ट कर सकता है।
+Plugin के स्वामित्व वाला स्टोरेज उस Plugin के कॉन्फ़िगरेशन का पालन करता है; दूसरा एजेंट जोड़ने से प्रत्येक वैश्विक Plugin स्टोर स्वचालित रूप से विभाजित नहीं होता। उदाहरण के लिए, जब पर्सोना को संकलित विकी ज्ञान साझा नहीं करना चाहिए, तब
+[Memory Wiki के प्रति-एजेंट वॉल्ट](/hi/concepts/multi-agent#per-agent-memory-wiki-vaults)
+कॉन्फ़िगर करें।
 
 <Note>
-**कार्यस्थान नोट:** हर एजेंट का कार्यस्थान **डिफ़ॉल्ट cwd** है, कोई कठोर sandbox नहीं। Relative paths कार्यस्थान के अंदर resolve होते हैं, लेकिन sandboxing enabled न हो तो absolute paths अन्य host locations तक पहुँच सकते हैं। देखें [Sandboxing](/hi/gateway/sandboxing)।
+**कार्यस्थल नोट:** प्रत्येक एजेंट का कार्यक्षेत्र **डिफ़ॉल्ट cwd** है, कोई कठोर सैंडबॉक्स नहीं। सापेक्ष पथ कार्यक्षेत्र के भीतर हल होते हैं, लेकिन सैंडबॉक्सिंग सक्षम न होने पर निरपेक्ष पथ होस्ट के अन्य स्थानों तक पहुँच सकते हैं। [सैंडबॉक्सिंग](/hi/gateway/sandboxing) देखें।
 </Note>
 
-## पथ (त्वरित मैप)
+## पथ
 
-- कॉन्फ़िग: `~/.openclaw/openclaw.json` (या `OPENCLAW_CONFIG_PATH`)
-- स्थिति dir: `~/.openclaw` (या `OPENCLAW_STATE_DIR`)
-- कार्यस्थान: `~/.openclaw/workspace` (या `~/.openclaw/workspace-<agentId>`)
-- एजेंट dir: `~/.openclaw/agents/<agentId>/agent` (या `agents.list[].agentDir`)
-- सत्र: `~/.openclaw/agents/<agentId>/sessions`
+| क्या                              | डिफ़ॉल्ट                                                                               | ओवरराइड                                                                                    |
+| -------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| कॉन्फ़िगरेशन                    | `~/.openclaw/openclaw.json`                                                            | `OPENCLAW_CONFIG_PATH`                                                                      |
+| स्थिति डायरेक्टरी               | `~/.openclaw`                                                                          | `OPENCLAW_STATE_DIR`                                                                        |
+| डिफ़ॉल्ट एजेंट का कार्यक्षेत्र   | `~/.openclaw/workspace` (या जब `OPENCLAW_PROFILE` सेट हो तब `workspace-<profile>`)      | `agents.entries.*.workspace`, फिर `agents.defaults.workspace`, या `OPENCLAW_WORKSPACE_DIR` |
+| अन्य एजेंटों का कार्यक्षेत्र     | `<stateDir>/workspace-<agentId>` (या सेट होने पर `<agents.defaults.workspace>/<agentId>`) | `agents.entries.*.workspace`                                                                |
+| एजेंट डायरेक्टरी                 | `~/.openclaw/agents/<agentId>/agent`                                                   | `agents.entries.*.agentDir`                                                                 |
+| सत्र और ट्रांसक्रिप्ट            | `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`                             | —                                                                                           |
+| लीगेसी/संग्रहित सत्र आर्टिफ़ैक्ट | `~/.openclaw/agents/<agentId>/sessions`                                                | —                                                                                           |
 
-### सिंगल-एजेंट मोड (डिफ़ॉल्ट)
+### एकल-एजेंट मोड (डिफ़ॉल्ट)
 
-यदि आप कुछ नहीं करते, OpenClaw एक single agent चलाता है:
+यदि आप कुछ भी कॉन्फ़िगर नहीं करते, तो OpenClaw एक एजेंट चलाता है:
 
-- `agentId` डिफ़ॉल्ट रूप से **`main`** होता है।
-- सत्र `agent:main:<mainKey>` के रूप में key किए जाते हैं।
-- कार्यस्थान डिफ़ॉल्ट रूप से `~/.openclaw/workspace` होता है (या `OPENCLAW_PROFILE` सेट होने पर `~/.openclaw/workspace-<profile>`)।
-- स्थिति डिफ़ॉल्ट रूप से `~/.openclaw/agents/main/agent` होती है।
+- `agentId` का डिफ़ॉल्ट `main` है।
+- सत्रों की कुंजी `agent:main:<mainKey>` के रूप में होती है (डिफ़ॉल्ट `mainKey` का मान `main` है)।
+- कार्यस्थल का डिफ़ॉल्ट `~/.openclaw/workspace` है (या जब `OPENCLAW_PROFILE` को `default` के अलावा किसी अन्य मान पर सेट किया गया हो, तब `workspace-<profile>`)।
+- स्थिति का डिफ़ॉल्ट `~/.openclaw/agents/main/agent` है।
 
-## एजेंट helper
+## एजेंट सहायक
 
-नया isolated agent जोड़ने के लिए agent wizard का उपयोग करें:
+एक नया पृथक एजेंट जोड़ें:
 
 ```bash
 openclaw agents add work
 ```
 
-फिर आने वाले संदेशों को route करने के लिए `bindings` जोड़ें (या wizard को यह करने दें)।
+फ़्लैग: `--workspace <dir>`, `--model <id>`, `--agent-dir <dir>`, `--bind <channel[:accountId]>` (दोहराने योग्य), `--non-interactive` (इसके लिए `--workspace` आवश्यक है)।
 
-इससे सत्यापित करें:
+इनबाउंड संदेशों को रूट करने के लिए `bindings` जोड़ें (विज़ार्ड आपके लिए ऐसा करने का प्रस्ताव देता है), फिर सत्यापित करें:
 
 ```bash
 openclaw agents list --bindings
@@ -84,35 +91,33 @@ openclaw agents list --bindings
 ## त्वरित शुरुआत
 
 <Steps>
-  <Step title="Create each agent workspace">
-    wizard का उपयोग करें या workspaces मैन्युअल रूप से बनाएँ:
-
+  <Step title="प्रत्येक एजेंट का कार्यक्षेत्र बनाएँ">
     ```bash
     openclaw agents add coding
     openclaw agents add social
     ```
 
-    हर एजेंट को `SOUL.md`, `AGENTS.md`, और वैकल्पिक `USER.md` के साथ अपना कार्यस्थान मिलता है, साथ ही `~/.openclaw/agents/<agentId>` के अंतर्गत dedicated `agentDir` और session store मिलता है।
+    प्रत्येक एजेंट को `SOUL.md`, `AGENTS.md`, और वैकल्पिक `USER.md` सहित अपना कार्यक्षेत्र मिलता है, साथ ही एक समर्पित `agentDir` और `~/.openclaw/agents/<agentId>` के अंतर्गत सत्र स्टोर मिलता है।
 
   </Step>
-  <Step title="Create channel accounts">
-    अपने पसंदीदा चैनलों पर हर एजेंट के लिए एक खाता बनाएँ:
+  <Step title="चैनल खाते बनाएँ">
+    अपने पसंदीदा चैनलों पर प्रत्येक एजेंट के लिए एक खाता बनाएँ:
 
-    - Discord: हर एजेंट के लिए एक bot, Message Content Intent enable करें, हर token copy करें।
-    - Telegram: BotFather के ज़रिए हर एजेंट के लिए एक bot, हर token copy करें।
-    - WhatsApp: हर खाते के लिए हर phone number link करें।
+    - Discord: प्रत्येक एजेंट के लिए एक बॉट, Message Content Intent सक्षम करें, प्रत्येक टोकन कॉपी करें।
+    - Telegram: BotFather के माध्यम से प्रत्येक एजेंट के लिए एक बॉट, प्रत्येक टोकन कॉपी करें।
+    - WhatsApp: प्रत्येक खाते के लिए प्रत्येक फ़ोन नंबर लिंक करें।
 
     ```bash
     openclaw channels login --channel whatsapp --account work
     ```
 
-    चैनल गाइड देखें: [Discord](/hi/channels/discord), [Telegram](/hi/channels/telegram), [WhatsApp](/hi/channels/whatsapp)।
+    चैनल मार्गदर्शिकाएँ देखें: [Discord](/hi/channels/discord), [Telegram](/hi/channels/telegram), [WhatsApp](/hi/channels/whatsapp)।
 
   </Step>
-  <Step title="Add agents, accounts, and bindings">
-    `agents.list` के अंतर्गत agents, `channels.<channel>.accounts` के अंतर्गत channel accounts जोड़ें, और उन्हें `bindings` से connect करें (नीचे उदाहरण हैं)।
+  <Step title="एजेंट, खाते और बाइंडिंग्स जोड़ें">
+    `agents.entries` के अंतर्गत एजेंट, `channels.<channel>.accounts` के अंतर्गत चैनल खाते जोड़ें और उन्हें `bindings` से कनेक्ट करें (नीचे उदाहरण हैं)।
   </Step>
-  <Step title="Restart and verify">
+  <Step title="पुनः आरंभ और सत्यापन करें">
     ```bash
     openclaw gateway restart
     openclaw agents list --bindings
@@ -121,62 +126,92 @@ openclaw agents list --bindings
   </Step>
 </Steps>
 
-## कई एजेंट = कई लोग, कई व्यक्तित्व
+## कई एजेंट, कई पर्सोना
 
-**कई एजेंटों** के साथ, हर `agentId` एक **पूरी तरह isolated persona** बन जाता है:
+प्रत्येक कॉन्फ़िगर किया गया `agentId` मुख्य एजेंट स्थिति के लिए एक अलग पर्सोना सीमा है:
 
-- **अलग phone numbers/accounts** (प्रति channel `accountId`)।
-- **अलग personalities** (प्रति-एजेंट कार्यस्थान फ़ाइलें जैसे `AGENTS.md` और `SOUL.md`)।
-- **अलग auth + sessions** (जब तक स्पष्ट रूप से enable न किया जाए, कोई cross-talk नहीं)।
+- प्रति चैनल अलग खाते (प्रति `accountId`)।
+- अलग व्यक्तित्व (प्रति-एजेंट `AGENTS.md`/`SOUL.md`)।
+- अलग प्रमाणीकरण और सत्र, जिनमें एजेंटों के बीच पहुँच केवल स्पष्ट सुविधाओं या Plugin कॉन्फ़िगरेशन के माध्यम से सक्षम होती है।
 
-इससे **कई लोग** अपने AI "brains" और data को अलग रखते हुए एक Gateway server साझा कर सकते हैं।
+इससे मुख्य एजेंट स्थिति को अलग रखते हुए कई लोग एक Gateway साझा कर सकते हैं।
 
-## क्रॉस-एजेंट QMD memory search
+## प्रति-एजेंट Memory Wiki वॉल्ट
 
-यदि किसी एक एजेंट को दूसरे एजेंट के QMD session transcripts search करने चाहिए, तो `agents.list[].memorySearch.qmd.extraCollections` के अंतर्गत extra collections जोड़ें। `agents.defaults.memorySearch.qmd.extraCollections` का उपयोग केवल तब करें जब हर एजेंट को वही shared transcript collections inherit करनी हों।
+Memory Wiki डिफ़ॉल्ट रूप से एक वैश्विक वॉल्ट का उपयोग करता है। किसी सहायता एजेंट के
+संकलित ज्ञान को किसी मार्केटिंग एजेंट के ज्ञान से अलग रखने के लिए,
+`plugins.entries.memory-wiki.config.vault.scope` को `agent` पर सेट करें:
+
+```json5
+{
+  plugins: {
+    entries: {
+      "memory-wiki": {
+        enabled: true,
+        config: {
+          vault: {
+            scope: "agent",
+            path: "~/.openclaw/wiki",
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+कॉन्फ़िगर किया गया पथ पैरेंट डायरेक्टरी है। OpenClaw सामान्यीकृत
+एजेंट आईडी को जोड़ता है, जिससे `~/.openclaw/wiki/support` और
+`~/.openclaw/wiki/marketing` जैसे पथ बनते हैं। कई एजेंट कॉन्फ़िगर होने पर एजेंट-दायरे वाले CLI और Gateway संचालन के लिए
+एक स्पष्ट एजेंट आवश्यक होता है। ब्रिज
+फ़िल्टरिंग, माइग्रेशन और विश्वास-सीमा विवरण के लिए
+[Memory Wiki के प्रति-एजेंट वॉल्ट](/hi/plugins/memory-wiki#per-agent-vaults) देखें।
+
+## एजेंटों के बीच QMD मेमोरी खोज
+
+एक एजेंट को दूसरे एजेंट के QMD सत्र ट्रांसक्रिप्ट खोजने देने के लिए, `agents.entries.*.memory.search.qmd.extraCollections` के अंतर्गत अतिरिक्त संग्रह जोड़ें। जब प्रत्येक एजेंट को समान संग्रह साझा करने चाहिए, तब `memory.search.qmd.extraCollections` का उपयोग करें।
 
 ```json5
 {
   agents: {
     defaults: {
       workspace: "~/workspaces/main",
-      memorySearch: {
-        qmd: {
-          extraCollections: [{ path: "~/agents/family/sessions", name: "family-sessions" }],
-        },
-      },
     },
-    list: [
-      {
-        id: "main",
+    entries: {
+      main: {
         workspace: "~/workspaces/main",
-        memorySearch: {
-          qmd: {
-            extraCollections: [{ path: "notes" }], // resolves inside workspace -> collection named "notes-main"
+        memory: {
+          search: {
+            qmd: {
+              extraCollections: [{ path: "notes" }], // कार्यक्षेत्र के भीतर हल होता है -> "notes-main" नाम का संग्रह
+            },
           },
         },
       },
-      { id: "family", workspace: "~/workspaces/family" },
-    ],
+      family: { workspace: "~/workspaces/family" },
+    },
   },
   memory: {
     backend: "qmd",
+    search: {
+      qmd: {
+        extraCollections: [{ path: "~/agents/family/sessions", name: "family-sessions" }],
+      },
+    },
     qmd: { includeDefaultMemory: false },
   },
 }
 ```
 
-Extra collection path agents के बीच shared हो सकता है, लेकिन जब path agent workspace के बाहर होता है तो collection name explicit रहता है। Workspace के अंदर के paths agent-scoped रहते हैं ताकि हर एजेंट अपना transcript search set रखे।
+एक अतिरिक्त-संग्रह पथ एजेंटों के बीच साझा किया जा सकता है, लेकिन जब पथ एजेंट कार्यक्षेत्र के बाहर हो तो उसका `name` स्पष्ट रहता है। कार्यक्षेत्र के भीतर के पथ एजेंट-दायरे वाले रहते हैं, ताकि प्रत्येक एजेंट का अपना ट्रांसक्रिप्ट खोज सेट बना रहे।
 
-## एक WhatsApp नंबर, कई लोग (DM split)
+## एक WhatsApp नंबर, कई लोग (DM विभाजन)
 
-आप **एक WhatsApp account** पर रहते हुए **अलग-अलग WhatsApp DMs** को अलग-अलग agents तक route कर सकते हैं। Sender E.164 (जैसे `+15551234567`) पर `peer.kind: "direct"` के साथ match करें। Replies फिर भी उसी WhatsApp number से आती हैं (कोई प्रति-एजेंट sender identity नहीं)।
+प्रेषक E.164 (`+15551234567`) को `peer.kind: "direct"` से मिलाकर **एक** WhatsApp खाते पर अलग-अलग WhatsApp DM को अलग-अलग एजेंटों तक रूट करें। उत्तर फिर भी उसी WhatsApp नंबर से आते हैं — प्रति-एजेंट अलग प्रेषक पहचान नहीं होती।
 
 <Note>
-Direct chats agent की **main session key** पर collapse होती हैं, इसलिए true isolation के लिए **हर व्यक्ति के लिए एक agent** चाहिए।
+प्रत्यक्ष चैट डिफ़ॉल्ट रूप से एजेंट की मुख्य सत्र कुंजी में समाहित हो जाती हैं, इसलिए वास्तविक पृथक्करण के लिए प्रति व्यक्ति एक एजेंट आवश्यक है।
 </Note>
-
-उदाहरण:
 
 ```json5
 {
@@ -205,81 +240,36 @@ Direct chats agent की **main session key** पर collapse होती ह�
 }
 ```
 
-नोट्स:
+DM पहुँच नियंत्रण (पेयरिंग/अनुमति-सूची) प्रति WhatsApp खाते पर वैश्विक है, प्रति एजेंट नहीं। साझा समूहों के लिए, समूह को एक एजेंट से बाइंड करें या [ब्रॉडकास्ट समूह](/hi/channels/broadcast-groups) का उपयोग करें।
 
-- DM access control **हर WhatsApp account के लिए global** है (pairing/allowlist), प्रति agent नहीं।
-- Shared groups के लिए, group को एक agent से bind करें या [Broadcast groups](/hi/channels/broadcast-groups) का उपयोग करें।
+## रूटिंग नियम
 
-## Routing rules (messages कैसे agent चुनते हैं)
+बाइंडिंग्स नियतात्मक होती हैं और सबसे विशिष्ट मिलान जीतता है। पूर्ण स्तर क्रम (सटीक पीयर, पैरेंट पीयर, पीयर वाइल्डकार्ड, गिल्ड+भूमिकाएँ, गिल्ड, टीम, खाता, चैनल, डिफ़ॉल्ट एजेंट) के लिए [चैनल रूटिंग](/hi/channels/channel-routing#routing-rules-how-an-agent-is-chosen) देखें। यहाँ कुछ उल्लेखनीय नियम हैं:
 
-Bindings **deterministic** हैं और **सबसे-specific जीतता है**:
+- यदि एक ही स्तर के भीतर कई बाइंडिंग्स मेल खाती हैं, तो कॉन्फ़िगरेशन क्रम में पहली बाइंडिंग जीतती है।
+- यदि कोई बाइंडिंग कई मिलान फ़ील्ड सेट करती है (उदाहरण के लिए `peer` + `guildId`), तो सभी निर्दिष्ट फ़ील्ड का मेल खाना आवश्यक है (`AND` सिमेंटिक्स)।
+- ऐसी बाइंडिंग जिसमें `accountId` नहीं है, केवल डिफ़ॉल्ट खाते से मेल खाती है, प्रत्येक खाते से नहीं। चैनल-व्यापी फ़ॉलबैक के लिए `accountId: "*"` या एक खाते के लिए `accountId: "<name>"` का उपयोग करें। स्पष्ट खाता आईडी के साथ वही बाइंडिंग फिर से जोड़ने पर मौजूदा केवल-चैनल बाइंडिंग डुप्लिकेट होने के बजाय अपग्रेड हो जाती है।
 
-<Steps>
-  <Step title="peer match">
-    Exact DM/group/channel id।
-  </Step>
-  <Step title="parentPeer match">
-    Thread inheritance।
-  </Step>
-  <Step title="guildId + roles">
-    Discord role routing।
-  </Step>
-  <Step title="guildId">
-    Discord।
-  </Step>
-  <Step title="teamId">
-    Slack।
-  </Step>
-  <Step title="accountId match for a channel">
-    प्रति-account fallback।
-  </Step>
-  <Step title="Channel-level match">
-    `accountId: "*"`।
-  </Step>
-  <Step title="Default agent">
-    `agents.list[].default` पर fallback, नहीं तो पहली list entry, डिफ़ॉल्ट: `main`।
-  </Step>
-</Steps>
+## कई खाते / फ़ोन नंबर
+
+कई खातों का समर्थन करने वाले चैनल (जैसे WhatsApp) प्रत्येक लॉगिन की पहचान करने के लिए `accountId` का उपयोग करते हैं। प्रत्येक `accountId` अपने एजेंट तक रूट होता है, इसलिए एक सर्वर सत्रों को मिलाए बिना कई फ़ोन नंबर होस्ट कर सकता है।
+
+जिस खाते का उपयोग तब करना है जब `accountId` छोड़ा गया हो, उसे चुनने के लिए `channels.<channel>.defaultAccount` सेट करें। सेट न होने पर, यदि `default` मौजूद है तो OpenClaw उसका उपयोग करता है, अन्यथा पहले कॉन्फ़िगर किए गए खाता आईडी (क्रमबद्ध) का।
+
+एकाधिक खातों का समर्थन करने वाले चैनल: `discord`, `feishu`, `googlechat`, `imessage`, `irc`, `line`, `mattermost`, `matrix`, `nextcloud-talk`, `nostr`, `signal`, `slack`, `telegram`, `whatsapp`, `zalo`, `zalouser`।
+
+## अवधारणाएँ
+
+- `agentId`: एक "मस्तिष्क" (वर्कस्पेस, प्रति-एजेंट प्रमाणीकरण, प्रति-एजेंट सत्र स्टोर)।
+- `accountId`: एक चैनल खाता इंस्टेंस (जैसे WhatsApp खाता `personal` बनाम `biz`)।
+- `binding`: आने वाले संदेशों को `(channel, accountId, peer)`, और वैकल्पिक रूप से गिल्ड/टीम आईडी के आधार पर किसी `agentId` तक रूट करता है।
+- प्रत्यक्ष चैट `agent:<agentId>:<mainKey>` में समाहित हो जाती हैं (प्रति-एजेंट "मुख्य"; `session.mainKey` देखें)।
+
+## प्लेटफ़ॉर्म के उदाहरण
 
 <AccordionGroup>
-  <Accordion title="Tie-breaking and AND semantics">
-    - यदि एक ही tier में कई bindings match करती हैं, तो config order में पहली जीतती है।
-    - यदि कोई binding कई match fields set करती है (उदाहरण के लिए `peer` + `guildId`), तो सभी specified fields आवश्यक होते हैं (`AND` semantics)।
-
-  </Accordion>
-  <Accordion title="Account-scope detail">
-    - `accountId` omit करने वाली binding केवल default account से match करती है। यह सभी accounts से match नहीं करती।
-    - सभी accounts पर channel-wide fallback के लिए `accountId: "*"` का उपयोग करें।
-    - किसी एक account से match करने के लिए `accountId: "<name>"` का उपयोग करें।
-    - यदि आप बाद में उसी agent के लिए explicit account id के साथ वही binding जोड़ते हैं, तो OpenClaw existing channel-only binding को duplicate करने के बजाय account-scoped में upgrade करता है।
-
-  </Accordion>
-</AccordionGroup>
-
-## कई accounts / phone numbers
-
-जो channels **कई accounts** support करते हैं (जैसे WhatsApp), वे हर login की पहचान के लिए `accountId` का उपयोग करते हैं। हर `accountId` अलग agent तक route हो सकता है, इसलिए एक server sessions मिलाए बिना कई phone numbers host कर सकता है।
-
-यदि `accountId` omitted होने पर आपको channel-wide default account चाहिए, तो `channels.<channel>.defaultAccount` (optional) set करें। Unset होने पर, OpenClaw मौजूद होने पर `default` पर fallback करता है, अन्यथा पहली configured account id (sorted) पर।
-
-इस pattern को support करने वाले common channels में शामिल हैं:
-
-- `whatsapp`, `telegram`, `discord`, `slack`, `signal`, `imessage`
-- `irc`, `line`, `googlechat`, `mattermost`, `matrix`, `nextcloud-talk`
-- `zalo`, `zalouser`, `nostr`, `feishu`
-
-## Concepts
-
-- `agentId`: एक "brain" (workspace, per-agent auth, per-agent session store)।
-- `accountId`: एक channel account instance (जैसे WhatsApp account `"personal"` बनाम `"biz"`)।
-- `binding`: `(channel, accountId, peer)` और optionally guild/team ids के आधार पर inbound messages को `agentId` तक route करता है।
-- Direct chats `agent:<agentId>:<mainKey>` पर collapse होती हैं (per-agent "main"; `session.mainKey`)।
-
-## Platform examples
-
-<AccordionGroup>
-  <Accordion title="Discord bots per agent">
-    हर Discord bot account एक unique `accountId` से map होता है। हर account को एक agent से bind करें और allowlists प्रति bot रखें।
+  <Accordion title="प्रति एजेंट Discord बॉट">
+    प्रत्येक Discord बॉट खाता एक अद्वितीय `accountId` से मैप होता है। प्रत्येक खाते को एक एजेंट से बाँधें और प्रत्येक बॉट के लिए अलग अनुमति-सूचियाँ रखें।
 
     ```json5
     {
@@ -358,17 +348,17 @@ Bindings **deterministic** हैं और **सबसे-specific जीतत
     }
     ```
 
-    - BotFather के साथ प्रति एजेंट एक बॉट बनाएं और प्रत्येक टोकन कॉपी करें।
+    - BotFather से प्रत्येक एजेंट के लिए एक बॉट बनाएँ और प्रत्येक टोकन कॉपी करें।
     - टोकन `channels.telegram.accounts.<id>.botToken` में रहते हैं (डिफ़ॉल्ट खाता `TELEGRAM_BOT_TOKEN` का उपयोग कर सकता है)।
-    - एक ही Telegram समूह में कई बॉट के लिए, प्रत्येक बॉट को आमंत्रित करें और उस बॉट का उल्लेख करें जिसे उत्तर देना चाहिए।
-    - प्रत्येक समूह बॉट के लिए BotFather Privacy Mode अक्षम करें, फिर बॉट को दोबारा जोड़ें ताकि Telegram सेटिंग लागू करे।
-    - `channels.telegram.groups` के साथ समूहों को अनुमति दें, या केवल भरोसेमंद समूह डिप्लॉयमेंट के लिए `groupPolicy: "open"` का उपयोग करें।
-    - प्रेषक उपयोगकर्ता ID को `groupAllowFrom` में रखें। समूह और सुपरग्रुप ID `channels.telegram.groups` में होते हैं, `groupAllowFrom` में नहीं।
-    - `accountId` से बाइंड करें ताकि प्रत्येक बॉट अपने ही एजेंट तक रूट हो।
+    - एक ही Telegram समूह में एकाधिक बॉट के लिए, प्रत्येक बॉट को आमंत्रित करें और उस बॉट का उल्लेख करें जिसे उत्तर देना चाहिए।
+    - प्रत्येक समूह बॉट के लिए BotFather Privacy Mode अक्षम करें (`/setprivacy` -> Disable), फिर बॉट को हटाकर दोबारा जोड़ें ताकि Telegram यह सेटिंग लागू करे।
+    - `channels.telegram.groups` से समूहों की अनुमति दें, या केवल विश्वसनीय समूह परिनियोजनों के लिए `groupPolicy: "open"` का उपयोग करें।
+    - प्रेषक उपयोगकर्ता आईडी `groupAllowFrom` में रखें। समूह और सुपरग्रुप आईडी `channels.telegram.groups` में होने चाहिए, `groupAllowFrom` में नहीं।
+    - `accountId` के आधार पर बाँधें ताकि प्रत्येक बॉट अपने एजेंट तक रूट हो।
 
   </Accordion>
   <Accordion title="प्रति एजेंट WhatsApp नंबर">
-    Gateway शुरू करने से पहले प्रत्येक खाते को लिंक करें:
+    Gateway शुरू करने से पहले प्रत्येक खाता लिंक करें:
 
     ```bash
     openclaw channels login --channel whatsapp --account personal
@@ -397,12 +387,12 @@ Bindings **deterministic** हैं और **सबसे-specific जीतत
         ],
       },
 
-      // Deterministic routing: first match wins (most-specific first).
+      // निर्धारक रूटिंग: पहला मिलान प्रभावी होता है (सबसे विशिष्ट पहले)।
       bindings: [
         { agentId: "home", match: { channel: "whatsapp", accountId: "personal" } },
         { agentId: "work", match: { channel: "whatsapp", accountId: "biz" } },
 
-        // Optional per-peer override (example: send a specific group to work agent).
+        // वैकल्पिक प्रति-पीयर ओवरराइड (उदाहरण: किसी विशिष्ट समूह को कार्य एजेंट को भेजें)।
         {
           agentId: "work",
           match: {
@@ -413,7 +403,7 @@ Bindings **deterministic** हैं और **सबसे-specific जीतत
         },
       ],
 
-      // Off by default: agent-to-agent messaging must be explicitly enabled + allowlisted.
+      // डिफ़ॉल्ट रूप से बंद: एजेंट-से-एजेंट संदेश सेवा को स्पष्ट रूप से सक्षम करके अनुमति-सूची में रखना आवश्यक है।
       tools: {
         agentToAgent: {
           enabled: false,
@@ -425,11 +415,11 @@ Bindings **deterministic** हैं और **सबसे-specific जीतत
         whatsapp: {
           accounts: {
             personal: {
-              // Optional override. Default: ~/.openclaw/credentials/whatsapp/personal
+              // वैकल्पिक ओवरराइड। डिफ़ॉल्ट: ~/.openclaw/credentials/whatsapp/personal
               // authDir: "~/.openclaw/credentials/whatsapp/personal",
             },
             biz: {
-              // Optional override. Default: ~/.openclaw/credentials/whatsapp/biz
+              // वैकल्पिक ओवरराइड। डिफ़ॉल्ट: ~/.openclaw/credentials/whatsapp/biz
               // authDir: "~/.openclaw/credentials/whatsapp/biz",
             },
           },
@@ -444,8 +434,8 @@ Bindings **deterministic** हैं और **सबसे-specific जीतत
 ## सामान्य पैटर्न
 
 <Tabs>
-  <Tab title="WhatsApp दैनिक + Telegram गहन कार्य">
-    चैनल के अनुसार विभाजित करें: WhatsApp को तेज़ रोज़मर्रा के एजेंट पर और Telegram को Opus एजेंट पर रूट करें।
+  <Tab title="WhatsApp दैनिक कार्य + Telegram गहन कार्य">
+    चैनल के आधार पर विभाजित करें: WhatsApp को तेज़ दैनिक एजेंट और Telegram को Opus एजेंट तक रूट करें।
 
     ```json5
     {
@@ -472,14 +462,11 @@ Bindings **deterministic** हैं और **सबसे-specific जीतत
     }
     ```
 
-    नोट्स:
-
-    - ये उदाहरण `accountId: "*"` का उपयोग करते हैं ताकि बाद में खाते जोड़ने पर भी बाइंडिंग काम करती रहें।
-    - बाकी को चैट पर रखते हुए किसी एक DM/समूह को Opus पर रूट करने के लिए, उस peer के लिए `match.peer` बाइंडिंग जोड़ें; peer मिलान हमेशा चैनल-व्यापी नियमों पर प्राथमिकता लेते हैं।
+    ये उदाहरण `accountId: "*"` का उपयोग करते हैं ताकि बाद में खाते जोड़ने पर भी बाइंडिंग काम करती रहें। बाकी को चैट पर रखते हुए किसी एक DM/समूह को Opus तक रूट करने के लिए, उस पीयर हेतु `match.peer` बाइंडिंग जोड़ें — पीयर मिलान हमेशा चैनल-व्यापी नियमों पर प्राथमिकता लेते हैं।
 
   </Tab>
-  <Tab title="वही चैनल, एक peer Opus पर">
-    WhatsApp को तेज़ एजेंट पर रखें, लेकिन एक DM को Opus पर रूट करें:
+  <Tab title="वही चैनल, एक पीयर Opus को">
+    WhatsApp को तेज़ एजेंट पर रखें, लेकिन एक DM को Opus तक रूट करें:
 
     ```json5
     {
@@ -509,11 +496,11 @@ Bindings **deterministic** हैं और **सबसे-specific जीतत
     }
     ```
 
-    Peer बाइंडिंग हमेशा प्राथमिकता लेती हैं, इसलिए उन्हें चैनल-व्यापी नियम के ऊपर रखें।
+    पीयर बाइंडिंग हमेशा प्राथमिकता लेती हैं, इसलिए उन्हें चैनल-व्यापी नियम के ऊपर रखें।
 
   </Tab>
-  <Tab title="WhatsApp समूह से बाइंड किया गया पारिवारिक एजेंट">
-    एक समर्पित पारिवारिक एजेंट को एकल WhatsApp समूह से बाइंड करें, mention gating और अधिक कड़ी टूल नीति के साथ:
+  <Tab title="WhatsApp समूह से बँधा पारिवारिक एजेंट">
+    एक समर्पित पारिवारिक एजेंट को किसी एक WhatsApp समूह से बाँधें, जिसमें उल्लेख की शर्त और अधिक सख्त टूल नीति हो:
 
     ```json5
     {
@@ -558,17 +545,14 @@ Bindings **deterministic** हैं और **सबसे-specific जीतत
     }
     ```
 
-    नोट्स:
-
-    - टूल allow/deny सूचियां **tools** हैं, Skills नहीं। यदि किसी skill को बाइनरी चलानी है, तो सुनिश्चित करें कि `exec` अनुमत है और बाइनरी sandbox में मौजूद है।
-    - अधिक कड़ी gating के लिए, `agents.list[].groupChat.mentionPatterns` सेट करें और चैनल के लिए समूह allowlists सक्षम रखें।
+    टूल की अनुमति/अस्वीकृति सूचियाँ **टूल** हैं, Skills नहीं। यदि किसी स्किल को बाइनरी चलाने की आवश्यकता है, तो सुनिश्चित करें कि `exec` अनुमत है और बाइनरी सैंडबॉक्स में मौजूद है। अधिक सख्त नियंत्रण के लिए, `agents.entries.*.groupChat.mentionPatterns` सेट करें और चैनल के लिए समूह अनुमति-सूचियाँ सक्षम रखें।
 
   </Tab>
 </Tabs>
 
-## प्रति-एजेंट sandbox और टूल कॉन्फ़िगरेशन
+## प्रति-एजेंट सैंडबॉक्स और टूल कॉन्फ़िगरेशन
 
-प्रत्येक एजेंट का अपना sandbox और टूल प्रतिबंध हो सकते हैं:
+प्रत्येक एजेंट के अपने सैंडबॉक्स और टूल प्रतिबंध हो सकते हैं:
 
 ```js
 {
@@ -578,24 +562,24 @@ Bindings **deterministic** हैं और **सबसे-specific जीतत
         id: "personal",
         workspace: "~/.openclaw/workspace-personal",
         sandbox: {
-          mode: "off",  // No sandbox for personal agent
+          mode: "off",  // व्यक्तिगत एजेंट के लिए कोई सैंडबॉक्स नहीं
         },
-        // No tool restrictions - all tools available
+        // कोई टूल प्रतिबंध नहीं - सभी टूल उपलब्ध हैं
       },
       {
         id: "family",
         workspace: "~/.openclaw/workspace-family",
         sandbox: {
-          mode: "all",     // Always sandboxed
-          scope: "agent",  // One container per agent
+          mode: "all",     // हमेशा सैंडबॉक्स में
+          scope: "agent",  // प्रति एजेंट एक कंटेनर
           docker: {
-            // Optional one-time setup after container creation
+            // कंटेनर बनने के बाद वैकल्पिक एकबारगी सेटअप
             setupCommand: "apt-get update && apt-get install -y git curl",
           },
         },
         tools: {
-          allow: ["read"],                    // Only read tool
-          deny: ["exec", "write", "edit", "apply_patch"],    // Deny others
+          allow: ["read"],                    // केवल रीड टूल
+          deny: ["exec", "write", "edit", "apply_patch"],    // अन्य को अस्वीकार करें
         },
       },
     ],
@@ -604,25 +588,25 @@ Bindings **deterministic** हैं और **सबसे-specific जीतत
 ```
 
 <Note>
-`setupCommand` `sandbox.docker` के अंतर्गत रहता है और कंटेनर बनने पर एक बार चलता है। जब resolved scope `"shared"` हो, तो प्रति-एजेंट `sandbox.docker.*` overrides अनदेखे किए जाते हैं।
+`setupCommand`, `sandbox.docker` के अंतर्गत रहता है और कंटेनर बनने पर एक बार चलता है। जब निर्धारित स्कोप `"shared"` हो, तब प्रति-एजेंट `sandbox.docker.*` ओवरराइड अनदेखे कर दिए जाते हैं।
 </Note>
 
-**लाभ:**
+इससे आपको मिलता है:
 
 - **सुरक्षा पृथक्करण**: अविश्वसनीय एजेंटों के लिए टूल सीमित करें।
-- **संसाधन नियंत्रण**: कुछ एजेंटों को sandbox में रखें जबकि बाकी को host पर रखें।
-- **लचीली नीतियां**: प्रति एजेंट अलग-अलग अनुमतियां।
+- **संसाधन नियंत्रण**: कुछ एजेंटों को सैंडबॉक्स में रखें और अन्य को होस्ट पर बनाए रखें।
+- **लचीली नीतियाँ**: प्रत्येक एजेंट के लिए अलग अनुमतियाँ।
 
 <Note>
-`tools.elevated` **global** और sender-based है; इसे प्रति एजेंट कॉन्फ़िगर नहीं किया जा सकता। यदि आपको प्रति-एजेंट सीमाएं चाहिए, तो `exec` को deny करने के लिए `agents.list[].tools` का उपयोग करें। समूह targeting के लिए, `agents.list[].groupChat.mentionPatterns` का उपयोग करें ताकि @mentions साफ़ तौर पर लक्षित एजेंट से मैप हों।
+`tools.elevated` में वैश्विक गेट (`tools.elevated.enabled`/`allowFrom`) और प्रति-एजेंट गेट (`agents.entries.*.tools.elevated.enabled`/`allowFrom`) दोनों हैं। प्रति-एजेंट गेट वैश्विक गेट को केवल और अधिक सीमित कर सकता है — उन्नत कमांड चलाने के लिए दोनों को प्रेषक की अनुमति देनी होगी। समूह लक्ष्यीकरण के लिए, `agents.entries.*.groupChat.mentionPatterns` का उपयोग करें ताकि @उल्लेख इच्छित एजेंट से स्पष्ट रूप से मैप हों।
 </Note>
 
-विस्तृत उदाहरणों के लिए [Multi-agent sandbox and tools](/hi/tools/multi-agent-sandbox-tools) देखें।
+विस्तृत उदाहरणों के लिए [बहु-एजेंट सैंडबॉक्स और टूल](/hi/tools/multi-agent-sandbox-tools) देखें।
 
 ## संबंधित
 
-- [ACP एजेंट](/hi/tools/acp-agents) — बाहरी coding harnesses चलाना
-- [चैनल रूटिंग](/hi/channels/channel-routing) — संदेश एजेंटों तक कैसे रूट होते हैं
+- [ACP एजेंट](/hi/tools/acp-agents) — बाहरी कोडिंग हार्नेस चलाना
+- [चैनल रूटिंग](/hi/channels/channel-routing) — संदेश एजेंट तक कैसे रूट होते हैं
 - [उपस्थिति](/hi/concepts/presence) — एजेंट की उपस्थिति और उपलब्धता
 - [सत्र](/hi/concepts/session) — सत्र पृथक्करण और रूटिंग
-- [उप-एजेंट](/hi/tools/subagents) — पृष्ठभूमि एजेंट runs spawn करना
+- [उप-एजेंट](/hi/tools/subagents) — पृष्ठभूमि में एजेंट रन शुरू करना

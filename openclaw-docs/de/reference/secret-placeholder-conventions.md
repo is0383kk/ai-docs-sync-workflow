@@ -1,34 +1,35 @@
 ---
 read_when:
-    - Dokumentation verfassen, die Tokens, API-Schlüssel oder Auszüge aus Anmeldedaten enthält
-    - Aktualisieren von Beispielen, die möglicherweise von Werkzeugen zur Geheimniserkennung gescannt werden
+    - Dokumentation verfassen, die Token, API-Schlüssel oder Auszüge aus Zugangsdaten enthält
+    - Aktualisieren von Beispielen, die möglicherweise von Tools zur Erkennung von Geheimnissen gescannt werden
 summary: Konventionen für Secret-Scanner-sichere Platzhalter in Dokumentation und Beispielen
-title: Konventionen für Geheimnisplatzhalter
+title: Konventionen für Geheimnis-Platzhalter
 x-i18n:
-    generated_at: "2026-07-12T02:09:08Z"
+    generated_at: "2026-07-26T18:46:06Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 0864f0fcc6fb1e4a3147b4b2ce0aac475437a19d694f3d059374782428c7f248
     source_path: reference/secret-placeholder-conventions.md
     workflow: 16
 ---
 
-# Konventionen für Secret-Platzhalter
+# Konventionen für Geheimnis-Platzhalter
 
-Verwenden Sie Platzhalter, die für Menschen lesbar sind, aber nicht wie echte Secrets aussehen.
+Verwenden Sie Platzhalter, die für Menschen lesbar sind, aber echten Geheimnissen nicht ähneln.
 
 ## Empfohlener Stil
 
-- Bevorzugen Sie aussagekräftige Werte wie `example-openai-key-not-real` oder `example-discord-bot-token`.
-- Bevorzugen Sie in Shell-Codeausschnitten `${OPENAI_API_KEY}` gegenüber direkt eingefügten tokenähnlichen Zeichenfolgen.
-- Gestalten Sie Beispiele eindeutig als Fälschungen und stimmen Sie sie auf den jeweiligen Zweck ab (Provider, Kanal, Authentifizierungstyp).
+- Bevorzugen Sie beschreibende Werte wie `example-openai-key-not-real` oder `example-discord-bot-token`.
+- Bevorzugen Sie für Shell-Ausschnitte `${OPENAI_API_KEY}` gegenüber eingebetteten Token-ähnlichen Zeichenfolgen.
+- Gestalten Sie Beispiele eindeutig als unecht und beschränken Sie sie auf ihren Zweck (Provider, Kanal, Authentifizierungstyp).
 
-## Vermeiden Sie diese Muster in der Dokumentation
+## Diese Muster in der Dokumentation vermeiden
 
-- Wörtliche Kopf- oder Fußzeilentexte privater PEM-Schlüssel.
-- Präfixe, die echten Zugangsdaten ähneln, z. B. `sk-...`, `xoxb-...`, `AKIA...`.
-- Realistisch aussehende Bearer-Tokens, die aus Laufzeitprotokollen kopiert wurden.
+- Wörtlicher Kopf- oder Fußzeilentext eines privaten PEM-Schlüssels.
+- Präfixe, die echten Anmeldedaten ähneln, z. B. `sk-...`, `xoxb-...`, `AKIA...`.
+- Realistisch wirkende Bearer-Token, die aus Laufzeitprotokollen kopiert wurden.
 
 ## Beispiel
 

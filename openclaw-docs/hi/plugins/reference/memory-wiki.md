@@ -1,30 +1,31 @@
 ---
 read_when:
-    - आप memory-wiki plugin को इंस्टॉल, कॉन्फ़िगर, या ऑडिट कर रहे हैं
+    - आप memory-wiki plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
 summary: OpenClaw के लिए स्थायी विकि कंपाइलर और Obsidian-अनुकूल ज्ञान वॉल्ट।
-title: Memory Wiki Plugin
+title: मेमोरी विकी Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:46:19Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:14:55Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 461c9e3e52db968fc98b058c70070585f272ad27024392a6af0ce3d2f0237635
+    source_hash: b36b0638011658857d9cccccb0d5db678f8d13b347afcb0fc2c8bbc3c5eeff04
     source_path: plugins/reference/memory-wiki.md
     workflow: 16
 ---
 
 # Memory Wiki Plugin
 
-OpenClaw के लिए स्थायी wiki compiler और Obsidian-अनुकूल knowledge vault।
+OpenClaw के लिए स्थायी विकी कंपाइलर और Obsidian-अनुकूल ज्ञान वॉल्ट।
 
 ## वितरण
 
 - पैकेज: `@openclaw/memory-wiki`
 - इंस्टॉल मार्ग: OpenClaw में शामिल
 
-## सतह
+## सरफ़ेस
 
-अनुबंध: tools; Skills
+अनुबंध: `tools`; Skills
 
 ## संबंधित दस्तावेज़
 

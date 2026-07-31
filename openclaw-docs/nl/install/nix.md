@@ -2,13 +2,14 @@
 read_when:
     - Je wilt reproduceerbare installaties die kunnen worden teruggedraaid
     - Je gebruikt al Nix/NixOS/Home Manager
-    - Je wilt alles vastgezet en declaratief beheerd hebben
+    - Je wilt alles vastgepind en declaratief beheerd hebben
 summary: Installeer OpenClaw declaratief met Nix
 title: Nix
 x-i18n:
-    generated_at: "2026-07-12T09:00:32Z"
+    generated_at: "2026-07-27T06:19:33Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 6f74e259ec3d909c73d9184db24d236135db04c29c2e7fab9be9e6fa7f98ba91
     source_path: install/nix.md
@@ -21,18 +22,18 @@ Installeer OpenClaw declaratief met **[nix-openclaw](https://github.com/openclaw
 De [nix-openclaw](https://github.com/openclaw/nix-openclaw)-repository is de gezaghebbende bron voor Nix-installatie. Deze pagina biedt een kort overzicht.
 </Info>
 
-## Wat u krijgt
+## Wat je krijgt
 
-- Gateway + macOS-app + hulpmiddelen (whisper, spotify, camera's), allemaal vastgezet op specifieke versies
-- Launchd-service die na opnieuw opstarten actief blijft
-- Pluginsysteem met declaratieve configuratie
+- Gateway + macOS-app + hulpmiddelen (whisper, spotify, camera's), allemaal vastgezet
+- Launchd-service die herstarts overleeft
+- Plugin-systeem met declaratieve configuratie
 - Direct terugdraaien: `home-manager switch --rollback`
 
 ## Snel aan de slag
 
 <Steps>
   <Step title="Determinate Nix installeren">
-    Als Nix nog niet is geïnstalleerd, volgt u de instructies voor het [Determinate Nix-installatieprogramma](https://github.com/DeterminateSystems/nix-installer).
+    Als Nix nog niet is geïnstalleerd, volg je de instructies van het [Determinate Nix-installatieprogramma](https://github.com/DeterminateSystems/nix-installer).
   </Step>
   <Step title="Een lokale flake maken">
     Gebruik de agentgerichte sjabloon uit de nix-openclaw-repository:
@@ -42,15 +43,15 @@ De [nix-openclaw](https://github.com/openclaw/nix-openclaw)-repository is de gez
     ```
   </Step>
   <Step title="Geheimen configureren">
-    Stel het token van uw berichtenbot en de API-sleutel van uw modelprovider in. Gewone bestanden in `~/.secrets/` werken prima.
+    Stel het token van je berichtenbot en de API-sleutel van de modelprovider in. Platte bestanden op `~/.secrets/` werken prima.
   </Step>
-  <Step title="Sjabloonplaatshouders invullen en overschakelen">
+  <Step title="De tijdelijke aanduidingen in de sjabloon invullen en overschakelen">
     ```bash
     home-manager switch
     ```
   </Step>
   <Step title="Verifiëren">
-    Controleer of de launchd-service actief is en uw bot op berichten reageert.
+    Controleer of de launchd-service actief is en je bot op berichten reageert.
   </Step>
 </Steps>
 
@@ -60,13 +61,13 @@ Raadpleeg de [README van nix-openclaw](https://github.com/openclaw/nix-openclaw)
 
 Wanneer `OPENCLAW_NIX_MODE=1` is ingesteld (automatisch met nix-openclaw), schakelt OpenClaw over naar een deterministische modus voor door Nix beheerde installaties. Andere Nix-pakketten kunnen dezelfde modus instellen; nix-openclaw is de officiële referentie.
 
-U kunt deze ook handmatig instellen:
+Je kunt deze ook handmatig instellen:
 
 ```bash
 export OPENCLAW_NIX_MODE=1
 ```
 
-Op macOS neemt de GUI-app geen shell-omgevingsvariabelen over. Schakel de Nix-modus daarom in via `defaults`:
+Op macOS neemt de GUI-app geen omgevingsvariabelen van de shell over. Schakel de Nix-modus in plaats daarvan in via `defaults`:
 
 ```bash
 defaults write ai.openclaw.mac openclaw.nixMode -bool true
@@ -74,27 +75,27 @@ defaults write ai.openclaw.mac openclaw.nixMode -bool true
 
 ### Wat er verandert in de Nix-modus
 
-- Automatische installatie- en zelfwijzigingsprocessen zijn uitgeschakeld.
-- `openclaw.json` wordt als onveranderlijk behandeld. Bij het opstarten afgeleide standaardwaarden blijven uitsluitend tijdens runtime van kracht en configuratieschrijvers (installatie, onboarding, wijzigende `openclaw update`, installatie/bijwerking/verwijdering/inschakeling van plugins, `doctor --fix`, `doctor --generate-gateway-token`, `openclaw config set`) weigeren het bestand te bewerken.
-- Bewerk in plaats daarvan de Nix-bron. Gebruik voor nix-openclaw de agentgerichte [snelstartgids](https://github.com/openclaw/nix-openclaw#quick-start) en stel de configuratie in onder `programs.openclaw.config` of `instances.<name>.config`.
+- Automatische installatie en zelfwijzigingsprocessen zijn uitgeschakeld.
+- `openclaw.json` wordt als onveranderlijk behandeld. Bij het opstarten afgeleide standaardwaarden blijven uitsluitend tijdens runtime beschikbaar en configuratieschrijvers (installatie, onboarding, wijzigende `openclaw update`, installeren/bijwerken/verwijderen/inschakelen van Plugins, `doctor --fix`, `doctor --generate-gateway-token`, `openclaw config set`) weigeren het bestand te bewerken.
+- Bewerk in plaats daarvan de Nix-bron. Gebruik voor nix-openclaw de agentgerichte [Snelstartgids](https://github.com/openclaw/nix-openclaw#quick-start) en stel de configuratie in onder `programs.openclaw.config` of `instances.<name>.config`.
 - Bij ontbrekende afhankelijkheden worden Nix-specifieke herstelberichten weergegeven.
 - De gebruikersinterface toont een alleen-lezenbanner voor de Nix-modus.
 
-### Paden voor configuratie en statusgegevens
+### Paden voor configuratie en status
 
-OpenClaw leest JSON5-configuratie uit `OPENCLAW_CONFIG_PATH` en slaat wijzigbare gegevens op in `OPENCLAW_STATE_DIR`. Stel deze onder Nix expliciet in op door Nix beheerde locaties, zodat runtimestatus en configuratie buiten de onveranderlijke opslag blijven.
+OpenClaw leest JSON5-configuratie uit `OPENCLAW_CONFIG_PATH` en slaat wijzigbare gegevens op in `OPENCLAW_STATE_DIR`. Stel deze onder Nix expliciet in op door Nix beheerde locaties, zodat runtimestatus en configuratie buiten de onveranderlijke store blijven.
 
-| Variabele              | Standaardwaarde                          |
-| ---------------------- | ---------------------------------------- |
+| Variabele               | Standaardwaarde                         |
+| ---------------------- | --------------------------------------- |
 | `OPENCLAW_HOME`        | `HOME` / `USERPROFILE` / `os.homedir()` |
-| `OPENCLAW_STATE_DIR`   | `~/.openclaw`                            |
-| `OPENCLAW_CONFIG_PATH` | `$OPENCLAW_STATE_DIR/openclaw.json`      |
+| `OPENCLAW_STATE_DIR`   | `~/.openclaw`                           |
+| `OPENCLAW_CONFIG_PATH` | `$OPENCLAW_STATE_DIR/openclaw.json`     |
 
 ### PATH-detectie voor services
 
-De launchd-/systemd-service van de Gateway detecteert automatisch binaire bestanden in Nix-profielen, zodat plugins en hulpmiddelen die via de shell door `nix` geïnstalleerde uitvoerbare bestanden aanroepen, zonder handmatige PATH-configuratie werken:
+De launchd/systemd-Gateway-service detecteert automatisch binaire bestanden in Nix-profielen, zodat Plugins en hulpmiddelen die via de shell door `nix` geïnstalleerde uitvoerbare bestanden aanroepen zonder handmatige PATH-configuratie werken:
 
-- Wanneer `NIX_PROFILES` is ingesteld, wordt elke vermelding met prioriteit van rechts naar links aan het service-PATH toegevoegd (overeenkomstig de prioriteit van de Nix-shell: de meest rechtse vermelding wint).
+- Wanneer `NIX_PROFILES` is ingesteld, wordt elk item van rechts naar links volgens de voorrangsvolgorde toegevoegd aan het PATH van de service (overeenkomstig de voorrangsvolgorde van de Nix-shell: het meest rechtse item heeft voorrang).
 - Wanneer `NIX_PROFILES` niet is ingesteld, wordt `~/.nix-profile/bin` als terugvaloptie toegevoegd.
 
 Dit geldt voor zowel macOS-launchd- als Linux-systemd-serviceomgevingen.
@@ -106,10 +107,10 @@ Dit geldt voor zowel macOS-launchd- als Linux-systemd-serviceomgevingen.
     Gezaghebbende Home Manager-module en volledige installatiegids.
   </Card>
   <Card title="Installatiewizard" href="/nl/start/wizard" icon="wand-magic-sparkles">
-    Stapsgewijze CLI-installatie zonder Nix.
+    Stapsgewijze configuratie via de CLI zonder Nix.
   </Card>
   <Card title="Docker" href="/nl/install/docker" icon="docker">
-    Installatie in containers als alternatief zonder Nix.
+    Gecontaineriseerde installatie als alternatief zonder Nix.
   </Card>
   <Card title="Bijwerken" href="/nl/install/updating" icon="arrow-up-right-from-square">
     Door Home Manager beheerde installaties samen met het pakket bijwerken.

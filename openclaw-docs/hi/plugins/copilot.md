@@ -1,56 +1,78 @@
 ---
 read_when:
     - आप किसी एजेंट के लिए GitHub Copilot SDK हार्नेस का उपयोग करना चाहते हैं
-    - आपको `copilot` रनटाइम के लिए कॉन्फ़िगरेशन उदाहरण चाहिए
-    - आप किसी एजेंट को subscription Copilot (github / openclaw / copilot) से जोड़ रहे हैं और चाहते हैं कि यह Copilot CLI के माध्यम से चले
-summary: OpenClaw के अंतर्निहित एजेंट चक्रों को बाहरी GitHub Copilot SDK हार्नेस के माध्यम से चलाएँ
+    - आपको `copilot` रनटाइम के लिए कॉन्फ़िगरेशन उदाहरणों की आवश्यकता है
+    - आप किसी एजेंट को सदस्यता-आधारित Copilot (github / openclaw / copilot) से जोड़ रहे हैं और चाहते हैं कि वह Copilot CLI के माध्यम से चले।
+summary: बाहरी GitHub Copilot SDK हार्नेस के माध्यम से OpenClaw एम्बेडेड एजेंट टर्न चलाएँ
 title: Copilot SDK हार्नेस
 x-i18n:
-    generated_at: "2026-06-28T23:35:29Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T21:20:57Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: e1a052cc21130b680f6af9ae32bc1dbaeaa15be5092939f0c236515a3233ab9b
+    source_hash: 4b67959c2c72bda97a81d0b45bc32ba363373064ec40c54f9709705dd15dd9fc
     source_path: plugins/copilot.md
     workflow: 16
 ---
 
-The external `@openclaw/copilot` Plugin OpenClaw को अंतर्निहित PI हार्नेस के बजाय GitHub Copilot CLI (`@github/copilot-sdk`) के माध्यम से एम्बेडेड subscription Copilot एजेंट टर्न चलाने देता है।
+बाहरी `@openclaw/copilot` Plugin, OpenClaw के अंतर्निहित हार्नेस के बजाय GitHub Copilot CLI (`@github/copilot-sdk`) के माध्यम से एम्बेडेड सब्सक्रिप्शन Copilot
+एजेंट टर्न चलाता है। Copilot CLI सत्र निम्न-स्तरीय
+एजेंट लूप का स्वामी होता है: नेटिव टूल निष्पादन, नेटिव Compaction (`infiniteSessions`), और
+`copilotHome` के अंतर्गत CLI-प्रबंधित थ्रेड स्थिति। OpenClaw अब भी चैट
+चैनलों, सत्र फ़ाइलों, मॉडल चयन, डायनेमिक टूल (ब्रिज किए गए), अनुमोदनों,
+मीडिया डिलीवरी, दृश्यमान ट्रांसक्रिप्ट मिरर, `/btw` सहायक प्रश्नों (देखें
+[सहायक प्रश्न (`/btw`)](#side-questions-btw)), और `openclaw doctor` का स्वामी रहता है।
 
-Copilot SDK हार्नेस का उपयोग तब करें जब आप चाहते हों कि Copilot CLI सत्र निम्न-स्तरीय एजेंट लूप का स्वामी हो: native tool execution, native Compaction (`infiniteSessions`), और `copilotHome` के अंतर्गत CLI-प्रबंधित thread state।
-OpenClaw अब भी चैट channels, session files, model selection, OpenClaw dynamic tools (bridged), approvals, media delivery, visible transcript mirror, `/btw` side questions (in-tree PI fallback द्वारा संभाले गए — देखें [Side questions (`/btw`)](#side-questions-btw)), और `openclaw doctor` का स्वामी रहता है।
-
-व्यापक model/provider/runtime विभाजन के लिए, [Agent runtimes](/hi/concepts/agent-runtimes) से शुरू करें।
+व्यापक मॉडल/प्रोवाइडर/रनटाइम विभाजन के लिए,
+[एजेंट रनटाइम](/hi/concepts/agent-runtimes) से शुरू करें।
 
 ## आवश्यकताएँ
 
-- OpenClaw जिसमें `@openclaw/copilot` Plugin स्थापित हो।
-- यदि आपका config `plugins.allow` का उपयोग करता है, तो `copilot` शामिल करें (Plugin द्वारा घोषित manifest id)। एक restrictive allowlist जो npm-style `@openclaw/copilot` package name का उपयोग करती है, Plugin को blocked छोड़ देगी और runtime load नहीं होगा, भले ही `agentRuntime.id: "copilot"` हो।
-- एक GitHub Copilot subscription जो Copilot CLI को drive कर सके (या headless / cron runs के लिए `gitHubToken` env / auth-profile entry)।
-- writable `copilotHome` directory। जब OpenClaw agent directory प्रदान करता है, तो हार्नेस default रूप से `<agentDir>/copilot` का उपयोग करता है, अन्यथा full per-agent isolation के लिए `~/.openclaw/agents/<agentId>/copilot` का।
+- `@openclaw/copilot` Plugin इंस्टॉल किया हुआ OpenClaw।
+- यदि आपका कॉन्फ़िगरेशन `plugins.allow` का उपयोग करता है, तो `copilot` (Plugin द्वारा
+  घोषित मैनिफ़ेस्ट आईडी) शामिल करें। npm पैकेज नाम
+  `@openclaw/copilot` के लिए अलाउलिस्ट प्रविष्टि मेल नहीं खाएगी और
+  `agentRuntime.id: "copilot"` सेट होने पर भी Plugin को अवरुद्ध रखेगी।
+- ऐसा GitHub Copilot सब्सक्रिप्शन जो Copilot CLI चला सके, या
+  हेडलेस अथवा Cron रन के लिए `gitHubToken` env var / ऑथ-प्रोफ़ाइल प्रविष्टि।
+- लिखने योग्य `copilotHome` डायरेक्टरी। OpenClaw द्वारा एजेंट डायरेक्टरी
+  दिए जाने पर डिफ़ॉल्ट `<agentDir>/copilot`, अन्यथा
+  `~/.openclaw/agents/<agentId>/copilot` होता है।
 
-`openclaw doctor` declarative session-state ownership और भविष्य की compatibility migrations के लिए Plugin [doctor contract](#doctor) चलाता है। यह Copilot CLI environment probes नहीं चलाता।
+`openclaw doctor` सत्र-स्थिति स्वामित्व और भावी कॉन्फ़िगरेशन माइग्रेशन के लिए
+Plugin का [डॉक्टर अनुबंध](#doctor) चलाता है। यह
+Copilot CLI परिवेश की जाँच नहीं करता।
 
-## Plugin स्थापना
+## इंस्टॉल करना
 
-Copilot runtime एक external Plugin है, इसलिए core `openclaw` package `@github/copilot-sdk` dependency या उसकी platform-specific `@github/copilot-<platform>-<arch>` CLI binary नहीं रखता। साथ में वे लगभग 260 MB जोड़ते हैं, इसलिए उन्हें केवल उन agents के लिए install करें जो इस runtime में opt in करते हैं:
+Copilot रनटाइम बाहरी Plugin के रूप में वितरित होता है, ताकि मुख्य `openclaw`
+पैकेज में `@github/copilot-sdk` या इसका प्लेटफ़ॉर्म-विशिष्ट
+`@github/copilot-<platform>-<arch>` CLI बाइनरी (दोनों मिलाकर लगभग 260 MB) शामिल न हों।
+इसे केवल उन एजेंटों के लिए इंस्टॉल करें जो इस रनटाइम को चुनते हैं:
 
 ```bash
 openclaw plugins install @openclaw/copilot
 ```
 
-Wizard Plugin को पहली बार तब install करता है जब आप कोई `github-copilot/*` model चुनते हैं **और** आपका config model (या उसके provider) को `agentRuntime: { id: "copilot" }` के माध्यम से Copilot agent runtime में opt करता है (नीचे [Quickstart](#quickstart) देखें)। Opt-in के बिना, openclaw अपने built-in GitHub Copilot provider का उपयोग करता है और runtime Plugin कभी install नहीं करता।
+जब आप पहली बार कोई `github-copilot/*` मॉडल चुनते हैं **और** आपका कॉन्फ़िगरेशन
+`agentRuntime: { id: "copilot" }` के माध्यम से उस मॉडल (या उसके प्रोवाइडर) को Copilot रनटाइम पर रूट करता है,
+तो सेटअप विज़ार्ड Plugin को अपने-आप इंस्टॉल करता है; देखें
+[त्वरित शुरुआत](#quickstart)। इस विकल्प को चुने बिना OpenClaw अपने अंतर्निहित
+GitHub Copilot प्रोवाइडर का उपयोग करता है और इस Plugin को कभी इंस्टॉल नहीं करता।
 
-Runtime SDK को इस क्रम में resolve करता है:
+रनटाइम SDK को इस क्रम में रिज़ॉल्व करता है:
 
-1. installed `@openclaw/copilot` package से `import("@github/copilot-sdk")`।
-2. well-known fallback dir `~/.openclaw/npm-runtime/copilot/` (legacy on-demand install target)।
+1. इंस्टॉल किए गए `@openclaw/copilot` पैकेज से `import("@github/copilot-sdk")`।
+2. फ़ॉलबैक डायरेक्टरी `~/.openclaw/npm-runtime/copilot/` (पुराना ऑन-डिमांड
+   इंस्टॉल लक्ष्य)।
 
-Missing SDK code `COPILOT_SDK_MISSING` और ऊपर दिए Plugin reinstall command के साथ एक single error surface करता है।
+SDK न मिलने पर `COPILOT_SDK_MISSING` कोड वाली एक त्रुटि और ऊपर दिया गया
+पुनः इंस्टॉल कमांड दिखता है।
 
-## त्वरित प्रारंभ
+## त्वरित शुरुआत
 
-एक model (या एक provider) को हार्नेस पर pin करें:
+एक मॉडल (या एक प्रोवाइडर) को हार्नेस पर पिन करें:
 
 ```json5
 {
@@ -67,33 +89,41 @@ Missing SDK code `COPILOT_SDK_MISSING` और ऊपर दिए Plugin reinsta
 }
 ```
 
-दोनों routes equivalent हैं। `agentRuntime.id` को single model entry पर तब उपयोग करें जब केवल वही model हार्नेस के माध्यम से route होना चाहिए; किसी provider पर `agentRuntime.id` तब set करें जब उस provider के अंतर्गत हर model इसका उपयोग करे।
+केवल एक मॉडल को हार्नेस से रूट करने के लिए उसकी प्रविष्टि पर `agentRuntime.id`
+सेट करें, या उस प्रोवाइडर के अंतर्गत प्रत्येक मॉडल को रूट करने के लिए प्रोवाइडर पर सेट करें।
 
-`github-copilot/auto` portable starting point है। Named Copilot models account- और organization-policy-dependent होते हैं, इसलिए केवल तब pin करें जब यह पुष्टि हो जाए कि authenticated Copilot CLI उसे expose करता है।
+`github-copilot/auto` पोर्टेबल शुरुआती बिंदु है। नामित Copilot मॉडल
+अकाउंट और संगठन की नीति पर निर्भर होते हैं; किसी मॉडल को पिन करने से पहले पुष्टि करें कि आपका प्रमाणित
+Copilot CLI वास्तव में उसे उपलब्ध कराता है।
 
-## समर्थित providers
+## समर्थित प्रोवाइडर
 
-हार्नेस canonical `github-copilot` provider (वही id जो `extensions/github-copilot` के स्वामित्व में है) के लिए support advertise करता है:
+हार्नेस कैनोनिकल `github-copilot` प्रोवाइडर (`extensions/github-copilot` के स्वामित्व वाला)
+के साथ-साथ कस्टम `models.providers` प्रविष्टियों का समर्थन करता है, जब
+मॉडल में गैर-रिक्त `baseUrl` और इन `api` स्वरूपों में से एक हो:
 
-- `github-copilot`
-
-यह custom `models.providers` entries को भी support करता है जब selected model में non-empty `baseUrl` हो और इनमें से कोई API shape हो:
-
-- `openai-responses`
-- `openai-completions`
-- `ollama` (OpenAI-compatible completions)
-- `azure-openai-responses`
 - `anthropic-messages`
+- `azure-openai-responses`
+- `ollama` (OpenAI-संगत कम्प्लीशन)
+- `openai-completions`
+- `openai-responses`
 
-Native provider ids जैसे `openai`, `anthropic`, `google`, और `ollama` अपने native runtimes के स्वामित्व में रहते हैं। Copilot BYOK के माध्यम से endpoint route करते समय अलग custom provider id का उपयोग करें।
+नेटिव प्रोवाइडर आईडी (`openai`, `anthropic`, `google`, `ollama`) अपने
+नेटिव रनटाइम के स्वामित्व में रहते हैं। इसके बजाय Copilot BYOK के माध्यम से एंडपॉइंट
+रूट करने के लिए अलग कस्टम प्रोवाइडर आईडी का उपयोग करें।
 
-Copilot BYOK endpoints public-network HTTPS URLs होने चाहिए। हार्नेस Copilot SDK को per-attempt loopback proxy URL देता है, फिर provider traffic को OpenClaw के guarded fetch path से forward करता है ताकि DNS pinning और SSRF policy OpenClaw के स्वामित्व में रहें। local Ollama, LM Studio, या LAN model servers के लिए native OpenClaw runtime का उपयोग करें।
+Copilot BYOK एंडपॉइंट सार्वजनिक HTTPS URL होने चाहिए। हार्नेस
+Copilot SDK को प्रत्येक प्रयास के लिए एक लूपबैक प्रॉक्सी देता है, फिर प्रोवाइडर ट्रैफ़िक को
+OpenClaw के सुरक्षित फ़ेच पथ से अग्रेषित करता है, ताकि DNS पिनिंग और SSRF नीति
+OpenClaw के स्वामित्व में रहें। स्थानीय Ollama, LM
+Studio, या LAN मॉडल सर्वर के लिए नेटिव OpenClaw रनटाइम का उपयोग करें।
 
 ## BYOK
 
-Copilot BYOK SDK के session-level custom provider contract का उपयोग करता है। OpenClaw resolved model endpoint, API key, bearer-token mode, headers, model id, और context/output limits को provider transport logic को core में ले जाए बिना pass करता है।
-
-उदाहरण के लिए:
+Copilot BYOK, SDK के सत्र-स्तरीय कस्टम प्रोवाइडर अनुबंध का उपयोग करता है। OpenClaw
+रिज़ॉल्व किया हुआ मॉडल एंडपॉइंट, API कुंजी, बेयरर-टोकन मोड, हेडर, मॉडल
+आईडी और संदर्भ/आउटपुट सीमाएँ पास करता है; प्रोवाइडर ट्रांसपोर्ट लॉजिक SDK में रहता है, न कि
+कोर में।
 
 ```json5
 {
@@ -122,192 +152,232 @@ Copilot BYOK SDK के session-level custom provider contract का उपय�
 }
 ```
 
-BYOK sessions subscription sessions और अन्य endpoints या credential fingerprints से अलग keyed होते हैं। Key, headers, model, या endpoint rotate करने पर incompatible state resume करने के बजाय fresh Copilot SDK session बनता है।
+BYOK सत्रों की कुंजियाँ सब्सक्रिप्शन सत्रों और अन्य
+BYOK एंडपॉइंट या क्रेडेंशियल से अलग होती हैं। कुंजी, हेडर, मॉडल या एंडपॉइंट
+बदलने पर असंगत स्थिति को पुनः शुरू करने के बजाय नया Copilot SDK सत्र शुरू होता है।
 
 ## प्रमाणीकरण
 
-Per-agent precedence, `runCopilotAttempt` के दौरान लागू:
+`runCopilotAttempt` के दौरान प्रति एजेंट लागू होने वाली प्राथमिकता:
 
-1. Attempt input पर **Explicit `useLoggedInUser: true`**। Agent के `copilotHome` के अंतर्गत resolved Copilot CLI के logged-in user का उपयोग करता है।
-2. Attempt input पर **Explicit `gitHubToken`** (`profileId` + `profileVersion` के साथ)। Direct CLI invocations और tests के लिए उपयोगी, जहाँ caller auth-profile resolution को bypass करना चाहता है।
-3. `EmbeddedRunAttemptParams` shape से **Contract-resolved `resolvedApiKey` + `authProfileId`**। यह **production main path** है: core, हार्नेस invoke करने से पहले agent के configured `github-copilot` auth profile को (via `src/infra/provider-usage.auth.ts:resolveProviderAuths`) resolve करता है, और हार्नेस दोनों fields को सीधे consume करता है। इससे `github-copilot:<profile>` auth profile headless / cron / multi-profile setups के लिए env vars के बिना end-to-end काम करता है।
-4. Direct CLI / dogfood runs के लिए **Env-var fallback** जहाँ कोई auth profile configured नहीं है। Runtime निम्न vars को precedence order में check करता है, shipped `github-copilot` provider (`extensions/github-copilot/auth.ts`) और documented Copilot SDK setup को mirror करते हुए:
-   1. `OPENCLAW_GITHUB_TOKEN` -- harness-specific override; इसे OpenClaw हार्नेस के लिए token pin करने हेतु set करें, बिना system-wide `gh` / Copilot CLI config को disturb किए।
-   2. `COPILOT_GITHUB_TOKEN` -- standard Copilot SDK / CLI env var।
-   3. `GH_TOKEN` -- standard `gh` CLI env var (existing `github-copilot` provider precedence से match करता है)।
-   4. `GITHUB_TOKEN` -- generic GitHub token fallback।
+1. प्रयास इनपुट पर **स्पष्ट `useLoggedInUser: true`** — एजेंट के `copilotHome` के अंतर्गत
+   Copilot CLI के लॉग-इन उपयोगकर्ता का उपयोग करता है।
+2. प्रयास इनपुट पर **स्पष्ट `gitHubToken`** (`profileId` +
+   `profileVersion` आवश्यक)। सीधे CLI आह्वानों और उन परीक्षणों के लिए जिन्हें
+   ऑथ-प्रोफ़ाइल रिज़ॉल्यूशन को बायपास करना हो।
+3. **अनुबंध द्वारा रिज़ॉल्व किया गया `resolvedApiKey` + `authProfileId`** — मुख्य
+   प्रोडक्शन पथ। कोर हार्नेस को
+   आह्वान करने से पहले एजेंट की कॉन्फ़िगर की गई `github-copilot` ऑथ
+   प्रोफ़ाइल (`src/infra/provider-usage.auth.ts:resolveProviderAuths`) रिज़ॉल्व करता है, इसलिए `github-copilot:<profile>` ऑथ प्रोफ़ाइल
+   env var के बिना हेडलेस, Cron या मल्टी-प्रोफ़ाइल सेटअप में
+   शुरू से अंत तक काम करती है।
+4. **env-var फ़ॉलबैक**, इस क्रम में जाँचा जाता है (पहला गैर-रिक्त मान स्वीकार होता है,
+   रिक्त स्ट्रिंग अनुपस्थित मानी जाती हैं; `extensions/github-copilot/auth.ts` में वितरित `github-copilot`
+   प्रोवाइडर की प्राथमिकता को प्रतिबिंबित करता है):
+   1. `OPENCLAW_GITHUB_TOKEN` — हार्नेस-विशिष्ट ओवरराइड; इससे आप सिस्टम-व्यापी `gh` /
+      Copilot CLI कॉन्फ़िगरेशन को प्रभावित किए बिना OpenClaw हार्नेस के लिए
+      टोकन पिन कर सकते हैं।
+   2. `COPILOT_GITHUB_TOKEN` — मानक Copilot SDK / CLI env var।
+   3. `GH_TOKEN` — मानक `gh` CLI env var।
+   4. `GITHUB_TOKEN` — सामान्य GitHub टोकन फ़ॉलबैक।
 
-   पहला non-empty value जीतता है; empty strings को absent माना जाता है। Synthesised pool profile id `env:<NAME>` है और profileVersion token का non-reversible sha256 fingerprint है, इसलिए env value rotate करने से client pool cleanly bust होता है।
+   संश्लेषित पूल प्रोफ़ाइल आईडी `env:<NAME>` है; प्रोफ़ाइल संस्करण टोकन का
+   अपरिवर्तनीय sha256 फ़िंगरप्रिंट है, इसलिए env मान बदलने पर
+   क्लाइंट पूल साफ़ रूप से अमान्य हो जाता है।
 
-5. कोई token signal उपलब्ध न होने पर **Default `useLoggedInUser`**।
+5. कोई टोकन संकेत उपलब्ध न होने पर **डिफ़ॉल्ट `useLoggedInUser`**।
 
-हर agent को dedicated `copilotHome` मिलता है ताकि Copilot CLI tokens, sessions, और config एक ही machine पर agents के बीच leak न हों। Default `<agentDir>/copilot` है जब host हार्नेस को agent directory देता है (उसी directory में OpenClaw के `models.json` / `auth-profiles.json` से SDK state को isolate करते हुए), या अन्यथा `~/.openclaw/agents/<agentId>/copilot`। Custom location की आवश्यकता होने पर attempt input पर `copilotHome: <path>` से override करें (उदाहरण के लिए, migration के लिए shared mount)।
+प्रत्येक एजेंट को अपना `copilotHome` मिलता है, ताकि एक ही मशीन पर एजेंटों के बीच
+Copilot CLI टोकन, सत्र और कॉन्फ़िगरेशन कभी लीक न हों। डिफ़ॉल्ट:
+`<agentDir>/copilot` (SDK स्थिति को OpenClaw की
+`models.json` / `auth-profiles.json` वाली डायरेक्टरी से बाहर रखता है), या
+एजेंट डायरेक्टरी न दिए जाने पर `~/.openclaw/agents/<agentId>/copilot`।
+कस्टम स्थान के लिए प्रयास इनपुट पर `copilotHome: <path>` से ओवरराइड करें
+(उदाहरण के लिए, माइग्रेशन हेतु साझा माउंट)।
 
-Live harness tests direct token की आवश्यकता होने पर `OPENCLAW_COPILOT_AGENT_LIVE_TOKEN` का उपयोग करते हैं। Shared live-test setup isolated test home में real auth profiles stage करने के बाद जानबूझकर `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`, और `GITHUB_TOKEN` scrub करता है, इसलिए dedicated live-test variable के माध्यम से `gh auth token` value pass करने से token को unrelated suites में expose किए बिना false skips avoid होते हैं।
+लाइव हार्नेस परीक्षण सीधे टोकन के लिए `OPENCLAW_COPILOT_AGENT_LIVE_TOKEN` का उपयोग करते हैं।
+साझा लाइव-परीक्षण सेटअप वास्तविक ऑथ प्रोफ़ाइल को अलग परीक्षण
+होम में स्टेज करने के बाद `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`,
+और `GITHUB_TOKEN` को हटा देता है, इसलिए समर्पित वेरिएबल से पास किया गया
+`gh auth token` मान असंबंधित सुइट में लीक हुए बिना गलत स्किप से बचाता है।
 
 ## कॉन्फ़िगरेशन सतह
 
-हार्नेस अपना config per-attempt input (`runCopilotAttempt({...})`) और `extensions/copilot/src/` के अंदर env defaults के छोटे set से पढ़ता है:
+हार्नेस प्रति-प्रयास इनपुट (`runCopilotAttempt({...})`) और
+`extensions/copilot/src/` के भीतर env डिफ़ॉल्ट के एक छोटे समूह से कॉन्फ़िगरेशन पढ़ता है:
 
-- `copilotHome` — per-agent CLI state directory (defaults ऊपर documented हैं)।
-- `model` — string या `{ provider, id, api?, baseUrl?, headers?, authHeader? }`। Omitted होने पर, OpenClaw agent के normal model selection का उपयोग करता है और हार्नेस verify करता है कि resolved provider supported है।
-- `reasoningEffort` — `"low" | "medium" | "high" | "xhigh"`। `auto-reply/thinking.ts` में OpenClaw के `ThinkLevel` / `ReasoningLevel` resolution से map करता है।
-- `infiniteSessionConfig` — SDK `infiniteSessions` block के लिए optional override जो `harness.compact` द्वारा driven है। Defaults को as-is छोड़ना safe है।
-- `hooksConfig` — tool/MCP, user-prompt, session, और error callbacks के लिए optional native Copilot SDK `SessionHooks` compatibility config। यह OpenClaw के portable lifecycle hooks से अलग है।
-- `permissionPolicy` — SDK के `onPermissionRequest` handler के लिए optional override जो built-in SDK tool kinds (`shell`, `write`, `read`, `url`, `mcp`, `memory`, `hook`) के लिए उपयोग होता है। Safety net के रूप में default `rejectAllPolicy` है; व्यवहार में SDK उन kinds में से किसी को भी कभी invoke नहीं करता क्योंकि हर bridged OpenClaw tool `overridesBuiltInTool: true` और `skipPermission: true` के साथ registered है, इसलिए 100% tool calls OpenClaw के wrapped `execute()` से flow करते हैं। देखें [Permissions and ask_user](#permissions-and-ask_user)।
-- `enableSessionTelemetry` — optional SDK session telemetry flag।
+| फ़ील्ड                    | उद्देश्य                                                                                                                                                                                                                                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `copilotHome`            | प्रति-एजेंट CLI स्थिति डायरेक्टरी (ऊपर दिए गए डिफ़ॉल्ट)।                                                                                                                                                                                                                                                 |
+| `model`                  | स्ट्रिंग या `{ provider, id, api?, baseUrl?, headers?, authHeader? }`। एजेंट के सामान्य मॉडल चयन का उपयोग करने के लिए इसे छोड़ दें; हार्नेस पुष्टि करता है कि रिज़ॉल्व किया गया प्रोवाइडर समर्थित है।                                                                                                                   |
+| `reasoningEffort`        | `"low" \| "medium" \| "high" \| "xhigh"`। `auto-reply/thinking.ts` में OpenClaw के `ThinkLevel` / `ReasoningLevel` रिज़ॉल्यूशन से मैप होता है।                                                                                                                                                          |
+| `infiniteSessionConfig`  | `harness.compact` द्वारा संचालित SDK `infiniteSessions` ब्लॉक के लिए वैकल्पिक ओवरराइड। इसे यथावत छोड़ना सुरक्षित है।                                                                                                                                                                                        |
+| `hooksConfig`            | टूल/MCP, उपयोगकर्ता-प्रॉम्प्ट, सत्र और त्रुटि कॉलबैक के लिए वैकल्पिक नेटिव Copilot SDK `SessionHooks` कॉन्फ़िगरेशन। OpenClaw के पोर्टेबल लाइफ़साइकल हुक से अलग।                                                                                                                                   |
+| `permissionPolicy`       | अंतर्निहित SDK टूल प्रकारों (`shell`, `write`, `read`, `url`, `mcp`, `memory`, `hook`) के लिए SDK के `onPermissionRequest` हैंडलर का वैकल्पिक ओवरराइड। सुरक्षा उपाय के रूप में डिफ़ॉल्ट `rejectAllPolicy` होता है; यह वास्तव में कभी क्यों सक्रिय नहीं होता, इसके लिए [अनुमतियाँ और ask_user](#permissions-and-ask_user) देखें। |
+| `enableSessionTelemetry` | वैकल्पिक SDK सत्र टेलीमेट्री फ़्लैग।                                                                                                                                                                                                                                                            |
 
-OpenClaw Plugin hooks को Copilot-specific attempt configuration की आवश्यकता नहीं होती। हार्नेस standard harness helpers के माध्यम से `before_prompt_build` (और legacy `before_agent_start` compatibility hook), `llm_input`, `llm_output`, और `agent_end` चलाता है। Successful SDK compactions `before_compaction` और `after_compaction` भी चलाते हैं। Bridged OpenClaw tools `before_tool_call` चलाते रहते हैं और `after_tool_call` report करते हैं; `hooksConfig` native SDK-only callbacks के लिए रहता है जिनका कोई portable equivalent नहीं है।
+OpenClaw Plugin हुक को Copilot-विशिष्ट प्रयास कॉन्फ़िगरेशन की आवश्यकता नहीं है।
+हार्नेस मानक हार्नेस हेल्पर के माध्यम से `before_prompt_build`, `llm_input`, `llm_output`, और `agent_end` चलाता है।
+सफल SDK Compaction भी
+`before_compaction` और `after_compaction` चलाते हैं। ब्रिज किए गए OpenClaw टूल
+`before_tool_call` चलाते हैं और `after_tool_call` की रिपोर्ट करते हैं; `hooksConfig` उन
+नेटिव, केवल-SDK कॉलबैक के लिए बना रहता है जिनका कोई पोर्टेबल समतुल्य नहीं है।
 
-OpenClaw के बाकी हिस्से को इन fields के बारे में जानने की आवश्यकता नहीं है। Other plugins, channels, और core code केवल standard `AgentHarnessAttemptParams` / `AgentHarnessAttemptResult` shape देखते हैं।
+OpenClaw में किसी अन्य चीज़ को इन फ़ील्ड के बारे में जानने की आवश्यकता नहीं है। अन्य Plugin,
+चैनल और कोर कोड केवल मानक `AgentHarnessAttemptParams` /
+`AgentHarnessAttemptResult` स्वरूप देखते हैं।
 
 ## Compaction
 
-जब `harness.compact` चलता है, Copilot SDK हार्नेस:
+जब `harness.compact` चलता है, तो Copilot SDK हार्नेस:
 
-1. Pending work continue किए बिना tracked SDK session resume करता है।
-2. SDK का session-scoped history compaction RPC call करता है।
-3. Workspace के अंतर्गत compatibility marker files लिखे बिना SDK compaction outcome return करता है।
+1. लंबित कार्य जारी रखे बिना ट्रैक किए गए SDK सत्र को फिर से शुरू करता है।
+2. SDK के सत्र-स्कोप वाले इतिहास Compaction RPC को कॉल करता है।
+3. वर्कस्पेस के अंतर्गत संगतता मार्कर फ़ाइलें लिखे बिना SDK Compaction परिणाम
+   लौटाता है।
 
-OpenClaw side transcript mirror (नीचे देखें) post-compaction messages receive करता रहता है, इसलिए user-facing chat history consistent रहती है।
+OpenClaw-पक्षीय ट्रांसक्रिप्ट मिरर (नीचे) Compaction के बाद के
+संदेश प्राप्त करता रहता है, इसलिए उपयोगकर्ता को दिखाई देने वाला चैट इतिहास सुसंगत रहता है।
 
 ## ट्रांसक्रिप्ट मिररिंग
 
-`runCopilotAttempt` हर turn के mirrorable messages को `extensions/copilot/src/dual-write-transcripts.ts` के माध्यम से OpenClaw audit transcript में dual-write करता है। Mirror per-session scoped (`copilot:${sessionId}`) है और per-message identity (`${role}:${sha256_16(role,content)}`) का उपयोग करता है, इसलिए prior-turn entries के re-emits existing on-disk keys से collide करते हैं और duplicate नहीं होते।
+`runCopilotAttempt` प्रत्येक टर्न के मिरर किए जा सकने वाले संदेशों को
+`extensions/copilot/src/dual-write-transcripts.ts` के माध्यम से OpenClaw ऑडिट ट्रांसक्रिप्ट में
+डुअल-राइट करता है। मिरर का दायरा प्रति सत्र
+(`copilot:${sessionId}`) होता है और कुंजी प्रति संदेश
+(`${role}:${sha256_16(role,content)}`) होती है, इसलिए दोबारा उत्सर्जित पिछले-टर्न की प्रविष्टियाँ
+डुप्लिकेट होने के बजाय डिस्क पर मौजूद कुंजियों से टकराती हैं।
 
-Mirror failure containment की दो layers में wrapped है ताकि transcript write failure attempt को fail न कर सके: internal best-effort wrapper और attempt level पर defense-in-depth `.catch(...)`। Failures logged होते हैं लेकिन surfaced नहीं होते।
+विफलता-नियंत्रण की दो परतें मिरर को आवृत करती हैं, ताकि ट्रांसक्रिप्ट लिखने की
+विफलता से प्रयास कभी विफल न हो: एक आंतरिक सर्वोत्तम-प्रयास रैपर, और प्रयास
+स्तर पर अतिरिक्त सुरक्षा हेतु `.catch(...)`। विफलताओं को लॉग किया जाता है,
+सामने नहीं लाया जाता।
 
-## पार्श्व प्रश्न (`/btw`)
+## सहायक प्रश्न (`/btw`)
 
-`/btw` इस harness पर **native** नहीं है। `createCopilotAgentHarness()`
-जानबूझकर `harness.runSideQuestion` को undefined छोड़ता है, इसलिए OpenClaw का `/btw`
-dispatcher (`src/agents/btw.ts`) उसी in-tree PI fallback
-path पर चला जाता है जिसे वह हर non-Codex runtime के लिए उपयोग करता है: configured model provider को
-एक छोटे side-question prompt के साथ सीधे call किया जाता है और
-`streamSimple` के ज़रिए stream करके वापस भेजा जाता है (कोई CLI session नहीं, कोई अतिरिक्त pool slot नहीं)।
+इस हार्नेस पर `/btw` **नेटिव नहीं** है। `createCopilotAgentHarness()`
+जानबूझकर `harness.runSideQuestion` को अपरिभाषित छोड़ता है
+(`extensions/copilot/harness.test.ts`, `describe("runSideQuestion")` में अभिकथित),
+इसलिए OpenClaw का `/btw` डिस्पैचर (`src/agents/btw.ts`) उसी
+पथ पर पहुँचता है जिसका उपयोग वह प्रत्येक गैर-Codex रनटाइम के लिए करता है:
+कॉन्फ़िगर किए गए मॉडल प्रदाता को एक छोटे सहायक-प्रश्न प्रॉम्प्ट के साथ सीधे
+कॉल किया जाता है और `streamSimple` के माध्यम से वापस स्ट्रीम किया जाता है
+(कोई CLI सत्र नहीं, कोई अतिरिक्त पूल स्लॉट नहीं)।
 
-इससे Copilot CLI sessions agent के मुख्य turn loop के लिए reserved रहते हैं, और
-`/btw` behavior अन्य PI-backed runtimes जैसा ही रहता है। contract को
-[`extensions/copilot/harness.test.ts`](https://github.com/openclaw/openclaw/blob/main/extensions/copilot/harness.test.ts)
-में `describe("runSideQuestion")` के अंतर्गत assert किया गया है।
+इससे Copilot CLI सत्र एजेंट के मुख्य टर्न लूप के लिए आरक्षित रहते हैं, और
+`/btw` का व्यवहार अन्य गैर-Codex रनटाइम के समान बना रहता है।
 
 ## Doctor
 
 `extensions/copilot/doctor-contract-api.ts` को
-`src/plugins/doctor-contract-registry.ts` द्वारा auto-loaded किया जाता है। यह योगदान देता है:
+`src/plugins/doctor-contract-registry.ts` द्वारा स्वतः लोड किया जाता है। यह निम्नलिखित प्रदान करता है:
 
-- एक empty `legacyConfigRules` (MVP में कोई retired fields नहीं)।
-- एक no-op `normalizeCompatibilityConfig` (ताकि future field retirements के लिए
-  एक stable in-tree home रहे)।
-- एक `sessionRouteStateOwners` entry जो provider `github-copilot`;
-  runtime `copilot`; CLI session key `copilot`; auth profile
-  prefix `github-copilot:` claim करती है।
+- एक खाली `legacyConfigRules` (अभी तक कोई सेवानिवृत्त फ़ील्ड नहीं)।
+- एक नो-ऑप `normalizeCompatibilityConfig` (रखा गया है ताकि भविष्य में फ़ील्ड
+  सेवानिवृत्त करने के लिए स्रोत-वृक्ष में एक स्थिर स्थान उपलब्ध हो)।
+- एक `sessionRouteStateOwners` प्रविष्टि: प्रदाता `github-copilot`, रनटाइम
+  `copilot`, CLI सत्र कुंजी `copilot`, प्रमाणीकरण प्रोफ़ाइल उपसर्ग `github-copilot:`।
 
 ## सीमाएँ
 
-- harness `github-copilot` और unowned custom BYOK provider ids को claim करता है।
-  Manifest-owned native provider ids अपने owning runtime पर ही रहते हैं, भले ही
-  `agentRuntime.id` को `copilot` पर force किया गया हो।
-- harness TUI deliver नहीं करता; PI का TUI अप्रभावित है और उन
-  runtimes के लिए fallback बना रहता है जिनके पास peer surface नहीं है।
-- जब कोई agent `copilot` पर switch करता है, तो PI session state migrate नहीं की जाती।
-  चयन per attempt होता है; मौजूदा PI sessions valid रहते हैं।
-- `ask_user` वही OpenClaw prompt-and-reply path उपयोग करता है जो Codex
-  harness करता है। जब Copilot SDK user input मांगता है, OpenClaw active channel/TUI पर
-  blocking prompt post करता है और अगला queued user
-  message SDK request को resolve करता है।
+- हार्नेस `github-copilot` के साथ स्वामित्व-रहित कस्टम BYOK प्रदाता आईडी पर दावा करता है।
+  मैनिफ़ेस्ट-स्वामित्व वाली नेटिव प्रदाता आईडी अपने स्वामी रनटाइम पर ही रहती हैं, भले ही
+  `agentRuntime.id` को बाध्य करके `copilot` किया गया हो।
+- कोई TUI सतह नहीं; बिना समकक्ष सतह वाले रनटाइम के लिए PI का TUI फ़ॉलबैक बना रहता है।
+- जब कोई एजेंट `copilot` पर स्विच करता है, तो PI सत्र स्थिति माइग्रेट नहीं होती।
+  चयन प्रति प्रयास होता है; मौजूदा PI सत्र वैध बने रहते हैं।
+- `ask_user` प्रदाता-निरपेक्ष Gateway प्रश्न रनटाइम का उपयोग करता है। Control
+  UI अन्य OpenClaw प्रश्नों जैसा ही प्रश्न कार्ड दिखाता है, समर्थित
+  चैनल विकल्प बटन रेंडर करते हैं, और अगला कतारबद्ध सादा-पाठ संदेश
+  SDK अनुरोध के लौटने से पहले उस Gateway रिकॉर्ड का समाधान करता है।
 
 ## अनुमतियाँ और ask_user
 
-bridged OpenClaw tools के लिए permission enforcement **tool wrapper के अंदर**
-होता है, SDK के `onPermissionRequest` callback के ज़रिए नहीं। वही
-`wrapToolWithBeforeToolCallHook` जिसे PI उपयोग करता है
-(`src/agents/pi-tools.before-tool-call.ts`), `createOpenClawCodingTools` द्वारा
-हर coding tool पर लागू किया जाता है: loop detection,
-trusted Plugin policies, before-tool-call hooks, और gateway
-(`plugin.approval.request`) के ज़रिए two-phase Plugin approvals, सभी native PI attempts जैसे
-ठीक उसी code path के साथ चलते हैं।
+ब्रिज किए गए OpenClaw टूल के लिए अनुमति प्रवर्तन SDK के
+`onPermissionRequest` कॉलबैक के माध्यम से नहीं, बल्कि **टूल रैपर के भीतर** होता है।
+PI द्वारा उपयोग किया जाने वाला वही
+`wrapToolWithBeforeToolCallHook`
+(`src/agents/agent-tools.before-tool-call.ts`) हर कोडिंग टूल पर
+`createOpenClawCodingTools` द्वारा लागू किया जाता है: लूप पहचान, विश्वसनीय
+Plugin नीतियाँ, टूल-कॉल-पूर्व हुक, और Gateway के माध्यम से दो-चरणीय Plugin अनुमोदन
+(`plugin.approval.request`) सभी नेटिव PI प्रयासों वाले ठीक उसी कोड
+पथ से चलते हैं।
 
-उस wrapper को decision own करने देने के लिए,
-`convertOpenClawToolToSdkTool` द्वारा लौटाया गया SDK Tool इनसे marked होता है:
+Copilot टूल ब्रिज द्वारा लौटाए गए प्रत्येक SDK टूल को इनके साथ चिह्नित किया जाता है:
 
-- `overridesBuiltInTool: true` — समान नाम वाले Copilot CLI के built-in
-  tool को replace करता है (edit, read, write, bash, …), ताकि हर tool
-  invocation वापस OpenClaw पर route हो।
-- `skipPermission: true` — SDK को बताता है कि tool invoke करने से पहले
-  `onPermissionRequest({kind: "custom-tool"})` fire न करे।
-  wrapped `execute()` internally अधिक समृद्ध OpenClaw policy check करता है;
-  SDK-level prompt या तो OpenClaw के enforcement को short-circuit करेगा
-  (अगर हम allow-all करें) या हर tool call block करेगा (अगर हम
-  reject-all करें) — इनमें से कोई भी PI parity से मेल नहीं खाता।
+- `overridesBuiltInTool: true` — समान नाम वाले Copilot CLI के अंतर्निहित टूल को
+  प्रतिस्थापित करता है (edit, read, write, bash, ...), ताकि प्रत्येक टूल कॉल
+  वापस OpenClaw पर रूट हो।
+- `skipPermission: true` — SDK को टूल का आह्वान करने से पहले
+  `onPermissionRequest({kind: "custom-tool"})` सक्रिय न करने का निर्देश देता है।
+  आवृत `execute()` पहले ही अधिक समृद्ध OpenClaw नीति जाँच करता है; SDK-स्तरीय
+  प्रॉम्प्ट या तो OpenClaw के प्रवर्तन को शॉर्ट-सर्किट करेगा
+  (सभी को अनुमति) या प्रत्येक टूल कॉल को अवरुद्ध करेगा (सभी को अस्वीकार) — इनमें से कोई भी PI
+  समानता से मेल नहीं खाता।
 
-in-tree codex harness वही split उपयोग करता है: bridged OpenClaw tools
-wrapped होते हैं (`extensions/codex/src/app-server/dynamic-tools.ts`) और
-codex-app-server के _अपने_ native approval kinds
-(`item/commandExecution/requestApproval`,
-`item/fileChange/requestApproval`,
-`item/permissions/requestApproval`) को
-`plugin.approval.request`
-(`extensions/codex/src/app-server/approval-bridge.ts`) के ज़रिए route किया जाता है। Copilot SDK
-equivalent — किसी भी non-`custom-tool`
-kind के लिए fail-closed `rejectAllPolicy`, जो कभी `onPermissionRequest` तक पहुंचे — वही safety net है,
-और व्यवहार में यह fire नहीं करता क्योंकि `overridesBuiltInTool: true`
-हर built-in को displace कर देता है।
+स्रोत-वृक्ष में मौजूद Codex हार्नेस भी इसी विभाजन का उपयोग करता है: ब्रिज किए गए OpenClaw टूल
+आवृत होते हैं (`extensions/codex/src/app-server/dynamic-tools.ts`) और
+codex-app-server के अपने नेटिव अनुमोदन प्रकार
+(`item/commandExecution/requestApproval`, `item/fileChange/requestApproval`,
+`item/permissions/requestApproval`) `plugin.approval.request`
+(`extensions/codex/src/app-server/approval-bridge.ts`) के माध्यम से रूट होते हैं। Copilot SDK
+का समतुल्य — `onPermissionRequest` तक कभी पहुँचने वाले किसी भी गैर-`custom-tool`
+प्रकार के लिए विफलता-बंद `rejectAllPolicy` — वही सुरक्षा तंत्र है, और व्यवहार में यह
+कभी सक्रिय नहीं होता क्योंकि `overridesBuiltInTool: true` प्रत्येक
+अंतर्निहित टूल को विस्थापित करता है।
 
-wrapped-tool layer को PI के equivalent policy decisions लेने देने के लिए,
-harness पूरा PI attempt-tool context
-`createOpenClawCodingTools` को forward करता है — identity (`senderIsOwner`,
-`memberRoleIds`, `ownerOnlyToolAllowlist`, …), channel/routing
-(`groupId`, `currentChannelId`, `replyToMode`, message-tool toggles),
-auth (`authProfileStore`), run identity
-(`sessionKey`/`runSessionKey` derived from `sandboxSessionKey`,
-`runId`), model context (`modelApi`, `modelContextWindowTokens`,
-`modelCompat`, `modelHasVision`), और run hooks (`onToolOutcome`,
-`onYield`)। उन fields के बिना, owner-only allowlists चुपचाप
-deny-by-default जैसा behave करती हैं, Plugin-trust policies सही
-scope तक resolve नहीं कर पातीं, और `session_status: "current"` stale
-sandbox key पर resolve होता है। bridge builder
-`extensions/copilot/src/tool-bridge.ts` में है और PI
-authoritative call को mirror करता है:
-`src/agents/pi-embedded-runner/run/attempt.ts:1029-1117`। `runAttempt`
-पहले से shared `resolveSandboxContext` seam के ज़रिए sandbox context resolve करता है,
-SDK को effective working directory pass करता है, और `sandbox` के साथ subagent-spawn workspace को
-tool bridge में forward करता है। bridge bounded tool-construction
-controls भी forward करता है जिन्हें वह SDK boundary पर enforce कर सकता है: `includeCoreTools`,
-runtime tool allowlist, और `toolConstructionPlan`।
+आवृत-टूल परत द्वारा PI के समतुल्य नीतिगत निर्णय लेने के लिए,
+हार्नेस संपूर्ण PI प्रयास-टूल संदर्भ
+`createOpenClawCodingTools` को अग्रेषित करता है: पहचान (`senderIsOwner`, `memberRoleIds`,
+`ownerOnlyToolAllowlist`, ...), चैनल/रूटिंग (`groupId`,
+`currentChannelId`, `replyToMode`, संदेश-टूल टॉगल), प्रमाणीकरण
+(`authProfileStore`), रन पहचान (`sandboxSessionKey`, `runId` से व्युत्पन्न
+`sessionKey` / `runSessionKey`), मॉडल संदर्भ (`modelApi`,
+`modelContextWindowTokens`, `modelCompat`, `modelHasVision`), और रन हुक
+(`onToolOutcome`, `onYield`)। इन फ़ील्ड के बिना, केवल-स्वामी अनुमतिसूचियाँ
+डिफ़ॉल्ट रूप से चुपचाप अस्वीकार करती हैं, Plugin-विश्वास नीतियाँ सही
+दायरा निर्धारित नहीं कर पातीं, और `session_status: "current"` एक पुराने सैंडबॉक्स कुंजी में
+समाधान होता है। ब्रिज बिल्डर `extensions/copilot/src/tool-bridge.ts` है, जो
+`src/agents/embedded-agent-runner/run/attempt.ts:1262` पर PI की आधिकारिक कॉल को प्रतिबिंबित करता है।
+`runAttempt` साझा
+`resolveSandboxContext` सीम के माध्यम से सैंडबॉक्स संदर्भ निर्धारित करता है, SDK को एक प्रभावी कार्यशील निर्देशिका देता है,
+और `sandbox` के साथ उप-एजेंट-सृजन कार्यक्षेत्र को टूल
+ब्रिज में अग्रेषित करता है। ब्रिज उन सीमित टूल-निर्माण नियंत्रणों को भी अग्रेषित करता है
+जिन्हें वह SDK सीमा पर लागू कर सकता है: `includeCoreTools`, रनटाइम टूल
+अनुमतिसूची, और `toolConstructionPlan`।
 
-bridge PI parity के लिए
-`openclaw/plugin-sdk/agent-harness-tool-runtime` से shared harness tool-surface helper भी उपयोग करता है। जब
-tool-search enabled होता है, SDK हर OpenClaw tool schema के बजाय compact control tools और एक hidden
-catalog executor देखता है। जब code mode enabled होता है,
-helper वही code-mode control surface और catalog
-lifecycle बनाता है जिसे दूसरे agent harnesses उपयोग करते हैं। Local-model lean defaults,
-runtime-compatible schema filtering, directory hydration, और catalog
-cleanup सभी shared helper में रहते हैं ताकि Copilot और Codex-adjacent
-harnesses drift न करें।
+PI समानता के लिए ब्रिज
+`openclaw/plugin-sdk/agent-harness-tool-runtime` के साझा हार्नेस टूल-सतह सहायक का भी उपयोग करता है।
+टूल-खोज सक्षम होने पर, SDK प्रत्येक OpenClaw टूल स्कीमा के बजाय संक्षिप्त
+नियंत्रण टूल और एक छिपा हुआ कैटलॉग निष्पादक देखता है। कोड मोड सक्षम होने पर,
+सहायक वही कोड-मोड नियंत्रण सतह और कैटलॉग जीवनचक्र बनाता है जिसका उपयोग अन्य
+एजेंट हार्नेस करते हैं। स्थानीय-मॉडल के हल्के डिफ़ॉल्ट,
+रनटाइम-संगत स्कीमा फ़िल्टरिंग, निर्देशिका हाइड्रेशन और कैटलॉग
+क्लीनअप सभी साझा सहायक में रहते हैं, ताकि Copilot और Codex-सन्निकट
+हार्नेस में विचलन न हो।
 
-### Session-level GitHub token
+### सत्र-स्तरीय GitHub टोकन
 
-Copilot SDK contract **client-level** GitHub
-token (`CopilotClientOptions.gitHubToken`, जिसका उपयोग CLI process को authenticate करने के लिए होता है)
-और **session-level** token
-(`SessionConfig.gitHubToken`, जो उस session के लिए content exclusion,
-model routing, और quota निर्धारित करता है और `createSession` तथा
-`resumeSession` दोनों पर honored होता है) में अंतर करता है। harness auth को
-`resolveCopilotAuth` के ज़रिए एक बार resolve करता है और जब auth mode
-`gitHubToken` हो (explicit `auth.gitHubToken` या configured `github-copilot` auth profile से
-contract-resolved `resolvedApiKey`), तब दोनों fields set करता है।
-जब resolved mode `useLoggedInUser` होता है, session-level field
-omit की जाती है ताकि SDK logged-in
-identity से identity derive करता रहे।
+Copilot SDK अनुबंध **क्लाइंट-स्तरीय** GitHub टोकन
+(`CopilotClientOptions.gitHubToken`, जो स्वयं CLI प्रक्रिया को प्रमाणित करता है)
+और **सत्र-स्तरीय** टोकन (`SessionConfig.gitHubToken`, जो उस सत्र के लिए
+सामग्री बहिष्करण, मॉडल रूटिंग और कोटा निर्धारित करता है; `createSession` और
+`resumeSession` दोनों पर मान्य) के बीच अंतर करता है। हार्नेस
+`resolveCopilotAuth` के माध्यम से एक बार प्रमाणीकरण निर्धारित करता है और प्रमाणीकरण मोड
+`gitHubToken` होने पर दोनों फ़ील्ड सेट करता है
+(एक स्पष्ट `auth.gitHubToken` या कॉन्फ़िगर की गई `github-copilot`
+प्रमाणीकरण प्रोफ़ाइल से अनुबंध-द्वारा-निर्धारित `resolvedApiKey`)। जब निर्धारित मोड
+`useLoggedInUser` होता है, तो सत्र-स्तरीय फ़ील्ड छोड़ दिया जाता है, ताकि SDK
+लॉग-इन पहचान से पहचान व्युत्पन्न करता रहे।
 
-`ask_user` `SessionConfig.onUserInputRequest` उपयोग करता है। bridge
-fixed-choice requests के लिए choice indexes या labels accept करता है, SDK request द्वारा अनुमति होने पर
-free-form answers accept करता है, और OpenClaw attempt aborted होने पर
-pending request cancel करता है।
+`ask_user`, `SessionConfig.onUserInputRequest` का उपयोग करता है। ब्रिज SDK
+विकल्पों या विकल्प-रहित मुक्त-पाठ प्रॉम्प्ट को Gateway प्रश्नों के रूप में पंजीकृत करता है, निश्चित-विकल्प
+अनुरोधों के लिए विकल्प सूचकांक या लेबल स्वीकार करता है, और SDK अनुरोध द्वारा अनुमति मिलने पर
+मुक्त-रूप उत्तर स्वीकार करता है। OpenClaw प्रयास को निरस्त करने से
+Gateway रिकॉर्ड रद्द हो जाता है और एक खाली SDK उत्तर लौटता है।
 
 ## संबंधित
 
-- [Agent runtimes](/hi/concepts/agent-runtimes)
-- [Codex harness](/hi/plugins/codex-harness)
-- [Agent harness plugins (SDK reference)](/hi/plugins/sdk-agent-harness)
+- [एजेंट रनटाइम](/hi/concepts/agent-runtimes)
+- [Codex हार्नेस](/hi/plugins/codex-harness)
+- [एजेंट हार्नेस Plugin (SDK संदर्भ)](/hi/plugins/sdk-agent-harness)

@@ -1,77 +1,210 @@
 ---
 read_when:
     - Android Node को पेयर करना या फिर से कनेक्ट करना
-    - Android Gateway खोज या प्रमाणीकरण को डीबग करना
-    - क्लाइंट्स में चैट इतिहास समानता सत्यापित करना
-summary: 'Android ऐप (node): कनेक्शन रनबुक + कनेक्ट/चैट/वॉइस/कैनवास कमांड सतह'
+    - Android Gateway खोज या प्रमाणीकरण की डिबगिंग
+    - किसी रिमोट Mac से Android डिवाइस को मिरर या नियंत्रित करना
+    - क्लाइंटों के बीच चैट इतिहास की समानता सत्यापित करना
+summary: 'Android ऐप (Node): कनेक्शन रनबुक + Connect/Chat/OpenClaw/Voice/Canvas कमांड सतह'
 title: Android ऐप
 x-i18n:
-    generated_at: "2026-06-28T23:27:02Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:31:20Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 5c02d4921c3f3011c09e564d83b773a7c155d17a82a6e70d3fd3e973597142f1
+    source_hash: a134a678e26924abc24dd107c3feaad9d09e83e3829eef73514c7ef078d578f1
     source_path: platforms/android.md
     workflow: 16
 ---
 
 <Note>
-आधिकारिक Android ऐप [Google Play](https://play.google.com/store/apps/details?id=ai.openclaw.app&hl=en_IN) पर उपलब्ध है। यह एक साथी नोड है और इसके लिए चलता हुआ OpenClaw Gateway आवश्यक है। स्रोत कोड [OpenClaw रिपॉज़िटरी](https://github.com/openclaw/openclaw) में `apps/android` के अंतर्गत भी उपलब्ध है; बिल्ड निर्देशों के लिए [apps/android/README.md](https://github.com/openclaw/openclaw/blob/main/apps/android/README.md) देखें।
+आधिकारिक Android ऐप [Google Play](https://play.google.com/store/apps/details?id=ai.openclaw.app&hl=en_IN) पर और समर्थित [GitHub Releases](https://github.com/openclaw/openclaw/releases) में हस्ताक्षरित स्टैंडअलोन APK के रूप में उपलब्ध है। यह एक सहायक Node है और इसके लिए चालू OpenClaw Gateway आवश्यक है। स्रोत: [apps/android](https://github.com/openclaw/openclaw/tree/main/apps/android) ([बिल्ड निर्देश](https://github.com/openclaw/openclaw/blob/main/apps/android/README.md))।
 </Note>
 
-## समर्थन स्नैपशॉट
+## समर्थन का संक्षिप्त विवरण
 
-- भूमिका: साथी नोड ऐप (Android Gateway होस्ट नहीं करता)।
-- Gateway आवश्यक: हाँ (इसे macOS, Linux, या WSL2 के माध्यम से Windows पर चलाएँ)।
-- इंस्टॉल करें: ऐप के लिए [Google Play](https://play.google.com/store/apps/details?id=ai.openclaw.app&hl=en_IN), Gateway के लिए [प्रारंभ करना](/hi/start/getting-started), फिर [पेयरिंग](/hi/channels/pairing)।
+- भूमिका: सहायक Node ऐप (Android Gateway को होस्ट नहीं करता)।
+- Gateway आवश्यक: हाँ (इसे macOS, Linux या WSL2 के माध्यम से Windows पर चलाएँ)।
+- इंस्टॉल करें: [Google Play](https://play.google.com/store/apps/details?id=ai.openclaw.app&hl=en_IN) या समर्थित [GitHub Release](https://github.com/openclaw/openclaw/releases) से `OpenClaw-Android.apk`, Gateway के लिए [आरंभ करना](/hi/start/getting-started), फिर [पेयरिंग](/hi/channels/pairing)।
 - Gateway: [रनबुक](/hi/gateway) + [कॉन्फ़िगरेशन](/hi/gateway/configuration)।
-  - प्रोटोकॉल: [Gateway प्रोटोकॉल](/hi/gateway/protocol) (नोड + नियंत्रण प्लेन)।
+  - प्रोटोकॉल: [Gateway प्रोटोकॉल](/hi/gateway/protocol) (Nodes + नियंत्रण तल)।
+- जब ऑपरेटर कनेक्शन में `operator.admin` हो और Gateway `openclaw.chat` का समर्थन करता हो, तब **Settings → OpenClaw** एक समर्पित Gateway सेटिंग सहायक खोलता है। इसकी सेटअप बातचीत सामान्य Chat से अलग रहती है, गुप्त उत्तरों को स्थानीय रूप से संपादित करती है और आपके **Open Chat** पर टैप करने के बाद ही Chat में जाती है।
 
-## सिस्टम नियंत्रण
+सिस्टम नियंत्रण (launchd/systemd) Gateway होस्ट पर रहता है — [Gateway](/hi/gateway) देखें।
 
-सिस्टम नियंत्रण (launchd/systemd) Gateway होस्ट पर रहता है। [Gateway](/hi/gateway) देखें।
+## एक साथ Gateway सत्र
+
+प्रत्येक Gateway को एक बार पेयर करें, फिर **Settings → Gateway** खोलें। चेकमार्क
+फ़ोकस किए गए Gateway को चिह्नित करता है और प्रत्येक स्विच यह नियंत्रित करता है कि किसी गैर-फ़ोकस किए गए Gateway का
+ऑपरेटर सत्र कनेक्टेड रहे या नहीं। ऐप के अग्रभूमि में रहते समय सक्षम Gateways स्वतंत्र रूप से पुनः कनेक्ट होते हैं,
+इसलिए फ़ोकस बदलने से अन्य कनेक्शन बंद नहीं होते।
+केवल फ़ोकस किया गया Gateway ही Android Node सत्र और डिवाइस
+क्षमताओं का स्वामी होता है; इससे एक साथ जुड़े Gateways को एक ही फ़ोन पर कैमरा,
+स्थान, स्क्रीन या सूचना कमांड जारी करने से रोका जाता है। ऐप के अग्रभूमि से बाहर जाने के बाद Android
+द्वितीयक कनेक्शन निलंबित कर सकता है।
+
+## Wear OS सहायक
+
+Wear OS सहायक पेयर किए गए Android फ़ोन के प्रमाणीकृत Gateway कनेक्शन का उपयोग करता है; घड़ी कभी भी Gateway क्रेडेंशियल प्राप्त या संग्रहीत नहीं करती। यह एजेंट और सत्र चुन सकता है, सीमित ट्रांसक्रिप्ट पढ़ सकता है, टेक्स्ट या बोलकर दिए गए उत्तर भेज सकता है, सक्रिय रन रोक सकता है, चयनित सत्र में रीयल-टाइम Talk शुरू कर सकता है और पेयर किए गए फ़ोन के Gateway को कनेक्ट या डिस्कनेक्ट कर सकता है। यह स्थानीय उत्तर सूचनाएँ, गहरा या हल्का स्वरूप और उत्तरों के लिए वैकल्पिक स्वचालित वाचन भी प्रदान करता है। फ़ोन और घड़ी के अलग-अलग समय पर होने वाले अपडेट के लिए एजेंट और Gateway नियंत्रणों की क्षमता पर बातचीत की जाती है। रीयल-टाइम Talk माइक्रोफ़ोन और प्लेबैक ऑडियो को अस्थायी Wear OS Data Layer चैनल पर स्ट्रीम करता है और चयनित फ़ोन, Gateway कनेक्शन या ऑडियो चैनल खो जाने पर रुक जाता है।
+
+## Google Play के बाहर इंस्टॉल करना
+
+नियमित अंतिम और सुधारात्मक GitHub Releases में एक सार्वभौमिक `OpenClaw-Android.apk` और `OpenClaw-Android-SHA256SUMS.txt` शामिल होते हैं। APK रिलीज़ टैग से बनाया जाता है, OpenClaw Android रिलीज़ कुंजी से हस्ताक्षरित होता है और इसमें GitHub Actions उद्गम प्रमाण होता है।
+
+ऐसी [रिलीज़](https://github.com/openclaw/openclaw/releases) चुनें जिसमें दोनों एसेट सूचीबद्ध हों, फिर साइडलोड करने से पहले उसी टैग को डाउनलोड और सत्यापित करें:
+
+```bash
+release_tag=vYYYY.M.PATCH
+gh release download "$release_tag" \
+  --repo openclaw/openclaw \
+  --pattern OpenClaw-Android.apk \
+  --pattern OpenClaw-Android-SHA256SUMS.txt
+sha256sum --check OpenClaw-Android-SHA256SUMS.txt
+gh attestation verify OpenClaw-Android.apk \
+  --repo openclaw/openclaw \
+  --signer-workflow openclaw/openclaw/.github/workflows/android-release.yml \
+  --source-ref "refs/tags/${release_tag}" \
+  --deny-self-hosted-runners
+```
+
+<Warning>
+Google Play और स्टैंडअलोन APK इंस्टॉल अलग-अलग अपडेट चैनलों का उपयोग करते हैं और उनकी हस्ताक्षर पहचान अलग हो सकती है। चैनल बदलने से पहले Android को मौजूदा ऐप अनइंस्टॉल करने की आवश्यकता हो सकती है, जिससे उसका स्थानीय ऐप डेटा हट जाता है। सामान्य अपडेट के लिए एक ही चैनल पर बने रहें।
+</Warning>
+
+## दूरस्थ Mac से Android को मिरर और नियंत्रित करना
+
+[scrcpy](https://github.com/Genymobile/scrcpy) Android स्क्रीन को macOS विंडो में मिरर करता है और
+Android Debug Bridge (ADB) के माध्यम से कीबोर्ड और पॉइंटर इनपुट अग्रेषित करता है। यह ऑपरेटर-पक्ष का
+वर्कफ़्लो है, जो OpenClaw Node कनेक्शन से अलग है। यह तब उपयोगी होता है जब Android डिवाइस और
+Mac अलग-अलग स्थानों पर हों, लेकिन एक निजी Tailscale नेटवर्क साझा करते हों।
+
+### शुरू करने से पहले
+
+- Android डिवाइस और Mac पर Tailscale इंस्टॉल करें और दोनों को एक ही tailnet से कनेक्ट करें।
+- Android पर **Developer options** और **USB debugging** सक्षम करें। Android 16 में **Wireless
+  debugging**, **Settings > System > Developer options** के अंतर्गत होता है। [Android developer
+  options](https://developer.android.com/studio/debug/dev-options) देखें।
+- Mac पर scrcpy और ADB इंस्टॉल करें:
+
+  ```bash
+  brew install scrcpy
+  brew install --cask android-platform-tools
+  ```
+
+- पहले कनेक्शन के लिए Android डिवाइस को उपलब्ध रखें। किसी Mac द्वारा डिवाइस नियंत्रित किए जाने से पहले Android को उस Mac की ADB
+  कुंजी को स्वीकृत करना होगा।
+
+### TCP पर ADB सक्षम करें
+
+आरंभिक सेटअप के लिए Android डिवाइस को USB द्वारा किसी विश्वसनीय कंप्यूटर से कनेक्ट करें और उसके
+डीबगिंग संकेत को स्वीकृत करें। फिर चलाएँ:
+
+```bash
+adb devices
+adb tcpip 5555
+```
+
+अब आप USB डिस्कनेक्ट कर सकते हैं। यदि डिवाइस रीबूट या डीबगिंग रीसेट के बाद पोर्ट 5555 सुनना बंद कर दे,
+तो यह स्थानीय सेटअप चरण दोहराएँ। Android 11 और बाद के संस्करण **Wireless debugging > Pair device with pairing code** और `adb pair` से भी आरंभिक विश्वास स्थापित कर सकते हैं।
+
+### केवल नियंत्रक Mac को अनुमति दें
+
+प्रतिबंधात्मक अनुदान वाले tailnets को Android डिवाइस के TCP पोर्ट 5555 तक पहुँचने के लिए नियंत्रक Mac को स्पष्ट रूप से अनुमति देनी होगी।
+tailnet नीति में एक सीमित नियम जोड़ें और उदाहरण पतों को
+दोनों डिवाइसों के स्थिर Tailscale IP से बदलें:
+
+```json5
+{
+  grants: [
+    {
+      src: ["<remote-mac-tailnet-ip>"],
+      dst: ["<android-tailnet-ip>"],
+      ip: ["tcp:5555"],
+    },
+  ],
+}
+```
+
+होस्ट उपनामों और अन्य चयनकर्ताओं के लिए [Tailscale grants](https://tailscale.com/docs/reference/syntax/grants) देखें।
+इस पोर्ट की अनुमति सार्वजनिक इंटरनेट को न दें और इसे Funnel के साथ उजागर न करें: अधिकृत ADB
+क्लाइंट के पास डिवाइस का व्यापक नियंत्रण होता है।
+
+### कनेक्ट करके मिररिंग शुरू करें
+
+दूरस्थ Mac पर:
+
+```bash
+adb connect <android-tailnet-ip>:5555
+adb devices
+scrcpy --serial <android-tailnet-ip>:5555
+```
+
+इस Mac से पहला `adb connect` Android पर प्राधिकरण संवाद दिखाता है। डिवाइस अनलॉक करें,
+कुंजी फ़िंगरप्रिंट की पुष्टि करें और केवल Mac विश्वसनीय होने पर **Always allow from this computer** चुनें।
+सफल `adb devices` प्रविष्टि के अंत में `device` होता है; `unauthorized` का अर्थ है कि डिवाइस पर दिखाई गई स्वीकृति
+अभी मंज़ूर नहीं हुई है।
+
+scrcpy विंडो खुलने के बाद उसे सीधे उपयोग करें या [Peekaboo](https://peekaboo.sh/) जैसे
+macOS स्क्रीन-ऑटोमेशन टूल से लक्षित करें। scrcpy डिस्प्ले और इनपुट वहन करता है; Tailscale केवल
+निजी नेटवर्क पथ प्रदान करता है।
+
+### समस्या निवारण
+
+- `Connection timed out`: TCP 5555 के लिए tailnet अनुदान सत्यापित करें। सफल `tailscale ping`
+  पीयर तक पहुँच सिद्ध करता है, यह नहीं कि नीति इस TCP पोर्ट की अनुमति देती है। Mac से
+  `nc -vz <android-tailnet-ip> 5555` द्वारा परीक्षण करें।
+- `unauthorized`: Android अनलॉक करें और दूरस्थ Mac की ADB कुंजी स्वीकृत करें, या **Wireless debugging > Paired devices** के अंतर्गत पुराने वर्कस्टेशन को हटाकर
+  उसे फिर से पेयर करें।
+- `Connection refused`: स्थानीय रूप से पुनः कनेक्ट करें और `adb tcpip 5555` फिर से चलाएँ।
+- एक से अधिक डिवाइस सूचीबद्ध हैं: स्पष्ट `--serial <android-tailnet-ip>:5555` तर्क बनाए रखें।
+
+काम पूरा होने पर scrcpy बंद करें और ADB डिस्कनेक्ट करें:
+
+```bash
+adb disconnect <android-tailnet-ip>:5555
+```
 
 ## कनेक्शन रनबुक
 
-Android नोड ऐप ⇄ (mDNS/NSD + WebSocket) ⇄ **Gateway**
+Android Node ऐप ⇄ (mDNS/NSD + WebSocket) ⇄ **Gateway**
 
-Android सीधे Gateway WebSocket से जुड़ता है और डिवाइस पेयरिंग (`role: node`) का उपयोग करता है।
+Android सीधे Gateway WebSocket से कनेक्ट होता है और डिवाइस पेयरिंग (`role: node`) का उपयोग करता है।
 
-Tailscale या सार्वजनिक होस्ट के लिए, Android को सुरक्षित एंडपॉइंट चाहिए:
+Tailscale या सार्वजनिक होस्ट के लिए Android को सुरक्षित एंडपॉइंट चाहिए:
 
-- प्राथमिकता: Tailscale Serve / Funnel, `https://<magicdns>` / `wss://<magicdns>` के साथ
-- समर्थित भी: वास्तविक TLS एंडपॉइंट वाला कोई अन्य `wss://` Gateway URL
-- क्लियरटेक्स्ट `ws://` निजी LAN पतों / `.local` होस्टों, साथ ही `localhost`, `127.0.0.1`, और Android एम्युलेटर ब्रिज (`10.0.2.2`) पर समर्थित रहता है
+- वरीय: `https://<magicdns>` / `wss://<magicdns>` के साथ Tailscale Serve / Funnel
+- यह भी समर्थित है: वास्तविक TLS एंडपॉइंट वाला कोई अन्य `wss://` Gateway URL
+- स्पष्ट-पाठ `ws://` निजी LAN पतों / `.local` होस्ट, साथ ही `localhost`, `127.0.0.1` और Android एम्युलेटर ब्रिज (`10.0.2.2`) पर समर्थित रहता है; गैर-लूपबैक सेटअप स्वचालित रूप से सीमित ऑपरेटर पहुँच का उपयोग करता है
 
 ### पूर्वापेक्षाएँ
 
-- आप "मास्टर" मशीन पर Gateway चला सकते हैं।
-- Android डिवाइस/एम्युलेटर Gateway WebSocket तक पहुँच सकता है:
-  - mDNS/NSD के साथ वही LAN, **या**
-  - Wide-Area Bonjour / unicast DNS-SD का उपयोग करके वही Tailscale tailnet (नीचे देखें), **या**
-  - मैनुअल Gateway होस्ट/पोर्ट (fallback)
-- Tailnet/सार्वजनिक मोबाइल पेयरिंग कच्चे tailnet IP `ws://` एंडपॉइंट का उपयोग **नहीं** करती। इसके बजाय Tailscale Serve या किसी अन्य `wss://` URL का उपयोग करें।
-- आप Gateway मशीन पर CLI (`openclaw`) चला सकते हैं (या SSH के माध्यम से)।
+- Gateway किसी अन्य मशीन पर चल रहा हो (या SSH के माध्यम से पहुँच योग्य हो)।
+- Android डिवाइस/एम्युलेटर Gateway WebSocket तक पहुँच सकता हो:
+  - mDNS/NSD के साथ समान LAN, **या**
+  - Wide-Area Bonjour / यूनिकास्ट DNS-SD का उपयोग करने वाला समान Tailscale tailnet (नीचे देखें), **या**
+  - मैन्युअल Gateway होस्ट/पोर्ट (फ़ॉलबैक)
+- Tailnet/सार्वजनिक मोबाइल पेयरिंग अपरिष्कृत tailnet IP `ws://` एंडपॉइंट का उपयोग **नहीं** करती। इसके बजाय Tailscale Serve या किसी अन्य `wss://` URL का उपयोग करें।
+- पेयरिंग अनुरोध स्वीकृत करने के लिए Gateway मशीन पर (या SSH के माध्यम से) `openclaw` CLI उपलब्ध हो।
 
-### 1) Gateway शुरू करें
+### 1. Gateway शुरू करें
 
 ```bash
 openclaw gateway --port 18789 --verbose
 ```
 
-लॉग में पुष्टि करें कि आपको कुछ ऐसा दिखता है:
+पुष्टि करें कि लॉग में ऐसा कुछ दिखाई देता है:
 
 - `listening on ws://0.0.0.0:18789`
 
-Tailscale पर दूरस्थ Android पहुँच के लिए, कच्चे tailnet bind के बजाय Serve/Funnel को प्राथमिकता दें:
+Tailscale पर दूरस्थ Android पहुँच के लिए अपरिष्कृत tailnet बाइंड के बजाय Serve/Funnel को प्राथमिकता दें:
 
 ```bash
 openclaw gateway --tailscale serve
 ```
 
-यह Android को सुरक्षित `wss://` / `https://` एंडपॉइंट देता है। केवल `gateway.bind: "tailnet"` सेटअप पहली बार दूरस्थ Android पेयरिंग के लिए पर्याप्त नहीं है, जब तक आप अलग से TLS टर्मिनेट न करें।
+यह Android को एक सुरक्षित `wss://` / `https://` एंडपॉइंट देता है। जब तक आप अलग से TLS समाप्ति भी न करें, केवल `gateway.bind: "tailnet"` सेटअप पहली बार की दूरस्थ Android पेयरिंग के लिए पर्याप्त नहीं है।
 
-### 2) डिस्कवरी सत्यापित करें (वैकल्पिक)
+### 2. खोज सत्यापित करें (वैकल्पिक)
 
 Gateway मशीन से:
 
@@ -79,54 +212,62 @@ Gateway मशीन से:
 dns-sd -B _openclaw-gw._tcp local.
 ```
 
-अधिक डिबगिंग नोट्स: [Bonjour](/hi/gateway/bonjour)।
+अधिक डीबगिंग टिप्पणियाँ: [Bonjour](/hi/gateway/bonjour)।
 
-यदि आपने wide-area डिस्कवरी डोमेन भी कॉन्फ़िगर किया है, तो इससे तुलना करें:
+यदि आपने विस्तृत-क्षेत्र खोज डोमेन भी कॉन्फ़िगर किया है, तो इससे तुलना करें:
 
 ```bash
 openclaw gateway discover --json
 ```
 
-यह `local.` और कॉन्फ़िगर किए गए wide-area डोमेन को एक ही पास में दिखाता है और TXT-केवल संकेतों के बजाय resolved
-सेवा एंडपॉइंट का उपयोग करता है।
+यह केवल TXT संकेतों के बजाय समाधान किए गए सेवा एंडपॉइंट का उपयोग करके एक ही बार में `local.` और कॉन्फ़िगर किया गया विस्तृत-क्षेत्र डोमेन दिखाता है।
 
-#### unicast DNS-SD के माध्यम से Tailnet (Vienna ⇄ London) डिस्कवरी
+#### यूनिकास्ट DNS-SD द्वारा क्रॉस-नेटवर्क खोज
 
-Android NSD/mDNS डिस्कवरी नेटवर्कों के पार नहीं जाएगी। यदि आपका Android नोड और Gateway अलग-अलग नेटवर्कों पर हैं लेकिन Tailscale के माध्यम से जुड़े हैं, तो इसके बजाय Wide-Area Bonjour / unicast DNS-SD का उपयोग करें।
+Android NSD/mDNS खोज नेटवर्क सीमाओं को पार नहीं करती। यदि Android Node और Gateway अलग-अलग नेटवर्क पर हैं, लेकिन Tailscale के माध्यम से जुड़े हैं, तो इसके बजाय Wide-Area Bonjour / यूनिकास्ट DNS-SD का उपयोग करें। केवल खोज tailnet/सार्वजनिक Android पेयरिंग के लिए पर्याप्त नहीं है — खोजे गए मार्ग को फिर भी सुरक्षित एंडपॉइंट (`wss://` या Tailscale Serve) चाहिए:
 
-केवल डिस्कवरी tailnet/सार्वजनिक Android पेयरिंग के लिए पर्याप्त नहीं है। खोजे गए रूट को फिर भी सुरक्षित एंडपॉइंट (`wss://` या Tailscale Serve) चाहिए:
-
-1. Gateway होस्ट पर DNS-SD ज़ोन (उदाहरण `openclaw.internal.`) सेट अप करें और `_openclaw-gw._tcp` रिकॉर्ड प्रकाशित करें।
-2. अपने चुने हुए डोमेन के लिए Tailscale split DNS कॉन्फ़िगर करें, जो उस DNS सर्वर की ओर संकेत करे।
+1. Gateway होस्ट पर DNS-SD ज़ोन (उदाहरण `openclaw.internal.`) सेट करें और `_openclaw-gw._tcp` रिकॉर्ड प्रकाशित करें।
+2. अपने चुने हुए डोमेन के लिए उस DNS सर्वर की ओर इंगित करने वाला Tailscale स्प्लिट DNS कॉन्फ़िगर करें।
 
 विवरण और उदाहरण CoreDNS कॉन्फ़िगरेशन: [Bonjour](/hi/gateway/bonjour)।
 
-### 3) Android से कनेक्ट करें
+### 3. Android से कनेक्ट करें
 
 Android ऐप में:
 
-- ऐप अपनी Gateway कनेक्शन को **फ़ोरग्राउंड सेवा** (स्थायी नोटिफ़िकेशन) के माध्यम से जीवित रखता है।
-- **कनेक्ट** टैब खोलें।
-- **सेटअप कोड** या **मैनुअल** मोड का उपयोग करें।
-- यदि डिस्कवरी अवरुद्ध है, तो **उन्नत नियंत्रण** में मैनुअल होस्ट/पोर्ट का उपयोग करें। निजी LAN होस्टों के लिए, `ws://` अभी भी काम करता है। Tailscale/सार्वजनिक होस्टों के लिए, TLS चालू करें और `wss://` / Tailscale Serve एंडपॉइंट का उपयोग करें।
+- ऐप एक **foreground service** (स्थायी सूचना) द्वारा अपना Gateway कनेक्शन सक्रिय रखता है।
+- **Connect** टैब खोलें।
+- **Setup Code** या **Manual** मोड का उपयोग करें।
+- यदि खोज अवरुद्ध है, तो **Advanced controls** में मैन्युअल होस्ट/पोर्ट का उपयोग करें। निजी LAN होस्ट के लिए `ws://` अब भी काम करता है। Tailscale/सार्वजनिक होस्ट के लिए TLS चालू करें और `wss://` / Tailscale Serve एंडपॉइंट का उपयोग करें।
 
-पहली सफल पेयरिंग के बाद, Android लॉन्च पर अपने-आप फिर से कनेक्ट होता है:
+पहली सफल पेयरिंग के बाद Android लॉन्च होने पर सक्रिय पेयर किए गए Gateway से स्वचालित रूप से पुनः कनेक्ट होता है (खोजे गए Gateways के लिए यथासंभव, जिन्हें नेटवर्क पर दिखाई देना आवश्यक है)।
 
-- मैनुअल एंडपॉइंट (यदि सक्षम हो), अन्यथा
-- पिछला खोजा गया Gateway (सर्वोत्तम प्रयास)।
+आधिकारिक सेटअप कोड Android को Node के रूप में कनेक्ट करते हैं और डिफ़ॉल्ट रूप से `wss://` के माध्यम से पूर्ण Gateway ऑपरेटर
+पहुँच प्रदान करते हैं। प्लेनटेक्स्ट नॉन-लूपबैक `ws://` सेटअप
+बेयरर-टोकन सुरक्षा के लिए स्वचालित रूप से सीमित पहुँच का उपयोग करता है। **Settings → Gateway**
+में **Full** या **Limited** पहुँच दिखाई जाती है। सीमित कनेक्शन के लिए,
+`wss://` या Tailscale Serve कॉन्फ़िगर करें, Control UI में या
+`openclaw qr` से नया पूर्ण-पहुँच कोड जनरेट करें, फिर उस पृष्ठ पर उसे स्कैन या पेस्ट करके दोबारा कनेक्ट करें। जो ऑपरेटर
+कम अधिकारों वाली प्रोफ़ाइल चाहते हैं, वे Control UI में **Limited access** चुन सकते हैं या
+`openclaw qr --limited` चला सकते हैं।
 
-### Presence alive बीकन
+### युग्मित Gateway प्रबंधित करें
 
-प्रमाणित नोड सत्र कनेक्ट होने के बाद, और जब ऐप पृष्ठभूमि में चला जाता है जबकि
-फ़ोरग्राउंड सेवा अभी भी कनेक्टेड होती है, Android `node.event` को
-`event: "node.presence.alive"` के साथ कॉल करता है। Gateway इसे पेयर किए गए नोड/डिवाइस मेटाडेटा पर
-`lastSeenAtMs`/`lastSeenReason` के रूप में तभी रिकॉर्ड करता है जब प्रमाणित नोड डिवाइस पहचान ज्ञात हो।
+ऐप अपने साथ युग्मित प्रत्येक Gateway की रजिस्ट्री रखता है, ताकि आप ऑपरेटर सत्रों को कनेक्ट रख सकें और दोबारा युग्मित किए बिना फ़ोकस बदल सकें:
 
-ऐप बीकन को सफलतापूर्वक रिकॉर्ड किया गया तभी मानता है जब Gateway प्रतिक्रिया में
-`handled: true` शामिल हो। पुराने Gateways `node.event` को `{ "ok": true }` के साथ स्वीकार कर सकते हैं; वह प्रतिक्रिया
-संगत है लेकिन टिकाऊ last-seen अपडेट के रूप में नहीं गिनी जाती।
+- **Settings → Gateway** में युग्मित Gateway सूचीबद्ध होते हैं और फ़ोकस किए गए Gateway को चिह्नित किया जाता है। किसी प्रविष्टि पर टैप करके उस पर फ़ोकस करें; अन्य सक्षम ऑपरेटर सत्र कनेक्ट रहते हैं।
+- प्रत्येक स्विच नियंत्रित करता है कि ऐप के फ़ोरग्राउंड में रहने के दौरान वह गैर-फ़ोकस Gateway कनेक्ट रहे या नहीं। फ़ोकस किया गया Gateway सक्षम रहता है और फ़ोन के Node कनेक्शन तथा डिवाइस क्षमताओं का स्वामी होता है।
+- एक से अधिक Gateway युग्मित होने पर **Connect** टैब एक त्वरित स्विचर दिखाता है।
+- क्रेडेंशियल, डिवाइस टोकन, TLS ट्रस्ट, चैट इतिहास और कतारबद्ध ऑफ़लाइन संदेश प्रत्येक Gateway के लिए अलग-अलग संग्रहीत होते हैं। फ़ोकस बदलने से Gateway के बीच स्थिति कभी नहीं मिलती, और ऑफ़लाइन रहते हुए कतारबद्ध संदेश केवल उसी Gateway को भेजे जाते हैं जिसके लिए वे लिखे गए थे।
+- **Forget** किसी Gateway की रजिस्ट्री प्रविष्टि को उसके क्रेडेंशियल, डिवाइस टोकन, TLS पिन और कैश किए गए चैट सहित हटा देता है।
 
-### 4) पेयरिंग अनुमोदित करें (CLI)
+### उपस्थिति सक्रियता बीकन
+
+प्रमाणीकृत Node सत्र कनेक्ट होने के बाद, और फ़ोरग्राउंड सेवा के कनेक्ट रहते हुए ऐप के बैकग्राउंड में जाने पर, Android `event: "node.presence.alive"` के साथ `node.event` को कॉल करता है। प्रमाणीकृत Node डिवाइस पहचान ज्ञात होने के बाद ही Gateway इसे युग्मित Node/डिवाइस मेटाडेटा पर `lastSeenAtMs`/`lastSeenReason` के रूप में दर्ज करता है।
+
+ऐप बीकन को सफलतापूर्वक दर्ज हुआ केवल तभी मानता है, जब Gateway प्रतिक्रिया में `handled: true` शामिल हो। पुराने Gateway `{ "ok": true }` के साथ `node.event` को स्वीकार कर सकते हैं; वह प्रतिक्रिया संगत है, लेकिन उसे स्थायी अंतिम-दर्शन अपडेट नहीं माना जाता।
+
+### 4. युग्मन स्वीकृत करें (CLI)
 
 Gateway मशीन पर:
 
@@ -136,10 +277,9 @@ openclaw devices approve <requestId>
 openclaw devices reject <requestId>
 ```
 
-पेयरिंग विवरण: [पेयरिंग](/hi/channels/pairing)।
+युग्मन विवरण: [युग्मन](/hi/channels/pairing)।
 
-वैकल्पिक: यदि Android नोड हमेशा कड़े नियंत्रण वाले subnet से कनेक्ट होता है,
-तो आप स्पष्ट CIDR या exact IPs के साथ पहली बार नोड auto-approval में opt in कर सकते हैं:
+वैकल्पिक: यदि Android Node हमेशा कड़ाई से नियंत्रित सबनेट से कनेक्ट होता है, तो आप स्पष्ट CIDR या सटीक IP के साथ पहली बार के Node स्वचालित-अनुमोदन को सक्षम कर सकते हैं:
 
 ```json5
 {
@@ -153,51 +293,37 @@ openclaw devices reject <requestId>
 }
 ```
 
-यह डिफ़ॉल्ट रूप से अक्षम है। यह केवल नए `role: node` पेयरिंग पर लागू होता है, जहाँ
-कोई requested scopes नहीं हैं। Operator/browser पेयरिंग और कोई भी role, scope, metadata, या
-public-key बदलाव अब भी मैनुअल approval मांगता है।
+यह डिफ़ॉल्ट रूप से अक्षम है। यह बिना अनुरोधित स्कोप वाले नए `role: node` युग्मन पर ही लागू होता है। ऑपरेटर/ब्राउज़र युग्मन और भूमिका, स्कोप, मेटाडेटा या सार्वजनिक-कुंजी में किसी भी बदलाव के लिए अब भी मैन्युअल अनुमोदन आवश्यक है।
 
-### 5) सत्यापित करें कि नोड कनेक्टेड है
+### 5. सत्यापित करें कि Node कनेक्ट है
 
-- नोड स्थिति के माध्यम से:
+```bash
+openclaw nodes status
+openclaw gateway call node.list --params "{}"
+```
 
-  ```bash
-  openclaw nodes status
-  ```
-
-- Gateway के माध्यम से:
-
-  ```bash
-  openclaw gateway call node.list --params "{}"
-  ```
-
-### 6) चैट + इतिहास
+### 6. चैट + इतिहास
 
 Android चैट टैब सत्र चयन का समर्थन करता है (डिफ़ॉल्ट `main`, साथ ही अन्य मौजूदा सत्र):
 
-- इतिहास: `chat.history` (display-normalized; inline directive tags को
-  visible text से हटाया जाता है, plain-text tool-call XML payloads (जिसमें
-  `<tool_call>...</tool_call>`, `<function_call>...</function_call>`,
-  `<tool_calls>...</tool_calls>`, `<function_calls>...</function_calls>`, और
-  truncated tool-call blocks शामिल हैं) और leaked ASCII/full-width model control tokens
-  हटाए जाते हैं, exact `NO_REPLY` /
-  `no_reply` जैसी pure silent-token assistant rows छोड़ी जाती हैं, और oversized rows को placeholders से बदला जा सकता है)
+- इतिहास: `chat.history` (प्रदर्शन के लिए सामान्यीकृत — इनलाइन डायरेक्टिव टैग, प्लेन-टेक्स्ट टूल-कॉल XML पेलोड (`<tool_call>`, `<function_call>`, `<tool_calls>`, `<function_calls>` और उनके संक्षिप्त किए गए प्रकार), तथा लीक हुए ASCII/पूर्ण-चौड़ाई मॉडल नियंत्रण टोकन हटा दिए जाते हैं; सटीक `NO_REPLY` / `no_reply` जैसी मूक-टोकन सहायक पंक्तियाँ छोड़ दी जाती हैं; बहुत बड़ी पंक्तियों को प्लेसहोल्डर से बदला जा सकता है)
 - भेजें: `chat.send`
-- Push updates (best-effort): `chat.subscribe` → `event:"chat"`
+- स्थायी प्रेषण: प्रत्येक प्रेषण (टेक्स्ट, चुनी हुई छवियाँ और वॉइस नोट) किसी भी नेटवर्क प्रयास से पहले प्रत्येक Gateway के लिए डिवाइस पर मौजूद आउटबॉक्स में दर्ज किया जाता है, इसलिए ऐप बंद होने पर सबमिट किया गया इनपुट नष्ट नहीं हो सकता। ऑफ़लाइन रहते हुए कतारबद्ध प्रेषण दोबारा कनेक्ट होने पर स्थिर आइडेम्पोटेंसी कुंजियों के साथ क्रम से डिलीवर होते हैं, और कोई प्रेषण केवल तभी हटाया जाता है जब वह टर्न कैनोनिकल `chat.history` में दिखाई दे — केवल अभिस्वीकृति को डिलीवरी का प्रमाण नहीं माना जाता। अस्पष्ट परिणाम (अभिस्वीकृति खोना, प्रेषण के बीच ऐप बंद होना, ट्रांसक्रिप्ट लिखे जाने से पहले Gateway पुनः आरंभ होना) स्वचालित रूप से दोबारा भेजने के बजाय स्पष्ट **Retry**/**Delete** वाली दृश्यमान पंक्तियों के रूप में दिखते हैं। स्लैश कमांड दोबारा कनेक्ट होने के बाद कभी स्वचालित रूप से पुनः नहीं चलाए जाते; उन्हें स्पष्ट पुनः प्रयास के लिए रोक दिया जाता है। कतार सीमित है (प्रत्येक Gateway के लिए 50 संदेश और 48 MB अटैचमेंट बाइट), और न भेजी गई पंक्तियाँ 48 घंटे बाद समाप्त हो जाती हैं। कभी सबमिट न किए गए कंपोज़र ड्राफ़्ट प्रक्रिया-स्थायी नहीं होते।
+- पुश अपडेट (सर्वोत्तम प्रयास): `chat.subscribe` -> `event:"chat"`
+- सुनें: किसी सहायक संदेश को देर तक दबाएँ और उसे सुनने के लिए **Listen** चुनें; ऑडियो कॉन्फ़िगर की गई TTS प्रदाता शृंखला के साथ Gateway `tts.speak` के माध्यम से रेंडर होता है, और Gateway द्वारा ऑडियो रेंडर न कर पाने पर डिवाइस की सिस्टम TTS का उपयोग किया जाता है। सत्र बदलने, नई चैट शुरू करने, ऐप के बैकग्राउंड में जाने या चैट बंद होने पर प्लेबैक रुक जाता है।
 
-### 7) Canvas + कैमरा
+### 7. कैनवास + कैमरा
 
-#### Gateway Canvas Host (वेब सामग्री के लिए अनुशंसित)
+#### Gateway कैनवास होस्ट (वेब सामग्री के लिए अनुशंसित)
 
-यदि आप चाहते हैं कि नोड वास्तविक HTML/CSS/JS दिखाए जिसे एजेंट डिस्क पर संपादित कर सके, तो नोड को Gateway canvas host की ओर इंगित करें।
+Node को वास्तविक HTML/CSS/JS दिखाने के लिए, जिसे एजेंट डिस्क पर संपादित कर सके, Node को Gateway कैनवास होस्ट पर निर्देशित करें।
 
 <Note>
-नोड Gateway HTTP सर्वर से canvas लोड करते हैं (`gateway.port` जैसा ही पोर्ट, डिफ़ॉल्ट `18789`)।
+Node, Gateway HTTP सर्वर से कैनवास लोड करते हैं (`gateway.port` के समान पोर्ट, डिफ़ॉल्ट `18789`)।
 </Note>
 
 1. Gateway होस्ट पर `~/.openclaw/workspace/canvas/index.html` बनाएँ।
-
-2. नोड को उस पर नेविगेट करें (LAN):
+2. Node को वहाँ ले जाएँ (LAN):
 
 ```bash
 openclaw nodes invoke --node "<Android Node>" --command canvas.navigate --params '{"url":"http://<gateway-hostname>.local:18789/__openclaw__/canvas/"}'
@@ -205,32 +331,34 @@ openclaw nodes invoke --node "<Android Node>" --command canvas.navigate --params
 
 Tailnet (वैकल्पिक): यदि दोनों डिवाइस Tailscale पर हैं, तो `.local` के बजाय MagicDNS नाम या tailnet IP का उपयोग करें, जैसे `http://<gateway-magicdns>:18789/__openclaw__/canvas/`।
 
-यह सर्वर HTML में live-reload client इंजेक्ट करता है और फ़ाइल बदलावों पर reload करता है।
-Gateway `/__openclaw__/a2ui/` भी serve करता है, लेकिन Android ऐप remote A2UI pages को render-only मानता है। Action-capable A2UI commands messages लागू करने से पहले bundled app-owned A2UI page का उपयोग करते हैं।
+यह सर्वर HTML में लाइव-रीलोड क्लाइंट इंजेक्ट करता है और फ़ाइल बदलने पर पुनः लोड करता है। Gateway `/__openclaw__/a2ui/` भी सर्व करता है, लेकिन Android ऐप दूरस्थ A2UI पृष्ठों को केवल रेंडर करने योग्य मानता है। क्रिया-सक्षम A2UI कमांड ऐप के स्वामित्व वाले बंडल किए गए A2UI पृष्ठ का उपयोग करते हैं।
 
-Canvas commands (केवल foreground):
+कैनवास कमांड (केवल फ़ोरग्राउंड में):
 
-- `canvas.eval`, `canvas.snapshot`, `canvas.navigate` (डिफ़ॉल्ट scaffold पर लौटने के लिए `{"url":""}` या `{"url":"/"}` का उपयोग करें)। `canvas.snapshot` `{ format, base64 }` लौटाता है (डिफ़ॉल्ट `format="jpeg"`)।
-- A2UI: `canvas.a2ui.push`, `canvas.a2ui.reset` (`canvas.a2ui.pushJSONL` legacy alias)। ये commands action-capable rendering के लिए bundled app-owned A2UI page का उपयोग करते हैं।
+- `canvas.eval`, `canvas.snapshot`, `canvas.navigate` (डिफ़ॉल्ट स्कैफ़ोल्ड पर लौटने के लिए `{"url":""}` या `{"url":"/"}` का उपयोग करें)। `canvas.snapshot`, `{ format, base64 }` लौटाता है (डिफ़ॉल्ट `format="jpeg"`)।
+- A2UI: `canvas.a2ui.push`, `canvas.a2ui.reset` (`canvas.a2ui.pushJSONL` पुराना उपनाम)। ये क्रिया-सक्षम रेंडरिंग के लिए ऐप के स्वामित्व वाले बंडल किए गए A2UI पृष्ठ का उपयोग करते हैं।
 
-कैमरा commands (केवल foreground; permission-gated):
+कैमरा कमांड (केवल फ़ोरग्राउंड में; अनुमति-नियंत्रित): `camera.snap` (jpg), `camera.clip` (mp4)। पैरामीटर और CLI सहायकों के लिए [कैमरा Node](/hi/nodes/camera) देखें।
 
-- `camera.snap` (jpg)
-- `camera.clip` (mp4)
+### 8. आवाज़ + विस्तारित Android कमांड सतह
 
-पैरामीटर और CLI helpers के लिए [Camera node](/hi/nodes/camera) देखें।
-
-### 8) वॉइस + विस्तृत Android command surface
-
-- वॉइस टैब: Android में दो explicit capture modes हैं। **Mic** एक मैनुअल वॉइस-टैब सत्र है जो प्रत्येक pause को chat turn के रूप में भेजता है और ऐप के foreground छोड़ने या उपयोगकर्ता के वॉइस टैब छोड़ने पर रुक जाता है। **Talk** निरंतर Talk Mode है और toggled off होने या नोड disconnect होने तक सुनता रहता है।
-- Talk Mode capture शुरू होने से पहले मौजूदा foreground service को `connectedDevice` से `connectedDevice|microphone` में promote करता है, फिर Talk Mode रुकने पर उसे demote करता है। नोड सेवा `CHANGE_NETWORK_STATE` के साथ `FOREGROUND_SERVICE_CONNECTED_DEVICE` घोषित करती है; Android 14+ को `FOREGROUND_SERVICE_MICROPHONE` घोषणा, `RECORD_AUDIO` runtime grant, और runtime पर microphone service type भी चाहिए।
-- डिफ़ॉल्ट रूप से, Android Talk native speech recognition, Gateway chat, और configured gateway Talk provider के माध्यम से `talk.speak` का उपयोग करता है। Local system TTS का उपयोग केवल तब होता है जब `talk.speak` उपलब्ध नहीं होता।
-- Android Talk realtime Gateway relay का उपयोग केवल तब करता है जब `talk.realtime.mode` `realtime` हो और `talk.realtime.transport` `gateway-relay` हो।
-- वॉइस wake Android UX/runtime में अक्षम रहता है।
-- अतिरिक्त Android command families (उपलब्धता डिवाइस, permissions, और user settings पर निर्भर करती है):
+- Android का शेल नेविगेशन **Home**, **Chat** और **Settings** है। ध्वनि इनपुट
+  चैट कंपोज़र में होता है; अलग Voice टैब नहीं है।
+- डिवाइस पर वाक् पहचान से ड्राफ़्ट में ट्रांसक्रिप्ट डालने के लिए कंपोज़र माइक्रोफ़ोन पर टैप करें।
+  वॉइस-नोट अटैचमेंट रिकॉर्ड करने के लिए माइक्रोफ़ोन को देर तक दबाएँ।
+  प्रयास को चुपचाप छोड़ने के बजाय UI अनुपलब्ध पहचान, अनुपस्थित अनुमति,
+  व्यस्तता/नेटवर्क विफलताओं और वाक् न मिलने के परिणामों की सूचना देता है।
+- चैट वेवफ़ॉर्म से निरंतर **Talk** शुरू करें। डिक्टेशन, वॉइस-नोट
+  रिकॉर्डिंग और Talk परस्पर अनन्य माइक्रोफ़ोन पथ हैं।
+- Talk Mode कैप्चर शुरू होने से पहले मौजूदा फ़ोरग्राउंड सेवा को `connectedDevice` से `connectedDevice|microphone` में पदोन्नत करता है, फिर Talk Mode रुकने पर उसे अवनत कर देता है। Node सेवा `CHANGE_NETWORK_STATE` के साथ `FOREGROUND_SERVICE_CONNECTED_DEVICE` घोषित करती है; Android 14+ के लिए `FOREGROUND_SERVICE_MICROPHONE` घोषणा, `RECORD_AUDIO` रनटाइम अनुदान और रनटाइम पर माइक्रोफ़ोन सेवा प्रकार भी आवश्यक हैं।
+- डिफ़ॉल्ट रूप से Android Talk, कॉन्फ़िगर किए गए Gateway Talk प्रदाता के माध्यम से मूल वाक् पहचान, Gateway चैट और `talk.speak` का उपयोग करता है। स्थानीय सिस्टम TTS का उपयोग केवल तब किया जाता है जब `talk.speak` अनुपलब्ध हो।
+- Android Talk रीयलटाइम Gateway रिले का उपयोग केवल तब करता है जब `talk.realtime.mode`, `realtime` हो और `talk.realtime.transport`, `gateway-relay` हो।
+- Android `voiceWake` क्षमता का विज्ञापन नहीं करता। ध्वनि इनपुट के लिए चैट डिक्टेशन,
+  वॉइस नोट या Talk का उपयोग करें।
+- अतिरिक्त Android कमांड परिवार (उपलब्धता डिवाइस, अनुमतियों और उपयोगकर्ता सेटिंग्स पर निर्भर करती है):
   - `device.status`, `device.info`, `device.permissions`, `device.health`
-  - `device.apps` केवल तब जब **Settings > Phone Capabilities > Installed Apps** सक्षम हो; यह डिफ़ॉल्ट रूप से launcher-visible apps सूचीबद्ध करता है।
-  - `notifications.list`, `notifications.actions` (नीचे [नोटिफ़िकेशन फ़ॉरवर्डिंग](#notification-forwarding) देखें)
+  - `device.apps` केवल तब, जब **Settings > Phone Capabilities > Installed Apps** सक्षम हो; यह डिफ़ॉल्ट रूप से लॉन्चर में दिखाई देने वाले ऐप सूचीबद्ध करता है (पूरी सूची के लिए `includeNonLaunchable` पास करें)।
+  - `notifications.list`, `notifications.actions` (नीचे [सूचना अग्रेषण](#notification-forwarding) देखें)
   - `photos.latest`
   - `contacts.search`, `contacts.add`
   - `calendar.events`, `calendar.add`
@@ -238,57 +366,67 @@ Canvas commands (केवल foreground):
   - `sms.search`
   - `motion.activity`, `motion.pedometer`
 
-## सहायक entrypoints
+### 9. कार्यस्थान फ़ाइलें (केवल-पढ़ने योग्य)
 
-Android system assistant trigger (Google
-Assistant) से OpenClaw launch करने का समर्थन करता है। कॉन्फ़िगर होने पर, home button दबाए रखना या "Hey Google, ask
-OpenClaw..." कहना ऐप खोलता है और prompt को chat composer में सौंप देता है।
+Home अवलोकन में एक **Files** कार्ड शामिल है, जो केवल-पढ़ने योग्य `agents.workspace.list` / `agents.workspace.get` Gateway RPC के माध्यम से सक्रिय एजेंट के कार्यस्थान को ब्राउज़ करता है: डायरेक्टरी में अंदर जाना, टेक्स्ट और छवि पूर्वावलोकन तथा Android शेयर शीट के माध्यम से निर्यात। कोई लेखन क्रिया नहीं है, और पूर्वावलोकन का आकार Gateway द्वारा सीमित किया जाता है।
 
-यह ऐप manifest में घोषित Android **App Actions** metadata का उपयोग करता है। Gateway side पर कोई
-अतिरिक्त configuration आवश्यक नहीं है -- assistant intent पूरी तरह Android ऐप द्वारा
-handled होता है और सामान्य chat message के रूप में forward किया जाता है।
+## कमांड अनुमोदनों की समीक्षा करें
 
-<Note>
-App Actions availability डिवाइस, Google Play Services version,
-और इस बात पर निर्भर करती है कि उपयोगकर्ता ने OpenClaw को default assistant app के रूप में set किया है या नहीं।
-</Note>
+`operator.admin` वाला ऑपरेटर कनेक्शन, या Gateway द्वारा स्पष्ट रूप से लक्षित
+युग्मित `operator.approvals` कनेक्शन, **Settings -> Approvals** के अंतर्गत
+लंबित निष्पादन अनुरोधों की समीक्षा कर सकता है। ऐप अपने बटन सक्षम करने से पहले
+Gateway का सैनिटाइज़ किया गया अनुमोदन रिकॉर्ड लोड करता है, उस अनुरोध द्वारा दिए गए
+सभी सुरक्षा चेतावनी और सटीक निर्णय दिखाता है, तथा अनुमोदन ID और स्वामी प्रकार
+Gateway को वापस सबमिट करता है।
 
-## नोटिफ़िकेशन फ़ॉरवर्डिंग
+अनुमोदन स्थिति Control UI और समर्थित चैट सतहों के साथ साझा की जाती है।
+पहला प्रतिबद्ध उत्तर मान्य होता है; किसी अन्य सतह द्वारा पहले उत्तर दिए जाने पर भी Android
+वही कैनोनिकल परिणाम दिखाता है। यदि समाधान प्रतिक्रिया खो जाती है या Gateway
+डिस्कनेक्ट हो जाता है, तो ऐप कार्रवाई को लॉक रखता है और दूसरा निर्णय देने से पहले
+अनुमोदन को दोबारा पढ़ता है।
 
-Android डिवाइस notifications को events के रूप में Gateway को forward कर सकता है। कई controls आपको scope करने देते हैं कि कौन-से notifications forward हों और कब।
+एकीकृत अनुमोदन विधियों से पुराने Gateway, जारी किए गए
+निष्पादन-विशिष्ट तरीकों पर वापस चले जाते हैं। लंबित समीक्षा फिर भी काम करती है, लेकिन सुरक्षित रखी गई टर्मिनल स्थिति
+और अधिक समृद्ध क्रॉस-सतह परिणाम के लिए अपडेट किया हुआ Gateway आवश्यक है।
 
-| कुंजी                            | प्रकार         | विवरण                                                                                           |
-| -------------------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
-| `notifications.allowPackages`    | string[]       | केवल इन package names से notifications forward करें। यदि set है, तो अन्य सभी packages ignored होते हैं। |
-| `notifications.denyPackages`     | string[]       | इन package names से notifications कभी forward न करें। `allowPackages` के बाद applied होता है। |
-| `notifications.quietHours.start` | string (HH:mm) | quiet hours window की शुरुआत (local device time)। इस window के दौरान notifications suppressed होते हैं। |
-| `notifications.quietHours.end`   | string (HH:mm) | quiet hours window का अंत।                                                                      |
-| `notifications.rateLimit`        | number         | प्रति package प्रति minute अधिकतम forwarded notifications। अतिरिक्त notifications dropped होते हैं। |
+## एजेंट के प्रश्नों का उत्तर दें
 
-notification picker forwarded notification events के लिए safer behavior भी उपयोग करता है, जिससे sensitive system notifications की accidental forwarding रुकती है।
+चैट, `operator.questions` (या `operator.admin`) वाले ऑपरेटर कनेक्शन के लिए
+लंबित Gateway प्रश्नों को मूल कार्ड के रूप में दिखाता है। कार्ड एकल और
+बहु-चयन विकल्पों, विकल्प विवरणों, मुक्त-टेक्स्ट **Other** उत्तरों और
+समाप्ति उलटी गिनती का समर्थन करते हैं। दोबारा कनेक्ट होने पर लंबित प्रश्न Gateway से पुनः लोड होते हैं। जब यह डिवाइस उत्तर देता है, कोई अन्य सतह पहले उत्तर देती है, या प्रश्न
+समाप्त अथवा रद्द हो जाता है, तो कार्ड लॉक हो जाता है।
 
-उदाहरण कॉन्फ़िगरेशन:
+## सहायक प्रवेश-बिंदु
 
-```json5
-{
-  notifications: {
-    allowPackages: ["com.slack", "com.whatsapp"],
-    denyPackages: ["com.android.systemui"],
-    quietHours: {
-      start: "22:00",
-      end: "07:00",
-    },
-    rateLimit: 5,
-  },
-}
-```
+Android सिस्टम सहायक ट्रिगर (Google Assistant) से OpenClaw लॉन्च करने का समर्थन करता है। होम बटन को दबाए रखने पर (या किसी अन्य `ACTION_ASSIST` ट्रिगर से) ऐप खुलता है; "Hey Google, ask OpenClaw `<prompt>`" कहने पर ऐप का घोषित App Actions क्वेरी पैटर्न मेल खाता है और प्रॉम्प्ट को स्वचालित रूप से भेजे बिना चैट कंपोज़र में डाल देता है।
+
+यह ऐप मेनिफ़ेस्ट में घोषित Android **App Actions** (`shortcuts.xml` क्षमता) का उपयोग करता है। Gateway की ओर किसी कॉन्फ़िगरेशन की आवश्यकता नहीं है — सहायक इंटेंट पूरी तरह Android ऐप द्वारा संभाला जाता है।
 
 <Note>
-सूचना फ़ॉरवर्डिंग के लिए Android Notification Listener अनुमति आवश्यक है। सेटअप के दौरान ऐप इसके लिए संकेत देता है।
+App Actions की उपलब्धता डिवाइस, Google Play Services संस्करण और इस बात पर निर्भर करती है कि उपयोगकर्ता ने OpenClaw को डिफ़ॉल्ट सहायक ऐप के रूप में सेट किया है या नहीं।
 </Note>
+
+## सूचना अग्रेषण
+
+Android डिवाइस सूचनाओं को `node.event` आइटम के रूप में Gateway को अग्रेषित कर सकता है। इसे ऐप की Settings शीट में **डिवाइस पर** कॉन्फ़िगर किया जाता है — Gateway/`openclaw.json` कॉन्फ़िगरेशन में नहीं।
+
+| सेटिंग                     | विवरण                                                                                                                                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| सूचना ईवेंट अग्रेषित करें | मुख्य टॉगल। डिफ़ॉल्ट रूप से बंद; पहले Notification Listener Access प्रदान करना आवश्यक है।                                                                                                              |
+| पैकेज फ़िल्टर              | **अनुमति-सूची** (केवल सूचीबद्ध पैकेज ID अग्रेषित किए जाते हैं) या **अवरोध-सूची** (डिफ़ॉल्ट: सूचीबद्ध ID को छोड़कर सभी पैकेज)। अग्रेषण लूप रोकने के लिए अवरोध-सूची मोड में OpenClaw का अपना पैकेज हमेशा बाहर रखा जाता है। |
+| शांत समय                 | स्थानीय HH:mm आरंभ/समाप्ति अवधि, जिसमें अग्रेषण रोक दिया जाता है। डिफ़ॉल्ट रूप से अक्षम; सक्षम होने पर डिफ़ॉल्ट अवधि `22:00`-`07:00` होती है।                                                                                |
+| अधिकतम ईवेंट / मिनट         | अग्रेषित सूचनाओं पर प्रति-डिवाइस दर सीमा। डिफ़ॉल्ट 20।                                                                                                                                          |
+| रूट सत्र कुंजी           | वैकल्पिक। अग्रेषित सूचना ईवेंट को डिवाइस के डिफ़ॉल्ट सूचना रूट के बजाय किसी विशिष्ट सत्र में निर्धारित करती है।                                                                               |
+
+<Note>
+सूचना अग्रेषण के लिए Android Notification Listener अनुमति आवश्यक है। ऐप सेटअप के दौरान इसके लिए संकेत देता है।
+</Note>
+
+WhatsApp, WhatsApp Business, Telegram, Telegram X, Discord और Signal की सूचनाएँ हमेशा बाहर रखी जाती हैं। उनके संदेश पहले से ही मूल OpenClaw चैनल सत्रों के स्वामित्व में होते हैं; Android सूचना को अलग Node ईवेंट के रूप में अग्रेषित करने से उत्तर गलत वार्तालाप के माध्यम से रूट हो सकता है।
 
 ## संबंधित
 
 - [iOS ऐप](/hi/platforms/ios)
-- [नोड्स](/hi/nodes)
-- [Android नोड समस्या निवारण](/hi/nodes/troubleshooting)
+- [Nodes](/hi/nodes)
+- [Android Node समस्या निवारण](/hi/nodes/troubleshooting)

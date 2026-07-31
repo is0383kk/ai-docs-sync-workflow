@@ -1,35 +1,35 @@
 ---
 read_when:
-    - आपको शीर्ष ओपन सोर्स LLMs के लिए एक ही API कुंजी चाहिए
-    - आप OpenClaw में DeepInfra के API के माध्यम से मॉडल चलाना चाहते हैं
-summary: OpenClaw में सबसे लोकप्रिय ओपन सोर्स और फ्रंटियर मॉडल तक पहुंचने के लिए DeepInfra के unified API का उपयोग करें
+    - आप शीर्ष ओपन सोर्स LLM के लिए एक ही API कुंजी चाहते हैं
+    - आप OpenClaw में DeepInfra के API के ज़रिए मॉडल चलाना चाहते हैं
+summary: OpenClaw में सबसे लोकप्रिय ओपन-सोर्स और अग्रणी मॉडल तक पहुँचने के लिए DeepInfra की एकीकृत API का उपयोग करें
 title: DeepInfra
 x-i18n:
-    generated_at: "2026-06-28T23:57:48Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:49:33Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 059a556c24d2de2c8c5290b54c78fbc7451dc534238bfc4c725dcfbbd9a2d17f
+    source_hash: a63bdd4ffd2189cde50f0ee601fd7ee32ca86c943a9899072f0c140823608004
     source_path: providers/deepinfra.md
     workflow: 16
 ---
 
-DeepInfra एक **एकीकृत API** प्रदान करता है, जो अनुरोधों को एक ही endpoint और API key के पीछे सबसे लोकप्रिय open source और अग्रणी मॉडल तक रूट करता है। यह OpenAI-संगत है, इसलिए अधिकांश OpenAI SDKs base URL बदलने से काम करते हैं।
+DeepInfra लोकप्रिय ओपन सोर्स और फ़्रंटियर मॉडल के अनुरोधों को एक
+OpenAI-संगत एंडपॉइंट और API कुंजी के पीछे रूट करता है। अधिकांश OpenAI SDK
+बेस URL बदलने पर इसके साथ काम करते हैं।
 
 ## Plugin इंस्टॉल करें
-
-आधिकारिक Plugin इंस्टॉल करें, फिर Gateway रीस्टार्ट करें:
 
 ```bash
 openclaw plugins install @openclaw/deepinfra-provider
 openclaw gateway restart
 ```
 
-## API key प्राप्त करना
+## API कुंजी प्राप्त करें
 
-1. [https://deepinfra.com/](https://deepinfra.com/) पर जाएं
-2. साइन इन करें या खाता बनाएं
-3. Dashboard / Keys पर जाएं और नई API key जनरेट करें या स्वतः बनाई गई key का उपयोग करें
+1. [deepinfra.com](https://deepinfra.com/) पर साइन इन करें
+2. Dashboard / Keys पर जाएँ और एक कुंजी जनरेट करें, या अपने-आप बनाई गई कुंजी का उपयोग करें
 
 ## CLI सेटअप
 
@@ -37,13 +37,13 @@ openclaw gateway restart
 openclaw onboard --deepinfra-api-key <key>
 ```
 
-या environment variable सेट करें:
+या एनवायरनमेंट वेरिएबल सेट करें:
 
 ```bash
 export DEEPINFRA_API_KEY="<your-deepinfra-api-key>" # pragma: allowlist secret
 ```
 
-## Config स्निपेट
+## कॉन्फ़िगरेशन स्निपेट
 
 ```json5
 {
@@ -56,46 +56,55 @@ export DEEPINFRA_API_KEY="<your-deepinfra-api-key>" # pragma: allowlist secret
 }
 ```
 
-## समर्थित OpenClaw सतहें
+## समर्थित सरफ़ेस
 
-Plugin उन सभी DeepInfra सतहों को पंजीकृत करता है जो मौजूदा OpenClaw प्रदाता contracts से मेल खाती हैं। चैट, image generation, और video generation अपने model catalogues को `/v1/openai/models?sort_by=openclaw&filter=with_meta` से लाइव refresh करते हैं जब `DEEPINFRA_API_KEY` configured होता है; अन्य सतहें नीचे दिए गए curated static defaults का उपयोग करती हैं।
+`DEEPINFRA_API_KEY` कॉन्फ़िगर होने के बाद चैट, इमेज जनरेशन और वीडियो जनरेशन
+अपने मॉडल कैटलॉग को `https://api.deepinfra.com/v1/openai/models?sort_by=openclaw&filter=with_meta` से
+लाइव रीफ़्रेश करते हैं। लाइव डिस्कवरी चयन योग्य मॉडलों की सूची का विस्तार
+करती है; प्रत्येक सरफ़ेस का डिफ़ॉल्ट मॉडल नीचे दिया गया स्थिर मान ही रहता है।
+अन्य सरफ़ेस उसी लाइव कैटलॉग पर स्थानांतरित होने तक स्थिर कैटलॉग का उपयोग करते हैं।
 
-| सतह                     | डिफ़ॉल्ट मॉडल                                                                                         | OpenClaw config/tool                                     |
-| ------------------------ | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| चैट / मॉडल प्रदाता       | लाइव catalog से पहला chat-tagged entry (manifest fallback `deepseek-ai/DeepSeek-V4-Flash`)            | `agents.defaults.model`                                  |
-| Image generation/editing | लाइव catalog से पहला `image-gen`-tagged entry (static fallback `black-forest-labs/FLUX-1-schnell`)    | `image_generate`, `agents.defaults.imageGenerationModel` |
-| मीडिया समझ              | images के लिए `moonshotai/Kimi-K2.5`                                                                 | incoming image समझ                                      |
-| Speech-to-text           | `openai/whisper-large-v3-turbo`                                                                       | incoming audio transcription                             |
-| Text-to-speech           | `hexgrad/Kokoro-82M`                                                                                  | `messages.tts.provider: "deepinfra"`                     |
-| Video generation         | लाइव catalog से पहला `video-gen`-tagged entry (static fallback `Pixverse/Pixverse-T2V`)               | `video_generate`, `agents.defaults.videoGenerationModel` |
-| Memory embeddings        | `BAAI/bge-m3`                                                                                         | `agents.defaults.memorySearch.provider: "deepinfra"`     |
+| सरफ़ेस                  | डिफ़ॉल्ट मॉडल                                                                  | OpenClaw कॉन्फ़िगरेशन/टूल                                  |
+| ------------------------ | ------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| चैट / मॉडल प्रोवाइडर    | `deepseek-ai/DeepSeek-V4-Flash` (लाइव कैटलॉग और चैट मॉडल जोड़ता है)           | `agents.defaults.model`                               |
+| इमेज जनरेशन/एडिटिंग | `black-forest-labs/FLUX-1-schnell` (लाइव कैटलॉग और `image-gen` मॉडल जोड़ता है) | `image_generate`, `agents.defaults.mediaModels.image` |
+| मीडिया की समझ      | इमेज के लिए `moonshotai/Kimi-K2.5`                                              | इनबाउंड इमेज की समझ                           |
+| स्पीच-टू-टेक्स्ट           | `openai/whisper-large-v3-turbo`                                                | इनबाउंड ऑडियो ट्रांसक्रिप्शन                           |
+| टेक्स्ट-टू-स्पीच           | `hexgrad/Kokoro-82M`                                                           | `tts.provider: "deepinfra"`                           |
+| वीडियो जनरेशन         | `Pixverse/Pixverse-T2V` (लाइव कैटलॉग और `video-gen` मॉडल जोड़ता है)            | `video_generate`, `agents.defaults.mediaModels.video` |
+| मेमोरी एम्बेडिंग        | `BAAI/bge-m3`                                                                  | `memory.search.provider: "deepinfra"`                 |
 
-DeepInfra reranking, classification, object-detection, और अन्य native model types भी उपलब्ध कराता है। OpenClaw में इन श्रेणियों के लिए अभी first-class provider contracts नहीं हैं, इसलिए यह Plugin उन्हें अभी पंजीकृत नहीं करता।
+DeepInfra री-रैंकिंग, वर्गीकरण, ऑब्जेक्ट डिटेक्शन और अन्य
+नेटिव मॉडल प्रकार भी उपलब्ध कराता है। OpenClaw में अभी उन श्रेणियों के लिए
+कोई प्रोवाइडर कॉन्ट्रैक्ट नहीं है, इसलिए यह Plugin उन्हें रजिस्टर नहीं करता।
 
 ## उपलब्ध मॉडल
 
-OpenClaw startup पर उपलब्ध DeepInfra models को dynamic रूप से discover करता है। उपलब्ध models की पूरी सूची देखने के लिए `/models deepinfra` का उपयोग करें।
+कुंजी कॉन्फ़िगर होने के बाद OpenClaw DeepInfra मॉडल को डायनेमिक रूप से खोजता है।
+वर्तमान सूची देखने के लिए `/models deepinfra` या
+`openclaw models list --provider deepinfra` का उपयोग करें।
 
-[DeepInfra.com](https://deepinfra.com/) पर उपलब्ध किसी भी model को `deepinfra/` prefix के साथ उपयोग किया जा सकता है:
+[deepinfra.com](https://deepinfra.com/) पर उपलब्ध कोई भी मॉडल
+`deepinfra/` प्रीफ़िक्स के साथ काम करता है:
 
-```
+```text
 deepinfra/deepseek-ai/DeepSeek-V4-Flash
 deepinfra/deepseek-ai/DeepSeek-V3.2
 deepinfra/MiniMaxAI/MiniMax-M2.5
 deepinfra/moonshotai/Kimi-K2.5
 deepinfra/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B
 deepinfra/zai-org/GLM-5.1
-...and many more
+...और कई अन्य
 ```
 
-## नोट्स
+## टिप्पणियाँ
 
-- Model refs `deepinfra/<provider>/<model>` होते हैं (जैसे, `deepinfra/Qwen/Qwen3-Max`)।
-- डिफ़ॉल्ट मॉडल: `deepinfra/deepseek-ai/DeepSeek-V4-Flash`
-- Base URL: `https://api.deepinfra.com/v1/openai`
-- Native video generation `https://api.deepinfra.com/v1/inference/<model>` का उपयोग करता है।
+- मॉडल रेफ़रेंस `deepinfra/<provider>/<model>` होते हैं (उदाहरण के लिए `deepinfra/Qwen/Qwen3-Max`)।
+- डिफ़ॉल्ट चैट मॉडल: `deepinfra/deepseek-ai/DeepSeek-V4-Flash`
+- बेस URL: `https://api.deepinfra.com/v1/openai`
+- वीडियो जनरेशन OpenAI-संगत एसिंक्रोनस एंडपॉइंट `https://api.deepinfra.com/v1/openai/videos` का उपयोग करता है (सबमिट करें, फिर पोल करें)। कॉन्फ़िगर किए गए `baseUrl` का पालन किया जाता है। `openclaw doctor --fix`, `api.deepinfra.com` पर लेगेसी `nativeBaseUrl` या `/v1/inference` मानों को अपने-आप `baseUrl` में माइग्रेट करता है; कस्टम नेटिव एंडपॉइंट को डॉक्टर सूचना के साथ हटा दिया जाता है और उनके लिए मैन्युअल रूप से कॉन्फ़िगर किया गया OpenAI-संगत `baseUrl` आवश्यक है। जब तक `baseUrl` हटाए गए `/v1/inference` सरफ़ेस को लक्षित करता है, वीडियो जनरेशन कोई अनुरोध भेजने से पहले कार्रवाई योग्य त्रुटि के साथ विफल हो जाता है।
 
 ## संबंधित
 
-- [Model providers](/hi/concepts/model-providers)
-- [All providers](/hi/providers/index)
+- [मॉडल प्रोवाइडर](/hi/concepts/model-providers)
+- [सभी प्रोवाइडर](/hi/providers/index)

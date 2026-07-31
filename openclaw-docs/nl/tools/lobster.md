@@ -3,58 +3,59 @@ read_when:
     - Je wilt deterministische workflows met meerdere stappen en expliciete goedkeuringen
     - Je moet een workflow hervatten zonder eerdere stappen opnieuw uit te voeren
 summary: Getypeerde workflowruntime voor OpenClaw met hervatbare goedkeuringspoorten.
-title: Kreeft
+title: Lobster
 x-i18n:
-    generated_at: "2026-07-12T09:29:46Z"
+    generated_at: "2026-07-27T06:15:51Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: eedb6577133588b726992a882a92d94f1f414e55998d0fc80644dd3a64ffc1ab
+    source_hash: 85b7900f86bfedc9d73fcc91c3d0dac37b81f7413b1e68c54dd8a797b70f79fc
     source_path: tools/lobster.md
     workflow: 16
 ---
 
-Lobster voert toolpijplijnen met meerdere stappen uit als één deterministische toolaanroep, met
+Lobster voert meerstaps toolpijplijnen uit als één deterministische toolaanroep, met
 expliciete goedkeuringscontrolepunten en hervattingstokens. Het bevindt zich één laag boven
-losgekoppeld achtergrondwerk: voor het orkestreren van stromen over veel losgekoppelde taken,
+losgekoppeld achtergrondwerk: voor het orkestreren van flows over veel losgekoppelde taken,
 zie [Task Flow](/nl/automation/taskflow) (`openclaw tasks flow`); voor het
 activiteitenlogboek van taken, zie [Achtergrondtaken](/nl/automation/tasks).
 
 ## Waarom
 
-Zonder Lobster vereist een taak met meerdere stappen veel heen-en-weergaande toolaanroepen, waarbij het
+Zonder Lobster betekent een meerstapstaak veel heen-en-weergaande toolaanroepen, waarbij het
 model elke stap orkestreert. Lobster verplaatst die orkestratie naar een getypeerde
 runtime:
 
-- **Eén aanroep in plaats van veel**: één Lobster-toolaanroep retourneert een gestructureerd
+- **Eén aanroep in plaats van vele**: één Lobster-toolaanroep retourneert een gestructureerd
   resultaat voor de volledige pijplijn.
 - **Ingebouwde goedkeuringen**: neveneffecten (verzenden, plaatsen, verwijderen) stoppen de workflow
-  totdat ze expliciet zijn goedgekeurd.
+  totdat deze expliciet zijn goedgekeurd.
 - **Hervatbaar**: een gestopte workflow retourneert een token; keur goed en hervat zonder
   eerdere stappen opnieuw uit te voeren.
 
-Lobster is een kleine, beperkte DSL en geen algemene scripttaal:
-goedkeuren/hervatten is een duurzame, ingebouwde primitieve bewerking; pijplijnen zijn gegevens (eenvoudig te
-loggen, vergelijken, opnieuw afspelen en beoordelen); de kleine grammatica beperkt 'creatieve' codepaden, zodat
+Lobster is een kleine, beperkte DSL in plaats van een algemene scripttaal:
+goedkeuren/hervatten is een duurzame, ingebouwde primitieve bewerking; pijplijnen zijn data (eenvoudig te
+loggen, vergelijken, herhalen en beoordelen); de kleine grammatica beperkt "creatieve" codepaden, zodat
 validatie realistisch blijft; time-outs, uitvoerlimieten, sandboxcontroles en
-toegestane lijsten worden afgedwongen door de runtime, niet door elk script. Elke stap kan nog steeds
-elke CLI of elk script aanroepen; genereer desgewenst `.lobster`-bestanden met andere hulpmiddelen als u
-een uitgebreidere auteurstaal wilt.
+toegestane lijsten worden door de runtime afgedwongen, niet door elk script. Elke stap kan nog steeds
+elke CLI of elk script aanroepen - genereer desgewenst `.lobster`-bestanden vanuit andere tooling als je
+een rijkere auteurstaal wilt.
 
-Zonder Lobster ziet terugkerende e-mailtriage er als volgt uit:
+Zonder Lobster ziet terugkerende e-mailtriage er zo uit:
 
 ```text
 Gebruiker: "Controleer mijn e-mail en stel antwoorden op"
 → openclaw roept gmail.list aan
 → LLM vat samen
 → Gebruiker: "stel antwoorden op voor #2 en #5"
-→ LLM stelt antwoorden op
+→ LLM stelt concepten op
 → Gebruiker: "verzend #2"
 → openclaw roept gmail.send aan
-(dagelijks herhalen, zonder geheugen van wat is getrieerd)
+(dagelijks herhalen, zonder geheugen van wat is getriageerd)
 ```
 
-Met Lobster bestaat dezelfde taak uit één aanroep die stopt voor goedkeuring en daarna wordt hervat:
+Met Lobster is dezelfde taak één aanroep die stopt voor goedkeuring en daarna wordt hervat:
 
 ```json
 { "action": "run", "pipeline": "email.triage --limit 20", "timeoutMs": 30000 }
@@ -64,10 +65,10 @@ Met Lobster bestaat dezelfde taak uit één aanroep die stopt voor goedkeuring e
 {
   "ok": true,
   "status": "needs_approval",
-  "output": [{ "summary": "5 need replies, 2 need action" }],
+  "output": [{ "summary": "5 vereisen een antwoord, 2 vereisen actie" }],
   "requiresApproval": {
     "type": "approval_request",
-    "prompt": "Send 2 draft replies?",
+    "prompt": "2 conceptantwoorden verzenden?",
     "items": [],
     "resumeToken": "..."
   }
@@ -76,16 +77,16 @@ Met Lobster bestaat dezelfde taak uit één aanroep die stopt voor goedkeuring e
 
 ## Hoe het werkt
 
-OpenClaw voert Lobster-workflows **in het proces** uit met het gebundelde
-pakket `@clawdbot/lobster` als ingebedde runner. Er wordt geen extern `lobster`-
-subproces gestart; de toolaanroep retourneert rechtstreeks een JSON-envelop. Als de
-pijplijn stopt voor goedkeuring, bevat de envelop een hervattingstoken (of een korte
-goedkeurings-ID), zodat u later kunt doorgaan.
+OpenClaw voert Lobster-workflows **in-process** uit met het gebundelde
+`@clawdbot/lobster`-pakket als ingebedde runner. Er wordt geen extern `lobster`-
+subproces gestart; de toolaanroep retourneert rechtstreeks een JSON-envelope. Als de
+pijplijn stopt voor goedkeuring, bevat de envelope een hervattingstoken (of een korte
+goedkeurings-ID), zodat je later kunt doorgaan.
 
 ## Inschakelen
 
 Lobster is een **optionele** Plugin-tool en is niet standaard ingeschakeld. Deze wordt
-gebundeld geleverd, dus er is geen afzonderlijke installatiestap nodig; sta de tool eenvoudig toe:
+gebundeld meegeleverd, dus er is geen afzonderlijke installatiestap vereist - sta de tool gewoon toe:
 
 ```json
 {
@@ -114,21 +115,21 @@ Of per agent:
 
 <Note>
 `alsoAllow` voegt `lobster` toe boven op het actieve toolprofiel zonder
-andere kerntools te beperken. Gebruik `tools.allow` alleen als u in plaats daarvan een beperkende modus met een
-toegestane lijst wilt.
+andere kerntools te beperken. Gebruik `tools.allow` alleen als je in plaats daarvan een beperkende
+modus met een lijst van toegestane items wilt.
 </Note>
 
-De tool is volledig uitgeschakeld voor toolcontexten in een sandbox.
+De tool is volledig uitgeschakeld voor gesandboxte toolcontexten.
 
-Als u de zelfstandige Lobster CLI nodig hebt voor ontwikkeling of externe pijplijnen
-(buiten de ingebedde Gateway-runner), installeert u deze vanuit de
-[Lobster-repository](https://github.com/openclaw/lobster) en plaatst u `lobster` in
+Als je de zelfstandige Lobster-CLI nodig hebt voor ontwikkeling of externe pijplijnen
+(buiten de ingebedde Gateway-runner), installeer deze dan vanuit de
+[Lobster-repository](https://github.com/openclaw/lobster) en plaats `lobster` in
 `PATH`.
 
-## Patroon: kleine CLI + JSON-pijpen + goedkeuringen
+## Patroon: kleine CLI + JSON-pipes + goedkeuringen
 
-Bouw kleine opdrachten die JSON gebruiken en koppel ze vervolgens tot één Lobster-aanroep.
-(Onderstaande voorbeeldopdrachten kunt u vervangen door uw eigen opdrachten.)
+Bouw kleine opdrachten die JSON gebruiken en koppel ze vervolgens aan elkaar in één Lobster-aanroep.
+(Onderstaande voorbeeldopdrachtnamen kun je vervangen door je eigen namen.)
 
 ```bash
 inbox list --json
@@ -139,12 +140,12 @@ inbox apply --json
 ```json
 {
   "action": "run",
-  "pipeline": "exec --json --shell 'inbox list --json' | exec --stdin json --shell 'inbox categorize --json' | exec --stdin json --shell 'inbox apply --json' | approve --preview-from-stdin --limit 5 --prompt 'Apply changes?'",
+  "pipeline": "exec --json --shell 'inbox list --json' | exec --stdin json --shell 'inbox categorize --json' | exec --stdin json --shell 'inbox apply --json' | approve --preview-from-stdin --limit 5 --prompt 'Wijzigingen toepassen?'",
   "timeoutMs": 30000
 }
 ```
 
-Als de pijplijn om goedkeuring vraagt, hervat u deze met het token:
+Als de pijplijn om goedkeuring vraagt, hervat je deze met het token:
 
 ```json
 {
@@ -154,7 +155,7 @@ Als de pijplijn om goedkeuring vraagt, hervat u deze met het token:
 }
 ```
 
-Voorbeeld: wijs invoeritems toe aan toolaanroepen:
+Voorbeeld: invoeritems omzetten in toolaanroepen:
 
 ```bash
 gog.gmail.search --query 'newer_than:1d' \
@@ -163,8 +164,8 @@ gog.gmail.search --query 'newer_than:1d' \
 
 ## LLM-stappen met uitsluitend JSON (llm-task)
 
-Voor een **gestructureerde LLM-stap** binnen een workflow schakelt u de optionele
-`llm-task`-Plugin-tool in en roept u deze vanuit Lobster aan:
+Voor een **gestructureerde LLM-stap** binnen een workflow schakel je de optionele
+`llm-task` Plugin-tool in en roep je deze aan vanuit Lobster:
 
 ```json
 {
@@ -184,11 +185,11 @@ Voor een **gestructureerde LLM-stap** binnen een workflow schakelt u de optionel
 }
 ```
 
-### Belangrijke beperking: ingebedde Lobster tegenover `openclaw.invoke`
+### Belangrijke beperking: ingebedde Lobster versus `openclaw.invoke`
 
-De gebundelde Lobster-Plugin voert workflows **in het proces** uit binnen de Gateway.
+De gebundelde Lobster-Plugin voert workflows **in-process** uit binnen de Gateway.
 In die ingebedde modus neemt `openclaw.invoke` niet automatisch een
-Gateway-URL-/authenticatiecontext over voor geneste OpenClaw CLI-toolaanroepen.
+Gateway-URL/authenticatiecontext over voor geneste OpenClaw-CLI-toolaanroepen.
 
 Dit betekent dat dit patroon **momenteel niet betrouwbaar is in de ingebedde runner**:
 
@@ -196,15 +197,15 @@ Dit betekent dat dit patroon **momenteel niet betrouwbaar is in de ingebedde run
 openclaw.invoke --tool llm-task --action json --args-json '{ ... }'
 ```
 
-Gebruik het onderstaande voorbeeld alleen wanneer u de **zelfstandige Lobster CLI** uitvoert in een
+Gebruik het onderstaande voorbeeld alleen als je de **zelfstandige Lobster-CLI** uitvoert in een
 omgeving waarin `openclaw.invoke` al is geconfigureerd met de juiste
 Gateway-/authenticatiecontext.
 
 ```lobster
 openclaw.invoke --tool llm-task --action json --args-json '{
-  "prompt": "Given the input email, return intent and draft.",
+  "prompt": "Geef op basis van de ingevoerde e-mail de intentie en een concept terug.",
   "thinking": "low",
-  "input": { "subject": "Hello", "body": "Can you help?" },
+  "input": { "subject": "Hallo", "body": "Kun je helpen?" },
   "schema": {
     "type": "object",
     "properties": {
@@ -217,11 +218,11 @@ openclaw.invoke --tool llm-task --action json --args-json '{
 }'
 ```
 
-Als u momenteel de ingebedde Lobster-Plugin gebruikt, geeft u de voorkeur aan:
+Als je momenteel de ingebedde Lobster-Plugin gebruikt, geef dan de voorkeur aan:
 
 - een rechtstreekse `llm-task`-toolaanroep buiten Lobster, of
-- stappen zonder `openclaw.invoke` binnen de Lobster-pijplijn totdat er een ondersteunde
-  ingebedde brug is toegevoegd.
+- niet-`openclaw.invoke`-stappen binnen de Lobster-pijplijn totdat een ondersteunde
+  ingebedde bridge is toegevoegd.
 
 Zie [LLM-taak](/nl/tools/llm-task) voor details en configuratieopties.
 
@@ -256,6 +257,25 @@ Opmerkingen:
 - `stdin: $step.stdout` en `stdin: $step.json` geven de uitvoer van een eerdere stap door.
 - `condition` (of `when`) kan stappen afhankelijk maken van `$step.approved`.
 
+### Geïnjecteerde omgevingsvariabelen
+
+Elke stapshell neemt de bovenliggende omgeving over, plus deze door Lobster geïnjecteerde
+variabelen, zodat opdrachten naar opgeloste workflowargumenten kunnen verwijzen zonder
+ruwe waarden in de opdrachttekenreeks op te nemen:
+
+- `LOBSTER_ARG_<NAME>` - één per workflowargument. De naam wordt omgezet naar hoofdletters, waarbij elke
+  reeks niet-alfanumerieke tekens wordt samengevoegd tot `_`, zodat argument `user-id`
+  `LOBSTER_ARG_USER_ID` wordt.
+- `LOBSTER_ARGS_JSON` - elk opgelost argument als één JSON-tekenreeks.
+
+Dit is de volledige geïnjecteerde set. Er zijn **geen** uitvoervariabelen per stap,
+zoals `LOBSTER_STEP_<id>_STDOUT` of `LOBSTER_STEP_<id>_JSON_<field>`; shells
+behandelen die namen als niet ingesteld, waardoor standaardwaarden van parameterexpansie de fout kunnen verbergen.
+Lees de uitvoer van een eerdere stap in plaats daarvan via stapverwijzingen - `$step.stdout`,
+`$step.json` of `$step.json.<field>` - in een waarde voor `stdin:`, `env:` of `condition:`.
+(`LOBSTER_STATE_DIR` is een afzonderlijke runtime-instelling voor de statusmap,
+geen argument per uitvoering.)
+
 ## Toolparameters
 
 ### `run`
@@ -270,7 +290,7 @@ Opmerkingen:
 }
 ```
 
-Voer een workflowbestand uit met argumenten:
+Een workflowbestand uitvoeren met argumenten:
 
 ```json
 {
@@ -280,13 +300,13 @@ Voer een workflowbestand uit met argumenten:
 }
 ```
 
-| Veld             | Standaardwaarde | Opmerkingen                                                                                                  |
-| ---------------- | --------------- | ------------------------------------------------------------------------------------------------------------ |
-| `pipeline`       | vereist         | Ingesloten pijplijntekenreeks of een pad dat eindigt op `.lobster`/`.yaml`/`.yml`/`.json` voor een workflowbestand. |
-| `cwd`            | Gateway-cwd     | Relatieve werkmap; moet binnen de werkmap van de Gateway worden omgezet (absolute paden worden geweigerd).   |
-| `timeoutMs`      | `20000`         | Breekt de uitvoering af als deze waarde wordt overschreden.                                                  |
-| `maxStdoutBytes` | `512000`        | Breekt de uitvoering af als vastgelegde standaarduitvoer of standaardfoutuitvoer deze grootte overschrijdt. |
-| `argsJson`       | -               | JSON-tekenreeks met argumenten voor een workflowbestand (genegeerd voor ingesloten pijplijnen).              |
+| Veld             | Standaard    | Opmerkingen                                                                                                  |
+| ---------------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
+| `pipeline`       | vereist      | Inline pijplijntekenreeks, of een pad dat eindigt op `.lobster`/`.yaml`/`.yml`/`.json` voor een workflowbestand. |
+| `cwd`            | Gateway-cwd | Relatieve werkmap; moet binnen de Gateway-werkmap worden opgelost (absolute paden worden geweigerd).          |
+| `timeoutMs`      | `20000`      | Breekt de uitvoering af als dit wordt overschreden.                                                          |
+| `maxStdoutBytes` | `512000`     | Breekt de uitvoering af als vastgelegde stdout of stderr deze grootte overschrijdt.                           |
+| `argsJson`       | -            | JSON-tekenreeks met argumenten voor een workflowbestand (genegeerd voor inline pijplijnen).                   |
 
 ### `resume`
 
@@ -299,83 +319,88 @@ Voer een workflowbestand uit met argumenten:
 ```
 
 `resume` accepteert `token` (het volledige hervattingstoken uit `requiresApproval`)
-of `approvalId` (de korte ID uit hetzelfde object); gebruik wat de gestopte
+of `approvalId` (de korte ID uit hetzelfde object) - gebruik wat de gestopte
 uitvoering heeft geretourneerd. `approve` is vereist.
 
 ### Beheerde Task Flow-modus
 
-Door `flowControllerId` en `flowGoal` door te geven bij `run` (of `flowId` en
-`flowExpectedRevision` bij `resume`), wordt de aanroep via de beheerde
-[Task Flow](/nl/automation/taskflow)-API van de Plugin-runtime uitgevoerd in plaats van een
-kale envelop te retourneren: OpenClaw maakt een duurzame stroomrecord aan of hervat deze, past de
-Lobster-envelop erop toe (`waiting` bij goedkeuring, `succeeded`/`failed` bij
+Door `flowControllerId` en `flowGoal` door te geven aan `run` (of `flowId` en
+`flowExpectedRevision` aan `resume`) wordt de aanroep via de beheerde
+[Task Flow](/nl/automation/taskflow)-API van de Plugin-runtime uitgevoerd, in plaats van
+een kale envelope te retourneren: OpenClaw maakt of hervat een duurzaam flowrecord, past de
+Lobster-envelope erop toe (`waiting` bij goedkeuring, `succeeded`/`failed` bij
 voltooiing) en retourneert `{ ok, envelope, flow, mutation }`. Deze modus vereist
 een gekoppelde Task Flow-runtime en is bedoeld voor Plugin-/controllercode die
-duurzame stroomstatus nodig heeft tijdens herstarts van de Gateway, niet voor normaal ad-hocgebruik door agents.
+duurzame flowstatus nodig heeft na Gateway-herstarts, niet voor normaal ad-hocgebruik door agents.
 
-## Uitvoerenvelop
+## Uitvoerenvelope
 
-Lobster retourneert een JSON-envelop met een van drie statussen:
+Lobster retourneert een JSON-envelope met een van drie statussen:
 
-- `ok` - met succes voltooid
+- `ok` - succesvol voltooid
 - `needs_approval` - gepauzeerd; `requiresApproval` bevat een `resumeToken` en een
-  korte `approvalId`, die beide de uitvoering kunnen hervatten
+  korte `approvalId`, waarmee de uitvoering beide kan worden hervat
 - `cancelled` - expliciet geweigerd of geannuleerd
 
-De tool stelt de envelop beschikbaar in zowel `content` (opgemaakte JSON) als `details`
+De tool maakt de envelope beschikbaar in zowel `content` (opgemaakte JSON) als `details`
 (ruw object).
 
 ## Goedkeuringen
 
-Als `requiresApproval` aanwezig is, bekijkt u de vraag en beslist u:
+Als `requiresApproval` aanwezig is, controleer je de prompt en beslis je:
 
-- `approve: true` - hervat en ga door met neveneffecten
-- `approve: false` - annuleer en voltooi de workflow
+- `approve: true` - hervatten en doorgaan met neveneffecten
+- `approve: false` - de workflow annuleren en afronden
 
 Gebruik `approve --preview-from-stdin --limit N` om een JSON-voorbeeld aan
-goedkeuringsverzoeken toe te voegen zonder aangepaste jq-/heredoc-koppeling. De hervattingsstatus wordt opgeslagen als
+goedkeuringsverzoeken toe te voegen zonder aangepaste jq-/heredoc-constructies. De hervattingsstatus wordt opgeslagen als
 kleine JSON-bestanden in de Lobster-statusmap (standaard `~/.lobster/state`,
-te overschrijven met `LOBSTER_STATE_DIR`); het token zelf bevat alleen een
+te overschrijven met `LOBSTER_STATE_DIR`); het token zelf codeert alleen een
 verwijzing naar die status, niet de volledige pijplijnstatus.
 
 ## OpenProse
 
-OpenProse werkt goed samen met Lobster: gebruik `/prose` om voorbereiding met meerdere agents te
-orkestreren en voer daarna een Lobster-pijplijn uit voor deterministische goedkeuringen. Als een Prose-
-programma Lobster nodig heeft, staat u de `lobster`-tool voor subagents toe via
+OpenProse werkt goed samen met Lobster: gebruik `/prose` om voorbereiding door meerdere agents
+te orkestreren en voer vervolgens een Lobster-pijplijn uit voor deterministische goedkeuringen. Als een Prose-
+programma Lobster nodig heeft, sta je de tool `lobster` toe voor subagents via
 `tools.subagents.tools`. Zie [OpenProse](/nl/prose).
 
 ## Veiligheid
 
-- **Alleen lokaal en in het proces** - workflows worden uitgevoerd binnen het Gateway-proces; de
-  Plugin zelf voert geen netwerkaanroepen uit.
-- **Geen geheimen** - Lobster beheert geen OAuth; het roept OpenClaw-tools aan die
+- **Alleen lokaal binnen hetzelfde proces** - workflows worden uitgevoerd binnen het Gateway-proces; geen
+  netwerkaanroepen vanuit de Plugin zelf.
+- **Geen geheimen** - Lobster beheert OAuth niet; het roept OpenClaw-tools aan die
   dat wel doen.
-- **Sandboxbewust** - uitgeschakeld wanneer de toolcontext zich in een sandbox bevindt.
-- **Versterkt** - time-outs en uitvoerlimieten worden door de ingebedde runner afgedwongen.
+- **Sandboxbewust** - uitgeschakeld wanneer de toolcontext in een sandbox wordt uitgevoerd.
+- **Versterkt** - time-outs en uitvoerlimieten worden afgedwongen door de ingebouwde runner.
 
 ## Probleemoplossing
 
-| Fout                                                          | Oorzaak/oplossing                                                                 |
+| Fout                                                          | Oorzaak / oplossing                                                               |
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `lobster runtime timed out`                                   | De pijplijn heeft `timeoutMs` overschreden. Verhoog de waarde of splits de pijplijn. |
-| `lobster stdout exceeded maxStdoutBytes` (of `stderr`)        | De vastgelegde uitvoer heeft de limiet overschreden. Verhoog `maxStdoutBytes` of verminder de uitvoer. |
-| `run --args-json must be valid JSON`                          | Het parseren van `argsJson` (uitvoeringen van workflowbestanden) is mislukt. Corrigeer de JSON-tekenreeks. |
-| `lobster runtime failed` (of een ander `runtime_error`-bericht) | De ingebedde runtime heeft een foutenvelop geretourneerd. Controleer de Gateway-logboeken voor details. |
+| `lobster runtime timed out`                                   | De pijplijn overschreed `timeoutMs`. Verhoog deze waarde of splits de pijplijn. |
+| `lobster stdout exceeded maxStdoutBytes` (of `stderr`)        | De vastgelegde uitvoer overschreed de limiet. Verhoog `maxStdoutBytes` of verminder de uitvoer. |
+| `run --args-json must be valid JSON`                          | `argsJson` (uitvoeringen vanuit workflowbestanden) kon niet worden geparseerd. Corrigeer de JSON-tekenreeks. |
+| `lobster runtime failed` (of een ander `runtime_error`-bericht) | De ingebouwde runtime retourneerde een foutenvelop. Controleer de Gateway-logboeken voor details. |
 
 ## Meer informatie
 
 - [Plugins](/nl/tools/plugin)
-- [Plugin-tools maken](/nl/plugins/building-plugins#registering-agent-tools)
+- [Tools voor Plugins maken](/nl/plugins/building-plugins#registering-agent-tools)
 
-## Casestudy: communityworkflows
+## Praktijkvoorbeeld: communityworkflows
 
-Een openbaar voorbeeld: een ‘tweede brein’-CLI met Lobster-pijplijnen die drie Markdown-kluizen beheren (persoonlijk, partner, gedeeld). De CLI genereert JSON voor statistieken, inboxoverzichten en scans op verouderde inhoud; Lobster koppelt deze opdrachten tot werkstromen zoals `weekly-review`, `inbox-triage`, `memory-consolidation` en `shared-task-sync`, elk met goedkeuringsmomenten. AI neemt, indien beschikbaar, beslissingen (categorisering) en valt anders terug op deterministische regels.
+Een openbaar voorbeeld: een CLI voor een 'tweede brein' met Lobster-pijplijnen die drie
+Markdown-kluizen beheren (persoonlijk, partner, gedeeld). De CLI produceert JSON voor statistieken,
+inboxoverzichten en scans op verouderde inhoud; Lobster koppelt die opdrachten tot workflows
+zoals `weekly-review`, `inbox-triage`, `memory-consolidation` en
+`shared-task-sync`, elk met goedkeuringspoorten. AI neemt waar mogelijk beslissingen
+(categorisering) en valt anders terug op deterministische regels.
 
 - Discussie: [https://x.com/plattenschieber/status/2014508656335770033](https://x.com/plattenschieber/status/2014508656335770033)
-- Repository: [https://github.com/bloomedai/brain-cli](https://github.com/bloomedai/brain-cli)
+- Repo: [https://github.com/bloomedai/brain-cli](https://github.com/bloomedai/brain-cli)
 
 ## Gerelateerd
 
 - [Automatisering](/nl/automation) - alle automatiseringsmechanismen
-- [Overzicht van hulpprogramma's](/nl/tools) - alle beschikbare agenthulpprogramma's
+- [Overzicht van tools](/nl/tools) - alle beschikbare agenttools

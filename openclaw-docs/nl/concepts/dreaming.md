@@ -4,141 +4,126 @@ read_when:
     - Je wilt begrijpen wat elke Dreaming-fase doet
     - Je wilt consolidatie afstemmen zonder MEMORY.md te vervuilen
 sidebarTitle: Dreaming
-summary: Achtergrondgeheugenconsolidatie met lichte, diepe en REM-fasen plus een Dream Diary
+summary: Consolidatie van achtergrondgeheugen met lichte, diepe en REM-fasen plus een droomdagboek
 title: Dreaming
 x-i18n:
-    generated_at: "2026-06-30T14:13:43Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T04:56:54Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 1b636df63cdc5b60758f9600af695b3b6453122a03b0cc6fdc69d3c9259d1e61
+    source_hash: 501ab42cfdfa0216c308896aa8c1719b06b49d64a62afdb004e097102a376eac
     source_path: concepts/dreaming.md
     workflow: 16
 ---
 
-Dreaming is het achtergrond­systeem voor geheugenconsolidatie in `memory-core`. Het helpt OpenClaw sterke kortetermijnsignalen naar duurzaam geheugen te verplaatsen, terwijl het proces uitlegbaar en controleerbaar blijft.
+Dreaming is het systeem voor geheugenconsolidatie op de achtergrond in `memory-core`. Het zet sterke kortetermijnsignalen om in duurzaam geheugen, terwijl het proces uitlegbaar en controleerbaar blijft.
 
 <Note>
-Dreaming is **opt-in** en standaard uitgeschakeld.
+Dreaming is **optioneel** en standaard uitgeschakeld.
 </Note>
 
-## Wat dreaming schrijft
+## Wat Dreaming schrijft
 
-Dreaming houdt twee soorten uitvoer bij:
+- **Machinestatus** in `memory/.dreams/` (opslag voor herinneringen, fasesignalen, opnamecontrolepunten, vergrendelingen).
+- **Voor mensen leesbare uitvoer** in `DREAMS.md` (of een bestaande `dreams.md`) en optionele faserapportbestanden onder `memory/dreaming/<phase>/YYYY-MM-DD.md`.
 
-- **Machinestatus** in `memory/.dreams/` (recall-opslag, fasesignalen, ingestiecheckpoints, locks).
-- **Voor mensen leesbare uitvoer** in `DREAMS.md` (of bestaande `dreams.md`) en optionele faserapportbestanden onder `memory/dreaming/<phase>/YYYY-MM-DD.md`.
-
-Langetermijnpromotie schrijft nog steeds alleen naar `MEMORY.md`.
+Promotie naar het langetermijngeheugen schrijft nog steeds alleen naar `MEMORY.md`.
 
 ## Fasemodel
 
-Dreaming gebruikt drie samenwerkende fasen:
+Dreaming voert per cyclus drie samenwerkende fasen in deze volgorde uit: light -> REM -> deep. Dit zijn interne implementatiefasen, geen afzonderlijke door de gebruiker geconfigureerde modi.
 
-| Fase  | Doel                                             | Duurzame schrijfactie |
-| ----- | ------------------------------------------------ | --------------------- |
-| Light | Recent kortetermijnmateriaal sorteren en faseren | Nee                   |
-| Deep  | Duurzame kandidaten scoren en promoveren         | Ja (`MEMORY.md`)      |
-| REM   | Reflecteren op thema's en terugkerende ideeën    | Nee                   |
-
-Deze fasen zijn interne implementatiedetails, geen afzonderlijke door gebruikers geconfigureerde "modi".
+| Fase  | Doel                                              | Duurzame schrijfactie |
+| ----- | ------------------------------------------------- | --------------------- |
+| Light | Recent kortetermijnmateriaal sorteren en klaarzetten | Nee                |
+| REM   | Reflecteren op thema's en terugkerende ideeën     | Nee                   |
+| Deep  | Duurzame kandidaten scoren en promoveren          | Ja (`MEMORY.md`) |
 
 <AccordionGroup>
   <Accordion title="Light-fase">
-    De Light-fase neemt recente dagelijkse geheugensignalen en recall-sporen op, dedupliceert ze en faseert kandidaatregels.
+    - Leest de recente status van kortetermijnherinneringen, dagelijkse geheugenbestanden en geredigeerde sessietranscripten wanneer die beschikbaar zijn.
+    - Ontdubbelt signalen en zet kandidaatregels klaar.
+    - Schrijft een beheerd `## Light Sleep`-blok wanneer de opslag inline-uitvoer bevat.
+    - Registreert versterkingssignalen voor latere rangschikking in de deep-fase.
+    - Schrijft nooit naar `MEMORY.md`.
 
-    - Leest uit kortetermijn-recallstatus, recente dagelijkse geheugenbestanden en geredigeerde sessietranscripten wanneer beschikbaar.
-    - Schrijft een beheerd `## Light Sleep`-blok wanneer opslag inline-uitvoer bevat.
-    - Registreert versterkingssignalen voor latere Deep-rangschikking.
+  </Accordion>
+  <Accordion title="REM-fase">
+    - Maakt thema- en reflectiesamenvattingen van recente kortetermijnsporen.
+    - Schrijft een beheerd `## REM Sleep`-blok wanneer de opslag inline-uitvoer bevat.
+    - Registreert REM-versterkingssignalen die voor de rangschikking in de deep-fase worden gebruikt.
     - Schrijft nooit naar `MEMORY.md`.
 
   </Accordion>
   <Accordion title="Deep-fase">
-    De Deep-fase bepaalt wat langetermijngeheugen wordt.
-
-    - Rangschikt kandidaten met gewogen scores en drempelpoorten.
-    - Vereist dat `minScore`, `minRecallCount` en `minUniqueQueries` slagen.
-    - Hydrateert snippets opnieuw uit live dagelijkse bestanden voordat er wordt geschreven, zodat verouderde/verwijderde snippets worden overgeslagen.
-    - Voegt gepromoveerde items toe aan `MEMORY.md`.
-    - Schrijft een `## Deep Sleep`-samenvatting naar `DREAMS.md` en schrijft optioneel `memory/dreaming/deep/YYYY-MM-DD.md`.
-
-  </Accordion>
-  <Accordion title="REM-fase">
-    De REM-fase extraheert patronen en reflectieve signalen.
-
-    - Bouwt thema- en reflectiesamenvattingen uit recente kortetermijnsporen.
-    - Schrijft een beheerd `## REM Sleep`-blok wanneer opslag inline-uitvoer bevat.
-    - Registreert REM-versterkingssignalen die door Deep-rangschikking worden gebruikt.
-    - Schrijft nooit naar `MEMORY.md`.
+    - Rangschikt kandidaten met gewogen scores en drempelpoorten (`minScore`, `minRecallCount` en `minUniqueQueries` moeten allemaal slagen).
+    - Laadt fragmenten vóór het schrijven opnieuw uit actuele dagelijkse bestanden, zodat verouderde of verwijderde fragmenten worden overgeslagen.
+    - Voegt gepromoveerde vermeldingen toe aan `MEMORY.md`.
+    - Schrijft een `## Deep Sleep`-samenvatting naar `DREAMS.md` en optioneel `memory/dreaming/deep/YYYY-MM-DD.md`.
 
   </Accordion>
 </AccordionGroup>
 
-## Ingestie van sessietranscripten
+## Opname van sessietranscripten
 
-Dreaming kan geredigeerde sessietranscripten opnemen in het dreaming-corpus. Wanneer transcripten beschikbaar zijn, worden ze naast dagelijkse geheugensignalen en recall-sporen aan de Light-fase gevoerd. Persoonlijke en gevoelige inhoud wordt vóór ingestie geredigeerd.
+Dreaming kan geredigeerde sessietranscripten opnemen in het Dreaming-corpus. Wanneer ze beschikbaar zijn, worden transcripten naast dagelijkse geheugensignalen en herinneringssporen aan de light-fase toegevoegd. Persoonlijke en gevoelige inhoud wordt vóór opname geredigeerd.
 
-## Dream Diary
+## Droomdagboek
 
-Dreaming houdt ook een narratief **Dream Diary** bij in `DREAMS.md`. Nadat elke fase genoeg materiaal heeft, voert `memory-core` best-effort een achtergrondbeurt met een subagent uit en voegt een kort dagboekitem toe. Het gebruikt het standaard runtimemodel tenzij `dreaming.model` is geconfigureerd. Als het geconfigureerde model niet beschikbaar is, probeert Dream Diary het eenmaal opnieuw met het standaardsessiemodel.
+Dreaming houdt een verhalend **Droomdagboek** bij in `DREAMS.md`. Nadat elke fase voldoende materiaal heeft, voert `memory-core` op de achtergrond naar beste vermogen een subagentbeurt uit en voegt het een korte dagboekvermelding toe. Hiervoor wordt het standaardruntimemodel gebruikt, tenzij `dreaming.model` is geconfigureerd. Als het geconfigureerde model niet beschikbaar is, wordt de dagboekuitvoering eenmaal opnieuw geprobeerd met het standaardsessiemodel; fouten met vertrouwen of toelatingslijsten worden niet opnieuw geprobeerd en blijven zichtbaar in de logboeken in plaats van stilzwijgend terug te vallen op een algemene dagboekvermelding.
 
 <Note>
-Dit dagboek is bedoeld voor menselijke lezing in de Dreams-UI, niet als promotiebron. Door Dreaming gegenereerde dagboek-/rapportartefacten worden uitgesloten van kortetermijnpromotie. Alleen onderbouwde geheugensnippets komen in aanmerking voor promotie naar `MEMORY.md`.
+Het dagboek is bedoeld om door mensen te worden gelezen in de Dreams-UI, niet als bron voor promotie. Dagboek- en rapportartefacten worden uitgesloten van kortetermijnpromotie; alleen onderbouwde geheugenfragmenten komen in aanmerking voor promotie naar `MEMORY.md`.
 </Note>
 
-Er is ook een onderbouwde historische backfill-lane voor review- en herstelwerk:
+Er is ook een onderbouwd historisch aanvullingstraject voor controle- en herstelwerk:
 
 <AccordionGroup>
-  <Accordion title="Backfill-opdrachten">
-    - `memory rem-harness --path ... --grounded` toont een preview van onderbouwde dagboekuitvoer uit historische `YYYY-MM-DD.md`-notities.
-    - `memory rem-backfill --path ...` schrijft omkeerbare onderbouwde dagboekitems naar `DREAMS.md`.
-    - `memory rem-backfill --path ... --stage-short-term` faseert onderbouwde duurzame kandidaten in dezelfde kortetermijn-bewijsopslag die de normale Deep-fase al gebruikt.
-    - `memory rem-backfill --rollback` en `--rollback-short-term` verwijderen die gefaseerde backfill-artefacten zonder gewone dagboekitems of live kortetermijn-recall aan te raken.
+  <Accordion title="Aanvulopdrachten">
+    - `memory rem-harness --path ... --grounded` toont een voorbeeld van onderbouwde dagboekuitvoer uit historische `YYYY-MM-DD.md`-notities.
+    - `memory rem-backfill --path ...` schrijft omkeerbare, onderbouwde dagboekvermeldingen naar `DREAMS.md`.
+    - `memory rem-backfill --path ... --stage-short-term` zet onderbouwde duurzame kandidaten klaar in dezelfde opslag voor kortetermijnbewijs die door de normale deep-fase wordt gebruikt.
+    - `memory rem-backfill --rollback` en `--rollback-short-term` verwijderen die klaargezette aanvullingsartefacten zonder gewone dagboekvermeldingen of actuele kortetermijnherinneringen te wijzigen.
 
   </Accordion>
 </AccordionGroup>
 
-De Control-UI biedt dezelfde backfill-/resetflow voor het dagboek, zodat je resultaten in de Dreams-scène kunt inspecteren voordat je beslist of de onderbouwde kandidaten promotie verdienen. De Scene toont ook een aparte onderbouwde lane, zodat je kunt zien welke gefaseerde kortetermijnitems uit historische replay kwamen, welke gepromoveerde items door onderbouwing werden geleid, en alleen gefaseerde items kunt wissen die uitsluitend onderbouwd zijn zonder gewone live kortetermijnstatus aan te raken.
+De Control UI biedt dezelfde stroom voor aanvulling en reset van het dagboek op het tabblad Memory van de agent (pagina Agents), zodat je de resultaten in de droomscène kunt bekijken voordat je beslist of onderbouwde kandidaten promotie verdienen. Een afzonderlijk onderbouwd Scene-traject toont welke klaargezette kortetermijnvermeldingen afkomstig zijn van historische herhaling, welke gepromoveerde items voornamelijk door onderbouwde gegevens zijn bepaald, en laat je alleen klaargezette vermeldingen verwijderen die uitsluitend onderbouwd zijn, zonder de actuele kortetermijnstatus te wijzigen.
 
-## Deep-rangschikkingssignalen
+## Signalen voor rangschikking in de deep-fase
 
-Deep-rangschikking gebruikt zes gewogen basissignalen plus faseversterking:
+De rangschikking in de deep-fase gebruikt zes gewogen basissignalen plus faseversterking:
 
-| Signaal              | Gewicht | Beschrijving                                                   |
-| -------------------- | ------- | -------------------------------------------------------------- |
-| Frequentie           | 0.24    | Hoeveel kortetermijnsignalen het item heeft verzameld          |
-| Relevantie           | 0.30    | Gemiddelde ophaalkwaliteit voor het item                       |
-| Querydiversiteit     | 0.15    | Afzonderlijke query-/dagcontexten waarin het naar voren kwam   |
-| Recentheid           | 0.15    | Tijdvervalste versheidsscore                                   |
-| Consolidatie         | 0.10    | Sterkte van herhaling over meerdere dagen                      |
-| Conceptuele rijkdom  | 0.06    | Dichtheid van concepttags uit snippet/pad                      |
+| Signaal               | Gewicht | Beschrijving                                                |
+| --------------------- | ------- | ----------------------------------------------------------- |
+| Relevantie            | 0.30    | Gemiddelde opvraagkwaliteit voor de vermelding               |
+| Frequentie            | 0.24    | Hoeveel kortetermijnsignalen de vermelding heeft verzameld   |
+| Querydiversiteit      | 0.15    | Afzonderlijke query-/dagcontexten waarin deze naar voren kwam |
+| Recentheid            | 0.15    | In de tijd afnemende versheidsscore                          |
+| Consolidatie          | 0.10    | Sterkte van herhaling over meerdere dagen                    |
+| Conceptuele rijkdom   | 0.06    | Dichtheid van concepttags uit fragment/pad                   |
 
-Hits in de Light- en REM-fase voegen een kleine, door recentheid vervallende boost toe vanuit `memory/.dreams/phase-signals.json`.
+Treffers in de light- en REM-fase voegen een kleine, met de tijd afnemende recentheidsboost toe vanuit `memory/.dreams/phase-signals.json`.
 
-Schaduwproefresultaten kunnen bovenop die basisscore worden gelegd als reviewsignaal vóór een duurzame schrijfactie. Een nuttige proef geeft de kandidaat een kleine begrensde boost, een neutrale proef houdt hem uitgesteld, en een schadelijke proef markeert hem als afgewezen voor die scoreronde. Dit signaal is nog steeds alleen voor rapportage: het kan de volgorde van kandidaten of reviewmetadata wijzigen, maar schrijft niet naar `MEMORY.md` en promoveert de kandidaat niet zelfstandig.
+Resultaten van schaduwproeven kunnen boven op de basisscore als controlesignaal worden toegepast voordat er duurzaam wordt geschreven: een nuttige proef geeft een kandidaat een kleine begrensde boost, een neutrale proef houdt deze uitgesteld en een schadelijke proef markeert deze als afgewezen voor die scoreronde. Dit signaal is uitsluitend voor rapportage: het kan de volgorde van kandidaten of controlemetagegevens wijzigen, maar schrijft nooit naar `MEMORY.md` en promoveert niet zelfstandig een kandidaat.
 
-## Rapportdekking voor QA-schaduwproef
+### Rapportdekking voor QA-schaduwproeven
 
-QA Lab bevat een scenario dat alleen rapporteert om te verkennen hoe een toekomstige dreaming-schaduwproef een kandidaatgeheugen vóór promotie zou kunnen beoordelen. Het scenario vraagt een agent een basisantwoord te vergelijken met een antwoord dat het kandidaatgeheugen kan gebruiken, en vervolgens een lokaal rapport te schrijven met een oordeel, reden en risicovlaggen.
+QA Lab bevat een scenario dat uitsluitend rapporteert om te onderzoeken hoe een toekomstige Dreaming-schaduwproef een kandidaatgeheugen vóór promotie zou kunnen beoordelen: een agent vergelijkt een basisantwoord met een antwoord dat het kandidaatgeheugen kan gebruiken en schrijft vervolgens een lokaal rapport met een oordeel, reden en risicomarkeringen. Deze dekking is beperkt tot QA: ze verifieert dat het rapportartefact gescheiden blijft van `MEMORY.md` en dat de agent nooit beweert dat de kandidaat is gepromoveerd. Ze voegt geen productieschaduwproefgedrag toe en wijzigt de promotie-engine van de deep-fase niet.
 
-Deze dekking is bewust beperkt tot QA. Ze verifieert dat het rapportartefact gescheiden blijft van `MEMORY.md` en dat de agent niet claimt dat de kandidaat is gepromoveerd. Ze voegt geen productiegedrag voor schaduwproeven toe en wijzigt de promotie-engine van de Deep-fase niet.
-
-De schaduwproefrunner van `memory-core` houdt hetzelfde alleen-rapportagecontract aan voor codepaden die een stabiel artefact nodig hebben. Hij accepteert de kandidaat, proefprompt, basisuitkomst, kandidaatuitkomst, oordeel, reden, risicovlaggen en bewijsreferenties, en schrijft vervolgens een rapport met `promotion action: report-only`. Nuttige oordelen mappen naar een aanbeveling `promote`, neutrale oordelen naar `defer`, en schadelijke oordelen naar `reject`; geen van die aanbevelingen schrijft naar `MEMORY.md` of past Deep-fasepromotie toe.
+De schaduwproefrunner `memory-core` behoudt hetzelfde contract van uitsluitend rapporteren voor codepaden die een stabiel artefact nodig hebben. Deze accepteert de kandidaat, proefprompt, basisuitkomst, kandidaatuitkomst, oordeel, reden, risicomarkeringen en bewijsverwijzingen en schrijft vervolgens een rapport met `promotion action: report-only`. Nuttige oordelen worden gekoppeld aan een aanbeveling voor `promote`, neutrale oordelen aan `defer` en schadelijke oordelen aan `reject`; geen daarvan schrijft naar `MEMORY.md` of past promotie in de deep-fase toe.
 
 ## Planning
 
-Wanneer ingeschakeld beheert `memory-core` automatisch één cronjob voor een volledige dreaming-sweep. Elke sweep voert fasen op volgorde uit: Light → REM → Deep.
+Wanneer ingeschakeld, beheert `memory-core` automatisch één Cron-taak voor een volledige Dreaming-cyclus, ontdubbeld over de primaire runtimewerkruimte en alle geconfigureerde agentwerkruimten, zodat uitwaaiering van subagentwerkruimten `DREAMS.md` en de geheugenstatus van de hoofdagent niet uitsluit.
 
-De sweep omvat de primaire runtimewerkruimte en alle geconfigureerde agentwerkruimten, gededupliceerd op pad, zodat fan-out naar subagentwerkruimten de `DREAMS.md` en geheugenstatus van de hoofdagent niet uitsluit.
+| Instelling             | Standaardmodel |
+| ---------------------- | -------------- |
+| `dreaming.frequency` | `0 3 * * *`   |
+| `dreaming.model`     | standaardmodel |
 
-Standaard cadansgedrag:
-
-| Instelling           | Standaard       |
-| -------------------- | --------------- |
-| `dreaming.frequency` | `0 3 * * *`     |
-| `dreaming.model`     | standaardmodel  |
-
-## Snel starten
+## Snel aan de slag
 
 <Tabs>
   <Tab title="Dreaming inschakelen">
@@ -158,7 +143,7 @@ Standaard cadansgedrag:
     }
     ```
   </Tab>
-  <Tab title="Aangepaste sweep-cadans">
+  <Tab title="Aangepast cyclusritme">
     ```json
     {
       "plugins": {
@@ -181,19 +166,19 @@ Standaard cadansgedrag:
 
 ## Slash-opdracht
 
-```
+```text
 /dreaming status
 /dreaming on
 /dreaming off
 /dreaming help
 ```
 
-`/dreaming on` en `/dreaming off` wijzigen gateway-brede configuratie. Kanaalaanroepers moeten eigenaren zijn, en Gateway-clients moeten `operator.admin` hebben. `/dreaming status` en `/dreaming help` blijven alleen-lezen.
+`/dreaming on` en `/dreaming off` vereisen de eigenaarstatus voor kanaalaanroepers of `operator.admin` voor Gateway-clients. `/dreaming status` en `/dreaming help` zijn alleen-lezen.
 
 ## CLI-workflow
 
 <Tabs>
-  <Tab title="Promotiepreview / toepassen">
+  <Tab title="Promotievoorbeeld / toepassen">
     ```bash
     openclaw memory promote
     openclaw memory promote --apply
@@ -201,11 +186,11 @@ Standaard cadansgedrag:
     openclaw memory status --deep
     ```
 
-    Handmatige `memory promote` gebruikt standaard Deep-fasedrempels, tenzij overschreven met CLI-vlaggen.
+    Handmatige `memory promote` gebruikt standaard de drempels van de deep-fase, tenzij deze met CLI-vlaggen worden overschreven.
 
   </Tab>
   <Tab title="Promotie uitleggen">
-    Leg uit waarom een specifieke kandidaat wel of niet zou promoveren:
+    Leg uit waarom een specifieke kandidaat wel of niet zou worden gepromoveerd:
 
     ```bash
     openclaw memory promote-explain "router vlan"
@@ -213,8 +198,8 @@ Standaard cadansgedrag:
     ```
 
   </Tab>
-  <Tab title="REM-harnesspreview">
-    Bekijk een preview van REM-reflecties, kandidaatwaarheden en Deep-promotie-uitvoer zonder iets te schrijven:
+  <Tab title="Voorbeeld van REM-harnas">
+    Bekijk REM-reflecties, kandidaatwaarheden en uitvoer voor promotie in de deep-fase zonder iets te schrijven:
 
     ```bash
     openclaw memory rem-harness
@@ -226,47 +211,43 @@ Standaard cadansgedrag:
 
 ## Belangrijkste standaardwaarden
 
-Alle instellingen staan onder `plugins.entries.memory-core.config.dreaming`.
+Alle instellingen bevinden zich onder `plugins.entries.memory-core.config.dreaming`.
 
 <ParamField path="enabled" type="boolean" default="false">
-  Schakel de dreaming-sweep in of uit.
+  Schakel de Dreaming-cyclus in of uit.
 </ParamField>
 <ParamField path="frequency" type="string" default="0 3 * * *">
-  Cron-cadans voor de volledige dreaming-sweep.
+  Cron-ritme voor de volledige Dreaming-cyclus.
 </ParamField>
 <ParamField path="model" type="string">
-  Optionele modeloverride voor de Dream Diary-subagent. Gebruik een canonieke `provider/model`-waarde wanneer je ook een subagent-allowlist `allowedModels` instelt.
+  Optionele modeloverschrijving voor de Droomdagboek-subagent. Gebruik een canonieke `provider/model`-waarde wanneer je ook een `allowedModels`-toelatingslijst voor een subagent instelt.
 </ParamField>
 <ParamField path="phases.deep.maxPromotedSnippetTokens" type="number" default="160">
-  Maximaal geschat aantal tokens dat wordt behouden uit elke kortetermijn-recallsnippet die naar `MEMORY.md` wordt gepromoveerd. Rangschikkingsherkomst blijft zichtbaar.
+  Maximaal geschat aantal tokens dat wordt behouden van elk fragment uit kortetermijnherinneringen dat naar `MEMORY.md` wordt gepromoveerd. De herkomst van de rangschikking blijft zichtbaar.
 </ParamField>
 
 <Warning>
-`dreaming.model` vereist `plugins.entries.memory-core.subagent.allowModelOverride: true`. Om dit te beperken, stel je ook `plugins.entries.memory-core.subagent.allowedModels` in. Vertrouwens- of allowlistfouten blijven zichtbaar in plaats van stilzwijgend terug te vallen; de retry dekt alleen fouten waarbij het model niet beschikbaar is.
+`dreaming.model` vereist `plugins.entries.memory-core.subagent.allowModelOverride: true`. Stel ook `plugins.entries.memory-core.subagent.allowedModels` in om dit te beperken. De automatische nieuwe poging geldt alleen voor fouten waarbij het model niet beschikbaar is; fouten met vertrouwen of toelatingslijsten blijven zichtbaar in de logboeken in plaats van stilzwijgend terug te vallen.
 </Warning>
 
 <Note>
-De meeste fasebeleidsregels, drempels en opslaggedrag zijn interne implementatiedetails. Zie [Referentie voor geheugenconfiguratie](/nl/reference/memory-config#dreaming) voor de volledige lijst met keys.
+Het meeste fasebeleid, de meeste drempels en het meeste opslaggedrag zijn interne implementatiedetails. Zie [Referentie voor geheugenconfiguratie](/nl/reference/memory-config#dreaming) voor de volledige lijst met sleutels.
 </Note>
 
 ## Dreams-UI
 
-Wanneer ingeschakeld toont het tabblad **Dreams** van de Gateway:
+Wanneer ingeschakeld, toont het tabblad **Dreams** van de Gateway:
 
-- huidige ingeschakelde dreaming-status
-- status op faseniveau en aanwezigheid van beheerde sweep
-- aantallen voor kortetermijn-, onderbouwde, signaal- en vandaag-gepromoveerde items
-- timing van de volgende geplande uitvoering
-- een aparte onderbouwde Scene-lane voor gefaseerde historische replay-items
-- een uitklapbare Dream Diary-lezer ondersteund door `doctor.memory.dreamDiary`
-
-## Dreaming wordt nooit uitgevoerd: status toont geblokkeerd
-
-Als `openclaw memory status` `Dreaming status: blocked` rapporteert, bestaat de beheerde cron, maar vuurt de Heartbeat van de standaardagent niet. Controleer of Heartbeat is ingeschakeld voor de standaardagent en dat het doel niet `none` is, en voer daarna na het volgende Heartbeat-interval opnieuw `openclaw memory status --deep` uit.
+- de huidige ingeschakelde status van Dreaming
+- de status per fase en de aanwezigheid van een beheerde cyclus
+- aantallen voor kortetermijngeheugen, onderbouwde gegevens, signalen en vandaag gepromoveerde items
+- het tijdstip van de volgende geplande uitvoering
+- een afzonderlijk onderbouwd Scene-traject voor klaargezette vermeldingen uit historische herhaling
+- een uitvouwbare Droomdagboeklezer op basis van `doctor.memory.dreamDiary`
 
 ## Gerelateerd
 
 - [Geheugen](/nl/concepts/memory)
 - [Geheugen-CLI](/nl/cli/memory)
 - [Referentie voor geheugenconfiguratie](/nl/reference/memory-config)
-- [Geheugen zoeken](/nl/concepts/memory-search)
+- [Zoeken in het geheugen](/nl/concepts/memory-search)

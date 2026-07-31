@@ -1,10 +1,11 @@
 ---
 summary: 重新導向至 /automation/cron-jobs
-title: Gmail 發布／訂閱
+title: Gmail PubSub
 x-i18n:
-    generated_at: "2026-07-11T21:05:04Z"
+    generated_at: "2026-07-26T07:32:45Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 1307459db642f4a11f9bb84fbedd73053a813ce9221cd1d63a0be99b6199dbf5
     source_path: automation/gmail-pubsub.md

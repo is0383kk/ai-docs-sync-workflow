@@ -1,20 +1,21 @@
 ---
 read_when:
-    - Node bağlı ancak kamera/canvas/ekran/exec araçları başarısız oluyor
+    - Node bağlı ancak kamera/tuval/ekran/exec araçları çalışmıyor
     - Node eşleştirmesi ile onaylar arasındaki zihinsel modele ihtiyacınız var
-summary: Node eşleştirme, ön planda çalışma gereksinimleri, izinler ve araç hatalarıyla ilgili sorunları giderin
+summary: Node eşleştirme, ön planda çalışma gereksinimleri, izinler ve araç hatalarıyla ilgili sorunları giderme
 title: Node sorun giderme
 x-i18n:
-    generated_at: "2026-07-12T11:55:47Z"
+    generated_at: "2026-07-26T23:26:42Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 53d082dcd2f4bb022eb683d72d193dbb6800b5a81a8f5ab9506d82feaa0dbc49
+    source_hash: 4a7ee9e48985805e91cd5acfa1b9f6b676b7e67236ce29fe91e2c8d03002e5c4
     source_path: nodes/troubleshooting.md
     workflow: 16
 ---
 
-Bir Node durumda görünür olduğu hâlde Node araçları başarısız olduğunda bu sayfayı kullanın.
+Durumda bir Node görünürken Node araçları başarısız oluyorsa bu sayfayı kullanın.
 
 ## Komut sıralaması
 
@@ -34,11 +35,11 @@ openclaw nodes describe --node <idOrNameOrIp>
 openclaw approvals get --node <idOrNameOrIp>
 ```
 
-Sağlıklı çalışma göstergeleri:
+Sağlıklı çalışma belirtileri:
 
 - Node bağlıdır ve `node` rolü için eşleştirilmiştir.
 - `nodes describe`, çağırdığınız yeteneği içerir.
-- Yürütme onayları beklenen modu/izin listesini gösterir.
+- Çalıştırma onayları, beklenen modu/izin verilenler listesini gösterir.
 
 ## Ön planda çalışma gereksinimleri
 
@@ -54,25 +55,25 @@ openclaw logs --follow
 
 `NODE_BACKGROUND_UNAVAILABLE` görürseniz Node uygulamasını ön plana getirin ve yeniden deneyin.
 
-## İzin matrisi
+## İzinler matrisi
 
-| Yetenek                      | iOS                                                     | Android                                                         | macOS Node uygulaması                          | Tipik hata kodu                               |
-| ---------------------------- | ------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------- |
-| `camera.snap`, `camera.clip` | Kamera (+ klip sesi için mikrofon)                      | Kamera (+ klip sesi için mikrofon)                              | Kamera (+ klip sesi için mikrofon)            | `*_PERMISSION_REQUIRED`                       |
-| `screen.record`              | Ekran Kaydı (+ isteğe bağlı mikrofon)                   | Ekran yakalama istemi (+ isteğe bağlı mikrofon)                 | Ekran Kaydı                                   | `*_PERMISSION_REQUIRED`                       |
-| `computer.act`               | geçerli değil                                           | geçerli değil                                                   | Erişilebilirlik + Ekran Kaydı                  | `COMPUTER_DISABLED`, `ACCESSIBILITY_REQUIRED` |
-| `location.get`               | Uygulamayı Kullanırken veya Her Zaman (moda bağlıdır)   | Moda göre ön plan/arka plan konumu                              | Konum izni                                    | `LOCATION_PERMISSION_REQUIRED`                |
-| `system.run`                 | geçerli değil (Node ana makinesi yolu)                  | geçerli değil (Node ana makinesi yolu)                          | Yürütme onayları gereklidir                    | `SYSTEM_RUN_DENIED`                           |
+| Yetenek                      | iOS                                     | Android                                      | macOS Node uygulaması            | Tipik hata kodu                               |
+| ---------------------------- | --------------------------------------- | -------------------------------------------- | -------------------------------- | --------------------------------------------- |
+| `camera.snap`, `camera.clip` | Kamera (+ klip sesi için mikrofon)       | Kamera (+ klip sesi için mikrofon)            | Kamera (+ klip sesi için mikrofon) | `*_PERMISSION_REQUIRED`                       |
+| `screen.record`              | Ekran Kaydı (+ isteğe bağlı mikrofon)    | Ekran yakalama istemi (+ isteğe bağlı mikrofon) | Ekran Kaydı                    | `*_PERMISSION_REQUIRED`                       |
+| `computer.act`               | geçerli değil                           | geçerli değil                                | Erişilebilirlik + Ekran Kaydı     | `COMPUTER_DISABLED`, `ACCESSIBILITY_REQUIRED` |
+| `location.get`               | Kullanırken veya Her Zaman (moda bağlı) | Moda göre ön plan/arka plan konumu            | Konum izni                       | `LOCATION_PERMISSION_REQUIRED`                |
+| `system.run`                 | geçerli değil (Node ana makine yolu)    | geçerli değil (Node ana makine yolu)          | Çalıştırma onayları gerekli       | `SYSTEM_RUN_DENIED`                           |
 
 ## Eşleştirme ve onaylar
 
-Bir Node komutunun başarılı olup olmayacağını üç ayrı geçit belirler:
+Bir Node komutunun başarılı olup olmayacağını üç ayrı geçit denetler:
 
 1. **Cihaz eşleştirmesi**: Bu Node, Gateway'e bağlanabilir mi?
-2. **Gateway Node komutu politikası**: RPC komut kimliğine `gateway.nodes.allowCommands` / `denyCommands` ve platform varsayılanları tarafından izin veriliyor mu?
-3. **Yürütme onayları**: Bu Node, belirli bir kabuk komutunu yerel olarak çalıştırabilir mi?
+2. **Gateway Node komutu politikası**: RPC komut kimliğine `gateway.nodes.commands.allow` / `gateway.nodes.commands.deny` ve platform varsayılanları tarafından izin veriliyor mu?
+3. **Çalıştırma onayları**: Bu Node, belirli bir kabuk komutunu yerel olarak çalıştırabilir mi?
 
-Node eşleştirmesi bir kimlik/güven geçididir; komut başına onay yüzeyi değildir. `system.run` için Node başına politika, Gateway eşleştirme kaydında değil, o Node'un yürütme onayları dosyasında (`openclaw approvals get --node ...`) bulunur.
+Node eşleştirmesi, komut başına bir onay yüzeyi değil, bir kimlik/güven geçididir. `system.run` için Node başına politika, Gateway eşleştirme kaydında değil, ilgili Node'un çalıştırma onayları dosyasında (`openclaw approvals get --node ...`) bulunur.
 
 Hızlı kontroller:
 
@@ -83,26 +84,26 @@ openclaw approvals get --node <idOrNameOrIp>
 openclaw approvals allowlist add --node <idOrNameOrIp> "/usr/bin/uname"
 ```
 
-- Eşleştirme eksikse önce Node cihazını onaylayın.
-- `nodes describe` içinde bir komut eksikse Gateway Node komutu politikasını ve Node'un bağlantı sırasında bu komutu gerçekten bildirmiş olup olmadığını kontrol edin.
-- Eşleştirme düzgün olduğu hâlde `system.run` başarısız oluyorsa o Node'daki yürütme onaylarını/izin listesini düzeltin.
+- Eşleştirme eksik: Önce Node cihazını onaylayın.
+- `nodes describe` içinde bir komut eksik: Gateway Node komutu politikasını ve Node'un bağlanırken bu komutu gerçekten bildirmiş olup olmadığını kontrol edin.
+- Eşleştirme sorunsuz ancak `system.run` başarısız oluyor: İlgili Node'daki çalıştırma onaylarını/izin verilenler listesini düzeltin.
 
-Onay destekli `host=node` çalıştırmalarında Gateway, yürütmeyi hazırlanmış standart `systemRunPlan` ile de ilişkilendirir. Daha sonraki bir çağıran, onaylanan çalıştırma iletilmeden önce komutu, çalışma dizinini veya oturum meta verilerini değiştirirse Gateway, düzenlenmiş yüke güvenmek yerine çalıştırmayı onay uyuşmazlığı nedeniyle reddeder.
+Onay destekli `host=node` çalıştırmalarında Gateway, yürütmeyi hazırlanmış standart `systemRunPlan` öğesine de bağlar. Daha sonraki bir çağıran, onaylanan çalıştırma iletilmeden önce komutu, cwd'yi veya oturum meta verilerini değiştirirse Gateway, düzenlenmiş yüke güvenmek yerine çalıştırmayı onay uyuşmazlığı nedeniyle reddeder.
 
 ## Yaygın Node hata kodları
 
-| Kod                                    | Anlamı                                                                                                                                                                                                                                     |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `NODE_BACKGROUND_UNAVAILABLE`          | Uygulama arka plandadır; ön plana getirin.                                                                                                                                                                                                  |
-| `CAMERA_DISABLED`                      | Node ayarlarındaki kamera anahtarı devre dışıdır.                                                                                                                                                                                           |
-| `*_PERMISSION_REQUIRED`                | İşletim sistemi izni eksik veya reddedilmiş.                                                                                                                                                                                                |
-| `LOCATION_DISABLED`                    | Konum modu kapalıdır.                                                                                                                                                                                                                       |
-| `LOCATION_PERMISSION_REQUIRED`         | İstenen konum modu için izin verilmemiştir.                                                                                                                                                                                                 |
-| `LOCATION_BACKGROUND_UNAVAILABLE`      | Uygulama arka plandadır ancak yalnızca Uygulamayı Kullanırken izni mevcuttur.                                                                                                                                                                |
-| `COMPUTER_DISABLED`                    | macOS uygulamasında **Bilgisayar Denetimine İzin Ver** seçeneğini etkinleştirin, ardından eşleştirme güncellemesini onaylayın.                                                                                                               |
-| `ACCESSIBILITY_REQUIRED`               | macOS Sistem Ayarları'nda geçerli OpenClaw uygulama paketine Erişilebilirlik izni verin.                                                                                                                                                     |
-| `SYSTEM_RUN_DENIED: approval required` | Yürütme isteği açık onay gerektirir.                                                                                                                                                                                                        |
-| `SYSTEM_RUN_DENIED: allowlist miss`    | Komut, izin listesi modu tarafından engellendi. Windows Node ana makinelerinde `cmd.exe /c ...` gibi kabuk sarmalayıcı biçimleri, soru akışı üzerinden onaylanmadıkça izin listesi modunda izin listesi eşleşmemesi olarak değerlendirilir. |
+| Kod                                    | Anlamı                                                                                                                                                                                  |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NODE_BACKGROUND_UNAVAILABLE`          | Uygulama arka plandadır; ön plana getirin.                                                                                                                                               |
+| `CAMERA_DISABLED`                      | Node ayarlarında kamera anahtarı devre dışıdır.                                                                                                                                          |
+| `*_PERMISSION_REQUIRED`                | İşletim sistemi izni eksik veya reddedilmiştir.                                                                                                                                          |
+| `LOCATION_DISABLED`                    | Konum modu kapalıdır.                                                                                                                                                                    |
+| `LOCATION_PERMISSION_REQUIRED`         | İstenen konum modu için izin verilmemiştir.                                                                                                                                              |
+| `LOCATION_BACKGROUND_UNAVAILABLE`      | Uygulama arka plandadır ancak yalnızca Kullanırken izni vardır.                                                                                                                          |
+| `COMPUTER_DISABLED`                    | macOS uygulamasında **Allow Computer Control** seçeneğini etkinleştirin, ardından eşleştirme güncellemesini onaylayın.                                                                   |
+| `ACCESSIBILITY_REQUIRED`               | macOS Sistem Ayarları'nda geçerli OpenClaw uygulama paketine Erişilebilirlik izni verin.                                                                                                 |
+| `SYSTEM_RUN_DENIED: approval required` | Çalıştırma isteği açık onay gerektirir.                                                                                                                                                  |
+| `SYSTEM_RUN_DENIED: allowlist miss`    | Komut, izin verilenler listesi modu tarafından engellendi. Windows Node ana makinelerinde `cmd.exe /c ...` gibi kabuk sarmalayıcı biçimleri, soru akışı üzerinden onaylanmadıkları sürece izin verilenler listesi modunda liste dışı kabul edilir. |
 
 ## Hızlı kurtarma döngüsü
 
@@ -113,14 +114,14 @@ openclaw approvals get --node <idOrNameOrIp>
 openclaw logs --follow
 ```
 
-Sorun devam ederse:
+Sorun hâlâ sürüyorsa:
 
 - Cihaz eşleştirmesini yeniden onaylayın.
 - Node uygulamasını yeniden açın (ön planda).
 - İşletim sistemi izinlerini yeniden verin.
-- Yürütme onayı politikasını yeniden oluşturun veya ayarlayın.
+- Çalıştırma onayı politikasını yeniden oluşturun/ayarlayın.
 
-Bilgisayar denetimi için ayrıca görsel algılama yeteneğine sahip bir ajanın `computer` aracını sunduğunu, `screen.snapshot` komutunun Ekran Kaydı izniyle başarılı olduğunu ve `/phone status` komutunun amaçladığınız geçici veya kalıcı Gateway yetkilendirmesini gösterdiğini doğrulayın. Bir `gateway.nodes.denyCommands` girdisi her zaman `allowCommands` değerini geçersiz kılar.
+Bilgisayar denetimi için ayrıca görsel yetenekli bir aracının `computer` aracını sunduğunu, `screen.snapshot` işleminin Ekran Kaydı izniyle başarılı olduğunu ve `/phone status` öğesinin amaçladığınız geçici veya kalıcı Gateway yetkilendirmesini gösterdiğini doğrulayın. Bir `gateway.nodes.commands.deny` girdisi her zaman `gateway.nodes.commands.allow` ayarını geçersiz kılar.
 
 ## İlgili konular
 
@@ -128,7 +129,7 @@ Bilgisayar denetimi için ayrıca görsel algılama yeteneğine sahip bir ajanı
 - [Kamera Node'ları](/tr/nodes/camera)
 - [Konum komutu](/tr/nodes/location-command)
 - [Bilgisayar kullanımı](/tr/nodes/computer-use)
-- [Yürütme onayları](/tr/tools/exec-approvals)
+- [Çalıştırma onayları](/tr/tools/exec-approvals)
 - [Gateway eşleştirmesi](/tr/gateway/pairing)
-- [Gateway sorunlarını giderme](/tr/gateway/troubleshooting)
-- [Kanal sorunlarını giderme](/tr/channels/troubleshooting)
+- [Gateway sorun giderme](/tr/gateway/troubleshooting)
+- [Kanal sorun giderme](/tr/channels/troubleshooting)

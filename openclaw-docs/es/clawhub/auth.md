@@ -1,13 +1,14 @@
 ---
 read_when:
-    - Iniciar sesión en ClawHub
+    - Inicio de sesión en ClawHub
     - Uso de la CLI de ClawHub
-    - Depuración de 401s
+    - Depuración de errores 401
 summary: Inicio de sesión en ClawHub, tokens de API, inicio de sesión en la CLI, almacenamiento de tokens y revocación.
 x-i18n:
-    generated_at: "2026-07-04T20:23:37Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T05:01:47Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 4f39be61235d71ff7a563c11a16cfd3b90562b664314c9cffd184dddd2199dbc
     source_path: clawhub/auth.md
@@ -16,56 +17,56 @@ x-i18n:
 
 # Autenticación
 
-ClawHub usa GitHub para el inicio de sesión web. La CLI usa tokens de API de ClawHub creados
+ClawHub usa GitHub para iniciar sesión en la web. La CLI usa tokens de API de ClawHub creados
 mediante esa cuenta con sesión iniciada.
 
-## Inicio de sesión web
+## Inicio de sesión en la web
 
-Usa GitHub para iniciar sesión en [clawhub.ai](https://clawhub.ai).
+Use GitHub para iniciar sesión en [clawhub.ai](https://clawhub.ai).
 
-Las cuentas eliminadas, bloqueadas o deshabilitadas no pueden completar el inicio de sesión normal de ClawHub.
-Si el inicio de sesión te devuelve a un estado sin sesión, es posible que tu cuenta no esté en buen
-estado. Si tu cuenta fue bloqueada o deshabilitada, usa el
-[formulario de apelación de ClawHub](https://appeals.openclaw.ai/) si crees que se trata de un
+Las cuentas eliminadas, bloqueadas o deshabilitadas no pueden completar el inicio de sesión normal en ClawHub.
+Si al iniciar sesión vuelve a un estado sin sesión iniciada, es posible que su cuenta no esté en
+regla. Si su cuenta fue bloqueada o deshabilitada, use el
+[formulario de apelación de ClawHub](https://appeals.openclaw.ai/) si cree que se trata de un
 error.
 
 ## Inicio de sesión en la CLI
 
-El flujo predeterminado de inicio de sesión de la CLI abre tu navegador:
+El flujo predeterminado de inicio de sesión de la CLI abre el navegador:
 
 ```bash
 clawhub login
 clawhub whoami
 ```
 
-Qué ocurre:
+Qué sucede:
 
-1. La CLI inicia un servidor de callback temporal en `127.0.0.1`.
-2. Tu navegador abre la página de inicio de sesión de ClawHub.
-3. Después del inicio de sesión con GitHub, ClawHub crea un token de API.
-4. El navegador redirige de vuelta al callback local.
-5. La CLI almacena el token en tu archivo de configuración de ClawHub.
+1. La CLI inicia un servidor de devolución de llamada temporal en `127.0.0.1`.
+2. El navegador abre la página de inicio de sesión de ClawHub.
+3. Después de iniciar sesión con GitHub, ClawHub crea un token de API.
+4. El navegador redirige de vuelta a la devolución de llamada local.
+5. La CLI almacena el token en el archivo de configuración de ClawHub.
 
-Si tu navegador no puede alcanzar el callback local debido a reglas de firewall, VPN o
-proxy, usa el flujo de token sin interfaz gráfica.
+Si el navegador no puede acceder a la devolución de llamada local debido a reglas del firewall, la VPN o el
+proxy, use el flujo de token sin interfaz gráfica.
 
 ## Inicio de sesión sin interfaz gráfica
 
-Crea un token en la interfaz web de ClawHub y luego pásalo a la CLI:
+Cree un token en la interfaz web de ClawHub y, a continuación, páselo a la CLI:
 
 ```bash
 clawhub login --token clh_...
 ```
 
-Usa este flujo para servidores, trabajos de CI o entornos solo de terminal.
+Use este flujo para servidores, trabajos de CI o entornos que solo disponen de terminal.
 
-Para shells remotos donde puedes abrir un navegador en otro lugar, ejecuta:
+Para shells remotos en los que pueda abrir un navegador en otro lugar, ejecute:
 
 ```bash
 clawhub login --device
 ```
 
-La CLI imprime un código de un solo uso y espera mientras lo autorizas en
+La CLI muestra un código de un solo uso y espera mientras se autoriza en
 `https://clawhub.ai/cli/device`.
 
 ## Almacenamiento de tokens
@@ -76,13 +77,13 @@ Rutas de configuración predeterminadas:
 - Linux/XDG: `$XDG_CONFIG_HOME/clawhub/config.json` o `~/.config/clawhub/config.json`
 - Windows: `%APPDATA%\\clawhub\\config.json`
 
-Sobrescribe la ruta con:
+Para sustituir la ruta, use:
 
 ```bash
 export CLAWHUB_CONFIG_PATH=/path/to/config.json
 ```
 
-Imprime el token almacenado para configurar CI con:
+Para configurar la CI, muestre el token almacenado con:
 
 ```bash
 clawhub token
@@ -90,12 +91,12 @@ clawhub token
 
 ## Revocación
 
-Puedes revocar tokens de API en la interfaz web de ClawHub.
+Puede revocar los tokens de API en la interfaz web de ClawHub.
 
-Los tokens revocados, no válidos o ausentes devuelven `401 Unauthorized`. Inicia sesión de nuevo
-con `clawhub login` o proporciona un token nuevo con `clawhub login --token`.
+Los tokens revocados, no válidos o ausentes devuelven `401 Unauthorized`. Vuelva a iniciar sesión
+con `clawhub login` o proporcione un token nuevo con `clawhub login --token`.
 
-Las cuentas eliminadas, bloqueadas o deshabilitadas no pueden seguir usando tokens de API existentes.
-Si tu cuenta fue bloqueada o deshabilitada, usa el
-[formulario de apelación de ClawHub](https://appeals.openclaw.ai/) si crees que se trata de un
+Las cuentas eliminadas, bloqueadas o deshabilitadas no pueden seguir usando los tokens de API existentes.
+Si su cuenta fue bloqueada o deshabilitada, use el
+[formulario de apelación de ClawHub](https://appeals.openclaw.ai/) si cree que se trata de un
 error.

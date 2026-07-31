@@ -1,27 +1,28 @@
 ---
 read_when:
-    - Sie installieren, konfigurieren oder überprüfen das Voyage-Plugin.
-summary: Fügt Unterstützung für Provider von Speicher-Embeddings hinzu.
+    - Sie installieren, konfigurieren oder überprüfen das voyage-Plugin.
+summary: Fügt Unterstützung für Provider von Memory-Embeddings hinzu.
 title: Voyage-Plugin
 x-i18n:
-    generated_at: "2026-07-12T01:58:48Z"
+    generated_at: "2026-07-26T18:00:25Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: ba1dcf8d6f7c45c01f855797333e9d510bc822b2f7442c5a0727ac2a208ffe36
+    source_hash: 30470935000d501180467314647efe876dc956ae57e53e13279e7670aea554e3
     source_path: plugins/reference/voyage.md
     workflow: 16
 ---
 
 # Voyage-Plugin
 
-Fügt Unterstützung für Provider von Memory-Embeddings hinzu.
+Fügt Unterstützung für einen Provider für Speicher-Embeddings hinzu.
 
-## Bereitstellung
+## Distribution
 
 - Paket: `@openclaw/voyage-provider`
 - Installationsweg: in OpenClaw enthalten
 
-## Schnittstelle
+## Oberfläche
 
-Verträge: memoryEmbeddingProviders
+Verträge: `memoryEmbeddingProviders`

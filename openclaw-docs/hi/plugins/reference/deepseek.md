@@ -1,21 +1,22 @@
 ---
 read_when:
     - आप deepseek Plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
-summary: OpenClaw में DeepSeek मॉडल प्रदाता समर्थन जोड़ता है।
+summary: OpenClaw में DeepSeek मॉडल प्रदाता का समर्थन जोड़ता है।
 title: DeepSeek Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:43:17Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:38:12Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c391a9d87d4de66f279f0b851868857b1a57e328feede3f5833e5e323ea5e281
+    source_hash: 9fba8a1a64bc216923b4ea893cf89f7c13874afaa54fed024ccd281c26cb3d02
     source_path: plugins/reference/deepseek.md
     workflow: 16
 ---
 
 # DeepSeek Plugin
 
-OpenClaw में DeepSeek मॉडल प्रदाता समर्थन जोड़ता है।
+OpenClaw में DeepSeek मॉडल प्रदाता का समर्थन जोड़ता है।
 
 ## वितरण
 
@@ -24,7 +25,7 @@ OpenClaw में DeepSeek मॉडल प्रदाता समर्थ�
 
 ## सतह
 
-providers: deepseek
+प्रदाता: `deepseek`; अनुबंध: `usageProviders`
 
 ## संबंधित दस्तावेज़
 

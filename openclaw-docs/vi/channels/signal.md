@@ -2,25 +2,26 @@
 read_when:
     - Thiết lập hỗ trợ Signal
     - Gỡ lỗi gửi/nhận Signal
-summary: Hỗ trợ Signal thông qua signal-cli (daemon gốc hoặc container bbernhard), các phương thức thiết lập và mô hình số điện thoại
+summary: Hỗ trợ Signal thông qua signal-cli (daemon gốc hoặc container bbernhard), các đường dẫn thiết lập và mô hình số điện thoại
 title: Signal
 x-i18n:
-    generated_at: "2026-07-12T07:40:52Z"
+    generated_at: "2026-07-19T05:42:31Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: db2497d0d6dcdc61cf9f7388929f9ee107602c9ed97bd248e20e67519e878b8b
+    source_hash: 0bbae246e797f79e68b1b217006450b557021a5587467975b79840672ac34d75
     source_path: channels/signal.md
     workflow: 16
 ---
 
-Signal là một plugin kênh có thể tải xuống (`@openclaw/signal`). Gateway giao tiếp với `signal-cli` qua HTTP: sử dụng daemon gốc (JSON-RPC + SSE) hoặc container [bbernhard/signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api) (REST + WebSocket). OpenClaw không nhúng libsignal.
+Signal là một Plugin kênh có thể tải xuống (`@openclaw/signal`). Gateway giao tiếp với `signal-cli` qua HTTP: daemon gốc (JSON-RPC + SSE) hoặc container [bbernhard/signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api) (REST + WebSocket). OpenClaw không nhúng libsignal.
 
 ## Mô hình số điện thoại (hãy đọc phần này trước)
 
 - Gateway kết nối với một **thiết bị Signal**: tài khoản `signal-cli`.
-- Chạy bot trên **tài khoản Signal cá nhân của bạn** sẽ khiến bot bỏ qua tin nhắn của chính bạn (để chống lặp).
-- Để có trải nghiệm "tôi nhắn tin cho bot và bot trả lời", hãy dùng một **số điện thoại riêng cho bot**.
+- Chạy bot trên **tài khoản Signal cá nhân của bạn** khiến bot bỏ qua tin nhắn của chính bạn (bảo vệ chống vòng lặp).
+- Để "tôi nhắn tin cho bot và bot trả lời", hãy dùng một **số điện thoại riêng cho bot**.
 
 ## Cài đặt
 
@@ -28,15 +29,15 @@ Signal là một plugin kênh có thể tải xuống (`@openclaw/signal`). Gate
 openclaw plugins install @openclaw/signal
 ```
 
-Đặc tả plugin không có tiền tố sẽ thử ClawHub trước, sau đó dự phòng sang npm. Buộc sử dụng một nguồn bằng `openclaw plugins install clawhub:@openclaw/signal` hoặc `npm:@openclaw/signal`. `plugins install` đăng ký và bật plugin; không cần bước `enable` riêng. Xem [Plugin](/vi/tools/plugin) để biết các quy tắc cài đặt chung.
+Đặc tả Plugin dạng rút gọn sẽ thử ClawHub trước, sau đó dự phòng sang npm. Buộc dùng một nguồn bằng `openclaw plugins install clawhub:@openclaw/signal` hoặc `npm:@openclaw/signal`. `plugins install` đăng ký và bật Plugin; không cần bước `enable` riêng. Xem [Plugin](/vi/tools/plugin) để biết các quy tắc cài đặt chung.
 
 ## Thiết lập nhanh
 
 <Steps>
   <Step title="Chọn một số điện thoại">
-    Sử dụng một **số Signal riêng** cho bot (khuyến nghị).
+    Dùng một **số Signal riêng** cho bot (khuyến nghị).
   </Step>
-  <Step title="Cài đặt plugin">
+  <Step title="Cài đặt Plugin">
     ```bash
     openclaw plugins install @openclaw/signal
     ```
@@ -45,18 +46,21 @@ openclaw plugins install @openclaw/signal
     ```bash
     openclaw channels add
     ```
-    Trình hướng dẫn phát hiện xem `signal-cli` có nằm trong `PATH` hay không và khi thiếu, sẽ đề nghị cài đặt: tải xuống bản dựng GraalVM gốc chính thức trên Linux x86-64 hoặc cài đặt qua Homebrew trên macOS và các kiến trúc khác. Sau đó, trình hướng dẫn yêu cầu nhập số điện thoại của bot và đường dẫn `signal-cli`.
-  </Step>
-  <Step title="Liên kết hoặc đăng ký tài khoản">
-    - **Liên kết bằng mã QR (nhanh nhất):** `signal-cli link -n "OpenClaw"`, sau đó quét bằng Signal. Xem [Phương án A](#setup-path-a-link-existing-signal-account-qr).
-    - **Đăng ký qua SMS:** số điện thoại riêng cùng captcha + xác minh SMS. Xem [Phương án B](#setup-path-b-register-dedicated-bot-number-sms-linux).
+    Trình hướng dẫn phát hiện `signal-cli` có nằm trên `PATH` hay không và nếu thiếu sẽ đề nghị cài đặt: tải bản dựng GraalVM gốc chính thức trên Linux x86-64 hoặc cài đặt qua Homebrew trên macOS và các kiến trúc khác. Sau đó, trình hướng dẫn yêu cầu số điện thoại của bot và đường dẫn `signal-cli`.
+
+    Đối với thiết lập không tương tác, `openclaw channels add --channel signal` cũng chấp nhận `--signal-number <e164>` cho số điện thoại của bot, cùng với `--http-host <host>` và `--http-port <port>` cho điểm cuối daemon Signal (mặc định là `127.0.0.1:8080`).
 
   </Step>
-  <Step title="Xác minh và ghép cặp">
+  <Step title="Liên kết hoặc đăng ký tài khoản">
+    - **Liên kết bằng mã QR (nhanh nhất):** `signal-cli link -n "OpenClaw"`, sau đó quét bằng Signal. Xem [Lộ trình A](#setup-path-a-link-existing-signal-account-qr).
+    - **Đăng ký bằng SMS:** số điện thoại riêng với captcha + xác minh qua SMS. Xem [Lộ trình B](#setup-path-b-register-dedicated-bot-number-sms-linux).
+
+  </Step>
+  <Step title="Xác minh và ghép đôi">
     ```bash
     openclaw gateway call channels.status --params '{"probe":true}'
     ```
-    Gửi tin nhắn trực tiếp đầu tiên và phê duyệt ghép cặp: `openclaw pairing approve signal <CODE>`.
+    Gửi tin nhắn trực tiếp đầu tiên và phê duyệt ghép đôi: `openclaw pairing approve signal <CODE>`.
   </Step>
 </Steps>
 
@@ -76,31 +80,31 @@ Cấu hình tối thiểu:
 }
 ```
 
-| Trường       | Mô tả                                                       |
-| ------------ | ----------------------------------------------------------- |
-| `account`    | Số điện thoại bot ở định dạng E.164 (`+15551234567`)        |
-| `cliPath`    | Đường dẫn đến `signal-cli` (`signal-cli` nếu có trong `PATH`) |
-| `configPath` | Thư mục cấu hình signal-cli được truyền dưới dạng `--config` |
-| `dmPolicy`   | Chính sách truy cập tin nhắn trực tiếp (khuyến nghị `pairing`) |
+| Trường        | Mô tả                                       |
+| ------------ | ------------------------------------------------- |
+| `account`    | Số điện thoại của bot ở định dạng E.164 (`+15551234567`) |
+| `cliPath`    | Đường dẫn đến `signal-cli` (`signal-cli` nếu nằm trên `PATH`)  |
+| `configPath` | Thư mục cấu hình signal-cli được truyền dưới dạng `--config`        |
+| `dmPolicy`   | Chính sách truy cập tin nhắn trực tiếp (khuyến nghị `pairing`)          |
 | `allowFrom`  | Các số điện thoại hoặc giá trị `uuid:<id>` được phép gửi tin nhắn trực tiếp |
 
-Hỗ trợ nhiều tài khoản: sử dụng `channels.signal.accounts` với cấu hình riêng cho từng tài khoản và `name` tùy chọn. Xem [Kênh nhiều tài khoản](/vi/gateway/config-channels#multi-account-all-channels) để biết mẫu dùng chung.
+Hỗ trợ nhiều tài khoản: dùng `channels.signal.accounts` với cấu hình cho từng tài khoản và `name` tùy chọn. Xem [Kênh nhiều tài khoản](/vi/gateway/config-channels#multi-account-all-channels) để biết mẫu dùng chung.
 
 ## Chức năng
 
-- Định tuyến xác định: câu trả lời luôn được gửi trở lại Signal.
-- Các tin nhắn trực tiếp dùng chung phiên chính của tác nhân; các nhóm được tách biệt (`agent:<agentId>:signal:group:<groupId>`).
-- Theo mặc định, Signal có thể ghi các cập nhật cấu hình được kích hoạt bởi `/config set|unset` (yêu cầu `commands.config: true`). Tắt bằng `channels.signal.configWrites: false`.
+- Định tuyến tất định: câu trả lời luôn được gửi lại qua Signal.
+- Tin nhắn trực tiếp dùng chung phiên chính của tác nhân; các nhóm được cô lập (`agent:<agentId>:signal:group:<groupId>`).
+- Theo mặc định, Signal có thể ghi các bản cập nhật cấu hình do `/config set|unset` kích hoạt (yêu cầu `commands.config: true`). Tắt bằng `channels.signal.configWrites: false`.
 
-## Phương án thiết lập A: liên kết tài khoản Signal hiện có (QR)
+## Lộ trình thiết lập A: liên kết tài khoản Signal hiện có (QR)
 
-1. Cài đặt `signal-cli` (bản dựng JVM hoặc bản dựng gốc), hoặc để `openclaw channels add` cài đặt giúp bạn.
+1. Cài đặt `signal-cli` (bản dựng JVM hoặc gốc), hoặc để `openclaw channels add` cài đặt thay bạn.
 2. Liên kết tài khoản bot: `signal-cli link -n "OpenClaw"`, sau đó quét mã QR trong Signal.
 3. Cấu hình Signal và khởi động Gateway.
 
-## Phương án thiết lập B: đăng ký số điện thoại riêng cho bot (SMS, Linux)
+## Lộ trình thiết lập B: đăng ký số điện thoại riêng cho bot (SMS, Linux)
 
-Sử dụng phương án này cho một số điện thoại riêng của bot thay vì liên kết tài khoản ứng dụng Signal hiện có. Quy trình dưới đây đã được kiểm thử trên Ubuntu 24.
+Dùng cách này cho số điện thoại riêng của bot thay vì liên kết một tài khoản ứng dụng Signal hiện có. Quy trình dưới đây đã được kiểm thử trên Ubuntu 24.
 
 1. Chuẩn bị một số điện thoại có thể nhận SMS (hoặc xác minh bằng cuộc gọi thoại đối với điện thoại cố định). Số điện thoại riêng cho bot giúp tránh xung đột tài khoản/phiên.
 2. Cài đặt `signal-cli` trên máy chủ Gateway:
@@ -113,7 +117,7 @@ sudo ln -sf /opt/signal-cli /usr/local/bin/
 signal-cli --version
 ```
 
-Nếu sử dụng bản dựng JVM (`signal-cli-${VERSION}.tar.gz`), hãy cài đặt JRE trước. Duy trì `signal-cli` ở phiên bản mới nhất; dự án nguồn lưu ý rằng các bản phát hành cũ có thể ngừng hoạt động khi API máy chủ Signal thay đổi.
+Nếu dùng bản dựng JVM (`signal-cli-${VERSION}.tar.gz`), hãy cài đặt JRE trước. Luôn cập nhật `signal-cli`; tài liệu thượng nguồn lưu ý rằng các bản phát hành cũ có thể ngừng hoạt động khi API máy chủ Signal thay đổi.
 
 3. Đăng ký và xác minh số điện thoại:
 
@@ -121,11 +125,11 @@ Nếu sử dụng bản dựng JVM (`signal-cli-${VERSION}.tar.gz`), hãy cài �
 signal-cli -a +<BOT_PHONE_NUMBER> register
 ```
 
-Nếu yêu cầu captcha (cần quyền truy cập trình duyệt để hoàn thành bước này):
+Nếu cần captcha (cần truy cập trình duyệt để hoàn thành bước này):
 
 1. Mở `https://signalcaptchas.org/registration/generate.html`.
-2. Hoàn thành captcha, sao chép đích liên kết `signalcaptcha://...` từ "Open Signal".
-3. Khi có thể, hãy chạy từ cùng địa chỉ IP bên ngoài với phiên trình duyệt (mã thông báo captcha hết hạn nhanh chóng).
+2. Hoàn thành captcha, sao chép đích của liên kết `signalcaptcha://...` từ "Open Signal".
+3. Khi có thể, hãy chạy từ cùng địa chỉ IP bên ngoài với phiên trình duyệt (token captcha hết hạn nhanh).
 4. Đăng ký và xác minh ngay lập tức:
 
 ```bash
@@ -144,16 +148,16 @@ openclaw doctor
 openclaw channels status --probe
 ```
 
-5. Ghép cặp người gửi tin nhắn trực tiếp:
-   - Gửi một tin nhắn bất kỳ đến số điện thoại của bot.
+5. Ghép đôi người gửi tin nhắn trực tiếp:
+   - Gửi bất kỳ tin nhắn nào đến số điện thoại của bot.
    - Phê duyệt trên máy chủ: `openclaw pairing approve signal <PAIRING_CODE>`.
    - Lưu số điện thoại của bot làm liên hệ trên điện thoại để tránh "Unknown contact".
 
 <Warning>
-Việc đăng ký tài khoản số điện thoại bằng `signal-cli` có thể hủy xác thực phiên ứng dụng Signal chính của số điện thoại đó. Nên sử dụng một số điện thoại riêng cho bot hoặc dùng chế độ liên kết bằng mã QR để giữ nguyên thiết lập ứng dụng hiện có trên điện thoại.
+Việc đăng ký tài khoản số điện thoại bằng `signal-cli` có thể hủy xác thực phiên ứng dụng Signal chính của số đó. Nên dùng một số điện thoại riêng cho bot hoặc chế độ liên kết bằng mã QR để giữ nguyên thiết lập ứng dụng điện thoại hiện có.
 </Warning>
 
-Tài liệu tham khảo từ dự án nguồn:
+Tài liệu tham khảo thượng nguồn:
 
 - README của `signal-cli`: `https://github.com/AsamK/signal-cli`
 - Quy trình captcha: `https://github.com/AsamK/signal-cli/wiki/Registration-with-captcha`
@@ -161,7 +165,7 @@ Tài liệu tham khảo từ dự án nguồn:
 
 ## Chế độ daemon bên ngoài (httpUrl)
 
-Để tự quản lý `signal-cli` (khởi động nguội JVM chậm, khởi tạo container, CPU dùng chung), hãy chạy daemon riêng biệt và trỏ OpenClaw đến daemon đó:
+Để tự quản lý `signal-cli` (khởi động nguội JVM chậm, khởi tạo container, CPU dùng chung), hãy chạy daemon riêng và trỏ OpenClaw đến daemon đó:
 
 ```json5
 {
@@ -174,11 +178,11 @@ Tài liệu tham khảo từ dự án nguồn:
 }
 ```
 
-Điều này bỏ qua việc tự động khởi chạy tiến trình và khoảng chờ khởi động của OpenClaw. Đối với các lần khởi động tự động chậm, hãy đặt `channels.signal.startupTimeoutMs`.
+Cách này bỏ qua việc tự động tạo tiến trình và thời gian chờ khởi động của OpenClaw. Đối với các lần khởi động tự động tạo tiến trình nhưng chậm, hãy đặt `channels.signal.startupTimeoutMs`.
 
 ## Chế độ container (bbernhard/signal-cli-rest-api)
 
-Thay vì chạy `signal-cli` theo cách gốc, hãy sử dụng container Docker [bbernhard/signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api), cung cấp một giao diện REST + WebSocket bao quanh `signal-cli`.
+Thay vì chạy `signal-cli` theo cách gốc, hãy dùng container Docker [bbernhard/signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api), bao bọc `signal-cli` phía sau giao diện REST + WebSocket.
 
 Yêu cầu:
 
@@ -214,82 +218,109 @@ Cấu hình OpenClaw:
 }
 ```
 
-`apiMode` kiểm soát giao thức mà OpenClaw sử dụng:
+`apiMode` kiểm soát giao thức OpenClaw sử dụng:
 
-| Giá trị       | Hành vi                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------- |
-| `"auto"`      | (Mặc định) Thăm dò cả hai phương thức truyền tải; luồng truyền trực tiếp xác thực khả năng nhận qua WebSocket của container |
-| `"native"`    | Buộc dùng signal-cli gốc (JSON-RPC tại `/api/v1/rpc`, SSE tại `/api/v1/events`)             |
-| `"container"` | Buộc dùng container bbernhard (REST tại `/v2/send`, WebSocket tại `/v1/receive/{account}`)  |
+| Giá trị         | Hành vi                                                                             |
+| ------------- | ------------------------------------------------------------------------------------ |
+| `"auto"`      | (Mặc định) Thăm dò cả hai phương thức truyền tải; luồng dữ liệu xác thực khả năng nhận qua WebSocket của container    |
+| `"native"`    | Buộc dùng signal-cli gốc (JSON-RPC tại `/api/v1/rpc`, SSE tại `/api/v1/events`)         |
+| `"container"` | Buộc dùng container bbernhard (REST tại `/v2/send`, WebSocket tại `/v1/receive/{account}`) |
 
-Khi `apiMode` là `"auto"`, OpenClaw lưu chế độ đã phát hiện vào bộ nhớ đệm trong 30 giây cho mỗi URL daemon để tránh thăm dò lặp lại (chế độ gốc được ưu tiên khi cả hai phương thức truyền tải đều hoạt động tốt). Việc nhận qua container chỉ được chọn cho luồng truyền trực tiếp sau khi `/v1/receive/{account}` nâng cấp lên WebSocket, yêu cầu `MODE=json-rpc`.
+Khi `apiMode` là `"auto"`, OpenClaw lưu chế độ đã phát hiện vào bộ nhớ đệm trong 30 giây cho mỗi URL daemon để tránh thăm dò lặp lại (chế độ gốc được ưu tiên khi cả hai phương thức truyền tải đều hoạt động tốt). Chế độ nhận của container chỉ được chọn để truyền luồng sau khi `/v1/receive/{account}` nâng cấp lên WebSocket, việc này yêu cầu `MODE=json-rpc`.
 
-Chế độ container hỗ trợ các thao tác Signal giống chế độ gốc khi container cung cấp các API tương ứng: gửi, nhận, tệp đính kèm, chỉ báo đang nhập, biên nhận đã đọc/đã xem, phản ứng, nhóm và văn bản có kiểu định dạng. OpenClaw chuyển đổi các lệnh gọi RPC Signal gốc thành tải trọng REST của container, bao gồm ID nhóm `group.{base64(internal_id)}` và `text_mode: "styled"` cho văn bản được định dạng.
+Chế độ container hỗ trợ các thao tác Signal giống như chế độ gốc khi container cung cấp các API tương ứng: gửi, nhận, tệp đính kèm, chỉ báo đang nhập, biên nhận đã đọc/đã xem, phản ứng, nhóm và văn bản có định dạng. OpenClaw chuyển đổi các lệnh gọi RPC Signal gốc thành payload REST của container, bao gồm ID nhóm `group.{base64(internal_id)}` và `text_mode: "styled"` cho văn bản có định dạng.
 
 Lưu ý vận hành:
 
-- Sử dụng `autoStart: false` với chế độ container; OpenClaw không nên khởi chạy daemon gốc khi chọn `apiMode: "container"`.
-- Sử dụng `MODE=json-rpc` để nhận tin nhắn. `MODE=normal` có thể khiến `/v1/about` trông như đang hoạt động tốt, nhưng `/v1/receive/{account}` sẽ không nâng cấp lên WebSocket, vì vậy OpenClaw sẽ không chọn luồng nhận qua container ở chế độ `auto`.
-- Đặt `apiMode: "container"` khi `httpUrl` trỏ đến API REST bbernhard, `"native"` khi trỏ đến JSON-RPC/SSE của `signal-cli` gốc và `"auto"` khi phương thức triển khai có thể thay đổi.
-- Việc tải xuống tệp đính kèm ở chế độ container tuân theo cùng giới hạn byte phương tiện như chế độ gốc. Các phản hồi quá lớn bị từ chối trước khi được lưu toàn bộ vào bộ đệm khi máy chủ gửi `Content-Length`; nếu không, chúng bị từ chối trong quá trình truyền trực tiếp.
+- Dùng `autoStart: false` với chế độ container; OpenClaw không nên tạo daemon gốc khi `apiMode: "container"` được chọn.
+- Dùng `MODE=json-rpc` để nhận. `MODE=normal` có thể khiến `/v1/about` có vẻ hoạt động tốt, nhưng `/v1/receive/{account}` sẽ không nâng cấp lên WebSocket, vì vậy OpenClaw sẽ không chọn truyền luồng nhận của container trong chế độ `auto`.
+- Đặt `apiMode: "container"` khi `httpUrl` trỏ đến API REST bbernhard, `"native"` khi nó trỏ đến JSON-RPC/SSE `signal-cli` gốc và `"auto"` khi cách triển khai có thể thay đổi.
+- Việc tải xuống tệp đính kèm trong container tuân theo cùng giới hạn số byte phương tiện như chế độ gốc. Các phản hồi quá lớn sẽ bị từ chối trước khi được đệm hoàn toàn khi máy chủ gửi `Content-Length`, hoặc trong khi truyền luồng ở các trường hợp khác.
 
 ## Kiểm soát truy cập (tin nhắn trực tiếp + nhóm)
 
 Tin nhắn trực tiếp:
 
 - Mặc định: `channels.signal.dmPolicy = "pairing"`.
-- Người gửi không xác định nhận được mã ghép cặp; tin nhắn bị bỏ qua cho đến khi được phê duyệt (mã hết hạn sau 1 giờ).
+- Người gửi không xác định nhận được mã ghép đôi; tin nhắn bị bỏ qua cho đến khi được phê duyệt (mã hết hạn sau 1 giờ).
 - Phê duyệt qua `openclaw pairing list signal` và `openclaw pairing approve signal <CODE>`.
-- Ghép cặp là phương thức trao đổi mã thông báo mặc định cho tin nhắn trực tiếp Signal. Chi tiết: [Ghép cặp](/vi/channels/pairing)
+- Ghép đôi là cơ chế trao đổi token mặc định cho tin nhắn trực tiếp Signal. Chi tiết: [Ghép đôi](/vi/channels/pairing)
 - Người gửi chỉ có UUID (từ `sourceUuid`) được lưu dưới dạng `uuid:<id>` trong `channels.signal.allowFrom`.
 
 Nhóm:
 
 - `channels.signal.groupPolicy = open | allowlist | disabled`.
-- `channels.signal.groupAllowFrom` kiểm soát những nhóm hoặc người gửi nào có thể kích hoạt phản hồi nhóm khi đặt `allowlist`; mục nhập có thể là ID nhóm Signal (dạng thô, `group:<id>` hoặc `signal:group:<id>`), số điện thoại người gửi, giá trị `uuid:<id>` hoặc `*`.
+- `channels.signal.groupAllowFrom` kiểm soát những nhóm hoặc người gửi nào có thể kích hoạt câu trả lời trong nhóm khi `allowlist` được đặt; mục nhập có thể là ID nhóm Signal (thô, `group:<id>` hoặc `signal:group:<id>`), số điện thoại người gửi, giá trị `uuid:<id>` hoặc `*`.
 - `channels.signal.groups["<group-id>" | "*"]` có thể ghi đè hành vi nhóm bằng `requireMention`, `tools` và `toolsBySender`.
-- Sử dụng `channels.signal.accounts.<id>.groups` để ghi đè theo từng tài khoản trong thiết lập nhiều tài khoản.
-- Việc đưa một nhóm vào danh sách cho phép thông qua `groupAllowFrom` không tự động tắt yêu cầu đề cập. Một mục `channels.signal.groups["<group-id>"]` được cấu hình cụ thể sẽ xử lý mọi tin nhắn nhóm trừ khi `requireMention: true` được đặt rõ ràng.
-- Lưu ý khi chạy: nếu hoàn toàn không có `channels.signal`, hệ thống khi chạy sẽ dự phòng sang `groupPolicy="allowlist"` để kiểm tra nhóm (ngay cả khi đã đặt `channels.defaults.groupPolicy`).
+- Dùng `channels.signal.accounts.<id>.groups` để ghi đè theo từng tài khoản trong thiết lập nhiều tài khoản.
+- Việc thêm một nhóm Signal vào danh sách cho phép thông qua `groupAllowFrom` không tự động tắt cơ chế yêu cầu đề cập. Một mục `channels.signal.groups["<group-id>"]` được cấu hình cụ thể sẽ xử lý mọi tin nhắn nhóm trừ khi `requireMention=true` được đặt.
+- Với `requireMention=true`, các lượt @đề cập gốc của Signal được đối chiếu từ siêu dữ liệu đề cập có cấu trúc với số điện thoại hoặc `accountUuid` của tài khoản bot. Các `mentionPatterns` đã cấu hình vẫn là phương án dự phòng bằng văn bản thuần túy.
+- Lưu ý khi chạy: nếu hoàn toàn thiếu `channels.signal`, thời gian chạy sẽ dự phòng sang `groupPolicy="allowlist"` để kiểm tra nhóm (ngay cả khi `channels.defaults.groupPolicy` được đặt).
+
+Nhóm yêu cầu đề cập với ngữ cảnh giới hạn:
+
+```json5
+{
+  channels: {
+    signal: {
+      account: "+15551234567",
+      accountUuid: "bot-signal-uuid",
+      groupPolicy: "allowlist",
+      groupAllowFrom: ["group:<signal-group-id>"],
+      historyLimit: 8,
+      groups: {
+        "<signal-group-id>": { requireMention: true },
+      },
+    },
+  },
+  messages: {
+    groupChat: {
+      mentionPatterns: ["\\bopenclaw\\b"],
+    },
+  },
+}
+```
+
+Các tin nhắn nhóm được cho phép nhưng không đề cập đến bot sẽ không nhận được phản hồi và chỉ được lưu trong cửa sổ lịch sử chờ có giới hạn. Khi một lượt @đề cập gốc hoặc đề cập bằng văn bản dự phòng sau đó kích hoạt bot, OpenClaw sẽ đưa ngữ cảnh gần đây đó vào và trả lời trong cùng nhóm. Phần nội dung của tệp đính kèm bị bỏ qua sẽ không được tải xuống; chúng có thể chỉ xuất hiện dưới dạng phần giữ chỗ phương tiện nhỏ gọn trong ngữ cảnh chờ.
 
 ## Cách hoạt động (hành vi)
 
-- Chế độ gốc: `signal-cli` chạy dưới dạng daemon; Gateway đọc sự kiện qua SSE.
-- Chế độ container: Gateway gửi qua API REST và nhận qua WebSocket.
+- Chế độ gốc: `signal-cli` chạy dưới dạng daemon; Gateway đọc các sự kiện qua SSE.
+- Chế độ vùng chứa: Gateway gửi qua REST API và nhận qua WebSocket.
 - Tin nhắn đến được chuẩn hóa thành phong bì kênh dùng chung.
-- Câu trả lời luôn được định tuyến trở lại cùng số điện thoại hoặc nhóm.
-- Câu trả lời cho tin nhắn đến bao gồm siêu dữ liệu trích dẫn gốc của Signal khi phần phụ trợ chấp nhận dấu thời gian và tác giả của tin nhắn đến; nếu thiếu hoặc từ chối siêu dữ liệu trích dẫn, OpenClaw gửi câu trả lời dưới dạng tin nhắn thông thường.
-- Cấu hình việc sử dụng trích dẫn gốc bằng `channels.signal.replyToMode = off | first | all | batched` hoặc `channels.signal.replyToModeByChatType.direct/group` để ghi đè theo từng loại cuộc trò chuyện. Các giá trị cấp tài khoản trong `channels.signal.accounts.<id>` được ưu tiên.
+- Phản hồi luôn được định tuyến trở lại cùng số hoặc nhóm.
+- Phản hồi cho tin nhắn đến bao gồm siêu dữ liệu trích dẫn Signal gốc khi backend chấp nhận dấu thời gian và tác giả của tin nhắn đến; nếu siêu dữ liệu trích dẫn bị thiếu hoặc bị từ chối, OpenClaw sẽ gửi phản hồi dưới dạng tin nhắn thông thường.
+- Cấu hình việc sử dụng trích dẫn gốc bằng `channels.signal.replyToMode = off | first | all | batched`, hoặc `channels.signal.replyToModeByChatType.direct/group` để ghi đè theo từng loại cuộc trò chuyện. Các giá trị cấp tài khoản trong `channels.signal.accounts.<id>` được ưu tiên.
 
 ## Phương tiện + giới hạn
 
 - Văn bản gửi đi được chia thành các đoạn theo `channels.signal.textChunkLimit` (mặc định 4000).
-- Tùy chọn chia đoạn theo dòng mới: đặt `channels.signal.chunkMode="newline"` để tách tại các dòng trống (ranh giới đoạn văn) trước khi chia theo độ dài.
-- Có hỗ trợ tệp đính kèm (dữ liệu base64 được lấy từ `signal-cli`).
-- Tệp đính kèm ghi chú thoại sử dụng tên tệp từ `signal-cli` làm MIME dự phòng khi thiếu `contentType`, để quá trình chuyển âm thanh thành văn bản vẫn có thể phân loại bản ghi nhớ thoại AAC.
+- Tùy chọn chia đoạn theo dòng mới: đặt `channels.signal.streaming.chunkMode="newline"` để chia tại các dòng trống (ranh giới đoạn văn) trước khi chia theo độ dài.
+- Có hỗ trợ tệp đính kèm (base64 được truy xuất từ `signal-cli`).
+- Tệp đính kèm ghi chú thoại sử dụng tên tệp `signal-cli` làm phương án MIME dự phòng khi thiếu `contentType`, để tính năng phiên âm vẫn có thể phân loại các bản ghi nhớ thoại AAC.
 - Giới hạn phương tiện mặc định: `channels.signal.mediaMaxMb` (mặc định 8).
-- Sử dụng `channels.signal.ignoreAttachments` để bỏ qua việc tải xuống phương tiện.
-- Ngữ cảnh lịch sử nhóm sử dụng `channels.signal.historyLimit` (hoặc `channels.signal.accounts.*.historyLimit`), với giá trị dự phòng là `messages.groupChat.historyLimit`. Đặt thành `0` để tắt (mặc định 50).
+- Dùng `channels.signal.ignoreAttachments` để bỏ qua việc tải phương tiện xuống.
+- Ngữ cảnh lịch sử nhóm sử dụng `channels.signal.historyLimit` (hoặc `channels.signal.accounts.*.historyLimit`), dự phòng về `messages.groupChat.historyLimit`. Đặt `0` để tắt (mặc định 50).
 
-## Chỉ báo đang nhập + xác nhận đã đọc
+## Chỉ báo nhập + xác nhận đã đọc
 
 - **Chỉ báo đang nhập**: OpenClaw gửi tín hiệu đang nhập qua `signal-cli sendTyping` và làm mới chúng trong khi đang tạo phản hồi.
-- **Xác nhận đã đọc**: khi `channels.signal.sendReadReceipts` là true, OpenClaw chuyển tiếp xác nhận đã đọc cho các tin nhắn trực tiếp được cho phép.
+- **Xác nhận đã đọc**: khi `channels.signal.sendReadReceipts` là true, OpenClaw chuyển tiếp xác nhận đã đọc cho các DM được cho phép.
 - `signal-cli` không cung cấp xác nhận đã đọc cho nhóm.
 
 ## Phản ứng trạng thái vòng đời
 
-Đặt `messages.statusReactions.enabled: true` để Signal hiển thị vòng đời phản ứng dùng chung gồm đã xếp hàng/đang suy nghĩ/công cụ/compaction/hoàn tất/lỗi cho các lượt đến. Signal sử dụng dấu thời gian của tin nhắn đến làm đích phản ứng; phản ứng nhóm được gửi bằng ID nhóm Signal cùng với người gửi ban đầu làm tác giả đích.
+Đặt `messages.statusReactions.enabled: true` để Signal hiển thị vòng đời phản ứng dùng chung gồm đang xếp hàng/đang suy nghĩ/công cụ/Compaction/hoàn tất/lỗi trên các lượt đến. Signal sử dụng dấu thời gian của tin nhắn đến làm mục tiêu phản ứng; phản ứng nhóm được gửi với ID nhóm Signal cùng người gửi ban đầu làm tác giả mục tiêu.
 
-Phản ứng trạng thái cũng yêu cầu một phản ứng xác nhận và `messages.ackReactionScope` tương ứng (`direct`, `group-all`, `group-mentions` hoặc `all`). Đặt `channels.signal.reactionLevel: "off"` để tắt phản ứng trạng thái Signal.
+Phản ứng trạng thái cũng yêu cầu một phản ứng xác nhận và `messages.ackReactionScope` tương ứng (`direct`, `group-all`, `group-mentions`, hoặc `all`). Đặt `channels.signal.reactionLevel: "off"` để tắt phản ứng trạng thái Signal.
 
 `messages.removeAckAfterReply: true` xóa phản ứng trạng thái cuối cùng sau thời gian giữ đã cấu hình. Nếu không, Signal khôi phục phản ứng xác nhận ban đầu sau trạng thái hoàn tất/lỗi cuối cùng.
 
 ## Phản ứng (công cụ tin nhắn)
 
-Sử dụng `message action=react` với `channel=signal`.
+Dùng `message action=react` với `channel=signal`.
 
-- Đích: E.164 hoặc UUID của người gửi (sử dụng `uuid:<id>` từ đầu ra ghép đôi; UUID trần cũng hoạt động).
+- Mục tiêu: E.164 hoặc UUID của người gửi (dùng `uuid:<id>` từ đầu ra ghép nối; UUID thuần cũng hoạt động).
 - `messageId` là dấu thời gian Signal của tin nhắn mà bạn đang phản ứng.
 - Phản ứng nhóm yêu cầu `targetAuthor` hoặc `targetAuthorUuid`.
 
@@ -303,30 +334,34 @@ Cấu hình:
 
 - `channels.signal.actions.reactions`: bật/tắt hành động phản ứng (mặc định true).
 - `channels.signal.reactionLevel`: `off | ack | minimal | extensive` (mặc định `minimal`).
-  - `off`/`ack` tắt phản ứng của tác nhân (công cụ tin nhắn `react` báo lỗi).
-  - `minimal`/`extensive` bật phản ứng của tác nhân và thiết lập mức hướng dẫn.
+  - `off`/`ack` tắt phản ứng của tác tử (công cụ tin nhắn `react` báo lỗi).
+  - `minimal`/`extensive` bật phản ứng của tác tử và đặt mức hướng dẫn.
 - Ghi đè theo từng tài khoản: `channels.signal.accounts.<id>.actions.reactions`, `channels.signal.accounts.<id>.reactionLevel`.
 
 ## Phản ứng phê duyệt
 
-Lời nhắc phê duyệt thực thi và Plugin trên Signal sử dụng các khối định tuyến cấp cao nhất `approvals.exec` và `approvals.plugin`. Signal không có khối `channels.signal.execApprovals`.
+Lời nhắc phê duyệt lệnh thực thi và Plugin của Signal sử dụng các khối định tuyến cấp cao nhất `approvals.exec` và `approvals.plugin`. Signal không có khối `channels.signal.execApprovals`.
 
 - `👍` phê duyệt một lần.
 - `👎` từ chối.
-- Sử dụng `/approve <id> allow-always` khi yêu cầu cung cấp tùy chọn phê duyệt vĩnh viễn.
+- Dùng `/approve <id> allow-always` khi yêu cầu cung cấp tùy chọn phê duyệt lâu dài.
 
-Việc xử lý phản ứng phê duyệt yêu cầu người phê duyệt Signal được chỉ định rõ trong `channels.signal.allowFrom`, `channels.signal.defaultTo` hoặc các trường tương ứng ở cấp tài khoản. Lời nhắc phê duyệt thực thi trực tiếp trong cùng cuộc trò chuyện vẫn có thể ẩn phương án dự phòng `/approve` cục bộ trùng lặp mà không cần người phê duyệt rõ ràng; phê duyệt nhóm không có người phê duyệt vẫn hiển thị phương án dự phòng cục bộ.
+Việc xử lý phản ứng phê duyệt yêu cầu chỉ định rõ người phê duyệt Signal từ `channels.signal.allowFrom`, `channels.signal.defaultTo`, hoặc các trường cấp tài khoản tương ứng. Lời nhắc phê duyệt lệnh thực thi trực tiếp trong cùng cuộc trò chuyện vẫn có thể ẩn phương án dự phòng cục bộ `/approve` bị trùng lặp mà không cần chỉ định rõ người phê duyệt; phê duyệt nhóm không có người phê duyệt vẫn hiển thị phương án dự phòng cục bộ.
 
-## Đích gửi (CLI/cron)
+## Phản ứng cho câu hỏi
 
-- Tin nhắn trực tiếp: `signal:+15551234567` (hoặc E.164 thuần).
-- Tin nhắn trực tiếp qua UUID: `uuid:<id>` (hoặc UUID trần).
+Đối với lời nhắc `ask_user` có một câu hỏi không bí mật, chọn một đáp án và từ một đến bốn tùy chọn, Signal hiển thị `1️⃣` đến `4️⃣` bên cạnh nhãn tùy chọn. Hãy phản ứng với lời nhắc đã gửi bằng số tương ứng để trả lời. OpenClaw xác minh rằng phản ứng nhắm đến tin nhắn do bot tạo, sau đó ánh xạ số đó sang tùy chọn chuẩn thông qua Gateway. Các lượt nhấn cũ hoặc trùng lặp bị bỏ qua. Lời nhắc có nhiều câu hỏi, chọn nhiều đáp án và văn bản tự do vẫn chỉ có thể trả lời bằng văn bản; các quy tắc chấp nhận DM/nhóm Signal thông thường sẽ cấp quyền cho người gửi.
+
+## Mục tiêu gửi (CLI/cron)
+
+- DM: `signal:+15551234567` (hoặc E.164 thuần).
+- DM UUID: `uuid:<id>` (hoặc UUID thuần).
 - Nhóm: `signal:group:<groupId>`.
 - Tên người dùng: `username:<name>` (nếu tài khoản Signal của bạn hỗ trợ).
 
 ## Bí danh
 
-Cấu hình bí danh để đặt tên ổn định cho các đích Signal được sử dụng định kỳ. Bí danh chỉ là cấu hình phía OpenClaw; chúng không tạo hoặc chỉnh sửa liên hệ Signal.
+Cấu hình bí danh làm tên ổn định cho các mục tiêu Signal thường xuyên sử dụng. Bí danh chỉ là cấu hình phía OpenClaw; chúng không tạo hoặc chỉnh sửa danh bạ Signal.
 
 ```json5
 {
@@ -343,7 +378,7 @@ Cấu hình bí danh để đặt tên ổn định cho các đích Signal đư�
 }
 ```
 
-Sử dụng bí danh ở bất kỳ nơi nào chấp nhận đích gửi Signal:
+Dùng bí danh ở bất kỳ nơi nào chấp nhận mục tiêu gửi Signal:
 
 ```bash
 openclaw message send --channel signal --target signal:ops --message "Deployment is complete"
@@ -370,11 +405,11 @@ Bí danh theo từng tài khoản kế thừa các bí danh cấp cao nhất và
 }
 ```
 
-`openclaw directory peers list --channel signal` và `openclaw directory groups list --channel signal` liệt kê các bí danh đã cấu hình. Thư mục Signal dựa trên cấu hình; nó không truy vấn trực tiếp liên hệ Signal hoặc sửa đổi tài khoản Signal.
+`openclaw directory peers list --channel signal` và `openclaw directory groups list --channel signal` liệt kê các bí danh đã cấu hình. Thư mục Signal dựa trên cấu hình; nó không truy vấn trực tiếp danh bạ Signal hoặc sửa đổi tài khoản Signal.
 
 ## Khắc phục sự cố
 
-Trước tiên, hãy chạy chuỗi lệnh sau:
+Trước tiên, chạy chuỗi kiểm tra này:
 
 ```bash
 openclaw status
@@ -384,7 +419,7 @@ openclaw doctor
 openclaw channels status --probe
 ```
 
-Sau đó, xác nhận trạng thái ghép đôi tin nhắn trực tiếp nếu cần:
+Sau đó, xác nhận trạng thái ghép nối DM nếu cần:
 
 ```bash
 openclaw pairing list signal
@@ -392,13 +427,13 @@ openclaw pairing list signal
 
 Các lỗi thường gặp:
 
-- Có thể truy cập trình nền nhưng không có phản hồi: xác minh cài đặt tài khoản/trình nền (`httpUrl`, `account`) và chế độ nhận.
-- Tin nhắn trực tiếp bị bỏ qua: người gửi đang chờ phê duyệt ghép đôi.
-- Tin nhắn nhóm bị bỏ qua: cơ chế kiểm soát người gửi/lượt đề cập của nhóm chặn việc gửi.
+- Có thể truy cập daemon nhưng không có phản hồi: xác minh cài đặt tài khoản/daemon (`httpUrl`, `account`) và chế độ nhận.
+- DM bị bỏ qua: người gửi đang chờ phê duyệt ghép nối.
+- Tin nhắn nhóm bị bỏ qua: cổng kiểm soát người gửi/đề cập của nhóm chặn việc gửi.
 - Lỗi xác thực cấu hình sau khi chỉnh sửa: chạy `openclaw doctor --fix`.
-- Không có Signal trong chẩn đoán: xác nhận `channels.signal.enabled: true`.
+- Không có Signal trong thông tin chẩn đoán: xác nhận `channels.signal.enabled: true`.
 
-Kiểm tra bổ sung:
+Các bước kiểm tra bổ sung:
 
 ```bash
 openclaw pairing list signal
@@ -406,14 +441,14 @@ pgrep -af signal-cli
 grep -i "signal" "/tmp/openclaw/openclaw-$(date +%Y-%m-%d).log" | tail -20
 ```
 
-Để xem quy trình phân loại sự cố: [Khắc phục sự cố kênh](/vi/channels/troubleshooting).
+Để xem quy trình phân loại: [Khắc phục sự cố kênh](/vi/channels/troubleshooting).
 
 ## Lưu ý bảo mật
 
-- `signal-cli` lưu trữ khóa tài khoản cục bộ (thường tại `~/.local/share/signal-cli/data/`).
-- Sao lưu trạng thái tài khoản Signal trước khi di chuyển hoặc xây dựng lại máy chủ.
-- Giữ `channels.signal.dmPolicy: "pairing"` trừ khi bạn chủ động muốn quyền truy cập tin nhắn trực tiếp rộng hơn.
-- Chỉ cần xác minh SMS cho quy trình đăng ký hoặc khôi phục, nhưng việc mất quyền kiểm soát số điện thoại/tài khoản có thể khiến quá trình đăng ký lại trở nên phức tạp.
+- `signal-cli` lưu khóa tài khoản cục bộ (thường là `~/.local/share/signal-cli/data/`).
+- Sao lưu trạng thái tài khoản Signal trước khi di chuyển hoặc dựng lại máy chủ.
+- Giữ nguyên `channels.signal.dmPolicy: "pairing"` trừ khi bạn chủ ý muốn cấp quyền truy cập DM rộng hơn.
+- Xác minh SMS chỉ cần thiết cho quy trình đăng ký hoặc khôi phục, nhưng việc mất quyền kiểm soát số/tài khoản có thể khiến quá trình đăng ký lại trở nên phức tạp.
 
 ## Tham chiếu cấu hình (Signal)
 
@@ -421,50 +456,51 @@ Cấu hình đầy đủ: [Cấu hình](/vi/gateway/configuration)
 
 Tùy chọn nhà cung cấp:
 
-- `channels.signal.enabled`: bật/tắt quá trình khởi động kênh.
-- `channels.signal.apiMode`: `auto | native | container` (mặc định: auto). Xem [Chế độ vùng chứa](#container-mode-bbernhardsignal-cli-rest-api).
+- `channels.signal.enabled`: bật/tắt khởi động kênh.
+- `channels.signal.apiMode`: `auto | native | container` (mặc định: tự động). Xem [Chế độ vùng chứa](#container-mode-bbernhardsignal-cli-rest-api).
 - `channels.signal.account`: E.164 cho tài khoản bot.
+- `channels.signal.accountUuid`: UUID tùy chọn của tài khoản bot để phát hiện @mention gốc và bảo vệ khỏi vòng lặp.
 - `channels.signal.cliPath`: đường dẫn đến `signal-cli`.
 - `channels.signal.configPath`: thư mục `signal-cli --config` tùy chọn.
-- `channels.signal.httpUrl`: URL đầy đủ của trình nền (ghi đè máy chủ/cổng).
-- `channels.signal.httpHost`, `channels.signal.httpPort`: địa chỉ liên kết của trình nền (mặc định `127.0.0.1:8080`).
-- `channels.signal.autoStart`: tự động khởi chạy trình nền (mặc định true nếu chưa đặt `httpUrl`).
+- `channels.signal.httpUrl`: URL đầy đủ của daemon (ghi đè máy chủ/cổng).
+- `channels.signal.httpHost`, `channels.signal.httpPort`: địa chỉ liên kết của daemon (mặc định `127.0.0.1:8080`).
+- `channels.signal.autoStart`: tự động khởi chạy daemon (mặc định là true nếu chưa đặt `httpUrl`).
 - `channels.signal.startupTimeoutMs`: thời gian chờ khởi động tính bằng mili giây (tối thiểu 1000, tối đa 120000; mặc định 30000).
 - `channels.signal.receiveMode`: `on-start | manual`.
 - `channels.signal.ignoreAttachments`: bỏ qua việc tải xuống tệp đính kèm.
-- `channels.signal.ignoreStories`: bỏ qua tin từ trình nền.
+- `channels.signal.ignoreStories`: bỏ qua các tin từ daemon.
 - `channels.signal.sendReadReceipts`: chuyển tiếp xác nhận đã đọc.
-- `channels.signal.dmPolicy`: `pairing | allowlist | open | disabled` (mặc định: pairing).
-- `channels.signal.allowFrom`: danh sách cho phép tin nhắn trực tiếp (E.164 hoặc `uuid:<id>`). `open` yêu cầu `"*"`. Signal không có tên người dùng; hãy sử dụng ID điện thoại/UUID.
-- `channels.signal.aliases`: bí danh phía OpenClaw cho đích gửi tin nhắn trực tiếp hoặc nhóm.
-- `channels.signal.groupPolicy`: `open | allowlist | disabled` (mặc định: allowlist).
-- `channels.signal.groupAllowFrom`: danh sách cho phép của nhóm; chấp nhận ID nhóm Signal (dạng thô, `group:<id>` hoặc `signal:group:<id>`), số E.164 của người gửi hoặc giá trị `uuid:<id>`.
-- `channels.signal.groups`: ghi đè theo từng nhóm, được lập khóa bằng ID nhóm Signal (hoặc `"*"`). Các trường được hỗ trợ: `requireMention`, `tools`, `toolsBySender`.
-- `channels.signal.accounts.<id>.groups`: phiên bản theo từng tài khoản của `channels.signal.groups` dành cho cấu hình nhiều tài khoản.
-- `channels.signal.accounts.<id>.aliases`: bí danh theo từng tài khoản, được hợp nhất với bí danh cấp cao nhất.
+- `channels.signal.dmPolicy`: `pairing | allowlist | open | disabled` (mặc định: ghép nối).
+- `channels.signal.allowFrom`: danh sách cho phép DM (E.164 hoặc `uuid:<id>`). `open` yêu cầu `"*"`. Signal không có tên người dùng; hãy dùng ID điện thoại/UUID.
+- `channels.signal.aliases`: bí danh phía OpenClaw cho các đích gửi DM hoặc nhóm.
+- `channels.signal.groupPolicy`: `open | allowlist | disabled` (mặc định: danh sách cho phép).
+- `channels.signal.groupAllowFrom`: danh sách cho phép của nhóm; chấp nhận ID nhóm Signal (dạng thô, `group:<id>` hoặc `signal:group:<id>`), số E.164 của người gửi hoặc các giá trị `uuid:<id>`.
+- `channels.signal.groups`: các giá trị ghi đè theo nhóm, được lập khóa bằng ID nhóm Signal (hoặc `"*"`). Các trường được hỗ trợ: `requireMention`, `tools`, `toolsBySender`.
+- `channels.signal.accounts.<id>.groups`: phiên bản theo tài khoản của `channels.signal.groups` dành cho cấu hình nhiều tài khoản.
+- `channels.signal.accounts.<id>.aliases`: bí danh theo tài khoản, được hợp nhất với các bí danh cấp cao nhất.
 - `channels.signal.replyToMode`: chế độ trích dẫn trả lời gốc, `off | first | all | batched` (mặc định: `all`).
-- `channels.signal.replyToModeByChatType.direct`, `channels.signal.replyToModeByChatType.group`: ghi đè trích dẫn trả lời gốc theo loại cuộc trò chuyện.
-- `channels.signal.accounts.<id>.replyToMode`, `channels.signal.accounts.<id>.replyToModeByChatType.direct`, `channels.signal.accounts.<id>.replyToModeByChatType.group`: ghi đè trích dẫn trả lời theo từng tài khoản.
-- `channels.signal.historyLimit`: số lượng tin nhắn nhóm tối đa được đưa vào ngữ cảnh (0 để tắt).
-- `channels.signal.dmHistoryLimit`: giới hạn lịch sử tin nhắn trực tiếp tính theo lượt người dùng. Ghi đè theo từng người dùng: `channels.signal.dms["<phone_or_uuid>"].historyLimit`.
-- `channels.signal.textChunkLimit`: kích thước đoạn gửi đi tính theo ký tự (mặc định 4000).
-- `channels.signal.chunkMode`: `length` (mặc định) hoặc `newline` để tách tại các dòng trống (ranh giới đoạn văn) trước khi chia theo độ dài.
-- `channels.signal.mediaMaxMb`: giới hạn phương tiện đến/đi tính bằng MB (mặc định 8).
-- `channels.signal.reactionLevel`: `off | ack | minimal | extensive` (mặc định `minimal`). Xem [Phản ứng](#reactions-message-tool).
-- `channels.signal.reactionNotifications`: `off | own | all | allowlist` (mặc định `own`) - thời điểm tác nhân được thông báo về phản ứng đến từ người khác.
-- `channels.signal.reactionAllowlist`: những người gửi có phản ứng sẽ thông báo cho tác nhân khi `reactionNotifications: "allowlist"`.
-- `channels.signal.blockStreaming`, `channels.signal.blockStreamingCoalesce`: các điều khiển truyền phát ở chế độ khối được dùng chung giữa các kênh. Xem [Truyền phát](/vi/concepts/streaming).
+- `channels.signal.replyToModeByChatType.direct`, `channels.signal.replyToModeByChatType.group`: các giá trị ghi đè trích dẫn trả lời gốc theo loại cuộc trò chuyện.
+- `channels.signal.accounts.<id>.replyToMode`, `channels.signal.accounts.<id>.replyToModeByChatType.direct`, `channels.signal.accounts.<id>.replyToModeByChatType.group`: các giá trị ghi đè trích dẫn trả lời theo tài khoản.
+- `channels.signal.historyLimit`: số tin nhắn nhóm tối đa cần đưa vào làm ngữ cảnh (0 để tắt).
+- `channels.signal.dmHistoryLimit`: giới hạn lịch sử DM tính theo lượt của người dùng. Giá trị ghi đè theo người dùng: `channels.signal.dms["<phone_or_uuid>"].historyLimit`.
+- `channels.signal.textChunkLimit`: kích thước phân đoạn gửi đi tính theo ký tự (mặc định 4000).
+- `channels.signal.streaming.chunkMode`: `length` (mặc định) hoặc `newline` để tách tại các dòng trống (ranh giới đoạn văn) trước khi phân đoạn theo độ dài.
+- `channels.signal.mediaMaxMb`: giới hạn phương tiện đầu vào/đầu ra tính bằng MB (mặc định 8).
+- `channels.signal.reactionLevel`: `off | ack | minimal | extensive` (mặc định `minimal`). Xem [Cảm xúc](#reactions-message-tool).
+- `channels.signal.reactionNotifications`: `off | own | all | allowlist` (mặc định `own`) - thời điểm tác nhân được thông báo về cảm xúc đến từ người khác.
+- `channels.signal.reactionAllowlist`: những người gửi có cảm xúc sẽ thông báo cho tác nhân khi `reactionNotifications: "allowlist"`.
+- `channels.signal.streaming.block.enabled`, `channels.signal.streaming.block.coalesce`: các chế độ điều khiển truyền phát theo khối được dùng chung giữa các kênh. Xem [Truyền phát](/vi/concepts/streaming).
 
 Các tùy chọn toàn cục liên quan:
 
-- `agents.list[].groupChat.mentionPatterns` (Signal không hỗ trợ lượt đề cập gốc).
-- `messages.groupChat.mentionPatterns` (giá trị dự phòng toàn cục).
+- `agents.list[].groupChat.mentionPatterns` (phương án dự phòng văn bản thuần túy; @mention gốc của Signal được phát hiện từ siêu dữ liệu có cấu trúc khi danh tính tài khoản bot được cấu hình).
+- `messages.groupChat.mentionPatterns` (phương án dự phòng toàn cục).
 - `messages.responsePrefix`.
 
 ## Liên quan
 
-- [Tổng quan về các kênh](/vi/channels) - tất cả các kênh được hỗ trợ
-- [Ghép đôi](/vi/channels/pairing) - quy trình xác thực và ghép đôi tin nhắn trực tiếp
-- [Nhóm](/vi/channels/groups) - hành vi trò chuyện nhóm và cơ chế kiểm soát lượt đề cập
+- [Tổng quan về kênh](/vi/channels) - tất cả các kênh được hỗ trợ
+- [Ghép nối](/vi/channels/pairing) - xác thực DM và luồng ghép nối
+- [Nhóm](/vi/channels/groups) - hành vi trò chuyện nhóm và kiểm soát bằng lượt đề cập
 - [Định tuyến kênh](/vi/channels/channel-routing) - định tuyến phiên cho tin nhắn
-- [Bảo mật](/vi/gateway/security) - mô hình truy cập và tăng cường bảo mật
+- [Bảo mật](/vi/gateway/security) - mô hình truy cập và gia cố bảo mật

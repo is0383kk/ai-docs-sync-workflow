@@ -1,12 +1,13 @@
 ---
 read_when:
-    - Inicializar manualmente un espacio de trabajo
+    - Inicialización manual de un espacio de trabajo
 summary: Plantilla del espacio de trabajo para TOOLS.md
 title: Plantilla de TOOLS.md
 x-i18n:
-    generated_at: "2026-07-11T23:31:17Z"
+    generated_at: "2026-07-26T05:21:43Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 20eab78b3b117566a1d33a70873e70ff2d5099543aa44e2719dc8d0797099afe
     source_path: reference/templates/TOOLS.md
@@ -15,7 +16,7 @@ x-i18n:
 
 # TOOLS.md - Notas locales
 
-Skills define _cómo_ funcionan las herramientas. Este archivo contiene _tus_ datos específicos: aquello que es exclusivo de tu configuración, como los nombres y las ubicaciones de las cámaras, los hosts y alias de SSH, las voces de TTS preferidas, los nombres de altavoces y habitaciones, los apodos de dispositivos y cualquier otro elemento específico del entorno.
+Las Skills definen _cómo_ funcionan las herramientas. Este archivo contiene _tus_ datos específicos: aquello que es exclusivo de tu configuración, como los nombres y las ubicaciones de las cámaras, los hosts y alias SSH, las voces TTS preferidas, los nombres de altavoces y habitaciones, los apodos de los dispositivos y cualquier dato específico del entorno.
 
 ## Ejemplos
 
@@ -31,18 +32,18 @@ Skills define _cómo_ funcionan las herramientas. Este archivo contiene _tus_ da
 
 ### TTS
 
-- Voz preferida: "Nova" (cálida, con un ligero acento británico)
-- Altavoz predeterminado: HomePod de la cocina
+- Voz preferida: "Nova" (cálida, ligeramente británica)
+- Altavoz predeterminado: Kitchen HomePod
 ```
 
 ## ¿Por qué mantenerlos separados?
 
-Skills se comparten. Tu configuración es solo tuya. Mantenerlos separados te permite actualizar las Skills sin perder tus notas y compartirlas sin revelar tu infraestructura.
+Las Skills se comparten. Tu configuración es tuya. Mantenerlas separadas permite actualizar las Skills sin perder tus notas y compartirlas sin revelar tu infraestructura.
 
 ---
 
-Añade todo lo que te ayude a hacer tu trabajo. Esta es tu guía de referencia rápida.
+Añade todo lo que te ayude a realizar tu trabajo. Esta es tu hoja de referencia rápida.
 
-## Contenido relacionado
+## Temas relacionados
 
 - [Espacio de trabajo del agente](/es/concepts/agent-workspace)

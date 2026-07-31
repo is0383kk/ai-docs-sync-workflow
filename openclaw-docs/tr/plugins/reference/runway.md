@@ -1,19 +1,20 @@
 ---
 read_when:
-    - runway Plugin'ini kuruyor, yapılandırıyor veya denetliyorsunuz
+    - Runway pluginini yüklüyor, yapılandırıyor veya denetliyorsunuz
 summary: Video oluşturma sağlayıcısı desteği ekler.
-title: Runway Plugin'i
+title: Runway Plugin
 x-i18n:
-    generated_at: "2026-07-12T12:03:21Z"
+    generated_at: "2026-07-26T23:28:57Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 52a36a1257fa59b6d159816496158940bdc2c84b1764cc822506b74f22b08465
+    source_hash: 48cff38962414711cf75563073a527f73ed7d824ad1d96c2ba9591f782de0ad3
     source_path: plugins/reference/runway.md
     workflow: 16
 ---
 
-# Runway plugin'i
+# Runway plugin
 
 Video oluşturma sağlayıcısı desteği ekler.
 
@@ -24,8 +25,8 @@ Video oluşturma sağlayıcısı desteği ekler.
 
 ## Yüzey
 
-sözleşmeler: videoGenerationProviders
+sözleşmeler: `videoGenerationProviders`
 
 ## İlgili belgeler
 
-- [runway](/tr/providers/runway)
+- [Runway](/tr/providers/runway)

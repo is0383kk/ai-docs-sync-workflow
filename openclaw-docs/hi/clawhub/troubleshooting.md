@@ -1,12 +1,13 @@
 ---
 read_when:
-    - ClawHub CLI या OpenClaw registry कमांड विफल हो जाते हैं
+    - ClawHub CLI या OpenClaw रजिस्ट्री कमांड विफल हो जाते हैं
     - किसी पैकेज को इंस्टॉल, प्रकाशित या अपडेट नहीं किया जा सकता
-summary: ClawHub साइन-इन, इंस्टॉल, प्रकाशित करने, अपडेट, और API समस्याओं का निवारण।
+summary: ClawHub साइन-इन, इंस्टॉल, प्रकाशन, अपडेट और API संबंधी समस्याओं का निवारण।
 x-i18n:
-    generated_at: "2026-07-04T20:33:01Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:22:51Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: fc789fcc891cf8c44b5d1a10d38a4e6dd4dec9474d8d13f8058ea1c3392a9f91
     source_path: clawhub/troubleshooting.md
@@ -15,147 +16,148 @@ x-i18n:
 
 # समस्या निवारण
 
-## `clawhub login` ब्राउज़र खोलता है लेकिन कभी पूरा नहीं होता
+## `clawhub login` ब्राउज़र खोलता है, लेकिन कभी पूरा नहीं होता
 
-CLI ब्राउज़र लॉगिन के दौरान एक अल्पकालिक स्थानीय callback server शुरू करता है।
+ब्राउज़र लॉगिन के दौरान CLI एक अल्पकालिक स्थानीय कॉलबैक सर्वर शुरू करता है।
 
-- सुनिश्चित करें कि आपका ब्राउज़र `http://127.0.0.1:<port>/callback` तक पहुंच सकता है।
-- यदि callback कभी नहीं आता, तो स्थानीय firewall, VPN, और proxy नियम जांचें।
-- headless वातावरणों में, ClawHub web UI में API token बनाएं और चलाएं:
+- सुनिश्चित करें कि आपका ब्राउज़र `http://127.0.0.1:<port>/callback` तक पहुँच सकता है।
+- यदि कॉलबैक कभी नहीं आता, तो स्थानीय फ़ायरवॉल, VPN और प्रॉक्सी नियमों की जाँच करें।
+- हेडलेस परिवेशों में, ClawHub वेब UI में API टोकन बनाएँ और चलाएँ:
 
 ```bash
 clawhub login --token clh_...
 ```
 
-## `whoami` या `publish` `Unauthorized` (401) लौटाता है
+## `whoami` या `publish`, `Unauthorized` (401) लौटाता है
 
-- `clawhub login` के साथ फिर से sign in करें।
-- यदि आप custom config path का उपयोग करते हैं, तो पुष्टि करें कि `CLAWHUB_CONFIG_PATH` उस
-  file की ओर इशारा करता है जिसमें आपका वर्तमान token है।
-- यदि आप API token का उपयोग करते हैं, तो पुष्टि करें कि उसे web UI में revoke नहीं किया गया है।
+- `clawhub login` से फिर से साइन इन करें।
+- यदि आप कस्टम कॉन्फ़िग पथ का उपयोग करते हैं, तो पुष्टि करें कि `CLAWHUB_CONFIG_PATH` उस
+  फ़ाइल को इंगित करता है जिसमें आपका वर्तमान टोकन है।
+- यदि आप API टोकन का उपयोग करते हैं, तो पुष्टि करें कि उसे वेब UI में निरस्त नहीं किया गया था।
 
-## Search या install `Rate limit exceeded` (429) लौटाता है
+## खोज या इंस्टॉल करने पर `Rate limit exceeded` (429) लौटता है
 
-response में retry जानकारी पढ़ें:
+प्रतिक्रिया में पुनः प्रयास की जानकारी पढ़ें:
 
-- `Retry-After`: retry करने से पहले प्रतीक्षा करने के seconds।
-- `RateLimit-Limit`: इस request पर लागू limit।
-- `RateLimit-Remaining`: header मौजूद होने पर आपका सटीक शेष budget। `429` पर, यह `0` होता है।
-- `RateLimit-Reset` या `X-RateLimit-Reset`: reset timing।
+- `Retry-After`: पुनः प्रयास करने से पहले प्रतीक्षा के सेकंड।
+- `RateLimit-Limit`: इस अनुरोध पर लागू सीमा।
+- `RateLimit-Remaining`: हेडर मौजूद होने पर आपका सटीक शेष बजट। `429` पर, यह `0` है।
+- `RateLimit-Reset` या `X-RateLimit-Reset`: रीसेट का समय।
 
-यदि कई users एक egress IP साझा करते हैं, तो anonymous IP limits hit हो सकती हैं, भले ही हर
-व्यक्ति केवल कुछ requests भेजे। जहां संभव हो sign in करें और बताई गई
-delay के बाद retry करें।
+यदि कई उपयोगकर्ता एक निकास IP साझा करते हैं, तो प्रत्येक व्यक्ति के केवल कुछ
+अनुरोध भेजने पर भी अनाम IP सीमाएँ पूरी हो सकती हैं। जहाँ संभव हो, साइन इन करें और
+बताई गई देरी के बाद पुनः प्रयास करें।
 
-## Search या install proxy के पीछे fail होता है
+## प्रॉक्सी के पीछे खोज या इंस्टॉल विफल होता है
 
-CLI standard proxy variables का सम्मान करता है:
+CLI मानक प्रॉक्सी वेरिएबल का पालन करता है:
 
 ```bash
 export HTTPS_PROXY=http://proxy.example.com:3128
 clawhub search "my query"
 ```
 
-समर्थित names में `HTTPS_PROXY`, `HTTP_PROXY`, `https_proxy`, और
+समर्थित नामों में `HTTPS_PROXY`, `HTTP_PROXY`, `https_proxy` और
 `http_proxy` शामिल हैं।
 
-## कोई skill search में दिखाई नहीं देता
+## कोई Skill खोज में दिखाई नहीं देता
 
-- यदि आपको exact slug या owner page पता है, तो उसे जांचें।
-- पुष्टि करें कि release public है और scan या moderation द्वारा रोकी नहीं गई है।
-- यदि skill आपकी है, तो sign in करें और उसका निरीक्षण करें:
+- यदि आपको सटीक स्लग या स्वामी पृष्ठ पता है, तो उसकी जाँच करें।
+- पुष्टि करें कि रिलीज़ सार्वजनिक है और स्कैन या मॉडरेशन द्वारा रोकी नहीं गई है।
+- यदि Skill आपका है, तो साइन इन करके उसका निरीक्षण करें:
 
 ```bash
 clawhub inspect @openclaw/demo
 ```
 
-Owner-visible diagnostics scan, upload-gate, या moderation state समझा सकते हैं।
+स्वामी को दिखाई देने वाला निदान स्कैन, अपलोड-गेट या मॉडरेशन स्थिति की व्याख्या कर सकता है।
 
-## Publish fail होता है क्योंकि required metadata missing है
+## आवश्यक मेटाडेटा न होने के कारण प्रकाशन विफल होता है
 
-skills के लिए, `SKILL.md` frontmatter जांचें। Required environment variables और
-tools घोषित होने चाहिए ताकि users और scanners package को समझ सकें।
+Skills के लिए, `SKILL.md` फ्रंटमैटर जाँचें। आवश्यक परिवेश वेरिएबल और
+टूल घोषित किए जाने चाहिए, ताकि उपयोगकर्ता और स्कैनर पैकेज को समझ सकें।
 
-plugins के लिए, `package.json` compatibility metadata जांचें। Code-plugin publishes
-को `openclaw.compat.pluginApi` और
-`openclaw.build.openclawVersion` जैसे OpenClaw compatibility fields चाहिए।
+Plugins के लिए, `package.json` संगतता मेटाडेटा जाँचें। कोड-Plugin प्रकाशनों
+के लिए `openclaw.compat.pluginApi` और `openclaw.build.openclawVersion` जैसे OpenClaw संगतता फ़ील्ड
+आवश्यक हैं।
 
-पहले publish payload preview करें:
+पहले प्रकाशन पेलोड का पूर्वावलोकन करें:
 
 ```bash
 clawhub package publish <source> --family code-plugin --dry-run
 ```
 
-## Publish GitHub owner या source error के कारण fail होता है
+## GitHub स्वामी या स्रोत त्रुटि के कारण प्रकाशन विफल होता है
 
-ClawHub packages को उनके publishers से जोड़ने के लिए GitHub identity और source attribution का उपयोग करता है।
+ClawHub पैकेजों को उनके प्रकाशकों से जोड़ने के लिए GitHub पहचान और स्रोत
+एट्रिब्यूशन का उपयोग करता है।
 
-- सुनिश्चित करें कि आप उस GitHub account से signed in हैं जो package का owner है या उसे publish कर सकता है।
-- जांचें कि source URL public है या ClawHub के लिए accessible है।
-- GitHub sources के लिए, `owner/repo`, `owner/repo@ref`, या full GitHub URL का उपयोग करें।
+- सुनिश्चित करें कि आपने उस GitHub खाते से साइन इन किया है जो पैकेज का स्वामी है या उसे प्रकाशित कर सकता है।
+- जाँचें कि स्रोत URL सार्वजनिक है या ClawHub के लिए सुलभ है।
+- GitHub स्रोतों के लिए, `owner/repo`, `owner/repo@ref` या पूर्ण GitHub URL का उपयोग करें।
 
-## Publish fail होता है क्योंकि namespace claimed या reserved है
+## नेमस्पेस पर दावा या उसके आरक्षित होने के कारण प्रकाशन विफल होता है
 
-यदि publish इसलिए fail होता है क्योंकि owner handle, org namespace, package scope, skill
-slug, या package name पहले से claimed या reserved है, तो पहले पुष्टि करें कि आप
-namespace से मेल खाने वाले owner के साथ publish कर रहे हैं। plugin packages के लिए,
-`@example-org/example-plugin` जैसे scoped names को matching `example-org` owner के रूप में publish किया जाना चाहिए।
+यदि स्वामी हैंडल, संगठन नेमस्पेस, पैकेज स्कोप, Skill स्लग या पैकेज नाम पर पहले से
+दावा किए जाने या उसके आरक्षित होने के कारण प्रकाशन विफल होता है, तो पहले पुष्टि करें
+कि आप नेमस्पेस से मेल खाने वाले स्वामी के साथ प्रकाशित कर रहे हैं। Plugin पैकेजों के
+लिए, `@example-org/example-plugin` जैसे स्कोप वाले नामों को मेल खाने वाले
+`example-org` स्वामी के रूप में प्रकाशित करना आवश्यक है।
 
-यदि आपको लगता है कि आपकी org, project, या brand ही सही namespace owner है लेकिन
-आप current ClawHub owner manage नहीं कर सकते, तो public, non-sensitive proof के साथ
-[Org / Namespace Claim issue](https://github.com/openclaw/clawhub/issues/new?template=org-namespace-claim.yml)
-खोलें। evidence guidance और public issues से क्या
-बाहर रखना है, इसके लिए
-[Org and Namespace Claims](/clawhub/namespace-claims) देखें।
+यदि आपको लगता है कि आपका संगठन, प्रोजेक्ट या ब्रांड नेमस्पेस का वैध स्वामी है, लेकिन
+आप वर्तमान ClawHub स्वामी को प्रबंधित नहीं कर सकते, तो सार्वजनिक और गैर-संवेदनशील प्रमाण के साथ
+[संगठन / नेमस्पेस दावे की समस्या](https://github.com/openclaw/clawhub/issues/new?template=org-namespace-claim.yml)
+खोलें। प्रमाण संबंधी मार्गदर्शन और सार्वजनिक समस्याओं में क्या शामिल नहीं करना है, इसके लिए
+[संगठन और नेमस्पेस दावे](/hi/clawhub/namespace-claims) देखें।
 
-## `sync` कहता है कि कोई skills नहीं मिले
+## `sync` कहता है कि कोई Skill नहीं मिला
 
-`sync` `SKILL.md` या `skill.md` वाली folders खोजता है।
+`sync` उन फ़ोल्डरों को खोजता है जिनमें `SKILL.md` या `skill.md` हो।
 
-इसे उन roots की ओर point करें जिन्हें आप scan करना चाहते हैं:
+इसे उन रूट पथों पर इंगित करें जिन्हें आप स्कैन करना चाहते हैं:
 
 ```bash
 clawhub sync --root /path/to/skills
 ```
 
-यदि आप निश्चित नहीं हैं कि क्या publish होगा, तो पहले preview करें:
+यदि आप सुनिश्चित नहीं हैं कि क्या प्रकाशित होगा, तो पहले पूर्वावलोकन करें:
 
 ```bash
 clawhub sync --all --dry-run --no-input
 ```
 
-## `update` स्थानीय बदलावों के कारण मना करता है
+## स्थानीय परिवर्तनों के कारण `update` मना करता है
 
-स्थानीय files ClawHub को ज्ञात किसी भी version से मेल नहीं खातीं। एक चुनें:
+स्थानीय फ़ाइलें ClawHub को ज्ञात किसी भी संस्करण से मेल नहीं खातीं। कोई एक विकल्प चुनें:
 
-- स्थानीय edits रखें और update skip करें।
-- published version से overwrite करें:
+- स्थानीय संपादन बनाए रखें और अपडेट छोड़ दें।
+- प्रकाशित संस्करण से अधिलेखित करें:
 
 ```bash
 clawhub update @openclaw/demo --force
 ```
 
-- अपनी edited copy को नए slug या fork के रूप में publish करें।
+- अपनी संपादित प्रति को नए स्लग या फ़ोर्क के रूप में प्रकाशित करें।
 
-## OpenClaw में Plugin install fail होता है
+## OpenClaw में Plugin इंस्टॉल विफल होता है
 
-- explicit ClawHub source का उपयोग करें:
+- स्पष्ट ClawHub स्रोत का उपयोग करें:
 
 ```bash
 openclaw plugins install clawhub:<package>
 ```
 
-- scan status और compatibility metadata के लिए package detail page जांचें।
-- पुष्टि करें कि आपका OpenClaw version package की advertised
-  compatibility range को satisfy करता है।
-- यदि package hidden, held, या blocked है, तो owner द्वारा issue resolve करने तक
-  वह installable नहीं हो सकता।
+- स्कैन स्थिति और संगतता मेटाडेटा के लिए पैकेज विवरण पृष्ठ जाँचें।
+- पुष्टि करें कि आपका OpenClaw संस्करण पैकेज की विज्ञापित
+  संगतता सीमा को पूरा करता है।
+- यदि पैकेज छिपा हुआ, रोका हुआ या अवरुद्ध है, तो स्वामी द्वारा समस्या का समाधान किए जाने तक
+  संभव है कि उसे इंस्टॉल न किया जा सके।
 
-## Public API requests fail होती हैं
+## सार्वजनिक API अनुरोध विफल होते हैं
 
-- `429` retry headers का सम्मान करें और public list/search responses cache करें।
-- users को canonical ClawHub listing पर वापस link करें।
-- hidden, private, held, या moderation-blocked content को
-  public API surface के बाहर mirror न करें।
+- `429` पुनः प्रयास हेडर का पालन करें और सार्वजनिक सूची/खोज प्रतिक्रियाओं को कैश करें।
+- उपयोगकर्ताओं को प्रामाणिक ClawHub सूची पर वापस भेजें।
+- छिपी हुई, निजी, रोकी हुई या मॉडरेशन द्वारा अवरुद्ध सामग्री को सार्वजनिक
+  API सतह के बाहर मिरर न करें।
 
-endpoint details के लिए [HTTP API](/clawhub/http-api) देखें।
+एंडपॉइंट विवरण के लिए [HTTP API](/hi/clawhub/http-api) देखें।

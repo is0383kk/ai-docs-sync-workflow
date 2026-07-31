@@ -1,49 +1,50 @@
 ---
 read_when:
     - Je wilt weten wat npm shrinkwrap betekent in een OpenClaw-release
-    - Je beoordeelt lockbestanden van pakketten, wijzigingen in afhankelijkheden of risico's voor de softwaretoeleveringsketen
-    - Je valideert npm-pakketten van de hoofdmap of Plugins voordat je ze publiceert
-summary: Heldere en technische uitleg over npm-shrinkwrap in OpenClaw-releases
-title: npm-shrinkwrap
+    - Je beoordeelt lockfiles van pakketten, wijzigingen in afhankelijkheden of risico's voor de toeleveringsketen
+    - Je valideert root- of plugin-npm-pakketten vóór publicatie
+summary: Eenvoudige en technische uitleg van npm shrinkwrap in OpenClaw-releases
+title: npm shrinkwrap
 x-i18n:
-    generated_at: "2026-07-12T08:57:59Z"
+    generated_at: "2026-07-27T05:48:24Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: d1e6c0d4541da9220d50cde0b9db064e5a91b81d6562cb16ac697de7d4017098
     source_path: gateway/security/shrinkwrap.md
     workflow: 16
 ---
 
-OpenClaw-broncodecheck-outs gebruiken `pnpm-lock.yaml`. Gepubliceerde OpenClaw-npm-pakketten gebruiken `npm-shrinkwrap.json`, het publiceerbare vergrendelingsbestand voor afhankelijkheden van npm, zodat pakketinstallaties de tijdens de release beoordeelde afhankelijkheidsgraaf gebruiken.
+OpenClaw-broncodecheck-outs gebruiken `pnpm-lock.yaml`. Gepubliceerde OpenClaw-npm-pakketten gebruiken `npm-shrinkwrap.json`, npm's publiceerbare vergrendelingsbestand voor afhankelijkheden, zodat pakketinstallaties de tijdens de release beoordeelde afhankelijkheidsgraaf gebruiken.
 
 ## Waarom dit belangrijk is
 
-Shrinkwrap is een bewijsstuk voor de afhankelijkheidsstructuur die met een npm-pakket wordt geleverd: het vertelt npm welke exacte transitieve versies moeten worden geïnstalleerd.
+Shrinkwrap is een ontvangstbewijs voor de afhankelijkheidsboom die met een npm-pakket wordt geleverd: het vertelt npm welke exacte transitieve versies moeten worden geïnstalleerd.
 
-| Bestand               | Waar het van belang is      | Wat het betekent                         |
-| --------------------- | --------------------------- | ---------------------------------------- |
-| `pnpm-lock.yaml`      | OpenClaw-broncodecheck-out  | Afhankelijkheidsgraaf voor beheerders    |
-| `npm-shrinkwrap.json` | Gepubliceerd npm-pakket     | npm-installatiegraaf voor gebruikers     |
-| `package-lock.json`   | Lokale npm-apps             | Niet het publicatiecontract van OpenClaw |
+| Bestand               | Waar het van belang is        | Wat het betekent                            |
+| --------------------- | ----------------------------- | ------------------------------------------- |
+| `pnpm-lock.yaml`    | OpenClaw-broncodecheck-out    | Afhankelijkheidsgraaf voor maintainers      |
+| `npm-shrinkwrap.json`    | Gepubliceerd npm-pakket       | npm-installatiegraaf voor gebruikers        |
+| `package-lock.json`    | Lokale npm-apps               | Niet het publicatiecontract van OpenClaw    |
 
 Voor OpenClaw-releases betekent dit:
 
 - het gepubliceerde pakket vraagt npm niet om tijdens de installatie een nieuwe afhankelijkheidsgraaf te bedenken;
-- wijzigingen in afhankelijkheden kunnen worden beoordeeld omdat ze in een diff van een vergrendelingsbestand terechtkomen;
-- de releasevalidatie test dezelfde graaf die gebruikers zullen installeren;
-- verrassingen met de pakketgrootte of native afhankelijkheden komen vóór publicatie aan het licht.
+- wijzigingen in afhankelijkheden zijn controleerbaar omdat ze in een diff van het vergrendelingsbestand terechtkomen;
+- releasevalidatie test dezelfde graaf die gebruikers zullen installeren;
+- verrassingen met pakketgrootte of native afhankelijkheden komen vóór publicatie aan het licht.
 
-Shrinkwrap is geen sandbox. Het maakt een afhankelijkheid op zichzelf niet veilig en vervangt geen hostisolatie, `openclaw security audit`, herkomstgegevens van pakketten of installatierooktests.
+Shrinkwrap is geen sandbox. Het maakt een afhankelijkheid op zichzelf niet veilig en vervangt geen hostisolatie, `openclaw security audit`, pakketprovenance of installatierooktests.
 
-OpenClaw is een Gateway, Plugin-host, modelrouter en agentruntime, dus een standaardinstallatie beïnvloedt de opstarttijd, het schijfgebruik, downloads van native pakketten en de blootstelling aan risico's in de toeleveringsketen. Shrinkwrap biedt releasebeoordelingen een stabiele grens: beoordelaars zien wijzigingen in transitieve afhankelijkheden, validators wijzen onverwachte afwijkingen in vergrendelingsbestanden af en Plugin-pakketten bevatten hun eigen vergrendelde afhankelijkheidsgraaf in plaats van op het hoofdpakket te vertrouwen.
+OpenClaw is een Gateway, Plugin-host, modelrouter en agentruntime, dus een standaardinstallatie beïnvloedt de opstarttijd, het schijfgebruik, downloads van native pakketten en de blootstelling aan risico's in de toeleveringsketen. Shrinkwrap geeft releasebeoordeling een stabiele grens: reviewers zien bewegingen in transitieve afhankelijkheden, validators wijzen onverwachte afwijkingen in het vergrendelingsbestand af en Plugin-pakketten bevatten hun eigen vergrendelde afhankelijkheidsgraaf in plaats van op het hoofdpakket te vertrouwen.
 
 ## Genereren en controleren
 
-Het npm-hoofdpakket `openclaw`, npm-Plugin-pakketten die eigendom zijn van OpenClaw (bijvoorbeeld `@openclaw/discord`) en publiceerbare werkruimtepakketten zoals [`@openclaw/ai`](/reference/openclaw-ai) bevatten bij publicatie `npm-shrinkwrap.json`. Werkruimteafhankelijkheden worden weggelaten uit de shrinkwrap van het hoofdpakket, omdat ze naast het hoofdpakket worden gepubliceerd; elk publiceerbaar werkruimtepakket legt in plaats daarvan zijn eigen transitieve structuur vast. Geschikte Plugin-pakketten kunnen ook worden gepubliceerd met expliciete `bundledDependencies`, waarbij hun runtime-afhankelijkheidsbestanden in het Plugin-tar-archief worden opgenomen in plaats van uitsluitend op omzetting tijdens de installatie te vertrouwen.
+Het npm-hoofdpakket `openclaw`, npm-Plugin-pakketten van OpenClaw (bijvoorbeeld `@openclaw/discord`) en publiceerbare workspace-pakketten zoals [`@openclaw/ai`](/nl/reference/openclaw-ai) bevatten bij publicatie `npm-shrinkwrap.json`. Workspace-afhankelijkheden worden uit de hoofd-shrinkwrap weggelaten omdat ze naast het hoofdpakket worden gepubliceerd; elk publiceerbaar workspace-pakket legt in plaats daarvan zijn eigen transitieve boom vast. Geschikte Plugin-pakketten kunnen ook worden gepubliceerd met expliciete `bundledDependencies`, waarbij hun runtime-afhankelijkheidsbestanden in de Plugin-tarball worden opgenomen in plaats van uitsluitend op resolutie tijdens de installatie te vertrouwen.
 
 ```bash
-# Alle door shrinkwrap beheerde pakketten (hoofdmap + publiceerbare Plugins)
+# Alle door shrinkwrap beheerde pakketten (hoofd + publiceerbare Plugins)
 pnpm deps:shrinkwrap:generate
 pnpm deps:shrinkwrap:check
 
@@ -56,16 +57,16 @@ pnpm deps:shrinkwrap:changed:generate
 pnpm deps:shrinkwrap:changed:check
 ```
 
-De generator zet npm's publiceerbare vergrendelingsindeling om, maar wijst gegenereerde pakketversies af die nog niet in `pnpm-lock.yaml` voorkomen. Daardoor blijven de grenzen voor de leeftijd van pnpm-afhankelijkheden en de beoordeling van overschrijvingen en patches intact.
+De generator zet npm's publiceerbare vergrendelingsindeling om, maar wijst gegenereerde pakketversies af die nog niet in `pnpm-lock.yaml` aanwezig zijn. Zo blijft de beoordelingsgrens voor de ouderdom van pnpm-afhankelijkheden, overrides en patches intact.
 
-Behandel deze als beveiligingsgevoelig:
+Behandel het volgende als beveiligingsgevoelig:
 
 - `pnpm-lock.yaml`
 - `npm-shrinkwrap.json`
-- meegeleverde afhankelijkheidspayloads van Plugins
+- afhankelijkheidspayloads van gebundelde Plugins
 - elke diff van `package-lock.json`
 
-OpenClaw-pakketvalidators vereisen shrinkwrap in nieuwe tar-archieven van het hoofdpakket en wijzen `package-lock.json` af voor gepubliceerde pakketten. Het npm-publicatiepad voor Plugins controleert de lokale shrinkwrap van de Plugin, installeert de lokale meegeleverde afhankelijkheden van het pakket en maakt of publiceert het pakket vervolgens.
+OpenClaw-pakketvalidators vereisen shrinkwrap in nieuwe tarballs van het hoofdpakket en wijzen `package-lock.json` af voor gepubliceerde pakketten. Het npm-publicatiepad voor Plugins controleert de Plugin-lokale shrinkwrap, installeert pakketlokale gebundelde afhankelijkheden en maakt of publiceert vervolgens het pakket.
 
 ## Een gepubliceerd pakket inspecteren
 
@@ -84,4 +85,4 @@ tar -tf /tmp/openclaw-plugin-pack/openclaw-discord-<version>.tgz | grep '^packag
 tar -tf /tmp/openclaw-plugin-pack/openclaw-discord-<version>.tgz | grep '^package/node_modules/'
 ```
 
-Achtergrondinformatie: [npm-shrinkwrap.json](https://docs.npmjs.com/cli/v11/configuring-npm/npm-shrinkwrap-json).
+Achtergrond: [npm-shrinkwrap.json](https://docs.npmjs.com/cli/v11/configuring-npm/npm-shrinkwrap-json).

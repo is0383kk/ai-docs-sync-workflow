@@ -2,131 +2,101 @@
 read_when: You want a dedicated explanation of sandboxing or need to tune agents.defaults.sandbox.
 sidebarTitle: Sandboxing
 status: active
-summary: 'OpenClaw सैंडबॉक्सिंग कैसे काम करती है: मोड, स्कोप, workspace एक्सेस, और इमेजेज'
+summary: 'OpenClaw सैंडबॉक्सिंग कैसे काम करती है: मोड, स्कोप, वर्कस्पेस एक्सेस और इमेजेज'
 title: सैंडबॉक्सिंग
 x-i18n:
-    generated_at: "2026-06-28T23:12:44Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:21:30Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 7c9754fbfc71ee5fb48df72eece8ba3b155ce5e0d9c55aae75ce21801dceb07d
+    source_hash: a3668dc512a8ff30732290ee68e9dd29a3a2e9c106e6e39077a97bfbd90098f7
     source_path: gateway/sandboxing.md
     workflow: 16
 ---
 
-OpenClaw प्रभाव-क्षेत्र घटाने के लिए **सैंडबॉक्स बैकएंड के अंदर टूल** चला सकता है। यह **वैकल्पिक** है और कॉन्फ़िगरेशन (`agents.defaults.sandbox` या `agents.list[].sandbox`) से नियंत्रित होता है। यदि सैंडबॉक्सिंग बंद है, तो टूल होस्ट पर चलते हैं। Gateway होस्ट पर रहता है; सक्षम होने पर टूल निष्पादन एक अलग-थलग सैंडबॉक्स में चलता है।
+OpenClaw ब्लास्ट रेडियस कम करने के लिए टूल निष्पादन को सैंडबॉक्स बैकएंड के भीतर चला सकता है। सैंडबॉक्सिंग डिफ़ॉल्ट रूप से बंद होती है और इसे `agents.defaults.sandbox` (वैश्विक) या `agents.entries.*.sandbox` (प्रति-एजेंट) द्वारा नियंत्रित किया जाता है। Gateway प्रक्रिया हमेशा होस्ट पर रहती है; सक्षम होने पर केवल टूल निष्पादन सैंडबॉक्स में जाता है।
 
 <Note>
-यह कोई पूर्ण सुरक्षा सीमा नहीं है, लेकिन जब मॉडल कोई गलत काम करता है तो यह फ़ाइल सिस्टम और प्रक्रिया पहुंच को स्पष्ट रूप से सीमित करता है।
+यह पूर्ण सुरक्षा सीमा नहीं है, लेकिन मॉडल द्वारा कोई मूर्खतापूर्ण कार्य किए जाने पर यह फ़ाइल सिस्टम और प्रक्रिया की पहुँच को काफ़ी हद तक सीमित करती है।
 </Note>
 
 ## क्या सैंडबॉक्स किया जाता है
 
-- टूल निष्पादन (`exec`, `read`, `write`, `edit`, `apply_patch`, `process`, आदि)।
+- टूल निष्पादन: `exec`, `read`, `write`, `edit`, `apply_patch`, `process`, आदि।
 - वैकल्पिक सैंडबॉक्स किया गया ब्राउज़र (`agents.defaults.sandbox.browser`)।
 
-<AccordionGroup>
-  <Accordion title="Sandboxed browser details">
-    - डिफ़ॉल्ट रूप से, जब ब्राउज़र टूल को इसकी ज़रूरत होती है, तो सैंडबॉक्स ब्राउज़र अपने आप शुरू होता है (यह सुनिश्चित करता है कि CDP पहुंच योग्य है)। `agents.defaults.sandbox.browser.autoStart` और `agents.defaults.sandbox.browser.autoStartTimeoutMs` से कॉन्फ़िगर करें।
-    - डिफ़ॉल्ट रूप से, सैंडबॉक्स ब्राउज़र कंटेनर वैश्विक `bridge` नेटवर्क के बजाय एक समर्पित Docker नेटवर्क (`openclaw-sandbox-browser`) का उपयोग करते हैं। `agents.defaults.sandbox.browser.network` से कॉन्फ़िगर करें।
-    - वैकल्पिक `agents.defaults.sandbox.browser.cdpSourceRange` कंटेनर-एज CDP इनग्रेस को CIDR allowlist (उदाहरण के लिए `172.21.0.1/32`) से सीमित करता है।
-    - noVNC ऑब्ज़र्वर पहुंच डिफ़ॉल्ट रूप से पासवर्ड-सुरक्षित होती है; OpenClaw एक अल्पकालिक टोकन URL जारी करता है, जो एक स्थानीय bootstrap पेज परोसता है और URL fragment में पासवर्ड के साथ noVNC खोलता है (query/header logs में नहीं)।
-    - `agents.defaults.sandbox.browser.allowHostControl` सैंडबॉक्स किए गए सेशन को होस्ट ब्राउज़र को स्पष्ट रूप से लक्ष्य बनाने देता है।
-    - वैकल्पिक allowlists `target: "custom"` को नियंत्रित करती हैं: `allowedControlUrls`, `allowedControlHosts`, `allowedControlPorts`।
+सैंडबॉक्स नहीं किए जाते:
 
-  </Accordion>
-</AccordionGroup>
+- स्वयं Gateway प्रक्रिया।
+- `tools.elevated` के माध्यम से सैंडबॉक्स के बाहर चलने की स्पष्ट अनुमति प्राप्त कोई भी टूल। उन्नत exec सैंडबॉक्सिंग को बायपास करता है और कॉन्फ़िगर किए गए एस्केप पथ पर चलता है (डिफ़ॉल्ट रूप से `gateway`, या जब exec लक्ष्य `node` हो तब `node`)। यदि सैंडबॉक्सिंग बंद है, तो `tools.elevated` से कुछ नहीं बदलता क्योंकि exec पहले से ही होस्ट पर चलता है। [उन्नत मोड](/hi/tools/elevated) देखें।
 
-सैंडबॉक्स नहीं किया गया:
+## मोड, दायरा और बैकएंड
 
-- Gateway प्रक्रिया स्वयं।
-- कोई भी टूल जिसे सैंडबॉक्स के बाहर चलने की स्पष्ट अनुमति है (जैसे `tools.elevated`)।
-  - **Elevated exec सैंडबॉक्सिंग को बायपास करता है और कॉन्फ़िगर किए गए escape path का उपयोग करता है (डिफ़ॉल्ट रूप से `gateway`, या जब exec लक्ष्य `node` हो तो `node`)।**
-  - यदि सैंडबॉक्सिंग बंद है, तो `tools.elevated` निष्पादन नहीं बदलता (पहले से ही होस्ट पर है)। [Elevated Mode](/hi/tools/elevated) देखें।
+तीन स्वतंत्र सेटिंग सैंडबॉक्स के व्यवहार को नियंत्रित करती हैं:
 
-## मोड
+| सेटिंग | कुंजी                               | मान                       | डिफ़ॉल्ट  |
+| ------- | --------------------------------- | ---------------------------- | -------- |
+| मोड    | `agents.defaults.sandbox.mode`    | `off`, `non-main`, `all`     | `off`    |
+| दायरा   | `agents.defaults.sandbox.scope`   | `agent`, `session`, `shared` | `agent`  |
+| बैकएंड | `agents.defaults.sandbox.backend` | `docker`, `ssh`, `openshell` | `docker` |
 
-`agents.defaults.sandbox.mode` यह नियंत्रित करता है कि सैंडबॉक्सिंग **कब** उपयोग की जाती है:
+**मोड** नियंत्रित करता है कि सैंडबॉक्सिंग कब लागू होती है:
 
-<Tabs>
-  <Tab title="off">
-    कोई सैंडबॉक्सिंग नहीं।
-  </Tab>
-  <Tab title="non-main">
-    केवल **non-main** सेशन को सैंडबॉक्स करें (यदि आप सामान्य चैट होस्ट पर चाहते हैं तो डिफ़ॉल्ट)।
+- `off`: कोई सैंडबॉक्सिंग नहीं।
+- `non-main`: एजेंट के मुख्य सत्र को छोड़कर प्रत्येक सत्र को सैंडबॉक्स करें। मुख्य सत्र की कुंजी हमेशा `agent:<agentId>:main` होती है (या जब `session.scope`, `"global"` हो तब `global`); इसे कॉन्फ़िगर नहीं किया जा सकता। समूह/चैनल सत्र अपनी अलग कुंजियों का उपयोग करते हैं, इसलिए उन्हें हमेशा गैर-मुख्य माना जाता है और वे सैंडबॉक्स किए जाते हैं।
+- `all`: प्रत्येक सत्र सैंडबॉक्स में चलता है।
 
-    `"non-main"` `session.mainKey` (डिफ़ॉल्ट `"main"`) पर आधारित है, एजेंट id पर नहीं। ग्रुप/चैनल सेशन अपनी कुंजियों का उपयोग करते हैं, इसलिए वे non-main माने जाते हैं और सैंडबॉक्स किए जाएंगे।
+**दायरा** नियंत्रित करता है कि कितने कंटेनर/परिवेश बनाए जाते हैं:
 
-  </Tab>
-  <Tab title="all">
-    हर सेशन सैंडबॉक्स में चलता है।
-  </Tab>
-</Tabs>
+- `agent`: प्रति एजेंट एक कंटेनर।
+- `session`: प्रति सत्र एक कंटेनर।
+- `shared`: सभी सैंडबॉक्स किए गए सत्रों द्वारा साझा किया गया एक कंटेनर (इस दायरे में प्रति-एजेंट `docker`/`ssh`/`browser` ओवरराइड अनदेखे किए जाते हैं)।
 
-## दायरा
-
-`agents.defaults.sandbox.scope` यह नियंत्रित करता है कि **कितने कंटेनर** बनाए जाते हैं:
-
-- `"agent"` (डिफ़ॉल्ट): प्रति एजेंट एक कंटेनर।
-- `"session"`: प्रति सेशन एक कंटेनर।
-- `"shared"`: सभी सैंडबॉक्स किए गए सेशन द्वारा साझा किया गया एक कंटेनर।
-
-## बैकएंड
-
-`agents.defaults.sandbox.backend` यह नियंत्रित करता है कि **कौन सा runtime** सैंडबॉक्स प्रदान करता है:
-
-- `"docker"` (सैंडबॉक्सिंग सक्षम होने पर डिफ़ॉल्ट): स्थानीय Docker-backed सैंडबॉक्स runtime।
-- `"ssh"`: generic SSH-backed remote sandbox runtime।
-- `"openshell"`: OpenShell-backed sandbox runtime।
-
-SSH-विशिष्ट कॉन्फ़िगरेशन `agents.defaults.sandbox.ssh` के अंतर्गत रहता है। OpenShell-विशिष्ट कॉन्फ़िगरेशन `plugins.entries.openshell.config` के अंतर्गत रहता है।
-
-### बैकएंड चुनना
+**बैकएंड** नियंत्रित करता है कि कौन-सा रनटाइम सैंडबॉक्स किए गए टूल निष्पादित करता है। SSH-विशिष्ट कॉन्फ़िगरेशन `agents.defaults.sandbox.ssh` के अंतर्गत रहता है; OpenShell-विशिष्ट कॉन्फ़िगरेशन `plugins.entries.openshell.config` के अंतर्गत रहता है।
 
 |                     | Docker                           | SSH                            | OpenShell                                           |
 | ------------------- | -------------------------------- | ------------------------------ | --------------------------------------------------- |
-| **कहां चलता है**   | स्थानीय कंटेनर                  | कोई भी SSH-पहुंच योग्य होस्ट        | OpenShell managed sandbox                           |
-| **सेटअप**           | `scripts/sandbox-setup.sh`       | SSH key + target host          | OpenShell plugin enabled                            |
-| **Workspace model** | Bind-mount या copy               | Remote-canonical (seed once)   | `mirror` या `remote`                                |
-| **नेटवर्क नियंत्रण** | `docker.network` (डिफ़ॉल्ट: none) | remote host पर निर्भर         | OpenShell पर निर्भर                                |
+| **यह कहाँ चलता है**   | स्थानीय कंटेनर                  | कोई भी SSH-सुलभ होस्ट        | OpenShell द्वारा प्रबंधित सैंडबॉक्स                           |
+| **सेटअप**           | `scripts/sandbox-setup.sh`       | SSH कुंजी + लक्ष्य होस्ट          | OpenShell Plugin सक्षम                            |
+| **वर्कस्पेस मॉडल** | बाइंड-माउंट या कॉपी               | रिमोट-कैनोनिकल (एक बार सीड करें)   | `mirror` या `remote`                                |
+| **नेटवर्क नियंत्रण** | `docker.network` (डिफ़ॉल्ट: कोई नहीं) | रिमोट होस्ट पर निर्भर         | OpenShell पर निर्भर                                |
 | **ब्राउज़र सैंडबॉक्स** | समर्थित                        | समर्थित नहीं                  | अभी समर्थित नहीं                                   |
-| **Bind mounts**     | `docker.binds`                   | N/A                            | N/A                                                 |
-| **इसके लिए सर्वोत्तम** | Local dev, full isolation        | remote machine पर offloading | वैकल्पिक two-way sync के साथ managed remote sandboxes |
+| **बाइंड माउंट**     | `docker.binds`                   | लागू नहीं                            | लागू नहीं                                                 |
+| **इनके लिए सर्वश्रेष्ठ**        | स्थानीय विकास, पूर्ण पृथक्करण        | रिमोट मशीन पर भार स्थानांतरित करना | वैकल्पिक द्विदिश सिंक वाले प्रबंधित रिमोट सैंडबॉक्स |
 
-### Docker बैकएंड
+## Docker बैकएंड
 
-सैंडबॉक्सिंग डिफ़ॉल्ट रूप से बंद होती है। यदि आप सैंडबॉक्सिंग सक्षम करते हैं और कोई बैकएंड नहीं चुनते, तो OpenClaw Docker बैकएंड का उपयोग करता है। यह Docker daemon socket (`/var/run/docker.sock`) के माध्यम से स्थानीय रूप से टूल और सैंडबॉक्स ब्राउज़र चलाता है। सैंडबॉक्स कंटेनर isolation Docker namespaces द्वारा निर्धारित होता है।
+सैंडबॉक्सिंग सक्षम होने के बाद Docker डिफ़ॉल्ट बैकएंड होता है। यह Docker डेमन सॉकेट (`/var/run/docker.sock`) के माध्यम से टूल और सैंडबॉक्स ब्राउज़र स्थानीय रूप से चलाता है; पृथक्करण Docker नेमस्पेस से मिलता है।
 
-होस्ट GPU को Docker सैंडबॉक्स के सामने लाने के लिए, `agents.defaults.sandbox.docker.gpus` या per-agent `agents.list[].sandbox.docker.gpus` override सेट करें। मान Docker के `--gpus` flag को अलग argument के रूप में दिया जाता है, उदाहरण के लिए `"all"` या `"device=GPU-uuid"`, और इसके लिए NVIDIA Container Toolkit जैसे compatible host runtime की आवश्यकता होती है।
+डिफ़ॉल्ट: `network: "none"` (कोई इग्रेस नहीं), `readOnlyRoot: true`, `capDrop: ["ALL"]`, इमेज `openclaw-sandbox:bookworm-slim`।
+
+होस्ट GPU उपलब्ध कराने के लिए, `agents.defaults.sandbox.docker.gpus` (या प्रति-एजेंट ओवरराइड) को `"all"` या `"device=GPU-uuid"` जैसे मान पर सेट करें। इसे Docker के `--gpus` फ़्लैग में भेजा जाता है और इसके लिए NVIDIA Container Toolkit जैसा संगत होस्ट रनटाइम आवश्यक है।
 
 <Warning>
-**Docker-out-of-Docker (DooD) सीमाएं**
+**Docker-आउट-ऑफ़-Docker (DooD) की सीमाएँ**
 
-यदि आप OpenClaw Gateway को स्वयं Docker कंटेनर के रूप में deploy करते हैं, तो यह होस्ट के Docker socket (DooD) का उपयोग करके sibling sandbox containers orchestrate करता है। इससे एक विशिष्ट path mapping constraint आता है:
+यदि आप OpenClaw Gateway को ही Docker कंटेनर के रूप में तैनात करते हैं, तो यह होस्ट के Docker सॉकेट (DooD) का उपयोग करके समान-स्तर के सैंडबॉक्स कंटेनरों का संचालन करता है। इससे पथ मैपिंग की एक सीमा उत्पन्न होती है:
 
-- **Config को host paths चाहिए**: `openclaw.json` `workspace` configuration में **Host's absolute path** (जैसे `/home/user/.openclaw/workspaces`) होना चाहिए, internal Gateway container path नहीं। जब OpenClaw Docker daemon से sandbox spawn करने को कहता है, तो daemon paths को Gateway namespace नहीं, बल्कि Host OS namespace के सापेक्ष evaluate करता है।
-- **FS bridge parity (identical volume map)**: OpenClaw Gateway native process भी `workspace` directory में heartbeat और bridge files लिखता है। क्योंकि Gateway अपने containerized environment के भीतर से वही exact string (host path) evaluate करता है, Gateway deployment में host namespace को natively link करने वाला identical volume map शामिल होना चाहिए (`-v /home/user/.openclaw:/home/user/.openclaw`)।
-- **Codex code mode**: जब OpenClaw sandbox सक्रिय होता है, तो OpenClaw उस turn के लिए Codex app-server native Code Mode, user MCP servers, और app-backed plugin execution को disable कर देता है, क्योंकि ये native surfaces OpenClaw sandbox backend के बजाय Gateway-host app-server process से चलते हैं। जब normal exec/process tools उपलब्ध हों, तो shell access OpenClaw sandbox-backed tools जैसे `sandbox_exec` और `sandbox_process` के माध्यम से exposed होता है। agent sandbox containers या custom Codex sandboxes में host Docker socket mount न करें।
+- **कॉन्फ़िगरेशन में होस्ट पथ आवश्यक हैं**: `openclaw.json` `workspace` में आंतरिक Gateway कंटेनर पथ के बजाय **होस्ट का निरपेक्ष पथ** (उदाहरण के लिए `/home/user/.openclaw/workspaces`) होना चाहिए। Docker डेमन पथों का मूल्यांकन Gateway के अपने नेमस्पेस के बजाय होस्ट OS नेमस्पेस के सापेक्ष करता है।
+- **मेल खाता वॉल्यूम मैप आवश्यक है**: Gateway प्रक्रिया उस `workspace` पथ पर Heartbeat और ब्रिज फ़ाइलें भी लिखती है। Gateway कंटेनर को समान वॉल्यूम मैप (`-v /home/user/.openclaw:/home/user/.openclaw`) दें, ताकि वही होस्ट पथ Gateway कंटेनर के भीतर से भी सही ढंग से रिज़ॉल्व हो। मैपिंग में अंतर होने पर Gateway द्वारा अपना Heartbeat लिखने का प्रयास करते समय `EACCES` दिखाई देता है।
+- **Codex कोड मोड**: जब OpenClaw सैंडबॉक्स सक्रिय होता है, तो उस टर्न के लिए OpenClaw, Codex ऐप-सर्वर के मूल Code Mode, उपयोगकर्ता MCP सर्वर और ऐप-समर्थित Plugin निष्पादन को अक्षम कर देता है (ये OpenClaw सैंडबॉक्स बैकएंड से नहीं, बल्कि Gateway-होस्ट ऐप-सर्वर प्रक्रिया से चलते हैं), जब तक कि सैंडबॉक्स टूल नीति आवश्यक टूल उपलब्ध न कराए और आप प्रयोगात्मक सैंडबॉक्स exec-सर्वर पथ को न चुनें। इसके बाद शेल पहुँच `sandbox_exec` और `sandbox_process` जैसे OpenClaw सैंडबॉक्स-समर्थित टूल के माध्यम से रूट होती है। होस्ट Docker सॉकेट को एजेंट सैंडबॉक्स कंटेनरों या कस्टम Codex सैंडबॉक्स में माउंट न करें। पूर्ण व्यवहार के लिए [Codex हार्नेस](/hi/plugins/codex-harness) देखें।
 
-Ubuntu/AppArmor hosts पर, Codex `workspace-write` shell startup से पहले fail हो सकता है
-जब आप जानबूझकर active OpenClaw sandboxing के बिना native Codex `workspace-write`
-चलाते हैं और service user को unprivileged user namespaces बनाने की अनुमति नहीं है।
-जब Docker sandbox egress disabled हो (`network: "none"`, डिफ़ॉल्ट), तो
-Codex को unprivileged network namespace भी चाहिए। सामान्य symptoms हैं
-`bwrap: setting up uid map: Permission denied` और
-`bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted`। चलाएं
-`openclaw doctor`; यदि यह Codex bwrap namespace probe failure रिपोर्ट करता है, तो OpenClaw service
-process को आवश्यक namespaces देने वाली AppArmor profile को प्राथमिकता दें।
-`kernel.apparmor_restrict_unprivileged_userns=0` host-wide
-fallback है जिसमें security tradeoffs हैं; इसे केवल तभी उपयोग करें जब वह host posture
-स्वीकार्य हो।
-
-यदि आप absolute host parity के बिना paths को internally map करते हैं, तो OpenClaw container environment के भीतर अपना heartbeat लिखने का प्रयास करते समय natively `EACCES` permission error फेंकता है, क्योंकि fully qualified path string natively मौजूद नहीं होती।
+Docker सैंडबॉक्स मोड सक्षम वाले Ubuntu/AppArmor होस्ट पर, Codex ऐप-सर्वर के `workspace-write` शेल निष्पादन को सैंडबॉक्स कंटेनर के भीतर गैर-विशेषाधिकार प्राप्त उपयोगकर्ता नेमस्पेस की आवश्यकता होती है, और सेवा उपयोगकर्ता द्वारा उन्हें न बना पाने पर यह शेल शुरू होने से पहले विफल हो सकता है। Docker सैंडबॉक्स इग्रेस अक्षम होने पर (`network: "none"`, डिफ़ॉल्ट) इसके लिए एक गैर-विशेषाधिकार प्राप्त नेटवर्क नेमस्पेस भी आवश्यक होता है। सामान्य लक्षण: `bwrap: setting up uid map: Permission denied` और `bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted`। `openclaw doctor` चलाएँ; यदि यह Codex bwrap नेमस्पेस जाँच की विफलता रिपोर्ट करता है, तो ऐसा AppArmor प्रोफ़ाइल चुनें जो OpenClaw सेवा प्रक्रिया को आवश्यक नेमस्पेस प्रदान करता हो। `kernel.apparmor_restrict_unprivileged_userns=0` सुरक्षा संबंधी समझौतों वाला होस्ट-व्यापी फ़ॉलबैक है; इसका उपयोग केवल तभी करें जब उस होस्ट की सुरक्षा स्थिति स्वीकार्य हो।
 </Warning>
 
-### SSH बैकएंड
+### सैंडबॉक्स किया गया ब्राउज़र
 
-`backend: "ssh"` का उपयोग तब करें जब आप चाहते हैं कि OpenClaw `exec`, file tools, और media reads को किसी arbitrary SSH-accessible machine पर sandbox करे।
+- जब ब्राउज़र टूल को इसकी आवश्यकता होती है, तो सैंडबॉक्स ब्राउज़र स्वतः शुरू होता है (यह सुनिश्चित करता है कि CDP पहुँच योग्य है)। इसे `agents.defaults.sandbox.browser.autoStart` (डिफ़ॉल्ट `true`) और `autoStartTimeoutMs` (डिफ़ॉल्ट 12s) के माध्यम से कॉन्फ़िगर करें।
+- सैंडबॉक्स ब्राउज़र कंटेनर वैश्विक `bridge` नेटवर्क के बजाय एक समर्पित Docker नेटवर्क (`openclaw-sandbox-browser`) का उपयोग करते हैं। इसे `agents.defaults.sandbox.browser.network` से कॉन्फ़िगर करें।
+- `agents.defaults.sandbox.browser.cdpSourceRange`, CIDR अनुमत-सूची (उदाहरण के लिए `172.21.0.1/32`) के साथ कंटेनर-किनारे के CDP इनग्रेस को सीमित करता है।
+- noVNC पर्यवेक्षक पहुँच डिफ़ॉल्ट रूप से पासवर्ड-सुरक्षित होती है; OpenClaw एक अल्पकालिक टोकन URL जारी करता है, जो स्थानीय बूटस्ट्रैप पृष्ठ उपलब्ध कराता है और URL फ़्रैगमेंट में पासवर्ड के साथ noVNC खोलता है (क्वेरी स्ट्रिंग या हेडर लॉग में नहीं)।
+- `agents.defaults.sandbox.browser.allowHostControl` (डिफ़ॉल्ट `false`) सैंडबॉक्स किए गए सत्रों को स्पष्ट रूप से होस्ट ब्राउज़र को लक्ष्य बनाने देता है।
+- वैकल्पिक अनुमत-सूचियाँ `target: "custom"` को नियंत्रित करती हैं: `allowedControlUrls`, `allowedControlHosts`, `allowedControlPorts`।
+
+## SSH बैकएंड
+
+किसी भी SSH-सुलभ मशीन पर `exec`, फ़ाइल टूल और मीडिया रीड को सैंडबॉक्स करने के लिए `backend: "ssh"` का उपयोग करें।
 
 ```json5
 {
@@ -145,7 +115,7 @@ fallback है जिसमें security tradeoffs हैं; इसे क�
           identityFile: "~/.ssh/id_ed25519",
           certificateFile: "~/.ssh/id_ed25519-cert.pub",
           knownHostsFile: "~/.ssh/known_hosts",
-          // Or use SecretRefs / inline contents instead of local files:
+          // या स्थानीय फ़ाइलों के बजाय SecretRefs / इनलाइन सामग्री का उपयोग करें:
           // identityData: { source: "env", provider: "default", id: "SSH_IDENTITY" },
           // certificateData: { source: "env", provider: "default", id: "SSH_CERTIFICATE" },
           // knownHostsData: { source: "env", provider: "default", id: "SSH_KNOWN_HOSTS" },
@@ -156,36 +126,15 @@ fallback है जिसमें security tradeoffs हैं; इसे क�
 }
 ```
 
-<AccordionGroup>
-  <Accordion title="How it works">
-    - OpenClaw `sandbox.ssh.workspaceRoot` के अंतर्गत per-scope remote root बनाता है।
-    - create या recreate के बाद पहले उपयोग पर, OpenClaw उस remote workspace को local workspace से एक बार seed करता है।
-    - उसके बाद, `exec`, `read`, `write`, `edit`, `apply_patch`, prompt media reads, और inbound media staging सीधे SSH के माध्यम से remote workspace के विरुद्ध चलते हैं।
-    - OpenClaw remote changes को local workspace में automatically sync नहीं करता।
+डिफ़ॉल्ट: `command: "ssh"`, `workspaceRoot: "/tmp/openclaw-sandboxes"`, `strictHostKeyChecking: true`, `updateHostKeys: true`।
 
-  </Accordion>
-  <Accordion title="Authentication material">
-    - `identityFile`, `certificateFile`, `knownHostsFile`: मौजूदा local files का उपयोग करें और उन्हें OpenSSH config के माध्यम से pass करें।
-    - `identityData`, `certificateData`, `knownHostsData`: inline strings या SecretRefs का उपयोग करें। OpenClaw उन्हें normal secrets runtime snapshot के माध्यम से resolve करता है, `0600` के साथ temp files में लिखता है, और SSH session समाप्त होने पर उन्हें delete करता है।
-    - यदि एक ही item के लिए `*File` और `*Data` दोनों सेट हैं, तो उस SSH session के लिए `*Data` जीतता है।
+- **जीवनचक्र**: OpenClaw, `sandbox.ssh.workspaceRoot` के अंतर्गत प्रति-दायरा रिमोट रूट बनाता है। बनाने या दोबारा बनाने के बाद पहली बार उपयोग करने पर, यह स्थानीय वर्कस्पेस से उस रिमोट वर्कस्पेस को एक बार सीड करता है। उसके बाद, `exec`, `read`, `write`, `edit`, `apply_patch`, प्रॉम्प्ट मीडिया रीड और इनबाउंड मीडिया स्टेजिंग सीधे SSH के माध्यम से रिमोट वर्कस्पेस पर चलते हैं। OpenClaw रिमोट बदलावों को स्थानीय वर्कस्पेस में स्वचालित रूप से सिंक नहीं करता।
+- **प्रमाणीकरण सामग्री**: `identityFile`/`certificateFile`/`knownHostsFile` मौजूदा स्थानीय फ़ाइलों को संदर्भित करते हैं। `identityData`/`certificateData`/`knownHostsData` इनलाइन स्ट्रिंग या SecretRefs स्वीकार करते हैं, जिन्हें सामान्य सीक्रेट रनटाइम स्नैपशॉट के माध्यम से रिज़ॉल्व किया जाता है, मोड `0600` वाली अस्थायी फ़ाइलों में लिखा जाता है और SSH सत्र समाप्त होने पर हटा दिया जाता है। यदि एक ही आइटम के लिए `*File` और `*Data` दोनों प्रकार सेट हैं, तो उस सत्र के लिए `*Data` प्रभावी होता है।
+- **रिमोट-कैनोनिकल के परिणाम**: प्रारंभिक सीड के बाद रिमोट SSH वर्कस्पेस वास्तविक सैंडबॉक्स स्थिति बन जाता है। सीड चरण के बाद OpenClaw के बाहर किए गए होस्ट-स्थानीय संपादन तब तक रिमोट पर दिखाई नहीं देते, जब तक आप सैंडबॉक्स को दोबारा नहीं बनाते। `openclaw sandbox recreate` प्रति-दायरा रिमोट रूट को हटा देता है और अगले उपयोग पर स्थानीय से फिर सीड करता है। इस बैकएंड पर ब्राउज़र सैंडबॉक्सिंग समर्थित नहीं है और `sandbox.docker.*` सेटिंग इस पर लागू नहीं होतीं।
 
-  </Accordion>
-  <Accordion title="Remote-canonical consequences">
-    यह एक **remote-canonical** model है। initial seed के बाद remote SSH workspace वास्तविक sandbox state बन जाता है।
+## OpenShell बैकएंड
 
-    - seed step के बाद OpenClaw के बाहर किए गए host-local edits remotely visible नहीं होते, जब तक आप sandbox recreate नहीं करते।
-    - `openclaw sandbox recreate` per-scope remote root को delete करता है और अगले उपयोग पर local से फिर seed करता है।
-    - SSH backend पर browser sandboxing supported नहीं है।
-    - `sandbox.docker.*` settings SSH backend पर लागू नहीं होतीं।
-
-  </Accordion>
-</AccordionGroup>
-
-### OpenShell बैकएंड
-
-`backend: "openshell"` का उपयोग तब करें जब आप चाहते हैं कि OpenClaw OpenShell-managed remote environment में tools को sandbox करे। पूर्ण setup guide, configuration reference, और workspace mode comparison के लिए, dedicated [OpenShell page](/hi/gateway/openshell) देखें।
-
-OpenShell generic SSH backend की तरह वही core SSH transport और remote filesystem bridge reuse करता है, और OpenShell-specific lifecycle (`sandbox create/get/delete`, `sandbox ssh-config`) तथा वैकल्पिक `mirror` workspace mode जोड़ता है।
+OpenShell द्वारा प्रबंधित रिमोट परिवेश में टूल सैंडबॉक्स करने के लिए `backend: "openshell"` का उपयोग करें। OpenShell सामान्य SSH बैकएंड के समान SSH ट्रांसपोर्ट और रिमोट फ़ाइल सिस्टम ब्रिज का पुनः उपयोग करता है, और इसमें OpenShell जीवनचक्र (`sandbox create/get/delete/ssh-config`) के साथ वैकल्पिक `mirror` वर्कस्पेस सिंक मोड जोड़ता है।
 
 ```json5
 {
@@ -205,9 +154,7 @@ OpenShell generic SSH backend की तरह वही core SSH transport औ�
         enabled: true,
         config: {
           from: "openclaw",
-          mode: "remote", // mirror | remote
-          remoteWorkspaceDir: "/sandbox",
-          remoteAgentWorkspaceDir: "/agent",
+          mode: "remote", // मिरर | रिमोट
         },
       },
     },
@@ -215,132 +162,96 @@ OpenShell generic SSH backend की तरह वही core SSH transport औ�
 }
 ```
 
-OpenShell modes:
+`mode: "mirror"` (डिफ़ॉल्ट) स्थानीय वर्कस्पेस को कैनोनिकल बनाए रखता है: OpenClaw, `exec` से पहले स्थानीय सामग्री को सैंडबॉक्स में सिंक करता है और बाद में वापस सिंक करता है। `mode: "remote"` रिमोट वर्कस्पेस को स्थानीय सामग्री से एक बार आरंभ करता है, फिर वापस सिंक किए बिना `exec`/`read`/`write`/`edit`/`apply_patch` को सीधे रिमोट वर्कस्पेस पर चलाता है; आरंभिक प्रतिलिपि के बाद किए गए स्थानीय संपादन तब तक दिखाई नहीं देते, जब तक आप `openclaw sandbox recreate` नहीं करते। `scope: "agent"` या `scope: "shared"` के अंतर्गत, वह रिमोट वर्कस्पेस उसी दायरे में साझा किया जाता है। वर्तमान सीमाएँ: सैंडबॉक्स ब्राउज़र अभी समर्थित नहीं है और `sandbox.docker.binds` इस बैकएंड पर लागू नहीं होता।
 
-- `mirror` (डिफ़ॉल्ट): local workspace canonical रहता है। OpenClaw exec से पहले local files को OpenShell में sync करता है और exec के बाद remote workspace को वापस sync करता है।
-- `remote`: sandbox बनने के बाद OpenShell workspace canonical होता है। OpenClaw remote workspace को local workspace से एक बार seed करता है, फिर file tools और exec बदलावों को वापस sync किए बिना सीधे remote sandbox के विरुद्ध चलते हैं।
+`openclaw sandbox list`/`recreate`/प्रून सभी OpenShell रनटाइम को Docker रनटाइम के समान मानते हैं; प्रून लॉजिक बैकएंड से अवगत है।
 
-<AccordionGroup>
-  <Accordion title="रिमोट ट्रांसपोर्ट विवरण">
-    - OpenClaw `openshell sandbox ssh-config <name>` के ज़रिए OpenShell से sandbox-विशिष्ट SSH config मांगता है।
-    - Core उस SSH config को एक अस्थायी फ़ाइल में लिखता है, SSH session खोलता है, और `backend: "ssh"` द्वारा इस्तेमाल किए जाने वाले उसी remote filesystem bridge का पुनः उपयोग करता है।
-    - `mirror` mode में केवल lifecycle अलग होता है: exec से पहले local को remote से sync करें, फिर exec के बाद वापस sync करें।
+सभी पूर्वापेक्षाओं, कॉन्फ़िगरेशन संदर्भ, वर्कस्पेस-मोड तुलना और लाइफ़साइकल विवरण के लिए [OpenShell](/hi/gateway/openshell) देखें।
 
-  </Accordion>
-  <Accordion title="मौजूदा OpenShell सीमाएं">
-    - sandbox browser अभी समर्थित नहीं है
-    - OpenShell backend पर `sandbox.docker.binds` समर्थित नहीं है
-    - `sandbox.docker.*` के अंतर्गत Docker-विशिष्ट runtime knobs अभी भी केवल Docker backend पर लागू होते हैं
+## वर्कस्पेस एक्सेस
 
-  </Accordion>
-</AccordionGroup>
+`agents.defaults.sandbox.workspaceAccess` नियंत्रित करता है कि सैंडबॉक्स क्या देख सकता है:
 
-#### Workspace modes
+| मान            | व्यवहार                                                                                  |
+| ---------------- | ----------------------------------------------------------------------------------------- |
+| `none` (डिफ़ॉल्ट) | टूल `~/.openclaw/sandboxes` के अंतर्गत एक पृथक सैंडबॉक्स वर्कस्पेस देखते हैं।                    |
+| `ro`             | एजेंट वर्कस्पेस को `/agent` पर केवल-पढ़ने योग्य रूप में माउंट करता है (`write`/`edit`/`apply_patch` को अक्षम करता है)। |
+| `rw`             | एजेंट वर्कस्पेस को `/workspace` पर पढ़ने/लिखने योग्य रूप में माउंट करता है।                                    |
 
-OpenShell के दो workspace मॉडल हैं। व्यवहार में सबसे अधिक महत्व इसी भाग का है।
+OpenShell बैकएंड के साथ, `mirror` मोड अभी भी एक्ज़ेक टर्न के बीच स्थानीय वर्कस्पेस को कैनोनिकल स्रोत के रूप में उपयोग करता है, `remote` मोड आरंभिक प्रतिलिपि के बाद रिमोट OpenShell वर्कस्पेस को कैनोनिकल स्रोत के रूप में उपयोग करता है और `workspaceAccess: "ro"`/`"none"` अभी भी लिखने के व्यवहार को उसी प्रकार सीमित करते हैं।
 
-<Tabs>
-  <Tab title="mirror (local canonical)">
-    जब आप चाहते हैं कि **local workspace canonical बना रहे**, तब `plugins.entries.openshell.config.mode: "mirror"` का उपयोग करें।
-
-    व्यवहार:
-
-    - `exec` से पहले, OpenClaw local workspace को OpenShell sandbox में sync करता है।
-    - `exec` के बाद, OpenClaw remote workspace को वापस local workspace में sync करता है।
-    - File tools अब भी sandbox bridge के माध्यम से काम करते हैं, लेकिन turns के बीच local workspace ही source of truth रहता है।
-
-    इसका उपयोग तब करें जब:
-
-    - आप OpenClaw के बाहर local रूप से फ़ाइलें edit करते हैं और चाहते हैं कि वे बदलाव sandbox में अपने आप दिखाई दें
-    - आप चाहते हैं कि OpenShell sandbox जितना संभव हो Docker backend जैसा व्यवहार करे
-    - आप चाहते हैं कि प्रत्येक exec turn के बाद host workspace sandbox writes को दर्शाए
-
-    Tradeoff: exec से पहले और बाद में अतिरिक्त sync लागत।
-
-  </Tab>
-  <Tab title="remote (OpenShell canonical)">
-    जब आप चाहते हैं कि **OpenShell workspace canonical बन जाए**, तब `plugins.entries.openshell.config.mode: "remote"` का उपयोग करें।
-
-    व्यवहार:
-
-    - जब sandbox पहली बार बनाया जाता है, OpenClaw local workspace से remote workspace को एक बार seed करता है।
-    - उसके बाद, `exec`, `read`, `write`, `edit`, और `apply_patch` सीधे remote OpenShell workspace पर काम करते हैं।
-    - OpenClaw exec के बाद remote बदलावों को वापस local workspace में sync **नहीं** करता।
-    - Prompt-time media reads फिर भी काम करते हैं, क्योंकि file और media tools local host path मानने के बजाय sandbox bridge के माध्यम से पढ़ते हैं।
-    - Transport, `openshell sandbox ssh-config` द्वारा लौटाए गए OpenShell sandbox में SSH है।
-
-    महत्वपूर्ण परिणाम:
-
-    - यदि seed step के बाद आप OpenClaw के बाहर host पर फ़ाइलें edit करते हैं, तो remote sandbox उन बदलावों को अपने आप **नहीं** देखेगा।
-    - यदि sandbox फिर से बनाया जाता है, तो remote workspace फिर से local workspace से seed होता है।
-    - `scope: "agent"` या `scope: "shared"` के साथ, वह remote workspace उसी scope पर साझा किया जाता है।
-
-    इसका उपयोग तब करें जब:
-
-    - sandbox मुख्य रूप से remote OpenShell side पर रहना चाहिए
-    - आप प्रति-turn sync overhead कम चाहते हैं
-    - आप नहीं चाहते कि host-local edits चुपचाप remote sandbox state को overwrite करें
-
-  </Tab>
-</Tabs>
-
-यदि आप sandbox को एक अस्थायी execution environment मानते हैं, तो `mirror` चुनें। यदि आप sandbox को वास्तविक workspace मानते हैं, तो `remote` चुनें।
-
-#### OpenShell lifecycle
-
-OpenShell sandboxes अब भी सामान्य sandbox lifecycle के माध्यम से manage होते हैं:
-
-- `openclaw sandbox list` OpenShell runtimes के साथ-साथ Docker runtimes भी दिखाता है
-- `openclaw sandbox recreate` मौजूदा runtime को delete करता है और अगले उपयोग पर OpenClaw को उसे फिर से बनाने देता है
-- prune logic भी backend-aware है
-
-`remote` mode के लिए, recreate विशेष रूप से महत्वपूर्ण है:
-
-- recreate उस scope के लिए canonical remote workspace को delete करता है
-- अगला उपयोग local workspace से एक fresh remote workspace seed करता है
-
-`mirror` mode के लिए, recreate मुख्य रूप से remote execution environment को reset करता है, क्योंकि local workspace वैसे भी canonical रहता है।
-
-## Workspace access
-
-`agents.defaults.sandbox.workspaceAccess` नियंत्रित करता है कि **sandbox क्या देख सकता है**:
-
-<Tabs>
-  <Tab title="none (default)">
-    Tools `~/.openclaw/sandboxes` के अंतर्गत एक sandbox workspace देखते हैं।
-  </Tab>
-  <Tab title="ro">
-    Agent workspace को `/agent` पर read-only mount करता है (`write`/`edit`/`apply_patch` को disable करता है)।
-  </Tab>
-  <Tab title="rw">
-    Agent workspace को `/workspace` पर read/write mount करता है।
-  </Tab>
-</Tabs>
-
-OpenShell backend के साथ:
-
-- `mirror` mode अब भी exec turns के बीच local workspace को canonical source के रूप में उपयोग करता है
-- `remote` mode initial seed के बाद remote OpenShell workspace को canonical source के रूप में उपयोग करता है
-- `workspaceAccess: "ro"` और `"none"` अब भी write behavior को उसी तरह restrict करते हैं
-
-Inbound media को active sandbox workspace (`media/inbound/*`) में copy किया जाता है।
+आने वाला मीडिया सक्रिय सैंडबॉक्स वर्कस्पेस (`media/inbound/*`) में कॉपी किया जाता है।
 
 <Note>
-**Skills note:** `read` tool sandbox-rooted है। `workspaceAccess: "none"` के साथ, OpenClaw eligible skills को sandbox workspace (`.../skills`) में mirror करता है ताकि उन्हें पढ़ा जा सके। `"rw"` के साथ, workspace skills `/workspace/skills` से readable होती हैं, और eligible managed, bundled, या plugin skills generated read-only path `/workspace/.openclaw/sandbox-skills/skills` में materialize की जाती हैं।
+**Skills**: `read` टूल सैंडबॉक्स-रूटेड है। `workspaceAccess: "none"` के साथ, OpenClaw पात्र स्किल्स को सैंडबॉक्स वर्कस्पेस (`.../skills`) में मिरर करता है ताकि उन्हें पढ़ा जा सके। `"rw"` के साथ, वर्कस्पेस स्किल्स को `/workspace/skills` से पढ़ा जा सकता है और पात्र प्रबंधित, बंडल की गई या Plugin स्किल्स को जनरेट किए गए केवल-पढ़ने योग्य पथ `/workspace/.openclaw/sandbox-skills/skills` में उपलब्ध कराया जाता है।
 </Note>
 
-## Custom bind mounts
+## एक एजेंट के लिए अनेक फ़ोल्डर
 
-`agents.defaults.sandbox.docker.binds` अतिरिक्त host directories को container में mount करता है। Format: `host:container:mode` (जैसे, `"/home/user/source:/source:rw"`).
+जब किसी सैंडबॉक्स किए गए एजेंट को उसके प्राथमिक वर्कस्पेस से अधिक की आवश्यकता हो, तो Docker बाइंड माउंट का उपयोग करें। प्रत्येक प्रविष्टि एक होस्ट फ़ोल्डर को स्पष्ट एक्सेस मोड वाले कंटेनर पथ से मैप करती है:
 
-Global और per-agent binds **merge** किए जाते हैं (replace नहीं किए जाते)। `scope: "shared"` के अंतर्गत, per-agent binds ignore किए जाते हैं।
+```text
+host-directory:container-directory:ro
+host-directory:container-directory:rw
+```
 
-`agents.defaults.sandbox.browser.binds` अतिरिक्त host directories को केवल **sandbox browser** container में mount करता है।
+- `ro` माउंट किए गए फ़ोल्डर को सैंडबॉक्स के भीतर केवल-पढ़ने योग्य बनाता है।
+- `rw` सैंडबॉक्स किए गए टूल और प्रक्रियाओं को होस्ट फ़ोल्डर बदलने देता है।
+- कंटेनर पथ वह पथ है जिसका एजेंट उपयोग करता है। होस्ट पथ स्वचालित रूप से उजागर नहीं होते।
 
-- जब set हो (जिसमें `[]` भी शामिल है), यह browser container के लिए `agents.defaults.sandbox.docker.binds` को replace करता है।
-- जब omit हो, browser container `agents.defaults.sandbox.docker.binds` पर fallback करता है (backwards compatible).
+यह उदाहरण `research` एजेंट को लिखने योग्य प्राथमिक वर्कस्पेस, `/reference` पर केवल-पढ़ने योग्य संदर्भ सामग्री और `/drafts` पर एक अलग लिखने योग्य आउटपुट फ़ोल्डर देता है:
 
-Example (read-only source + एक अतिरिक्त data directory):
+```json5
+{
+  agents: {
+    defaults: {
+      sandbox: {
+        mode: "all",
+        scope: "agent",
+      },
+    },
+    list: [
+      {
+        id: "research",
+        workspace: "/srv/openclaw/research-workspace",
+        sandbox: {
+          workspaceAccess: "rw",
+          docker: {
+            binds: ["/srv/shared/reference:/reference:ro", "/srv/shared/drafts:/drafts:rw"],
+            // आवश्यक है क्योंकि ये स्रोत एजेंट वर्कस्पेस के बाहर हैं।
+            dangerouslyAllowExternalBindSources: true,
+          },
+        },
+      },
+    ],
+  },
+}
+```
+
+`workspaceAccess` और बाइंड मोड एक-दूसरे से स्वतंत्र हैं:
+
+| सेटिंग                          | नियंत्रण                                                                    |
+| -------------------------------- | --------------------------------------------------------------------------- |
+| `workspaceAccess: "none"`        | एक पृथक सैंडबॉक्स वर्कस्पेस का उपयोग करता है; एजेंट वर्कस्पेस को उजागर नहीं करता।    |
+| `workspaceAccess: "ro"`          | एजेंट वर्कस्पेस को `/agent` पर केवल-पढ़ने योग्य रूप में माउंट करता है।                           |
+| `workspaceAccess: "rw"`          | एजेंट वर्कस्पेस को `/workspace` पर पढ़ने/लिखने योग्य रूप में माउंट करता है।                      |
+| `docker.binds` प्रविष्टि `:ro`/`:rw` | केवल उस अतिरिक्त होस्ट फ़ोल्डर को उसके कॉन्फ़िगर किए गए कंटेनर पथ पर नियंत्रित करती है। |
+
+`workspaceAccess` बदलने से कोई अतिरिक्त बाइंड `ro` से `rw` या इसके विपरीत नहीं बदलता। वैश्विक और प्रति-एजेंट `docker.binds` मर्ज किए जाते हैं। प्रति-एजेंट बाइंड के लिए `scope: "agent"` या `"session"` रखें; `scope: "shared"` सभी प्रति-एजेंट Docker ओवरराइड की उपेक्षा करता है और केवल वैश्विक बाइंड का उपयोग करता है।
+
+बाइंड माउंट समर्थित बहु-फ़ोल्डर सीमा हैं क्योंकि Docker माउंट आइसोलेशन के साथ कंटेनर का फ़ाइल सिस्टम दृश्य बनाता है और `ro`/`rw` मोड सैंडबॉक्स की प्रत्येक प्रक्रिया पर लागू होता है। यह सीमा प्रत्येक OpenClaw कोड पथ में पथ-अधिकरण जाँचों को दोहराए बिना `exec`, फ़ाइल सिस्टम टूल, चाइल्ड प्रक्रियाओं और लाइब्रेरी को कवर करती है। जब कोई अनुमत शेल या निर्भरता सीधे फ़ाइलों को एक्सेस कर सकती है, तब होस्ट-साइड पथ अनुमति-सूची वही संपूर्ण सीमा प्रदान नहीं कर सकती।
+
+ऑप्ट-इन `dangerouslyAllowExternalBindSources` केवल वर्कस्पेस रूट के बाहर के स्रोतों की अनुमति देता है। यह OpenClaw की अवरुद्ध सिस्टम, क्रेडेंशियल, Docker सॉकेट, सिमलिंक-पैरेंट या आरक्षित-लक्ष्य जाँचों को अक्षम नहीं करता। सबसे छोटे फ़ोल्डर को प्राथमिकता दें, जब तक लिखना आवश्यक न हो तब तक `ro` का उपयोग करें और माउंट बदलने के बाद सैंडबॉक्स को फिर से बनाएँ:
+
+```bash
+openclaw sandbox recreate --agent research
+```
+
+### अन्य बाइंड व्यवहार
+
+`agents.defaults.sandbox.docker.binds` वैश्विक माउंट कॉन्फ़िगर करता है। प्रारूप वही `host:container:mode` रूप है (उदाहरण के लिए, `"/home/user/source:/source:rw"`)।
+
+`agents.defaults.sandbox.browser.binds` अतिरिक्त होस्ट डायरेक्टरियों को केवल **सैंडबॉक्स ब्राउज़र** कंटेनर में माउंट करता है। सेट किए जाने पर (`[]` सहित), यह ब्राउज़र कंटेनर के लिए `docker.binds` को प्रतिस्थापित करता है; छोड़े जाने पर, ब्राउज़र कंटेनर `docker.binds` पर फ़ॉलबैक करता है।
 
 ```json5
 {
@@ -367,41 +278,40 @@ Example (read-only source + एक अतिरिक्त data directory):
 ```
 
 <Warning>
-**Bind security**
+**बाइंड सुरक्षा**
 
-- Binds sandbox filesystem को bypass करते हैं: वे आपके set किए गए mode (`:ro` या `:rw`) के साथ host paths expose करते हैं।
-- OpenClaw dangerous bind sources को block करता है (उदाहरण: `docker.sock`, `/etc`, `/proc`, `/sys`, `/dev`, और parent mounts जो उन्हें expose करेंगे)।
-- OpenClaw आम home-directory credential roots जैसे `~/.aws`, `~/.cargo`, `~/.config`, `~/.docker`, `~/.gnupg`, `~/.netrc`, `~/.npm`, और `~/.ssh` को भी block करता है।
-- Bind validation केवल string matching नहीं है। OpenClaw source path को normalize करता है, फिर blocked paths और allowed roots को फिर से check करने से पहले उसे deepest existing ancestor के माध्यम से फिर resolve करता है।
-- इसका मतलब है कि symlink-parent escapes तब भी fail closed होते हैं जब final leaf अभी मौजूद नहीं है। Example: यदि `run-link` वहां point करता है, तो `/workspace/run-link/new-file` अब भी `/var/run/...` के रूप में resolve होता है।
-- Allowed source roots को भी इसी तरह canonicalize किया जाता है, इसलिए कोई path जो symlink resolution से पहले ही allowlist के अंदर दिखता है, फिर भी `outside allowed roots` के रूप में reject किया जाता है।
-- Sensitive mounts (secrets, SSH keys, service credentials) `:ro` होने चाहिए, जब तक कि बिल्कुल आवश्यक न हो।
-- यदि आपको workspace तक केवल read access चाहिए, तो `workspaceAccess: "ro"` के साथ combine करें; bind modes स्वतंत्र रहते हैं।
-- Binds tool policy और elevated exec के साथ कैसे interact करते हैं, इसके लिए [Sandbox vs Tool Policy vs Elevated](/hi/gateway/sandbox-vs-tool-policy-vs-elevated) देखें।
+- बाइंड सैंडबॉक्स फ़ाइल सिस्टम को बायपास करते हैं: वे होस्ट पथों को आपके द्वारा निर्धारित मोड (`:ro` या `:rw`) के साथ उजागर करते हैं।
+- OpenClaw डिफ़ॉल्ट रूप से खतरनाक बाइंड स्रोतों को अवरुद्ध करता है: सिस्टम पथ (`/etc`, `/proc`, `/sys`, `/dev`, `/root`, `/boot`), Docker सॉकेट डायरेक्टरियाँ (`/run`, `/var/run` और उनके `docker.sock` प्रकार) तथा सामान्य होम-डायरेक्टरी क्रेडेंशियल रूट (`~/.aws`, `~/.cargo`, `~/.config`, `~/.docker`, `~/.gnupg`, `~/.netrc`, `~/.npm`, `~/.ssh`)।
+- सत्यापन स्रोत पथ को नॉर्मलाइज़ करता है, फिर अवरुद्ध पथों और अनुमत रूट की दोबारा जाँच करने से पहले सबसे गहरे मौजूदा पूर्वज के माध्यम से उसे फिर से रिज़ॉल्व करता है, इसलिए अंतिम लीफ़ के अभी मौजूद न होने पर भी सिमलिंक-पैरेंट एस्केप बंद रहकर विफल होते हैं (उदाहरण के लिए, यदि `run-link` वहाँ इंगित करता है, तो `/workspace/run-link/new-file` अभी भी `/var/run/...` के रूप में रिज़ॉल्व होता है)।
+- आरक्षित कंटेनर माउंट पॉइंट (`/workspace`, `/agent`) को ढकने वाले बाइंड लक्ष्य भी डिफ़ॉल्ट रूप से अवरुद्ध होते हैं; `agents.defaults.sandbox.docker.dangerouslyAllowReservedContainerTargets: true` से ओवरराइड करें।
+- वर्कस्पेस/एजेंट-वर्कस्पेस की अनुमति-सूची वाले रूट के बाहर के बाइंड स्रोत डिफ़ॉल्ट रूप से अवरुद्ध होते हैं; `agents.defaults.sandbox.docker.dangerouslyAllowExternalBindSources: true` से ओवरराइड करें। अनुमत रूट भी उसी प्रकार कैनोनिकलाइज़ किए जाते हैं, इसलिए सिमलिंक रिज़ॉल्यूशन से पहले केवल अनुमति-सूची के भीतर दिखने वाला पथ भी अनुमत रूट से बाहर होने के कारण अस्वीकार कर दिया जाता है।
+- संवेदनशील माउंट (सीक्रेट, SSH कुंजियाँ, सेवा क्रेडेंशियल) तब तक `:ro` होने चाहिए, जब तक बिल्कुल आवश्यक न हों।
+- यदि आपको वर्कस्पेस तक केवल पढ़ने का एक्सेस चाहिए, तो `workspaceAccess: "ro"` के साथ संयोजित करें; बाइंड मोड स्वतंत्र रहते हैं।
+- बाइंड टूल नीति और एलिवेटेड एक्ज़ेक के साथ कैसे इंटरैक्ट करते हैं, इसके लिए [सैंडबॉक्स बनाम टूल नीति बनाम एलिवेटेड](/hi/gateway/sandbox-vs-tool-policy-vs-elevated) देखें।
 
 </Warning>
 
-## Images and setup
+## इमेज और सेटअप
 
-Default Docker image: `openclaw-sandbox:bookworm-slim`
+डिफ़ॉल्ट Docker इमेज: `openclaw-sandbox:bookworm-slim`
 
 <Note>
-**Source checkout vs npm install**
+**स्रोत चेकआउट बनाम npm इंस्टॉल**
 
-`scripts/sandbox-setup.sh`, `scripts/sandbox-common-setup.sh`, और `scripts/sandbox-browser-setup.sh` helper scripts केवल [source checkout](https://github.com/openclaw/openclaw) से चलाते समय उपलब्ध हैं। वे npm package में शामिल नहीं हैं।
+`scripts/sandbox-setup.sh`, `scripts/sandbox-common-setup.sh` और `scripts/sandbox-browser-setup.sh` सहायक स्क्रिप्ट केवल [स्रोत चेकआउट](https://github.com/openclaw/openclaw) से चलाते समय उपलब्ध होती हैं। वे npm पैकेज में शामिल नहीं हैं।
 
-यदि आपने OpenClaw को `npm install -g openclaw` के ज़रिए install किया है, तो इसके बजाय नीचे दिखाए गए inline `docker build` commands का उपयोग करें।
+यदि आपने OpenClaw को `npm install -g openclaw` के माध्यम से इंस्टॉल किया है, तो इसके बजाय नीचे दिखाए गए इनलाइन `docker build` कमांड का उपयोग करें।
 </Note>
 
 <Steps>
-  <Step title="Default image build करें">
-    Source checkout से:
+  <Step title="डिफ़ॉल्ट इमेज बनाएँ">
+    स्रोत चेकआउट से:
 
     ```bash
     scripts/sandbox-setup.sh
     ```
 
-    npm install से (source checkout आवश्यक नहीं):
+    npm इंस्टॉल से (स्रोत चेकआउट आवश्यक नहीं):
 
     ```bash
     docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -417,119 +327,116 @@ Default Docker image: `openclaw-sandbox:bookworm-slim`
     DOCKERFILE
     ```
 
-    Default image में Node शामिल **नहीं** है। यदि किसी skill को Node (या अन्य runtimes) चाहिए, तो या तो custom image bake करें या `sandbox.docker.setupCommand` के माध्यम से install करें (network egress + writable root + root user आवश्यक है)।
+    डिफ़ॉल्ट इमेज में Node शामिल **नहीं** है। यदि किसी स्किल को Node (या अन्य रनटाइम) की आवश्यकता है, तो या तो कस्टम इमेज में उसे पहले से शामिल करें या `sandbox.docker.setupCommand` के माध्यम से इंस्टॉल करें (नेटवर्क इग्रेस + लिखने योग्य रूट + रूट उपयोगकर्ता आवश्यक हैं)।
 
-    जब `openclaw-sandbox:bookworm-slim` missing होता है, तो OpenClaw चुपचाप plain `debian:bookworm-slim` substitute नहीं करता। Default image को target करने वाले sandbox runs build instruction के साथ fast fail होते हैं जब तक आप इसे build नहीं करते, क्योंकि bundled image sandbox write/edit helpers के लिए `python3` लेकर आती है।
+    `openclaw-sandbox:bookworm-slim` के न होने पर OpenClaw चुपचाप सामान्य `debian:bookworm-slim` को प्रतिस्थापित नहीं करता। डिफ़ॉल्ट इमेज को लक्षित करने वाले सैंडबॉक्स रन, आपके द्वारा इसे बनाए जाने तक बिल्ड निर्देश के साथ तुरंत विफल हो जाते हैं, क्योंकि बंडल की गई इमेज में सैंडबॉक्स लिखने/संपादित करने वाले सहायकों के लिए `python3` होता है।
 
   </Step>
-  <Step title="Optional: common image build करें">
-    Common tooling (उदाहरण के लिए `curl`, `jq`, Node 24, pnpm, `python3`, और `git`) के साथ अधिक functional sandbox image के लिए:
+  <Step title="वैकल्पिक: सामान्य इमेज बनाएँ">
+    सामान्य टूलिंग (उदाहरण के लिए `curl`, `jq`, Node 24, pnpm, `python3` और `git`) वाली अधिक कार्यक्षम सैंडबॉक्स इमेज के लिए:
 
-    Source checkout से:
+    स्रोत चेकआउट से:
 
     ```bash
     scripts/sandbox-common-setup.sh
     ```
 
-    npm install से, पहले default image build करें (ऊपर देखें), फिर repository से [`scripts/docker/sandbox/Dockerfile.common`](https://github.com/openclaw/openclaw/blob/main/scripts/docker/sandbox/Dockerfile.common) का उपयोग करके उसके ऊपर common image build करें।
+    npm इंस्टॉल से, पहले डिफ़ॉल्ट इमेज बनाएँ (ऊपर देखें), फिर रिपॉज़िटरी के [`scripts/docker/sandbox/Dockerfile.common`](https://github.com/openclaw/openclaw/blob/main/scripts/docker/sandbox/Dockerfile.common) का उपयोग करके उसके ऊपर सामान्य इमेज बनाएँ।
 
-    फिर `agents.defaults.sandbox.docker.image` को `openclaw-sandbox-common:bookworm-slim` पर set करें।
+    फिर `agents.defaults.sandbox.docker.image` को `openclaw-sandbox-common:bookworm-slim` पर सेट करें।
 
   </Step>
-  <Step title="Optional: sandbox browser image build करें">
-    Source checkout से:
+  <Step title="वैकल्पिक: सैंडबॉक्स ब्राउज़र इमेज बनाएँ">
+    स्रोत चेकआउट से:
 
     ```bash
     scripts/sandbox-browser-setup.sh
     ```
 
-    npm install से, repository से [`scripts/docker/sandbox/Dockerfile.browser`](https://github.com/openclaw/openclaw/blob/main/scripts/docker/sandbox/Dockerfile.browser) का उपयोग करके build करें।
+    npm इंस्टॉल से, रिपॉज़िटरी के [`scripts/docker/sandbox/Dockerfile.browser`](https://github.com/openclaw/openclaw/blob/main/scripts/docker/sandbox/Dockerfile.browser) का उपयोग करके बनाएँ।
 
   </Step>
 </Steps>
 
-Default रूप से, Docker sandbox containers **बिना network** के चलते हैं। `agents.defaults.sandbox.docker.network` के साथ override करें।
+डिफ़ॉल्ट रूप से, Docker सैंडबॉक्स कंटेनर **बिना नेटवर्क** के चलते हैं। `agents.defaults.sandbox.docker.network` से ओवरराइड करें।
 
 <AccordionGroup>
-  <Accordion title="Sandbox browser Chromium defaults">
-    Bundled sandbox browser image containerized workloads के लिए conservative Chromium startup defaults भी apply करती है। मौजूदा container defaults में शामिल हैं:
+  <Accordion title="सैंडबॉक्स ब्राउज़र Chromium के डिफ़ॉल्ट">
+    बंडल की गई सैंडबॉक्स ब्राउज़र इमेज कंटेनरीकृत वर्कलोड के लिए सावधानीपूर्ण Chromium स्टार्टअप फ़्लैग लागू करती है:
 
     - `--remote-debugging-address=127.0.0.1`
     - `--remote-debugging-port=<derived from OPENCLAW_BROWSER_CDP_PORT>`
     - `--user-data-dir=${HOME}/.chrome`
     - `--no-first-run`
     - `--no-default-browser-check`
-    - `--disable-3d-apis`
-    - `--disable-gpu`
     - `--disable-dev-shm-usage`
     - `--disable-background-networking`
-    - `--disable-extensions`
-    - `--disable-features=TranslateUI`
     - `--disable-breakpad`
     - `--disable-crash-reporter`
-    - `--disable-software-rasterizer`
     - `--no-zygote`
     - `--metrics-recording-only`
-    - `--renderer-process-limit=2`
-    - जब `noSandbox` enabled हो, तो `--no-sandbox`।
-    - तीन graphics hardening flags (`--disable-3d-apis`, `--disable-software-rasterizer`, `--disable-gpu`) optional हैं और तब उपयोगी हैं जब containers में GPU support न हो। यदि आपके workload को WebGL या अन्य 3D/browser features चाहिए, तो `OPENCLAW_BROWSER_DISABLE_GRAPHICS_FLAGS=0` set करें।
-    - `--disable-extensions` default रूप से enabled है और extension-reliant flows के लिए `OPENCLAW_BROWSER_DISABLE_EXTENSIONS=0` से disabled किया जा सकता है।
-    - `--renderer-process-limit=2` `OPENCLAW_BROWSER_RENDERER_PROCESS_LIMIT=<N>` द्वारा controlled है, जहां `0` Chromium का default रखता है।
+    - `--password-store=basic`
+    - `--use-mock-keychain`
+    - `--headless=new`, जब `browser.headless` सक्षम हो।
+    - `--no-sandbox --disable-setuid-sandbox`, जब `browser.noSandbox` सक्षम हो।
+    - डिफ़ॉल्ट रूप से `--disable-3d-apis`, `--disable-gpu`, `--disable-software-rasterizer`; ये ग्राफ़िक्स-सुदृढ़ीकरण फ़्लैग GPU समर्थन के बिना कंटेनरों में सहायक होते हैं। यदि आपके कार्यभार को WebGL या अन्य 3D सुविधाओं की आवश्यकता हो, तो `OPENCLAW_BROWSER_DISABLE_GRAPHICS_FLAGS=0` सेट करें।
+    - डिफ़ॉल्ट रूप से `--disable-extensions`; एक्सटेंशन पर निर्भर प्रवाहों के लिए `OPENCLAW_BROWSER_DISABLE_EXTENSIONS=0` सेट करें।
+    - डिफ़ॉल्ट रूप से `--renderer-process-limit=2`; इसे `OPENCLAW_BROWSER_RENDERER_PROCESS_LIMIT=<N>` नियंत्रित करता है, जिसमें `0` Chromium का डिफ़ॉल्ट बनाए रखता है।
 
-    यदि आपको अलग runtime profile चाहिए, तो custom browser image का उपयोग करें और अपना entrypoint provide करें। Local (non-container) Chromium profiles के लिए, additional startup flags append करने हेतु `browser.extraArgs` का उपयोग करें।
+    यदि आपको अलग रनटाइम प्रोफ़ाइल चाहिए, तो कस्टम ब्राउज़र इमेज का उपयोग करें और अपना एंट्रीपॉइंट दें। स्थानीय (गैर-कंटेनर) Chromium प्रोफ़ाइलों के लिए अतिरिक्त स्टार्टअप फ़्लैग जोड़ने हेतु `browser.extraArgs` का उपयोग करें।
 
   </Accordion>
   <Accordion title="नेटवर्क सुरक्षा डिफ़ॉल्ट">
     - `network: "host"` अवरुद्ध है।
-    - `network: "container:<id>"` डिफ़ॉल्ट रूप से अवरुद्ध है (namespace join bypass जोखिम)।
-    - ब्रेक-ग्लास ओवरराइड: `agents.defaults.sandbox.docker.dangerouslyAllowContainerNamespaceJoin: true`।
+    - `network: "container:<id>"` डिफ़ॉल्ट रूप से अवरुद्ध है (नेमस्पेस जॉइन बायपास का जोखिम)।
+    - आपातकालीन ओवरराइड: `agents.defaults.sandbox.docker.dangerouslyAllowContainerNamespaceJoin: true`।
 
   </Accordion>
 </AccordionGroup>
 
-Docker इंस्टॉल और containerized Gateway यहां हैं: [Docker](/hi/install/docker)
+Docker इंस्टॉलेशन और कंटेनरीकृत Gateway यहाँ उपलब्ध हैं: [Docker](/hi/install/docker)
 
-Docker Gateway deployments के लिए, `scripts/docker/setup.sh` sandbox config को bootstrap कर सकता है। उस पथ को सक्षम करने के लिए `OPENCLAW_SANDBOX=1` (या `true`/`yes`/`on`) सेट करें। आप `OPENCLAW_DOCKER_SOCKET` से socket location override कर सकते हैं। पूरा setup और env reference: [Docker](/hi/install/docker#agent-sandbox).
+Docker Gateway डिप्लॉयमेंट के लिए, `scripts/docker/setup.sh` सैंडबॉक्स कॉन्फ़िगरेशन को बूटस्ट्रैप कर सकता है। उस पथ को सक्षम करने के लिए `OPENCLAW_SANDBOX=1` (या `true`/`yes`/`on`) सेट करें। सॉकेट स्थान को `OPENCLAW_DOCKER_SOCKET` से ओवरराइड करें। पूर्ण सेटअप और पर्यावरण चर संदर्भ: [Docker](/hi/install/docker#agent-sandbox)।
 
-## setupCommand (एक-बार container setup)
+## setupCommand (एक-बार का कंटेनर सेटअप)
 
-`setupCommand` sandbox container बनने के बाद **एक बार** चलता है (हर run पर नहीं)। यह container के अंदर `sh -lc` के जरिए execute होता है।
+सैंडबॉक्स कंटेनर बनने के बाद `setupCommand` **एक बार** चलता है (हर रन पर नहीं)। यह कंटेनर के भीतर `sh -lc` के माध्यम से निष्पादित होता है।
 
-Paths:
+पथ:
 
-- Global: `agents.defaults.sandbox.docker.setupCommand`
-- Per-agent: `agents.list[].sandbox.docker.setupCommand`
+- वैश्विक: `agents.defaults.sandbox.docker.setupCommand`
+- प्रति-एजेंट: `agents.entries.*.sandbox.docker.setupCommand`
 
 <AccordionGroup>
-  <Accordion title="सामान्य pitfalls">
-    - डिफ़ॉल्ट `docker.network` `"none"` है (कोई egress नहीं), इसलिए package installs विफल होंगे।
-    - `docker.network: "container:<id>"` के लिए `dangerouslyAllowContainerNamespaceJoin: true` जरूरी है और यह केवल break-glass के लिए है।
-    - `readOnlyRoot: true` writes रोकता है; `readOnlyRoot: false` सेट करें या custom image bake करें।
-    - package installs के लिए `user` root होना चाहिए (`user` छोड़ दें या `user: "0:0"` सेट करें)।
-    - Sandbox exec host `process.env` inherit **नहीं** करता। skill API keys के लिए `agents.defaults.sandbox.docker.env` (या custom image) इस्तेमाल करें।
-    - `agents.defaults.sandbox.docker.env` में values explicit Docker container environment variables के रूप में pass होती हैं। Docker daemon access वाला कोई भी व्यक्ति उन्हें `docker inspect` जैसे Docker metadata commands से inspect कर सकता है। अगर यह metadata exposure स्वीकार्य नहीं है, तो custom image, mounted secret file, या कोई दूसरा secret delivery path इस्तेमाल करें।
+  <Accordion title="सामान्य समस्याएँ">
+    - डिफ़ॉल्ट `docker.network`, `"none"` है (कोई बाहरी नेटवर्क पहुँच नहीं), इसलिए पैकेज इंस्टॉलेशन विफल होंगे।
+    - `docker.network: "container:<id>"` के लिए `dangerouslyAllowContainerNamespaceJoin: true` आवश्यक है और यह केवल आपातकालीन उपयोग के लिए है।
+    - `readOnlyRoot: true` लेखन रोकता है; `readOnlyRoot: false` सेट करें या कस्टम इमेज बनाएँ।
+    - पैकेज इंस्टॉलेशन के लिए `user` का root होना आवश्यक है (`user` को छोड़ दें या `user: "0:0"` सेट करें)।
+    - सैंडबॉक्स निष्पादन होस्ट के `process.env` को इनहेरिट **नहीं** करता। Skills API कुंजियों के लिए `agents.defaults.sandbox.docker.env` (या कस्टम इमेज) का उपयोग करें।
+    - `agents.defaults.sandbox.docker.env` के मान स्पष्ट Docker कंटेनर पर्यावरण चर के रूप में पास किए जाते हैं। Docker डेमन तक पहुँच वाला कोई भी व्यक्ति `docker inspect` जैसे Docker मेटाडेटा कमांड से उनका निरीक्षण कर सकता है। यदि यह मेटाडेटा प्रकटीकरण स्वीकार्य नहीं है, तो कस्टम इमेज, माउंट की गई गोपनीय फ़ाइल या किसी अन्य गोपनीयता-वितरण पथ का उपयोग करें।
 
   </Accordion>
 </AccordionGroup>
 
-## Tool policy और escape hatches
+## टूल नीति और आपातकालीन निकास
 
-Tool allow/deny policies sandbox rules से पहले भी लागू होती हैं। अगर कोई tool globally या per-agent denied है, तो sandboxing उसे वापस नहीं लाती।
+सैंडबॉक्स नियमों से पहले भी टूल अनुमति/अस्वीकृति नीतियाँ लागू होती हैं। यदि कोई टूल वैश्विक या प्रति-एजेंट स्तर पर अस्वीकृत है, तो सैंडबॉक्सिंग उसे वापस उपलब्ध नहीं कराती।
 
-`tools.elevated` एक explicit escape hatch है जो sandbox के बाहर `exec` चलाता है (डिफ़ॉल्ट रूप से `gateway`, या जब exec target `node` हो तो `node`)। `/exec` directives केवल authorized senders के लिए लागू होती हैं और per session persist करती हैं; `exec` को hard-disable करने के लिए, tool policy deny इस्तेमाल करें ([Sandbox vs Tool Policy vs Elevated](/hi/gateway/sandbox-vs-tool-policy-vs-elevated) देखें)।
+`tools.elevated` एक स्पष्ट आपातकालीन निकास है, जो `exec` को सैंडबॉक्स के बाहर चलाता है (डिफ़ॉल्ट रूप से `gateway`, या जब निष्पादन लक्ष्य `node` हो तब `node`)। `/exec` निर्देश केवल अधिकृत प्रेषकों पर लागू होते हैं और प्रत्येक सत्र में बने रहते हैं; `exec` को पूर्णतः अक्षम करने के लिए टूल नीति में अस्वीकृति का उपयोग करें ([सैंडबॉक्स बनाम टूल नीति बनाम उन्नत](/hi/gateway/sandbox-vs-tool-policy-vs-elevated) देखें)।
 
-Debugging:
+डीबगिंग:
 
-- effective sandbox mode, tool policy, और fix-it config keys inspect करने के लिए `openclaw sandbox explain` इस्तेमाल करें।
-- "यह blocked क्यों है?" mental model के लिए [Sandbox vs Tool Policy vs Elevated](/hi/gateway/sandbox-vs-tool-policy-vs-elevated) देखें।
+- `openclaw sandbox list` सैंडबॉक्स कंटेनर, स्थिति, इमेज मिलान, आयु, निष्क्रिय समय और संबद्ध सत्र/एजेंट दिखाता है।
+- `openclaw sandbox explain [--session <key>] [--agent <id>]` प्रभावी सैंडबॉक्स मोड, होस्ट कार्यक्षेत्र, रनटाइम कार्यशील निर्देशिका, Docker माउंट, टूल नीति और सुधार कॉन्फ़िगरेशन कुंजियों का निरीक्षण करता है। इसका `workspaceRoot` फ़ील्ड कॉन्फ़िगर किया गया सैंडबॉक्स रूट ही रहता है; `effectiveHostWorkspaceRoot` दिखाता है कि सक्रिय कार्यक्षेत्र वास्तव में कहाँ स्थित है।
+- `openclaw sandbox recreate [--all | --session <key> | --agent <id>] [--browser] [--force]` कंटेनर/परिवेश हटा देता है, ताकि अगले उपयोग पर वे वर्तमान कॉन्फ़िगरेशन के साथ पुनः बनाए जाएँ।
+- “यह क्यों अवरुद्ध है?” को समझने के मानसिक मॉडल के लिए [सैंडबॉक्स बनाम टूल नीति बनाम उन्नत](/hi/gateway/sandbox-vs-tool-policy-vs-elevated) देखें।
 
-इसे locked down रखें।
+## बहु-एजेंट ओवरराइड
 
-## Multi-agent overrides
+प्रत्येक एजेंट सैंडबॉक्स और टूल को ओवरराइड कर सकता है: `agents.entries.*.sandbox` और `agents.entries.*.tools` (साथ ही सैंडबॉक्स टूल नीति के लिए `agents.entries.*.tools.sandbox.tools`)। प्राथमिकता क्रम के लिए [बहु-एजेंट सैंडबॉक्स और टूल](/hi/tools/multi-agent-sandbox-tools) देखें।
 
-हर agent sandbox + tools override कर सकता है: `agents.list[].sandbox` और `agents.list[].tools` (साथ ही sandbox tool policy के लिए `agents.list[].tools.sandbox.tools`)। Precedence के लिए [Multi-Agent Sandbox & Tools](/hi/tools/multi-agent-sandbox-tools) देखें।
-
-## Minimal enable example
+## न्यूनतम सक्षमीकरण उदाहरण
 
 ```json5
 {
@@ -545,10 +452,10 @@ Debugging:
 }
 ```
 
-## Related
+## संबंधित
 
-- [Multi-Agent Sandbox & Tools](/hi/tools/multi-agent-sandbox-tools) — per-agent overrides और precedence
-- [OpenShell](/hi/gateway/openshell) — managed sandbox backend setup, workspace modes, और config reference
-- [Sandbox configuration](/hi/gateway/config-agents#agentsdefaultssandbox)
-- [Sandbox vs Tool Policy vs Elevated](/hi/gateway/sandbox-vs-tool-policy-vs-elevated) — debugging "यह blocked क्यों है?"
-- [Security](/hi/gateway/security)
+- [बहु-एजेंट सैंडबॉक्स और टूल](/hi/tools/multi-agent-sandbox-tools) -- प्रति-एजेंट ओवरराइड और प्राथमिकता क्रम
+- [OpenShell](/hi/gateway/openshell) -- प्रबंधित सैंडबॉक्स बैकएंड सेटअप, कार्यक्षेत्र मोड और कॉन्फ़िगरेशन संदर्भ
+- [सैंडबॉक्स कॉन्फ़िगरेशन](/hi/gateway/config-agents#agentsdefaultssandbox)
+- [सैंडबॉक्स बनाम टूल नीति बनाम उन्नत](/hi/gateway/sandbox-vs-tool-policy-vs-elevated) -- “यह क्यों अवरुद्ध है?” की डीबगिंग
+- [सुरक्षा](/hi/gateway/security)

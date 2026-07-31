@@ -1,12 +1,13 @@
 ---
 read_when:
-    - Sie möchten schnell auf wichtige Dokumentationsseiten zugreifen.
+    - Sie möchten schnellen Zugriff auf wichtige Dokumentationsseiten
 summary: Kuratierte Links zu den meistgenutzten OpenClaw-Dokumentationsseiten.
 title: Dokumentationsverzeichnis
 x-i18n:
-    generated_at: "2026-07-12T02:11:50Z"
+    generated_at: "2026-07-26T19:15:23Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 48859dc0b31139f1f5acaa403e506cd6d9767ee32e502a4ef74340dbbc21918f
     source_path: start/docs-directory.md
@@ -37,8 +38,8 @@ Eine vollständige Übersicht der Dokumentation finden Sie unter [Dokumentations
 - [Gateway-Betriebshandbuch](/de/gateway)
 - [Nodes (iOS und Android)](/de/nodes)
 - [Weboberflächen (Steuerungsoberfläche)](/de/web)
-- [Erkennung und Übertragungswege](/de/gateway/discovery)
-- [Fernzugriff](/de/gateway/remote)
+- [Erkennung und Transportwege](/de/gateway/discovery)
+- [Remotezugriff](/de/gateway/remote)
 
 ## Kanäle und Benutzererlebnis
 
@@ -47,9 +48,9 @@ Eine vollständige Übersicht der Dokumentation finden Sie unter [Dokumentations
 - [Gruppen](/de/channels/groups)
 - [iMessage](/de/channels/imessage)
 - [Mattermost](/de/channels/mattermost)
-- [Medienaudio](/de/nodes/audio)
-- [Medienbilder](/de/nodes/images)
-- [QQ-Bot](/de/channels/qqbot)
+- [Medien: Audio](/de/nodes/audio)
+- [Medien: Bilder](/de/nodes/images)
+- [QQ Bot](/de/channels/qqbot)
 - [Telegram](/de/channels/telegram)
 - [WebChat](/de/web/webchat)
 - [WhatsApp-Gruppennachrichten](/de/channels/group-messages)
@@ -60,7 +61,7 @@ Eine vollständige Übersicht der Dokumentation finden Sie unter [Dokumentations
 - [iOS-App](/de/platforms/ios)
 - [Linux-App](/de/platforms/linux)
 - [macOS-App](/de/platforms/macos)
-- [Windows-Zentrale](/de/platforms/windows)
+- [Windows Hub](/de/platforms/windows)
 
 ## Betrieb und Sicherheit
 

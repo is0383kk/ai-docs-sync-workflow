@@ -1,12 +1,13 @@
 ---
 read_when:
-    - 你需要一份完整的文档地图
+    - 你想查看完整的文档地图
 summary: 链接到所有 OpenClaw 文档的中心页
 title: 文档中心
 x-i18n:
-    generated_at: "2026-07-11T20:58:54Z"
+    generated_at: "2026-07-26T06:23:58Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 9b51fc77155b2e7ed6cb6e36d375585ebd457c3d89f97c4151877d1aae20717f
     source_path: start/hubs.md
@@ -14,10 +15,10 @@ x-i18n:
 ---
 
 <Note>
-如果你刚开始使用 OpenClaw，请先阅读[入门指南](/zh-CN/start/getting-started)。
+如果你刚开始使用 OpenClaw，请从[入门指南](/zh-CN/start/getting-started)开始。
 </Note>
 
-通过这些中心页面查找所有页面，包括左侧导航栏中未显示的深入解析和参考文档。
+使用这些中心页面发现所有页面，包括左侧导航中未显示的深入解析和参考文档。
 
 ## 从这里开始
 
@@ -32,14 +33,14 @@ x-i18n:
 - [配置](/zh-CN/gateway/configuration)
 - [配置示例](/zh-CN/gateway/configuration-examples)
 - [OpenClaw 助手](/zh-CN/start/openclaw)
-- [示例展示](/zh-CN/start/showcase)
+- [案例展示](/zh-CN/start/showcase)
 - [背景故事](/zh-CN/start/lore)
 
-## 安装和更新
+## 安装 + 更新
 
 - [Docker](/zh-CN/install/docker)
 - [Nix](/zh-CN/install/nix)
-- [更新/回滚](/zh-CN/install/updating)
+- [更新 / 回滚](/zh-CN/install/updating)
 - [Bun 工作流（实验性）](/zh-CN/install/bun)
 
 ## 核心概念
@@ -51,7 +52,7 @@ x-i18n:
 - [Agent 工作区](/zh-CN/concepts/agent-workspace)
 - [记忆](/zh-CN/concepts/memory)
 - [Agent loop](/zh-CN/concepts/agent-loop)
-- [流式传输和分块](/zh-CN/concepts/streaming)
+- [流式传输 + 分块](/zh-CN/concepts/streaming)
 - [多 Agent 路由](/zh-CN/concepts/multi-agent)
 - [压缩](/zh-CN/concepts/compaction)
 - [会话](/zh-CN/concepts/session)
@@ -71,7 +72,7 @@ x-i18n:
 - [模型故障转移](/zh-CN/concepts/model-failover)
 - [OAuth](/zh-CN/concepts/oauth)
 
-## 提供商和入口
+## 提供商 + 入口
 
 - [聊天渠道中心](/zh-CN/channels)
 - [模型提供商中心](/zh-CN/providers/models)
@@ -88,7 +89,7 @@ x-i18n:
 - [Webhooks](/zh-CN/automation/cron-jobs#webhooks)
 - [Gmail Pub/Sub](/zh-CN/automation/cron-jobs#gmail-pubsub-integration)
 
-## Gateway 网关和运维
+## Gateway 网关 + 运维
 
 - [Gateway 网关运行手册](/zh-CN/gateway)
 - [网络模型](/zh-CN/network#core-model)
@@ -108,7 +109,7 @@ x-i18n:
 - [安全](/zh-CN/gateway/security)
 - [故障排查](/zh-CN/gateway/troubleshooting)
 
-## 工具和自动化
+## 工具 + 自动化
 
 - [工具界面](/zh-CN/tools)
 - [OpenProse](/zh-CN/prose)
@@ -116,9 +117,9 @@ x-i18n:
 - [Exec 工具](/zh-CN/tools/exec)
 - [PDF 工具](/zh-CN/tools/pdf)
 - [提升权限模式](/zh-CN/tools/elevated)
-- [Cron 任务](/zh-CN/automation/cron-jobs)
+- [定时任务](/zh-CN/automation/cron-jobs)
 - [自动化](/zh-CN/automation)
-- [思考和详细输出](/zh-CN/tools/thinking)
+- [思考 + 详细输出](/zh-CN/tools/thinking)
 - [Models](/zh-CN/concepts/models)
 - [子智能体](/zh-CN/tools/subagents)
 - [Agent 发送 CLI](/zh-CN/tools/agent-send)
@@ -127,7 +128,7 @@ x-i18n:
 - [浏览器（Linux 故障排查）](/zh-CN/tools/browser-linux-troubleshooting)
 - [投票](/zh-CN/cli/message)
 
-## 节点、媒体和语音
+## 节点、媒体、语音
 
 - [节点概览](/zh-CN/nodes)
 - [相机](/zh-CN/nodes/camera)
@@ -175,15 +176,15 @@ x-i18n:
 - [插件清单](/zh-CN/plugins/manifest)
 - [Agent 工具](/zh-CN/plugins/building-plugins#registering-agent-tools)
 - [插件包](/zh-CN/plugins/bundles)
-- [ClawHub](/clawhub)
+- [ClawHub](/zh-CN/clawhub)
 - [能力扩展手册](/zh-CN/plugins/adding-capabilities)
 - [语音通话插件](/zh-CN/plugins/voice-call)
 - [Zalo 用户插件](/zh-CN/plugins/zalouser)
 
-## 工作区和模板
+## 工作区 + 模板
 
 - [Skills](/zh-CN/tools/skills)
-- [ClawHub](/clawhub)
+- [ClawHub](/zh-CN/clawhub)
 - [Skills 配置](/zh-CN/tools/skills-config)
 - [默认 AGENTS](/zh-CN/reference/AGENTS.default)
 - [模板：AGENTS](/zh-CN/reference/templates/AGENTS)
@@ -198,7 +199,7 @@ x-i18n:
 
 - [致谢](/zh-CN/reference/credits)
 
-## 测试和发布
+## 测试 + 发布
 
 - [测试](/zh-CN/reference/test)
 - [发布策略](/zh-CN/reference/RELEASING)

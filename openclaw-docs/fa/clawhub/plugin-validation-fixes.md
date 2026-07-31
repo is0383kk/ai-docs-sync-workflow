@@ -1,14 +1,15 @@
 ---
 read_when:
-    - شما `clawhub package validate` را اجرا کرده‌اید و باید یافته‌های Plugin را برطرف کنید
-    - ClawHub انتشار بسته Plugin را رد کرد یا درباره آن هشدار داد
-    - در حال به‌روزرسانی فرادادهٔ بستهٔ plugin پیش از انتشار هستید
-summary: رفع یافته‌های اعتبارسنجی بسته Plugin در ClawHub پیش از انتشار
+    - clawhub package validate را اجرا کرده‌اید و باید یافته‌های Plugin را برطرف کنید
+    - ClawHub انتشار یک بستهٔ Plugin را رد کرد یا دربارهٔ آن هشدار داد
+    - پیش از انتشار، فرادادهٔ بستهٔ Plugin را به‌روزرسانی می‌کنید
+summary: رفع یافته‌های اعتبارسنجی بستهٔ Plugin در ClawHub پیش از انتشار
 title: اصلاحات اعتبارسنجی Plugin
 x-i18n:
-    generated_at: "2026-07-04T20:38:21Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T15:14:04Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 2cb869e41c9a9f1c0725f514f6b48095eb3838bf61aaf06c2474a18192f0e819
     source_path: clawhub/plugin-validation-fixes.md
@@ -17,9 +18,14 @@ x-i18n:
 
 # اصلاحات اعتبارسنجی Plugin
 
-ClawHub بسته‌های Plugin را پیش از انتشار اعتبارسنجی می‌کند و همچنین می‌تواند یافته‌های اسکن‌های خودکار بسته را نشان دهد. این صفحه یافته‌های روبه‌روی نویسنده را پوشش می‌دهد، یعنی یافته‌هایی که نویسنده Plugin می‌تواند در فراداده بسته، مانیفست، واردسازی‌های SDK یا مصنوع منتشرشده بسته خود اصلاح کند.
+ClawHub بسته‌های Plugin را پیش از انتشار اعتبارسنجی می‌کند و همچنین می‌تواند یافته‌های حاصل از
+اسکن‌های خودکار بسته را نمایش دهد. این صفحه یافته‌های مربوط به نویسنده را پوشش می‌دهد؛ یعنی
+یافته‌هایی که نویسنده Plugin می‌تواند در فرادادهٔ بسته، مانیفست، importهای SDK
+یا آرتیفکت منتشرشدهٔ خود برطرف کند.
 
-این صفحه یافته‌های پوشش داخلی Plugin Inspector را پوشش نمی‌دهد. اگر یک گزارش کامل شامل کدهای نگهداری اسکنر بدون راهنمای اصلاح برای نویسنده باشد، آن‌ها برای نگهدارندگان OpenClaw هستند، نه نویسندگان Plugin.
+این صفحه یافته‌های داخلی پوشش Plugin Inspector را شامل نمی‌شود. اگر گزارشی کامل
+حاوی کدهای نگه‌داری اسکنر بدون راهنمای رفع مشکل برای نویسنده باشد، آن موارد
+برای نگه‌دارندگان OpenClaw هستند، نه نویسندگان Plugin.
 
 پس از اعمال هر اصلاح، دوباره اجرا کنید:
 
@@ -27,271 +33,305 @@ ClawHub بسته‌های Plugin را پیش از انتشار اعتبارسن�
 clawhub package validate <path-to-plugin>
 ```
 
-## یافته‌های روبه‌روی نویسنده
+## یافته‌های مربوط به نویسنده
 
-| کد                                     | از اینجا شروع کنید                                                                                                           |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `package-json-missing`                  | [افزودن فراداده بسته](/fa/clawhub/plugin-validation-fixes#package-json-missing)                                                   |
-| `package-openclaw-metadata-missing`     | [افزودن بلوک openclaw بسته](/fa/clawhub/plugin-validation-fixes#package-openclaw-metadata-missing)                                |
-| `package-openclaw-entry-missing`        | [اعلام نقطه‌های ورود بسته OpenClaw](/fa/clawhub/plugin-validation-fixes#package-openclaw-entry-missing)                           |
-| `package-entrypoint-missing`            | [انتشار نقطه ورود اعلام‌شده](/fa/clawhub/plugin-validation-fixes#package-entrypoint-missing)                                      |
-| `package-install-metadata-incomplete`   | [کامل کردن فراداده نصب](/fa/clawhub/plugin-validation-fixes#package-install-metadata-incomplete)                                  |
-| `package-plugin-api-compat-missing`     | [اعلام سازگاری API Plugin](/fa/clawhub/plugin-validation-fixes#package-plugin-api-compat-missing)                                 |
-| `package-min-host-version-drift`        | [هم‌راستا کردن حداقل نسخه میزبان](/fa/clawhub/plugin-validation-fixes#package-min-host-version-drift)                             |
-| `package-manifest-version-drift`        | [هم‌راستا کردن نسخه‌های بسته و مانیفست](/fa/clawhub/plugin-validation-fixes#package-manifest-version-drift)                        |
-| `package-openclaw-unsupported-metadata` | [حذف فراداده پشتیبانی‌نشده بسته OpenClaw](/fa/clawhub/plugin-validation-fixes#package-openclaw-unsupported-metadata)              |
-| `package-npm-pack-unavailable`          | [قابل بسته‌بندی کردن مصنوع npm](/fa/clawhub/plugin-validation-fixes#package-npm-pack-unavailable)                                 |
-| `package-npm-pack-entrypoint-missing`   | [گنجاندن نقطه‌های ورود در خروجی بسته npm](/fa/clawhub/plugin-validation-fixes#package-npm-pack-entrypoint-missing)                |
-| `package-npm-pack-metadata-missing`     | [گنجاندن فراداده در خروجی بسته npm](/fa/clawhub/plugin-validation-fixes#package-npm-pack-metadata-missing)                        |
-| `manifest-name-missing`                 | [افزودن نام نمایشی مانیفست](/fa/clawhub/plugin-validation-fixes#manifest-name-missing)                                            |
-| `manifest-unknown-fields`               | [حذف فیلدهای پشتیبانی‌نشده مانیفست](/fa/clawhub/plugin-validation-fixes#manifest-unknown-fields)                                  |
-| `manifest-unknown-contracts`            | [حذف کلیدهای قرارداد پشتیبانی‌نشده](/fa/clawhub/plugin-validation-fixes#manifest-unknown-contracts)                               |
-| `legacy-root-sdk-import`                | [جایگزینی واردسازی‌های ریشه SDK](/fa/clawhub/plugin-validation-fixes#legacy-root-sdk-import)                                      |
-| `reserved-sdk-import`                   | [حذف واردسازی‌های رزروشده SDK](/fa/clawhub/plugin-validation-fixes#reserved-sdk-import)                                           |
-| `sdk-load-session-store`                | [جایگزینی دسترسی به کل مخزن نشست](/fa/clawhub/plugin-validation-fixes#sdk-load-session-store)                                     |
-| `sdk-session-store-write`               | [جایگزینی نوشتن در کل مخزن نشست](/fa/clawhub/plugin-validation-fixes#sdk-session-store-write)                                     |
-| `sdk-session-file-helper`               | [جایگزینی کمک‌تابع‌های مسیر فایل نشست](/fa/clawhub/plugin-validation-fixes#sdk-session-file-helper)                              |
-| `sdk-session-transcript-file-target`    | [جایگزینی مقصدهای فایل رونوشت قدیمی](/fa/clawhub/plugin-validation-fixes#sdk-session-transcript-file-target)                      |
-| `sdk-session-transcript-low-level`      | [جایگزینی کمک‌تابع‌های سطح پایین رونوشت](/fa/clawhub/plugin-validation-fixes#sdk-session-transcript-low-level)                    |
-| `legacy-before-agent-start`             | [جایگزینی before_agent_start](/fa/clawhub/plugin-validation-fixes#legacy-before-agent-start)                                      |
-| `provider-auth-env-vars`                | [انتقال متغیرهای محیطی ارائه‌دهنده به فراداده راه‌اندازی](/fa/clawhub/plugin-validation-fixes#provider-auth-env-vars)             |
-| `channel-env-vars`                      | [آینه‌سازی متغیرهای محیطی کانال در فراداده فعلی](/fa/clawhub/plugin-validation-fixes#channel-env-vars)                            |
-| `security-manifest-schema-unavailable`  | [حذف ارجاع‌های طرح‌واره مانیفست امنیتی ناموجود](/fa/clawhub/plugin-validation-fixes#security-manifest-schema-unavailable)         |
-| `unrecognized-security-manifest`        | [حذف فایل‌های مانیفست امنیتی پشتیبانی‌نشده](/fa/clawhub/plugin-validation-fixes#unrecognized-security-manifest)                   |
+| کد                                    | از اینجا شروع کنید                                                                                                                  |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `package-json-missing`                  | [افزودن فرادادهٔ بسته](/fa/clawhub/plugin-validation-fixes#package-json-missing)                                                   |
+| `package-openclaw-metadata-missing`     | [افزودن بلوک openclaw بسته](/fa/clawhub/plugin-validation-fixes#package-openclaw-metadata-missing)                            |
+| `package-openclaw-entry-missing`        | [اعلام نقاط ورود بستهٔ OpenClaw](/fa/clawhub/plugin-validation-fixes#package-openclaw-entry-missing)                         |
+| `package-entrypoint-missing`            | [انتشار نقطهٔ ورود اعلام‌شده](/fa/clawhub/plugin-validation-fixes#package-entrypoint-missing)                                  |
+| `package-install-metadata-incomplete`   | [تکمیل فرادادهٔ نصب](/fa/clawhub/plugin-validation-fixes#package-install-metadata-incomplete)                               |
+| `package-plugin-api-compat-missing`     | [اعلام سازگاری API ‏Plugin](/fa/clawhub/plugin-validation-fixes#package-plugin-api-compat-missing)                          |
+| `package-min-host-version-drift`        | [هم‌تراز کردن حداقل نسخهٔ میزبان](/fa/clawhub/plugin-validation-fixes#package-min-host-version-drift)                                   |
+| `package-manifest-version-drift`        | [هم‌تراز کردن نسخه‌های بسته و مانیفست](/fa/clawhub/plugin-validation-fixes#package-manifest-version-drift)                          |
+| `package-openclaw-unsupported-metadata` | [حذف فرادادهٔ پشتیبانی‌نشدهٔ بستهٔ OpenClaw](/fa/clawhub/plugin-validation-fixes#package-openclaw-unsupported-metadata)          |
+| `package-npm-pack-unavailable`          | [قابل‌بسته‌بندی کردن آرتیفکت npm](/fa/clawhub/plugin-validation-fixes#package-npm-pack-unavailable)                                 |
+| `package-npm-pack-entrypoint-missing`   | [گنجاندن نقاط ورود در خروجی بسته‌بندی npm](/fa/clawhub/plugin-validation-fixes#package-npm-pack-entrypoint-missing)                  |
+| `package-npm-pack-metadata-missing`     | [گنجاندن فراداده در خروجی بسته‌بندی npm](/fa/clawhub/plugin-validation-fixes#package-npm-pack-metadata-missing)                       |
+| `manifest-name-missing`                 | [افزودن نام نمایشی مانیفست](/fa/clawhub/plugin-validation-fixes#manifest-name-missing)                                           |
+| `manifest-unknown-fields`               | [حذف فیلدهای پشتیبانی‌نشدهٔ مانیفست](/fa/clawhub/plugin-validation-fixes#manifest-unknown-fields)                                  |
+| `manifest-unknown-contracts`            | [حذف کلیدهای قرارداد پشتیبانی‌نشده](/fa/clawhub/plugin-validation-fixes#manifest-unknown-contracts)                                 |
+| `legacy-root-sdk-import`                | [جایگزینی importهای ریشهٔ SDK](/fa/clawhub/plugin-validation-fixes#legacy-root-sdk-import)                                             |
+| `reserved-sdk-import`                   | [حذف importهای رزروشدهٔ SDK](/fa/clawhub/plugin-validation-fixes#reserved-sdk-import)                                             |
+| `sdk-load-session-store`                | [جایگزینی دسترسی به کل مخزن نشست](/fa/clawhub/plugin-validation-fixes#sdk-load-session-store)                                   |
+| `sdk-session-store-write`               | [جایگزینی نوشتن در کل مخزن نشست](/fa/clawhub/plugin-validation-fixes#sdk-session-store-write)                                  |
+| `sdk-session-file-helper`               | [جایگزینی توابع کمکی مسیر فایل نشست](/fa/clawhub/plugin-validation-fixes#sdk-session-file-helper)                                   |
+| `sdk-session-transcript-file-target`    | [جایگزینی مقصدهای قدیمی فایل رونوشت](/fa/clawhub/plugin-validation-fixes#sdk-session-transcript-file-target)                   |
+| `sdk-session-transcript-low-level`      | [جایگزینی توابع کمکی سطح‌پایین رونوشت](/fa/clawhub/plugin-validation-fixes#sdk-session-transcript-low-level)                       |
+| `legacy-before-agent-start`             | [جایگزینی before_agent_start](/fa/clawhub/plugin-validation-fixes#legacy-before-agent-start)                                        |
+| `provider-auth-env-vars`                | [انتقال متغیرهای محیطی ارائه‌دهنده به فرادادهٔ راه‌اندازی](/fa/clawhub/plugin-validation-fixes#provider-auth-env-vars)                             |
+| `channel-env-vars`                      | [بازتاب متغیرهای محیطی کانال در فرادادهٔ کنونی](/fa/clawhub/plugin-validation-fixes#channel-env-vars)                                |
+| `security-manifest-schema-unavailable`  | [حذف ارجاع‌های در دسترس نبودن شِمای مانیفست امنیتی](/fa/clawhub/plugin-validation-fixes#security-manifest-schema-unavailable) |
+| `unrecognized-security-manifest`        | [حذف فایل‌های پشتیبانی‌نشدهٔ مانیفست امنیتی](/fa/clawhub/plugin-validation-fixes#unrecognized-security-manifest)                   |
 
-## فراداده بسته
+## فرادادهٔ بسته
 
 ### package-json-missing
 
-ریشه بسته شامل `package.json` نیست، بنابراین ClawHub نمی‌تواند بسته npm، نسخه، نقطه‌های ورود یا فراداده OpenClaw را شناسایی کند.
+ریشهٔ بسته شامل `package.json` نیست، بنابراین ClawHub نمی‌تواند
+بستهٔ npm، نسخه، نقاط ورود یا فرادادهٔ OpenClaw را شناسایی کند.
 
 - `package.json` را با `name`، `version` و `type` اضافه کنید.
-- وقتی بسته یک Plugin برای OpenClaw ارائه می‌کند، یک بلوک `openclaw` اضافه کنید.
-- برای یک نمونه حداقلی بسته از [ساخت Pluginها](/fa/plugins/building-plugins) و برای جداسازی بسته از مانیفست از [مانیفست Plugin](/fa/plugins/manifest#manifest-versus-packagejson) استفاده کنید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- هنگامی که بسته یک Plugin ‏OpenClaw ارائه می‌کند، یک بلوک `openclaw` اضافه کنید.
+- برای نمونه‌ای حداقلی از بسته، از [ساخت Pluginها](/fa/plugins/building-plugins)
+  و برای تفکیک بسته از مانیفست، از [مانیفست Plugin](/fa/plugins/manifest#manifest-versus-packagejson)
+  استفاده کنید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### package-openclaw-metadata-missing
 
-بسته `package.json` دارد، اما فراداده بسته OpenClaw را اعلام نمی‌کند.
+بسته دارای `package.json` است، اما فرادادهٔ بستهٔ
+OpenClaw را اعلام نمی‌کند.
 
 - `package.json#openclaw` را اضافه کنید.
-- فراداده نقطه ورود مانند `openclaw.extensions` یا `openclaw.runtimeExtensions` را شامل کنید.
-- وقتی بسته قرار است از طریق ClawHub منتشر یا نصب شود، فراداده سازگاری و نصب را اضافه کنید.
-- [فیلدهای package.json که بر کشف اثر می‌گذارند](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) را ببینید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- فرادادهٔ نقطهٔ ورود مانند `openclaw.extensions` یا
+  `openclaw.runtimeExtensions` را وارد کنید.
+- اگر بسته از طریق ClawHub منتشر یا نصب خواهد شد، فرادادهٔ سازگاری و نصب را اضافه کنید.
+- به [فیلدهای package.json مؤثر بر کشف](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) مراجعه کنید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### package-openclaw-entry-missing
 
-فراداده بسته وجود دارد، اما نقطه ورود زمان اجرای OpenClaw را اعلام نمی‌کند.
+فرادادهٔ بسته وجود دارد، اما نقطهٔ ورود زمان اجرای OpenClaw را
+اعلام نمی‌کند.
 
-- برای نقطه‌های ورود Plugin بومی، `openclaw.extensions` را اضافه کنید.
-- وقتی بسته منتشرشده باید JavaScript ساخته‌شده را بارگذاری کند، `openclaw.runtimeExtensions` را اضافه کنید.
-- همه مسیرهای نقطه ورود را داخل پوشه بسته نگه دارید.
-- [نقطه‌های ورود Plugin](/fa/plugins/sdk-entrypoints) و [فیلدهای package.json که بر کشف اثر می‌گذارند](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) را ببینید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- برای نقاط ورود بومی Plugin، ‏`openclaw.extensions` را اضافه کنید.
+- هنگامی که بستهٔ منتشرشده باید JavaScript ساخته‌شده را بارگذاری کند،
+  `openclaw.runtimeExtensions` را اضافه کنید.
+- همهٔ مسیرهای نقطهٔ ورود را داخل پوشهٔ بسته نگه دارید.
+- به [نقاط ورود Plugin](/fa/plugins/sdk-entrypoints) و
+  [فیلدهای package.json مؤثر بر کشف](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) مراجعه کنید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### package-entrypoint-missing
 
-بسته یک نقطه ورود OpenClaw را اعلام می‌کند، اما فایل ارجاع‌شده در بسته‌ای که اعتبارسنجی می‌شود وجود ندارد.
+بسته یک نقطهٔ ورود OpenClaw را اعلام می‌کند، اما فایل ارجاع‌شده
+در بسته‌ای که اعتبارسنجی می‌شود وجود ندارد.
 
-- هر مسیر را در `openclaw.extensions`، `openclaw.runtimeExtensions`، `openclaw.setupEntry` و `openclaw.runtimeSetupEntry` بررسی کنید.
-- اگر نقطه ورود در `dist` تولید می‌شود، بسته را بسازید.
-- اگر نقطه ورود جابه‌جا شده است، فراداده را به‌روزرسانی کنید.
-- [نقطه‌های ورود Plugin](/fa/plugins/sdk-entrypoints) را ببینید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- هر مسیر را در `openclaw.extensions`، `openclaw.runtimeExtensions`،
+  `openclaw.setupEntry` و `openclaw.runtimeSetupEntry` بررسی کنید.
+- اگر نقطهٔ ورود در `dist` تولید می‌شود، بسته را بسازید.
+- اگر نقطهٔ ورود جابه‌جا شده است، فراداده را به‌روزرسانی کنید.
+- به [نقاط ورود Plugin](/fa/plugins/sdk-entrypoints) مراجعه کنید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### package-install-metadata-incomplete
 
 ClawHub نمی‌تواند تشخیص دهد بسته چگونه باید نصب یا به‌روزرسانی شود.
 
-- `openclaw.install` را با منبع نصب پشتیبانی‌شده، مانند `clawhubSpec`، `npmSpec` یا `localPath` پر کنید.
-- وقتی بیش از یک منبع نصب در دسترس است، `openclaw.install.defaultChoice` را تنظیم کنید.
-- برای حداقل نسخه میزبان OpenClaw از `openclaw.install.minHostVersion` استفاده کنید.
-- [فیلدهای package.json که بر کشف اثر می‌گذارند](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) را ببینید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- `openclaw.install` را با منبع نصب پشتیبانی‌شده، مانند
+  `clawhubSpec`، `npmSpec` یا `localPath` تکمیل کنید.
+- هنگامی که بیش از یک منبع نصب در دسترس است،
+  `openclaw.install.defaultChoice` را تنظیم کنید.
+- برای حداقل نسخهٔ میزبان OpenClaw از `openclaw.install.minHostVersion` استفاده کنید.
+- به [فیلدهای package.json مؤثر بر کشف](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) مراجعه کنید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### package-plugin-api-compat-missing
 
-بسته بازه API Plugin مربوط به OpenClaw را که پشتیبانی می‌کند اعلام نمی‌کند.
+بسته محدودهٔ API ‏Plugin ‏OpenClaw مورد پشتیبانی خود را اعلام نمی‌کند.
 
 - `openclaw.compat.pluginApi` را به `package.json` اضافه کنید.
-- از نسخه API Plugin مربوط به OpenClaw یا کف semver که بر پایه آن ساخته و آزمایش کرده‌اید استفاده کنید.
-- این را از نسخه بسته جدا نگه دارید. نسخه بسته انتشار Plugin را توصیف می‌کند؛ `openclaw.compat.pluginApi` قرارداد API میزبان را توصیف می‌کند.
-- [فیلدهای package.json که بر کشف اثر می‌گذارند](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) را ببینید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- از نسخهٔ API ‏Plugin ‏OpenClaw یا کف semver که بسته را بر مبنای آن ساخته و آزمایش کرده‌اید
+  استفاده کنید.
+- این مورد را از نسخهٔ بسته جدا نگه دارید. نسخهٔ بسته انتشار Plugin را توصیف می‌کند؛
+  `openclaw.compat.pluginApi` قرارداد API میزبان را توصیف می‌کند.
+- به [فیلدهای package.json مؤثر بر کشف](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) مراجعه کنید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### package-min-host-version-drift
 
-حداقل نسخه میزبان بسته با فراداده نسخه OpenClaw که بسته بر پایه آن ساخته شده است مطابقت ندارد.
+حداقل نسخهٔ میزبان بسته با فرادادهٔ نسخهٔ OpenClaw که
+بسته بر مبنای آن ساخته شده است مطابقت ندارد.
 
 - `openclaw.install.minHostVersion` را بررسی کنید.
-- هر فراداده ساخت OpenClaw در بسته، مانند نسخه OpenClaw استفاده‌شده هنگام انتشار، را بررسی کنید.
-- حداقل نسخه میزبان را با بازه نسخه میزبان که بسته واقعاً پشتیبانی می‌کند هم‌راستا کنید.
-- [فیلدهای package.json که بر کشف اثر می‌گذارند](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) را ببینید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- هرگونه فرادادهٔ ساخت OpenClaw در بسته، مانند نسخهٔ OpenClaw
+  استفاده‌شده هنگام انتشار، را بررسی کنید.
+- حداقل نسخهٔ میزبان را با محدودهٔ نسخهٔ میزبانی که بسته
+  واقعاً پشتیبانی می‌کند هم‌تراز کنید.
+- به [فیلدهای package.json مؤثر بر کشف](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) مراجعه کنید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### package-manifest-version-drift
 
-نسخه بسته و نسخه مانیفست Plugin با هم اختلاف دارند.
+نسخهٔ بسته و نسخهٔ مانیفست Plugin با یکدیگر مغایرت دارند.
 
-- `package.json#version` را به‌عنوان نسخه انتشار بسته ترجیح دهید.
-- اگر `openclaw.plugin.json` نیز `version` دارد، آن را برای مطابقت به‌روزرسانی کنید یا وقتی فراداده بسته مرجع است، فراداده نسخه مانیفست قدیمی را حذف کنید.
-- پس از تغییر فراداده منتشرشده، یک نسخه بسته جدید منتشر کنید.
-- [مانیفست Plugin](/fa/plugins/manifest) را ببینید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- `package.json#version` را به‌عنوان نسخهٔ انتشار بسته ترجیح دهید.
+- اگر `openclaw.plugin.json` نیز دارای `version` است، آن را برای مطابقت به‌روزرسانی کنید یا
+  وقتی فرادادهٔ بسته مرجع اصلی است، فرادادهٔ قدیمی نسخهٔ مانیفست را حذف کنید.
+- پس از تغییر فرادادهٔ منتشرشده، نسخهٔ جدیدی از بسته منتشر کنید.
+- به [مانیفست Plugin](/fa/plugins/manifest) مراجعه کنید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### package-openclaw-unsupported-metadata
 
-بلوک `package.json#openclaw` شامل فیلدهایی است که به‌عنوان فراداده بسته OpenClaw پشتیبانی نمی‌شوند.
+بلوک `package.json#openclaw` حاوی فیلدهایی است که به‌عنوان
+فرادادهٔ بستهٔ OpenClaw پشتیبانی نمی‌شوند.
 
 - فیلدهای پشتیبانی‌نشده مانند `openclaw.bundle` را حذف کنید.
-- فراداده Plugin بومی را در `openclaw.plugin.json` نگه دارید.
-- نقطه‌های ورود بسته، سازگاری، نصب، راه‌اندازی و فراداده کاتالوگ را در فیلدهای پشتیبانی‌شده `package.json#openclaw` نگه دارید.
-- [فیلدهای package.json که بر کشف اثر می‌گذارند](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) را ببینید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- فرادادهٔ Plugin بومی را در `openclaw.plugin.json` نگه دارید.
+- نقاط ورود بسته، فرادادهٔ سازگاری، نصب، راه‌اندازی و کاتالوگ را
+  در فیلدهای پشتیبانی‌شدهٔ `package.json#openclaw` نگه دارید.
+- به [فیلدهای package.json مؤثر بر کشف](/fa/plugins/manifest#packagejson-fields-that-affect-discovery) مراجعه کنید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
-## مصنوع منتشرشده
+## آرتیفکت منتشرشده
 
 ### package-npm-pack-unavailable
 
-بسته نمی‌تواند به مصنوعی بسته‌بندی شود که ClawHub بررسی یا منتشر می‌کند.
+بسته را نمی‌توان در آرتیفکتی بسته‌بندی کرد که ClawHub آن را بازرسی یا
+منتشر می‌کند.
 
-- از ریشه بسته، `npm pack --dry-run` را اجرا کنید.
-- فراداده نامعتبر بسته، اسکریپت‌های چرخه عمر خراب، یا ورودی‌های فایل‌هایی را که باعث شکست بسته‌بندی می‌شوند اصلاح کنید.
+- `npm pack --dry-run` را از ریشهٔ بسته اجرا کنید.
+- فرادادهٔ نامعتبر بسته، اسکریپت‌های چرخهٔ عمر خراب یا ورودی‌های files را که
+  باعث شکست بسته‌بندی می‌شوند، اصلاح کنید.
 - اگر این بسته برای انتشار عمومی در نظر گرفته شده است، `private: true` را حذف کنید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### package-npm-pack-entrypoint-missing
 
-بسته قابل بسته‌بندی است، اما مصنوع بسته‌بندی‌شده شامل فایل‌های نقطه ورود اعلام‌شده در `package.json#openclaw` نیست.
+بسته قابل‌بسته‌بندی است، اما آرتیفکت بسته‌بندی‌شده فایل‌های
+نقطهٔ ورود اعلام‌شده در `package.json#openclaw` را شامل نمی‌شود.
 
-- `npm pack --dry-run` را اجرا کنید و فایل‌هایی را که شامل می‌شوند بررسی کنید.
-- پیش از بسته‌بندی، نقطه‌های ورود تولیدشده را بسازید.
-- `files`، `.npmignore` یا خروجی ساخت را به‌روزرسانی کنید تا نقطه‌های ورود اعلام‌شده شامل شوند.
-- [نقطه‌های ورود Plugin](/fa/plugins/sdk-entrypoints) را ببینید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- `npm pack --dry-run` را اجرا و فایل‌هایی را که گنجانده خواهند شد بررسی کنید.
+- پیش از بسته‌بندی، نقاط ورود تولیدشده را بسازید.
+- `files`، `.npmignore` یا خروجی ساخت را به‌روزرسانی کنید تا نقاط ورود اعلام‌شده
+  گنجانده شوند.
+- به [نقاط ورود Plugin](/fa/plugins/sdk-entrypoints) مراجعه کنید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### package-npm-pack-metadata-missing
 
-مصنوع بسته‌بندی‌شده فاقد فراداده OpenClaw است که در بسته منبع شما وجود دارد.
+آرتیفکت بسته‌بندی‌شده فاقد فرادادهٔ OpenClaw موجود در بستهٔ
+منبع شما است.
 
-- `npm pack --dry-run` را اجرا کنید و فایل‌های فراداده شامل‌شده را بررسی کنید.
-- مطمئن شوید `package.json` در مصنوع بسته‌بندی‌شده شامل بلوک `openclaw` است.
-- وقتی بسته یک Plugin بومی OpenClaw است، مطمئن شوید `openclaw.plugin.json` شامل شده است.
-- `files` یا `.npmignore` را به‌روزرسانی کنید تا فراداده بسته مستثنا نشود.
-- [ساخت Pluginها](/fa/plugins/building-plugins) را ببینید.
-- دوباره `clawhub package validate <path-to-plugin>` را اجرا کنید.
+- `npm pack --dry-run` را اجرا کنید و فایل‌های فرادادهٔ موجود را بررسی کنید.
+- مطمئن شوید `package.json` بلوک `openclaw` را در مصنوع بسته‌بندی‌شده شامل می‌شود.
+- هنگامی که بسته یک plugin بومی OpenClaw است، مطمئن شوید
+  `openclaw.plugin.json` در آن گنجانده شده است.
+- `files` یا `.npmignore` را به‌روزرسانی کنید تا فرادادهٔ بسته مستثنا نشود.
+- [ساخت pluginها](/fa/plugins/building-plugins) را ببینید.
+- `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
-## فراداده مانیفست
+## فرادادهٔ مانیفست
 
 ### manifest-name-missing
 
-مانیفست Plugin بومی شامل نام نمایشی نیست.
+مانیفست plugin بومی شامل نام نمایشی نیست.
 
-- یک فیلد `name` غیرخالی به `openclaw.plugin.json` اضافه کنید.
-- `name` را خوانا برای انسان نگه دارید و `id` را به‌عنوان شناسه پایدار ماشینی حفظ کنید.
+- یک فیلد غیرخالی `name` به `openclaw.plugin.json` اضافه کنید.
+- `name` را خوانا برای انسان نگه دارید و `id` را به‌عنوان شناسهٔ پایدار ماشین حفظ کنید.
 - [مانیفست Plugin](/fa/plugins/manifest) را ببینید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### manifest-unknown-fields
 
-مانیفست Plugin فیلدهای سطح بالایی دارد که OpenClaw از آن‌ها پشتیبانی نمی‌کند.
+مانیفست plugin دارای فیلدهای سطح بالایی است که OpenClaw از آن‌ها پشتیبانی نمی‌کند.
 
 - هر فیلد سطح بالا را با
   [مرجع فیلدهای مانیفست](/fa/plugins/manifest#top-level-field-reference) مقایسه کنید.
 - فیلدهای سفارشی را از `openclaw.plugin.json` حذف کنید.
-- فراداده بسته یا نصب را به‌جای مانیفست، به فیلدهای پشتیبانی‌شده `package.json#openclaw`
+- فرادادهٔ بسته یا نصب را به‌جای مانیفست، به فیلدهای پشتیبانی‌شدهٔ `package.json#openclaw`
   منتقل کنید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### manifest-unknown-contracts
 
-مانیفست، کلیدهای پشتیبانی‌نشده‌ای را داخل `contracts` اعلام می‌کند.
+مانیفست کلیدهای پشتیبانی‌نشده‌ای را درون `contracts` اعلام می‌کند.
 
 - هر کلید زیر `contracts` را با
   [مرجع قراردادها](/fa/plugins/manifest#contracts-reference) مقایسه کنید.
 - کلیدهای قرارداد پشتیبانی‌نشده را حذف کنید.
-- رفتار زمان اجرا را به کد ثبت Plugin منتقل کنید، و `contracts`
-  را به فراداده مالکیت قابلیت ایستا محدود نگه دارید.
+- رفتار زمان اجرا را به کد ثبت plugin منتقل کنید و `contracts` را
+  به فرادادهٔ ایستای مالکیت قابلیت محدود نگه دارید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
-## SDK و مهاجرت سازگاری
+## مهاجرت SDK و سازگاری
 
 ### legacy-root-sdk-import
 
-Plugin از barrel ریشه‌ای منسوخ‌شده SDK ایمپورت می‌کند:
+plugin از barrel ریشهٔ منسوخ‌شدهٔ SDK وارد می‌کند:
 `openclaw/plugin-sdk`.
 
-- ایمپورت‌های barrel ریشه‌ای را با ایمپورت‌های زیرمسیر عمومی متمرکز جایگزین کنید.
+- واردسازی‌های barrel ریشه را با واردسازی‌های متمرکز از زیرمسیرهای عمومی جایگزین کنید.
 - برای `definePluginEntry` از `openclaw/plugin-sdk/plugin-entry` استفاده کنید.
-- برای کمک‌کننده‌های ورودی کانال از `openclaw/plugin-sdk/channel-core` استفاده کنید.
-- برای یافتن ایمپورت محدود، از [قراردادهای ایمپورت](/fa/plugins/building-plugins#import-conventions) و
+- برای کمک‌تابع‌های نقطهٔ ورود کانال از `openclaw/plugin-sdk/channel-core` استفاده کنید.
+- برای یافتن واردسازی محدود، از [قراردادهای واردسازی](/fa/plugins/building-plugins#import-conventions) و
   [زیرمسیرهای SDK مربوط به Plugin](/fa/plugins/sdk-subpaths) استفاده کنید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### reserved-sdk-import
 
-Plugin یک مسیر SDK را ایمپورت می‌کند که برای Pluginهای همراه یا سازگاری
-داخلی رزرو شده است.
+plugin یک مسیر SDK را وارد می‌کند که برای pluginهای همراه یا سازگاری داخلی
+رزرو شده است.
 
-- ایمپورت‌های SDK داخلی رزروشده OpenClaw را با زیرمسیرهای عمومی مستندشده
+- واردسازی‌های رزروشدهٔ SDK داخلی OpenClaw را با زیرمسیرهای عمومی و مستندشدهٔ
   `openclaw/plugin-sdk/*` جایگزین کنید.
-- اگر رفتار، SDK عمومی ندارد، کمک‌کننده را داخل بسته خود نگه دارید یا
+- اگر این رفتار SDK عمومی ندارد، کمک‌تابع را درون بستهٔ خود نگه دارید یا
   یک API عمومی OpenClaw درخواست کنید.
-- برای انتخاب یک ایمپورت پشتیبانی‌شده، از [زیرمسیرهای SDK مربوط به Plugin](/fa/plugins/sdk-subpaths) و
+- برای انتخاب واردسازی پشتیبانی‌شده، از [زیرمسیرهای SDK مربوط به Plugin](/fa/plugins/sdk-subpaths) و
   [مهاجرت SDK](/fa/plugins/sdk-migration) استفاده کنید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### sdk-load-session-store
 
-Plugin هنوز از کمک‌کننده منسوخ‌شده کل مخزن نشست
+plugin همچنان از کمک‌تابع منسوخ‌شدهٔ کل مخزن نشست
 `loadSessionStore` استفاده می‌کند.
 
-- هنگام خواندن وضعیت نشست، از `getSessionEntry(...)` یا `listSessionEntries(...)` استفاده کنید.
-- هنگام نوشتن وضعیت نشست، از `patchSessionEntry(...)` یا `upsertSessionEntry(...)` استفاده کنید.
-- از بارگذاری، جهش دادن، و ذخیره کردن کل شیء مخزن نشست پرهیز کنید.
-- `loadSessionStore(...)` را فقط تا زمانی نگه دارید که بازه سازگاری اعلام‌شده شما
-  هنوز از نسخه‌های قدیمی‌تر OpenClaw که به آن نیاز دارند پشتیبانی می‌کند.
+- هنگام خواندن وضعیت نشست، از `getSessionEntry(...)` یا `listSessionEntries(...)`
+  استفاده کنید.
+- هنگام نوشتن وضعیت نشست، از `patchSessionEntry(...)` یا `upsertSessionEntry(...)`
+  استفاده کنید.
+- از بارگذاری، تغییر و ذخیره‌سازی کل شیء مخزن نشست خودداری کنید.
+- `loadSessionStore(...)` را فقط تا زمانی نگه دارید که محدودهٔ سازگاری اعلام‌شدهٔ شما
+  همچنان از نسخه‌های قدیمی‌تر OpenClaw که به آن نیاز دارند پشتیبانی می‌کند.
 - [API زمان اجرا](/fa/plugins/sdk-runtime#agent-session-state) و
   [زیرمسیرهای SDK مربوط به Plugin](/fa/plugins/sdk-subpaths) را ببینید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### sdk-session-store-write
 
-Plugin هنوز از یک کمک‌کننده نوشتن منسوخ‌شده برای کل مخزن نشست، مانند
+plugin همچنان از یک کمک‌تابع منسوخ‌شدهٔ نوشتن کل مخزن نشست مانند
 `saveSessionStore` یا `updateSessionStore` استفاده می‌کند.
 
-- هنگام به‌روزرسانی فیلدهای یک ورودی نشست موجود، از `patchSessionEntry(...)` استفاده کنید.
+- هنگام به‌روزرسانی فیلدهای یک ورودی نشست موجود، از `patchSessionEntry(...)`
+  استفاده کنید.
 - هنگام جایگزینی یا ایجاد یک ورودی نشست، از `upsertSessionEntry(...)` استفاده کنید.
-- از بارگذاری، جهش دادن، و ذخیره کردن کل شیء مخزن نشست پرهیز کنید.
-- کمک‌کننده‌های نوشتن کل مخزن را فقط تا زمانی نگه دارید که بازه سازگاری اعلام‌شده شما
-  هنوز از نسخه‌های قدیمی‌تر OpenClaw که به آن‌ها نیاز دارند پشتیبانی می‌کند.
+- از بارگذاری، تغییر و ذخیره‌سازی کل شیء مخزن نشست خودداری کنید.
+- کمک‌تابع‌های نوشتن کل مخزن را فقط تا زمانی نگه دارید که محدودهٔ سازگاری اعلام‌شدهٔ شما
+  همچنان از نسخه‌های قدیمی‌تر OpenClaw که به آن‌ها نیاز دارند پشتیبانی می‌کند.
 - [API زمان اجرا](/fa/plugins/sdk-runtime#agent-session-state) و
   [زیرمسیرهای SDK مربوط به Plugin](/fa/plugins/sdk-subpaths) را ببینید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### sdk-session-file-helper
 
-Plugin هنوز از کمک‌کننده‌های منسوخ‌شده مسیر فایل نشست مانند
+plugin همچنان از کمک‌تابع‌های منسوخ‌شدهٔ مسیر فایل نشست مانند
 `resolveSessionFilePath` یا `resolveAndPersistSessionFile` استفاده می‌کند.
 
-- برای خواندن فراداده نشست بر اساس عامل و هویت نشست، از `getSessionEntry(...)` استفاده کنید.
-- برای پایدارسازی فراداده نشست، از `patchSessionEntry(...)` یا `upsertSessionEntry(...)` استفاده کنید.
-- وقتی کد در حال آماده‌سازی یک عملیات رونوشت است، از هویت رونوشت یا کمک‌کننده‌های هدف استفاده کنید.
-- مسیرهای فایل رونوشت قدیمی را پایدار نکنید یا به آن‌ها وابسته نباشید.
+- برای خواندن فرادادهٔ نشست بر اساس هویت عامل و نشست، از `getSessionEntry(...)`
+  استفاده کنید.
+- برای ماندگار کردن فرادادهٔ نشست، از `patchSessionEntry(...)` یا `upsertSessionEntry(...)`
+  استفاده کنید.
+- هنگامی که کد یک عملیات رونوشت را آماده می‌کند، از هویت رونوشت یا کمک‌تابع‌های هدف
+  استفاده کنید.
+- مسیرهای فایل رونوشت قدیمی را ماندگار نکنید و به آن‌ها وابسته نباشید.
 - [API زمان اجرا](/fa/plugins/sdk-runtime#agent-session-state) و
   [زیرمسیرهای SDK مربوط به Plugin](/fa/plugins/sdk-subpaths) را ببینید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### sdk-session-transcript-file-target
 
-Plugin هنوز از کمک‌کننده منسوخ‌شده هدف فایل رونوشت
+plugin همچنان از کمک‌تابع منسوخ‌شدهٔ هدف فایل رونوشت
 `resolveSessionTranscriptLegacyFileTarget` استفاده می‌کند.
 
-- وقتی کد فقط به هویت عمومی نشست نیاز دارد، از `resolveSessionTranscriptIdentity(...)` استفاده کنید.
-- وقتی کد به یک هدف ساخت‌یافته عملیات رونوشت نیاز دارد، از `resolveSessionTranscriptTarget(...)` استفاده کنید.
-- از خواندن یا ساختن مستقیم هدف‌های فایل رونوشت قدیمی پرهیز کنید.
-- کمک‌کننده قدیمی را فقط تا زمانی نگه دارید که بازه سازگاری اعلام‌شده شما هنوز
+- هنگامی که کد فقط به هویت عمومی نشست نیاز دارد، از `resolveSessionTranscriptIdentity(...)`
+  استفاده کنید.
+- هنگامی که کد به یک هدف ساخت‌یافته برای عملیات رونوشت نیاز دارد، از `resolveSessionTranscriptTarget(...)`
+  استفاده کنید.
+- از خواندن یا ساخت مستقیم هدف‌های قدیمی فایل رونوشت خودداری کنید.
+- کمک‌تابع قدیمی را فقط تا زمانی نگه دارید که محدودهٔ سازگاری اعلام‌شدهٔ شما همچنان
   از نسخه‌های قدیمی‌تر OpenClaw که به آن نیاز دارند پشتیبانی می‌کند.
 - [API زمان اجرا](/fa/plugins/sdk-runtime#agent-session-state) و
   [زیرمسیرهای SDK مربوط به Plugin](/fa/plugins/sdk-subpaths) را ببینید.
@@ -299,26 +339,27 @@ Plugin هنوز از کمک‌کننده منسوخ‌شده هدف فایل ر�
 
 ### sdk-session-transcript-low-level
 
-Plugin هنوز از کمک‌کننده‌های رونوشت سطح پایین منسوخ‌شده مانند
+plugin همچنان از کمک‌تابع‌های سطح پایین منسوخ‌شدهٔ رونوشت مانند
 `appendSessionTranscriptMessage` یا `emitSessionTranscriptUpdate` استفاده می‌کند.
 
-- برای افزودن به رونوشت، از `appendSessionTranscriptMessageByIdentity(...)` استفاده کنید.
-- برای اعلان‌های به‌روزرسانی رونوشت، از `publishSessionTranscriptUpdateByIdentity(...)` استفاده کنید.
-- سطح ساخت‌یافته زمان اجرای رونوشت را ترجیح دهید تا OpenClaw بتواند
-  مرزهای تراکنش و مدیریت هویت درست را اعمال کند.
-- کمک‌کننده‌های رونوشت سطح پایین را فقط تا زمانی نگه دارید که بازه سازگاری اعلام‌شده شما
-  هنوز از نسخه‌های قدیمی‌تر OpenClaw که به آن‌ها نیاز دارند پشتیبانی می‌کند.
+- برای افزودن به رونوشت از `appendSessionTranscriptMessageByIdentity(...)` استفاده کنید.
+- برای اعلان‌های به‌روزرسانی رونوشت از `publishSessionTranscriptUpdateByIdentity(...)`
+  استفاده کنید.
+- سطح ساخت‌یافتهٔ زمان اجرای رونوشت را ترجیح دهید تا OpenClaw بتواند
+  مرزهای صحیح تراکنش و مدیریت هویت را اعمال کند.
+- کمک‌تابع‌های سطح پایین رونوشت را فقط تا زمانی نگه دارید که محدودهٔ سازگاری اعلام‌شدهٔ شما
+  همچنان از نسخه‌های قدیمی‌تر OpenClaw که به آن‌ها نیاز دارند پشتیبانی می‌کند.
 - [API زمان اجرا](/fa/plugins/sdk-runtime#agent-session-state) و
   [زیرمسیرهای SDK مربوط به Plugin](/fa/plugins/sdk-subpaths) را ببینید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### legacy-before-agent-start
 
-Plugin هنوز از hook قدیمی `before_agent_start` استفاده می‌کند.
+plugin همچنان از hook قدیمی `before_agent_start` استفاده می‌کند.
 
-- کار مربوط به بازنویسی مدل یا ارائه‌دهنده را به `before_model_resolve` منتقل کنید.
-- کار مربوط به جهش prompt یا زمینه را به `before_prompt_build` منتقل کنید.
-- `before_agent_start` را فقط تا زمانی نگه دارید که بازه سازگاری اعلام‌شده شما هنوز
+- کارهای بازنویسی مدل یا ارائه‌دهنده را به `before_model_resolve` منتقل کنید.
+- کارهای تغییر prompt یا context را به `before_prompt_build` منتقل کنید.
+- `before_agent_start` را فقط تا زمانی نگه دارید که محدودهٔ سازگاری اعلام‌شدهٔ شما همچنان
   از نسخه‌های قدیمی‌تر OpenClaw که به آن نیاز دارند پشتیبانی می‌کند.
 - [Hookها](/fa/plugins/hooks) و
   [سازگاری Plugin](/fa/plugins/compatibility) را ببینید.
@@ -326,48 +367,48 @@ Plugin هنوز از hook قدیمی `before_agent_start` استفاده می‌
 
 ### provider-auth-env-vars
 
-مانیفست هنوز از فراداده احراز هویت ارائه‌دهنده قدیمی `providerAuthEnvVars` استفاده می‌کند.
+مانیفست همچنان از فرادادهٔ قدیمی احراز هویت ارائه‌دهندهٔ `providerAuthEnvVars` استفاده می‌کند.
 
-- فراداده متغیر محیطی ارائه‌دهنده را در `setup.providers[].envVars` بازتاب دهید.
-- `providerAuthEnvVars` را فقط به‌عنوان فراداده سازگاری نگه دارید، تا زمانی که بازه
-  OpenClaw پشتیبانی‌شده شما هنوز به آن نیاز دارد.
-- [مرجع setup](/fa/plugins/manifest#setup-reference) و
+- فرادادهٔ متغیر محیطی ارائه‌دهنده را در `setup.providers[].envVars` نیز بازتاب دهید.
+- `providerAuthEnvVars` را فقط به‌عنوان فرادادهٔ سازگاری نگه دارید، مادامی که محدودهٔ پشتیبانی‌شدهٔ
+  OpenClaw شما همچنان به آن نیاز دارد.
+- [مرجع راه‌اندازی](/fa/plugins/manifest#setup-reference) و
   [مهاجرت SDK](/fa/plugins/sdk-migration) را ببینید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### channel-env-vars
 
-مانیفست از فراداده قدیمی یا کهنه‌تر متغیر محیطی کانال استفاده می‌کند، بدون فراداده
-setup یا پیکربندی فعلی که ClawHub انتظار دارد.
+مانیفست از فرادادهٔ قدیمی یا پیشین متغیر محیطی کانال، بدون فرادادهٔ کنونی
+راه‌اندازی یا پیکربندی مورد انتظار ClawHub استفاده می‌کند.
 
-- فراداده متغیر محیطی کانال را اعلانی نگه دارید تا OpenClaw بتواند وضعیت setup را
+- فرادادهٔ متغیر محیطی کانال را اعلانی نگه دارید تا OpenClaw بتواند وضعیت راه‌اندازی را
   بدون بارگذاری زمان اجرای کانال بررسی کند.
-- setup کانال مبتنی بر متغیر محیطی را در setup فعلی، پیکربندی کانال، یا
-  فراداده کانال بسته که شکل Plugin شما استفاده می‌کند بازتاب دهید.
-- `channelEnvVars` را فقط به‌عنوان فراداده سازگاری نگه دارید، تا زمانی که نسخه‌های قدیمی‌تر
-  پشتیبانی‌شده OpenClaw هنوز به آن نیاز دارند.
+- راه‌اندازی کانال مبتنی بر متغیر محیطی را در فرادادهٔ کنونی راه‌اندازی، پیکربندی کانال یا
+  کانال بسته که شکل plugin شما استفاده می‌کند نیز بازتاب دهید.
+- `channelEnvVars` را فقط به‌عنوان فرادادهٔ سازگاری نگه دارید، مادامی که نسخه‌های قدیمی‌تر پشتیبانی‌شدهٔ
+  OpenClaw همچنان به آن نیاز دارند.
 - [مانیفست Plugin](/fa/plugins/manifest) و
-  [Pluginهای کانال](/fa/plugins/sdk-channel-plugins) را ببینید.
+  [pluginهای کانال](/plugins/sdk-channel-plugins) را ببینید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
-## مانیفست امنیت
+## مانیفست امنیتی
 
 ### security-manifest-schema-unavailable
 
-بسته، `openclaw.security.json` را با ارجاع schema منتشر می‌کند که ClawHub
-آن را به‌عنوان موجود نمی‌شناسد.
+بسته، `openclaw.security.json` را با ارجاعی به schema ارائه می‌کند که ClawHub
+آن را در دسترس تشخیص نمی‌دهد.
 
-- اگر URL مربوط به schema فقط جنبه راهنمایی دارد، آن را حذف کنید.
-- فقط پس از انتشار یک schema نسخه‌بندی‌شده توسط OpenClaw، از آن schema مستندشده استفاده کنید.
+- اگر URL مربوط به schema فقط جنبهٔ توصیه‌ای دارد، آن را حذف کنید.
+- فقط پس از انتشار یک schema نسخه‌بندی‌شده توسط OpenClaw، از آن استفاده کنید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
 ### unrecognized-security-manifest
 
-بسته یک فایل مانیفست امنیت پشتیبانی‌نشده منتشر می‌کند.
+بسته یک فایل مانیفست امنیتی پشتیبانی‌نشده ارائه می‌کند.
 
-- تا زمانی که OpenClaw یک schema نسخه‌بندی‌شده برای مانیفست امنیت و رفتار ClawHub را مستند نکرده است،
-  `openclaw.security.json` را حذف کنید.
-- تا زمانی که قرارداد مانیفست وجود ندارد، رفتار حساس به امنیت را در مستندات عمومی بسته یا
+- `openclaw.security.json` را حذف کنید تا زمانی که OpenClaw یک schema نسخه‌بندی‌شدهٔ مانیفست امنیتی
+  و رفتار ClawHub را مستند کند.
+- تا زمان ایجاد قرارداد مانیفست، رفتار حساس به امنیت را در مستندات عمومی بسته یا
   README خود مستند نگه دارید.
 - `clawhub package validate <path-to-plugin>` را دوباره اجرا کنید.
 
@@ -375,7 +416,7 @@ setup یا پیکربندی فعلی که ClawHub انتظار دارد.
 
 - [CLI مربوط به ClawHub](/fa/clawhub/cli)
 - [انتشار در ClawHub](/fa/clawhub/publishing)
-- [ساخت Pluginها](/fa/plugins/building-plugins)
+- [ساخت pluginها](/fa/plugins/building-plugins)
 - [مانیفست Plugin](/fa/plugins/manifest)
-- [نقاط ورودی Plugin](/fa/plugins/sdk-entrypoints)
+- [نقاط ورود Plugin](/fa/plugins/sdk-entrypoints)
 - [سازگاری Plugin](/fa/plugins/compatibility)

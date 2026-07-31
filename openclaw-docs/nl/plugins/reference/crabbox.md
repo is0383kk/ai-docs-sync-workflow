@@ -1,14 +1,15 @@
 ---
 read_when:
-    - Je installeert, configureert of controleert de crabbox-Plugin
+    - Je installeert, configureert of controleert de crabbox-plugin
 summary: Cloudworkerprovider ondersteund door de Crabbox CLI.
 title: Crabbox-plugin
 x-i18n:
-    generated_at: "2026-07-12T09:06:26Z"
+    generated_at: "2026-07-27T06:27:29Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b52daa026c1a44ae7ca68d3974bc068fc41f6dd18f195d957be9afbd4bfebdea
+    source_hash: e2c0b8d23b37746d79bedb93361bcec779ed03bca9bb8e08ad43a21d6d40be12
     source_path: plugins/reference/crabbox.md
     workflow: 16
 ---
@@ -24,7 +25,7 @@ Cloudworkerprovider ondersteund door de Crabbox-CLI.
 
 ## Oppervlak
 
-contracten: workerProviders
+contracten: `workerProviders`
 
 <!-- openclaw-plugin-reference:manual-start -->
 

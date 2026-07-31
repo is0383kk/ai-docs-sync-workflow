@@ -1,13 +1,14 @@
 ---
 read_when:
     - Matrix-clients bouwen die uitgebreide OpenClaw-antwoorden weergeven
-    - Foutopsporing van de inhoud van com.openclaw.presentation-gebeurtenissen
-summary: Matrix MessagePresentation-metadata voor OpenClaw-bewuste clients
+    - Foutopsporing in de inhoud van com.openclaw.presentation-events
+summary: Matrix MessagePresentation-metadata voor OpenClaw-compatibele clients
 title: Matrix-presentatiemetadata
 x-i18n:
-    generated_at: "2026-07-12T08:37:44Z"
+    generated_at: "2026-07-27T05:02:12Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: c0de4d13c6cefc6f91dcc7a4b0edeea6bf001f3bd71f52c9f0498ad422783d8a
     source_path: channels/matrix-presentation.md
@@ -16,23 +17,23 @@ x-i18n:
 
 OpenClaw voegt genormaliseerde `MessagePresentation`-metadata toe aan uitgaande Matrix-`m.room.message`-gebeurtenissen onder de inhoudssleutel `com.openclaw.presentation`.
 
-Standaard Matrix-clients blijven de platte tekst in `body` weergeven. Clients met ondersteuning voor OpenClaw kunnen de gestructureerde metadata lezen en systeemeigen UI-elementen weergeven, zoals knoppen, keuzelijsten, contextregels en scheidingslijnen.
+Standaard Matrix-clients blijven de platte tekst `body` weergeven. Clients die OpenClaw ondersteunen, kunnen de gestructureerde metadata lezen en systeemeigen UI weergeven, zoals knoppen, selectielijsten, contextregels en scheidingslijnen.
 
 ## Gebeurtenisinhoud
 
 ```json
 {
   "msgtype": "m.text",
-  "body": "Select model\n\nChoose model:\n- DeepSeek",
+  "body": "Selecteer model\n\nKies model:\n- DeepSeek",
   "com.openclaw.presentation": {
     "version": 1,
     "type": "message.presentation",
-    "title": "Select model",
+    "title": "Selecteer model",
     "tone": "info",
     "blocks": [
       {
         "type": "select",
-        "placeholder": "Choose model",
+        "placeholder": "Kies model",
         "options": [
           {
             "label": "DeepSeek",
@@ -45,48 +46,48 @@ Standaard Matrix-clients blijven de platte tekst in `body` weergeven. Clients me
 }
 ```
 
-- `version` is de versie van het metadataschema; de huidige versie is `1`. `type` is een stabiele discriminator en is altijd `"message.presentation"`. De Matrix-adapter verzendt alleen payloads met exact deze versie en dit type; clients moeten eveneens onbekende versies die ze niet veilig kunnen interpreteren, onbekende `type`-waarden en onbekende bloktypen negeren.
+- `version` is de versie van het metadataschema; de huidige versie is `1`. `type` is een stabiele discriminator, altijd `"message.presentation"`. De Matrix-adapter verzendt alleen payloads met precies deze versie en dit type; clients moeten eveneens onbekende versies negeren die ze niet veilig kunnen interpreteren, evenals onbekende waarden voor `type` en onbekende bloktypen.
 - `title` en `tone` (`info`, `success`, `warning`, `danger`, `neutral`) zijn optionele aanwijzingen.
-- Knoppen en opties in keuzelijsten kunnen naast de verouderde tekenreeks `value` een getypeerde `action` bevatten (`{ "type": "command", "command": "/..." }` of `{ "type": "callback", "value": "..." }`). Geef de voorkeur aan `action` wanneer beide aanwezig zijn.
+- Knoppen en selectieopties kunnen naast de verouderde tekenreeks `value` een getypeerde `action` (`{ "type": "command", "command": "/..." }` of `{ "type": "callback", "value": "..." }`) bevatten. Geef de voorkeur aan `action` wanneer beide aanwezig zijn.
 
 ## Terugvalgedrag
 
-OpenClaw geeft altijd een leesbare terugvaltekst zonder opmaak weer in `body`. De gestructureerde metadata is aanvullend en mag niet vereist zijn voor elementaire interoperabiliteit met Matrix.
+OpenClaw geeft altijd een leesbare terugvaltekst in platte tekst weer in `body`. De gestructureerde metadata is aanvullend en mag niet vereist zijn voor elementaire interoperabiliteit met Matrix.
 
 Regels voor terugvalweergave:
 
-- Inhoud van `title`, `text` en `context` wordt als regels zonder opmaak weergegeven.
-- Knoppen met een `command`-actie worden weergegeven als ``label: `/command` ``, zodat de opdracht kopieerbaar blijft. Knoppen met een `callback`-actie of alleen een verouderde `value` worden uitsluitend met hun label weergegeven, zodat ondoorzichtige callbackwaarden privé blijven; uitgeschakelde knoppen worden altijd uitsluitend met hun label weergegeven. URL- en webapp-knoppen worden weergegeven als `label: URL`.
-- `select`-blokken geven de tijdelijke aanduiding (of `Options:`) weer als kop, gevolgd door optieregels die uitsluitend het label bevatten.
-- Als niets wordt weergegeven, bijvoorbeeld bij een presentatie die alleen uit een scheidingslijn bestaat, valt de hoofdtekst terug op `---`.
+- Inhoud van `title`, `text` en `context` wordt als platte regels weergegeven.
+- Knoppen met een `command`-actie worden weergegeven als ``label: `/command` ``, zodat de opdracht kopieerbaar blijft. Knoppen met een `callback`-actie of alleen een verouderde `value` worden uitsluitend met hun label weergegeven, zodat ondoorzichtige callbackwaarden privé blijven; uitgeschakelde knoppen worden altijd uitsluitend met hun label weergegeven. URL- en webappknoppen worden weergegeven als `label: URL`.
+- Selectieblokken geven de tijdelijke aanduiding (of `Options:`) weer als kop, gevolgd door optieregels met alleen labels.
+- Als niets wordt weergegeven, bijvoorbeeld bij een presentatie met alleen een scheidingslijn, valt de hoofdtekst terug op `---`.
 
-Niet-ondersteunde clients blijven de terugvaltekst tonen. Clients met ondersteuning voor OpenClaw kunnen voor de weergave de voorkeur geven aan de gestructureerde metadata, terwijl ze de terugvaltekst behouden voor kopiëren, zoeken, meldingen en toegankelijkheid.
+Niet-ondersteunde clients blijven de terugvaltekst weergeven. Clients die OpenClaw ondersteunen, kunnen voor de weergave de voorkeur geven aan de gestructureerde metadata, terwijl ze de terugvaltekst behouden voor kopiëren, zoeken, meldingen en toegankelijkheid.
 
 ## Ondersteunde blokken
 
-De uitgaande Matrix-adapter vermeldt systeemeigen ondersteuning voor:
+De uitgaande Matrix-adapter biedt systeemeigen ondersteuning voor:
 
 - `buttons`
 - `select`
 - `context`
 - `divider`
 
-`text`-blokken worden altijd ondersteund via de terugvaltekst. Behandel alle blokken als niet-gegarandeerde presentatieaanwijzingen; negeer onbekende velden en bloktypen in plaats van het volledige bericht te laten mislukken.
+`text`-blokken worden altijd ondersteund via de terugvaltekst. Behandel alle blokken als presentatieaanwijzingen op basis van beste inspanning; negeer onbekende velden en bloktypen in plaats van het hele bericht te laten mislukken.
 
 ## Interacties
 
-Deze metadata voegt geen callback-semantiek toe aan Matrix. Waarden van knoppen en keuzelijsten zijn terugvalpayloads voor interacties, doorgaans slash-opdrachten of tekstopdrachten. Een Matrix-client die interactie wil ondersteunen, bepaalt de besturingswaarde (`action.command`, vervolgens `action.value` en daarna `value`) en stuurt deze als een normaal bericht terug naar de ruimte.
+Deze metadata voegt geen Matrix-callbacksemantiek toe. Waarden van knoppen en selecties zijn terugvalpayloads voor interacties, meestal slash-opdrachten of tekstopdrachten. Een Matrix-client die interactie wil ondersteunen, bepaalt de waarde van het besturingselement (`action.command`, vervolgens `action.value`, vervolgens `value`) en stuurt die als een normaal bericht terug naar de ruimte.
 
 Een knop met de waarde `/model deepseek/deepseek-chat` kan bijvoorbeeld worden verwerkt door die waarde als versleuteld Matrix-tekstbericht in dezelfde ruimte te verzenden.
 
-## Relatie tot goedkeuringsmetadata
+## Relatie met goedkeuringsmetadata
 
 `com.openclaw.presentation` is bedoeld voor algemene, uitgebreide berichtpresentatie.
 
-Goedkeuringsprompts gebruiken de specifieke metadata `com.openclaw.approval`, omdat goedkeuringen veiligheidsgevoelige status, beslissingen en uitvoerings-/Plugingegevens bevatten. Als beide metadatasleutels op dezelfde gebeurtenis aanwezig zijn, moeten clients de voorkeur geven aan de specifieke goedkeuringsweergave.
+Goedkeuringsprompts gebruiken de specifieke `com.openclaw.approval`-metadata, omdat goedkeuringen veiligheidsgevoelige status, beslissingen en uitvoerings-/plugingegevens bevatten. Als beide metadatasleutels in dezelfde gebeurtenis aanwezig zijn, moeten clients de voorkeur geven aan de specifieke goedkeuringsrenderer.
 
 ## Mediaberichten
 
-Wanneer een antwoord meerdere media-URL's bevat, verzendt OpenClaw één Matrix-gebeurtenis per media-URL. Bijschrifttekst en presentatiemetadata worden alleen aan de eerste gebeurtenis toegevoegd, zodat clients één stabiele, gestructureerde payload ontvangen zonder dubbele weergavecomponenten. Dezelfde regel geldt wanneer lange tekst over meerdere gebeurtenissen wordt verdeeld: de metadata wordt alleen met de eerste gebeurtenis meegestuurd.
+Wanneer een antwoord meerdere media-URL's bevat, verzendt OpenClaw één Matrix-gebeurtenis per media-URL. Bijschrifttekst en presentatiemetadata worden alleen aan de eerste gebeurtenis toegevoegd, zodat clients één stabiele gestructureerde payload krijgen zonder dubbele renderers. Dezelfde regel geldt wanneer lange tekst over meerdere gebeurtenissen wordt verdeeld: de metadata wordt alleen met de eerste gebeurtenis meegestuurd.
 
-Houd presentatiemetadata compact. Lange, voor gebruikers zichtbare tekst moet in `body` blijven staan en het normale pad voor het opsplitsen van Matrix-tekst gebruiken.
+Houd presentatiemetadata compact. Grote, voor gebruikers zichtbare tekst moet in `body` blijven en het normale pad voor het opsplitsen van Matrix-tekst gebruiken.

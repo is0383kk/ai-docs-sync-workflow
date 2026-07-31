@@ -1,38 +1,39 @@
 ---
 read_when:
-    - DigitalOcean'da OpenClaw Kurulumu
-    - OpenClaw için basit, ücretli bir VPS arıyorum
+    - DigitalOcean'da OpenClaw kurulumu
+    - OpenClaw için basit bir ücretli VPS arıyorum
 summary: OpenClaw'u bir DigitalOcean Droplet üzerinde barındırma
 title: DigitalOcean
 x-i18n:
-    generated_at: "2026-07-12T12:24:27Z"
+    generated_at: "2026-07-27T00:02:39Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: e124a59c079efda0c8e880018f2657fad784af1489ca3f98ed8ab609249e35bd
     source_path: install/digitalocean.md
     workflow: 16
 ---
 
-DigitalOcean Droplet üzerinde kalıcı bir OpenClaw Gateway çalıştırın (1 GB Basic plan için ayda yaklaşık 6 ABD doları).
+Kalıcı bir OpenClaw Gateway'i DigitalOcean Droplet üzerinde çalıştırın (1 GB Basic plan için ayda yaklaşık $6).
 
-DigitalOcean, kullanımı kolay bir ücretli VPS seçeneğidir. Daha ucuz veya ücretsiz seçenekler için:
+DigitalOcean, basit bir ücretli VPS seçeneğidir. Daha ucuz veya ücretsiz seçenekler için:
 
 - [Hetzner](/tr/install/hetzner) -- dolar başına daha fazla çekirdek/RAM.
-- [Oracle Cloud](/tr/install/oracle) -- Always Free ARM katmanı (4 OCPU ve 24 GB RAM'e kadar), ancak kaydolma süreci sorunlu olabilir ve yalnızca ARM desteklenir.
+- [Oracle Cloud](/tr/install/oracle) -- Always Free ARM katmanı (4 OCPU ve 24 GB RAM'e kadar), ancak kaydolma süreci sorunlu olabilir ve yalnızca ARM destekler.
 
 ## Ön koşullar
 
 - DigitalOcean hesabı ([kaydolun](https://cloud.digitalocean.com/registrations/new))
-- SSH anahtar çifti (veya parola tabanlı kimlik doğrulama kullanmaya istekli olmanız)
+- SSH anahtar çifti (veya parola kimlik doğrulaması kullanma isteği)
 - Yaklaşık 20 dakika
 
 ## Kurulum
 
 <Steps>
-  <Step title="Bir Droplet oluşturun">
+  <Step title="Droplet oluşturun">
     <Warning>
-    Temiz bir temel kalıp (Ubuntu 24.04 LTS) kullanın. Başlatma betiklerini ve güvenlik duvarı varsayılanlarını incelemediğiniz üçüncü taraf Marketplace tek tıklamalı kalıplarından kaçının.
+    Temiz bir temel imaj (Ubuntu 24.04 LTS) kullanın. Başlatma betiklerini ve güvenlik duvarı varsayılanlarını incelemediyseniz üçüncü taraf Marketplace tek tıklamalı imajlarından kaçının.
     </Warning>
 
     1. [DigitalOcean](https://cloud.digitalocean.com/) hesabınızda oturum açın.
@@ -41,7 +42,7 @@ DigitalOcean, kullanımı kolay bir ücretli VPS seçeneğidir. Daha ucuz veya �
        - **Region:** Size en yakın bölge
        - **Image:** Ubuntu 24.04 LTS
        - **Size:** Basic, Regular, 1 vCPU / 1 GB RAM / 25 GB SSD
-       - **Authentication:** SSH anahtarı (önerilen) veya parola
+       - **Authentication:** SSH key (önerilen) veya password
     4. **Create Droplet** seçeneğine tıklayın ve IP adresini not edin.
 
   </Step>
@@ -68,16 +69,16 @@ DigitalOcean, kullanımı kolay bir ücretli VPS seçeneğidir. Daha ucuz veya �
     openclaw --version
     ```
 
-    Root kabuğunu yalnızca ilk sistem kurulumu için kullanın. Durumun `/home/openclaw/.openclaw/` altında tutulması ve Gateway'in bu kullanıcının systemd `--user` hizmeti olarak yüklenmesi için OpenClaw komutlarını root olmayan `openclaw` kullanıcısı olarak çalıştırın.
+    Root kabuğunu yalnızca sistem önyükleme kurulumu için kullanın. Durumun `/home/openclaw/.openclaw/` altında tutulması ve Gateway'in bu kullanıcının systemd `--user` hizmeti olarak yüklenmesi için OpenClaw komutlarını root olmayan `openclaw` kullanıcısı olarak çalıştırın.
 
   </Step>
 
-  <Step title="İlk yapılandırmayı çalıştırın">
+  <Step title="İlk katılımı çalıştırın">
     ```bash
     openclaw onboard --install-daemon
     ```
 
-    Sihirbaz; model kimlik doğrulaması, kanal kurulumu, Gateway belirteci oluşturma ve daemon yükleme (systemd kullanıcı hizmeti) adımlarında size rehberlik eder.
+    Sihirbaz; model kimlik doğrulaması, kanal kurulumu, gateway belirteci oluşturma ve daemon yükleme (systemd kullanıcı hizmeti) adımlarında size yol gösterir.
 
   </Step>
 
@@ -99,8 +100,8 @@ DigitalOcean, kullanımı kolay bir ücretli VPS seçeneğidir. Daha ucuz veya �
     ```
   </Step>
 
-  <Step title="Kontrol Arayüzüne erişin">
-    Gateway varsayılan olarak local loopback adresine bağlanır. Aşağıdaki seçeneklerden birini belirleyin.
+  <Step title="Control UI'ye erişin">
+    Gateway varsayılan olarak geri döngü arabirimine bağlanır. Aşağıdaki seçeneklerden birini belirleyin.
 
     **Seçenek A: SSH tüneli (en basit)**
 
@@ -122,16 +123,16 @@ DigitalOcean, kullanımı kolay bir ücretli VPS seçeneğidir. Daha ucuz veya �
 
     Ardından tailnet'inizdeki herhangi bir cihazdan `https://<magicdns>/` adresini açın.
 
-    Tailscale Serve, Kontrol Arayüzü ve WebSocket trafiğinin kimliğini tailnet kimlik üstbilgileri aracılığıyla doğrular; bu, Gateway ana makinesinin kendisine güvenildiğini varsayar. HTTP API uç noktaları ise bundan bağımsız olarak Gateway'in normal kimlik doğrulama modunu (belirteç/parola) izlemeye devam eder. Serve üzerinden açıkça paylaşılan gizli bilgi kimlik bilgileri gerektirmek için `gateway.auth.allowTailscale: false` ayarını yapın ve `gateway.auth.mode: "token"` veya `"password"` kullanın.
+    Tailscale Serve, Control UI ve WebSocket trafiğinin kimliğini tailnet kimlik üstbilgileri aracılığıyla doğrular; bu, gateway ana makinesinin güvenilir olduğunu varsayar. HTTP API uç noktaları ise her durumda gateway'in normal kimlik doğrulama modunu (belirteç/parola) kullanmaya devam eder. Serve üzerinden açıkça paylaşılan gizli bilgi kimlik bilgileri istemek için `gateway.auth.allowTailscale: false` değerini ayarlayın ve `gateway.auth.mode: "token"` veya `"password"` kullanın.
 
-    **Seçenek C: Tailnet bağlantısı (Serve olmadan)**
+    **Seçenek C: Tailnet'e bağlama (Serve olmadan)**
 
     ```bash
     openclaw config set gateway.bind tailnet
     openclaw gateway restart
     ```
 
-    Ardından `http://<tailscale-ip>:18789` adresini açın (belirteç gerekir).
+    Ardından `http://<tailscale-ip>:18789` adresini açın (belirteç gereklidir).
 
   </Step>
 </Steps>
@@ -140,37 +141,37 @@ DigitalOcean, kullanımı kolay bir ücretli VPS seçeneğidir. Daha ucuz veya �
 
 OpenClaw durumu şurada tutulur:
 
-- `~/.openclaw/` -- `openclaw.json`, kanal/sağlayıcı kimlik bilgileri, aracı başına `auth-profiles.json` ve oturum verileri.
-- `~/.openclaw/workspace/` -- aracı çalışma alanı (SOUL.md, bellek, yapıtlar).
+- `~/.openclaw/` -- `openclaw.json`, kanal/sağlayıcı kimlik bilgileri, ajan başına `auth-profiles.json` ve oturum verileri.
+- `~/.openclaw/workspace/` -- ajan çalışma alanı (SOUL.md, bellek, yapıtlar).
 
-Bunlar Droplet yeniden başlatmalarında korunur. Taşınabilir bir anlık görüntü oluşturmak için:
+Bunlar Droplet yeniden başlatmalarından etkilenmez. Taşınabilir bir anlık görüntü almak için:
 
 ```bash
 openclaw backup create
 ```
 
-DigitalOcean anlık görüntüleri Droplet'in tamamını yedekler; `openclaw backup create` ise ana makineler arasında taşınabilir.
+DigitalOcean anlık görüntüleri Droplet'in tamamını yedekler; `openclaw backup create` ana makineler arasında taşınabilir.
 
 ## 1 GB RAM için ipuçları
 
-6 ABD dolarlık Droplet yalnızca 1 GB RAM'e sahiptir. Sistemin sorunsuz çalışmasını sağlamak için:
+$6 tutarındaki Droplet yalnızca 1 GB RAM'e sahiptir. Sorunsuz çalışmasını sağlamak için:
 
 - Yeniden başlatmalardan sonra korunması için yukarıdaki takas alanı adımının `/etc/fstab` içinde bulunduğundan emin olun.
-- Yerel modeller yerine API tabanlı modelleri (Claude, GPT) tercih edin; yerel LLM çıkarımı 1 GB'a sığmaz.
-- Büyük istemlerde yetersiz bellek hatalarıyla karşılaşırsanız `agents.defaults.model.primary` değerini daha küçük bir modele ayarlayın.
+- Yerel modeller yerine API tabanlı modelleri (Claude, GPT) tercih edin -- yerel LLM çıkarımı 1 GB'a sığmaz.
+- Büyük istemlerde OOM hatalarıyla karşılaşırsanız `agents.defaults.model.primary` değerini daha küçük bir modele ayarlayın.
 - `free -h` ve `htop` ile izleyin.
 
 ## Sorun giderme
 
-**Gateway başlatılmıyor** -- `openclaw doctor --non-interactive` komutunu çalıştırın ve `journalctl --user -u openclaw-gateway.service -n 50` ile günlükleri kontrol edin.
+**Gateway başlamıyor** -- `openclaw doctor --non-interactive` komutunu çalıştırın ve günlükleri `journalctl --user -u openclaw-gateway.service -n 50` ile kontrol edin.
 
-**Bağlantı noktası zaten kullanımda** -- Süreci bulmak için `lsof -i :18789` komutunu çalıştırın, ardından süreci durdurun.
+**Bağlantı noktası zaten kullanımda** -- İşlemi bulmak için `lsof -i :18789` komutunu çalıştırın, ardından işlemi durdurun.
 
-**Bellek yetersiz** -- `free -h` ile takas alanının etkin olduğunu doğrulayın. Hâlâ yetersiz bellek hatalarıyla karşılaşıyorsanız yerel modeller yerine API tabanlı modellere (Claude, GPT) geçin veya 2 GB'lık bir Droplet'e yükseltin.
+**Bellek yetersiz** -- Takas alanının etkin olduğunu `free -h` ile doğrulayın. OOM hataları devam ediyorsa yerel modeller yerine API tabanlı modellere (Claude, GPT) geçin veya 2 GB'lık bir Droplet'e yükseltin.
 
 ## Sonraki adımlar
 
-- [Kanallar](/tr/channels) -- Telegram, WhatsApp, Discord ve diğerlerini bağlayın
+- [Kanallar](/tr/channels) -- Telegram, WhatsApp, Discord ve daha fazlasını bağlayın
 - [Gateway yapılandırması](/tr/gateway/configuration) -- tüm yapılandırma seçenekleri
 - [Güncelleme](/tr/install/updating) -- OpenClaw'u güncel tutun
 

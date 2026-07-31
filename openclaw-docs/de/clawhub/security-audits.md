@@ -1,107 +1,108 @@
 ---
 read_when:
-    - ClawHub-Sicherheitsaudit-Ergebnisse verstehen
-    - Entscheiden, ob Sie ein Skill oder Plugin installieren sollten
-    - ClawHub-Prüfstatus, Risikostufe oder Befunde erklären
+    - ClawHub-Sicherheitsauditergebnisse verstehen
+    - Entscheidung, ob ein Skill oder Plugin installiert werden soll
+    - Erläuterung des ClawHub-Prüfstatus, der Risikostufe oder der Feststellungen
 sidebarTitle: Security Audits
-summary: So verstehen Sie ClawHub-Sicherheitsauditergebnisse, bevor Sie einen Skill oder ein Plugin installieren.
+summary: So verstehen Sie die Ergebnisse der ClawHub-Sicherheitsprüfung, bevor Sie Skills oder Plugins installieren.
 title: Sicherheitsaudits
 x-i18n:
-    generated_at: "2026-07-04T20:28:23Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T17:41:26Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: c4178a568c9b8e202da666ed95d2200ad73f931a22c7e473aeaba84545e8bb25
     source_path: clawhub/security-audits.md
     workflow: 16
 ---
 
-# Sicherheitsaudits
+# Sicherheitsprüfungen
 
-Sicherheitsaudits von ClawHub helfen Ihnen zu entscheiden, ob ein Skill oder Plugin sicher genug ist, um installiert zu werden. Sie zeigen, was ein Release tut, welche Befugnisse es anfordert und ob etwas besondere Aufmerksamkeit verdient, bevor es auf Dateien, Konten, Zugangsdaten, Code oder externe Dienste zugreifen kann.
+Die Sicherheitsprüfungen von ClawHub helfen Ihnen bei der Entscheidung, ob ein Skill oder Plugin sicher genug für die Installation ist. Sie zeigen, was ein Release bewirkt, welche Berechtigungen es anfordert und ob etwas besondere Aufmerksamkeit erfordert, bevor es auf Dateien, Konten, Anmeldedaten, Code oder externe Dienste zugreifen kann.
 
-Audits sind starke Sicherheitssignale, aber sie garantieren nicht, dass ein Release risikofrei ist. Nutzen Sie immer Ihr eigenes Urteilsvermögen, bevor Sie sensiblen Zugriff gewähren.
+Prüfungen sind aussagekräftige Sicherheitssignale, aber keine Garantie dafür, dass ein Release risikofrei ist. Wägen Sie stets sorgfältig ab, bevor Sie vertraulichen Zugriff gewähren.
 
-Siehe auch [Sicherheit](/clawhub/security), [Akzeptable Nutzung](/clawhub/acceptable-usage) und [Moderation und Kontosicherheit](/clawhub/moderation).
+Siehe auch [Sicherheit](/de/clawhub/security), [Zulässige Nutzung](/de/clawhub/acceptable-usage) und [Moderation und Kontosicherheit](/de/clawhub/moderation).
 
 ## Was vor der Installation zu prüfen ist
 
 Prüfen Sie vor der Installation:
 
-- den allgemeinen Auditstatus
+- den Gesamtstatus der Prüfung
 - die Risikostufe
 - alle aufgeführten Befunde
-- erforderliche Zugangsdaten, Berechtigungen oder Umgebungsvariablen
-- Owner, Quelle, Version, Changelog, Downloads, Sterne und andere Vertrauenssignale
+- erforderliche Anmeldedaten, Berechtigungen oder Umgebungsvariablen
+- Eigentümer, Quelle, Version, Änderungsprotokoll, Downloads, Sterne und andere Vertrauenssignale
 
 Installieren Sie nur Inhalte, die Sie verstehen und denen Sie vertrauen.
 
-## Auditstatus
+## Prüfstatus
 
-Der Auditstatus zeigt Ihnen, wie Sie auf das Auditergebnis reagieren sollten:
+Der Prüfstatus gibt an, wie Sie auf das Prüfergebnis reagieren sollten:
 
-| Status      | Bedeutung                                                                 |
+| Status      | Bedeutung                                                                   |
 | ----------- | ------------------------------------------------------------------------- |
-| `Pass`      | Es wurde kein sichtbares Problem oberhalb eines niedrigen Risikos gefunden. |
+| `Pass`      | Es wurde kein sichtbares Problem oberhalb der niedrigen Risikostufe gefunden.                                |
 | `Review`    | Lesen Sie vor der Installation die Befunde. Das Release kann dennoch legitim sein. |
-| `Warn`      | Seien Sie besonders vorsichtig. ClawHub hat ein Problem mit großer Auswirkung oder ein Warnsignal gefunden. |
-| `Malicious` | Nicht installieren.                                                       |
-| `Pending`   | Die Audits sind noch nicht abgeschlossen.                                 |
-| `Error`     | Das Audit konnte nicht abgeschlossen werden.                              |
+| `Warn`      | Seien Sie besonders vorsichtig. ClawHub hat ein Problem mit weitreichenden Auswirkungen oder ein Warnsignal gefunden. |
+| `Malicious` | Nicht installieren.                                                           |
+| `Pending`   | Die Prüfungen sind noch nicht abgeschlossen.                                             |
+| `Error`     | Die Prüfung konnte nicht abgeschlossen werden.                                         |
 
-Ein `Pass` ist beruhigend, ersetzt aber nicht Ihr eigenes Urteilsvermögen. Das ist besonders wichtig bei Tools, die Inhalte veröffentlichen, Daten bearbeiten, Befehle ausführen, Dateien lesen oder auf Produktionssysteme zugreifen können.
+Ein `Pass` ist beruhigend, ersetzt aber nicht Ihre eigene Einschätzung. Dies ist besonders wichtig bei Tools, die Inhalte veröffentlichen, Daten bearbeiten, Befehle ausführen, Dateien lesen oder auf Produktionssysteme zugreifen können.
 
 ## Risikostufe
 
-Die Risikostufe beschreibt den Auswirkungsbereich: wie viel Macht das Release zu haben scheint, wenn Sie es wie vorgesehen verwenden.
+Die Risikostufe beschreibt den potenziellen Wirkungsbereich: wie viel Macht das Release offenbar hat, wenn Sie es wie vorgesehen verwenden.
 
-| Risikostufe | Bedeutung                                                                     |
-| ----------- | ----------------------------------------------------------------------------- |
-| `Low`       | Es wurden nur geringe sensible Befugnisse oder Auswirkungen auf Benutzer gefunden. |
-| `Medium`    | Das Release hat relevante Befugnisse, etwa Kontozugriff oder Datenänderungen. |
-| `High`      | Das Release hat Befugnisse mit großer Auswirkung, schwerwiegende Befunde oder bösartige Signale. |
+| Risikostufe | Bedeutung                                                                       |
+| ---------- | ----------------------------------------------------------------------------- |
+| `Low`      | Es wurden nur geringe vertrauliche Berechtigungen oder Auswirkungen auf Benutzer festgestellt.                          |
+| `Medium`   | Das Release verfügt über bedeutende Berechtigungen, etwa Kontozugriff oder die Möglichkeit, Daten zu ändern. |
+| `High`     | Das Release verfügt über Berechtigungen mit weitreichenden Auswirkungen, schwerwiegende Befunde oder Anzeichen für Schadsoftware. |
 
-Risikostufe und Auditstatus beantworten unterschiedliche Fragen:
+Risikostufe und Prüfstatus beantworten unterschiedliche Fragen:
 
-- Die Risikostufe fragt: „Wie viel Macht steckt hier?“
-- Der Auditstatus fragt: „Was sollte ich mit diesem Ergebnis tun?“
+- Die Risikostufe fragt: „Wie viel Macht steckt hierin?“
+- Der Prüfstatus fragt: „Wie soll ich mit diesem Ergebnis umgehen?“
 
-Beispielsweise kann ein Veröffentlichungs-Skill `Review` mit Risiko `Medium` anzeigen. Das bedeutet nicht, dass er bösartig ist. Es bedeutet, dass der Skill zweckorientiert wirkt, aber mit relevanten Kontobefugnissen handeln kann.
+Beispielsweise kann ein Skill zum Veröffentlichen `Review` mit dem Risiko `Medium` anzeigen. Das bedeutet nicht, dass er bösartig ist. Es bedeutet, dass der Skill offenbar seinem Zweck entspricht, aber mit bedeutenden Kontoberechtigungen handeln kann.
 
 ## Befunde
 
-Befunde erklären, warum ein Auditergebnis angezeigt wurde. Jeder Befund enthält in der Regel:
+Befunde erläutern, warum ein bestimmtes Prüfergebnis angezeigt wurde. Jeder Befund enthält in der Regel:
 
 - was er bedeutet
 - warum er markiert wurde
-- die relevanten Skill- oder Plugin-Inhalte
+- die relevanten Inhalte des Skills oder Plugins
 - eine Empfehlung
 
-Befunde können mit `Info`, `Low`, `Medium`, `High` oder `Critical` gekennzeichnet sein. Befunde mit höherem Schweregrad tragen stärker zur Risikostufe und zum Auditstatus bei.
+Befunde können als `Info`, `Low`, `Medium`, `High` oder `Critical` gekennzeichnet sein. Befunde mit höherem Schweregrad wirken sich stärker auf die Risikostufe und den Prüfstatus aus.
 
-Befunde mit geringer Konfidenz werden aus der öffentlichen Audit-Zusammenfassung ausgeblendet, damit die Seite auf nützliche Nachweise fokussiert bleibt.
+Befunde mit geringer Zuverlässigkeit werden in der öffentlichen Prüfungsübersicht ausgeblendet, damit die Seite auf aussagekräftige Nachweise ausgerichtet bleibt.
 
 ## Was ClawHub prüft
 
-ClawHub auditiert eingereichte Release-Artefakte, darunter:
+ClawHub prüft eingereichte Release-Artefakte, darunter:
 
 - Skill-Anweisungen oder Plugin-Metadaten
 - deklarierte Umgebungsvariablen und Berechtigungen
 - Installationsanweisungen und Paketmetadaten
 - enthaltene Dateien und Dateimanifeste
-- Kompatibilitäts- und Fähigkeitsmetadaten
+- Kompatibilitäts- und Funktionsmetadaten
 
-Die Hauptfrage ist Kohärenz: Stimmen Name, Zusammenfassung, Metadaten, angeforderte Befugnisse und tatsächliche Inhalte mit dem überein, was Benutzer vernünftigerweise erwarten würden?
+Die zentrale Frage lautet, ob alles stimmig ist: Entsprechen Name, Zusammenfassung, Metadaten, angeforderte Berechtigungen und tatsächliche Inhalte dem, was Benutzer vernünftigerweise erwarten würden?
 
-Leistungsfähiges Verhalten ist nicht automatisch schlecht. Viele nützliche Tools benötigen Zugangsdaten, lokale Befehle, Provider-APIs oder Paketinstallationen. Das Audit prüft, ob diese Macht erwartet, offengelegt und verhältnismäßig ist.
+Leistungsfähiges Verhalten ist nicht automatisch schlecht. Viele nützliche Tools benötigen Anmeldedaten, lokale Befehle, Provider-APIs oder Paketinstallationen. Die Prüfung ermittelt, ob diese Befugnisse erwartet werden können, offengelegt sind und in einem angemessenen Verhältnis stehen.
 
-Artefaktseiten verlinken auf das vollständige Audit unter:
+Artefaktseiten verweisen unter folgender Adresse auf die vollständige Prüfung:
 
 ```text
 /<owner>/skills/<slug>/security-audit
 ```
 
-Die Auditseite kombiniert:
+Die Prüfseite kombiniert:
 
 1. SkillSpector
 2. VirusTotal
@@ -109,32 +110,34 @@ Die Auditseite kombiniert:
 
 ## VirusTotal
 
-ClawHub verwendet VirusTotal als Malware-Telemetrie im Audit-Stack. VirusTotal ist ein vertrauenswürdiger Branchenstandard für Dateireputation und Malware-Scanning, und unsere Partnerschaft ermöglicht ClawHub, umfassendere Security Intelligence zur Prüfung von Skills und Plugins hinzuzufügen.
+ClawHub verwendet VirusTotal als Malware-Telemetrie im Prüfungsverbund. VirusTotal ist ein vertrauenswürdiger Branchenstandard für die Bewertung des Rufs von Dateien und die Suche nach Malware. Durch unsere Partnerschaft kann ClawHub die Prüfung von Skills und Plugins um umfassendere Sicherheitsinformationen ergänzen.
 
-VirusTotal ist besonders nützlich für bekannte bösartige Artefakte, Engine-Treffer und Reputationssignale, die ClawHubs agentenbewusste Prüfung ergänzen. Wenn Vendor-Engine-Zählungen verfügbar sind, fasst das Audit sie in einfacher Sprache zusammen, zum Beispiel:
+VirusTotal ist besonders nützlich für bekannte schädliche Artefakte, Treffer von Scan-Engines und Reputationssignale, welche die agentenbezogene Prüfung von ClawHub ergänzen. Wenn die Anzahl der Bewertungen durch Anbieter-Engines verfügbar ist, fasst die Prüfung sie in allgemein verständlicher Form zusammen, zum Beispiel:
 
 ```text
-62/62 vendors flagged this skill as clean.
+62/62 Anbieter haben diesen Skill als unbedenklich eingestuft.
 ```
 
 oder:
 
 ```text
-2/64 vendors flagged this skill as malicious, 1/64 flagged it as suspicious, and 61/64 flagged it as clean.
+2/64 Anbieter haben diesen Skill als schädlich eingestuft, 1/64 als verdächtig und 61/64 als unbedenklich.
 ```
 
-Wenn ClawHub keine Vendor-Zählungs-Telemetrie zusammenfassen kann, sagt das Audit:
+Wenn ClawHub keine Telemetrie zur Anzahl der Anbieterbewertungen zusammenfassen kann, lautet die Meldung der Prüfung:
 
 ```text
-No VirusTotal findings
+Keine VirusTotal-Befunde
 ```
 
-VirusTotal bleibt Telemetrie. Es ersetzt nicht ClawHubs eigene artefaktbewusste Risikoanalyse.
+VirusTotal bleibt eine Telemetriequelle. Es ersetzt nicht die eigene artefaktbezogene Risikoanalyse von ClawHub.
 
 ## Risikoanalyse
 
-Die Risikoanalyse wird intern von ClawScan unterstützt, ClawHubs eigenem Sicherheitsauditsystem. Sie prüft jedes Release als agentenbezogenes Artefakt: Anweisungen, Metadaten, deklarierte Berechtigungen, Dateien, Fähigkeitssignale, statische Scan-Signale, SkillSpector-Befunde, VirusTotal-Telemetrie und vom Publisher bereitgestellten Kontext. Statische Scan-Signale sind interner Kontext für diese Prüfung; sie sind kein eigenständiger öffentlicher Auditabschnitt und kein installationsblockierendes Urteil.
+Die Risikoanalyse wird intern von ClawScan unterstützt, dem eigenen Sicherheitsprüfungssystem von ClawHub. Es prüft jedes Release als Artefakt für Agenten: Anweisungen, Metadaten, deklarierte Berechtigungen, Dateien, Funktionssignale, Signale statischer Scans, SkillSpector-Befunde, VirusTotal-Telemetrie und vom Herausgeber bereitgestellten Kontext. Signale statischer Scans dienen als interner Kontext für diese Prüfung; sie sind weder ein eigenständiger öffentlicher Prüfungsabschnitt noch ein Urteil, das die Installation blockiert.
 
-Die Risikoanalyse verwendet die [OWASP Agentic Skills Top 10](https://owasp.org/www-project-agentic-skills-top-10/) als Perspektive für Risiken wie Prompt Injection, Tool-Missbrauch, Offenlegung von Zugangsdaten, unsichere Ausführung, Memory- oder Context-Poisoning und übermäßige Handlungsfähigkeit.
+Die Risikoanalyse verwendet die
+[OWASP Agentic Skills Top 10](https://owasp.org/www-project-agentic-skills-top-10/)
+als Orientierungsrahmen für Risiken wie Prompt-Injection, Missbrauch von Tools, Offenlegung von Anmeldedaten, unsichere Ausführung, Vergiftung des Speichers oder Kontexts und übermäßige Handlungsautonomie.
 
-ClawScan behandelt eine gefährlich wirkende Fähigkeit nicht automatisch als bösartig. Es fragt, ob die Fähigkeit offengelegt, zweckorientiert und durch den angegebenen Anwendungsfall des Releases gestützt ist.
+ClawScan stuft eine bedrohlich wirkende Funktion nicht automatisch als bösartig ein. Es prüft, ob die Funktion offengelegt ist, dem Zweck entspricht und durch den angegebenen Anwendungsfall des Releases gerechtfertigt wird.

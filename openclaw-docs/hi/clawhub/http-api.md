@@ -1,65 +1,67 @@
 ---
 read_when:
-    - एंडपॉइंट्स जोड़ना/बदलना
-    - CLI ↔ रजिस्ट्री अनुरोधों की डिबगिंग
-summary: HTTP API संदर्भ (सार्वजनिक + CLI एंडपॉइंट + प्रमाणीकरण).
+    - एंडपॉइंट जोड़ना/बदलना
+    - CLI ↔ रजिस्ट्री अनुरोधों की डीबगिंग
+summary: HTTP API संदर्भ (सार्वजनिक + CLI एंडपॉइंट + प्रमाणीकरण)।
 x-i18n:
-    generated_at: "2026-07-04T20:31:22Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T17:25:50Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 8926327c9d81d535c5683dad55b8e0aff704261f17c2b17c95bd7026bb31887d
+    source_hash: 5b180bbd56d20a3d88c1fe74ccab0fd0ecbe0e8c9624cd1afd2070a2ca1f7fb3
     source_path: clawhub/http-api.md
     workflow: 16
 ---
 
 # HTTP API
 
-बेस URL: `https://clawhub.ai` (डिफ़ॉल्ट).
+आधार URL: `https://clawhub.ai` (डिफ़ॉल्ट)।
 
-सभी v1 पाथ `/api/v1/...` के अंतर्गत हैं।
-लेगेसी `/api/...` और `/api/cli/...` संगतता के लिए बने रहते हैं (`DEPRECATIONS.md` देखें)।
-OpenAPI: `/api/v1/openapi.json`.
+सभी v1 पथ `/api/v1/...` के अंतर्गत हैं।
+संगतता के लिए पुराने `/api/...` और `/api/cli/...` उपलब्ध हैं (`DEPRECATIONS.md` देखें)।
+OpenAPI: `/api/v1/openapi.json`।
 
-## सार्वजनिक कैटलॉग का पुन: उपयोग
+## सार्वजनिक कैटलॉग का पुनः उपयोग
 
-तृतीय-पक्ष डायरेक्टरियाँ ClawHub Skills को सूचीबद्ध या खोजने के लिए सार्वजनिक रीड एंडपॉइंट्स का उपयोग कर सकती हैं। कृपया परिणाम कैश करें, `429`/`Retry-After` का सम्मान करें, उपयोगकर्ताओं को कैननिकल ClawHub लिस्टिंग (`https://clawhub.ai/<owner>/skills/<slug>`) पर वापस लिंक करें, और यह संकेत देने से बचें कि ClawHub तृतीय-पक्ष साइट का समर्थन करता है। सार्वजनिक API सतह के बाहर छिपी, निजी, या मॉडरेशन द्वारा अवरुद्ध सामग्री को मिरर करने का प्रयास न करें।
+तृतीय-पक्ष निर्देशिकाएँ ClawHub Skills को सूचीबद्ध करने या खोजने के लिए सार्वजनिक रीड एंडपॉइंट का उपयोग कर सकती हैं। कृपया परिणामों को कैश करें, `429`/`Retry-After` का पालन करें, उपयोगकर्ताओं को प्रामाणिक ClawHub सूची (`https://clawhub.ai/<owner>/skills/<slug>`) पर वापस भेजने वाला लिंक दें, और ऐसा संकेत देने से बचें कि ClawHub तृतीय-पक्ष साइट का समर्थन करता है। सार्वजनिक API सतह के बाहर छिपी, निजी या मॉडरेशन द्वारा अवरुद्ध सामग्री को मिरर करने का प्रयास न करें।
 
-वेब slug शॉर्टकट रजिस्ट्री परिवारों में resolve होते हैं, लेकिन API क्लाइंट्स को route
-precedence को फिर से बनाने के बजाय रीड एंडपॉइंट्स द्वारा लौटाए गए कैननिकल URLs का उपयोग करना चाहिए।
+वेब स्लग शॉर्टकट सभी रजिस्ट्री फ़ैमिली में रिज़ॉल्व होते हैं, लेकिन API क्लाइंट को रूट
+प्राथमिकता का पुनर्निर्माण करने के बजाय रीड एंडपॉइंट द्वारा लौटाए गए प्रामाणिक URL का
+उपयोग करना चाहिए।
 
-## रेट सीमाएँ
+## दर सीमाएँ
 
-लागू करने का मॉडल:
+प्रवर्तन मॉडल:
 
 - अनाम अनुरोध: प्रति IP लागू।
-- प्रमाणित अनुरोध (मान्य Bearer token): प्रति उपयोगकर्ता bucket लागू।
-- यदि token अनुपस्थित/अमान्य है, तो व्यवहार IP enforcement पर वापस जाता है।
-- प्रमाणित write endpoints को bare `Unauthorized` नहीं लौटाना चाहिए जब
-  server को कारण पता हो। अनुपस्थित tokens, अमान्य/revoked tokens, और
-  deleted/banned/disabled accounts में से प्रत्येक को actionable text मिलना चाहिए ताकि CLI
-  clients उपयोगकर्ताओं को बता सकें कि उन्हें किसने रोका।
+- प्रमाणित अनुरोध (मान्य Bearer टोकन): प्रति उपयोगकर्ता बकेट लागू।
+- यदि टोकन अनुपस्थित/अमान्य है, तो व्यवहार IP प्रवर्तन पर वापस चला जाता है।
+- जब सर्वर को कारण ज्ञात हो, तो प्रमाणित राइट एंडपॉइंट को केवल `Unauthorized` नहीं लौटाना चाहिए।
+  अनुपस्थित टोकन, अमान्य/निरस्त टोकन और हटाए गए/प्रतिबंधित/अक्षम खातों में से
+  प्रत्येक के लिए कार्रवाई योग्य टेक्स्ट मिलना चाहिए, ताकि CLI क्लाइंट उपयोगकर्ताओं को बता
+  सकें कि उन्हें किस कारण से रोका गया।
 
-- Read: 3000/min प्रति IP, 12000/min प्रति key
-- Write: 300/min प्रति IP, 3000/min प्रति key
-- Download: 1200/min प्रति IP, 6000/min प्रति key (download endpoints)
+- रीड: प्रति IP 3000/मिनट, प्रति कुंजी 12000/मिनट
+- राइट: प्रति IP 300/मिनट, प्रति कुंजी 3000/मिनट
+- डाउनलोड: प्रति IP 1200/मिनट, प्रति कुंजी 6000/मिनट (डाउनलोड एंडपॉइंट)
 
-Headers:
+हेडर:
 
-- लेगेसी संगतता: `X-RateLimit-Limit`, `X-RateLimit-Reset`
+- पुरानी संगतता: `X-RateLimit-Limit`, `X-RateLimit-Reset`
 - मानकीकृत: `RateLimit-Limit`, `RateLimit-Reset`
 - `429` पर: `X-RateLimit-Remaining: 0` और `RateLimit-Remaining: 0`
 - `429` पर: `Retry-After`
 
-Header semantics:
+हेडर के अर्थ:
 
-- `X-RateLimit-Reset`: absolute Unix epoch seconds
-- `RateLimit-Reset`: reset तक seconds (delay)
-- `X-RateLimit-Remaining` / `RateLimit-Remaining`: मौजूद होने पर exact remaining budget.
-  Sharded सफल requests approximate global value लौटाने के बजाय इस header को omit करते हैं।
-- `Retry-After`: `429` पर retry से पहले प्रतीक्षा करने के seconds (delay)
+- `X-RateLimit-Reset`: निरपेक्ष Unix युग सेकंड
+- `RateLimit-Reset`: रीसेट होने तक सेकंड (विलंब)
+- `X-RateLimit-Remaining` / `RateLimit-Remaining`: उपलब्ध होने पर शेष सटीक बजट।
+  शार्ड किए गए सफल अनुरोध अनुमानित वैश्विक मान लौटाने के बजाय इस हेडर को छोड़ देते हैं।
+- `Retry-After`: `429` पर पुनः प्रयास से पहले प्रतीक्षा के सेकंड (विलंब)
 
-उदाहरण `429` response:
+`429` प्रतिक्रिया का उदाहरण:
 
 ```http
 HTTP/2 429
@@ -72,47 +74,47 @@ ratelimit-remaining: 0
 ratelimit-reset: 34
 retry-after: 34
 
-Rate limit exceeded
+दर सीमा पार हो गई
 ```
 
-Client guidance:
+क्लाइंट मार्गदर्शन:
 
-- यदि `Retry-After` मौजूद है, तो retry से पहले उतने seconds प्रतीक्षा करें।
-- synchronized retries से बचने के लिए jittered backoff का उपयोग करें।
-- यदि `Retry-After` अनुपस्थित है, तो `RateLimit-Reset` पर fallback करें (या `X-RateLimit-Reset` से compute करें)।
+- यदि `Retry-After` मौजूद है, तो पुनः प्रयास से पहले उतने सेकंड प्रतीक्षा करें।
+- समन्वित पुनः प्रयासों से बचने के लिए जिटरयुक्त बैकऑफ़ का उपयोग करें।
+- यदि `Retry-After` अनुपस्थित है, तो `RateLimit-Reset` पर वापस जाएँ (या `X-RateLimit-Reset` से गणना करें)।
 
-IP source:
+IP स्रोत:
 
-- trusted client IP headers, जिनमें `cf-connecting-ip` शामिल है, का उपयोग केवल तब करता है जब
-  deployment trusted forwarded headers को स्पष्ट रूप से enable करता है।
-- ClawHub edge पर client IPs पहचानने के लिए trusted forwarding headers का उपयोग करता है।
-- यदि कोई trusted client IP उपलब्ध नहीं है, तो anonymous requests fallback buckets का उपयोग करते हैं
-  जो केवल rate-limit kind द्वारा scoped होते हैं। इन fallback buckets में
-  caller-supplied paths, slugs, package names, versions, query strings, या अन्य
-  artifact parameters शामिल नहीं होते।
+- विश्वसनीय क्लाइंट IP हेडर, जिनमें `cf-connecting-ip` भी शामिल है, का उपयोग केवल तब किया जाता है
+  जब परिनियोजन विश्वसनीय फ़ॉरवर्डेड हेडर को स्पष्ट रूप से सक्षम करता है।
+- ClawHub एज पर क्लाइंट IP की पहचान करने के लिए विश्वसनीय फ़ॉरवर्डिंग हेडर का उपयोग करता है।
+- यदि कोई विश्वसनीय क्लाइंट IP उपलब्ध नहीं है, तो अनाम अनुरोध केवल
+  दर-सीमा प्रकार के दायरे वाले फ़ॉलबैक बकेट का उपयोग करते हैं। इन फ़ॉलबैक बकेट में
+  कॉलर द्वारा दिए गए पथ, स्लग, पैकेज नाम, संस्करण, क्वेरी स्ट्रिंग या अन्य
+  आर्टिफ़ैक्ट पैरामीटर शामिल नहीं होते।
 
-## Error responses
+## त्रुटि प्रतिक्रियाएँ
 
-Public v1 error responses `content-type: text/plain; charset=utf-8` के साथ plain text होते हैं।
-इसमें validation failures (`400`), missing public resources (`404`), auth और
-permission failures (`401`/`403`), rate limits (`429`), और blocked downloads शामिल हैं। Clients
-को response body को human-readable string के रूप में पढ़ना चाहिए। Unknown query parameters को
-compatibility के लिए ignore किया जाता है, लेकिन invalid values वाले recognized query parameters
+सार्वजनिक v1 त्रुटि प्रतिक्रियाएँ `content-type: text/plain; charset=utf-8` के साथ सादा टेक्स्ट होती हैं।
+इसमें सत्यापन विफलताएँ (`400`), अनुपस्थित सार्वजनिक संसाधन (`404`), प्रमाणीकरण और
+अनुमति विफलताएँ (`401`/`403`), दर सीमाएँ (`429`) और अवरुद्ध डाउनलोड शामिल हैं। क्लाइंट को
+प्रतिक्रिया बॉडी को मानव-पठनीय स्ट्रिंग के रूप में पढ़ना चाहिए। संगतता के लिए अज्ञात क्वेरी पैरामीटर
+अनदेखे किए जाते हैं, लेकिन अमान्य मान वाले पहचाने गए क्वेरी पैरामीटर
 `400` लौटाते हैं।
 
-## Public endpoints (auth नहीं)
+## सार्वजनिक एंडपॉइंट (प्रमाणीकरण आवश्यक नहीं)
 
 ### `GET /api/v1/search`
 
-Query params:
+क्वेरी पैरामीटर:
 
-- `q` (required): query string
-- `limit` (optional): integer
-- `highlightedOnly` (optional): highlighted Skills तक filter करने के लिए `true`
-- `nonSuspiciousOnly` (optional): suspicious (`flagged.suspicious`) Skills छिपाने के लिए `true`
-- `nonSuspicious` (optional): `nonSuspiciousOnly` के लिए legacy alias
+- `q` (आवश्यक): क्वेरी स्ट्रिंग
+- `limit` (वैकल्पिक): पूर्णांक
+- `highlightedOnly` (वैकल्पिक): हाइलाइट की गई Skills तक सीमित करने के लिए `true`
+- `nonSuspiciousOnly` (वैकल्पिक): संदिग्ध (`flagged.suspicious`) Skills को छिपाने के लिए `true`
+- `nonSuspicious` (वैकल्पिक): `nonSuspiciousOnly` का पुराना उपनाम
 
-Response:
+प्रतिक्रिया:
 
 ```json
 {
@@ -135,42 +137,42 @@ Response:
 }
 ```
 
-Notes:
+टिप्पणियाँ:
 
-- Results relevance order में लौटाए जाते हैं (embedding similarity + exact slug/name token boosts + एक छोटा popularity prior)।
-- Relevance popularity से अधिक मजबूत है। precise slug या display-name token match, बहुत अधिक engagement वाले looser match से ऊपर rank कर सकता है।
-- ASCII text को word और punctuation boundaries पर tokenize किया जाता है। उदाहरण के लिए, `personal-map` में standalone `map` token होता है, जबकि `amap-jsapi-skill` में `amap`, `jsapi`, और `skill` होते हैं; इसलिए `map` खोजने पर `personal-map` को `amap-jsapi-skill` की तुलना में अधिक मजबूत lexical match मिलता है।
-- Popularity log-scaled और capped है। High-engagement Skills lower rank कर सकते हैं जब query text weaker match हो।
-- Suspicious या hidden moderation state caller filters और current moderation status के आधार पर किसी Skill को public search से हटा सकता है।
+- परिणाम प्रासंगिकता क्रम में लौटाए जाते हैं (एम्बेडिंग समानता + सटीक स्लग/नाम टोकन बूस्ट + एक छोटी लोकप्रियता पूर्व-प्राथमिकता)।
+- प्रासंगिकता लोकप्रियता से अधिक प्रभावशाली होती है। सटीक स्लग या प्रदर्शन-नाम टोकन मिलान, कहीं अधिक सहभागिता वाले ढीले मिलान से ऊपर आ सकता है।
+- ASCII टेक्स्ट को शब्द और विराम-चिह्न सीमाओं पर टोकनाइज़ किया जाता है। उदाहरण के लिए, `personal-map` में एक स्वतंत्र `map` टोकन होता है, जबकि `amap-jsapi-skill` में `amap`, `jsapi` और `skill` होते हैं; इसलिए `map` खोजने पर `personal-map` को `amap-jsapi-skill` की तुलना में अधिक मजबूत शब्दगत मिलान मिलता है।
+- लोकप्रियता को लॉग-स्केल किया जाता है और उसकी अधिकतम सीमा तय होती है। अधिक सहभागिता वाली Skills भी तब नीचे रैंक कर सकती हैं जब क्वेरी टेक्स्ट का मिलान कमजोर हो।
+- कॉलर फ़िल्टर और वर्तमान मॉडरेशन स्थिति के आधार पर संदिग्ध या छिपी हुई मॉडरेशन स्थिति किसी Skill को सार्वजनिक खोज से हटा सकती है।
 
-Publisher discoverability guidance:
+प्रकाशक दृश्यता मार्गदर्शन:
 
-- वे terms display name, summary, और tags में रखें जिन्हें users सचमुच search करेंगे। standalone slug token का उपयोग केवल तब करें जब वह भी एक stable identity हो जिसे आप बनाए रखना चाहते हैं।
-- केवल एक query को chase करने के लिए slug rename न करें, जब तक नया slug बेहतर long-term canonical name न हो। पुराने slugs redirect aliases बन जाते हैं, लेकिन canonical URL, displayed slug, और future search digests नए slug का उपयोग करते हैं।
-- Rename aliases पुराने URLs और registry के माध्यम से resolve होने वाले installs के लिए resolution बनाए रखते हैं, लेकिन rename index होने के बाद search ranking canonical Skill metadata पर आधारित होती है। Existing stats Skill के साथ रहती हैं।
-- यदि कोई Skill अप्रत्याशित रूप से invisible है, तो ranking-related metadata बदलने से पहले logged in रहते हुए `clawhub inspect @owner/slug` से moderation state पहले जाँचें।
+- जिन शब्दों को उपयोगकर्ता वास्तव में खोजेंगे, उन्हें प्रदर्शन नाम, सारांश और टैग में रखें। स्वतंत्र स्लग टोकन का उपयोग केवल तभी करें जब वह एक स्थिर पहचान भी हो जिसे आप बनाए रखना चाहते हैं।
+- केवल एक क्वेरी को लक्षित करने के लिए स्लग का नाम न बदलें, जब तक कि नया स्लग दीर्घकाल में बेहतर प्रामाणिक नाम न हो। पुराने स्लग रीडायरेक्ट उपनाम बन जाते हैं, लेकिन प्रामाणिक URL, प्रदर्शित स्लग और भावी खोज डाइजेस्ट नए स्लग का उपयोग करते हैं।
+- नाम बदलने वाले उपनाम पुराने URL और रजिस्ट्री के माध्यम से रिज़ॉल्व होने वाले इंस्टॉल के लिए रिज़ॉल्यूशन बनाए रखते हैं, लेकिन नाम परिवर्तन के इंडेक्स होने के बाद खोज रैंकिंग प्रामाणिक Skill मेटाडेटा पर आधारित होती है। मौजूदा आँकड़े Skill के साथ बने रहते हैं।
+- यदि कोई Skill अप्रत्याशित रूप से दिखाई नहीं दे रही है, तो रैंकिंग-संबंधी मेटाडेटा बदलने से पहले लॉग इन रहते हुए `clawhub inspect @owner/slug` से मॉडरेशन स्थिति जाँचें।
 
 ### `GET /api/v1/skills`
 
-Query params:
+क्वेरी पैरामीटर:
 
-- `limit` (optional): integer (1–200)
-- `cursor` (optional): किसी भी non-`trending` sort के लिए pagination cursor
-- `sort` (optional): `updated` (default), `recommended` (alias: `default`), `createdAt` (alias: `newest`), `downloads`, `stars` (alias: `rating`), legacy install aliases `installsCurrent`/`installs`/`installsAllTime` `downloads` पर map होते हैं, `trending`
-- `nonSuspiciousOnly` (optional): suspicious (`flagged.suspicious`) Skills छिपाने के लिए `true`
-- `nonSuspicious` (optional): `nonSuspiciousOnly` के लिए legacy alias
+- `limit` (वैकल्पिक): पूर्णांक (1–200)
+- `cursor` (वैकल्पिक): किसी भी गैर-`trending` सॉर्ट के लिए पेजिनेशन कर्सर
+- `sort` (वैकल्पिक): `updated` (डिफ़ॉल्ट), `recommended` (उपनाम: `default`), `createdAt` (उपनाम: `newest`), `downloads`, `stars` (उपनाम: `rating`), पुराने इंस्टॉल उपनाम `installsCurrent`/`installs`/`installsAllTime`, `downloads`, `trending` पर मैप होते हैं
+- `nonSuspiciousOnly` (वैकल्पिक): संदिग्ध (`flagged.suspicious`) Skills को छिपाने के लिए `true`
+- `nonSuspicious` (वैकल्पिक): `nonSuspiciousOnly` का पुराना उपनाम
 
-Invalid `sort` values `400` लौटाते हैं।
+अमान्य `sort` मान `400` लौटाते हैं।
 
-Notes:
+टिप्पणियाँ:
 
-- `recommended` engagement और recency signals का उपयोग करता है।
-- `trending` पिछले 7 दिनों में installs के आधार पर rank करता है (telemetry-based)।
-- `createdAt` new-skill crawls के लिए stable है; `updated` तब बदलता है जब existing Skills republish होते हैं।
-- जब `nonSuspiciousOnly=true` हो, cursor-based sorts किसी page पर `limit` items से कम लौटा सकते हैं क्योंकि suspicious Skills page retrieval के बाद filter होते हैं।
-- मौजूद होने पर pagination जारी रखने के लिए `nextCursor` का उपयोग करें। short page अपने आप end-of-results नहीं बताता।
+- `recommended` सहभागिता और नवीनता संकेतों का उपयोग करता है।
+- `trending` पिछले 7 दिनों के इंस्टॉल के अनुसार रैंक करता है (टेलीमेट्री-आधारित)।
+- `createdAt` नई Skill क्रॉल के लिए स्थिर है; मौजूदा Skills को पुनः प्रकाशित करने पर `updated` बदलता है।
+- जब `nonSuspiciousOnly=true` हो, तो कर्सर-आधारित सॉर्ट किसी पृष्ठ पर `limit` से कम आइटम लौटा सकते हैं, क्योंकि पृष्ठ प्राप्त होने के बाद संदिग्ध Skills को फ़िल्टर किया जाता है।
+- उपलब्ध होने पर पेजिनेशन जारी रखने के लिए `nextCursor` का उपयोग करें। केवल छोटा पृष्ठ मिलने का अर्थ यह नहीं है कि परिणाम समाप्त हो गए हैं।
 
-Response:
+प्रतिक्रिया:
 
 ```json
 {
@@ -194,7 +196,7 @@ Response:
 
 ### `GET /api/v1/skills/{slug}`
 
-Response:
+प्रतिक्रिया:
 
 ```json
 {
@@ -223,19 +225,19 @@ Response:
 }
 ```
 
-Notes:
+टिप्पणियाँ:
 
-- owner rename/merge flows द्वारा बनाए गए पुराने slugs canonical Skill पर resolve होते हैं।
-- `metadata.os`: Skill frontmatter में घोषित OS restrictions (जैसे `["macos"]`, `["linux"]`)। घोषित न होने पर `null`।
-- `metadata.systems`: Nix system targets (जैसे `["aarch64-darwin", "x86_64-linux"]`)। घोषित न होने पर `null`।
-- यदि Skill में कोई platform metadata नहीं है, तो `metadata` `null` है।
-- `moderation` केवल तब शामिल होता है जब Skill flagged हो या owner उसे देख रहा हो।
+- स्वामी के नाम बदलने/मर्ज करने वाले प्रवाहों द्वारा बनाए गए पुराने स्लग प्रामाणिक Skill पर रिज़ॉल्व होते हैं।
+- `metadata.os`: Skill फ्रंटमैटर में घोषित OS प्रतिबंध (जैसे `["macos"]`, `["linux"]`)। घोषित न होने पर `null`।
+- `metadata.systems`: Nix सिस्टम लक्ष्य (जैसे `["aarch64-darwin", "x86_64-linux"]`)। घोषित न होने पर `null`।
+- यदि Skill में कोई प्लेटफ़ॉर्म मेटाडेटा नहीं है, तो `metadata`, `null` होता है।
+- `moderation` केवल तभी शामिल होता है जब Skill फ़्लैग की गई हो या स्वामी उसे देख रहा हो।
 
 ### `GET /api/v1/skills/{slug}/moderation`
 
-Structured moderation state लौटाता है।
+संरचित मॉडरेशन स्थिति लौटाता है।
 
-Response:
+प्रतिक्रिया:
 
 ```json
 {
@@ -262,28 +264,28 @@ Response:
 }
 ```
 
-Notes:
+टिप्पणियाँ:
 
-- Owners और moderators hidden Skills के लिए moderation details access कर सकते हैं।
-- Public callers को केवल already-flagged visible Skills के लिए `200` मिलता है।
-- Evidence public callers के लिए redacted होता है और केवल owners/moderators के लिए raw snippets शामिल करता है।
+- स्वामी और मॉडरेटर छिपी हुई Skills के मॉडरेशन विवरण तक पहुँच सकते हैं।
+- सार्वजनिक कॉलर को पहले से फ़्लैग की गई दृश्यमान Skills के लिए केवल `200` मिलता है।
+- सार्वजनिक कॉलर के लिए साक्ष्य को संपादित किया जाता है और केवल स्वामियों/मॉडरेटर के लिए मूल स्निपेट शामिल होते हैं।
 
 ### `POST /api/v1/skills/{slug}/report`
 
-moderator review के लिए Skill report करें। Reports Skill-level होते हैं, optional रूप से
-किसी version से linked होते हैं, और Skill report queue को feed करते हैं।
+मॉडरेटर समीक्षा के लिए किसी Skill की रिपोर्ट करें। रिपोर्ट Skill-स्तर की होती हैं, वैकल्पिक रूप से
+किसी संस्करण से लिंक होती हैं और Skill रिपोर्ट कतार में भेजी जाती हैं।
 
-Auth:
+प्रमाणीकरण:
 
-- API token आवश्यक है।
+- एक API टोकन आवश्यक है।
 
-Request:
+अनुरोध:
 
 ```json
-{ "reason": "Suspicious install step", "version": "1.2.3" }
+{ "reason": "संदिग्ध इंस्टॉल चरण", "version": "1.2.3" }
 ```
 
-Response:
+प्रतिक्रिया:
 
 ```json
 {
@@ -298,15 +300,15 @@ Response:
 
 ### `GET /api/v1/skills/-/reports`
 
-Skill report intake के लिए moderator/admin endpoint।
+Skill रिपोर्ट ग्रहण करने के लिए मॉडरेटर/एडमिन एंडपॉइंट।
 
-Query params:
+क्वेरी पैरामीटर:
 
-- `status` (optional): `open` (default), `confirmed`, `dismissed`, या `all`
-- `limit` (optional): integer (1-200)
-- `cursor` (optional): pagination cursor
+- `status` (वैकल्पिक): `open` (डिफ़ॉल्ट), `confirmed`, `dismissed` या `all`
+- `limit` (वैकल्पिक): पूर्णांक (1-200)
+- `cursor` (वैकल्पिक): पेजिनेशन कर्सर
 
-Response:
+प्रतिक्रिया:
 
 ```json
 {
@@ -318,13 +320,13 @@ Response:
       "slug": "gifgrep",
       "displayName": "GifGrep",
       "version": "1.2.3",
-      "reason": "Suspicious install step",
+      "reason": "संदिग्ध इंस्टॉल चरण",
       "status": "open",
       "createdAt": 1730000000000,
       "reporter": {
         "userId": "users:...",
         "handle": "reporter",
-        "displayName": "Reporter"
+        "displayName": "रिपोर्टकर्ता"
       },
       "triagedAt": null,
       "triagedBy": null,
@@ -338,56 +340,57 @@ Response:
 
 ### `POST /api/v1/skills/-/reports/{reportId}/triage`
 
-Skill reports resolve या reopen करने के लिए moderator/admin endpoint।
+स्किल रिपोर्ट का समाधान करने या उन्हें दोबारा खोलने के लिए मॉडरेटर/एडमिन एंडपॉइंट।
 
-Request:
+अनुरोध:
 
 ```json
-{ "status": "confirmed", "note": "Reviewed and hid affected version.", "finalAction": "hide" }
+{ "status": "confirmed", "note": "समीक्षा की गई और प्रभावित संस्करण छिपाया गया।", "finalAction": "hide" }
 ```
 
-`note` `confirmed` और `dismissed` के लिए required है; `status` को वापस `open` पर
-set करते समय इसे omit किया जा सकता है। triaged report के साथ `finalAction: "hide"` pass करें ताकि
-उसी auditable workflow में Skill hide हो जाए।
+`note`, `confirmed` और `dismissed` के लिए आवश्यक है; `status` को वापस `open` पर
+सेट करते समय इसे छोड़ा जा सकता है। उसी ऑडिट-योग्य कार्यप्रवाह में स्किल को छिपाने के लिए ट्राइएज की गई
+रिपोर्ट के साथ `finalAction: "hide"` पास करें।
 
 ### `GET /api/v1/skills/{slug}/versions`
 
-Query params:
+क्वेरी पैरामीटर:
 
-- `limit` (optional): integer
-- `cursor` (optional): pagination cursor
+- `limit` (वैकल्पिक): पूर्णांक
+- `cursor` (वैकल्पिक): पेजिनेशन कर्सर
 
 ### `GET /api/v1/skills/{slug}/versions/{version}`
 
-version metadata + files list लौटाता है।
+संस्करण मेटाडेटा + फ़ाइलों की सूची लौटाता है।
 
-- `version.security` normalized scan verification status और scanner details
-  (VirusTotal + LLM) शामिल करता है, जब उपलब्ध हो।
+- `version.security` उपलब्ध होने पर सामान्यीकृत स्कैन सत्यापन स्थिति और स्कैनर विवरण
+  (VirusTotal + LLM) शामिल करता है।
 
 ### `GET /api/v1/skills/{slug}/scan`
 
-किसी Skill version के लिए security scan verification details लौटाता है।
+किसी स्किल संस्करण के लिए सुरक्षा स्कैन सत्यापन विवरण लौटाता है।
 
-Query params:
+क्वेरी पैरामीटर:
 
-- `version` (optional): specific version string.
-- `tag` (optional): tagged version resolve करें (उदाहरण के लिए `latest`)।
+- `version` (वैकल्पिक): विशिष्ट संस्करण स्ट्रिंग।
+- `tag` (वैकल्पिक): टैग किए गए संस्करण को रिज़ॉल्व करें (उदाहरण के लिए `latest`)।
 
-Notes:
+टिप्पणियाँ:
 
-- यदि `version` या `tag` में से कोई भी प्रदान नहीं किया गया है, तो नवीनतम संस्करण का उपयोग करता है।
-- सामान्यीकृत सत्यापन स्थिति और scanner-विशिष्ट विवरण शामिल करता है।
-- `security.hasScanResult` केवल तब `true` होता है जब किसी scanner ने कोई निश्चित verdict (`clean`, `suspicious`, या `malicious`) दिया हो।
-- `moderation` नवीनतम संस्करण से लिया गया मौजूदा skill-स्तरीय moderation snapshot है।
-- किसी ऐतिहासिक संस्करण को query करते समय, `moderation` और `security` को समान version context मानने से पहले `moderation.matchesRequestedVersion` और `moderation.sourceVersion` जांचें।
+- यदि न तो `version` और न ही `tag` दिया गया है, तो नवीनतम संस्करण का उपयोग होता है।
+- सामान्यीकृत सत्यापन स्थिति के साथ स्कैनर-विशिष्ट विवरण शामिल करता है।
+- `security.hasScanResult` केवल तभी `true` होता है, जब किसी स्कैनर ने निर्णायक निर्णय (`clean`, `suspicious`, या `malicious`) दिया हो।
+- `moderation`, नवीनतम संस्करण से प्राप्त वर्तमान स्किल-स्तरीय मॉडरेशन स्नैपशॉट है।
+- ऐतिहासिक संस्करण की क्वेरी करते समय, `moderation` और `security` को समान संस्करण संदर्भ मानने से पहले `moderation.matchesRequestedVersion` और `moderation.sourceVersion` जाँचें।
 
 ### `POST /api/v1/skills/-/scan`
 
-नए ClawScan jobs के लिए authenticated submit endpoint।
+नई ClawScan जॉब के लिए प्रमाणीकृत सबमिट एंडपॉइंट।
 
-Local upload scans अब supported नहीं हैं। `multipart/form-data` या `{ "source": { "kind": "upload" } }` का उपयोग करने वाली requests `410` लौटाती हैं।
+स्थानीय अपलोड स्कैन अब समर्थित नहीं हैं। `multipart/form-data` या `{ "source": { "kind": "upload" } }`
+का उपयोग करने वाले अनुरोध `410` लौटाते हैं।
 
-Published scans JSON का उपयोग करते हैं:
+प्रकाशित स्कैन JSON का उपयोग करते हैं:
 
 ```json
 {
@@ -396,72 +399,72 @@ Published scans JSON का उपयोग करते हैं:
 }
 ```
 
-नोट्स:
+टिप्पणियाँ:
 
-- Scan request payloads और downloadable reports retention window के बाद scan-request store से expire हो जाते हैं।
-- Published scans के लिए owner/publisher management access, या platform moderator/admin authority आवश्यक है।
-- Published scans केवल तब write back करते हैं जब `update: true` हो और scan सफलतापूर्वक पूरा हो जाए।
-- Response `202` होता है, जिसमें `{ "ok": true, "scanId": "...", "jobId": "...", "status": "queued", "sourceKind": "published", "update": false, "queue": { "queuedAhead": 0, "queuedAheadIsEstimate": false, "position": 1, "running": 0, "runningIsEstimate": false, "note": "Scans are asynchronous and may take time to complete." } }` होता है।
-- Scan jobs asynchronous होते हैं। Manual scan requests को सामान्य publish/backfill work से पहले प्राथमिकता दी जाती है, लेकिन completion फिर भी worker availability पर निर्भर करता है।
+- स्कैन अनुरोध पेलोड और डाउनलोड योग्य रिपोर्ट अवधारण अवधि के बाद स्कैन-अनुरोध स्टोर से समाप्त हो जाते हैं।
+- प्रकाशित स्कैन के लिए स्वामी/प्रकाशक प्रबंधन पहुँच या प्लेटफ़ॉर्म मॉडरेटर/एडमिन प्राधिकार आवश्यक है।
+- प्रकाशित स्कैन केवल तभी वापस लिखते हैं, जब `update: true` हो और स्कैन सफलतापूर्वक पूरा हो।
+- प्रतिक्रिया `{ "ok": true, "scanId": "...", "jobId": "...", "status": "queued", "sourceKind": "published", "update": false, "queue": { "queuedAhead": 0, "queuedAheadIsEstimate": false, "position": 1, "running": 0, "runningIsEstimate": false, "note": "Scans are asynchronous and may take time to complete." } }` के साथ `202` होती है।
+- स्कैन जॉब एसिंक्रोनस हैं। मैन्युअल स्कैन अनुरोधों को सामान्य प्रकाशन/बैकफ़िल कार्य से पहले प्राथमिकता दी जाती है, लेकिन पूर्णता फिर भी वर्कर की उपलब्धता पर निर्भर करती है।
 
 ### `GET /api/v1/skills/-/scan/{scanId}`
 
-Submitted scan के लिए authenticated poll endpoint।
+सबमिट किए गए स्कैन के लिए प्रमाणीकृत पोल एंडपॉइंट।
 
-- Queued/running/succeeded/failed status लौटाता है।
-- Queued रहते समय `queue.queuedAhead` और `queue.position` लौटाता है, ताकि clients दिखा सकें कि request से आगे कितने prioritized manual scans हैं। बहुत बड़ी queues bounded होती हैं और `queuedAheadIsEstimate: true` के साथ report की जाती हैं।
-- उपलब्ध होने पर, `report` में `clawscan`, `skillspector`, `staticAnalysis`, और `virustotal` sections शामिल होते हैं।
-- Failed scan jobs `lastError` के साथ `status: "failed"` लौटाते हैं।
+- कतारबद्ध/चल रही/सफल/विफल स्थिति लौटाता है।
+- कतारबद्ध रहने के दौरान `queue.queuedAhead` और `queue.position` लौटाता है, ताकि क्लाइंट दिखा सकें कि अनुरोध से पहले कितने प्राथमिकता-प्राप्त मैन्युअल स्कैन हैं। बहुत बड़ी कतारें सीमित की जाती हैं और `queuedAheadIsEstimate: true` के साथ रिपोर्ट की जाती हैं।
+- उपलब्ध होने पर, `report` में `clawscan`, `skillspector`, `staticAnalysis`, और `virustotal` अनुभाग होते हैं।
+- विफल स्कैन जॉब `lastError` के साथ `status: "failed"` लौटाते हैं।
 
 ### `GET /api/v1/skills/-/scan/{scanId}/download`
 
-Authenticated report archive endpoint।
+प्रमाणीकृत रिपोर्ट संग्रह एंडपॉइंट।
 
-- Succeeded scan आवश्यक है; non-terminal scans `409` लौटाते हैं।
-- `manifest.json`, `clawscan.json`, `skillspector.json`, `static-analysis.json`, `virustotal.json`, और `README.md` वाली ZIP लौटाता है।
+- सफल स्कैन आवश्यक है; गैर-अंतिम स्कैन `409` लौटाते हैं।
+- `manifest.json`, `clawscan.json`, `skillspector.json`, `static-analysis.json`, `virustotal.json`, और `README.md` वाला ZIP लौटाता है।
 
 ### `GET /api/v1/skills/-/scan/download/{name}?version=<version>&kind=skill|plugin`
 
-Submitted versions के लिए authenticated stored report archive endpoint।
+सबमिट किए गए संस्करणों के लिए प्रमाणीकृत संग्रहीत रिपोर्ट संग्रह एंडपॉइंट।
 
-- Skill या Plugin के लिए owner/publisher management access, या platform moderator/admin authority आवश्यक है।
-- Exact submitted version के लिए stored scan results लौटाता है, जिसमें blocked या hidden versions भी शामिल हैं।
-- `kind` default रूप से `skill` होता है; plugin/package scans के लिए `kind=plugin` का उपयोग करें।
-- Scan-request downloads जैसी ही ZIP shape लौटाता है।
+- स्किल या Plugin तक स्वामी/प्रकाशक प्रबंधन पहुँच या प्लेटफ़ॉर्म मॉडरेटर/एडमिन प्राधिकार आवश्यक है।
+- अवरुद्ध या छिपे हुए संस्करणों सहित, सटीक सबमिट किए गए संस्करण के लिए संग्रहीत स्कैन परिणाम लौटाता है।
+- `kind` का डिफ़ॉल्ट `skill` है; Plugin/पैकेज स्कैन के लिए `kind=plugin` का उपयोग करें।
+- स्कैन-अनुरोध डाउनलोड के समान ZIP संरचना लौटाता है।
 
 ### `POST /api/v1/skills/-/scan/batch`
 
-Admin-only canonical batch rescan route। यह legacy `POST /api/v1/skills/-/rescan-batch` जैसी ही payload shape स्वीकार करता है।
+केवल-एडमिन कैनोनिकल बैच रीस्कैन रूट। यह पुराने `POST /api/v1/skills/-/rescan-batch` के समान पेलोड संरचना स्वीकार करता है।
 
 ### `POST /api/v1/skills/-/scan/batch/status`
 
-Admin-only canonical batch status route। यह `{ "jobIds": ["..."] }` स्वीकार करता है और legacy `POST /api/v1/skills/-/rescan-batch/status` जैसे ही aggregate counters लौटाता है।
+केवल-एडमिन कैनोनिकल बैच स्थिति रूट। यह `{ "jobIds": ["..."] }` स्वीकार करता है और पुराने `POST /api/v1/skills/-/rescan-batch/status` के समान समेकित काउंटर लौटाता है।
 
 ### `GET /api/v1/skills/{slug}/verify`
 
-`clawhub skill verify` द्वारा उपयोग किया जाने वाला Skill Card verification envelope लौटाता है।
+`clawhub skill verify` द्वारा उपयोग किया जाने वाला स्किल कार्ड सत्यापन एनवेलप लौटाता है।
 
-Query params:
+क्वेरी पैरामीटर:
 
-- `version` (वैकल्पिक): specific version string।
-- `tag` (वैकल्पिक): tagged version resolve करें (उदाहरण के लिए `latest`)।
+- `version` (वैकल्पिक): विशिष्ट संस्करण स्ट्रिंग।
+- `tag` (वैकल्पिक): टैग किए गए संस्करण को रिज़ॉल्व करें (उदाहरण के लिए `latest`)।
 
-नोट्स:
+टिप्पणियाँ:
 
-- `ok` केवल तब `true` होता है जब selected version में generated Skill Card हो, वह moderation द्वारा malware-blocked न हो, और ClawScan verification clean हो।
-- Skill identity, publisher identity, और selected version metadata top-level envelope fields (`slug`, `displayName`, `publisherHandle`, `version`, `resolvedFrom`, `tag`, `createdAt`) हैं, ताकि shell automation nested wrappers unpack किए बिना उन्हें पढ़ सके।
-- `security` top-level ClawScan/security verdict है। Automation को `ok`, `decision`, `reasons`, और `security.status` के आधार पर काम करना चाहिए।
-- `security.signals` में supporting scanner evidence जैसे `staticScan`, `virusTotal`, और `skillSpector` शामिल होते हैं।
-- `security.signals.dependencyRegistry` v1 response compatibility के लिए retained है, लेकिन dependency registry existence scanner retired है और यह key हमेशा `null` होती है।
-- `provenance` केवल तब `server-resolved-github-import` होता है जब ClawHub ने publish या import के दौरान GitHub repo/ref/commit/path resolve और store किया हो; अन्यथा यह `unavailable` होता है।
+- `ok` केवल तभी `true` होता है, जब चयनित संस्करण के पास जनरेट किया गया स्किल कार्ड हो, वह मॉडरेशन द्वारा मैलवेयर के कारण अवरुद्ध न हो, और ClawScan सत्यापन क्लीन हो।
+- स्किल पहचान, प्रकाशक पहचान, और चयनित संस्करण मेटाडेटा शीर्ष-स्तरीय एनवेलप फ़ील्ड (`slug`, `displayName`, `publisherHandle`, `version`, `resolvedFrom`, `tag`, `createdAt`) हैं, ताकि शेल ऑटोमेशन नेस्टेड रैपर अनपैक किए बिना उन्हें पढ़ सके।
+- `security` शीर्ष-स्तरीय ClawScan/सुरक्षा निर्णय है। ऑटोमेशन को `ok`, `decision`, `reasons`, और `security.status` के आधार पर काम करना चाहिए।
+- `security.signals` में `staticScan`, `virusTotal`, और `skillSpector` जैसे सहायक स्कैनर साक्ष्य होते हैं।
+- `security.signals.dependencyRegistry` को v1 प्रतिक्रिया संगतता के लिए बनाए रखा गया है, लेकिन डिपेंडेंसी रजिस्ट्री अस्तित्व स्कैनर सेवानिवृत्त हो चुका है और यह कुंजी हमेशा `null` होती है।
+- `provenance` केवल तभी `server-resolved-github-import` होता है, जब ClawHub ने प्रकाशन या आयात के दौरान GitHub रेपो/रेफ़/कमिट/पथ रिज़ॉल्व और संग्रहीत किया हो; अन्यथा यह `unavailable` होता है।
 
 ### `POST /api/v1/skills/-/security-verdicts`
 
-Exact skill versions के लिए मौजूदा compact security verdicts लौटाता है। यह
-collection endpoint उन clients के लिए है जो पहले से जानते हैं कि उन्हें कौन से installed
-ClawHub skill versions display करने हैं, जैसे OpenClaw Control UI।
+सटीक स्किल संस्करणों के लिए वर्तमान संक्षिप्त सुरक्षा निर्णय लौटाता है। यह
+संग्रह एंडपॉइंट उन क्लाइंट के लिए है, जिन्हें पहले से पता है कि उन्हें किन इंस्टॉल किए गए
+ClawHub स्किल संस्करणों को प्रदर्शित करना है, जैसे OpenClaw Control UI।
 
-Request:
+अनुरोध:
 
 ```json
 {
@@ -469,17 +472,17 @@ Request:
 }
 ```
 
-नोट्स:
+टिप्पणियाँ:
 
-- `items` में 1-100 unique `{ slug, version }` pairs होने चाहिए।
-- Results per item होते हैं; एक missing skill या version पूरे response को fail नहीं करता।
-- Response केवल security-only है। इसमें Skill Card data, generated card status, artifact file lists, या detailed scanner payloads शामिल नहीं हैं।
-- `security.signals` में केवल status-level supporting evidence शामिल होता है; full scanner details के लिए `/scan` या ClawHub security-audit page का उपयोग करें।
-- `security.signals.dependencyRegistry` v1 response compatibility के लिए retained है, लेकिन dependency registry existence scanner retired है और यह key हमेशा `null` होती है।
-- Skill Card की अनुपस्थिति इस endpoint के `ok`, `decision`, या `reasons` को प्रभावित नहीं करती; clients को card content की आवश्यकता होने पर installed `skill-card.md` locally पढ़ना चाहिए।
-- जब आपको single-skill Skill Card verification envelope चाहिए तो `/verify` का उपयोग करें, generated card markdown चाहिए तो `/card` का, और detailed scanner data चाहिए तो `/scan` का उपयोग करें।
+- `items` में 1-100 अद्वितीय `{ slug, version }` युग्म होने चाहिए।
+- परिणाम प्रत्येक आइटम के अनुसार होते हैं; एक अनुपलब्ध स्किल या संस्करण पूरी प्रतिक्रिया को विफल नहीं करता।
+- प्रतिक्रिया केवल सुरक्षा संबंधी है। इसमें स्किल कार्ड डेटा, जनरेट किए गए कार्ड की स्थिति, आर्टिफ़ैक्ट फ़ाइल सूचियाँ, या विस्तृत स्कैनर पेलोड शामिल नहीं होते।
+- `security.signals` में केवल स्थिति-स्तरीय सहायक साक्ष्य होते हैं; पूरे स्कैनर विवरण के लिए `/scan` या ClawHub सुरक्षा-ऑडिट पेज का उपयोग करें।
+- `security.signals.dependencyRegistry` को v1 प्रतिक्रिया संगतता के लिए बनाए रखा गया है, लेकिन डिपेंडेंसी रजिस्ट्री अस्तित्व स्कैनर सेवानिवृत्त हो चुका है और यह कुंजी हमेशा `null` होती है।
+- स्किल कार्ड की अनुपस्थिति इस एंडपॉइंट के `ok`, `decision`, या `reasons` को प्रभावित नहीं करती; कार्ड सामग्री की आवश्यकता होने पर क्लाइंट को इंस्टॉल किया गया `skill-card.md` स्थानीय रूप से पढ़ना चाहिए।
+- एकल-स्किल स्किल कार्ड सत्यापन एनवेलप की आवश्यकता होने पर `/verify`, जनरेट किए गए कार्ड मार्कडाउन की आवश्यकता होने पर `/card`, और विस्तृत स्कैनर डेटा की आवश्यकता होने पर `/scan` का उपयोग करें।
 
-Response:
+प्रतिक्रिया:
 
 ```json
 {
@@ -517,7 +520,7 @@ Response:
       "reasons": ["version.not_found"],
       "requestedSlug": "missing-version",
       "requestedVersion": "1.0.0",
-      "error": { "code": "version_not_found", "message": "Version not found" },
+      "error": { "code": "version_not_found", "message": "संस्करण नहीं मिला" },
       "security": null
     }
   ]
@@ -526,131 +529,135 @@ Response:
 
 ### `GET /api/v1/skills/{slug}/file`
 
-रॉ टेक्स्ट सामग्री लौटाता है।
+सटीक संग्रहीत फ़ाइल बाइट डाउनलोड के रूप में लौटाता है। सीमित एस्केप किए गए टेक्स्ट
+पूर्वावलोकन का अनुरोध करने के लिए `preview=1` जोड़ें; मान्य UTF-8 बाइट वाली किसी भी फ़ाइल का पूर्वावलोकन किया जा सकता है, चाहे उसका एक्सटेंशन या MIME
+मेटाडेटा कुछ भी हो।
 
 क्वेरी पैरामीटर:
 
 - `path` (आवश्यक)
 - `version` (वैकल्पिक)
 - `tag` (वैकल्पिक)
+- `preview=1` (वैकल्पिक; बाइट मान्य UTF-8 न होने पर `text/plain` या `415` लौटाता है)
 
-नोट्स:
+टिप्पणियाँ:
 
-- नवीनतम संस्करण पर डिफ़ॉल्ट होता है।
-- फ़ाइल आकार सीमा: 200KB।
+- डिफ़ॉल्ट रूप से नवीनतम संस्करण।
+- रॉ डाउनलोड सीमा: 10MB।
+- टेक्स्ट पूर्वावलोकन सीमा: 200KB।
 
 ### `GET /api/v1/packages`
 
-इनके लिए एकीकृत कैटलॉग endpoint:
+इसके लिए एकीकृत कैटलॉग एंडपॉइंट:
 
-- Skills
-- code Plugins
-- bundle Plugins
+- स्किल
+- कोड Plugin
+- बंडल Plugin
 
 क्वेरी पैरामीटर:
 
 - `limit` (वैकल्पिक): पूर्णांक (1–100)
-- `cursor` (वैकल्पिक): pagination cursor
+- `cursor` (वैकल्पिक): पेजिनेशन कर्सर
 - `family` (वैकल्पिक): `skill`, `code-plugin`, या `bundle-plugin`
 - `channel` (वैकल्पिक): `official`, `community`, या `private`
 - `isOfficial` (वैकल्पिक): `true` या `false`
-- `sort` (वैकल्पिक): `updated` (डिफ़ॉल्ट), `recommended`, `trending`, `downloads`, legacy alias `installs`
-- `category` (वैकल्पिक): Plugin category filter. केवल तब समर्थित जब
-  request Plugin packages (`/api/v1/plugins`,
-  `/api/v1/code-plugins`, `/api/v1/bundle-plugins`, या package endpoints जिनमें
-  `family=code-plugin`/`family=bundle-plugin` हो) तक सीमित हो। Controlled categories और
-  legacy v1 filter aliases `GET /api/v1/plugins` के अंतर्गत दस्तावेज़ित हैं।
+- `sort` (वैकल्पिक): `updated` (डिफ़ॉल्ट), `recommended`, `trending`, `downloads`, पुराना उपनाम `installs`
+- `category` (वैकल्पिक): Plugin श्रेणी फ़िल्टर। केवल तभी समर्थित है, जब
+  अनुरोध Plugin पैकेज (`/api/v1/plugins`,
+  `/api/v1/code-plugins`, `/api/v1/bundle-plugins`, या `family=code-plugin`/`family=bundle-plugin`
+  वाले पैकेज एंडपॉइंट) तक सीमित हो। नियंत्रित श्रेणियाँ और
+  पुराने v1 फ़िल्टर उपनाम `GET /api/v1/plugins` के अंतर्गत प्रलेखित हैं।
 
-नोट्स:
+टिप्पणियाँ:
 
 - `family`, `channel`, `isOfficial`, `featured`,
-  `highlightedOnly`, या `sort` के अमान्य मान `400` लौटाते हैं। अज्ञात query parameters अनदेखे किए जाते हैं।
-- `GET /api/v1/code-plugins` और `GET /api/v1/bundle-plugins` fixed-family aliases बने रहते हैं।
-- Skill entries skill registry से समर्थित रहती हैं और अभी भी केवल `POST /api/v1/skills` के माध्यम से प्रकाशित की जा सकती हैं।
-- `POST /api/v1/packages` अभी भी केवल code-plugin और bundle-plugin releases के लिए है।
-- Anonymous callers केवल public package channels देखते हैं।
-- Authenticated callers list/search results में उन publishers के private packages देख सकते हैं जिनसे वे संबंधित हैं।
-- `channel=private` केवल वे packages लौटाता है जिन्हें authenticated caller पढ़ सकता है।
+  `highlightedOnly`, या `sort` के अमान्य मान `400` लौटाते हैं। अज्ञात क्वेरी पैरामीटर अनदेखे किए जाते हैं।
+- `GET /api/v1/code-plugins` और `GET /api/v1/bundle-plugins` निश्चित-परिवार उपनाम बने रहते हैं।
+- स्किल प्रविष्टियाँ स्किल रजिस्ट्री द्वारा समर्थित रहती हैं और अब भी केवल `POST /api/v1/skills` के माध्यम से प्रकाशित की जा सकती हैं।
+- `POST /api/v1/packages` अब भी केवल कोड-Plugin और बंडल-Plugin रिलीज़ के लिए है।
+- अनाम कॉलर केवल सार्वजनिक पैकेज चैनल देखते हैं।
+- प्रमाणीकृत कॉलर सूची/खोज परिणामों में उन प्रकाशकों के निजी पैकेज देख सकते हैं जिनसे वे संबंधित हैं।
+- `channel=private` केवल वे पैकेज लौटाता है जिन्हें प्रमाणीकृत कॉलर पढ़ सकता है।
 
 ### `GET /api/v1/packages/search`
 
-Skills + Plugin packages में एकीकृत कैटलॉग search.
+स्किल + Plugin पैकेज में एकीकृत कैटलॉग खोज।
 
 क्वेरी पैरामीटर:
 
-- `q` (आवश्यक): query string
+- `q` (आवश्यक): क्वेरी स्ट्रिंग
 - `limit` (वैकल्पिक): पूर्णांक (1–100)
 - `family` (वैकल्पिक): `skill`, `code-plugin`, या `bundle-plugin`
 - `channel` (वैकल्पिक): `official`, `community`, या `private`
 - `isOfficial` (वैकल्पिक): `true` या `false`
-- `category` (वैकल्पिक): Plugin category filter. केवल तब समर्थित जब
-  request Plugin packages तक सीमित हो। Controlled categories और legacy v1
-  filter aliases `GET /api/v1/plugins` के अंतर्गत दस्तावेज़ित हैं।
+- `category` (वैकल्पिक): Plugin श्रेणी फ़िल्टर। केवल तब समर्थित है जब
+  अनुरोध का दायरा Plugin पैकेज तक सीमित हो। नियंत्रित श्रेणियाँ और लेगेसी v1
+  फ़िल्टर उपनाम `GET /api/v1/plugins` के अंतर्गत प्रलेखित हैं।
 
-नोट्स:
+टिप्पणियाँ:
 
 - `family`, `channel`, `isOfficial`, `featured`, या
-  `highlightedOnly` के अमान्य मान `400` लौटाते हैं। अज्ञात query parameters अनदेखे किए जाते हैं।
-- Anonymous callers केवल public package channels देखते हैं।
-- Authenticated callers उन publishers के private packages खोज सकते हैं जिनसे वे संबंधित हैं।
-- `channel=private` केवल वे packages लौटाता है जिन्हें authenticated caller पढ़ सकता है।
+  `highlightedOnly` के अमान्य मान `400` लौटाते हैं। अज्ञात क्वेरी पैरामीटर अनदेखे किए जाते हैं।
+- अनाम कॉलर केवल सार्वजनिक पैकेज चैनल देख सकते हैं।
+- प्रमाणित कॉलर उन प्रकाशकों के निजी पैकेज खोज सकते हैं जिनसे वे संबद्ध हैं।
+- `channel=private` केवल वे पैकेज लौटाता है जिन्हें प्रमाणित कॉलर पढ़ सकता है।
 
 ### `GET /api/v1/plugins`
 
-code-plugin और bundle-plugin packages में केवल-Plugin कैटलॉग browse.
+कोड-Plugin और बंडल-Plugin पैकेजों में केवल-Plugin कैटलॉग ब्राउज़िंग।
 
 क्वेरी पैरामीटर:
 
 - `limit` (वैकल्पिक): पूर्णांक (1-100)
-- `cursor` (वैकल्पिक): pagination cursor
+- `cursor` (वैकल्पिक): पृष्ठांकन कर्सर
 - `isOfficial` (वैकल्पिक): `true` या `false`
-- `sort` (वैकल्पिक): `recommended` (डिफ़ॉल्ट), `trending`, `downloads`, `updated`, legacy alias `installs`
-- `category` (वैकल्पिक): Plugin category filter. वर्तमान मान:
+- `sort` (वैकल्पिक): `recommended` (डिफ़ॉल्ट), `trending`, `downloads`, `updated`, लेगेसी उपनाम `installs`
+- `category` (वैकल्पिक): Plugin श्रेणी फ़िल्टर। वर्तमान मान:
   `channels`, `models`, `memory`, `context`, `voice`, `media`, `web`,
-  `tools`, `runtime`, `gateway`, `security`, `other`.
+  `tools`, `runtime`, `gateway`, `security`, `other`।
 
-Legacy v1 filter aliases read endpoints पर स्वीकार किए जाते रहते हैं:
+लेगेसी v1 फ़िल्टर उपनाम पठन एंडपॉइंट पर अभी भी स्वीकार किए जाते हैं:
 
-- `mcp-tooling`, `data`, और `automation` `tools` में resolve होते हैं।
-- `observability` और `deployment` `gateway` में resolve होते हैं।
-- `dev-tools` `runtime` में resolve होता है।
+- `mcp-tooling`, `data`, और `automation` का समाधान `tools` के रूप में होता है।
+- `observability` और `deployment` का समाधान `gateway` के रूप में होता है।
+- `dev-tools` का समाधान `runtime` के रूप में होता है।
 
-`trending` सात-दिन का install/download leaderboard है और all-time totals का उपयोग नहीं करता।
-एकीकृत `/api/v1/packages` endpoint पर यह केवल-Plugin है; skill catalog के लिए
+`trending` सात-दिवसीय इंस्टॉल/डाउनलोड लीडरबोर्ड है और सर्वकालिक योग का उपयोग नहीं करता।
+एकीकृत `/api/v1/packages` एंडपॉइंट पर यह केवल-Plugin है; Skills कैटलॉग के लिए
 `/api/v1/skills?sort=trending` का उपयोग करें।
 
-Legacy aliases stored या author-declared category values के रूप में स्वीकार नहीं किए जाते।
+लेगेसी उपनाम संग्रहीत या लेखक-घोषित श्रेणी मानों के रूप में स्वीकार नहीं किए जाते।
 
 ### `GET /api/v1/skills/export`
 
-offline analysis के लिए नवीनतम public Skills का bulk export.
+ऑफ़लाइन विश्लेषण के लिए नवीनतम सार्वजनिक Skills का थोक निर्यात।
 
-Auth:
+प्रमाणीकरण:
 
-- API token आवश्यक।
+- API टोकन आवश्यक है।
 
 क्वेरी पैरामीटर:
 
-- `startDate` (आवश्यक): skill `updatedAt` के लिए Unix milliseconds lower bound.
-- `endDate` (आवश्यक): skill `updatedAt` के लिए Unix milliseconds upper bound.
-- `limit` (वैकल्पिक): पूर्णांक (1-250), डिफ़ॉल्ट `250`.
-- `cursor` (वैकल्पिक): पिछले response से pagination cursor.
+- `startDate` (आवश्यक): Skill `updatedAt` के लिए Unix मिलीसेकंड की निचली सीमा।
+- `endDate` (आवश्यक): Skill `updatedAt` के लिए Unix मिलीसेकंड की ऊपरी सीमा।
+- `limit` (वैकल्पिक): पूर्णांक (1-250), डिफ़ॉल्ट `250`।
+- `cursor` (वैकल्पिक): पिछले प्रत्युत्तर का पृष्ठांकन कर्सर।
 
-Response:
+प्रत्युत्तर:
 
-- Body: ZIP archive.
-- प्रत्येक exported skill `{publisher}/{slug}/` पर rooted होता है।
-- Hosted skills में नवीनतम stored version files शामिल होती हैं और उन्हें
+- बॉडी: ZIP आर्काइव।
+- प्रत्येक निर्यातित Skill का मूल `{publisher}/{slug}/` पर होता है।
+- होस्ट की गई Skills में नवीनतम संग्रहीत संस्करण फ़ाइलें शामिल होती हैं और उन्हें
   `_manifest.json` में `sourceRef: "public-clawhub"` के साथ सूचीबद्ध किया जाता है।
-- `clean` या `suspicious` scan वाले वर्तमान GitHub-backed skills में
-  `_source_handoff.json` शामिल होता है, जिसमें `sourceRef: "public-github"`, repo, commit, path,
-  content hash, और archive URL होते हैं। इनमें ClawHub-hosted source files शामिल नहीं होतीं।
-- प्रत्येक skill में `_export_skill_meta.json` शामिल होता है।
-- `_manifest.json` हमेशा ZIP root पर शामिल होता है।
-- `_errors.json` तब शामिल होता है जब individual skills या files
-  export नहीं की जा सकीं।
+- `clean` या `suspicious` स्कैन वाली वर्तमान GitHub-समर्थित Skills में
+  `_source_handoff.json` के साथ `sourceRef: "public-github"`, रिपॉज़िटरी, कमिट, पथ,
+  सामग्री हैश और आर्काइव URL शामिल होते हैं। इनमें ClawHub द्वारा होस्ट की गई स्रोत फ़ाइलें शामिल नहीं होतीं।
+- प्रत्येक Skill में `_export_skill_meta.json` शामिल होता है।
+- `_manifest.json` हमेशा ZIP के मूल में शामिल होता है।
+- जब अलग-अलग Skills या फ़ाइलें निर्यात नहीं की जा सकीं, तब
+  `_errors.json` शामिल होता है।
 
-Headers:
+हेडर:
 
 - `X-Next-Cursor`
 - `X-Has-More`
@@ -668,22 +675,23 @@ Headers:
 
 क्वेरी पैरामीटर:
 
-- `startDate` (आवश्यक): Plugin `updatedAt` के लिए Unix मिलीसेकंड निचली सीमा।
-- `endDate` (आवश्यक): Plugin `updatedAt` के लिए Unix मिलीसेकंड ऊपरी सीमा।
+- `startDate` (आवश्यक): Plugin `updatedAt` के लिए Unix मिलीसेकंड की निचली सीमा।
+- `endDate` (आवश्यक): Plugin `updatedAt` के लिए Unix मिलीसेकंड की ऊपरी सीमा।
 - `limit` (वैकल्पिक): पूर्णांक (1-250), डिफ़ॉल्ट `250`।
-- `cursor` (वैकल्पिक): पिछले प्रत्युत्तर से पेजिनेशन कर्सर।
-- `family` (वैकल्पिक): `code-plugin` या `bundle-plugin`। छोड़े जाने का अर्थ है दोनों
-  Plugin परिवार।
+- `cursor` (वैकल्पिक): पिछले प्रत्युत्तर का पृष्ठांकन कर्सर।
+- `family` (वैकल्पिक): `code-plugin` या `bundle-plugin`। छोड़े जाने का अर्थ दोनों
+  Plugin परिवार हैं।
 
 प्रत्युत्तर:
 
 - बॉडी: ZIP आर्काइव।
-- प्रत्येक निर्यातित Plugin `{family}/{packageName}/` पर रूट होता है।
+- प्रत्येक निर्यातित Plugin का मूल `{family}/{packageName}/` पर होता है।
 - प्रत्येक निर्यातित Plugin में नवीनतम रिलीज़ की संग्रहीत फ़ाइलें शामिल होती हैं।
 - प्रति-Plugin निर्यात मेटाडेटा
   `__clawhub_export/{family}/{packageName}/plugin_meta.json` पर संग्रहीत होता है।
-- `_manifest.json` हमेशा ZIP रूट में शामिल होता है।
-- जब अलग-अलग Plugin या फ़ाइलें निर्यात नहीं की जा सकीं, तो `_errors.json` शामिल होता है।
+- `_manifest.json` हमेशा ZIP के मूल में शामिल होता है।
+- जब अलग-अलग Plugins या फ़ाइलें निर्यात नहीं की जा सकीं, तब
+  `_errors.json` शामिल होता है।
 
 हेडर:
 
@@ -695,7 +703,7 @@ Headers:
 
 ### `GET /api/v1/plugins/search`
 
-code-plugin और bundle-plugin पैकेजों में केवल-Plugin खोज।
+कोड-Plugin और बंडल-Plugin पैकेजों में केवल-Plugin खोज।
 
 क्वेरी पैरामीटर:
 
@@ -706,32 +714,33 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
   `channels`, `models`, `memory`, `context`, `voice`, `media`, `web`,
   `tools`, `runtime`, `gateway`, `security`, `other`।
 
-टिप्पणियां:
+टिप्पणियाँ:
 
-- `GET /api/v1/plugins` के अंतर्गत दस्तावेज़ीकृत पुराने v1 फ़िल्टर उपनाम भी
+- `GET /api/v1/plugins` के अंतर्गत प्रलेखित लेगेसी v1 फ़िल्टर उपनाम भी
   स्वीकार किए जाते हैं।
-- श्रेणी फ़िल्टरिंग Plugin श्रेणी डाइजेस्ट पंक्तियों द्वारा समर्थित वास्तविक API फ़िल्टर है,
-  कोई खोज-क्वेरी पुनर्लेखन नहीं।
-- परिणाम प्रासंगिकता क्रम में लौटाए जाते हैं और वर्तमान में पेजिनेट नहीं होते।
-- Plugin खोज के लिए ब्राउज़र UI सॉर्ट नियंत्रण लोड किए गए प्रासंगिकता परिणामों को फिर से क्रमित करते हैं,
-  जो वर्तमान `/skills` ब्राउज़ व्यवहार से मेल खाते हैं।
+- श्रेणी फ़िल्टरिंग Plugin श्रेणी डाइजेस्ट पंक्तियों द्वारा समर्थित एक वास्तविक API फ़िल्टर है,
+  न कि खोज-क्वेरी का पुनर्लेखन।
+- परिणाम प्रासंगिकता क्रम में लौटाए जाते हैं और वर्तमान में उनका पृष्ठांकन नहीं होता।
+- Plugin खोज के लिए ब्राउज़र UI सॉर्ट नियंत्रण लोड किए गए प्रासंगिकता परिणामों को पुनः क्रमित करते हैं,
+  जो वर्तमान `/skills` ब्राउज़ व्यवहार से मेल खाता है।
 
 ### `GET /api/v1/packages/{name}`
 
 पैकेज विवरण मेटाडेटा लौटाता है।
 
-टिप्पणियां:
+टिप्पणियाँ:
 
-- Skills एकीकृत कैटलॉग में इस रूट के माध्यम से भी हल हो सकते हैं।
-- निजी पैकेज `404` लौटाते हैं, जब तक कॉलर स्वामित्व रखने वाले प्रकाशक को पढ़ नहीं सकता।
+- एकीकृत कैटलॉग में इस रूट के माध्यम से Skills का समाधान भी हो सकता है।
+- यदि कॉलर स्वामी प्रकाशक को नहीं पढ़ सकता, तो निजी पैकेज `404` लौटाते हैं।
 
 ### `DELETE /api/v1/packages/{name}`
 
-किसी पैकेज और सभी रिलीज़ को सॉफ़्ट-डिलीट करता है।
+पैकेज और सभी रिलीज़ को सॉफ़्ट-डिलीट करता है।
 
-टिप्पणियां:
+टिप्पणियाँ:
 
-- पैकेज स्वामी, संगठन प्रकाशक स्वामी/एडमिन, प्लेटफ़ॉर्म मॉडरेटर, या प्लेटफ़ॉर्म एडमिन के लिए API टोकन आवश्यक है।
+- पैकेज स्वामी, संगठन प्रकाशक स्वामी/व्यवस्थापक,
+  प्लेटफ़ॉर्म मॉडरेटर या प्लेटफ़ॉर्म व्यवस्थापक के लिए API टोकन आवश्यक है।
 
 ### `GET /api/v1/packages/{name}/versions`
 
@@ -740,40 +749,41 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
 क्वेरी पैरामीटर:
 
 - `limit` (वैकल्पिक): पूर्णांक (1–100)
-- `cursor` (वैकल्पिक): पेजिनेशन कर्सर
+- `cursor` (वैकल्पिक): पृष्ठांकन कर्सर
 
-टिप्पणियां:
+टिप्पणियाँ:
 
-- निजी पैकेज `404` लौटाते हैं, जब तक कॉलर स्वामित्व रखने वाले प्रकाशक को पढ़ नहीं सकता।
+- यदि कॉलर स्वामी प्रकाशक को नहीं पढ़ सकता, तो निजी पैकेज `404` लौटाते हैं।
 
 ### `GET /api/v1/packages/{name}/versions/{version}`
 
-फ़ाइल मेटाडेटा, संगतता, सत्यापन, आर्टिफ़ैक्ट मेटाडेटा, और स्कैन डेटा सहित एक पैकेज संस्करण लौटाता है।
+फ़ाइल मेटाडेटा, संगतता, सत्यापन, आर्टिफ़ैक्ट मेटाडेटा और स्कैन डेटा सहित
+एक पैकेज संस्करण लौटाता है।
 
-टिप्पणियां:
+टिप्पणियाँ:
 
-- `version.artifact.kind` पुराने-जगत के पैकेज आर्काइव के लिए `legacy-zip` है या
-  ClawPack-समर्थित रिलीज़ के लिए `npm-pack`।
+- `version.artifact.kind` पुराने स्वरूप वाले पैकेज आर्काइव के लिए `legacy-zip` या
+  ClawPack-समर्थित रिलीज़ के लिए `npm-pack` है।
 - ClawPack रिलीज़ में npm-संगत `npmIntegrity`, `npmShasum`, और
   `npmTarballName` फ़ील्ड शामिल होते हैं।
-- `version.sha256hash` पुराने क्लाइंट के लिए पदावनत संगतता मेटाडेटा है। यह
+- `version.sha256hash` पुराने क्लाइंट के लिए अप्रचलित संगतता मेटाडेटा है। यह
   `/api/v1/packages/{name}/download` द्वारा लौटाए गए सटीक ZIP बाइट्स को हैश करता है।
   आधुनिक क्लाइंट को `version.artifact.sha256` का उपयोग करना चाहिए, जो
   कैनोनिकल रिलीज़ आर्टिफ़ैक्ट की पहचान करता है।
 - स्कैन डेटा मौजूद होने पर `version.vtAnalysis`, `version.llmAnalysis`, और `version.staticScan`
   शामिल होते हैं।
-- निजी पैकेज `404` लौटाते हैं, जब तक कॉलर स्वामित्व रखने वाले प्रकाशक को पढ़ नहीं सकता।
+- यदि कॉलर स्वामी प्रकाशक को नहीं पढ़ सकता, तो निजी पैकेज `404` लौटाते हैं।
 
 ### `GET /api/v1/packages/{name}/versions/{version}/security`
 
-इंस्टॉल क्लाइंट के लिए सटीक पैकेज रिलीज़ सुरक्षा और भरोसा सारांश लौटाता है।
-यह यह तय करने के लिए सार्वजनिक OpenClaw उपभोग सतह है कि कोई हल की गई रिलीज़
-इंस्टॉल की जा सकती है या नहीं।
+इंस्टॉल क्लाइंट के लिए पैकेज रिलीज़ का सटीक सुरक्षा और विश्वास सारांश लौटाता है।
+यह तय करने के लिए कि समाधान की गई रिलीज़ इंस्टॉल की जा सकती है या नहीं, यह सार्वजनिक OpenClaw
+उपयोग सतह है।
 
 प्रमाणीकरण:
 
-- सार्वजनिक पढ़ने वाला एंडपॉइंट। कोई स्वामी, प्रकाशक, मॉडरेटर, या एडमिन टोकन
-  आवश्यक नहीं है।
+- सार्वजनिक पठन एंडपॉइंट। किसी स्वामी, प्रकाशक, मॉडरेटर या व्यवस्थापक टोकन की
+  आवश्यकता नहीं है।
 
 प्रत्युत्तर:
 
@@ -807,81 +817,83 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
 
 प्रत्युत्तर फ़ील्ड:
 
-- `package.name`, `package.displayName`, और `package.family` हल किए गए
+- `package.name`, `package.displayName`, और `package.family` समाधान किए गए
   रजिस्ट्री पैकेज की पहचान करते हैं।
-- `release.releaseId`, `release.version`, और `release.createdAt`
-  मूल्यांकित की गई सटीक रिलीज़ की पहचान करते हैं।
-- रिलीज़ आर्टिफ़ैक्ट के लिए ज्ञात होने पर `release.artifactKind`, `release.artifactSha256`, `release.npmIntegrity`,
-  `release.npmShasum`, और `release.npmTarballName` मौजूद होते हैं।
-- `trust.scanStatus` स्कैनर इनपुट और मैनुअल रिलीज़ मॉडरेशन से व्युत्पन्न प्रभावी भरोसा स्थिति है।
-- `trust.moderationState` nullable है। जब कोई मैनुअल रिलीज़
-  मॉडरेशन मौजूद नहीं होता, तो यह `null` होता है।
+- `release.releaseId`, `release.version`, और `release.createdAt` उस सटीक
+  रिलीज़ की पहचान करते हैं जिसका मूल्यांकन किया गया था।
+- `release.artifactKind`, `release.artifactSha256`, `release.npmIntegrity`,
+  `release.npmShasum`, और `release.npmTarballName` रिलीज़ आर्टिफ़ैक्ट के लिए
+  ज्ञात होने पर मौजूद होते हैं।
+- `trust.scanStatus` स्कैनर इनपुट और मैन्युअल रिलीज़ मॉडरेशन से प्राप्त
+  प्रभावी विश्वास स्थिति है।
+- `trust.moderationState` शून्य-योग्य है। मैन्युअल रिलीज़ मॉडरेशन मौजूद न होने पर यह
+  `null` होता है।
 - `trust.blockedFromDownload` इंस्टॉल अवरोध संकेत है। OpenClaw और अन्य
-  इंस्टॉल क्लाइंट को, स्कैनर या मॉडरेशन फ़ील्ड से अवरोध नियमों को फिर से निकालने के बजाय,
-  इस मान के `true` होने पर इंस्टॉलेशन को रोकना चाहिए।
-- `trust.reasons` उपयोगकर्ता-सामने और ऑडिट व्याख्या सूची है। कारण कोड
-  स्थिर, संक्षिप्त स्ट्रिंग होते हैं जैसे `manual:quarantined`, `scan:malicious`,
-  और `package:malicious`।
-- `trust.pending` का अर्थ है कि एक या अधिक भरोसा इनपुट अभी भी पूर्णता की प्रतीक्षा कर रहे हैं।
-- `trust.stale` का अर्थ है कि भरोसा सारांश पुराने इनपुट से गणना किया गया था और
-  उच्च-विश्वास allow निर्णय से पहले इसे रीफ़्रेश आवश्यक माना जाना चाहिए।
+  इंस्टॉल क्लाइंट को स्कैनर या मॉडरेशन फ़ील्ड से अवरोध नियमों को पुनः प्राप्त करने के बजाय,
+  यह मान `true` होने पर इंस्टॉलेशन अवरुद्ध करना चाहिए।
+- `trust.reasons` उपयोगकर्ता-दृश्य और ऑडिट स्पष्टीकरण सूची है। कारण कोड
+  `manual:quarantined`, `scan:malicious`, और `package:malicious` जैसे
+  स्थिर, संक्षिप्त स्ट्रिंग होते हैं।
+- `trust.pending` का अर्थ है कि एक या अधिक विश्वास इनपुट अभी भी पूर्ण होने की प्रतीक्षा में हैं।
+- `trust.stale` का अर्थ है कि विश्वास सारांश की गणना पुराने इनपुट से की गई थी और
+  उच्च-विश्वसनीयता वाले अनुमति निर्णय से पहले इसे रीफ़्रेश करना आवश्यक माना जाना चाहिए।
 
-टिप्पणियां:
+टिप्पणियाँ:
 
-- यह एंडपॉइंट संस्करण-सटीक है। क्लाइंट को इसे उस पैकेज संस्करण को हल करने के बाद कॉल करना चाहिए
-  जिसे वे इंस्टॉल करना चाहते हैं, न कि केवल नवीनतम
-  पैकेज मेटाडेटा पढ़ने के बाद।
-- निजी पैकेज `404` लौटाते हैं, जब तक कॉलर स्वामित्व रखने वाले प्रकाशक को पढ़ नहीं सकता।
+- यह एंडपॉइंट संस्करण-सटीक है। क्लाइंट को केवल नवीनतम
+  पैकेज मेटाडेटा पढ़ने के बाद नहीं, बल्कि उस पैकेज संस्करण का समाधान करने के बाद इसे कॉल करना चाहिए
+  जिसे वे इंस्टॉल करना चाहते हैं।
+- यदि कॉलर स्वामी प्रकाशक को नहीं पढ़ सकता, तो निजी पैकेज `404` लौटाते हैं।
 - यह एंडपॉइंट जानबूझकर स्वामी/मॉडरेटर मॉडरेशन
-  एंडपॉइंट से संकरा है। यह इंस्टॉल निर्णय और सार्वजनिक व्याख्या उजागर करता है,
-  रिपोर्टर पहचान, रिपोर्ट बॉडी, निजी साक्ष्य, या आंतरिक समीक्षा
-  टाइमलाइन नहीं।
+  एंडपॉइंट से अधिक सीमित है। यह इंस्टॉल निर्णय और सार्वजनिक स्पष्टीकरण प्रदर्शित करता है, न कि
+  रिपोर्टकर्ता की पहचान, रिपोर्ट की सामग्री, निजी साक्ष्य या आंतरिक समीक्षा
+  समयरेखाएँ।
 
 ### `GET /api/v1/packages/{name}/versions/{version}/artifact`
 
-किसी पैकेज संस्करण के लिए स्पष्ट आर्टिफ़ैक्ट रिज़ॉल्वर मेटाडेटा लौटाता है।
+पैकेज संस्करण के लिए स्पष्ट आर्टिफ़ैक्ट रिज़ॉल्वर मेटाडेटा लौटाता है।
 
-टिप्पणियां:
+टिप्पणियाँ:
 
 - लेगेसी पैकेज संस्करण एक `legacy-zip` आर्टिफ़ैक्ट और लेगेसी ZIP
   `downloadUrl` लौटाते हैं।
-- ClawPack संस्करण एक `npm-pack` आर्टिफ़ैक्ट, npm integrity फ़ील्ड, एक
+- ClawPack संस्करण एक `npm-pack` आर्टिफ़ैक्ट, npm अखंडता फ़ील्ड, एक
   `tarballUrl`, और लेगेसी ZIP संगतता URL लौटाते हैं।
-- यह OpenClaw रिज़ॉल्वर सतह है; यह साझा URL से
-  आर्काइव फ़ॉर्मैट का अनुमान लगाने से बचती है।
+- यह OpenClaw रिज़ॉल्वर सतह है; यह किसी साझा URL से आर्काइव प्रारूप का
+  अनुमान लगाने से बचती है।
 
 ### `GET /api/v1/packages/{name}/versions/{version}/artifact/download`
 
 स्पष्ट रिज़ॉल्वर पथ के माध्यम से संस्करण आर्टिफ़ैक्ट डाउनलोड करता है।
 
-टिप्पणियां:
+टिप्पणियाँ:
 
-- ClawPack संस्करण सटीक अपलोड किए गए npm-pack `.tgz` बाइट्स स्ट्रीम करते हैं।
-- लेगेसी ZIP संस्करण `/api/v1/packages/{name}/download?version=` पर रीडायरेक्ट करते हैं।
+- ClawPack संस्करण अपलोड किए गए सटीक npm-pack `.tgz` बाइट्स स्ट्रीम करते हैं।
+- पुराने ZIP संस्करण `/api/v1/packages/{name}/download?version=` पर रीडायरेक्ट होते हैं।
 - डाउनलोड दर बकेट का उपयोग करता है।
 
 ### `GET /api/v1/packages/{name}/readiness`
 
-भविष्य के OpenClaw उपभोग के लिए गणना की गई तत्परता लौटाता है।
+OpenClaw द्वारा भविष्य में उपयोग के लिए परिकलित तत्परता लौटाता है।
 
-तत्परता जांचें कवर करती हैं:
+तत्परता जाँच में शामिल हैं:
 
 - आधिकारिक चैनल स्थिति
-- नवीनतम संस्करण उपलब्धता
-- ClawPack npm-pack आर्टिफ़ैक्ट उपलब्धता
+- नवीनतम संस्करण की उपलब्धता
+- ClawPack npm-pack आर्टिफ़ैक्ट की उपलब्धता
 - आर्टिफ़ैक्ट डाइजेस्ट
-- स्रोत रेपो और कमिट उत्पत्ति
+- स्रोत रिपॉज़िटरी और कमिट की उत्पत्ति
 - OpenClaw संगतता मेटाडेटा
 - होस्ट लक्ष्य
 - स्कैन स्थिति
 
-प्रत्युत्तर:
+प्रतिक्रिया:
 
 ```json
 {
   "package": {
     "name": "@openclaw/example-plugin",
-    "displayName": "Example Plugin",
+    "displayName": "उदाहरण Plugin",
     "family": "code-plugin",
     "isOfficial": true,
     "latestVersion": "1.2.3"
@@ -890,9 +902,9 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
   "checks": [
     {
       "id": "clawpack",
-      "label": "ClawPack artifact",
+      "label": "ClawPack आर्टिफ़ैक्ट",
       "status": "fail",
-      "message": "Latest version is legacy ZIP-only."
+      "message": "नवीनतम संस्करण केवल पुराने ZIP प्रारूप में है।"
     }
   ],
   "blockers": ["clawpack"]
@@ -901,7 +913,7 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
 
 ### `GET /api/v1/packages/migrations`
 
-आधिकारिक OpenClaw Plugin माइग्रेशन पंक्तियों को सूचीबद्ध करने के लिए मॉडरेटर एंडपॉइंट।
+आधिकारिक OpenClaw Plugin माइग्रेशन पंक्तियाँ सूचीबद्ध करने के लिए मॉडरेटर एंडपॉइंट।
 
 प्रमाणीकरण:
 
@@ -913,9 +925,9 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
   `legacy-zip-only`, `metadata-ready`, `blocked`, `ready-for-openclaw`, या
   `all` (डिफ़ॉल्ट)।
 - `limit` (वैकल्पिक): पूर्णांक (1-100)
-- `cursor` (वैकल्पिक): पेजिनेशन कर्सर
+- `cursor` (वैकल्पिक): पृष्ठांकन कर्सर
 
-प्रत्युत्तर:
+प्रतिक्रिया:
 
 ```json
 {
@@ -930,7 +942,7 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
       "sourcePath": "plugins/search",
       "sourceCommit": "abc123",
       "phase": "blocked",
-      "blockers": ["missing ClawPack"],
+      "blockers": ["ClawPack अनुपलब्ध"],
       "hostTargetsComplete": true,
       "scanClean": false,
       "moderationApproved": false,
@@ -964,21 +976,21 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
   "sourcePath": "plugins/search",
   "sourceCommit": "abc123",
   "phase": "blocked",
-  "blockers": ["missing ClawPack"],
+  "blockers": ["ClawPack अनुपलब्ध"],
   "hostTargetsComplete": true,
   "scanClean": false,
   "moderationApproved": false,
   "runtimeBundlesReady": false,
-  "notes": "waiting on publisher upload"
+  "notes": "प्रकाशक के अपलोड की प्रतीक्षा है"
 }
 ```
 
-टिप्पणियां:
+टिप्पणियाँ:
 
-- `bundledPluginId` को लोअरकेस में सामान्यीकृत किया जाता है और यह स्थिर upsert कुंजी है।
-- `packageName` npm-name सामान्यीकृत है; नियोजित
-  माइग्रेशन के लिए पैकेज अनुपस्थित हो सकता है।
-- यह केवल माइग्रेशन तत्परता को ट्रैक करता है। यह OpenClaw को परिवर्तित नहीं करता या
+- `bundledPluginId` को लोअरकेस में सामान्यीकृत किया जाता है और यह स्थिर अपसर्ट कुंजी है।
+- `packageName` को npm नाम के अनुसार सामान्यीकृत किया जाता है; नियोजित
+  माइग्रेशन के लिए पैकेज अनुपलब्ध हो सकता है।
+- यह केवल माइग्रेशन की तत्परता ट्रैक करता है। यह OpenClaw को परिवर्तित नहीं करता या
   ClawPacks जनरेट नहीं करता।
 
 ### `GET /api/v1/packages/moderation/queue`
@@ -993,16 +1005,16 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
 
 - `status` (वैकल्पिक): `open` (डिफ़ॉल्ट), `blocked`, `manual`, या `all`
 - `limit` (वैकल्पिक): पूर्णांक (1-100)
-- `cursor` (वैकल्पिक): पेजिनेशन कर्सर
+- `cursor` (वैकल्पिक): पृष्ठांकन कर्सर
 
-स्थिति अर्थ:
+स्थितियों के अर्थ:
 
-- `open`: संदिग्ध, दुर्भावनापूर्ण, लंबित, क्वारंटीन, निरस्त, या रिपोर्ट की गई रिलीज़।
-- `blocked`: क्वारंटीन, निरस्त, या दुर्भावनापूर्ण रिलीज़।
-- `manual`: मैनुअल मॉडरेशन ओवरराइड वाली कोई भी रिलीज़।
-- `all`: मैनुअल ओवरराइड, non-clean स्कैन स्थिति, या पैकेज रिपोर्ट वाली कोई भी रिलीज़।
+- `open`: संदिग्ध, दुर्भावनापूर्ण, लंबित, क्वारंटीन की गई, निरस्त की गई या रिपोर्ट की गई रिलीज़।
+- `blocked`: क्वारंटीन की गई, निरस्त की गई या दुर्भावनापूर्ण रिलीज़।
+- `manual`: मैन्युअल मॉडरेशन ओवरराइड वाली कोई भी रिलीज़।
+- `all`: मैन्युअल ओवरराइड, गैर-स्वच्छ स्कैन स्थिति या पैकेज रिपोर्ट वाली कोई भी रिलीज़।
 
-प्रत्युत्तर:
+प्रतिक्रिया:
 
 ```json
 {
@@ -1011,7 +1023,7 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
       "packageId": "packages:...",
       "releaseId": "packageReleases:...",
       "name": "@openclaw/example-plugin",
-      "displayName": "Example Plugin",
+      "displayName": "उदाहरण Plugin",
       "family": "code-plugin",
       "channel": "community",
       "isOfficial": false,
@@ -1020,7 +1032,7 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
       "artifactKind": "npm-pack",
       "scanStatus": "malicious",
       "moderationState": "quarantined",
-      "moderationReason": "manual review",
+      "moderationReason": "मैन्युअल समीक्षा",
       "sourceRepo": "openclaw/example-plugin",
       "sourceCommit": "abc123",
       "reportCount": 2,
@@ -1035,10 +1047,10 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
 
 ### `POST /api/v1/packages/{name}/report`
 
-मॉडरेटर समीक्षा के लिए पैकेज की रिपोर्ट करें। रिपोर्ट पैकेज-स्तर की होती हैं, वैकल्पिक रूप से
-किसी संस्करण से लिंक की जाती हैं। वे मॉडरेशन कतार को फ़ीड करती हैं लेकिन अपने आप
-डाउनलोड को auto-hide या ब्लॉक नहीं करतीं; मॉडरेटर को आर्टिफ़ैक्ट को
-स्वीकृत, क्वारंटीन, या निरस्त करने के लिए रिलीज़ मॉडरेशन का उपयोग करना चाहिए।
+मॉडरेटर समीक्षा के लिए किसी पैकेज की रिपोर्ट करें। रिपोर्ट पैकेज-स्तरीय होती हैं और वैकल्पिक रूप से
+किसी संस्करण से लिंक की जा सकती हैं। वे मॉडरेशन कतार को डेटा देती हैं, लेकिन स्वयं पैकेज को स्वतः छिपाती या
+डाउनलोड अवरुद्ध नहीं करतीं; आर्टिफ़ैक्ट को स्वीकृत, क्वारंटीन या निरस्त करने के लिए मॉडरेटर को रिलीज़ मॉडरेशन का
+उपयोग करना चाहिए।
 
 प्रमाणीकरण:
 
@@ -1047,10 +1059,10 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
 अनुरोध:
 
 ```json
-{ "reason": "Suspicious native binary", "version": "1.2.3" }
+{ "reason": "संदिग्ध नेटिव बाइनरी", "version": "1.2.3" }
 ```
 
-प्रत्युत्तर:
+प्रतिक्रिया:
 
 ```json
 {
@@ -1065,17 +1077,17 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
 
 ### `GET /api/v1/packages/reports`
 
-मॉडरेटर/एडमिन endpoint, package report intake के लिए।
+पैकेज रिपोर्ट प्राप्त करने के लिए मॉडरेटर/एडमिन एंडपॉइंट।
 
 प्रमाणीकरण:
 
-- मॉडरेटर या एडमिन उपयोगकर्ता के लिए API token आवश्यक है।
+- मॉडरेटर या एडमिन उपयोगकर्ता के लिए API टोकन आवश्यक है।
 
 क्वेरी पैरामीटर:
 
 - `status` (वैकल्पिक): `open` (डिफ़ॉल्ट), `confirmed`, `dismissed`, या `all`
 - `limit` (वैकल्पिक): पूर्णांक (1-100)
-- `cursor` (वैकल्पिक): पेजिनेशन cursor
+- `cursor` (वैकल्पिक): पृष्ठांकन कर्सर
 
 प्रतिक्रिया:
 
@@ -1087,16 +1099,16 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
       "packageId": "packages:...",
       "releaseId": "packageReleases:...",
       "name": "@openclaw/example-plugin",
-      "displayName": "Example Plugin",
+      "displayName": "उदाहरण Plugin",
       "family": "code-plugin",
       "version": "1.2.3",
-      "reason": "Suspicious native binary",
+      "reason": "संदिग्ध नेटिव बाइनरी",
       "status": "open",
       "createdAt": 1730000000000,
       "reporter": {
         "userId": "users:...",
         "handle": "reporter",
-        "displayName": "Reporter"
+        "displayName": "रिपोर्टकर्ता"
       },
       "triagedAt": null,
       "triagedBy": null,
@@ -1110,12 +1122,12 @@ code-plugin और bundle-plugin पैकेजों में केवल-Pl
 
 ### `GET /api/v1/packages/{name}/moderation`
 
-package moderation दृश्यता के लिए owner/moderator endpoint।
+पैकेज मॉडरेशन दृश्यता के लिए स्वामी/मॉडरेटर एंडपॉइंट।
 
 प्रमाणीकरण:
 
-- package owner, publisher member, moderator, या
-  admin user के लिए API token आवश्यक है।
+- पैकेज स्वामी, प्रकाशक सदस्य, मॉडरेटर या
+  एडमिन उपयोगकर्ता के लिए API टोकन आवश्यक है।
 
 प्रतिक्रिया:
 
@@ -1124,7 +1136,7 @@ package moderation दृश्यता के लिए owner/moderator endpoi
   "package": {
     "packageId": "packages:...",
     "name": "@openclaw/example-plugin",
-    "displayName": "Example Plugin",
+    "displayName": "उदाहरण Plugin",
     "family": "code-plugin",
     "channel": "community",
     "isOfficial": false,
@@ -1138,7 +1150,7 @@ package moderation दृश्यता के लिए owner/moderator endpoi
     "artifactKind": "npm-pack",
     "scanStatus": "malicious",
     "moderationState": "quarantined",
-    "moderationReason": "manual review",
+    "moderationReason": "मैन्युअल समीक्षा",
     "blockedFromDownload": true,
     "reasons": ["manual:quarantined", "scan:malicious", "reports:2"],
     "createdAt": 1730000000000
@@ -1148,21 +1160,21 @@ package moderation दृश्यता के लिए owner/moderator endpoi
 
 ### `POST /api/v1/packages/reports/{reportId}/triage`
 
-package reports को resolve या reopen करने के लिए moderator/admin endpoint।
+पैकेज रिपोर्ट का समाधान करने या उन्हें फिर से खोलने के लिए मॉडरेटर/एडमिन एंडपॉइंट।
 
 अनुरोध:
 
 ```json
 {
   "status": "confirmed",
-  "note": "Reviewed and quarantined affected release.",
+  "note": "समीक्षा की गई और प्रभावित रिलीज़ को क्वारंटीन किया गया।",
   "finalAction": "quarantine"
 }
 ```
 
-`confirmed` और `dismissed` के लिए `note` आवश्यक है; `status` को वापस `open` पर
-सेट करते समय इसे छोड़ा जा सकता है। उसी auditable workflow में release moderation लागू करने के लिए
-confirmed report के साथ `finalAction: "quarantine"` या
+`note`, `confirmed` और `dismissed` के लिए आवश्यक है; `status` को वापस
+`open` पर सेट करते समय इसे छोड़ा जा सकता है। उसी ऑडिट-योग्य कार्यप्रवाह में रिलीज़ मॉडरेशन लागू करने के लिए
+पुष्टि की गई रिपोर्ट के साथ `finalAction: "quarantine"` या
 `finalAction: "revoke"` पास करें।
 
 प्रतिक्रिया:
@@ -1179,95 +1191,97 @@ confirmed report के साथ `finalAction: "quarantine"` या
 
 ### `POST /api/v1/packages/{name}/versions/{version}/moderation`
 
-package release review के लिए moderator/admin endpoint।
+पैकेज रिलीज़ समीक्षा के लिए मॉडरेटर/एडमिन एंडपॉइंट।
 
 अनुरोध:
 
 ```json
-{ "state": "quarantined", "reason": "Suspicious native payload." }
+{ "state": "quarantined", "reason": "संदिग्ध नेटिव पेलोड।" }
 ```
 
-समर्थित states:
+समर्थित स्थितियाँ:
 
-- `approved`: मैन्युअल रूप से review किया गया और अनुमति दी गई।
-- `quarantined`: follow-up लंबित रहने तक blocked।
-- `revoked`: किसी release के पहले trusted होने के बाद blocked।
+- `approved`: मैन्युअल रूप से समीक्षा की गई और अनुमति दी गई।
+- `quarantined`: आगे की कार्रवाई तक अवरुद्ध।
+- `revoked`: किसी रिलीज़ पर पहले भरोसा किए जाने के बाद अवरुद्ध।
 
-Quarantined और revoked releases artifact download routes से `403` लौटाते हैं।
-हर बदलाव audit log entry लिखता है।
+क्वारंटीन और निरस्त की गई रिलीज़ आर्टिफ़ैक्ट डाउनलोड रूट से `403` लौटाती हैं।
+प्रत्येक परिवर्तन एक ऑडिट लॉग प्रविष्टि लिखता है।
 
 ### `GET /api/v1/packages/{name}/file`
 
-package file के लिए raw text content लौटाता है।
+संग्रहीत पैकेज फ़ाइल के सटीक बाइट्स डाउनलोड के रूप में लौटाता है। Skills फ़ाइलों के लिए उपयोग किए जाने वाले समान सीमित
+UTF-8 टेक्स्ट पूर्वावलोकन का अनुरोध करने हेतु `preview=1` जोड़ें।
 
 क्वेरी पैरामीटर:
 
 - `path` (आवश्यक)
 - `version` (वैकल्पिक)
 - `tag` (वैकल्पिक)
+- `preview=1` (वैकल्पिक; बाइट्स के मान्य UTF-8 न होने पर `text/plain` या `415` लौटाता है)
 
-नोट्स:
+टिप्पणियाँ:
 
-- latest release पर डिफ़ॉल्ट होता है।
-- download bucket नहीं, read rate bucket का उपयोग करता है।
-- Binary files `415` लौटाती हैं।
-- File size limit: 200KB।
-- Pending VirusTotal scans reads को block नहीं करते; malicious releases फिर भी कहीं और रोकी जा सकती हैं।
-- Private packages `404` लौटाते हैं जब तक caller owning publisher को read नहीं कर सकता।
+- डिफ़ॉल्ट रूप से नवीनतम रिलीज़ का उपयोग करता है।
+- डाउनलोड बकेट के बजाय रीड दर बकेट का उपयोग करता है।
+- रॉ डाउनलोड सीमा: 10MB।
+- टेक्स्ट पूर्वावलोकन सीमा: 200KB; अपारदर्शी फ़ाइलें केवल पूर्वावलोकन अनुरोधों के लिए `415` लौटाती हैं।
+- लंबित VirusTotal स्कैन रीड को अवरुद्ध नहीं करते; दुर्भावनापूर्ण रिलीज़ अब भी कहीं और रोकी जा सकती हैं।
+- निजी पैकेज `404` लौटाते हैं, जब तक कि कॉलर स्वामी प्रकाशक को पढ़ न सकता हो।
 
 ### `GET /api/v1/packages/{name}/download`
 
-package release के लिए legacy deterministic ZIP archive download करता है।
+किसी पैकेज रिलीज़ के लिए पुराना नियतात्मक ZIP संग्रह डाउनलोड करता है।
 
 क्वेरी पैरामीटर:
 
 - `version` (वैकल्पिक)
 - `tag` (वैकल्पिक)
 
-नोट्स:
+टिप्पणियाँ:
 
-- latest release पर डिफ़ॉल्ट होता है।
-- Skills `GET /api/v1/download` पर redirect करते हैं।
-- Plugin/package archives zip files होती हैं जिनमें `package/` root होता है ताकि पुराने OpenClaw
-  clients काम करते रहें।
-- यह route ZIP-only रहता है। यह ClawPack `.tgz` files stream नहीं करता।
-- Responses में resolver integrity checks के लिए `ETag`, `Digest`, `X-ClawHub-Artifact-Type`, और
-  `X-ClawHub-Artifact-Sha256` headers शामिल होते हैं।
-- Registry-only metadata downloaded archive में inject नहीं किया जाता।
-- Pending VirusTotal scans downloads को block नहीं करते; malicious releases `403` लौटाती हैं।
-- Private packages `404` लौटाते हैं जब तक caller owner न हो।
+- डिफ़ॉल्ट रूप से नवीनतम रिलीज़ का उपयोग करता है।
+- Skills को `GET /api/v1/download` पर रीडायरेक्ट किया जाता है।
+- Plugin/पैकेज संग्रह ऐसी zip फ़ाइलें हैं जिनमें `package/` रूट होता है, ताकि पुराने OpenClaw
+  क्लाइंट काम करते रहें।
+- यह रूट केवल ZIP के लिए रहता है। यह ClawPack `.tgz` फ़ाइलें स्ट्रीम नहीं करता।
+- रिज़ॉल्वर अखंडता जाँच के लिए प्रतिक्रियाओं में `ETag`, `Digest`, `X-ClawHub-Artifact-Type`, और
+  `X-ClawHub-Artifact-Sha256` हेडर शामिल होते हैं।
+- केवल रजिस्ट्री वाला मेटाडेटा डाउनलोड किए गए संग्रह में इंजेक्ट नहीं किया जाता।
+- लंबित VirusTotal स्कैन डाउनलोड अवरुद्ध नहीं करते; दुर्भावनापूर्ण रिलीज़ `403` लौटाती हैं।
+- निजी पैकेज `404` लौटाते हैं, जब तक कि कॉलर स्वामी न हो।
 
 ### `GET /api/npm/{package}`
 
-ClawPack-backed package versions के लिए npm-compatible packument लौटाता है।
+ClawPack-समर्थित पैकेज संस्करणों के लिए npm-संगत पैक्यूमेंट लौटाता है।
 
-नोट्स:
+टिप्पणियाँ:
 
-- केवल uploaded ClawPack npm-pack tarballs वाले versions listed होते हैं।
-- Legacy ZIP-only versions जानबूझकर omitted हैं।
-- `dist.tarball`, `dist.integrity`, और `dist.shasum` npm-compatible
-  fields का उपयोग करते हैं ताकि users चाहें तो npm को mirror पर point कर सकें।
-- Scoped package packuments `/api/npm/@scope/name` और npm के
-  encoded `/api/npm/@scope%2Fname` request path, दोनों को support करते हैं।
+- केवल अपलोड किए गए ClawPack npm-pack टारबॉल वाले संस्करण सूचीबद्ध होते हैं।
+- पुराने केवल-ZIP संस्करण जानबूझकर छोड़े जाते हैं।
+- `dist.tarball`, `dist.integrity`, और `dist.shasum` npm-संगत
+  फ़ील्ड का उपयोग करते हैं, ताकि उपयोगकर्ता चाहें तो npm को मिरर पर इंगित कर सकें।
+- स्कोप किए गए पैकेज पैक्यूमेंट `/api/npm/@scope/name` और npm के
+  एन्कोड किए गए `/api/npm/@scope%2Fname` अनुरोध पथ, दोनों का समर्थन करते हैं।
 
 ### `GET /api/npm/{package}/-/{tarball}.tgz`
 
-npm mirror clients के लिए exact uploaded ClawPack tarball bytes stream करता है।
+npm मिरर क्लाइंट के लिए अपलोड किए गए सटीक ClawPack टारबॉल बाइट्स स्ट्रीम करता है।
 
-नोट्स:
+टिप्पणियाँ:
 
-- download rate bucket का उपयोग करता है।
-- Download headers में ClawHub SHA-256 और npm integrity/shasum metadata शामिल होता है।
-- Moderation और private package access checks अभी भी लागू होते हैं।
+- डाउनलोड दर बकेट का उपयोग करता है।
+- डाउनलोड हेडर में ClawHub SHA-256 के साथ npm अखंडता/shasum मेटाडेटा शामिल होता है।
+- मॉडरेशन और निजी पैकेज अभिगम जाँच अब भी लागू होती हैं।
 
 ### `GET /api/v1/resolve`
 
-local fingerprint को known version पर map करने के लिए CLI द्वारा उपयोग किया जाता है।
+किसी स्थानीय फ़िंगरप्रिंट को ज्ञात संस्करण से मैप करने के लिए CLI द्वारा उपयोग किया जाता है।
 
 क्वेरी पैरामीटर:
 
 - `slug` (आवश्यक)
-- `hash` (आवश्यक): bundle fingerprint का 64-char hex sha256
+- `hash` (आवश्यक): बंडल फ़िंगरप्रिंट का 64-वर्णीय हेक्स sha256
 
 प्रतिक्रिया:
 
@@ -1277,28 +1291,27 @@ local fingerprint को known version पर map करने के लिए 
 
 ### `GET /api/v1/download`
 
-hosted skill version ZIP download करता है, या `clean` या `suspicious` scan और बिना hosted
-version वाले current GitHub-backed skill के लिए GitHub source handoff लौटाता है।
+होस्ट किए गए skill संस्करण की ZIP डाउनलोड करता है, या ऐसे मौजूदा GitHub-समर्थित skill के लिए GitHub स्रोत हैंडऑफ़ लौटाता है जिसकी `clean` या `suspicious` स्कैन स्थिति हो और जिसका कोई होस्ट किया गया संस्करण न हो।
 
 क्वेरी पैरामीटर:
 
 - `slug` (आवश्यक)
-- `version` (वैकल्पिक): semver string
-- `tag` (वैकल्पिक): tag name (जैसे `latest`)
+- `version` (वैकल्पिक): semver स्ट्रिंग
+- `tag` (वैकल्पिक): टैग नाम (उदा. `latest`)
 
-नोट्स:
+टिप्पणियाँ:
 
-- यदि `version` और `tag` में से कोई भी provided नहीं है, तो latest version उपयोग किया जाता है।
-- Soft-deleted versions `410` लौटाते हैं।
-- GitHub-backed skill handoffs bytes को proxy या mirror नहीं करते। JSON response में
+- यदि न तो `version` और न ही `tag` दिया गया है, तो नवीनतम संस्करण का उपयोग किया जाता है।
+- सॉफ़्ट-डिलीट किए गए संस्करण `410` लौटाते हैं।
+- GitHub-समर्थित skill हैंडऑफ़ बाइट्स को प्रॉक्सी या मिरर नहीं करते। JSON प्रतिक्रिया में
   `sourceRef: "public-github"`, `repo`, `commit`, `path`, `contentHash`,
-  और `archiveUrl` शामिल होते हैं; scan/current state एक gate है और success
-  payload metadata के रूप में शामिल नहीं होती।
-- Download stats प्रति UTC day unique identities के रूप में counted हैं (`userId` जब API token valid हो, अन्यथा IP)।
+  और `archiveUrl` शामिल होते हैं; स्कैन/वर्तमान स्थिति एक गेट है और सफल
+  पेलोड मेटाडेटा के रूप में शामिल नहीं होती।
+- डाउनलोड आँकड़े प्रति UTC दिन विशिष्ट पहचानों के रूप में गिने जाते हैं (API टोकन मान्य होने पर `userId`, अन्यथा IP)।
 
-## प्रमाणीकरण endpoints (Bearer token)
+## प्रमाणीकरण एंडपॉइंट (Bearer टोकन)
 
-सभी endpoints को आवश्यक है:
+सभी एंडपॉइंट के लिए आवश्यक है:
 
 ```
 Authorization: Bearer clh_...
@@ -1306,173 +1319,175 @@ Authorization: Bearer clh_...
 
 ### `GET /api/v1/whoami`
 
-token validate करता है और user handle लौटाता है।
+टोकन सत्यापित करता है और उपयोगकर्ता हैंडल लौटाता है।
 
 ### `POST /api/v1/skills`
 
-नया version publish करता है।
+नया संस्करण प्रकाशित करता है।
 
-- Preferred: `payload` JSON + `files[]` blobs के साथ `multipart/form-data`।
-- `files` (storageId-based) वाला JSON body भी accepted है।
-- वैकल्पिक payload field: `ownerHandle`। मौजूद होने पर, API उस
-  publisher को server-side resolve करता है और actor के पास publisher access होना आवश्यक है।
-- वैकल्पिक payload field: `migrateOwner`। `ownerHandle` के साथ `true` होने पर,
-  यदि actor current और target publishers दोनों पर admin/owner है, तो existing skill उस owner पर move हो सकता है।
-  इस opt-in के बिना, owner changes
-  rejected हैं।
+- वरीय: `multipart/form-data`, `payload` JSON + `files[]` ब्लॉब्स के साथ।
+- `files` (storageId-आधारित) वाला JSON बॉडी भी स्वीकार किया जाता है।
+- वैकल्पिक पेलोड फ़ील्ड: `ownerHandle`। मौजूद होने पर, API उस
+  प्रकाशक को सर्वर की ओर से रिज़ॉल्व करता है और कर्ता के पास प्रकाशक पहुँच होना आवश्यक बनाता है।
+- वैकल्पिक पेलोड फ़ील्ड: `migrateOwner`। `ownerHandle` के साथ `true` होने पर,
+  किसी मौजूदा skill को उस स्वामी के पास स्थानांतरित किया जा सकता है, यदि कर्ता वर्तमान
+  और लक्षित दोनों प्रकाशकों पर एडमिन/स्वामी हो। इस स्पष्ट सहमति के बिना, स्वामी परिवर्तन
+  अस्वीकार कर दिए जाते हैं।
 
 ### `POST /api/v1/packages`
 
-code-plugin या bundle-plugin release publish करता है।
+code-plugin या bundle-plugin रिलीज़ प्रकाशित करता है।
 
-- Bearer token auth आवश्यक है।
+- Bearer टोकन प्रमाणीकरण आवश्यक है।
 - `multipart/form-data` आवश्यक है।
-- Allowed form fields हैं `payload`, repeated `files` blobs, या एक `clawpack`
-  tarball reference। `clawpack` एक `.tgz` blob या
-  upload-url flow द्वारा returned storage id हो सकता है। Staged storage-id publishes में उस upload URL के साथ returned
-  `clawpackUploadTicket` भी शामिल होना चाहिए।
-- उसी request में `files` या `clawpack` में से एक का उपयोग करें, दोनों का कभी नहीं।
-- JSON bodies और caller-supplied `payload.files` / `payload.artifact`
-  metadata rejected हैं।
-- Direct multipart publish requests 18MB पर capped हैं। ClawPack tarballs
-  120MB tarball cap तक upload-url flow का उपयोग कर सकते हैं।
-- वैकल्पिक payload field: `ownerHandle`। मौजूद होने पर, केवल admins उस owner की ओर से publish कर सकते हैं।
+- अनुमत फ़ॉर्म फ़ील्ड हैं `payload`, दोहराए गए `files` ब्लॉब्स, या एक `clawpack`
+  टारबॉल संदर्भ। `clawpack` एक `.tgz` ब्लॉब या
+  upload-url प्रवाह द्वारा लौटाई गई स्टोरेज आईडी हो सकता है। चरणबद्ध स्टोरेज-आईडी प्रकाशनों में उस
+  अपलोड URL के साथ लौटाया गया `clawpackUploadTicket` भी शामिल होना चाहिए।
+- या तो `files` या `clawpack` का उपयोग करें, एक ही अनुरोध में दोनों का कभी नहीं।
+- JSON बॉडी और कॉलर द्वारा दिए गए `payload.files` / `payload.artifact`
+  मेटाडेटा अस्वीकार किए जाते हैं।
+- प्रत्यक्ष multipart प्रकाशन अनुरोधों की सीमा 18MB है। ClawPack टारबॉल
+  120MB टारबॉल सीमा तक upload-url प्रवाह का उपयोग कर सकते हैं।
+- वैकल्पिक पेलोड फ़ील्ड: `ownerHandle`। मौजूद होने पर, केवल एडमिन उस स्वामी की ओर से प्रकाशित कर सकते हैं।
 
-Validation highlights:
+सत्यापन की मुख्य बातें:
 
-- `family` को `code-plugin` या `bundle-plugin` होना चाहिए।
-- Plugin packages को `openclaw.plugin.json` आवश्यक है। ClawPack `.tgz` uploads में
-  इसे `package/openclaw.plugin.json` पर contain करना चाहिए।
-- Code plugins को `package.json`, source repo metadata, source commit
-  metadata, config schema metadata, `openclaw.compat.pluginApi`, और
+- `family` का `code-plugin` या `bundle-plugin` होना आवश्यक है।
+- Plugin पैकेजों के लिए `openclaw.plugin.json` आवश्यक है। ClawPack `.tgz` अपलोड में
+  यह `package/openclaw.plugin.json` पर होना चाहिए।
+- कोड Plugin के लिए `package.json`, स्रोत रिपॉज़िटरी मेटाडेटा, स्रोत कमिट
+  मेटाडेटा, कॉन्फ़िग स्कीमा मेटाडेटा, `openclaw.compat.pluginApi`, और
   `openclaw.build.openclawVersion` आवश्यक हैं।
-- `openclaw.hostTargets` और `openclaw.environment` वैकल्पिक metadata हैं।
-- केवल `openclaw` org publisher और current `openclaw` org members के
-  personal publishers `official` channel पर publish कर सकते हैं।
-- On-behalf publishes अब भी target owner account के विरुद्ध official-channel eligibility validate करते हैं।
+- `openclaw.hostTargets` और `openclaw.environment` वैकल्पिक मेटाडेटा हैं।
+- केवल `openclaw` संगठन प्रकाशक और वर्तमान `openclaw` संगठन सदस्यों के
+  व्यक्तिगत प्रकाशक `official` चैनल पर प्रकाशित कर सकते हैं।
+- किसी की ओर से किए गए प्रकाशन भी लक्षित स्वामी खाते के विरुद्ध आधिकारिक-चैनल पात्रता सत्यापित करते हैं।
 
 ### `DELETE /api/v1/skills/{slug}` / `POST /api/v1/skills/{slug}/undelete`
 
-skill को soft-delete / restore करें (owner, moderator, या admin)।
+किसी skill को सॉफ़्ट-डिलीट / पुनर्स्थापित करें (स्वामी, मॉडरेटर या एडमिन)।
 
-वैकल्पिक JSON body:
+वैकल्पिक JSON बॉडी:
 
 ```json
-{ "reason": "Held for moderation pending legal review." }
+{ "reason": "कानूनी समीक्षा लंबित होने के कारण मॉडरेशन हेतु रोका गया।" }
 ```
 
-मौजूद होने पर, `reason` skill moderation note के रूप में stored होता है और audit log में copied होता है।
-Owner-initiated soft deletes slug को 30 दिनों के लिए reserve करते हैं, फिर slug को
-दूसरा publisher claim कर सकता है। जब यह expiry लागू होती है, delete response में `slugReservedUntil` शामिल होता है।
-Moderator/admin hides और security removals इस तरह expire नहीं होते।
+मौजूद होने पर, `reason` को skill मॉडरेशन टिप्पणी के रूप में संग्रहीत किया जाता है और ऑडिट लॉग में कॉपी किया जाता है।
+स्वामी द्वारा आरंभ किए गए सॉफ़्ट डिलीट स्लग को 30 दिनों के लिए आरक्षित रखते हैं, जिसके बाद
+कोई अन्य प्रकाशक उस स्लग का दावा कर सकता है। यह समाप्ति लागू होने पर डिलीट प्रतिक्रिया में `slugReservedUntil` शामिल होता है।
+मॉडरेटर/एडमिन द्वारा छिपाना और सुरक्षा निष्कासन इस प्रकार समाप्त नहीं होते।
 
-Delete response:
+डिलीट प्रतिक्रिया:
 
 ```json
 { "ok": true, "slugReservedUntil": 1730000000000 }
 ```
 
-Status codes:
+स्थिति कोड:
 
-- `200`: ok
-- `401`: unauthorized
-- `403`: forbidden
-- `404`: skill/user not found
-- `500`: internal server error
+- `200`: ठीक
+- `401`: अनधिकृत
+- `403`: निषिद्ध
+- `404`: skill/उपयोगकर्ता नहीं मिला
+- `500`: आंतरिक सर्वर त्रुटि
 
 ### `POST /api/v1/users/publisher`
 
-Admin-only। किसी handle के लिए org publisher मौजूद होना सुनिश्चित करता है। यदि handle अभी भी
-legacy shared user/personal publisher की ओर point करता है, तो endpoint पहले उसे org publisher में migrate करता है।
-Newly-created org के लिए, `memberHandle` दें; acting admin को member के रूप में add नहीं किया जाता।
-`memberRole` डिफ़ॉल्ट रूप से `owner` होता है।
+केवल एडमिन। सुनिश्चित करता है कि किसी हैंडल के लिए संगठन प्रकाशक मौजूद हो। यदि हैंडल अब भी किसी
+पुराने साझा उपयोगकर्ता/व्यक्तिगत प्रकाशक की ओर संकेत करता है, तो एंडपॉइंट पहले उसे संगठन प्रकाशक में माइग्रेट करता है।
+नव-निर्मित संगठन के लिए `memberHandle` दें; कार्यरत एडमिन को सदस्य के रूप में नहीं जोड़ा जाता।
+`memberRole` का डिफ़ॉल्ट `owner` है।
 
-- Body: `{ "handle": "openclaw", "displayName": "OpenClaw", "memberHandle": "alice", "memberRole": "owner", "trusted": true }`
-- Response: `{ "ok": true, "publisherId": "...", "handle": "openclaw", "created": true, "migrated": false, "trusted": true, "member": { "userId": "...", "handle": "alice", "role": "owner" } }`
+- बॉडी: `{ "handle": "openclaw", "displayName": "OpenClaw", "memberHandle": "alice", "memberRole": "owner", "trusted": true }`
+- प्रतिक्रिया: `{ "ok": true, "publisherId": "...", "handle": "openclaw", "created": true, "migrated": false, "trusted": true, "member": { "userId": "...", "handle": "alice", "role": "owner" } }`
 
 ### `POST /api/v1/publishers`
 
-Authenticated self-serve org publisher creation। नया org publisher बनाता है और
-caller को owner के रूप में add करता है। यह endpoint existing user/personal handles को migrate नहीं करता और
-publisher को trusted/official mark नहीं करता।
+प्रमाणीकृत स्वयं-सेवा संगठन प्रकाशक निर्माण। नया संगठन प्रकाशक बनाता है और
+कॉलर को स्वामी के रूप में जोड़ता है। यह एंडपॉइंट मौजूदा उपयोगकर्ता/व्यक्तिगत हैंडल माइग्रेट नहीं करता और
+प्रकाशक को विश्वसनीय/आधिकारिक चिह्नित नहीं करता।
 
-- Body: `{ "handle": "opik", "displayName": "Opik" }`
-- Response: `{ "ok": true, "publisherId": "...", "handle": "opik", "created": true, "trusted": false }`
-- जब handle पहले से किसी publisher, user, या personal publisher द्वारा used हो, तो `409` लौटाता है।
+- बॉडी: `{ "handle": "opik", "displayName": "Opik" }`
+- प्रतिक्रिया: `{ "ok": true, "publisherId": "...", "handle": "opik", "created": true, "trusted": false }`
+- यदि हैंडल पहले से किसी प्रकाशक, उपयोगकर्ता या व्यक्तिगत प्रकाशक द्वारा उपयोग किया जा रहा हो, तो `409` लौटाता है।
 
 ### `POST /api/v1/users/reserve`
 
-Admin-only। release publish किए बिना rightful owner के लिए root slugs और package names reserve करता है।
-Package names बिना release rows वाले private placeholder packages बन जाते हैं, ताकि वही
-owner बाद में real code-plugin या bundle-plugin release को उस name में publish कर सके।
+केवल एडमिन। रिलीज़ प्रकाशित किए बिना वास्तविक स्वामी के लिए रूट स्लग और पैकेज नाम आरक्षित करता है।
+पैकेज नाम बिना किसी रिलीज़ पंक्ति वाले निजी प्लेसहोल्डर पैकेज बन जाते हैं, ताकि वही
+स्वामी बाद में उस नाम में वास्तविक code-plugin या bundle-plugin रिलीज़ प्रकाशित कर सके।
 
-- Body: `{ "handle": "openclaw", "slugs": ["diffs"], "packageNames": ["@openclaw/diffs"], "reason": "reserved for official OpenClaw plugin" }`
-- Response: `{ "ok": true, "succeeded": 2, "failed": 0, "results": [{ "kind": "slug", "name": "diffs", "ok": true, "action": "reserved" }] }`
+- बॉडी: `{ "handle": "openclaw", "slugs": ["diffs"], "packageNames": ["@openclaw/diffs"], "reason": "reserved for official OpenClaw plugin" }`
+- प्रतिक्रिया: `{ "ok": true, "succeeded": 2, "failed": 0, "results": [{ "kind": "slug", "name": "diffs", "ok": true, "action": "reserved" }] }`
 
 ### `POST /api/v1/users/publisher-recovery`
 
-Admin-only। Convex Auth account rows edit किए बिना verified replacement GitHub OAuth principal
-के लिए personal publisher recover करता है। Request में दोनों immutable GitHub
-provider account ids बताने होंगे; mutable handles केवल operator-facing guard के रूप में used होते हैं।
+केवल एडमिन। Convex Auth खाता पंक्तियों को संपादित किए बिना सत्यापित प्रतिस्थापन GitHub OAuth प्रिंसिपल के लिए
+व्यक्तिगत प्रकाशक पुनर्प्राप्त करता है। अनुरोध में दोनों अपरिवर्तनीय GitHub
+प्रदाता खाता आईडी का उल्लेख होना चाहिए; परिवर्तनशील हैंडल केवल ऑपरेटर-सामना करने वाले गार्ड के रूप में उपयोग किए जाते हैं।
 
-एंडपॉइंट डिफ़ॉल्ट रूप से ड्राई-रन होता है। रिकवरी लागू करने के लिए स्टाफ़ द्वारा दोनों GitHub principals के बीच निरंतरता स्वतंत्र रूप से सत्यापित करने के बाद `dryRun: false` और
-`confirmIdentityVerified: true` आवश्यक हैं। जब गंतव्य उपयोगकर्ता के मौजूदा व्यक्तिगत
-publisher के पास skills, packages, या GitHub skill sources हों, तो रिकवरी fail closed होती है।
-रिकवरी, पुनर्प्राप्त publisher के skills, skill slug aliases, packages, package inspector warnings, और derived search digest rows के लिए legacy `ownerUserId` फ़ील्ड भी माइग्रेट करती है ताकि
-direct-owner paths नए publisher authority से मेल खाएँ। पुनर्प्राप्त handle के लिए सक्रिय protected-handle
-reservation भी replacement user को फिर से सौंपा जाता है ताकि बाद का
-profile synchronization पूर्व उपयोगकर्ता की competing authority को restore न कर सके। प्रत्येक primary table प्रति apply transaction
-100 rows तक सीमित है; बड़ी recoveries को पहले resumable owner migration का उपयोग करना होगा।
-GitHub skill sources publisher-scoped हैं और उन्हें rewrite करने के बजाय checked के रूप में report किया जाता है।
+एंडपॉइंट का डिफ़ॉल्ट dry-run है। पुनर्प्राप्ति लागू करने के लिए कर्मचारियों द्वारा दोनों
+GitHub प्रिंसिपल के बीच निरंतरता का स्वतंत्र रूप से सत्यापन करने के बाद `dryRun: false` और
+`confirmIdentityVerified: true` आवश्यक हैं। यदि गंतव्य उपयोगकर्ता के वर्तमान व्यक्तिगत
+प्रकाशक के पास skills, पैकेज या GitHub skill स्रोत हों, तो पुनर्प्राप्ति बंद स्थिति में विफल होती है।
+पुनर्प्राप्ति, पुनर्प्राप्त प्रकाशक के skills, skill स्लग उपनामों, पैकेजों,
+पैकेज इंस्पेक्टर चेतावनियों और व्युत्पन्न खोज डाइजेस्ट पंक्तियों के लिए पुराने `ownerUserId` फ़ील्ड भी माइग्रेट करती है, ताकि
+प्रत्यक्ष-स्वामी पथ नई प्रकाशक प्राधिकृति से सहमत हों। पुनर्प्राप्त हैंडल का एक सक्रिय संरक्षित-हैंडल
+आरक्षण भी प्रतिस्थापन उपयोगकर्ता को पुनः सौंप दिया जाता है, ताकि बाद का
+प्रोफ़ाइल सिंक्रनाइज़ेशन पूर्व उपयोगकर्ता की प्रतिस्पर्धी प्राधिकृति पुनर्स्थापित न कर सके। प्रत्येक प्राथमिक तालिका
+प्रति लागू लेनदेन 100 पंक्तियों तक सीमित है; बड़ी पुनर्प्राप्तियों को पहले पुनः आरंभ किए जा सकने वाले स्वामी माइग्रेशन का उपयोग करना चाहिए।
+GitHub skill स्रोत प्रकाशक-स्कोप वाले होते हैं और पुनर्लिखित किए जाने के बजाय जाँचे गए के रूप में रिपोर्ट किए जाते हैं।
 
-- Body: `{ "handle": "gingiris", "nextUserHandle": "gingiris-1031", "previousGitHubProviderAccountId": "123", "nextGitHubProviderAccountId": "456", "reason": "Verified account continuity for issue #2555", "confirmIdentityVerified": true, "dryRun": false }`
-- Response: `{ "ok": true, "dryRun": false, "recovered": true, "publisherId": "...", "handle": "gingiris", "previousUser": { "userId": "...", "handle": "gingiris", "nextHandle": "gingiris-recovered", "githubProviderAccountId": "123", "authAccountCount": 1 }, "nextUser": { "userId": "...", "handle": "gingiris-1031", "nextHandle": "gingiris", "githubProviderAccountId": "456", "authAccountCount": 1 }, "retiredPersonalPublisher": null, "resourceOwnerMigration": { "limitPerTable": 100, "skills": 1, "skillSlugAliases": 1, "packages": 0, "packageInspectorWarnings": 0, "githubSourcesChecked": 1, "handleReservations": 1 }, "identityVerified": true, "reason": "Verified account continuity for issue #2555" }`
+- बॉडी: `{ "handle": "gingiris", "nextUserHandle": "gingiris-1031", "previousGitHubProviderAccountId": "123", "nextGitHubProviderAccountId": "456", "reason": "Verified account continuity for issue #2555", "confirmIdentityVerified": true, "dryRun": false }`
+- प्रतिक्रिया: `{ "ok": true, "dryRun": false, "recovered": true, "publisherId": "...", "handle": "gingiris", "previousUser": { "userId": "...", "handle": "gingiris", "nextHandle": "gingiris-recovered", "githubProviderAccountId": "123", "authAccountCount": 1 }, "nextUser": { "userId": "...", "handle": "gingiris-1031", "nextHandle": "gingiris", "githubProviderAccountId": "456", "authAccountCount": 1 }, "retiredPersonalPublisher": null, "resourceOwnerMigration": { "limitPerTable": 100, "skills": 1, "skillSlugAliases": 1, "packages": 0, "packageInspectorWarnings": 0, "githubSourcesChecked": 1, "handleReservations": 1 }, "identityVerified": true, "reason": "Verified account continuity for issue #2555" }`
 
-### Owner slug management endpoints
+### स्वामी स्लग प्रबंधन एंडपॉइंट
 
 - `POST /api/v1/skills/{slug}/rename`
-  - Body: `{ "newSlug": "new-canonical-slug" }`
-  - Response: `{ "ok": true, "slug": "new-canonical-slug", "previousSlug": "old-slug" }`
+  - बॉडी: `{ "newSlug": "new-canonical-slug" }`
+  - प्रतिक्रिया: `{ "ok": true, "slug": "new-canonical-slug", "previousSlug": "old-slug" }`
 - `POST /api/v1/skills/{slug}/merge`
-  - Body: `{ "targetSlug": "canonical-target-slug" }`
-  - Response: `{ "ok": true, "sourceSlug": "old-slug", "targetSlug": "canonical-target-slug" }`
+  - बॉडी: `{ "targetSlug": "canonical-target-slug" }`
+  - प्रतिक्रिया: `{ "ok": true, "sourceSlug": "old-slug", "targetSlug": "canonical-target-slug" }`
 
-नोट्स:
+टिप्पणियाँ:
 
-- दोनों endpoints के लिए API token auth आवश्यक है और ये केवल skill owner के लिए काम करते हैं।
-- `rename` पिछले slug को redirect alias के रूप में सुरक्षित रखता है।
-- `merge` source listing को छिपाता है और source slug को target listing पर redirect करता है।
+- दोनों एंडपॉइंट के लिए API टोकन प्रमाणीकरण आवश्यक है और वे केवल skill स्वामी के लिए काम करते हैं।
+- `rename` पिछले स्लग को रीडायरेक्ट उपनाम के रूप में सुरक्षित रखता है।
+- `merge` स्रोत सूची को छिपाता है और स्रोत स्लग को लक्षित सूची पर रीडायरेक्ट करता है।
 
-### Transfer ownership endpoints
+### स्वामित्व हस्तांतरण एंडपॉइंट
 
 - `POST /api/v1/skills/{slug}/transfer`
-  - Body: `{ "toUserHandle": "target_handle", "message": "optional" }`
-  - Response: `{ "ok": true, "transferId": "skillOwnershipTransfers:...", "toUserHandle": "target_handle", "expiresAt": 1730000000000 }`
+  - बॉडी: `{ "toUserHandle": "target_handle", "message": "optional" }`
+  - प्रतिक्रिया: `{ "ok": true, "transferId": "skillOwnershipTransfers:...", "toUserHandle": "target_handle", "expiresAt": 1730000000000 }`
 - `POST /api/v1/skills/{slug}/transfer/accept`
 - `POST /api/v1/skills/{slug}/transfer/reject`
 - `POST /api/v1/skills/{slug}/transfer/cancel`
-  - Response (accept/reject/cancel): `{ "ok": true, "skillSlug": "demo-skill?" }`
+  - प्रतिक्रिया (स्वीकार/अस्वीकार/रद्द): `{ "ok": true, "skillSlug": "demo-skill?" }`
 - `GET /api/v1/transfers/incoming`
 - `GET /api/v1/transfers/outgoing`
-  - Response shape: `{ "transfers": [{ "_id": "...", "skill": { "slug": "demo", "displayName": "Demo" }, "fromUser"|"toUser": { "handle": "..." }, "message": "...", "requestedAt": 0, "expiresAt": 0 }] }`
+  - प्रतिक्रिया संरचना: `{ "transfers": [{ "_id": "...", "skill": { "slug": "demo", "displayName": "Demo" }, "fromUser"|"toUser": { "handle": "..." }, "message": "...", "requestedAt": 0, "expiresAt": 0 }] }`
 
 ### `POST /api/v1/users/ban`
 
-किसी उपयोगकर्ता को ban करें और owned skills को hard-delete करें (केवल moderator/admin)।
+किसी उपयोगकर्ता को प्रतिबंधित करें और उसके स्वामित्व वाले skills स्थायी रूप से हटाएँ (केवल मॉडरेटर/एडमिन)।
 
-Body:
+बॉडी:
 
 ```json
-{ "handle": "user_handle", "reason": "optional ban reason" }
+{ "handle": "user_handle", "reason": "वैकल्पिक प्रतिबंध कारण" }
 ```
 
 या
 
 ```json
-{ "userId": "users_...", "reason": "optional ban reason" }
+{ "userId": "users_...", "reason": "वैकल्पिक प्रतिबंध कारण" }
 ```
 
-Response:
+प्रतिक्रिया:
 
 ```json
 { "ok": true, "alreadyBanned": false, "deletedSkills": 3 }
@@ -1480,21 +1495,21 @@ Response:
 
 ### `POST /api/v1/users/unban`
 
-किसी उपयोगकर्ता को unban करें और eligible skills को restore करें (केवल admin)।
+किसी उपयोगकर्ता का प्रतिबंध हटाएँ और पात्र skills पुनर्स्थापित करें (केवल एडमिन)।
 
-Body:
+बॉडी:
 
 ```json
-{ "handle": "user_handle", "reason": "optional unban reason" }
+{ "handle": "user_handle", "reason": "वैकल्पिक प्रतिबंध हटाने का कारण" }
 ```
 
 या
 
 ```json
-{ "userId": "users_...", "reason": "optional unban reason" }
+{ "userId": "users_...", "reason": "वैकल्पिक प्रतिबंध हटाने का कारण" }
 ```
 
-Response:
+प्रतिक्रिया:
 
 ```json
 { "ok": true, "alreadyUnbanned": false, "restoredSkills": 3 }
@@ -1502,22 +1517,22 @@ Response:
 
 ### `POST /api/v1/users/reclassify-ban`
 
-किसी मौजूदा ban के stored reason को unban किए बिना या
-content restore किए बिना बदलें (केवल admin)। जब तक `dryRun` `false` न हो, डिफ़ॉल्ट dry-run होता है।
+प्रतिबंध हटाए या सामग्री पुनर्स्थापित किए बिना किसी मौजूदा प्रतिबंध का संग्रहीत कारण बदलें
+(केवल एडमिन)। जब तक `dryRun`, `false` न हो, डिफ़ॉल्ट dry-run है।
 
-Body:
+बॉडी:
 
 ```json
-{ "handle": "user_handle", "reason": "bulk publishing spam", "dryRun": true }
+{ "handle": "user_handle", "reason": "थोक प्रकाशन स्पैम", "dryRun": true }
 ```
 
 या
 
 ```json
-{ "userId": "users_...", "reason": "bulk publishing spam", "dryRun": false }
+{ "userId": "users_...", "reason": "थोक प्रकाशन स्पैम", "dryRun": false }
 ```
 
-Response:
+प्रतिक्रिया:
 
 ```json
 {
@@ -1525,17 +1540,17 @@ Response:
   "dryRun": false,
   "userId": "users_...",
   "handle": "user_handle",
-  "previousReason": "malware auto-ban",
-  "nextReason": "bulk publishing spam",
+  "previousReason": "मैलवेयर स्वतः-प्रतिबंध",
+  "nextReason": "थोक प्रकाशन स्पैम",
   "changed": true
 }
 ```
 
 ### `POST /api/v1/users/role`
 
-किसी user role को बदलें (केवल admin)।
+उपयोगकर्ता भूमिका बदलें (केवल एडमिन)।
 
-Body:
+बॉडी:
 
 ```json
 { "handle": "user_handle", "role": "moderator" }
@@ -1547,7 +1562,7 @@ Body:
 { "userId": "users_...", "role": "admin" }
 ```
 
-Response:
+प्रतिक्रिया:
 
 ```json
 { "ok": true, "role": "moderator" }
@@ -1555,15 +1570,15 @@ Response:
 
 ### `GET /api/v1/users`
 
-Users की सूची दें या खोजें (केवल admin)।
+उपयोगकर्ताओं को सूचीबद्ध करें या खोजें (केवल एडमिन)।
 
-Query params:
+क्वेरी पैरामीटर:
 
-- `q` (optional): search query
-- `query` (optional): `q` के लिए alias
-- `limit` (optional): अधिकतम results (default 20, max 200)
+- `q` (वैकल्पिक): खोज क्वेरी
+- `query` (वैकल्पिक): `q` का उपनाम
+- `limit` (वैकल्पिक): अधिकतम परिणाम (डिफ़ॉल्ट 20, अधिकतम 200)
 
-Response:
+प्रतिक्रिया:
 
 ```json
 {
@@ -1571,8 +1586,8 @@ Response:
     {
       "userId": "users_...",
       "handle": "user_handle",
-      "displayName": "User",
-      "name": "User",
+      "displayName": "उपयोगकर्ता",
+      "name": "उपयोगकर्ता",
       "role": "moderator"
     }
   ],
@@ -1582,9 +1597,10 @@ Response:
 
 ### `POST /api/v1/stars/{slug}` / `DELETE /api/v1/stars/{slug}`
 
-एक star (highlights) जोड़ें/हटाएँ। दोनों endpoints idempotent हैं।
+Bookmark जोड़ें/हटाएँ। संगतता के लिए पुराना `stars` रूट और प्रतिक्रिया फ़ील्ड नाम बने हुए हैं।
+दोनों एंडपॉइंट idempotent हैं।
 
-Responses:
+प्रतिक्रियाएँ:
 
 ```json
 { "ok": true, "starred": true, "alreadyStarred": false }
@@ -1594,9 +1610,9 @@ Responses:
 { "ok": true, "unstarred": true, "alreadyUnstarred": false }
 ```
 
-## Legacy CLI endpoints (deprecated)
+## पुराने CLI एंडपॉइंट (अप्रचलित)
 
-पुराने CLI versions के लिए अभी भी supported:
+पुराने CLI संस्करणों के लिए अब भी समर्थित:
 
 - `GET /api/cli/whoami`
 - `POST /api/cli/upload-url`
@@ -1605,23 +1621,23 @@ Responses:
 - `POST /api/cli/skill/delete`
 - `POST /api/cli/skill/undelete`
 
-removal plan के लिए `DEPRECATIONS.md` देखें।
+हटाने की योजना के लिए `DEPRECATIONS.md` देखें।
 
-`POST /api/cli/upload-url` `uploadUrl` और `uploadTicket` लौटाता है। ऐसे Package
-publishes जो ClawPack tarball stage करते हैं, उन्हें परिणामी storage id को
-`clawpack` के रूप में और लौटाए गए ticket को `clawpackUploadTicket` के रूप में भेजना होगा।
+`POST /api/cli/upload-url`, `uploadUrl` और `uploadTicket` लौटाता है। ऐसे पैकेज
+प्रकाशन जो ClawPack टारबॉल को चरणबद्ध करते हैं, उन्हें परिणामी स्टोरेज आईडी
+`clawpack` के रूप में और लौटाया गया टिकट `clawpackUploadTicket` के रूप में भेजना आवश्यक है।
 
-## Registry discovery (`/.well-known/clawhub.json`)
+## रजिस्ट्री खोज (`/.well-known/clawhub.json`)
 
-CLI site से registry/auth settings discover कर सकता है:
+CLI साइट से रजिस्ट्री/प्रमाणीकरण सेटिंग्स खोज सकता है:
 
-- `/.well-known/clawhub.json` (JSON, preferred)
-- `/.well-known/clawdhub.json` (legacy)
+- `/.well-known/clawhub.json` (JSON, वरीय)
+- `/.well-known/clawdhub.json` (पुराना)
 
-Schema:
+स्कीमा:
 
 ```json
 { "apiBase": "https://clawhub.ai", "authBase": "https://clawhub.ai", "minCliVersion": "0.0.5" }
 ```
 
-यदि आप self-host करते हैं, तो इस file को serve करें (या `CLAWHUB_REGISTRY` explicitly set करें; legacy `CLAWDHUB_REGISTRY`)।
+यदि आप स्वयं होस्ट करते हैं, तो यह फ़ाइल सर्व करें (या `CLAWHUB_REGISTRY` स्पष्ट रूप से सेट करें; पुराना `CLAWDHUB_REGISTRY`)।

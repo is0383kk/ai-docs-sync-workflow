@@ -1,15 +1,16 @@
 ---
 read_when:
     - Je wilt Vydra-mediageneratie in OpenClaw
-    - Je hebt instructies nodig voor het instellen van een Vydra-API-sleutel
+    - Je hebt uitleg nodig voor het instellen van een Vydra-API-sleutel
 summary: Gebruik Vydra voor afbeeldingen, video en spraak in OpenClaw
 title: Vydra
 x-i18n:
-    generated_at: "2026-07-12T09:15:52Z"
+    generated_at: "2026-07-27T05:31:59Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: e775bdd6f4ec7d1f5189910af450b92d8d6e831c17c338271afee962636ba69f
+    source_hash: cc3856c2dd740e87d70d7eedefd9eae7905ab547aa0d68a1c479a305c59b2982
     source_path: providers/vydra.md
     workflow: 16
 ---
@@ -22,18 +23,18 @@ De meegeleverde Vydra-plugin voegt het volgende toe:
 
 OpenClaw gebruikt dezelfde `VYDRA_API_KEY` voor alle drie de mogelijkheden.
 
-| Eigenschap             | Waarde                                                                    |
-| ---------------------- | ------------------------------------------------------------------------- |
-| Provider-id            | `vydra`                                                                   |
-| Plugin                 | meegeleverd, `enabledByDefault: true`                                      |
-| Omgevingsvariabele voor authenticatie | `VYDRA_API_KEY`                                              |
-| Onboarding-vlag        | `--auth-choice vydra-api-key`                                             |
-| Rechtstreekse CLI-vlag | `--vydra-api-key <key>`                                                   |
-| Contracten             | `imageGenerationProviders`, `videoGenerationProviders`, `speechProviders` |
-| Basis-URL              | `https://www.vydra.ai/api/v1` (gebruik de `www`-host)                     |
+| Eigenschap      | Waarde                                                                    |
+| --------------- | ------------------------------------------------------------------------- |
+| Provider-id     | `vydra`                                                        |
+| Plugin          | meegeleverd, `enabledByDefault: true`                                          |
+| Auth-omgevingsvariabele | `VYDRA_API_KEY`                                                |
+| Onboardingvlag  | `--auth-choice vydra-api-key`                                                        |
+| Directe CLI-vlag | `--vydra-api-key <key>`                                                       |
+| Contracten      | `imageGenerationProviders`, `videoGenerationProviders`, `speechProviders`               |
+| Basis-URL       | `https://www.vydra.ai/api/v1` (gebruik de host `www`)                   |
 
 <Warning>
-Gebruik `https://www.vydra.ai/api/v1` als basis-URL. Vydra's hoofddomein (`https://vydra.ai/api/v1`) leidt momenteel om naar `www`. Sommige HTTP-clients verwijderen `Authorization` bij die omleiding tussen hosts, waardoor een geldige API-sleutel ten onrechte een misleidende authenticatiefout oplevert. De meegeleverde plugin normaliseert elke geconfigureerde `vydra.ai`-basis-URL naar `www.vydra.ai` om dit te voorkomen.
+Gebruik `https://www.vydra.ai/api/v1` als basis-URL. De apexhost van Vydra (`https://vydra.ai/api/v1`) verwijst momenteel door naar `www`. Sommige HTTP-clients laten `Authorization` weg bij die doorverwijzing tussen hosts, waardoor een geldige API-sleutel resulteert in een misleidende authenticatiefout. De meegeleverde Plugin normaliseert elke geconfigureerde `vydra.ai`-basis-URL naar `www.vydra.ai` om dit te voorkomen.
 </Warning>
 
 ## Installatie
@@ -52,7 +53,7 @@ Gebruik `https://www.vydra.ai/api/v1` als basis-URL. Vydra's hoofddomein (`https
 
   </Step>
   <Step title="Een standaardmogelijkheid kiezen">
-    Kies hieronder een of meer mogelijkheden (afbeelding, video of spraak) en pas de bijbehorende configuratie toe.
+    Kies een of meer van de onderstaande mogelijkheden (afbeelding, video of spraak) en pas de bijbehorende configuratie toe.
   </Step>
 </Steps>
 
@@ -78,7 +79,7 @@ Gebruik `https://www.vydra.ai/api/v1` als basis-URL. Vydra's hoofddomein (`https
     }
     ```
 
-    De meegeleverde ondersteuning is uitsluitend voor tekst-naar-afbeelding, met maximaal één afbeelding per aanvraag. Vydra's gehoste bewerkingsroutes verwachten externe afbeeldings-URL's en de meegeleverde plugin voegt geen Vydra-specifieke uploadbrug toe.
+    De meegeleverde ondersteuning is alleen voor tekst-naar-afbeelding, met maximaal één afbeelding per aanvraag. De gehoste bewerkingsroutes van Vydra verwachten externe afbeeldings-URL's en de meegeleverde Plugin voegt geen Vydra-specifieke uploadbridge toe.
 
     <Note>
     Zie [Afbeeldingen genereren](/nl/tools/image-generation) voor gedeelde toolparameters, providerselectie en failovergedrag.
@@ -108,9 +109,9 @@ Gebruik `https://www.vydra.ai/api/v1` als basis-URL. Vydra's hoofddomein (`https
 
     Opmerkingen:
 
-    - `vydra/kling` weigert lokale bestandsuploads direct; alleen een verwijzing naar een externe afbeeldings-URL werkt.
-    - Vydra's HTTP-route voor `kling` is niet consistent geweest over de vraag of deze `image_url` of `video_url` vereist; de meegeleverde provider verzendt dezelfde externe afbeeldings-URL in beide velden.
-    - De meegeleverde plugin blijft behoudend en stuurt geen ongedocumenteerde stijlopties door, zoals beeldverhouding, resolutie, watermerk of gegenereerde audio.
+    - `vydra/kling` weigert uploads van lokale bestanden vooraf; alleen een verwijzing naar een externe afbeeldings-URL werkt.
+    - De HTTP-route `kling` van Vydra is niet consistent geweest over de vraag of deze `image_url` of `video_url` vereist; de meegeleverde provider verzendt dezelfde externe afbeeldings-URL in beide velden.
+    - De meegeleverde Plugin blijft terughoudend en stuurt geen ongedocumenteerde stijlopties door, zoals beeldverhouding, resolutie, watermerk of gegenereerde audio.
 
     <Note>
     Zie [Video's genereren](/nl/tools/video-generation) voor gedeelde toolparameters, providerselectie en failovergedrag.
@@ -119,7 +120,7 @@ Gebruik `https://www.vydra.ai/api/v1` als basis-URL. Vydra's hoofddomein (`https
   </Accordion>
 
   <Accordion title="Live tests voor video">
-    Provider-specifieke live testdekking:
+    Providerspecifieke live testdekking:
 
     ```bash
     OPENCLAW_LIVE_TEST=1 \
@@ -141,18 +142,16 @@ Gebruik `https://www.vydra.ai/api/v1` als basis-URL. Vydra's hoofddomein (`https
   </Accordion>
 
   <Accordion title="Spraaksynthese">
-    Stel Vydra in als de spraakprovider:
+    Stel Vydra in als spraakprovider:
 
     ```json5
     {
-      messages: {
-        tts: {
-          provider: "vydra",
-          providers: {
-            vydra: {
-              apiKey: "${VYDRA_API_KEY}",
-              voiceId: "21m00Tcm4TlvDq8ikWAM",
-            },
+      tts: {
+        provider: "vydra",
+        providers: {
+          vydra: {
+            apiKey: "${VYDRA_API_KEY}",
+            voiceId: "21m00Tcm4TlvDq8ikWAM",
           },
         },
       },
@@ -164,7 +163,7 @@ Gebruik `https://www.vydra.ai/api/v1` als basis-URL. Vydra's hoofddomein (`https
     - Model: `elevenlabs/tts`
     - Stem-id: `21m00Tcm4TlvDq8ikWAM` ("Rachel")
 
-    De meegeleverde plugin stelt deze ene betrouwbaar werkende standaardstem beschikbaar en retourneert MP3-audiobestanden.
+    De meegeleverde Plugin stelt deze ene beproefde standaardstem beschikbaar en retourneert MP3-audiobestanden.
 
   </Accordion>
 </AccordionGroup>
@@ -176,12 +175,12 @@ Gebruik `https://www.vydra.ai/api/v1` als basis-URL. Vydra's hoofddomein (`https
     Bekijk alle beschikbare providers.
   </Card>
   <Card title="Afbeeldingen genereren" href="/nl/tools/image-generation" icon="image">
-    Gedeelde parameters voor afbeeldingstools en providerselectie.
+    Gedeelde parameters voor de afbeeldingstool en providerselectie.
   </Card>
   <Card title="Video's genereren" href="/nl/tools/video-generation" icon="video">
-    Gedeelde parameters voor videotools en providerselectie.
+    Gedeelde parameters voor de videotool en providerselectie.
   </Card>
   <Card title="Configuratiereferentie" href="/nl/gateway/config-agents#agent-defaults" icon="gear">
-    Standaardinstellingen voor agents en modelconfiguratie.
+    Standaardwaarden voor agents en modelconfiguratie.
   </Card>
 </CardGroup>

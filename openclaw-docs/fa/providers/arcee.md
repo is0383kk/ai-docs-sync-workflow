@@ -1,20 +1,21 @@
 ---
 read_when:
-    - می‌خواهید از Arcee AI همراه با OpenClaw استفاده کنید
+    - می‌خواهید از Arcee AI با OpenClaw استفاده کنید
     - به متغیر محیطی کلید API یا گزینه احراز هویت CLI نیاز دارید
 summary: راه‌اندازی Arcee AI (احراز هویت + انتخاب مدل)
 title: Arcee AI
 x-i18n:
-    generated_at: "2026-07-12T10:42:16Z"
+    generated_at: "2026-07-27T16:03:37Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: fe519393db3cf39f1b14b8121603b6f667102ac8c122fb6560d9b73a6ee6b0a3
+    source_hash: a4c2fc7b8d86dd0d2a300dfc48951657cbcfcd9250016f52c1804777b2966e11
     source_path: providers/arcee.md
     workflow: 16
 ---
 
-[Arcee AI](https://arcee.ai) خانواده مدل‌های ترکیب متخصصان Trinity را از طریق یک API سازگار با OpenAI ارائه می‌دهد. همه مدل‌های Trinity تحت مجوز Apache 2.0 هستند. Arcee یک Plugin رسمی OpenClaw است و همراه با هسته ارائه نمی‌شود؛ بنابراین پیش از راه‌اندازی اولیه باید نصب شود.
+[Arcee AI](https://arcee.ai) خانواده مدل‌های ترکیب خبرگان Trinity را از طریق یک API سازگار با OpenAI ارائه می‌دهد. همه مدل‌های Trinity تحت مجوز Apache 2.0 هستند. Arcee یک Plugin رسمی OpenClaw است و همراه هسته ارائه نمی‌شود؛ بنابراین پیش از راه‌اندازی اولیه باید نصب شود.
 
 از طریق پلتفرم Arcee یا [OpenRouter](/fa/providers/openrouter) مستقیماً به مدل‌های Arcee دسترسی پیدا کنید.
 
@@ -38,7 +39,7 @@ openclaw gateway restart
   <Tab title="مستقیم (پلتفرم Arcee)">
     <Steps>
       <Step title="دریافت کلید API">
-        در [Arcee AI](https://chat.arcee.ai/) یک کلید API ایجاد کنید.
+        یک کلید API در [Arcee AI](https://chat.arcee.ai/) ایجاد کنید.
       </Step>
       <Step title="اجرای راه‌اندازی اولیه">
         ```bash
@@ -62,7 +63,7 @@ openclaw gateway restart
   <Tab title="از طریق OpenRouter">
     <Steps>
       <Step title="دریافت کلید API">
-        در [OpenRouter](https://openrouter.ai/keys) یک کلید API ایجاد کنید.
+        یک کلید API در [OpenRouter](https://openrouter.ai/keys) ایجاد کنید.
       </Step>
       <Step title="اجرای راه‌اندازی اولیه">
         ```bash
@@ -80,7 +81,7 @@ openclaw gateway restart
         }
         ```
 
-        ارجاع‌های مدل یکسان برای هر دو پیکربندی مستقیم و OpenRouter کار می‌کنند.
+        همان ارجاع‌های مدل برای هر دو پیکربندی مستقیم و OpenRouter کار می‌کنند.
       </Step>
     </Steps>
 
@@ -109,17 +110,21 @@ openclaw gateway restart
   </Tab>
 </Tabs>
 
-## کاتالوگ داخلی
+## فهرست مدل‌های مستقیم Arcee
 
-| ارجاع مدل                      | نام                   | ورودی | زمینه | حداکثر خروجی | هزینه (ورودی/خروجی به‌ازای هر ۱ میلیون) | ابزارها | یادداشت‌ها                                     |
+| ارجاع مدل                      | نام                   | ورودی | زمینه | حداکثر خروجی | هزینه (ورودی/خروجی به‌ازای هر 1M) | ابزارها | یادداشت‌ها                                     |
 | ------------------------------ | ---------------------- | ----- | ------- | ---------- | -------------------- | ----- | ----------------------------------------- |
-| `arcee/trinity-large-thinking` | Trinity Large Thinking | متن  | ۲۵۶K    | ۸۰K        | $0.25 / $0.90        | خیر    | مدل پیش‌فرض؛ تفکر گسترده          |
-| `arcee/trinity-large-preview`  | Trinity Large Preview  | متن  | ۱۲۸K    | ۱۶K        | $0.25 / $1.00        | بله   | چندمنظوره؛ ۴۰۰ میلیارد پارامتر، ۱۳ میلیارد فعال  |
-| `arcee/trinity-mini`           | Trinity Mini 26B       | متن  | ۱۲۸K    | ۸۰K        | $0.045 / $0.15       | بله   | سریع و مقرون‌به‌صرفه؛ فراخوانی تابع |
+| `arcee/trinity-large-thinking` | Trinity Large Thinking | متن  | 256K    | 80K        | $0.25 / $0.90        | خیر    | مدل پیش‌فرض؛ تفکر توسعه‌یافته          |
+| `arcee/trinity-large-preview`  | Trinity Large Preview  | متن  | 128K    | 16K        | $0.25 / $1.00        | بله   | همه‌منظوره؛ 400B پارامتر، 13B فعال  |
+| `arcee/trinity-mini`           | Trinity Mini 26B       | متن  | 128K    | 80K        | $0.045 / $0.15       | بله   | سریع و مقرون‌به‌صرفه؛ فراخوانی تابع |
 
 <Tip>
 پیش‌تنظیم راه‌اندازی اولیه، `arcee/trinity-large-thinking` را به‌عنوان مدل پیش‌فرض تنظیم می‌کند.
 </Tip>
+
+## فهرست مدل‌های OpenRouter
+
+راه‌اندازی اولیه OpenRouter، مدل‌های `arcee/trinity-large-preview` و `arcee/trinity-large-thinking` را در دسترس قرار می‌دهد. OpenClaw این ارجاع‌های مدل دارای شناسه ارائه‌دهنده را در پیکربندی نگه می‌دارد و شناسه‌های زمان اجرای متعارف `arcee-ai/*` متعلق به OpenRouter را ارسال می‌کند. Trinity Mini دیگر از طریق OpenRouter ارائه نمی‌شود؛ برای این مدل از API مستقیم Arcee استفاده کنید.
 
 ## قابلیت‌های پشتیبانی‌شده
 
@@ -127,20 +132,21 @@ openclaw gateway restart
 | --------------------------------------------- | -------------------------------------------- |
 | پخش جریانی                                     | بله                                          |
 | استفاده از ابزار / فراخوانی تابع                   | بله (Trinity Mini، Trinity Large Preview)    |
-| خروجی ساخت‌یافته (حالت JSON و شِمای JSON) | بله                                          |
-| تفکر گسترده                             | بله (Trinity Large Thinking؛ ابزارها غیرفعال‌اند) |
+| خروجی ساختاریافته (حالت JSON و شِمای JSON) | بله                                          |
+| تفکر توسعه‌یافته                             | بله (Trinity Large Thinking؛ ابزارها غیرفعال‌اند) |
 
 <AccordionGroup>
   <Accordion title="نکته محیطی">
-    اگر Gateway به‌صورت یک سرویس پس‌زمینه (launchd/systemd) اجرا می‌شود، مطمئن شوید `ARCEEAI_API_KEY`
-    (یا `OPENROUTER_API_KEY`) برای آن فرایند در دسترس است؛ برای مثال در
+    اگر Gateway به‌صورت دیمن (launchd/systemd) اجرا می‌شود، مطمئن شوید `ARCEEAI_API_KEY`
+    (یا `OPENROUTER_API_KEY`) برای آن فرایند در دسترس است؛ برای نمونه در
     `~/.openclaw/.env` یا از طریق `env.shellEnv`.
   </Accordion>
 
   <Accordion title="مسیریابی OpenRouter">
-    هنگام استفاده از مدل‌های Arcee از طریق OpenRouter، همان ارجاع‌های مدل `arcee/*` اعمال می‌شوند.
-    OpenClaw بر اساس انتخاب احراز هویت شما به‌صورت شفاف مسیریابی می‌کند. برای جزئیات پیکربندی
-    مختص OpenRouter، [مستندات ارائه‌دهنده OpenRouter](/fa/providers/openrouter) را ببینید.
+    OpenRouter از همان ارجاع مدل `arcee/trinity-large-thinking` در OpenClaw استفاده می‌کند.
+    OpenClaw آن را با شناسه متعارف زمان اجرای `arcee-ai/trinity-large-thinking`
+    در OpenRouter مسیریابی می‌کند. برای جزئیات پیکربندی مختص OpenRouter به
+    [مستندات ارائه‌دهنده OpenRouter](/fa/providers/openrouter) مراجعه کنید.
   </Accordion>
 </AccordionGroup>
 

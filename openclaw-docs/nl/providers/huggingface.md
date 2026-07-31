@@ -1,28 +1,29 @@
 ---
 read_when:
-    - Je wilt Hugging Face Inference gebruiken met OpenClaw
-    - Je hebt de omgevingsvariabele voor het HF-token of de keuze voor CLI-authenticatie nodig
+    - Je wilt Hugging Face Inference met OpenClaw gebruiken
+    - Je hebt de omgevingsvariabele voor het HF-token of de CLI-authenticatiekeuze nodig
 summary: Hugging Face Inference instellen (authenticatie + modelselectie)
 title: Hugging Face (inferentie)
 x-i18n:
-    generated_at: "2026-07-12T09:18:38Z"
+    generated_at: "2026-07-27T05:19:33Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c4e0d98c844c053484559254a0bdf4258c3d39954ac5804cdb0d081a651b89df
+    source_hash: 92c400b78c5ad2cc724ad4029560dccc5bc2006fdeae400fc6b58998e727e17c
     source_path: providers/huggingface.md
     workflow: 16
 ---
 
-[Hugging Face Inference Providers](https://huggingface.co/docs/inference-providers) biedt met één token een OpenAI-compatibele router voor chatvoltooiingen voor veel gehoste modellen (DeepSeek, Llama en meer). OpenClaw communiceert **uitsluitend met het eindpunt voor chatvoltooiingen**; gebruik voor tekst-naar-afbeelding, embeddings of spraak rechtstreeks de [HF-inferenceclients](https://huggingface.co/docs/api-inference/quicktour).
+[Hugging Face Inference Providers](https://huggingface.co/docs/inference-providers) biedt een OpenAI-compatibele router voor chatvoltooiingen vóór veel gehoste modellen (DeepSeek, Llama en meer) onder één token. OpenClaw communiceert alleen met het **eindpunt voor chatvoltooiingen**; gebruik voor tekst-naar-afbeelding, embeddings of spraak rechtstreeks de [HF-inferenceclients](https://huggingface.co/docs/api-inference/quicktour).
 
-| Eigenschap           | Waarde                                                                                                                           |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Provider-id          | `huggingface`                                                                                                                    |
-| Plugin               | meegeleverd (standaard ingeschakeld, geen installatiestap)                                                                       |
-| Omgevingsvariabele voor authenticatie | `HUGGINGFACE_HUB_TOKEN` of `HF_TOKEN` (fijnmazig token)                                                        |
-| API                  | OpenAI-compatibel (`https://router.huggingface.co/v1`)                                                                            |
-| Facturering          | Eén HF-token; de [tarieven](https://huggingface.co/docs/inference-providers/pricing) volgen de tarieven van de provider en omvatten een gratis niveau |
+| Eigenschap    | Waarde                                                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Provider-id   | `huggingface`                                                                                                          |
+| Plugin        | gebundeld (standaard ingeschakeld, geen installatiestap)                                                                    |
+| Auth-omgevingsvariabele | `HUGGINGFACE_HUB_TOKEN` of `HF_TOKEN` (fijnmazig token)                                                        |
+| API           | OpenAI-compatibel (`https://router.huggingface.co/v1`)                                                                                       |
+| Facturering   | Eén HF-token; [prijzen](https://huggingface.co/docs/inference-providers/pricing) volgen de tarieven van de provider met een gratis niveau |
 
 ## Aan de slag
 
@@ -35,7 +36,7 @@ x-i18n:
     </Warning>
 
   </Step>
-  <Step title="De onboarding uitvoeren">
+  <Step title="Onboarding uitvoeren">
     Kies **Hugging Face** in de providerkeuzelijst en voer vervolgens je API-sleutel in wanneer daarom wordt gevraagd:
 
     ```bash
@@ -44,7 +45,7 @@ x-i18n:
 
   </Step>
   <Step title="Een standaardmodel selecteren">
-    Kies een model in de keuzelijst **Default Hugging Face model**. De lijst wordt vanuit de Inference API geladen wanneer je token geldig is; anders toont OpenClaw de ingebouwde catalogus hieronder. Je keuze wordt opgeslagen als `agents.defaults.model.primary`:
+    Kies een model in de keuzelijst **Standaardmodel van Hugging Face**. De lijst wordt vanuit de Inference API geladen wanneer je token geldig is; anders toont OpenClaw de ingebouwde catalogus hieronder. Je keuze wordt opgeslagen als `agents.defaults.model.primary`:
 
     ```json5
     {
@@ -75,37 +76,36 @@ openclaw onboard --non-interactive \
 
 Stelt `huggingface/deepseek-ai/DeepSeek-R1` in als standaardmodel.
 
-## Model-id's
+## Model-ID's
 
-Modelverwijzingen gebruiken de vorm `huggingface/<org>/<model>` (id's in Hub-stijl). De ingebouwde catalogus van OpenClaw:
+Modelverwijzingen gebruiken de vorm `huggingface/<org>/<model>` (ID's in Hub-stijl). De ingebouwde catalogus van OpenClaw:
 
-| Model                        | Verwijzing (voorafgegaan door `huggingface/`) |
-| ---------------------------- | --------------------------------------------- |
-| DeepSeek R1                  | `deepseek-ai/DeepSeek-R1`                     |
-| DeepSeek V3.1                | `deepseek-ai/DeepSeek-V3.1`                   |
-| GPT-OSS 120B                 | `openai/gpt-oss-120b`                         |
-| Llama 3.3 70B Instruct Turbo | `meta-llama/Llama-3.3-70B-Instruct-Turbo`     |
+| Model         | Verwijzing (voorvoegen met `huggingface/`) |
+| ------------- | -------------------------------- |
+| DeepSeek R1   | `deepseek-ai/DeepSeek-R1`        |
+| DeepSeek V3.1 | `deepseek-ai/DeepSeek-V3.1`      |
+| GPT-OSS 120B  | `openai/gpt-oss-120b`            |
 
 <Tip>
-Wanneer je token geldig is, detecteert OpenClaw tijdens de onboarding en bij het opstarten van de Gateway ook alle andere modellen via **GET** `https://router.huggingface.co/v1/models`. Daardoor kan je catalogus veel meer dan de vier bovenstaande modellen bevatten. Je kunt `:fastest` of `:cheapest` aan elk model-id toevoegen; de router van HF stuurt de aanvraag naar de overeenkomende inferenceprovider. Stel de standaardvolgorde van je providers in via [Inference Provider settings](https://hf.co/settings/inference-providers).
+Wanneer je token geldig is, detecteert OpenClaw tijdens de onboarding en bij het starten van de Gateway ook alle andere modellen via **GET** `https://router.huggingface.co/v1/models`, zodat je catalogus veel meer dan de drie bovenstaande modellen kan bevatten. Je kunt `:fastest` of `:cheapest` aan elk model-id toevoegen; de router van HF routeert naar de overeenkomende inferenceprovider. Stel je standaardvolgorde van providers in bij de [instellingen voor Inference Providers](https://hf.co/settings/inference-providers).
 </Tip>
 
 ## Geavanceerde configuratie
 
 <AccordionGroup>
-  <Accordion title="Modeldetectie en de onboardingkeuzelijst">
+  <Accordion title="Modeldetectie en onboardingkeuzelijst">
     OpenClaw detecteert modellen met:
 
     ```bash
     GET https://router.huggingface.co/v1/models
-    Authorization: Bearer $HUGGINGFACE_HUB_TOKEN   # or $HF_TOKEN
+    Authorization: Bearer $HUGGINGFACE_HUB_TOKEN   # of $HF_TOKEN
     ```
 
-    Het antwoord heeft de OpenAI-indeling: `{ "object": "list", "data": [ { "id": "Qwen/Qwen3-8B", "owned_by": "Qwen", ... }, ... ] }`.
+    Het antwoord heeft de OpenAI-stijl: `{ "object": "list", "data": [ { "id": "Qwen/Qwen3-8B", "owned_by": "Qwen", ... }, ... ] }`.
 
-    Met een geconfigureerde sleutel (via onboarding, `HUGGINGFACE_HUB_TOKEN` of `HF_TOKEN`) wordt de keuzelijst **Default Hugging Face model** tijdens de interactieve configuratie gevuld vanuit dit eindpunt. Bij het opstarten van de Gateway wordt dezelfde aanroep herhaald om de catalogus te vernieuwen. Gedetecteerde modellen worden samengevoegd met de ingebouwde catalogus hierboven (die wordt gebruikt voor metagegevens zoals het contextvenster en de kosten wanneer een id overeenkomt). Als de aanvraag mislukt, geen gegevens retourneert of er geen sleutel is ingesteld, gebruikt OpenClaw uitsluitend de ingebouwde catalogus.
+    Met een geconfigureerde sleutel (onboarding, `HUGGINGFACE_HUB_TOKEN` of `HF_TOKEN`) wordt de keuzelijst **Standaardmodel van Hugging Face** tijdens de interactieve configuratie vanuit dit eindpunt gevuld. Bij het starten van de Gateway wordt dezelfde aanroep herhaald om de catalogus te vernieuwen. Gedetecteerde modellen worden samengevoegd met de ingebouwde catalogus hierboven (die wordt gebruikt voor metagegevens zoals het contextvenster en de kosten wanneer een id overeenkomt). Als de aanvraag mislukt, geen gegevens retourneert of er geen sleutel is ingesteld, valt OpenClaw uitsluitend terug op de ingebouwde catalogus.
 
-    Schakel detectie uit zonder de provider te verwijderen:
+    Detectie uitschakelen zonder de provider te verwijderen:
 
     ```bash
     openclaw config set plugins.entries.huggingface.config.discovery.enabled false
@@ -114,8 +114,8 @@ Wanneer je token geldig is, detecteert OpenClaw tijdens de onboarding en bij het
   </Accordion>
 
   <Accordion title="Modelnamen, aliassen en beleidsachtervoegsels">
-    - **Naam uit de API:** gedetecteerde modellen gebruiken de `name`, `title` of `display_name` van de API wanneer deze aanwezig is; anders leidt OpenClaw een naam af uit het model-id (bijvoorbeeld `deepseek-ai/DeepSeek-R1` wordt "DeepSeek R1").
-    - **Weergavenaam overschrijven:** stel in de configuratie per model een aangepast label in:
+    - **Naam uit de API:** gedetecteerde modellen gebruiken indien aanwezig de `name`, `title` of `display_name` van de API; anders leidt OpenClaw een naam af van het model-id (bijvoorbeeld `deepseek-ai/DeepSeek-R1` wordt "DeepSeek R1").
+    - **Weergavenaam overschrijven:** stel per model een aangepast label in de configuratie in:
 
     ```json5
     {
@@ -130,13 +130,13 @@ Wanneer je token geldig is, detecteert OpenClaw tijdens de onboarding en bij het
     }
     ```
 
-    - **Beleidsachtervoegsels:** `:fastest` en `:cheapest` zijn conventies van de HF-router en worden niet door OpenClaw herschreven: het achtervoegsel wordt letterlijk als onderdeel van het model-id verzonden en de router van HF kiest de overeenkomende inferenceprovider. Voeg elke variant als afzonderlijke vermelding toe onder `models.providers.huggingface.models` (of in `model.primary`) als je per achtervoegsel een afzonderlijke alias wilt.
-    - **Samenvoegen van configuraties:** bestaande vermeldingen in `models.providers.huggingface.models` (bijvoorbeeld in `models.json`) blijven behouden wanneer configuraties worden samengevoegd. Daardoor blijven aangepaste waarden voor `name`, `alias` of modelopties die je daar instelt behouden na opnieuw opstarten.
+    - **Beleidsachtervoegsels:** `:fastest` en `:cheapest` zijn conventies van de HF-router, niet iets wat OpenClaw herschrijft: het achtervoegsel wordt letterlijk als onderdeel van het model-id verzonden en de router van HF kiest de overeenkomende inferenceprovider. Voeg elke variant als afzonderlijke vermelding toe onder `models.providers.huggingface.models` (of in `model.primary`) als je per achtervoegsel een afzonderlijke alias wilt.
+    - **Configuratiesamenvoeging:** bestaande vermeldingen in `models.providers.huggingface.models` (bijvoorbeeld in `models.json`) blijven bij het samenvoegen van de configuratie behouden, zodat aangepaste `name`, `alias` of modelopties die je daar instelt ook na herstarts behouden blijven.
 
   </Accordion>
 
   <Accordion title="Omgevings- en daemonconfiguratie">
-    Als de Gateway als daemon (launchd/systemd) wordt uitgevoerd, zorg er dan voor dat `HUGGINGFACE_HUB_TOKEN` of `HF_TOKEN` beschikbaar is voor dat proces (bijvoorbeeld in `~/.openclaw/.env` of via `env.shellEnv`).
+    Als de Gateway als daemon draait (launchd/systemd), zorg er dan voor dat `HUGGINGFACE_HUB_TOKEN` of `HF_TOKEN` beschikbaar is voor dat proces (bijvoorbeeld in `~/.openclaw/.env` of via `env.shellEnv`).
 
     <Note>
     OpenClaw accepteert zowel `HUGGINGFACE_HUB_TOKEN` als `HF_TOKEN`. Als beide zijn ingesteld, heeft `HUGGINGFACE_HUB_TOKEN` voorrang.
@@ -163,7 +163,7 @@ Wanneer je token geldig is, detecteert OpenClaw tijdens de onboarding en bij het
     ```
   </Accordion>
 
-  <Accordion title="Configuratie: DeepSeek met de goedkoopste en snelste varianten">
+  <Accordion title="Configuratie: DeepSeek met goedkoopste en snelste varianten">
     ```json5
     {
       agents: {
@@ -180,21 +180,17 @@ Wanneer je token geldig is, detecteert OpenClaw tijdens de onboarding en bij het
     ```
   </Accordion>
 
-  <Accordion title="Configuratie: DeepSeek + Llama + GPT-OSS met aliassen">
+  <Accordion title="Configuratie: DeepSeek + GPT-OSS met aliassen">
     ```json5
     {
       agents: {
         defaults: {
           model: {
             primary: "huggingface/deepseek-ai/DeepSeek-V3.1",
-            fallbacks: [
-              "huggingface/meta-llama/Llama-3.3-70B-Instruct-Turbo",
-              "huggingface/openai/gpt-oss-120b",
-            ],
+            fallbacks: ["huggingface/openai/gpt-oss-120b"],
           },
           models: {
             "huggingface/deepseek-ai/DeepSeek-V3.1": { alias: "DeepSeek V3.1" },
-            "huggingface/meta-llama/Llama-3.3-70B-Instruct-Turbo": { alias: "Llama 3.3 70B Turbo" },
             "huggingface/openai/gpt-oss-120b": { alias: "GPT-OSS 120B" },
           },
         },
@@ -208,7 +204,7 @@ Wanneer je token geldig is, detecteert OpenClaw tijdens de onboarding en bij het
 
 <CardGroup cols={2}>
   <Card title="Modelselectie" href="/nl/concepts/model-providers" icon="layers">
-    Overzicht van alle providers, modelverwijzingen en het gedrag bij failover.
+    Overzicht van alle providers, modelverwijzingen en failovergedrag.
   </Card>
   <Card title="Modelselectie" href="/nl/concepts/models" icon="brain">
     Modellen kiezen en configureren.

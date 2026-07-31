@@ -1,34 +1,35 @@
 ---
 read_when:
-    - U wilt Azure-spraaksynthese voor uitgaande antwoorden
-    - Je hebt native Ogg Opus-uitvoer voor spraaknotities van Azure Speech nodig
+    - Je wilt Azure-spraaksynthese voor uitgaande antwoorden
+    - Je hebt native Ogg Opus-uitvoer voor spraakberichten van Azure Speech nodig
 summary: Azure AI Speech-tekst-naar-spraak voor OpenClaw-antwoorden
 title: Azure-spraak
 x-i18n:
-    generated_at: "2026-07-12T09:12:25Z"
+    generated_at: "2026-07-27T06:06:43Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 61e700724dbb7cb8c217f91485cea0eec776698e439f6c6985dac58dc4cafc01
+    source_hash: cfeeb9daa8d7d6aa24e497d57d64e07efa94c3c0c6b16f793343a450286ab3c1
     source_path: providers/azure-speech.md
     workflow: 16
 ---
 
-Azure Speech is een meegeleverde tekst-naar-spraakprovider van Azure AI Speech. OpenClaw
+Azure Speech is een meegeleverde Azure AI Speech-provider voor tekst-naar-spraak. OpenClaw
 roept de Azure Speech REST API rechtstreeks aan met SSML en synthetiseert MP3 voor
 standaardantwoorden, native Ogg/Opus voor spraakberichten en 8 kHz mulaw voor
-telefoniekanalen zoals Voice Call. De aanvraag verzendt de door de provider beheerde
-uitvoerindeling via de header `X-Microsoft-OutputFormat`.
+telefoniekanalen zoals Voice Call. De aanvraag stuurt de uitvoerindeling van de provider
+via de header `X-Microsoft-OutputFormat`.
 
 | Detail                  | Waarde                                                                                                         |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Provider-ID             | `azure-speech` (alias: `azure`)                                                                                |
+| Provider-ID             | `azure-speech` (alias: `azure`)                                                                |
 | Website                 | [Azure AI Speech](https://azure.microsoft.com/products/ai-services/ai-speech)                                  |
 | Documentatie            | [Speech REST tekst-naar-spraak](https://learn.microsoft.com/azure/ai-services/speech-service/rest-text-to-speech) |
-| Authenticatie           | `AZURE_SPEECH_KEY` plus `AZURE_SPEECH_REGION`                                                                  |
+| Authenticatie           | `AZURE_SPEECH_KEY` plus `AZURE_SPEECH_REGION`                                                                    |
 | Standaardstem           | `en-US-JennyNeural`                                                                                            |
-| Standaardbestandsuitvoer | `audio-24khz-48kbitrate-mono-mp3`                                                                             |
-| Standaardbestand voor spraakberichten | `ogg-24khz-16bit-mono-opus`                                                                      |
+| Standaardbestandsuitvoer | `audio-24khz-48kbitrate-mono-mp3`                                                                                           |
+| Standaardbestand voor spraakberichten | `ogg-24khz-16bit-mono-opus`                                                                                  |
 
 ## Aan de slag
 
@@ -44,18 +45,16 @@ uitvoerindeling via de header `X-Microsoft-OutputFormat`.
     ```
 
   </Step>
-  <Step title="Azure Speech selecteren in messages.tts">
+  <Step title="Azure Speech selecteren in tts">
     ```json5
     {
-      messages: {
-        tts: {
-          auto: "always",
-          provider: "azure-speech",
-          providers: {
-            "azure-speech": {
-              voice: "en-US-JennyNeural",
-              lang: "en-US",
-            },
+      tts: {
+        auto: "always",
+        provider: "azure-speech",
+        providers: {
+          "azure-speech": {
+            voice: "en-US-JennyNeural",
+            lang: "en-US",
           },
         },
       },
@@ -63,31 +62,33 @@ uitvoerindeling via de header `X-Microsoft-OutputFormat`.
     ```
   </Step>
   <Step title="Een bericht verzenden">
-    Verzend een antwoord via een verbonden kanaal. OpenClaw synthetiseert de audio
-    met Azure Speech en levert MP3 voor standaardaudio of Ogg/Opus wanneer
+    Stuur een antwoord via een verbonden kanaal. OpenClaw synthetiseert de audio
+    met Azure Speech en levert MP3 voor standaardaudio, of Ogg/Opus wanneer
     het kanaal een spraakbericht verwacht.
   </Step>
 </Steps>
 
 ## Configuratieopties
 
-Alle opties staan onder `messages.tts.providers["azure-speech"]`.
+Alle opties bevinden zich onder `tts.providers["azure-speech"]`.
 
-| Optie                   | Beschrijving                                                                                           |
+| Optie                   | Beschrijving                                                                                          |
 | ----------------------- | ----------------------------------------------------------------------------------------------------- |
-| `apiKey`                | Azure Speech-resourcesleutel. Valt terug op `AZURE_SPEECH_KEY`, `AZURE_SPEECH_API_KEY` of `SPEECH_KEY`. |
-| `region`                | Regio van de Azure Speech-resource. Valt terug op `AZURE_SPEECH_REGION` of `SPEECH_REGION`.           |
-| `endpoint`              | Optionele overschrijving van het Azure Speech-eindpunt. Valt terug op `AZURE_SPEECH_ENDPOINT`.        |
-| `baseUrl`               | Optionele overschrijving van de Azure Speech-basis-URL.                                               |
-| `voice`                 | Azure-stemwaarde `ShortName` (standaard `en-US-JennyNeural`). Verouderde alias: `voiceId`.            |
-| `lang`                  | SSML-taalcode (standaard `en-US`).                                                                    |
-| `outputFormat`          | Uitvoerindeling voor audiobestanden (standaard `audio-24khz-48kbitrate-mono-mp3`).                    |
-| `voiceNoteOutputFormat` | Uitvoerindeling voor spraakberichten (standaard `ogg-24khz-16bit-mono-opus`).                          |
-| `timeoutMs`             | Overschrijving van de aanvraagtijdslimiet in milliseconden. Valt terug op de algemene `messages.tts.timeoutMs`. |
+| `apiKey`      | Resourcesleutel voor Azure Speech. Valt terug op `AZURE_SPEECH_KEY`, `AZURE_SPEECH_API_KEY` of `SPEECH_KEY`. |
+| `region`      | Resourceregio voor Azure Speech. Valt terug op `AZURE_SPEECH_REGION` of `SPEECH_REGION`.              |
+| `endpoint`      | Optionele overschrijving van het Azure Speech-eindpunt. Valt terug op vertrouwde `AZURE_SPEECH_ENDPOINT`.  |
+| `baseUrl`      | Optionele overschrijving van de basis-URL voor Azure Speech.                                          |
+| `voice`      | ShortName van de Azure-stem (standaard `en-US-JennyNeural`). Verouderde alias: `voiceId`.     |
+| `lang`      | SSML-taalcode (standaard `en-US`).                                                         |
+| `outputFormat`      | Uitvoerindeling van audiobestanden (standaard `audio-24khz-48kbitrate-mono-mp3`).                                    |
+| `voiceNoteOutputFormat`      | Uitvoerindeling voor spraakberichten (standaard `ogg-24khz-16bit-mono-opus`).                                  |
+| `timeoutMs`      | Overschrijving van de time-out voor aanvragen in milliseconden. Valt terug op de globale `tts.timeoutMs`. |
 
-De provider wordt als geconfigureerd beschouwd zodra `apiKey` is ingesteld, samen met
-`region`, `endpoint` of `baseUrl`. Omgevingsvariabelen worden alleen als terugvaloptie
-gecontroleerd voor niet-ingestelde configuratiesleutels.
+De provider wordt als geconfigureerd beschouwd zodra `apiKey` is ingesteld, samen met een van
+`region`, `endpoint` of `baseUrl`. Omgevingsvariabelen worden alleen als terugvaloptie gecontroleerd
+voor niet-ingestelde configuratiesleutels. `.env`-bestanden van de werkruimte kunnen
+`AZURE_SPEECH_ENDPOINT` niet instellen; gebruik de procesomgeving, het globale runtime-dotenv-bestand
+of expliciete configuratie voor eindpuntroutering.
 
 ## Opmerkingen
 
@@ -95,14 +96,14 @@ gecontroleerd voor niet-ingestelde configuratiesleutels.
   <Accordion title="Authenticatie">
     Azure Speech gebruikt een Speech-resourcesleutel, geen Azure OpenAI-sleutel. De sleutel
     wordt verzonden als `Ocp-Apim-Subscription-Key`; OpenClaw leidt
-    `https://<region>.tts.speech.microsoft.com` af uit `region`, tenzij u
+    `https://<region>.tts.speech.microsoft.com` af van `region`, tenzij je
     `endpoint` of `baseUrl` opgeeft.
   </Accordion>
   <Accordion title="Stemnamen">
-    Gebruik de `ShortName`-waarde van de Azure Speech-stem, bijvoorbeeld
-    `en-US-JennyNeural`. De meegeleverde provider kan via dezelfde
-    Speech-resource stemmen weergeven en filtert stemmen uit die als verouderd,
-    buiten gebruik of uitgeschakeld zijn gemarkeerd.
+    Gebruik de waarde `ShortName` van de Azure Speech-stem, bijvoorbeeld
+    `en-US-JennyNeural`. De meegeleverde provider kan via dezelfde Speech-resource
+    stemmen weergeven en filtert stemmen uit die zijn gemarkeerd als verouderd, ingetrokken
+    of uitgeschakeld.
   </Accordion>
   <Accordion title="Audio-uitvoer">
     Azure accepteert uitvoerindelingen zoals `audio-24khz-48kbitrate-mono-mp3`,
@@ -122,10 +123,10 @@ gecontroleerd voor niet-ingestelde configuratiesleutels.
 
 <CardGroup cols={2}>
   <Card title="Tekst-naar-spraak" href="/nl/tools/tts" icon="waveform-lines">
-    Overzicht van TTS, providers en de configuratie van `messages.tts`.
+    Overzicht van TTS, providers en `tts`-configuratie.
   </Card>
   <Card title="Configuratie" href="/nl/gateway/configuration" icon="gear">
-    Volledige configuratiereferentie, inclusief instellingen voor `messages.tts`.
+    Volledige configuratiereferentie, inclusief `tts`-instellingen.
   </Card>
   <Card title="Providers" href="/nl/providers" icon="grid">
     Alle meegeleverde OpenClaw-providers.

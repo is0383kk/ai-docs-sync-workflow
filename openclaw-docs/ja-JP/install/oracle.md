@@ -1,14 +1,15 @@
 ---
 read_when:
     - Oracle Cloud で OpenClaw をセットアップする
-    - OpenClaw 用の無料 VPS ホスティングを探す
+    - OpenClaw向けの無料VPSホスティングを探す
     - 小型サーバーで OpenClaw を 24 時間 365 日稼働させたい
 summary: Oracle Cloud の Always Free ARM ティアで OpenClaw をホストする
 title: Oracle Cloud
 x-i18n:
-    generated_at: "2026-07-11T22:21:37Z"
+    generated_at: "2026-07-26T09:28:11Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 5e1eb95b6bc8ad73e1492a03d8ebe32d89c80e58347614e6ae12d2d3d926d577
     source_path: install/oracle.md
@@ -19,8 +20,8 @@ Oracle Cloud の **Always Free** ARM ティア（最大 4 OCPU、24 GB RAM、200
 
 ## 前提条件
 
-- Oracle Cloud アカウント（[登録](https://www.oracle.com/cloud/free/)）-- 問題が発生した場合は、[コミュニティの登録ガイド](https://gist.github.com/rssnyder/51e3cfedd730e7dd5f4a816143b25dbd)を参照してください
-- Tailscale アカウント（[tailscale.com](https://tailscale.com)で無料）
+- Oracle Cloud アカウント（[登録](https://www.oracle.com/cloud/free/)）-- 問題が発生した場合は、[コミュニティの登録ガイド](https://gist.github.com/rssnyder/51e3cfedd730e7dd5f4a816143b25dbd)を参照
+- Tailscale アカウント（[tailscale.com](https://tailscale.com) で無料）
 - SSH キーペア
 - 約 30 分
 
@@ -41,7 +42,7 @@ Oracle Cloud の **Always Free** ARM ティア（最大 4 OCPU、24 GB RAM、200
     4. **Create** をクリックし、パブリック IP アドレスを控えます。
 
     <Tip>
-    「Out of capacity」というメッセージでインスタンスの作成に失敗する場合は、別の可用性ドメインを試すか、後でもう一度試してください。無料ティアの容量には限りがあります。
+    「Out of capacity」と表示されてインスタンスの作成に失敗した場合は、別の可用性ドメインを試すか、後でもう一度試してください。無料ティアの容量には限りがあります。
     </Tip>
 
   </Step>
@@ -75,7 +76,7 @@ Oracle Cloud の **Always Free** ARM ティア（最大 4 OCPU、24 GB RAM、200
     sudo tailscale up --ssh --hostname=openclaw
     ```
 
-    以降は Tailscale 経由で接続します：`ssh ubuntu@openclaw`。
+    以降は、Tailscale 経由で接続します: `ssh ubuntu@openclaw`。
 
   </Step>
 
@@ -90,7 +91,7 @@ Oracle Cloud の **Always Free** ARM ティア（最大 4 OCPU、24 GB RAM、200
   </Step>
 
   <Step title="Gateway を設定する">
-    安全なリモートアクセスのために、Tailscale Serve とトークン認証を使用します。
+    安全なリモートアクセスのため、Tailscale Serve とトークン認証を使用します。
 
     ```bash
     openclaw config set gateway.bind loopback
@@ -102,7 +103,7 @@ Oracle Cloud の **Always Free** ARM ティア（最大 4 OCPU、24 GB RAM、200
     systemctl --user restart openclaw-gateway.service
     ```
 
-    ここでの `gateway.trustedProxies=["127.0.0.1"]` は、ローカルの Tailscale Serve プロキシによる転送元 IP／ローカルクライアントの処理にのみ使用されます。これは `gateway.auth.mode: "trusted-proxy"` **ではありません**。この設定では、差分ビューアーのルートは引き続きフェイルクローズ動作を維持します。転送プロキシヘッダーのない生の `127.0.0.1` ビューアーリクエストには `Diff not found` が返されます。添付ファイルには `mode=file` / `mode=both` を使用してください。共有可能なビューアーリンクが必要な場合は、リモートビューアーを意図的に有効にして `plugins.entries.diffs.config.viewerBaseUrl` を設定するか、プロキシの `baseUrl` を渡します。
+    ここでの `gateway.trustedProxies=["127.0.0.1"]` は、ローカルの Tailscale Serve プロキシにおける転送 IP／ローカルクライアントの処理にのみ使用されます。これは `gateway.auth.mode: "trusted-proxy"` **ではありません**。この設定では、差分ビューアーのルートはフェイルクローズ動作を維持します。転送プロキシヘッダーのない生の `127.0.0.1` ビューアーリクエストは `Diff not found` を返します。添付ファイルには `mode=file`／`mode=both` を使用してください。共有可能なビューアーリンクが必要な場合は、リモートビューアーを意図的に有効にして `plugins.entries.diffs.config.viewerBaseUrl` を設定するか、プロキシの `baseUrl` を渡します。
 
   </Step>
 
@@ -110,11 +111,11 @@ Oracle Cloud の **Always Free** ARM ティア（最大 4 OCPU、24 GB RAM、200
     ネットワーク境界で Tailscale 以外のすべてのトラフィックをブロックします。
 
     1. OCI Console で **Networking > Virtual Cloud Networks** に移動します。
-    2. 対象の VCN をクリックし、**Security Lists > Default Security List** に移動します。
+    2. VCN をクリックし、**Security Lists > Default Security List** に移動します。
     3. `0.0.0.0/0 UDP 41641`（Tailscale）以外のすべての受信ルールを**削除**します。
     4. デフォルトの送信ルール（すべての送信を許可）は維持します。
 
-    これにより、ネットワーク境界でポート 22 の SSH、HTTP、HTTPS、およびその他すべてがブロックされます。以降は Tailscale 経由でのみ接続できます。
+    これにより、ポート 22 の SSH、HTTP、HTTPS、およびその他すべてがネットワーク境界でブロックされます。これ以降は、Tailscale 経由でのみ接続できます。
 
   </Step>
 
@@ -137,36 +138,36 @@ Oracle Cloud の **Always Free** ARM ティア（最大 4 OCPU、24 GB RAM、200
   </Step>
 </Steps>
 
-## セキュリティ状態を確認する
+## セキュリティ態勢を確認する
 
-VCN をロックダウンして UDP 41641 のみを開放し、Gateway をループバックにバインドすると、パブリックトラフィックはネットワーク境界でブロックされ、管理アクセスは tailnet 内に限定されます。そのため、従来の VPS 強化手順のいくつかは不要になります。
+VCN をロックダウンし（UDP 41641 のみ開放）、Gateway をループバックにバインドすると、パブリックトラフィックはネットワーク境界でブロックされ、管理アクセスは tailnet のみに制限されます。そのため、従来の VPS 強化手順の一部は不要になります。
 
-| 従来の手順           | 必要か        | 理由                                                                       |
+| 従来の手順         | 必要か      | 理由                                                                      |
 | ------------------ | ----------- | ------------------------------------------------------------------------- |
-| UFW ファイアウォール | いいえ        | VCN がインスタンスに到達する前にトラフィックをブロックします。                    |
-| fail2ban           | いいえ        | ポート 22 は VCN でブロックされるため、ブルートフォース攻撃の対象領域がありません。 |
-| sshd の強化         | いいえ        | Tailscale SSH は sshd を使用しません。                                      |
-| root ログインの無効化 | いいえ        | Tailscale はシステムユーザーではなく、tailnet のアイデンティティで認証します。     |
-| SSH 鍵のみの認証     | いいえ        | 同様に、tailnet のアイデンティティがシステムの SSH 鍵に代わります。                |
-| IPv6 の強化          | 通常は不要    | VCN／サブネットの設定によって異なります。実際に割り当て／公開されているものを確認してください。 |
+| UFW ファイアウォール | いいえ      | VCN がインスタンスに到達する前にトラフィックをブロックします。             |
+| fail2ban           | いいえ      | ポート 22 は VCN でブロックされるため、ブルートフォース攻撃の対象がありません。 |
+| sshd の強化        | いいえ      | Tailscale SSH は sshd を使用しません。                                    |
+| root ログインの無効化 | いいえ      | Tailscale はシステムユーザーではなく、tailnet の ID で認証します。          |
+| SSH 鍵のみの認証   | いいえ      | 同様に、tailnet の ID がシステムの SSH 鍵に代わります。                    |
+| IPv6 の強化        | 通常は不要  | VCN／サブネットの設定によります。実際に割り当て／公開されている内容を確認してください。 |
 
-引き続き推奨される事項：
+引き続き推奨される事項:
 
-- `chmod 700 ~/.openclaw` で認証情報ファイルの権限を制限します。
-- `openclaw security audit` で OpenClaw 固有のセキュリティ状態を確認します。
-- OS パッチを適用するため、定期的に `sudo apt update && sudo apt upgrade` を実行します。
+- 認証情報ファイルの権限を制限するための `chmod 700 ~/.openclaw`。
+- OpenClaw 固有のセキュリティ態勢を確認するための `openclaw security audit`。
+- OS パッチ適用のための定期的な `sudo apt update && sudo apt upgrade`。
 - [Tailscale admin console](https://login.tailscale.com/admin) でデバイスを定期的に確認します。
 
-簡易確認コマンド：
+簡易確認コマンド:
 
 ```bash
 # パブリックポートがリッスンしていないことを確認
 sudo ss -tlnp | grep -v '127.0.0.1\|::1'
 
 # Tailscale SSH が有効であることを確認
-tailscale status | grep -q 'offers: ssh' && echo "Tailscale SSH active"
+tailscale status | grep -q 'offers: ssh' && echo "Tailscale SSH が有効です"
 
-# 任意：Tailscale SSH が動作していることを確認した後、sshd を完全に無効化
+# 任意: Tailscale SSH が動作することを確認した後、sshd を完全に無効化
 sudo systemctl disable --now ssh
 ```
 
@@ -174,18 +175,18 @@ sudo systemctl disable --now ssh
 
 Always Free ティアは ARM（`aarch64`）です。OpenClaw のほとんどの機能は問題なく動作しますが、少数のネイティブバイナリでは ARM ビルドが必要です。
 
-- Node.js、Telegram、WhatsApp（Baileys）：純粋な JavaScript のため、問題はありません。
-- ネイティブコードを含むほとんどの npm パッケージ：ビルド済みの `linux-arm64` アーティファクトを利用できます。
-- オプションの CLI ヘルパー（例：Skills が提供する Go／Rust バイナリ）：インストール前に `aarch64` / `linux-arm64` リリースがあるか確認してください。
+- Node.js、Telegram、WhatsApp（Baileys）: 純粋な JavaScript のため、問題はありません。
+- ネイティブコードを含むほとんどの npm パッケージ: ビルド済みの `linux-arm64` アーティファクトを利用できます。
+- 任意の CLI ヘルパー（例: skills によって提供される Go／Rust バイナリ）: インストール前に `aarch64`／`linux-arm64` リリースがあるか確認します。
 
-`uname -m` でアーキテクチャを確認します（`aarch64` と表示されるはずです）。ARM ビルドのないバイナリは、ソースからインストールするか、使用を見送ってください。
+`uname -m` でアーキテクチャを確認します（`aarch64` と出力されるはずです）。ARM ビルドがないバイナリは、ソースからインストールするか、使用を省略してください。
 
 ## 永続化とバックアップ
 
 OpenClaw の状態は次の場所に保存されます。
 
-- `~/.openclaw/` -- `openclaw.json`、エージェントごとの `auth-profiles.json`、チャネル／プロバイダーの状態、セッションデータ。
-- `~/.openclaw/workspace/` -- エージェントのワークスペース（SOUL.md、メモリ、アーティファクト）。
+- `~/.openclaw/` -- `openclaw.json`、エージェントごとの `auth-profiles.json`、チャネル／プロバイダーの状態、およびセッションデータ。
+- `~/.openclaw/workspace/` -- エージェントワークスペース（SOUL.md、メモリ、アーティファクト）。
 
 これらは再起動後も保持されます。移植可能なスナップショットを作成するには、次を実行します。
 
@@ -193,7 +194,7 @@ OpenClaw の状態は次の場所に保存されます。
 openclaw backup create
 ```
 
-## 代替手段：SSH トンネル
+## フォールバック: SSH トンネル
 
 Tailscale Serve が動作しない場合は、ローカルマシンから SSH トンネルを使用します。
 
@@ -205,9 +206,9 @@ ssh -L 18789:127.0.0.1:18789 ubuntu@openclaw
 
 ## トラブルシューティング
 
-**インスタンスの作成に失敗する（「Out of capacity」）** -- 無料ティアの ARM インスタンスは人気があります。別の可用性ドメインを試すか、利用の少ない時間帯に再試行してください。
+**インスタンスの作成に失敗する（「Out of capacity」）** -- 無料ティアの ARM インスタンスは人気があります。別の可用性ドメインを試すか、オフピーク時間帯に再試行してください。
 
-**Tailscale が接続できない** -- `sudo tailscale up --ssh --hostname=openclaw --reset` を実行して再認証します。
+**Tailscale が接続しない** -- `sudo tailscale up --ssh --hostname=openclaw --reset` を実行して再認証します。
 
 **Gateway が起動しない** -- `openclaw doctor --non-interactive` を実行し、`journalctl --user -u openclaw-gateway.service -n 50` でログを確認します。
 
@@ -215,9 +216,9 @@ ssh -L 18789:127.0.0.1:18789 ubuntu@openclaw
 
 ## 次のステップ
 
-- [チャネル](/ja-JP/channels) -- Telegram、WhatsApp、Discord などを接続する
+- [チャネル](/ja-JP/channels) -- Telegram、WhatsApp、Discord などを接続
 - [Gateway の設定](/ja-JP/gateway/configuration) -- すべての設定オプション
-- [更新](/ja-JP/install/updating) -- OpenClaw を最新の状態に保つ
+- [更新](/ja-JP/install/updating) -- OpenClaw を最新の状態に維持
 
 ## 関連項目
 

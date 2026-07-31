@@ -1,14 +1,15 @@
 ---
 read_when:
-    - Mac menü kullanıcı arayüzünü veya durum mantığını ince ayarlama
+    - Mac menü kullanıcı arayüzünü veya durum mantığını ayarlama
 summary: Menü çubuğu durum mantığı ve kullanıcılara gösterilenler
 title: Menü çubuğu
 x-i18n:
-    generated_at: "2026-07-12T12:28:57Z"
+    generated_at: "2026-07-26T23:25:32Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 480a85f383a6495c0e45850a322c0c67c4cc35e21d2d29b4bd86f42fdbf9430a
+    source_hash: d53cd15109864b88010f41ccf4c46ea7fff6721bc6632630d83a558084cb2d62
     source_path: platforms/mac/menu-bar.md
     workflow: 16
 ---
@@ -17,18 +18,19 @@ x-i18n:
 
 - Mevcut ajan çalışma durumu, menü çubuğu simgesinde ve menünün ilk durum satırında görüntülenir.
 - Çalışma etkinken sistem durumu gizlenir; tüm oturumlar boşta olduğunda yeniden görünür.
-- Kök düzeyindeki "Bağlam" öğesi, oturumları kök menüde genişletmek yerine son oturumların bulunduğu bir alt menü açar.
-- Kök menüdeki "Node'lar" bloğu, istemci/varlık girdilerini değil, yalnızca (`node.list` kaynağındaki) eşleştirilmiş **cihazları** listeler.
-- Sağlayıcı kullanım anlık görüntüleri mevcut olduğunda Bağlam'ın altında kök düzeyinde bir "Kullanım" bölümü, varsa bunun ardından maliyet ayrıntıları görüntülenir.
+- Kök düzeyindeki "Bağlam" öğesi, son oturumları kök menüde genişletmek yerine bunları içeren bir alt menü açar.
+- Kök menüdeki "Node'lar" bloğu, istemci/iletişim durumu girdilerini değil, yalnızca eşleştirilmiş **cihazları** (`node.list` kaynağından) listeler.
+- Sağlayıcı kullanım anlık görüntüleri mevcut olduğunda, Bağlam'ın altında kök düzeyinde bir "Kullanım" bölümü; varsa bunun ardından maliyet ayrıntıları görünür.
+- **Hızlı Sohbet**, kayan ana oturum düzenleyicisini açar; mevcut genel kısayolu öğenin yanında görünür.
 
 ## Durum modeli
 
 - Kaynak: `WorkActivityStore` (`apps/macos/Sources/OpenClaw/WorkActivityStore.swift`).
-- Olaylar, bir `runId` ile `ControlAgentEvent` olarak gelir; işleyici (`ControlChannel.routeWorkActivity`), olay yükünden `sessionKey` değerini okur ve bu değer yoksa varsayılan olarak `"main"` kullanır.
-- Öncelik: ana oturum (varsayılan olarak `sessionKey == "main"`) her zaman önceliklidir. Ana oturum etkinse durumu hemen gösterilir. Ana oturum boştaysa bunun yerine en son etkin olan ana oturum dışındaki oturum gösterilir. Depo, etkinlik sırasında geçiş yapmaz; yalnızca mevcut oturum boşa geçtiğinde veya ana oturum etkinleştiğinde geçiş yapar.
+- Olaylar, bir `runId` ile birlikte `ControlAgentEvent` olarak gelir; işleyici (`ControlChannel.routeWorkActivity`), olay yükünden `sessionKey` değerini okur ve bu değer yoksa varsayılan olarak `"main"` kullanır.
+- Öncelik: Ana oturum (varsayılan olarak `sessionKey == "main"`) her zaman önceliklidir. Ana oturum etkinse durumu hemen gösterilir. Ana oturum boşta ise bunun yerine ana oturum dışındaki en son etkin oturum gösterilir. Depo, etkinliğin ortasında geçiş yapmaz; yalnızca mevcut oturum boşta olduğunda veya ana oturum etkinleştiğinde geçiş yapar.
 - Etkinlik türleri:
   - `job`: üst düzey komut yürütme (`state: started|streaming|done|error|...`).
-  - `tool`: `name` ve isteğe bağlı `meta`/`args` ile `phase: start|result`.
+  - `tool`: `name` içeren `phase: start|result`, isteğe bağlı `meta`/`args`.
 
 ## IconState numaralandırması (Swift)
 
@@ -37,11 +39,11 @@ x-i18n:
 - `workingOther(ActivityKind)`
 - `overridden(ActivityKind)` (hata ayıklama geçersiz kılması)
 
-### ActivityKind -> rozet sembolü
+### ActivityKind -> rozet simgesi
 
-`ActivityKind`, bir `ToolKind` (`bash`, `read`, `write`, `edit`, `attach`, `other`) veya yalın bir `job` sarmalar. Her biri, yaratık simgesinin üzerine çizilen bir SF Symbols rozetine (`IconState.badgeSymbolName`) eşlenir:
+`ActivityKind`, bir `ToolKind` (`bash`, `read`, `write`, `edit`, `attach`, `other`) veya yalın bir `job` sarmalar. Her biri, yaratık simgesinin üzerine çizilen bir SF Symbols rozetine eşlenir (`IconState.badgeSymbolName`):
 
-| Tür             | Sembol                             |
+| Tür             | Simge                              |
 | --------------- | ---------------------------------- |
 | `bash`          | `chevron.left.slash.chevron.right` |
 | `read`          | `doc`                              |
@@ -53,21 +55,21 @@ x-i18n:
 ### Görsel eşleme
 
 - `idle`: normal yaratık, rozet yok.
-- `workingMain`: sembollü rozet, tam renk tonu (`.primary` belirginliği), bacaklarda "çalışma" animasyonu.
-- `workingOther`: sembollü rozet, soluk renk tonu (`.secondary` belirginliği), koşturma yok.
-- `overridden`: gerçek etkinlikten bağımsız olarak seçilen sembolü/renk tonunu kullanır.
+- `workingMain`: simgeli rozet, tam renk tonu (`.primary` belirginliği), bacaklarda "çalışma" animasyonu.
+- `workingOther`: simgeli rozet, soluk renk tonu (`.secondary` belirginliği), hızlı hareket yok.
+- `overridden`: gerçek etkinlikten bağımsız olarak seçilen simgeyi/renk tonunu kullanır.
 
 ## Bağlam alt menüsü
 
-- Kök menü, oturum sayısı/durumu içeren tek bir "Bağlam" satırı gösterir; bu satır bir alt menü (`MenuSessionsInjector`) açar.
+- Kök menü, oturum sayısını/durumunu içeren tek bir "Bağlam" satırı gösterir; bu satır bir alt menü açar (`MenuSessionsInjector`).
 - Alt menü başlığı, son 24 saatteki etkin oturum sayısını gösterir.
-- Her oturum satırı; token çubuğunu, yaşını, önizlemesini, düşünme/ayrıntılı mod geçişini ve sıfırlama, sıkıştırma ve silme eylemlerini korur.
-- Yükleniyor, bağlantı kesildi ve oturum yükleme hatası mesajları Bağlam alt menüsünde görüntülenir.
+- Her oturum satırı; token çubuğunu, yaşını, önizlemesini, düşünme/ayrıntılı çıktı açma-kapama denetimini ve sıfırlama, sıkıştırma ve silme eylemlerini korur.
+- Yükleme, bağlantı kesintisi ve oturum yükleme hata iletileri Bağlam alt menüsünde görüntülenir.
 - Kullanım ve maliyet bölümleri, alt menüyü açmadan bir bakışta görülebilmeleri için Bağlam'ın altında kök düzeyinde kalır.
 
 ## Durum satırı metni (menü)
 
-- Çalışma etkinken: `<Session role> · <activity label>` (`MenuContentView` içinde `"\(roleLabel) · \(activity.label)"`); burada rol etiketi `Main` veya `Other` olur.
+- Çalışma etkinken: `<Session role> · <activity label>` (`MenuContentView` içindeki `"\(roleLabel) · \(activity.label)"`); burada rol etiketi `Main` veya `Other` olur.
 - Boştayken: sistem durumu özetine geri döner.
 
 ## Olay alımı
@@ -76,7 +78,7 @@ x-i18n:
 - Ayrıştırılan alanlar:
   - Başlatma/durdurma için `data.state` ile `stream: "job"`.
   - `data.phase`, `data.name` ve isteğe bağlı `data.meta`/`data.args` ile `stream: "tool"`.
-- Araç etiketleri `ToolDisplayRegistry.resolve(name:args:meta:)` üzerinden alınır; çözümlenemeyen adlar için ham araç adı kullanılır.
+- Araç etiketleri `ToolDisplayRegistry.resolve(name:args:meta:)` kaynağından gelir; çözümlenemeyen adlar ham araç adına geri döner.
 
 ## Hata ayıklama geçersiz kılması
 
@@ -84,15 +86,15 @@ x-i18n:
   - `System (auto)` (varsayılan)
   - `Working: main` / `Working: other` (araç türüne göre: bash, okuma, yazma, düzenleme, diğer)
   - `Idle`
-- `UserDefaults` altındaki `openclaw.iconOverride` anahtarında saklanır; `IconState.overridden` ile eşlenir.
+- `UserDefaults` altında `openclaw.iconOverride` anahtarıyla saklanır; `IconState.overridden` değerine eşlenir.
 
 ## Test kontrol listesi
 
-- Ana oturum işini tetikleyin: simge hemen değişir ve durum satırı ana etiketi gösterir.
-- Ana oturum boştayken ana olmayan bir oturum işini tetikleyin: simge/durum ana olmayan oturumu gösterir ve iş tamamlanana kadar sabit kalır.
-- Başka bir oturum etkinken ana oturumu başlatın: simge anında ana oturuma geçer.
-- Hızlı araç etkinliği serileri: rozet titremez (tamamlanan bir araç temizlenmeden önce 2 saniyelik bekleme aralığı, `WorkActivityStore.toolResultGrace`).
-- Tüm oturumlar boşa geçtiğinde sistem durumu satırı yeniden görünür.
+- Ana oturum işini tetikleyin: Simge hemen değişir ve durum satırı ana etiketi gösterir.
+- Ana oturum boştayken ana oturum dışındaki bir oturum işini tetikleyin: Simge/durum ana oturum dışındaki oturumu gösterir ve işlem tamamlanana kadar sabit kalır.
+- Başka bir oturum etkinken ana oturumu başlatın: Simge anında ana oturuma geçer.
+- Hızlı araç etkinliği artışları: Rozet titremez (tamamlanan bir araç temizlenmeden önce 2 sn. ek süre, `WorkActivityStore.toolResultGrace`).
+- Tüm oturumlar boşta olduğunda sistem durumu satırı yeniden görünür.
 
 ## İlgili
 

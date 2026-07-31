@@ -1,100 +1,104 @@
 ---
 read_when:
     - Auswahl eines Onboarding-Pfads
-    - Eine neue Umgebung einrichten
+    - Einrichten einer neuen Umgebung
 sidebarTitle: Onboarding Overview
 summary: Überblick über die Onboarding-Optionen und -Abläufe von OpenClaw
 title: Onboarding-Übersicht
 x-i18n:
-    generated_at: "2026-07-12T15:54:15Z"
+    generated_at: "2026-07-26T18:38:37Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 15
+    prompt_version: 32
     provider: openai
-    source_hash: 3460887108dc078c963802a32238133814afcc7d36b27eb4760280328ee070e5
+    source_hash: 4bcda1dcfb91f388ca6bef59f9bdf5177571d93c0d89c45025ef837628fa7ba0
     source_path: start/onboarding-overview.md
     workflow: 16
 ---
 
 OpenClaw bietet ein Onboarding im Terminal und in der macOS-App. Beide richten zuerst die Inferenz ein:
-Sie erkennen vorhandenen KI-Zugriff, erfordern eine erfolgreiche Live-Completion und starten erst dann
-Crestodian, um die verbleibende Einrichtung zu konfigurieren. Ein erreichbarer, konfigurierter Gateway,
-dessen Standard-Agent bereits über ein konfiguriertes Modell verfügt, überspringt das Onboarding und öffnet
-die normale Agent-Benutzeroberfläche. Der Terminal-Ablauf bietet außerdem den vollständigen klassischen Assistenten für
+Sie erkennen vorhandenen KI-Zugriff, erfordern eine erfolgreiche Live-Vervollständigung und starten erst dann
+OpenClaw, um die verbleibende Einrichtung zu konfigurieren. Bei einem erreichbaren, konfigurierten Gateway,
+dessen Standard-Agent bereits über ein konfiguriertes Modell verfügt, wird das Onboarding übersprungen und
+die normale Agenten-Benutzeroberfläche geöffnet. Der Terminal-Ablauf bietet außerdem den vollständigen klassischen Assistenten für
 eine detaillierte Einrichtung.
 
 ## Welchen Weg sollte ich verwenden?
 
-|                 | CLI-Onboarding                              | Onboarding in der macOS-App            |
-| --------------- | ------------------------------------------- | --------------------------------------- |
-| **Plattformen** | macOS, Linux, Windows (nativ oder mit WSL2) | Nur macOS                               |
-| **Oberfläche**  | Inferenzeinrichtung, dann Crestodian        | Inferenzeinrichtung, dann Crestodian    |
-| **Ideal für**   | Server, Headless-Betrieb, volle Kontrolle   | Desktop-Mac, visuelle Einrichtung       |
-| **Automatisierung** | `--non-interactive` für Skripte         | Nur manuell                             |
-| **Befehl**      | `openclaw onboard`                          | App starten                             |
+|                  | CLI-Onboarding                          | Onboarding in der macOS-App      |
+| ---------------- | --------------------------------------- | -------------------------------- |
+| **Plattformen**  | macOS, Linux, Windows (nativ oder WSL2) | Nur macOS                        |
+| **Oberfläche**   | Inferenz-Einrichtung, dann OpenClaw     | Inferenz-Einrichtung, dann OpenClaw |
+| **Geeignet für** | Server, Headless-Betrieb, volle Kontrolle | Desktop-Mac, visuelle Einrichtung |
+| **Automatisierung** | `--non-interactive` für Skripte       | Nur manuell                      |
+| **Befehl**       | `openclaw onboard`                      | App starten                      |
 
 Die meisten Benutzer sollten mit dem **CLI-Onboarding** beginnen — es funktioniert überall und bietet
-Ihnen die größtmögliche Kontrolle.
+Ihnen die größte Kontrolle.
 
 ## Was das Onboarding konfiguriert
 
 Die geführte Inferenzphase richtet nur Folgendes ein:
 
-1. **Modell-Provider und Authentifizierung** — erkannter Zugriff oder ein verifizierter API-Schlüssel
-2. **Verifizierte Inferenz** — eine echte Completion mit dem effektiven
+1. **Modell-Provider und Authentifizierung** — erkannter Zugriff oder eine verifizierte Provider-Anmeldung,
+   ein API-Schlüssel oder Token
+2. **Verifizierte Inferenz** — eine tatsächliche Vervollständigung mit dem effektiven
    Modell des Standard-Agenten
 
-Nachdem diese Completion erfolgreich war, kann Crestodian den Workspace, den Gateway,
+Nachdem diese Vervollständigung erfolgreich war, kann OpenClaw den Arbeitsbereich, das Gateway,
 den Gateway-Dienst, Kanäle, Agenten, Plugins und weitere optionale Funktionen konfigurieren.
 
 Der klassische CLI-Assistent kann zusätzlich Folgendes konfigurieren:
 
-1. **Kanäle** (optional) — integrierte und gebündelte Chatkanäle wie
+1. **Kanäle** (optional) — integrierte und mitgelieferte Chat-Kanäle wie
    Discord, Feishu, Google Chat, iMessage, Mattermost, Microsoft Teams,
    Telegram, WhatsApp und weitere
-2. **Erweiterte Gateway-Steuerung** — Remote-Modus, Netzwerkeinstellungen und Daemon-Auswahl
+2. **Erweiterte Gateway-Steuerung** — Remote-Modus, Netzwerkeinstellungen und Daemon-Optionen
 
 ## CLI-Onboarding
 
-Führen Sie den folgenden Befehl in einem beliebigen Terminal aus:
+In einem beliebigen Terminal ausführen:
 
 ```bash
 openclaw onboard
 ```
 
-Der geführte Ablauf erkennt vorhandenen KI-Zugriff, testet Kandidaten der Reihe nach live,
-wechselt bei einem Fehler zum nächsten und bietet eine maskierte manuelle Schlüsseleingabe an. Er speichert das
-Modell und die Anmeldedaten erst nach einer erfolgreichen Completion und startet anschließend Crestodian,
-um den Workspace, den Gateway, Kanäle, Agenten, Plugins und weitere
-optionale Funktionen zu konfigurieren. Es gibt weder Crestodian vor der Inferenz noch einen Pfad zum Überspringen der KI oder
-eine Übergabe an den klassischen Assistenten innerhalb des Ablaufs. Beenden Sie den Vorgang und führen Sie `openclaw onboard --classic` aus, wenn Sie
-stattdessen den klassischen Assistenten verwenden möchten.
+Der geführte Ablauf erkennt vorhandenen KI-Zugriff, testet Kandidaten der Reihe nach live
+und fährt bei einem Fehler mit dem nächsten fort. Wenn die Erkennung ausgeschöpft ist, werden zuerst OpenAI,
+Anthropic, xAI (Grok), Google und OpenRouter angezeigt. **Mehr…** enthält die
+verbleibenden Provider in Provider-Gruppen sowie Regionen, Tarife und unterstützte
+Browser-, Geräte-, API-Schlüssel- oder Token-Methoden in einem zweiten Menü. Modell
+und Zugangsdaten werden erst nach einer erfolgreichen Vervollständigung gespeichert. Anschließend wird OpenClaw gestartet, um
+den Arbeitsbereich, das Gateway, Kanäle, Agenten, Plugins und weitere optionale
+Funktionen zu konfigurieren. **Vorerst überspringen** beendet den Ablauf, ohne OpenClaw zu starten. Innerhalb
+des Ablaufs erfolgt keine Übergabe an den klassischen Assistenten. Beenden Sie den Ablauf und führen Sie `openclaw onboard --classic` aus, wenn Sie stattdessen
+den klassischen Assistenten verwenden möchten.
 
-Nach erfolgreicher Inferenz kann Crestodian die Kanaleinrichtung an einen Terminal-Assistenten
-mit maskierter Eingabe übergeben. Dabei wird weder die geführte noch die klassische Provider-Einrichtung geöffnet. Beenden Sie Crestodian und
+Nach erfolgreicher Inferenz kann OpenClaw die Kanaleinrichtung an einen Terminal-Assistenten
+mit maskierter Eingabe übergeben. Dieser öffnet weder die geführte noch die klassische Provider-Einrichtung. Beenden Sie OpenClaw und
 führen Sie `openclaw onboard` aus, um den Modell-Provider oder dessen Authentifizierung zu ändern.
 
-Verwenden Sie `openclaw onboard --classic` für die detaillierte Einrichtung von Modell und Authentifizierung, Kanälen, Skills,
-Remote-Gateway oder Importen. Durch Hinzufügen von `--install-daemon` wird ebenfalls der
+Verwenden Sie `openclaw onboard --classic` für die detaillierte Einrichtung von Modell/Authentifizierung, Kanälen, Skills,
+Remote-Gateway oder Importen. Durch zusätzliches Angeben von `--install-daemon` wird außerdem der
 klassische Ablauf ausgewählt und der Hintergrunddienst in einem Schritt installiert. Verwenden Sie `openclaw
-crestodian` für die dialogbasierte Einrichtung und Reparatur außerhalb der Inferenz. `openclaw
-onboard --modern` ist ein Kompatibilitätsalias, der dieselbe Live-Inferenz-
-Prüfung verwendet.
+openclaw` für die dialogorientierte Einrichtung und Reparatur ohne Inferenz. `openclaw
+onboard --modern` ist ein Kompatibilitätsalias, der dieselbe Live-Inferenzprüfung
+verwendet.
 
 Vollständige Referenz: [Onboarding (CLI)](/de/start/wizard)
 Dokumentation zum CLI-Befehl: [`openclaw onboard`](/de/cli/onboard)
 
 ## Onboarding in der macOS-App
 
-Öffnen Sie die OpenClaw-App. Wenn ihr konfigurierter lokaler oder entfernter Gateway erreichbar ist
+Öffnen Sie die OpenClaw-App. Wenn das konfigurierte lokale oder Remote-Gateway erreichbar ist
 und der Standard-Agent bereits über ein konfiguriertes Modell verfügt, überspringt die App das Onboarding
-und Crestodian und öffnet sofort die normale Agent-Benutzeroberfläche.
+und OpenClaw und öffnet sofort die normale Agenten-Benutzeroberfläche.
 
 Bei einem neuen oder unvollständig eingerichteten Gateway erkennt der Ablauf beim ersten Start vorhandenen KI-
 Zugriff (Claude Code, Codex oder API-Schlüssel), testet die beste
-Option live und speichert sie erst nach einer echten Antwort — mit automatischem Rückgriff auf Alternativen und
-einem verifizierten Schritt zur manuellen Eingabe eines API-Schlüssels, wenn nichts gefunden wird. Vertrauliche
-Anmeldedaten werden maskiert eingegeben. Sobald die Inferenz erfolgreich ist, startet Crestodian und
+Option live und speichert sie erst nach einer tatsächlichen Antwort. Dabei greift er automatisch auf Alternativen zurück und
+bietet einen verifizierten manuellen API-Schlüssel-Schritt an, wenn nichts gefunden wird. Vertrauliche
+Zugangsdaten werden maskiert eingegeben. Sobald die Inferenz erfolgreich ist, startet OpenClaw und
 hilft bei der Konfiguration der übrigen Komponenten.
 
 Gemini CLI bleibt nach der Einrichtung für normale Agenten verfügbar, wird für diese
@@ -107,11 +111,11 @@ Vollständige Referenz: [Onboarding (macOS-App)](/de/start/onboarding)
 Wenn Ihr Provider nicht aufgeführt ist, führen Sie `openclaw onboard --classic` aus, wählen Sie
 **Benutzerdefinierter Provider** und geben Sie Folgendes ein:
 
-- Endpoint-Kompatibilität: OpenAI-kompatibel (`/chat/completions`), mit OpenAI Responses kompatibel (`/responses`), Anthropic-kompatibel (`/messages`) oder unbekannt (prüft alle drei und erkennt sie automatisch)
-- Basis-URL und API-Schlüssel (der API-Schlüssel ist optional, wenn der Endpoint keinen erfordert)
+- Endpunkt-Kompatibilität: OpenAI-kompatibel (`/chat/completions`), mit OpenAI Responses kompatibel (`/responses`), Anthropic-kompatibel (`/messages`) oder unbekannt (prüft alle drei und erkennt sie automatisch)
+- Basis-URL und API-Schlüssel (der API-Schlüssel ist optional, wenn der Endpunkt keinen erfordert)
 - Modell-ID und optionaler Modellalias
 
-Mehrere benutzerdefinierte Endpoints können gleichzeitig vorhanden sein — jeder erhält eine eigene Endpoint-ID.
+Mehrere benutzerdefinierte Endpunkte können gleichzeitig vorhanden sein — jeder erhält eine eigene Endpunkt-ID.
 
 ## Verwandte Themen
 

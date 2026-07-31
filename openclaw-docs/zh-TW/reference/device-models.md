@@ -1,20 +1,21 @@
 ---
 read_when:
-    - 更新裝置型號識別碼對應或 NOTICE／授權檔案
-    - 變更執行個體 UI 顯示裝置名稱的方式
-summary: OpenClaw 如何在 macOS 應用程式中內建 Apple 裝置型號識別碼，以顯示易於辨識的名稱。
+    - 更新裝置型號識別碼對應或 NOTICE／授權條款檔案
+    - 變更 Instances UI 顯示裝置名稱的方式
+summary: OpenClaw 如何在 macOS 應用程式中內建 Apple 裝置型號識別碼，以顯示易讀名稱。
 title: 裝置型號資料庫
 x-i18n:
-    generated_at: "2026-07-11T21:45:51Z"
+    generated_at: "2026-07-26T07:55:31Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 930cd330594072d9c986b8c85c5a68e02dd096e5f0c015e3ee86b767073b93e6
     source_path: reference/device-models.md
     workflow: 16
 ---
 
-macOS 輔助應用程式的 **執行個體** 使用者介面會將 Apple 型號識別碼對應為易於理解的名稱（`iPad16,6` ->「iPad Pro 13 吋（M4）」、`Mac16,6` ->「MacBook Pro（14 吋，2024）」）。`DeviceModelCatalog` 也會使用識別碼前綴（若無法使用則回退至裝置系列），為每部裝置選擇一個 SF Symbol。
+macOS 伴隨應用程式的 **執行個體** UI 會將 Apple 機型識別碼對應為易於理解的名稱（`iPad16,6` -> “iPad Pro 13 吋 (M4)”、`Mac16,6` -> “MacBook Pro (14 吋, 2024)”）。`DeviceModelCatalog` 也會使用識別碼前綴（若無法使用則改用裝置系列），為每個裝置選擇 SF Symbol。
 
 `apps/macos/Sources/OpenClaw/Resources/DeviceModels/` 中的檔案：
 
@@ -27,7 +28,7 @@ macOS 輔助應用程式的 **執行個體** 使用者介面會將 Apple 型號�
 
 ## 資料來源
 
-從採用 MIT 授權的 GitHub 儲存庫 `kyle-seongwoo-jun/apple-device-identifiers` 引入。JSON 檔案固定至 `NOTICE.md` 中記錄的提交 SHA，以確保建置結果具確定性。
+內建自採用 MIT 授權的 `kyle-seongwoo-jun/apple-device-identifiers` GitHub 儲存庫。JSON 檔案會固定至 `NOTICE.md` 中記錄的提交 SHA，以確保建置結果具有確定性。
 
 ## 更新資料庫
 
@@ -46,8 +47,8 @@ curl -fsSL "https://raw.githubusercontent.com/kyle-seongwoo-jun/apple-device-ide
   -o apps/macos/Sources/OpenClaw/Resources/DeviceModels/mac-device-identifiers.json
 ```
 
-4. 確認 `LICENSE.apple-device-identifiers.txt` 仍與上游一致；若上游授權條款已有變更，請予以替換。
-5. 驗證 macOS 應用程式能順利建置：
+4. 確認 `LICENSE.apple-device-identifiers.txt` 仍與上游一致；若上游授權條款有所變更，請予以替換。
+5. 確認 macOS 應用程式能順利建置：
 
 ```bash
 swift build --package-path apps/macos

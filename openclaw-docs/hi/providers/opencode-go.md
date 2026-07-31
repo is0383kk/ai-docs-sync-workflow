@@ -1,72 +1,47 @@
 ---
 read_when:
-    - आपको OpenCode Go कैटलॉग चाहिए
-    - आपको Go-होस्टेड मॉडल के लिए रनटाइम मॉडल refs चाहिए
+    - आप OpenCode Go कैटलॉग चाहते हैं
+    - आपको Go-होस्टेड मॉडल के लिए रनटाइम मॉडल रेफ़रेंस चाहिए
 summary: साझा OpenCode सेटअप के साथ OpenCode Go कैटलॉग का उपयोग करें
 title: OpenCode Go
 x-i18n:
-    generated_at: "2026-06-29T00:01:21Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:27:34Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: eb4e6bd452eeebca5456b0cd70e7622e07ed050a07ff9d6d00926f32efe90569
+    source_hash: df647721e8966fd4fad3178550b071a2eb827148fe765bda53b3d7c97ceaadc2
     source_path: providers/opencode-go.md
     workflow: 16
 ---
 
-OpenCode Go, [OpenCode](/hi/providers/opencode) के भीतर Go कैटलॉग है।
-यह Zen कैटलॉग जैसा ही `OPENCODE_API_KEY` उपयोग करता है, लेकिन रनटाइम
-प्रदाता id `opencode-go` रखता है ताकि अपस्ट्रीम प्रति-मॉडल रूटिंग सही रहे।
+OpenCode Go, [OpenCode](/hi/providers/opencode) के भीतर मौजूद Go कैटलॉग है। यह Zen कैटलॉग के साथ
+`OPENCODE_API_KEY` क्रेडेंशियल साझा करता है, लेकिन अपनी अलग
+रनटाइम प्रोवाइडर आईडी (`opencode-go`) रखता है, ताकि अपस्ट्रीम प्रति-मॉडल रूटिंग
+सही बनी रहे।
 
-| गुण              | मान                             |
-| ---------------- | ------------------------------- |
-| रनटाइम प्रदाता   | `opencode-go`                   |
-| प्रमाणीकरण       | `OPENCODE_API_KEY`              |
-| पैरेंट सेटअप     | [OpenCode](/hi/providers/opencode) |
+| प्रॉपर्टी         | मान                                              |
+| ---------------- | -------------------------------------------------- |
+| रनटाइम प्रोवाइडर | `opencode-go`                                      |
+| प्रमाणीकरण             | `OPENCODE_API_KEY` (उपनाम: `OPENCODE_ZEN_API_KEY`) |
+| पैरेंट सेटअप     | [OpenCode](/hi/providers/opencode)                    |
 
-## अंतर्निहित कैटलॉग
-
-OpenClaw अधिकांश Go कैटलॉग पंक्तियां बंडल की गई OpenClaw मॉडल रजिस्ट्री से लेता है और
-रजिस्ट्री के अद्यतन होने तक मौजूदा अपस्ट्रीम पंक्तियां जोड़ता है। मौजूदा मॉडल सूची के लिए
-`openclaw models list --provider opencode-go` चलाएं।
-
-प्रदाता में शामिल हैं:
-
-| मॉडल ref                       | नाम                   |
-| ------------------------------- | --------------------- |
-| `opencode-go/glm-5`             | GLM-5                 |
-| `opencode-go/glm-5.1`           | GLM-5.1               |
-| `opencode-go/glm-5.2`           | GLM-5.2               |
-| `opencode-go/kimi-k2.5`         | Kimi K2.5             |
-| `opencode-go/kimi-k2.6`         | Kimi K2.6 (3x सीमाएं) |
-| `opencode-go/kimi-k2.7-code`    | Kimi K2.7 Code        |
-| `opencode-go/deepseek-v4-pro`   | DeepSeek V4 Pro       |
-| `opencode-go/deepseek-v4-flash` | DeepSeek V4 Flash     |
-| `opencode-go/mimo-v2-omni`      | MiMo V2 Omni          |
-| `opencode-go/mimo-v2-pro`       | MiMo V2 Pro           |
-| `opencode-go/minimax-m2.5`      | MiniMax M2.5          |
-| `opencode-go/minimax-m2.7`      | MiniMax M2.7          |
-| `opencode-go/qwen3.5-plus`      | Qwen3.5 Plus          |
-| `opencode-go/qwen3.6-plus`      | Qwen3.6 Plus          |
-
-GLM-5.2, 1M-token संदर्भ विंडो का उपयोग करता है और 131K तक आउटपुट टोकन का समर्थन करता है।
-
-## शुरू करना
+## आरंभ करना
 
 <Tabs>
-  <Tab title="Interactive">
+  <Tab title="इंटरैक्टिव">
     <Steps>
-      <Step title="Run onboarding">
+      <Step title="ऑनबोर्डिंग चलाएँ">
         ```bash
         openclaw onboard --auth-choice opencode-go
         ```
       </Step>
-      <Step title="Set a Go model as default">
+      <Step title="किसी Go मॉडल को डिफ़ॉल्ट के रूप में सेट करें">
         ```bash
         openclaw config set agents.defaults.model.primary "opencode-go/kimi-k2.6"
         ```
       </Step>
-      <Step title="Verify models are available">
+      <Step title="सत्यापित करें कि मॉडल उपलब्ध हैं">
         ```bash
         openclaw models list --provider opencode-go
         ```
@@ -74,14 +49,14 @@ GLM-5.2, 1M-token संदर्भ विंडो का उपयोग क�
     </Steps>
   </Tab>
 
-  <Tab title="Non-interactive">
+  <Tab title="गैर-इंटरैक्टिव">
     <Steps>
-      <Step title="Pass the key directly">
+      <Step title="कुंजी सीधे पास करें">
         ```bash
         openclaw onboard --opencode-go-api-key "$OPENCODE_API_KEY"
         ```
       </Step>
-      <Step title="Verify models are available">
+      <Step title="सत्यापित करें कि मॉडल उपलब्ध हैं">
         ```bash
         openclaw models list --provider opencode-go
         ```
@@ -90,7 +65,7 @@ GLM-5.2, 1M-token संदर्भ विंडो का उपयोग क�
   </Tab>
 </Tabs>
 
-## कॉन्फ़िग उदाहरण
+## कॉन्फ़िगरेशन उदाहरण
 
 ```json5
 {
@@ -99,36 +74,63 @@ GLM-5.2, 1M-token संदर्भ विंडो का उपयोग क�
 }
 ```
 
+## अंतर्निहित कैटलॉग
+
+वर्तमान मॉडल सूची के लिए `openclaw models list --provider opencode-go` चलाएँ।
+बंडल की गई पंक्तियाँ:
+
+| मॉडल संदर्भ                       | नाम              | कॉन्टेक्स्ट   | अधिकतम आउटपुट | इमेज इनपुट |
+| ------------------------------- | ----------------- | --------- | ---------- | ----------- |
+| `opencode-go/deepseek-v4-pro`   | DeepSeek V4 Pro   | 1M        | 384K       | नहीं          |
+| `opencode-go/deepseek-v4-flash` | DeepSeek V4 Flash | 1M        | 384K       | नहीं          |
+| `opencode-go/glm-5`             | GLM-5             | 202,752   | 32,768     | नहीं          |
+| `opencode-go/glm-5.1`           | GLM-5.1           | 202,752   | 32,768     | नहीं          |
+| `opencode-go/glm-5.2`           | GLM-5.2           | 1M        | 131,072    | नहीं          |
+| `opencode-go/hy3-preview`       | HY3 Preview       | 262,144   | 32,768     | नहीं          |
+| `opencode-go/kimi-k2.5`         | Kimi K2.5         | 262,144   | 65,536     | हाँ         |
+| `opencode-go/kimi-k2.6`         | Kimi K2.6         | 262,144   | 65,536     | हाँ         |
+| `opencode-go/kimi-k2.7-code`    | Kimi K2.7 Code    | 262,144   | 262,144    | हाँ         |
+| `opencode-go/mimo-v2.5`         | MiMo V2.5         | 1M        | 128,000    | हाँ         |
+| `opencode-go/mimo-v2.5-pro`     | MiMo V2.5 Pro     | 1,048,576 | 128,000    | नहीं          |
+| `opencode-go/minimax-m2.5`      | MiniMax M2.5      | 204,800   | 65,536     | नहीं          |
+| `opencode-go/minimax-m2.7`      | MiniMax M2.7      | 204,800   | 131,072    | नहीं          |
+| `opencode-go/minimax-m3`        | MiniMax M3        | 204,800   | 131,072    | नहीं          |
+| `opencode-go/qwen3.5-plus`      | Qwen3.5 Plus      | 262,144   | 65,536     | हाँ         |
+| `opencode-go/qwen3.6-plus`      | Qwen3.6 Plus      | 262,144   | 65,536     | हाँ         |
+| `opencode-go/qwen3.7-max`       | Qwen3.7 Max       | 1M        | 65,536     | नहीं          |
+| `opencode-go/qwen3.7-plus`      | Qwen3.7 Plus      | 1M        | 65,536     | हाँ         |
+
 ## उन्नत कॉन्फ़िगरेशन
 
 <AccordionGroup>
-  <Accordion title="Routing behavior">
-    जब मॉडल ref `opencode-go/...` का उपयोग करता है, तो OpenClaw प्रति-मॉडल रूटिंग
-    अपने-आप संभालता है। किसी अतिरिक्त प्रदाता कॉन्फ़िग की आवश्यकता नहीं है।
+  <Accordion title="रूटिंग व्यवहार">
+    OpenClaw किसी भी `opencode-go/...` मॉडल संदर्भ को स्वचालित रूप से रूट करता है। किसी अतिरिक्त
+    प्रोवाइडर कॉन्फ़िगरेशन की आवश्यकता नहीं है।
   </Accordion>
 
-  <Accordion title="Runtime ref convention">
-    रनटाइम refs स्पष्ट रहते हैं: Zen के लिए `opencode/...`, Go के लिए `opencode-go/...`।
-    इससे दोनों कैटलॉग में अपस्ट्रीम प्रति-मॉडल रूटिंग सही रहती है।
+  <Accordion title="रनटाइम संदर्भ परिपाटी">
+    रनटाइम संदर्भ स्पष्ट रहते हैं: Zen के लिए `opencode/...`, और
+    Go के लिए `opencode-go/...`। इससे दोनों कैटलॉग में अपस्ट्रीम प्रति-मॉडल रूटिंग सही बनी रहती है।
   </Accordion>
 
-  <Accordion title="Shared credentials">
-    Zen और Go दोनों कैटलॉग द्वारा वही `OPENCODE_API_KEY` उपयोग किया जाता है। सेटअप के दौरान
-    कुंजी दर्ज करने से दोनों रनटाइम प्रदाताओं के लिए क्रेडेंशियल संग्रहीत हो जाते हैं।
+  <Accordion title="साझा क्रेडेंशियल">
+    एक `OPENCODE_API_KEY`, Zen और Go दोनों कैटलॉग को कवर करता है। सेटअप के दौरान
+    कुंजी दर्ज करने से दोनों रनटाइम प्रोवाइडरों के क्रेडेंशियल संग्रहीत हो जाते हैं।
   </Accordion>
 </AccordionGroup>
 
 <Tip>
-साझा ऑनबोर्डिंग अवलोकन और पूर्ण Zen + Go कैटलॉग संदर्भ के लिए [OpenCode](/hi/providers/opencode) देखें।
+साझा ऑनबोर्डिंग अवलोकन और संपूर्ण
+Zen + Go कैटलॉग संदर्भ के लिए [OpenCode](/hi/providers/opencode) देखें।
 </Tip>
 
 ## संबंधित
 
 <CardGroup cols={2}>
-  <Card title="OpenCode (parent)" href="/hi/providers/opencode" icon="server">
-    साझा ऑनबोर्डिंग, कैटलॉग अवलोकन, और उन्नत नोट्स।
+  <Card title="OpenCode (पैरेंट)" href="/hi/providers/opencode" icon="server">
+    साझा ऑनबोर्डिंग, कैटलॉग अवलोकन और उन्नत टिप्पणियाँ।
   </Card>
-  <Card title="Model selection" href="/hi/concepts/model-providers" icon="layers">
-    प्रदाताओं, मॉडल refs, और फ़ेलओवर व्यवहार को चुनना।
+  <Card title="मॉडल चयन" href="/hi/concepts/model-providers" icon="layers">
+    प्रोवाइडर, मॉडल संदर्भ और फ़ेलओवर व्यवहार चुनना।
   </Card>
 </CardGroup>

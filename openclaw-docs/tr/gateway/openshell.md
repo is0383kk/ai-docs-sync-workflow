@@ -1,35 +1,36 @@
 ---
 read_when:
     - Yerel Docker yerine bulut tarafından yönetilen korumalı alanlar istiyorsunuz
-    - OpenShell Pluginini kuruyorsunuz
+    - OpenShell pluginini kuruyorsunuz
     - Yansıtma ve uzak çalışma alanı modları arasında seçim yapmanız gerekir
-summary: OpenClaw ajanları için yönetilen korumalı alan arka ucu olarak OpenShell kullanın
+summary: OpenShell'i OpenClaw aracıları için yönetilen bir korumalı alan arka ucu olarak kullanın
 title: OpenShell
 x-i18n:
-    generated_at: "2026-07-12T12:20:05Z"
+    generated_at: "2026-07-26T22:46:45Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: bf5c33912bd0db759a01cf58ea26712a8ada68c0804bf16f69f1f7cdd496828c
     source_path: gateway/openshell.md
     workflow: 16
 ---
 
-OpenShell, yönetilen bir korumalı alan arka ucudur: OpenClaw, Docker kapsayıcılarını
-yerel olarak çalıştırmak yerine korumalı alan yaşam döngüsünü uzak ortamlar
-hazırlayan ve komutları SSH üzerinden çalıştıran `openshell` CLI'ye devreder.
+OpenShell, yönetilen bir sandbox arka ucudur: OpenClaw, Docker container'larını
+yerel olarak çalıştırmak yerine sandbox yaşam döngüsünü uzak ortamları
+hazırlayan ve komutları SSH üzerinden yürüten `openshell` CLI'ye devreder.
 
-Plugin, genel [SSH arka ucuyla](/tr/gateway/sandboxing#ssh-backend) aynı SSH aktarımını
-ve uzak dosya sistemi köprüsünü yeniden kullanır; ayrıca OpenShell yaşam döngüsünü
-(`sandbox create/get/delete/ssh-config`) ve isteğe bağlı `mirror` çalışma alanı
-eşitleme modunu ekler.
+Plugin, genel [SSH arka ucuyla](/tr/gateway/sandboxing#ssh-backend) aynı SSH
+aktarımını ve uzak dosya sistemi köprüsünü yeniden kullanır; ayrıca OpenShell
+yaşam döngüsünü (`sandbox create/get/delete/ssh-config`) ve isteğe bağlı `mirror`
+çalışma alanı eşitleme modunu ekler.
 
 ## Ön koşullar
 
-- OpenShell Plugin'inin yüklü olması (`openclaw plugins install @openclaw/openshell-sandbox`)
-- `PATH` üzerinde `openshell` CLI (veya
-  `plugins.entries.openshell.config.command` aracılığıyla özel bir yol)
-- Korumalı alan erişimi olan bir OpenShell hesabı
+- OpenShell plugin'i yüklü (`openclaw plugins install @openclaw/openshell-sandbox`)
+- `openshell` CLI, `PATH` üzerinde (veya
+  `plugins.entries.openshell.config.command` aracılığıyla özel bir yolda)
+- Sandbox erişimine sahip bir OpenShell hesabı
 - Ana makinede çalışan OpenClaw Gateway
 
 ## Hızlı başlangıç
@@ -64,8 +65,8 @@ openclaw plugins install @openclaw/openshell-sandbox
 }
 ```
 
-Gateway'i yeniden başlatın. Bir sonraki aracı turunda OpenClaw bir OpenShell
-korumalı alanı oluşturur ve araç yürütmeyi bunun üzerinden yönlendirir. Şunlarla
+Gateway'i yeniden başlatın. Bir sonraki ajan turunda OpenClaw bir OpenShell
+sandbox'ı oluşturur ve araç yürütmesini bunun üzerinden yönlendirir. Şunlarla
 doğrulayın:
 
 ```bash
@@ -75,84 +76,83 @@ openclaw sandbox explain
 
 ## Çalışma alanı modları
 
-Bu, OpenShell için en önemli karardır.
+Bu, en önemli OpenShell kararıdır.
 
 ### mirror (varsayılan)
 
 `plugins.entries.openshell.config.mode: "mirror"`, **yerel çalışma alanını
 kanonik** tutar:
 
-- OpenClaw, `exec` öncesinde yerel çalışma alanını korumalı alanla eşitler.
-- OpenClaw, `exec` sonrasında uzak çalışma alanını yeniden yerel ortama eşitler.
-- Dosya araçları korumalı alan köprüsünden geçer ancak turlar arasında doğruluk
-  kaynağı yerel ortam olmaya devam eder.
+- `exec` öncesinde OpenClaw, yerel çalışma alanını sandbox'a eşitler.
+- `exec` sonrasında OpenClaw, uzak çalışma alanını yeniden yerele eşitler.
+- Dosya araçları sandbox köprüsünden geçer, ancak turlar arasında yerel
+  ortam doğruluk kaynağı olarak kalır.
 
-Geliştirme iş akışları için en uygunudur: OpenClaw dışında yapılan yerel
-düzenlemeler bir sonraki yürütmede görünür ve korumalı alan Docker arka ucuna
-benzer şekilde davranır.
+Geliştirme iş akışları için idealdir: OpenClaw dışındaki yerel düzenlemeler
+bir sonraki yürütmede görünür ve sandbox, Docker arka ucuna benzer şekilde
+davranır.
 
-Ödünleşim: Her yürütme turunda yükleme ve indirme maliyeti oluşur.
+Ödünleşim: Her yürütme turunda yükleme + indirme maliyeti.
 
 ### remote
 
 `mode: "remote"`, **OpenShell çalışma alanını kanonik** hâle getirir:
 
-- İlk korumalı alan oluşturulduğunda OpenClaw, uzak çalışma alanını yerel
-  ortamdan bir kez başlangıç verileriyle doldurur.
-- Bundan sonra `exec`, `read`, `write`, `edit` ve `apply_patch` doğrudan uzak
-  çalışma alanında işlem yapar. OpenClaw, uzak değişiklikleri yerel ortama
-  **eşitlemez**.
-- İstem sırasında medya okumaları çalışmaya devam eder (dosya/medya araçları
-  korumalı alan köprüsü üzerinden okur).
+- İlk sandbox oluşturulduğunda OpenClaw, uzak çalışma alanını yerelden
+  yalnızca bir kez başlangıç verileriyle doldurur.
+- Bundan sonra `exec`, `read`, `write`, `edit` ve `apply_patch`
+  doğrudan uzak çalışma alanında çalışır. OpenClaw, uzak değişiklikleri
+  yerele **eşitlemez**.
+- İstem sırasındaki medya okumaları çalışmaya devam eder (dosya/medya araçları
+  sandbox köprüsü üzerinden okur).
 
-Uzun süre çalışan aracılar ve CI için en uygunudur: Tur başına ek yük daha
-düşüktür ve ana makinedeki yerel düzenlemeler uzak durumun sessizce üzerine
-yazamaz.
+Uzun süre çalışan ajanlar ve CI için idealdir: tur başına ek yük daha düşüktür
+ve ana makinedeki yerel düzenlemeler uzak durumun sessizce üzerine yazamaz.
 
 <Warning>
-İlk başlangıç verileri aktarıldıktan sonra ana makinede OpenClaw dışında düzenlenen dosyalar uzak korumalı alanda görünmez. Başlangıç verilerini yeniden aktarmak için `openclaw sandbox recreate` komutunu çalıştırın.
+İlk başlangıç verileri aktarıldıktan sonra ana makinede OpenClaw dışında düzenlenen dosyalar uzak sandbox tarafından görülemez. Yeniden başlangıç verileri aktarmak için `openclaw sandbox recreate` komutunu çalıştırın.
 </Warning>
 
 ### Mod seçimi
 
-|                            | `mirror`                         | `remote`                         |
-| -------------------------- | -------------------------------- | -------------------------------- |
-| **Kanonik çalışma alanı**  | Yerel ana makine                 | Uzak OpenShell                   |
-| **Eşitleme yönü**          | Çift yönlü (her yürütmede)       | Tek seferlik başlangıç aktarımı  |
-| **Tur başına ek yük**      | Daha yüksek (yükleme + indirme)  | Daha düşük (doğrudan uzak işlem) |
-| **Yerel düzenlemeler görünür mü?** | Evet, sonraki yürütmede | Hayır, yeniden oluşturulana kadar |
-| **En uygun kullanım**      | Geliştirme iş akışları           | Uzun süre çalışan aracılar, CI   |
+|                          | `mirror`                   | `remote`                  |
+| ------------------------ | -------------------------- | ------------------------- |
+| **Kanonik çalışma alanı**  | Yerel ana makine                 | Uzak OpenShell          |
+| **Eşitleme yönü**       | Çift yönlü (her yürütmede) | Tek seferlik başlangıç verisi aktarımı             |
+| **Tur başına ek yük**    | Daha yüksek (yükleme + indirme) | Daha düşük (doğrudan uzak işlemler) |
+| **Yerel düzenlemeler görünür mü?** | Evet, sonraki yürütmede          | Hayır, yeniden oluşturulana kadar        |
+| **En uygun kullanım**             | Geliştirme iş akışları      | Uzun süre çalışan ajanlar, CI   |
 
-## Yapılandırma başvurusu
+## Yapılandırma referansı
 
 Tüm OpenShell yapılandırması `plugins.entries.openshell.config` altında bulunur:
 
-| Anahtar                   | Tür                      | Varsayılan    | Açıklama                                                                                          |
-| ------------------------- | ------------------------ | ------------- | ------------------------------------------------------------------------------------------------- |
-| `mode`                    | `"mirror"` veya `"remote"` | `"mirror"`  | Çalışma alanı eşitleme modu                                                                       |
-| `command`                 | `string`                 | `"openshell"` | `openshell` CLI'nin yolu veya adı                                                                 |
-| `from`                    | `string`                 | `"openclaw"`  | İlk oluşturma için korumalı alan kaynağı                                                          |
-| `gateway`                 | `string`                 | ayarlanmamış  | OpenShell Gateway adı (üst düzey `--gateway`)                                                     |
-| `gatewayEndpoint`         | `string`                 | ayarlanmamış  | OpenShell Gateway uç noktası (üst düzey `--gateway-endpoint`)                                     |
-| `policy`                  | `string`                 | ayarlanmamış  | Korumalı alan oluşturma için OpenShell politika kimliği                                           |
-| `providers`               | `string[]`               | `[]`          | Korumalı alan oluşturulurken bağlanan sağlayıcı adları (yinelenenler kaldırılır, girdi başına bir `--provider` bayrağı) |
-| `gpu`                     | `boolean`                | `false`       | GPU kaynakları iste (`--gpu`)                                                                     |
-| `autoProviders`           | `boolean`                | `true`        | Oluşturma sırasında `--auto-providers` (veya false olduğunda `--no-auto-providers`) geçir          |
-| `remoteWorkspaceDir`      | `string`                 | `"/sandbox"`  | Korumalı alan içindeki birincil yazılabilir çalışma alanı                                         |
-| `remoteAgentWorkspaceDir` | `string`                 | `"/agent"`    | Aracı çalışma alanının bağlama yolu (çalışma alanı erişimi `rw` değilse salt okunur)               |
-| `timeoutSeconds`          | `number`                 | `120`         | `openshell` CLI işlemleri için zaman aşımı                                                        |
+| Anahtar                       | Tür                     | Varsayılan       | Açıklama                                                                            |
+| ------------------------- | ------------------------ | ------------- | -------------------------------------------------------------------------------------- |
+| `mode`                    | `"mirror"` veya `"remote"` | `"mirror"`    | Çalışma alanı eşitleme modu                                                                    |
+| `command`                 | `string`                 | `"openshell"` | `openshell` CLI'nin yolu veya adı                                                    |
+| `from`                    | `string`                 | `"openclaw"`  | İlk oluşturma için sandbox kaynağı                                                   |
+| `gateway`                 | `string`                 | ayarlanmamış         | OpenShell gateway adı (üst düzey `--gateway`)                                         |
+| `gatewayEndpoint`         | `string`                 | ayarlanmamış         | OpenShell gateway uç noktası (üst düzey `--gateway-endpoint`)                            |
+| `policy`                  | `string`                 | ayarlanmamış         | Sandbox oluşturma için OpenShell politika kimliği                                               |
+| `providers`               | `string[]`               | `[]`          | Sandbox oluşturulurken eklenen sağlayıcı adları (yinelenenler kaldırılır, giriş başına bir `--provider` bayrağı) |
+| `gpu`                     | `boolean`                | `false`       | GPU kaynakları iste (`--gpu`)                                                        |
+| `autoProviders`           | `boolean`                | `true`        | Oluşturma sırasında `--auto-providers` (false olduğunda `--no-auto-providers`) geçir            |
+| `remoteWorkspaceDir`      | `string`                 | `"/sandbox"`  | Sandbox içindeki birincil yazılabilir çalışma alanı                                          |
+| `remoteAgentWorkspaceDir` | `string`                 | `"/agent"`    | Ajan çalışma alanının bağlama yolu (çalışma alanı erişimi `rw` olmadığında salt okunur)               |
+| `timeoutSeconds`          | `number`                 | `120`         | `openshell` CLI işlemlerinin zaman aşımı                                                 |
 
-`remoteWorkspaceDir` ve `remoteAgentWorkspaceDir` mutlak yollar olmalı ve
-yönetilen `/sandbox` veya `/agent` kökleri altında kalmalıdır; diğer mutlak
-yollar reddedilir.
+`remoteWorkspaceDir` ve `remoteAgentWorkspaceDir` mutlak yollar olmalı ve yönetilen
+`/sandbox` veya `/agent` kökleri altında kalmalıdır; diğer mutlak yollar
+reddedilir.
 
-Korumalı alan düzeyindeki ayarlar (`mode`, `scope`, `workspaceAccess`), diğer
-arka uçlarda olduğu gibi `agents.defaults.sandbox` altında bulunur. Tam matris
-için [Korumalı Alan Kullanımı](/tr/gateway/sandboxing) sayfasına bakın.
+Sandbox düzeyindeki ayarlar (`mode`, `scope`, `workspaceAccess`) diğer
+arka uçlarda olduğu gibi `agents.defaults.sandbox` altında bulunur. Tam matris için
+[Sandbox Kullanımı](/tr/gateway/sandboxing) sayfasına bakın.
 
 ## Örnekler
 
-### Asgari uzak kurulum
+### En küçük remote kurulumu
 
 ```json5
 {
@@ -209,7 +209,7 @@ için [Korumalı Alan Kullanımı](/tr/gateway/sandboxing) sayfasına bakın.
 }
 ```
 
-### Özel Gateway ile aracı başına OpenShell
+### Özel gateway ile ajan başına OpenShell
 
 ```json5
 {
@@ -249,20 +249,21 @@ için [Korumalı Alan Kullanımı](/tr/gateway/sandboxing) sayfasına bakın.
 ## Yaşam döngüsü yönetimi
 
 ```bash
-# Tüm korumalı alan çalışma ortamlarını listele (Docker + OpenShell)
+# Tüm sandbox çalışma ortamlarını listele (Docker + OpenShell)
 openclaw sandbox list
 
-# Etkin politikayı incele
+# Geçerli politikayı incele
 openclaw sandbox explain
 
-# Yeniden oluştur (uzak çalışma alanını siler, sonraki kullanımda başlangıç verilerini yeniden aktarır)
+# Yeniden oluştur (uzak çalışma alanını siler, sonraki kullanımda yeniden başlangıç verileri aktarır)
 openclaw sandbox recreate --all
 ```
 
-`remote` modu için yeniden oluşturma özellikle önemlidir: İlgili kapsamın
-kanonik uzak çalışma alanını siler ve sonraki kullanımda yerel ortamdan yeni
-bir çalışma alanına başlangıç verileri aktarılır. `mirror` modunda yerel ortam
-kanonik kaldığından yeniden oluşturma esas olarak uzak yürütme ortamını sıfırlar.
+`remote` modu için yeniden oluşturma özellikle önemlidir: bu kapsamın
+kanonik uzak çalışma alanını siler ve sonraki kullanımda yerelden yeni bir
+çalışma alanına başlangıç verileri aktarılır. `mirror` modunda yerel
+ortam kanonik kaldığından yeniden oluşturma, esas olarak uzak yürütme ortamını
+sıfırlar.
 
 Şunlardan herhangi birini değiştirdikten sonra yeniden oluşturun:
 
@@ -271,42 +272,40 @@ kanonik kaldığından yeniden oluşturma esas olarak uzak yürütme ortamını 
 - `plugins.entries.openshell.config.mode`
 - `plugins.entries.openshell.config.policy`
 
-## Güvenlik sağlamlaştırması
+## Güvenliği sağlamlaştırma
 
 Mirror modu dosya sistemi köprüsü, yerel çalışma alanı kökünü sabitler ve her
-okuma, yazma, dizin oluşturma, kaldırma ve yeniden adlandırma işleminden önce
-kanonik yolları (realpath aracılığıyla) yeniden denetleyerek yolun ortasındaki
-sembolik bağlantıları reddeder. Sembolik bağlantı değişimi veya yeniden bağlanan
-bir çalışma alanı, dosya erişimini yansıtılan ağacın dışına yönlendiremez.
+okuma, yazma, mkdir, kaldırma ve yeniden adlandırma işleminden önce kanonik
+yolları (realpath aracılığıyla) yeniden denetleyerek yolun ortasındaki sembolik
+bağlantıları reddeder. Bir sembolik bağlantı değişimi veya yeniden bağlanan
+çalışma alanı, dosya erişimini yansıtılan ağacın dışına yönlendiremez.
 
 ## Mevcut sınırlamalar
 
-- Korumalı alan tarayıcısı OpenShell arka ucunda desteklenmez.
-- `sandbox.docker.binds`, OpenShell için geçerli değildir; bağlamalar
-  yapılandırılmışsa korumalı alan oluşturma başarısız olur.
-- `sandbox.docker.*` altındaki Docker'a özgü çalışma zamanı ayarları (`env`
-  hariç) yalnızca Docker arka ucu için geçerlidir.
+- Sandbox tarayıcısı OpenShell arka ucunda desteklenmez.
+- Bağlamalar yapılandırılmışsa `sandbox.docker.binds` OpenShell'e uygulanmaz;
+  sandbox oluşturma başarısız olur.
+- `sandbox.docker.*` altındaki Docker'a özgü çalışma ortamı ayarları (`env` dışında)
+  yalnızca Docker arka ucuna uygulanır.
 
 ## Nasıl çalışır?
 
-1. OpenClaw, korumalı alan adı için `sandbox get` komutunu çalıştırır
-   (yapılandırılmış `--gateway`/`--gateway-endpoint` değerleriyle); bu başarısız
-   olursa `sandbox create` ile bir tane oluşturur ve ayarlandığında `--name`,
-   `--from`, `--policy`, etkinleştirildiğinde `--gpu`,
-   `--auto-providers`/`--no-auto-providers` ve yapılandırılmış her sağlayıcı
-   için bir `--provider` bayrağı geçirir.
-2. OpenClaw, SSH bağlantı ayrıntılarını almak için korumalı alan adıyla
+1. OpenClaw, sandbox adı için (yapılandırılmış tüm
+   `--gateway`/`--gateway-endpoint` değerleriyle) `sandbox get` komutunu çalıştırır; bu başarısız olursa
+   `sandbox create` ile bir tane oluşturur ve ayarlandıklarında `--name`, `--from`, `--policy`,
+   etkin olduğunda `--gpu`, `--auto-providers`/`--no-auto-providers` ve yapılandırılmış her
+   sağlayıcı için bir `--provider` bayrağı geçirir.
+2. OpenClaw, SSH bağlantı ayrıntılarını almak için sandbox adına
    `sandbox ssh-config` komutunu çalıştırır.
 3. Çekirdek, SSH yapılandırmasını geçici bir dosyaya yazar ve genel SSH arka
    ucuyla aynı uzak dosya sistemi köprüsü üzerinden bir SSH oturumu açar.
-4. `mirror` modunda: yürütmeden önce yerelden uzağa eşitler, çalıştırır ve
-   sonrasında yeniden yerel ortama eşitler.
-5. `remote` modunda: oluşturma sırasında başlangıç verilerini bir kez aktarır,
-   ardından doğrudan uzak çalışma alanında işlem yapar.
+4. `mirror` modunda: yürütmeden önce yerelden uzağa eşitle, çalıştır, ardından yeniden yerele eşitle.
+5. `remote` modunda: oluşturma sırasında bir kez başlangıç verileri aktar, ardından doğrudan
+   uzak çalışma alanında çalış.
 
 ## İlgili konular
 
-- [Korumalı Alan Kullanımı](/tr/gateway/sandboxing) - modlar, kapsamlar ve arka uç karşılaştırması
-- [Korumalı Alan, Araç Politikası ve Yükseltilmiş Yetki Karşılaştırması](/tr/gateway/sandbox-vs-tool-policy-vs-elevated) - engellenen araçlarda hata ayıklama
-- [Çok Aracılı Korumalı Alan ve Araçlar](/tr/tools/multi-agent-sandbox-tools) - aracı başına geçersiz kılmalar
-- [Korumalı Alan CLI](/tr/cli/sandbox) - `openclaw sandbox` komutları
+- [Sandbox Kullanımı](/tr/gateway/sandboxing) - modlar, kapsamlar ve arka uç karşılaştırması
+- [Sandbox, Araç Politikası ve Yükseltilmiş Arasındaki Farklar](/tr/gateway/sandbox-vs-tool-policy-vs-elevated) - engellenen araçlarda hata ayıklama
+- [Çok Ajanlı Sandbox ve Araçlar](/tr/tools/multi-agent-sandbox-tools) - ajan başına geçersiz kılmalar
+- [Sandbox CLI](/tr/cli/sandbox) - `openclaw sandbox` komutları

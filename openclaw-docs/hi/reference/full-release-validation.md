@@ -1,205 +1,312 @@
 ---
+doc-schema-version: 1
 read_when:
     - पूर्ण रिलीज़ सत्यापन चलाना या फिर से चलाना
-    - स्थिर और पूर्ण रिलीज़ सत्यापन प्रोफ़ाइलों की तुलना
+    - स्थिर और पूर्ण रिलीज़ सत्यापन प्रोफ़ाइलों की तुलना करना
     - रिलीज़ सत्यापन चरण की विफलताओं को डीबग करना
-summary: पूर्ण रिलीज़ सत्यापन चरण, चाइल्ड वर्कफ़्लो, रिलीज़ प्रोफ़ाइल, फिर से चलाने के हैंडल, और साक्ष्य
+summary: पूर्ण रिलीज़ सत्यापन के चरण, चाइल्ड वर्कफ़्लो, रिलीज़ प्रोफ़ाइल, पुनः चलाने के हैंडल और साक्ष्य
 title: पूर्ण रिलीज़ सत्यापन
 x-i18n:
-    generated_at: "2026-06-29T00:07:02Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:56:49Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 791930254e3cac7da101d809cfc9b56773225159574d3727189f67cf85bd3fce
+    source_hash: ddf165d5515f4b9bb11d239382649d332d20bb8a32bd4492ae99092fb5ee2216
     source_path: reference/full-release-validation.md
     workflow: 16
 ---
 
-`Full Release Validation` रिलीज़ umbrella है। यह प्री-रिलीज़ प्रमाण के लिए एकमात्र मैन्युअल
-entrypoint है, लेकिन अधिकांश काम चाइल्ड workflows में होता है ताकि किसी
-विफल बॉक्स को पूरी रिलीज़ फिर से शुरू किए बिना दोबारा चलाया जा सके।
+`Full Release Validation` रिलीज़ उत्पाद-सत्यापन का समग्र आवरण है। अधिकांश कार्य
+चाइल्ड वर्कफ़्लो में होता है, ताकि किसी विफल बॉक्स को पूरी रिलीज़ पुनः आरंभ किए
+बिना दोबारा चलाया जा सके। Code SHA को फ़्रीज़ करने से पहले रिलीज़ तैयारी चलाएँ; यदि
+बैकग्राउंड बॉट ने Control UI लोकेल आउटपुट अभी तक लैंड नहीं किया है, तो यह उसे
+रीफ़्रेश करती है, फिर रिलीज़ CI में प्रयुक्त उसी सख़्त शून्य-फ़ॉलबैक जाँच को लागू करती है।
 
-इसे किसी विश्वसनीय workflow ref से चलाएँ, सामान्यतः `main`, और रिलीज़ branch,
-tag, या पूरा commit SHA `ref` के रूप में पास करें:
+चेंजलॉग-पूर्व उत्पाद-पूर्ण कमिट को **Code SHA** के रूप में फ़्रीज़ करें, फिर चलाएँ:
+
+```bash
+pnpm ci:full-release \
+  --sha <code-sha> \
+  --target-ref release/YYYY.M.PATCH
+```
+
+`provider` क्रॉस-OS ऑनबोर्डिंग और एंड-टू-एंड एजेंट टर्न के लिए `anthropic` या `minimax` भी स्वीकार करता है।
+हेल्पर अल्फ़ा/बीटा पैकेज संस्करणों से `beta` प्रोफ़ाइल और अन्यथा
+`stable` का अनुमान लगाता है। वैकल्पिक वर्कफ़्लो इनपुट `-f key=value` के साथ
+पास करें; व्यापक एडवाइज़री स्वीप के लिए ही `-f release_profile=full` का उपयोग करें।
+
+हेल्पर एक विश्वसनीय `origin/main` वर्कफ़्लो SHA पर पिन किया हुआ अस्थायी
+`release-ci/*` रेफ़ बनाता है, लक्ष्य SHA को केवल उम्मीदवार `ref` के रूप में पास करता है,
+और सत्यापन के बाद अस्थायी रेफ़ हटा देता है। डिस्पैच किए गए प्रत्येक चाइल्ड को
+उसी वर्कफ़्लो SHA की रिपोर्ट करनी होगी। नया रन बाध्य करने के लिए
+`-f reuse_evidence=false` या वर्तमान `origin/main` से अब भी पहुँच योग्य
+पुराना वर्कफ़्लो कमिट चुनने के लिए `--workflow-sha <trusted-main-sha>` पास करें।
+वर्कफ़्लो स्वयं कभी रिपॉज़िटरी रेफ़ नहीं बनाता या अपडेट करता।
+
+## एक्सटेंडेड-स्टेबल अपवाद
+
+एक्सटेंडेड-स्टेबल प्रकाशन के लिए ऐसा रन आवश्यक है, जिसमें वर्कफ़्लो और लक्ष्य दोनों
+कैनोनिकल ब्रांच हों:
 
 ```bash
 gh workflow run full-release-validation.yml \
-  --ref main \
-  -f ref=release/YYYY.M.PATCH \
-  -f provider=openai \
-  -f mode=both \
+  --ref extended-stable/YYYY.M.33 \
+  -f ref=extended-stable/YYYY.M.33 \
   -f release_profile=stable
 ```
 
-चाइल्ड workflows harness के लिए विश्वसनीय workflow ref और परीक्षणाधीन
-candidate के लिए इनपुट `ref` का उपयोग करते हैं। इससे पुराने रिलीज़ branch या tag
-को validate करते समय नई validation logic उपलब्ध रहती है।
+`pnpm ci:full-release` या `release-ci/*` का उपयोग न करें। प्रकाशन रन की
+ब्रांच, हेड/लक्ष्य SHA, मैनिफ़ेस्ट `workflowRef`, ID और प्रयास को कैनोनिकल
+ब्रांच तथा रिलीज़ कमिट से बाँधता है।
 
-`release_profile=stable` और `release_profile=full` हमेशा exhaustive
-live/Docker soak चलाते हैं। beta profile के साथ वही soak lanes शामिल करने के लिए
-`run_release_soak=true` पास करें। Stable publication इस soak और blocking
-product-performance evidence के बिना validation manifest को अस्वीकार कर देता है।
+उत्पाद विफलताओं को बैकपोर्ट करें; फ़्रीज़ किए गए लक्ष्य की टूलिंग के लिए व्यवहार-संरक्षित
+सबसे छोटा सुधार करें; स्रोत परिवर्तन के बिना प्रदाता, अनुमोदन या रनर विफलताओं को
+पुनः आज़माएँ। किसी भी ब्रांच परिवर्तन के लिए पूर्ण नया रन आवश्यक है। लक्ष्य पुराना होने के
+कारण आवश्यक पैकेज, इंस्टॉलर, अपडेट, चैनल या लाइव व्यवहार को न छोड़ें।
 
-Package Acceptance सामान्यतः resolved `ref` से candidate tarball बनाता है,
-जिसमें `pnpm ci:full-release` से dispatch किए गए full-SHA runs शामिल हैं। beta
-publish के बाद, release checks, Package Acceptance, cross-OS, release-path Docker,
-और package Telegram में shipped npm package का दोबारा उपयोग करने के लिए
-`release_package_spec=openclaw@YYYY.M.PATCH-beta.N` पास करें। केवल तब
-`package_acceptance_package_spec` उपयोग करें जब Package Acceptance को जानबूझकर
-किसी अलग package को prove करना हो। Codex Plugin live package lane भी उसी state
-का पालन करता है: published `release_package_spec` values
-`codex_plugin_spec=npm:@openclaw/codex@<version>` derive करती हैं; SHA/artifact
-runs selected ref से `extensions/codex` pack करते हैं; और operators `npm:`,
-`npm-pack:`, या `git:` Plugin sources के लिए सीधे `codex_plugin_spec` set कर
-सकते हैं। यह lane उस Plugin के लिए आवश्यक explicit Codex CLI install approval
-देता है, फिर Codex CLI preflight और same-session OpenAI agent turns चलाता है।
+नियमित रिलीज़ के लिए, Code SHA के हरा होने पर केवल
+`CHANGELOG.md` जनरेट और कमिट करें। यह नया कमिट **Release SHA** है। Release SHA के लिए
+वही हेल्पर चलाएँ। उत्पाद साक्ष्य का पुनः उपयोग केवल तभी होता है, जब GitHub सिद्ध करे कि Release
+SHA, Code SHA से व्युत्पन्न है और बदले हुए पथों का पूरा सेट ठीक
+`CHANGELOG.md` है; npm प्रीफ़्लाइट और पैकेज/इंस्टॉल स्वीकृति फिर भी
+Release SHA पर चलते हैं।
 
-## शीर्ष-स्तरीय stages
+`release_profile=stable` और `release_profile=full` हमेशा संपूर्ण
+लाइव/Docker सोक चलाते हैं। `beta` प्रोफ़ाइल के साथ वही सोक लेन
+शामिल करने के लिए `run_release_soak=true` पास करें। इस सोक और अवरोधक उत्पाद-प्रदर्शन साक्ष्य के
+बिना सत्यापन मैनिफ़ेस्ट को स्टेबल प्रकाशन अस्वीकार करता है।
 
-| Stage                | Details                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Target resolution    | **Job:** `Resolve target ref`<br />**Child workflow:** none<br />**Proves:** release branch, tag, या full commit SHA resolve करता है और selected inputs record करता है।<br />**Rerun:** यदि यह विफल हो, तो umbrella दोबारा चलाएँ।                                                                                                                                                                                                                                             |
-| Vitest and normal CI | **Job:** `Run normal full CI`<br />**Child workflow:** `CI`<br />**Proves:** target ref के विरुद्ध manual full CI graph, जिसमें Linux Node lanes, bundled Plugin shards, Plugin और channel contract shards, Node 22 compatibility, `check-*`, `check-additional-*`, built-artifact smoke checks, docs checks, Python skills, Windows, macOS, Control UI i18n, और umbrella के माध्यम से Android शामिल हैं।<br />**Rerun:** `rerun_group=ci`।                           |
-| Plugin prerelease    | **Job:** `Run plugin prerelease validation`<br />**Child workflow:** `Plugin Prerelease`<br />**Proves:** release-only Plugin static checks, agentic Plugin coverage, full extension batch shards, Plugin prerelease Docker lanes, और compatibility triage के लिए non-blocking `plugin-inspector-advisory` artifact।<br />**Rerun:** `rerun_group=plugin-prerelease`।                                                                                        |
-| Release checks       | **Job:** `Run release/live/Docker/QA validation`<br />**Child workflow:** `OpenClaw Release Checks`<br />**Proves:** install smoke, cross-OS package checks, Package Acceptance, QA Lab parity, live Matrix, और live Telegram। Stable और full profiles exhaustive live/E2E suites और Docker release-path chunks भी चलाते हैं; beta `run_release_soak=true` के साथ opt in कर सकता है।<br />**Rerun:** `rerun_group=release-checks` या कोई संकरा release-checks handle। |
-| Package Telegram     | **Job:** `Run package Telegram E2E`<br />**Child workflow:** `NPM Telegram Beta E2E`<br />**Proves:** जब `release_package_spec` या `npm_telegram_package_spec` set हो, तब focused published-package Telegram E2E। Full candidate validation इसके बजाय canonical Package Acceptance Telegram E2E का उपयोग करता है।<br />**Rerun:** `release_package_spec` या `npm_telegram_package_spec` के साथ `rerun_group=npm-telegram`।                                               |
-| Umbrella verifier    | **Job:** `Verify full validation`<br />**Child workflow:** none<br />**Proves:** recorded child run conclusions दोबारा check करता है और child workflows से slowest-job tables append करता है।<br />**Rerun:** किसी failed child को green करने के लिए rerun करने के बाद केवल यह job दोबारा चलाएँ।                                                                                                                                                                                                  |
+Package Acceptance सामान्यतः रिज़ॉल्व किए गए
+`ref` से उम्मीदवार टारबॉल बनाता है, जिसमें `pnpm ci:full-release` के साथ डिस्पैच किए गए पूर्ण-SHA रन भी शामिल हैं। बीटा
+प्रकाशन के बाद, रिलीज़ जाँचों, Package Acceptance, क्रॉस-OS,
+रिलीज़-पथ Docker और पैकेज Telegram में प्रकाशित npm पैकेज का पुनः उपयोग करने के लिए
+`release_package_spec=openclaw@YYYY.M.PATCH-beta.N` पास करें। `package_acceptance_package_spec` का उपयोग केवल
+तभी करें, जब Package Acceptance को जानबूझकर किसी भिन्न पैकेज को सिद्ध करना हो।
+Codex Plugin की लाइव पैकेज लेन भी इसी स्थिति का अनुसरण करती है: प्रकाशित
+`release_package_spec` मान `codex_plugin_spec=npm:@openclaw/codex@<version>` व्युत्पन्न करते हैं;
+SHA/आर्टिफ़ैक्ट रन चयनित रेफ़ से `extensions/codex` पैक करते हैं; और ऑपरेटर
+`npm:`, `npm-pack:` या `git:` Plugin
+स्रोतों के लिए सीधे `codex_plugin_spec` सेट कर सकते हैं। लेन उस Plugin के लिए
+आवश्यक स्पष्ट Codex CLI इंस्टॉल अनुमोदन प्रदान करती है, फिर Codex CLI प्रीफ़्लाइट और
+उसी सेशन में OpenAI एजेंट टर्न चलाती है। उसका अंतिम शून्य-पुनःप्रयास, मध्यम-चिंतन टर्न
+Codex `final` को छोड़े रखते हुए दृश्यमान प्रगति भेजता है, रैंडमाइज़ किए गए
+वर्कस्पेस इनपुट पढ़ता है, उनका सटीक आर्टिफ़ैक्ट लिखता है और स्पष्ट पूर्णता संदेश भेजता है।
+यह v2026.7.1 की उस रिग्रेशन को पकड़ता है, जिसमें सामान्य प्रगति संदेश भेजने पर टर्न समाप्त हो जाता था।
 
-`ref=main` और `rerun_group=all` के लिए, नया umbrella पुराने को supersede करता है।
-जब parent cancel होता है, तो उसका monitor पहले से dispatched किसी भी child
-workflow को cancel कर देता है। Release branch और tag validation runs default रूप
-से एक-दूसरे को cancel नहीं करते।
+## शीर्ष-स्तरीय चरण
 
-## Release checks stages
+`rerun_group=all` के लिए, पहले एक `Check for reusable validation evidence` जॉब चलता है।
+यह समान रिलीज़ प्रोफ़ाइल, प्रभावी सोक सेटिंग और सत्यापन इनपुट वाला सबसे नया पूर्व हरा
+पूर्ण सत्यापन खोजता है। सटीक-लक्ष्य पुनःरन `exact-target-full-validation-v1` का उपयोग करते हैं।
+ऐसा वंशज जिसका पूरा डेल्टा ठीक
+`CHANGELOG.md` है, `changelog-only-release-v1` का उपयोग करता है; प्रत्येक उत्पाद लेन छोड़ दी जाती है
+और सत्यापक स्वतंत्र रूप से GitHub कमिट तुलना, अपरिवर्तनीय पैरेंट आर्टिफ़ैक्ट,
+चाइल्ड रन और डिस्पैच लॉग की दोबारा जाँच करता है। किसी अन्य लक्ष्य परिवर्तन के लिए
+नया Code SHA सत्यापन आवश्यक है। नया पूर्ण रन बाध्य करने के लिए `reuse_evidence=false`
+पास करें। साक्ष्य का पुनः उपयोग केवल `main` या कैनोनिकल SHA-पिन किए गए
+`release-ci/*` रेफ़ से चलता है, जिसका वर्कफ़्लो कमिट विश्वसनीय `main` वंशावली पर बना रहता है;
+अन्य वर्कफ़्लो रेफ़ चयनित लेन को नए सिरे से चलाते हैं।
 
-`OpenClaw Release Checks` सबसे बड़ा child workflow है। यह target को एक बार
-resolve करता है और package या Docker-facing stages को आवश्यकता होने पर shared
-`release-package-under-test` artifact तैयार करता है।
+नया पैकेज-संबंधी सत्यापन Plugin Prerelease और OpenClaw Release Checks को डिस्पैच
+करने से पहले एक अपरिवर्तनीय टारबॉल और एक Docker इमेज आर्टिफ़ैक्ट तैयार करता है।
+दोनों चाइल्ड उपयोग से पहले समान पैकेज SHA, आर्टिफ़ैक्ट ID, सेवा डाइजेस्ट,
+उत्पादक रन प्रयास और Docker आर्काइव डाइजेस्ट सत्यापित करते हैं। पैकेज-स्वतंत्र
+बेर Docker परत सामग्री-पते वाले GHCR कैश का उपयोग करती है; उम्मीदवार-विशिष्ट इमेज
+अपरिवर्तनीय GitHub आर्टिफ़ैक्ट बनी रहती हैं। स्पष्ट प्रकाशित पैकेज विनिर्देश वाले
+केंद्रित रन इसके बजाय मौजूदा पैकेज पथ बनाए रखते हैं।
 
-| चरण                | विवरण                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| रिलीज़ लक्ष्य       | **Job:** `Resolve target ref`<br />**Backing workflow:** कोई नहीं<br />**Tests:** चयनित ref, वैकल्पिक अपेक्षित SHA, प्रोफ़ाइल, rerun group, और केंद्रित लाइव suite filter.<br />**Rerun:** `rerun_group=release-checks`.                                                                                                                                                                                                                                                                          |
-| पैकेज आर्टिफ़ैक्ट   | **Job:** `Prepare release package artifact`<br />**Backing workflow:** कोई नहीं<br />**Tests:** एक उम्मीदवार tarball को पैक या resolve करता है और downstream पैकेज-केंद्रित checks के लिए `release-package-under-test` अपलोड करता है.<br />**Rerun:** प्रभावित पैकेज, cross-OS, या live/E2E group.                                                                                                                                                                                               |
-| इंस्टॉल स्मोक        | **Job:** `Run install smoke`<br />**Backing workflow:** `Install Smoke`<br />**Tests:** root Dockerfile smoke image reuse, QR package install, root और gateway Docker smokes, installer Docker tests, Bun global install image-provider smoke, और fast bundled-plugin install/uninstall E2E के साथ पूरा install path.<br />**Rerun:** `rerun_group=install-smoke`.                                                                                                                                 |
-| Cross-OS            | **Job:** `cross_os_release_checks`<br />**Backing workflow:** `OpenClaw Cross-OS Release Checks (Reusable)`<br />**Tests:** चयनित provider और mode के लिए Linux, Windows, और macOS पर fresh और upgrade lanes, candidate tarball और baseline package का उपयोग करते हुए.<br />**Rerun:** `rerun_group=cross-os`.                                                                                                                                                                                    |
-| Repo और live E2E    | **Job:** `Run repo/live E2E validation`<br />**Backing workflow:** `OpenClaw Live And E2E Checks (Reusable)`<br />**Tests:** repository E2E, live cache, OpenAI websocket streaming, native live provider और plugin shards, और `release_profile` द्वारा चुने गए Docker-backed live model/backend/gateway harnesses.<br />**Runs:** `run_release_soak=true`, `release_profile=full`, या केंद्रित `rerun_group=live-e2e`.<br />**Rerun:** `rerun_group=live-e2e`, वैकल्पिक रूप से `live_suite_filter` के साथ. |
-| Docker रिलीज़ पथ    | **Job:** `Run Docker release-path validation`<br />**Backing workflow:** `OpenClaw Live And E2E Checks (Reusable)`<br />**Tests:** साझा package artifact के विरुद्ध release-path Docker chunks.<br />**Runs:** `run_release_soak=true`, `release_profile=full`, या केंद्रित `rerun_group=live-e2e`.<br />**Rerun:** `rerun_group=live-e2e`.                                                                                                                                                    |
-| Package Acceptance  | **Job:** `Run package acceptance`<br />**Backing workflow:** `Package Acceptance`<br />**Tests:** offline plugin package fixtures, plugin update, canonical mock-OpenAI Telegram package E2E, और उसी tarball के विरुद्ध published-upgrade survivor checks. Blocking release checks default latest published baseline का उपयोग करते हैं; soak checks `2026.4.23` पर या उसके बाद की हर stable npm release और reported-issue fixtures तक विस्तृत होते हैं.<br />**Rerun:** `rerun_group=package`.        |
-| QA parity           | **Job:** `Run QA Lab parity lane` और `Run QA Lab parity report`<br />**Backing workflow:** direct jobs<br />**Tests:** candidate और baseline agentic parity packs, फिर parity report.<br />**Rerun:** `rerun_group=qa-parity` या `rerun_group=qa`.                                                                                                                                                                                                                                                 |
-| QA live Matrix      | **Job:** `Run QA Lab live Matrix lane`<br />**Backing workflow:** direct job<br />**Tests:** `qa-live-shared` environment में fast live Matrix QA profile.<br />**Rerun:** `rerun_group=qa-live` या `rerun_group=qa`.                                                                                                                                                                                                                                                                                |
-| QA live Telegram    | **Job:** `Run QA Lab live Telegram lane`<br />**Backing workflow:** direct job<br />**Tests:** Convex CI credential leases के साथ live Telegram QA.<br />**Rerun:** `rerun_group=qa-live` या `rerun_group=qa`.                                                                                                                                                                                                                                                                                      |
-| रिलीज़ verifier     | **Job:** `Verify release checks`<br />**Backing workflow:** कोई नहीं<br />**Tests:** चयनित rerun group के लिए आवश्यक release-check jobs.<br />**Rerun:** केंद्रित child jobs pass होने के बाद rerun करें.                                                                                                                                                                                                                                                                                         |
+साथ ही `rerun_group=all` के लिए, एक `Verify Docker runtime image assets` जॉब
+`OPENCLAW_EXTENSIONS=diagnostics-otel,codex` के साथ `runtime-assets` Docker लक्ष्य बनाता है।
+यह अन्य चरणों के समानांतर चलता है और समग्र सत्यापक द्वारा लागू किया जाता है; लेन अब
+डिस्पैच करने से पहले इसकी प्रतीक्षा नहीं करतीं। अधिक सीमित `rerun_group` इस प्रीफ़्लाइट को छोड़ देता है।
 
-## Docker release-path chunks
+| चरण                    | विवरण                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| लक्ष्य रिज़ॉल्यूशन       | **जॉब:** `Resolve target ref`<br />**चाइल्ड वर्कफ़्लो:** कोई नहीं<br />**सिद्ध करता है:** रिलीज़ ब्रांच, टैग या पूर्ण कमिट SHA को रिज़ॉल्व करता है और चयनित इनपुट दर्ज करता है।<br />**पुनःरन:** इसके विफल होने पर समग्र आवरण को पुनः चलाएँ।                                                                                                                                                                                                                                                                                                            |
+| साझा उम्मीदवार        | **जॉब:** `Prepare shared release candidate`<br />**चाइल्ड वर्कफ़्लो:** `OpenClaw Live And E2E Checks (Reusable)`<br />**सिद्ध करता है:** एक सटीक-SHA पैकेज को पैक और सत्यापित करता है, एक कार्यशील Docker इमेज बनाता है और दोनों पैकेज-संबंधी चाइल्ड वर्कफ़्लो के लिए अपरिवर्तनीय पैकेज तथा इमेज आर्टिफ़ैक्ट टपल दर्ज करता है।<br />**पुनःरन:** प्रभावित पैकेज, Plugin-प्रीरिलीज़, क्रॉस-OS या लाइव/E2E समूह को पुनः चलाएँ।                                                                                                                 |
+| Docker एसेट प्रीफ़्लाइट | **जॉब:** `Verify Docker runtime image assets`<br />**चाइल्ड वर्कफ़्लो:** कोई नहीं<br />**सिद्ध करता है:** किसी अन्य चरण के डिस्पैच होने से पहले `runtime-assets` Docker बिल्ड लक्ष्य अब भी सफल होता है। केवल `rerun_group=all` के लिए चलता है।<br />**पुनःरन:** `rerun_group=all` के साथ समग्र आवरण को पुनः चलाएँ।                                                                                                                                                                                                                                         |
+| Vitest और सामान्य CI    | **जॉब:** `Run normal full CI`<br />**चाइल्ड वर्कफ़्लो:** `CI`<br />**सिद्ध करता है:** लक्ष्य रेफ़ के विरुद्ध मैन्युअल पूर्ण CI ग्राफ़, जिसमें Linux Node लेन, बंडल किए गए Plugin शार्ड, Plugin और चैनल अनुबंध शार्ड, Node 22 संगतता, `check-*`, `check-additional-*`, निर्मित-आर्टिफ़ैक्ट स्मोक जाँचें, दस्तावेज़ जाँचें, Python Skills, Windows, macOS, Control UI i18n और समग्र आवरण के माध्यम से Android शामिल हैं।<br />**पुनःरन:** `rerun_group=ci`।                                                                                          |
+| Plugin प्रीरिलीज़       | **जॉब:** `Run plugin prerelease validation`<br />**चाइल्ड वर्कफ़्लो:** `Plugin Prerelease`<br />**सिद्ध करता है:** केवल-रिलीज़ Plugin स्थैतिक जाँचें, एजेंटिक Plugin कवरेज, पूर्ण Plugin बैच शार्ड, Plugin प्रीरिलीज़ Docker लेन और संगतता ट्रायेज के लिए एक गैर-अवरोधक `plugin-inspector-advisory` आर्टिफ़ैक्ट।<br />**पुनःरन:** `rerun_group=plugin-prerelease`।                                                                                                                                                          |
+| रिलीज़ जाँचें          | **जॉब:** `Run release/live/Docker/QA validation`<br />**चाइल्ड वर्कफ़्लो:** `OpenClaw Release Checks`<br />**सिद्ध करता है:** इंस्टॉल स्मोक, क्रॉस-OS पैकेज जाँचें, Package Acceptance, QA Lab समता, लाइव Matrix और Telegram, साथ ही गेटेड एडवाइज़री Discord, WhatsApp और Slack लेन। स्टेबल और पूर्ण प्रोफ़ाइल संपूर्ण लाइव/E2E सूट तथा Docker रिलीज़-पथ खंड भी चलाते हैं; बीटा `run_release_soak=true` के साथ ऑप्ट इन कर सकता है।<br />**पुनःरन:** `rerun_group=release-checks` या अधिक सीमित रिलीज़-जाँच हैंडल।              |
+| पैकेज Telegram        | **जॉब:** `Run package Telegram E2E`<br />**चाइल्ड वर्कफ़्लो:** `NPM Telegram Beta E2E`<br />**सिद्ध करता है:** जब `release_package_spec` या `npm_telegram_package_spec` सेट हो, तब केंद्रित प्रकाशित-पैकेज Telegram E2E। इसके बजाय पूर्ण उम्मीदवार सत्यापन कैनोनिकल Package Acceptance Telegram E2E का उपयोग करता है।<br />**पुनःरन:** `release_package_spec` या `npm_telegram_package_spec` के साथ `rerun_group=npm-telegram`।                                                                                                              |
+| उत्पाद प्रदर्शन     | **जॉब:** `Run product performance evidence`<br />**चाइल्ड वर्कफ़्लो:** `OpenClaw Performance`<br />**सिद्ध करता है:** लक्ष्य SHA के विरुद्ध रिलीज़-प्रोफ़ाइल प्रदर्शन रन (`profile=release`, `repeat=3`, `fail_on_regression=true`, `publish_reports=false`)। Kova आउटपुट वर्कफ़्लो आर्टिफ़ैक्ट में रहता है और चाइल्ड को सिद्ध करना होगा कि उसका रिपोर्ट प्रकाशक छोड़ दिया गया था। केवल `rerun_group=all` या `rerun_group=performance` के लिए आवश्यक (अवरोधक); अधिक सीमित पुनःरन समूहों के लिए आवश्यक नहीं।<br />**पुनःरन:** `rerun_group=performance`। |
+| समग्र सत्यापक       | **जॉब:** `Verify full validation`<br />**चाइल्ड वर्कफ़्लो:** कोई नहीं<br />**सिद्ध करता है:** दर्ज किए गए चाइल्ड रन निष्कर्षों की दोबारा जाँच करता है और चाइल्ड वर्कफ़्लो से सबसे धीमे जॉब की तालिकाएँ जोड़ता है।<br />**पुनःरन:** विफल चाइल्ड को हरा होने तक पुनः चलाने के बाद केवल इस जॉब को पुनः चलाएँ।                                                                                                                                                                                                                                                                 |
 
-जब `live_suite_filter` खाली होता है, Docker release-path चरण ये chunks चलाता है:
+समग्र आवरण हमेशा उत्पाद प्रदर्शन को केवल-आर्टिफ़ैक्ट मोड में डिस्पैच करता है।
+`OpenClaw Performance` रिपोर्ट प्रकाशन की अनुमति केवल शेड्यूल किए गए रन या ऐसे
+मैन्युअल डिस्पैच के लिए देता है जो स्पष्ट रूप से `publish_reports=true` सेट करता हो। केवल-आर्टिफ़ैक्ट
+गार्ड को सफलतापूर्वक पूरा होना होगा, जिससे सिद्ध हो कि प्रकाशक जॉब छोड़ा हुआ रहा।
+नए और पुनः प्रयुक्त साक्ष्य
+`controls.performanceReportPublication=artifact-only` दर्ज करते हैं; सत्यापक और पुनः उपयोग
+चयनकर्ता मेल खाते सामान्यीकृत प्रदर्शन-चाइल्ड प्रमाण के बिना साक्ष्य अस्वीकार करते हैं।
 
-| Chunk                                                           | कवरेज                                                                                                                   |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `core`                                                          | Core Docker release-path smoke lanes.                                                                                      |
-| `package-update-openai`                                         | OpenAI package install/update behavior, Codex on-demand install, Codex plugin live turns, और Chat Completions tool calls. |
-| `package-update-anthropic`                                      | Anthropic package install और update behavior.                                                                             |
-| `package-update-core`                                           | Provider-neutral package और update behavior.                                                                              |
-| `plugins-runtime-plugins`                                       | Plugin runtime lanes जो plugin behavior को exercise करते हैं.                                                                        |
-| `plugins-runtime-services`                                      | Service-backed और live plugin runtime lanes; अनुरोध किए जाने पर OpenWebUI शामिल है.                                           |
-| `plugins-runtime-install-a` through `plugins-runtime-install-h` | समानांतर release validation के लिए विभाजित Plugin install/runtime batches.                                                      |
+सत्यापक कैनॉनिकल मैनिफ़ेस्ट को
+`full-release-validation-<run-id>-<run-attempt>` के रूप में अपलोड करता है। साक्ष्य टूलिंग उस सटीक
+आर्टिफ़ैक्ट ID को डाउनलोड करने से पहले उसके आर्टिफ़ैक्ट ID, डाइजेस्ट, निर्माता रन और प्रयास को सत्यापित करती है।
+यह डाउनलोड किए गए ZIP के आकार को सीमित करती है, REST
+`sha256:` डाइजेस्ट के विरुद्ध उसके बाइट्स सत्यापित करती है, और आर्काइव को
+निकाले बिना एकमात्र अनुमत सीमित मैनिफ़ेस्ट प्रविष्टि को स्ट्रीम करती है। पुराने
+प्रकाशन उपभोक्ताओं के लिए स्थिर-नाम उपनाम अस्थायी रूप से बना रहता है। सत्यापक हमेशा प्रयास-योग्य आर्टिफ़ैक्ट को प्राथमिकता देता है;
+संक्रमण के रूप में, यह स्थिर नाम केवल प्रयास-1 मैनिफ़ेस्ट v2
+निर्माता के लिए स्वीकार करता है। यह बाद के प्रयासों और मैनिफ़ेस्ट v3 के लिए उस विरासती नाम को अस्वीकार करता है।
 
-जब केवल एक Docker lane विफल हुआ हो, reusable live/E2E workflow पर लक्षित `docker_lanes=<lane[,lane]>` का उपयोग करें. उपलब्ध होने पर release artifacts में package artifact और image reuse inputs के साथ per-lane rerun commands शामिल होते हैं.
+`rerun_group=all` वाले `ref=main` के लिए, `release/*` रेफ़्स के लिए और Tideclaw
+अल्फ़ा रेफ़्स के लिए, एक नया अम्ब्रेला रन समान रेफ़ और
+पुनः-रन समूह वाले पुराने रन का स्थान ले लेता है। जब पैरेंट रद्द किया जाता है, तो उसका मॉनिटर उसके द्वारा पहले ही डिस्पैच किए गए किसी भी चाइल्ड
+वर्कफ़्लो को रद्द कर देता है। टैग और पिन किए गए-SHA सत्यापन रन
+एक-दूसरे को रद्द नहीं करते।
 
-## रिलीज़ प्रोफ़ाइलें
+## रिलीज़ जाँच के चरण
 
-`release_profile` मुख्य रूप से release checks के भीतर live/provider विस्तार को नियंत्रित करता है.
-यह सामान्य full CI, Plugin Prerelease, install smoke, package
-acceptance, या QA Lab को नहीं हटाता. Stable और full profiles हमेशा exhaustive repo/live
-E2E और Docker release-path soak coverage चलाते हैं. beta profile
-`run_release_soak=true` के साथ opt in कर सकता है. Package Acceptance हर full candidate के लिए canonical package
-Telegram E2E प्रदान करता है, इसलिए umbrella उस
-live poller को duplicate नहीं करता.
+`OpenClaw Release Checks` सबसे बड़ा चाइल्ड वर्कफ़्लो है। यह लक्ष्य को
+एक बार रिज़ॉल्व करता है और उपलब्ध होने पर अम्ब्रेला के साझा पैकेज आर्टिफ़ैक्ट को सत्यापित करता है। कोई
+प्रत्यक्ष या केंद्रित डिस्पैच, पैकेज या Docker-संबंधित चरणों को आवश्यकता होने पर अपना
+`release-package-under-test` आर्टिफ़ैक्ट तैयार करता है।
 
-| Profile   | Intended use                      | Included live/provider coverage                                                                                                                                                     |
-| --------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `minimum` | सबसे तेज़ release-critical smoke.   | OpenAI/core live path, OpenAI के लिए Docker live models, native gateway core, native OpenAI gateway profile, native OpenAI plugin, और Docker live gateway OpenAI.                     |
-| `stable`  | Default release approval profile. | `minimum` के साथ Anthropic smoke, Google, MiniMax, backend, native live test harness, Docker live CLI backend, Docker ACP bind, Docker Codex harness, और OpenCode Go smoke shard. |
-| `full`    | व्यापक advisory sweep.             | `stable` के साथ advisory providers, plugin live shards, और media live shards.                                                                                                        |
+| चरण                     | विवरण                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| रिलीज़ लक्ष्य            | **जॉब:** `Resolve target ref`<br />**सहायक वर्कफ़्लो:** कोई नहीं<br />**परीक्षण:** चयनित रेफ़, वैकल्पिक अपेक्षित SHA, प्रोफ़ाइल, पुनः-रन समूह और केंद्रित लाइव सुइट फ़िल्टर।<br />**पुनः-रन:** `rerun_group=release-checks`।                                                                                                                                                                                                                                                                                                                                                             |
+| पैकेज आर्टिफ़ैक्ट        | **जॉब:** `Prepare release package artifact`<br />**सहायक वर्कफ़्लो:** कोई नहीं<br />**परीक्षण:** अम्ब्रेला के अपरिवर्तनीय पैकेज ट्यूपल को सत्यापित करता है, या प्रत्यक्ष/केंद्रित रिलीज़ जाँच डिस्पैच के लिए एक उम्मीदवार टारबॉल पैक करता है, फिर उसे डाउनस्ट्रीम पैकेज-संबंधित जाँचों के लिए उपलब्ध कराता है।<br />**पुनः-रन:** प्रभावित पैकेज, क्रॉस-OS या लाइव/E2E समूह।                                                                                                                                                                                                                                |
+| इंस्टॉल स्मोक            | **जॉब:** `Run install smoke`<br />**सहायक वर्कफ़्लो:** `Install Smoke`<br />**परीक्षण:** रूट Dockerfile स्मोक इमेज के पुनः उपयोग, QR पैकेज इंस्टॉल, रूट और Gateway Docker स्मोक, इंस्टॉलर Docker परीक्षण और Bun ग्लोबल इंस्टॉल इमेज-प्रोवाइडर स्मोक सहित पूर्ण इंस्टॉल पथ।<br />**पुनः-रन:** `rerun_group=install-smoke`।                                                                                                                                                                                                                                                           |
+| क्रॉस-OS                 | **जॉब:** `cross_os_release_checks`<br />**सहायक वर्कफ़्लो:** `OpenClaw Cross-OS Release Checks (Reusable)`<br />**परीक्षण:** उम्मीदवार टारबॉल और एक बेसलाइन पैकेज का उपयोग करके चयनित प्रोवाइडर और मोड के लिए Linux, Windows और macOS पर नए तथा अपग्रेड लेन।<br />**पुनः-रन:** `rerun_group=cross-os`।                                                                                                                                                                                                                                                                 |
+| रिपॉज़िटरी और लाइव E2E   | **जॉब:** `Run repo/live E2E validation`<br />**सहायक वर्कफ़्लो:** `OpenClaw Live And E2E Checks (Reusable)`<br />**परीक्षण:** रिपॉज़िटरी E2E, लाइव कैश, OpenAI वेबसॉकेट स्ट्रीमिंग, नेटिव लाइव प्रोवाइडर और Plugin शार्ड, तथा `release_profile` द्वारा चयनित Docker-समर्थित लाइव मॉडल/बैकएंड/Gateway हार्नेस।<br />**रन:** `run_release_soak=true`, `release_profile=full`, या केंद्रित `rerun_group=live-e2e`।<br />**पुनः-रन:** `rerun_group=live-e2e`, वैकल्पिक रूप से `live_suite_filter` के साथ।                                                                                |
+| Docker रिलीज़ पथ         | **जॉब:** `Run Docker release-path validation`<br />**सहायक वर्कफ़्लो:** `OpenClaw Live And E2E Checks (Reusable)`<br />**परीक्षण:** साझा पैकेज आर्टिफ़ैक्ट के विरुद्ध रिलीज़-पथ Docker खंड।<br />**रन:** `run_release_soak=true`, `release_profile=full`, या केंद्रित `rerun_group=live-e2e`।<br />**पुनः-रन:** `rerun_group=live-e2e`।                                                                                                                                                                                                                                     |
+| पैकेज स्वीकृति           | **जॉब:** `Run package acceptance`<br />**सहायक वर्कफ़्लो:** `Package Acceptance`<br />**परीक्षण:** ऑफ़लाइन Plugin पैकेज फ़िक्स्चर, Plugin अपडेट, कैनॉनिकल मॉक-OpenAI Telegram पैकेज E2E और उसी टारबॉल के विरुद्ध प्रकाशित-अपग्रेड सर्वाइवर जाँच। अवरोधक रिलीज़ जाँच डिफ़ॉल्ट रूप से नवीनतम प्रकाशित बेसलाइन का उपयोग करती हैं; सोक जाँच (`run_release_soak=true`) रिपोर्ट की गई समस्या के अपग्रेड फ़िक्स्चर के विरुद्ध चलने के लिए अंतिम 4 स्थिर npm रिलीज़ और 3 पिन किए गए ऐतिहासिक संस्करणों (`2026.4.23`, `2026.5.2`, `2026.4.15`) तक विस्तार करती हैं।<br />**पुनः-रन:** `rerun_group=package`। |
+| परिपक्वता स्कोरकार्ड     | **जॉब:** `Render maturity scorecard release docs`<br />**सहायक वर्कफ़्लो:** `maturity-scorecard.yml`<br />**परीक्षण:** लक्ष्य रेफ़ के विरुद्ध परामर्शात्मक परिपक्वता स्कोरकार्ड दस्तावेज़ रेंडर करता है। केवल तभी चलता है जब `run_maturity_scorecard=true` पास किया जाता है।<br />**पुनः-रन:** `run_maturity_scorecard=true` के साथ `rerun_group=qa`।                                                                                                                                                                                                                                                           |
+| QA समानता                | **जॉब:** `Run QA Lab parity lane` और `Run QA Lab parity report`<br />**सहायक वर्कफ़्लो:** प्रत्यक्ष जॉब<br />**परीक्षण:** उम्मीदवार और बेसलाइन एजेंटिक समानता पैक, फिर समानता रिपोर्ट।<br />**पुनः-रन:** `rerun_group=qa-parity` या `rerun_group=qa`।                                                                                                                                                                                                                                                                                                                         |
+| QA रनटाइम समानता         | **जॉब:** `Verify QA Lab runtime-pair lanes`<br />**सहायक वर्कफ़्लो:** प्रत्यक्ष जॉब<br />**परीक्षण:** कैनॉनिकल कोर `openclaw`/`codex` लेन (`pnpm openclaw qa suite --runtime-pair openclaw,codex --runtime-pair-lane core`) और `run_release_soak=true` के साथ सोक लेन। परामर्श: अलग-अलग लेन जॉब रिलीज़-जाँच सत्यापक को अवरुद्ध नहीं करते।<br />**पुनः-रन:** `rerun_group=qa-parity` या `rerun_group=qa`।                                                                                                                                                             |
+| QA रनटाइम टूल कवरेज      | **जॉब:** `Enforce QA Lab runtime tool coverage`<br />**सहायक वर्कफ़्लो:** प्रत्यक्ष जॉब<br />**परीक्षण:** कैनॉनिकल कोर रनटाइम-युग्म लेन (`pnpm openclaw qa coverage --tools`) में `openclaw` और `codex` के बीच डायनेमिक टूल विचलन, उस लेन के आउटपुट का उपयोग करते हुए। अवरोधक: इस जॉब को परामर्शात्मक ओवरराइड नहीं किया जा सकता।<br />**पुनः-रन:** `rerun_group=qa-parity` या `rerun_group=qa`।                                                                                                                                                                                                     |
+| QA लाइव Matrix           | **जॉब:** `Run QA Live Matrix profile`<br />**सहायक वर्कफ़्लो:** `QA-Lab - All Lanes` पुनः उपयोग योग्य वर्कफ़्लो<br />**परीक्षण:** `qa-live-shared` परिवेश में साझा Matrix लाइव अडैप्टर के माध्यम से समानता-सिद्ध YAML परिदृश्य।<br />**पुनः-रन:** `rerun_group=qa-live` या `rerun_group=qa`; केंद्रित Matrix पुनः-रन के लिए `live_suite_filter=qa-live-matrix` का उपयोग करें।                                                                                                                                                                                                                    |
+| QA लाइव Telegram         | **जॉब:** `Run QA Lab live Telegram lane`<br />**सहायक वर्कफ़्लो:** विश्वसनीय `OpenClaw Release Telegram QA` डिस्पैच<br />**परीक्षण:** Convex CI क्रेडेंशियल लीज़ के साथ लाइव Telegram QA।<br />**पुनः-रन:** `rerun_group=qa-live` या `rerun_group=qa`।                                                                                                                                                                                                                                                                                                                                 |
+| QA लाइव Discord          | **जॉब:** `Run QA Lab live Discord lane`<br />**सहायक वर्कफ़्लो:** प्रत्यक्ष परामर्शात्मक जॉब<br />**परीक्षण:** `OPENCLAW_RELEASE_QA_DISCORD_LIVE_CI_ENABLED` सक्षम होने पर Convex CI क्रेडेंशियल लीज़ के साथ लाइव Discord QA।<br />**पुनः-रन:** `live_suite_filter=qa-live-discord` के साथ `rerun_group=qa-live`।                                                                                                                                                                                                                                                                            |
+| QA लाइव WhatsApp         | **जॉब:** `Run QA Lab live WhatsApp lane`<br />**सहायक वर्कफ़्लो:** प्रत्यक्ष परामर्शात्मक जॉब<br />**परीक्षण:** `OPENCLAW_RELEASE_QA_WHATSAPP_LIVE_CI_ENABLED` सक्षम होने पर Convex CI क्रेडेंशियल लीज़ के साथ लाइव WhatsApp QA।<br />**पुनः-रन:** `live_suite_filter=qa-live-whatsapp` के साथ `rerun_group=qa-live`।                                                                                                                                                                                                                                                                        |
+| QA लाइव Slack            | **जॉब:** `Run QA Lab live Slack lane`<br />**सहायक वर्कफ़्लो:** प्रत्यक्ष परामर्शात्मक जॉब<br />**परीक्षण:** `OPENCLAW_RELEASE_QA_SLACK_LIVE_CI_ENABLED` सक्षम होने पर Convex CI क्रेडेंशियल लीज़ के साथ लाइव Slack QA।<br />**पुनः-रन:** `live_suite_filter=qa-live-slack` के साथ `rerun_group=qa-live`।                                                                                                                                                                                                                                                                                    |
+| रिलीज़ सत्यापक           | **जॉब:** `Verify release checks`<br />**सहायक वर्कफ़्लो:** कोई नहीं<br />**परीक्षण:** चयनित पुनः-रन समूह के लिए आवश्यक रिलीज़-जाँच जॉब।<br />**पुनः-रन:** केंद्रित चाइल्ड जॉब पास होने के बाद पुनः चलाएँ।                                                                                                                                                                                                                                                                                                                                                                                   |
 
-## केवल full में जोड़े गए
+## Docker रिलीज़-पथ खंड
 
-ये suites `stable` द्वारा छोड़े जाते हैं और `full` में शामिल होते हैं:
+जब `live_suite_filter` खाली होता है, तब Docker रिलीज़-पथ चरण ये खंड चलाता है:
 
-| Area                             | Full-only coverage                                                                                                          |
+| खंड                                                           | कवरेज                                                                                                                                     |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `core`                                                          | मुख्य Docker रिलीज़-पथ स्मोक लेन।                                                                                                        |
+| `package-update-openai`                                         | OpenAI पैकेज इंस्टॉल/अपडेट व्यवहार, Codex ऑन-डिमांड इंस्टॉल, Codex Plugin की लाइव प्रगति का अनुवर्तन, और Chat Completions टूल कॉल। |
+| `package-update-anthropic`                                      | Anthropic पैकेज इंस्टॉल और अपडेट व्यवहार।                                                                                               |
+| `package-update-core`                                           | प्रदाता-निरपेक्ष पैकेज और अपडेट व्यवहार।                                                                                                |
+| `plugins-runtime-plugins`                                       | Plugin व्यवहार का अभ्यास करने वाली Plugin रनटाइम लेन।                                                                                          |
+| `plugins-runtime-services`                                      | सेवा-समर्थित और लाइव Plugin रनटाइम लेन।                                                                                                |
+| `plugins-runtime-install-a` से `plugins-runtime-install-h` | समानांतर रिलीज़ सत्यापन के लिए विभाजित Plugin इंस्टॉल/रनटाइम बैच।                                                                        |
+| `openwebui`                                                     | अनुरोध किए जाने पर समर्पित बड़ी-डिस्क वाले रनर पर पृथक OpenWebUI संगतता स्मोक।                                                      |
+
+जब केवल एक Docker लेन विफल हो, तब पुनः उपयोग योग्य लाइव/E2E वर्कफ़्लो पर लक्षित `docker_lanes=<lane[,lane]>` का उपयोग करें। उपलब्ध होने पर, रिलीज़ आर्टिफ़ैक्ट में पैकेज आर्टिफ़ैक्ट और इमेज पुनः उपयोग इनपुट वाली प्रति-लेन पुनः चलाने की कमांड शामिल होती हैं।
+
+## रिलीज़ प्रोफ़ाइल
+
+`release_profile` मुख्यतः रिलीज़ जाँचों के भीतर लाइव/प्रदाता विस्तार को नियंत्रित करता है।
+यह सामान्य पूर्ण CI, Plugin प्रीरिलीज़, इंस्टॉल स्मोक, पैकेज
+स्वीकृति या QA Lab को नहीं हटाता। स्थिर और पूर्ण प्रोफ़ाइल हमेशा व्यापक रिपॉज़िटरी/लाइव
+E2E और Docker रिलीज़-पथ सोक कवरेज चलाती हैं। बीटा प्रोफ़ाइल
+`run_release_soak=true` के साथ इसे चुन सकती है। पैकेज स्वीकृति प्रत्येक पूर्ण उम्मीदवार के लिए मानक पैकेज
+Telegram E2E प्रदान करती है, इसलिए समग्र वर्कफ़्लो उस
+लाइव पोलर को दोहराता नहीं है।
+
+| प्रोफ़ाइल  | अभिप्रेत उपयोग                      | शामिल लाइव/प्रदाता कवरेज                                                                                                                                                                            |
+| -------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `beta`   | सबसे तेज़ रिलीज़-महत्वपूर्ण स्मोक।   | OpenAI/मुख्य लाइव पथ, OpenAI के लिए Docker लाइव मॉडल, मूल Gateway कोर, मूल OpenAI Gateway प्रोफ़ाइल, मूल OpenAI Plugin, और Docker लाइव Gateway OpenAI।                                            |
+| `stable` | डिफ़ॉल्ट रिलीज़ अनुमोदन प्रोफ़ाइल। | `beta` के साथ Anthropic स्मोक, Google, MiniMax, बैकएंड, मूल लाइव परीक्षण हार्नेस, Docker लाइव CLI बैकएंड, Docker ACP बाइंड, Docker Codex हार्नेस, Docker सबएजेंट-घोषणा, और एक OpenCode Go स्मोक शार्ड। |
+| `full`   | व्यापक परामर्शी स्वीप।             | `stable` के साथ परामर्शी प्रदाता, Plugin लाइव शार्ड, और मीडिया लाइव शार्ड।                                                                                                                               |
+
+## केवल पूर्ण प्रोफ़ाइल के अतिरिक्त भाग
+
+इन सुइट को `stable` द्वारा छोड़ा जाता है और `full` द्वारा शामिल किया जाता है:
+
+| क्षेत्र                             | केवल पूर्ण प्रोफ़ाइल का कवरेज                                                                                                          |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Docker live models               | OpenCode Go, OpenRouter, xAI, Z.ai, और Fireworks.                                                                          |
-| Docker live gateway              | Advisory providers DeepSeek/Fireworks, OpenCode Go/OpenRouter, और xAI/Z.ai shards में विभाजित.                              |
-| Native gateway provider profiles | Full Anthropic Opus और Sonnet/Haiku shards, Fireworks, DeepSeek, full OpenCode Go model shards, OpenRouter, xAI, और Z.ai. |
-| Native plugin live shards        | Plugins A-K, L-N, O-Z other, Moonshot, और xAI.                                                                             |
-| Native media live shards         | Audio, Google music, MiniMax music, और video groups A-D.                                                                   |
+| Docker लाइव मॉडल               | OpenCode Go, OpenRouter, xAI, Z.ai, और Fireworks।                                                                          |
+| Docker लाइव Gateway              | परामर्शी प्रदाता DeepSeek/Fireworks, OpenCode Go/OpenRouter, और xAI/Z.ai शार्ड में विभाजित।                              |
+| मूल Gateway प्रदाता प्रोफ़ाइल | पूर्ण Anthropic Opus और Sonnet/Haiku शार्ड, Fireworks, DeepSeek, पूर्ण OpenCode Go मॉडल शार्ड, OpenRouter, xAI, और Z.ai। |
+| मूल Plugin लाइव शार्ड        | Plugin A-K, L-N, O-Z अन्य, Moonshot, और xAI।                                                                             |
+| मूल मीडिया लाइव शार्ड         | ऑडियो, Google संगीत, MiniMax संगीत, और वीडियो समूह A-D।                                                                   |
 
 `stable` में `native-live-src-gateway-profiles-anthropic-smoke` और
-`native-live-src-gateway-profiles-opencode-go-smoke` शामिल हैं; `full` इसके बजाय व्यापक
-Anthropic और OpenCode Go model shards का उपयोग करता है. Focused reruns फिर भी
-aggregate `native-live-src-gateway-profiles-anthropic` या
-`native-live-src-gateway-profiles-opencode-go` handles का उपयोग कर सकते हैं.
+`native-live-src-gateway-profiles-opencode-go-smoke` शामिल हैं; इसके बजाय `full` अधिक व्यापक
+Anthropic और OpenCode Go मॉडल शार्ड का उपयोग करता है। केंद्रित पुनः संचालन अब भी
+समग्र `native-live-src-gateway-profiles-anthropic` या
+`native-live-src-gateway-profiles-opencode-go` हैंडल का उपयोग कर सकते हैं।
 
-## केंद्रित reruns
+## केंद्रित पुनः संचालन
 
-असंबंधित रिलीज़ बॉक्स दोहराने से बचने के लिए `rerun_group` का उपयोग करें:
+असंबंधित रिलीज़ बॉक्स को दोहराने से बचने के लिए `rerun_group` का उपयोग करें:
 
-| Handle              | Scope                                                                                           |
+| हैंडल              | दायरा                                                                                           |
 | ------------------- | ----------------------------------------------------------------------------------------------- |
-| `all`               | सभी पूर्ण रिलीज़ वैलिडेशन चरण।                                                             |
+| `all`               | पूर्ण रिलीज़ सत्यापन के सभी चरण।                                                             |
 | `ci`                | केवल मैन्युअल पूर्ण CI चाइल्ड।                                                                      |
-| `plugin-prerelease` | केवल Plugin प्री-रिलीज़ चाइल्ड।                                                                   |
-| `release-checks`    | सभी OpenClaw रिलीज़ जांच चरण।                                                             |
-| `install-smoke`     | रिलीज़ जांचों तक इंस्टॉल स्मोक।                                                           |
-| `cross-os`          | क्रॉस-OS रिलीज़ जांचें।                                                                        |
-| `live-e2e`          | रेपो/लाइव E2E और Docker रिलीज़-पाथ वैलिडेशन।                                               |
+| `plugin-prerelease` | केवल Plugin प्रीरिलीज़ चाइल्ड।                                                                   |
+| `release-checks`    | OpenClaw रिलीज़ जाँचों के सभी चरण।                                                             |
+| `install-smoke`     | इंस्टॉल स्मोक से रिलीज़ जाँचों तक।                                                           |
+| `cross-os`          | क्रॉस-OS रिलीज़ जाँचें।                                                                        |
+| `live-e2e`          | रिपॉज़िटरी/लाइव E2E और Docker रिलीज़-पथ सत्यापन।                                               |
 | `package`           | पैकेज स्वीकृति।                                                                             |
-| `qa`                | QA समानता और QA लाइव लेन।                                                                   |
-| `qa-parity`         | केवल QA समानता लेन और रिपोर्ट।                                                                |
-| `qa-live`           | सक्षम होने पर QA लाइव Matrix/Telegram और गेटेड Discord, WhatsApp, और Slack लेन।             |
-| `npm-telegram`      | प्रकाशित-पैकेज Telegram E2E; `release_package_spec` या `npm_telegram_package_spec` आवश्यक है। |
+| `qa`                | QA समतुल्यता और QA लाइव लेन।                                                                   |
+| `qa-parity`         | केवल QA समतुल्यता लेन और रिपोर्ट।                                                                |
+| `qa-live`           | सक्षम होने पर QA लाइव Matrix/Telegram और गेटेड Discord, WhatsApp तथा Slack लेन।             |
+| `npm-telegram`      | प्रकाशित-पैकेज Telegram E2E; इसके लिए `release_package_spec` या `npm_telegram_package_spec` आवश्यक है। |
+| `performance`       | केवल उत्पाद प्रदर्शन प्रमाण।                                                              |
 
-जब कोई एक लाइव सूट विफल हो, तो `rerun_group=live-e2e` के साथ `live_suite_filter` का उपयोग करें।
-मान्य फ़िल्टर ids पुन: प्रयोज्य लाइव/E2E वर्कफ़्लो में परिभाषित हैं, जिनमें
+जब एक लाइव सुइट विफल हो, तब `rerun_group=live-e2e` के साथ `live_suite_filter` का उपयोग करें।
+मान्य फ़िल्टर आईडी पुनः उपयोग योग्य लाइव/E2E वर्कफ़्लो में परिभाषित हैं, जिनमें
 `docker-live-models`, `live-gateway-docker`,
 `live-gateway-anthropic-docker`, `live-gateway-google-docker`,
 `live-gateway-minimax-docker`, `live-gateway-advisory-docker`,
 `live-cli-backend-docker`, `live-acp-bind-docker`, और
 `live-codex-harness-docker` शामिल हैं।
 
-`live-gateway-advisory-docker` handle अपने तीन प्रदाता शार्ड के लिए एक समेकित
-रीरन handle है, इसलिए यह अब भी सभी advisory Docker Gateway jobs में फैलता है।
+केंद्रित QA ट्रांसपोर्ट पुनः संचालन के लिए, `rerun_group=qa-live` सेट करें और
+मानक चयनकर्ता `qa-live-matrix`, `qa-live-telegram`, `qa-live-discord`,
+`qa-live-whatsapp`, या `qa-live-slack` का उपयोग करें।
 
-जब कोई एक क्रॉस-OS लेन विफल हो, तो `rerun_group=cross-os` के साथ
-`cross_os_suite_filter` का उपयोग करें। फ़िल्टर OS id, suite id, या OS/suite
-जोड़ी स्वीकार करता है, उदाहरण के लिए `windows/packaged-upgrade`, `windows`, या
-`packaged-fresh`। क्रॉस-OS सारांशों में पैकेज्ड अपग्रेड लेन के लिए प्रति-चरण
-समय शामिल होते हैं, और लंबे समय तक चलने वाले कमांड Heartbeat पंक्तियाँ प्रिंट
-करते हैं ताकि अटका हुआ Windows अपडेट job timeout से पहले दिखाई दे।
+`live-gateway-advisory-docker` हैंडल अपने तीन प्रदाता शार्ड के लिए एक समग्र पुनः संचालन हैंडल है, इसलिए यह अब भी सभी परामर्शी Docker Gateway जॉब में फैलता है।
 
-QA रिलीज़-जांच विफलताएँ सामान्य रिलीज़ वैलिडेशन को ब्लॉक करती हैं। मानक tier में
-आवश्यक OpenClaw डायनामिक टूल drift भी रिलीज़-जांच verifier को ब्लॉक करता है।
-Tideclaw alpha runs अब भी गैर-पैकेज-सुरक्षा रिलीज़-जांच लेन को advisory मान सकते
-हैं। जब `live_suite_filter` स्पष्ट रूप से Discord, WhatsApp, या Slack जैसी
-गेटेड QA लाइव लेन का अनुरोध करता है, तो मिलते-जुलते
-`OPENCLAW_RELEASE_QA_*_LIVE_CI_ENABLED` repo variable को सक्षम होना चाहिए; अन्यथा
-इनपुट कैप्चर लेन को चुपचाप छोड़ने के बजाय विफल हो जाता है। जब आपको ताज़ा QA
-साक्ष्य चाहिए, तो `rerun_group=qa`, `qa-parity`, या `qa-live` को फिर से चलाएँ।
+जब एक क्रॉस-OS लेन विफल हो, तब `rerun_group=cross-os` के साथ `cross_os_suite_filter` का उपयोग करें।
+फ़िल्टर एक OS आईडी, सुइट आईडी, या OS/सुइट युग्म स्वीकार करता है, उदाहरण के लिए `windows/packaged-upgrade`, `windows`, या `packaged-fresh`। क्रॉस-OS
+सारांश में पैकेज किए गए अपग्रेड लेन के लिए प्रति-चरण समय शामिल होता है, और लंबे समय तक चलने वाली
+कमांड Heartbeat पंक्तियाँ प्रिंट करती हैं, ताकि जॉब
+टाइमआउट से पहले अटका हुआ अपडेट दिखाई दे।
 
-## रखने योग्य साक्ष्य
+QA रिलीज़-जाँच विफलताएँ केवल चयनित
+Matrix, Telegram और QA रनटाइम टूल कवरेज लेन के लिए सामान्य रिलीज़ सत्यापन को अवरुद्ध करती हैं। QA समतुल्यता, रनटाइम
+समतुल्यता और गेटेड Discord, WhatsApp तथा Slack लाइव लेन परामर्शी हैं और
+रिलीज़ सत्यापक को अवरुद्ध किए बिना स्थिति आर्टिफ़ैक्ट प्रकाशित करती हैं। Tideclaw
+अल्फ़ा संचालन अब भी गैर-पैकेज-सुरक्षा रिलीज़-जाँच लेन को परामर्शी मान सकते हैं। `release_profile=beta` के साथ, `Run repo/live E2E validation` लाइव-प्रदाता सुइट
+परामर्शी हैं: तृतीय-पक्ष मॉडल परिनियोजन किसी रिलीज़ के अंतर्गत बदलते रहते हैं, इसलिए
+बीटा उनकी विफलताओं को चेतावनियों के रूप में दिखाता है, जबकि स्थिर और पूर्ण प्रोफ़ाइल
+उन्हें अवरोधक बनाए रखती हैं। जब
+`live_suite_filter` स्पष्ट रूप से Discord,
+WhatsApp या Slack जैसी गेटेड QA लाइव लेन का अनुरोध करता है, तब संबंधित `OPENCLAW_RELEASE_QA_*_LIVE_CI_ENABLED` रिपॉज़िटरी
+चर सक्षम होना चाहिए; अन्यथा लेन को चुपचाप छोड़ने के बजाय इनपुट कैप्चर विफल हो जाता है।
+जब आपको नए QA प्रमाण की आवश्यकता हो, तब `rerun_group=qa`, `qa-parity`, या `qa-live` को पुनः चलाएँ।
 
-रिलीज़-स्तरीय इंडेक्स के रूप में `Full Release Validation` सारांश रखें। यह
-चाइल्ड रन ids से लिंक करता है और इसमें सबसे धीमे jobs की तालिकाएँ शामिल होती
-हैं। विफलताओं के लिए, पहले चाइल्ड वर्कफ़्लो देखें, फिर ऊपर दिए गए सबसे छोटे
-मिलते-जुलते handle को फिर से चलाएँ।
+## बनाए रखने योग्य प्रमाण
 
-उपयोगी artifacts:
+रिलीज़-स्तरीय अनुक्रमणिका के रूप में `Full Release Validation` सारांश बनाए रखें। यह चाइल्ड रन आईडी से लिंक करता है और इसमें सबसे धीमे जॉब की तालिकाएँ शामिल होती हैं। विफलताओं के लिए, पहले चाइल्ड
+वर्कफ़्लो का निरीक्षण करें, फिर ऊपर दिए गए सबसे छोटे मेल खाते हैंडल को पुनः चलाएँ।
+
+नियमित रिलीज़ के लिए, Code SHA और Release SHA दोनों, पुनः उपयोग नीति
+और बदले गए पथों का सेट, सफल Code SHA पैरेंट रन तथा हल्का Release
+SHA पैरेंट रन दर्ज करें। विस्तारित-स्थिर के लिए, मानक शाखा, सटीक रिलीज़
+SHA, नया पैरेंट रन आईडी और प्रयास, वर्कफ़्लो रेफ़, प्रत्येक चाइल्ड रन, और कोई भी
+स्थिर-लक्ष्य संगतता सुधार या जानबूझकर किया गया अपवर्जन दर्ज करें।
+
+उपयोगी आर्टिफ़ैक्ट:
 
 - `OpenClaw Release Checks` से `release-package-under-test`
-- `.artifacts/docker-tests/` के अंतर्गत Docker रिलीज़-पाथ artifacts
-- पैकेज स्वीकृति `package-under-test` और Docker acceptance artifacts
-- प्रत्येक OS और suite के लिए क्रॉस-OS रिलीज़-जांच artifacts
-- QA समानता, Matrix, और Telegram artifacts
+- `.artifacts/docker-tests/` के अंतर्गत Docker रिलीज़-पथ आर्टिफ़ैक्ट
+- पैकेज स्वीकृति `package-under-test` और Docker स्वीकृति आर्टिफ़ैक्ट
+- प्रत्येक OS और सुइट के लिए क्रॉस-OS रिलीज़-जाँच आर्टिफ़ैक्ट
+- QA समतुल्यता, रनटाइम समतुल्यता, और चयनित Matrix, Telegram, Discord, WhatsApp,
+  या Slack आर्टिफ़ैक्ट
 
 ## वर्कफ़्लो फ़ाइलें
 
@@ -208,5 +315,8 @@ Tideclaw alpha runs अब भी गैर-पैकेज-सुरक्ष�
 - `.github/workflows/openclaw-live-and-e2e-checks-reusable.yml`
 - `.github/workflows/plugin-prerelease.yml`
 - `.github/workflows/install-smoke.yml`
+- `.github/workflows/install-smoke-reusable.yml`
 - `.github/workflows/openclaw-cross-os-release-checks-reusable.yml`
 - `.github/workflows/package-acceptance.yml`
+- `.github/workflows/openclaw-performance.yml`
+- `.github/workflows/npm-telegram-beta-e2e.yml`

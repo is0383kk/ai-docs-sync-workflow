@@ -1,21 +1,22 @@
 ---
 read_when:
-    - U installeert, configureert of controleert de gmi-Plugin
+    - Je installeert, configureert of controleert de gmi-plugin
 summary: OpenClaw-providerplugin voor GMI Cloud.
-title: Gmi-Plugin
+title: Gmi-plugin
 x-i18n:
-    generated_at: "2026-07-12T09:13:29Z"
+    generated_at: "2026-07-27T06:27:47Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 19b0adb711875e2b7a1bbded01df13b8bec6c043b04acfd634b8acd897c3fa0f
+    source_hash: 6314fe1c4ba0138e37614ca9c748d0d04d7db5c49abfa3a8fee9e74f210881d0
     source_path: plugins/reference/gmi.md
     workflow: 16
 ---
 
 # Gmi-plugin
 
-OpenClaw GMI Cloud-providerplugin.
+OpenClaw-providerplugin voor GMI Cloud.
 
 ## Distributie
 
@@ -24,7 +25,7 @@ OpenClaw GMI Cloud-providerplugin.
 
 ## Oppervlak
 
-providers: gmi, gmi-cloud, gmicloud
+providers: `gmi`, `gmi-cloud`, `gmicloud`
 
 ## Gerelateerde documentatie
 

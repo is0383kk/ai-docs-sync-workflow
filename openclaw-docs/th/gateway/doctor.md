@@ -1,21 +1,22 @@
 ---
 read_when:
     - การเพิ่มหรือแก้ไขการย้ายข้อมูลของ doctor
-    - การแนะนำการเปลี่ยนแปลง config ที่ไม่เข้ากันย้อนหลัง
+    - การนำเสนอการเปลี่ยนแปลงการกำหนดค่าที่ไม่เข้ากันย้อนหลัง
 sidebarTitle: Doctor
-summary: 'คำสั่ง doctor: การตรวจสอบสุขภาพ การย้ายข้อมูลการกำหนดค่า และขั้นตอนการซ่อมแซม'
-title: ตัวตรวจสอบ
+summary: 'คำสั่ง Doctor: การตรวจสอบสถานะ การย้ายการกำหนดค่า และขั้นตอนการซ่อมแซม'
+title: ตัวตรวจวินิจฉัย
 x-i18n:
-    generated_at: "2026-06-27T17:33:30Z"
-    model: gpt-5.5
+    generated_at: "2026-07-20T05:59:42Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: fdb5e3fb437a8678c427dee698a0ea6004b22b71c6e38cc6f75ba674fa4fcc5e
+    source_hash: e2b33c4ae538f8aa8b8049012a788261f3b9051b006f84b17c0e10fe94dc0fdc
     source_path: gateway/doctor.md
     workflow: 16
 ---
 
-`openclaw doctor` เป็นเครื่องมือซ่อมแซม + ย้ายข้อมูลสำหรับ OpenClaw โดยแก้ไข config/state ที่ค้างเก่า ตรวจสุขภาพ และให้ขั้นตอนซ่อมแซมที่นำไปทำต่อได้
+`openclaw doctor` คือเครื่องมือซ่อมแซมและย้ายข้อมูลสำหรับ OpenClaw โดยแก้ไขการกำหนดค่า/สถานะที่ล้าสมัย ตรวจสอบความสมบูรณ์ และแสดงขั้นตอนการซ่อมแซมที่นำไปปฏิบัติได้
 
 ## เริ่มต้นอย่างรวดเร็ว
 
@@ -23,7 +24,7 @@ x-i18n:
 openclaw doctor
 ```
 
-### โหมด headless และ automation
+### โหมด Headless และระบบอัตโนมัติ
 
 <Tabs>
   <Tab title="--yes">
@@ -31,7 +32,7 @@ openclaw doctor
     openclaw doctor --yes
     ```
 
-    ยอมรับค่าเริ่มต้นโดยไม่ถามยืนยัน (รวมถึงขั้นตอนซ่อมแซม restart/service/sandbox เมื่อมีผลใช้ได้)
+    ยอมรับค่าเริ่มต้นโดยไม่แสดงข้อความถาม (รวมถึงขั้นตอนการซ่อมแซมการรีสตาร์ต/บริการ/แซนด์บ็อกซ์เมื่อเกี่ยวข้อง)
 
   </Tab>
   <Tab title="--fix">
@@ -39,7 +40,7 @@ openclaw doctor
     openclaw doctor --fix
     ```
 
-    ใช้การซ่อมแซมที่แนะนำโดยไม่ถามยืนยัน (การซ่อมแซม + การ restart เมื่อปลอดภัย)
+    ใช้การซ่อมแซมที่แนะนำโดยไม่แสดงข้อความถาม (`--repair` เป็นนามแฝง)
 
   </Tab>
   <Tab title="--lint">
@@ -48,9 +49,8 @@ openclaw doctor
     openclaw doctor --lint --json
     ```
 
-    รันการตรวจสุขภาพแบบมีโครงสร้างสำหรับ CI หรือ automation ก่อนเริ่มงาน โหมดนี้เป็น
-    แบบอ่านอย่างเดียว: ไม่ถามยืนยัน ไม่ซ่อมแซม ไม่ย้าย config ไม่ restart services และไม่
-    แตะต้อง state
+    เรียกใช้การตรวจสอบความสมบูรณ์แบบมีโครงสร้างสำหรับ CI หรือระบบอัตโนมัติก่อนดำเนินการ เป็นแบบอ่านอย่างเดียว: ไม่มี
+    ข้อความถาม การซ่อมแซม การย้ายข้อมูล การรีสตาร์ต หรือการเขียนสถานะ
 
   </Tab>
   <Tab title="--fix --force">
@@ -58,7 +58,7 @@ openclaw doctor
     openclaw doctor --fix --force
     ```
 
-    ใช้การซ่อมแซมเชิงรุกด้วย (เขียนทับ config supervisor แบบกำหนดเอง)
+    ใช้การซ่อมแซมเชิงรุกด้วย (เขียนทับการกำหนดค่า supervisor แบบกำหนดเอง)
 
   </Tab>
   <Tab title="--non-interactive">
@@ -66,7 +66,9 @@ openclaw doctor
     openclaw doctor --non-interactive
     ```
 
-    รันโดยไม่ถามยืนยันและใช้เฉพาะ migration ที่ปลอดภัย (การ normalize config + การย้าย state บนดิสก์) ข้ามการกระทำ restart/service/sandbox ที่ต้องให้มนุษย์ยืนยัน migration ของ state แบบ legacy จะรันอัตโนมัติเมื่อตรวจพบ
+    ทำงานโดยไม่แสดงข้อความถาม และใช้เฉพาะการย้ายข้อมูลที่ปลอดภัย (การทำให้การกำหนดค่าเป็นมาตรฐาน +
+    การย้ายสถานะบนดิสก์) ข้ามการดำเนินการรีสตาร์ต/บริการ/แซนด์บ็อกซ์ที่ต้องมีการ
+    ยืนยันจากมนุษย์ การย้ายสถานะแบบเดิมยังคงทำงานโดยอัตโนมัติเมื่อตรวจพบ
 
   </Tab>
   <Tab title="--deep">
@@ -74,12 +76,12 @@ openclaw doctor
     openclaw doctor --deep
     ```
 
-    สแกน system services เพื่อหา gateway installs เพิ่มเติม (launchd/systemd/schtasks)
+    สแกนบริการระบบเพื่อค้นหาการติดตั้ง Gateway เพิ่มเติม (launchd/systemd/schtasks)
 
   </Tab>
 </Tabs>
 
-หากต้องการตรวจทานการเปลี่ยนแปลงก่อนเขียน ให้เปิดไฟล์ config ก่อน:
+หากต้องการตรวจสอบการเปลี่ยนแปลงก่อนเขียน ให้เปิดไฟล์การกำหนดค่าก่อน:
 
 ```bash
 cat ~/.openclaw/openclaw.json
@@ -87,26 +89,37 @@ cat ~/.openclaw/openclaw.json
 
 ## โหมด lint แบบอ่านอย่างเดียว
 
-`openclaw doctor --lint` เป็นโหมดพี่น้องที่เป็นมิตรกับ automation ของ
-`openclaw doctor --fix` ทั้งสองใช้การตรวจสุขภาพของ doctor แต่ท่าทีของโหมด
-ต่างกัน:
+`openclaw doctor --lint` เป็นเครื่องมือคู่กันของ
+`openclaw doctor --fix` ที่เหมาะกับระบบอัตโนมัติ ทั้งสองใช้รีจิสทรีกฎ Doctor เดียวกัน แต่
+เลือกหรือดำเนินการกับกฎด้วยวิธีที่ต่างกัน:
 
-| โหมด                     | การถามยืนยัน   | เขียน config/state     | เอาต์พุต                 | ใช้สำหรับ                      |
+| โหมด                     | ข้อความถาม   | เขียนการกำหนดค่า/สถานะ     | เอาต์พุต                 | ใช้สำหรับ                      |
 | ------------------------ | --------- | ----------------------- | ---------------------- | ------------------------------- |
-| `openclaw doctor`        | ใช่       | ไม่                      | รายงานสุขภาพที่อ่านง่าย | คนตรวจสถานะ         |
-| `openclaw doctor --fix`  | บางครั้ง | ใช่ พร้อมนโยบายการซ่อมแซม | log การซ่อมแซมที่อ่านง่าย    | ใช้การซ่อมแซมที่อนุมัติแล้ว       |
-| `openclaw doctor --lint` | ไม่        | ไม่                      | findings แบบมีโครงสร้าง    | CI, preflight และ review gates |
+| `openclaw doctor`        | ใช่       | ไม่                      | รายงานความสมบูรณ์ที่อ่านง่าย | มนุษย์ตรวจสอบสถานะ         |
+| `openclaw doctor --fix`  | บางครั้ง | ใช่ ตามนโยบายการซ่อมแซม | บันทึกการซ่อมแซมที่อ่านง่าย    | ใช้การซ่อมแซมที่ได้รับอนุมัติ       |
+| `openclaw doctor --lint` | ไม่        | ไม่                      | ผลการตรวจสอบแบบมีโครงสร้าง    | CI การตรวจสอบล่วงหน้า และเกตการรีวิว |
 
-การตรวจสุขภาพที่ปรับให้ทันสมัยอาจให้ implementation `repair()` แบบไม่บังคับ
-`doctor --fix` จะใช้การซ่อมแซมเหล่านั้นเมื่อมีอยู่ และยังใช้ flow การซ่อมแซม
-ของ doctor ที่มีอยู่สำหรับ checks ที่ยังไม่ได้ migrate
-สัญญาการซ่อมแซมแบบมีโครงสร้างยังแยกการรายงานการซ่อมแซมออกจากการตรวจจับ:
-`detect()` รายงาน findings ปัจจุบัน ขณะที่ `repair()` สามารถรายงานการเปลี่ยนแปลง,
-diff ของ config/file และผลข้างเคียงที่ไม่ใช่ไฟล์ วิธีนี้ทำให้เส้นทาง migration ยังเปิดอยู่
-สำหรับ `doctor --fix --dry-run` และเอาต์พุต diff ในอนาคต โดยไม่ทำให้ lint checks
-วางแผน mutation
+โดยค่าเริ่มต้น `doctor --lint` จะเรียกใช้โปรไฟล์ระบบอัตโนมัติแบบครอบคลุมและปลอดภัย ซึ่งเป็นการตรวจสอบที่
+เป็นแบบคงที่ อยู่ภายในเครื่อง และมีประโยชน์ในเอาต์พุตของ CI หรือการตรวจสอบล่วงหน้า โดยจะข้ามการตรวจสอบแบบเลือกใช้ที่
+มีลักษณะเป็นคำแนะนำ อ่อนไหวต่อสภาพแวดล้อม พึ่งพาบริการที่กำลังทำงาน เป็นรายการบัญชี/พื้นที่ทำงาน
+หรือเป็นการล้างข้อมูลย้อนหลัง ใช้ `doctor --lint --all` เมื่อต้องการ
+ตรวจสอบ lint ที่ลงทะเบียนไว้ทั้งหมด รวมถึงการตรวจสอบแบบเลือกใช้เหล่านั้น หรือใช้ `--only <id>` สำหรับ
+การตรวจสอบเฉพาะเจาะจง
 
-ตัวอย่าง:
+`doctor --fix` ไม่ใช้โปรไฟล์เริ่มต้นของ lint และไม่ยอมรับ
+`--all` โดยจะเรียกใช้เส้นทางการซ่อมแซมตามลำดับของ Doctor: การตรวจสอบความสมบูรณ์สมัยใหม่อาจมี
+การใช้งาน `repair()` ซึ่งเป็นทางเลือก และส่วนที่เก่ากว่ายังคงใช้
+ขั้นตอนการซ่อมแซมแบบเดิมของ Doctor ผลการตรวจสอบ lint บางรายการมีไว้เพื่อการวินิจฉัยเท่านั้นโดยเจตนา ดังนั้น
+การตรวจสอบที่ปรากฏใน `--lint --all` ไม่ได้หมายความว่า `--fix` จะเปลี่ยนแปลงส่วนนั้น
+สัญญาจะแยก `detect()` (รายงานผลการตรวจสอบ) ออกจาก `repair()` (รายงาน
+การเปลี่ยนแปลง/ส่วนต่าง/ผลข้างเคียง) ซึ่งเปิดทางไว้สำหรับ
+`doctor --fix --dry-run` ในอนาคตโดยไม่เปลี่ยนการตรวจสอบ lint ให้เป็นตัววางแผนการเปลี่ยนแปลง
+
+การตรวจสอบในตัวบางรายการถูกปิดใช้งานเป็นค่าเริ่มต้นภายใน เพื่อให้ยังพร้อมใช้งานสำหรับ
+`--all`, `--only` และขั้นตอนการซ่อมแซมของ Doctor โดยไม่กลายเป็นส่วนหนึ่งของโปรไฟล์ระบบอัตโนมัติ
+`doctor --lint` เริ่มต้น แต่ละผลการตรวจสอบยังคงระบุระดับความรุนแรง
+(`info`, `warning` หรือ `error`); การเลือกเริ่มต้นไม่ใช่
+ระดับความรุนแรง
 
 ```bash
 openclaw doctor --lint
@@ -116,471 +129,470 @@ openclaw doctor --lint --all
 openclaw doctor --lint --only core/doctor/gateway-config --json
 ```
 
-เอาต์พุต JSON มี:
+ฟิลด์เอาต์พุต JSON:
 
-- `ok`: มี finding ที่มองเห็นได้ตรงตาม threshold ความรุนแรงที่เลือกหรือไม่
-- `checksRun`: จำนวน health checks ที่รัน
-- `checksSkipped`: checks ที่ถูกข้ามโดย profile ที่เลือก, `--only` หรือ `--skip`
-- `findings`: diagnostics แบบมีโครงสร้างพร้อม `checkId`, `severity`, `message` และ
-  `path`, `line`, `column`, `ocPath` และ `fixHint` แบบไม่บังคับ
+- `ok`: มีผลการตรวจสอบใดถึงเกณฑ์ระดับความรุนแรงที่เลือกหรือไม่
+- `checksRun` / `checksSkipped`: จำนวน (ถูกข้ามเนื่องจากโปรไฟล์, `--only` หรือ `--skip`)
+- `findings`: ข้อมูลวินิจฉัยแบบมีโครงสร้างที่มี `checkId`, `severity`, `message` และอาจมี `path`, `line`, `column`, `ocPath`, `source`, `target`, `requirement`, `fixHint`
 
-Exit codes:
+รหัสออก:
 
-- `0`: ไม่มี findings ที่ระดับหรือสูงกว่า threshold ที่เลือก
-- `1`: มี findings อย่างน้อยหนึ่งรายการตรงตาม threshold ที่เลือก
-- `2`: command/runtime ล้มเหลวก่อนปล่อย lint findings ได้
+| รหัส | ความหมาย                                                  |
+| ---- | -------------------------------------------------------- |
+| `0`  | ไม่มีผลการตรวจสอบที่ระดับเท่ากับหรือสูงกว่าเกณฑ์ที่เลือก           |
+| `1`  | มีผลการตรวจสอบอย่างน้อยหนึ่งรายการถึงเกณฑ์ที่เลือก          |
+| `2`  | คำสั่ง/รันไทม์ล้มเหลวก่อนที่จะส่งผลการตรวจสอบได้ |
 
-ใช้ `--severity-min info|warning|error` เพื่อควบคุมทั้งสิ่งที่พิมพ์และสิ่งที่
-ทำให้ lint exit ไม่เป็นศูนย์ ใช้ `--all` เพื่อรันรายการ lint ทั้งหมด
-รวมถึง checks เชิงลึกแบบ opt-in ที่ถูกยกเว้นจากชุด automation เริ่มต้น ใช้ `--only <id>` สำหรับ preflight gates แบบแคบ และ
-`--skip <id>` เพื่อยกเว้น check ที่มีเสียงรบกวนชั่วคราว โดยยังคงให้ส่วนที่เหลือของ
-lint run ทำงานอยู่
-ตัวเลือกเอาต์พุต lint เช่น `--json`, `--severity-min`, `--all`, `--only` และ
-`--skip` ต้องใช้คู่กับ `--lint`; การรัน doctor และ repair ปกติจะปฏิเสธ
-ตัวเลือกเหล่านี้
+แฟล็ก:
 
-## สิ่งที่ทำ (สรุป)
+- `--severity-min info|warning|error` (ค่าเริ่มต้น `warning`): ควบคุมทั้งสิ่งที่พิมพ์และสิ่งที่ทำให้รหัสออกไม่เป็นศูนย์
+- `--all`: เรียกใช้การตรวจสอบ lint ที่ลงทะเบียนไว้ทุกรายการ รวมถึงการตรวจสอบแบบเลือกใช้ที่ไม่รวมอยู่ในชุดระบบอัตโนมัติเริ่มต้น
+- `--only <id>` (ใช้ซ้ำได้): เรียกใช้เฉพาะ ID การตรวจสอบที่ระบุ; ID ที่ไม่รู้จักจะถูกรายงานเป็นผลการตรวจสอบข้อผิดพลาด
+- `--skip <id>` (ใช้ซ้ำได้): ไม่รวมการตรวจสอบหนึ่งรายการโดยยังคงให้ส่วนที่เหลือทำงานต่อ
+- `--json`, `--severity-min`, `--all`, `--only` และ `--skip` ต้องใช้ `--lint`; การเรียกใช้ `openclaw doctor` และ `--fix` แบบธรรมดาจะปฏิเสธรายการเหล่านี้
+
+## สิ่งที่เครื่องมือนี้ทำ (สรุป)
 
 <AccordionGroup>
-  <Accordion title="Health, UI, and updates">
-    - การ update ก่อนเริ่มงานแบบไม่บังคับสำหรับ git installs (เฉพาะ interactive)
-    - การตรวจความสดใหม่ของโปรโตคอล UI (build Control UI ใหม่เมื่อ protocol schema ใหม่กว่า)
-    - การตรวจสุขภาพ + prompt ให้ restart
-    - สรุปสถานะ Skills (eligible/missing/blocked) และสถานะ Plugin
+  <Accordion title="ความสมบูรณ์ UI และการอัปเดต">
+    - การอัปเดตก่อนดำเนินการที่เป็นทางเลือกสำหรับการติดตั้งผ่าน git (เฉพาะโต้ตอบ)
+    - การตรวจสอบความใหม่ของโปรโตคอล UI (สร้าง Control UI ใหม่เมื่อสคีมาโปรโตคอลใหม่กว่า)
+    - การตรวจสอบความสมบูรณ์ + ข้อความถามให้รีสตาร์ต
+    - หมายเหตุเฉพาะปัญหาเกี่ยวกับ skill และ plugin; รายการที่สมบูรณ์จะยังคงอยู่ใน `openclaw skills check` และ `openclaw plugins list`
 
   </Accordion>
-  <Accordion title="Config and migrations">
-    - การ normalize config สำหรับค่า legacy
-    - การ migrate talk config จากฟิลด์ legacy แบบแบน `talk.*` ไปเป็น `talk.provider` + `talk.providers.<provider>`
-    - การตรวจ migration ของ browser สำหรับ config legacy ของ Chrome extension และความพร้อม Chrome MCP
-    - คำเตือนการ override provider ของ OpenCode (`models.providers.opencode` / `models.providers.opencode-go`)
-    - migration ของ provider/profile OpenAI Codex แบบ legacy (`openai-codex` → `openai`) และคำเตือน shadowing สำหรับ `models.providers.openai-codex` ที่ค้างเก่า
-    - การตรวจ prerequisites ของ OAuth TLS สำหรับ profile OpenAI Codex OAuth
-    - คำเตือน allowlist ของ Plugin/tool เมื่อ `plugins.allow` จำกัดเข้มงวดแต่นโยบาย tool ยังขอ wildcard หรือ tools ที่ Plugin เป็นเจ้าของ
-    - migration ของ state บนดิสก์แบบ legacy (sessions/agent dir/WhatsApp auth)
-    - migration key สัญญา manifest ของ Plugin แบบ legacy (`speechProviders`, `realtimeTranscriptionProviders`, `realtimeVoiceProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, `videoGenerationProviders`, `webFetchProviders`, `webSearchProviders` → `contracts`)
-    - migration ของ cron store แบบ legacy (`jobId`, `schedule.cron`, ฟิลด์ delivery/payload ระดับบน, payload `provider`, งาน fallback webhook `notify: true`)
-    - การล้าง runtime-policy ทั้ง agent แบบ legacy; runtime policy ของ provider/model คือ route selector ที่ใช้งานอยู่
-    - การล้าง config ของ Plugin ที่ค้างเก่าเมื่อ plugins เปิดใช้งานอยู่; เมื่อ `plugins.enabled=false` การอ้างอิง Plugin ที่ค้างเก่าจะถือเป็น config containment ที่ไม่ทำงานและจะถูกเก็บไว้
+  <Accordion title="การกำหนดค่าและการย้ายข้อมูล">
+    - การทำให้การกำหนดค่าเป็นมาตรฐานสำหรับรูปแบบค่าแบบเดิม
+    - การย้ายการกำหนดค่า Talk จากฟิลด์ `talk.*` แบบแบนเดิมไปยัง `talk.provider` + `talk.providers.<provider>`
+    - การตรวจสอบการย้ายเบราว์เซอร์สำหรับการกำหนดค่าส่วนขยาย Chrome แบบเดิมและความพร้อมของ Chrome MCP
+    - คำเตือนการแทนที่ผู้ให้บริการ OpenCode (`models.providers.opencode` / `opencode-zen` / `opencode-go`)
+    - การย้ายผู้ให้บริการ/โปรไฟล์ OpenAI Codex แบบเดิม (`openai-codex` → `openai`) และคำเตือนการบดบังสำหรับ `models.providers.openai-codex` ที่ล้าสมัย
+    - การตรวจสอบข้อกำหนดเบื้องต้นของ OAuth TLS สำหรับโปรไฟล์ OpenAI Codex OAuth
+    - คำเตือนรายการอนุญาต plugin/เครื่องมือเมื่อ `plugins.allow` จำกัดการใช้งาน แต่นโยบายเครื่องมือยังคงขอไวลด์การ์ดหรือเครื่องมือที่ plugin เป็นเจ้าของ
+    - การย้ายสถานะบนดิสก์แบบเดิม (เซสชัน/ไดเรกทอรีเอเจนต์/การยืนยันตัวตน WhatsApp)
+    - การย้ายคีย์สัญญาแมนิเฟสต์ plugin แบบเดิม (`speechProviders`, `realtimeTranscriptionProviders`, `realtimeVoiceProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, `videoGenerationProviders`, `webFetchProviders`, `webSearchProviders` → `contracts`)
+    - การย้ายที่เก็บ Cron แบบเดิม (`jobId`, `schedule.cron`, ฟิลด์การส่งมอบ/เพย์โหลดระดับบนสุด, เพย์โหลด `provider`, งาน Webhook สำรอง `notify: true`)
+    - การซ่อมแซมการตรึงรันไทม์ Codex CLI (`agentRuntime.id: "codex-cli"` → `"codex"`) ใน `agents.defaults`, `agents.list[]` และ `models.providers.*` (รวมถึงรายการต่อโมเดล)
+    - การล้างการกำหนดค่า plugin ที่ล้าสมัยเมื่อเปิดใช้งาน plugin; เมื่อ `plugins.enabled=false` การอ้างอิง plugin ที่ล้าสมัยจะถูกเก็บไว้เป็นการกำหนดค่าควบคุมที่ไม่ทำงาน
 
   </Accordion>
-  <Accordion title="State and integrity">
-    - การตรวจไฟล์ lock ของ session และการล้าง lock ที่ค้างเก่า
-    - การซ่อมแซม transcript ของ session สำหรับ branch prompt-rewrite ที่ซ้ำกันซึ่งสร้างโดย build 2026.4.24 ที่ได้รับผลกระทบ
-    - การตรวจ tombstone สำหรับการกู้คืน restart ของ subagent ที่ค้าง พร้อมรองรับ `--fix` เพื่อล้าง flag การกู้คืนที่ aborted และค้างเก่า เพื่อให้ startup ไม่ถือว่า child เป็น restart-aborted ต่อไป
-    - การตรวจความสมบูรณ์ของ state และ permissions (sessions, transcripts, state dir)
-    - การตรวจ permission ของไฟล์ config (chmod 600) เมื่อรันในเครื่อง
-    - สุขภาพ auth ของ model: ตรวจ OAuth expiry, สามารถ refresh token ที่ใกล้หมดอายุ และรายงานสถานะ cooldown/disabled ของ auth-profile
+  <Accordion title="สถานะและความสมบูรณ์ของข้อมูล">
+    - การตรวจสอบไฟล์ล็อกเซสชันและการล้างล็อกที่ล้าสมัย
+    - การซ่อมแซมทรานสคริปต์เซสชันสำหรับแขนงการเขียนพรอมต์ใหม่ที่ซ้ำกัน ซึ่งสร้างโดยบิลด์ 2026.4.24 ที่ได้รับผลกระทบ
+    - การตรวจหาทูมสโตนการกู้คืนหลังรีสตาร์ตของเซสชันหลักและเอเจนต์ย่อยที่ค้าง Doctor จะรายงานเซสชันที่ถูกบล็อกและซ่อมแซมเฉพาะแฟล็กยกเลิกที่ล้าสมัยซึ่งขัดแย้งกับทูมสโตนที่มีอยู่เท่านั้น โดยจะไม่เปิดใช้การกู้คืนอัตโนมัติอีกครั้ง
+    - การตรวจสอบความสมบูรณ์และสิทธิ์ของสถานะ (เซสชัน ทรานสคริปต์ ไดเรกทอรีสถานะ)
+    - การตรวจสอบสิทธิ์ไฟล์การกำหนดค่า (chmod 600) เมื่อทำงานภายในเครื่อง
+    - ความสมบูรณ์ของการยืนยันตัวตนโมเดล: ตรวจสอบการหมดอายุของ OAuth สามารถรีเฟรชโทเค็นที่ใกล้หมดอายุ และรายงานสถานะคูลดาวน์/ปิดใช้งานของโปรไฟล์การยืนยันตัวตน
 
   </Accordion>
-  <Accordion title="Gateway, services, and supervisors">
-    - การซ่อมแซม sandbox image เมื่อเปิดใช้ sandboxing
-    - migration ของ service แบบ legacy และการตรวจ gateway เพิ่มเติม
-    - migration ของ state legacy สำหรับ Matrix channel (ในโหมด `--fix` / `--repair`)
-    - การตรวจ runtime ของ Gateway (service ติดตั้งแล้วแต่ไม่ทำงาน; label launchd ที่ cache ไว้)
-    - คำเตือนสถานะ channel (probe จาก gateway ที่กำลังรัน)
-    - การตรวจ permission เฉพาะ channel อยู่ใต้ `openclaw channels capabilities`; ตัวอย่างเช่น permission ของ Discord voice channel ถูก audit ด้วย `openclaw channels capabilities --channel discord --target channel:<channel-id>`
-    - การตรวจ responsiveness ของ WhatsApp สำหรับสุขภาพ event-loop ของ Gateway ที่เสื่อมสภาพโดยยังมี local TUI clients ทำงานอยู่; `--fix` หยุดเฉพาะ local TUI clients ที่ยืนยันแล้ว
-    - การซ่อม route ของ Codex สำหรับ model refs แบบ legacy `openai-codex/*` ใน primary models, fallbacks, models สำหรับ image/video generation, overrides ของ heartbeat/subagent/compaction, hooks, overrides ของ channel model และ route pins ของ session; `--fix` เขียนใหม่เป็น `openai/*`, migrate auth profiles/order `openai-codex:*` เป็น `openai:*`, ลบ runtime pins ของ session/whole-agent ที่ค้างเก่า และคง agent refs ของ OpenAI แบบ canonical ไว้บน Codex harness เริ่มต้น
-    - การ audit config supervisor (launchd/systemd/schtasks) พร้อมการซ่อมแซมแบบไม่บังคับ
-    - การล้าง environment ของ embedded proxy สำหรับ gateway services ที่จับค่า shell `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` ไว้ระหว่าง install หรือ update
-    - การตรวจ best practice ของ runtime Gateway (Node เทียบกับ Bun, paths ของ version-manager)
-    - diagnostics สำหรับการชนกันของพอร์ต Gateway (ค่าเริ่มต้น `18789`)
+  <Accordion title="Gateway บริการ และ supervisor">
+    - การซ่อมแซมอิมเมจแซนด์บ็อกซ์เมื่อเปิดใช้งานแซนด์บ็อกซ์
+    - การย้ายบริการแบบเดิมและการตรวจหา Gateway เพิ่มเติม
+    - การย้ายสถานะแบบเดิมของช่องทาง Matrix (ในโหมด `--fix` / `--repair`)
+    - การตรวจสอบรันไทม์ Gateway (ติดตั้งบริการแล้วแต่ไม่ทำงาน; ป้ายกำกับ launchd ที่แคชไว้)
+    - คำเตือนสถานะช่องทาง (ตรวจสอบจาก Gateway ที่กำลังทำงาน)
+    - การตรวจสอบสิทธิ์เฉพาะช่องทางอยู่ภายใต้ `openclaw channels capabilities`; ตัวอย่างเช่น สิทธิ์ช่องเสียง Discord จะได้รับการตรวจสอบด้วย `openclaw channels capabilities --channel discord --target channel:<channel-id>`
+    - การตรวจสอบการตอบสนองของ WhatsApp สำหรับความสมบูรณ์ของลูปเหตุการณ์ Gateway ที่เสื่อมลงขณะที่ไคลเอ็นต์ TUI ภายในเครื่องยังคงทำงานอยู่; `--fix` จะหยุดเฉพาะไคลเอ็นต์ TUI ภายในเครื่องที่ได้รับการยืนยันแล้วเท่านั้น
+    - การซ่อมแซมเส้นทาง Codex สำหรับการอ้างอิงโมเดล `openai-codex/*` แบบเดิมในโมเดลหลัก ทางเลือกสำรอง โมเดลสร้างรูปภาพ/วิดีโอ การแทนที่ Heartbeat/เอเจนต์ย่อย/Compaction ฮุก การแทนที่โมเดลช่องทาง และการตรึงเส้นทางเซสชัน; `--fix` จะเขียนรายการเหล่านั้นใหม่เป็น `openai/*` ย้ายโปรไฟล์/ลำดับการยืนยันตัวตน `openai-codex:*` ไปยัง `openai:*` ลบการตรึงรันไทม์ระดับเซสชัน/ทั้งเอเจนต์ที่ล้าสมัย และให้เส้นทางที่มีผลหลังซ่อมแซมเป็นตัวกำหนดว่า Codex เข้ากันได้หรือไม่
+    - การตรวจสอบการกำหนดค่า supervisor (launchd/systemd/schtasks) พร้อมตัวเลือกการซ่อมแซม
+    - การล้างตัวแปรสภาพแวดล้อมพร็อกซีที่ฝังอยู่สำหรับบริการ Gateway ซึ่งบันทึกค่า `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` ของเชลล์ไว้ระหว่างการติดตั้งหรืออัปเดต
+    - การตรวจสอบรันไทม์ Gateway (บริการ Bun แบบเดิมที่ไม่รองรับ, พาธตัวจัดการเวอร์ชัน)
+    - การวินิจฉัยพอร์ต Gateway ชนกัน (ค่าเริ่มต้น `18789`)
 
   </Accordion>
-  <Accordion title="Auth, security, and pairing">
-    - คำเตือน security สำหรับนโยบาย DM ที่เปิดกว้าง
-    - การตรวจ auth ของ Gateway สำหรับโหมด token ในเครื่อง (เสนอการสร้าง token เมื่อไม่มี token source; ไม่เขียนทับ config SecretRef ของ token)
-    - การตรวจจับปัญหาการ pairing อุปกรณ์ (คำขอ pair ครั้งแรกที่ pending, การอัปเกรด role/scope ที่ pending, drift ของ cache device-token ในเครื่องที่ค้างเก่า และ drift ของ auth ใน paired-record)
+  <Accordion title="การยืนยันตัวตน ความปลอดภัย และการจับคู่">
+    - คำเตือนด้านความปลอดภัยสำหรับนโยบาย DM แบบเปิด
+    - การตรวจสอบการยืนยันตัวตน Gateway สำหรับโหมดโทเค็นภายในเครื่อง (เสนอให้สร้างโทเค็นเมื่อไม่มีแหล่งโทเค็น; ไม่เขียนทับการกำหนดค่า SecretRef ของโทเค็น)
+    - การตรวจหาปัญหาการจับคู่อุปกรณ์ (คำขอจับคู่ครั้งแรกที่รอดำเนินการ การอัปเกรดบทบาท/ขอบเขตที่รอดำเนินการ ความคลาดเคลื่อนของแคชโทเค็นอุปกรณ์ภายในเครื่องที่ล้าสมัย และความคลาดเคลื่อนของการยืนยันตัวตนในระเบียนที่จับคู่แล้ว)
 
   </Accordion>
-  <Accordion title="Workspace and shell">
-    - การตรวจ systemd linger บน Linux
-    - การตรวจขนาดไฟล์ bootstrap ของ workspace (คำเตือน truncation/ใกล้ถึง limit สำหรับ context files)
-    - การตรวจความพร้อม Skills สำหรับ agent เริ่มต้น; รายงาน skills ที่อนุญาตแต่ขาด bins, env, config หรือข้อกำหนด OS และ `--fix` สามารถปิด skills ที่ใช้ไม่ได้ใน `skills.entries`
-    - การตรวจสถานะ shell completion และการ auto-install/upgrade
-    - การตรวจความพร้อม provider ของ memory search embedding (local model, remote API key หรือ QMD binary)
-    - การตรวจ source install (pnpm workspace mismatch, UI assets หาย, tsx binary หาย)
-    - เขียน config ที่ update แล้ว + metadata ของ wizard
+  <Accordion title="พื้นที่ทำงานและเชลล์">
+    - การตรวจสอบ linger ของ systemd บน Linux
+    - การตรวจสอบขนาดไฟล์บูตสแตรปพื้นที่ทำงาน (คำเตือนเมื่อไฟล์บริบทถูกตัดทอน/ใกล้ถึงขีดจำกัด)
+    - การตรวจสอบความพร้อมของ Skills สำหรับเอเจนต์เริ่มต้น; รายงาน Skills ที่อนุญาตแต่ไม่มีไบนารี ตัวแปรสภาพแวดล้อม การกำหนดค่า หรือข้อกำหนดของระบบปฏิบัติการ และ `--fix` สามารถปิดใช้งาน Skills ที่ไม่พร้อมใช้งานใน `skills.entries`
+    - การตรวจสอบสถานะการเติมคำสั่งเชลล์และการติดตั้ง/อัปเกรดอัตโนมัติ
+    - การตรวจสอบความพร้อมของผู้ให้บริการ embedding สำหรับการค้นหาหน่วยความจำ (โมเดลภายในเครื่อง คีย์ API ระยะไกล หรือไบนารี QMD)
+    - การตรวจสอบการติดตั้งจากซอร์ส (พื้นที่ทำงาน pnpm ไม่ตรงกัน ไม่มีแอสเซ็ต UI ไม่มีไบนารี tsx)
+    - เขียนการกำหนดค่าที่อัปเดต + ข้อมูลเมตาของวิซาร์ด
 
   </Accordion>
 </AccordionGroup>
 
-## การ backfill และ reset ของ Dreams UI
+## การเติมข้อมูลย้อนหลังและรีเซ็ต UI ของ Dreams
 
-ฉาก Dreams ใน Control UI มี action **Backfill**, **Reset** และ **Clear Grounded** สำหรับ workflow grounded dreaming action เหล่านี้ใช้ method RPC แบบ doctor-style ของ gateway แต่ **ไม่ใช่** ส่วนหนึ่งของการซ่อมแซม/migration ของ CLI `openclaw doctor`
+  ฉาก Dreams ใน Control UI มีการดำเนินการ **Backfill**, **Reset** และ **Clear Grounded** สำหรับเวิร์กโฟลว์ Dreaming แบบ grounded การดำเนินการเหล่านี้ใช้เมธอด RPC แบบ doctor ของ Gateway แต่ **ไม่ใช่** ส่วนหนึ่งของการซ่อมแซม/การย้ายข้อมูลด้วย CLI `openclaw doctor`
 
-สิ่งที่ action เหล่านี้ทำ:
+  | การดำเนินการ         | สิ่งที่ดำเนินการ                                                                                                                                                      |
+  | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Backfill       | สแกนไฟล์ `memory/YYYY-MM-DD.md` ย้อนหลังในเวิร์กสเปซที่ใช้งานอยู่ เรียกใช้รอบไดอารี REM แบบ grounded และเขียนรายการ backfill ที่ย้อนกลับได้ลงใน `DREAMS.md` |
+  | Reset          | ลบเฉพาะรายการไดอารี backfill ที่ทำเครื่องหมายไว้จาก `DREAMS.md`                                                                                                  |
+  | Clear Grounded | ลบเฉพาะรายการระยะสั้นแบบ grounded-only ที่อยู่ในระยะพักจากการเล่นย้อนหลัง ซึ่งยังไม่มีการสะสมการเรียกคืนแบบสดหรือการสนับสนุนรายวัน                           |
 
-- **Backfill** สแกนไฟล์ประวัติ `memory/YYYY-MM-DD.md` ใน workspace ที่ใช้งานอยู่ รัน grounded REM diary pass และเขียน entry backfill ที่ย้อนกลับได้ลงใน `DREAMS.md`
-- **Reset** ลบเฉพาะ diary entries ของ backfill ที่ทำเครื่องหมายไว้จาก `DREAMS.md`
-- **Clear Grounded** ลบเฉพาะ entry ระยะสั้นแบบ grounded-only ที่ staged ไว้ ซึ่งมาจาก historical replay และยังไม่ได้สะสม live recall หรือ daily support
+  การดำเนินการเหล่านี้จะไม่แก้ไข `MEMORY.md` เรียกใช้การย้ายข้อมูลทั้งหมดของ doctor หรือพักผู้สมัครแบบ grounded ไว้ในที่เก็บการเลื่อนระดับระยะสั้นแบบสดด้วยตนเอง หากต้องการป้อนการเล่นย้อนหลังแบบ grounded เข้าสู่ช่องทางการเลื่อนระดับเชิงลึกตามปกติ ให้ใช้ขั้นตอน CLI แทน:
 
-สิ่งที่ action เหล่านี้ **ไม่** ทำด้วยตัวเอง:
+  ```bash
+  openclaw memory rem-backfill --path ./memory --stage-short-term
+  ```
 
-- ไม่แก้ไข `MEMORY.md`
-- ไม่รัน doctor migrations แบบเต็ม
-- ไม่ stage grounded candidates เข้า live short-term promotion store โดยอัตโนมัติ เว้นแต่คุณจะรัน staged CLI path ก่อนอย่างชัดเจน
+  คำสั่งนี้จะพักผู้สมัครแบบคงทนที่เป็น grounded ไว้ในที่เก็บ Dreaming ระยะสั้น โดยที่ `DREAMS.md` ยังคงเป็นพื้นผิวสำหรับการตรวจสอบ
 
-หากต้องการให้ grounded historical replay มีผลกับ lane การ promote เชิงลึกตามปกติ ให้ใช้ flow ของ CLI แทน:
+  ## พฤติกรรมโดยละเอียดและเหตุผล
 
-```bash
-openclaw memory rem-backfill --path ./memory --stage-short-term
-```
-
-คำสั่งนี้จะ stage grounded durable candidates เข้า short-term dreaming store ขณะที่คง `DREAMS.md` ไว้เป็นพื้นผิวสำหรับ review
-
-## พฤติกรรมและเหตุผลโดยละเอียด
-
-<AccordionGroup>
-  <Accordion title="0. Optional update (git installs)">
-    หากนี่เป็น git checkout และ doctor กำลังรันแบบ interactive จะเสนอให้ update (fetch/rebase/build) ก่อนรัน doctor
+  <AccordionGroup>
+  <Accordion title="0. การอัปเดตเพิ่มเติม (การติดตั้งด้วย git)">
+    หากนี่เป็น checkout ของ git และ doctor กำลังทำงานแบบโต้ตอบ ระบบจะเสนอให้อัปเดต (fetch/rebase/build) ก่อนเรียกใช้ doctor
   </Accordion>
-  <Accordion title="1. Config normalization">
-    หาก config มีรูปแบบค่า legacy (เช่น `messages.ackReaction` โดยไม่มี override เฉพาะ channel) doctor จะ normalize ค่าเหล่านั้นเข้าสู่ schema ปัจจุบัน
+  <Accordion title="1. การทำให้การกำหนดค่าเป็นมาตรฐาน">
+    Doctor ทำให้รูปแบบค่ารุ่นเก่าเป็นมาตรฐานตามสคีมาปัจจุบัน การกำหนดค่าเสียงพูดของ Talk ปัจจุบันคือ `talk.provider` + `talk.providers.<provider>` โดยมีการกำหนดค่าเสียงแบบเรียลไทม์อยู่ภายใต้ `talk.realtime.*` Doctor เขียนรูปแบบเก่า `talk.voiceId` / `talk.voiceAliases` / `talk.modelId` / `talk.outputFormat` / `talk.apiKey` ใหม่ลงในแมปผู้ให้บริการ และเขียนตัวเลือกระดับบนสุดแบบเรียลไทม์รุ่นเก่า (`talk.mode`, `talk.transport`, `talk.brain`, `talk.model`, `talk.voice`) ใหม่เป็น `talk.realtime`
 
-    ซึ่งรวมถึงฟิลด์แบบแบนของ Talk legacy ด้วย config speech ของ Talk แบบ public ปัจจุบันคือ `talk.provider` + `talk.providers.<provider>` และ config realtime voice คือ `talk.realtime.*` Doctor เขียนรูปแบบเก่า `talk.voiceId` / `talk.voiceAliases` / `talk.modelId` / `talk.outputFormat` / `talk.apiKey` ใหม่เข้า provider map และเขียน selector realtime ระดับบนแบบ legacy (`talk.mode`, `talk.transport`, `talk.brain`, `talk.model`, `talk.voice`) ใหม่เข้า `talk.realtime`
-
-    doctor ยังเตือนเมื่อ `plugins.allow` ไม่ว่างและนโยบายเครื่องมือใช้
-    รายการไวลด์การ์ดหรือรายการเครื่องมือที่ Plugin เป็นเจ้าของ `tools.allow: ["*"]` จะจับคู่เฉพาะเครื่องมือ
-    จาก Plugin ที่โหลดได้จริงเท่านั้น และจะไม่ข้าม allowlist เฉพาะของ Plugin
+    Doctor ยังเตือนเมื่อ `plugins.allow` ไม่ว่าง และนโยบายเครื่องมือใช้ไวลด์การ์ดหรือรายการเครื่องมือที่ Plugin เป็นเจ้าของ `tools.allow: ["*"]` จะจับคู่เฉพาะเครื่องมือจาก Plugin ที่โหลดจริงเท่านั้น และไม่ได้ข้ามรายการอนุญาตเฉพาะของ Plugin
 
   </Accordion>
-  <Accordion title="2. การย้ายคีย์คอนฟิกแบบเดิม">
-    เมื่อคอนฟิกมีคีย์ที่เลิกใช้แล้ว คำสั่งอื่นจะปฏิเสธการทำงานและขอให้คุณเรียกใช้ `openclaw doctor`
+  <Accordion title="2. การย้ายคีย์การกำหนดค่ารุ่นเก่า">
+    เมื่อการกำหนดค่ามีคีย์ที่เลิกใช้แล้วและมีการย้ายข้อมูลที่ใช้งานอยู่ คำสั่งอื่นจะปฏิเสธการทำงานและขอให้เรียกใช้ `openclaw doctor` Doctor จะอธิบายว่าพบคีย์รุ่นเก่าใดบ้าง แสดงการย้ายข้อมูลที่นำไปใช้ และเขียน `~/.openclaw/openclaw.json` ใหม่ด้วยสคีมาที่อัปเดตแล้ว การเริ่มต้น Gateway จะปฏิเสธรูปแบบการกำหนดค่ารุ่นเก่าและขอให้เรียกใช้ `openclaw doctor --fix` โดยจะไม่เขียน `openclaw.json` ใหม่ขณะเริ่มต้น การย้ายที่เก็บงาน Cron ยังจัดการโดย `openclaw doctor --fix` ด้วย
 
-    doctor จะ:
+    <Note>
+      Doctor จะเก็บการย้ายข้อมูลอัตโนมัติไว้เพียงประมาณสองเดือนหลังจาก
+      เลิกใช้คีย์แล้ว คีย์รุ่นเก่าที่เก่ากว่านั้น (เช่น
+      `routing.queue`, `routing.bindings`, `routing.agents`/`defaultAgentId`,
+      `routing.transcribeAudio`, `agent.*` ระดับบนสุด หรือ `identity` ระดับบนสุด
+      จากรูปแบบการกำหนดค่าก่อนรองรับหลายเอเจนต์) ไม่มีเส้นทางการย้ายข้อมูลอีกต่อไป
+      การกำหนดค่าที่ใช้คีย์เหล่านี้จะไม่ผ่านการตรวจสอบแทนที่จะถูกเขียนใหม่ โปรดแก้ไข
+      คีย์เหล่านั้นด้วยตนเองโดยอ้างอิงข้อมูลการกำหนดค่าปัจจุบัน ก่อนที่ doctor
+      จะดำเนินการต่อได้
+    </Note>
 
-    - อธิบายว่าพบคีย์เดิมใดบ้าง
-    - แสดงการย้ายที่นำไปใช้
-    - เขียน `~/.openclaw/openclaw.json` ใหม่ด้วยสคีมาที่อัปเดตแล้ว
+    การย้ายข้อมูลที่ใช้งานอยู่:
 
-    การเริ่มต้น Gateway จะปฏิเสธรูปแบบคอนฟิกเดิมและขอให้คุณเรียกใช้ `openclaw doctor --fix`; ระบบจะไม่เขียน `openclaw.json` ใหม่ตอนเริ่มต้น การย้ายที่เก็บงาน Cron ก็จัดการโดย `openclaw doctor --fix` เช่นกัน
+    | คีย์รุ่นเก่า                                                                                    | คีย์ปัจจุบัน                                                                 |
+    | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+    | `routing.allowFrom`                                                                              | `channels.whatsapp.allowFrom`                                                |
+    | `routing.groupChat.requireMention`                                                               | `channels.whatsapp/telegram/imessage.groups."*".requireMention`             |
+    | `routing.groupChat.historyLimit`                                                                 | `messages.groupChat.historyLimit`                                            |
+    | `routing.groupChat.mentionPatterns`                                                              | `messages.groupChat.mentionPatterns`                                         |
+    | `channels.telegram.requireMention`                                                               | `channels.telegram.groups."*".requireMention`                               |
+    | `channels.webchat`, `gateway.webchat`                                                            | นำออกแล้ว (WebChat เลิกใช้งานแล้ว)                                                 |
+    | `channels.feishu.accounts.<accountId>.botName`                                                   | `channels.feishu.accounts.<accountId>.name`                                 |
+    | `session.threadBindings.ttlHours`, `channels.<id>.threadBindings.ttlHours` (และสำหรับแต่ละบัญชี)      | `...threadBindings.idleHours`                                               |
+    | `talk.voiceId`/`talk.voiceAliases`/`talk.modelId`/`talk.outputFormat`/`talk.apiKey` รุ่นเก่า        | `talk.provider` + `talk.providers.<provider>`                               |
+    | ตัวเลือก Talk แบบเรียลไทม์ระดับบนสุดรุ่นเก่า (`talk.mode`/`talk.transport`/`talk.brain`/`talk.model`/`talk.voice`) | `talk.realtime`                                                              |
+    | `messages.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`)                             | `messages.tts.providers.<provider>`                                          |
+    | `messages.tts.provider: "edge"` / `messages.tts.providers.edge`                                  | `messages.tts.provider: "microsoft"` / `messages.tts.providers.microsoft`   |
+    | ฟิลด์ผู้พูด TTS `voice`/`voiceName`/`voiceId`                                                 | `speakerVoice`/`speakerVoiceId`                                              |
+    | `channels.<id>.tts.<provider>` / `channels.<id>.accounts.<accountId>.tts.<provider>` (ทุกช่องทางยกเว้น Discord)                                          | `...tts.providers.<provider>`                                                |
+    | `channels.<id>.voice.tts.<provider>` / `channels.<id>.accounts.<accountId>.voice.tts.<provider>` (ทุกช่องทาง รวมถึง Discord)                          | `...voice.tts.providers.<provider>`                                          |
+    | `plugins.entries.voice-call.config.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`)     | `plugins.entries.voice-call.config.tts.providers.<provider>`                |
+    | `plugins.entries.voice-call.config.tts.provider: "edge"` / `...tts.providers.edge`                | `provider: "microsoft"` / `...tts.providers.microsoft`                      |
+    | `plugins.entries.voice-call.config.provider: "log"`                                              | `"mock"`                                                                      |
+    | `plugins.entries.voice-call.config.twilio.from`                                                  | `plugins.entries.voice-call.config.fromNumber`                              |
+    | `plugins.entries.voice-call.config.streaming.sttProvider`                                        | `plugins.entries.voice-call.config.streaming.provider`                      |
+    | `plugins.entries.voice-call.config.streaming.openaiApiKey`/`sttModel`/`silenceDurationMs`/`vadThreshold` | `plugins.entries.voice-call.config.streaming.providers.openai.*`             |
+    | `models.providers.*.api: "openai"`                                                               | `"openai-completions"` (การเริ่มต้น Gateway จะข้ามผู้ให้บริการที่มี `api` เป็นค่า enum ในอนาคต/ที่ไม่รู้จักแทนการหยุดทำงานแบบปิดกั้นด้วย) |
+    | `browser.ssrfPolicy.allowPrivateNetwork`                                                         | `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork`                          |
+    | `browser.profiles.*.driver: "extension"`                                                         | `"existing-session"`                                                          |
+    | `browser.relayBindHost`                                                                          | นำออกแล้ว (การตั้งค่ารีเลย์ส่วนขยาย Chrome รุ่นเก่า)                             |
+    | `mcp.servers.*.type` (นามแฝงแบบเนทีฟของ CLI)                                                        | `mcp.servers.*.transport`                                                    |
+    | นามแฝงระยะหมดเวลาของ MCP `connectTimeout`/`connect_timeout`/`timeout`                                 | `connectionTimeoutMs`/`requestTimeoutMs`                                    |
+    | `defaultModel` ระดับบนสุด                                                                         | `agents.defaults.model`                                                      |
+    | `messages.messagePrefix`                                                                         | `channels.whatsapp.messagePrefix`                                            |
+    | `session.maintenance.pruneDays`, `session.resetByType.dm`                                        | `session.maintenance.pruneAfter`, `session.resetByType.direct`               |
+    | `tui` ระดับบนสุด                                                                                  | นำออกแล้ว (ส่วนท้ายของ TUI ใช้ค่าเริ่มต้นแบบกะทัดรัด)                            |
+    | `plugins.entries.codex.config.codexDynamicToolsProfile`                                          | นำออกแล้ว (เซิร์ฟเวอร์แอป Codex จะเก็บเครื่องมือเวิร์กสเปซแบบเนทีฟของ Codex ให้เป็นแบบเนทีฟเสมอ) |
+    | `commands.modelsWrite`                                                                           | นำออกแล้ว (`/models add` เลิกใช้แล้ว)                                       |
+    | `agents.defaults/list[].silentReplyRewrite`, `surfaces.*.silentReplyRewrite`                     | นำออกแล้ว (`NO_REPLY` ที่ตรงกันทุกประการจะไม่ถูกเขียนใหม่เป็นข้อความสำรองที่มองเห็นได้อีกต่อไป)  |
+    | `agents.defaults/list[].systemPromptOverride`                                                    | นำออกแล้ว (OpenClaw เป็นเจ้าของพรอมต์ระบบที่สร้างขึ้น)                        |
+    | `agents.defaults/list[].embeddedPi`                                                              | `embeddedAgent`                                                              |
+    | `agents.defaults/list[].sandbox.perSession`                                                      | `sandbox.scope`                                                              |
+    | `agents.defaults.llm`                                                                             | นำออกแล้ว (ใช้ `models.providers.<id>.timeoutSeconds` สำหรับระยะหมดเวลาของโมเดล/ผู้ให้บริการที่ช้า โดยคงค่าไว้ต่ำกว่าเพดานระยะหมดเวลาของเอเจนต์/การเรียกใช้) |
+    | `memorySearch` ระดับบนสุด                                                                         | `agents.defaults.memorySearch`                                              |
+    | `memorySearch.provider: "auto"`                                                                  | `"openai"`                                                                    |
+    | `memorySearch.store.path` (ทุกระดับ)                                                            | นำออกแล้ว (ดัชนีหน่วยความจำอยู่ในฐานข้อมูลของแต่ละเอเจนต์)                       |
+    | `heartbeat` ระดับบนสุด                                                                            | `agents.defaults.heartbeat` / `channels.defaults.heartbeat`                 |
+    | รหัสนโยบาย `plugins.openai-codex`                                                                | `plugins.openai`                                                             |
+    | `tools.web.x_search.apiKey`                                                                      | `plugins.entries.xai.config.webSearch.apiKey`                               |
+    | `session.maintenance.rotateBytes`, `session.parentForkMaxTokens`                                 | นำออกแล้ว (เลิกใช้แล้ว)                                                        |
+    | ตัวปรับแต่งรันไทม์และช่องทางที่เลิกใช้ใน 2026.7                                               | นำออกแล้ว (ใช้ค่าเริ่มต้นสำหรับการใช้งานจริงที่มีในตัว)                               |
 
-    การย้ายปัจจุบัน:
+    <Note>
+      แถว `plugins.entries.voice-call.config.*` ด้านบนจะถูกทำให้เป็นรูปแบบมาตรฐานโดย
+      Plugin Voice Call เองทุกครั้งที่โหลดการกำหนดค่า ไม่ใช่โดย `openclaw
+      doctor` นอกจากนี้ Plugin ยังบันทึกคำเตือนเมื่อเริ่มต้นระบบซึ่งชี้ไปที่ `openclaw
+      doctor --fix` แต่ขณะนี้ doctor ไม่ได้เขียน
+      `openclaw.json` ใหม่สำหรับคีย์เหล่านี้ การทำให้เป็นรูปแบบมาตรฐานของ Plugin เองคือสิ่งที่
+      นำการเปลี่ยนแปลงไปใช้ขณะรันไทม์
+    </Note>
 
-    - `routing.allowFrom` → `channels.whatsapp.allowFrom`
-    - `routing.groupChat.requireMention` → `channels.whatsapp/telegram/imessage.groups."*".requireMention`
-    - `routing.groupChat.historyLimit` → `messages.groupChat.historyLimit`
-    - `routing.groupChat.mentionPatterns` → `messages.groupChat.mentionPatterns`
-    - `channels.telegram.requireMention` → `channels.telegram.groups."*".requireMention`
-    - ลบ `channels.webchat` และ `gateway.webchat` ที่ปลดระวางแล้ว
-    - `routing.queue` → `messages.queue`
-    - `routing.bindings` → `bindings` ระดับบนสุด
-    - `routing.agents`/`routing.defaultAgentId` → `agents.list` + `agents.list[].default`
-    - `talk.voiceId`/`talk.voiceAliases`/`talk.modelId`/`talk.outputFormat`/`talk.apiKey` แบบเดิม → `talk.provider` + `talk.providers.<provider>`
-    - ตัวเลือก Talk แบบเรียลไทม์ระดับบนสุดแบบเดิม (`talk.mode`/`talk.transport`/`talk.brain`/`talk.model`/`talk.voice`) + `talk.provider`/`talk.providers` → `talk.realtime`
-    - `routing.agentToAgent` → `tools.agentToAgent`
-    - `routing.transcribeAudio` → `tools.media.audio.models`
-    - `messages.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`) → `messages.tts.providers.<provider>`
-    - `messages.tts.provider: "edge"` และ `messages.tts.providers.edge` → `messages.tts.provider: "microsoft"` และ `messages.tts.providers.microsoft`
-    - ฟิลด์เลือกผู้พูด TTS (`voice`/`voiceName`/`voiceId`) → `speakerVoice`/`speakerVoiceId`
-    - `channels.discord.voice.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`) → `channels.discord.voice.tts.providers.<provider>`
-    - `channels.discord.accounts.<id>.voice.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`) → `channels.discord.accounts.<id>.voice.tts.providers.<provider>`
-    - `plugins.entries.voice-call.config.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`) → `plugins.entries.voice-call.config.tts.providers.<provider>`
-    - `plugins.entries.voice-call.config.tts.provider: "edge"` และ `plugins.entries.voice-call.config.tts.providers.edge` → `provider: "microsoft"` และ `providers.microsoft`
-    - `plugins.entries.voice-call.config.provider: "log"` → `"mock"`
-    - `plugins.entries.voice-call.config.twilio.from` → `plugins.entries.voice-call.config.fromNumber`
-    - `plugins.entries.voice-call.config.streaming.sttProvider` → `plugins.entries.voice-call.config.streaming.provider`
-    - `plugins.entries.voice-call.config.streaming.openaiApiKey|sttModel|silenceDurationMs|vadThreshold` → `plugins.entries.voice-call.config.streaming.providers.openai.*`
-    - `bindings[].match.accountID` → `bindings[].match.accountId`
-    - สำหรับช่องทางที่มี `accounts` แบบตั้งชื่อ แต่ยังมีค่าช่องทางระดับบนสุดแบบบัญชีเดียวค้างอยู่ ให้ย้ายค่าที่อยู่ในขอบเขตบัญชีเหล่านั้นไปยังบัญชีที่เลื่อนระดับซึ่งเลือกไว้สำหรับช่องทางนั้น (`accounts.default` สำหรับช่องทางส่วนใหญ่; Matrix สามารถรักษาเป้าหมายแบบตั้งชื่อ/ค่าเริ่มต้นที่ตรงกันอยู่แล้วได้)
-    - `identity` → `agents.list[].identity`
-    - `agent.*` → `agents.defaults` + `tools.*` (tools/elevated/exec/sandbox/subagents)
-    - `agent.model`/`allowedModels`/`modelAliases`/`modelFallbacks`/`imageModelFallbacks` → `agents.defaults.models` + `agents.defaults.model.primary/fallbacks` + `agents.defaults.imageModel.primary/fallbacks`
-    - ลบ `agents.defaults.llm`; ใช้ `models.providers.<id>.timeoutSeconds` สำหรับไทม์เอาต์ของผู้ให้บริการ/โมเดลที่ช้า และตั้งค่าไทม์เอาต์ของเอเจนต์/การรันให้สูงกว่าค่านั้นเมื่อทั้งการรันต้องคงอยู่ได้นานกว่า
-    - `browser.ssrfPolicy.allowPrivateNetwork` → `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork`
-    - `browser.profiles.*.driver: "extension"` → `"existing-session"`
-    - ลบ `browser.relayBindHost` (การตั้งค่ารีเลย์ส่วนขยายแบบเดิม)
-    - `models.providers.*.api: "openai"` แบบเดิม → `"openai-completions"` (การเริ่มต้น Gateway จะข้ามผู้ให้บริการที่ตั้งค่า `api` เป็นค่า enum ในอนาคตหรือไม่รู้จักแทนการล้มเหลวแบบปิด)
-    - ลบ `plugins.entries.codex.config.codexDynamicToolsProfile`; แอปเซิร์ฟเวอร์ Codex จะคงเครื่องมือเวิร์กสเปซแบบเนทีฟของ Codex ไว้เป็นเนทีฟเสมอ
+    คำแนะนำเกี่ยวกับบัญชีเริ่มต้นสำหรับช่องทางที่มีหลายบัญชี:
 
-    คำเตือนของ doctor ยังรวมคำแนะนำค่าเริ่มต้นของบัญชีสำหรับช่องทางหลายบัญชีด้วย:
-
-    - หากกำหนดค่ารายการ `channels.<channel>.accounts` สองรายการขึ้นไปโดยไม่มี `channels.<channel>.defaultAccount` หรือ `accounts.default` doctor จะเตือนว่าการกำหนดเส้นทางสำรองอาจเลือกบัญชีที่ไม่คาดคิด
+    - หากกำหนดค่ารายการ `channels.<channel>.accounts` ตั้งแต่สองรายการขึ้นไปโดยไม่มี `channels.<channel>.defaultAccount` หรือ `accounts.default` doctor จะเตือนว่าการกำหนดเส้นทางสำรองอาจเลือกบัญชีที่ไม่คาดคิด
     - หากตั้งค่า `channels.<channel>.defaultAccount` เป็น ID บัญชีที่ไม่รู้จัก doctor จะเตือนและแสดงรายการ ID บัญชีที่กำหนดค่าไว้
 
   </Accordion>
   <Accordion title="2b. การแทนที่ผู้ให้บริการ OpenCode">
-    หากคุณเพิ่ม `models.providers.opencode`, `opencode-zen` หรือ `opencode-go` ด้วยตนเอง ค่านั้นจะแทนที่แคตตาล็อก OpenCode ในตัวจาก `openclaw/plugin-sdk/llm` ซึ่งอาจบังคับให้โมเดลใช้ API ที่ผิดหรือทำให้ต้นทุนเป็นศูนย์ doctor จะเตือนเพื่อให้คุณลบการแทนที่และกู้คืนการกำหนดเส้นทาง API + ต้นทุนรายโมเดล
+    หากเพิ่ม `models.providers.opencode`, `opencode-zen` หรือ `opencode-go` ด้วยตนเอง รายการดังกล่าวจะแทนที่แค็ตตาล็อก OpenCode ในตัวจาก `openclaw/plugin-sdk/llm` ซึ่งอาจบังคับให้โมเดลใช้ API ที่ไม่ถูกต้องหรือทำให้ต้นทุนเป็นศูนย์ doctor จะเตือนเพื่อให้สามารถนำการแทนที่ออกและคืนค่าการกำหนดเส้นทาง API พร้อมต้นทุนแยกตามโมเดล
   </Accordion>
   <Accordion title="2c. การย้ายเบราว์เซอร์และความพร้อมของ Chrome MCP">
-    หากคอนฟิกเบราว์เซอร์ของคุณยังชี้ไปยังพาธส่วนขยาย Chrome ที่ถูกลบแล้ว doctor จะปรับให้เป็นโมเดลการแนบ Chrome MCP แบบโฮสต์ภายในปัจจุบัน:
+    หากการกำหนดค่าเบราว์เซอร์ยังชี้ไปยังพาธส่วนขยาย Chrome ที่ถูกนำออกแล้ว doctor จะทำให้เป็นรูปแบบมาตรฐานตามโมเดลการเชื่อมต่อ Chrome MCP ภายในโฮสต์ในปัจจุบัน (`browser.profiles.*.driver: "extension"` → `"existing-session"`; นำ `browser.relayBindHost` ออก)
 
-    - `browser.profiles.*.driver: "extension"` กลายเป็น `"existing-session"`
-    - `browser.relayBindHost` ถูกลบออก
+    นอกจากนี้ doctor ยังตรวจสอบพาธ Chrome MCP ภายในโฮสต์เมื่อใช้ `defaultProfile: "user"` หรือโปรไฟล์ `existing-session` ที่กำหนดค่าไว้:
 
-    doctor ยังตรวจสอบพาธ Chrome MCP แบบโฮสต์ภายในเมื่อคุณใช้ `defaultProfile: "user"` หรือโปรไฟล์ `existing-session` ที่กำหนดค่าไว้:
+    - ตรวจสอบว่าติดตั้ง Google Chrome บนโฮสต์เดียวกันหรือไม่สำหรับโปรไฟล์เชื่อมต่ออัตโนมัติเริ่มต้น
+    - ตรวจสอบเวอร์ชัน Chrome ที่ตรวจพบและเตือนเมื่อต่ำกว่า Chrome 144
+    - เตือนให้เปิดใช้การดีบักระยะไกลในหน้าตรวจสอบของเบราว์เซอร์ (เช่น `chrome://inspect/#remote-debugging`, `brave://inspect/#remote-debugging` หรือ `edge://inspect/#remote-debugging`)
 
-    - ตรวจว่า Google Chrome ติดตั้งอยู่บนโฮสต์เดียวกันสำหรับโปรไฟล์เชื่อมต่ออัตโนมัติค่าเริ่มต้นหรือไม่
-    - ตรวจเวอร์ชัน Chrome ที่ตรวจพบ และเตือนเมื่อเวอร์ชันต่ำกว่า Chrome 144
-    - เตือนให้คุณเปิดใช้การดีบักระยะไกลในหน้า inspect ของเบราว์เซอร์ (เช่น `chrome://inspect/#remote-debugging`, `brave://inspect/#remote-debugging` หรือ `edge://inspect/#remote-debugging`)
+    doctor ไม่สามารถเปิดใช้การตั้งค่าฝั่ง Chrome ให้ได้ Chrome MCP ภายในโฮสต์ยังคงต้องใช้เบราว์เซอร์ที่ใช้ Chromium 144+ บนโฮสต์ Gateway/Node ซึ่งทำงานภายในเครื่อง เปิดใช้การดีบักระยะไกล และอนุมัติพรอมต์ขอความยินยอมในการเชื่อมต่อครั้งแรกในเบราว์เซอร์
 
-    doctor ไม่สามารถเปิดใช้การตั้งค่าฝั่ง Chrome ให้คุณได้ Chrome MCP แบบโฮสต์ภายในยังต้องการ:
-
-    - เบราว์เซอร์ที่ใช้ Chromium 144+ บนโฮสต์ gateway/node
-    - เบราว์เซอร์ทำงานอยู่ในเครื่อง
-    - เปิดใช้การดีบักระยะไกลในเบราว์เซอร์นั้น
-    - อนุมัติพรอมป์ยินยอมแนบครั้งแรกในเบราว์เซอร์
-
-    ความพร้อมในส่วนนี้เกี่ยวข้องเฉพาะข้อกำหนดเบื้องต้นของการแนบในเครื่องเท่านั้น Existing-session ยังคงใช้ขีดจำกัดเส้นทาง Chrome MCP ปัจจุบัน; เส้นทางขั้นสูง เช่น `responsebody`, การส่งออก PDF, การดักการดาวน์โหลด และการทำงานแบบชุด ยังต้องใช้เบราว์เซอร์ที่จัดการแล้วหรือโปรไฟล์ CDP ดิบ
-
-    การตรวจนี้ **ไม่** ใช้กับ Docker, sandbox, remote-browser หรือโฟลว์ headless อื่น โฟลว์เหล่านั้นยังใช้ CDP ดิบต่อไป
+    ความพร้อมในส่วนนี้ครอบคลุมเฉพาะข้อกำหนดเบื้องต้นสำหรับการเชื่อมต่อภายในเครื่อง Existing-session ยังคงใช้ข้อจำกัดของเส้นทาง Chrome MCP ปัจจุบัน เส้นทางขั้นสูง เช่น `responsebody`, การส่งออก PDF, การดักจับการดาวน์โหลด และการดำเนินการแบบกลุ่ม ยังคงต้องใช้เบราว์เซอร์ที่มีการจัดการหรือโปรไฟล์ CDP แบบดิบ การตรวจสอบนี้ไม่ใช้กับ Docker, sandbox, เบราว์เซอร์ระยะไกล หรือโฟลว์แบบ headless อื่น ๆ ซึ่งยังคงใช้ CDP แบบดิบ
 
   </Accordion>
-  <Accordion title="2d. ข้อกำหนดเบื้องต้นของ OAuth TLS">
-    เมื่อกำหนดค่าโปรไฟล์ OpenAI Codex OAuth doctor จะตรวจ endpoint การอนุญาตของ OpenAI เพื่อยืนยันว่าสแต็ก TLS ของ Node/OpenSSL ในเครื่องสามารถตรวจสอบสายโซ่ใบรับรองได้ หากการตรวจล้มเหลวด้วยข้อผิดพลาดใบรับรอง (เช่น `UNABLE_TO_GET_ISSUER_CERT_LOCALLY`, ใบรับรองหมดอายุ หรือใบรับรองที่ลงนามเอง) doctor จะพิมพ์คำแนะนำการแก้ไขเฉพาะแพลตฟอร์ม บน macOS ที่ใช้ Node จาก Homebrew การแก้มักเป็น `brew postinstall ca-certificates` เมื่อใช้ `--deep` การตรวจจะทำงานแม้ Gateway จะปกติดี
+  <Accordion title="2d. ข้อกำหนดเบื้องต้นของ TLS สำหรับ OAuth">
+    เมื่อกำหนดค่าโปรไฟล์ OpenAI Codex OAuth แล้ว doctor จะตรวจสอบปลายทางการอนุญาตของ OpenAI เพื่อยืนยันว่าสแต็ก TLS ของ Node/OpenSSL ภายในเครื่องสามารถตรวจสอบความถูกต้องของสายใบรับรองได้ หากการตรวจสอบล้มเหลวด้วยข้อผิดพลาดเกี่ยวกับใบรับรอง (เช่น `UNABLE_TO_GET_ISSUER_CERT_LOCALLY`, ใบรับรองหมดอายุ หรือใบรับรองที่ลงนามด้วยตนเอง) doctor จะแสดงคำแนะนำการแก้ไขเฉพาะแพลตฟอร์ม สำหรับ macOS ที่ใช้ Node จาก Homebrew โดยปกติการแก้ไขคือ `brew postinstall ca-certificates` เมื่อใช้ `--deep` การตรวจสอบจะทำงานแม้ว่า Gateway จะทำงานปกติ
   </Accordion>
   <Accordion title="2e. การแทนที่ผู้ให้บริการ Codex OAuth">
-    หากก่อนหน้านี้คุณเพิ่มการตั้งค่าการขนส่ง OpenAI แบบเดิมไว้ใต้ `models.providers.openai-codex` ค่านั้นอาจบดบังพาธผู้ให้บริการ Codex OAuth ในตัวที่รีลีสใหม่กว่าใช้อัตโนมัติ doctor จะเตือนเมื่อเห็นการตั้งค่าการขนส่งเก่าเหล่านั้นอยู่ร่วมกับ Codex OAuth เพื่อให้คุณลบหรือเขียนการแทนที่การขนส่งที่ค้างอยู่ใหม่ และนำพฤติกรรมการกำหนดเส้นทาง/สำรองในตัวกลับมา พร็อกซีแบบกำหนดเองและการแทนที่เฉพาะส่วนหัวรองรับอยู่เช่นเดิมและจะไม่ทำให้เกิดคำเตือนนี้
+    หากก่อนหน้านี้เพิ่มการตั้งค่าการรับส่งข้อมูล OpenAI แบบเก่าภายใต้ `models.providers.openai-codex` การตั้งค่าเหล่านั้นอาจบดบังพาธผู้ให้บริการ Codex OAuth ในตัว doctor จะเตือนเมื่อตรวจพบการตั้งค่าการรับส่งข้อมูลเก่าเหล่านั้นพร้อมกับ Codex OAuth เพื่อให้สามารถนำการแทนที่การรับส่งข้อมูลที่ล้าสมัยออกหรือเขียนใหม่ และคืนค่าพฤติกรรมการกำหนดเส้นทางปัจจุบัน พร็อกซีที่กำหนดเองและการแทนที่เฉพาะส่วนหัวจะยังคงรองรับและไม่ทำให้เกิดคำเตือนนี้ แต่เส้นทางคำขอที่กำหนดขึ้นเหล่านั้นไม่มีสิทธิ์ใช้การเลือก Codex โดยนัย
   </Accordion>
-  <Accordion title="2f. การซ่อมเส้นทาง Codex">
-    doctor ตรวจหา ref โมเดล `openai-codex/*` แบบเดิม การกำหนดเส้นทางฮาร์เนส Codex แบบเนทีฟใช้ ref โมเดล `openai/*` ตามรูปแบบบัญญัติ; เทิร์นเอเจนต์ OpenAI จะผ่านฮาร์เนสแอปเซิร์ฟเวอร์ Codex แทนพาธผู้ให้บริการ OpenAI ของ OpenClaw
+  <Accordion title="2f. การซ่อมแซมเส้นทาง Codex">
+    doctor ตรวจสอบการอ้างอิงโมเดล `openai-codex/*` แบบเก่า การกำหนดเส้นทางชุดควบคุม Codex แบบเนทีฟใช้การอ้างอิงโมเดล `openai/*` ที่เป็นรูปแบบมาตรฐาน แต่คำนำหน้าเพียงอย่างเดียวจะไม่เลือก Codex เมื่อไม่ได้ตั้งค่านโยบายรันไทม์หรือใช้ `auto` จะมีสิทธิ์เฉพาะเส้นทาง HTTPS อย่างเป็นทางการที่ตรงกันทุกประการของ Platform Responses หรือ ChatGPT Responses ซึ่งไม่มีการแทนที่คำขอที่กำหนดขึ้นเท่านั้น ดู [รันไทม์เอเจนต์โดยนัยของ OpenAI](/th/providers/openai#implicit-agent-runtime)
 
-    ในโหมด `--fix` / `--repair` doctor จะเขียน ref ของเอเจนต์ค่าเริ่มต้นและรายเอเจนต์ที่ได้รับผลกระทบใหม่ รวมถึงโมเดลหลัก โมเดลสำรอง โมเดลสร้างภาพ/วิดีโอ การแทนที่ Heartbeat/subagent/Compaction, hooks, การแทนที่โมเดลของช่องทาง และสถานะเส้นทางเซสชันที่คงอยู่ซึ่งค้างอยู่:
+    ในโหมด `--fix` / `--repair` doctor จะเขียนการอ้างอิงเริ่มต้นของเอเจนต์และการอ้างอิงแยกตามเอเจนต์ที่ได้รับผลกระทบใหม่ ซึ่งรวมถึงโมเดลหลัก โมเดลสำรอง โมเดลสร้างภาพ/วิดีโอ การแทนที่สำหรับ Heartbeat/เอเจนต์ย่อย/Compaction ฮุก การแทนที่โมเดลของช่องทาง และสถานะเส้นทางเซสชันที่บันทึกไว้ซึ่งล้าสมัย:
 
-    - `openai-codex/gpt-*` กลายเป็น `openai/gpt-*`
-    - เจตนา Codex ย้ายไปยังรายการ `agentRuntime.id: "codex"` ตามขอบเขตผู้ให้บริการ/โมเดลสำหรับ ref โมเดลเอเจนต์ที่ซ่อมแล้ว
-    - คอนฟิกรันไทม์ทั้งเอเจนต์และ pin รันไทม์เซสชันที่คงอยู่ซึ่งค้างอยู่จะถูกลบ เพราะการเลือกรันไทม์อยู่ในขอบเขตผู้ให้บริการ/โมเดล
-    - นโยบายรันไทม์ผู้ให้บริการ/โมเดลที่มีอยู่จะถูกเก็บรักษาไว้ เว้นแต่ ref โมเดลเดิมที่ซ่อมแล้วต้องใช้การกำหนดเส้นทาง Codex เพื่อรักษาพาธ auth เดิม
-    - รายการโมเดลสำรองที่มีอยู่จะถูกเก็บรักษาไว้พร้อมเขียนรายการเดิมใหม่; การตั้งค่ารายโมเดลที่คัดลอกไว้จะย้ายจากคีย์เดิมไปยังคีย์ `openai/*` ตามรูปแบบบัญญัติ
-    - `modelProvider`/`providerOverride`, `model`/`modelOverride`, ประกาศ fallback และ pin โปรไฟล์ auth ของเซสชันที่คงอยู่จะถูกซ่อมในที่เก็บเซสชันเอเจนต์ทั้งหมดที่ค้นพบ
-    - `/codex ...` หมายถึง "ควบคุมหรือผูกการสนทนา Codex แบบเนทีฟจากแชต"
-    - `/acp ...` หรือ `runtime: "acp"` หมายถึง "ใช้ตัวปรับต่อ ACP/acpx ภายนอก"
+    - `openai-codex/gpt-*` เปลี่ยนเป็น `openai/gpt-*`
+    - เจตนาการใช้ Codex จะย้ายไปยังรายการ `agentRuntime.id: "codex"` ที่มีขอบเขตตามผู้ให้บริการ/โมเดลสำหรับการอ้างอิงโมเดลของเอเจนต์ที่ซ่อมแซมแล้ว
+    - การกำหนดค่ารันไทม์ทั้งเอเจนต์ที่ล้าสมัยและการปักหมุดรันไทม์ของเซสชันที่บันทึกไว้จะถูกนำออก เนื่องจากการเลือกรันไทม์มีขอบเขตตามผู้ให้บริการ/โมเดล
+    - นโยบายรันไทม์ของผู้ให้บริการ/โมเดลที่มีอยู่จะถูกรักษาไว้ เว้นแต่การอ้างอิงโมเดลแบบเก่าที่ซ่อมแซมแล้วต้องใช้การกำหนดเส้นทาง Codex เพื่อคงพาธการยืนยันตัวตนเดิม
+    - รายการโมเดลสำรองที่มีอยู่จะถูกรักษาไว้โดยเขียนรายการแบบเก่าใหม่ การตั้งค่าแยกตามโมเดลที่คัดลอกจะย้ายจากคีย์แบบเก่าไปยังคีย์มาตรฐาน `openai/*`
+    - `modelProvider`/`providerOverride`, `model`/`modelOverride`, การแจ้งเตือนการใช้ทางเลือกสำรอง และการปักหมุดโปรไฟล์การยืนยันตัวตนของเซสชันที่บันทึกไว้จะได้รับการซ่อมแซมในที่เก็บเซสชันของเอเจนต์ทั้งหมดที่ค้นพบ
+    - doctor จะแยกซ่อมแซมการปักหมุด `agentRuntime.id: "codex-cli"` ที่ล้าสมัย (ID รันไทม์แบบเก่าที่แตกต่างกัน) เป็น `"codex"` ในรายการโมเดล `agents.defaults`, `agents.list[]` และ `models.providers.*`
+    - `/codex ...` หมายถึง "ควบคุมหรือเชื่อมโยงการสนทนา Codex แบบเนทีฟจากแชต"
+    - `/acp ...` หรือ `runtime: "acp"` หมายถึง "ใช้อะแดปเตอร์ ACP/acpx ภายนอก"
 
   </Accordion>
   <Accordion title="2g. การล้างเส้นทางเซสชัน">
-    doctor ยังสแกนที่เก็บเซสชันเอเจนต์ที่ค้นพบเพื่อหาสถานะเส้นทางที่สร้างอัตโนมัติและค้างอยู่ หลังจากคุณย้ายโมเดลหรือรันไทม์ที่กำหนดค่าไว้ให้ออกจากเส้นทางที่ Plugin เป็นเจ้าของ เช่น Codex
+    doctor ยังสแกนที่เก็บเซสชันของเอเจนต์ที่ค้นพบเพื่อหาสถานะเส้นทางที่สร้างโดยอัตโนมัติซึ่งล้าสมัย หลังจากย้ายโมเดลหรือรันไทม์ที่กำหนดค่าไว้ออกจากเส้นทางที่ Plugin เป็นเจ้าของ เช่น Codex
 
-    `openclaw doctor --fix` สามารถล้างสถานะค้างที่สร้างอัตโนมัติ เช่น pin โมเดล `modelOverrideSource: "auto"`, เมทาดาทาโมเดลรันไทม์, ID ฮาร์เนสที่ pin ไว้, การผูกเซสชัน CLI และการแทนที่โปรไฟล์ auth อัตโนมัติ เมื่อเส้นทางเจ้าของของสิ่งเหล่านั้นไม่ได้ถูกกำหนดค่าไว้อีกต่อไป ตัวเลือกโมเดลของผู้ใช้แบบชัดเจนหรือเซสชันเดิมจะถูกรายงานเพื่อให้ตรวจสอบด้วยตนเองและปล่อยไว้โดยไม่แตะต้อง; เปลี่ยนด้วย `/model ...`, `/new` หรือรีเซ็ตเซสชันเมื่อไม่ต้องการเส้นทางนั้นอีกต่อไป
-
-  </Accordion>
-  <Accordion title="3. การย้ายสถานะเดิม (เลย์เอาต์ดิสก์)">
-    doctor สามารถย้ายเลย์เอาต์บนดิสก์ที่เก่ากว่าไปยังโครงสร้างปัจจุบันได้:
-
-    - ที่เก็บเซสชัน + transcripts:
-      - จาก `~/.openclaw/sessions/` ไปยัง `~/.openclaw/agents/<agentId>/sessions/`
-    - ไดเรกทอรีเอเจนต์:
-      - จาก `~/.openclaw/agent/` ไปยัง `~/.openclaw/agents/<agentId>/agent/`
-    - สถานะ auth ของ WhatsApp (Baileys):
-      - จาก `~/.openclaw/credentials/*.json` แบบเดิม (ยกเว้น `oauth.json`)
-      - ไปยัง `~/.openclaw/credentials/whatsapp/<accountId>/...` (ID บัญชีค่าเริ่มต้น: `default`)
-
-    การย้ายเหล่านี้เป็นแบบพยายามอย่างดีที่สุดและทำซ้ำได้อย่างปลอดภัย; doctor จะส่งคำเตือนเมื่อปล่อยให้โฟลเดอร์เดิมใด ๆ เหลือไว้เป็นข้อมูลสำรอง Gateway/CLI ยังย้ายเซสชันเดิม + ไดเรกทอรีเอเจนต์โดยอัตโนมัติตอนเริ่มต้น เพื่อให้ประวัติ/auth/โมเดลลงไปอยู่ในพาธรายเอเจนต์โดยไม่ต้องเรียก doctor ด้วยตนเอง auth ของ WhatsApp ตั้งใจให้ย้ายผ่าน `openclaw doctor` เท่านั้น การปรับ provider/provider-map ของ Talk ให้เป็นรูปแบบปกติตอนนี้เปรียบเทียบด้วยความเท่ากันเชิงโครงสร้าง ดังนั้น diff ที่ต่างกันเฉพาะลำดับคีย์จะไม่ทำให้เกิดการเปลี่ยนแปลง `doctor --fix` แบบ no-op ซ้ำอีก
+    `openclaw doctor --fix` สามารถล้างสถานะล้าสมัยที่สร้างโดยอัตโนมัติ เช่น การปักหมุดโมเดล `modelOverrideSource: "auto"`, ข้อมูลเมตาโมเดลรันไทม์, ID ชุดควบคุมที่ปักหมุดไว้, การเชื่อมโยงเซสชัน CLI และการแทนที่โปรไฟล์การยืนยันตัวตนอัตโนมัติ เมื่อไม่มีการกำหนดค่าเส้นทางที่เป็นเจ้าของสถานะเหล่านั้นอีกต่อไป ตัวเลือกโมเดลของเซสชันที่ผู้ใช้กำหนดไว้อย่างชัดเจนหรือเป็นแบบเก่าจะถูกรายงานเพื่อให้ตรวจสอบด้วยตนเองและคงไว้โดยไม่เปลี่ยนแปลง ให้สลับตัวเลือกเหล่านั้นด้วย `/model ...`, `/new` หรือรีเซ็ตเซสชันเมื่อไม่ต้องการใช้เส้นทางนั้นอีกต่อไป
 
   </Accordion>
-  <Accordion title="3a. การย้าย manifest ของ Plugin รุ่นเก่า">
-    เครื่องมือ doctor สแกน manifest ของ Plugin ที่ติดตั้งทั้งหมดเพื่อหาคีย์ความสามารถระดับบนสุดที่เลิกใช้แล้ว (`speechProviders`, `realtimeTranscriptionProviders`, `realtimeVoiceProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, `videoGenerationProviders`, `webFetchProviders`, `webSearchProviders`) เมื่อพบ ระบบจะเสนอให้ย้ายคีย์เหล่านั้นเข้าไปในออบเจ็กต์ `contracts` และเขียนไฟล์ manifest เดิมทับที่ การย้ายนี้ทำซ้ำได้อย่างปลอดภัย หากคีย์ `contracts` มีค่าเดียวกันอยู่แล้ว คีย์รุ่นเก่าจะถูกลบโดยไม่ทำข้อมูลซ้ำ
-  </Accordion>
-  <Accordion title="3b. การย้ายที่เก็บ Cron รุ่นเก่า">
-    เครื่องมือ doctor ยังตรวจสอบที่เก็บงาน cron (`~/.openclaw/cron/jobs.json` โดยค่าเริ่มต้น หรือ `cron.store` เมื่อถูกแทนที่) เพื่อหารูปแบบงานเก่าที่ยังยอมรับในตัวจัดกำหนดการเพื่อความเข้ากันได้
+  <Accordion title="3. การย้ายสถานะแบบเก่า (โครงร่างบนดิสก์)">
+    doctor สามารถย้ายโครงร่างบนดิสก์รุ่นเก่าไปยังโครงสร้างปัจจุบันได้:
 
-    การล้าง cron ปัจจุบันประกอบด้วย:
+    - ที่เก็บเซสชันและบันทึกถอดความ: จาก `~/.openclaw/sessions/` ไปยัง `~/.openclaw/agents/<agentId>/sessions/`
+    - ไดเรกทอรีเอเจนต์: จาก `~/.openclaw/agent/` ไปยัง `~/.openclaw/agents/<agentId>/agent/`
+    - สถานะการยืนยันตัวตนของ WhatsApp (Baileys): จาก `~/.openclaw/credentials/*.json` แบบเก่า (ยกเว้น `oauth.json`) ไปยัง `~/.openclaw/credentials/whatsapp/<accountId>/...` (ID บัญชีเริ่มต้น: `default`)
+    - ข้อมูลประจำตัวของอุปกรณ์ที่ลงนามแล้ว: จาก `~/.openclaw/identity/device.json` ไปยังแถว `device_identities` ของ `primary` ใน `state/openclaw.sqlite` โดยไฟล์การยืนยันตัวตนของอุปกรณ์ที่แยกต่างหากจะยังคงไม่ถูกแก้ไข
+
+    การย้ายเหล่านี้ดำเนินการอย่างเต็มความสามารถและทำซ้ำได้โดยให้ผลเหมือนเดิม doctor จะแสดงคำเตือนเมื่อยังเหลือโฟลเดอร์แบบเก่าไว้เป็นข้อมูลสำรอง Gateway/CLI ยังย้ายเซสชันแบบเก่าและไดเรกทอรีเอเจนต์โดยอัตโนมัติเมื่อเริ่มต้นระบบ เพื่อให้ประวัติ/การยืนยันตัวตน/โมเดลอยู่ในพาธแยกตามเอเจนต์โดยไม่ต้องเรียกใช้ doctor ด้วยตนเอง การย้ายการยืนยันตัวตนของ WhatsApp จะดำเนินการผ่าน `openclaw doctor` เท่านั้นโดยเจตนา การทำให้ผู้ให้บริการ Talk/แมปผู้ให้บริการเป็นรูปแบบมาตรฐานจะเปรียบเทียบด้วยความเท่ากันทางโครงสร้าง ดังนั้นความแตกต่างเฉพาะลำดับคีย์จะไม่ทำให้เกิดการเปลี่ยนแปลง `doctor --fix` ที่ไม่ดำเนินการใด ๆ ซ้ำอีกต่อไป
+
+  </Accordion>
+  <Accordion title="3a. การย้ายไฟล์กำกับ Plugin แบบเก่า">
+    doctor จะสแกนไฟล์กำกับ Plugin ที่ติดตั้งทั้งหมดเพื่อหาคีย์ความสามารถระดับบนสุดที่เลิกใช้แล้ว (`speechProviders`, `realtimeTranscriptionProviders`, `realtimeVoiceProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, `videoGenerationProviders`, `webFetchProviders`, `webSearchProviders`) เมื่อพบ ระบบจะเสนอให้ย้ายคีย์เหล่านั้นเข้าไปในออบเจ็กต์ `contracts` และเขียนไฟล์กำกับใหม่ ณ ตำแหน่งเดิม การย้ายนี้ทำซ้ำได้โดยให้ผลเหมือนเดิม หาก `contracts` มีค่าเดียวกันอยู่แล้ว คีย์แบบเก่าจะถูกนำออกโดยไม่ทำข้อมูลซ้ำ
+  </Accordion>
+  <Accordion title="3b. การย้ายที่เก็บ Cron แบบเก่า">
+    doctor ยังตรวจสอบที่เก็บงาน Cron (ค่าเริ่มต้นคือ `~/.openclaw/cron/jobs.json` หรือ `cron.store` เมื่อมีการแทนที่) เพื่อหารูปแบบงานเก่าที่ตัวจัดกำหนดการยังคงยอมรับเพื่อความเข้ากันได้
+
+    การล้าง Cron ปัจจุบันประกอบด้วย:
 
     - `jobId` → `id`
     - `schedule.cron` → `schedule.expr`
-    - ฟิลด์ payload ระดับบนสุด (`message`, `model`, `thinking`, ...) → `payload`
-    - ฟิลด์ delivery ระดับบนสุด (`deliver`, `channel`, `to`, `provider`, ...) → `delivery`
-    - alias การส่ง payload `provider` → `delivery.channel` แบบชัดเจน
-    - งาน fallback Webhook รุ่นเก่าที่เป็น `notify: true` → การส่ง Webhook แบบชัดเจนจาก `cron.webhook` เมื่อตั้งค่าไว้; งานประกาศจะยังคงการส่งทางแชตไว้และได้รับ `delivery.completionDestination` เมื่อไม่ได้ตั้งค่า `cron.webhook` เครื่องหมาย `notify` ระดับบนสุดที่ไม่ทำงานจะถูกลบสำหรับงานที่ไม่มีเป้าหมาย (การส่งที่มีอยู่ รวมถึงการประกาศ จะถูกคงไว้) เพราะการส่งขณะรันไทม์ไม่เคยอ่านค่านี้
+    - ฟิลด์เพย์โหลดระดับบนสุด (`message`, `model`, `thinking`, ...) → `payload`
+    - ฟิลด์การนำส่งระดับบนสุด (`deliver`, `channel`, `to`, `provider`, ...) → `delivery`
+    - นามแฝงการนำส่ง `provider` ในเพย์โหลด → `delivery.channel` ที่ระบุอย่างชัดเจน
+    - งานสำรอง Webhook `notify: true` แบบเก่า → การนำส่ง Webhook ที่ระบุอย่างชัดเจนจากค่า `cron.webhook` แบบดิบที่เลิกใช้แล้วเมื่อค่านั้นใช้ได้ งานประกาศจะคงการนำส่งผ่านแชตไว้และได้รับ `delivery.completionDestination` จากนั้น doctor จะนำคีย์การกำหนดค่าเก่าออก หากไม่มี Webhook แบบเก่าที่ใช้งานได้ เครื่องหมาย `notify` ระดับบนสุดที่ไม่มีผลจะถูกนำออกจากงานที่ไม่มีเป้าหมาย (การนำส่งที่มีอยู่ รวมถึงการประกาศ จะถูกรักษาไว้) เนื่องจากการนำส่งขณะรันไทม์ไม่เคยอ่านค่านี้
 
-    Gateway ยังทำความสะอาดแถว cron ที่มีรูปแบบผิดขณะโหลด เพื่อให้งานที่ถูกต้องยังทำงานต่อไปได้ แถวดิบที่มีรูปแบบผิดจะถูกคัดลอกไปยัง `jobs-quarantine.json` ถัดจากที่เก็บที่ใช้งานอยู่ก่อนถูกลบออกจาก `jobs.json`; doctor รายงานแถวที่ถูกกักกันเพื่อให้คุณตรวจสอบหรือซ่อมแซมด้วยตนเองได้
+    Gateway ยังทำความสะอาดแถว Cron ที่มีรูปแบบไม่ถูกต้องขณะโหลด เพื่อให้งานที่ถูกต้องทำงานต่อไป แถวข้อมูลดิบที่มีรูปแบบไม่ถูกต้องจะถูกคัดลอกไปยัง `jobs-quarantine.json` ถัดจากที่เก็บที่ใช้งานอยู่ ก่อนนำออกจาก `jobs.json` doctor จะรายงานแถวที่ถูกกักกันเพื่อให้สามารถตรวจสอบหรือซ่อมแซมด้วยตนเอง
 
-    ตอนเริ่มต้น Gateway จะ normalize projection ขณะรันไทม์และละเว้นเครื่องหมาย `notify` ระดับบนสุด แต่ยังคง config cron ที่บันทึกไว้เพื่อให้ doctor ซ่อมแซม เมื่อไม่ได้ตั้งค่า `cron.webhook` doctor จะลบเครื่องหมายที่ไม่ทำงานสำหรับงานที่ไม่มีเป้าหมายการย้าย (`delivery.mode` เป็น none/ไม่มีอยู่, เป้าหมาย Webhook ที่ใช้ไม่ได้, หรือการส่งประกาศ/แชตที่มีอยู่) โดยปล่อยการส่งเดิมไว้ไม่แตะต้อง ทำให้การรัน `doctor --fix` ซ้ำไม่เตือนงานเดิมอีกต่อไป หากตั้งค่า `cron.webhook` แล้วแต่ไม่ใช่ URL HTTP(S) ที่ถูกต้อง doctor จะยังเตือนและคงเครื่องหมายนั้นไว้เพื่อให้คุณแก้ URL ได้
+    เมื่อ Gateway เริ่มต้น ระบบจะทำให้การฉายภาพรันไทม์เป็นรูปแบบมาตรฐานและละเว้นเครื่องหมาย `notify` ระดับบนสุด แต่จะคงสถานะ Cron ที่บันทึกไว้ให้ doctor ซ่อมแซม doctor จะนำเครื่องหมายที่ไม่มีผลออกจากงานที่ไม่มีเป้าหมายสำหรับการย้าย (`delivery.mode` เป็น none/ไม่มีอยู่, เป้าหมาย Webhook แบบเก่าที่ใช้ไม่ได้ หรือมีการนำส่งแบบประกาศ/แชตอยู่แล้ว) โดยไม่เปลี่ยนแปลงการนำส่งที่มีอยู่ ดังนั้นการเรียกใช้ `doctor --fix` ซ้ำจะไม่เตือนเกี่ยวกับงานเดิมอีกต่อไป
 
-    บน Linux doctor ยังเตือนเมื่อ crontab ของผู้ใช้ยังเรียกใช้ `~/.openclaw/bin/ensure-whatsapp.sh` รุ่นเก่า สคริปต์เฉพาะโฮสต์นี้ไม่ได้รับการดูแลโดย OpenClaw ปัจจุบัน และอาจเขียนข้อความ `Gateway inactive` ที่ไม่ถูกต้องลงใน `~/.openclaw/logs/whatsapp-health.log` เมื่อ cron เข้าถึง systemd user bus ไม่ได้ ลบรายการ crontab ที่เก่าด้วย `crontab -e`; ใช้ `openclaw channels status --probe`, `openclaw doctor` และ `openclaw gateway status` สำหรับการตรวจสุขภาพปัจจุบัน
-
-  </Accordion>
-  <Accordion title="3c. การล้าง lock ของเซสชัน">
-    เครื่องมือ doctor สแกนไดเรกทอรีเซสชันของ agent ทุกตัวเพื่อหาไฟล์ write-lock ที่ค้างอยู่ — ไฟล์ที่เหลืออยู่เมื่อเซสชันออกอย่างผิดปกติ สำหรับไฟล์ lock แต่ละไฟล์ที่พบ ระบบจะรายงาน: path, PID, PID นั้นยังทำงานอยู่หรือไม่, อายุของ lock และถือว่าเป็นไฟล์ค้างหรือไม่ (PID ตายแล้ว, metadata เจ้าของมีรูปแบบผิด, เก่ากว่า 30 นาที, หรือ PID ที่ยังทำงานอยู่แต่พิสูจน์ได้ว่าเป็นของกระบวนการที่ไม่ใช่ OpenClaw) ในโหมด `--fix` / `--repair` ระบบจะลบ lock ที่มีเจ้าของเป็น PID ที่ตายแล้ว, กำพร้า, ถูกนำกลับมาใช้ใหม่, เก่าและมีรูปแบบผิด, หรือไม่ใช่ OpenClaw โดยอัตโนมัติ lock เก่าที่ยังเป็นของกระบวนการ OpenClaw ที่ทำงานอยู่จะถูกรายงานแต่คงไว้ เพื่อไม่ให้ doctor ตัดการทำงานของตัวเขียน transcript ที่ยังใช้งานอยู่
-  </Accordion>
-  <Accordion title="3d. การซ่อมแซม branch ของ transcript เซสชัน">
-    เครื่องมือ doctor สแกนไฟล์ JSONL ของเซสชัน agent เพื่อหารูปแบบ branch ซ้ำที่สร้างโดยบั๊กการเขียน prompt transcript ใหม่ใน 2026.4.24: turn ของผู้ใช้ที่ถูกทิ้งซึ่งมี context รันไทม์ภายในของ OpenClaw รวมกับ sibling ที่ยังใช้งานอยู่ซึ่งมี prompt ผู้ใช้ที่มองเห็นได้เหมือนกัน ในโหมด `--fix` / `--repair` doctor จะสำรองไฟล์ที่ได้รับผลกระทบแต่ละไฟล์ไว้ถัดจากต้นฉบับ แล้วเขียน transcript ใหม่ให้เป็น branch ที่ใช้งานอยู่ เพื่อให้ประวัติ Gateway และตัวอ่าน memory ไม่เห็น turn ซ้ำอีก
-  </Accordion>
-  <Accordion title="4. การตรวจสอบความสมบูรณ์ของสถานะ (การคงอยู่ของเซสชัน, การ routing และความปลอดภัย)">
-    ไดเรกทอรีสถานะคือแกนประสาทการทำงาน หากมันหายไป คุณจะสูญเสียเซสชัน ข้อมูลรับรอง log และ config (เว้นแต่คุณมี backup อยู่ที่อื่น)
-
-    Doctor ตรวจสอบ:
-
-    - **ไดเรกทอรีสถานะหายไป**: เตือนเรื่องการสูญเสียสถานะอย่างรุนแรง แจ้งให้สร้างไดเรกทอรีใหม่ และย้ำว่าไม่สามารถกู้คืนข้อมูลที่หายไปได้
-    - **สิทธิ์ของไดเรกทอรีสถานะ**: ตรวจสอบว่าสามารถเขียนได้; เสนอให้ซ่อมสิทธิ์ (และแสดงคำใบ้ `chown` เมื่อตรวจพบว่า owner/group ไม่ตรงกัน)
-    - **ไดเรกทอรีสถานะบน macOS ที่ซิงก์กับ cloud**: เตือนเมื่อ state resolve ไปอยู่ใต้ iCloud Drive (`~/Library/Mobile Documents/com~apple~CloudDocs/...`) หรือ `~/Library/CloudStorage/...` เพราะ path ที่รองรับด้วยการ sync อาจทำให้ I/O ช้าลงและเกิดการแข่งขันของ lock/sync
-    - **ไดเรกทอรีสถานะ Linux บน SD หรือ eMMC**: เตือนเมื่อ state resolve ไปยังแหล่ง mount `mmcblk*` เพราะ random I/O ที่รองรับด้วย SD หรือ eMMC อาจช้ากว่าและสึกหรอเร็วขึ้นภายใต้การเขียนเซสชันและข้อมูลรับรอง
-    - **ไดเรกทอรีสถานะ Linux แบบ volatile**: เตือนเมื่อ state resolve ไปยัง `tmpfs` หรือ `ramfs` เพราะเซสชัน ข้อมูลรับรอง config และสถานะ SQLite พร้อมไฟล์ sidecar WAL/journal จะหายไปเมื่อรีบูต Docker mount แบบ `overlay` จะไม่ถูก flag โดยตั้งใจ เพราะ writable layer ของมันคงอยู่ข้ามการรีบูตโฮสต์ตราบใดที่ container ยังอยู่
-    - **ไดเรกทอรีเซสชันหายไป**: `sessions/` และไดเรกทอรีที่เก็บเซสชันจำเป็นต่อการคงประวัติและหลีกเลี่ยง crash แบบ `ENOENT`
-    - **Transcript ไม่ตรงกัน**: เตือนเมื่อรายการเซสชันล่าสุดมีไฟล์ transcript หายไป
-    - **เซสชันหลัก "JSONL 1 บรรทัด"**: flag เมื่อ transcript หลักมีเพียงหนึ่งบรรทัด (ประวัติไม่ได้สะสม)
-    - **ไดเรกทอรีสถานะหลายชุด**: เตือนเมื่อมีโฟลเดอร์ `~/.openclaw` หลายชุดใน home directory ต่าง ๆ หรือเมื่อ `OPENCLAW_STATE_DIR` ชี้ไปที่อื่น (ประวัติอาจแยกระหว่างการติดตั้ง)
-    - **ตัวเตือนโหมดระยะไกล**: หาก `gateway.mode=remote` doctor จะเตือนให้คุณรันบนโฮสต์ระยะไกล (state อยู่ที่นั่น)
-    - **สิทธิ์ไฟล์ config**: เตือนหาก `~/.openclaw/openclaw.json` อ่านได้โดย group/world และเสนอให้จำกัดเป็น `600`
+    บน Linux doctor ยังเตือนเมื่อ crontab ของผู้ใช้ยังคงเรียกใช้ `~/.openclaw/bin/ensure-whatsapp.sh` แบบเก่า สคริปต์ภายในโฮสต์ดังกล่าวไม่ได้รับการบำรุงรักษาโดย OpenClaw ปัจจุบัน และอาจเขียนข้อความ `Gateway inactive` ที่ไม่เป็นจริงไปยัง `~/.openclaw/logs/whatsapp-health.log` เมื่อ Cron ไม่สามารถเข้าถึงบัสผู้ใช้ของ systemd ให้นำรายการ crontab ที่ล้าสมัยออกด้วย `crontab -e` และใช้ `openclaw channels status --probe`, `openclaw doctor` และ `openclaw gateway status` สำหรับการตรวจสอบสถานะปัจจุบัน
 
   </Accordion>
-  <Accordion title="5. สุขภาพการ auth ของโมเดล (OAuth หมดอายุ)">
-    Doctor ตรวจสอบโปรไฟล์ OAuth ในที่เก็บ auth เตือนเมื่อ token ใกล้หมดอายุ/หมดอายุแล้ว และสามารถ refresh ได้เมื่อปลอดภัย หากโปรไฟล์ Anthropic OAuth/token เก่า ระบบจะแนะนำ Anthropic API key หรือ path setup-token ของ Anthropic prompt สำหรับ refresh จะแสดงเฉพาะเมื่อรันแบบโต้ตอบ (TTY); `--non-interactive` จะข้ามความพยายาม refresh
+  <Accordion title="3c. การล้างล็อกเซสชัน">
+    Doctor สแกนไดเรกทอรีเซสชันของเอเจนต์ทุกไดเรกทอรีเพื่อค้นหาไฟล์ล็อกการเขียนที่ค้างอยู่หลังจากเซสชันสิ้นสุดอย่างผิดปกติ สำหรับไฟล์ล็อกแต่ละไฟล์ที่พบ ระบบจะรายงานพาธ, PID, PID ยังทำงานอยู่หรือไม่, อายุของล็อก และล็อกนั้นถือว่าค้างหรือไม่ (PID หยุดทำงาน, ข้อมูลเมตาของเจ้าของมีรูปแบบไม่ถูกต้อง, มีอายุเกิน 30 นาที หรือพิสูจน์แล้วว่า PID ที่ยังทำงานอยู่เป็นของกระบวนการที่ไม่ใช่ OpenClaw) ในโหมด `--fix` / `--repair` ระบบจะลบล็อกที่มีเจ้าของเป็น PID ที่หยุดทำงาน, กำพร้า, ถูกนำกลับมาใช้ใหม่, มีข้อมูลรูปแบบไม่ถูกต้องและเก่า หรือไม่ใช่ OpenClaw โดยอัตโนมัติ ส่วนล็อกเก่าที่ยังเป็นของกระบวนการ OpenClaw ที่ทำงานอยู่จะถูกรายงานแต่ไม่ถูกลบ เพื่อไม่ให้ doctor ตัดการทำงานของตัวเขียนทรานสคริปต์ที่ยังทำงานอยู่
+  </Accordion>
+  <Accordion title="3d. การซ่อมแซมแขนงทรานสคริปต์ของเซสชัน">
+    Doctor สแกนไฟล์ JSONL ของเซสชันเอเจนต์เพื่อค้นหาโครงสร้างแขนงซ้ำที่เกิดจากบั๊กการเขียนทรานสคริปต์พรอมต์ใหม่ในเวอร์ชัน 2026.4.24 ซึ่งประกอบด้วยเทิร์นของผู้ใช้ที่ถูกละทิ้งพร้อมบริบทรันไทม์ภายในของ OpenClaw และแขนงพี่น้องที่ยังใช้งานอยู่ซึ่งมีพรอมต์ของผู้ใช้ที่มองเห็นเหมือนกัน ในโหมด `--fix` / `--repair` doctor จะสำรองไฟล์ที่ได้รับผลกระทบแต่ละไฟล์ไว้ข้างไฟล์ต้นฉบับ แล้วเขียนทรานสคริปต์ใหม่ให้เหลือแขนงที่ใช้งานอยู่ เพื่อไม่ให้ตัวอ่านประวัติของ gateway และหน่วยความจำเห็นเทิร์นซ้ำอีก
+  </Accordion>
+  <Accordion title="4. การตรวจสอบความสมบูรณ์ของสถานะ (การคงอยู่ของเซสชัน การกำหนดเส้นทาง และความปลอดภัย)">
+    ไดเรกทอรีสถานะคือก้านสมองของการดำเนินงาน หากไดเรกทอรีนี้หายไป เซสชัน ข้อมูลรับรอง บันทึก และการกำหนดค่าจะสูญหาย เว้นแต่จะมีข้อมูลสำรองอยู่ที่อื่น
 
-    เมื่อ OAuth refresh ล้มเหลวถาวร (เช่น `refresh_token_reused`, `invalid_grant` หรือ provider บอกให้คุณ sign in อีกครั้ง) doctor จะรายงานว่าจำเป็นต้อง auth ใหม่ และพิมพ์คำสั่ง `openclaw models auth login --provider ...` ที่ต้องรันแบบตรงตัว
+    Doctor ตรวจสอบรายการต่อไปนี้:
 
-    Doctor ยังรายงานโปรไฟล์ auth ที่ใช้งานไม่ได้ชั่วคราวเนื่องจาก:
-
-    - cooldown สั้น ๆ (rate limit/timeout/auth failure)
-    - การปิดใช้งานนานขึ้น (billing/credit failure)
-
-    โปรไฟล์ OAuth ของ Codex รุ่นเก่าที่ token อยู่ใน macOS Keychain (onboarding รุ่นเก่าก่อน layout sidecar แบบไฟล์) จะถูกซ่อมโดย doctor เท่านั้น รัน `openclaw doctor --fix` หนึ่งครั้งจาก terminal แบบโต้ตอบเพื่อย้าย token รุ่นเก่าที่รองรับด้วย Keychain เข้าไปใน `auth-profiles.json` แบบ inline; หลังจากนั้น turn แบบ embedded (Telegram, cron, sub-agent dispatch) จะ resolve เป็นโปรไฟล์ OpenAI OAuth แบบ canonical
+    - **ไดเรกทอรีสถานะหายไป**: เตือนเกี่ยวกับการสูญเสียสถานะอย่างร้ายแรง แจ้งให้สร้างไดเรกทอรีขึ้นใหม่ และย้ำว่าไม่สามารถกู้คืนข้อมูลที่หายไปได้
+    - **สิทธิ์ของไดเรกทอรีสถานะ**: ตรวจสอบว่าสามารถเขียนได้ และเสนอให้ซ่อมแซมสิทธิ์ (พร้อมแสดงคำแนะนำ `chown` เมื่อตรวจพบว่าเจ้าของ/กลุ่มไม่ตรงกัน)
+    - **ไดเรกทอรีสถานะที่ซิงค์กับคลาวด์บน macOS**: เตือนเมื่อพาธสถานะอยู่ภายใต้ iCloud Drive (`~/Library/Mobile Documents/com~apple~CloudDocs/...`) หรือ `~/Library/CloudStorage/...` เนื่องจากพาธที่รองรับด้วยการซิงค์อาจทำให้ I/O ช้าลงและเกิดภาวะแข่งขันระหว่างการล็อก/การซิงค์
+    - **ไดเรกทอรีสถานะบน SD หรือ eMMC ของ Linux**: เตือนเมื่อพาธสถานะชี้ไปยังแหล่งเมานต์ `mmcblk*` เนื่องจาก I/O แบบสุ่มที่รองรับด้วย SD/eMMC อาจช้าลงและสึกหรอเร็วขึ้นจากการเขียนเซสชันและข้อมูลรับรอง
+    - **ไดเรกทอรีสถานะแบบชั่วคราวของ Linux**: เตือนเมื่อพาธสถานะชี้ไปยัง `tmpfs` หรือ `ramfs` เนื่องจากเซสชัน ข้อมูลรับรอง การกำหนดค่า และสถานะ SQLite (รวมถึงไฟล์ข้างเคียง WAL/journal) จะหายไปเมื่อรีบูต เมานต์ Docker `overlay` จะไม่ถูกตั้งใจแจ้งเตือน เนื่องจากเลเยอร์ที่เขียนได้จะคงอยู่ข้ามการรีบูตโฮสต์ตราบใดที่คอนเทนเนอร์ยังคงอยู่
+    - **ไดเรกทอรีเซสชันหายไป**: ต้องมี `sessions/` และไดเรกทอรีที่เก็บเซสชันเพื่อคงประวัติไว้และหลีกเลี่ยงการหยุดทำงานของ `ENOENT`
+    - **ทรานสคริปต์ไม่ตรงกัน**: เตือนเมื่อรายการเซสชันล่าสุดไม่มีไฟล์ทรานสคริปต์
+    - **เซสชันหลัก "JSONL 1 บรรทัด"**: แจ้งเตือนเมื่อทรานสคริปต์หลักมีเพียงหนึ่งบรรทัด (ประวัติไม่ได้สะสม)
+    - **มีไดเรกทอรีสถานะหลายแห่ง**: เตือนเมื่อมีโฟลเดอร์ `~/.openclaw` หลายโฟลเดอร์ในไดเรกทอรีโฮมต่าง ๆ หรือเมื่อ `OPENCLAW_STATE_DIR` ชี้ไปยังตำแหน่งอื่น (ประวัติอาจแยกกระจายระหว่างการติดตั้ง)
+    - **การแจ้งเตือนโหมดระยะไกล**: หากเป็น `gateway.mode=remote` doctor จะเตือนให้เรียกใช้บนโฮสต์ระยะไกล (สถานะอยู่ที่โฮสต์นั้น)
+    - **สิทธิ์ของไฟล์การกำหนดค่า**: เตือนหากกลุ่มหรือผู้ใช้ทั้งหมดสามารถอ่าน `~/.openclaw/openclaw.json` ได้ และเสนอให้จำกัดสิทธิ์เป็น `600`
 
   </Accordion>
-  <Accordion title="6. การตรวจสอบโมเดลของ hooks">
-    หากตั้งค่า `hooks.gmail.model` doctor จะตรวจสอบ model reference กับ catalog และ allowlist และเตือนเมื่อ resolve ไม่ได้หรือไม่ได้รับอนุญาต
-  </Accordion>
-  <Accordion title="7. การซ่อมแซม image ของ sandbox">
-    เมื่อเปิดใช้ sandboxing doctor จะตรวจสอบ image ของ Docker และเสนอให้ build หรือสลับไปใช้ชื่อรุ่นเก่าหาก image ปัจจุบันหายไป
-  </Accordion>
-  <Accordion title="7b. การล้างการติดตั้ง Plugin">
-    Doctor ลบสถานะ staging dependency ของ Plugin ที่ OpenClaw สร้างรุ่นเก่าในโหมด `openclaw doctor --fix` / `openclaw doctor --repair` ซึ่งครอบคลุม root dependency ที่สร้างไว้และเก่าแล้ว, ไดเรกทอรี install-stage เก่า, เศษไฟล์เฉพาะ package จากโค้ดซ่อมแซม dependency ของ bundled-plugin รุ่นก่อน และสำเนา npm ที่จัดการไว้ของ Plugin `@openclaw/*` แบบ bundled ที่กำพร้าหรือกู้คืนมา ซึ่งอาจบัง manifest แบบ bundled ปัจจุบัน Doctor ยัง relink package `openclaw` ของโฮสต์เข้าไปใน Plugin npm ที่จัดการไว้และประกาศ `peerDependencies.openclaw` เพื่อให้ runtime import เฉพาะ package เช่น `openclaw/plugin-sdk/*` ยัง resolve ได้หลังการอัปเดตหรือการซ่อม npm
+  <Accordion title="5. สถานะการตรวจสอบสิทธิ์ของโมเดล (OAuth หมดอายุ)">
+    Doctor ตรวจสอบโปรไฟล์ OAuth ในที่เก็บการตรวจสอบสิทธิ์ เตือนเมื่อโทเค็นใกล้หมดอายุหรือหมดอายุแล้ว และสามารถรีเฟรชได้เมื่อดำเนินการได้อย่างปลอดภัย หากโปรไฟล์ OAuth/โทเค็นของ Anthropic ล้าสมัย ระบบจะแนะนำคีย์ Anthropic API หรือพาธโทเค็นการตั้งค่าของ Anthropic พรอมต์ให้รีเฟรชจะปรากฏเฉพาะเมื่อทำงานแบบโต้ตอบ (TTY) ส่วน `--non-interactive` จะข้ามความพยายามรีเฟรช
 
-    Doctor ยังสามารถติดตั้ง Plugin ที่ดาวน์โหลดได้ซึ่งหายไปใหม่ เมื่อ config อ้างถึง Plugin เหล่านั้นแต่ registry ของ Plugin ภายในเครื่องหาไม่พบ ตัวอย่างเช่น `plugins.entries` ที่เป็นเนื้อหา, การตั้งค่า channel/provider/search ที่กำหนดไว้ และ runtime ของ agent ที่กำหนดไว้ ระหว่างการอัปเดต package doctor จะหลีกเลี่ยงการซ่อม Plugin ด้วย package-manager ขณะที่ core package กำลังถูกสลับ; รัน `openclaw doctor --fix` อีกครั้งหลังอัปเดตหาก Plugin ที่กำหนดไว้ยังต้องกู้คืน การเริ่มต้น Gateway และการ reload config จะไม่รัน package manager; การติดตั้ง Plugin ยังคงเป็นงาน doctor/install/update ที่ต้องทำอย่างชัดเจน
+    เมื่อการรีเฟรช OAuth ล้มเหลวอย่างถาวร (เช่น `refresh_token_reused`, `invalid_grant` หรือผู้ให้บริการแจ้งให้ลงชื่อเข้าใช้อีกครั้ง) doctor จะรายงานว่าต้องตรวจสอบสิทธิ์ใหม่และแสดงคำสั่ง `openclaw models auth login --provider ...` ที่ต้องเรียกใช้อย่างถูกต้องครบถ้วน
+
+    Doctor ยังรายงานโปรไฟล์การตรวจสอบสิทธิ์ที่ไม่สามารถใช้งานได้ชั่วคราวเนื่องจากช่วงพักสั้น ๆ (การจำกัดอัตรา/หมดเวลา/การตรวจสอบสิทธิ์ล้มเหลว) หรือการปิดใช้งานที่นานกว่า (การเรียกเก็บเงิน/เครดิตล้มเหลว)
+
+    โปรไฟล์ Codex OAuth แบบเดิมซึ่งมีโทเค็นอยู่ใน macOS Keychain (การเริ่มต้นใช้งานรุ่นเก่าก่อนเลย์เอาต์ไฟล์ข้างเคียง) สามารถซ่อมแซมได้โดย doctor เท่านั้น เรียกใช้ `openclaw doctor --fix` หนึ่งครั้งจากเทอร์มินัลแบบโต้ตอบเพื่อย้ายโทเค็นแบบเดิมที่เก็บใน Keychain ไปยัง `auth-profiles.json` โดยตรง หลังจากนั้นเทิร์นแบบฝัง (Telegram, cron, การส่งต่อไปยังเอเจนต์ย่อย) จะจำแนกโทเค็นเหล่านั้นเป็นโปรไฟล์ OpenAI OAuth มาตรฐาน
 
   </Accordion>
-  <Accordion title="8. การย้าย service ของ Gateway และคำใบ้การล้าง">
-    Doctor ตรวจพบ service Gateway รุ่นเก่า (launchd/systemd/schtasks) และเสนอให้ลบออกพร้อมติดตั้ง service ของ OpenClaw โดยใช้พอร์ต Gateway ปัจจุบัน นอกจากนี้ยังสามารถสแกนหา service เพิ่มเติมที่คล้าย Gateway และพิมพ์คำใบ้การล้างได้ service Gateway ของ OpenClaw ที่ตั้งชื่อตามโปรไฟล์ถือเป็นสิ่งหลักและจะไม่ถูก flag ว่า "เพิ่มเติม"
+  <Accordion title="6. การตรวจสอบความถูกต้องของโมเดล Hooks">
+    หากตั้งค่า `hooks.gmail.model` ไว้ doctor จะตรวจสอบการอ้างอิงโมเดลกับแค็ตตาล็อกและรายการที่อนุญาต และเตือนเมื่อไม่สามารถจำแนกการอ้างอิงนั้นได้หรือไม่ได้รับอนุญาต
+  </Accordion>
+  <Accordion title="7. การซ่อมแซมอิมเมจแซนด์บ็อกซ์">
+    เมื่อเปิดใช้งานแซนด์บ็อกซ์ doctor จะตรวจสอบอิมเมจ Docker และเสนอให้สร้างหรือเปลี่ยนไปใช้ชื่อแบบเดิมหากไม่มีอิมเมจปัจจุบัน
+  </Accordion>
+  <Accordion title="7b. การล้างข้อมูลการติดตั้ง Plugin">
+    ในโหมด `openclaw doctor --fix` / `openclaw doctor --repair` Doctor จะลบสถานะการจัดเตรียมการขึ้นต่อกันของ Plugin แบบเดิมที่ OpenClaw สร้างขึ้น ได้แก่ รากการขึ้นต่อกันที่สร้างไว้และค้างอยู่ ไดเรกทอรีขั้นตอนการติดตั้งเก่า เศษไฟล์ภายในแพ็กเกจจากโค้ดซ่อมแซมการขึ้นต่อกันของ Plugin ที่รวมมาให้รุ่นก่อน และสำเนา npm ที่ได้รับการจัดการซึ่งเป็นสำเนากำพร้าหรือกู้คืนมาของ Plugin `@openclaw/*` ที่รวมมาให้และอาจบดบัง manifest ที่รวมมาให้ในปัจจุบัน นอกจากนี้ Doctor ยังเชื่อมโยงแพ็กเกจ `openclaw` ของโฮสต์อีกครั้งเข้ากับ Plugin npm ที่ได้รับการจัดการซึ่งประกาศ `peerDependencies.openclaw` เพื่อให้อิมพอร์ตรันไทม์ภายในแพ็กเกจ เช่น `openclaw/plugin-sdk/*` ยังคงจำแนกได้หลังการอัปเดตหรือการซ่อมแซม npm
 
-    บน Linux หาก service Gateway ระดับผู้ใช้หายไปแต่มี service Gateway ของ OpenClaw ระดับระบบอยู่ doctor จะไม่ติดตั้ง service ระดับผู้ใช้อันที่สองโดยอัตโนมัติ ตรวจสอบด้วย `openclaw gateway status --deep` หรือ `openclaw doctor --deep` จากนั้นลบรายการซ้ำหรือตั้งค่า `OPENCLAW_SERVICE_REPAIR_POLICY=external` เมื่อ supervisor ของระบบเป็นเจ้าของ lifecycle ของ Gateway
+    Doctor ยังสามารถติดตั้ง Plugin ที่ดาวน์โหลดได้และหายไปใหม่ เมื่อการกำหนดค่าอ้างอิงถึง Plugin เหล่านั้นแต่รีจิสทรี Plugin ภายในเครื่องหาไม่พบ (เนื้อหาสำคัญ `plugins.entries`, การตั้งค่าช่องทาง/ผู้ให้บริการ/การค้นหาที่กำหนดค่าไว้, รันไทม์เอเจนต์ที่กำหนดค่าไว้) ระหว่างการอัปเดตแพ็กเกจ doctor จะหลีกเลี่ยงการติดตั้งแพ็กเกจ Plugin ใหม่ขณะที่กำลังสลับแพ็กเกจหลัก หาก Plugin ที่กำหนดค่าไว้ยังต้องกู้คืน ให้เรียกใช้ `openclaw doctor --fix` อีกครั้งหลังการอัปเดต นอกเหนือจากข้อยกเว้นการเริ่มต้นอิมเมจคอนเทนเนอร์ด้านล่าง การเริ่มต้น gateway และการโหลดการกำหนดค่าใหม่จะไม่เรียกใช้การซ่อมแซมแพ็กเกจ การติดตั้ง Plugin ยังคงต้องดำเนินการผ่าน doctor/install/update อย่างชัดเจน
+
+    การเริ่มต้น gateway ในคอนเทนเนอร์มีข้อยกเว้นสำหรับการอัปเกรดที่จำกัดมาก: เมื่อ `openclaw gateway run` เริ่มต้นบน OpenClaw เวอร์ชันใหม่ ระบบจะเรียกใช้การย้ายสถานะที่ปลอดภัยและการปรับ Plugin หลังแกนหลักที่มีอยู่ให้สอดคล้องกันก่อนพร้อมใช้งาน จากนั้นบันทึกจุดตรวจสอบแยกตามเวอร์ชัน ขั้นตอนระหว่างการเริ่มต้นนี้สามารถล้างระเบียน Plugin ที่รวมมาให้และค้างอยู่ ซ่อมแซมลิงก์ Plugin ภายในเครื่อง ติดตั้งแพ็กเกจ Plugin ที่กำหนดค่าไว้ใหม่เมื่อกระบวนการปรับให้สอดคล้องจำเป็นต้องทำ และตรวจสอบเพย์โหลด Plugin ที่ใช้งานอยู่ หากการเริ่มต้นไม่สามารถซ่อมแซมได้อย่างปลอดภัย ให้เรียกใช้อิมเมจเดียวกันหนึ่งครั้งด้วย `openclaw doctor --fix` กับสถานะ/การกำหนดค่าที่เมานต์ชุดเดียวกัน ก่อนเริ่มคอนเทนเนอร์ใหม่ตามปกติ
 
   </Accordion>
-  <Accordion title="8b. การย้าย Startup Matrix">
-    เมื่อบัญชี channel ของ Matrix มีการย้ายสถานะรุ่นเก่าที่ค้างอยู่หรือดำเนินการได้ doctor (ในโหมด `--fix` / `--repair`) จะสร้าง snapshot ก่อนการย้าย จากนั้นรันขั้นตอนการย้ายแบบ best-effort: การย้ายสถานะ Matrix รุ่นเก่าและการเตรียม encrypted-state รุ่นเก่า ทั้งสองขั้นตอนไม่ทำให้ระบบล้มเหลว; ข้อผิดพลาดจะถูก log และการเริ่มต้นจะดำเนินต่อไป ในโหมดอ่านอย่างเดียว (`openclaw doctor` โดยไม่มี `--fix`) การตรวจนี้จะถูกข้ามทั้งหมด
+  <Accordion title="8. การย้ายบริการ Gateway และคำแนะนำในการล้างข้อมูล">
+    Doctor ตรวจพบบริการ gateway แบบเดิม (launchd/systemd/schtasks) และเสนอให้ลบออกและติดตั้งบริการ OpenClaw โดยใช้พอร์ต gateway ปัจจุบัน นอกจากนี้ยังสามารถสแกนหาบริการอื่นที่ทำงานคล้าย gateway และแสดงคำแนะนำในการล้างข้อมูล บริการ gateway ของ OpenClaw ที่ตั้งชื่อตามโปรไฟล์ถือเป็นบริการระดับปฐมภูมิและจะไม่ถูกแจ้งว่าเป็น "ส่วนเกิน"
+
+    บน Linux หากไม่มีบริการ gateway ระดับผู้ใช้แต่มีบริการ gateway ของ OpenClaw ระดับระบบอยู่ doctor จะไม่ติดตั้งบริการระดับผู้ใช้ชุดที่สองโดยอัตโนมัติ ตรวจสอบด้วย `openclaw gateway status --deep` หรือ `openclaw doctor --deep` แล้วลบรายการที่ซ้ำกัน หรือตั้งค่า `OPENCLAW_SERVICE_REPAIR_POLICY=external` เมื่อตัวควบคุมระดับระบบเป็นผู้จัดการวงจรชีวิตของ gateway
+
   </Accordion>
-  <Accordion title="8c. การจับคู่อุปกรณ์และ auth drift">
-    Doctor ตอนนี้ตรวจสอบสถานะการจับคู่อุปกรณ์เป็นส่วนหนึ่งของการตรวจสุขภาพปกติ
+  <Accordion title="8b. การย้าย Matrix ระหว่างการเริ่มต้น">
+    เมื่อบัญชีช่องทาง Matrix มีการย้ายสถานะแบบเดิมที่รอดำเนินการหรือสามารถดำเนินการได้ doctor (ในโหมด `--fix` / `--repair`) จะสร้างสแนปช็อตก่อนการย้าย แล้วเรียกใช้ขั้นตอนการย้ายแบบพยายามอย่างเต็มที่ ได้แก่ การย้ายสถานะ Matrix แบบเดิมและการเตรียมสถานะที่เข้ารหัสแบบเดิม ทั้งสองขั้นตอนไม่ทำให้ระบบล้มเหลว ระบบจะบันทึกข้อผิดพลาดและดำเนินการเริ่มต้นต่อ ในโหมดอ่านอย่างเดียว (`openclaw doctor` โดยไม่มี `--fix`) การตรวจสอบนี้จะถูกข้ามทั้งหมด
+  </Accordion>
+  <Accordion title="8c. การจับคู่อุปกรณ์และการคลาดเคลื่อนของการตรวจสอบสิทธิ์">
+    Doctor ตรวจสอบสถานะการจับคู่อุปกรณ์เป็นส่วนหนึ่งของการตรวจสอบสถานะตามปกติ โดยรายงานรายการต่อไปนี้:
 
-    สิ่งที่รายงาน:
+    - คำขอจับคู่ครั้งแรกที่รอดำเนินการ
+    - การอัปเกรดบทบาทหรือขอบเขตที่รอดำเนินการสำหรับอุปกรณ์ที่จับคู่แล้ว
+    - การซ่อมแซมกรณีคีย์สาธารณะไม่ตรงกัน ซึ่ง ID อุปกรณ์ยังตรงกันแต่ข้อมูลระบุตัวตนของอุปกรณ์ไม่ตรงกับระเบียนที่อนุมัติแล้ว
+    - ระเบียนที่จับคู่แล้วแต่ไม่มีโทเค็นที่ใช้งานอยู่สำหรับบทบาทที่อนุมัติ
+    - โทเค็นที่จับคู่แล้วซึ่งมีขอบเขตคลาดออกนอกค่าฐานการจับคู่ที่อนุมัติ
+    - รายการโทเค็นอุปกรณ์ที่แคชไว้ภายในเครื่องสำหรับเครื่องปัจจุบัน ซึ่งมีอยู่ก่อนการหมุนเวียนโทเค็นฝั่ง gateway หรือมีข้อมูลเมตาขอบเขตที่ล้าสมัย
 
-    - คำขอจับคู่ครั้งแรกที่ค้างอยู่
-    - การอัปเกรด role ที่ค้างอยู่สำหรับอุปกรณ์ที่จับคู่แล้ว
-    - การอัปเกรด scope ที่ค้างอยู่สำหรับอุปกรณ์ที่จับคู่แล้ว
-    - การซ่อม public-key mismatch ที่ device id ยังตรงกันแต่ identity ของอุปกรณ์ไม่ตรงกับ record ที่อนุมัติแล้วอีกต่อไป
-    - record ที่จับคู่แล้วซึ่งไม่มี token ที่ active สำหรับ role ที่อนุมัติ
-    - token ที่จับคู่แล้วซึ่ง scope drift ออกจาก baseline การจับคู่ที่อนุมัติ
-    - รายการ device-token ที่ cache ไว้ในเครื่องสำหรับเครื่องปัจจุบัน ซึ่งเก่ากว่าการ rotate token ฝั่ง Gateway หรือมี metadata scope ที่เก่าแล้ว
+    Doctor จะไม่อนุมัติคำขอจับคู่หรือหมุนเวียนโทเค็นอุปกรณ์โดยอัตโนมัติ แต่จะแสดงขั้นตอนถัดไปที่ต้องทำอย่างถูกต้องครบถ้วน:
 
-    Doctor ไม่อนุมัติคำขอจับคู่หรือ rotate device token โดยอัตโนมัติ แต่พิมพ์ขั้นตอนถัดไปแบบตรงตัวแทน:
+    - ตรวจสอบคำขอที่รอดำเนินการด้วย `openclaw devices list`
+    - อนุมัติคำขอที่ระบุด้วย `openclaw devices approve <requestId>`
+    - หมุนเวียนโทเค็นใหม่ด้วย `openclaw devices rotate --device <deviceId> --role <role>`
+    - ลบและอนุมัติระเบียนที่ล้าสมัยอีกครั้งด้วย `openclaw devices remove <deviceId>`
 
-    - ตรวจสอบคำขอที่ค้างอยู่ด้วย `openclaw devices list`
-    - อนุมัติคำขอที่เจาะจงด้วย `openclaw devices approve <requestId>`
-    - rotate token ใหม่ด้วย `openclaw devices rotate --device <deviceId> --role <role>`
-    - ลบและอนุมัติ record เก่าอีกครั้งด้วย `openclaw devices remove <deviceId>`
-
-    การแก้ไขนี้ปิดช่องโหว่ทั่วไปแบบ "จับคู่แล้วแต่ยังได้รับข้อความว่าต้องจับคู่": ตอนนี้ doctor แยกแยะการจับคู่ครั้งแรกออกจากการอัปเกรดบทบาท/ขอบเขตที่ค้างอยู่ และจากความคลาดเคลื่อนของโทเค็น/อัตลักษณ์อุปกรณ์ที่ล้าสมัย
+    วิธีนี้แยกการจับคู่ครั้งแรกออกจากการอัปเกรดบทบาท/ขอบเขตที่รอดำเนินการ และจากการคลาดเคลื่อนของโทเค็น/ข้อมูลระบุตัวตนอุปกรณ์ที่ล้าสมัย จึงปิดช่องโหว่ทั่วไปที่ว่า "จับคู่แล้วแต่ยังได้รับข้อความว่าต้องจับคู่"
 
   </Accordion>
   <Accordion title="9. คำเตือนด้านความปลอดภัย">
-    Doctor แสดงคำเตือนเมื่อผู้ให้บริการเปิดรับ DM โดยไม่มี allowlist หรือเมื่อนโยบายถูกกำหนดค่าในลักษณะที่เป็นอันตราย
+    Doctor แสดงหมายเหตุด้านความปลอดภัยเฉพาะเมื่อพบคำเตือน เช่น ผู้ให้บริการที่เปิดรับ DM โดยไม่มีรายการที่อนุญาต หรือนโยบายที่กำหนดค่าไว้อย่างอันตราย ใช้ `openclaw security audit` เพื่อดูรายการตรวจสอบความปลอดภัยทั้งหมด
   </Accordion>
   <Accordion title="10. systemd linger (Linux)">
-    หากรันเป็นบริการผู้ใช้ systemd doctor จะตรวจให้แน่ใจว่าเปิดใช้ lingering เพื่อให้ Gateway ยังทำงานต่อหลังออกจากระบบ
+    หากทำงานเป็นบริการผู้ใช้ systemd doctor จะตรวจสอบให้แน่ใจว่าเปิดใช้งาน lingering เพื่อให้ gateway ยังคงทำงานหลังออกจากระบบ
   </Accordion>
-  <Accordion title="11. สถานะเวิร์กสเปซ (skills, plugins และ TaskFlows)">
-    Doctor พิมพ์สรุปสถานะเวิร์กสเปซสำหรับเอเจนต์เริ่มต้น:
+  <Accordion title="11. สถานะเวิร์กสเปซ (Skills, Plugin และ TaskFlow)">
+    Doctor แสดงปัญหาและการดำเนินการสำหรับเอเจนต์เริ่มต้น ไม่ใช่รายการสถานะที่ปกติ:
 
-    - **สถานะ Skills**: นับ Skills ที่มีสิทธิ์ใช้งาน, ขาดข้อกำหนด และถูก allowlist บล็อก
-    - **สถานะ Plugin**: นับ plugins ที่เปิดใช้/ปิดใช้/เกิดข้อผิดพลาด; แสดงรายการ ID ของ plugin สำหรับข้อผิดพลาดใดๆ; รายงานความสามารถของ bundle plugin
-    - **คำเตือนความเข้ากันได้ของ Plugin**: ระบุ plugins ที่มีปัญหาความเข้ากันได้กับ runtime ปัจจุบัน
-    - **การวินิจฉัย Plugin**: แสดงคำเตือนหรือข้อผิดพลาดขณะโหลดที่ registry ของ plugin ส่งออกมา
-    - **การกู้คืน TaskFlow**: แสดง TaskFlows ที่จัดการอยู่ซึ่งน่าสงสัยและต้องตรวจสอบหรือยกเลิกด้วยตนเอง
+    - **Skills**: แสดงชื่อ Skills ที่อนุญาตแต่ใช้งานไม่ได้ ใช้ `openclaw skills check` เพื่อดูรายละเอียดข้อกำหนดและจำนวนทั้งหมด
+    - **Plugin**: รายงานเฉพาะ ID ของ Plugin ที่เกิดข้อผิดพลาด ใช้ `openclaw plugins list` เพื่อดูรายการ Plugin ที่โหลด อิมพอร์ต ปิดใช้งาน และรวมมาให้
+    - **คำเตือนความเข้ากันได้ของ Plugin**: แจ้ง Plugin ที่มีปัญหาด้านความเข้ากันได้กับรันไทม์ปัจจุบัน
+    - **การวินิจฉัย Plugin**: แสดงคำเตือนหรือข้อผิดพลาดที่รีจิสทรี Plugin ส่งออกระหว่างการโหลด
+    - **การกู้คืน TaskFlow**: แสดง TaskFlow ที่ได้รับการจัดการซึ่งน่าสงสัยและต้องตรวจสอบหรือยกเลิกด้วยตนเอง
+    - **Claude CLI**: รายงานเฉพาะปัญหาของไบนารี การตรวจสอบสิทธิ์ โปรไฟล์ เวิร์กสเปซ หรือไดเรกทอรีโปรเจกต์ โดยไม่แสดงรายละเอียดการตรวจสอบที่ปกติ
 
   </Accordion>
-  <Accordion title="11b. ขนาดไฟล์ bootstrap">
-    Doctor ตรวจว่าไฟล์ bootstrap ของเวิร์กสเปซ (เช่น `AGENTS.md`, `CLAUDE.md` หรือไฟล์ context อื่นที่ถูกฉีดเข้าไป) ใกล้หรือเกินงบประมาณจำนวนอักขระที่กำหนดไว้หรือไม่ โดยรายงานจำนวนอักขระดิบเทียบกับจำนวนที่ถูกฉีดต่อไฟล์, เปอร์เซ็นต์การตัดทอน, สาเหตุการตัดทอน (`max/file` หรือ `max/total`) และจำนวนอักขระที่ถูกฉีดทั้งหมดเป็นสัดส่วนของงบประมาณทั้งหมด เมื่อไฟล์ถูกตัดทอนหรือใกล้ถึงขีดจำกัด doctor จะพิมพ์คำแนะนำสำหรับปรับ `agents.defaults.bootstrapMaxChars` และ `agents.defaults.bootstrapTotalMaxChars`
+  <Accordion title="11b. ขนาดไฟล์บูตสแตรป">
+    Doctor ตรวจสอบว่าไฟล์บูตสแตรปของเวิร์กสเปซ (เช่น `AGENTS.md`, `CLAUDE.md` หรือไฟล์บริบทอื่นที่แทรกเข้ามา) มีขนาดใกล้ถึงหรือเกินงบประมาณอักขระที่กำหนดค่าไว้หรือไม่ ระบบจะรายงานจำนวนอักขระดิบเทียบกับจำนวนที่แทรกแยกตามไฟล์ เปอร์เซ็นต์การตัดทอน สาเหตุของการตัดทอน (`max/file` หรือ `max/total`) และจำนวนอักขระที่แทรกทั้งหมดในรูปสัดส่วนของงบประมาณรวม เมื่อไฟล์ถูกตัดทอนหรือใกล้ถึงขีดจำกัด doctor จะแสดงเคล็ดลับสำหรับปรับ `agents.defaults.bootstrapMaxChars` และ `agents.defaults.bootstrapTotalMaxChars`
   </Accordion>
-  <Accordion title="11d. การล้าง channel plugin ที่ล้าสมัย">
-    เมื่อ `openclaw doctor --fix` ลบ channel plugin ที่หายไปแล้ว มันจะลบ config ที่ผูกกับช่องทางซึ่งค้างอยู่และอ้างถึง plugin นั้นด้วย ได้แก่รายการ `channels.<id>`, เป้าหมาย Heartbeat ที่ระบุชื่อช่องทาง และ override ของ `agents.*.models["<channel>/*"]` วิธีนี้ป้องกันลูปการบูต Gateway ที่ runtime ของช่องทางหายไปแล้วแต่ config ยังสั่งให้ gateway ผูกกับช่องทางนั้น
+  <Accordion title="11c. การเติมคำสั่งเชลล์อัตโนมัติ">
+    Doctor ตรวจสอบว่ามีการติดตั้งการเติมคำด้วยแป้น Tab สำหรับเชลล์ปัจจุบัน (zsh, bash, fish หรือ PowerShell) หรือไม่:
+
+    - หากโปรไฟล์เชลล์ใช้รูปแบบ completion แบบไดนามิกที่ช้า (`source <(openclaw completion ...)`) doctor จะอัปเกรดเป็นรูปแบบไฟล์แคชที่เร็วกว่า
+    - หากมีการกำหนดค่า completion ในโปรไฟล์ แต่ไฟล์แคชหายไป doctor จะสร้างแคชใหม่โดยอัตโนมัติ
+    - หากยังไม่ได้กำหนดค่า completion เลย doctor จะแจ้งให้ติดตั้ง (เฉพาะโหมดโต้ตอบเท่านั้น; ข้ามเมื่อใช้ `--non-interactive`)
+
+    เรียกใช้ `openclaw completion --write-state` เพื่อสร้างแคชใหม่ด้วยตนเอง
+
   </Accordion>
-  <Accordion title="11c. การเติมคำสั่งใน shell">
-    Doctor ตรวจว่ามีการติดตั้งการเติมด้วยแท็บสำหรับ shell ปัจจุบันหรือไม่ (zsh, bash, fish หรือ PowerShell):
-
-    - หากโปรไฟล์ shell ใช้รูปแบบการเติมคำสั่งแบบไดนามิกที่ช้า (`source <(openclaw completion ...)`) doctor จะอัปเกรดเป็นรูปแบบไฟล์แคชที่เร็วกว่า
-    - หากกำหนดค่าการเติมคำสั่งไว้ในโปรไฟล์แต่ไฟล์แคชหายไป doctor จะสร้างแคชใหม่โดยอัตโนมัติ
-    - หากไม่ได้กำหนดค่าการเติมคำสั่งไว้เลย doctor จะถามให้ติดตั้ง (เฉพาะโหมดโต้ตอบเท่านั้น; ข้ามเมื่อใช้ `--non-interactive`)
-
-    รัน `openclaw completion --write-state` เพื่อสร้างแคชใหม่ด้วยตนเอง
-
+  <Accordion title="11d. การล้าง Plugin ช่องทางที่ล้าสมัย">
+    เมื่อ `openclaw doctor --fix` ลบ Plugin ช่องทางที่หาไม่พบ ระบบจะลบการกำหนดค่าที่จำกัดขอบเขตเฉพาะช่องทางซึ่งค้างอยู่และอ้างอิง Plugin นั้นด้วย ได้แก่ รายการ `channels.<id>`, เป้าหมาย Heartbeat ที่ระบุชื่อช่องทาง และค่าที่เขียนทับ `agents.*.models["<channel>/*"]` วิธีนี้ป้องกันลูปการบูต Gateway ในกรณีที่รันไทม์ของช่องทางหายไปแล้ว แต่การกำหนดค่ายังคงสั่งให้ Gateway ผูกกับรันไทม์นั้น
   </Accordion>
   <Accordion title="12. การตรวจสอบการยืนยันตัวตนของ Gateway (โทเค็นภายในเครื่อง)">
-    Doctor ตรวจความพร้อมของการยืนยันตัวตนด้วยโทเค็นของ gateway ภายในเครื่อง
+    Doctor ตรวจสอบความพร้อมของการยืนยันตัวตนด้วยโทเค็นของ Gateway ภายในเครื่อง
 
-    - หากโหมดโทเค็นต้องใช้โทเค็นและไม่มีแหล่งโทเค็น doctor จะเสนอให้สร้างโทเค็น
-    - หาก `gateway.auth.token` จัดการโดย SecretRef แต่ไม่พร้อมใช้งาน doctor จะเตือนและจะไม่เขียนทับด้วยข้อความธรรมดา
-    - `openclaw doctor --generate-gateway-token` บังคับสร้างเฉพาะเมื่อไม่ได้กำหนดค่า SecretRef ของโทเค็นไว้
-
-  </Accordion>
-  <Accordion title="12b. การซ่อมแซมแบบอ่านอย่างเดียวที่รับรู้ SecretRef">
-    โฟลว์การซ่อมแซมบางอย่างต้องตรวจสอบข้อมูลประจำตัวที่กำหนดค่าไว้โดยไม่ทำให้พฤติกรรม runtime แบบล้มเหลวเร็วอ่อนลง
-
-    - ตอนนี้ `openclaw doctor --fix` ใช้โมเดลสรุป SecretRef แบบอ่านอย่างเดียวเดียวกับคำสั่งตระกูลสถานะสำหรับการซ่อมแซม config แบบเจาะจง
-    - ตัวอย่าง: การซ่อมแซม `@username` ของ Telegram `allowFrom` / `groupAllowFrom` จะพยายามใช้ข้อมูลประจำตัวของบอทที่กำหนดค่าไว้เมื่อพร้อมใช้งาน
-    - หากโทเค็นบอท Telegram ถูกกำหนดค่าผ่าน SecretRef แต่ไม่พร้อมใช้งานในพาธคำสั่งปัจจุบัน doctor จะรายงานว่าข้อมูลประจำตัวถูกกำหนดค่าไว้แต่ไม่พร้อมใช้งาน และข้ามการแก้ไขอัตโนมัติแทนที่จะขัดข้องหรือรายงานผิดว่าโทเค็นหายไป
+    - หากโหมดโทเค็นต้องใช้โทเค็นแต่ไม่มีแหล่งโทเค็น doctor จะเสนอให้สร้างโทเค็น
+    - หาก `gateway.auth.token` จัดการโดย SecretRef แต่ไม่พร้อมใช้งาน doctor จะแจ้งเตือนและจะไม่เขียนทับด้วยข้อความธรรมดา
+    - `openclaw doctor --generate-gateway-token` จะบังคับสร้างเฉพาะเมื่อไม่ได้กำหนดค่า SecretRef ของโทเค็นไว้
 
   </Accordion>
-  <Accordion title="13. การตรวจสุขภาพ Gateway + การรีสตาร์ต">
-    Doctor รันการตรวจสุขภาพและเสนอให้รีสตาร์ต gateway เมื่อดูเหมือนไม่ปกติ
+  <Accordion title="12b. การซ่อมแซมแบบอ่านอย่างเดียวที่รองรับ SecretRef">
+    ขั้นตอนการซ่อมแซมบางอย่างจำเป็นต้องตรวจสอบข้อมูลประจำตัวที่กำหนดค่าไว้โดยไม่ทำให้พฤติกรรมหยุดทันทีเมื่อเกิดข้อผิดพลาดของรันไทม์อ่อนแอลง
+
+    - `openclaw doctor --fix` ใช้โมเดลสรุป SecretRef แบบอ่านอย่างเดียวเดียวกับคำสั่งในตระกูลสถานะสำหรับการซ่อมแซมการกำหนดค่าแบบเจาะจง
+    - ตัวอย่าง: การซ่อมแซม `@username` ของ Telegram `allowFrom` / `groupAllowFrom` จะพยายามใช้ข้อมูลประจำตัวของบอตที่กำหนดค่าไว้เมื่อพร้อมใช้งาน
+    - หากกำหนดค่าโทเค็นบอต Telegram ผ่าน SecretRef แต่ไม่พร้อมใช้งานในเส้นทางคำสั่งปัจจุบัน doctor จะรายงานว่าข้อมูลประจำตัวได้รับการกำหนดค่าแล้วแต่ไม่พร้อมใช้งาน และข้ามการแก้ไขอัตโนมัติ แทนที่จะขัดข้องหรือรายงานโทเค็นอย่างไม่ถูกต้องว่าหายไป
+
+  </Accordion>
+  <Accordion title="13. การตรวจสอบสถานะ Gateway + การเริ่มใหม่">
+    Doctor ตรวจสอบสถานะและเสนอให้เริ่ม Gateway ใหม่เมื่อดูเหมือนว่าทำงานผิดปกติ
   </Accordion>
   <Accordion title="13b. ความพร้อมของการค้นหาหน่วยความจำ">
-    Doctor ตรวจว่าผู้ให้บริการ embedding สำหรับการค้นหาหน่วยความจำที่กำหนดค่าไว้พร้อมสำหรับเอเจนต์เริ่มต้นหรือไม่ พฤติกรรมขึ้นอยู่กับ backend และผู้ให้บริการที่กำหนดค่าไว้:
+    Doctor ตรวจสอบว่าผู้ให้บริการ embedding สำหรับการค้นหาหน่วยความจำที่กำหนดค่าไว้พร้อมใช้งานสำหรับเอเจนต์เริ่มต้นหรือไม่ พฤติกรรมจะขึ้นอยู่กับแบ็กเอนด์และผู้ให้บริการที่กำหนดค่าไว้:
 
-    - **QMD backend**: ตรวจว่าไบนารี `qmd` พร้อมใช้งานและเริ่มได้หรือไม่ หากไม่ได้ จะพิมพ์คำแนะนำการแก้ไขซึ่งรวมถึงแพ็กเกจ npm และตัวเลือกพาธไบนารีแบบกำหนดเอง
-    - **ผู้ให้บริการภายในเครื่องแบบระบุชัดเจน**: ตรวจหาไฟล์โมเดลภายในเครื่องหรือ URL โมเดลระยะไกล/ที่ดาวน์โหลดได้ซึ่งรู้จัก หากหายไป จะแนะนำให้เปลี่ยนไปใช้ผู้ให้บริการระยะไกล
-    - **ผู้ให้บริการระยะไกลแบบระบุชัดเจน** (`openai`, `voyage` ฯลฯ): ตรวจว่ามี API key อยู่ใน environment หรือ auth store พิมพ์คำแนะนำการแก้ไขที่ทำได้หากไม่มี
-    - **ผู้ให้บริการ auto แบบเก่า**: ถือว่า `memorySearch.provider: "auto"` เป็น OpenAI, ตรวจความพร้อมของ OpenAI และ `doctor --fix` จะเขียนใหม่เป็น `provider: "openai"`
+    - **แบ็กเอนด์ QMD**: ตรวจสอบว่าไบนารี `qmd` พร้อมใช้งานและเริ่มทำงานได้หรือไม่ หากไม่ได้ จะแสดงคำแนะนำในการแก้ไข ซึ่งรวมถึง `npm install -g @tobilu/qmd` (หรือคำสั่งเทียบเท่าสำหรับ Bun) และตัวเลือกพาธไบนารีแบบกำหนดเอง
+    - **ผู้ให้บริการภายในเครื่องที่ระบุอย่างชัดเจน**: ตรวจหาไฟล์โมเดลภายในเครื่องหรือ URL ของโมเดลระยะไกล/ที่ดาวน์โหลดได้ซึ่งระบบรู้จัก หากไม่พบ จะแนะนำให้เปลี่ยนไปใช้ผู้ให้บริการระยะไกล
+    - **ผู้ให้บริการระยะไกลที่ระบุอย่างชัดเจน** (`openai`, `voyage` ฯลฯ): ตรวจสอบว่ามีคีย์ API อยู่ในสภาพแวดล้อมหรือที่เก็บข้อมูลการยืนยันตัวตน หากไม่มี จะแสดงคำแนะนำแก้ไขที่นำไปใช้ได้จริง
+    - **ผู้ให้บริการอัตโนมัติแบบเดิม**: ถือว่า `memorySearch.provider: "auto"` คือ OpenAI ตรวจสอบความพร้อมของ OpenAI และ `doctor --fix` จะเขียนใหม่เป็น `provider: "openai"`
 
-    เมื่อมีผลการ probe Gateway ที่แคชไว้ (gateway มีสุขภาพดี ณ เวลาที่ตรวจ) doctor จะเทียบผลนั้นกับ config ที่ CLI มองเห็นและบันทึกความคลาดเคลื่อนใดๆ Doctor จะไม่เริ่ม ping embedding ใหม่ในพาธเริ่มต้น; ใช้คำสั่งสถานะหน่วยความจำแบบลึกเมื่อคุณต้องการตรวจผู้ให้บริการแบบสด
+    เมื่อมีผลการตรวจสอบ Gateway ที่แคชไว้ (Gateway มีสถานะปกติ ณ เวลาที่ตรวจสอบ) doctor จะตรวจสอบผลดังกล่าวเทียบกับการกำหนดค่าที่มองเห็นได้จาก CLI และระบุความคลาดเคลื่อนที่พบ Doctor จะไม่เริ่มส่งคำขอ ping สำหรับ embedding ใหม่ในเส้นทางเริ่มต้น ให้ใช้คำสั่งสถานะหน่วยความจำเชิงลึกเมื่อต้องการตรวจสอบผู้ให้บริการแบบสด
 
-    ใช้ `openclaw memory status --deep` เพื่อตรวจสอบความพร้อมของ embedding ขณะ runtime
+    ใช้ `openclaw memory status --deep` เพื่อตรวจสอบความพร้อมของ embedding ขณะรันไทม์
 
   </Accordion>
   <Accordion title="14. คำเตือนสถานะช่องทาง">
-    หาก gateway มีสุขภาพดี doctor จะรันการ probe สถานะช่องทางและรายงานคำเตือนพร้อมวิธีแก้ไขที่แนะนำ
+    หาก Gateway มีสถานะปกติ doctor จะตรวจสอบสถานะช่องทางและรายงานคำเตือนพร้อมแนวทางแก้ไขที่แนะนำ
   </Accordion>
-  <Accordion title="15. การตรวจสอบ + ซ่อมแซม config ของ supervisor">
-    Doctor ตรวจ config ของ supervisor ที่ติดตั้งไว้ (launchd/systemd/schtasks) เพื่อหาค่าเริ่มต้นที่หายไปหรือล้าสมัย (เช่น dependency ของ systemd network-online และเวลาหน่วงการรีสตาร์ต) เมื่อพบความไม่ตรงกัน จะแนะนำให้อัปเดตและสามารถเขียนไฟล์บริการ/งานใหม่เป็นค่าเริ่มต้นปัจจุบันได้
+  <Accordion title="15. การตรวจสอบและซ่อมแซมการกำหนดค่าตัวควบคุมดูแล">
+    Doctor ตรวจสอบการกำหนดค่าตัวควบคุมดูแลที่ติดตั้งไว้ (launchd/systemd/schtasks) เพื่อหาค่าเริ่มต้นที่หายไปหรือล้าสมัย (เช่น การขึ้นต่อกันของ systemd network-online และระยะหน่วงก่อนเริ่มใหม่) เมื่อพบความไม่ตรงกัน ระบบจะแนะนำให้อัปเดตและสามารถเขียนไฟล์บริการ/งานใหม่ให้เป็นค่าเริ่มต้นปัจจุบันได้
 
     หมายเหตุ:
 
-    - `openclaw doctor` จะถามก่อนเขียน config ของ supervisor ใหม่
-    - `openclaw doctor --yes` ยอมรับ prompt การซ่อมแซมเริ่มต้น
-    - `openclaw doctor --fix` ใช้การแก้ไขที่แนะนำโดยไม่ถาม (`--repair` เป็น alias)
-    - `openclaw doctor --fix --force` เขียนทับ config supervisor แบบกำหนดเอง
-    - `OPENCLAW_SERVICE_REPAIR_POLICY=external` ทำให้ doctor เป็นแบบอ่านอย่างเดียวสำหรับวงจรชีวิตบริการ gateway โดยยังคงรายงานสุขภาพบริการและรันการซ่อมแซมที่ไม่ใช่บริการ แต่ข้ามการติดตั้ง/เริ่ม/รีสตาร์ต/bootstrap บริการ, การเขียน config supervisor ใหม่ และการล้างบริการเก่า เพราะ supervisor ภายนอกเป็นเจ้าของวงจรชีวิตนั้น
-    - บน Linux doctor จะไม่เขียน metadata ของคำสั่ง/entrypoint ใหม่ขณะที่หน่วย systemd gateway ที่ตรงกันยังทำงานอยู่ นอกจากนี้ยังละเว้นหน่วย gateway-like เพิ่มเติมที่ไม่ใช่ legacy และไม่ได้ใช้งานระหว่างสแกนบริการซ้ำ เพื่อไม่ให้ไฟล์บริการคู่กันสร้างเสียงรบกวนในการล้างข้อมูล
-    - หากการยืนยันตัวตนด้วยโทเค็นต้องใช้โทเค็นและ `gateway.auth.token` จัดการโดย SecretRef การติดตั้ง/ซ่อมแซมบริการของ doctor จะตรวจสอบ SecretRef แต่จะไม่คงค่าโทเค็นข้อความธรรมดาที่ resolve แล้วลงใน metadata environment ของบริการ supervisor
-    - Doctor ตรวจจับค่า environment ของบริการที่จัดการโดย `.env`/SecretRef ซึ่งการติดตั้ง LaunchAgent, systemd หรือ Windows Scheduled Task รุ่นเก่าเคยฝังแบบ inline และเขียน metadata ของบริการใหม่เพื่อให้ค่าเหล่านั้นโหลดจากแหล่ง runtime แทนที่จะอยู่ใน definition ของ supervisor
-    - Doctor ตรวจจับเมื่อคำสั่งบริการยังตรึง `--port` เก่าไว้หลัง `gateway.port` เปลี่ยน และเขียน metadata ของบริการใหม่ให้เป็นพอร์ตปัจจุบัน
-    - หากการยืนยันตัวตนด้วยโทเค็นต้องใช้โทเค็นและ SecretRef ของโทเค็นที่กำหนดค่าไว้ยัง resolve ไม่ได้ doctor จะบล็อกพาธการติดตั้ง/ซ่อมแซมพร้อมคำแนะนำที่ทำได้
-    - หากกำหนดค่าทั้ง `gateway.auth.token` และ `gateway.auth.password` แล้วแต่ไม่ได้ตั้ง `gateway.auth.mode` doctor จะบล็อกการติดตั้ง/ซ่อมแซมจนกว่าจะตั้งโหมดอย่างชัดเจน
-    - สำหรับหน่วย Linux user-systemd ตอนนี้การตรวจ token drift ของ doctor รวมทั้งแหล่ง `Environment=` และ `EnvironmentFile=` เมื่อเปรียบเทียบ metadata การยืนยันตัวตนของบริการ
-    - การซ่อมแซมบริการของ Doctor จะปฏิเสธการเขียนใหม่ หยุด หรือรีสตาร์ตบริการ gateway จากไบนารี OpenClaw รุ่นเก่าเมื่อ config ถูกเขียนครั้งล่าสุดโดยเวอร์ชันใหม่กว่า ดู [การแก้ปัญหา Gateway](/th/gateway/troubleshooting#split-brain-installs-and-newer-config-guard)
-    - คุณสามารถบังคับเขียนใหม่ทั้งหมดได้เสมอผ่าน `openclaw gateway install --force`
+    - `openclaw doctor` จะแจ้งให้ยืนยันก่อนเขียนการกำหนดค่าตัวควบคุมดูแลใหม่
+    - `openclaw doctor --yes` ยอมรับข้อความแจ้งการซ่อมแซมเริ่มต้น
+    - `openclaw doctor --fix` ใช้การแก้ไขที่แนะนำโดยไม่แสดงข้อความแจ้ง (`--repair` เป็นนามแฝง)
+    - `openclaw doctor --fix --force` เขียนทับการกำหนดค่าตัวควบคุมดูแลแบบกำหนดเอง
+    - `OPENCLAW_SERVICE_REPAIR_POLICY=external` ทำให้ doctor เป็นแบบอ่านอย่างเดียวสำหรับวงจรชีวิตบริการ Gateway ระบบยังคงรายงานสถานะบริการและดำเนินการซ่อมแซมที่ไม่เกี่ยวกับบริการ แต่ข้ามการติดตั้ง/เริ่มต้น/เริ่มใหม่/บูตสแตรปบริการ การเขียนการกำหนดค่าตัวควบคุมดูแลใหม่ และการล้างบริการแบบเดิม เนื่องจากตัวควบคุมดูแลภายนอกเป็นเจ้าของวงจรชีวิตนั้น
+    - บน Linux doctor จะไม่เขียนข้อมูลเมตาของคำสั่ง/จุดเริ่มต้นใหม่ขณะที่ยูนิต systemd ของ Gateway ที่ตรงกันยังทำงานอยู่ นอกจากนี้ ระบบจะละเว้นยูนิตเพิ่มเติมที่มีลักษณะคล้าย Gateway ซึ่งไม่ได้ทำงานและไม่ใช่แบบเดิมระหว่างการสแกนหาบริการซ้ำ เพื่อไม่ให้ไฟล์บริการประกอบสร้างข้อความรบกวนในการล้างข้อมูล
+    - หากการยืนยันตัวตนด้วยโทเค็นต้องใช้โทเค็นและ `gateway.auth.token` จัดการโดย SecretRef การติดตั้ง/ซ่อมแซมบริการของ doctor จะตรวจสอบ SecretRef แต่จะไม่บันทึกค่าโทเค็นข้อความธรรมดาที่แก้ไขแล้วลงในข้อมูลเมตาสภาพแวดล้อมของบริการตัวควบคุมดูแล
+    - Doctor ตรวจพบค่าสภาพแวดล้อมบริการที่จัดการโดย `.env`/รองรับด้วย SecretRef ซึ่งการติดตั้ง LaunchAgent, systemd หรือ Windows Scheduled Task รุ่นเก่าเคยฝังไว้โดยตรง และจะเขียนข้อมูลเมตาบริการใหม่เพื่อให้ค่าเหล่านั้นโหลดจากแหล่งรันไทม์แทนข้อกำหนดของตัวควบคุมดูแล
+    - Doctor ตรวจพบเมื่อคำสั่งบริการยังคงตรึง `--port` เก่าไว้หลังจาก `gateway.port` เปลี่ยนแปลง และจะเขียนข้อมูลเมตาบริการใหม่ให้ใช้พอร์ตปัจจุบัน
+    - หากการยืนยันตัวตนด้วยโทเค็นต้องใช้โทเค็นและ SecretRef ของโทเค็นที่กำหนดค่าไว้ไม่สามารถแก้ไขค่าได้ doctor จะบล็อกเส้นทางการติดตั้ง/ซ่อมแซมพร้อมคำแนะนำที่นำไปใช้ได้จริง
+    - หากกำหนดค่าทั้ง `gateway.auth.token` และ `gateway.auth.password` แต่ไม่ได้ตั้งค่า `gateway.auth.mode` doctor จะบล็อกการติดตั้ง/ซ่อมแซมจนกว่าจะตั้งค่าโหมดอย่างชัดเจน
+    - สำหรับยูนิต systemd ระดับผู้ใช้บน Linux การตรวจสอบความคลาดเคลื่อนของโทเค็นโดย doctor จะรวมทั้งแหล่ง `Environment=` และ `EnvironmentFile=` เมื่อเปรียบเทียบข้อมูลเมตาการยืนยันตัวตนของบริการ
+    - การซ่อมแซมบริการโดย Doctor จะปฏิเสธการเขียนใหม่ หยุด หรือเริ่มบริการ Gateway ใหม่จากไบนารี OpenClaw รุ่นเก่า เมื่อการกำหนดค่าถูกเขียนครั้งล่าสุดโดยเวอร์ชันที่ใหม่กว่า ดู[การแก้ไขปัญหา Gateway](/th/gateway/troubleshooting#split-brain-installs-and-newer-config-guard)
+    - สามารถบังคับให้เขียนใหม่ทั้งหมดได้เสมอผ่าน `openclaw gateway install --force`
 
   </Accordion>
-  <Accordion title="16. การวินิจฉัย runtime + พอร์ตของ Gateway">
-    Doctor ตรวจ runtime ของบริการ (PID, สถานะการออกล่าสุด) และเตือนเมื่อบริการติดตั้งแล้วแต่ไม่ได้ทำงานจริง นอกจากนี้ยังตรวจการชนกันของพอร์ตบนพอร์ต gateway (ค่าเริ่มต้น `18789`) และรายงานสาเหตุที่เป็นไปได้ (gateway ทำงานอยู่แล้ว, SSH tunnel)
+  <Accordion title="16. การวินิจฉัยรันไทม์และพอร์ตของ Gateway">
+    Doctor ตรวจสอบรันไทม์ของบริการ (PID, สถานะการออกล่าสุด) และเตือนเมื่อมีการติดตั้งบริการแล้วแต่ไม่ได้ทำงานจริง นอกจากนี้ยังตรวจสอบการชนกันของพอร์ตบนพอร์ต Gateway (ค่าเริ่มต้น `18789`) และรายงานสาเหตุที่เป็นไปได้ (Gateway ทำงานอยู่แล้ว, อุโมงค์ SSH)
   </Accordion>
-  <Accordion title="17. แนวทางปฏิบัติที่ดีของ runtime Gateway">
-    Doctor เตือนเมื่อบริการ gateway รันบน Bun หรือพาธ Node ที่จัดการด้วยเวอร์ชัน (`nvm`, `fnm`, `volta`, `asdf` ฯลฯ) ช่องทาง WhatsApp + Telegram ต้องใช้ Node และพาธของ version-manager อาจเสียหลังการอัปเกรดเพราะบริการไม่ได้โหลด shell init ของคุณ Doctor เสนอให้ย้ายไปใช้การติดตั้ง Node ของระบบเมื่อพร้อมใช้งาน (Homebrew/apt/choco)
+  <Accordion title="17. แนวทางปฏิบัติที่ดีที่สุดสำหรับรันไทม์ Gateway">
+    Doctor เตือนเมื่อบริการ Gateway ทำงานบน Bun หรือพาธ Node ที่จัดการโดยตัวจัดการเวอร์ชัน (`nvm`, `fnm`, `volta`, `asdf` ฯลฯ) Bun ไม่สามารถเปิดที่เก็บสถานะ `node:sqlite` ของ OpenClaw ได้ ดังนั้นการซ่อมแซมจะย้ายบริการ Bun แบบเดิมไปยัง Node พาธของตัวจัดการเวอร์ชันอาจเสียหายหลังการอัปเกรด เนื่องจากบริการไม่ได้โหลดการเริ่มต้นเชลล์ของคุณ Doctor จะเสนอให้ย้ายไปใช้การติดตั้ง Node ของระบบเมื่อพร้อมใช้งาน (Homebrew/apt/choco)
 
-    LaunchAgents ของ macOS ที่ติดตั้งหรือซ่อมแซมใหม่ใช้ PATH ระบบแบบ canonical (`/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin`) แทนการคัดลอก PATH ของ shell แบบโต้ตอบ เพื่อให้ไบนารีระบบที่ Homebrew จัดการยังพร้อมใช้งาน ขณะที่ Volta, asdf, fnm, pnpm และไดเรกทอรี version-manager อื่นๆ ไม่เปลี่ยนว่าโปรเซสลูกของ Node จะ resolve อะไร บริการ Linux ยังเก็บ root environment ที่ระบุชัดเจน (`NVM_DIR`, `FNM_DIR`, `VOLTA_HOME`, `ASDF_DATA_DIR`, `BUN_INSTALL`, `PNPM_HOME`) และไดเรกทอรี user-bin ที่เสถียรไว้ แต่ไดเรกทอรี fallback ของ version-manager ที่คาดเดาจะถูกเขียนลงใน PATH ของบริการเฉพาะเมื่อไดเรกทอรีเหล่านั้นมีอยู่จริงบนดิสก์
+    LaunchAgent ของ macOS ที่ติดตั้งหรือซ่อมแซมใหม่จะใช้ PATH มาตรฐานของระบบ (`/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin`) แทนการคัดลอก PATH ของเชลล์แบบโต้ตอบ เพื่อให้ไบนารีระบบที่ Homebrew จัดการยังคงพร้อมใช้งาน ขณะที่ Volta, asdf, fnm, pnpm และไดเรกทอรีของตัวจัดการเวอร์ชันอื่น ๆ จะไม่เปลี่ยน Node ที่โปรเซสลูกค้นพบ บริการ Linux ยังคงเก็บรากสภาพแวดล้อมที่ระบุอย่างชัดเจน (`NVM_DIR`, `FNM_DIR`, `VOLTA_HOME`, `ASDF_DATA_DIR`, `BUN_INSTALL`, `PNPM_HOME`) และไดเรกทอรีไบนารีของผู้ใช้ที่มีเสถียรภาพ แต่ไดเรกทอรีสำรองของตัวจัดการเวอร์ชันที่คาดเดาไว้จะถูกเขียนลงใน PATH ของบริการเฉพาะเมื่อไดเรกทอรีเหล่านั้นมีอยู่จริงบนดิสก์
 
   </Accordion>
-  <Accordion title="18. การเขียน config + metadata ของ wizard">
-    Doctor คงการเปลี่ยนแปลง config ใดๆ และประทับ metadata ของ wizard เพื่อบันทึกการรัน doctor
+  <Accordion title="18. การเขียนการกำหนดค่าและข้อมูลเมตาของวิซาร์ด">
+    Doctor บันทึกการเปลี่ยนแปลงการกำหนดค่าทั้งหมดและประทับข้อมูลเมตาของวิซาร์ดเพื่อบันทึกการเรียกใช้ doctor
   </Accordion>
-  <Accordion title="19. เคล็ดลับเวิร์กสเปซ (การสำรองข้อมูล + ระบบหน่วยความจำ)">
-    Doctor แนะนำระบบหน่วยความจำของเวิร์กสเปซเมื่อไม่มี และพิมพ์เคล็ดลับการสำรองข้อมูลหากเวิร์กสเปซยังไม่ได้อยู่ภายใต้ git
+  <Accordion title="19. เคล็ดลับพื้นที่ทำงาน (การสำรองข้อมูลและระบบหน่วยความจำ)">
+    Doctor แนะนำระบบหน่วยความจำสำหรับพื้นที่ทำงานเมื่อยังไม่มี และแสดงเคล็ดลับการสำรองข้อมูลหากพื้นที่ทำงานยังไม่ได้อยู่ภายใต้ git
 
-    ดู [/concepts/agent-workspace](/th/concepts/agent-workspace) สำหรับคู่มือฉบับเต็มเกี่ยวกับโครงสร้างเวิร์กสเปซและการสำรองข้อมูลด้วย git (แนะนำ GitHub หรือ GitLab แบบส่วนตัว)
+    ดูคำแนะนำฉบับเต็มเกี่ยวกับโครงสร้างพื้นที่ทำงานและการสำรองข้อมูลด้วย git (แนะนำ GitHub หรือ GitLab แบบส่วนตัว) ได้ที่ [/concepts/agent-workspace](/th/concepts/agent-workspace)
 
   </Accordion>
 </AccordionGroup>
 
 ## ที่เกี่ยวข้อง
 
-- [Runbook ของ Gateway](/th/gateway)
-- [การแก้ปัญหา Gateway](/th/gateway/troubleshooting)
+- [คู่มือปฏิบัติการ Gateway](/th/gateway)
+- [การแก้ไขปัญหา Gateway](/th/gateway/troubleshooting)

@@ -1,20 +1,23 @@
 ---
 read_when:
     - 你希望通过 LiteLLM 代理路由 OpenClaw
-    - 你需要通过 LiteLLM 实现成本跟踪、日志记录或模型路由
-summary: 通过 LiteLLM Proxy 运行 OpenClaw，实现统一的模型访问和成本跟踪
+    - 你需要通过 LiteLLM 进行成本跟踪、日志记录或模型路由
+summary: 通过 LiteLLM Proxy 运行 OpenClaw，以实现统一的模型访问和成本跟踪
 title: LiteLLM
 x-i18n:
-    generated_at: "2026-07-11T20:53:27Z"
+    generated_at: "2026-07-26T06:59:56Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 797b7d02a80a4cd37b92553665e260532af49e011398202d3504a28c511cee2f
+    source_hash: 22451f0eefcf991a602409701fc752f97600a67752c67304137c7f17f3dd1a16
     source_path: providers/litellm.md
     workflow: 16
 ---
 
-[LiteLLM](https://litellm.ai) 是一个开源 LLM 网关，通过统一 API 支持 100 多个模型提供商。通过 LiteLLM 路由 OpenClaw，无需更改 OpenClaw 配置，即可实现集中式成本跟踪、日志记录、设有支出限额的虚拟密钥以及后端故障转移。
+[LiteLLM](https://litellm.ai) 是一个开源 LLM Gateway 网关，通过统一 API 接入 100 多个模型
+提供商。通过 LiteLLM 路由 OpenClaw，可集中跟踪成本和记录日志，使用带有
+支出限额的虚拟密钥，并实现后端故障转移，而无需更改 OpenClaw 配置。
 
 ## 快速开始
 
@@ -94,7 +97,9 @@ x-i18n:
 
 ## 图像生成
 
-LiteLLM 可以通过与 OpenAI 兼容的 `/images/generations` 和 `/images/edits` 路由为 `image_generate` 工具提供后端支持。默认图像模型是 `gpt-image-2`；如需使用其他模型，请在 `agents.defaults.imageGenerationModel` 下进行配置：
+LiteLLM 可以通过 OpenAI 兼容的 `/images/generations` 和
+`/images/edits` 路由为 `image_generate` 工具提供后端支持。默认图像模型是 `gpt-image-2`；可在
+`agents.defaults.mediaModels.image` 下配置其他模型：
 
 ```json5
 {
@@ -117,13 +122,15 @@ LiteLLM 可以通过与 OpenAI 兼容的 `/images/generations` 和 `/images/edit
 }
 ```
 
-回环 LiteLLM URL（`http://localhost:4000`、`127.0.0.1`、`::1`、`host.docker.internal`）无需全局私有网络覆盖设置即可使用。对于托管在局域网中的代理，请设置 `models.providers.litellm.request.allowPrivateNetwork: true`，因为 API 密钥会发送到该主机。
+local loopback LiteLLM URL（`http://localhost:4000`、`127.0.0.1`、`::1`、`host.docker.internal`）无需全局专用网络覆盖即可
+使用。对于托管在 LAN 上的代理，请设置
+`models.providers.litellm.request.allowPrivateNetwork: true`，因为 API 密钥会发送到该主机。
 
-## 高级功能
+## 高级
 
 <AccordionGroup>
   <Accordion title="虚拟密钥">
-    为 OpenClaw 创建一个设有支出限额的专用密钥：
+    为 OpenClaw 创建一个带有支出限额的专用密钥：
 
     ```bash
     curl -X POST "http://localhost:4000/key/generate" \
@@ -141,7 +148,7 @@ LiteLLM 可以通过与 OpenAI 兼容的 `/images/generations` 和 `/images/edit
   </Accordion>
 
   <Accordion title="模型路由">
-    LiteLLM 可以将模型请求路由到不同的后端。请在 LiteLLM 的 `config.yaml` 中配置：
+    LiteLLM 可以将模型请求路由到不同后端。在 LiteLLM 的 `config.yaml` 中进行配置：
 
     ```yaml
     model_list:
@@ -156,7 +163,7 @@ LiteLLM 可以通过与 OpenAI 兼容的 `/images/generations` 和 `/images/edit
           api_key: os.environ/OPENAI_API_KEY
     ```
 
-    OpenClaw 会继续请求 `claude-opus-4-6`，由 LiteLLM 处理路由。
+    OpenClaw 会继续请求 `claude-opus-4-6`；LiteLLM 负责处理路由。
 
   </Accordion>
 
@@ -174,16 +181,18 @@ LiteLLM 可以通过与 OpenAI 兼容的 `/images/generations` 和 `/images/edit
   </Accordion>
 
   <Accordion title="代理行为说明">
-    - LiteLLM 默认运行于 `http://localhost:4000`。
-    - OpenClaw 通过 LiteLLM 代理式、与 OpenAI 兼容的 `/v1` 端点进行连接。
-    - 仅适用于原生 OpenAI 的请求构造不适用于已配置的 LiteLLM 基础 URL：不会设置 `service_tier`、Responses `store`、提示词缓存提示，也不会对 OpenAI 推理强度有效载荷进行构造。
-    - OpenClaw 的隐藏归因请求头（`originator`、`version`、`User-Agent`）只会发送到已验证的原生 OpenAI 端点，因此不会注入自定义 LiteLLM 基础 URL 的请求中。
-
+    - LiteLLM 默认运行在 `http://localhost:4000` 上。
+    - OpenClaw 通过 LiteLLM 代理式的 OpenAI 兼容 `/v1` 端点进行连接。
+    - 配置 LiteLLM 基础 URL 后，不会应用仅限原生 OpenAI 的请求调整：
+      不使用 `service_tier`，不使用 Responses `store`，不使用提示缓存提示，也不进行 OpenAI 推理强度
+      载荷调整。
+    - 隐藏的 OpenClaw 归因标头（`originator`、`version`、`User-Agent`）仅会发送到
+      已验证的原生 OpenAI 端点，因此不会注入自定义 LiteLLM 基础 URL。
   </Accordion>
 </AccordionGroup>
 
 <Note>
-有关通用提供商配置和故障转移行为，请参阅[模型提供商](/zh-CN/concepts/model-providers)。
+有关常规提供商配置和故障转移行为，请参阅[模型提供商](/zh-CN/concepts/model-providers)。
 </Note>
 
 ## 相关内容
@@ -196,7 +205,7 @@ LiteLLM 可以通过与 OpenAI 兼容的 `/images/generations` 和 `/images/edit
     所有提供商、模型引用和故障转移行为的概览。
   </Card>
   <Card title="配置" href="/zh-CN/gateway/configuration" icon="gear">
-    完整的配置参考。
+    完整配置参考。
   </Card>
   <Card title="Models" href="/zh-CN/concepts/models" icon="brain">
     如何选择和配置模型。

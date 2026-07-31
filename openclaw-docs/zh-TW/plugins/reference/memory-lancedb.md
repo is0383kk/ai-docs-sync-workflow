@@ -1,30 +1,31 @@
 ---
 read_when:
-    - 您正在安裝、設定或稽核 memory-lancedb 外掛
-summary: 由 LanceDB 支援的 OpenClaw 長期記憶外掛，具備自動回憶、自動擷取與向量搜尋功能。
+    - 你正在安裝、設定或稽核 memory-lancedb 外掛
+summary: 採用 LanceDB 後端的 OpenClaw 長期記憶外掛，具備自動回想、自動擷取與向量搜尋功能。
 title: 記憶體 LanceDB 外掛
 x-i18n:
-    generated_at: "2026-07-11T21:36:39Z"
+    generated_at: "2026-07-26T07:59:12Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: db3843c421abdf738723f87f5bf12ed7acc2e6638e5869c2ad10b4b5722d402d
+    source_hash: b3fc4d560d4f38a17eca034f44dc890e144d97610b9660a5674b6a6fd2a341d7
     source_path: plugins/reference/memory-lancedb.md
     workflow: 16
 ---
 
-# Memory LanceDB 外掛
+# Memory Lancedb 外掛
 
-由 LanceDB 支援的 OpenClaw 長期記憶外掛，具備自動回憶、自動擷取與向量搜尋功能。
+以 LanceDB 為後端的 OpenClaw 長期記憶外掛，具備自動回憶、自動擷取與向量搜尋功能。
 
-## 發行方式
+## 發佈
 
 - 套件：`@openclaw/memory-lancedb`
 - 安裝管道：npm；ClawHub
 
 ## 介面
 
-合約：工具
+合約：`tools`
 
 ## 相關文件
 

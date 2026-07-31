@@ -1,21 +1,22 @@
 ---
 read_when:
-    - minimax Pluginをインストール、設定、または監査している場合
+    - minimax Plugin をインストール、設定、または監査している場合
 summary: OpenClaw に MiniMax および MiniMax Portal モデルプロバイダーのサポートを追加します。
 title: MiniMax Plugin
 x-i18n:
-    generated_at: "2026-07-11T22:33:19Z"
+    generated_at: "2026-07-26T09:44:08Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: a3c5d999505a27b9ffbe2927c5ae7e67bfe3a53be7477490fee79e2a420f72da
+    source_hash: c9bff5e2346298479b15d60af5b94e6b7f535ace078e4a43e7c0ba2526cf4c3a
     source_path: plugins/reference/minimax.md
     workflow: 16
 ---
 
 # MiniMax Plugin
 
-OpenClaw に MiniMax、MiniMax Portal モデルプロバイダーのサポートを追加します。
+OpenClaw に MiniMax および MiniMax Portal モデルプロバイダーのサポートを追加します。
 
 ## 配布
 
@@ -24,7 +25,7 @@ OpenClaw に MiniMax、MiniMax Portal モデルプロバイダーのサポート
 
 ## 提供機能
 
-プロバイダー: minimax、minimax-portal、コントラクト: imageGenerationProviders、mediaUnderstandingProviders、musicGenerationProviders、speechProviders、usageProviders、videoGenerationProviders、webSearchProviders
+プロバイダー: `minimax`、`minimax-portal`; コントラクト: `imageGenerationProviders`、`mediaUnderstandingProviders`、`musicGenerationProviders`、`speechProviders`、`usageProviders`、`videoGenerationProviders`、`webSearchProviders`
 
 ## 関連ドキュメント
 

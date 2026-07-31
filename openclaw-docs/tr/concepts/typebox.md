@@ -4,57 +4,58 @@ read_when:
 summary: Gateway protokolü için tek doğruluk kaynağı olarak TypeBox şemaları
 title: TypeBox
 x-i18n:
-    generated_at: "2026-07-12T11:40:52Z"
+    generated_at: "2026-07-26T23:19:29Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 24490edf0d73e918f834e9dd53d09ba0e5183b2bc126ee981a94f8099e76283b
     source_path: concepts/typebox.md
     workflow: 16
 ---
 
-TypeBox, TypeScript öncelikli bir şema kütüphanesidir. OpenClaw bunu **Gateway WebSocket protokolünü** (el sıkışma, istek/yanıt, sunucu olayları) tanımlamak için kullanır. Bu şemalar macOS uygulaması için **çalışma zamanı doğrulamasını** (AJV), **JSON Schema dışa aktarımını** ve **Swift kod üretimini** yönlendirir. Tek bir doğruluk kaynağı vardır; diğer her şey bundan üretilir.
+TypeBox, TypeScript öncelikli bir şema kütüphanesidir. OpenClaw bunu **Gateway WebSocket protokolünü** (el sıkışma, istek/yanıt, sunucu olayları) tanımlamak için kullanır. Bu şemalar **çalışma zamanı doğrulamasını** (AJV), **JSON Schema dışa aktarımını** ve macOS uygulaması için **Swift kod üretimini** yönlendirir. Tek bir doğruluk kaynağı vardır; diğer her şey üretilir.
 
 Üst düzey protokol bağlamı için [Gateway mimarisi](/tr/concepts/architecture) ile başlayın.
 
 ## Zihinsel model (30 saniye)
 
-Her Gateway WS iletisi şu üç çerçeveden biridir:
+Her Gateway WS mesajı üç çerçeveden biridir:
 
 - **İstek**: `{ type: "req", id, method, params }`
 - **Yanıt**: `{ type: "res", id, ok, payload | error }`
 - **Olay**: `{ type: "event", event, payload, seq?, stateVersion? }`
 
-İlk çerçeve bir `connect` isteği **olmalıdır**. Bundan sonra istemciler yöntemleri çağırır (ör. `health`, `send`, `chat.send`) ve olaylara abone olur (ör. `presence`, `tick`, `agent`).
+İlk çerçeve **mutlaka** bir `connect` isteği olmalıdır. Bundan sonra istemciler yöntemleri (ör. `health`, `send`, `chat.send`) çağırır ve olaylara (ör. `presence`, `tick`, `agent`) abone olur.
 
 Bağlantı akışı (asgari):
 
 ```text
-İstemci                  Gateway
-  |---- istek:connect ------>|
-  |<---- yanıt:hello-ok ------|
-  |<---- olay:tick -----------|
-  |---- istek:health -------->|
-  |<---- yanıt:health --------|
+İstemci                   Gateway
+  |---- istek:connect ------->|
+  |<---- yanıt:hello-ok -------|
+  |<---- olay:tick ------------|
+  |---- istek:health --------->|
+  |<---- yanıt:health ---------|
 ```
 
 Yaygın yöntemler ve olaylar:
 
-| Kategori     | Örnekler                                                   | Notlar                                           |
-| ------------ | ---------------------------------------------------------- | ------------------------------------------------ |
-| Çekirdek     | `connect`, `health`, `status`                              | `connect` ilk olmalıdır                          |
-| Mesajlaşma   | `send`, `agent`, `agent.wait`, `system-event`, `logs.tail` | yan etkili yöntemler `idempotencyKey` gerektirir |
-| Sohbet       | `chat.history`, `chat.send`, `chat.abort`                  | WebChat bunları kullanır                         |
-| Oturumlar    | `sessions.list`, `sessions.patch`, `sessions.delete`       | oturum yönetimi                                  |
-| Otomasyon    | `wake`, `cron.list`, `cron.run`, `cron.runs`               | uyandırma ve cron denetimi                       |
-| Node'lar     | `node.list`, `node.invoke`, `node.pair.*`                  | Gateway WS ve node eylemleri                     |
-| Olaylar      | `tick`, `presence`, `agent`, `chat`, `health`, `shutdown`  | sunucudan anlık gönderim                         |
+| Kategori   | Örnekler                                                   | Notlar                                        |
+| ---------- | ---------------------------------------------------------- | --------------------------------------------- |
+| Çekirdek   | `connect`, `health`, `status`                              | `connect` ilk olmalıdır                      |
+| Mesajlaşma | `send`, `agent`, `agent.wait`, `system-event`, `logs.tail` | yan etkili yöntemler `idempotencyKey` gerektirir |
+| Sohbet     | `chat.history`, `chat.send`, `chat.abort`                  | WebChat bunları kullanır                      |
+| Oturumlar  | `sessions.list`, `sessions.patch`, `sessions.delete`       | oturum yönetimi                               |
+| Otomasyon  | `wake`, `cron.list`, `cron.run`, `cron.runs`               | uyandırma ve cron denetimi                    |
+| Node'lar   | `node.list`, `node.invoke`, `node.pair.*`                  | Gateway WS ve node eylemleri                  |
+| Olaylar    | `tick`, `presence`, `agent`, `chat`, `health`, `shutdown`  | sunucu gönderimi                              |
 
-Yetkili olarak duyurulan **keşif** envanteri `src/gateway/server-methods-list.ts` içindeki `listGatewayMethods` ve `GATEWAY_EVENTS` öğelerinde bulunur.
+Yetkili olarak duyurulan **keşif** envanteri `src/gateway/server-methods-list.ts` içinde bulunur (`listGatewayMethods`, `GATEWAY_EVENTS`).
 
 ## Şemaların bulunduğu yer
 
-- Kaynak dışa aktarım dosyası: `packages/gateway-protocol/src/schema.ts`, `packages/gateway-protocol/src/schema/*.ts` altındaki etki alanı modüllerini yeniden dışa aktarır (üst düzey zarflar ve el sıkışma için `frames.ts`; özellik alanına göre `agent.ts`, `sessions.ts`, `cron.ts` vb.). `protocol-schemas.ts`, şema adlarını TypeBox tanımlarıyla eşleyen merkezi `ProtocolSchemas` kayıt defteridir.
+- Kaynak dışa aktarma noktası: `packages/gateway-protocol/src/schema.ts`, `packages/gateway-protocol/src/schema/*.ts` altındaki alan modüllerini yeniden dışa aktarır (üst düzey zarflar ve el sıkışma için `frames.ts`; özellik alanına göre `agent.ts`, `sessions.ts`, `cron.ts` vb.). `protocol-schemas.ts`, şema adlarını TypeBox tanımlarıyla eşleyen merkezi `ProtocolSchemas` kayıt defteridir.
 - Çalışma zamanı doğrulayıcıları (AJV): `packages/gateway-protocol/src/index.ts`
 - Duyurulan özellik/keşif kayıt defteri: `src/gateway/server-methods-list.ts`
 - Sunucu el sıkışması ve yöntem yönlendirmesi: `src/gateway/server.impl.ts`
@@ -62,22 +63,22 @@ Yetkili olarak duyurulan **keşif** envanteri `src/gateway/server-methods-list.t
 - Üretilen JSON Schema: `dist/protocol.schema.json` (derleme çıktısıdır, depoya kaydedilmez)
 - Üretilen Swift modelleri: `apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift`
 
-## Güncel işlem hattı
+## Geçerli işlem hattı
 
 - `pnpm protocol:gen`, JSON Schema'yı (draft-07) `dist/protocol.schema.json` konumuna yazar.
 - `pnpm protocol:gen:swift`, Swift Gateway modellerini üretir.
-- `pnpm protocol:check`, her iki üreticiyi de çalıştırır ve Swift çıktısının depoya kaydedildiğini doğrular (JSON Schema çıktısı, git tarafından yok sayılan bir derleme eseridir).
+- `pnpm protocol:check`, her iki üreticiyi çalıştırır ve Swift çıktısının depoya kaydedildiğini doğrular (JSON Schema çıktısı, git tarafından yok sayılan bir derleme yapıtıdır).
 
 ## Şemaların çalışma zamanında kullanımı
 
-- **Sunucu tarafı**: Gelen her çerçeve AJV ile doğrulanır. El sıkışma yalnızca parametreleri `ConnectParams` ile eşleşen bir `connect` isteğini kabul eder.
+- **Sunucu tarafı**: gelen her çerçeve AJV ile doğrulanır. El sıkışma yalnızca parametreleri `ConnectParams` ile eşleşen bir `connect` isteğini kabul eder.
 - **İstemci tarafı**: JS istemcisi, olay ve yanıt çerçevelerini kullanmadan önce doğrular.
-- **Özellik keşfi**: Gateway, `listGatewayMethods()` ve `GATEWAY_EVENTS` kaynaklarından alınan ihtiyatlı bir `features.methods` ve `features.events` listesini `hello-ok` içinde gönderir.
-- Bu keşif listesi, `coreGatewayHandlers` içindeki çağrılabilir her yardımcının üretilmiş bir dökümü değildir; bazı yardımcı RPC'ler, duyurulan özellik listesinde numaralandırılmadan `src/gateway/server-methods/*.ts` içinde uygulanır.
+- **Özellik keşfi**: Gateway, `listGatewayMethods()` ve `GATEWAY_EVENTS` kaynaklarından alınan temkinli bir `features.methods` ve `features.events` listesini `hello-ok` içinde gönderir.
+- Bu keşif listesi, `coreGatewayHandlers` içindeki çağrılabilir her yardımcının üretilmiş bir dökümü değildir; bazı yardımcı RPC'ler duyurulan özellik listesinde sıralanmadan `src/gateway/server-methods/*.ts` içinde uygulanır.
 
 ## Örnek çerçeveler
 
-Bağlanma (ilk ileti):
+Bağlanma (ilk mesaj):
 
 ```json
 {
@@ -141,7 +142,7 @@ Olay:
 
 ## Asgari istemci (Node.js)
 
-Kullanışlı en küçük akış: bağlanma + sistem durumu.
+Kullanışlı en küçük akış: bağlantı + sistem durumu.
 
 ```ts
 import { WebSocket } from "ws";
@@ -181,7 +182,7 @@ ws.on("message", (data) => {
 });
 ```
 
-## Uygulamalı örnek: uçtan uca yöntem ekleme
+## Ayrıntılı örnek: uçtan uca yöntem ekleme
 
 Örnek: `{ ok: true, text }` döndüren yeni bir `system.echo` isteği ekleyin.
 
@@ -234,9 +235,9 @@ export const systemHandlers: GatewayRequestHandlers = {
 };
 ```
 
-Bunu `src/gateway/server-methods.ts` içinde kaydedin (`systemHandlers` zaten birleştirilir), ardından `"system.echo"` öğesini `src/gateway/server-methods-list.ts` içindeki `listGatewayMethods` girdisine ekleyin.
+Bunu `src/gateway/server-methods.ts` içinde kaydedin (zaten `systemHandlers` birleştirilmektedir), ardından `src/gateway/server-methods-list.ts` içindeki `listGatewayMethods` girdisine `"system.echo"` ekleyin.
 
-Yöntem operatör veya node istemcileri tarafından çağrılabiliyorsa kapsam zorlaması ile `hello-ok` özellik duyurusunun uyumlu kalması için yöntemi ayrıca `src/gateway/method-scopes.ts` içinde sınıflandırın.
+Yöntem operatör veya node istemcileri tarafından çağrılabiliyorsa kapsam zorlamasıyla `hello-ok` özellik duyurusunun uyumlu kalması için yöntemi `src/gateway/method-scopes.ts` içinde de sınıflandırın.
 
 4. **Yeniden üretme**
 
@@ -253,36 +254,36 @@ pnpm protocol:check
 Swift üreticisi şunları oluşturur:
 
 - `req`, `res`, `event` ve `unknown` durumlarını içeren bir `GatewayFrame` enum'u
-- kesin türlendirilmiş yük struct'ları/enum'ları
+- kesin tür belirtilmiş yük yapıları/enum'ları
 - `ErrorCode` değerleri, `GATEWAY_PROTOCOL_VERSION` ve `GATEWAY_MIN_PROTOCOL_VERSION`
 
-Bilinmeyen çerçeve türleri, ileriye dönük uyumluluk için ham yükler olarak korunur.
+Bilinmeyen çerçeve türleri ileriye dönük uyumluluk için ham yükler olarak korunur.
 
-## Sürümleme ve uyumluluk
+## Sürüm oluşturma ve uyumluluk
 
-- `PROTOCOL_VERSION`, `packages/gateway-protocol/src/version.ts` içinde bulunur (güncel değer: `4`).
-- İstemciler `minProtocol` ve `maxProtocol` gönderir; sunucu, güncel protokolünü içermeyen aralıkları reddeder.
+- `PROTOCOL_VERSION`, `packages/gateway-protocol/src/version.ts` içinde bulunur (geçerli değer: `4`).
+- İstemciler `minProtocol` ve `maxProtocol` gönderir; sunucu geçerli protokolünü içermeyen aralıkları reddeder.
 - Swift modelleri, eski istemcilerin bozulmasını önlemek için bilinmeyen çerçeve türlerini korur.
 
 ## Şema kalıpları ve kuralları
 
-- Çoğu nesne, katı yükler için `additionalProperties: false` kullanır.
-- Kimlikler ve yöntem/olay adları için varsayılan değer `NonEmptyString` (`Type.String({ minLength: 1 })`) olur.
+- Çoğu nesne katı yükler için `additionalProperties: false` kullanır.
+- `NonEmptyString` (`Type.String({ minLength: 1 })`), kimlikler ve yöntem/olay adları için varsayılandır.
 - Üst düzey `GatewayFrame`, `type` üzerinde bir **ayırt edici** kullanır.
 - Yan etkileri olan yöntemler genellikle parametrelerde bir `idempotencyKey` gerektirir (örnek: `send`, `poll`, `agent`, `chat.send`).
-- `agent`, çalışma zamanında üretilen düzenleme bağlamı için isteğe bağlı `internalEvents` kabul eder (örneğin alt ajan/cron görevi tamamlama devri); bunu dahili API yüzeyi olarak değerlendirin.
+- `agent`, çalışma zamanında üretilen orkestrasyon bağlamı (örneğin alt ajan/cron görevi tamamlanma devri) için isteğe bağlı `internalEvents` kabul eder; bunu dahili API yüzeyi olarak değerlendirin.
 
 ## Canlı şema JSON'u
 
-Üretilen JSON Schema bir derleme eseridir ve depoya kaydedilmez. Yayımlanan ham dosya genellikle şu adreste bulunur:
+Üretilen JSON Schema bir derleme yapıtıdır ve depoya kaydedilmez. Yayımlanan ham dosya genellikle şu adreste bulunur:
 
 - [https://raw.githubusercontent.com/openclaw/openclaw/main/dist/protocol.schema.json](https://raw.githubusercontent.com/openclaw/openclaw/main/dist/protocol.schema.json)
 
 ## Şemaları değiştirdiğinizde
 
-1. Sahibi olan `packages/gateway-protocol/src/schema/*.ts` modülündeki TypeBox şemalarını güncelleyin ve bunları `protocol-schemas.ts` içine kaydedin.
-2. Yöntemi/olayı `src/gateway/server-methods-list.ts` içine kaydedin.
-3. Yeni RPC'nin operatör veya node kapsamı sınıflandırmasına ihtiyaç duyması durumunda `src/gateway/method-scopes.ts` dosyasını güncelleyin.
+1. Sahibi olan `packages/gateway-protocol/src/schema/*.ts` modülündeki TypeBox şemalarını güncelleyin ve bunları `protocol-schemas.ts` içinde kaydedin.
+2. Yöntemi/olayı `src/gateway/server-methods-list.ts` içinde kaydedin.
+3. Yeni RPC operatör veya node kapsamı sınıflandırması gerektiriyorsa `src/gateway/method-scopes.ts` dosyasını güncelleyin.
 4. `pnpm protocol:check` komutunu çalıştırın.
 5. Yeniden üretilen Swift modellerini depoya kaydedin.
 

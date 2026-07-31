@@ -4,34 +4,35 @@ read_when:
 summary: Ondersteuningsstatus, mogelijkheden en configuratie van Tlon/Urbit
 title: Tlon
 x-i18n:
-    generated_at: "2026-07-12T08:37:40Z"
+    generated_at: "2026-07-27T05:44:00Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: d53ea7d97a7445910c5692a247758b652e1fce82793e65950e1e21a10fa16813
+    source_hash: d742628d6cf9aaf82d79a8d96b1685229905e9452c9fc4d3a494d2dee8d69943
     source_path: channels/tlon.md
     workflow: 16
 ---
 
 Tlon is een gedecentraliseerde messenger die op Urbit is gebouwd. OpenClaw maakt verbinding met je Urbit-ship en
-reageert op privéberichten en groepschatberichten. Voor groepsantwoorden is standaard een @-vermelding vereist, met
-daarbovenop autorisatieregels en een goedkeuringsproces door de eigenaar.
+reageert op DM's en groepschatberichten. Voor groepsreacties is standaard een @-vermelding vereist, met
+autorisatieregels en daarbovenop een goedkeuringsflow voor de eigenaar.
 
-Status: gebundelde plugin. Privéberichten, groepsvermeldingen, threads, opgemaakte tekst, uploaden/downloaden van afbeeldingen en een
+Status: gebundelde plugin. DM's, groepsvermeldingen, threads, opgemaakte tekst, uploaden/downloaden van afbeeldingen en een
 goedkeuringssysteem voor de eigenaar worden ondersteund. Reacties en peilingen niet.
 
 ## Gebundelde plugin
 
 Tlon wordt gebundeld meegeleverd in huidige OpenClaw-releases; voor verpakte builds is geen afzonderlijke installatie nodig.
 
-Installeer bij een oudere build of aangepaste installatie waarin deze niet is opgenomen vanuit npm:
+Installeer vanuit npm bij een oudere build of aangepaste installatie waarin de plugin niet is opgenomen:
 
 ```bash
 openclaw plugins install @openclaw/tlon
 ```
 
 Gebruik alleen de pakketnaam om de huidige releasetag te volgen. Zet een versie vast (`@openclaw/tlon@x.y.z`)
-uitsluitend voor reproduceerbare installaties.
+alleen voor reproduceerbare installaties.
 
 Vanuit een lokale checkout:
 
@@ -41,7 +42,7 @@ openclaw plugins install ./path/to/local/tlon-plugin
 
 Details: [Plugins](/nl/tools/plugin)
 
-## Configuratie
+## Installatie
 
 ```bash
 openclaw channels add --channel tlon --ship ~sampel-palnet --url https://your-ship-host --code lidlut-tabwed-pillex-ridrup
@@ -63,13 +64,19 @@ Of bewerk de configuratie rechtstreeks:
 }
 ```
 
-Start de Gateway opnieuw nadat je de configuratie rechtstreeks hebt bewerkt. Stuur de bot vervolgens een privébericht of vermeld deze met @ in een
+Herstart de Gateway nadat je de configuratie rechtstreeks hebt bewerkt. Stuur de bot vervolgens een DM of vermeld deze met @ in een
 groepskanaal.
+
+## Duurzaamheid van inkomende berichten
+
+OpenClaw slaat geaccepteerde Tlon-DM- en groepschatgebeurtenissen permanent op voordat ze naar de agent worden gestuurd. Openstaande of opnieuw uitvoerbare beurten overleven een herstart van de Gateway en het werk blijft per groepskanaal of directe gesprekspartner geserialiseerd. Stabiele Urbit-bericht-ID's onderdrukken ook een opnieuw aangeleverde gebeurtenis zolang de bijbehorende wachtrijrecord of bewaarde voltooiingsrecord bestaat.
+
+Levering over de grens tussen wachtrij en agent vindt ten minste eenmaal plaats: een crash tijdens de overdracht kan een beurt opnieuw afspelen. Agentacties die externe neveneffecten veroorzaken, moeten daarom waar mogelijk idempotent blijven.
 
 ## Privé-/LAN-ships
 
-OpenClaw blokkeert standaard privé/interne hostnamen en IP-bereiken ter bescherming tegen SSRF. Als je
-ship op een privénetwerk draait (localhost, LAN-IP, interne hostnaam), moet je dit expliciet inschakelen:
+OpenClaw blokkeert standaard privé-/interne hostnamen en IP-bereiken ter bescherming tegen SSRF. Als je
+ship op een privénetwerk draait (localhost, LAN-IP, interne hostnaam), moet je dit expliciet toestaan:
 
 ```json5
 {
@@ -85,7 +92,7 @@ ship op een privénetwerk draait (localhost, LAN-IP, interne hostnaam), moet je 
 ```
 
 Dit geldt voor doelen zoals `http://localhost:8080`, `http://192.168.x.x:8080` en
-`http://my-ship.local:8080`. Schakel dit alleen in voor een ship-URL die je vertrouwt; hierdoor wordt de SSRF-
+`http://my-ship.local:8080`. Schakel dit alleen in voor een ship-URL die je vertrouwt; hiermee wordt de SSRF-
 bescherming voor de HTTP-verzoeken van dat account uitgeschakeld.
 
 <Note>
@@ -108,13 +115,13 @@ Zet kanalen handmatig vast of schakel automatische detectie in:
 }
 ```
 
-`autoDiscoverChannels` is standaard `false` wanneer deze niet in de configuratie is ingesteld; de configuratiewizard stelt bij de
-vraag standaard ja voor en schrijft expliciet `true`. Wanneer dit is ingeschakeld, bevraagt OpenClaw bij het opstarten de groepen waarvan het lid is,
-volgt het nieuwe kanalen wanneer groepsuitnodigingen worden geaccepteerd en controleert het deze elke 2 minuten opnieuw.
+`autoDiscoverChannels` is standaard `false` wanneer deze niet in de configuratie is ingesteld; de installatiewizard stelt de
+prompt standaard in op ja en schrijft `true` expliciet. Wanneer dit is ingeschakeld, vraagt OpenClaw bij het opstarten aangesloten groepen op,
+bewaakt het nieuwe kanalen wanneer groepsuitnodigingen worden geaccepteerd en controleert het elke 2 minuten opnieuw.
 
 ## Toegangsbeheer
 
-Toegestane afzenders voor privéberichten (leeg = geen privéberichten toegestaan, tenzij de afzender `ownerShip` is):
+Toestaanlijst voor DM's (leeg = geen DM's toegestaan, tenzij de afzender `ownerShip` is):
 
 ```json5
 {
@@ -126,7 +133,7 @@ Toegestane afzenders voor privéberichten (leeg = geen privéberichten toegestaa
 }
 ```
 
-Groepsautorisatie is standaard per kanaal ingesteld op `restricted`. Stel `defaultAuthorizedShips` in als
+Groepsautorisatie is standaard `restricted` per kanaal. Stel `defaultAuthorizedShips` in als
 basis en overschrijf dit per kanaalnest:
 
 ```json5
@@ -151,7 +158,11 @@ basis en overschrijf dit per kanaalnest:
 ```
 
 Zodra de bot binnen een thread heeft geantwoord, blijft deze op latere berichten in die thread reageren
-zonder dat een nieuwe vermelding nodig is.
+zonder nog een vermelding te vereisen.
+
+Stel `channels.tlon.implicitMentions.threadParticipation: false` in om voor die vervolgberichten een nieuwe expliciete vermelding
+te vereisen. Overschrijvingen voor accounts gebruiken `channels.tlon.accounts.<id>.implicitMentions`. Tlon
+produceert momenteel geen `replyToBot`- of `quotedBot`-feiten, dus die vlaggen hebben hier geen effect.
 
 ## Eigenaar en goedkeuringssysteem
 
@@ -165,35 +176,35 @@ zonder dat een nieuwe vermelding nodig is.
 }
 ```
 
-De ship van de eigenaar is overal geautoriseerd: uitnodigingen voor privéberichten worden altijd automatisch geaccepteerd, groepsuitnodigingen worden
-altijd automatisch geaccepteerd en kanaalberichten doorstaan altijd de autorisatie. De eigenaar hoeft niet in
-`dmAllowlist`, `defaultAuthorizedShips` of `groupInviteAllowlist` te staan.
+De ship van de eigenaar is overal geautoriseerd: DM-uitnodigingen worden altijd automatisch geaccepteerd, groepsuitnodigingen worden
+altijd automatisch geaccepteerd en kanaalberichten slagen altijd voor de autorisatie. De eigenaar hoeft niet
+in `dmAllowlist`, `defaultAuthorizedShips` of `groupInviteAllowlist` te staan.
 
-Wanneer `ownerShip` is ingesteld, worden ongeautoriseerde verzoeken niet simpelweg genegeerd — ze worden als wachtende
-goedkeuring in de wachtrij geplaatst en de eigenaar ontvangt een privébericht:
+Wanneer `ownerShip` is ingesteld, worden ongeautoriseerde verzoeken niet alleen verwijderd — ze worden als openstaande
+goedkeuring in de wachtrij geplaatst en de eigenaar ontvangt een DM:
 
-- Privéberichtverzoeken van ships die niet in `dmAllowlist` staan
-- Vermeldingen in kanalen waar de afzender niet door de autorisatie komt
-- Groepsuitnodigingen van ships die niet in `groupInviteAllowlist` staan (wanneer automatisch accepteren is uitgeschakeld, of ingeschakeld maar de
-  uitnodiger niet op de lijst staat)
+- DM-verzoeken van ships die niet op `dmAllowlist` staan
+- Vermeldingen in kanalen waarin de afzender niet door de autorisatie komt
+- Groepsuitnodigingen van ships die niet op `groupInviteAllowlist` staan (wanneer automatisch accepteren is uitgeschakeld, of ingeschakeld maar de
+  uitnodiger niet op de toestaanlijst staat)
 
-De eigenaar antwoordt via een privébericht om een verzoek af te handelen:
+De eigenaar antwoordt per DM om op een verzoek te reageren:
 
-| Antwoord van eigenaar         | Effect                                                       |
-| ---------------------------- | ------------------------------------------------------------ |
-| `approve` / `deny` / `block` | Handelt de meest recente wachtende goedkeuring af             |
-| `approve <id>` / `deny <id>` | Handelt een specifieke goedkeuring op basis van id af         |
-| `block`                      | Blokkeert de ship ook systeemeigen, zodat deze niet opnieuw verbinding kan maken |
-| `unblock ~ship`              | Maakt een systeemeigen blokkering ongedaan                    |
-| `blocked`                    | Toont de momenteel geblokkeerde ships                         |
-| `pending`                    | Toont wachtende goedkeuringsverzoeken                         |
+| Antwoord van eigenaar         | Effect                                               |
+| ---------------------------- | ---------------------------------------------------- |
+| `approve` / `deny` / `block` | Handelt de meest recente openstaande goedkeuring af |
+| `approve <id>` / `deny <id>` | Handelt een specifieke goedkeuring af op basis van ID |
+| `block`                      | Blokkeert de ship ook systeem-eigen, zodat deze niet opnieuw verbinding kan maken |
+| `unblock ~ship`              | Maakt een systeem-eigen blokkering ongedaan          |
+| `blocked`                    | Toont de momenteel geblokkeerde ships                |
+| `pending`                    | Toont openstaande goedkeuringsverzoeken              |
 
-Zonder een geconfigureerde `ownerShip` worden ongeautoriseerde privéberichten en kanaalvermeldingen simpelweg genegeerd en gelogd;
-er verschijnt geen goedkeuringsverzoek.
+Zonder geconfigureerde `ownerShip` worden ongeautoriseerde DM's en kanaalvermeldingen gewoon verwijderd en gelogd;
+er verschijnt geen goedkeuringsprompt.
 
 ## Instellingen voor automatisch accepteren
 
-Accepteer uitnodigingen voor privéberichten automatisch van ships die al in `dmAllowlist` staan (de eigenaar wordt altijd automatisch geaccepteerd,
+Accepteer automatisch DM-uitnodigingen van ships die al op `dmAllowlist` staan (de eigenaar wordt altijd automatisch geaccepteerd,
 ongeacht deze vlag):
 
 ```json5
@@ -206,8 +217,8 @@ ongeacht deze vlag):
 }
 ```
 
-Accepteer groepsuitnodigingen automatisch op basis van een lijst met toegestane ships (weigert standaard: met `autoAcceptGroupInvites: true` en
-een lege `groupInviteAllowlist` wordt geen uitnodiging van een niet-eigenaar geaccepteerd):
+Accepteer automatisch groepsuitnodigingen van een toestaanlijst (standaard weigeren: met `autoAcceptGroupInvites: true` en
+een lege `groupInviteAllowlist` wordt geen enkele uitnodiging van iemand anders dan de eigenaar geaccepteerd):
 
 ```json5
 {
@@ -220,53 +231,53 @@ een lege `groupInviteAllowlist` wordt geen uitnodiging van een niet-eigenaar gea
 }
 ```
 
-## Opnieuw laden zonder herstart via de Urbit-instellingenopslag
+## Hot-reload via de Urbit-instellingenopslag
 
 De meeste bovenstaande instellingen (`dmAllowlist`, `groupInviteAllowlist`, `groupChannels`,
 `defaultAuthorizedShips`, `autoDiscoverChannels`, `autoAcceptDmInvites`,
 `autoAcceptGroupInvites`, `ownerShip`, `showModelSignature`) worden bij de eerste uitvoering gespiegeld naar de
-`%settings`-agent van de ship (desk `moltbot`, bucket `tlon`) en daarna rechtstreeks daaruit gelezen,
-zodat wijzigingen via een Landscape-client of de instellingenopdrachten van de gebundelde Skill worden toegepast zonder dat de
-Gateway opnieuw hoeft te worden gestart. `channelRules` en wachtende goedkeuringen worden daar ook als JSON opgeslagen. De
-bestandsconfiguratie blijft de bron van waarheid voor waarden die nooit naar de instellingenopslag zijn geschreven.
+`%settings`-agent van de ship (desk `moltbot`, bucket `tlon`) en vervolgens live daaruit gelezen,
+zodat wijzigingen die via een Landscape-client of de instellingencommando's van de gebundelde skill worden aangebracht, zonder
+herstart van de Gateway worden toegepast. `channelRules` en openstaande goedkeuringen worden daar ook als JSON opgeslagen. De bestandsconfiguratie
+blijft de bron van waarheid voor waarden die nooit naar de instellingenopslag zijn geschreven.
 
-## Afleverdoelen (CLI/Cron)
+## Bezorgingsdoelen (CLI/cron)
 
-Gebruik met `openclaw message send` of aflevering via Cron:
+Gebruik met `openclaw message send` of cron-bezorging:
 
-- Privébericht: `~sampel-palnet` of `dm/~sampel-palnet`
+- DM: `~sampel-palnet` of `dm/~sampel-palnet`
 - Groep: `chat/~host-ship/channel` of `group:~host-ship/channel`
 
-## Gebundelde Skill
+## Gebundelde skill
 
 De plugin bundelt [`@tloncorp/tlon-skill`](https://github.com/tloncorp/tlon-skill), een CLI voor
-rechtstreekse Urbit-bewerkingen die automatisch beschikbaar is zodra de plugin is geïnstalleerd:
+rechtstreekse Urbit-bewerkingen, die automatisch beschikbaar is zodra de plugin is geïnstalleerd:
 
 - **Activiteit**: vermeldingen, antwoorden, ongelezen berichten
 - **Kanalen**: weergeven, maken, hernoemen
 - **Contacten**: profielen weergeven/ophalen/bijwerken
-- **Groepen**: maken, deelnemen, uitnodigings-/aanvraagprocessen, rollen
+- **Groepen**: maken, deelnemen, uitnodigings-/aanvraagflows, rollen
 - **Hooks**: kanaalhooks beheren
 - **Berichten**: geschiedenis, zoeken
-- **Privéberichten**: verzenden, reageren, accepteren/afwijzen
+- **DM's**: verzenden, reageren, accepteren/weigeren
 - **Berichten**: reageren, verwijderen
-- **Notitieboek**: publiceren in dagboekkanalen
-- **Instellingen**: pluginconfiguratie zonder herstart opnieuw laden via de bovenstaande instellingenopslag
+- **Notitieboek**: publiceren naar dagboekkanalen
+- **Instellingen**: pluginconfiguratie via hot-reload toepassen met de bovenstaande instellingenopslag
 
 ## Mogelijkheden
 
-| Functie            | Status                                               |
-| ------------------ | ---------------------------------------------------- |
-| Privéberichten      | Ondersteund                                          |
-| Groepen/kanalen     | Ondersteund (standaard alleen na een vermelding)     |
-| Threads             | Ondersteund (blijft antwoorden zodra de bot deelneemt) |
-| Opgemaakte tekst    | Markdown wordt naar de systeemeigen indeling van Tlon geconverteerd |
-| Afbeeldingen        | Inkomend gedownload, uitgaand geüpload               |
-| Reacties            | Alleen via de [gebundelde Skill](#bundled-skill)     |
-| Peilingen           | Niet ondersteund                                     |
-| Systeemeigen opdrachten | Standaard alleen voor de eigenaar                |
+| Functie         | Status                                        |
+| --------------- | --------------------------------------------- |
+| Directe berichten | Ondersteund                                  |
+| Groepen/kanalen | Ondersteund (standaard alleen na vermelding)  |
+| Threads         | Ondersteund (blijft reageren nadat de bot is deelgenomen) |
+| Opgemaakte tekst | Markdown geconverteerd naar het systeemeigen formaat van Tlon |
+| Afbeeldingen    | Inkomend gedownload, uitgaand geüpload        |
+| Reacties        | Alleen via de [gebundelde skill](#bundled-skill) |
+| Peilingen       | Niet ondersteund                              |
+| Systeemeigen commando's | Standaard alleen voor de eigenaar     |
 
-## Probleemoplossing
+## Problemen oplossen
 
 ```bash
 openclaw status
@@ -277,8 +288,8 @@ openclaw doctor
 
 Veelvoorkomende fouten:
 
-- **Privéberichten worden genegeerd**: de afzender staat niet in `dmAllowlist` en er is geen `ownerShip` geconfigureerd voor het goedkeuringsproces.
-- **Groepsberichten worden genegeerd**: het kanaal is niet gedetecteerd/vastgezet, of de afzender komt niet door de autorisatie en er is geen
+- **DM's genegeerd**: afzender staat niet in `dmAllowlist` en er is geen `ownerShip` geconfigureerd voor de goedkeuringsflow.
+- **Groepsberichten genegeerd**: kanaal is niet gedetecteerd/vastgezet, of de afzender slaagt niet voor de autorisatie en er is geen
   `ownerShip` om een goedkeuring in de wachtrij te plaatsen.
 - **Verbindingsfouten**: controleer of de ship-URL bereikbaar is; stel
   `network.dangerouslyAllowPrivateNetwork` in voor lokale ships.
@@ -290,37 +301,38 @@ Volledige configuratie: [Configuratie](/nl/gateway/configuration)
 
 | Sleutel                                                | Betekenis                                                      |
 | ------------------------------------------------------ | -------------------------------------------------------------- |
-| `channels.tlon.enabled`                                | Opstarten van het kanaal in-/uitschakelen.                     |
+| `channels.tlon.enabled`                                | Opstarten van kanaal in-/uitschakelen.                         |
 | `channels.tlon.ship`                                   | Urbit-shipnaam van de bot (bijv. `~sampel-palnet`).            |
-| `channels.tlon.url`                                    | Ship-URL (bijv. `https://sampel-palnet.tlon.network`).         |
+| `channels.tlon.url`                                    | Ship-URL (bijv. `https://sampel-palnet.tlon.network`).                            |
 | `channels.tlon.code`                                   | Aanmeldcode van de ship.                                       |
-| `channels.tlon.network.dangerouslyAllowPrivateNetwork` | Ship-URL's voor localhost/LAN toestaan (expliciete SSRF-toestemming). |
-| `channels.tlon.ownerShip`                              | Ship van de eigenaar: altijd geautoriseerd, ontvangt goedkeuringsverzoeken. |
-| `channels.tlon.dmAllowlist`                            | Ships die privéberichten mogen sturen (leeg = geen behalve de eigenaar). |
-| `channels.tlon.autoAcceptDmInvites`                    | Privéberichten van ships in `dmAllowlist` automatisch accepteren. |
-| `channels.tlon.autoAcceptGroupInvites`                 | Groepsuitnodigingen van `groupInviteAllowlist` automatisch accepteren. |
+| `channels.tlon.network.dangerouslyAllowPrivateNetwork` | Ship-URL's op localhost/LAN toestaan (expliciete SSRF-toestemming). |
+| `channels.tlon.ownerShip`                              | Ship van eigenaar: altijd geautoriseerd, ontvangt goedkeuringsverzoeken. |
+| `channels.tlon.dmAllowlist`                            | Ships die een DM mogen sturen (leeg = alleen eigenaar).        |
+| `channels.tlon.autoAcceptDmInvites`                    | Automatisch DM's accepteren van ships in `dmAllowlist`.       |
+| `channels.tlon.autoAcceptGroupInvites`                 | Automatisch groepsuitnodigingen accepteren van `groupInviteAllowlist`. |
 | `channels.tlon.groupInviteAllowlist`                   | Ships waarvan groepsuitnodigingen automatisch worden geaccepteerd. |
-| `channels.tlon.autoDiscoverChannels`                   | Groepskanalen waarvan de bot lid is automatisch detecteren (standaard: `false`). |
+| `channels.tlon.autoDiscoverChannels`                   | Aangesloten groepskanalen automatisch detecteren (standaard: `false`). |
+| `channels.tlon.implicitMentions.threadParticipation`   | Vervolgberichten in threads waaraan is deelgenomen de vermeldingsvereiste laten omzeilen. |
 | `channels.tlon.groupChannels`                          | Handmatig vastgezette kanaalnesten.                            |
 | `channels.tlon.defaultAuthorizedShips`                 | Ships die voor alle kanalen zijn geautoriseerd (gebruikt wanneer geen regel overeenkomt). |
-| `channels.tlon.authorization.channelRules`             | Autorisatiemodus en lijst met toegestane ships per kanaalnest. |
-| `channels.tlon.showModelSignature`                     | Voeg `_[Generated by <model>]_` toe aan antwoorden.            |
+| `channels.tlon.authorization.channelRules`             | Autorisatiemodus en toestaanlijst per kanaalnest.              |
+| `channels.tlon.showModelSignature`                     | `_[Generated by <model>]_` aan antwoorden toevoegen.                   |
 | `channels.tlon.responsePrefix`                         | Statisch voorvoegsel dat vóór uitgaande antwoorden wordt geplaatst. |
 | `channels.tlon.accounts.<id>`                          | Aanvullende benoemde accounts (configuraties met meerdere ships). |
 
 ## Opmerkingen
 
-- Voor groepsantwoorden is een @-vermelding nodig (bijv. `~your-bot-ship`), tenzij de bot al aan die thread deelneemt.
-- Threadantwoorden worden binnen de thread geplaatst; de bot krijgt ook de laatste 10 berichten uit de threadcontext vooraf
-  toegevoegd voor de agent.
-- Opgemaakte tekst (vet, cursief, code, koppen, lijsten) wordt naar de systeemeigen indeling van Tlon geconverteerd.
-- Het verzenden van een inkomend bericht waarin om een kanaalsamenvatting wordt gevraagd (bijvoorbeeld "vat dit
-  kanaal samen") activeert een ingebouwde samenvatting van de geschiedenis in plaats van het normale antwoordproces.
+- Voor antwoorden in groepen is een @-vermelding vereist (bijv. `~your-bot-ship`), tenzij de bot al aan die thread deelneemt.
+- Antwoorden op threads worden in de thread geplaatst; de bot krijgt ook de laatste 10 berichten uit de threadcontext voorgevoegd
+  voor de agent.
+- Tekst met opmaak (vet, cursief, code, koppen, lijsten) wordt omgezet naar de systeemeigen indeling van Tlon.
+- Als je een inkomend bericht verstuurt waarin om een samenvatting van een kanaal wordt gevraagd (bijvoorbeeld "vat dit
+  kanaal samen"), wordt een ingebouwde samenvatting van de geschiedenis geactiveerd in plaats van de normale antwoordflow.
 
 ## Gerelateerd
 
 - [Overzicht van kanalen](/nl/channels) — alle ondersteunde kanalen
-- [Koppeling](/nl/channels/pairing) — authenticatie en koppelingsproces voor privéberichten
+- [Koppelen](/nl/channels/pairing) — DM-authenticatie en koppelingsflow
 - [Groepen](/nl/channels/groups) — gedrag van groepschats en vereiste vermeldingen
 - [Kanaalroutering](/nl/channels/channel-routing) — sessieroutering voor berichten
 - [Beveiliging](/nl/gateway/security) — toegangsmodel en beveiliging

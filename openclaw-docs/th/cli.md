@@ -1,97 +1,98 @@
 ---
 read_when:
-    - การค้นหาคำสั่งย่อย `openclaw` ที่เหมาะสม
+    - ค้นหาคำสั่งย่อย `openclaw` ที่เหมาะสม
     - การค้นหาแฟล็กส่วนกลางหรือกฎการจัดรูปแบบเอาต์พุต
 summary: 'ดัชนี CLI ของ OpenClaw: รายการคำสั่ง แฟล็กส่วนกลาง และลิงก์ไปยังหน้าของแต่ละคำสั่ง'
-title: ข้อมูลอ้างอิง CLI
+title: เอกสารอ้างอิง CLI
 x-i18n:
-    generated_at: "2026-07-12T16:00:52Z"
+    generated_at: "2026-07-21T15:17:16Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 91dce0026e177c0f0664f7a3dbe286630dcaec68b1abf2d4640e090f965515f3
+    source_hash: 0f9694ac6a50a646862edda79d218786808a2e6008eaf9abdac0e634d373c1f7
     source_path: cli/index.md
     workflow: 16
 ---
 
-`openclaw` เป็นจุดเริ่มต้นหลักของ CLI คำสั่งหลักแต่ละคำสั่งมีหน้าอ้างอิงเฉพาะ
-หรือมีเอกสารกำกับไว้กับคำสั่งที่คำสั่งนั้นใช้นามแฝง ดัชนีนี้แสดงรายการ
-คำสั่ง แฟล็กส่วนกลาง และกฎการจัดรูปแบบเอาต์พุตที่ใช้ทั่วทั้ง CLI
+`openclaw` เป็นจุดเริ่มต้นหลักของ CLI แต่ละคำสั่งหลักมี
+หน้าอ้างอิงเฉพาะ หรือมีเอกสารอยู่ร่วมกับคำสั่งที่เป็นชื่อแทน ดัชนีนี้แสดง
+คำสั่ง แฟล็กส่วนกลาง และกฎการจัดรูปแบบเอาต์พุตที่ใช้กับ CLI ทั้งหมด
 
-คำสั่งตั้งค่าตามวัตถุประสงค์:
+คำสั่งตั้งค่าแบ่งตามวัตถุประสงค์:
 
-- `openclaw setup` และ `openclaw onboard` ตรวจสอบการอนุมานก่อน จากนั้นเริ่ม Crestodian เพื่อตั้งค่า Gateway, พื้นที่ทำงาน, ช่องทาง, Skills และสถานะความพร้อมใช้งาน
-- `openclaw setup --baseline` สร้างการกำหนดค่าพื้นฐานและพื้นที่ทำงานโดยไม่ดำเนินตามขั้นตอนการเริ่มต้นใช้งานแบบมีคำแนะนำ
-- `openclaw configure` เปลี่ยนแปลงเฉพาะส่วนของการตั้งค่าที่มีอยู่ ได้แก่ การยืนยันตัวตนของโมเดล, Gateway, ช่องทาง, Plugin หรือ Skills
-- `openclaw channels add` กำหนดค่าบัญชีช่องทางหลังจากมีค่าพื้นฐานแล้ว เรียกใช้โดยไม่มีแฟล็กสำหรับการตั้งค่าแบบมีคำแนะนำ หรือใช้แฟล็กเฉพาะช่องทางสำหรับสคริปต์
+- `openclaw setup` และ `openclaw onboard` ตรวจสอบการอนุมานก่อน จากนั้นเริ่ม OpenClaw เพื่อตั้งค่า Gateway, เวิร์กสเปซ, ช่องทาง, Skills และสถานะระบบ
+- `openclaw setup --baseline` สร้างการกำหนดค่าพื้นฐานและเวิร์กสเปซโดยไม่ดำเนินตามขั้นตอนเริ่มต้นใช้งานแบบมีคำแนะนำ
+- `openclaw configure` เปลี่ยนแปลงส่วนที่เจาะจงของการตั้งค่าที่มีอยู่ ได้แก่ การยืนยันตัวตนของโมเดล, Gateway, ช่องทาง, plugins หรือ Skills
+- `openclaw channels add` กำหนดค่าบัญชีช่องทางหลังจากมีการตั้งค่าพื้นฐานแล้ว หากเลือกเฉพาะช่องทางจะใช้การตั้งค่าแบบมีคำแนะนำ ส่วนแฟล็กบัญชี ข้อมูลประจำตัว หรือการกำหนดค่าช่องทางจะใช้เส้นทางโดยตรงสำหรับสคริปต์
 
 ## หน้าคำสั่ง
 
-| พื้นที่                         | คำสั่ง                                                                                                                                                                                                                                  |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| การตั้งค่าและการเริ่มต้นใช้งาน         | [`crestodian`](/th/cli/crestodian) · [`setup`](/th/cli/setup) · [`onboard`](/th/cli/onboard) · [`configure`](/th/cli/configure) · [`config`](/th/cli/config) · [`completion`](/th/cli/completion) · [`doctor`](/th/cli/doctor) · [`dashboard`](/th/cli/dashboard) |
-| การรีเซ็ต การสำรองข้อมูล และการย้ายข้อมูล | [`backup`](/th/cli/backup) · [`migrate`](/th/cli/migrate) · [`reset`](/th/cli/reset) · [`uninstall`](/th/cli/uninstall) · [`update`](/th/cli/update)                                                                                                     |
-| การรับส่งข้อความและเอเจนต์         | [`message`](/th/cli/message) · [`agent`](/th/cli/agent) · [`agents`](/th/cli/agents) · [`attach`](/th/cli/attach) · [`acp`](/th/cli/acp) · [`mcp`](/th/cli/mcp)                                                                                             |
-| สถานะความพร้อมใช้งานและเซสชัน          | [`status`](/th/cli/status) · [`health`](/th/cli/health) · [`sessions`](/th/cli/sessions) · [`audit`](/cli/audit)                                                                                                                                   |
-| Gateway และบันทึกเหตุการณ์             | [`gateway`](/th/cli/gateway) · [`logs`](/th/cli/logs) · [`system`](/th/cli/system)                                                                                                                                                                 |
-| โมเดลและการอนุมาน         | [`models`](/th/cli/models) · [`promos`](/th/cli/promos) · [`infer`](/th/cli/infer) · `capability` (นามแฝงของ [`infer`](/th/cli/infer)) · [`memory`](/th/cli/memory) · [`commitments`](/th/cli/commitments) · [`wiki`](/th/cli/wiki)                            |
-| เครือข่ายและ Node            | [`directory`](/th/cli/directory) · [`nodes`](/th/cli/nodes) · [`devices`](/th/cli/devices) · [`node`](/th/cli/node)                                                                                                                                   |
-| รันไทม์และแซนด์บ็อกซ์          | [`approvals`](/th/cli/approvals) · `exec-policy` (ดู [`approvals`](/th/cli/approvals)) · [`sandbox`](/th/cli/sandbox) · [`tui`](/th/cli/tui) · `chat`/`terminal` (นามแฝงของ [`tui --local`](/th/cli/tui)) · [`browser`](/th/cli/browser)                 |
-| ระบบอัตโนมัติ                   | [`cron`](/th/cli/cron) · [`tasks`](/th/cli/tasks) · [`hooks`](/th/cli/hooks) · [`webhooks`](/th/cli/webhooks) · [`transcripts`](/th/cli/transcripts)                                                                                                     |
-| การค้นหาและเอกสาร           | [`dns`](/th/cli/dns) · [`docs`](/th/cli/docs)                                                                                                                                                                                                   |
-| การจับคู่และช่องทาง         | [`pairing`](/th/cli/pairing) · [`qr`](/th/cli/qr) · [`channels`](/th/cli/channels)                                                                                                                                                                 |
-| ความปลอดภัยและ Plugin         | [`security`](/th/cli/security) · [`secrets`](/th/cli/secrets) · [`skills`](/th/cli/skills) · [`plugins`](/th/cli/plugins) · [`proxy`](/th/cli/proxy)                                                                                                     |
-| นามแฝงเดิม               | [`daemon`](/th/cli/daemon) (บริการ Gateway) · [`clawbot`](/th/cli/clawbot) (เนมสเปซ)                                                                                                                                                         |
-| Plugin (ไม่บังคับ)           | [`path`](/th/cli/path) · [`policy`](/th/cli/policy) · [`voicecall`](/th/cli/voicecall) · [`workboard`](/th/cli/workboard) (หากติดตั้งแล้ว)                                                                                                              |
+| พื้นที่                         | คำสั่ง                                                                                                                                                                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| การตั้งค่าและการเริ่มต้นใช้งาน         | [`openclaw`](/th/cli/openclaw) · [`setup`](/th/cli/setup) · [`onboard`](/th/cli/onboard) · [`configure`](/th/cli/configure) · [`config`](/th/cli/config) · [`completion`](/th/cli/completion) · [`doctor`](/th/cli/doctor) · [`dashboard`](/th/cli/dashboard) |
+| การรีเซ็ต การสำรองข้อมูล และการย้ายข้อมูล | [`backup`](/th/cli/backup) · [`migrate`](/th/cli/migrate) · [`reset`](/th/cli/reset) · [`uninstall`](/th/cli/uninstall) · [`update`](/th/cli/update)                                                                                                 |
+| การรับส่งข้อความและเอเจนต์         | [`message`](/th/cli/message) · [`agent`](/th/cli/agent) · [`agents`](/th/cli/agents) · [`attach`](/th/cli/attach) · [`acp`](/th/cli/acp) · [`mcp`](/th/cli/mcp)                                                                                         |
+| สถานะระบบและเซสชัน          | [`status`](/th/cli/status) · [`health`](/th/cli/health) · [`sessions`](/th/cli/sessions) · [`audit`](/th/cli/audit)                                                                                                                               |
+| Gateway และบันทึก             | [`gateway`](/th/cli/gateway) · [`logs`](/th/cli/logs) · [`system`](/th/cli/system)                                                                                                                                                             |
+| โมเดลและการอนุมาน         | [`models`](/th/cli/models) · [`promos`](/th/cli/promos) · [`infer`](/th/cli/infer) · `capability` (ชื่อแทนของ [`infer`](/th/cli/infer)) · [`memory`](/th/cli/memory) · [`commitments`](/th/cli/commitments) · [`wiki`](/th/cli/wiki)                        |
+| เครือข่ายและ Node            | [`directory`](/th/cli/directory) · [`nodes`](/th/cli/nodes) · [`devices`](/th/cli/devices) · [`node`](/th/cli/node) · [`worker`](/th/cli/worker)                                                                                                     |
+| รันไทม์และแซนด์บ็อกซ์          | [`approvals`](/th/cli/approvals) · `exec-policy` (ดู [`approvals`](/th/cli/approvals)) · [`sandbox`](/th/cli/sandbox) · [`tui`](/th/cli/tui) · `chat`/`terminal` (ชื่อแทนของ [`tui --local`](/th/cli/tui)) · [`browser`](/th/cli/browser)             |
+| ระบบอัตโนมัติ                   | [`cron`](/th/cli/cron) · [`tasks`](/th/cli/tasks) · [`hooks`](/th/cli/hooks) · [`webhooks`](/th/cli/webhooks) · [`transcripts`](/th/cli/transcripts)                                                                                                 |
+| การค้นหาและเอกสาร           | [`dns`](/th/cli/dns) · [`docs`](/th/cli/docs)                                                                                                                                                                                               |
+| การจับคู่และช่องทาง         | [`pairing`](/th/cli/pairing) · [`qr`](/th/cli/qr) · [`channels`](/th/cli/channels)                                                                                                                                                             |
+| ความปลอดภัยและ plugins         | [`security`](/th/cli/security) · [`secrets`](/th/cli/secrets) · [`skills`](/th/cli/skills) · [`plugins`](/th/cli/plugins) · [`proxy`](/th/cli/proxy)                                                                                                 |
+| ชื่อแทนแบบเดิม               | [`daemon`](/th/cli/daemon) (บริการ Gateway) · [`clawbot`](/th/cli/clawbot) (เนมสเปซ)                                                                                                                                                     |
+| Plugins (ไม่บังคับ)           | [`path`](/th/cli/path) · [`policy`](/th/cli/policy) · [`voicecall`](/th/cli/voicecall) · [`workboard`](/th/cli/workboard) (หากติดตั้งแล้ว)                                                                                                          |
 
 ## แฟล็กส่วนกลาง
 
 | แฟล็ก                    | วัตถุประสงค์                                                                                                 |
 | ----------------------- | ------------------------------------------------------------------------------------------------------- |
-| `--dev`                 | แยกสถานะไว้ภายใต้ `~/.openclaw-dev` ใช้พอร์ต Gateway เริ่มต้น 19001 และเลื่อนพอร์ตที่คำนวณต่อเนื่อง              |
+| `--dev`                 | แยกสถานะไว้ภายใต้ `~/.openclaw-dev` ใช้พอร์ต Gateway เริ่มต้น 19001 และเลื่อนพอร์ตที่คำนวณต่อเนื่องจากพอร์ตดังกล่าว              |
 | `--profile <name>`      | แยกสถานะไว้ภายใต้ `~/.openclaw-<name>` (`OPENCLAW_STATE_DIR`/`OPENCLAW_CONFIG_PATH`)                  |
 | `--container <name>`    | เรียกใช้ CLI ภายในคอนเทนเนอร์ Podman/Docker ที่กำลังทำงานและมีชื่อว่า `<name>` (ค่าเริ่มต้น: env `OPENCLAW_CONTAINER`) |
-| `--log-level <level>`   | แทนที่ระดับบันทึกเหตุการณ์ส่วนกลางสำหรับเอาต์พุตไฟล์และคอนโซล                                                 |
-| `--no-color`            | ปิดใช้งานสี ANSI (รองรับ `NO_COLOR=1` เช่นกัน)                                                    |
-| `--update`              | รูปแบบย่อของ [`openclaw update`](/th/cli/update) ใช้ได้ทั้งกับการเช็กเอาต์ซอร์สและการติดตั้งแพ็กเกจ    |
+| `--log-level <level>`   | แทนที่ระดับบันทึกส่วนกลางสำหรับเอาต์พุตไปยังไฟล์และคอนโซล                                                 |
+| `--no-color`            | ปิดใช้สี ANSI (`NO_COLOR=1` จะได้รับการรองรับด้วย)                                                    |
+| `--update`              | รูปแบบย่อของ [`openclaw update`](/th/cli/update) ใช้ได้ทั้งกับเช็กเอาต์ซอร์สและการติดตั้งแพ็กเกจ    |
 | `-V`, `--version`, `-v` | แสดงเวอร์ชันและออก                                                                                  |
 
 ## โหมดเอาต์พุต
 
-- สี ANSI และตัวบ่งชี้ความคืบหน้าจะแสดงเฉพาะในเซสชัน TTY
+- สี ANSI และตัวบ่งชี้ความคืบหน้าจะแสดงผลเฉพาะในเซสชัน TTY
 - ไฮเปอร์ลิงก์ OSC-8 จะแสดงเป็นลิงก์ที่คลิกได้ในระบบที่รองรับ มิฉะนั้น
   CLI จะใช้ URL แบบข้อความธรรมดาแทน
-- `--json` (และ `--plain` ในส่วนที่รองรับ) จะปิดการจัดรูปแบบเพื่อให้ได้เอาต์พุตที่สะอาด
-- คำสั่งที่ทำงานเป็นเวลานานจะแสดงตัวบ่งชี้ความคืบหน้า (OSC 9;4 เมื่อรองรับ)
+- `--json` (และ `--plain` ในระบบที่รองรับ) ปิดการจัดรูปแบบเพื่อให้ได้เอาต์พุตที่เรียบง่าย
+- คำสั่งที่ทำงานเป็นเวลานานจะแสดงตัวบ่งชี้ความคืบหน้า (OSC 9;4 ในระบบที่รองรับ)
 
-## จานสี
+## ชุดสี
 
-OpenClaw ใช้จานสีแบบล็อบสเตอร์สำหรับเอาต์พุต CLI:
+OpenClaw ใช้ชุดสีกุ้งล็อบสเตอร์สำหรับเอาต์พุต CLI:
 
-| โทเค็น          | เลขฐานสิบหก       | ใช้สำหรับ                             |
+| โทเค็น          | Hex       | ใช้สำหรับ                             |
 | -------------- | --------- | ------------------------------------ |
-| `accent`       | `#FF5A2D` | หัวข้อ ป้ายกำกับ และการเน้นหลัก |
+| `accent`       | `#FF5A2D` | หัวเรื่อง ป้ายกำกับ และการเน้นหลัก |
 | `accentBright` | `#FF7A3D` | ชื่อคำสั่งและการเน้น              |
 | `accentDim`    | `#D14A22` | ข้อความเน้นรอง             |
 | `info`         | `#FF8A5B` | ค่าข้อมูล                 |
 | `success`      | `#2FBF71` | สถานะสำเร็จ                       |
-| `warn`         | `#FFB020` | คำเตือน แฟล็กตัวเลือก และทางเลือกสำรอง    |
+| `warn`         | `#FFB020` | คำเตือน แฟล็กตัวเลือก และค่าทดแทน    |
 | `error`        | `#E23D2D` | ข้อผิดพลาดและความล้มเหลว                     |
-| `muted`        | `#8B7F77` | การลดความเด่นและเมทาดาทา                |
+| `muted`        | `#8B7F77` | การลดความเด่นและข้อมูลเมตา                |
 
-แหล่งข้อมูลจริงของจานสี: `packages/terminal-core/src/palette.ts`
+แหล่งข้อมูลอ้างอิงหลักของชุดสี: `packages/terminal-core/src/palette.ts`
 
-## แผนผังคำสั่ง
+## โครงสร้างคำสั่ง
 
-<Accordion title="แผนผังคำสั่งทั้งหมด">
+<Accordion title="โครงสร้างคำสั่งทั้งหมด">
 
-แผนผังนี้ครอบคลุมคำสั่งหลักและคำสั่งย่อยหลัก คำสั่งย่อยที่เพิ่มโดย Plugin
-(เช่น ภายใต้ `skills`, `plugins` และ `wiki`) มีการพัฒนา
-อย่างเป็นอิสระ เรียกใช้ `<command> --help` เพื่อดูรายการปัจจุบันที่เป็นแหล่งข้อมูลหลัก
+แผนผังนี้ครอบคลุมคำสั่งหลักและคำสั่งย่อยหลัก คำสั่งย่อยที่ Plugin เพิ่ม
+(เช่น ภายใต้ `skills`, `plugins` และ `wiki`) พัฒนา
+อย่างเป็นอิสระ เรียกใช้ `<command> --help` เพื่อดูรายการปัจจุบันที่เป็นแหล่งข้อมูลอ้างอิงหลัก
 
 ```
 openclaw [--dev] [--profile <name>] <command>
-  crestodian
+  openclaw
   setup
   onboard
   configure
@@ -352,6 +353,7 @@ openclaw [--dev] [--profile <name>] <command>
     uninstall
     stop
     restart
+  worker
   approvals
     get
     set
@@ -430,24 +432,24 @@ Plugin สามารถเพิ่มคำสั่งระดับบน�
 
 ข้อความแชตรองรับคำสั่ง `/...` โปรดดู[คำสั่งเครื่องหมายทับ](/th/tools/slash-commands)
 
-คำสั่งสำคัญ:
+จุดเด่น:
 
 - `/status` - การวินิจฉัยอย่างรวดเร็ว
-- `/trace` - บรรทัดการติดตาม/ดีบักของ Plugin ซึ่งจำกัดขอบเขตเฉพาะเซสชัน
-- `/config` - การเปลี่ยนแปลงการกำหนดค่าที่บันทึกไว้อย่างถาวร
-- `/debug` - การแทนที่การกำหนดค่าสำหรับรันไทม์เท่านั้น (อยู่ในหน่วยความจำ ไม่ใช่บนดิสก์ และต้องกำหนด `commands.debug: true`)
+- `/trace` - บรรทัดการติดตาม/ดีบัก Plugin ที่จำกัดขอบเขตเฉพาะเซสชัน
+- `/config` - การเปลี่ยนแปลงการกำหนดค่าที่บันทึกถาวร
+- `/debug` - การแทนที่การกำหนดค่าเฉพาะขณะรันไทม์ (อยู่ในหน่วยความจำ ไม่ใช่บนดิสก์ และต้องใช้ `commands.debug: true`)
 
 ## การติดตามการใช้งาน
 
-`openclaw status --usage` และส่วนติดต่อผู้ใช้ควบคุมจะแสดงการใช้งาน/โควตาของผู้ให้บริการเมื่อ
-มีข้อมูลรับรอง OAuth/API ข้อมูลมาจากเอนด์พอยต์การใช้งาน
-ของผู้ให้บริการโดยตรง และถูกปรับให้อยู่ในรูปแบบ `X% left` ผู้ให้บริการที่มี
-ช่วงเวลาการใช้งานในปัจจุบัน ได้แก่ Anthropic, Gemini CLI, GitHub Copilot, MiniMax, OpenAI Codex,
+`openclaw status --usage` และ Control UI แสดงการใช้งาน/โควตาของผู้ให้บริการเมื่อ
+มีข้อมูลประจำตัว OAuth/API ข้อมูลมาจากปลายทางการใช้งานของผู้ให้บริการโดยตรง
+และได้รับการปรับให้อยู่ในรูปแบบ `X% left` ผู้ให้บริการที่มีกรอบเวลาการใช้งานปัจจุบัน
+ได้แก่ Anthropic, Gemini CLI, GitHub Copilot, MiniMax, OpenAI Codex,
 Xiaomi และ z.ai
 
 โปรดดูรายละเอียดที่[การติดตามการใช้งาน](/th/concepts/usage-tracking)
 
-## เนื้อหาที่เกี่ยวข้อง
+## ที่เกี่ยวข้อง
 
 - [คำสั่งเครื่องหมายทับ](/th/tools/slash-commands)
 - [การกำหนดค่า](/th/gateway/configuration)

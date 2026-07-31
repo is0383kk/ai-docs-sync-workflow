@@ -1,22 +1,23 @@
 ---
 read_when:
-    - 你想使用 Perplexity Search 進行網頁搜尋
+    - 你想使用 Perplexity Search 進行網路搜尋
     - 你需要設定 PERPLEXITY_API_KEY 或 OPENROUTER_API_KEY
-summary: Perplexity Search API 與 Sonar/OpenRouter 對 web_search 的相容性
+summary: Perplexity Search API 與 Sonar/OpenRouter 的 web_search 相容性
 title: Perplexity 搜尋
 x-i18n:
-    generated_at: "2026-07-11T21:55:04Z"
+    generated_at: "2026-07-26T07:38:01Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: a7ca97355110e70a05f1d57acab475dda8dec89393804df40c6e9be5e30780e8
     source_path: tools/perplexity-search.md
     workflow: 16
 ---
 
-OpenClaw 支援將 Perplexity Search API 作為 `web_search` 提供者。它會傳回包含 `title`、`url` 與 `snippet` 欄位的結構化結果。
+OpenClaw 支援將 Perplexity Search API 作為 `web_search` 提供者。它會傳回包含 `title`、`url` 和 `snippet` 欄位的結構化結果。
 
-為了相容性，OpenClaw 也支援舊版 Perplexity Sonar/OpenRouter 設定。如果您使用 `OPENROUTER_API_KEY`、在 `plugins.entries.perplexity.config.webSearch.apiKey` 中使用 `sk-or-...` 金鑰，或設定 `plugins.entries.perplexity.config.webSearch.baseUrl` / `model`，提供者便會切換至聊天補全路徑，並傳回附有引用來源的 AI 綜合回答，而非結構化的 Search API 結果。
+為了相容性，OpenClaw 也支援舊版 Perplexity Sonar/OpenRouter 設定。如果你使用 `OPENROUTER_API_KEY`、在 `plugins.entries.perplexity.config.webSearch.apiKey` 中設定 `sk-or-...` 鍵，或設定 `plugins.entries.perplexity.config.webSearch.baseUrl` / `model`，提供者會切換至聊天補全路徑，並傳回附有引用來源的 AI 綜合回答，而非結構化的 Search API 結果。
 
 ## 安裝外掛
 
@@ -30,12 +31,12 @@ openclaw gateway restart
 ## 取得 Perplexity API 金鑰
 
 1. 在 [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api) 建立 Perplexity 帳戶。
-2. 在控制台中產生 API 金鑰。
+2. 在控制面板中產生 API 金鑰。
 3. 將金鑰儲存在設定中，或在閘道環境中設定 `PERPLEXITY_API_KEY`。
 
 ## OpenRouter 相容性
 
-如果您已透過 OpenRouter 使用 Perplexity Sonar，請保留 `provider: "perplexity"`，並在閘道環境中設定 `OPENROUTER_API_KEY`，或在 `plugins.entries.perplexity.config.webSearch.apiKey` 中儲存 `sk-or-...` 金鑰。
+如果你已經透過 OpenRouter 使用 Perplexity Sonar，請保留 `provider: "perplexity"`，並在閘道環境中設定 `OPENROUTER_API_KEY`，或在 `plugins.entries.perplexity.config.webSearch.apiKey` 中儲存 `sk-or-...` 鍵。
 
 選用的相容性控制項：
 
@@ -96,13 +97,13 @@ openclaw gateway restart
 }
 ```
 
-## 金鑰設定位置
+## 金鑰的設定位置
 
-**透過設定：**執行 `openclaw configure --section web`。此命令會將金鑰儲存在 `~/.openclaw/openclaw.json` 的 `plugins.entries.perplexity.config.webSearch.apiKey` 下。該欄位也接受 SecretRef 物件。
+**透過設定：**執行 `openclaw configure --section web`。它會將金鑰儲存在 `~/.openclaw/openclaw.json` 的 `plugins.entries.perplexity.config.webSearch.apiKey` 下。該欄位也接受 SecretRef 物件。
 
-**透過環境：**在閘道程序環境中設定 `PERPLEXITY_API_KEY` 或 `OPENROUTER_API_KEY`。若是閘道安裝，請將其放入 `~/.openclaw/.env`（或您的服務環境）中。請參閱[環境變數](/zh-TW/help/faq#env-vars-and-env-loading)。
+**透過環境：**在閘道程序環境中設定 `PERPLEXITY_API_KEY` 或 `OPENROUTER_API_KEY`。若為閘道安裝，請將其放入 `~/.openclaw/.env`（或你的服務環境）。請參閱[環境變數](/zh-TW/help/faq#env-vars-and-env-loading)。
 
-如果已設定 `provider: "perplexity"`，但 Perplexity 金鑰 SecretRef 無法解析且沒有環境變數備援，啟動或重新載入會立即失敗。
+如果已設定 `provider: "perplexity"`，且 Perplexity 金鑰 SecretRef 無法解析，也沒有環境變數後援，啟動或重新載入會立即失敗。
 
 ## 工具參數
 
@@ -113,11 +114,11 @@ openclaw gateway restart
 </ParamField>
 
 <ParamField path="count" type="number" default="5">
-要傳回的結果數量（1 至 10）。
+要傳回的結果數量（1-10）。
 </ParamField>
 
 <ParamField path="country" type="string">
-2 個字母的 ISO 國家代碼（例如 `US`、`DE`）。
+2 位字母的 ISO 國家代碼（例如 `US`、`DE`）。
 </ParamField>
 
 <ParamField path="language" type="string">
@@ -141,23 +142,23 @@ ISO 639-1 語言代碼（例如 `en`、`de`、`fr`）。
 </ParamField>
 
 <ParamField path="max_tokens" type="number" default="25000">
-總內容預算（上限為 1000000）。
+內容總額度（最多 1000000）。
 </ParamField>
 
 <ParamField path="max_tokens_per_page" type="number" default="2048">
 每頁權杖上限。
 </ParamField>
 
-針對舊版 Sonar/OpenRouter 相容路徑：
+對於舊版 Sonar/OpenRouter 相容性路徑：
 
-- 接受 `query`、`count` 與 `freshness`。
-- `count` 在此僅供相容用途；回應仍是一則附有引用來源的綜合回答，而非包含 N 筆結果的清單。
-- 僅限 Search API 的篩選條件（`country`、`language`、`date_after`、`date_before`、`domain_filter`、`max_tokens`、`max_tokens_per_page`）會傳回明確錯誤。
+- 接受 `query`、`count` 和 `freshness`。
+- `count` 在該路徑中僅供相容性使用；回應仍是一個附有引用來源的綜合回答，而非包含 N 筆結果的清單。
+- 僅適用於 Search API 的篩選條件（`country`、`language`、`date_after`、`date_before`、`domain_filter`、`max_tokens`、`max_tokens_per_page`）會傳回明確的錯誤。
 
 **範例：**
 
 ```javascript
-// 依國家和語言搜尋
+// 針對特定國家和語言的搜尋
 await web_search({
   query: "renewable energy",
   country: "DE",
@@ -200,29 +201,29 @@ await web_search({
 ### 網域篩選規則
 
 - 每個篩選條件最多可包含 20 個網域。
-- 同一個請求中不能混用允許清單與拒絕清單項目。
-- 拒絕清單項目請使用 `-` 前綴（例如 `["-reddit.com"]`）。
+- 同一個請求中不可混用允許清單與拒絕清單項目。
+- 拒絕清單項目應使用 `-` 前綴（例如 `["-reddit.com"]`）。
 
 ## 注意事項
 
 - Perplexity Search API 會傳回結構化的網頁搜尋結果（`title`、`url`、`snippet`）。
 - OpenRouter 或明確設定的 `plugins.entries.perplexity.config.webSearch.baseUrl` / `model`，會基於相容性將 Perplexity 切換回 Sonar 聊天補全。
-- Sonar/OpenRouter 相容模式會傳回一則附有引用來源的綜合回答，而非結構化結果列。
-- 預設會快取結果 15 分鐘（可透過 `cacheTtlMinutes` 設定）。
+- Sonar/OpenRouter 相容性會傳回一個附有引用來源的綜合回答，而非結構化結果列。
+- 結果預設會快取 15 分鐘（可透過 `cacheTtlMinutes` 設定）。
 
 ## 相關內容
 
 <CardGroup cols={2}>
-  <Card title="網頁搜尋概覽" href="/zh-TW/tools/web" icon="globe">
-    所有提供者與自動偵測規則。
+  <Card title="網頁搜尋概觀" href="/zh-TW/tools/web" icon="globe">
+    所有提供者及自動偵測規則。
   </Card>
   <Card title="Brave 搜尋" href="/zh-TW/tools/brave-search" icon="shield">
-    支援國家與語言篩選的結構化結果。
+    提供國家與語言篩選條件的結構化結果。
   </Card>
   <Card title="Exa 搜尋" href="/zh-TW/tools/exa-search" icon="magnifying-glass">
     具備內容擷取功能的神經搜尋。
   </Card>
   <Card title="Perplexity Search API 文件" href="https://docs.perplexity.ai/docs/search/quickstart" icon="arrow-up-right-from-square">
-    官方 Perplexity Search API 快速入門與參考資料。
+    Perplexity Search API 官方快速入門與參考文件。
   </Card>
 </CardGroup>

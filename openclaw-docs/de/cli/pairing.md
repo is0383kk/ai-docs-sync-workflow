@@ -4,11 +4,12 @@ read_when:
 summary: CLI-Referenz für `openclaw pairing` (Kopplungsanfragen genehmigen/auflisten)
 title: Kopplung
 x-i18n:
-    generated_at: "2026-07-12T01:29:23Z"
+    generated_at: "2026-07-26T18:22:09Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: ca83ad9d9e55cfffd49301cb529b28df370c2dcff03484880f7cfc85ec2d6440
+    source_hash: e4c6c53f1a3eefe50b4b7a45fa535e9a05faabb50df1ba5195a7635ee13d9da0
     source_path: cli/pairing.md
     workflow: 16
 ---
@@ -17,7 +18,12 @@ x-i18n:
 
 Genehmigen oder prüfen Sie DM-Kopplungsanfragen für Kanäle, die Kopplung unterstützen (nur Chat-DMs – für die Kopplung von Nodes/Geräten wird `openclaw devices` verwendet).
 
-Siehe auch: [Kopplungsablauf](/de/channels/pairing)
+Verwandt: [Kopplungsablauf](/de/channels/pairing)
+
+Dieselben ausstehenden Anfragen können in der Control UI unter **Settings →
+Channels → DM access requests** geprüft werden. Die Control UI unterstützt das Genehmigen, die optionale
+Benachrichtigung der anfragenden Person und das Verwerfen. Beim Verwerfen wird die aktuelle Anfrage entfernt,
+der Absender jedoch nicht dauerhaft blockiert.
 
 ## Befehle
 
@@ -33,20 +39,20 @@ openclaw pairing approve --channel telegram --account work <code> --notify
 
 ## `pairing list`
 
-Listet ausstehende Kopplungsanfragen für einen Kanal auf.
+Ausstehende Kopplungsanfragen für einen Kanal auflisten.
 
-| Option                  | Beschreibung                                      |
-| ----------------------- | ------------------------------------------------- |
-| `[channel]`             | Positionsargument für die Kanal-ID                |
-| `--channel <channel>`   | explizite Kanal-ID                                 |
-| `--account <accountId>` | Konto-ID für Kanäle mit mehreren Konten           |
-| `--json`                | maschinenlesbare Ausgabe                           |
+| Option                  | Beschreibung                          |
+| ----------------------- | ------------------------------------- |
+| `[channel]`             | positionale Kanal-ID                  |
+| `--channel <channel>`   | explizite Kanal-ID                    |
+| `--account <accountId>` | Konto-ID für Kanäle mit mehreren Konten |
+| `--json`                | maschinenlesbare Ausgabe              |
 
-Wenn mehrere kopplungsfähige Kanäle konfiguriert sind, geben Sie einen Kanal als Positionsargument oder mit `--channel` an. Erweiterungskanäle funktionieren, sofern die Kanal-ID gültig ist.
+Wenn mehrere kopplungsfähige Kanäle konfiguriert sind, geben Sie einen Kanal positional oder mit `--channel` an. Erweiterungskanäle funktionieren, sofern die Kanal-ID gültig ist.
 
 ## `pairing approve`
 
-Genehmigt einen ausstehenden Kopplungscode und lässt den zugehörigen Absender zu.
+Einen ausstehenden Kopplungscode genehmigen und diesen Absender zulassen.
 
 Verwendung:
 
@@ -54,15 +60,15 @@ Verwendung:
 - `openclaw pairing approve --channel <channel> <code>`
 - `openclaw pairing approve <code>`, wenn genau ein kopplungsfähiger Kanal konfiguriert ist
 
-Optionen: `--channel <channel>`, `--account <accountId>`, `--notify` (sendet dem Anfragenden über denselben Kanal eine Bestätigung).
+Optionen: `--channel <channel>`, `--account <accountId>`, `--notify` (eine Bestätigung über denselben Kanal an die anfragende Person senden).
 
-### Ersteinrichtung des Besitzers
+### Ersteinrichtung des Eigentümers
 
-Wenn `commands.ownerAllowFrom` beim Genehmigen eines Kopplungscodes leer ist, erfasst OpenClaw den genehmigten Absender außerdem als Befehlsbesitzer. Dazu wird ein kanalspezifischer Eintrag wie `telegram:123456789` verwendet. Dadurch wird nur der erste Besitzer eingerichtet – spätere Kopplungsgenehmigungen ersetzen oder erweitern `commands.ownerAllowFrom` niemals.
+Wenn `commands.ownerAllowFrom` beim Genehmigen eines Kopplungscodes leer ist, trägt die CLI den genehmigten Absender außerdem als Befehlseigentümer ein und verwendet dafür einen kanalspezifischen Eintrag wie `telegram:123456789`. Dadurch wird nur der erste Eigentümer eingerichtet – spätere Kopplungsgenehmigungen ersetzen oder erweitern `commands.ownerAllowFrom` niemals. Die Control UI zeigt diese Rechteerweiterung als separates, durch `operator.admin` geschütztes Kontrollkästchen an, statt sie automatisch anzuwenden.
 
-Der Befehlsbesitzer ist das Konto des menschlichen Betreibers, das ausschließlich Besitzern vorbehaltene Befehle ausführen und gefährliche Aktionen wie `/diagnostics`, `/export-trajectory`, `/config` und Ausführungsgenehmigungen genehmigen darf. Durch die Kopplung kann ein Absender lediglich mit dem Agenten kommunizieren; abgesehen von dieser einmaligen Ersteinrichtung werden dadurch allein keine Besitzerrechte gewährt.
+Der Befehlseigentümer ist das Konto der menschlichen Bedienperson, das ausschließlich Eigentümern vorbehaltene Befehle ausführen und gefährliche Aktionen wie `/diagnostics`, `/export-session`, `/export-trajectory`, `/config` sowie Ausführungsgenehmigungen autorisieren darf. Durch die Kopplung kann ein Absender lediglich mit dem Agenten kommunizieren; abgesehen von dieser einmaligen Ersteinrichtung gewährt sie für sich genommen keine Eigentümerrechte.
 
-Wenn Sie einen Absender genehmigt haben, bevor diese Ersteinrichtung verfügbar war, führen Sie `openclaw doctor` aus. Der Befehl warnt Sie, wenn kein Befehlsbesitzer konfiguriert ist, und zeigt den genauen Befehl `openclaw config set commands.ownerAllowFrom ...` zur Behebung an.
+Wenn Sie einen Absender genehmigt haben, bevor diese Ersteinrichtung eingeführt wurde, führen Sie `openclaw doctor` aus. Der Befehl warnt, wenn kein Befehlseigentümer konfiguriert ist, und zeigt den genauen `openclaw config set commands.ownerAllowFrom ...`-Befehl zur Behebung an.
 
 ## Verwandte Themen
 

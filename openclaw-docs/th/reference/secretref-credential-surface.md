@@ -1,32 +1,33 @@
 ---
 read_when:
-    - การตรวจสอบความครอบคลุมของข้อมูลประจำตัว SecretRef
-    - การตรวจสอบว่าข้อมูลประจำตัวมีสิทธิ์ใช้ `secrets configure` หรือ `secrets apply` หรือไม่
-    - การตรวจสอบว่าเหตุใดข้อมูลประจำตัวจึงอยู่นอกขอบเขตที่รองรับ
-summary: ขอบเขตข้อมูลประจำตัว SecretRef มาตรฐานที่รองรับและไม่รองรับ
+    - การตรวจสอบความครอบคลุมของข้อมูลรับรอง SecretRef
+    - การตรวจสอบว่าข้อมูลรับรองมีสิทธิ์ใช้กับ `secrets configure` หรือ `secrets apply` หรือไม่
+    - การตรวจสอบสาเหตุที่ข้อมูลประจำตัวอยู่นอกขอบเขตที่รองรับ
+summary: พื้นผิวข้อมูลรับรอง SecretRef ที่รองรับและไม่รองรับอย่างเป็นมาตรฐาน
 title: พื้นผิวข้อมูลประจำตัว SecretRef
 x-i18n:
-    generated_at: "2026-07-12T16:41:48Z"
+    generated_at: "2026-07-20T06:06:21Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 435fc25ea9268be40abc367d96def70e8d367cb0ab640a4f2d271a0e9db19147
+    source_hash: 8409060dd08d8cdb9bde59bc1857da7e2c6273d10e148a3de35b23bd3cd3b1ab
     source_path: reference/secretref-credential-surface.md
     workflow: 16
 ---
 
-หน้านี้กำหนดพื้นผิวข้อมูลประจำตัว SecretRef มาตรฐาน: ฟิลด์ข้อมูลประจำตัวใดบ้างที่ยอมรับ `SecretRef` (การอ้างอิงที่อิงกับ env/file/exec) แทนค่าความลับแบบดิบ
+หน้านี้กำหนดพื้นผิวข้อมูลประจำตัว SecretRef มาตรฐาน: ฟิลด์ข้อมูลประจำตัวใดบ้างที่ยอมรับ `SecretRef` (การอ้างอิงที่มี env/file/exec เป็นแหล่งข้อมูล) แทนค่าความลับดิบ
 
 ขอบเขต:
 
-- อยู่ในขอบเขต: เฉพาะข้อมูลประจำตัวที่ผู้ใช้ระบุเองอย่างเคร่งครัด ซึ่ง OpenClaw ไม่ได้สร้างหรือหมุนเวียนให้
-- อยู่นอกขอบเขต: ข้อมูลประจำตัวที่สร้างหรือหมุนเวียนระหว่างรันไทม์ ข้อมูลรีเฟรช OAuth และอาร์ติแฟกต์ที่มีลักษณะคล้ายเซสชัน
+- อยู่ในขอบเขต: เฉพาะข้อมูลประจำตัวที่ผู้ใช้ระบุ ซึ่ง OpenClaw ไม่ได้ออกหรือหมุนเวียนให้
+- อยู่นอกขอบเขต: ข้อมูลประจำตัวที่ออกหรือหมุนเวียนขณะรัน ข้อมูลสำหรับรีเฟรช OAuth และอาร์ติแฟกต์ที่มีลักษณะเป็นเซสชัน
 
-รายการด้านล่างสร้างจากรีจิสทรีเป้าหมายในซอร์สและตรวจสอบเทียบกับ `docs/reference/secretref-user-supplied-credentials-matrix.json` ใน CI อย่าแก้ไขรายการด้วยตนเอง
+รายการด้านล่างสร้างจากรีจิสทรีเป้าหมายในซอร์สและตรวจสอบกับ `docs/reference/secretref-user-supplied-credentials-matrix.json` ใน CI โปรดอย่าแก้ไขรายการด้วยตนเอง
 
 ## ข้อมูลประจำตัวที่รองรับ
 
-### เป้าหมายใน `openclaw.json` (`secrets configure` + `secrets apply` + `secrets audit`)
+### เป้าหมาย `openclaw.json` (`secrets configure` + `secrets apply` + `secrets audit`)
 
 [//]: # "secretref-supported-list-start"
 
@@ -50,12 +51,12 @@ x-i18n:
 - `talk.providers.*.apiKey`
 - `talk.realtime.providers.*.apiKey`
 - `messages.tts.providers.*.apiKey`
-- `tools.web.fetch.firecrawl.apiKey`
 - `plugins.entries.acpx.config.mcpServers.*.env.*`
 - `plugins.entries.brave.config.webSearch.apiKey`
 - `plugins.entries.codex.config.appServer.authToken`
 - `plugins.entries.codex.config.appServer.headers.*`
 - `plugins.entries.exa.config.webSearch.apiKey`
+- `plugins.entries.firecrawl.config.webFetch.apiKey`
 - `plugins.entries.google-meet.config.realtime.providers.*.apiKey`
 - `plugins.entries.google.config.webSearch.apiKey`
 - `plugins.entries.xai.config.webSearch.apiKey`
@@ -69,8 +70,7 @@ x-i18n:
 - `plugins.entries.voice-call.config.streaming.providers.*.apiKey`
 - `plugins.entries.voice-call.config.tts.providers.*.apiKey`
 - `plugins.entries.voice-call.config.twilio.authToken`
-- `tools.web.search.*.apiKey`
-- `tools.web.search.apiKey`
+- `plugins.entries.webhooks.config.routes.*.secret`
 - `gateway.auth.password`
 - `gateway.auth.token`
 - `gateway.remote.token`
@@ -92,6 +92,8 @@ x-i18n:
 - `channels.slack.accounts.*.signingSecret`
 - `channels.sms.authToken`
 - `channels.sms.accounts.*.authToken`
+- `channels.clickclack.token`
+- `channels.clickclack.accounts.*.token`
 - `channels.discord.token`
 - `channels.discord.pluralkit.token`
 - `channels.discord.voice.tts.providers.*.apiKey`
@@ -128,7 +130,7 @@ x-i18n:
 - `channels.googlechat.serviceAccount` ผ่าน `serviceAccountRef` ที่อยู่ระดับเดียวกัน (ข้อยกเว้นด้านความเข้ากันได้)
 - `channels.googlechat.accounts.*.serviceAccount` ผ่าน `serviceAccountRef` ที่อยู่ระดับเดียวกัน (ข้อยกเว้นด้านความเข้ากันได้)
 
-### เป้าหมายใน `auth-profiles.json` (`secrets configure` + `secrets apply` + `secrets audit`)
+### เป้าหมาย `auth-profiles.json` (`secrets configure` + `secrets apply` + `secrets audit`)
 
 - `profiles.*.keyRef` (`type: "api_key"`; ไม่รองรับเมื่อ `auth.profiles.<id>.mode = "oauth"`)
 - `profiles.*.tokenRef` (`type: "token"`; ไม่รองรับเมื่อ `auth.profiles.<id>.mode = "oauth"`)
@@ -137,15 +139,17 @@ x-i18n:
 
 หมายเหตุ:
 
-- เป้าหมายของแผนโปรไฟล์การยืนยันตัวตนต้องมี `agentId` รายการแผนกำหนดเป้าหมายไปยัง `profiles.*.key` / `profiles.*.token` และเขียนการอ้างอิงที่อยู่ระดับเดียวกัน (`keyRef` / `tokenRef`) การอ้างอิงโปรไฟล์การยืนยันตัวตนรวมอยู่ในการแก้ค่าระหว่างรันไทม์และขอบเขตการตรวจสอบ
-- ใน `openclaw.json` SecretRef ต้องใช้ออบเจ็กต์แบบมีโครงสร้าง เช่น `{"source":"env","provider":"default","id":"DISCORD_BOT_TOKEN"}` สตริงตัวทำเครื่องหมายแบบเดิม `secretref-env:<ENV_VAR>` จะถูกปฏิเสธบนพาธข้อมูลประจำตัว SecretRef ให้เรียกใช้ `openclaw doctor --fix` เพื่อย้ายตัวทำเครื่องหมายที่ถูกต้อง
-- ตัวควบคุมนโยบาย OAuth: ไม่สามารถใช้ `auth.profiles.<id>.mode = "oauth"` ร่วมกับอินพุต SecretRef สำหรับโปรไฟล์นั้นได้ การเริ่มต้น/โหลดซ้ำและการแก้ค่าโปรไฟล์การยืนยันตัวตนจะล้มเหลวทันทีเมื่อละเมิดนโยบายนี้
-- สำหรับผู้ให้บริการโมเดลที่จัดการด้วย SecretRef รายการ `agents/*/agent/models.json` ที่สร้างขึ้นจะเก็บตัวทำเครื่องหมายที่ไม่เป็นความลับ (ไม่ใช่ค่าความลับที่แก้ค่าแล้ว) สำหรับพื้นผิว `apiKey`/ส่วนหัว การเก็บตัวทำเครื่องหมายยึดซอร์สเป็นแหล่งข้อมูลหลัก: OpenClaw เขียนตัวทำเครื่องหมายจากสแนปช็อตการกำหนดค่าซอร์สที่ใช้งานอยู่ (ก่อนการแก้ค่า) ไม่ใช่จากค่าความลับที่แก้ค่าแล้วในรันไทม์
-- สำหรับการค้นหาเว็บ: ในโหมดระบุผู้ให้บริการอย่างชัดเจน (ตั้งค่า `tools.web.search.provider`) จะใช้งานเฉพาะคีย์ของผู้ให้บริการที่เลือก ในโหมดอัตโนมัติ (ไม่ได้ตั้งค่า `tools.web.search.provider`) จะใช้งานเฉพาะคีย์ของผู้ให้บริการรายแรกที่แก้ค่าได้ตามลำดับความสำคัญ และการอ้างอิงของผู้ให้บริการที่ไม่ได้เลือกจะถือว่าไม่ได้ใช้งานจนกว่าจะถูกเลือก พาธผู้ให้บริการแบบเดิม `tools.web.search.*` ยังคงแก้ค่าได้ในช่วงความเข้ากันได้ แต่พื้นผิว SecretRef มาตรฐานคือ `plugins.entries.<plugin>.config.webSearch.*`
+- เป้าหมายแผนโปรไฟล์การยืนยันตัวตนต้องใช้ `agentId`; รายการแผนกำหนดเป้าหมายไปยัง `profiles.*.key` / `profiles.*.token` และเขียนการอ้างอิงที่อยู่ระดับเดียวกัน (`keyRef` / `tokenRef`) การอ้างอิงโปรไฟล์การยืนยันตัวตนรวมอยู่ในการแก้ไขค่าขณะรันและขอบเขตการตรวจสอบ
+- ใน `openclaw.json` SecretRefs ต้องใช้ออบเจ็กต์แบบมีโครงสร้าง เช่น `{"source":"env","provider":"default","id":"DISCORD_BOT_TOKEN"}` ระบบจะปฏิเสธสตริงเครื่องหมาย `secretref-env:<ENV_VAR>` แบบเดิมในเส้นทางข้อมูลประจำตัว SecretRef; เรียกใช้ `openclaw doctor --fix` เพื่อย้ายเครื่องหมายที่ถูกต้อง
+- ตัวป้องกันนโยบาย OAuth: ไม่สามารถใช้ `auth.profiles.<id>.mode = "oauth"` ร่วมกับอินพุต SecretRef สำหรับโปรไฟล์นั้นได้ การเริ่มต้น/โหลดซ้ำและการแก้ไขโปรไฟล์การยืนยันตัวตนจะล้มเหลวทันทีเมื่อละเมิดนโยบายนี้
+- สำหรับผู้ให้บริการโมเดลที่จัดการด้วย SecretRef รายการ `agents/*/agent/models.json` ที่สร้างขึ้นจะคงเครื่องหมายที่ไม่ใช่ความลับ (ไม่ใช่ค่าความลับที่แก้ไขแล้ว) สำหรับพื้นผิว `apiKey`/ส่วนหัว การคงเครื่องหมายยึดแหล่งข้อมูลเป็นหลัก: OpenClaw เขียนเครื่องหมายจากสแนปช็อตการกำหนดค่าแหล่งข้อมูลที่ใช้งานอยู่ (ก่อนการแก้ไขค่า) ไม่ใช่จากค่าความลับขณะรันที่แก้ไขแล้ว
+- การเริ่มต้น Gateway แบบ cold สามารถแยกความล้มเหลวในการแก้ไขค่าที่ลองใหม่ได้สำหรับเจ้าของที่มีการแมปและไม่ใช่ Gateway คลาสที่มีการแมปในปัจจุบันประกอบด้วยผู้ให้บริการโมเดลและ skills, ผู้ให้บริการสื่อ/TTS/cron, โปรไฟล์การยืนยันตัวตนที่เข้าเกณฑ์, หน่วยความจำรายเอเจนต์, sandbox SSH, บัญชีช่องทาง และเส้นทาง Plugin ที่ประกาศใน manifest การเริ่มต้นจะเก็บการอ้างอิงที่ระบุไว้อย่างชัดเจนของเจ้าของแต่ละรายที่ล้มเหลวไว้ในสแนปช็อตขณะรัน รายงานเจ้าของผ่านสถานะและ doctor และปฏิเสธคำขอสำหรับเจ้าของนั้นโดยไม่ลองใช้ข้อมูลประจำตัวที่มีลำดับความสำคัญต่ำกว่า การโหลดซ้ำและการตรวจสอบล่วงหน้าก่อนเขียนการกำหนดค่าใช้นโยบายที่รับรู้เจ้าของแบบเดียวกัน: เจ้าของที่สมบูรณ์จะรีเฟรช; เจ้าของที่เข้าเกณฑ์และล้มเหลวจะคงสถานะเก่าไว้เฉพาะเมื่ออัตลักษณ์การอ้างอิง คำจำกัดความผู้ให้บริการ และสัญญาของเจ้าของที่ไม่ใช่ความลับทั้งหมดไม่เปลี่ยนแปลง; ความล้มเหลวใหม่หรือที่เปลี่ยนแปลงจะกลายเป็น cold การยืนยันตัวตนขาเข้าของ Gateway, การอ้างอิงหรือค่าที่มีโครงสร้างไม่ถูกต้อง, เจ้าของที่ปิดเมื่อเกิดความล้มเหลว และเจ้าของที่ยังไม่มีการแมปยังคงเข้มงวด
+- สำหรับการค้นหาเว็บ: ในโหมดระบุผู้ให้บริการอย่างชัดเจน (ตั้งค่า `tools.web.search.provider`) เฉพาะคีย์ของผู้ให้บริการที่เลือกเท่านั้นที่ทำงาน ในโหมดอัตโนมัติ (ไม่ได้ตั้งค่า `tools.web.search.provider`) เฉพาะคีย์ผู้ให้บริการแรกที่แก้ไขค่าได้ตามลำดับความสำคัญเท่านั้นที่ทำงาน และการอ้างอิงของผู้ให้บริการที่ไม่ได้เลือกจะถือว่าไม่ทำงานจนกว่าจะถูกเลือก ข้อมูลประจำตัวของผู้ให้บริการใช้ `plugins.entries.<plugin>.config.webSearch.*`
+- Slack `identity: "user"` ใช้ `channels.slack.userToken` ร่วมกับ `channels.slack.appToken` สำหรับ Socket Mode หรือ `channels.slack.signingSecret` สำหรับโหมด HTTP การจับคู่แบบเดียวกันใช้ภายใต้ `channels.slack.accounts.*`; อัตลักษณ์นี้ไม่ต้องใช้โทเค็นบอต
 
 ## ข้อมูลประจำตัวที่ไม่รองรับ
 
-ข้อมูลประจำตัวเหล่านี้อยู่ในประเภทที่สร้างขึ้น หมุนเวียน มีเซสชัน หรือคงอยู่สำหรับ OAuth ซึ่งไม่เหมาะกับการแก้ค่า SecretRef ภายนอกแบบอ่านอย่างเดียว:
+ข้อมูลประจำตัวเหล่านี้เป็นคลาสที่มีการออกใหม่ หมุนเวียน มีข้อมูลเซสชัน หรือเก็บรักษา OAuth ระยะยาว ซึ่งไม่เหมาะกับการแก้ไขค่า SecretRef ภายนอกแบบอ่านอย่างเดียว:
 
 [//]: # "secretref-unsupported-list-start"
 
@@ -161,7 +165,7 @@ x-i18n:
 
 [//]: # "secretref-unsupported-list-end"
 
-## เนื้อหาที่เกี่ยวข้อง
+## ที่เกี่ยวข้อง
 
 - [การจัดการความลับ](/th/gateway/secrets)
 - [ความหมายของข้อมูลประจำตัวสำหรับการยืนยันตัวตน](/th/auth-credential-semantics)

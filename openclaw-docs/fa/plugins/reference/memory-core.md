@@ -1,27 +1,28 @@
 ---
 read_when:
-    - شما در حال نصب، پیکربندی یا ممیزی Plugin حافظهٔ اصلی هستید
-summary: ابزارهایی را اضافه می‌کند که عامل می‌تواند فراخوانی کند.
+    - در حال نصب، پیکربندی یا ممیزی Plugin هستهٔ حافظه هستید
+summary: ابزارهای قابل‌فراخوانی توسط عامل را اضافه می‌کند.
 title: Plugin هستهٔ حافظه
 x-i18n:
-    generated_at: "2026-07-12T10:30:31Z"
+    generated_at: "2026-07-27T15:44:12Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: cda6ebb02b0e4c1616f68c3c9636b269248b4c63ca5f778d7f8c48152b27f303
+    source_hash: dfdb9a85499d0a5d6f9dc9dd01d78773120d71b17dd941765442d9887c673f2d
     source_path: plugins/reference/memory-core.md
     workflow: 16
 ---
 
 # Plugin هستهٔ حافظه
 
-ابزارهای قابل فراخوانی توسط عامل را اضافه می‌کند.
+ابزارهای قابل‌فراخوانی توسط عامل را اضافه می‌کند.
 
 ## توزیع
 
 - بسته: `@openclaw/memory-core`
-- روش نصب: در OpenClaw گنجانده شده است
+- مسیر نصب: همراه OpenClaw ارائه می‌شود
 
 ## سطح
 
-قراردادها: ابزارها
+قراردادها: `tools`

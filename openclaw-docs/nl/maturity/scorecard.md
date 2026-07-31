@@ -2,9 +2,10 @@
 summary: Gereedheidsscores voor OpenClaw-releases voor productgebieden, integraties en ondersteunde workflows.
 title: Volwassenheidsscorekaart
 x-i18n:
-    generated_at: "2026-07-12T09:01:12Z"
+    generated_at: "2026-07-27T05:51:38Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 0cc55f54773a19369b865994ea22d00f1e07fc7df2b2d5b14cb4067f994fb0e2
     source_path: maturity/scorecard.md
@@ -22,7 +23,7 @@ x-i18n:
 
 ## Waarvoor deze pagina dient
 
-Gebruik deze pagina om één vraag te beantwoorden: welke OpenClaw-oppervlakken zijn geloofwaardige keuzes voor een release en welk bewijs ondersteunt dat oordeel? De dekking is gebaseerd op deterministisch QA-bewijs; kwaliteit en volledigheid worden bijgehouden als beoordeelde volwassenheidsscores.
+Gebruik deze pagina om één vraag te beantwoorden: welke OpenClaw-oppervlakken zijn geloofwaardige keuzes voor een release en welk bewijs ondersteunt dat oordeel? De dekking is afkomstig van deterministisch QA-bewijs; kwaliteit en volledigheid worden bijgehouden als beoordeelde volwassenheidsscores.
 
 ## In één oogopslag
 
@@ -43,7 +44,7 @@ Gebruik deze pagina om één vraag te beantwoorden: welke OpenClaw-oppervlakken 
   </div>
 </div>
 
-De dekking is bewust bewijsgericht: een gebied wordt niet als 'gereed' beschouwd alleen omdat de implementatie bestaat. De dekking telt niet mee voor de volwassenheidsscore, maar OpenClaw streeft ernaar om de end-to-enddekking voor volwassen functies met het niveau Stabiel of hoger op termijn boven 90% te houden.
+De dekking is bewust gebaseerd op bewijs: een gebied wordt niet automatisch als "gereed" beschouwd alleen omdat de implementatie bestaat. De dekking is geen invoer voor de volwassenheidsscore, maar OpenClaw streeft ernaar de end-to-enddekking voor volwassen functies met het niveau Stabiel of hoger in de loop van de tijd boven 90% te houden.
 
 ## Scorebereiken
 
@@ -59,7 +60,7 @@ De dekking is bewust bewijsgericht: een gebied wordt niet als 'gereed' beschouwd
 
 <a id="surface-explorer" />
 
-Oppervlakken zijn gerangschikt op volwassenheidsniveau, volledigheid en kwaliteit. LTS-ondersteuning wordt naast elke rij weergegeven, zodat opties die gereed zijn voor een release eenvoudig kunnen worden vergeleken.
+Oppervlakken worden gerangschikt op volwassenheidsniveau, volledigheid en kwaliteit. LTS-ondersteuning wordt naast elke rij weergegeven, zodat releaseklare opties eenvoudig te vergelijken zijn.
 
   <Tabs>
   <Tab title="Alle oppervlakken">
@@ -136,7 +137,7 @@ Oppervlakken zijn gerangschikt op volwassenheidsniveau, volledigheid en kwalitei
         <div className="maturity-surface-support"><span className="maturity-lts maturity-lts-partial">Gedeeltelijk - 5</span></div>
       </div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#browser-automation-exec-and-sandbox-tools"><span className="maturity-surface-title">Browserautomatisering, uitvoering en sandboxhulpmiddelen</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>3 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#browser-automation-exec-and-sandbox-tools"><span className="maturity-surface-title">Browserautomatisering, exec- en sandboxtools</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>3 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
@@ -150,7 +151,7 @@ Oppervlakken zijn gerangschikt op volwassenheidsniveau, volledigheid en kwalitei
         <div className="maturity-surface-support"><span className="maturity-lts maturity-lts-partial">Gedeeltelijk - 3</span></div>
       </div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#openai-and-codex-provider-path"><span className="maturity-surface-title">Providerpad voor OpenAI en Codex</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>5 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#openai-and-codex-provider-path"><span className="maturity-surface-title">OpenAI- en Codex-providerpad</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>5 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>26%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "26%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>74%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "74%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
@@ -276,7 +277,7 @@ Oppervlakken zijn gerangschikt op volwassenheidsniveau, volledigheid en kwalitei
         <div className="maturity-surface-support"><span className="maturity-lts maturity-lts-none">Geen</span></div>
       </div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#image-video-and-music-generation-tools"><span className="maturity-surface-title">Hulpmiddelen voor het genereren van afbeeldingen, video en muziek</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-alpha"><span className="maturity-level-code">M2</span><span>Alfa</span></span><span>5 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#image-video-and-music-generation-tools"><span className="maturity-surface-title">Tools voor het genereren van afbeeldingen, video's en muziek</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-alpha"><span className="maturity-level-code">M2</span><span>Alfa</span></span><span>5 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
@@ -402,14 +403,14 @@ Oppervlakken zijn gerangschikt op volwassenheidsniveau, volledigheid en kwalitei
         <div className="maturity-surface-support"><span className="maturity-lts maturity-lts-none">Geen</span></div>
       </div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#linux-companion-app"><span className="maturity-surface-title">Linux-begeleidende app</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-experimental"><span className="maturity-level-code">M0</span><span>Gepland</span></span><span>5 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#linux-companion-app"><span className="maturity-surface-title">Begeleidende Linux-app</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-experimental"><span className="maturity-level-code">M0</span><span>Gepland</span></span><span>5 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
         <div className="maturity-surface-support"><span className="maturity-lts maturity-lts-none">Geen</span></div>
       </div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#native-windows-companion-app"><span className="maturity-surface-title">Native Windows-begeleidende app</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-experimental"><span className="maturity-level-code">M0</span><span>Gepland</span></span><span>5 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#native-windows-companion-app"><span className="maturity-surface-title">Native begeleidende Windows-app</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-experimental"><span className="maturity-level-code">M0</span><span>Gepland</span></span><span>5 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
@@ -419,7 +420,7 @@ Oppervlakken zijn gerangschikt op volwassenheidsniveau, volledigheid en kwalitei
   </Tab>
   <Tab title="Kern">
     <div className="maturity-surface-table">
-      <div className="maturity-surface-row maturity-surface-row-header"><span>Onderdeel</span><span>Dekking</span><span>Kwaliteit</span><span>Volledigheid</span><span>Ondersteuning</span></div>
+      <div className="maturity-surface-row maturity-surface-row-header"><span>Oppervlak</span><span>Dekking</span><span>Kwaliteit</span><span>Volledigheid</span><span>Ondersteuning</span></div>
       <div className="maturity-surface-row">
         <a className="maturity-surface-name" href="/nl/maturity/taxonomy#cli"><span className="maturity-surface-title">CLI</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-stable"><span className="maturity-level-code">M4</span><span>Stabiel</span></span><span>7 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>4%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "4%" }} /></span></span></div>
@@ -484,7 +485,7 @@ Oppervlakken zijn gerangschikt op volwassenheidsniveau, volledigheid en kwalitei
         <div className="maturity-surface-support"><span className="maturity-lts maturity-lts-partial">Gedeeltelijk - 5</span></div>
       </div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#automation-cron-hooks-tasks-polling"><span className="maturity-surface-title">Automatisering: Cron, hooks, taken, polling</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>6 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#automation-cron-hooks-tasks-polling"><span className="maturity-surface-title">Automatisering: cron, hooks, taken, polling</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>6 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>2%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "2%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>72%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "72%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
@@ -580,7 +581,7 @@ Oppervlakken zijn gerangschikt op volwassenheidsniveau, volledigheid en kwalitei
         <div className="maturity-surface-support"><span className="maturity-lts maturity-lts-none">Geen</span></div>
       </div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#macos-companion-app"><span className="maturity-surface-title">Begeleidende macOS-app</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>8 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#macos-companion-app"><span className="maturity-surface-title">macOS-begeleidende app</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>8 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
@@ -719,11 +720,11 @@ Oppervlakken zijn gerangschikt op volwassenheidsniveau, volledigheid en kwalitei
       </div>
     </div>
   </Tab>
-  <Tab title="Provider en hulpmiddel">
+  <Tab title="Provider en tool">
     <div className="maturity-surface-table">
-      <div className="maturity-surface-row maturity-surface-row-header"><span>Onderdeel</span><span>Dekking</span><span>Kwaliteit</span><span>Volledigheid</span><span>Ondersteuning</span></div>
+      <div className="maturity-surface-row maturity-surface-row-header"><span>Oppervlak</span><span>Dekking</span><span>Kwaliteit</span><span>Volledigheid</span><span>Ondersteuning</span></div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#browser-automation-exec-and-sandbox-tools"><span className="maturity-surface-title">Browserautomatisering, exec- en sandboxhulpmiddelen</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>3 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#browser-automation-exec-and-sandbox-tools"><span className="maturity-surface-title">Browserautomatisering, exec- en sandboxtools</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>3 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
@@ -737,28 +738,28 @@ Oppervlakken zijn gerangschikt op volwassenheidsniveau, volledigheid en kwalitei
         <div className="maturity-surface-support"><span className="maturity-lts maturity-lts-partial">Gedeeltelijk - 3</span></div>
       </div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#web-search-tools"><span className="maturity-surface-title">Hulpmiddelen voor zoeken op internet</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>4 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#web-search-tools"><span className="maturity-surface-title">Webzoekhulpmiddelen</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>4 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>9%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "9%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>74%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "74%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div className="maturity-surface-support"><span className="maturity-lts maturity-lts-none">Geen</span></div>
       </div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#anthropic-provider-path"><span className="maturity-surface-title">Providerpad voor Anthropic</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>5 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#anthropic-provider-path"><span className="maturity-surface-title">Anthropic-providerpad</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>5 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>71%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "71%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
         <div className="maturity-surface-support"><span className="maturity-lts maturity-lts-none">Geen</span></div>
       </div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#google-provider-path"><span className="maturity-surface-title">Providerpad voor Google</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>5 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#google-provider-path"><span className="maturity-surface-title">Google-providerpad</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>5 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
         <div className="maturity-surface-support"><span className="maturity-lts maturity-lts-none">Geen</span></div>
       </div>
       <div className="maturity-surface-row">
-        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#openrouter-provider-path"><span className="maturity-surface-title">Providerpad voor OpenRouter</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>4 gebieden</span></span></a>
+        <a className="maturity-surface-name" href="/nl/maturity/taxonomy#openrouter-provider-path"><span className="maturity-surface-title">OpenRouter-providerpad</span><span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Bèta</span></span><span>4 gebieden</span></span></a>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Dekking</span><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Experimenteel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Kwaliteit</span><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div className="maturity-surface-metric"><span className="maturity-surface-metric-label">Volledigheid</span><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Bèta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
@@ -791,7 +792,7 @@ Oppervlakken zijn gerangschikt op volwassenheidsniveau, volledigheid en kwalitei
 
 ## Samenvatting van QA-bewijs
 
-De onderstaande controles tonen welke onderdelen van de scorekaart door bewijs uit QA-profielen zijn getest.
+De onderstaande controles laten zien welke scorecardgebieden zijn getest met bewijs uit QA-profielen.
 
 <div className="maturity-evidence-grid">
   <div className="maturity-evidence-card">
@@ -804,9 +805,9 @@ De onderstaande controles tonen welke onderdelen van de scorekaart door bewijs u
 
 ### Gereedheid per gebied
 
-Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst blijft ingeklapt, zodat de pagina in één oogopslag bruikbaar blijft.
+  Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst blijft ingeklapt, zodat de pagina in één oogopslag bruikbaar blijft.
 
-<AccordionGroup>
+  <AccordionGroup>
   <Accordion title="Agent-runtime - 9 gebieden">
     <p className="maturity-readiness-summary">8 gedeeltelijk beoordeeld / 1 moet worden beoordeeld</p>
     <div className="maturity-readiness-list">
@@ -817,23 +818,23 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 7 van 24 (29.2%)</span>
-        <span>17 ontbrekende mogelijkheden</span>
+        <span>17 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Externe runtimes en subagenten</span>
+          <span className="maturity-readiness-title">Externe runtimes en subagents</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 3 van 10 (30%)</span>
-        <span>7 ontbrekende mogelijkheden</span>
+        <span>7 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Uitvoering bij gehoste providers</span>
+          <span className="maturity-readiness-title">Uitvoering via gehoste providers</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>1 van 5 (20%) / 1 van 5 (20%)</span>
-        <span>4 ontbrekende mogelijkheden</span>
+        <span>4 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -841,7 +842,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
-        <span>5 ontbrekende mogelijkheden</span>
+        <span>5 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -849,7 +850,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 2 van 8 (25%)</span>
-        <span>6 ontbrekende mogelijkheden</span>
+        <span>6 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -857,7 +858,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 4 van 17 (23.5%)</span>
-        <span>13 ontbrekende mogelijkheden</span>
+        <span>13 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -865,23 +866,23 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 5 van 9 (55.6%)</span>
-        <span>4 ontbrekende mogelijkheden</span>
+        <span>4 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Toolaanroepen en antwoordverwerking</span>
+          <span className="maturity-readiness-title">Toolaanroepen en responsverwerking</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 15 van 23 (65.2%)</span>
-        <span>8 ontbrekende mogelijkheden</span>
+        <span>8 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Besturingselementen voor tooluitvoering</span>
+          <span className="maturity-readiness-title">Besturing van tooluitvoering</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 6 van 12 (50%)</span>
-        <span>6 ontbrekende mogelijkheden</span>
+        <span>6 hiaten in mogelijkheden</span>
       </div>
     </div>
   </Accordion>
@@ -896,7 +897,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 ontbrekende mogelijkheid</span>
+        <span>1 hiaat in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -904,7 +905,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 0 van 2 (0%)</span>
-        <span>2 ontbrekende mogelijkheden</span>
+        <span>2 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -912,7 +913,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 0 van 3 (0%)</span>
-        <span>3 ontbrekende mogelijkheden</span>
+        <span>3 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -920,7 +921,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 ontbrekende mogelijkheid</span>
+        <span>1 hiaat in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -928,7 +929,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 ontbrekende mogelijkheid</span>
+        <span>1 hiaat in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -936,7 +937,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 ontbrekende mogelijkheid</span>
+        <span>1 hiaat in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -944,7 +945,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 ontbrekende mogelijkheid</span>
+        <span>1 hiaat in mogelijkheden</span>
       </div>
     </div>
   </Accordion>
@@ -959,7 +960,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 4 (0%)</span>
-        <span>4 ontbrekende mogelijkheden</span>
+        <span>4 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -967,7 +968,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 12 (0%)</span>
-        <span>12 ontbrekende mogelijkheden</span>
+        <span>12 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -975,7 +976,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
-        <span>5 ontbrekende mogelijkheden</span>
+        <span>5 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -983,7 +984,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 9 (0%) / 0 van 9 (0%)</span>
-        <span>9 ontbrekende mogelijkheden</span>
+        <span>9 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -991,12 +992,12 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
-        <span>10 ontbrekende mogelijkheden</span>
+        <span>10 hiaten in mogelijkheden</span>
       </div>
     </div>
   </Accordion>
 
-  <Accordion title="Automatisering: Cron, hooks, taken, polling - 6 gebieden">
+  <Accordion title="Automatisering: cron, hooks, taken, polling - 6 gebieden">
     <p className="maturity-readiness-summary">5 moeten worden beoordeeld / 1 gedeeltelijk beoordeeld</p>
     <div className="maturity-readiness-list">
       <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
@@ -1010,7 +1011,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Achtergrondtaken en -stromen</span>
+          <span className="maturity-readiness-title">Achtergrondtaken en -flows</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
@@ -1037,12 +1038,12 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-title">Heartbeat</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>0 van 5 (0%) / 1 van 7 (14,3%)</span>
+        <span>0 van 5 (0%) / 1 van 7 (14.3%)</span>
         <span>6 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Besturingselementen voor polling</span>
+          <span className="maturity-readiness-title">Pollingbesturing</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
@@ -1051,7 +1052,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
     </div>
   </Accordion>
 
-  <Accordion title="Browserautomatisering, uitvoering en sandbox-hulpmiddelen - 3 gebieden">
+  <Accordion title="Browserautomatisering, uitvoering en sandboxtools - 3 gebieden">
     <p className="maturity-readiness-summary">2 gedeeltelijk beoordeeld / 1 moet worden beoordeeld</p>
     <div className="maturity-readiness-list">
       <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
@@ -1060,12 +1061,12 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-title">Browserautomatisering</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>1 van 8 (12,5%) / 1 van 8 (12,5%)</span>
+        <span>1 van 8 (12.5%) / 1 van 8 (12.5%)</span>
         <span>7 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Sandbox- en hulpmiddelenbeleid</span>
+          <span className="maturity-readiness-title">Sandbox- en toolbeleid</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 0 van 6 (0%)</span>
@@ -1073,10 +1074,10 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Aanroep en uitvoering van hulpmiddelen</span>
+          <span className="maturity-readiness-title">Toolaanroep en -uitvoering</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>2 van 6 (33,3%) / 4 van 8 (50%)</span>
+        <span>2 van 6 (33.3%) / 4 van 8 (50%)</span>
         <span>4 hiaten in mogelijkheden</span>
       </div>
     </div>
@@ -1096,7 +1097,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Realtimegesprekken in de browser</span>
+          <span className="maturity-readiness-title">Realtime browsergesprekken</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
@@ -1107,7 +1108,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-title">Browserinterface</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>0 van 10 (0%) / 1 van 12 (8,3%)</span>
+        <span>0 van 10 (0%) / 1 van 12 (8.3%)</span>
         <span>11 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
@@ -1120,10 +1121,10 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Beheerdersconsole</span>
+          <span className="maturity-readiness-title">Operatorconsole</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>0 van 10 (0%) / 1 van 12 (8,3%)</span>
+        <span>0 van 10 (0%) / 1 van 12 (8.3%)</span>
         <span>11 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
@@ -1143,7 +1144,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Kanaalacties, opdrachten en goedkeuringen</span>
+          <span className="maturity-readiness-title">Kanaalactieopdrachten en goedkeuringen</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
@@ -1154,7 +1155,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-title">Kanaalconfiguratie</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>0 van 5 (0%) / 1 van 7 (14,3%)</span>
+        <span>0 van 5 (0%) / 1 van 7 (14.3%)</span>
         <span>6 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
@@ -1162,20 +1163,20 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-title">Gespreksroutering en -bezorging</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>0 van 10 (0%) / 5 van 27 (18,5%)</span>
+        <span>0 van 10 (0%) / 5 van 27 (18.5%)</span>
         <span>22 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Gedrag van groepsthreads en omgevingsruimten</span>
+          <span className="maturity-readiness-title">Gedrag van groepsgesprekken en omgevingsruimten</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>0 van 5 (0%) / 4 van 11 (36,4%)</span>
+        <span>0 van 5 (0%) / 4 van 11 (36.4%)</span>
         <span>7 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Toegangs- en identiteitscontroles voor inkomend verkeer</span>
+          <span className="maturity-readiness-title">Poorten voor inkomende toegang en identiteit</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
@@ -1191,15 +1192,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Uitgaande bezorgings- en antwoordpijplijn</span>
+          <span className="maturity-readiness-title">Pijplijn voor uitgaande bezorging en antwoorden</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>0 van 4 (0%) / 8 van 21 (38,1%)</span>
+        <span>0 van 4 (0%) / 8 van 21 (38.1%)</span>
         <span>13 hiaten in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Status, systeemgezondheid en beheerdersbediening</span>
+          <span className="maturity-readiness-title">Statusgezondheid en operatorbesturing</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 6 (0%)</span>
@@ -1214,7 +1215,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Catalogusverkenning</span>
+          <span className="maturity-readiness-title">Catalogusdetectie</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
@@ -1230,7 +1231,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Levenscyclus en status van Plugins</span>
+          <span className="maturity-readiness-title">Pluginlevenscyclus en -status</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 26 (0%) / 0 van 26 (0%)</span>
@@ -1269,7 +1270,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Diagnose</span>
+          <span className="maturity-readiness-title">Doctor</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
@@ -1293,7 +1294,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Configuratie van Plugins en kanalen</span>
+          <span className="maturity-readiness-title">Plugin- en kanaalconfiguratie</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
@@ -1332,7 +1333,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Gespreksroutering en aflevering</span>
+          <span className="maturity-readiness-title">Gespreksroutering en -bezorging</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 12 (0%) / 0 van 12 (0%)</span>
@@ -1371,7 +1372,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Agentsandbox en hulpprogramma's</span>
+          <span className="maturity-readiness-title">Agentsandbox en tooling</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 0 van 3 (0%)</span>
@@ -1395,7 +1396,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Uitgave en validatie van images</span>
+          <span className="maturity-readiness-title">Imagerelease en -validatie</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>1 van 5 (20%) / 2 van 7 (28.6%)</span>
@@ -1407,14 +1408,14 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Feishu, QQ Bot, WeChat, Yuanbao, Zalo, Zalo Personal, regionale kanalen - 4 gebieden">
     <p className="maturity-readiness-summary">4 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Toegang en identiteit</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 ontbrekende capaciteit</span>
+        <span>1 ontbrekende mogelijkheid</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1422,7 +1423,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 0 van 6 (0%)</span>
-        <span>6 ontbrekende capaciteiten</span>
+        <span>6 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1430,7 +1431,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 ontbrekende capaciteit</span>
+        <span>1 ontbrekende mogelijkheid</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1438,7 +1439,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 ontbrekende capaciteit</span>
+        <span>1 ontbrekende mogelijkheid</span>
       </div>
     </div>
   </Accordion>
@@ -1446,14 +1447,14 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Gateway-runtime - 13 gebieden">
     <p className="maturity-readiness-summary">9 moeten worden beoordeeld / 4 gedeeltelijk beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Goedkeuringen en uitvoering op afstand</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 0 van 6 (0%)</span>
-        <span>6 ontbrekende capaciteiten</span>
+        <span>6 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1461,31 +1462,31 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
-        <span>10 ontbrekende capaciteiten</span>
+        <span>10 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Levenscyclus van de Gateway</span>
+          <span className="maturity-readiness-title">Gateway-levenscyclus</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 4 van 12 (33.3%)</span>
-        <span>8 ontbrekende capaciteiten</span>
+        <span>8 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">RPC-API's en gebeurtenissen van de Gateway</span>
+          <span className="maturity-readiness-title">Gateway-RPC-API's en -gebeurtenissen</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 20 (0%) / 2 van 22 (9.1%)</span>
-        <span>20 ontbrekende capaciteiten</span>
+        <span>20 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Status, diagnose en herstel</span>
+          <span className="maturity-readiness-title">Status, diagnostiek en herstel</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 0 van 7 (0%)</span>
-        <span>7 ontbrekende capaciteiten</span>
+        <span>7 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1493,7 +1494,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 4 (0%)</span>
-        <span>4 ontbrekende capaciteiten</span>
+        <span>4 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1501,7 +1502,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>1 van 4 (25%) / 1 van 4 (25%)</span>
-        <span>3 ontbrekende capaciteiten</span>
+        <span>3 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1509,7 +1510,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 0 van 6 (0%)</span>
-        <span>6 ontbrekende capaciteiten</span>
+        <span>6 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1517,7 +1518,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 8 (0%) / 0 van 8 (0%)</span>
-        <span>8 ontbrekende capaciteiten</span>
+        <span>8 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1525,7 +1526,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 0 van 7 (0%)</span>
-        <span>7 ontbrekende capaciteiten</span>
+        <span>7 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1533,7 +1534,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
-        <span>5 ontbrekende capaciteiten</span>
+        <span>5 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1541,7 +1542,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 0 van 6 (0%)</span>
-        <span>6 ontbrekende capaciteiten</span>
+        <span>6 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1549,7 +1550,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>1 van 8 (12.5%) / 1 van 8 (12.5%)</span>
-        <span>7 ontbrekende capaciteiten</span>
+        <span>7 ontbrekende mogelijkheden</span>
       </div>
     </div>
   </Accordion>
@@ -1557,14 +1558,14 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Google Chat - 5 gebieden">
     <p className="maturity-readiness-summary">5 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Toegang en identiteit</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 11 (0%) / 0 van 11 (0%)</span>
-        <span>11 ontbrekende capaciteiten</span>
+        <span>11 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1572,7 +1573,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 16 (0%) / 0 van 16 (0%)</span>
-        <span>16 ontbrekende capaciteiten</span>
+        <span>16 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1580,7 +1581,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 ontbrekende capaciteit</span>
+        <span>1 ontbrekende mogelijkheid</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -1588,15 +1589,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 ontbrekende capaciteit</span>
+        <span>1 ontbrekende mogelijkheid</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Native bedieningselementen en goedkeuringen</span>
+          <span className="maturity-readiness-title">Systeemeigen bedieningselementen en goedkeuringen</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 16 (0%) / 0 van 16 (0%)</span>
-        <span>16 ontbrekende capaciteiten</span>
+        <span>16 ontbrekende mogelijkheden</span>
       </div>
     </div>
   </Accordion>
@@ -1615,7 +1616,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Media, zoeken en realtimeverwerking</span>
+          <span className="maturity-readiness-title">Media, zoeken en realtime</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
@@ -1639,7 +1640,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Providerconfiguratie en aanmeldgegevens</span>
+          <span className="maturity-readiness-title">Providerconfiguratie en referenties</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
@@ -1648,7 +1649,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
     </div>
   </Accordion>
 
-  <Accordion title="Hulpmiddelen voor het genereren van afbeeldingen, video's en muziek - 5 gebieden">
+  <Accordion title="Tools voor het genereren van afbeeldingen, video en muziek - 5 gebieden">
     <p className="maturity-readiness-summary">5 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
       <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
@@ -1678,7 +1679,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Taaklevenscyclus en aflevering</span>
+          <span className="maturity-readiness-title">Taaklevenscyclus en levering</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 12 (0%) / 0 van 12 (0%)</span>
@@ -1717,7 +1718,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Gespreksroutering en aflevering</span>
+          <span className="maturity-readiness-title">Gespreksroutering en -levering</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 4 (0%)</span>
@@ -1780,7 +1781,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Gateway-configuratie en -diagnostiek</span>
+          <span className="maturity-readiness-title">Gateway-configuratie en diagnostiek</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 0 van 7 (0%)</span>
@@ -1796,7 +1797,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Meldingen en achtergrondverwerking</span>
+          <span className="maturity-readiness-title">Meldingen en achtergrond</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
@@ -1952,7 +1953,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Lokaal geheugen en insluitingen</span>
+          <span className="maturity-readiness-title">Lokaal geheugen en embeddings</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
@@ -1960,7 +1961,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Systeemeigen providerplugins</span>
+          <span className="maturity-readiness-title">Native providerplugins</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
@@ -1968,7 +1969,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Netwerkveiligheid en promptbesturing</span>
+          <span className="maturity-readiness-title">Netwerkveiligheid en promptbeheer</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 0 van 2 (0%)</span>
@@ -2015,7 +2016,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Provideractiviteiten</span>
+          <span className="maturity-readiness-title">Providerbewerkingen</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 12 (0%) / 0 van 12 (0%)</span>
@@ -2034,7 +2035,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 4 (0%)</span>
-        <span>4 hiaten in mogelijkheden</span>
+        <span>4 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2042,7 +2043,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 0 van 7 (0%)</span>
-        <span>7 hiaten in mogelijkheden</span>
+        <span>7 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2050,7 +2051,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
-        <span>5 hiaten in mogelijkheden</span>
+        <span>5 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2058,7 +2059,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 0 van 3 (0%)</span>
-        <span>3 hiaten in mogelijkheden</span>
+        <span>3 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2066,7 +2067,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
-        <span>5 hiaten in mogelijkheden</span>
+        <span>5 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2074,15 +2075,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
-        <span>5 hiaten in mogelijkheden</span>
+        <span>5 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Spraak en praten</span>
+          <span className="maturity-readiness-title">Spraak en gesprekken</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 0 van 3 (0%)</span>
-        <span>3 hiaten in mogelijkheden</span>
+        <span>3 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2090,7 +2091,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 0 van 3 (0%)</span>
-        <span>3 hiaten in mogelijkheden</span>
+        <span>3 hiaten in functionaliteit</span>
       </div>
     </div>
   </Accordion>
@@ -2105,7 +2106,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 4 (0%)</span>
-        <span>4 hiaten in mogelijkheden</span>
+        <span>4 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2113,7 +2114,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 4 (0%)</span>
-        <span>4 hiaten in mogelijkheden</span>
+        <span>4 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2121,7 +2122,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
-        <span>10 hiaten in mogelijkheden</span>
+        <span>10 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2129,7 +2130,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 9 (0%) / 0 van 9 (0%)</span>
-        <span>9 hiaten in mogelijkheden</span>
+        <span>9 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2137,7 +2138,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 4 (0%)</span>
-        <span>4 hiaten in mogelijkheden</span>
+        <span>4 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2145,7 +2146,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
-        <span>5 hiaten in mogelijkheden</span>
+        <span>5 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2153,7 +2154,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
-        <span>5 hiaten in mogelijkheden</span>
+        <span>5 hiaten in functionaliteit</span>
       </div>
     </div>
   </Accordion>
@@ -2168,23 +2169,23 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 0 van 7 (0%)</span>
-        <span>7 hiaten in mogelijkheden</span>
+        <span>7 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Kanaalconfiguratie en -beheer</span>
+          <span className="maturity-readiness-title">Kanaalconfiguratie en -activiteiten</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
-        <span>5 hiaten in mogelijkheden</span>
+        <span>5 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Gespreksroutering en -bezorging</span>
+          <span className="maturity-readiness-title">Routering en bezorging van gesprekken</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 hiaat in mogelijkheden</span>
+        <span>1 hiaat in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2192,7 +2193,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 0 van 3 (0%)</span>
-        <span>3 hiaten in mogelijkheden</span>
+        <span>3 hiaten in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2200,7 +2201,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 hiaat in mogelijkheden</span>
+        <span>1 hiaat in functionaliteit</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2208,7 +2209,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 0 van 6 (0%)</span>
-        <span>6 hiaten in mogelijkheden</span>
+        <span>6 hiaten in functionaliteit</span>
       </div>
     </div>
   </Accordion>
@@ -2235,7 +2236,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Gespreksroutering en -bezorging</span>
+          <span className="maturity-readiness-title">Routering en bezorging van gesprekken</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
@@ -2298,7 +2299,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Tekst-naar-spraakbezorging</span>
+          <span className="maturity-readiness-title">Bezorging van tekst-naar-spraak</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 0 van 2 (0%)</span>
@@ -2329,7 +2330,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Gespreksroutering en -bezorging</span>
+          <span className="maturity-readiness-title">Routering en bezorging van gesprekken</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
@@ -2446,7 +2447,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Activering en app-gebruikservaring</span>
+          <span className="maturity-readiness-title">Activering en app-UX</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 0 van 7 (0%)</span>
@@ -2470,7 +2471,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Levenscyclus van Plugins</span>
+          <span className="maturity-readiness-title">Plugin-levenscyclus</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 4 (0%)</span>
@@ -2487,7 +2488,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
     </div>
   </Accordion>
 
-  <Accordion title="Providerpad voor OpenAI en Codex - 5 gebieden">
+  <Accordion title="OpenAI- en Codex-providerpad - 5 gebieden">
     <p className="maturity-readiness-summary">2 moeten worden beoordeeld / 3 gedeeltelijk beoordeeld</p>
     <div className="maturity-readiness-list">
       <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
@@ -2509,7 +2510,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Systeemeigen Codex-harnas</span>
+          <span className="maturity-readiness-title">Native Codex-harnas</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 4 van 9 (44.4%)</span>
@@ -2580,7 +2581,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Hulpprogramma's voor resources</span>
+          <span className="maturity-readiness-title">Hulpfuncties voor resources</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 1 van 6 (16.7%)</span>
@@ -2592,7 +2593,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="OpenRouter-providerpad - 4 gebieden">
     <p className="maturity-readiness-summary">4 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Chatruntime en normalisatie</span>
@@ -2631,7 +2632,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Plugins - 9 gebieden">
     <p className="maturity-readiness-summary">6 moeten worden beoordeeld / 3 gedeeltelijk beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Plugins ontwikkelen en verpakken</span>
@@ -2674,7 +2675,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Plugingoedkeuringen</span>
+          <span className="maturity-readiness-title">Goedkeuringen voor plugins</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 0 van 6 (0%)</span>
@@ -2710,7 +2711,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Raspberry Pi en kleine Linux-apparaten - 4 gebieden">
     <p className="maturity-readiness-summary">4 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Gateway-runtime</span>
@@ -2749,7 +2750,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Beveiliging, authenticatie, koppeling en geheimen - 6 gebieden">
     <p className="maturity-readiness-summary">2 gedeeltelijk beoordeeld / 4 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Goedkeuringsbeleid en beveiligingsmaatregelen voor tools</span>
@@ -2804,14 +2805,14 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Sessie-, geheugen- en contextengine - 9 gebieden">
     <p className="maturity-readiness-summary">2 moeten worden beoordeeld / 7 gedeeltelijk beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">CLI-sessie- en transcriptbeheer</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 0 van 2 (0%)</span>
-        <span>2 functionaliteitshiaten</span>
+        <span>2 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2819,7 +2820,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 4 van 7 (57.1%)</span>
-        <span>3 functionaliteitshiaten</span>
+        <span>3 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2827,15 +2828,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 3 van 8 (37.5%)</span>
-        <span>5 functionaliteitshiaten</span>
+        <span>5 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Geschiedenis en sessiepariteit tussen clients</span>
+          <span className="maturity-readiness-title">Gelijkwaardigheid van geschiedenis en sessies tussen clients</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 2 van 5 (40%)</span>
-        <span>3 functionaliteitshiaten</span>
+        <span>3 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2843,7 +2844,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 4 van 10 (40%)</span>
-        <span>6 functionaliteitshiaten</span>
+        <span>6 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2851,7 +2852,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 6 van 13 (46.2%)</span>
-        <span>7 functionaliteitshiaten</span>
+        <span>7 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2859,7 +2860,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 1 van 4 (25%)</span>
-        <span>3 functionaliteitshiaten</span>
+        <span>3 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2867,15 +2868,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 2 van 10 (20%)</span>
-        <span>8 functionaliteitshiaten</span>
+        <span>8 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Permanente opslag van transcripten</span>
+          <span className="maturity-readiness-title">Transcriptopslag</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 0 van 2 (0%)</span>
-        <span>2 functionaliteitshiaten</span>
+        <span>2 tekortkomingen in mogelijkheden</span>
       </div>
     </div>
   </Accordion>
@@ -2883,14 +2884,14 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Signal - 5 gebieden">
     <p className="maturity-readiness-summary">5 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Toegang en identiteit</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 0 van 6 (0%)</span>
-        <span>6 functionaliteitshiaten</span>
+        <span>6 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2898,15 +2899,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 0 van 7 (0%)</span>
-        <span>7 functionaliteitshiaten</span>
+        <span>7 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Routering en aflevering van gesprekken</span>
+          <span className="maturity-readiness-title">Gespreksroutering en -bezorging</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 functionaliteitshiaat</span>
+        <span>1 tekortkoming in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2914,15 +2915,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 0 van 7 (0%)</span>
-        <span>7 functionaliteitshiaten</span>
+        <span>7 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Systeemeigen bedieningselementen en goedkeuringen</span>
+          <span className="maturity-readiness-title">Platformeigen bedieningselementen en goedkeuringen</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 0 van 3 (0%)</span>
-        <span>3 functionaliteitshiaten</span>
+        <span>3 tekortkomingen in mogelijkheden</span>
       </div>
     </div>
   </Accordion>
@@ -2930,14 +2931,14 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Slack - 5 gebieden">
     <p className="maturity-readiness-summary">5 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Toegang en identiteit</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 functionaliteitshiaat</span>
+        <span>1 tekortkoming in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2945,15 +2946,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
-        <span>10 functionaliteitshiaten</span>
+        <span>10 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Routering en aflevering van gesprekken</span>
+          <span className="maturity-readiness-title">Gespreksroutering en -bezorging</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
-        <span>5 functionaliteitshiaten</span>
+        <span>5 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2961,15 +2962,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 functionaliteitshiaat</span>
+        <span>1 tekortkoming in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Systeemeigen bedieningselementen en goedkeuringen</span>
+          <span className="maturity-readiness-title">Platformeigen bedieningselementen en goedkeuringen</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 8 (0%) / 0 van 8 (0%)</span>
-        <span>8 functionaliteitshiaten</span>
+        <span>8 tekortkomingen in mogelijkheden</span>
       </div>
     </div>
   </Accordion>
@@ -2977,14 +2978,14 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Telegram - 5 gebieden">
     <p className="maturity-readiness-summary">5 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Toegang en identiteit</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
-        <span>10 functionaliteitshiaten</span>
+        <span>10 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -2992,15 +2993,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
-        <span>10 functionaliteitshiaten</span>
+        <span>10 tekortkomingen in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Routering en aflevering van gesprekken</span>
+          <span className="maturity-readiness-title">Gespreksroutering en -bezorging</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 functionaliteitshiaat</span>
+        <span>1 tekortkoming in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3008,15 +3009,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
-        <span>1 functionaliteitshiaat</span>
+        <span>1 tekortkoming in mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Systeemeigen bedieningselementen en goedkeuringen</span>
+          <span className="maturity-readiness-title">Platformeigen bedieningselementen en goedkeuringen</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 9 (0%) / 0 van 9 (0%)</span>
-        <span>9 functionaliteitshiaten</span>
+        <span>9 tekortkomingen in mogelijkheden</span>
       </div>
     </div>
   </Accordion>
@@ -3090,7 +3091,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Veiligheid van weergave en uitvoer</span>
+          <span className="maturity-readiness-title">Veilige weergave en uitvoer</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 4 (0%)</span>
@@ -3098,7 +3099,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Uitvoeringsmodi</span>
+          <span className="maturity-readiness-title">Runtime-modi</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 14 (0%) / 0 van 14 (0%)</span>
@@ -3115,7 +3116,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
     </div>
   </Accordion>
 
-  <Accordion title="Spraak en realtimegesprekken - 6 gebieden">
+  <Accordion title="Spraak en realtime gesprekken - 6 gebieden">
     <p className="maturity-readiness-summary">6 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
       <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
@@ -3129,7 +3130,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Realtimegesprekssessies</span>
+          <span className="maturity-readiness-title">Realtime gesprekssessies</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 11 (0%) / 0 van 11 (0%)</span>
@@ -3184,7 +3185,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Kanaalconfiguratie en -beheer</span>
+          <span className="maturity-readiness-title">Kanaalconfiguratie en -activiteiten</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 0 van 2 (0%)</span>
@@ -3192,7 +3193,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Gespreksroutering en -aflevering</span>
+          <span className="maturity-readiness-title">Gespreksroutering en -bezorging</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 1 (0%) / 0 van 1 (0%)</span>
@@ -3220,14 +3221,14 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="watchOS-begeleidende oppervlakken - 5 gebieden">
     <p className="maturity-readiness-summary">5 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Levering en herstel</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 0 van 7 (0%)</span>
-        <span>7 hiaten in mogelijkheden</span>
+        <span>7 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3235,7 +3236,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 0 van 6 (0%)</span>
-        <span>6 hiaten in mogelijkheden</span>
+        <span>6 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3243,7 +3244,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 0 van 3 (0%)</span>
-        <span>3 hiaten in mogelijkheden</span>
+        <span>3 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3251,7 +3252,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 0 van 7 (0%)</span>
-        <span>7 hiaten in mogelijkheden</span>
+        <span>7 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3259,7 +3260,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 3 (0%) / 0 van 3 (0%)</span>
-        <span>3 hiaten in mogelijkheden</span>
+        <span>3 ontbrekende mogelijkheden</span>
       </div>
     </div>
   </Accordion>
@@ -3267,22 +3268,22 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Hulpmiddelen voor zoeken op het web - 4 gebieden">
     <p className="maturity-readiness-summary">2 moeten worden beoordeeld / 2 gedeeltelijk beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Netwerkveiligheid</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 4 (0%)</span>
-        <span>4 hiaten in mogelijkheden</span>
+        <span>4 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Zoekproviders</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>2 van 19 (10,5%) / 2 van 19 (10,5%)</span>
-        <span>17 hiaten in mogelijkheden</span>
+        <span>2 van 19 (10.5%) / 2 van 19 (10.5%)</span>
+        <span>17 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3290,15 +3291,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 9 (0%) / 0 van 9 (0%)</span>
-        <span>9 hiaten in mogelijkheden</span>
+        <span>9 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Beschikbaarheid en ophalen van hulpmiddelen</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>2 van 11 (18,2%) / 3 van 12 (25%)</span>
-        <span>9 hiaten in mogelijkheden</span>
+        <span>2 van 11 (18.2%) / 3 van 12 (25%)</span>
+        <span>9 ontbrekende mogelijkheden</span>
       </div>
     </div>
   </Accordion>
@@ -3306,14 +3307,14 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="WhatsApp - 5 gebieden">
     <p className="maturity-readiness-summary">5 moeten worden beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Toegang en identiteit</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 7 (0%) / 0 van 7 (0%)</span>
-        <span>7 hiaten in mogelijkheden</span>
+        <span>7 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3321,15 +3322,15 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 5 (0%) / 0 van 5 (0%)</span>
-        <span>5 hiaten in mogelijkheden</span>
+        <span>5 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Gespreksroutering en -levering</span>
+          <span className="maturity-readiness-title">Routering en levering van gesprekken</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 4 (0%) / 0 van 4 (0%)</span>
-        <span>4 hiaten in mogelijkheden</span>
+        <span>4 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3337,7 +3338,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 0 van 2 (0%)</span>
-        <span>2 hiaten in mogelijkheden</span>
+        <span>2 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3345,7 +3346,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 2 (0%) / 0 van 2 (0%)</span>
-        <span>2 hiaten in mogelijkheden</span>
+        <span>2 ontbrekende mogelijkheden</span>
       </div>
     </div>
   </Accordion>
@@ -3353,14 +3354,14 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
   <Accordion title="Windows via WSL2 - 6 gebieden">
     <p className="maturity-readiness-summary">5 moeten worden beoordeeld / 1 gedeeltelijk beoordeeld</p>
     <div className="maturity-readiness-list">
-      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Vervolgactie</span></div>
+      <div className="maturity-readiness-row maturity-readiness-row-header"><span>Gebied</span><span>Functies / dekkings-ID's</span><span>Opvolging</span></div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Browser en bedieningsinterface</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 0 van 6 (0%)</span>
-        <span>6 hiaten in mogelijkheden</span>
+        <span>6 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3368,23 +3369,23 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 8 (0%) / 0 van 8 (0%)</span>
-        <span>8 hiaten in mogelijkheden</span>
+        <span>8 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
           <span className="maturity-readiness-title">Diagnostiek en herstel</span>
           <span className="maturity-readiness-status maturity-readiness-status-partially-reviewed">Gedeeltelijk beoordeeld - Volledige taxonomievalidatie</span>
         </div>
-        <span>1 van 6 (16,7%) / 3 van 8 (37,5%)</span>
-        <span>5 hiaten in mogelijkheden</span>
+        <span>1 van 6 (16.7%) / 3 van 8 (37.5%)</span>
+        <span>5 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
-          <span className="maturity-readiness-title">Gateway-toegang en -blootstelling</span>
+          <span className="maturity-readiness-title">Toegang tot en blootstelling van de Gateway</span>
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 11 (0%) / 0 van 11 (0%)</span>
-        <span>11 hiaten in mogelijkheden</span>
+        <span>11 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3392,7 +3393,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 10 (0%) / 0 van 10 (0%)</span>
-        <span>10 hiaten in mogelijkheden</span>
+        <span>10 ontbrekende mogelijkheden</span>
       </div>
       <div className="maturity-readiness-row">
         <div className="maturity-readiness-area">
@@ -3400,7 +3401,7 @@ Open een onderdeel om de bewijsstatus van elke categorie te bekijken. De lijst b
           <span className="maturity-readiness-status maturity-readiness-status-needs-review">Moet worden beoordeeld - Volledige taxonomievalidatie</span>
         </div>
         <span>0 van 6 (0%) / 0 van 6 (0%)</span>
-        <span>6 hiaten in mogelijkheden</span>
+        <span>6 ontbrekende mogelijkheden</span>
       </div>
     </div>
   </Accordion>
